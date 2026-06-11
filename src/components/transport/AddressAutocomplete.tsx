@@ -526,11 +526,28 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
   );
 }
 
-function SuggestionRow({ suggestion, onSelect, icon, iconBg }: {
+function highlightMatch(text: string, query: string): React.ReactNode {
+  if (!query || query.trim().length < 1) return text;
+  const q = query.trim();
+  const lower = text.toLowerCase();
+  const needle = q.toLowerCase();
+  const idx = lower.indexOf(needle);
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <span className="font-semibold text-foreground bg-accent/40">{text.slice(idx, idx + q.length)}</span>
+      {text.slice(idx + q.length)}
+    </>
+  );
+}
+
+function SuggestionRow({ suggestion, onSelect, icon, iconBg, query }: {
   suggestion: Suggestion;
   onSelect: (s: Suggestion) => void;
   icon: React.ReactNode;
   iconBg: string;
+  query?: string;
 }) {
   return (
     <button
@@ -541,10 +558,17 @@ function SuggestionRow({ suggestion, onSelect, icon, iconBg }: {
       <div className={cn("w-8 h-8 rounded-none flex items-center justify-center shrink-0 mt-0.5", iconBg)}>
         {icon}
       </div>
-      <div className="min-w-0">
-        <p className="font-medium text-sm truncate">{suggestion.name}</p>
-        <p className="text-xs text-muted-foreground truncate">{suggestion.address}</p>
+      <div className="min-w-0 flex-1">
+        <p className="font-medium text-sm truncate">{highlightMatch(suggestion.name, query || '')}</p>
+        {suggestion.address && suggestion.address !== suggestion.name && (
+          <p className="text-xs text-muted-foreground truncate">{highlightMatch(suggestion.address, query || '')}</p>
+        )}
       </div>
+      {(suggestion.source === 'hotel' || suggestion.source === 'google') && (
+        <span className="text-[9px] uppercase tracking-wider text-muted-foreground/70 shrink-0 mt-1 font-mono">
+          Google
+        </span>
+      )}
     </button>
   );
 }
