@@ -461,7 +461,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
                 {isRu ? 'Отели и виллы' : 'Hotels & lodging'}
               </div>
               {hotelSuggestions.map((s) => (
-                <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<Hotel className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
+                <SuggestionRow key={s.id} suggestion={s} query={query} onSelect={handleSelect} icon={<Hotel className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
               ))}
             </>
           )}
@@ -476,7 +476,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
                 {isRu ? 'Адреса' : 'Addresses'}
               </div>
               {geocodeSuggestions.map((s) => (
-                <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<MapPin className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
+                <SuggestionRow key={s.id} suggestion={s} query={query} onSelect={handleSelect} icon={<MapPin className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
               ))}
             </>
           )}
@@ -488,7 +488,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
                 {isRu ? 'Жилые комплексы' : 'Residences'}
               </div>
               {projectSuggestions.map(s => (
-                <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<Building2 className="w-4 h-4 text-accent-amber" />} iconBg="bg-accent-amber/10" />
+                <SuggestionRow key={s.id} suggestion={s} query={query} onSelect={handleSelect} icon={<Building2 className="w-4 h-4 text-accent-amber" />} iconBg="bg-accent-amber/10" />
               ))}
             </>
           )}
@@ -500,7 +500,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
                 {isRu ? 'Популярные районы' : 'Popular areas'}
               </div>
               {areaSuggestions.map(s => (
-                <SuggestionRow key={s.id} suggestion={s} onSelect={handleSelect} icon={<MapPin className="w-4 h-4 text-muted-foreground" />} iconBg="bg-muted" />
+                <SuggestionRow key={s.id} suggestion={s} query={query} onSelect={handleSelect} icon={<MapPin className="w-4 h-4 text-muted-foreground" />} iconBg="bg-muted" />
               ))}
             </>
           )}
