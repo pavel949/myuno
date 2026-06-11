@@ -18,7 +18,7 @@ export const ForLocalServiceProviders = lazy(() => import('@/pages/ForLocalServi
 export const ForBusinessPage = lazy(() => import('@/pages/ForBusinessPage'));
 export const Discover = lazy(() => import('@/components/navigation/NavigatorEntry'));
 export const SituationDetail = lazy(() => import('@/components/navigation/v3/SituationDetailPage'));
-export const PlatformCatalog = lazy(() => import('@/pages/PlatformCatalog'));
+// Wave 3 stabilize: PlatformCatalog removed (orphan — /catalog redirects to /discover).
 export const MapView = lazy(() => import('@/pages/MapView'));
 export const Bookings = lazy(() => import('@/pages/Bookings'));
 export const BookingDetail = lazy(() => import('@/pages/BookingDetail'));
