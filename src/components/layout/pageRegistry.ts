@@ -636,6 +636,8 @@ export const NomadGuidePage = lazy(() => import('@/pages/nomad/NomadGuidePage'))
 export const SecondHomeLandingPage = lazy(() => import('@/pages/landings/SecondHomeLandingPage'));
 export const InvestorLandingPage = lazy(() => import('@/pages/landings/InvestorLandingPage'));
 export const AgentLandingPage = lazy(() => import('@/pages/landings/AgentLandingPage'));
+export const LiveSurfaceLandingPage = lazy(() => import('@/pages/landings/LiveSurfaceLandingPage'));
+export const BuildSurfaceLandingPage = lazy(() => import('@/pages/landings/BuildSurfaceLandingPage'));
 
 // ── Capital CRM ──
 export const CapitalNewbuildsDeals = lazy(() => import('@/pages/capital/CapitalNewbuildsDeals'));
