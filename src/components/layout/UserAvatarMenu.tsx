@@ -8,7 +8,7 @@ import {
   Heart, ShoppingBag, User, Settings,
   HelpCircle, Gift, LogOut, Store, Building2, Shield, Headphones,
   Menu, Bell, CreditCard, UserCog, Briefcase, Construction, Crown,
-  LineChart, Eye,
+  LineChart, Eye, Zap,
 } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -152,6 +152,19 @@ export function UserAvatarMenu() {
     [switchableRoles]
   );
 
+  // Quick Operate — single-tap shortcut for multi-role operators.
+  // Priority: last-used (localStorage) → admin → property_manager → owner → vendor → investor.
+  // Only shown when user has 2+ operational roles (otherwise Platform/Workspaces blocks already cover it).
+  const QUICK_OPERATE_PRIORITY: AppRole[] = ['admin', 'property_manager', 'owner', 'vendor', 'investor', 'uno_team', 'staff'];
+  const quickOperateRole = useMemo<AppRole | null>(() => {
+    if (switchableRoles.length < 2) return null;
+    try {
+      const last = localStorage.getItem('myuno:lastOperateRole') as AppRole | null;
+      if (last && switchableRoles.includes(last) && ROLE_SWITCH_CONFIG[last]) return last;
+    } catch { /* ignore */ }
+    return QUICK_OPERATE_PRIORITY.find((r) => switchableRoles.includes(r)) ?? null;
+  }, [switchableRoles]);
+
   if (!user) return null;
 
   const userName = user.user_metadata?.name || user.email?.split('@')[0] || 'User';
@@ -161,6 +174,7 @@ export function UserAvatarMenu() {
   const handleRoleSwitch = async (role: AppRole) => {
     const config = ROLE_SWITCH_CONFIG[role];
     if (!config) return;
+    try { localStorage.setItem('myuno:lastOperateRole', role); } catch { /* ignore */ }
     await switchContext({ role });
     navigate(config.path);
   };
@@ -299,6 +313,27 @@ export function UserAvatarMenu() {
       >
         {/* Role switch + developer portal — top, prominent (portal is not an AppRole) */}
         <DropdownMenuGroup>
+            {quickOperateRole && ROLE_SWITCH_CONFIG[quickOperateRole] && (() => {
+              const cfg = ROLE_SWITCH_CONFIG[quickOperateRole]!;
+              const Icon = cfg.icon;
+              return (
+                <DropdownMenuItem
+                  onClick={() => handleRoleSwitch(quickOperateRole)}
+                  className="flex items-center gap-3 px-4 py-3 cursor-pointer focus:bg-primary/10 bg-primary/5 border-l-2 border-primary"
+                >
+                  <Zap className="w-5 h-5 text-primary flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">
+                      {isRu ? 'Перейти в рабочую панель' : 'Jump to workspace'}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      <Icon className="w-3 h-3 inline mr-1 align-text-bottom" />
+                      {isRu ? cfg.labelRu : cfg.labelEn}
+                    </p>
+                  </div>
+                </DropdownMenuItem>
+              );
+            })()}
             {platformRoles.length > 0 && (
               <>
                 <DropdownMenuLabel className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
