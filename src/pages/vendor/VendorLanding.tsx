@@ -255,16 +255,16 @@ export default function VendorLanding() {
         </h2>
         <Card>
           <CardContent className="p-5 space-y-3">
-            {[
-              { icon: '💰', text: isRu ? 'Комиссия обсуждается индивидуально и фиксируется в договоре' : 'Commission is discussed individually and fixed in the contract' },
-              { icon: '⏱', text: isRu ? 'Выплаты каждую пятницу на ваш счёт' : 'Payouts every Friday to your account' },
-              { icon: '🔒', text: isRu ? 'Escrow: деньги защищены до завершения услуги' : 'Escrow: money is protected until service completion' },
-              { icon: '📊', text: isRu ? 'Прозрачная аналитика: заказы, выручка, рейтинг в реальном времени' : 'Transparent analytics: orders, revenue, rating in real time' },
-              { icon: '🆓', text: isRu ? 'Регистрация бесплатна. 0% комиссии в первый месяц' : 'Registration is free. 0% commission in the first month' },
-            ].map((item, i) => (
+            {([
+              { Icon: Wallet, text: isRu ? 'Комиссия обсуждается индивидуально и фиксируется в договоре' : 'Commission is discussed individually and fixed in the contract' },
+              { Icon: Clock, text: isRu ? 'Выплаты каждую пятницу на ваш счёт' : 'Payouts every Friday to your account' },
+              { Icon: Lock, text: isRu ? 'Escrow: деньги защищены до завершения услуги' : 'Escrow: money is protected until service completion' },
+              { Icon: BarChart3, text: isRu ? 'Прозрачная аналитика: заказы, выручка, рейтинг в реальном времени' : 'Transparent analytics: orders, revenue, rating in real time' },
+              { Icon: Gift, text: isRu ? 'Регистрация бесплатна. 0% комиссии в первый месяц' : 'Registration is free. 0% commission in the first month' },
+            ] as { Icon: LucideIcon; text: string }[]).map(({ Icon, text }, i) => (
               <div key={i} className="flex items-start gap-3">
-                <span className="text-lg shrink-0">{item.icon}</span>
-                <p className="text-sm">{item.text}</p>
+                <Icon className="h-5 w-5 shrink-0 text-primary mt-0.5" strokeWidth={1.75} />
+                <p className="text-sm">{text}</p>
               </div>
             ))}
           </CardContent>
