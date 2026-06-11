@@ -231,7 +231,7 @@ export default function OperatorTransfers() {
                         onClick={() => updateStatus.mutate({ orderId: order.id, newStatus: 'confirmed' as OrderStatus })}
                         disabled={updateStatus.isPending}
                       >
-                        <CheckCircle2 className="w-4 h-4 mr-1.5" /> Подтвердить
+                        <CheckCircle2 className="w-4 h-4 mr-1.5" /> {t.confirm}
                       </Button>
                     )}
                     {(order.status === 'pending' || order.status === 'confirmed') && (
