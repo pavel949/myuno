@@ -3,6 +3,7 @@
 import { Resend } from 'npm:resend@2.0.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
+import { getMailFrom } from '../_shared/admin-config.ts';
 
 type Lang = 'ru' | 'en' | 'th';
 
