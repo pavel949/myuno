@@ -94,7 +94,7 @@ export default function FETPage() {
             ? "Проверьте, нужен ли вам Foreign Exchange Transaction (FET) и попадаете ли вы в иностранную квоту кондоминиума. Бесплатная экспресс-проверка за 30 секунд."
             : "Check whether you need a Foreign Exchange Transaction (FET) and whether your condo purchase fits the foreign quota. Free 30-second express check."
         }
-        keywords={["FET Thailand", "foreign quota condo", "FET форма ошибка", "иностранная квота кондоминиум"]}
+        
       />
       <main className="container mx-auto max-w-3xl px-4 py-10">
         <header className="mb-8 flex items-start gap-4">
