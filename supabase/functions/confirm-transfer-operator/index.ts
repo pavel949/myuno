@@ -164,13 +164,13 @@ Deno.serve(async (req) => {
     <p>${t.confirmedBy(opName, totalStr)}</p>
     ${localMp ? `
     <h3 style="margin-top:20px">${t.meetingPoint}</h3>
-    <p><b>${localMp.name || ''}</b><br/>${localMp.address || ''}</p>
+    <p><b>${localMp.name || ''}</b></p>
     ${localMp.photo_url ? `<img src="${localMp.photo_url}" alt="Meeting point" style="max-width:100%;border-radius:8px;margin:8px 0"/>` : ''}
-    ${localMp.instructions ? `<p style="background:#fffbeb;padding:12px;border-radius:8px">${localMp.instructions}</p>` : ''}
+    ${localMp.description ? `<p style="background:#fffbeb;padding:12px;border-radius:8px">${localMp.description}</p>` : ''}
+    ${localMp.google_maps_url ? `<p><a href="${localMp.google_maps_url}" target="_blank">Google Maps →</a></p>` : ''}
     ` : ''}
     <h3>${t.operatorContact}</h3>
     <p><b>${opName}</b><br/>WhatsApp: <a href="https://wa.me/${opPhone}">+${op?.whatsapp_number || ''}</a></p>
-    ${localMp?.contact_phone ? `<p>${t.extraContact}: <a href="tel:${localMp.contact_phone}">${localMp.contact_phone}</a></p>` : ''}
   </div>
 </div>`;
       await resend.emails.send({
