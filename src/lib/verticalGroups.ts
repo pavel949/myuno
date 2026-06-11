@@ -44,14 +44,14 @@ export interface VerticalGroup {
   items: VerticalGroupItem[];
 }
 
-// Cluster-level emoji icons (footer/discover headers)
-const CLUSTER_EMOJI: Record<string, string> = {
-  arrive: '🛬',
-  live: '🏠',
-  manage: '🏢',
-  invest: '🏘️',
-  legal: '⚖️',
-  build: '🏗️',
+// Cluster-level Lucide icon names (kebab-case, see lucide-react/dynamic)
+const CLUSTER_ICON: Record<string, string> = {
+  arrive: 'plane-landing',
+  live: 'home',
+  manage: 'building',
+  invest: 'building-2',
+  legal: 'scale',
+  build: 'hard-hat',
 };
 
 function buildGroup(cluster: ClusterEntry): VerticalGroup {
