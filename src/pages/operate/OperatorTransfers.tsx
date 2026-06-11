@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,14 +11,22 @@ import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
+type Lang = 'ru' | 'en' | 'th';
 
-const STATUS_FILTERS: Array<{ id: string; labelEn: string; labelRu: string }> = [
-  { id: 'active', labelEn: 'Active', labelRu: 'Активные' },
-  { id: 'pending', labelEn: 'Pending', labelRu: 'Ожидают' },
-  { id: 'confirmed', labelEn: 'Confirmed', labelRu: 'Подтверждены' },
-  { id: 'completed', labelEn: 'Completed', labelRu: 'Выполнены' },
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
+const STATUS_FILTERS: Array<{ id: string; label: Record<Lang, string> }> = [
+  { id: 'active', label: { ru: 'Активные', en: 'Active', th: 'ใช้งานอยู่' } },
+  { id: 'pending', label: { ru: 'Ожидают', en: 'Pending', th: 'รอดำเนินการ' } },
+  { id: 'confirmed', label: { ru: 'Подтверждены', en: 'Confirmed', th: 'ยืนยันแล้ว' } },
+  { id: 'completed', label: { ru: 'Выполнены', en: 'Completed', th: 'เสร็จสมบูรณ์' } },
+  { id: 'all', label: { ru: 'Все', en: 'All', th: 'ทั้งหมด' } },
 ];
+
+const I18N = {
+  ru: { title: 'Операторская · Трансферы', orders: 'заказов', live: 'live-обновления', refresh: 'Обновить', empty: 'Нет заказов', confirm: 'Подтвердить', reject: 'Отклонить', complete: 'Завершить', waGuest: 'WhatsApp гостю', night: '🌙 ночной', statusUpdated: 'Статус обновлён', updateError: 'Ошибка обновления' },
+  en: { title: 'Operator · Transfers', orders: 'orders', live: 'live updates', refresh: 'Refresh', empty: 'No orders', confirm: 'Confirm', reject: 'Reject', complete: 'Complete', waGuest: 'WhatsApp guest', night: '🌙 night', statusUpdated: 'Status updated', updateError: 'Update failed' },
+  th: { title: 'เจ้าหน้าที่ · การรับส่ง', orders: 'รายการ', live: 'อัปเดตสด', refresh: 'รีเฟรช', empty: 'ไม่มีคำสั่ง', confirm: 'ยืนยัน', reject: 'ปฏิเสธ', complete: 'เสร็จสิ้น', waGuest: 'WhatsApp ลูกค้า', night: '🌙 กลางคืน', statusUpdated: 'อัปเดตสถานะแล้ว', updateError: 'อัปเดตล้มเหลว' },
+} as const;
+
 
 const statusColors: Record<string, string> = {
   pending: 'bg-warning/10 text-warning',
