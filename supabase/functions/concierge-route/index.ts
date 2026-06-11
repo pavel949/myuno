@@ -25,19 +25,20 @@ interface RouteItem {
   urgency: 'high' | 'medium' | 'low';
 }
 
+// icon = kebab-case Lucide icon name (resolved client-side via resolveOnboardingIcon)
 const KNOWN_ROUTES: { route: string; en: string; ru: string; icon: string }[] = [
-  { route: '/property/offplan', en: 'Off-plan investment projects', ru: 'Новостройки для инвестиций', icon: '🏗️' },
-  { route: '/property/resale', en: 'Resale & assignment market', ru: 'Вторичный рынок и переуступки', icon: '🔁' },
-  { route: '/property/rent', en: 'Long & short-term rentals', ru: 'Аренда — кратко и долгосрок', icon: '🏠' },
-  { route: '/invest', en: 'Capital advisory desk', ru: 'Инвест-консультации', icon: '💼' },
-  { route: '/relocate', en: 'Relocation kit (visa, schools, banks)', ru: 'Релокация — виза, школы, банки', icon: '🛬' },
-  { route: '/visa/quiz', en: 'Visa quiz — recommended type', ru: 'Подбор визы за 4 шага', icon: '🛂' },
-  { route: '/mc', en: 'Management Company workspace', ru: 'Рабочее место УК', icon: '🏢' },
-  { route: '/airport', en: 'Airport transfer & meet-greet', ru: 'Трансфер и встреча', icon: '✈️' },
-  { route: '/discover', en: 'Discover services & experiences', ru: 'Сервисы и впечатления', icon: '🧭' },
-  { route: '/account', en: 'Set up your myUNO ID', ru: 'Настроить myUNO ID', icon: '🪪' },
-  { route: '/school-finder', en: 'School finder', ru: 'Подбор школы', icon: '🎓' },
-  { route: '/legal', en: 'Legal & compliance hub', ru: 'Юридический хаб', icon: '⚖️' },
+  { route: '/property/offplan', en: 'Off-plan investment projects', ru: 'Новостройки для инвестиций', icon: 'construction' },
+  { route: '/property/resale', en: 'Resale & assignment market', ru: 'Вторичный рынок и переуступки', icon: 'repeat' },
+  { route: '/property/rent', en: 'Long & short-term rentals', ru: 'Аренда — кратко и долгосрок', icon: 'home' },
+  { route: '/invest', en: 'Capital advisory desk', ru: 'Инвест-консультации', icon: 'briefcase' },
+  { route: '/relocate', en: 'Relocation kit (visa, schools, banks)', ru: 'Релокация — виза, школы, банки', icon: 'plane-landing' },
+  { route: '/visa/quiz', en: 'Visa quiz — recommended type', ru: 'Подбор визы за 4 шага', icon: 'badge-check' },
+  { route: '/mc', en: 'Management Company workspace', ru: 'Рабочее место УК', icon: 'building-2' },
+  { route: '/airport', en: 'Airport transfer & meet-greet', ru: 'Трансфер и встреча', icon: 'plane' },
+  { route: '/discover', en: 'Discover services & experiences', ru: 'Сервисы и впечатления', icon: 'compass' },
+  { route: '/account', en: 'Set up your myUNO ID', ru: 'Настроить myUNO ID', icon: 'id-card' },
+  { route: '/school-finder', en: 'School finder', ru: 'Подбор школы', icon: 'graduation-cap' },
+  { route: '/legal', en: 'Legal & compliance hub', ru: 'Юридический хаб', icon: 'scale' },
 ];
 
 function deterministic(who: Who, goal: Goal, intensity: Intensity): RouteItem[] {
