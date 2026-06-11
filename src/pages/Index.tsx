@@ -1,29 +1,19 @@
 /**
- * Index — myUNO Home router.
+ * Index — myUNO Home.
  *
- * Тонкий switch по feature_flag:home_simplified_v1:
- *  - ON  → IndexSimplified (5 зон, дефолт)
- *  - OFF → IndexLegacy (15 блоков, regression-safe)
- *
- * Каждый layout вынесен в отдельный lazy-чанк, поэтому в основной бандл
- * попадает только тот, что реально рендерится. См. .lovable/plan.md, Шаг 1.
+ * Wave-1 IA cleanup (2026-06): IndexLegacy убран из критического пути.
+ * Главная теперь рендерит только IndexSimplified (5-зонный layout).
+ * История 15-блочного варианта живёт в git до коммита Wave-1.
  */
 import React, { Suspense, lazy } from 'react';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 
 const IndexSimplified = lazy(() => import('./IndexSimplified'));
-const IndexLegacy = lazy(() => import('./IndexLegacy'));
 
-const Index: React.FC = () => {
-  const simplifiedOn = useFeatureFlag('home_simplified_v1', true);
-  const Body = simplifiedOn ? IndexSimplified : IndexLegacy;
-
-  return (
-    <Suspense fallback={<LoadingState />}>
-      <Body />
-    </Suspense>
-  );
-};
+const Index: React.FC = () => (
+  <Suspense fallback={<LoadingState />}>
+    <IndexSimplified />
+  </Suspense>
+);
 
 export default Index;
