@@ -24,6 +24,8 @@ interface GeocodeSuggestion {
   name: string;
   address: string;
   type: string;
+  lat?: number;
+  lng?: number;
 }
 
 interface Suggestion {
@@ -31,11 +33,20 @@ interface Suggestion {
   name: string;
   address: string;
   source: 'google' | 'project' | 'area' | 'hotel';
+  lat?: number;
+  lng?: number;
+  placeId?: string;
+}
+
+export interface AddressMeta {
+  lat?: number;
+  lng?: number;
+  placeId?: string;
 }
 
 interface AddressAutocompleteProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, meta?: AddressMeta) => void;
   placeholder?: string;
   className?: string;
 }
