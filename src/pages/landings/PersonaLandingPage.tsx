@@ -226,7 +226,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
                     href={wp(app.route)}
                     className="group flex h-full flex-col items-start gap-1 border border-border bg-card p-3 transition-all hover:border-primary/60"
                   >
-                    <span className="text-xl" aria-hidden>{app.icon}</span>
+                    <AppIcon id={app.id} size={20} className="text-primary" />
                     <span className="text-sm font-medium text-foreground">
                       {isRu ? app.labelRu : app.labelEn}
                     </span>
