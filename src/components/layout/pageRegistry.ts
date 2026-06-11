@@ -244,6 +244,7 @@ export const CostOfLivingPage = lazy(() => import('@/pages/tools/CostOfLivingPag
 // ── LEGAL Cluster ──
 export const LegalClusterPage = lazy(() => import('@/pages/legal/LegalClusterPage'));
 export const ContractAnalysisPage = lazy(() => import('@/pages/legal/ContractAnalysisPage'));
+export const FETPage = lazy(() => import('@/pages/services/finance/FETPage'));
 export const TaxNavPage = lazy(() => import('@/pages/legal/TaxNavPage'));
 
 // ── INVEST Cluster (legacy alias → InvestmentHubLanding) ──

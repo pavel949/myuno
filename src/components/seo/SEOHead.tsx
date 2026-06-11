@@ -86,11 +86,11 @@ export function SEOHead({
       {/* Canonical URL */}
       <link rel="canonical" href={canonicalUrl} />
       
-      {/* Hreflang alternate links */}
+      {/* Hreflang alternate links — th omitted until Thai content ships (Trust Stack audit A3) */}
       <link rel="alternate" hrefLang="en" href={hreflangUrls.en} />
       <link rel="alternate" hrefLang="ru" href={hreflangUrls.ru} />
-      <link rel="alternate" hrefLang="th" href={hreflangUrls.th} />
       <link rel="alternate" hrefLang="x-default" href={hreflangUrls.en} />
+      
       
       {/* JSON-LD Structured Data */}
       {jsonLd && (

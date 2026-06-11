@@ -465,6 +465,7 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── LEGAL Cluster ── */}
         <Route path={APP_ROUTES.LEGAL_CLUSTER} element={<LazyPage><Pages.LegalClusterPage /></LazyPage>} />
         <Route path={APP_ROUTES.CONTRACT_ANALYSIS} element={<LazyPage><Pages.ContractAnalysisPage /></LazyPage>} />
+        <Route path={APP_ROUTES.FET_CHECK} element={<LazyPage><Pages.FETPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_NAV} element={<LazyPage><Pages.TaxNavPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_STRUCTURING} element={<LazyPage><Pages.TaxStructuringLanding /></LazyPage>} />
         <Route path={APP_ROUTES.CLEARVIEW_FOR_DEVELOPERS} element={<LazyPage><Pages.ClearViewForDevelopersLanding /></LazyPage>} />
