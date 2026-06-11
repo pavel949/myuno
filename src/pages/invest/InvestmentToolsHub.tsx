@@ -213,9 +213,32 @@ export default function InvestmentToolsHub() {
               })}
             </div>
             {visible.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                {isRu ? 'Нет инструментов в этой категории' : 'No tools in this category'}
-              </p>
+              <div
+                role="status"
+                aria-live="polite"
+                className="border border-dashed border-border bg-card/40 px-6 py-10 flex flex-col items-center text-center gap-3"
+              >
+                <div className="w-12 h-12 rounded-none bg-muted flex items-center justify-center">
+                  <Wrench className="w-5 h-5 text-muted-foreground" aria-hidden />
+                </div>
+                <div className="space-y-1 max-w-xs">
+                  <p className="text-sm font-semibold text-foreground">
+                    {isRu ? 'В этой категории пока пусто' : 'Nothing in this category yet'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {isRu
+                      ? 'Сбросьте фильтр, чтобы увидеть все инвестиционные инструменты.'
+                      : 'Reset the filter to see all investor tools.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActive('all')}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  {isRu ? 'Показать все инструменты' : 'Show all tools'}
+                </button>
+              </div>
             )}
           </section>
         </div>
