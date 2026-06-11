@@ -211,20 +211,29 @@ export default function InvestmentHubLanding() {
                 <Handshake className="h-3 w-3 mr-1" /> Advisory
               </Badge>
             </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="grid grid-cols-3 gap-2 pt-1">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate(APP_ROUTES.INVEST_TOOLS)}
+                className="gap-1"
+              >
+                <Calculator className="h-3.5 w-3.5" />
+                {isRu ? 'Инструменты' : 'Tools'}
+              </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
               >
-                {isRu ? 'Список сделок' : 'Deal list'}
+                {isRu ? 'Сделки' : 'Deals'}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
               >
-                {isRu ? 'Подача проекта' : 'Project submission'}
+                {isRu ? 'Подать' : 'Submit'}
               </Button>
             </div>
           </div>
