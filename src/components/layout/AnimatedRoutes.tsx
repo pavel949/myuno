@@ -760,6 +760,10 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── M6 Persona Landings (B.4) ── */}
         {/* Draft slugs and unknown slugs return 404 inside the page itself. */}
         <Route path="/for" element={<LazyPage><PersonaDirectoryPage /></LazyPage>} />
+        {/* Sprint 1 — high-conversion segment/B2B landings (must precede `/for/:persona`). */}
+        <Route path="/for/second-home" element={<LazyPage><Pages.SecondHomeLandingPage /></LazyPage>} />
+        <Route path="/for/investor" element={<LazyPage><Pages.InvestorLandingPage /></LazyPage>} />
+        <Route path="/for/agent" element={<LazyPage><Pages.AgentLandingPage /></LazyPage>} />
         {/* Wave 4 — geo long-tail: must precede `/for/:persona` to match first. */}
         <Route path="/for/:persona/in/:area" element={<LazyPage><PersonaAreaLandingPage /></LazyPage>} />
         <Route path="/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
