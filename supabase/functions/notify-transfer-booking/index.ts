@@ -86,7 +86,11 @@ async function sendWhatsApp(to: string, body: string): Promise<void> {
 
 function fmtDate(iso: string, locale: string) {
   const d = new Date(iso);
-  return `${d.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' })} ${d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+  // Always format in Phuket time — operator and customer expect local ICT.
+  const opts: Intl.DateTimeFormatOptions = { timeZone: 'Asia/Bangkok' };
+  const date = d.toLocaleDateString(locale, { ...opts, day: '2-digit', month: 'short', year: 'numeric' });
+  const time = d.toLocaleTimeString(locale, { ...opts, hour: '2-digit', minute: '2-digit', hour12: false });
+  return `${date} ${time} ICT`;
 }
 
 function buildOperatorMessage(p: TransferNotifyPayload, tr: Record<string, Record<Lang, string>>, confirmUrl: string) {
