@@ -295,6 +295,174 @@ const OVERRIDES: OverrideMap = {
       },
     },
   },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // LAGUNA
+  // ─────────────────────────────────────────────────────────────────────────
+  laguna: {
+    'passive-investors': {
+      intro: {
+        ru: 'Laguna Phuket — закрытый интегрированный курорт на 1000 акров с 8 отелями (Banyan Tree, Angsana, Dusit, Cassia, Avani, SAii, Outrigger) и собственным channel-manager. Самый институциональный pool аренды на острове.',
+        en: 'Laguna Phuket is a gated 1000-acre integrated resort with 8 hotels (Banyan Tree, Angsana, Dusit, Cassia, Avani, SAii, Outrigger) and an in-house channel manager — the most institutional rental pool on the island.',
+      },
+      reasons: {
+        ru: [
+          'Гарантированная доходность 6–7% от Laguna Property Management — 30 лет track record, ноль defaults.',
+          'Единственный кластер с собственным гольф-полем (18 holes), 3 пляжными клубами и lagoon-shuttle сервисом.',
+          'Самая высокая ликвидность вторички в премиум-сегменте: brand recognition ускоряет exit на 40%.',
+        ],
+        en: [
+          '6–7% guaranteed yield via Laguna Property Management — 30-year track record, zero defaults.',
+          'Only cluster with its own 18-hole golf course, 3 beach clubs and lagoon shuttle service.',
+          'Highest premium resale liquidity — brand recognition accelerates exit by 40%.',
+        ],
+      },
+      whatsappMessage: {
+        ru: 'Здравствуйте! Интересует инвестиция в Laguna Phuket с управлением от Laguna Property Management. Какие проекты сейчас открыты?',
+        en: 'Hello! Interested in a Laguna Phuket investment managed by Laguna Property Management. Which projects are open right now?',
+      },
+      whatsappLabel: {
+        ru: 'Запросить Laguna-подборку',
+        en: 'Request Laguna shortlist',
+      },
+    },
+    snowbirds: {
+      intro: {
+        ru: 'Laguna для второго дома — формат «всё внутри ворот»: 8 отелей, гольф, рестораны, спа, школа BIS, медцентр и lagoon-shuttle. Можно прилетать на полгода и не выезжать за периметр.',
+        en: 'Laguna as a second home is «everything inside the gates»: 8 hotels, golf, restaurants, spa, BIS school, medical clinic and lagoon shuttle. You can stay for half a year and never leave the perimeter.',
+      },
+      reasons: {
+        ru: [
+          'Закрытый контур 24/7: security, медцентр Bangkok Hospital Laguna, шаттл между отелями и пляжем.',
+          'Гольф 18 holes, теннис, велодорожки 12 км вокруг лагуны — режим жизни, а не отпуска.',
+          'Сервис уровня resort при наличии собственного жилья: housekeeping, room service, F&B credit.',
+        ],
+        en: [
+          '24/7 gated perimeter: security, Bangkok Hospital Laguna clinic, inter-hotel and beach shuttle.',
+          '18-hole golf, tennis, 12 km of bike paths around the lagoon — a lifestyle, not a vacation.',
+          'Resort-grade service while owning your home: housekeeping, room service, F&B credit.',
+        ],
+      },
+      whatsappMessage: {
+        ru: 'Здравствуйте! Ищу второй дом в Laguna Phuket — нужна резиденция с гольф-видом и управлением от Laguna.',
+        en: 'Hello! Looking for a second home in Laguna Phuket — residence with golf views and Laguna-managed service.',
+      },
+      whatsappLabel: {
+        ru: 'Обсудить резиденцию',
+        en: 'Discuss a residence',
+      },
+    },
+    families: {
+      intro: {
+        ru: 'Laguna для семьи — безопасный «город в городе» с British International School (BIS) внутри периметра, велодорожками вместо дорог и медцентром в 3 минутах. Дети могут самостоятельно ездить на велосипеде в школу и к друзьям.',
+        en: 'Laguna for families is a safe «town within a town» with British International School (BIS) inside the perimeter, bike paths instead of roads and a medical clinic 3 minutes away. Kids can bike to school and friends independently.',
+      },
+      reasons: {
+        ru: [
+          'BIS Phuket (British curriculum, £20–28K/год) внутри Laguna — дети ездят на велосипеде, без school bus.',
+          'Безопасный 1000-акровый периметр с 24/7 security: дети самостоятельно у бассейна, на пляже, на велодорожках.',
+          'Bangkok Hospital Laguna Clinic + педиатрия — 3 минуты от любой резиденции.',
+        ],
+        en: [
+          'BIS Phuket (British curriculum, £20–28K/year) inside Laguna — kids bike to school, no bus needed.',
+          '1000-acre gated perimeter with 24/7 security: independent kids at the pool, beach and bike paths.',
+          'Bangkok Hospital Laguna Clinic + paediatrics — 3 minutes from any residence.',
+        ],
+      },
+      whatsappMessage: {
+        ru: 'Здравствуйте! Переезжаю с семьёй в Laguna Phuket. Нужна вилла внутри периметра рядом с BIS-кампусом.',
+        en: 'Hello! Relocating my family to Laguna Phuket. Need a villa inside the perimeter near the BIS campus.',
+      },
+      whatsappLabel: {
+        ru: 'Подбор виллы и BIS',
+        en: 'Villa & BIS finder',
+      },
+    },
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // CHERNGTALAY
+  // ─────────────────────────────────────────────────────────────────────────
+  cherngtalay: {
+    'passive-investors': {
+      intro: {
+        ru: 'Cherngtalay — «расширение Bang Tao» с ценами на 20–25% ниже и теми же арендаторами. Растущий кластер кондоминиумов рядом с Boat Avenue и Porto de Phuket с доходностью 7–8% при меньшем входе.',
+        en: 'Cherngtalay is the «Bang Tao extension» — 20–25% cheaper at identical tenant demand. A growing condo cluster next to Boat Avenue and Porto de Phuket delivering 7–8% yield at a lower entry point.',
+      },
+      reasons: {
+        ru: [
+          'Цена за м² на 20–25% ниже Bang Tao при той же арендной ставке — лучший yield-per-baht на западном побережье.',
+          'Активный pipeline новостроек 2026–2028: ранний вход даёт capital growth 15–20% к handover.',
+          'Boat Avenue + Porto de Phuket в шаговой доступности — premium-тренд для семейных и snowbird-арендаторов.',
+        ],
+        en: [
+          'Price per sqm 20–25% below Bang Tao at the same rental rate — best yield-per-baht on the west coast.',
+          'Active 2026–2028 new-build pipeline: early entry yields 15–20% capital growth by handover.',
+          'Boat Avenue + Porto de Phuket within walking distance — premium pull for family and snowbird tenants.',
+        ],
+      },
+      whatsappMessage: {
+        ru: 'Здравствуйте! Интересует инвестиция в Cherngtalay — пришлите off-plan с ранним входом и расчётом доходности.',
+        en: 'Hello! Interested in Cherngtalay investments — please share off-plan options with early-entry pricing and yield breakdown.',
+      },
+      whatsappLabel: {
+        ru: 'Получить off-plan подборку',
+        en: 'Request off-plan shortlist',
+      },
+    },
+    snowbirds: {
+      intro: {
+        ru: 'Cherngtalay для второго дома — тишина деревни в 5 минутах от инфраструктуры Bang Tao: Boat Avenue, Porto de Phuket, пляж Layan. Цена ниже, сервис тот же, парковки больше.',
+        en: 'Cherngtalay as a second home offers village quiet 5 minutes from Bang Tao infrastructure: Boat Avenue, Porto de Phuket, Layan beach. Lower price, same services, more parking.',
+      },
+      reasons: {
+        ru: [
+          'Тише, чем Bang Tao: меньше туристов, прямой выезд к Layan/Bang Tao за 5–8 минут.',
+          'Инфраструктура «через дорогу»: Villa Market, Boat Avenue, фитнес, рестораны — без необходимости ездить далеко.',
+          'Цены на резиденции на 20% ниже Bang Tao при том же качестве застройщиков (Banyan Tree, Anantara, Layan Green Park).',
+        ],
+        en: [
+          'Quieter than Bang Tao: fewer tourists, direct 5–8 min access to Layan/Bang Tao.',
+          'Infrastructure across the road: Villa Market, Boat Avenue, gyms, restaurants — no long drives.',
+          'Residence prices 20% below Bang Tao at the same developer quality (Banyan Tree, Anantara, Layan Green Park).',
+        ],
+      },
+      whatsappMessage: {
+        ru: 'Здравствуйте! Ищу второй дом в Cherngtalay на 3–6 месяцев — нужна резиденция рядом с Boat Avenue.',
+        en: 'Hello! Looking for a second home in Cherngtalay for 3–6 months — residence near Boat Avenue preferred.',
+      },
+      whatsappLabel: {
+        ru: 'Обсудить второй дом',
+        en: 'Discuss a second home',
+      },
+    },
+    families: {
+      intro: {
+        ru: 'Cherngtalay для семьи — оптимум по цене/качеству: UWC и BIS в 7–10 минутах, виллы с большими участками (от 600 м²) и тихие soi без сквозного трафика. Подходит семьям, которым нужен сад и пространство.',
+        en: 'Cherngtalay for families is the best price/quality fit: UWC and BIS 7–10 minutes away, villas with large plots (600 m²+) and quiet soi streets with no through-traffic. Built for families who want a garden and space.',
+      },
+      reasons: {
+        ru: [
+          'UWC Thailand 7 минут, BIS Phuket 10 минут — реалистичный school commute без пробок.',
+          'Виллы с участками 600–1200 м² по цене таунхаусов Bang Tao — сад, барбекю, место для собаки.',
+          'Семейная деревня: педиатры, детские кружки, Villa Market, Tesco Lotus — всё в 5 минутах.',
+        ],
+        en: [
+          'UWC Thailand 7 min, BIS Phuket 10 min — realistic school commute with no traffic.',
+          'Villas with 600–1200 m² plots at Bang Tao townhouse prices — garden, BBQ, room for a dog.',
+          'Family village: paediatricians, kids clubs, Villa Market, Tesco Lotus — all within 5 minutes.',
+        ],
+      },
+      whatsappMessage: {
+        ru: 'Здравствуйте! Переезжаю с семьёй в Cherngtalay. Нужна вилла с участком 600+ м² рядом с UWC/BIS.',
+        en: 'Hello! Relocating my family to Cherngtalay. Need a villa with a 600 m²+ plot close to UWC/BIS.',
+      },
+      whatsappLabel: {
+        ru: 'Подбор виллы',
+        en: 'Villa finder',
+      },
+    },
+  },
 };
 
 export function findPersonaAreaOverride(
