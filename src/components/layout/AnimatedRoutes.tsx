@@ -209,11 +209,13 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.AUTH_RESET_PASSWORD} element={<LazyPage><Pages.ResetPassword /></LazyPage>} />
         
         {/* ── User ── */}
+        {/* Wave-1 IA cleanup: /discover — единственная каноническая «дверь» в каталог.
+            /navigator, /catalog, /categories — все редиректят на /discover. */}
         <Route path={APP_ROUTES.DISCOVER} element={<LazyPage><Pages.Discover /></LazyPage>} />
         <Route path={`${APP_ROUTES.DISCOVER}/:code`} element={<LazyPage><Pages.SituationDetail /></LazyPage>} />
-        <Route path={APP_ROUTES.NAVIGATOR} element={<LazyPage><Pages.Discover /></LazyPage>} />
-        <Route path="/catalog" element={<Navigate to={APP_ROUTES.NAVIGATOR} replace />} />
-        <Route path="/categories" element={<Navigate to={APP_ROUTES.NAVIGATOR} replace />} />
+        <Route path={APP_ROUTES.NAVIGATOR} element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
+        <Route path="/catalog" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
+        <Route path="/categories" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
         {/* Bible-v2 audit A1: the duplicate LEGAL_CLUSTER redirect that used
             to live here was shadowing the real LegalClusterPage route declared
             further down in the LEGAL Cluster block. `/legal` is one of the six
