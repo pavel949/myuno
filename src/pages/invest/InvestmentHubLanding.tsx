@@ -227,41 +227,9 @@ export default function InvestmentHubLanding() {
             </div>
           </div>
 
-          {/* Capital marketplace — neutral surface */}
-          <Card>
-            <CardContent className="p-5 space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="h-5 w-5 text-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm">
-                    {isRu ? 'Капитал-маркетплейс' : 'Capital marketplace'}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {isRu
-                      ? 'Недвижимость, бизнес, стартапы, франшизы. Все проекты анонимизированы.'
-                      : 'Real estate, business, startups, franchises. All projects anonymized.'}
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
-                >
-                  {isRu ? 'Список сделок' : 'Deal list'}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
-                >
-                  {isRu ? 'Подача проекта' : 'Project submission'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Wave 1: removed duplicate "Capital marketplace" card.
+              Hero CTAs above (Deal list / Raise) cover the same action. */}
+
 
           {/* 5 Zones */}
           <section className="space-y-3">
@@ -486,32 +454,10 @@ export default function InvestmentHubLanding() {
             </CardContent>
           </Card>
 
-          {/* Raise CTA */}
-          <section className="rounded-none border border-border bg-card p-5 space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-none bg-muted">
-                <Megaphone className="h-5 w-5 text-foreground" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">
-                  {isRu ? 'Подача проекта' : 'Project submission'}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isRu
-                    ? 'Размещение проекта недвижимости, действующего бизнеса или стартапа в каталоге.'
-                    : 'List a property project, operating business or startup in the catalog.'}
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
-              className="w-full gap-2"
-            >
-              {isRu ? 'Подача проекта' : 'Project submission'}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </section>
+          {/* Wave 1: removed duplicate "Project submission" CTA block.
+              Hero already exposes Raise as primary action and the Raise zone tile
+              above covers the same flow. */}
+
         </div>
       </MiniAppLayout>
     </>
