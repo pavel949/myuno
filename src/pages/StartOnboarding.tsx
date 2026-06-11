@@ -24,6 +24,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import {
   useStartOnboarding,
+  resolveOnboardingIcon,
   type WhoAnswer,
   type GoalAnswer,
   type IntensityAnswer,
