@@ -216,6 +216,10 @@ Deno.serve(async (req) => {
       .limit(1)
       .maybeSingle();
     const opWa = op?.phone_whatsapp || '';
+    const operatorMissing = !op;
+    if (operatorMissing) {
+      console.error('[Transfer] CRITICAL: no active operator found for order', p.order_number);
+    }
 
     // Persist operator_id + financial split on order so admin sees the chain.
     // Vehicle markup_pct=35 → vendor_payout = total / 1.35, platform_fee = remainder.
