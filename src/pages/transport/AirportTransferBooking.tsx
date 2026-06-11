@@ -167,9 +167,28 @@ export default function AirportTransferBooking() {
 
   const routeBasePrice = selectedDestination?.base_price || 0;
   const vehicleMultiplier = selectedVehicle?.price_multiplier || 1;
-  const totalPrice = routeBasePrice > 0 
-    ? Math.round(routeBasePrice * vehicleMultiplier) 
+  const basePrice = routeBasePrice > 0
+    ? Math.round(routeBasePrice * vehicleMultiplier)
     : (selectedVehicle?.base_price || 800);
+
+  // Night surcharge: arrivalTime falls within [start..end] (Asia/Bangkok window).
+  const isNightArrival = useMemo(() => {
+    if (!formData.arrivalTime || !nightSurchargeCfg) return false;
+    const t = formData.arrivalTime; // "HH:mm"
+    const { start, end } = nightSurchargeCfg; // "HH:mm:ss"
+    // Window crosses midnight (e.g. 22:00..06:00) → either t >= start OR t < end
+    if (start > end) return t >= start.slice(0, 5) || t < end.slice(0, 5);
+    return t >= start.slice(0, 5) && t < end.slice(0, 5);
+  }, [formData.arrivalTime, nightSurchargeCfg]);
+
+  const isVan = (selectedVehicle?.max_passengers || 4) >= 6;
+  const nightSurcharge = isNightArrival && nightSurchargeCfg
+    ? (isVan ? nightSurchargeCfg.van : nightSurchargeCfg.sedan)
+    : 0;
+  const totalPrice = basePrice + nightSurcharge;
+  // Vendor markup 35% → vendor_payout = total / 1.35, platform_fee = remainder
+  const vendorPayout = Math.round(totalPrice / 1.35);
+  const platformFee = totalPrice - vendorPayout;
 
   const handleDirectionChange = (dir: TransferDirection) => {
     setFormData(prev => ({ ...prev, direction: dir }));
