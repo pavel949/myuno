@@ -302,6 +302,23 @@ export default function InvestmentHubLanding() {
                 iconBgClass="bg-primary/10 text-primary dark:text-primary"
               />
               <ZoneCard
+                icon={Wrench}
+                titleRu="Инструменты инвестора"
+                titleEn="Investor tools"
+                descRu="ClearView рейтинг, калькулятор, advisory, DD-пакеты"
+                descEn="ClearView rating, calculator, advisory, DD packs"
+                bullets={[
+                  { ru: 'ClearView™ — рейтинг AAA–CCC', en: 'ClearView™ — AAA–CCC rating' },
+                  { ru: 'Калькулятор ROI и yield', en: 'ROI & yield calculator' },
+                  { ru: 'Due diligence отчёты', en: 'Due diligence reports' },
+                ]}
+                ctaPath={APP_ROUTES.INVEST_TOOLS}
+                accentClass="hover:bg-primary/5"
+                iconBgClass="bg-primary/10 text-primary dark:text-primary"
+                badgeRu="Moat"
+                badgeEn="Moat"
+              />
+              <ZoneCard
                 icon={Megaphone}
                 titleRu="Привлечь капитал"
                 titleEn="Raise Capital"
@@ -316,6 +333,7 @@ export default function InvestmentHubLanding() {
                 accentClass="hover:bg-accent/5 sm:col-span-2"
                 iconBgClass="bg-accent/10 text-accent dark:text-accent"
               />
+
             </div>
           </section>
 
