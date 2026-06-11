@@ -290,6 +290,70 @@ Deno.serve(async (req) => {
           logStep("WARN", `Vendor notification failed (non-fatal): ${vendorNotifyError}`);
         }
 
+        // ===== TRANSFER NOTIFY (race-fix): for airport transfers paid via Stripe =====
+        // Frontend fires notify-transfer-booking as fire-and-forget before redirect;
+        // if user closed the tab early, the operator never got pinged. Re-trigger here
+        // (notify function is idempotent via booking_notifications_log + transfer-op-${id}
+        // idempotency keys in send-transactional-email).
+        try {
+          if (order.order_type === 'vehicle') {
+            const { data: fullOrder } = await supabaseAdmin
+              .from('orders')
+              .select('id, order_number, total_amount, currency, start_at, notes, metadata, order_participants(name, email, phone, role)')
+              .eq('id', orderId)
+              .single();
+            const om = (fullOrder?.metadata || {}) as Record<string, unknown>;
+            if (fullOrder && om.transfer_type === 'airport') {
+              const participants = (fullOrder.order_participants || []) as Array<{ name?: string; email?: string; phone?: string; role?: string }>;
+              const primary = participants.find((p) => p.role === 'primary') || participants[0] || {};
+              const { data: existing } = await supabaseAdmin
+                .from('booking_notifications_log')
+                .select('id')
+                .in('notification_type', ['transfer_new_booking', 'transfer_new_booking_no_operator'])
+                .filter('metadata->>order_id', 'eq', orderId)
+                .limit(1);
+              if (!existing || existing.length === 0) {
+                await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/notify-transfer-booking`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+                  },
+                  body: JSON.stringify({
+                    order_id: orderId,
+                    order_number: fullOrder.order_number,
+                    direction: om.direction,
+                    terminal: om.terminal,
+                    flight_number: om.flight_number,
+                    vehicle_name: om.vehicle_name,
+                    meeting_sign_name: om.meeting_sign_name || primary.name,
+                    passengers: Number(om.passengers) || 1,
+                    luggage: Number(om.luggage) || 0,
+                    pickup_address: om.direction === 'from-airport'
+                      ? `Phuket Airport (${om.terminal || 'international'})`
+                      : (om.destination_address || ''),
+                    dropoff_address: om.direction === 'from-airport'
+                      ? (om.destination_address || '')
+                      : `Phuket Airport (${om.terminal || 'international'})`,
+                    scheduled_at: fullOrder.start_at,
+                    total_amount: Number(fullOrder.total_amount),
+                    currency: fullOrder.currency,
+                    payment_method: 'stripe',
+                    customer_name: primary.name || '',
+                    customer_phone: primary.phone || '',
+                    customer_email: primary.email || '',
+                    customer_language: om.language || 'ru',
+                    notes: fullOrder.notes || undefined,
+                  }),
+                });
+                logStep("Transfer notify (race-fix) triggered", { orderId: redactId(orderId) });
+              }
+            }
+          }
+        } catch (transferNotifyError) {
+          logStep("WARN", `Transfer notify race-fix failed (non-fatal): ${transferNotifyError}`);
+        }
+
         logStep("Order payment completed", { orderId });
 
         // ===== TRUST STACK: flip downstream artefact statuses =====

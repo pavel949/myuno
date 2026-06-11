@@ -4,6 +4,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
+import { getTransferMarkupMultiplier } from '../_shared/transfer-commission.ts';
 
 async function sendEmail(
   templateName: string,
@@ -238,8 +239,10 @@ Deno.serve(async (req) => {
     }
 
     // Persist operator_id + financial split on order so admin sees the chain.
-    // Vehicle markup_pct=35 → vendor_payout = total / 1.35, platform_fee = remainder.
+    // Markup multiplier is read from `vertical_commission_rules` (vertical='transfer').
+    // vendor_payout = total / multiplier, platform_fee = remainder.
     try {
+      const multiplier = await getTransferMarkupMultiplier();
       const { data: ord } = await sb()
         .from('orders')
         .select('total_amount, platform_fee_amount, metadata')
@@ -247,9 +250,14 @@ Deno.serve(async (req) => {
         .single();
       if (ord) {
         const total = Number(ord.total_amount) || p.total_amount;
-        const vendorPayout = Math.round(total / 1.35);
+        const vendorPayout = Math.round(total / multiplier);
         const platformFee = total - vendorPayout;
-        const meta = { ...(ord.metadata as Record<string, unknown> || {}), operator_id: op?.id || null, operator_name: op?.name || null };
+        const meta = {
+          ...(ord.metadata as Record<string, unknown> || {}),
+          operator_id: op?.id || null,
+          operator_name: op?.name || null,
+          markup_multiplier: multiplier,
+        };
         await sb().from('orders').update({
           metadata: meta,
           vendor_payout_amount: vendorPayout,
@@ -349,14 +357,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Log
+    // Log — booking_notifications_log columns: channel(single), notification_type, metadata(jsonb)
     await sb().from('booking_notifications_log').insert({
-      order_id: p.order_id,
+      channel: 'whatsapp+email',
       notification_type: operatorMissing ? 'transfer_new_booking_no_operator' : 'transfer_new_booking',
-      channels: ['whatsapp', 'email'],
-      recipients: { operator_wa: opWa, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email, customer_language: customerLang },
-      status: operatorMissing ? 'partial' : 'sent',
-    }).catch(() => {});
+      sent_at: new Date().toISOString(),
+      metadata: {
+        order_id: p.order_id,
+        order_number: p.order_number,
+        recipients: { operator_wa: opWa, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email, customer_language: customerLang },
+        status: operatorMissing ? 'partial' : 'sent',
+      },
+    }).catch((e) => console.error('[log]', e));
 
     return new Response(JSON.stringify({ success: true, operator: op?.name || null, operator_missing: operatorMissing, customer_language: customerLang }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
