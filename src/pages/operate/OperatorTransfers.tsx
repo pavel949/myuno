@@ -94,9 +94,9 @@ export default function OperatorTransfers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['operator-transfers'] });
-      toast.success('Статус обновлён');
+      toast.success(t.statusUpdated);
     },
-    onError: () => toast.error('Ошибка обновления'),
+    onError: () => toast.error(t.updateError),
   });
 
   return (
@@ -104,13 +104,13 @@ export default function OperatorTransfers() {
       <div className="p-4 md:p-6 lg:p-8 space-y-5 max-w-[1536px] mx-auto w-full">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <h1 className="text-2xl font-display font-bold">Операторская · Трансферы</h1>
+            <h1 className="text-2xl font-display font-bold">{t.title}</h1>
             <p className="text-sm text-muted-foreground">
-              {orders?.length || 0} заказов · live updates
+              {orders?.length || 0} {t.orders} · {t.live}
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="w-4 h-4 mr-2" /> Обновить
+            <RefreshCw className="w-4 h-4 mr-2" /> {t.refresh}
           </Button>
         </div>
 
@@ -121,7 +121,7 @@ export default function OperatorTransfers() {
             </SelectTrigger>
             <SelectContent>
               {STATUS_FILTERS.map(f => (
-                <SelectItem key={f.id} value={f.id}>{f.labelRu} / {f.labelEn}</SelectItem>
+                <SelectItem key={f.id} value={f.id}>{f.label[lang]}</SelectItem>
               ))}
             </SelectContent>
           </Select>
