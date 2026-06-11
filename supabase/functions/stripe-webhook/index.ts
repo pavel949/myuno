@@ -291,6 +291,31 @@ Deno.serve(async (req) => {
         }
 
         logStep("Order payment completed", { orderId });
+
+        // ===== TRUST STACK: flip downstream artefact statuses =====
+        // dispute_packs (A-3) and contract_analyses (A-2) live in their own
+        // tables; the canonical order path only updates `orders`. Flip status
+        // here so the success page can render the paid artefact.
+        try {
+          const ctype = session.metadata?.checkout_type;
+          const paidAt = new Date().toISOString();
+          if (ctype === "dispute_pack" && session.metadata?.dispute_pack_id) {
+            await supabaseAdmin
+              .from("dispute_packs")
+              .update({ status: "paid", paid_at: paidAt, order_id: orderId })
+              .eq("id", session.metadata.dispute_pack_id);
+            logStep("Dispute pack flipped to paid", { id: redactId(session.metadata.dispute_pack_id) });
+          }
+          if (ctype === "contract_analysis" && session.metadata?.contract_analysis_id) {
+            await supabaseAdmin
+              .from("contract_analyses")
+              .update({ status: "paid", paid_at: paidAt, order_id: orderId })
+              .eq("id", session.metadata.contract_analysis_id);
+            logStep("Contract analysis flipped to paid", { id: redactId(session.metadata.contract_analysis_id) });
+          }
+        } catch (artefactError) {
+          logStep("WARN", `Trust Stack artefact flip failed (non-fatal): ${artefactError}`);
+        }
       }
 
       // ===== LEGACY BOOKING PAYMENT (backward compatibility) =====

@@ -4098,6 +4098,57 @@ export type Database = {
           },
         ]
       }
+      contract_analyses: {
+        Row: {
+          contract_type: string | null
+          created_at: string
+          file_name: string
+          file_size: number
+          full_report: Json | null
+          id: string
+          language: string
+          order_id: string | null
+          paid_at: string | null
+          preview: Json | null
+          risk_score: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contract_type?: string | null
+          created_at?: string
+          file_name: string
+          file_size?: number
+          full_report?: Json | null
+          id?: string
+          language?: string
+          order_id?: string | null
+          paid_at?: string | null
+          preview?: Json | null
+          risk_score?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contract_type?: string | null
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          full_report?: Json | null
+          id?: string
+          language?: string
+          order_id?: string | null
+          paid_at?: string | null
+          preview?: Json | null
+          risk_score?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       crm_access_log: {
         Row: {
           action: string
