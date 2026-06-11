@@ -261,7 +261,7 @@ Deno.serve(async (req) => {
     const opMessage = buildOperatorMessage(p, tr, confirmUrl);
 
     // Send WhatsApp: operator Klod, admin primary, admin secondary
-    const waTargets = [op?.whatsapp_number, adminWA, secondaryWA].filter(Boolean) as string[];
+    const waTargets = [opWa, adminWA, secondaryWA].filter(Boolean) as string[];
     const uniqueWA = Array.from(new Set(waTargets.map(w => w.replace(/[^0-9]/g, ''))));
     await Promise.all(uniqueWA.map(num => sendWhatsApp(num, opMessage)));
 
@@ -329,7 +329,7 @@ ${p.attachments?.length ? `<h3>Attachments</h3><ul>${p.attachments.map(a => `<li
       order_id: p.order_id,
       notification_type: 'transfer_new_booking',
       channels: ['whatsapp', 'email'],
-      recipients: { operator_wa: op?.whatsapp_number, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email, customer_language: customerLang },
+      recipients: { operator_wa: opWa, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email, customer_language: customerLang },
       status: 'sent',
     }).catch(() => {});
 
