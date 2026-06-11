@@ -110,7 +110,11 @@ export default function InvestmentToolsHub() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const [active, setActive] = useState<ToolCategory>('all');
+  const { getValue, setValue } = useUrlFilters();
+  const raw = getValue('cat', 'all');
+  const active: ToolCategory = isToolCategory(raw) ? raw : 'all';
+  const setActive = (id: ToolCategory) => setValue('cat', id === 'all' ? null : id);
+
 
   const filters: FilterRibbonItem[] = useMemo(
     () => [
