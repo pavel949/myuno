@@ -9,6 +9,7 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Sparkles, Check, Loader2 } from 'lucide-react';
+import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { Button } from '@/components/ui/button';
