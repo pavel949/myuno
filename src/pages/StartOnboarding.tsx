@@ -338,9 +338,14 @@ export default function StartOnboarding() {
                           idx === 0 && 'border-primary/60 bg-primary/5',
                         )}
                       >
-                        <span className="text-2xl shrink-0" aria-hidden>
-                          {item.icon}
-                        </span>
+                        {(() => {
+                          const ItemIcon = resolveOnboardingIcon(item.icon);
+                          return (
+                            <span className="shrink-0 text-primary" aria-hidden>
+                              <ItemIcon className="h-6 w-6" strokeWidth={1.75} />
+                            </span>
+                          );
+                        })()}
                         <span className="flex-1">
                           <span className="block text-sm font-semibold text-foreground">
                             {T(item.title, lang)}
