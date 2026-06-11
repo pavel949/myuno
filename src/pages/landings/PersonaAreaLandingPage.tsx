@@ -147,13 +147,21 @@ const PersonaAreaLandingPage = () => {
             </div>
           </dl>
 
-          <div className="mt-7">
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button asChild size="lg" className="shadow-lg">
               <a href={wp(`${persona.primaryCta.href}${persona.primaryCta.href.includes('?') ? '&' : '?'}area=${a.slug}`)}>
                 {t(persona.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
+            {waUrl && override ? (
+              <Button asChild size="lg" variant="outline">
+                <a href={waUrl} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  {t(override.whatsappLabel)}
+                </a>
+              </Button>
+            ) : null}
           </div>
         </LandingContainer>
       </header>
