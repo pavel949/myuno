@@ -3,6 +3,7 @@
 import { Resend } from 'npm:resend@2.0.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
+import { getMailFrom } from '../_shared/admin-config.ts';
 
 type Lang = 'ru' | 'en' | 'th';
 
@@ -111,10 +112,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    await sb().from('orders').update({
-      status: 'confirmed',
-      confirmed_at: new Date().toISOString(),
-    }).eq('id', orderId);
+    // Atomic transition: only succeeds if status is still NOT 'confirmed'.
+    // Prevents double-click / parallel-tab race from running side-effects twice.
+    const { data: updated, error: updErr } = await sb()
+      .from('orders')
+      .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
+      .eq('id', orderId)
+      .neq('status', 'confirmed')
+      .select('id');
+
+    if (updErr) {
+      console.error('[confirm] atomic update failed', updErr);
+      return new Response(JSON.stringify({ error: 'Update failed' }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (!updated || updated.length === 0) {
+      // Someone else confirmed between our SELECT and UPDATE — treat as success, skip side effects.
+      return new Response(JSON.stringify({ success: true, already_confirmed: true, order_number: order.order_number }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     await sb().from('order_status_history').insert({
       order_id: orderId,
@@ -157,10 +175,11 @@ Deno.serve(async (req) => {
     const totalStr = `${order.currency} ${Number(order.total_amount).toLocaleString()}`;
     const localMp = pickMeetingPoint(mp, customerLang);
 
-    // Customer email — localized
+    // Customer email — localized, via verified domain when configured.
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (resendKey && order.customer_email) {
       const resend = new Resend(resendKey);
+      const mailFrom = await getMailFrom();
       const html = `
 <div style="font-family:Arial;color:#333;max-width:600px;margin:0 auto">
   <div style="background:linear-gradient(135deg,#059669,#10b981);color:#fff;padding:24px;border-radius:12px 12px 0 0">
@@ -182,7 +201,7 @@ Deno.serve(async (req) => {
   </div>
 </div>`;
       await resend.emails.send({
-        from: 'myUNO <noreply@resend.dev>',
+        from: mailFrom,
         to: [order.customer_email],
         subject: t.emailSubject(order.order_number),
         html,

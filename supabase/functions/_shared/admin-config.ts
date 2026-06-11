@@ -8,7 +8,29 @@ import { createServiceClient } from "./supabase.ts";
 const DEFAULTS = {
   admin_emails: ["pavel@ignatevestate.com", "pi@myuno.app"],
   admin_whatsapp: "66922407355",
+  mail_from: "myUNO <noreply@resend.dev>",
 };
+
+/**
+ * Returns the From address to use for outbound transactional emails.
+ * Reads `system_settings.mail_from` (string). Falls back to Resend sandbox
+ * sender so dev keeps working, but logs a warning so prod ops can spot it.
+ * Set in DB to: `myUNO <transfers@yourverifieddomain.com>` once a Resend
+ * domain is verified.
+ */
+export async function getMailFrom(): Promise<string> {
+  try {
+    const sb = createServiceClient();
+    const { data } = await sb.from("system_settings").select("value").eq("key", "mail_from").maybeSingle();
+    const v = data?.value;
+    const parsed = typeof v === "string" ? v : (v ? JSON.parse(JSON.stringify(v)) : null);
+    if (typeof parsed === "string" && parsed.includes("@")) return parsed;
+  } catch (e) {
+    console.warn("[admin-config] getMailFrom failed:", e);
+  }
+  console.warn("[admin-config] Using sandbox sender (resend.dev). Set system_settings.mail_from to a verified domain for production.");
+  return DEFAULTS.mail_from;
+}
 
 let _cache: { emails: string[]; whatsapp: string; ts: number } | null = null;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
