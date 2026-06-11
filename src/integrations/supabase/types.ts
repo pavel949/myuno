@@ -30797,15 +30797,6 @@ export type Database = {
       }
       get_system_setting: { Args: { p_key: string }; Returns: Json }
       get_user_company_ids: { Args: { _user_id?: string }; Returns: string[] }
-      get_yacht_availability: {
-        Args: { p_month?: string; p_yacht_id: string }
-        Returns: {
-          date: string
-          note: string
-          price_override: number
-          status: string
-        }[]
-      }
       get_yacht_price_for_date: {
         Args: { p_charter_type?: string; p_date: string; p_yacht_id: string }
         Returns: number
@@ -30823,10 +30814,6 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
-        Returns: boolean
-      }
-      has_specialization: {
-        Args: { check_user_id: string; spec: string }
         Returns: boolean
       }
       increment_helpful_count: {
@@ -30885,15 +30872,6 @@ export type Database = {
         Args: { p_event_name: string; p_landing_id?: string; p_user_id: string }
         Returns: string
       }
-      mcc_transition_user_state: {
-        Args: {
-          p_new_state: string
-          p_source_landing?: string
-          p_user_id: string
-          p_vertical?: string
-        }
-        Returns: undefined
-      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -30903,7 +30881,6 @@ export type Database = {
         }
         Returns: number
       }
-      normalize_developer_name: { Args: { input: string }; Returns: string }
       normalize_phone: { Args: { p: string }; Returns: string }
       normalize_phone_text: { Args: { p: string }; Returns: string }
       outreach_throttle_check: {
@@ -30953,26 +30930,11 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
-      recalculate_user_tier: { Args: { p_user_id: string }; Returns: Json }
-      record_deposit_ledger_entry: {
-        Args: {
-          p_amount: number
-          p_booking_id: string
-          p_currency?: string
-          p_entry_type?: string
-          p_property_id: string
-        }
-        Returns: undefined
-      }
       record_ledger_entries: {
         Args: { p_order_id: string }
         Returns: undefined
       }
       refresh_dashboard_materialized_views: { Args: never; Returns: undefined }
-      refund_wallet_booking: {
-        Args: { p_booking_id: string; p_user_id: string }
-        Returns: boolean
-      }
       release_event_spots: {
         Args: { p_count: number; p_event_id: string }
         Returns: undefined
@@ -30980,15 +30942,6 @@ export type Database = {
       reserve_event_spots: {
         Args: { p_count: number; p_event_id: string }
         Returns: boolean
-      }
-      resolve_catalog_by_life_situation: {
-        Args: { p_life_code: string; p_limit?: number }
-        Returns: {
-          entity_id: string
-          entity_type: string
-          rules: Json
-          weight: number
-        }[]
       }
       resolve_life_os_context: {
         Args: {
@@ -31012,19 +30965,6 @@ export type Database = {
           weight: number
         }[]
       }
-      resolve_life_scenarios: {
-        Args: { p_locale?: string; p_situation_code: string }
-        Returns: {
-          code: string
-          description: string
-          icon: string
-          id: string
-          priority: number
-          task_count: number
-          title: string
-          urgency_level: string
-        }[]
-      }
       resolve_user_context: {
         Args: { p_entity_id?: string; p_mode?: string; p_user_id: string }
         Returns: Json
@@ -31035,7 +30975,6 @@ export type Database = {
         Returns: boolean
       }
       slugify_text: { Args: { input: string }; Returns: string }
-      soft_delete_order: { Args: { p_order_id: string }; Returns: boolean }
       staff_can_access_property: {
         Args: { p_property_id: string; p_user_id: string }
         Returns: boolean
@@ -31057,11 +30996,6 @@ export type Database = {
         Args: { _source?: string; _user_id: string }
         Returns: undefined
       }
-      uno_team_can: {
-        Args: { _action: string; _user_id: string; _vertical: string }
-        Returns: boolean
-      }
-      update_realtime_stats: { Args: never; Returns: undefined }
       user_has_clearview_access: {
         Args: { _project_id: string }
         Returns: boolean
