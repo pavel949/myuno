@@ -503,6 +503,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.CAPITAL_DEAL_INTAKE} element={<LazyPage><Pages.CapitalDealIntake /></LazyPage>} />
         <Route path={APP_ROUTES.CAPITAL_ADVISORY} element={<LazyPage><Pages.CapitalAdvisoryLanding /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_CALCULATOR} element={<LazyPage><Pages.InvestmentCalculatorPage /></LazyPage>} />
+        {/* Wave 2: unified tools hub (ClearView + Calculator + Advisory + DD) */}
+        <Route path={APP_ROUTES.INVEST_TOOLS} element={<LazyPage><Pages.InvestmentToolsHub /></LazyPage>} />
+        {/* Wave 2: /invest/clearview alias → canonical /property/clearview */}
+        <Route path="/invest/clearview" element={<Navigate to={APP_ROUTES.CLEARVIEW} replace />} />
         <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
         {/* Legacy: /invest/articles → /invest/knowledge (merged hub) */}
         <Route path="/invest/articles" element={<Navigate to={APP_ROUTES.INVEST_KNOWLEDGE} replace />} />
