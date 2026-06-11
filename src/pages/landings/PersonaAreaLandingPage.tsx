@@ -316,9 +316,18 @@ const PersonaAreaLandingPage = () => {
       </article>
 
       <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
-        <Button asChild size="lg" className="w-full">
-          <a href={wp(persona.primaryCta.href)}>{t(persona.primaryCta.label)}</a>
-        </Button>
+        {waUrl && override ? (
+          <Button asChild size="lg" className="w-full">
+            <a href={waUrl} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              {t(override.whatsappLabel)}
+            </a>
+          </Button>
+        ) : (
+          <Button asChild size="lg" className="w-full">
+            <a href={wp(persona.primaryCta.href)}>{t(persona.primaryCta.label)}</a>
+          </Button>
+        )}
       </div>
     </AppLayout>
   );
