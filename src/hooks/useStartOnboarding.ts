@@ -78,7 +78,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: 'Новостройки и переуступки с рейтингом ClearView',
       },
       route: '/property/offplan',
-      icon: '🏗️',
+      icon: 'construction',
       urgency: 'high',
     });
     items.push({
@@ -88,7 +88,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: 'Связаться с инвестиционной командой',
       },
       route: '/invest',
-      icon: '💼',
+      icon: 'briefcase',
       urgency: 'medium',
     });
   }
@@ -102,7 +102,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: 'Виза, школы, банки и медицина в одном месте',
       },
       route: '/relocate',
-      icon: '🛬',
+      icon: 'plane-landing',
       urgency: 'high',
     });
     items.push({
@@ -112,14 +112,14 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: '4 вопроса → подходящий тип визы',
       },
       route: '/visa/quiz',
-      icon: '🛂',
+      icon: 'badge-check',
       urgency: 'high',
     });
     items.push({
       title: { en: 'Long-term rentals', ru: 'Долгосрочная аренда' },
       description: { en: 'Houses & condos for 6m+', ru: 'Дома и кондо от 6 месяцев' },
       route: '/property/rent',
-      icon: '🏠',
+      icon: 'home',
       urgency: 'medium',
     });
   }
@@ -133,7 +133,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: 'Разместить и управлять своей недвижимостью',
       },
       route: '/mc',
-      icon: '🏢',
+      icon: 'building-2',
       urgency: 'high',
     });
   }
@@ -144,14 +144,14 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
       title: { en: 'Short-term stays', ru: 'Краткосрочное жильё' },
       description: { en: 'Villas, condos, hotels with PMS-grade trust', ru: 'Виллы, кондо, отели от УК' },
       route: '/property/rent',
-      icon: '🏝️',
+      icon: 'palmtree',
       urgency: 'high',
     });
     items.push({
       title: { en: 'Airport transfer', ru: 'Трансфер из аэропорта' },
       description: { en: 'Meet & greet, fast-track', ru: 'Встреча, fast-track' },
       route: '/airport',
-      icon: '✈️',
+      icon: 'plane',
       urgency: 'medium',
     });
     items.push({
@@ -161,7 +161,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
         ru: 'Яхты, рестораны, спа, аптеки',
       },
       route: '/discover',
-      icon: '🧭',
+      icon: 'compass',
       urgency: 'low',
     });
   }
@@ -174,7 +174,7 @@ function recommend(answers: Required<StartAnswers>): OnboardingResult['items'] {
       ru: 'Единый профиль для визы, налогов, объектов и документов',
     },
     route: '/account',
-    icon: '🪪',
+    icon: 'id-card',
     urgency: 'medium',
   });
 
