@@ -128,8 +128,9 @@ export default function VendorLanding() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <Badge variant="secondary" className="mb-4 text-xs px-3 py-1">
-              {isRu ? '🚀 Бесплатная регистрация' : '🚀 Free registration'}
+            <Badge variant="secondary" className="mb-4 text-xs px-3 py-1 inline-flex items-center gap-1.5">
+              <Rocket className="h-3.5 w-3.5" strokeWidth={1.75} />
+              {isRu ? 'Бесплатная регистрация' : 'Free registration'}
             </Badge>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
               {isRu ? 'Продавайте услуги' : 'Sell your services'}
