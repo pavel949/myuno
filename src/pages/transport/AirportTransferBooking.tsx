@@ -64,6 +64,7 @@ export default function AirportTransferBooking() {
   const [createdOrderNumber, setCreatedOrderNumber] = useState<string | null>(null);
   const [isReverseGeocoding, setIsReverseGeocoding] = useState(false);
   const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [destinationCoords, setDestinationCoords] = useState<{ lat: number; lng: number; placeId?: string } | null>(null);
   const [nightSurchargeCfg, setNightSurchargeCfg] = useState<{ start: string; end: string; sedan: number; van: number } | null>(null);
   
   const [formData, setFormData] = useState({
@@ -270,10 +271,15 @@ export default function AirportTransferBooking() {
         {
           address_type: formData.direction === 'from-airport' ? 'pickup' : 'dropoff',
           address_text: `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`,
+          lat: 8.1132,
+          lng: 98.3169,
         },
         {
           address_type: formData.direction === 'from-airport' ? 'dropoff' : 'pickup',
           address_text: formData.destinationAddress,
+          ...(destinationCoords?.lat != null && destinationCoords?.lng != null
+            ? { lat: destinationCoords.lat, lng: destinationCoords.lng }
+            : {}),
         },
       ],
       payment: {
@@ -634,7 +640,17 @@ export default function AirportTransferBooking() {
                 <div className="flex gap-2">
                   <AddressAutocomplete
                     value={formData.destinationAddress}
-                    onChange={(val) => setFormData(prev => ({ ...prev, destinationAddress: val, selectedDestinationId: '' }))}
+                    onChange={(val, meta) => {
+                      setFormData(prev => ({ ...prev, destinationAddress: val, selectedDestinationId: '' }));
+                      if (meta?.lat != null && meta?.lng != null) {
+                        setDestinationCoords({ lat: meta.lat, lng: meta.lng, placeId: meta.placeId });
+                        if (formData.direction === 'to-airport') {
+                          setPickupCoords({ lat: meta.lat, lng: meta.lng });
+                        }
+                      } else {
+                        setDestinationCoords(null);
+                      }
+                    }}
                     placeholder={language === 'ru' ? 'Или введите свой адрес' : 'Or enter your address'}
                     className="flex-1"
                   />
