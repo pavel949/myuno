@@ -35,15 +35,16 @@
  * `halal-stay` were migrated to `APP_ROUTES` constants in the same pass.
  */
 import {
-  Plane, Home as HomeIcon, Heart, Scale, TrendingUp, Building2, HardHat, Baby,
-  Smartphone, ArrowLeftRight, Car, Landmark, Zap,
+  Plane, PlaneLanding, Home as HomeIcon, Heart, Scale, TrendingUp, Building2, HardHat, Baby,
+  Smartphone, ArrowLeftRight, Car, Landmark, Zap, Plug,
   Utensils, Sparkles, Stethoscope, ClipboardList, ShoppingBag, Users,
-  FileSearch, Calculator, Shield, AlertTriangle,
-  Calendar, BarChart3, Wrench, PenTool, DollarSign,
-  Building, Search, LineChart, Palette,
+  FileSearch, Calculator, Shield, ShieldCheck, AlertTriangle, LifeBuoy,
+  Calendar, BarChart3, Wrench, PenTool, DollarSign, LayoutGrid,
+  Building, Search, LineChart, Palette, Scissors, Crown, Bike, Shirt,
   Compass, Anchor, Dumbbell, CalendarDays, GraduationCap, PawPrint,
-  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Truck, Package, Route, Waves, Bandage,
-  Briefcase, Globe, BookOpen,
+  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Truck, Package, Route, Waves, Bandage, Pill, Flower2,
+  Briefcase, Globe, BookOpen, Heart as HeartIcon,
+  Stethoscope as VetIcon,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
