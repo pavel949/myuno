@@ -731,22 +731,45 @@ export default function AirportTransferBooking() {
               transition={{ duration: 0.25 }}
               className="space-y-5"
             >
-              <div className="p-3 rounded-none bg-muted/50 border border-border/50 flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-0.5">
-                    {formData.direction === 'from-airport' ? (
-                      <><Plane className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><MapPin className="w-3 h-3" /></>
-                    ) : (
-                      <><MapPin className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><Plane className="w-3 h-3" /></>
-                    )}
+              <div className="p-3 rounded-none bg-muted/50 border border-border/50 space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-0.5">
+                      {formData.direction === 'from-airport' ? (
+                        <><Plane className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><MapPin className="w-3 h-3" /></>
+                      ) : (
+                        <><MapPin className="w-3 h-3" /><ArrowRight className="w-2.5 h-2.5" /><Plane className="w-3 h-3" /></>
+                      )}
+                    </div>
+                    <p className="text-sm font-medium truncate">{formData.destinationAddress}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {selectedVehicle && (language === 'ru' ? selectedVehicle.name_ru : selectedVehicle.name_en)}
+                      {selectedDestination?.duration_minutes && ` · ~${selectedDestination.duration_minutes} ${language === 'ru' ? 'мин' : 'min'}`}
+                    </p>
                   </div>
-                  <p className="text-sm font-medium truncate">{formData.destinationAddress}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedVehicle && (language === 'ru' ? selectedVehicle.name_ru : selectedVehicle.name_en)}
-                    {selectedDestination?.duration_minutes && ` · ~${selectedDestination.duration_minutes} ${language === 'ru' ? 'мин' : 'min'}`}
-                  </p>
+                  <p className="font-bold text-lg shrink-0">฿{totalPrice.toLocaleString()}</p>
                 </div>
-                <p className="font-bold text-lg shrink-0">฿{totalPrice.toLocaleString()}</p>
+                {(nightSurcharge > 0 || basePrice !== totalPrice) && (
+                  <div className="pt-2 border-t border-border/50 space-y-1 text-xs">
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>{language === 'ru' ? 'Базовый тариф' : 'Base fare'}</span>
+                      <span>฿{basePrice.toLocaleString()}</span>
+                    </div>
+                    {nightSurcharge > 0 && (
+                      <div className="flex justify-between text-warning">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {language === 'ru' ? 'Ночной тариф (22:00–06:00)' : 'Night surcharge (22:00–06:00)'}
+                        </span>
+                        <span>+฿{nightSurcharge.toLocaleString()}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-semibold text-foreground pt-1 border-t border-border/30">
+                      <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
+                      <span>฿{totalPrice.toLocaleString()}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button
