@@ -42,9 +42,9 @@ const AREA_LINKS: Record<string, {
   personas: string[];
   clusters: string[];
 }> = {
-  'bang-tao':    { personas: ['hnw', 'families', 'ru-expats'],                 clusters: ['investment', 'settlement', 'lifestyle'] },
+  'bang-tao':    { personas: ['hnw', 'passive-investors', 'families', 'snowbirds', 'ru-expats'], clusters: ['investment', 'settlement', 'lifestyle'] },
   'laguna':      { personas: ['hnw', 'passive-investors'],                     clusters: ['investment', 'lifestyle'] },
-  'kamala':      { personas: ['families', 'passive-investors', 'ru-expats'],   clusters: ['settlement', 'lifestyle'] },
+  'kamala':      { personas: ['families', 'passive-investors', 'snowbirds', 'ru-expats'], clusters: ['settlement', 'lifestyle'] },
   'surin':       { personas: ['hnw'],                                          clusters: ['investment', 'lifestyle'] },
   'layan':       { personas: ['passive-investors', 'hnw'],                     clusters: ['investment', 'lifestyle'] },
   'nai-harn':    { personas: ['ru-expats', 'retirees', 'snowbirds'],           clusters: ['settlement', 'lifestyle'] },
@@ -52,7 +52,7 @@ const AREA_LINKS: Record<string, {
   'cherngtalay': { personas: ['families', 'passive-investors'],                clusters: ['settlement', 'investment'] },
   'kata':        { personas: ['tourists', 'passive-investors'],                clusters: ['arrival', 'lifestyle'] },
   'phuket-town': { personas: ['digital-nomads', 'ru-expats'],                  clusters: ['settlement', 'arrival'] },
-  'patong':      { personas: ['tourists', 'passive-investors'],                clusters: ['arrival', 'investment'] },
+  'patong':      { personas: ['passive-investors', 'snowbirds', 'families', 'tourists'], clusters: ['arrival', 'investment'] },
   'karon':       { personas: ['families', 'tourists', 'passive-investors'],    clusters: ['arrival', 'lifestyle'] },
   'chalong':     { personas: ['families', 'ru-expats', 'retirees'],            clusters: ['settlement', 'lifestyle'] },
 };
