@@ -484,7 +484,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_SERVICES} element={<LazyPage><Pages.InvestmentServicesZone /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_QUIZ} element={<LazyPage><Pages.InvestorQuiz /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DASHBOARD} element={<LazyPage><Pages.InvestorDashboard /></LazyPage>} />
-        <Route path={APP_ROUTES.INVEST_RAISE} element={<LazyPage><Pages.RaiseFunding /></LazyPage>} />
+        {/* Wave 1 IA consolidation: /invest/raise = canonical 5-step submit form.
+            Legacy /invest/pitch and /invest/articles redirect to canonical entries. */}
+        <Route path={APP_ROUTES.INVEST_RAISE} element={<LazyPage><Pages.InvestmentSubmit /></LazyPage>} />
         {/* Admin-only ops console (Market/Deals/Network/Execution shell) */}
         <Route path={APP_ROUTES.INVEST_OPS} element={<Navigate to={APP_ROUTES.INVEST_MARKET} replace />} />
         <Route path={APP_ROUTES.INVEST_MARKET} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
@@ -493,7 +495,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_EXECUTION} element={<AdminGuard><LazyPage><Pages.InvestmentOpsConsole /></LazyPage></AdminGuard>} />
         {/* Specific invest sub-routes BEFORE catch-all :id */}
         <Route path="/invest/thailand" element={<LazyPage><Pages.InvestInThailand /></LazyPage>} />
-        <Route path="/invest/pitch" element={<LazyPage><Pages.InvestmentPitch /></LazyPage>} />
+        {/* Legacy: /invest/pitch → /invest/raise (single canonical raise funnel) */}
+        <Route path="/invest/pitch" element={<Navigate to={APP_ROUTES.INVEST_RAISE} replace />} />
         {/* Phase 3 — universal capital marketplace public routes */}
         <Route path={APP_ROUTES.INVEST_SUBMIT} element={<LazyPage><Pages.InvestmentSubmit /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DEALS_BOARD} element={<LazyPage><Pages.InvestmentDeals /></LazyPage>} />
@@ -501,7 +504,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.CAPITAL_ADVISORY} element={<LazyPage><Pages.CapitalAdvisoryLanding /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_CALCULATOR} element={<LazyPage><Pages.InvestmentCalculatorPage /></LazyPage>} />
         <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
-        <Route path="/invest/articles" element={<LazyPage><Pages.InvestmentArticles /></LazyPage>} />
+        {/* Legacy: /invest/articles → /invest/knowledge (merged hub) */}
+        <Route path="/invest/articles" element={<Navigate to={APP_ROUTES.INVEST_KNOWLEDGE} replace />} />
         <Route path="/invest/articles/:slug" element={<LazyPage><Pages.InvestmentArticleDetail /></LazyPage>} />
         <Route path="/invest/business/:slug" element={<LazyPage><Pages.InvestmentBusinessDetail /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_DETAIL(':id')} element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />

@@ -119,7 +119,6 @@ export const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex
 export const InvestmentHubShell = lazy(() => import('@/pages/invest/InvestmentHubShell'));
 export const InvestmentDetail = lazy(() => import('@/pages/invest/InvestmentDetail'));
 export const InvestorDashboard = lazy(() => import('@/pages/invest/InvestorDashboard'));
-export const RaiseFunding = lazy(() => import('@/pages/invest/RaiseFunding'));
 export const InvestmentHubLanding = lazy(() => import('@/pages/invest/InvestmentHubLanding'));
 export const InvestmentRealEstateZone = lazy(() => import('@/pages/invest/InvestmentRealEstateZone'));
 export const InvestmentBusinessZone = lazy(() => import('@/pages/invest/InvestmentBusinessZone'));
@@ -127,12 +126,13 @@ export const InvestmentKnowledgeZone = lazy(() => import('@/pages/invest/Investm
 export const InvestmentServicesZone = lazy(() => import('@/pages/invest/InvestmentServicesZone'));
 export const InvestmentOpsConsole = lazy(() => import('@/pages/invest/InvestmentOpsConsole'));
 export const InvestmentBusinessDetail = lazy(() => import('@/pages/invest/InvestmentBusinessDetail'));
-export const InvestmentPitch = lazy(() => import('@/pages/invest/InvestmentPitch'));
+// InvestmentPitch removed in Wave 1 — /invest/pitch redirects to /invest/raise (InvestmentSubmit).
+// RaiseFunding removed in Wave 1 — /invest/raise now uses canonical InvestmentSubmit.
+// InvestmentArticles removed in Wave 1 — /invest/articles redirects to /invest/knowledge.
 export const InvestInThailand = lazy(() => import('@/pages/invest/InvestInThailand'));
 export const InvestmentSubmit = lazy(() => import('@/pages/invest/InvestmentSubmit'));
 export const InvestmentDeals = lazy(() => import('@/pages/invest/InvestmentDeals'));
 export const InvestmentDealPublicDetail = lazy(() => import('@/pages/invest/InvestmentDealPublicDetail'));
-export const InvestmentArticles = lazy(() => import('@/pages/invest/InvestmentArticles'));
 export const InvestmentArticleDetail = lazy(() => import('@/pages/invest/InvestmentArticleDetail'));
 export const CapitalInvestmentDeals = lazy(() => import('@/pages/capital/CapitalInvestmentDeals'));
 export const CapitalInvestmentDealDetail = lazy(() => import('@/pages/capital/CapitalInvestmentDealDetail'));
