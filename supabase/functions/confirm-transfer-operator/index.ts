@@ -178,7 +178,7 @@ Deno.serve(async (req) => {
     ${localMp.google_maps_url ? `<p><a href="${localMp.google_maps_url}" target="_blank">Google Maps →</a></p>` : ''}
     ` : ''}
     <h3>${t.operatorContact}</h3>
-    <p><b>${opName}</b><br/>WhatsApp: <a href="https://wa.me/${opPhone}">+${op?.whatsapp_number || ''}</a></p>
+    <p><b>${opName}</b><br/>WhatsApp: <a href="https://wa.me/${opPhone}">+${opWa || ''}</a></p>
   </div>
 </div>`;
       await resend.emails.send({
