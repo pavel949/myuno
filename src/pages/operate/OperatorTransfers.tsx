@@ -261,7 +261,7 @@ export default function OperatorTransfers() {
                         asChild
                       >
                         <a href={`https://wa.me/${guestPhone}`} target="_blank" rel="noopener noreferrer">
-                          <MessageCircle className="w-4 h-4 mr-1.5" /> WhatsApp гостю
+                          <MessageCircle className="w-4 h-4 mr-1.5" /> {t.waGuest}
                         </a>
                       </Button>
                     )}
