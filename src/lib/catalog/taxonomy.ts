@@ -396,8 +396,8 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Truck,
     color: '#0EA5E9',
     services: [
-      { id: 'storage',  path: `${SERVICES_URL}?category=storage`, labelRu: 'Хранение',   labelEn: 'Storage',      icon: Warehouse, status: 'available' },
-      { id: 'services', path: SERVICES_URL,                        labelRu: 'Все услуги', labelEn: 'Services hub', icon: Wrench,    status: 'available' },
+      { id: 'storage',  path: `${SERVICES_URL}?category=storage`, labelRu: 'Хранение',   labelEn: 'Storage',      icon: Warehouse,  status: 'available' },
+      { id: 'services', path: SERVICES_URL,                        labelRu: 'Все услуги', labelEn: 'Services hub', icon: LayoutGrid, status: 'available' },
     ],
   },
   {
