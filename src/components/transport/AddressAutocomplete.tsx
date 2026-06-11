@@ -413,6 +413,34 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
 
       {showDropdown && (
         <div className="absolute z-[100] left-0 right-0 mt-1 bg-popover border border-border rounded-none shadow-lg max-h-[60vh] overflow-y-auto touch-pan-y">
+          {/* Currently selected — sticky at top, persists across re-renders */}
+          {isSelectionActive && selectedSuggestion && (
+            <div className="flex items-start gap-3 px-3 py-3 bg-success/5 border-b border-border/50">
+              <div className="w-8 h-8 rounded-none bg-success/15 flex items-center justify-center shrink-0 mt-0.5">
+                <Check className="w-4 h-4 text-success" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-semibold text-success uppercase tracking-wider mb-0.5">
+                  {isRu ? 'Выбрано' : 'Selected'}
+                </p>
+                <p className="font-medium text-sm truncate">{selectedSuggestion.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{selectedSuggestion.address}</p>
+                {selectedSuggestion.lat != null && selectedSuggestion.lng != null && (
+                  <p className="text-[10px] text-muted-foreground/70 font-mono mt-0.5">
+                    {selectedSuggestion.lat.toFixed(5)}, {selectedSuggestion.lng.toFixed(5)}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={clearSelection}
+                className="text-xs text-muted-foreground hover:text-foreground underline shrink-0 mt-1"
+              >
+                {isRu ? 'Изменить' : 'Change'}
+              </button>
+            </div>
+          )}
+
           {/* Use my location */}
           <button
             type="button"
