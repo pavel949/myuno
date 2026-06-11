@@ -19,6 +19,7 @@ export const mcRoutes = (
   <>
     <Route index element={<LazyPage><Pages.OwnerDashboard /></LazyPage>} />
     {/* Waves 0-2 — universal vertical-spec onboarding + editor + catalog */}
+    <Route path="listings/new" element={<LazyPage><Pages.VerticalPickerPage /></LazyPage>} />
     <Route path="listings/new/:vertical" element={<LazyPage><Pages.VerticalOnboardingPage /></LazyPage>} />
     <Route path="listings/:id/edit" element={<LazyPage><Pages.ListingEditorPage /></LazyPage>} />
     <Route path="catalog" element={<LazyPage><Pages.VerticalCatalogPage /></LazyPage>} />

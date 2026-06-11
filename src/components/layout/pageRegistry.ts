@@ -495,6 +495,7 @@ export const OwnerRentalTerms = lazy(() => import('@/pages/owner/OwnerRentalTerm
 // EditProperty removed — use PropertyEditor instead
 
 // ── Vertical-spec onboarding / editor / catalog (Waves 0-2) ──
+export const VerticalPickerPage = lazy(() => import('@/pages/operate/VerticalPickerPage'));
 export const VerticalOnboardingPage = lazy(() => import('@/pages/operate/VerticalOnboardingPage'));
 export const ListingEditorPage = lazy(() => import('@/pages/operate/ListingEditorPage'));
 export const VerticalCatalogPage = lazy(() => import('@/pages/operate/VerticalCatalogPage'));
