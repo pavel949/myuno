@@ -47,6 +47,8 @@ const PersonaAreaLandingPage = () => {
   const theme = getPersonaTheme(persona.slug);
   const Icon = theme.icon;
   const wp = (href: string) => withPersonaParam(href, persona.slug);
+  const override = findPersonaAreaOverride(persona.slug, a.slug);
+  const waUrl = override ? getWhatsAppUrl(t(override.whatsappMessage)) : null;
 
   const og = buildPersonaOgUrl({
     persona: persona.slug,
