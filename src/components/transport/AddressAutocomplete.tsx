@@ -289,14 +289,14 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           const { latitude, longitude } = pos.coords;
           if (useGoogle) {
             const result = await googleGeocode.reverseGeocode(latitude, longitude);
-            if (result?.address) onChange(result.address);
+            if (result?.address) onChange(result.address, { lat: result.lat ?? latitude, lng: result.lng ?? longitude, placeId: result.placeId ?? undefined });
           } else {
             const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?lat=${latitude}&lng=${longitude}&language=${language}`;
             const res = await fetch(url, {
               headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
             });
             const json = await res.json();
-            if (json.results?.[0]) onChange(json.results[0].address || json.results[0].name);
+            if (json.results?.[0]) onChange(json.results[0].address || json.results[0].name, { lat: latitude, lng: longitude });
           }
         } catch (err) {
           console.error('[AddressAutocomplete] reverse geocode error:', err);
