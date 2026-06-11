@@ -240,19 +240,18 @@ Deno.serve(async (req) => {
     const localMp = pickMeetingPoint(mp, customerLang);
 
     // Customer email — via Lovable Emails (queue + retries + suppression).
-    if (order.customer_email) {
-      // Strip <b>/</b> from localized strings since template renders plain React text.
+    if (customerEmail) {
       const stripBold = (s: string) => s.replace(/<\/?b>/g, '');
       const { error: emailErr } = await sb().functions.invoke('send-transactional-email', {
         body: {
           templateName: 'transfer-customer-confirmed',
-          recipientEmail: order.customer_email,
+          recipientEmail: customerEmail,
           idempotencyKey: `transfer-confirmed-${orderId}`,
           templateData: {
             subjectText: t.emailSubject(order.order_number),
             title: t.title,
             orderNumber: order.order_number,
-            greet: t.greet(order.customer_name || ''),
+            greet: t.greet(customerName),
             confirmedLine: stripBold(t.confirmedBy(opName, totalStr)),
             meetingPointLabel: t.meetingPoint,
             meetingPointName: localMp?.name || '',
@@ -272,26 +271,31 @@ Deno.serve(async (req) => {
     // WhatsApp customer — localized
     const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
     const ultraMsgToken = Deno.env.get('ULTRAMSG_TOKEN');
-    if (ultraMsgInstance && ultraMsgToken && order.customer_phone) {
+    if (ultraMsgInstance && ultraMsgToken && customerPhone) {
       const waMsg = t.waMsg(order.order_number, opName, totalStr, opPhone, localMp?.name || undefined);
       await fetch(`https://api.ultramsg.com/${ultraMsgInstance}/messages/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           token: ultraMsgToken,
-          to: `+${order.customer_phone.replace(/[^0-9]/g, '')}`,
+          to: `+${customerPhone.replace(/[^0-9]/g, '')}`,
           body: waMsg,
         }),
       }).catch(e => console.error('[WA] customer confirm failed', e));
     }
 
     await sb().from('booking_notifications_log').insert({
-      order_id: orderId,
+      channel: 'whatsapp+email',
       notification_type: 'transfer_confirmed',
-      channels: ['whatsapp', 'email'],
-      recipients: { customer_email: order.customer_email, customer_phone: order.customer_phone, customer_language: customerLang },
-      status: 'sent',
-    }).catch(() => {});
+      sent_at: new Date().toISOString(),
+      metadata: {
+        order_id: orderId,
+        order_number: order.order_number,
+        recipients: { customer_email: customerEmail, customer_phone: customerPhone, customer_language: customerLang },
+        status: 'sent',
+      },
+    }).catch((e) => console.error('[log]', e));
+
 
     return new Response(JSON.stringify({ success: true, order_number: order.order_number, customer_language: customerLang }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
