@@ -235,7 +235,7 @@ export default function InvestmentHubLanding() {
 
           {/* 5 Zones */}
           <section className="space-y-3">
-            <h2 className="text-lg font-bold px-1">{isRu ? '5 направлений хаба' : 'Hub Zones'}</h2>
+            <h2 className="text-lg font-bold px-1">{isRu ? 'Направления хаба' : 'Hub Zones'}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <ZoneCard
                 icon={Building2}
