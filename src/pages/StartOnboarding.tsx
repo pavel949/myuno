@@ -117,7 +117,7 @@ const COPY = {
 };
 
 interface OptionGridProps<T extends string> {
-  options: { value: T; label: Copy; icon: string; desc?: Copy }[];
+  options: { value: T; label: Copy; icon: LucideIcon; desc?: Copy }[];
   selected: T | null;
   onSelect: (v: T) => void;
   lang: L;
@@ -128,6 +128,7 @@ function OptionGrid<T extends string>({ options, selected, onSelect, lang }: Opt
     <div className="grid gap-3 sm:grid-cols-2">
       {options.map((opt) => {
         const isActive = selected === opt.value;
+        const Icon = opt.icon;
         return (
           <motion.button
             key={opt.value}
@@ -141,8 +142,8 @@ function OptionGrid<T extends string>({ options, selected, onSelect, lang }: Opt
             )}
             aria-pressed={isActive}
           >
-            <span className="text-2xl shrink-0" aria-hidden>
-              {opt.icon}
+            <span className="shrink-0 text-primary" aria-hidden>
+              <Icon className="h-6 w-6" strokeWidth={1.75} />
             </span>
             <span className="flex-1">
               <span className="block text-sm font-semibold text-foreground">{T(opt.label, lang)}</span>
