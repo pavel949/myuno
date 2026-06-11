@@ -246,6 +246,10 @@ export const LegalClusterPage = lazy(() => import('@/pages/legal/LegalClusterPag
 export const ContractAnalysisPage = lazy(() => import('@/pages/legal/ContractAnalysisPage'));
 export const FETPage = lazy(() => import('@/pages/services/finance/FETPage'));
 export const TaxNavPage = lazy(() => import('@/pages/legal/TaxNavPage'));
+// ── Trust Stack §3 A-3 (Deposit Vault) ──
+export const DepositVaultPage = lazy(() => import('@/pages/legal/DepositVaultPage'));
+export const DepositDisputePage = lazy(() => import('@/pages/legal/DepositDisputePage'));
+export const DepositRiskQuizPage = lazy(() => import('@/pages/tools/DepositRiskQuizPage'));
 
 // ── INVEST Cluster (legacy alias → InvestmentHubLanding) ──
 export const InvestClusterPage = lazy(() => import('@/pages/invest/InvestmentHubLanding'));
