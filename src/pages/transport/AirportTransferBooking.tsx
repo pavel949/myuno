@@ -271,10 +271,14 @@ export default function AirportTransferBooking() {
         {
           address_type: formData.direction === 'from-airport' ? 'pickup' : 'dropoff',
           address_text: `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`,
+          lat: 8.1132,
+          lng: 98.3169,
         },
         {
           address_type: formData.direction === 'from-airport' ? 'dropoff' : 'pickup',
           address_text: formData.destinationAddress,
+          lat: destinationCoords?.lat ?? null,
+          lng: destinationCoords?.lng ?? null,
         },
       ],
       payment: {
