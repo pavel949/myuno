@@ -119,7 +119,6 @@ export const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex
 export const InvestmentHubShell = lazy(() => import('@/pages/invest/InvestmentHubShell'));
 export const InvestmentDetail = lazy(() => import('@/pages/invest/InvestmentDetail'));
 export const InvestorDashboard = lazy(() => import('@/pages/invest/InvestorDashboard'));
-export const RaiseFunding = lazy(() => import('@/pages/invest/RaiseFunding'));
 export const InvestmentHubLanding = lazy(() => import('@/pages/invest/InvestmentHubLanding'));
 export const InvestmentRealEstateZone = lazy(() => import('@/pages/invest/InvestmentRealEstateZone'));
 export const InvestmentBusinessZone = lazy(() => import('@/pages/invest/InvestmentBusinessZone'));
