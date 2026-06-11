@@ -709,7 +709,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="investment-deals" element={<LazyPage><Pages.CapitalInvestmentDeals /></LazyPage>} />
           <Route path="investment-deals/:id" element={<LazyPage><Pages.CapitalInvestmentDealDetail /></LazyPage>} />
           <Route path="developers" element={<LazyPage><Pages.CapitalDevelopersPending /></LazyPage>} />
-          <Route path="developers/pending" element={<LazyPage><Pages.CapitalDevelopersPending /></LazyPage>} />
+          {/* /capital/developers/pending removed — list page shows pending + approved via tabs */}
         </Route>
 
         {/* ── Owner → MC Redirects (legacy backward compat) ── */}

@@ -141,7 +141,6 @@ export const APP_ROUTES = {
   DEVELOPER_PORTAL_PROJECT_NEW: '/developer-portal/projects/new',
   DEVELOPER_PORTAL_PROJECT_EDIT: (id: string) => `/developer-portal/projects/${id}`,
   CAPITAL_DEVELOPERS: '/capital/developers',
-  CAPITAL_DEVELOPERS_PENDING: '/capital/developers/pending',
   ADMIN_NEWBUILDS: '/admin/newbuilds',
 
   // ── Investment Hub (top-level — multi-asset capital + business) ──
@@ -548,6 +547,7 @@ export const APP_ROUTES = {
   ADMIN_TRANSFERS: '/admin/transfers',
   ADMIN_CRM: '/admin/crm',
   ADMIN_TICKETS: '/admin/tickets',
+  /** Semantic alias for moderation entry-point; shares the Operations screen until a dedicated page exists. */
   ADMIN_MODERATION: '/admin/operations',
   VENDOR_PAYOUTS: '/vendor/payouts',
   TEAM_CONTENT: '/team/content',
