@@ -55,6 +55,7 @@ const LifeFlowAlias = () => {
 // paint on /auth, /property/:id, deep links, etc.
 import Auth from '@/pages/Auth';
 import NotFound from '@/pages/NotFound';
+import Unsubscribe from '@/pages/Unsubscribe';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Index = React.lazy(() => import('@/pages/Index'));
@@ -765,6 +766,9 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Area Landings (public, indexable) ── */}
         <Route path="/area" element={<LazyPage><Pages.AreaIndexPage /></LazyPage>} />
         <Route path="/area/:slug" element={<LazyPage><Pages.AreaLandingPage /></LazyPage>} />
+
+        {/* ── Email unsubscribe (token-based) ── */}
+        <Route path="/unsubscribe" element={<PageTransition><Unsubscribe /></PageTransition>} />
 
         {/* ── Catch-all ── */}
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
