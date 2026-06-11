@@ -467,6 +467,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.CONTRACT_ANALYSIS} element={<LazyPage><Pages.ContractAnalysisPage /></LazyPage>} />
         <Route path={APP_ROUTES.FET_CHECK} element={<LazyPage><Pages.FETPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_NAV} element={<LazyPage><Pages.TaxNavPage /></LazyPage>} />
+        {/* Trust Stack §3 A-3: Deposit Vault + Dispute Pack + magnet quiz */}
+        <Route path={APP_ROUTES.DEPOSIT_VAULT} element={<LazyPage><Pages.DepositVaultPage /></LazyPage>} />
+        <Route path={APP_ROUTES.DEPOSIT_DISPUTE_NEW} element={<LazyPage><Pages.DepositDisputePage /></LazyPage>} />
+        <Route path="/legal/deposit-vault/dispute/:packId" element={<LazyPage><Pages.DepositDisputePage /></LazyPage>} />
+        <Route path={APP_ROUTES.DEPOSIT_RISK_QUIZ} element={<LazyPage><Pages.DepositRiskQuizPage /></LazyPage>} />
         <Route path={APP_ROUTES.TAX_STRUCTURING} element={<LazyPage><Pages.TaxStructuringLanding /></LazyPage>} />
         <Route path={APP_ROUTES.CLEARVIEW_FOR_DEVELOPERS} element={<LazyPage><Pages.ClearViewForDevelopersLanding /></LazyPage>} />
         

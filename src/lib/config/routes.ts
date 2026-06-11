@@ -281,6 +281,11 @@ export const APP_ROUTES = {
   TAX_NAV: '/tax',
   CONTRACT_ANALYSIS: '/legal/contract-analysis',
   FET_CHECK: '/services/finance/fet',
+  // Trust Stack §3 A-3
+  DEPOSIT_VAULT: '/legal/deposit-vault',
+  DEPOSIT_DISPUTE_NEW: '/legal/deposit-vault/dispute/new',
+  DEPOSIT_DISPUTE_DETAIL: (packId: string) => `/legal/deposit-vault/dispute/${packId}`,
+  DEPOSIT_RISK_QUIZ: '/tools/deposit-risk',
 
 
   // ── INVEST Cluster (legacy alias → INVEST) ──
