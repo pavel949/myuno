@@ -13,7 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { 
   ArrowRight, CheckCircle2, Users, Shield, Zap, Globe, 
   Star, Clock, TrendingUp, BadgeCheck, Crown, Award,
-  Loader2, MessageCircle
+  Loader2, MessageCircle, Rocket, Wallet, Lock, BarChart3, Gift,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
