@@ -251,7 +251,7 @@ export default function OperatorTransfers() {
                         onClick={() => updateStatus.mutate({ orderId: order.id, newStatus: 'completed' as OrderStatus })}
                         disabled={updateStatus.isPending}
                       >
-                        Завершить
+                        {t.complete}
                       </Button>
                     )}
                     {guestPhone && (
