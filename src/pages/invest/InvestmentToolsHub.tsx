@@ -19,8 +19,12 @@ import {
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 import { UnifiedFilterRibbon, type FilterRibbonItem } from '@/components/shared/UnifiedFilterRibbon';
+import { useUrlFilters } from '@/hooks/useUrlFilters';
 
-type ToolCategory = 'all' | 'rating' | 'calc' | 'advisory' | 'dd';
+const TOOL_CATEGORIES = ['all', 'rating', 'calc', 'advisory', 'dd'] as const;
+type ToolCategory = typeof TOOL_CATEGORIES[number];
+const isToolCategory = (v: string): v is ToolCategory =>
+  (TOOL_CATEGORIES as readonly string[]).includes(v);
 
 interface ToolTile {
   icon: React.ElementType;
