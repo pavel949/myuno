@@ -17,6 +17,7 @@ import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
 import { MCPortalGuard } from '@/components/auth/MCPortalGuard';
+import ManageHubGate from '@/components/layout/ManageHubGate';
 
 import { CapitalLayout } from '@/components/capital/CapitalLayout';
 import { AdminLayout } from '@/components/admin/AdminLayout';
@@ -264,7 +265,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INSTALL} element={<LazyPage><Pages.Install /></LazyPage>} />
         <Route path={APP_ROUTES.BOOKING_ADVANCE_REQUESTED} element={<LazyPage><Pages.AdvanceRequested /></LazyPage>} />
         <Route path="/ref/:code" element={<LazyPage><Pages.ReferralLanding /></LazyPage>} />
-        <Route path="/for-management-companies" element={<LazyPage><Pages.ForManagementCompanies /></LazyPage>} />
+        {/* Wave 3 stabilize: Manage cluster routes role-aware (operators → portal, guests → landing) */}
+        <Route path="/for-management-companies" element={<ManageHubGate />} />
         <Route path={APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS} element={<LazyPage><Pages.ForDevelopers /></LazyPage>} />
         <Route path={APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS} element={<LazyPage><Pages.ForLocalServiceProviders /></LazyPage>} />
         <Route

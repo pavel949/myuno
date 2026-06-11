@@ -439,11 +439,11 @@ export const APP_ROUTES = {
   MC_INVOICES: '/mc/invoices',
   MC_OWNER_PAYOUTS: '/mc/finance/owner-payouts',
   MC_AR_AGING: '/mc/finance/ar-aging',
-  MC_TRUST_ACCOUNTS: '/mc/finance/trust-accounts',
+  // MC_TRUST_ACCOUNTS removed Wave 3 (route unmounted 2026-06-05, Y1 scope cut).
   MC_TAX_CENTER: '/mc/finance/tax-center',
   MC_STATEMENT_APPROVALS: '/mc/finance/statement-approvals',
   MC_SIGNATURES: '/mc/documents/signatures',
-  MC_APPROVALS: '/mc/approvals',
+  // MC_APPROVALS removed Wave 3 (constant existed but route never mounted).
   MC_TEAM_SHIFTS: '/mc/team/shifts',
   MC_PROCUREMENT: '/mc/procurement',
   MC_OWNER_ANALYTICS: '/mc/insights/owner-analytics',

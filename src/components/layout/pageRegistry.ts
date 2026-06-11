@@ -18,7 +18,7 @@ export const ForLocalServiceProviders = lazy(() => import('@/pages/ForLocalServi
 export const ForBusinessPage = lazy(() => import('@/pages/ForBusinessPage'));
 export const Discover = lazy(() => import('@/components/navigation/NavigatorEntry'));
 export const SituationDetail = lazy(() => import('@/components/navigation/v3/SituationDetailPage'));
-export const PlatformCatalog = lazy(() => import('@/pages/PlatformCatalog'));
+// Wave 3 stabilize: PlatformCatalog removed (orphan — /catalog redirects to /discover).
 export const MapView = lazy(() => import('@/pages/MapView'));
 export const Bookings = lazy(() => import('@/pages/Bookings'));
 export const BookingDetail = lazy(() => import('@/pages/BookingDetail'));
@@ -43,7 +43,7 @@ export const BeautyMap = lazy(() => import('@/pages/beauty/BeautyMap'));
 export const PropertyLanding = lazy(() => import('@/pages/property/PropertyLanding'));
 export const PropertyIndex = lazy(() => import('@/pages/property/PropertyIndex'));
 export const PropertySearchPage = lazy(() => import('@/pages/property/PropertySearchPage'));
-export const StaysSearchPage = lazy(() => import('@/pages/stays/StaysSearchPage'));
+// Wave 3 stabilize: StaysSearchPage removed (orphan — /stays/search redirects to /property/browse).
 export const PropertyDetail = lazy(() => import('@/pages/property/PropertyDetail'));
 export const PropertyInquiry = lazy(() => import('@/pages/property/PropertyInquiry'));
 export const ManualPaymentPending = lazy(() => import('@/pages/property/ManualPaymentPending'));
@@ -115,8 +115,8 @@ export const DeveloperStripeReturn = lazy(() => import('@/pages/developer-portal
 export const AdminNewbuilds = lazy(() => import('@/pages/admin/AdminNewbuilds'));
 
 // ── Investment ──
-export const InvestmentIndex = lazy(() => import('@/pages/invest/InvestmentIndex'));
-export const InvestmentHubShell = lazy(() => import('@/pages/invest/InvestmentHubShell'));
+// Wave 3 stabilize: InvestmentIndex removed (orphan — hub uses InvestmentHubLanding).
+// InvestmentHubShell stays as direct import in InvestmentOpsConsole, no Pages.* export needed.
 export const InvestmentDetail = lazy(() => import('@/pages/invest/InvestmentDetail'));
 export const InvestorDashboard = lazy(() => import('@/pages/invest/InvestorDashboard'));
 export const InvestmentHubLanding = lazy(() => import('@/pages/invest/InvestmentHubLanding'));
