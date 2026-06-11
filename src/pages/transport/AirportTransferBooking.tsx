@@ -277,8 +277,9 @@ export default function AirportTransferBooking() {
         {
           address_type: formData.direction === 'from-airport' ? 'dropoff' : 'pickup',
           address_text: formData.destinationAddress,
-          lat: destinationCoords?.lat ?? null,
-          lng: destinationCoords?.lng ?? null,
+          ...(destinationCoords?.lat != null && destinationCoords?.lng != null
+            ? { lat: destinationCoords.lat, lng: destinationCoords.lng }
+            : {}),
         },
       ],
       payment: {
