@@ -43,7 +43,7 @@ export const BeautyMap = lazy(() => import('@/pages/beauty/BeautyMap'));
 export const PropertyLanding = lazy(() => import('@/pages/property/PropertyLanding'));
 export const PropertyIndex = lazy(() => import('@/pages/property/PropertyIndex'));
 export const PropertySearchPage = lazy(() => import('@/pages/property/PropertySearchPage'));
-export const StaysSearchPage = lazy(() => import('@/pages/stays/StaysSearchPage'));
+// Wave 3 stabilize: StaysSearchPage removed (orphan — /stays/search redirects to /property/browse).
 export const PropertyDetail = lazy(() => import('@/pages/property/PropertyDetail'));
 export const PropertyInquiry = lazy(() => import('@/pages/property/PropertyInquiry'));
 export const ManualPaymentPending = lazy(() => import('@/pages/property/ManualPaymentPending'));
