@@ -291,68 +291,62 @@ Deno.serve(async (req) => {
     const uniqueWA = Array.from(new Set(waTargets.map(w => w.replace(/[^0-9]/g, ''))));
     await Promise.all(uniqueWA.map(num => sendWhatsApp(num, alertPrefix + opMessage)));
 
-    // Emails
-    const resendKey = Deno.env.get('RESEND_API_KEY');
-    if (resendKey) {
-      const resend = new Resend(resendKey);
-      const mailFrom = await getMailFrom();
-      const dateEn = fmtDate(p.scheduled_at, 'en-GB');
-      const alertBanner = operatorMissing
-        ? `<div style="background:#fee2e2;color:#991b1b;padding:14px;border-radius:8px;margin:0 0 16px;font-weight:600">🚨 NO ACTIVE OPERATOR — assign manually before customer waits</div>`
-        : '';
-      const operatorHtml = `
-<!DOCTYPE html><html><body style="font-family:Arial;color:#333">
-${alertBanner}
-<h2>🚗 Transfer #${p.order_number}</h2>
-<p><b>${p.direction === 'from-airport' ? 'Airport → Hotel' : 'Hotel → Airport'}</b> · ${dateEn}</p>
-<p>Flight: ${p.flight_number || '—'} · ${p.vehicle_name} · ${p.passengers}pax</p>
-<h3>Pickup</h3>
-<p>🇷🇺 ${tr.pickup.ru}<br/>🇬🇧 ${tr.pickup.en}<br/>🇹🇭 ${tr.pickup.th}</p>
-<h3>Drop-off</h3>
-<p>🇷🇺 ${tr.dropoff.ru}<br/>🇬🇧 ${tr.dropoff.en}<br/>🇹🇭 ${tr.dropoff.th}</p>
-${p.notes ? `<h3>Notes</h3><p>🇷🇺 ${tr.notes.ru}<br/>🇬🇧 ${tr.notes.en}<br/>🇹🇭 ${tr.notes.th}</p>` : ''}
-<p><b>Customer:</b> ${p.customer_name} · ${p.customer_phone} · ${p.customer_email} · lang=${customerLang.toUpperCase()}</p>
-<p><b>Total:</b> ฿${p.total_amount.toLocaleString()} (${p.payment_method})</p>
-${p.attachments?.length ? `<h3>Attachments</h3><ul>${p.attachments.map(a => `<li><a href="${a.url}">${a.filename || a.kind}</a></li>`).join('')}</ul>` : ''}
-<p style="margin-top:24px"><a href="${confirmUrl}" style="background:#059669;color:#fff;padding:12px 24px;text-decoration:none;border-radius:8px;display:inline-block">✅ Confirm Booking</a></p>
-</body></html>`;
+    // Emails — via Lovable Emails (queue, retries, suppression, unsubscribe handled centrally)
+    const dateEn = fmtDate(p.scheduled_at, 'en-GB');
+    const directionLabel = p.direction === 'from-airport' ? 'Airport → Hotel' : 'Hotel → Airport';
+    const vehicleLine = `${p.vehicle_name} · ${p.passengers}pax${p.luggage ? ` · ${p.luggage} bags` : ''}`;
+    const operatorTemplateData = {
+      orderNumber: p.order_number,
+      directionLabel,
+      dateLabel: dateEn,
+      flightNumber: p.flight_number || '—',
+      vehicleLine,
+      pickupRu: tr.pickup.ru,
+      pickupEn: tr.pickup.en,
+      pickupTh: tr.pickup.th,
+      dropoffRu: tr.dropoff.ru,
+      dropoffEn: tr.dropoff.en,
+      dropoffTh: tr.dropoff.th,
+      notesRu: tr.notes.ru,
+      notesEn: tr.notes.en,
+      notesTh: tr.notes.th,
+      customerName: p.customer_name,
+      customerPhone: p.customer_phone,
+      customerEmail: p.customer_email,
+      customerLang: customerLang,
+      totalLabel: `฿${p.total_amount.toLocaleString()}`,
+      paymentMethod: p.payment_method,
+      attachments: p.attachments || [],
+      confirmUrl,
+      operatorMissing,
+    };
 
-      // Operator
-      if (op?.email) {
-        await resend.emails.send({
-          from: mailFrom,
-          to: [op.email],
-          subject: `🚗 NEW Transfer #${p.order_number} — ${dateEn}`,
-          html: operatorHtml,
-        }).catch(e => console.error('[email] op failed', e));
-      }
-      // Admin — always, with alert subject prefix when operator missing
-      await resend.emails.send({
-        from: mailFrom,
-        to: adminEmails,
-        subject: `${operatorMissing ? '🚨 NO OPERATOR — ' : ''}🚗 Transfer #${p.order_number} — ${dateEn}`,
-        html: operatorHtml,
-      }).catch(e => console.error('[email] admin failed', e));
+    // Operator
+    if (op?.email) {
+      await sendEmail('transfer-operator-new', op.email, `transfer-op-${p.order_id}`, operatorTemplateData);
+    }
+    // Admin — always
+    for (const adminEmail of adminEmails) {
+      await sendEmail('transfer-operator-new', adminEmail, `transfer-admin-${p.order_id}-${adminEmail}`, operatorTemplateData);
+    }
 
-      // Customer "received" — localized to customer_language
-      if (p.customer_email) {
-        const c = CUSTOMER_RECEIVED[customerLang];
-        const localDate = fmtDate(p.scheduled_at, c.locale);
-        const customerHtml = `<div style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:16px">
-<h2 style="margin:0 0 12px">${c.title}</h2>
-<p>${c.orderLabel}: <b>#${p.order_number}</b></p>
-<p>${c.routeLabel}: ${tr.pickup[customerLang]} → ${tr.dropoff[customerLang]}</p>
-<p>${c.dateLabel}: ${localDate}</p>
-<p>${c.operatorLine(op?.name || 'Klod')}</p>
-<p>${c.amountLabel}: ฿${p.total_amount.toLocaleString()}</p>
-</div>`;
-        await resend.emails.send({
-          from: mailFrom,
-          to: [p.customer_email],
-          subject: c.subject(p.order_number),
-          html: customerHtml,
-        }).catch(e => console.error('[email] customer failed', e));
-      }
+    // Customer "received" — localized
+    if (p.customer_email) {
+      const c = CUSTOMER_RECEIVED[customerLang];
+      const localDate = fmtDate(p.scheduled_at, c.locale);
+      await sendEmail('transfer-customer-received', p.customer_email, `transfer-cust-recv-${p.order_id}`, {
+        subjectText: c.subject(p.order_number),
+        title: c.title,
+        orderNumber: p.order_number,
+        orderLabel: c.orderLabel,
+        routeLabel: c.routeLabel,
+        routeValue: `${tr.pickup[customerLang]} → ${tr.dropoff[customerLang]}`,
+        dateLabel: c.dateLabel,
+        dateValue: localDate,
+        operatorLine: c.operatorLine(op?.name || 'Klod').replace(/<\/?b>/g, ''),
+        amountLabel: c.amountLabel,
+        amountValue: `฿${p.total_amount.toLocaleString()}`,
+      });
     }
 
     // Log
