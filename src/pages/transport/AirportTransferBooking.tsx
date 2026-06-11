@@ -262,6 +262,7 @@ export default function AirportTransferBooking() {
           customer_name: formData.name,
           customer_phone: formData.phone,
           customer_email: formData.email,
+          customer_language: language,
           notes: formData.notes || undefined,
         },
       }).catch(err => console.error('[Notify] Transfer notification error:', err));
