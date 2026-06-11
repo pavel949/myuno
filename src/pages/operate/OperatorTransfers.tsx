@@ -144,8 +144,8 @@ export default function OperatorTransfers() {
               const pickup = addresses.find(a => a.address_type === 'pickup');
               const dropoff = addresses.find(a => a.address_type === 'dropoff');
               const scheduledDate = order.start_at ? format(new Date(order.start_at), 'dd.MM.yyyy HH:mm') : '—';
-              const translateField = (field: string, lang: string) =>
-                translations.find(t => t.field === field && t.lang === lang)?.value;
+              const translateField = (field: string, l: string) =>
+                translations.find(tr => tr.field === field && tr.lang === l)?.value;
 
               const guestPhone = primary?.phone?.replace(/\D/g, '') || '';
 
