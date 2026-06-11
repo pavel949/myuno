@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,14 +11,22 @@ import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
+type Lang = 'ru' | 'en' | 'th';
 
-const STATUS_FILTERS: Array<{ id: string; labelEn: string; labelRu: string }> = [
-  { id: 'active', labelEn: 'Active', labelRu: 'Активные' },
-  { id: 'pending', labelEn: 'Pending', labelRu: 'Ожидают' },
-  { id: 'confirmed', labelEn: 'Confirmed', labelRu: 'Подтверждены' },
-  { id: 'completed', labelEn: 'Completed', labelRu: 'Выполнены' },
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
+const STATUS_FILTERS: Array<{ id: string; label: Record<Lang, string> }> = [
+  { id: 'active', label: { ru: 'Активные', en: 'Active', th: 'ใช้งานอยู่' } },
+  { id: 'pending', label: { ru: 'Ожидают', en: 'Pending', th: 'รอดำเนินการ' } },
+  { id: 'confirmed', label: { ru: 'Подтверждены', en: 'Confirmed', th: 'ยืนยันแล้ว' } },
+  { id: 'completed', label: { ru: 'Выполнены', en: 'Completed', th: 'เสร็จสมบูรณ์' } },
+  { id: 'all', label: { ru: 'Все', en: 'All', th: 'ทั้งหมด' } },
 ];
+
+const I18N = {
+  ru: { title: 'Операторская · Трансферы', orders: 'заказов', live: 'live-обновления', refresh: 'Обновить', empty: 'Нет заказов', confirm: 'Подтвердить', reject: 'Отклонить', complete: 'Завершить', waGuest: 'WhatsApp гостю', night: '🌙 ночной', statusUpdated: 'Статус обновлён', updateError: 'Ошибка обновления' },
+  en: { title: 'Operator · Transfers', orders: 'orders', live: 'live updates', refresh: 'Refresh', empty: 'No orders', confirm: 'Confirm', reject: 'Reject', complete: 'Complete', waGuest: 'WhatsApp guest', night: '🌙 night', statusUpdated: 'Status updated', updateError: 'Update failed' },
+  th: { title: 'เจ้าหน้าที่ · การรับส่ง', orders: 'รายการ', live: 'อัปเดตสด', refresh: 'รีเฟรช', empty: 'ไม่มีคำสั่ง', confirm: 'ยืนยัน', reject: 'ปฏิเสธ', complete: 'เสร็จสิ้น', waGuest: 'WhatsApp ลูกค้า', night: '🌙 กลางคืน', statusUpdated: 'อัปเดตสถานะแล้ว', updateError: 'อัปเดตล้มเหลว' },
+} as const;
+
 
 const statusColors: Record<string, string> = {
   pending: 'bg-warning/10 text-warning',
@@ -29,6 +38,9 @@ const statusColors: Record<string, string> = {
 
 export default function OperatorTransfers() {
   const queryClient = useQueryClient();
+  const { language } = useLanguage();
+  const lang: Lang = (language === 'en' || language === 'th') ? language : 'ru';
+  const t = I18N[lang];
   const [filter, setFilter] = useState<string>('active');
 
   const { data: orders, isLoading, refetch } = useQuery({
@@ -82,9 +94,9 @@ export default function OperatorTransfers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['operator-transfers'] });
-      toast.success('Статус обновлён');
+      toast.success(t.statusUpdated);
     },
-    onError: () => toast.error('Ошибка обновления'),
+    onError: () => toast.error(t.updateError),
   });
 
   return (
@@ -92,13 +104,13 @@ export default function OperatorTransfers() {
       <div className="p-4 md:p-6 lg:p-8 space-y-5 max-w-[1536px] mx-auto w-full">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
-            <h1 className="text-2xl font-display font-bold">Операторская · Трансферы</h1>
+            <h1 className="text-2xl font-display font-bold">{t.title}</h1>
             <p className="text-sm text-muted-foreground">
-              {orders?.length || 0} заказов · live updates
+              {orders?.length || 0} {t.orders} · {t.live}
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="w-4 h-4 mr-2" /> Обновить
+            <RefreshCw className="w-4 h-4 mr-2" /> {t.refresh}
           </Button>
         </div>
 
@@ -109,7 +121,7 @@ export default function OperatorTransfers() {
             </SelectTrigger>
             <SelectContent>
               {STATUS_FILTERS.map(f => (
-                <SelectItem key={f.id} value={f.id}>{f.labelRu} / {f.labelEn}</SelectItem>
+                <SelectItem key={f.id} value={f.id}>{f.label[lang]}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -120,7 +132,7 @@ export default function OperatorTransfers() {
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : !orders?.length ? (
-          <div className="text-center py-20 text-muted-foreground">Нет заказов</div>
+          <div className="text-center py-20 text-muted-foreground">{t.empty}</div>
         ) : (
           <div className="space-y-3">
             {orders.map(order => {
@@ -132,8 +144,8 @@ export default function OperatorTransfers() {
               const pickup = addresses.find(a => a.address_type === 'pickup');
               const dropoff = addresses.find(a => a.address_type === 'dropoff');
               const scheduledDate = order.start_at ? format(new Date(order.start_at), 'dd.MM.yyyy HH:mm') : '—';
-              const translateField = (field: string, lang: string) =>
-                translations.find(t => t.field === field && t.lang === lang)?.value;
+              const translateField = (field: string, l: string) =>
+                translations.find(tr => tr.field === field && tr.lang === l)?.value;
 
               const guestPhone = primary?.phone?.replace(/\D/g, '') || '';
 
@@ -146,7 +158,7 @@ export default function OperatorTransfers() {
                         {order.status}
                       </Badge>
                       {(meta.night_surcharge_applied as boolean) && (
-                        <Badge className="bg-warning/10 text-warning">🌙 ночной</Badge>
+                        <Badge className="bg-warning/10 text-warning">{t.night}</Badge>
                       )}
                     </div>
                     <span className="font-bold text-lg tabular-nums">{order.currency} {order.total_amount?.toLocaleString()}</span>
@@ -219,7 +231,7 @@ export default function OperatorTransfers() {
                         onClick={() => updateStatus.mutate({ orderId: order.id, newStatus: 'confirmed' as OrderStatus })}
                         disabled={updateStatus.isPending}
                       >
-                        <CheckCircle2 className="w-4 h-4 mr-1.5" /> Подтвердить
+                        <CheckCircle2 className="w-4 h-4 mr-1.5" /> {t.confirm}
                       </Button>
                     )}
                     {(order.status === 'pending' || order.status === 'confirmed') && (
@@ -229,7 +241,7 @@ export default function OperatorTransfers() {
                         onClick={() => updateStatus.mutate({ orderId: order.id, newStatus: 'cancelled' as OrderStatus })}
                         disabled={updateStatus.isPending}
                       >
-                        <XCircle className="w-4 h-4 mr-1.5" /> Отклонить
+                        <XCircle className="w-4 h-4 mr-1.5" /> {t.reject}
                       </Button>
                     )}
                     {order.status === 'confirmed' && (
@@ -239,7 +251,7 @@ export default function OperatorTransfers() {
                         onClick={() => updateStatus.mutate({ orderId: order.id, newStatus: 'completed' as OrderStatus })}
                         disabled={updateStatus.isPending}
                       >
-                        Завершить
+                        {t.complete}
                       </Button>
                     )}
                     {guestPhone && (
@@ -249,7 +261,7 @@ export default function OperatorTransfers() {
                         asChild
                       >
                         <a href={`https://wa.me/${guestPhone}`} target="_blank" rel="noopener noreferrer">
-                          <MessageCircle className="w-4 h-4 mr-1.5" /> WhatsApp гостю
+                          <MessageCircle className="w-4 h-4 mr-1.5" /> {t.waGuest}
                         </a>
                       </Button>
                     )}

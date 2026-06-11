@@ -194,6 +194,7 @@ export default function AirportTransferBooking() {
         passengers: parseInt(formData.passengers),
         luggage: parseInt(formData.luggage),
         meeting_sign_name: formData.meetingSignName,
+        language,
       },
       items: [{
         item_name: `Airport Transfer - ${vehicleName}`,
@@ -261,6 +262,7 @@ export default function AirportTransferBooking() {
           customer_name: formData.name,
           customer_phone: formData.phone,
           customer_email: formData.email,
+          customer_language: language,
           notes: formData.notes || undefined,
         },
       }).catch(err => console.error('[Notify] Transfer notification error:', err));

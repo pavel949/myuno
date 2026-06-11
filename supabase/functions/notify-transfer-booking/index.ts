@@ -1,9 +1,11 @@
 // Trilingual transfer booking notifier (RU/EN/TH)
-// Recipients: Klod operator (WA+email), admin (WA+email), customer (email confirmation)
+// Recipients: Klod operator (WA+email), admin (WA+email), customer (email confirmation in their language)
 import { Resend } from 'npm:resend@2.0.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
+
+type Lang = 'ru' | 'en' | 'th';
 
 interface TransferNotifyPayload {
   order_id: string;
@@ -24,6 +26,7 @@ interface TransferNotifyPayload {
   customer_name: string;
   customer_phone: string;
   customer_email: string;
+  customer_language?: Lang;
   notes?: string;
   attachments?: Array<{ url: string; kind: string; filename?: string }>;
 }
@@ -33,21 +36,20 @@ const sb = () => createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 );
 
-async function translateField(text: string, targetLang: 'en' | 'th'): Promise<string> {
+const LANG_NAME: Record<Lang, string> = { ru: 'Russian', en: 'English', th: 'Thai' };
+
+async function translate(text: string, targetLang: Lang): Promise<string> {
   if (!text?.trim()) return text;
   const apiKey = Deno.env.get('LOVABLE_API_KEY');
   if (!apiKey) return text;
   try {
     const res = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         messages: [
-          { role: 'system', content: `Translate Russian text to ${targetLang === 'en' ? 'English' : 'Thai'}. Output ONLY the translation, no explanations.` },
+          { role: 'system', content: `Detect the source language and translate the user's text into ${LANG_NAME[targetLang]}. Preserve proper names, addresses, flight numbers. If the text is already in ${LANG_NAME[targetLang]}, return it unchanged. Output ONLY the translation, no quotes, no explanations.` },
           { role: 'user', content: text },
         ],
         temperature: 0.2,
@@ -82,34 +84,32 @@ async function sendWhatsApp(to: string, body: string): Promise<void> {
   }
 }
 
-function fmtDate(iso: string) {
+function fmtDate(iso: string, locale: string) {
   const d = new Date(iso);
-  return {
-    en: `${d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} ${d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`,
-    ru: `${d.toLocaleDateString('ru-RU')} ${d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`,
-  };
+  return `${d.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' })} ${d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: false })}`;
 }
 
-function buildOperatorMessage(p: TransferNotifyPayload, t: { pickup: { en: string; th: string }; dropoff: { en: string; th: string }; notes: { en: string; th: string } }, confirmUrl: string) {
-  const date = fmtDate(p.scheduled_at);
+function buildOperatorMessage(p: TransferNotifyPayload, tr: Record<string, Record<Lang, string>>, confirmUrl: string) {
+  const date = fmtDate(p.scheduled_at, 'en-GB');
   const dirEn = p.direction === 'from-airport' ? 'AIRPORT → HOTEL' : 'HOTEL → AIRPORT';
   const dirTh = p.direction === 'from-airport' ? 'สนามบิน → โรงแรม' : 'โรงแรม → สนามบิน';
   return `🚗 *NEW TRANSFER* / *การจองใหม่*
 
 📋 #${p.order_number}
 ✈️ ${dirEn} / ${dirTh}
-📅 ${date.en}
+📅 ${date}
 🛬 Flight: ${p.flight_number || '—'}
 🚙 ${p.vehicle_name} · ${p.passengers}pax${p.luggage ? ` · ${p.luggage} bags` : ''}
 
-📍 *Pickup (EN):* ${t.pickup.en}
-📍 *Pickup (TH):* ${t.pickup.th}
-📍 *Drop-off (EN):* ${t.dropoff.en}
-📍 *Drop-off (TH):* ${t.dropoff.th}
+📍 *Pickup (EN):* ${tr.pickup.en}
+📍 *Pickup (TH):* ${tr.pickup.th}
+📍 *Drop-off (EN):* ${tr.dropoff.en}
+📍 *Drop-off (TH):* ${tr.dropoff.th}
 
 👤 ${p.customer_name} · ${p.customer_phone}
+🌐 Lang: ${(p.customer_language || 'ru').toUpperCase()}
 💰 ฿${p.total_amount.toLocaleString()} (${p.payment_method})
-${t.notes.en ? `\n📝 ${t.notes.en}\n📝 ${t.notes.th}` : ''}
+${tr.notes.en ? `\n📝 EN: ${tr.notes.en}\n📝 TH: ${tr.notes.th}` : ''}
 ${p.attachments?.length ? `\n📎 ${p.attachments.length} attachment(s)` : ''}
 
 ✅ CONFIRM: ${confirmUrl}`;
@@ -126,32 +126,80 @@ async function generateConfirmToken(orderId: string): Promise<string> {
   return `${exp}.${sigHex}`;
 }
 
+// Customer "received" email — localized
+const CUSTOMER_RECEIVED = {
+  ru: {
+    subject: (n: string) => `Заявка #${n} принята — ждём подтверждения оператора`,
+    title: 'Спасибо! Заявка на трансфер принята',
+    orderLabel: 'Номер заявки',
+    routeLabel: 'Маршрут',
+    dateLabel: 'Дата',
+    operatorLine: (name: string) => `Оператор <b>${name}</b> свяжется с вами в течение ~30 минут для подтверждения.`,
+    amountLabel: 'Сумма',
+    locale: 'ru-RU',
+  },
+  en: {
+    subject: (n: string) => `Booking #${n} received — awaiting operator confirmation`,
+    title: 'Thank you! Your transfer request has been received',
+    orderLabel: 'Booking number',
+    routeLabel: 'Route',
+    dateLabel: 'Date',
+    operatorLine: (name: string) => `Operator <b>${name}</b> will contact you within ~30 minutes to confirm.`,
+    amountLabel: 'Total',
+    locale: 'en-GB',
+  },
+  th: {
+    subject: (n: string) => `รับคำขอ #${n} แล้ว — รอการยืนยันจากเจ้าหน้าที่`,
+    title: 'ขอบคุณ! เราได้รับคำขอจองรถรับส่งของคุณแล้ว',
+    orderLabel: 'หมายเลขการจอง',
+    routeLabel: 'เส้นทาง',
+    dateLabel: 'วันที่',
+    operatorLine: (name: string) => `เจ้าหน้าที่ <b>${name}</b> จะติดต่อคุณภายในประมาณ 30 นาทีเพื่อยืนยัน`,
+    amountLabel: 'ยอดรวม',
+    locale: 'th-TH',
+  },
+} as const;
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
     const p: TransferNotifyPayload = await req.json();
-    console.log('[Transfer] notify', p.order_number);
+    const customerLang: Lang = p.customer_language || 'ru';
+    console.log('[Transfer] notify', p.order_number, 'lang=', customerLang);
 
-    // Translate dynamic RU fields → EN + TH
-    const [pickupEn, pickupTh, dropoffEn, dropoffTh, notesEn, notesTh] = await Promise.all([
-      translateField(p.pickup_address, 'en'),
-      translateField(p.pickup_address, 'th'),
-      translateField(p.dropoff_address, 'en'),
-      translateField(p.dropoff_address, 'th'),
-      p.notes ? translateField(p.notes, 'en') : Promise.resolve(''),
-      p.notes ? translateField(p.notes, 'th') : Promise.resolve(''),
-    ]);
+    // Always produce EN+TH for operator; also produce customer-language version
+    const langsNeeded: Lang[] = Array.from(new Set<Lang>(['ru', 'en', 'th']));
 
-    // Persist translations
-    await sb().from('order_translations').upsert({
-      order_id: p.order_id,
-      field_translations: {
-        pickup_address: { ru: p.pickup_address, en: pickupEn, th: pickupTh },
-        dropoff_address: { ru: p.dropoff_address, en: dropoffEn, th: dropoffTh },
-        notes: { ru: p.notes || '', en: notesEn, th: notesTh },
-      },
-    }, { onConflict: 'order_id' });
+    const fields = ['pickup', 'dropoff', 'notes'] as const;
+    const sources: Record<string, string> = {
+      pickup: p.pickup_address,
+      dropoff: p.dropoff_address,
+      notes: p.notes || '',
+    };
+
+    // Translate every field to every needed language (source detected automatically).
+    const tr: Record<string, Record<Lang, string>> = { pickup: {} as any, dropoff: {} as any, notes: {} as any };
+    await Promise.all(
+      fields.flatMap((f) =>
+        langsNeeded.map(async (lang) => {
+          tr[f][lang] = sources[f] ? await translate(sources[f], lang) : '';
+        })
+      )
+    );
+
+    // Persist row-based translations
+    const rows: Array<{ order_id: string; field: string; lang: Lang; value: string }> = [];
+    for (const f of fields) {
+      for (const lang of langsNeeded) {
+        if (tr[f][lang]) rows.push({ order_id: p.order_id, field: `${f}_address`.replace('notes_address', 'notes'), lang, value: tr[f][lang] });
+      }
+    }
+    if (rows.length) {
+      await sb().from('order_translations').upsert(rows, { onConflict: 'order_id,field,lang' }).then(({ error }) => {
+        if (error) console.error('[translations] upsert error', error);
+      });
+    }
 
     // Lookup operator (Klod by default) + admin contacts
     const { data: op } = await sb()
@@ -171,12 +219,7 @@ Deno.serve(async (req) => {
     const token = await generateConfirmToken(p.order_id);
     const confirmUrl = `${baseUrl}/operate/transfers/confirm?id=${p.order_id}&t=${token}`;
 
-    const tFields = {
-      pickup: { en: pickupEn, th: pickupTh },
-      dropoff: { en: dropoffEn, th: dropoffTh },
-      notes: { en: notesEn, th: notesTh },
-    };
-    const opMessage = buildOperatorMessage(p, tFields, confirmUrl);
+    const opMessage = buildOperatorMessage(p, tr, confirmUrl);
 
     // Send WhatsApp: operator Klod, admin primary, admin secondary
     const waTargets = [op?.whatsapp_number, adminWA, secondaryWA].filter(Boolean) as string[];
@@ -187,18 +230,18 @@ Deno.serve(async (req) => {
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (resendKey) {
       const resend = new Resend(resendKey);
-      const date = fmtDate(p.scheduled_at);
+      const dateEn = fmtDate(p.scheduled_at, 'en-GB');
       const operatorHtml = `
 <!DOCTYPE html><html><body style="font-family:Arial;color:#333">
 <h2>🚗 Transfer #${p.order_number}</h2>
-<p><b>${p.direction === 'from-airport' ? 'Airport → Hotel' : 'Hotel → Airport'}</b> · ${date.en}</p>
+<p><b>${p.direction === 'from-airport' ? 'Airport → Hotel' : 'Hotel → Airport'}</b> · ${dateEn}</p>
 <p>Flight: ${p.flight_number || '—'} · ${p.vehicle_name} · ${p.passengers}pax</p>
 <h3>Pickup</h3>
-<p>🇷🇺 ${p.pickup_address}<br/>🇬🇧 ${pickupEn}<br/>🇹🇭 ${pickupTh}</p>
+<p>🇷🇺 ${tr.pickup.ru}<br/>🇬🇧 ${tr.pickup.en}<br/>🇹🇭 ${tr.pickup.th}</p>
 <h3>Drop-off</h3>
-<p>🇷🇺 ${p.dropoff_address}<br/>🇬🇧 ${dropoffEn}<br/>🇹🇭 ${dropoffTh}</p>
-${p.notes ? `<h3>Notes</h3><p>🇷🇺 ${p.notes}<br/>🇬🇧 ${notesEn}<br/>🇹🇭 ${notesTh}</p>` : ''}
-<p><b>Customer:</b> ${p.customer_name} · ${p.customer_phone} · ${p.customer_email}</p>
+<p>🇷🇺 ${tr.dropoff.ru}<br/>🇬🇧 ${tr.dropoff.en}<br/>🇹🇭 ${tr.dropoff.th}</p>
+${p.notes ? `<h3>Notes</h3><p>🇷🇺 ${tr.notes.ru}<br/>🇬🇧 ${tr.notes.en}<br/>🇹🇭 ${tr.notes.th}</p>` : ''}
+<p><b>Customer:</b> ${p.customer_name} · ${p.customer_phone} · ${p.customer_email} · lang=${customerLang.toUpperCase()}</p>
 <p><b>Total:</b> ฿${p.total_amount.toLocaleString()} (${p.payment_method})</p>
 ${p.attachments?.length ? `<h3>Attachments</h3><ul>${p.attachments.map(a => `<li><a href="${a.url}">${a.filename || a.kind}</a></li>`).join('')}</ul>` : ''}
 <p style="margin-top:24px"><a href="${confirmUrl}" style="background:#059669;color:#fff;padding:12px 24px;text-decoration:none;border-radius:8px;display:inline-block">✅ Confirm Booking</a></p>
@@ -209,7 +252,7 @@ ${p.attachments?.length ? `<h3>Attachments</h3><ul>${p.attachments.map(a => `<li
         await resend.emails.send({
           from: 'myUNO Transfer <noreply@resend.dev>',
           to: [op.email],
-          subject: `🚗 NEW Transfer #${p.order_number} — ${date.en}`,
+          subject: `🚗 NEW Transfer #${p.order_number} — ${dateEn}`,
           html: operatorHtml,
         }).catch(e => console.error('[email] op failed', e));
       }
@@ -217,24 +260,27 @@ ${p.attachments?.length ? `<h3>Attachments</h3><ul>${p.attachments.map(a => `<li
       await resend.emails.send({
         from: 'myUNO Transfer <noreply@resend.dev>',
         to: adminEmails,
-        subject: `🚗 Transfer #${p.order_number} — ${date.en}`,
+        subject: `🚗 Transfer #${p.order_number} — ${dateEn}`,
         html: operatorHtml,
       }).catch(e => console.error('[email] admin failed', e));
 
-      // Customer "received"
+      // Customer "received" — localized to customer_language
       if (p.customer_email) {
+        const c = CUSTOMER_RECEIVED[customerLang];
+        const localDate = fmtDate(p.scheduled_at, c.locale);
+        const customerHtml = `<div style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:16px">
+<h2 style="margin:0 0 12px">${c.title}</h2>
+<p>${c.orderLabel}: <b>#${p.order_number}</b></p>
+<p>${c.routeLabel}: ${tr.pickup[customerLang]} → ${tr.dropoff[customerLang]}</p>
+<p>${c.dateLabel}: ${localDate}</p>
+<p>${c.operatorLine(op?.name || 'Klod')}</p>
+<p>${c.amountLabel}: ฿${p.total_amount.toLocaleString()}</p>
+</div>`;
         await resend.emails.send({
           from: 'myUNO <noreply@resend.dev>',
           to: [p.customer_email],
-          subject: `Заявка #${p.order_number} принята — ждём подтверждения оператора`,
-          html: `<div style="font-family:Arial">
-<h2>Спасибо! Заявка на трансфер принята</h2>
-<p>Номер заявки: <b>#${p.order_number}</b></p>
-<p>Маршрут: ${p.pickup_address} → ${p.dropoff_address}</p>
-<p>Дата: ${date.ru}</p>
-<p>Оператор <b>${op?.name || 'Klod'}</b> свяжется с вами в течение ~30 минут для подтверждения.</p>
-<p>Сумма: ฿${p.total_amount.toLocaleString()}</p>
-</div>`,
+          subject: c.subject(p.order_number),
+          html: customerHtml,
         }).catch(e => console.error('[email] customer failed', e));
       }
     }
@@ -244,11 +290,11 @@ ${p.attachments?.length ? `<h3>Attachments</h3><ul>${p.attachments.map(a => `<li
       order_id: p.order_id,
       notification_type: 'transfer_new_booking',
       channels: ['whatsapp', 'email'],
-      recipients: { operator_wa: op?.whatsapp_number, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email },
+      recipients: { operator_wa: op?.whatsapp_number, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email, customer_language: customerLang },
       status: 'sent',
     }).catch(() => {});
 
-    return new Response(JSON.stringify({ success: true, operator: op?.name }), {
+    return new Response(JSON.stringify({ success: true, operator: op?.name, customer_language: customerLang }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: unknown) {
