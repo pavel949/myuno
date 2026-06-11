@@ -10,9 +10,32 @@
  * conversion-to-user later (post-signup) can be backfilled by a trigger.
  */
 import { useCallback, useMemo, useState } from 'react';
+import {
+  Construction, Briefcase, PlaneLanding, BadgeCheck, Home, Building2,
+  Palmtree, Plane, Compass, IdCard, HelpCircle,
+  type LucideIcon,
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  construction: Construction,
+  briefcase: Briefcase,
+  'plane-landing': PlaneLanding,
+  'badge-check': BadgeCheck,
+  home: Home,
+  'building-2': Building2,
+  palmtree: Palmtree,
+  plane: Plane,
+  compass: Compass,
+  'id-card': IdCard,
+};
+
+export function resolveOnboardingIcon(key: string | undefined | null): LucideIcon {
+  if (!key) return HelpCircle;
+  return ICON_MAP[key] ?? HelpCircle;
+}
 
 export type WhoAnswer = 'tourist' | 'relocator' | 'investor' | 'owner';
 export type GoalAnswer = 'live' | 'invest' | 'visit' | 'manage';
