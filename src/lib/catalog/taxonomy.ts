@@ -332,8 +332,8 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#EF4444',
     services: [
       { id: 'sos',           path: APP_ROUTES.SOS,           labelRu: 'SOS',           labelEn: 'SOS',           icon: AlertTriangle, status: 'available', jtbdClusters: ['H', 'A'] },
-      { id: 'vip-concierge', path: APP_ROUTES.VIP_CONCIERGE, labelRu: 'VIP-консьерж',   labelEn: 'VIP Concierge', icon: Sparkles,      status: 'available', jtbdClusters: ['H', 'A'] },
-      { id: 'support',       path: APP_ROUTES.SUPPORT,       labelRu: 'Поддержка',      labelEn: 'Support',       icon: ClipboardList, status: 'available', jtbdClusters: ['H', 'A'] },
+      { id: 'vip-concierge', path: APP_ROUTES.VIP_CONCIERGE, labelRu: 'VIP-консьерж',   labelEn: 'VIP Concierge', icon: Crown,         status: 'available', jtbdClusters: ['H', 'A'] },
+      { id: 'support',       path: APP_ROUTES.SUPPORT,       labelRu: 'Поддержка',      labelEn: 'Support',       icon: LifeBuoy,      status: 'available', jtbdClusters: ['H', 'A'] },
     ],
   },
 
