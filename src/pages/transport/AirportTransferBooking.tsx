@@ -175,7 +175,9 @@ export default function AirportTransferBooking() {
       return;
     }
 
-    const scheduledAt = `${formData.arrivalDate}T${formData.arrivalTime}:00`;
+    // Treat input as local Phuket time (Asia/Bangkok = UTC+7) and emit
+    // a timezone-aware ISO 8601 string so Postgres stores correct UTC.
+    const scheduledAt = `${formData.arrivalDate}T${formData.arrivalTime}:00+07:00`;
     const vehicleName = language === 'ru' ? selectedVehicle?.name_ru : selectedVehicle?.name_en;
 
     const result = await createOrder({

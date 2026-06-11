@@ -143,7 +143,9 @@ export default function OperatorTransfers() {
               const primary = participants.find(p => p.role === 'primary') || participants[0];
               const pickup = addresses.find(a => a.address_type === 'pickup');
               const dropoff = addresses.find(a => a.address_type === 'dropoff');
-              const scheduledDate = order.start_at ? format(new Date(order.start_at), 'dd.MM.yyyy HH:mm') : '—';
+              const scheduledDate = order.start_at
+                ? new Date(order.start_at).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) + ' ICT'
+                : '—';
               const translateField = (field: string, l: string) =>
                 translations.find(tr => tr.field === field && tr.lang === l)?.value;
 
