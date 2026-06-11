@@ -25,7 +25,7 @@ const ForManagementCompanies = React.lazy(
 );
 
 export default function ManageHubGate() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { activeRoles, isLoading: rolesLoading } = useUserRoles();
 
   // Guest — show marketing landing immediately, no role fetch needed.
