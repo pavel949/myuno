@@ -9,6 +9,7 @@ import { VERTICALS, type VerticalDefinition } from '@/lib/verticals';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Check } from 'lucide-react';
+import { DynamicIcon } from 'lucide-react/dynamic';
 
 interface CategoryPickerProps {
   value: string;
