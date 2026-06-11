@@ -34,56 +34,56 @@ type Copy = { en: string; ru: string };
 
 const T = (c: Copy, l: L) => c[l] ?? c.en;
 
-const WHO_OPTIONS: { value: WhoAnswer; label: Copy; icon: string; desc: Copy }[] = [
+const WHO_OPTIONS: { value: WhoAnswer; label: Copy; icon: LucideIcon; desc: Copy }[] = [
   {
     value: 'tourist',
-    icon: '🏝️',
+    icon: Palmtree,
     label: { en: 'Visitor / tourist', ru: 'Турист' },
     desc: { en: 'I’m here for a holiday', ru: 'Приехал отдохнуть' },
   },
   {
     value: 'relocator',
-    icon: '🛬',
+    icon: PlaneLanding,
     label: { en: 'Relocating / digital nomad', ru: 'Переезжаю / номад' },
     desc: { en: 'Long-term living in Phuket', ru: 'Долгосрочно жить на Пхукете' },
   },
   {
     value: 'investor',
-    icon: '💼',
+    icon: Briefcase,
     label: { en: 'Investor', ru: 'Инвестор' },
     desc: { en: 'Buying property or business', ru: 'Покупаю недвижимость или бизнес' },
   },
   {
     value: 'owner',
-    icon: '🏢',
+    icon: Building2,
     label: { en: 'Property owner', ru: 'Собственник' },
     desc: { en: 'I already own here', ru: 'У меня уже есть объект' },
   },
 ];
 
-const GOAL_OPTIONS: { value: GoalAnswer; label: Copy; icon: string }[] = [
-  { value: 'visit', icon: '🧭', label: { en: 'Enjoy a great trip', ru: 'Хорошо провести время' } },
-  { value: 'live', icon: '🏠', label: { en: 'Live & settle in', ru: 'Жить и обустроиться' } },
-  { value: 'invest', icon: '📈', label: { en: 'Invest & earn', ru: 'Инвестировать и зарабатывать' } },
-  { value: 'manage', icon: '🛠️', label: { en: 'Manage what I own', ru: 'Управлять активами' } },
+const GOAL_OPTIONS: { value: GoalAnswer; label: Copy; icon: LucideIcon }[] = [
+  { value: 'visit', icon: Compass, label: { en: 'Enjoy a great trip', ru: 'Хорошо провести время' } },
+  { value: 'live', icon: Home, label: { en: 'Live & settle in', ru: 'Жить и обустроиться' } },
+  { value: 'invest', icon: TrendingUp, label: { en: 'Invest & earn', ru: 'Инвестировать и зарабатывать' } },
+  { value: 'manage', icon: Wrench, label: { en: 'Manage what I own', ru: 'Управлять активами' } },
 ];
 
-const INTENSITY_OPTIONS: { value: IntensityAnswer; label: Copy; icon: string; desc: Copy }[] = [
+const INTENSITY_OPTIONS: { value: IntensityAnswer; label: Copy; icon: LucideIcon; desc: Copy }[] = [
   {
     value: 'short',
-    icon: '📅',
+    icon: Calendar,
     label: { en: 'Up to 30 days', ru: 'До 30 дней' },
     desc: { en: 'Short visit', ru: 'Короткий визит' },
   },
   {
     value: 'long',
-    icon: '🗓️',
+    icon: CalendarDays,
     label: { en: '1–12 months', ru: '1–12 месяцев' },
     desc: { en: 'Extended stay', ru: 'Долгий приезд' },
   },
   {
     value: 'permanent',
-    icon: '🏡',
+    icon: House,
     label: { en: '12 months +', ru: 'Больше года' },
     desc: { en: 'Permanent base', ru: 'На постоянной основе' },
   },
