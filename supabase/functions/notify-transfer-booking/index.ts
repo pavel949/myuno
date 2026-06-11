@@ -1,9 +1,25 @@
 // Trilingual transfer booking notifier (RU/EN/TH)
 // Recipients: Klod operator (WA+email), admin (WA+email), customer (email confirmation in their language)
-import { Resend } from 'npm:resend@2.0.0';
+// Email delivery via Lovable Emails (send-transactional-email) with built-in retry queue + suppression.
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { getAdminEmails, getAdminWhatsApp, getMailFrom } from '../_shared/admin-config.ts';
+import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
+
+async function sendEmail(
+  templateName: string,
+  recipientEmail: string,
+  idempotencyKey: string,
+  templateData: Record<string, unknown>,
+): Promise<void> {
+  try {
+    const { error } = await sb().functions.invoke('send-transactional-email', {
+      body: { templateName, recipientEmail, idempotencyKey, templateData },
+    });
+    if (error) console.error('[email]', templateName, '->', recipientEmail, error);
+  } catch (e) {
+    console.error('[email] invoke failed', templateName, e);
+  }
+}
 
 type Lang = 'ru' | 'en' | 'th';
 
