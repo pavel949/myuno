@@ -64,7 +64,7 @@ function buildGroup(cluster: ClusterEntry): VerticalGroup {
           ? { verticalId: svc.verticalId }
           : {
               route: svc.path,
-              icon: '📦',
+              icon: 'boxes',
               labelEn: svc.labelEn,
               labelRu: svc.labelRu,
               labelTh: svc.labelTh ?? svc.labelEn,
@@ -86,7 +86,7 @@ function buildGroup(cluster: ClusterEntry): VerticalGroup {
     labelEn: cluster.labelEn,
     labelRu: cluster.labelRu,
     labelTh: cluster.labelTh ?? cluster.labelEn,
-    icon: CLUSTER_EMOJI[cluster.id] ?? '📦',
+    icon: CLUSTER_ICON[cluster.id] ?? 'boxes',
     items: dedup,
   };
 }
