@@ -32,7 +32,7 @@ function resolveItem(item: VerticalGroupItem) {
   }
   if (item.route) {
     const slug = item.route.split('/').pop() || item.route;
-    return { id: slug, icon: item.icon || '📌', labelEn: item.labelEn || slug, labelRu: item.labelRu || slug };
+    return { id: slug, icon: item.icon || 'pin', labelEn: item.labelEn || slug, labelRu: item.labelRu || slug };
   }
   return null;
 }
@@ -62,7 +62,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
       {/* Selected badge */}
       {current && !selectedGroup && (
         <div className="flex items-center gap-2 px-4 py-3 rounded-none bg-primary/5 border border-primary/20">
-          <span className="text-lg">{current.item.icon}</span>
+          <DynamicIcon name={current.item.icon} className="h-5 w-5 text-primary" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{isRu ? current.item.labelRu : current.item.labelEn}</p>
             <p className="text-[11px] text-muted-foreground">{isRu ? current.group.labelRu : current.group.labelEn}</p>
@@ -99,7 +99,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
                       : "border-border/60 bg-card"
                   )}
                 >
-                  <span className="text-2xl">{group.icon}</span>
+                  <DynamicIcon name={group.icon} className="h-6 w-6 text-primary" />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold leading-tight">
                       {isRu ? group.labelRu : group.labelEn}
@@ -127,7 +127,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
               className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3 -ml-1 transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
-              <span className="text-lg">{selectedGroup.icon}</span>
+              <DynamicIcon name={selectedGroup.icon} className="h-5 w-5" />
               <span className="font-medium">{isRu ? selectedGroup.labelRu : selectedGroup.labelEn}</span>
             </button>
 
@@ -153,7 +153,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
                         : "border-border/60 bg-card hover:border-primary/30 hover:bg-primary/5"
                     )}
                   >
-                    <span className="text-xl">{resolved.icon}</span>
+                    <DynamicIcon name={resolved.icon} className="h-5 w-5 text-primary" />
                     <span className="text-sm font-medium leading-tight">
                       {isRu ? resolved.labelRu : resolved.labelEn}
                     </span>
