@@ -2,7 +2,7 @@
 // Recipients: Klod operator (WA+email), admin (WA+email), customer (email confirmation in their language)
 import { Resend } from 'npm:resend@2.0.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { getAdminEmails, getAdminWhatsApp } from '../_shared/admin-config.ts';
+import { getAdminEmails, getAdminWhatsApp, getMailFrom } from '../_shared/admin-config.ts';
 import { NOTIFY_CORS as corsHeaders } from '../_shared/notify-utils.ts';
 
 type Lang = 'ru' | 'en' | 'th';
