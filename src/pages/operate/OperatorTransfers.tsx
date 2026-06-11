@@ -158,7 +158,7 @@ export default function OperatorTransfers() {
                         {order.status}
                       </Badge>
                       {(meta.night_surcharge_applied as boolean) && (
-                        <Badge className="bg-warning/10 text-warning">🌙 ночной</Badge>
+                        <Badge className="bg-warning/10 text-warning">{t.night}</Badge>
                       )}
                     </div>
                     <span className="font-bold text-lg tabular-nums">{order.currency} {order.total_amount?.toLocaleString()}</span>
