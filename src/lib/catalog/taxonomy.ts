@@ -426,10 +426,10 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#EC4899',
     services: [
       { id: 'medical',   path: APP_ROUTES.MEDICAL,   labelRu: 'Медицина',  labelEn: 'Medical',   icon: Stethoscope, status: 'available', verticalId: 'medical' },
-      { id: 'pharmacy',  path: APP_ROUTES.PHARMACY,  labelRu: 'Аптеки',    labelEn: 'Pharmacy',  icon: Bandage,     status: 'available', verticalId: 'pharmacy' },
-      { id: 'beauty',    path: APP_ROUTES.BEAUTY,    labelRu: 'Красота',   labelEn: 'Beauty',    icon: Palette,     status: 'available', verticalId: 'beauty' },
+      { id: 'pharmacy',  path: APP_ROUTES.PHARMACY,  labelRu: 'Аптеки',    labelEn: 'Pharmacy',  icon: Pill,        status: 'available', verticalId: 'pharmacy' },
+      { id: 'beauty',    path: APP_ROUTES.BEAUTY,    labelRu: 'Красота',   labelEn: 'Beauty',    icon: Scissors,    status: 'available', verticalId: 'beauty' },
       { id: 'fitness',   path: APP_ROUTES.FITNESS,   labelRu: 'Фитнес',    labelEn: 'Fitness',   icon: Dumbbell,    status: 'available', verticalId: 'fitness' },
-      { id: 'insurance', path: APP_ROUTES.INSURANCE, labelRu: 'Страховка', labelEn: 'Insurance', icon: Shield,      status: 'available', verticalId: 'insurance' },
+      { id: 'insurance', path: APP_ROUTES.INSURANCE, labelRu: 'Страховка', labelEn: 'Insurance', icon: ShieldCheck, status: 'available', verticalId: 'insurance' },
     ],
   },
   {
