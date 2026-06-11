@@ -123,7 +123,7 @@ const PersonaAreaLandingPage = () => {
             {t(persona.h1)} {isRu ? 'в' : 'in'} {isRu ? a.name_ru : a.name_en}
           </h1>
           <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-            {isRu ? a.description_ru : a.description_en}
+            {override ? t(override.intro) : isRu ? a.description_ru : a.description_en}
           </p>
 
           <dl className="mt-6 grid grid-cols-3 gap-3 border border-border bg-card/60 p-4 backdrop-blur">
