@@ -132,7 +132,7 @@ export default function OperatorTransfers() {
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : !orders?.length ? (
-          <div className="text-center py-20 text-muted-foreground">Нет заказов</div>
+          <div className="text-center py-20 text-muted-foreground">{t.empty}</div>
         ) : (
           <div className="space-y-3">
             {orders.map(order => {
