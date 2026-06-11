@@ -43,7 +43,7 @@ export default function ManageHubGate() {
   }
 
   if (activeRoles.includes('property_manager')) {
-    return <Navigate to={APP_ROUTES.MC_HOME ?? '/mc'} replace />;
+    return <Navigate to={APP_ROUTES.MC} replace />;
   }
   if (activeRoles.includes('property_owner') || activeRoles.includes('owner')) {
     return <Navigate to={APP_ROUTES.OWNER_PORTAL} replace />;
