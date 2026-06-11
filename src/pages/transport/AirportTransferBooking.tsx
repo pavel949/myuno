@@ -295,30 +295,45 @@ export default function AirportTransferBooking() {
         ? formData.destinationAddress
         : `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`;
 
-      supabase.functions.invoke('notify-transfer-booking', {
-        body: {
-          order_id: result.order_id,
-          order_number: result.order_number || '',
-          direction: formData.direction,
-          terminal: formData.terminal,
-          flight_number: formData.flightNumber,
-          vehicle_name: vehicleName,
-          meeting_sign_name: formData.meetingSignName || formData.name,
-          passengers: parseInt(formData.passengers),
-          luggage: parseInt(formData.luggage),
-          pickup_address: pickupAddr,
-          dropoff_address: dropoffAddr,
-          scheduled_at: scheduledAt,
-          total_amount: totalPrice,
-          currency: 'THB',
-          payment_method: formData.paymentMethod,
-          customer_name: formData.name,
-          customer_phone: formData.phone,
-          customer_email: formData.email,
-          customer_language: language,
-          notes: formData.notes || undefined,
-        },
-      }).catch(err => console.error('[Notify] Transfer notification error:', err));
+      // Fire-and-await with one retry on failure so Klod always gets pinged.
+      const notifyPayload = {
+        order_id: result.order_id,
+        order_number: result.order_number || '',
+        direction: formData.direction,
+        terminal: formData.terminal,
+        flight_number: formData.flightNumber,
+        vehicle_name: vehicleName,
+        meeting_sign_name: formData.meetingSignName || formData.name,
+        passengers: parseInt(formData.passengers),
+        luggage: parseInt(formData.luggage),
+        pickup_address: pickupAddr,
+        dropoff_address: dropoffAddr,
+        scheduled_at: scheduledAt,
+        total_amount: totalPrice,
+        currency: 'THB',
+        payment_method: formData.paymentMethod,
+        customer_name: formData.name,
+        customer_phone: formData.phone,
+        customer_email: formData.email,
+        customer_language: language,
+        notes: formData.notes || undefined,
+      };
+      const sendNotify = async (attempt = 0): Promise<void> => {
+        const { error } = await supabase.functions.invoke('notify-transfer-booking', { body: notifyPayload });
+        if (error && attempt < 1) {
+          console.warn('[Notify] retry transfer notification', error);
+          await new Promise(r => setTimeout(r, 1200));
+          return sendNotify(attempt + 1);
+        }
+        if (error) console.error('[Notify] Transfer notification failed (giving up):', error);
+      };
+      // Don't block redirect to Stripe — but DO wait for cash/concierge so ledger entries
+      // and operator_id are persisted before user sees success screen.
+      if (formData.paymentMethod === 'stripe') {
+        sendNotify().catch(() => {});
+      } else {
+        await sendNotify();
+      }
 
       if (formData.paymentMethod === 'stripe') {
         setIsProcessingPayment(true);
