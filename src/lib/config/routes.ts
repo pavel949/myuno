@@ -548,6 +548,7 @@ export const APP_ROUTES = {
   ADMIN_TRANSFERS: '/admin/transfers',
   ADMIN_CRM: '/admin/crm',
   ADMIN_TICKETS: '/admin/tickets',
+  /** Semantic alias for moderation entry-point; shares the Operations screen until a dedicated page exists. */
   ADMIN_MODERATION: '/admin/operations',
   VENDOR_PAYOUTS: '/vendor/payouts',
   TEAM_CONTENT: '/team/content',
