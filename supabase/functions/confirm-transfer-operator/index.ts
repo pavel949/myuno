@@ -175,10 +175,11 @@ Deno.serve(async (req) => {
     const totalStr = `${order.currency} ${Number(order.total_amount).toLocaleString()}`;
     const localMp = pickMeetingPoint(mp, customerLang);
 
-    // Customer email — localized
+    // Customer email — localized, via verified domain when configured.
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (resendKey && order.customer_email) {
       const resend = new Resend(resendKey);
+      const mailFrom = await getMailFrom();
       const html = `
 <div style="font-family:Arial;color:#333;max-width:600px;margin:0 auto">
   <div style="background:linear-gradient(135deg,#059669,#10b981);color:#fff;padding:24px;border-radius:12px 12px 0 0">
@@ -200,7 +201,7 @@ Deno.serve(async (req) => {
   </div>
 </div>`;
       await resend.emails.send({
-        from: 'myUNO <noreply@resend.dev>',
+        from: mailFrom,
         to: [order.customer_email],
         subject: t.emailSubject(order.order_number),
         html,
