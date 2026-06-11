@@ -68,9 +68,8 @@ const TPL = {
 function pickMeetingPoint(mp: any, lang: Lang) {
   if (!mp) return null;
   const name = lang === 'th' ? (mp.name_th || mp.name_en) : lang === 'en' ? mp.name_en : (mp.name_ru || mp.name_en);
-  const address = lang === 'th' ? (mp.address_th || mp.address_en) : lang === 'en' ? mp.address_en : (mp.address_ru || mp.address_en);
-  const instructions = lang === 'th' ? (mp.instructions_th || mp.instructions_en) : lang === 'en' ? mp.instructions_en : (mp.instructions_ru || mp.instructions_en);
-  return { name, address, instructions, photo_url: mp.photo_url, contact_phone: mp.contact_phone };
+  const description = lang === 'th' ? (mp.description_th || mp.description_en) : lang === 'en' ? mp.description_en : (mp.description_ru || mp.description_en);
+  return { name, description, photo_url: mp.photo_url, google_maps_url: mp.google_maps_url };
 }
 
 Deno.serve(async (req) => {
