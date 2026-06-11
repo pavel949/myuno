@@ -79,6 +79,8 @@ Deno.serve(async (req) => {
     const body = req.method === 'POST' ? await req.json() : Object.fromEntries(new URL(req.url).searchParams);
     const orderId = body.id || body.order_id;
     const token = body.t || body.token;
+    const action: 'confirm' | 'reject' = body.action === 'reject' ? 'reject' : 'confirm';
+    const rejectReason: string | null = body.reason || null;
 
     if (!orderId || !token) {
       return new Response(JSON.stringify({ error: 'Missing id or token' }), {
@@ -105,6 +107,57 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ===== REJECT FLOW =====
+    if (action === 'reject') {
+      if (order.status === 'cancelled') {
+        return new Response(JSON.stringify({ success: true, already_cancelled: true, order_number: order.order_number }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const { data: rejUpd } = await sb()
+        .from('orders')
+        .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
+        .eq('id', orderId)
+        .not('status', 'in', '(cancelled,refunded)')
+        .select('id');
+
+      if (!rejUpd || rejUpd.length === 0) {
+        return new Response(JSON.stringify({ success: true, already_cancelled: true, order_number: order.order_number }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      await sb().from('order_status_history').insert({
+        order_id: orderId,
+        from_status: order.status,
+        to_status: 'cancelled',
+        changed_by_role: 'operator',
+        note: `Rejected by operator via signed link${rejectReason ? `: ${rejectReason}` : ''}`,
+      }).catch(() => {});
+
+      // Auto-refund (idempotent inside the function).
+      const { data: refundResult, error: refundErr } = await sb().functions.invoke('refund-transfer-order', {
+        body: { order_id: orderId, reason: rejectReason || 'operator_reject' },
+      });
+      if (refundErr) console.error('[reject] refund failed', refundErr);
+
+      await sb().from('booking_notifications_log').insert({
+        order_id: orderId,
+        notification_type: 'transfer_rejected',
+        channels: ['system'],
+        recipients: { customer_email: order.customer_email },
+        status: refundErr ? 'partial' : 'sent',
+      }).catch(() => {});
+
+      return new Response(JSON.stringify({
+        success: true,
+        rejected: true,
+        order_number: order.order_number,
+        refund: refundResult || null,
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // ===== CONFIRM FLOW =====
     if (order.status === 'confirmed') {
       return new Response(JSON.stringify({ success: true, already_confirmed: true, order_number: order.order_number }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
