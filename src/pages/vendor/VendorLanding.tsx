@@ -92,8 +92,8 @@ export default function VendorLanding() {
       border: 'border-primary/30',
       desc: isRu ? 'Документы + лицензия' : 'Documents + license',
       perks: isRu 
-        ? ['Значок ✓ Проверено', 'Приоритет в поиске', 'Защита G-Trust']
-        : ['✓ Verified badge', 'Search priority', 'G-Trust protection'],
+        ? ['Значок «Проверено»', 'Приоритет в поиске', 'Защита G-Trust']
+        : ['Verified badge', 'Search priority', 'G-Trust protection'],
     },
     {
       icon: Crown,
