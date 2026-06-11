@@ -141,7 +141,6 @@ export const APP_ROUTES = {
   DEVELOPER_PORTAL_PROJECT_NEW: '/developer-portal/projects/new',
   DEVELOPER_PORTAL_PROJECT_EDIT: (id: string) => `/developer-portal/projects/${id}`,
   CAPITAL_DEVELOPERS: '/capital/developers',
-  CAPITAL_DEVELOPERS_PENDING: '/capital/developers/pending',
   ADMIN_NEWBUILDS: '/admin/newbuilds',
 
   // ── Investment Hub (top-level — multi-asset capital + business) ──
