@@ -94,10 +94,10 @@ export function recommendationLabel(rec: ClearViewRecommendation | null, isRu: b
   return isRu ? map[rec].ru : map[rec].en;
 }
 
-/** Pricing for B2C report access (THB cents) */
+/** Pricing for B2C report access (THB cents) — Trust Stack v1.0 §3 A-2 */
 export const CLEARVIEW_PRICING = {
-  SINGLE_REPORT_THB_CENTS: 290000, // ฿2,900
-  BUNDLE_3_THB_CENTS: 750000,      // ฿7,500
+  SINGLE_REPORT_THB_CENTS: 490000, // ฿4,900
+  BUNDLE_3_THB_CENTS: 1200000,     // ฿12,000
   ACCESS_DURATION_MONTHS: 12,
 } as const;
 

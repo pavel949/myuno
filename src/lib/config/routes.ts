@@ -280,6 +280,8 @@ export const APP_ROUTES = {
   LEGAL_CLUSTER: '/stay-legal',
   TAX_NAV: '/tax',
   CONTRACT_ANALYSIS: '/legal/contract-analysis',
+  FET_CHECK: '/services/finance/fet',
+
 
   // ── INVEST Cluster (legacy alias → INVEST) ──
   INVEST_CLUSTER: '/invest',
