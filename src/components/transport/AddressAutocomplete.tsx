@@ -262,7 +262,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
   }, [isRu]);
 
   const handleSelect = async (s: Suggestion) => {
-    const full = s.address && s.address !== s.name ? `${s.name}, ${s.address}` : s.name;
+    let resolved: Suggestion = { ...s };
     let meta: AddressMeta = { lat: s.lat, lng: s.lng, placeId: s.placeId };
 
     // Hotels come without coords from autocomplete suggestions — resolve via Place Details
@@ -272,9 +272,20 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
       setIsSearching(false);
       if (details) {
         meta = { lat: details.lat, lng: details.lng, placeId: s.placeId };
+        // Prefer the canonical formatted address from Place Details
+        if (details.formattedAddress) {
+          resolved = { ...s, address: details.formattedAddress, lat: details.lat, lng: details.lng };
+        } else {
+          resolved = { ...s, lat: details.lat, lng: details.lng };
+        }
       }
     }
 
+    const full = resolved.address && resolved.address !== resolved.name
+      ? `${resolved.name}, ${resolved.address}`
+      : resolved.name;
+
+    setSelectedSuggestion(resolved);
     onChange(full, meta);
     setQuery('');
     setGeocodeResults([]);
@@ -283,6 +294,13 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     setIsFocused(false);
   };
 
+  const clearSelection = () => {
+    setSelectedSuggestion(null);
+    setQuery('');
+    onChange('', undefined);
+    setGeocodeResults([]);
+    setHotelResults([]);
+  };
 
   const handleFocus = () => {
     setIsFocused(true);
