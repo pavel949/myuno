@@ -8,7 +8,7 @@ import {
   Heart, ShoppingBag, User, Settings,
   HelpCircle, Gift, LogOut, Store, Building2, Shield, Headphones,
   Menu, Bell, CreditCard, UserCog, Briefcase, Construction, Crown,
-  LineChart, Eye,
+  LineChart, Eye, Zap,
 } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
