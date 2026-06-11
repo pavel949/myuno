@@ -357,14 +357,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Log
+    // Log — booking_notifications_log columns: channel(single), notification_type, metadata(jsonb)
     await sb().from('booking_notifications_log').insert({
-      order_id: p.order_id,
+      channel: 'whatsapp+email',
       notification_type: operatorMissing ? 'transfer_new_booking_no_operator' : 'transfer_new_booking',
-      channels: ['whatsapp', 'email'],
-      recipients: { operator_wa: opWa, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email, customer_language: customerLang },
-      status: operatorMissing ? 'partial' : 'sent',
-    }).catch(() => {});
+      sent_at: new Date().toISOString(),
+      metadata: {
+        order_id: p.order_id,
+        order_number: p.order_number,
+        recipients: { operator_wa: opWa, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email, customer_language: customerLang },
+        status: operatorMissing ? 'partial' : 'sent',
+      },
+    }).catch((e) => console.error('[log]', e));
 
     return new Response(JSON.stringify({ success: true, operator: op?.name || null, operator_missing: operatorMissing, customer_language: customerLang }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
