@@ -73,7 +73,7 @@ export default function DepositRiskQuizPage() {
             ? "5 вопросов — мгновенный вердикт. Бесплатный чекер риска удержания депозита от myUNO."
             : "5 questions — instant verdict. Free deposit-withholding risk check by myUNO."
         }
-        canonical="/tools/deposit-risk"
+        url="/tools/deposit-risk"
       />
       <div className="pb-24">
         <div className="relative bg-gradient-to-br from-primary to-primary/90 p-6 pt-16 pb-8">

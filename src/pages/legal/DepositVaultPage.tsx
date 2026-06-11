@@ -204,7 +204,7 @@ export default function DepositVaultPage() {
             ? "Бесплатное хранилище фото и данных о ваших арендах. Если депозит удержат — за 1 клик соберём пакет в OCPB."
             : "Free evidence vault for your rental deposit. If it gets withheld, generate an OCPB complaint pack in one click."
         }
-        canonical="/legal/deposit-vault"
+        url="/legal/deposit-vault"
       />
       <div className="pb-24">
         <div className="relative bg-gradient-to-br from-primary to-primary/90 p-6 pt-16 pb-8">

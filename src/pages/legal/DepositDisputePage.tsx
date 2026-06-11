@@ -156,7 +156,7 @@ export default function DepositDisputePage() {
             ? "Платный пакет ฿1,490: AI-черновик жалобы в OCPB + индекс доказательств."
             : "฿1,490 paid pack: AI-drafted OCPB complaint + evidence index."
         }
-        canonical="/legal/deposit-vault/dispute"
+        url="/legal/deposit-vault/dispute"
       />
       <div className="pb-24">
         <div className="relative bg-gradient-to-br from-primary to-primary/90 p-6 pt-16 pb-8">
