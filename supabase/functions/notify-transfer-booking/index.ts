@@ -264,18 +264,29 @@ Deno.serve(async (req) => {
 
     const opMessage = buildOperatorMessage(p, tr, confirmUrl);
 
-    // Send WhatsApp: operator Klod, admin primary, admin secondary
+    // ALERT if no operator is configured — admin gets a separate prefixed message so
+    // they immediately escalate, BEFORE the customer waits silently.
+    const alertPrefix = operatorMissing
+      ? `🚨 *NO ACTIVE OPERATOR* — admin must assign manually\n\n`
+      : '';
+
+    // Send WhatsApp: operator Klod (if any), admin primary, admin secondary
     const waTargets = [opWa, adminWA, secondaryWA].filter(Boolean) as string[];
     const uniqueWA = Array.from(new Set(waTargets.map(w => w.replace(/[^0-9]/g, ''))));
-    await Promise.all(uniqueWA.map(num => sendWhatsApp(num, opMessage)));
+    await Promise.all(uniqueWA.map(num => sendWhatsApp(num, alertPrefix + opMessage)));
 
     // Emails
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (resendKey) {
       const resend = new Resend(resendKey);
+      const mailFrom = await getMailFrom();
       const dateEn = fmtDate(p.scheduled_at, 'en-GB');
+      const alertBanner = operatorMissing
+        ? `<div style="background:#fee2e2;color:#991b1b;padding:14px;border-radius:8px;margin:0 0 16px;font-weight:600">🚨 NO ACTIVE OPERATOR — assign manually before customer waits</div>`
+        : '';
       const operatorHtml = `
 <!DOCTYPE html><html><body style="font-family:Arial;color:#333">
+${alertBanner}
 <h2>🚗 Transfer #${p.order_number}</h2>
 <p><b>${p.direction === 'from-airport' ? 'Airport → Hotel' : 'Hotel → Airport'}</b> · ${dateEn}</p>
 <p>Flight: ${p.flight_number || '—'} · ${p.vehicle_name} · ${p.passengers}pax</p>
@@ -293,17 +304,17 @@ ${p.attachments?.length ? `<h3>Attachments</h3><ul>${p.attachments.map(a => `<li
       // Operator
       if (op?.email) {
         await resend.emails.send({
-          from: 'myUNO Transfer <noreply@resend.dev>',
+          from: mailFrom,
           to: [op.email],
           subject: `🚗 NEW Transfer #${p.order_number} — ${dateEn}`,
           html: operatorHtml,
         }).catch(e => console.error('[email] op failed', e));
       }
-      // Admin
+      // Admin — always, with alert subject prefix when operator missing
       await resend.emails.send({
-        from: 'myUNO Transfer <noreply@resend.dev>',
+        from: mailFrom,
         to: adminEmails,
-        subject: `🚗 Transfer #${p.order_number} — ${dateEn}`,
+        subject: `${operatorMissing ? '🚨 NO OPERATOR — ' : ''}🚗 Transfer #${p.order_number} — ${dateEn}`,
         html: operatorHtml,
       }).catch(e => console.error('[email] admin failed', e));
 
@@ -320,7 +331,7 @@ ${p.attachments?.length ? `<h3>Attachments</h3><ul>${p.attachments.map(a => `<li
 <p>${c.amountLabel}: ฿${p.total_amount.toLocaleString()}</p>
 </div>`;
         await resend.emails.send({
-          from: 'myUNO <noreply@resend.dev>',
+          from: mailFrom,
           to: [p.customer_email],
           subject: c.subject(p.order_number),
           html: customerHtml,
@@ -331,13 +342,13 @@ ${p.attachments?.length ? `<h3>Attachments</h3><ul>${p.attachments.map(a => `<li
     // Log
     await sb().from('booking_notifications_log').insert({
       order_id: p.order_id,
-      notification_type: 'transfer_new_booking',
+      notification_type: operatorMissing ? 'transfer_new_booking_no_operator' : 'transfer_new_booking',
       channels: ['whatsapp', 'email'],
       recipients: { operator_wa: opWa, operator_email: op?.email, admin_wa: uniqueWA, admin_emails: adminEmails, customer_email: p.customer_email, customer_language: customerLang },
-      status: 'sent',
+      status: operatorMissing ? 'partial' : 'sent',
     }).catch(() => {});
 
-    return new Response(JSON.stringify({ success: true, operator: op?.name, customer_language: customerLang }), {
+    return new Response(JSON.stringify({ success: true, operator: op?.name || null, operator_missing: operatorMissing, customer_language: customerLang }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error: unknown) {
