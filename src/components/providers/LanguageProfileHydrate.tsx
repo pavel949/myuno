@@ -8,20 +8,23 @@ const isUiLanguage = (value: string | null | undefined): value is Language =>
   value === 'ru' || value === 'en' || value === 'th';
 
 /**
- * After sign-in, align UI language with `profiles.preferred_language` once per
- * user session (same idea as ThemeProvider hydrating `preferred_theme`).
- * LocalStorage from the guest session may be overwritten when the profile has
- * an explicit preference.
+ * Two-way sync between UI language and `profiles.preferred_language`:
+ *  - On sign-in: hydrate UI from profile (once per user).
+ *  - On language change while signed in: persist back to profile so the
+ *    next session / other device sees the same preference.
  */
 export function LanguageProfileHydrate() {
   const { user } = useAuth();
-  const { setLanguage } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const hydratedForUserId = useRef<string | null>(null);
+  const lastWrittenLang = useRef<string | null>(null);
 
+  // Hydrate from profile
   useEffect(() => {
     const userId = user?.id;
     if (!userId) {
       hydratedForUserId.current = null;
+      lastWrittenLang.current = null;
       return;
     }
     if (hydratedForUserId.current === userId) return;
@@ -42,6 +45,7 @@ export function LanguageProfileHydrate() {
       if (error || !data) return;
       const pl = data.preferred_language;
       if (isUiLanguage(pl)) {
+        lastWrittenLang.current = pl;
         setLanguage(pl);
       }
     })();
@@ -51,5 +55,21 @@ export function LanguageProfileHydrate() {
     };
   }, [user?.id, setLanguage]);
 
+  // Persist language change back to profile
+  useEffect(() => {
+    const userId = user?.id;
+    if (!userId) return;
+    if (hydratedForUserId.current !== userId) return; // wait until hydration done
+    if (lastWrittenLang.current === language) return;
+
+    lastWrittenLang.current = language;
+
+    void supabase
+      .from('profiles')
+      .update({ preferred_language: language })
+      .eq('id', userId);
+  }, [user?.id, language]);
+
   return null;
 }
+

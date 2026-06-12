@@ -38,6 +38,15 @@ export const propertyHubRoutes = (
   <>
     <Route index element={<LazyPage><PropertyHubIndex /></LazyPage>} />
     <Route path="browse" element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
+    {/* Top-level aliases for persona landings (C8) */}
+    <Route
+      path="rent"
+      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent`} replace />}
+    />
+    <Route
+      path="buy"
+      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=buy`} replace />}
+    />
     <Route
       path="rent/short-term"
       element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`} replace />}
@@ -50,6 +59,7 @@ export const propertyHubRoutes = (
       path="rent/long-term"
       element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`} replace />}
     />
+
     <Route
       path="quick-sale"
       element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=buy&intent=quick_sale`} replace />}

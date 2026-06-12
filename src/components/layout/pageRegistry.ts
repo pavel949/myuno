@@ -417,6 +417,8 @@ export const AdminDisputes = lazy(() => import('@/pages/admin/AdminDisputes'));
 export const AdminInvestorMetrics = lazy(() => import('@/pages/admin/AdminInvestorMetrics'));
 
 export const AdminConsultations = lazy(() => import('@/pages/admin/AdminConsultations'));
+export const AdminNbLeads = lazy(() => import('@/pages/admin/AdminNbLeads'));
+
 export const AdminUnoTeam = lazy(() => import('@/pages/admin/AdminUnoTeam'));
 export const AdminCities = lazy(() => import('@/pages/admin/AdminCities'));
 export const AdminTranslations = lazy(() => import('@/pages/admin/AdminTranslations'));

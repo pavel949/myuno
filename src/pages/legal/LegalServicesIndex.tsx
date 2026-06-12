@@ -83,8 +83,8 @@ export default function LegalServicesIndex() {
       onSearchChange={setSearchQuery}
       searchPlaceholder={isRu ? 'Поиск компаний…' : 'Search providers…'}
       showHero={false}
-      showFilter={false}
     >
+
       <VerticalContextBanner verticalId="legal" />
 
       {isLoading ? (
