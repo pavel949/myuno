@@ -344,6 +344,7 @@ export const PartnersPage = lazy(() => import('@/pages/info/PartnersPage'));
 export const PrivacyPage = lazy(() => import('@/pages/info/PrivacyPage'));
 export const TermsPage = lazy(() => import('@/pages/info/TermsPage'));
 export const BecomePartnerPage = lazy(() => import('@/pages/info/BecomePartnerPage'));
+export const PartnerStatusPage = lazy(() => import('@/pages/partner/PartnerStatusPage'));
 export const CookiePolicyPage = lazy(() => import('@/pages/info/CookiePolicyPage'));
 export const RefundPolicyPage = lazy(() => import('@/pages/info/RefundPolicyPage'));
 export const ContactPage = lazy(() => import('@/pages/info/ContactPage'));
