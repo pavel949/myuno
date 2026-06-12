@@ -69,7 +69,8 @@ export const OfficialNews: React.FC = () => {
                   <ExternalLink className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
                 </div>
               </a>
-            ))}
+              );
+            })}
       </div>
     </section>
   );
