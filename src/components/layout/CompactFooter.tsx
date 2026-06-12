@@ -20,6 +20,7 @@ import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { ECOSYSTEM_FOOTER_UI, pickTriplet } from '@/lib/ecosystemGlossary';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
+import { SURFACE_LANDINGS } from '@/lib/landings/surfaceLandings';
 
 export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
