@@ -4,6 +4,7 @@ import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Plane, Car, Wifi, Landmark, MapPin, Hotel, Compass, ArrowRight } from 'lucide-react';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { SEOHead } from '@/components/seo';
+import { buildSurfaceSeo } from '@/lib/landings/surfaceLandingSeo';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
@@ -28,13 +29,11 @@ export default function ArriveSurfaceLandingPage() {
   const navigate = useNavigate();
   const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Прилетаю на Пхукет, нужна помощь с прибытием' : 'Hello! I am arriving on Phuket, need help with arrival');
 
+  const seo = buildSurfaceSeo('arrive', t ? 'ru' : 'en');
+
   return (
     <>
-      <SEOHead
-        title={t ? 'Прибытие на Пхукет — трансфер, eSIM, заселение · myUNO' : 'Arrive on Phuket — transfer, eSIM, check-in · myUNO'}
-        description={t ? 'Первые 72 часа на Пхукете: трансфер из аэропорта, eSIM, наличные THB, заселение и ориентация по районам.' : 'First 72 hours on Phuket: airport transfer, eSIM, THB cash, check-in and area orientation.'}
-        url="https://www.myuno.app/for/arrive"
-      />
+      <SEOHead title={seo.title} description={seo.description} url={seo.url} jsonLd={seo.jsonLd} />
       <LandingLayout
         icon={Plane}
         title={t ? 'Прибытие на Пхукет' : 'Arrive on Phuket'}

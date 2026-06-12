@@ -4,6 +4,7 @@ import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Sunset, Home, GraduationCap, Stethoscope, Landmark, Wifi, ShoppingBag, Car, ArrowRight } from 'lucide-react';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { SEOHead } from '@/components/seo';
+import { buildSurfaceSeo } from '@/lib/landings/surfaceLandingSeo';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
@@ -29,13 +30,11 @@ export default function LiveSurfaceLandingPage() {
   const navigate = useNavigate();
   const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Планирую переезд и жизнь на Пхукете' : 'Hello! I plan to live on Phuket long-term');
 
+  const seo = buildSurfaceSeo('live', t ? 'ru' : 'en');
+
   return (
     <>
-      <SEOHead
-        title={t ? 'Жизнь на Пхукете — переезд, школа, банк · myUNO' : 'Life on Phuket — relocation, school, bank · myUNO'}
-        description={t ? 'Долгосрочная жизнь на Пхукете: жильё, банк, школа, страховка, транспорт. Чек-листы и сервисы в одном месте.' : 'Long-term life on Phuket: housing, banking, schools, insurance, transport. Checklists and services in one place.'}
-        url="https://www.myuno.app/for/live"
-      />
+      <SEOHead title={seo.title} description={seo.description} url={seo.url} jsonLd={seo.jsonLd} />
       <LandingLayout
         icon={Sunset}
         title={t ? 'Жизнь на Пхукете' : 'Live on Phuket'}

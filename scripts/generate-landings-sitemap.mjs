@@ -85,6 +85,11 @@ lines.push('-->');
 lines.push('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"');
 lines.push('        xmlns:xhtml="http://www.w3.org/1999/xhtml">');
 lines.push('');
+lines.push(`  <!-- ===== Surface landings (Master Taxonomy v1.0, 6) ===== -->`);
+for (const slug of ['arrive', 'live', 'manage', 'invest', 'legal', 'build']) {
+  lines.push(urlEntry(`/for/${slug}`, '0.9'));
+}
+lines.push('');
 lines.push(`  <!-- ===== Persona landings (${livePersonas.length}) ===== -->`);
 for (const slug of livePersonas) lines.push(urlEntry(`/for/${slug}`, '0.8'));
 lines.push('');

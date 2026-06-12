@@ -4,6 +4,7 @@ import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Scale, Stamp, FileText, Building2, Heart, ShieldAlert, BookOpen, ArrowRight } from 'lucide-react';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { SEOHead } from '@/components/seo';
+import { buildSurfaceSeo } from '@/lib/landings/surfaceLandingSeo';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
@@ -28,13 +29,11 @@ export default function LegalSurfaceLandingPage() {
   const navigate = useNavigate();
   const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Нужна юридическая помощь на Пхукете' : 'Hello! I need legal help on Phuket');
 
+  const seo = buildSurfaceSeo('legal', t ? 'ru' : 'en');
+
   return (
     <>
-      <SEOHead
-        title={t ? 'Юридические услуги на Пхукете — виза, компания, споры · myUNO' : 'Legal services on Phuket — visa, company, disputes · myUNO'}
-        description={t ? 'Виза и иммиграция, открытие тайской компании, семейное право, налоги, страховые споры. Юристы RU+EN, фиксированные цены.' : 'Visa and immigration, Thai company setup, family law, tax, insurance disputes. EN+RU lawyers, fixed pricing.'}
-        url="https://www.myuno.app/for/legal"
-      />
+      <SEOHead title={seo.title} description={seo.description} url={seo.url} jsonLd={seo.jsonLd} />
       <LandingLayout
         icon={Scale}
         title={t ? 'Юридическая помощь' : 'Legal help'}

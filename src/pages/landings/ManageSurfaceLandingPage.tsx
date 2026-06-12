@@ -4,6 +4,7 @@ import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Building2, Calendar, Wrench, Receipt, Users, BarChart3, ClipboardCheck, ArrowRight } from 'lucide-react';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { SEOHead } from '@/components/seo';
+import { buildSurfaceSeo } from '@/lib/landings/surfaceLandingSeo';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
@@ -28,13 +29,11 @@ export default function ManageSurfaceLandingPage() {
   const navigate = useNavigate();
   const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Хочу обсудить управление недвижимостью' : 'Hello! I want to discuss property management');
 
+  const seo = buildSurfaceSeo('manage', t ? 'ru' : 'en');
+
   return (
     <>
-      <SEOHead
-        title={t ? 'Управление недвижимостью на Пхукете — PMS, гости, отчёты · myUNO' : 'Property management on Phuket — PMS, guests, reports · myUNO'}
-        description={t ? 'Календарь, гости, уборка, отчёты собственнику, динамические цены — управление вашей недвижимостью на Пхукете под ключ.' : 'Calendar, guests, cleaning, owner reports, dynamic pricing — turnkey property management on Phuket.'}
-        url="https://www.myuno.app/for/manage"
-      />
+      <SEOHead title={seo.title} description={seo.description} url={seo.url} jsonLd={seo.jsonLd} />
       <LandingLayout
         icon={Building2}
         title={t ? 'Управление недвижимостью' : 'Manage your property'}
