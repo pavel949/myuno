@@ -27,6 +27,7 @@ import { PWAInstallProvider } from "@/contexts/PWAInstallContext";
 import { LifeSituationProvider } from "@/contexts/LifeSituationContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
+import { OrganizationJsonLdHydrator } from "@/components/seo/OrganizationJsonLdHydrator";
 
 import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { LegalComplianceModal } from "@/components/legal/LegalComplianceModal";
