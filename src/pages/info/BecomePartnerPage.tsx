@@ -96,17 +96,25 @@ const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    const isRu = language === 'ru';
+
     if (!selectedCategory) {
-      toast.error(language === 'ru' ? 'Выберите категорию' : 'Select a category');
+      toast.error(isRu ? 'Выберите категорию' : 'Select a category');
+      return;
+    }
+
+    // BUG-02 (P1): validate email shape before any DB write.
+    const email = formData.email.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error(isRu ? 'Укажите корректный email' : 'Enter a valid email');
       return;
     }
 
     // P0: anonymous insert fails RLS on partner_applications. Send user to auth,
     // draft is already persisted so they pick up where they left off.
     if (!user) {
-      toast(language === 'ru' ? 'Войдите для отправки' : 'Sign in to submit', {
-        description: language === 'ru'
+      toast(isRu ? 'Войдите для отправки' : 'Sign in to submit', {
+        description: isRu
           ? 'Мы сохранили вашу заявку и вернём вас сюда после входа.'
           : 'We saved your draft and will bring you back here after sign-in.',
       });
@@ -117,6 +125,29 @@ const navigate = useNavigate();
     setIsSubmitting(true);
 
     try {
+      // BUG-10 (P2): block obvious duplicates — active application for this user in last 7 days.
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: existing } = await supabase
+        .from('partner_applications')
+        .select('id')
+        .eq('user_id', user.id)
+        .in('status', ['pending', 'reviewing'])
+        .gte('created_at', sevenDaysAgo)
+        .limit(1);
+      if (existing && existing.length > 0) {
+        toast(isRu ? 'У вас уже есть активная заявка' : 'You already have an active application', {
+          description: isRu
+            ? 'Перейдите в раздел статуса, чтобы посмотреть детали.'
+            : 'Open the status page to see the details.',
+          action: {
+            label: isRu ? 'Открыть' : 'Open',
+            onClick: () => navigate('/partner/status'),
+          },
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const { data: inserted, error } = await supabase
         .from('partner_applications')
         .insert({
@@ -125,7 +156,7 @@ const navigate = useNavigate();
           business_category: selectedCategory,
           business_description: formData.description,
           contact_name: formData.contactName,
-          contact_email: formData.email,
+          contact_email: email,
           contact_phone: formData.phone,
           website: formData.website || null,
           status: 'pending',
@@ -143,22 +174,23 @@ const navigate = useNavigate();
 
       try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* noop */ }
       setIsSubmitted(true);
-      toast(language === 'ru' ? 'Заявка отправлена!' : 'Application submitted!', {
-        description: language === 'ru'
+      toast(isRu ? 'Заявка отправлена!' : 'Application submitted!', {
+        description: isRu
           ? 'Мы отправили подтверждение на ваш email и ответим в течение 24 часов'
           : 'Confirmation sent to your email. We will reply within 24 hours',
       });
     } catch (error) {
       console.error('Error submitting application:', error);
-      toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
-        description: language === 'ru' 
-          ? 'Не удалось отправить заявку. Попробуйте позже.' 
+      toast.error(isRu ? 'Ошибка' : 'Error', {
+        description: isRu
+          ? 'Не удалось отправить заявку. Попробуйте позже.'
           : 'Failed to submit application. Please try again.',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   if (isSubmitted) {
     return (

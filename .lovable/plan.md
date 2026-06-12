@@ -1,98 +1,63 @@
-## Цель
+# План: фиксы онбординга поставщиков
 
-Закрыть 5 критичных проблем (P0) из аудита онбординга поставщиков. Без рефакторинга архитектуры — только bugfix-уровень, безопасный для прод-данных. P1/P2 — отдельным спринтом.
+Закрываем 12 багов из аудита + убираем дубль `/provider/onboarding`. Без новых фич — только чистка и безопасность.
 
-## Что меняем
+## 1. Дедупликация флоу (архитектурно)
 
-### 1. VendorOnboarding больше не активирует вендора автоматически
-**Файл:** `src/pages/vendor/VendorOnboarding.tsx`
+- **Удалить** `src/pages/provider/ProviderOnboarding.tsx` (полный дубль `BecomePartnerPage`).
+- Маршрут `/provider/onboarding` → 301 redirect на `/become-partner` в `AnimatedRoutes.tsx`.
+- Убрать запись в `pageRegistry.ts` и suppress-list в `App.tsx`.
+- `BecomePartnerPage` становится единственным «лёгким» флоу (без создания `providers`).
+- `VendorOnboarding` остаётся единственным «тяжёлым» флоу (создаёт `providers` + application).
 
-- Создаём профиль в `providers` со статусом `is_active: false` и помечаем `verification_status: 'pending'` (если поле есть; иначе только `is_active: false`).
-- Параллельно создаём заявку в `partner_applications` (status `pending`) — это даёт админу единую очередь.
-- Первый листинг в `vendor_services` сохраняется с `is_active: false`, появится после апрува.
-- Step «Success» меняется на «Заявка на модерации, ответим за 24 часа» вместо «Вы в эфире».
-- Дашборд `/vendor` остаётся доступен (для отслеживания статуса), но публикации скрыты до апрува.
+## 2. P0 — критика
 
-### 2. ProviderOnboarding уведомляет админа
-**Файл:** `src/pages/provider/ProviderOnboarding.tsx`
+**BUG-01** `VendorOnboarding.tsx:99` — добавить guard: если `!user?.email` → блок submit с тостом «Email required», не вставлять application с `null`.
 
-- После успешного INSERT в `partner_applications` добавляем `supabase.functions.invoke('notify-admin-partner-application', ...)` — fire-and-forget, не блокирует UX.
-- Передаём id заявки, email, имя, категории.
+## 3. P1 — серьёзные
 
-### 3. Email заявителю при approve/reject
-**Файл:** `supabase/functions/approve-partner-application/index.ts` + новые шаблоны.
+- **BUG-02** `BecomePartnerPage.tsx`: валидация email через Zod перед insert; убрать тост «Confirmation sent» если email пустой.
+- **BUG-03** `notify-admin-partner-application/index.ts`: добавить проверку JWT через `supabase.auth.getUser(token)` в начале handler; 401 если нет валидной сессии. (Админ-уведомление при approve вызывается из admin-функции с service_role — там auth уже есть.)
+- **BUG-04** `PartnerApplicationsAdmin.tsx`: удалить мёртвую `fetchApplications()` (строки 173-195), оставить только `useEffect`-загрузку + кнопка Refresh, вызывающая ту же логику через `useCallback`.
+- **BUG-05** `PartnerApplicationsAdmin.tsx:210`: убрать `as never`; типизировать `updateData` через `Database['public']['Tables']['partner_applications']['Update']`.
+- **BUG-06** `PartnerStatusPage.tsx`: обернуть в `<AppLayout>` как остальные страницы.
+- **BUG-07** `approve-partner-application/index.ts:8`: заменить хардкод origin на `Access-Control-Allow-Origin: *` (или динамически из `req.headers.origin`), как в остальных функциях.
+- **BUG-08** `App.tsx:164`: добавить `/provider/onboarding` в suppress-list bottom-nav (на время до удаления маршрута, потом снять).
 
-- Используем Lovable Emails (built-in инфраструктура), не Resend напрямую — у проекта уже есть email-domain.
-- Два новых шаблона в `supabase/functions/_shared/transactional-email-templates/`:
-  - `partner-application-approved.tsx` — «Заявка одобрена, вход в кабинет, следующие шаги».
-  - `partner-application-rejected.tsx` — «К сожалению, отказ. Причина: …» с CTA «Связаться с нами».
-- Регистрируем в `registry.ts`.
-- В edge function: после успешного approve → invoke `send-transactional-email` с шаблоном approved. Для reject — добавим отдельный путь (`action: 'reject'`) или отдельную fn, см. ниже.
-- Аналогично добавляем подтверждение заявителю при подаче формы (через тот же канал): шаблон `partner-application-received.tsx` — «Получили вашу заявку #XXX, ответ за 24h».
-- Триггер «received» — из `notify-admin-partner-application` (там уже есть email заявителя), чтобы не плодить дубли invoke в frontend.
+## 4. P2
 
-### 4. /become-partner: graceful auth для анонимов
-**Файл:** `src/pages/info/BecomePartnerPage.tsx`
+- **BUG-09** `VendorOnboarding.tsx`: при ошибке вставки `partner_applications` — rollback: `DELETE` созданного `providers` row, показать пользователю ошибку.
+- **BUG-10** Защита от дублей: перед insert проверить существование `partner_applications` с тем же `contact_email` и `status IN ('pending','reviewing')` за последние 7 дней. Если есть — показать «У вас уже есть активная заявка, посмотреть статус» с ссылкой на `/partner/status`.
+- **BUG-11** `PartnerApplicationsAdmin.tsx`: расширить `status` тип до `string`, добавить fallback в `statusConfig` для неизвестных значений (`?? statusConfig.pending`).
+- **BUG-12** Sender domain: переключить оба edge function с `onboarding@resend.dev` на верифицированный домен через env `SENDER_DOMAIN` (если есть Lovable Emails) или оставить как fallback с TODO. Проверю `email_domain--check_email_domain_status` перед выбором.
 
-- Перед submit: если `!user` → `navigate('/auth?redirect=/become-partner&prefill=' + encodeURIComponent(JSON.stringify({email, businessName})))` и сохраняем черновик формы в localStorage.
-- После возврата с авторизации — восстанавливаем черновик и автоматически submit (или показываем кнопку «Отправить заявку»).
-- Это убирает «непонятную RLS-ошибку» и сохраняет конверсию.
+## 5. Технические детали
 
-### 5. Подтверждение перед изменением модерационной логики
+**Файлы к правке:**
+- `src/pages/vendor/VendorOnboarding.tsx`
+- `src/pages/info/BecomePartnerPage.tsx`
+- `src/pages/partner/PartnerStatusPage.tsx`
+- `src/pages/admin/PartnerApplicationsAdmin.tsx`
+- `src/components/layout/AnimatedRoutes.tsx`
+- `src/components/layout/pageRegistry.ts`
+- `src/App.tsx`
+- `supabase/functions/approve-partner-application/index.ts`
+- `supabase/functions/notify-admin-partner-application/index.ts`
 
-Перед тем как менять `is_active: true → false` в VendorOnboarding, надо понимать: **существующие вендоры**, созданные через старый flow, остаются активными — миграция бэкфилла **не нужна** (мы не хотим сносить уже-работающих). Затронуты только новые регистрации.
+**Файлы к удалению:**
+- `src/pages/provider/ProviderOnboarding.tsx`
 
-## Что НЕ делаем в этом спринте
+**Без изменений БД** — все правки на уровне кода и edge functions. Существующие данные не трогаем.
 
-- ❌ Унификация 4 потоков в один canonical funnel (P1, отдельный спринт).
-- ❌ Rate limiting на публичных edge fn — в проекте **нет стандартного rate-limit примитива** для backend (документировано); это известный gap, отдельная инициатива.
-- ❌ Funnel-метрики, страница статуса заявки, UI документов для Verified, дубль-чек с `vendor_prospects` — всё P1.
-- ❌ Замена `analytics_events` логики.
+**Deploy:** обе edge function пересобрать через `deploy_edge_functions`.
 
-## Технические детали
+## Acceptance
 
-### Email-инфраструктура
+- `npm run build` зелёный, типы без `as never` в правленых файлах.
+- `/provider/onboarding` редиректит на `/become-partner`.
+- Vendor onboarding без email → блокируется на UI, в БД мусор не попадает.
+- Повторная заявка от того же email за 7 дней → soft-block + ссылка на статус.
+- Admin notification функция без JWT → 401.
+- `PartnerStatusPage` отображается с шапкой и навигацией.
 
-Проверяем `email_domain--check_email_domain_status`. Если домен уже настроен — сразу скаффолдим транзакционные шаблоны через `email_domain--scaffold_transactional_email` (если ещё не было), создаём 3 шаблона, деплоим `send-transactional-email`.
-
-Если домена нет — показываем диалог настройки и продолжаем после.
-
-### Edge function `approve-partner-application`
-
-Текущий контракт принимает `{ application_id, action: 'approve' | 'reject', rejection_reason? }`. Расширяем:
-- Логика approve: после транзакции org/role → invoke `send-transactional-email` с `templateName: 'partner-application-approved'`, `recipientEmail: app.email`, `idempotencyKey: 'approve-' + application_id`.
-- Логика reject: invoke с `partner-application-rejected`, передаём `rejection_reason`.
-- Сбой email не должен откатывать approve — try/catch + лог.
-
-### Edge function `notify-admin-partner-application`
-
-Добавляем второй invoke (или один общий) на `send-transactional-email` с `partner-application-received` для заявителя.
-
-### Frontend изменения
-
-- `VendorOnboarding.tsx`: 1 поле в insert меняется, success-step текст меняется, добавляется INSERT в `partner_applications`.
-- `ProviderOnboarding.tsx`: добавляется 1 invoke после успешного INSERT.
-- `BecomePartnerPage.tsx`: добавляется проверка `user` перед submit + восстановление черновика на mount.
-
-### Что НЕ требует миграций
-
-Все изменения работают с существующей схемой (`providers.is_active`, `partner_applications` уже есть). Миграции БД не нужны.
-
-## Acceptance criteria
-
-- [ ] Новый вендор через `/vendor/onboarding` имеет `is_active=false` и видимую заявку в `PartnerApplicationsAdmin`.
-- [ ] Заявитель получает email «Заявка получена» в течение минуты после submit на любой из 3 форм.
-- [ ] При approve в админке заявитель получает email «Одобрено» с CTA на `/vendor`.
-- [ ] При reject заявитель получает email с причиной.
-- [ ] На `/become-partner` без логина клик «Отправить» уводит на `/auth`, после возврата форма заполнена.
-- [ ] Существующие активные вендоры не затронуты.
-
-## Очерёдность работы
-
-1. Email-инфраструктура: проверка статуса домена → scaffold (если нужно) → 3 шаблона → deploy.
-2. `approve-partner-application` — добавить рассылку.
-3. `notify-admin-partner-application` — добавить рассылку заявителю.
-4. `ProviderOnboarding.tsx` — добавить invoke.
-5. `VendorOnboarding.tsx` — снять автоактивацию + INSERT в `partner_applications`.
-6. `BecomePartnerPage.tsx` — auth-guard + draft restore.
-7. Финальная проверка в preview: пройти 3 формы, проверить заявки в админке, проверить email-flow.
+**Не входит в этот заход:** объединение `VendorOnboarding` и `BecomePartnerPage` в один canonical funnel (это P1-архитектура, отдельный спринт), rate-limiting, analytics_events, переезд email-инфры на Lovable Emails.

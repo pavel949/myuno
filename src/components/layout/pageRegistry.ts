@@ -451,8 +451,7 @@ export const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
 export const AdminSystemSettings = lazy(() => import('@/pages/admin/AdminSystemSettings'));
 export const AdminApiKeys = lazy(() => import('@/pages/admin/AdminApiKeys'));
 
-// ── Provider ──
-export const ProviderOnboarding = lazy(() => import('@/pages/provider/ProviderOnboarding'));
+// ── Provider ── (ProviderOnboarding removed 2026-06-12; duplicated /become-partner. /provider/onboarding now redirects.)
 
 // ── Vendor ──
 export const VendorDashboard = lazy(() => import('@/pages/vendor/VendorDashboard'));
