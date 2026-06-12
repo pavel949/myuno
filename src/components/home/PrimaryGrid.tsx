@@ -78,7 +78,7 @@ const SETS: Record<string, TileSet> = {
       hintRu: 'Off-plan · resale · капитал',
     },
     mini: [
-      { to: '/clearview',         icon: ScanSearch, labelEn: 'ClearView', labelRu: 'ClearView' },
+      { to: APP_ROUTES.CLEARVIEW, icon: ScanSearch, labelEn: 'ClearView', labelRu: 'ClearView' },
       { to: APP_ROUTES.PROPERTY,  icon: TrendingUp, labelEn: 'Returns',   labelRu: 'Доходность' },
       { to: APP_ROUTES.SUPPORT,   icon: Banknote,   labelEn: 'Capital',   labelRu: 'Капитал' },
     ],
