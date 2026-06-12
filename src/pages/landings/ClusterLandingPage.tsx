@@ -17,6 +17,7 @@ import {
   type ClusterLanding,
 } from '@/lib/landings/types';
 import { CLUSTER_LANDINGS } from '@/content/landings/clusterLandings';
+import { getSurfaceForCluster } from '@/lib/landings/surfaceLandings';
 import { PERSONA_LANDINGS } from '@/content/landings/personaLandings';
 import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
