@@ -58,6 +58,14 @@ export const LEGACY_SLUG_TO_CANONICAL: Readonly<Record<string, MasterPersonaCode
   'creatives':          'P04_digital_nomad',
   'students':           'P11_student',
 
+  // Sprint C — orphan coverage (Relocator segment + property-owner):
+  'long-stay':          'P03_long_stay_tourist',
+  'relocator-family':   'P08_relocator_family',
+  'relocator-solo':     'P09_relocator_solo',
+  'returnee':           'P10_returnee',
+  'employee-expat':     'P13_employee_expat',
+  'property-owner':     'P23_property_owner',
+
   // Lifestyle micro-niches NOT in Master Taxonomy v1.0 — kept as landings,
   // no canonical persona attached. Render is unaffected; CRM/AI routers
   // should fall back to nearest neighbour by tag.
@@ -86,13 +94,9 @@ export const COVERED_CANONICAL_CODES: ReadonlySet<MasterPersonaCode> = new Set(
 );
 
 /**
- * Master P-codes that have NO persona-landing yet. These are the Sprint C
- * landing-creation targets (relocator coverage, returnee, property-owner, …).
+ * Master P-codes that still have NO persona-landing. After Sprint C the
+ * Relocator gap is closed; remaining orphans are intentional deferrals.
  */
 export const ORPHAN_CANONICAL_CODES: readonly MasterPersonaCode[] = [
-  'P03_long_stay_tourist',
-  'P08_relocator_family',
-  'P10_returnee',
-  'P13_employee_expat',
-  'P23_property_owner',
+  // (none — all 25 master personas now have at least one landing)
 ];
