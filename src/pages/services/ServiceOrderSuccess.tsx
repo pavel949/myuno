@@ -31,26 +31,29 @@ export default function ServiceOrderSuccess() {
   const isRu = language === 'ru';
 
   const sessionId = searchParams.get('session_id');
-  const { functionName, functionIcon } = (location.state as {
+  const navState = (location.state as {
     functionName?: string;
     functionIcon?: string;
+    orderId?: string;
+    orderNumber?: string;
   } | null) || {};
+  const { functionName, functionIcon, orderId: stateOrderId } = navState;
 
   const [order, setOrder] = useState<OrderData | null>(null);
-  const [loading, setLoading] = useState(!!sessionId);
+  const [loading, setLoading] = useState(!!(sessionId || stateOrderId));
 
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId && !stateOrderId) return;
     let attempts = 0;
     const maxAttempts = 10;
 
     const fetchOrder = async () => {
-      const { data } = await supabase
-        .from('orders')
-        .select('id, order_number, total_amount, currency, status, start_at, metadata')
-        .eq('order_type', 'service')
-        .filter('metadata->>stripe_session_id', 'eq', sessionId)
-        .maybeSingle();
+      const baseSelect = 'id, order_number, total_amount, currency, status, start_at, metadata';
+      let query = supabase.from('orders').select(baseSelect).eq('order_type', 'service');
+      query = stateOrderId
+        ? query.eq('id', stateOrderId)
+        : query.filter('metadata->>stripe_session_id', 'eq', sessionId!);
+      const { data } = await query.maybeSingle();
 
       if (data) {
         setOrder(data as unknown as OrderData);
@@ -63,7 +66,7 @@ export default function ServiceOrderSuccess() {
     };
 
     fetchOrder();
-  }, [sessionId]);
+  }, [sessionId, stateOrderId]);
 
   const details = order ? (
     <div className="space-y-2 text-sm">

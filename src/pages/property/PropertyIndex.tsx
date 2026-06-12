@@ -2,7 +2,7 @@
  * PropertyIndex — Airbnb-style Discovery Page
  * Clean search pill + category icons ribbon + card grid
  */
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Heart, Star, ArrowRight, MapPin, SlidersHorizontal, Map } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
@@ -179,11 +179,32 @@ export default function PropertyIndex() {
     [filterValues, propertyMode, rentTenancy, saleIntent, isQuickSale]
   );
 
-  const { data: infiniteData, isLoading } = usePropertiesInfinite(serverFilters);
+  const {
+    data: infiniteData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePropertiesInfinite(serverFilters);
 
   const allProperties = useMemo(() => {
     return infiniteData?.pages.flatMap(p => p.properties) || [];
   }, [infiniteData]);
+
+  // C9 FIX: actually trigger fetchNextPage via IntersectionObserver sentinel
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage || isFetchingNextPage) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) fetchNextPage();
+      },
+      { rootMargin: '600px 0px' },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, allProperties.length]);
 
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
@@ -379,16 +400,20 @@ export default function PropertyIndex() {
                 </Button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-                {filteredProperties.slice(0, 20).map((property) => (
+                {filteredProperties.map((property) => (
                   <PropertyListingCard key={property.id} property={property} mode={propertyMode} />
                 ))}
               </div>
-              {filteredProperties.length > 20 && (
-                <div className="mt-6 text-center">
-                  <Button variant="outline" className="gap-2" onClick={() => navigate(APP_ROUTES.PROPERTY_SEARCH)}>
-                    {isRu ? `Показать все ${filteredProperties.length}` : `Show all ${filteredProperties.length}`}
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
+              {/* Infinite scroll sentinel */}
+              <div ref={sentinelRef} className="h-1" />
+              {isFetchingNextPage && (
+                <div className="mt-6 text-center text-sm text-muted-foreground">
+                  {isRu ? 'Загрузка...' : 'Loading...'}
+                </div>
+              )}
+              {!hasNextPage && filteredProperties.length > 0 && (
+                <div className="mt-6 text-center text-xs text-muted-foreground">
+                  {isRu ? `Всего объектов: ${filteredProperties.length}` : `Total: ${filteredProperties.length}`}
                 </div>
               )}
             </section>
@@ -398,6 +423,23 @@ export default function PropertyIndex() {
             <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-16")}>
               <p className="text-muted-foreground mb-3">
                 {isRu ? 'Нет объектов с выбранными фильтрами' : 'No properties match selected filters'}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => { setSelectedCategories([]); setFilterValues({}); clearStorage(); }}>
+                {isRu ? 'Сбросить фильтры' : 'Clear filters'}
+              </Button>
+            </div>
+          )}
+
+          {/* C7 FIX: empty state when DB has no properties at all for selected filters */}
+          {!isLoading && allProperties.length === 0 && (
+            <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-20")}>
+              <p className="text-base font-medium mb-2">
+                {isRu ? 'Пока нет объектов' : 'No properties yet'}
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                {isRu
+                  ? 'По выбранным параметрам ничего не нашлось. Попробуйте сбросить фильтры.'
+                  : 'Nothing matches your search. Try clearing filters.'}
               </p>
               <Button variant="outline" size="sm" onClick={() => { setSelectedCategories([]); setFilterValues({}); clearStorage(); }}>
                 {isRu ? 'Сбросить фильтры' : 'Clear filters'}

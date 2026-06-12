@@ -160,22 +160,9 @@ Deno.serve(async (req) => {
     }
 
     // ── APPROVE path ──
-    const { error: updateErr } = await sb
-      .from("partner_applications")
-      .update({
-        status: "approved",
-        reviewed_by: adminId,
-        reviewed_at: new Date().toISOString(),
-      })
-      .eq("id", application_id);
-
-    if (updateErr) {
-      return new Response(
-        JSON.stringify({ error: updateErr.message }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
+    // C2 FIX: do NOT mark application as approved until vendor org/provider
+    // activation succeeds. Otherwise a failed insert leaves an "approved"
+    // application with no vendor org, and the user can't log into vendor cabinet.
     if (app.user_id) {
       // If the applicant came from VendorOnboarding, providers/orgs/role already exist
       // but providers.is_active was forced to false until approval. Flip them on now.
@@ -269,6 +256,26 @@ Deno.serve(async (req) => {
         console.error("[approve-partner-application] user_roles upsert failed:", roleErr);
       }
     }
+
+    // Now that vendor activation succeeded, persist approval status.
+    const { error: updateErr } = await sb
+      .from("partner_applications")
+      .update({
+        status: "approved",
+        reviewed_by: adminId,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", application_id);
+
+    if (updateErr) {
+      console.error("[approve-partner-application] final status update failed:", updateErr);
+      return new Response(
+        JSON.stringify({ error: updateErr.message }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+
 
     await emailApplicant(app.contact_email, app.business_name, "approve");
 
