@@ -302,6 +302,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "agent_deals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "agent_deals_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
@@ -1098,6 +1105,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_keys_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2281,6 +2295,13 @@ export type Database = {
             foreignKeyName: "capital_contacts_origin_investment_deal_id_fkey"
             columns: ["origin_investment_deal_id"]
             isOneToOne: false
+            referencedRelation: "investment_deals_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capital_contacts_origin_investment_deal_id_fkey"
+            columns: ["origin_investment_deal_id"]
+            isOneToOne: false
             referencedRelation: "v_investment_deals_public"
             referencedColumns: ["id"]
           },
@@ -2488,6 +2509,13 @@ export type Database = {
             columns: ["investment_deal_id"]
             isOneToOne: false
             referencedRelation: "investment_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capital_pipeline_investment_deal_id_fkey"
+            columns: ["investment_deal_id"]
+            isOneToOne: false
+            referencedRelation: "investment_deals_public"
             referencedColumns: ["id"]
           },
           {
@@ -3478,6 +3506,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "company_category_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       company_storefronts: {
@@ -3526,6 +3561,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_storefronts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4096,6 +4138,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contact_tags_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contract_analyses: {
@@ -4188,6 +4237,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "crm_access_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       crm_activities: {
@@ -4242,6 +4298,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_activities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -4303,6 +4366,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "crm_assignment_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "crm_assignment_rules_pipeline_id_fkey"
             columns: ["pipeline_id"]
             isOneToOne: false
@@ -4354,6 +4424,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_comm_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4428,6 +4505,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4726,6 +4810,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "crm_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       crm_custom_field_values: {
@@ -4811,6 +4902,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "crm_custom_fields_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       crm_custom_options: {
@@ -4874,6 +4972,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_custom_options_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4945,6 +5050,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -5131,6 +5243,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "crm_emails_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "crm_emails_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
@@ -5198,6 +5317,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_meetings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -5326,6 +5452,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "crm_pipelines_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       crm_quotes: {
@@ -5395,6 +5528,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "crm_quotes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "crm_quotes_contact_id_fkey"
             columns: ["contact_id"]
             isOneToOne: false
@@ -5447,6 +5587,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_scoring_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -5592,6 +5739,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "crm_sequences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       crm_tasks: {
@@ -5658,6 +5812,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -5763,6 +5924,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "crm_web_forms_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "crm_web_forms_default_stage_id_fkey"
             columns: ["default_stage_id"]
             isOneToOne: false
@@ -5850,6 +6018,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_workflows_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -6000,6 +6175,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "deal_pipeline_stages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       deal_scheduled_activities: {
@@ -6060,6 +6242,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_scheduled_activities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -7707,6 +7896,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "goods_receipts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "goods_receipts_po_id_fkey"
             columns: ["po_id"]
             isOneToOne: false
@@ -8781,6 +8977,13 @@ export type Database = {
             foreignKeyName: "investor_inquiries_deal_id_fkey"
             columns: ["deal_id"]
             isOneToOne: false
+            referencedRelation: "investment_deals_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investor_inquiries_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
             referencedRelation: "v_investment_deals_public"
             referencedColumns: ["id"]
           },
@@ -9488,6 +9691,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ledger_accounts_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ledger_accounts_owner_org_id_fkey"
             columns: ["owner_org_id"]
             isOneToOne: false
@@ -9613,6 +9823,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_acceptances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -10871,6 +11088,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "management_company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       management_terms_activity: {
@@ -11732,6 +11956,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mc_onboarding_progress_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mc_property_slots: {
@@ -11768,6 +11999,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mc_property_slots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -13282,6 +13520,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "orders_source_company_id_fkey"
+            columns: ["source_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "orders_source_storefront_id_fkey"
             columns: ["source_storefront_id"]
             isOneToOne: false
@@ -13662,6 +13907,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "outreach_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       owner_invoices: {
@@ -13743,6 +13995,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -13954,6 +14213,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "owner_payouts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "owner_payouts_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
@@ -14130,6 +14396,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_portal_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -14383,6 +14656,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_statement_approvals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -14669,6 +14949,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payout_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -16815,6 +17102,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "properties_owner_contact_id_fkey"
             columns: ["owner_contact_id"]
             isOneToOne: false
@@ -16906,6 +17200,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_accounting_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -17589,6 +17890,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "property_checklist_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       property_complexes: {
@@ -17700,6 +18008,13 @@ export type Database = {
             columns: ["management_company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_complexes_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -21113,6 +21428,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "purchase_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       push_subscriptions: {
@@ -22979,6 +23301,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "signature_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       simulation_runs: {
@@ -23170,6 +23499,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -23782,6 +24118,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tax_filings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       taxonomy_definitions: {
@@ -24078,6 +24421,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "team_member_permissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       team_members: {
@@ -24229,6 +24579,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "team_shifts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       team_timesheets: {
@@ -24286,6 +24643,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_timesheets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
           {
@@ -27287,6 +27651,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "webhook_deliveries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "webhook_deliveries_endpoint_id_fkey"
             columns: ["endpoint_id"]
             isOneToOne: false
@@ -27347,6 +27718,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_endpoints_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -28283,6 +28661,72 @@ export type Database = {
           },
         ]
       }
+      investment_deals_public: {
+        Row: {
+          capital_range: Database["public"]["Enums"]["capital_range"] | null
+          capital_sought_usd_max: number | null
+          capital_sought_usd_min: number | null
+          category: string | null
+          created_at: string | null
+          deal_intent: Database["public"]["Enums"]["deal_intent"] | null
+          deal_size_midpoint_usd: number | null
+          deal_stage: Database["public"]["Enums"]["deal_stage"] | null
+          deal_structure: string | null
+          description_public: string | null
+          expected_irr: number | null
+          id: string | null
+          is_published: boolean | null
+          location_display: string | null
+          published_at: string | null
+          status: Database["public"]["Enums"]["deal_pipeline_status"] | null
+          target_timeline_months: number | null
+          teaser_public: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          capital_range?: Database["public"]["Enums"]["capital_range"] | null
+          capital_sought_usd_max?: number | null
+          capital_sought_usd_min?: number | null
+          category?: string | null
+          created_at?: string | null
+          deal_intent?: Database["public"]["Enums"]["deal_intent"] | null
+          deal_size_midpoint_usd?: number | null
+          deal_stage?: Database["public"]["Enums"]["deal_stage"] | null
+          deal_structure?: string | null
+          description_public?: string | null
+          expected_irr?: number | null
+          id?: string | null
+          is_published?: boolean | null
+          location_display?: string | null
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["deal_pipeline_status"] | null
+          target_timeline_months?: number | null
+          teaser_public?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          capital_range?: Database["public"]["Enums"]["capital_range"] | null
+          capital_sought_usd_max?: number | null
+          capital_sought_usd_min?: number | null
+          category?: string | null
+          created_at?: string | null
+          deal_intent?: Database["public"]["Enums"]["deal_intent"] | null
+          deal_size_midpoint_usd?: number | null
+          deal_stage?: Database["public"]["Enums"]["deal_stage"] | null
+          deal_structure?: string | null
+          description_public?: string | null
+          expected_irr?: number | null
+          id?: string | null
+          is_published?: boolean | null
+          location_display?: string | null
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["deal_pipeline_status"] | null
+          target_timeline_months?: number | null
+          teaser_public?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       life_os_catalog: {
         Row: {
           currency: string | null
@@ -28294,6 +28738,105 @@ export type Database = {
           title: string | null
           title_ru: string | null
           trust_level: string | null
+        }
+        Relationships: []
+      }
+      management_companies_public: {
+        Row: {
+          address: string | null
+          brand_color: string | null
+          cover_image: string | null
+          created_at: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          founded_year: number | null
+          has_24_7_support: boolean | null
+          has_emergency_service: boolean | null
+          id: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          logo: string | null
+          name_en: string | null
+          name_ru: string | null
+          phone: string | null
+          properties_count: number | null
+          properties_managed: number | null
+          rating: number | null
+          review_count: number | null
+          service_districts: string[] | null
+          service_types: string[] | null
+          services: string[] | null
+          slug: string | null
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          brand_color?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          founded_year?: number | null
+          has_24_7_support?: boolean | null
+          has_emergency_service?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          logo?: string | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          properties_count?: number | null
+          properties_managed?: number | null
+          rating?: number | null
+          review_count?: number | null
+          service_districts?: string[] | null
+          service_types?: string[] | null
+          services?: string[] | null
+          slug?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          brand_color?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: string | null
+          founded_year?: number | null
+          has_24_7_support?: boolean | null
+          has_emergency_service?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          logo?: string | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: string | null
+          properties_count?: number | null
+          properties_managed?: number | null
+          rating?: number | null
+          review_count?: number | null
+          service_districts?: string[] | null
+          service_types?: string[] | null
+          services?: string[] | null
+          slug?: string | null
+          website?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -28342,6 +28885,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -28675,6 +29225,13 @@ export type Database = {
             columns: ["management_company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -29126,6 +29683,13 @@ export type Database = {
             referencedRelation: "management_companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "owner_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       v_clearview_public: {
@@ -29446,6 +30010,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
@@ -30090,6 +30661,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "properties_owner_contact_id_fkey"
             columns: ["owner_contact_id"]
             isOneToOne: false
@@ -30290,6 +30868,13 @@ export type Database = {
             columns: ["management_company_id"]
             isOneToOne: false
             referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
