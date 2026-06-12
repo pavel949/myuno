@@ -89,7 +89,10 @@ const OfficialNewsPage: React.FC = () => {
                 : 'No news yet. Tap “Refresh”.'}
             </div>
           )}
-          {(data ?? []).map((n) => (
+          {(data ?? []).map((n) => {
+            const title = isRu && n.title_ru ? n.title_ru : n.title;
+            const summary = isRu && n.summary_ru ? n.summary_ru : n.summary;
+            return (
             <a
               key={n.id}
               href={n.url}
@@ -100,11 +103,11 @@ const OfficialNewsPage: React.FC = () => {
               <div className="flex items-start gap-3">
                 <span className="flex-1 min-w-0">
                   <span className="block text-[14px] font-medium text-foreground">
-                    {n.title}
+                    {title}
                   </span>
-                  {n.summary && (
+                  {summary && (
                     <span className="block text-[12px] text-muted-foreground mt-1 line-clamp-2">
-                      {n.summary}
+                      {summary}
                     </span>
                   )}
                   <span className="block text-[11px] text-muted-foreground mt-1.5">
@@ -115,7 +118,8 @@ const OfficialNewsPage: React.FC = () => {
                 <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
               </div>
             </a>
-          ))}
+            );
+          })}
         </div>
 
         <section>

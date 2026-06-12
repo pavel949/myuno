@@ -46,7 +46,9 @@ export const OfficialNews: React.FC = () => {
                 <div className="h-2 bg-muted rounded w-1/3" />
               </div>
             ))
-          : (data ?? []).map((n) => (
+          : (data ?? []).map((n) => {
+              const title = isRu && n.title_ru ? n.title_ru : n.title;
+              return (
               <a
                 key={n.id}
                 href={n.url}
@@ -57,7 +59,7 @@ export const OfficialNews: React.FC = () => {
                 <div className="flex items-start gap-2">
                   <span className="flex-1 min-w-0">
                     <span className="block text-[13px] font-medium text-foreground line-clamp-2">
-                      {n.title}
+                      {title}
                     </span>
                     <span className="block text-[11px] text-muted-foreground mt-1">
                       {n.source_label}
@@ -67,7 +69,8 @@ export const OfficialNews: React.FC = () => {
                   <ExternalLink className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
                 </div>
               </a>
-            ))}
+              );
+            })}
       </div>
     </section>
   );

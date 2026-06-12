@@ -12992,7 +12992,10 @@ export type Database = {
           source: string
           source_label: string
           summary: string | null
+          summary_ru: string | null
           title: string
+          title_ru: string | null
+          translated_at: string | null
           url: string
         }
         Insert: {
@@ -13005,7 +13008,10 @@ export type Database = {
           source: string
           source_label: string
           summary?: string | null
+          summary_ru?: string | null
           title: string
+          title_ru?: string | null
+          translated_at?: string | null
           url: string
         }
         Update: {
@@ -13018,7 +13024,10 @@ export type Database = {
           source?: string
           source_label?: string
           summary?: string | null
+          summary_ru?: string | null
           title?: string
+          title_ru?: string | null
+          translated_at?: string | null
           url?: string
         }
         Relationships: []
