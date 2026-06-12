@@ -84,6 +84,10 @@ export default function AdminSystemSettings() {
             <Flag className="h-4 w-4" />
             {isRu ? 'Флаги' : 'Flags'}
           </TabsTrigger>
+          <TabsTrigger value="org" className="gap-1.5">
+            <Building2 className="h-4 w-4" />
+            {isRu ? 'Организация' : 'Organization'}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="system" className="mt-4">
@@ -97,6 +101,9 @@ export default function AdminSystemSettings() {
         </TabsContent>
         <TabsContent value="flags" className="mt-4">
           <FeatureFlagManager />
+        </TabsContent>
+        <TabsContent value="org" className="mt-4">
+          <OrgProfileEditor />
         </TabsContent>
       </Tabs>
     </div>
