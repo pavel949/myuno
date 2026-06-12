@@ -699,6 +699,68 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_knowledge_documents: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          created_by: string | null
+          embedding: string | null
+          id: string
+          is_active: boolean
+          lang: string
+          metadata: Json
+          parent_id: string | null
+          source: string | null
+          tags: string[]
+          title: string
+          token_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          chunk_index?: number
+          content: string
+          created_at?: string
+          created_by?: string | null
+          embedding?: string | null
+          id?: string
+          is_active?: boolean
+          lang?: string
+          metadata?: Json
+          parent_id?: string | null
+          source?: string | null
+          tags?: string[]
+          title: string
+          token_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          embedding?: string | null
+          id?: string
+          is_active?: boolean
+          lang?: string
+          metadata?: Json
+          parent_id?: string | null
+          source?: string | null
+          tags?: string[]
+          title?: string
+          token_count?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_knowledge_documents_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_knowledge_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_task_suggestions: {
         Row: {
           acted_at: string | null
@@ -31771,6 +31833,23 @@ export type Database = {
       lead_temperature_from_score: {
         Args: { p_score: number }
         Returns: string
+      }
+      match_ai_knowledge: {
+        Args: {
+          filter_lang?: string
+          match_count?: number
+          query_embedding: string
+          similarity_threshold?: number
+        }
+        Returns: {
+          content: string
+          id: string
+          lang: string
+          similarity: number
+          source: string
+          tags: string[]
+          title: string
+        }[]
       }
       mc_can_access: {
         Args: {
