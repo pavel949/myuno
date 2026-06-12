@@ -422,8 +422,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/education/tutor/:id" element={<LazyPage><Pages.TutorDetail /></LazyPage>} />
         <Route path="/education/booking/:id" element={<LazyPage><Pages.EducationBooking /></LazyPage>} />
         
-        {/* ── Flowers ── */}
+        {/* ── Flowers (+ Bloom legacy alias) ── */}
         <Route path={APP_ROUTES.FLOWERS} element={<LazyPage><Pages.FlowersIndex /></LazyPage>} />
+        <Route path="/bloom" element={<Navigate to={APP_ROUTES.FLOWERS} replace />} />
+        <Route path="/bloom/*" element={<Navigate to={APP_ROUTES.FLOWERS} replace />} />
         <Route path="/flowers/bouquet/:id" element={<LazyPage><Pages.BouquetDetail /></LazyPage>} />
         <Route path="/flowers/shop" element={<Navigate to={APP_ROUTES.FLOWERS} replace />} />
         <Route path="/flowers/shop/:id" element={<LazyPage><Pages.FlowerShopDetail /></LazyPage>} />
