@@ -79,11 +79,45 @@ const VendorOnboarding = () => {
         email: user?.email || undefined,
         commission_rate: 10,
         is_verified: false,
-        is_active: true,
+        // P0: vendor is NOT live until admin approves the partner_application below.
+        is_active: false,
       });
 
       if (error) throw error;
       setCreatedProviderId(data?.id || null);
+
+      // P0: create a partner_application so the new vendor enters the moderation queue.
+      // Fire-and-forget — failure to insert shouldn't block onboarding UX.
+      try {
+        const { data: appRow } = await supabase
+          .from('partner_applications')
+          .insert({
+            user_id: user?.id ?? null,
+            business_name: businessName.trim(),
+            business_category: category,
+            contact_name: user?.user_metadata?.full_name || businessName.trim(),
+            contact_email: user?.email ?? null,
+            contact_phone: phone.trim() || null,
+            status: 'pending',
+            metadata: {
+              source: 'vendor_onboarding',
+              language,
+              provider_id: data?.id ?? null,
+              vertical: category,
+            },
+          })
+          .select('id')
+          .single();
+
+        if (appRow?.id) {
+          supabase.functions
+            .invoke('notify-admin-partner-application', { body: { application_id: appRow.id } })
+            .catch(() => {});
+        }
+      } catch (appErr) {
+        console.error('Could not create partner_application:', appErr);
+      }
+
       setCurrentStep(1);
     } catch (error) {
       console.error('Error creating profile:', error);
