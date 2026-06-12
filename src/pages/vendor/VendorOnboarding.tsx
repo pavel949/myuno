@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile, useVendorServices } from '@/hooks/useVendor';
 import { useUserContext } from '@/hooks/useUserContext';
+import { supabase } from '@/integrations/supabase/client';
 import { OnboardingLayout } from '@/components/layout/OnboardingLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Button } from '@/components/ui/button';
@@ -78,11 +79,45 @@ const VendorOnboarding = () => {
         email: user?.email || undefined,
         commission_rate: 10,
         is_verified: false,
-        is_active: true,
+        // P0: vendor is NOT live until admin approves the partner_application below.
+        is_active: false,
       });
 
       if (error) throw error;
       setCreatedProviderId(data?.id || null);
+
+      // P0: create a partner_application so the new vendor enters the moderation queue.
+      // Fire-and-forget — failure to insert shouldn't block onboarding UX.
+      try {
+        const { data: appRow } = await supabase
+          .from('partner_applications')
+          .insert({
+            user_id: user?.id ?? null,
+            business_name: businessName.trim(),
+            business_category: category,
+            contact_name: user?.user_metadata?.full_name || businessName.trim(),
+            contact_email: user?.email ?? null,
+            contact_phone: phone.trim() || null,
+            status: 'pending',
+            metadata: {
+              source: 'vendor_onboarding',
+              language,
+              provider_id: data?.id ?? null,
+              vertical: category,
+            },
+          })
+          .select('id')
+          .single();
+
+        if (appRow?.id) {
+          supabase.functions
+            .invoke('notify-admin-partner-application', { body: { application_id: appRow.id } })
+            .catch(() => {});
+        }
+      } catch (appErr) {
+        console.error('Could not create partner_application:', appErr);
+      }
+
       setCurrentStep(1);
     } catch (error) {
       console.error('Error creating profile:', error);
@@ -111,7 +146,8 @@ const VendorOnboarding = () => {
         currency: 'THB',
         category: category,
         images: servicePhoto ? [servicePhoto] : [],
-        is_active: true,
+        // P0: listing stays hidden until admin approves the partner_application.
+        is_active: false,
         max_capacity: 1,
       });
 
@@ -140,7 +176,7 @@ const VendorOnboarding = () => {
   const stepTitles = [
     { en: 'About You', ru: 'О вас' },
     { en: 'First Listing', ru: 'Первое объявление' },
-    { en: "You're Live!", ru: 'Вы на связи!' },
+    { en: 'Pending Review', ru: 'На модерации' },
   ];
 
   return (
@@ -434,12 +470,12 @@ const VendorOnboarding = () => {
                   </motion.div>
 
                   <h2 className="text-2xl font-bold mb-2">
-                    {isRu ? '🎉 Вы в деле!' : '🎉 You\'re Live!'}
+                    {isRu ? 'Заявка на модерации' : 'Application pending review'}
                   </h2>
                   <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
                     {isRu
-                      ? 'Объявление отправлено на модерацию. Завершите профиль, чтобы получить верификацию быстрее.'
-                      : 'Your listing is pending review. Complete your profile to get verified faster.'}
+                      ? 'Спасибо! Команда myUNO проверит заявку и ответит в течение 24 часов. Вы получите email с решением. Профиль и объявление появятся в каталоге после одобрения.'
+                      : 'Thanks! The myUNO team will review your application and reply within 24 hours. You will receive a decision by email. Your profile and listing will appear in the catalog after approval.'}
                   </p>
 
                   {/* Checklist */}

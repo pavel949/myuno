@@ -49,6 +49,8 @@ const benefits = [
   { icon: Clock, labelRu: 'Удобное управление заказами', labelEn: 'Easy order management' },
 ];
 
+const DRAFT_STORAGE_KEY = 'become_partner_draft_v1';
+
 export default function BecomePartnerPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
@@ -66,11 +68,49 @@ const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // Restore draft after returning from /auth
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as { selectedCategory?: string | null; formData?: typeof formData };
+      if (draft.selectedCategory) setSelectedCategory(draft.selectedCategory);
+      if (draft.formData) setFormData(prev => ({ ...prev, ...draft.formData }));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Persist draft as the user types (so /auth round-trip doesn't lose work)
+  React.useEffect(() => {
+    if (isSubmitted) return;
+    try {
+      localStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify({ selectedCategory, formData }),
+      );
+    } catch {
+      // ignore quota errors
+    }
+  }, [selectedCategory, formData, isSubmitted]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!selectedCategory) {
       toast.error(language === 'ru' ? 'Выберите категорию' : 'Select a category');
+      return;
+    }
+
+    // P0: anonymous insert fails RLS on partner_applications. Send user to auth,
+    // draft is already persisted so they pick up where they left off.
+    if (!user) {
+      toast(language === 'ru' ? 'Войдите для отправки' : 'Sign in to submit', {
+        description: language === 'ru'
+          ? 'Мы сохранили вашу заявку и вернём вас сюда после входа.'
+          : 'We saved your draft and will bring you back here after sign-in.',
+      });
+      navigate('/auth?redirect=' + encodeURIComponent('/become-partner'));
       return;
     }
 
@@ -80,7 +120,7 @@ const navigate = useNavigate();
       const { data: inserted, error } = await supabase
         .from('partner_applications')
         .insert({
-          user_id: user?.id || null,
+          user_id: user.id,
           business_name: formData.businessName,
           business_category: selectedCategory,
           business_description: formData.description,
@@ -101,11 +141,12 @@ const navigate = useNavigate();
         }).catch(() => {});
       }
 
+      try { localStorage.removeItem(DRAFT_STORAGE_KEY); } catch { /* noop */ }
       setIsSubmitted(true);
       toast(language === 'ru' ? 'Заявка отправлена!' : 'Application submitted!', {
         description: language === 'ru'
-          ? 'Мы свяжемся с вами в ближайшее время'
-          : 'We will contact you soon',
+          ? 'Мы отправили подтверждение на ваш email и ответим в течение 24 часов'
+          : 'Confirmation sent to your email. We will reply within 24 hours',
       });
     } catch (error) {
       console.error('Error submitting application:', error);
