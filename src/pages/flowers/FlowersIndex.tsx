@@ -50,9 +50,11 @@ export default function FlowersIndex() {
     return count;
   }, [filterValues]);
 
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 250);
+
   const filteredBouquets = useMemo(() => {
     let result = bouquets;
-    const q = searchQuery.trim().toLowerCase();
+    const q = debouncedSearchQuery.trim().toLowerCase();
     if (q) {
       result = result.filter(b => {
         const haystack = [
