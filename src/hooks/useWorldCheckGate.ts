@@ -7,8 +7,8 @@
  * screens can disable the "Pay" CTA until clearance is recorded.
  *
  * Current implementation: reads compliance status from `crm_contacts`
- * (`special_status` jsonb array contains 'worldcheck_cleared' or
- * 'worldcheck_pending'). Edge function `compliance-worldcheck` populates it.
+ * (`aml_kyc_status` enum + `tags` array for 'worldcheck_*' markers).
+ * Edge function `compliance-worldcheck` populates these fields.
  *
  * @returns gate.allowed === true → cleared; false → blocked; null → unknown
  */
@@ -37,6 +37,12 @@ interface Args {
   isRussianPassport?: boolean;
 }
 
+function isRussian(value: string | null | undefined): boolean {
+  if (!value) return false;
+  const v = value.toLowerCase();
+  return v === 'ru' || v === 'russia' || v === 'russian' || v === 'российская федерация' || v === 'россия';
+}
+
 export function useWorldCheckGate({ contactId, isRussianPassport }: Args): WorldCheckGate {
   const { data, isLoading } = useQuery({
     enabled: Boolean(contactId),
@@ -44,7 +50,7 @@ export function useWorldCheckGate({ contactId, isRussianPassport }: Args): World
     queryFn: async () => {
       const { data, error } = await supabase
         .from('crm_contacts')
-        .select('special_status, nationality, passport_country')
+        .select('aml_kyc_status, nationality, passport_country, tags')
         .eq('id', contactId!)
         .maybeSingle();
       if (error) throw error;
@@ -53,21 +59,16 @@ export function useWorldCheckGate({ contactId, isRussianPassport }: Args): World
     staleTime: 60_000,
   });
 
-  const russianFromDb =
-    data?.nationality === 'RU' ||
-    data?.nationality === 'Russia' ||
-    data?.passport_country === 'RU' ||
-    data?.passport_country === 'Russia';
+  const russianFromDb = isRussian(data?.nationality) || isRussian(data?.passport_country);
   const isRequired = Boolean(isRussianPassport ?? russianFromDb);
 
-  const statuses: string[] = Array.isArray(data?.special_status)
-    ? (data!.special_status as unknown as string[])
-    : [];
+  const tags: string[] = Array.isArray(data?.tags) ? (data!.tags as unknown as string[]) : [];
+  const kyc = (data?.aml_kyc_status ?? '').toString().toLowerCase();
 
   let state: WorldCheckState = 'unknown';
-  if (statuses.includes('worldcheck_cleared')) state = 'cleared';
-  else if (statuses.includes('worldcheck_flagged')) state = 'flagged';
-  else if (statuses.includes('worldcheck_pending')) state = 'pending';
+  if (kyc === 'cleared' || kyc === 'approved' || tags.includes('worldcheck_cleared')) state = 'cleared';
+  else if (kyc === 'flagged' || kyc === 'rejected' || tags.includes('worldcheck_flagged')) state = 'flagged';
+  else if (kyc === 'pending' || kyc === 'in_review' || tags.includes('worldcheck_pending')) state = 'pending';
   else if (!isRequired) state = 'not_required';
 
   const allowed = state === 'cleared' || state === 'not_required';
