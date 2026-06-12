@@ -139,6 +139,47 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         </LandingContainer>
       </header>
 
+      {/* ─── SURFACE CROSS-LINK (Master Taxonomy v1.0) ──────────── */}
+      {(() => {
+        const surface = getSurfaceForCluster(landing.slug);
+        if (!surface) return null;
+        const SurfaceIcon = surface.icon;
+        return (
+          <aside
+            aria-label={isRu ? 'Связанный surface' : 'Related surface'}
+            className="border-b border-border bg-muted/20"
+          >
+            <LandingContainer className="max-w-3xl px-4 py-4 sm:px-6">
+              <a
+                href={surface.href}
+                className="group flex items-center gap-3 border border-border bg-card p-3 transition-colors hover:border-foreground/30"
+              >
+                <div
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center"
+                  style={{ background: tokenColor(surface.color, 0.15), color: tokenColor(surface.color) }}
+                  aria-hidden
+                >
+                  <SurfaceIcon className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className="text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: tokenColor(surface.color) }}
+                  >
+                    {isRu ? 'Surface · myUNO' : 'Surface · myUNO'}
+                  </p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {isRu ? surface.titleRu : surface.titleEn}
+                    <span className="text-muted-foreground"> — {isRu ? surface.taglineRu : surface.taglineEn}</span>
+                  </p>
+                </div>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </a>
+            </LandingContainer>
+          </aside>
+        );
+      })()}
+
       <article className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
         {/* ─── JOBS (lifecycle phrases) ──────────────────────────── */}
         {landing.jobs.length > 0 ? (
