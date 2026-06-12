@@ -2,12 +2,13 @@
  * MagnetLandingPage — public route /l/:slug. Renders a builder-generated landing.
  */
 import React from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMagnetLandingBySlug } from '@/hooks/useMagnetLandings';
 import { MagnetLandingRenderer } from '@/components/magnets/MagnetLandingRenderer';
+import NotFound from '@/pages/NotFound';
 
 export default function MagnetLandingPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -22,7 +23,7 @@ export default function MagnetLandingPage() {
       </div>
     );
   }
-  if (!data) return <Navigate to="/404" replace />;
+  if (!data) return <NotFound />;
 
   const seoTitle = (isRu ? data.seo_title_ru : data.seo_title_en) || (isRu ? data.title_ru : data.title_en);
   const seoDesc =
