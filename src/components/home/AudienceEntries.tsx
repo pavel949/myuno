@@ -101,7 +101,7 @@ const AUDIENCES: Audience[] = [
     links: [
       { ru: 'Новостройки', en: 'New developments', to: '/newbuilds' },
       { ru: 'Перепродажа', en: 'Resale', to: '/property/resale' },
-      { ru: 'ClearView рейтинги', en: 'ClearView ratings', to: '/clearview' },
+      { ru: 'ClearView рейтинги', en: 'ClearView ratings', to: '/property/clearview' },
     ],
   },
   {
