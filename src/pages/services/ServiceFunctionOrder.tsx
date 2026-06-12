@@ -367,9 +367,9 @@ import { toast } from 'sonner';
            <Button 
              type="submit" 
              className="w-full h-12 text-base"
-             disabled={isSubmitting}
+             disabled={isCreating}
            >
-             {isSubmitting ? (
+             {isCreating ? (
                <Loader2 className="h-5 w-5 animate-spin mr-2" />
              ) : null}
              {isRu ? 'Отправить заявку' : 'Submit Request'}
