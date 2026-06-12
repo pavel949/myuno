@@ -201,7 +201,9 @@ export default function YachtBooking() {
 
     const bookingCharterType = charterType;
 
-    // Stripe checkout for online payments
+    // Stripe checkout for online payments — ORDER-FIRST: create order BEFORE Stripe redirect.
+    // This guarantees a DB record exists even if Stripe checkout is abandoned, so payments
+    // can always be reconciled via webhook → order_id lookup. See ARCHITECTURE_V2 §13.
     if (isInstant && paymentMethod === 'online') {
       const experiences = selectedExperiences.map(expId => {
         const exp = yachtExperiences.find(e => e.id === expId)!;
