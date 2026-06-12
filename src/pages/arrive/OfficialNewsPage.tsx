@@ -5,7 +5,7 @@
 import React from 'react';
 import { ExternalLink, Newspaper, RefreshCw } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { BackButton } from '@/components/ui/BackButton';
+import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOfficialNews } from '@/hooks/useOfficialNews';
 import { supabase } from '@/integrations/supabase/client';
