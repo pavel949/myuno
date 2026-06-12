@@ -385,7 +385,7 @@ export default function PartnerApplicationsAdmin() {
         <div className="space-y-3">
           <AnimatePresence mode="popLayout">
             {filteredApplications.map((app, index) => {
-              const status = statusConfig[app.status];
+              const status = statusConfig[app.status as KnownStatus] ?? statusConfig.pending;
               const StatusIcon = status.icon;
               
               return (
@@ -445,10 +445,10 @@ export default function PartnerApplicationsAdmin() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   {selectedApp.business_name}
-                  <Badge variant="outline" className={cn(statusConfig[selectedApp.status].color)}>
-                    {language === 'ru' 
-                      ? statusConfig[selectedApp.status].labelRu 
-                      : statusConfig[selectedApp.status].labelEn}
+                  <Badge variant="outline" className={cn((statusConfig[selectedApp.status as KnownStatus] ?? statusConfig.pending).color)}>
+                    {language === 'ru'
+                      ? (statusConfig[selectedApp.status as KnownStatus] ?? statusConfig.pending).labelRu
+                      : (statusConfig[selectedApp.status as KnownStatus] ?? statusConfig.pending).labelEn}
                   </Badge>
                 </DialogTitle>
                 <DialogDescription>
