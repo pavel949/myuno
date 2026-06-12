@@ -175,19 +175,19 @@ Deno.serve(async (req) => {
     }
 
     if (app.user_id) {
-      // If user is the source of a providers record from VendorOnboarding,
-      // mark it active now so listings become visible.
+      // If the applicant came from VendorOnboarding, providers/orgs/role already exist
+      // but providers.is_active was forced to false until approval. Flip them on now.
       try {
         await sb
           .from("providers")
           .update({ is_active: true })
-          .eq("created_by", app.user_id)
+          .eq("user_id", app.user_id)
           .eq("is_active", false);
-        // Also activate any pending vendor_services for this user
+
         const { data: pvs } = await sb
           .from("providers")
           .select("id")
-          .eq("created_by", app.user_id);
+          .eq("user_id", app.user_id);
         const providerIds = (pvs ?? []).map((p: { id: string }) => p.id);
         if (providerIds.length > 0) {
           await sb
@@ -195,48 +195,63 @@ Deno.serve(async (req) => {
             .update({ is_active: true })
             .in("provider_id", providerIds)
             .eq("is_active", false);
+          await sb
+            .from("marketplace_vendors")
+            .update({ approval_status: "approved" })
+            .in("id", providerIds)
+            .neq("approval_status", "approved");
         }
       } catch (e) {
         console.error("[approve-partner-application] activate provider failed", e);
       }
 
-      const { data: org, error: orgErr } = await sb
-        .from("orgs")
-        .insert({
-          org_type: "vendor",
-          name: app.business_name ?? "Vendor",
-          name_ru: app.business_name ?? undefined,
-          email: app.contact_email ?? null,
-          phone: app.contact_phone ?? null,
-          address: app.address ?? null,
+      // Check if user already has a vendor org (VendorOnboarding path). If so, skip creation.
+      const { data: existingMember } = await sb
+        .from("org_members")
+        .select("org_id, orgs!inner(org_type)")
+        .eq("user_id", app.user_id)
+        .eq("orgs.org_type", "vendor")
+        .maybeSingle();
+
+      if (!existingMember) {
+        const { data: org, error: orgErr } = await sb
+          .from("orgs")
+          .insert({
+            org_type: "vendor",
+            name: app.business_name ?? "Vendor",
+            name_ru: app.business_name ?? undefined,
+            email: app.contact_email ?? null,
+            phone: app.contact_phone ?? null,
+            address: app.address ?? null,
+            is_active: true,
+            is_verified: false,
+          })
+          .select("id")
+          .single();
+
+        if (orgErr) {
+          console.error("[approve-partner-application] org insert failed:", orgErr);
+          return new Response(
+            JSON.stringify({ error: "Failed to create vendor org", details: orgErr.message }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const { error: memberErr } = await sb.from("org_members").insert({
+          org_id: org.id,
+          user_id: app.user_id,
+          role: "owner",
           is_active: true,
-          is_verified: false,
-        })
-        .select("id")
-        .single();
+        });
 
-      if (orgErr) {
-        console.error("[approve-partner-application] org insert failed:", orgErr);
-        return new Response(
-          JSON.stringify({ error: "Failed to create vendor org", details: orgErr.message }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      const { error: memberErr } = await sb.from("org_members").insert({
-        org_id: org.id,
-        user_id: app.user_id,
-        role: "owner",
-        is_active: true,
-      });
-
-      if (memberErr) {
-        console.error("[approve-partner-application] org_members insert failed:", memberErr);
-        await sb.from("orgs").delete().eq("id", org.id);
-        return new Response(
-          JSON.stringify({ error: "Failed to add vendor member", details: memberErr.message }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        if (memberErr) {
+          console.error("[approve-partner-application] org_members insert failed:", memberErr);
+          await sb.from("orgs").delete().eq("id", org.id);
+          return new Response(
+            JSON.stringify({ error: "Failed to add vendor member", details: memberErr.message }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
       }
 
       const { error: roleErr } = await sb
