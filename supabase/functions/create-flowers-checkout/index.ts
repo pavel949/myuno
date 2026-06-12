@@ -116,7 +116,7 @@ Deno.serve(
           ? [{ address_type: "delivery", address_text: delivery_address }]
           : [],
         lineItems,
-        successUrl: `${origin}/bookings?success=true&session_id={CHECKOUT_SESSION_ID}`,
+        successUrl: `${origin}/flowers/success?session_id={CHECKOUT_SESSION_ID}`,
         cancelUrl: `${origin}/cart?canceled=true`,
         sessionMetadata: { checkout_type: "flowers" },
         statusReason: "Flower order created",
