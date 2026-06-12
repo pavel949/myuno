@@ -86,6 +86,7 @@ export const adminRoutes = (
     <Route path="/admin/data-import" element={<Pages.AdminDataImport />} />
     <Route path="/admin/ai-agents" element={<Pages.AdminAIAgents />} />
     <Route path="/admin/ai-ops" element={<Pages.AdminAIOps />} />
+    <Route path="/admin/ai-knowledge" element={<Pages.AdminAIKnowledge />} />
     <Route path="/admin/ai-agents/:id" element={<Pages.AdminAIAgentEditor />} />
     <Route path="/admin/add" element={<Pages.AdminAddHub />} />
     <Route path="/admin/intake" element={<Pages.AdminIntake />} />
