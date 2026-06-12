@@ -186,19 +186,24 @@ Deno.serve(async (req) => {
 
         const { data: pvs } = await sb
           .from("providers")
-          .select("id")
+          .select("id, marketplace_vendor_id")
           .eq("user_id", app.user_id);
         const providerIds = (pvs ?? []).map((p: { id: string }) => p.id);
+        const mvIds = (pvs ?? [])
+          .map((p: { marketplace_vendor_id: string | null }) => p.marketplace_vendor_id)
+          .filter((x): x is string => !!x);
         if (providerIds.length > 0) {
           await sb
             .from("vendor_services")
             .update({ is_active: true })
             .in("provider_id", providerIds)
             .eq("is_active", false);
+        }
+        if (mvIds.length > 0) {
           await sb
             .from("marketplace_vendors")
             .update({ approval_status: "approved" })
-            .in("id", providerIds)
+            .in("id", mvIds)
             .neq("approval_status", "approved");
         }
       } catch (e) {
