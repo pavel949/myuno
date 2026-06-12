@@ -59,6 +59,53 @@
     <meta name="twitter:description" content="Stays · Services · Property · Investments. Один аккаунт для всей жизни на Пхукете." />
     <meta name="twitter:image" content="https://myuno.app/og-image.png" />
 
+    <!-- Sitewide JSON-LD: Organization + WebSite (with SearchAction) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://www.myuno.app/#organization",
+          "name": "myUNO",
+          "alternateName": "myUNO Super-App",
+          "url": "https://www.myuno.app/",
+          "logo": "https://www.myuno.app/icons/icon-512x512.png",
+          "description": "Digital civic infrastructure for foreigners in Phuket: arrival, living, property management, investments, legal services and construction — under one account.",
+          "areaServed": [
+            { "@type": "Place", "name": "Phuket", "address": { "@type": "PostalAddress", "addressCountry": "TH", "addressRegion": "Phuket" } },
+            { "@type": "Country", "name": "Thailand" }
+          ],
+          "knowsLanguage": ["ru", "en", "th"],
+          "founder": { "@type": "Person", "name": "Pavel Ignatev" },
+          "parentOrganization": { "@type": "Organization", "name": "Ignatev Group" },
+          "sameAs": [
+            "https://t.me/myUNOapp",
+            "https://www.instagram.com/myuno.app",
+            "https://www.youtube.com/@myUNOapp",
+            "https://x.com/myUNOapp"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.myuno.app/#website",
+          "url": "https://www.myuno.app/",
+          "name": "myUNO",
+          "inLanguage": ["ru", "en"],
+          "publisher": { "@id": "https://www.myuno.app/#organization" },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://www.myuno.app/search?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
+
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://kakkwibljrjsawxgnupk.supabase.co" />
     <link rel="dns-prefetch" href="//kakkwibljrjsawxgnupk.supabase.co" />
