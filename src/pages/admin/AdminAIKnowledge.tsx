@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { untypedTables } from '@/lib/untypedTables';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,7 +51,7 @@ export default function AdminAIKnowledge() {
   const { data: docs, isLoading } = useQuery({
     queryKey: ['ai-knowledge-docs'],
     queryFn: async () => {
-      const { data, error } = await (untypedTables as any)
+      const { data, error } = await (supabase as any)
         .from('ai_knowledge_documents')
         .select('id,title,content,source,lang,tags,is_active,chunk_index,parent_id,token_count,created_at')
         .order('created_at', { ascending: false })
@@ -108,7 +107,7 @@ export default function AdminAIKnowledge() {
     mutationFn: async (parentId: string) => {
       // Delete parent — children cascade via FK
       const ids = chunksByParent[parentId]?.map((d) => d.id) ?? [parentId];
-      const { error } = await (untypedTables as any)
+      const { error } = await (supabase as any)
         .from('ai_knowledge_documents')
         .delete()
         .in('id', ids);
@@ -124,7 +123,7 @@ export default function AdminAIKnowledge() {
   const toggleActive = useMutation({
     mutationFn: async ({ parentId, value }: { parentId: string; value: boolean }) => {
       const ids = chunksByParent[parentId]?.map((d) => d.id) ?? [parentId];
-      const { error } = await (untypedTables as any)
+      const { error } = await (supabase as any)
         .from('ai_knowledge_documents')
         .update({ is_active: value })
         .in('id', ids);
