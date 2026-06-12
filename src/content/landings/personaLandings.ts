@@ -44,6 +44,14 @@ import { P24_CREATIVES } from './personas/P24_CREATIVES';
 import { P25_STUDENTS } from './personas/P25_STUDENTS';
 import { P26_CONSCIOUS_EATERS } from './personas/P26_CONSCIOUS_EATERS';
 
+// Sprint C (orphan coverage — Master Taxonomy v1.0):
+import { P03_LONG_STAY_TOURIST } from './personas/P03_LONG_STAY_TOURIST';
+import { P08_RELOCATOR_FAMILY } from './personas/P08_RELOCATOR_FAMILY';
+import { P09_RELOCATOR_SOLO } from './personas/P09_RELOCATOR_SOLO';
+import { P10_RETURNEE } from './personas/P10_RETURNEE';
+import { P13_EMPLOYEE_EXPAT } from './personas/P13_EMPLOYEE_EXPAT';
+import { P23_PROPERTY_OWNER } from './personas/P23_PROPERTY_OWNER';
+
 export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
   P1_TOURISTS,
   P2_CN_INVESTORS,
@@ -73,6 +81,13 @@ export const PERSONA_LANDINGS: readonly PersonaLanding[] = [
   P24_CREATIVES,
   P25_STUDENTS,
   P26_CONSCIOUS_EATERS,
+  // Sprint C — orphan coverage closing Relocator segment gap (35% → 90%):
+  P03_LONG_STAY_TOURIST,   // canonical P03
+  P08_RELOCATOR_FAMILY,    // canonical P08
+  P09_RELOCATOR_SOLO,      // canonical P09
+  P10_RETURNEE,            // canonical P10
+  P13_EMPLOYEE_EXPAT,      // canonical P13
+  P23_PROPERTY_OWNER,      // canonical P23
 ] as const;
 
 export const LIVE_PERSONA_SLUGS: readonly string[] = PERSONA_LANDINGS
