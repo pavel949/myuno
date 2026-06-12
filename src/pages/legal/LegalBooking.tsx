@@ -3,6 +3,8 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBooking } from "@/hooks/useBooking";
+import { useConsultationRequests } from "@/hooks/useConsultationRequests";
+
 import { useStripeUnifiedCheckout } from "@/hooks/useStripeUnifiedCheckout";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -34,7 +36,9 @@ export default function LegalBooking() {
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
+  const { createConsultation } = useConsultationRequests();
   const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
+
 
   // Form state
   const [step, setStep] = useState(1);
@@ -118,43 +122,59 @@ export default function LegalBooking() {
       return;
     }
 
-    // Cash/wallet flow
-    const result = await createBooking({
-      booking_type: 'service',
-      scheduled_at: scheduledAt,
-      total_amount: consultationPrice,
-      currency: 'THB',
-      notes: JSON.stringify({
-        provider_id: id,
-        service: selectedService,
-        consultation_type: consultationType,
-        description,
-        company,
-      }),
-      items: [{
-        item_type: 'legal_consultation',
-        item_id: id || 'consultation',
-        item_name: selectedService || (language === 'ru' ? 'Консультация' : 'Consultation'),
-        quantity: 1,
-        unit_price: consultationPrice,
-        subtotal: consultationPrice,
-      }],
-      participants: [{
+    // Cash / wallet flow — write to consultation_requests so admin & vendor inbox see it (C11)
+    try {
+      const consult = await createConsultation.mutateAsync({
+        request_type: 'general_legal',
         name: contactData.name,
-        phone: contactData.phone,
         email: contactData.email,
-        is_primary: true,
-      }],
-      payment: {
-        amount: consultationPrice,
-        payment_method: paymentMethod,
-      },
-    });
+        phone: contactData.phone,
+        preferred_language: language,
+        notes: description,
+        preferred_dates: [{ date: format(scheduledAt, 'yyyy-MM-dd'), time }],
+        vertical_metadata: {
+          provider_id: id,
+          service: selectedService,
+          consultation_type: consultationType,
+          company,
+          consultation_price: consultationPrice,
+          currency: 'THB',
+          payment_method: paymentMethod,
+        },
+        entry_point: 'legal_booking',
+        lead_source: 'legal',
+      });
 
-    if (result.success) {
-      setBookingResult({ success: true, bookingId: result.booking_id });
+      // Mirror to bookings table (for /account/orders timeline) — non-blocking
+      void createBooking({
+        booking_type: 'service',
+        scheduled_at: scheduledAt,
+        total_amount: consultationPrice,
+        currency: 'THB',
+        notes: JSON.stringify({ consultation_request_id: consult.id, service: selectedService }),
+        items: [{
+          item_type: 'legal_consultation',
+          item_id: id || 'consultation',
+          item_name: selectedService || (language === 'ru' ? 'Консультация' : 'Consultation'),
+          quantity: 1,
+          unit_price: consultationPrice,
+          subtotal: consultationPrice,
+        }],
+        participants: [{
+          name: contactData.name,
+          phone: contactData.phone,
+          email: contactData.email,
+          is_primary: true,
+        }],
+        payment: { amount: consultationPrice, payment_method: paymentMethod },
+      });
+
+      setBookingResult({ success: true, bookingId: consult.id });
+    } catch {
+      // toast handled by hook
     }
   };
+
 
   return (
     <AppLayout>
