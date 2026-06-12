@@ -1,168 +1,157 @@
+# Аудит myUNO: честный ответ на 4 вопроса
 
-# UX-аудит верхнего уровня + Wave 1 правок
+## TL;DR — короткий вердикт
 
-## Часть 1. Что нашли
+| Вопрос | Ответ |
+|---|---|
+| Крутая ли система? | **Да по амбиции, нет по исполнению.** 510 страниц, 405 таблиц, 25 персон, ClearView, PMS, CRM — масштаб уникальный. Но 50–60% поверхности дублируется или мёртвая. |
+| Решает все проблемы иностранцев? | **Частично.** Только 1 из 3 целевых сегментов (Investor) покрыт нормально (67%). Relocator $300–800K покрыт на **35%** — это главная дыра. Second-home — 50%. |
+| Работает ли? | **С серьёзными утечками.** Найдено **18 битых маршрутов** (404 на проде), 1 критическая Order-First дыра в Stripe (Yacht), 7+ хардкод-комиссий в коде. |
+| Есть ли дубли и неясности? | **Да, системные.** 3 параллельных таксономии персон, 6 коллизий P-кодов, 4 из 6 surface-лендингов отсутствуют, дублирующиеся investor/developer/raise страницы. |
 
-### Масштаб
-- 535 страниц, 418 `<Route>`, 66 уникальных top-level URL.
-- 4 параллельных «индекса» каталога/discover: `/discover`, `/navigator`, `/catalog→navigator`, `/categories→navigator`.
-- 3 главные: `Index.tsx` (router) → `IndexSimplified` (default) / `IndexLegacy` (15 блоков, regression-safe).
-- 2 drawer-а приложений: `components/layout/AllAppsDrawer.tsx` (170 LOC) и `components/nav/AppDrawer.tsx` (339 LOC).
-- 2 онбординга: `StartOnboarding.tsx` + `StartOnboardingV2.tsx` + `onboarding/OnboardingFlow.tsx`.
-- 24 layout/shell-компонента (AppLayout, MiniAppLayout, MeShell, NavShell, MCLayout, AdminLayout, StaffLayout, GuestLayout, CapitalLayout, NewbuildsLayout, DeveloperPortalLayout, LandingShell, FeatureLayout, UnifiedCatalogShell, OnboardingLayout, PageShell, StartPageLayout, UnifiedSuccessLayout, LandingLayout, NavShellContext и др.).
-- Drift между Master Taxonomy v1.0 (25 personas P01–P25) и runtime `useUserPersonas` (14 строковых ID: tourist/resident/investor/...).
+---
 
-### Ключевые проблемы UX-архитектуры
+## Что реально круто (не трогать)
 
-| # | Симптом | Где живёт | Боль для пользователя |
-|---|---------|-----------|----------------------|
-| 1 | Дублирующиеся «двери» в каталог (`/discover` ≈ `/navigator` ≈ AllAppsDrawer ≈ AppDrawer ≈ `/catalog`) | `AnimatedRoutes.tsx:211-215`, два drawer-компонента | «Где список приложений?» — 4 разных ответа, разный UX. |
-| 2 | Два home-варианта под флагом, оба загружаются в проде | `Index.tsx`, `IndexSimplified.tsx`, `IndexLegacy.tsx` | A/B-долг: легаси-блоки до сих пор тянутся в бандл, ломают аналитику. |
-| 3 | Persona-system раздвоен | Master Taxonomy = P01–P25, runtime = 14 строк | Персонализация на home/discover не совпадает с lifecycle/AI-routing → пользователь видит «не свою» подборку. |
-| 4 | Terminology mismatch — «Surface» vs «Canvas» | Memory правит, но в коде нет roleIA-карты | Команда (и AI-агенты) путают content-clusters и app-shell. |
-| 5 | Нет единого role-switcher boundary | UserAvatarMenu единая точка, но шеллы (MCLayout/AdminLayout/StaffLayout/Capital/Newbuilds) рендерят свои хедеры | Гость попадает в `/mc/*` или `/admin` и видит «чужой» UI до редиректа. |
-| 6 | Top-level URL разрослись (66) | `/babysitter` + `/babysitters`, `/airport-transfer` + `/transfers` + `/taxi-booking`, `/clinics` + `/medical`, `/spa` + `/salons`, `/sell` + `/list-with-us`, `/welcome` + `/welcome-landing` | SEO-дубли, разные карточки одной услуги. |
-| 7 | Investment-раздел очищен (Wave 1/2 сделаны), но альтернативные точки входа `/capital`, `/invest-hub`, `/property` дублируют CTA | `AnimatedRoutes.tsx` | Инвестор видит «капитал» 3 раза. |
-| 8 | Bottom-nav role-aware, но `PRIMARY_NAV` гость = Home·Discover·Market·Property·Me, при этом `/market` и `/property` уже доступны через Discover → перегруз | `nav/navigationModel.ts` | На малых экранах 5 слотов потрачены на пересекающиеся домены. |
-| 9 | DB-категории дрейфуют от `src/lib/catalog/taxonomy.ts` (комментарий 2026-05-21 прямо это фиксирует) | `category_groups`, `categories` | Drawer показывает одно число услуг, страница вертикали — другое. |
+- **Master Taxonomy v1.0** как замысел — двухслойная (Surface×6 + JTBD×10) с 25 персонами — индустриально-сильный фундамент.
+- **PMS на `properties` SSOT** с 281 колонкой и 20 RLS-политиками — серьёзная инженерия.
+- **ClearView V3** с 8-критериями, paywall и публичной сводкой через `v_clearview_public` — реальное конкурентное преимущество.
+- **AnimatedRoutes + APP_ROUTES + lazy-loading** — архитектурно правильно; нарушения локальные.
+- **Order-First** соблюдается в 3 из 4 проверенных flow.
+- Главные home-точки (`PrimaryGrid`, `ClusterGrid`, `TrustAsAService`) — все ссылки рабочие после фикса ClearView сегодня.
 
-### Карта дублей (для Wave 1)
+---
 
-```text
-home          : Index → {IndexSimplified | IndexLegacy}                   → schedule IndexLegacy delete
-all-apps      : AllAppsDrawer + AppDrawer                                  → keep AppDrawer (richer)
-discover      : /discover, /navigator, /catalog, /categories, /life       → keep /discover, all redirect
-onboarding    : StartOnboarding, StartOnboardingV2, OnboardingFlow        → keep V2 + OnboardingFlow
-welcome       : /welcome, /welcome-landing, WelcomeLanding.tsx            → keep /welcome
-transfers     : /airport-transfer, /transfers, /taxi-booking              → keep /transfers
-babysitter    : /babysitter, /babysitters                                  → keep /babysitter (singular)
-medical       : /clinics, /medical                                         → keep /medical
-beauty        : /spa, /salons, /beauty                                     → keep /beauty
-list-property : /sell, /list-with-us                                       → keep /list-with-us
-invest-entry  : /invest, /invest-hub, /capital                             → /invest canonical
-```
+## Топ-проблемы по 4 осям
 
-## Часть 2. Целевая IA (верхний уровень)
+### 🔴 Ось 1: Битые маршруты (404 на проде)
 
-### 6 Surfaces × 6 Canvases (фиксируем терминологию)
+| # | Маршрут | Где ссылка | Тип |
+|---|---|---|---|
+| 1 | `/invest/ops/market` + 4 sibling'а | `AnimatedRoutes.tsx:335` (редирект *на* несуществующий путь) | **404-петля** |
+| 2 | `/banking` | `LiveSurfaceLandingPage` | 404 |
+| 3 | `/school-finder` | `LiveSurfaceLandingPage` | 404 |
+| 4 | `/property/my` | `PropertyLanding.tsx:297` (должно быть `/my-property`) | 404 на главной property |
+| 5 | `/legal/deposit-vault` | `DepositRiskQuizPage:163` | 404 на платном flow |
+| 6 | `/legal/contract-analysis` | `NbTermsTab:153` | 404 |
+| 7 | `/services/architecture`, `/services/construction`, `/services/utilities/internet` | `BuildSurfaceLandingPage`, `LiveSurfaceLandingPage` | 404 (свежие лендинги ссылаются на несуществующие сервисы) |
+| 8 | `/invest/submit` | `DeveloperOverview:103` | 404 |
+| 9 | `/me/payments` | `PendingPaymentsChip:61` | 404 |
+| 10 | `/admin/newbuilds/documents` | `AdminNewbuildsConsole:71` | админ-404 |
 
-```text
-Canvases (app-shell, нижняя навигация / role-aware):
-  Home · Discover · Operate · Wallet · Me · Admin
+**Плюс:** `MeDocuments:214` — необработанный throw на архиве документа; `MCOnboarding:124,206` — silent fail на онбординге MC.
 
-Surfaces (content clusters, URL и каталог):
-  Arrive · Live · Manage · Invest · Legal · Build
+### 🔴 Ось 2: Дубли и таксономический хаос
 
-Правило: Surface != Canvas. Canvas — это «где я сейчас стою», Surface — «о чём контент».
-```
+**Самое серьёзное — 3 параллельные системы персон:**
+- `master.ts` (канон, P01–P25)
+- `content/landings/personas/*.ts` (старая P1–P26, **6 коллизий**: P10/P11/P13/P22/P23/P24/P25 указывают на разные персоны в двух системах)
+- `useUserPersonas.ts` (14 runtime-значений, не связаны ни с одной из двух)
 
-### Целевая bottom-nav (guest, 5 слотов)
+→ **PersonaLandingPage сейчас рендерит чужой контент** для большинства персон. Файл `P13_PET_OWNERS` живёт по адресу мастер-персоны `P13_employee_expat`.
 
-| Слот | Маршрут | Что внутри | Зачем |
-|------|---------|------------|-------|
-| Home | `/` | Persona-aware hero, активная ситуация, 3 CTA | Точка входа, всегда первая |
-| Discover | `/discover` | Единственная дверь в каталог (situation-first v3 за флагом, fallback v2) | Убирает 4 параллельных пути |
-| Invest | `/invest` | Капитальный funnel (HubLanding) | Стратегический сегмент №1 по марже |
-| Property | `/property` | Аренда / покупка / новостройки | Relocator + Second-home |
-| Me | `/me` | Профиль, документы, заказы, кошелёк, переключение роли | Единственный role-switcher |
+**Дублирующиеся страницы под одну job:**
+- Investor: `/for/investor` vs `/invest/capital-advisory` — нет канона, делят SEO-вес
+- Developer: 3 точки входа (`/for-developers`, `/clearview/for-developers`, `/developer-portal/apply`)
+- Raise: `/invest/raise` + `/invest/pitch` redirect + `/invest/submit` (объявлен, не зарегистрирован)
+- `/partner-terms` и `/partner-agreement` рендерят **один и тот же компонент** → duplicate content
+- `IndexSimplified.tsx` — orphan-страница без маршрута
 
-> Для B2B-ролей (owner/MC/vendor/admin/team/investor-pro) bottom-nav уже описан в `navigationModel.ts` — оставляем как есть, фиксируем правило: **переключение между Canvas-ами происходит только через `UserAvatarMenu` в Me**.
+**Surface-лендинги:** из 6 surface'ов есть только `/for/live` и `/for/build`. **Нет `/for/arrive`, `/for/manage`, `/for/invest`, `/for/legal`** — половина заявленной IA не существует.
 
-### Единый URL-контракт
+### 🔴 Ось 3: Покрытие персон и сегментов
 
-```text
-/                       Home (Canvas)
-/discover               Discover (Canvas) — situation-first
-/discover/:situationCode  → SituationDetail
-/me                     Me (Canvas) — profile/orders/wallet/role-switch
-/operate/:role          Operate Canvas — wrapper для всех B2B-шеллов
-/wallet                 Wallet Canvas
+| Сегмент | Покрытие | Главная дыра |
+|---|---|---|
+| **Investor $2M+** | 67% | P21 Active Investor нет канонического лендинга (размазан по `hnw`+`mn-investors`) |
+| **Relocator $300–800K** | **35%** | P08/P09 нет своих лендингов, **P10 Returnee — полный 0**, нет `/for/relocator-*` маршрутов |
+| **Second-home $200–500K** | 50% | P23 Property Owner подан как B2B-management, не как buyer journey |
 
-/arrive  /live  /manage  /invest  /legal  /build   Surface roots (content)
-/app/:surface/:vertical                            новые услуги — только сюда
+**Orphan-персоны с контентом, но без двери с главной:** P14 Medical, P15 Wedding, P16 Athletes, P18 LGBTQ, P19 Accessibility, P11/P25 Students.
 
-/property /newbuilds /beauty /legal/...            grandfathered, не трогаем
-```
+**Фантомные персоны без канона:** P26 Conscious Eaters, P13 Pet Owners — едят content surface, не описаны в master.ts.
 
-### Карта (mermaid-диаграмма прилагается отдельным артефактом)
+### 🔴 Ось 4: Деньги и бизнес-логика
 
-## Часть 3. Wave 1 — конкретные правки (этот PR)
+| # | Проблема | Файл |
+|---|---|---|
+| 1 | **Order-First нарушен в Yacht** — Stripe-чекаут до создания order | `YachtBooking.tsx:215 vs 238` |
+| 2 | **Все commission rates хардкод** (10%, 6%, 5%, 12%, 3%, 30%, 19%) — должны идти из `commission_agreements` | `realEstateEngine.ts:120-211`, `useAdminAnalytics.ts:213` |
+| 3 | **Stale ClearView копи "AAA–BB"** — должно быть AAA–CCC | `P9_HNW.ts:29,36` |
+| 4 | **WorldCheck не gated** для русских клиентов в capital deals | `realEstateEngine.ts`, `CapitalDealFeeBreakdown` |
+| 5 | **Audit marker отсутствует** на всех money-screen'ах кроме одного (`CapitalDealIntake`). Wallet и TransactionCard показывают `"—"` вместо ledger_entry_id | `Wallet.tsx:352`, `TransactionCard:96` |
+| 6 | **Feature flags не используются** для новых revenue features (STR fees, cross-sell, ClearView paywall) | разные |
+| 7 | **Хардкод "10% commission" в публичных лендингах** | `WeddingLandingPage:58`, P21/P22/P23 личные лендинги |
+| 8 | **FX/exchange_rates таблица не используется нигде в src/** — мультивалюта по факту не реализована | весь src |
 
-### Цель волны
-Убрать видимые дубли в навигации и каталоге без миграций БД, без правок auth, без новых таблиц. Всё за фиче-флагами там, где есть риск регрессии.
+---
 
-### Объём работ
+## Roadmap — 4 спринта по приоритету
 
-1. **Удалить `/catalog` и `/categories` как «маршруты»** — заменить чистыми `<Navigate replace>` на `/discover` (вместо текущего `NAVIGATOR`). Сделать `/navigator` тоже алиасом на `/discover`. URL `/discover` становится единственным каноном.
+### Sprint A · Stop the bleeding (1–2 дня)
+Только то, что прямо сейчас отдаёт 404 или теряет деньги.
+1. Yacht Order-First fix (P0, риск нерасшифровываемых платежей)
+2. 10 битых маршрутов из таблицы выше — либо зарегистрировать заглушки `ComingSoon`, либо переписать ссылки на канонические
+3. `/partner-terms` → `<Navigate>` на `/partner-agreement`
+4. `MeDocuments.tsx:214`, `MCOnboarding:124,206` — обернуть в try/catch + toast
+5. Стереть `IndexSimplified.tsx`
 
-2. **Объединить два drawer-а в один.**
-   - `AppDrawer.tsx` (339 LOC, richer) — оставляем.
-   - `AllAppsDrawer.tsx` (170 LOC) — экспортирует `<AllAppsDrawer>` как тонкий re-export `AppDrawer`, помечаем `@deprecated`, точечно меняем 3–5 импортов в `BottomBar`/Index.
-   - Цель: один и тот же набор приложений из `catalog/taxonomy.ts` показывается во всех точках.
+### Sprint B · Таксономия персон (3–4 дня)
+Без этого все persona landings врут пользователю.
+1. Переименовать файлы в `content/landings/personas/` на канонические P-коды (resolve 6 коллизий)
+2. Добавить `canonicalCode: PersonaCode` в `PersonaLanding` type и backfill всех 27 файлов
+3. Связать `UserPersona` hook → landing slug → master P-code единым lookup
+4. Убить `P26_CONSCIOUS_EATERS`, `P13_PET_OWNERS` или промотировать их в master.ts (решение продукта)
 
-3. **Удалить `IndexLegacy.tsx` из критического пути.** Перевести `useFeatureFlag('home_simplified_v1', true)` → `useFeatureFlag(..., true, { allowOverride: false })`, IndexLegacy переименовать в `_archive/IndexLegacy.tsx`, убрать lazy-import из `Index.tsx`. Регрессия покрывается тем, что флаг по умолчанию ON уже месяц.
+### Sprint C · Закрыть Relocator-сегмент (5–7 дней)
+Самая большая бизнес-дыра — $300–800K сегмент покрыт на 35%.
+1. `/for/relocator-family` (P08) и `/for/relocator-solo` (P09) — отдельные лендинги
+2. `/for/returnee` (P10) — единственная персона с полным нулём
+3. `/for/active-investor` (P21) — отделить от HNW
+4. `/for/property-owner` (P23) — buyer-журналинг вместо ops-копи
+5. Добавить P07 retiree в area-pages: `kamala`, `rawai`, `chalong`
 
-4. **Удалить `StartOnboarding.tsx` (v1)** и редиректнуть его URL на `/onboarding`. Оставить `StartOnboardingV2` + `OnboardingFlow`.
+### Sprint D · Деньги по правилам (5–7 дней)
+1. Все commission rates → live query к `commission_agreements`
+2. `<AuditMarker>` на Wallet/TransactionCard/OwnerPayouts/OwnerInvoices/OrderSuccess (реальные tx_id + ledger_entry_id + ISO timestamp)
+3. WorldCheck gate в capital flow (Russian clients)
+4. Feature flags для ClearView paywall, STR fees, cross-sell
+5. Стереть hardcoded "10%" из public-facing копи (4 файла лендингов)
+6. Поправить `AAA–BB` → `AAA–CCC` в `P9_HNW.ts`
 
-5. **Согласовать top-level дубли (только редиректы, без удаления страниц):**
-   ```text
-   /babysitters       → /babysitter
-   /airport-transfer  → /transfers
-   /taxi-booking      → /transfers
-   /clinics           → /medical
-   /spa               → /beauty
-   /salons            → /beauty
-   /sell              → /list-with-us
-   /welcome-landing   → /welcome
-   /invest-hub        → /invest   (уже есть, проверить)
-   /capital           → /invest   (capital раздел остаётся, ссылка из nav убирается)
-   ```
+### Sprint E · Surface landings (3 дня)
+`/for/arrive`, `/for/manage`, `/for/invest`, `/for/legal` — 4 недостающих surface-лендинга для закрытия IA и SEO.
 
-6. **Один role-switcher.** В `MCLayout`, `AdminLayout`, `StaffLayout`, `VendorLayout`, `CapitalLayout` убрать любые in-header переключатели ролей; оставить только `UserAvatarMenu`. Это уже задекларировано в Core memory, но в шеллах остались артефакты — точечная чистка.
+---
 
-7. **Persona drift — bridge (не миграция).** В `useUserPersonas.ts` добавить мап `UserPersona (14) → PersonaCode (P01..P25)` из `src/lib/taxonomies/master.ts`. Хук возвращает оба значения: `personas` (legacy для текущих компонентов) + `personaCodes` (новый, для discover-v3 и AI-routing). БД не меняем, миграция enum — отдельная Wave 2.
+## Метрика "после"
 
-8. **Регрессионный тест-страж** (`src/test/ia/`):
-   - `no-orphan-top-level-routes.test.ts` — список из 66 top-level URL фиксируется; новый top-level URL без `// @ia-approved` коммента падает в тесте (поддерживает Core rule «не добавлять new top-level routes»).
-   - `discover-is-canonical.test.ts` — `/catalog`, `/categories`, `/navigator` обязаны рендерить `<Navigate to="/discover">`.
-   - `single-app-drawer.test.tsx` — `AllAppsDrawer` и `AppDrawer` рендерят одинаковое количество кластеров.
+| Показатель | Сейчас | После A–D |
+|---|---|---|
+| Битых маршрутов в hot-paths | 10 | 0 |
+| Order-First compliance | 75% | 100% |
+| Relocator покрытие | 35% | 80% |
+| Investor покрытие | 67% | 90% |
+| Hardcoded commissions в src | 12 мест | 0 |
+| Money screens с audit marker | 1/8 | 8/8 |
+| Surface landings | 2/6 | 6/6 |
 
-9. **Документ `docs/canonical/architecture/UX_IA_AUDIT_2026-06.md`** — финальная версия этого аудита + before/after карта, чтобы зафиксировать решения и не вернуться к ним через 2 месяца.
+---
 
-### Что НЕ входит в Wave 1 (намеренно)
+## Технические детали (для разработки)
 
-- Перенос B2B-шеллов под `/operate/:role` — это Wave 2, риск ломки активных операторов.
-- Миграция enum `user_persona` в БД на P01–P25 — Wave 3, требует back-fill.
-- Реконсилирование `category_groups` / `categories` в БД с `catalog/taxonomy.ts` — Wave 4, нужен live-data аудит.
-- Слияние 24 layout-компонентов — Wave 5, чистый рефактор без UX-выгоды в моменте.
-- Visual design polish — отдельный design-review.
+- **Sprint A** — фронтенд + 1 backend touch (yacht checkout reorder)
+- **Sprint B** — чисто фронтенд + types refactor, no DB
+- **Sprint C** — фронтенд (5 новых страниц + area config edits)
+- **Sprint D** — фронтенд + хуки `useCommissionRate(verticalId)` поверх существующей `commission_agreements` таблицы
+- **Sprint E** — чисто фронтенд
 
-### Критерии приёмки
+DB-миграции не требуются — все нужные таблицы уже есть (`commission_agreements`, `system_settings`, `ledger_entries`).
 
-- [ ] Все 4 теста-стража зелёные.
-- [ ] `rg -n "AllAppsDrawer" src/` возвращает только тонкий re-export.
-- [ ] `rg -n "IndexLegacy" src/` — пусто вне `_archive/`.
-- [ ] `rg -n "/catalog\|/categories\|/navigator" src/` — только в `AnimatedRoutes.tsx` как `<Navigate>`.
-- [ ] `npm run build` чистый; bundle initial JS уменьшится за счёт удаления IndexLegacy lazy chunk.
-- [ ] В preview на 384px guest видит: Home → Discover → Invest → Property → Me. Один drawer.
+---
 
-### Технические детали
+## Рекомендация
 
-- Все правки маршрутов — в `src/components/layout/AnimatedRoutes.tsx` и `src/lib/config/routes.ts`. Используем `APP_ROUTES.*`, не сырые строки.
-- Удаление `IndexLegacy`: lazy-import снимается, файл переезжает в `src/_archive/` (исключён из tsconfig include), `src/components/layout/pageRegistry.ts` чистится.
-- Удаление `StartOnboarding`: lazy-export + `<Route>` снимаются, URL `/start` → `<Navigate to={APP_ROUTES.ONBOARDING}>`.
-- Persona bridge: чистый TS-мап без сетевых вызовов, экспортируется отдельной функцией `mapLegacyPersonaToCode(legacy: UserPersona): PersonaCode | null`.
-- Никаких изменений в Supabase (нет миграций, нет правок RLS).
+**Рекомендую начать со Sprint A немедленно** — это 1–2 дня работы, ноль продуктовых решений, и закрывает риск реальных потерь денег (Yacht Stripe) и потери трафика (10 hot-path 404). После A — Sprint B (таксономия), потому что без него Sprint C построит лендинги поверх сломанного фундамента.
 
-### Риски и митигация
-
-| Риск | Митигация |
-|------|-----------|
-| Внешние ссылки на `/catalog`, `/categories`, `/navigator` | Все три → `301`-эквивалент через `<Navigate replace>`, плюс canonical-link в `<head>` Discover. |
-| SEO `/spa`, `/salons`, `/clinics` | Перед редиректом проверить `semrush--top_pages`; если есть трафик — оставить как landing, добавить `<link rel="canonical">` на каноничный URL вместо редиректа. |
-| B2B-операторы привыкли к `/start` | Редирект на `/onboarding` сохраняет историю. |
-| Тест-страж top-level routes блокирует команду | Включён escape hatch `// @ia-approved <reason>` коммент, ревью в PR. |
-
-## Рекомендую
-
-Идти именно по этой волне. Она убирает 4 видимых пользователю дублей (drawer, discover, onboarding, home-legacy) и стабилизирует 6 SEO-дублей через редиректы — это даёт быстрый wins без риска для платежей, PMS и админки. Глубокие миграции (B2B-шеллы под `/operate`, persona-enum, DB-категории) откладываем явными последующими волнами, чтобы не мешать текущим релизам.
+Скажите «делай Sprint A» — и я выкачу фиксы пачкой.
