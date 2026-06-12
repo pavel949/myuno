@@ -765,7 +765,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/for/investor" element={<LazyPage><Pages.InvestorLandingPage /></LazyPage>} />
         <Route path="/for/agent" element={<LazyPage><Pages.AgentLandingPage /></LazyPage>} />
         {/* Sprint 2 — Surface marketing landings (Live + Build) under existing /for/* namespace. */}
+        <Route path="/for/arrive" element={<LazyPage><Pages.ArriveSurfaceLandingPage /></LazyPage>} />
         <Route path="/for/live" element={<LazyPage><Pages.LiveSurfaceLandingPage /></LazyPage>} />
+        <Route path="/for/manage" element={<LazyPage><Pages.ManageSurfaceLandingPage /></LazyPage>} />
+        <Route path="/for/invest" element={<LazyPage><Pages.InvestSurfaceLandingPage /></LazyPage>} />
+        <Route path="/for/legal" element={<LazyPage><Pages.LegalSurfaceLandingPage /></LazyPage>} />
         <Route path="/for/build" element={<LazyPage><Pages.BuildSurfaceLandingPage /></LazyPage>} />
         {/* Wave 4 — geo long-tail: must precede `/for/:persona` to match first. */}
         <Route path="/for/:persona/in/:area" element={<LazyPage><PersonaAreaLandingPage /></LazyPage>} />
