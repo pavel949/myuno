@@ -52,57 +52,78 @@ export default function FlowersIndex() {
 
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 250);
 
-  const filteredBouquets = useMemo(() => {
-    let result = bouquets;
-    const q = debouncedSearchQuery.trim().toLowerCase();
-    if (q) {
-      result = result.filter(b => {
-        const haystack = [
-          b.name_en, b.name_ru,
-          b.description_en, b.description_ru,
-          b.style, b.color_palette,
-          ...(b.flowers || []),
-          ...(b.colors || []),
-          ...(b.occasion_tags || []),
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        return haystack.includes(q);
-      });
+  // Precompute a lowercased haystack per bouquet once per `bouquets` identity.
+  // This is the most expensive step on mobile — caching it avoids re-joining
+  // arrays on every keystroke or filter toggle.
+  const haystacks = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const b of bouquets) {
+      map.set(b.id, [
+        b.name_en, b.name_ru,
+        b.description_en, b.description_ru,
+        b.style, b.color_palette,
+        ...(b.flowers || []),
+        ...(b.colors || []),
+        ...(b.occasion_tags || []),
+      ].filter(Boolean).join(' ').toLowerCase());
     }
-    if (activeFilterCount > 0) {
-      result = result.filter(b => {
-        const priceLevel = filterValues.priceLevel as string | null;
-        if (priceLevel) {
-          const ranges: Record<string, [number, number]> = { '1': [0, 1500], '2': [1500, 3000], '3': [3000, 5000], '4': [5000, Infinity] };
-          const [min, max] = ranges[priceLevel] || [0, Infinity];
-          if (b.price < min || b.price >= max) return false;
-        }
-        const occasions = filterValues.occasion as string[] | undefined;
-        if (occasions?.length && !(b.occasion_tags || []).some((o: string) => occasions.includes(o))) return false;
-        const styles = filterValues.style as string[] | undefined;
-        if (styles?.length && (!b.style || !styles.some(s => s.toLowerCase() === b.style?.toLowerCase()))) return false;
-        const colors = filterValues.colorPalette as string[] | undefined;
-        if (colors?.length) {
-          const palette = b.color_palette?.toLowerCase() || '';
-          const bColors = b.colors || [];
-          if (!colors.some(c => palette.includes(c.toLowerCase()) || bColors.some((bc: string) => bc.toLowerCase().includes(c.toLowerCase())))) return false;
-        }
-        const flowerTypes = filterValues.flowerType as string[] | undefined;
-        if (flowerTypes?.length) {
-          const flowers = b.flowers || [];
-          if (!flowerTypes.some(ft => flowers.some((f: string) => f.toLowerCase().includes(ft.toLowerCase())))) return false;
-        }
-        return true;
-      });
-    }
-    // Persona filter — uses occasion_tags + style as the synthetic tag pool.
-    return applyPersonaFilter(result, (b) => {
+    return map;
+  }, [bouquets]);
+
+  const normalizedQuery = useMemo(
+    () => debouncedSearchQuery.trim().toLowerCase(),
+    [debouncedSearchQuery],
+  );
+
+  // Stage 1: search-only result, cached on (bouquets, normalizedQuery).
+  // Toggling a filter (without changing the query) reuses this slice.
+  const searchedBouquets = useMemo(() => {
+    if (!normalizedQuery) return bouquets;
+    return bouquets.filter(b => (haystacks.get(b.id) || '').includes(normalizedQuery));
+  }, [bouquets, haystacks, normalizedQuery]);
+
+  // Stage 2: structured filters, cached on (searchedBouquets, filterValues).
+  // Typing in the search box without touching filters reuses prior filter pass.
+  const structurallyFiltered = useMemo(() => {
+    if (activeFilterCount === 0) return searchedBouquets;
+    const priceLevel = filterValues.priceLevel as string | null;
+    const occasions = filterValues.occasion as string[] | undefined;
+    const styles = (filterValues.style as string[] | undefined)?.map(s => s.toLowerCase());
+    const colors = (filterValues.colorPalette as string[] | undefined)?.map(c => c.toLowerCase());
+    const flowerTypes = (filterValues.flowerType as string[] | undefined)?.map(f => f.toLowerCase());
+    const priceRanges: Record<string, [number, number]> = {
+      '1': [0, 1500], '2': [1500, 3000], '3': [3000, 5000], '4': [5000, Infinity],
+    };
+    const [pMin, pMax] = priceLevel ? (priceRanges[priceLevel] || [0, Infinity]) : [0, Infinity];
+
+    return searchedBouquets.filter(b => {
+      if (priceLevel && (b.price < pMin || b.price >= pMax)) return false;
+      if (occasions?.length && !(b.occasion_tags || []).some((o: string) => occasions.includes(o))) return false;
+      if (styles?.length) {
+        const bStyle = b.style?.toLowerCase();
+        if (!bStyle || !styles.includes(bStyle)) return false;
+      }
+      if (colors?.length) {
+        const palette = b.color_palette?.toLowerCase() || '';
+        const bColors = (b.colors || []).map((c: string) => c.toLowerCase());
+        if (!colors.some(c => palette.includes(c) || bColors.some(bc => bc.includes(c)))) return false;
+      }
+      if (flowerTypes?.length) {
+        const flowers = (b.flowers || []).map((f: string) => f.toLowerCase());
+        if (!flowerTypes.some(ft => flowers.some(f => f.includes(ft)))) return false;
+      }
+      return true;
+    });
+  }, [searchedBouquets, filterValues, activeFilterCount]);
+
+  // Stage 3: persona filter (cheap, depends on persona context).
+  const filteredBouquets = useMemo(
+    () => applyPersonaFilter(structurallyFiltered, (b) => {
       const tags = (b.occasion_tags as string[] | null) ?? [];
       return [...tags, b.style].filter(Boolean) as string[];
-    });
-  }, [bouquets, debouncedSearchQuery, filterValues, activeFilterCount, applyPersonaFilter]);
+    }),
+    [structurallyFiltered, applyPersonaFilter],
+  );
 
   const handleRemoveFilter = useCallback((sectionId: string, optionId?: string) => {
     setFilterValues(prev => {
