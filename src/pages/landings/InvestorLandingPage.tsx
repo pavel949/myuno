@@ -8,7 +8,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const STEPS = [
-  { icon: Building2, labelEn: 'Off-plan & resale deals', labelRu: 'Новостройки и resale', descEn: 'Curated AAA–BBB projects only', descRu: 'Только AAA–BBB по ClearView™', path: APP_ROUTES.LANDING_NEW_DEVELOPMENTS, color: 'primary' },
+  { icon: Building2, labelEn: 'Off-plan & resale deals', labelRu: 'Новостройки и resale', descEn: 'Curated AAA–CCCB projects only', descRu: 'Только AAA–CCCB по ClearView™', path: APP_ROUTES.LANDING_NEW_DEVELOPMENTS, color: 'primary' },
   { icon: BarChart3, labelEn: 'ClearView™ ratings', labelRu: 'Рейтинги ClearView™', descEn: '8-criteria honest scoring', descRu: 'Честная оценка по 8 критериям', path: '/newbuilds', color: 'cluster-invest' },
   { icon: ShieldCheck, labelEn: 'Due diligence', labelRu: 'Due diligence', descEn: 'Developer, title, escrow checks', descRu: 'Девелопер, титул, эскроу', path: APP_ROUTES.LEGAL, color: 'accent-purple' },
   { icon: FileText, labelEn: 'Tax & structuring', labelRu: 'Налоги и структура', descEn: 'Personal vs company ownership', descRu: 'На себя vs через компанию', path: '/tax', color: 'cluster-legal' },

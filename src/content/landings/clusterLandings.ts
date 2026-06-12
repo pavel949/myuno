@@ -208,7 +208,7 @@ const D_INVESTMENT: ClusterLanding = {
     {
       slug: 'clearview-rating',
       label: { ru: 'ClearView™ рейтинг', en: 'ClearView™ rating' },
-      oneLiner: { ru: '8 категорий, AAA–BB, отчёт за 5 рабочих дней.', en: '8 categories, AAA–BB, 5-day report.' },
+      oneLiner: { ru: '8 категорий, AAA–CCC, отчёт за 5 рабочих дней.', en: '8 categories, AAA–CCC, 5-day report.' },
       href: '/clearview',
     },
     {
@@ -268,8 +268,8 @@ const D_INVESTMENT: ClusterLanding = {
     {
       q: { ru: 'Что входит в ClearView™ отчёт?', en: 'What’s in the ClearView™ report?' },
       a: {
-        ru: '8 категорий: финансы застройщика, юридический статус земли, история сдач, эскроу, локация, продукт, управление, выход. Шкала AAA–BB.',
-        en: '8 categories: developer finance, land legal status, delivery history, escrow, location, product, management, exit. Scale AAA–BB.',
+        ru: '8 категорий: финансы застройщика, юридический статус земли, история сдач, эскроу, локация, продукт, управление, выход. Шкала AAA–CCC.',
+        en: '8 categories: developer finance, land legal status, delivery history, escrow, location, product, management, exit. Scale AAA–CCC.',
       },
     },
     {

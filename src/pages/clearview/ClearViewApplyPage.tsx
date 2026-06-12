@@ -116,7 +116,7 @@ export default function ClearViewApplyPage() {
         </h3>
         <ul className="space-y-1.5 text-[13px] text-foreground/90">
           {[
-            { ru: 'Рейтинг AAA–BB по 8 категориям', en: 'AAA–BB rating across 8 categories' },
+            { ru: 'Рейтинг AAA–CCC по 8 категориям', en: 'AAA–CCC rating across 8 categories' },
             { ru: 'Юридическая верификация (title, escrow, FET)', en: 'Legal verification (title, escrow, FET)' },
             { ru: 'История девелопера и завершённые проекты', en: 'Developer track record and delivered projects' },
             { ru: 'ROI с учётом текущего STR-рынка района', en: 'ROI based on current district STR market data' },

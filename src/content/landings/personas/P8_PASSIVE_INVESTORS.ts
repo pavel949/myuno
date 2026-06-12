@@ -44,7 +44,7 @@ export const P8_PASSIVE_INVESTORS: PersonaLanding = {
     {
       slug: 'clearview-catalog',
       label: { ru: 'Каталог с ClearView™ рейтингом', en: 'Catalogue with ClearView™ rating' },
-      oneLiner: { ru: 'AAA–BB шкала, 8 категорий, отчёты застройщика.', en: 'AAA–BB scale, 8 categories, developer reports.' },
+      oneLiner: { ru: 'AAA–CCC шкала, 8 категорий, отчёты застройщика.', en: 'AAA–CCC scale, 8 categories, developer reports.' },
       href: '/property/offplan',
     },
     {
