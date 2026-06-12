@@ -119,9 +119,16 @@ export const OrganizationJsonLdHydrator = () => {
             ? (adminEmails[0] as string)
             : undefined);
 
-        const telephone =
+        const rawTelephone =
           (settings.get("org_telephone") as string | undefined) ||
           (settings.get("admin_whatsapp") as string | undefined);
+        const rawWhatsapp =
+          (settings.get("admin_whatsapp") as string | undefined) ||
+          (settings.get("org_telephone") as string | undefined);
+
+        const telNormalized = normalizeWhatsapp(rawTelephone);
+        const waNormalized = normalizeWhatsapp(rawWhatsapp);
+        const telephone = telNormalized?.e164;
 
         const streetAddress = settings.get("org_street_address") as
           | string
@@ -188,13 +195,22 @@ export const OrganizationJsonLdHydrator = () => {
               areaServed: "TH",
             },
           ];
+          mutated = true;
+        }
 
-          const sameAs = Array.isArray(org.sameAs) ? [...(org.sameAs as string[])] : [];
-          if (telephone) {
-            const waUrl = `https://wa.me/${telephone.replace(/[^\d]/g, "")}`;
-            if (!sameAs.includes(waUrl)) sameAs.unshift(waUrl);
-          }
-          org.sameAs = sameAs;
+        if (waNormalized) {
+          const existing = Array.isArray(org.sameAs)
+            ? (org.sameAs as unknown[]).filter(
+                (v): v is string => typeof v === "string",
+              )
+            : [];
+          // Drop any prior wa.me / api.whatsapp.com entries so we never ship
+          // a stale or malformed link alongside the canonical one.
+          const filtered = existing.filter(
+            (url) => !/(?:wa\.me|api\.whatsapp\.com|chat\.whatsapp\.com)/i.test(url),
+          );
+          const deduped = Array.from(new Set([waNormalized.waUrl, ...filtered]));
+          org.sameAs = deduped;
           mutated = true;
         }
 
