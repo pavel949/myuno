@@ -1,120 +1,80 @@
-## Что сейчас не так (диагноз по скрину и коду)
+## Phase 1 — что делаю в этой сессии (4–6 шагов, проверяемо)
 
-На consumer-страницах `AppLayout` одновременно рендерит **2 разных FAB-а**, плюс bottom-nav, плюс PWA install-pill — отсюда «навал» в правом нижнем углу:
+Цель: убрать максимум технических блокеров **без** касания live-платежей, тестовых данных и внешних ключей. После — честный re-check готовности.
 
-| Что | Файл | Поведение |
-|---|---|---|
-| Зелёный WhatsApp-кружок | `FloatingWhatsAppContact` (рендерится глобально) | Один клик → сразу wa.me |
-| Тёмная pill «Установить» | `FloatingInstallButton` (рендерится глобально) | PWA install |
-| Тёмный FAB-чат «message + зелёная точка» | `UnifiedChatFAB` — **готовый AI-ассистент + WhatsApp + Telegram в одном drawer**, но **подключён только на `/mc/help`** | Должен быть основным |
-| Кнопка «Help» (Concierge) | `FloatingConcierge` — третий вариант, вообще никуда не вмонтирован | Мёртвый код |
-| «Часов» на скрине нет — это PWA-pill наезжает на bottom-nav | — | UX-конфликт |
+### Шаг 1. Database security sweep (миграция)
+- Поправить **все** функции с `search_path_mutable` → добавить `SET search_path = public` (warn-level, но это OWASP-категория).
+- Пересоздать `SECURITY DEFINER` views с `security_invoker=on` где безопасно; задокументировать остальные.
+- Pgvector / прочие расширения из `public` — оценить и при безопасности перенести в `extensions`.
+- **Проверка:** повторный `security--run_security_scan`, целевое снижение error+warn ≥ 80%.
 
-В контактах (`src/lib/config/contacts.ts`) есть WhatsApp, Telegram, e-mail — **Line отсутствует**, надо добавить (для тайской аудитории канал №1). Социальные ссылки на Telegram/WhatsApp дублируются в `CompactFooter`, в landings и в десятках кнопок «связаться» — единого контракта нет.
+### Шаг 2. Аудит stripe-webhook (без правок логики платежей)
+- Прочитать все 600+ строк `supabase/functions/stripe-webhook/index.ts`.
+- Проверить идемпотентность по `payment_intent.id` (двойное срабатывание webhook).
+- Найти кейсы где `record_ledger_entries` НЕ вызывается → задокументировать.
+- Сверить покрытие `order_type`: clearview, service, vehicle, flowers, yacht, restaurant, contract, dispute, property_deposit + другие.
+- **Deliverable:** `docs/audits/stripe-webhook-audit-2026-06.md` с явным списком багов и приоритетом. Код НЕ трогаю без твоего OK по каждому пункту.
 
-## Целевая логика (рекомендую — единственный осмысленный вариант)
+### Шаг 3. Reconciliation health-check (read-only SQL)
+- Запрос: за последние 30 дней — `orders.status='paid'` без соответствующих `ledger_entries` → список «потерянных» транзакций.
+- Запрос: `reconciliation_alerts` за 30 дней.
+- **Deliverable:** числа в отчёте. Если 0 расхождений — это сильный сигнал, что webhook работает. Если N>0 — приоритет фикса автоматически растёт.
 
-**Один FAB в правом нижнем углу — `UnifiedChatFAB`** с AI-консьержем по умолчанию и человеческими каналами как fallback. Всё остальное переезжает в его drawer или в шапку.
+### Шаг 4. ComingSoonGate whitelist (готовые вертикали)
+- Расширить whitelist для роутов с готовностью ≥80%: `/`, `/property`, `/newbuilds`, `/legal`, `/auth`.
+- Остальное остаётся за gate до починки.
+- **Проверка:** ручной тест через browser preview — открыть `/property` без логина, увидеть лендинг (не gate).
 
-```text
-┌──────────────────────────────┐
-│   страница                   │
-│                              │
-│                     ┌─────┐  │  ← единственный FAB:
-│                     │ ✨  │  │    тёмный круг с искрой,
-│                     └─────┘  │    зелёная точка = «онлайн»
-│ ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔ │
-│ 🏠   🧭   ⊕   🛎   👤        │  ← bottom-nav
-└──────────────────────────────┘
+### Шаг 5. Lazy-load Sentry (perf win)
+- Перенести `@sentry/react` init в `requestIdleCallback` после first paint.
+- Ожидаемо: −80 KB из initial bundle, лучше LCP.
+- **Проверка:** `browser--performance_profile` до/после.
 
-Tap → bottom-sheet:
-┌──────────────────────────────┐
-│  Чем помочь?                 │
-│ ┌──────────────────────────┐ │
-│ │ ✨ UNO AI — спросите что │ │  ← primary, expand inline
-│ │   угодно. 24/7.          │ │
-│ └──────────────────────────┘ │
-│  Поговорить с человеком:     │
-│  [WhatsApp] [Telegram] [Line]│  ← вторичный ряд
-│  ────                        │
-│  ☎  +66 92 240 7355          │
-│  ✉  support@uno.ae · 9-21 ICT│
-│  📲  Установить приложение    │  ← сюда же уезжает PWA
-└──────────────────────────────┘
-```
-
-Принципы:
-1. **AI — первичный канал**, человеческие — вторичный. AI отвечает мгновенно и снимает 80% обращений; WhatsApp/Telegram/Line — для «надо живого».
-2. **Один якорь на экране** (FAB справа над bottom-nav) — никаких параллельных кружков.
-3. **PWA install уезжает в тот же sheet** — это редкое одноразовое действие, ему не нужен постоянный FAB.
-4. **Контекст-aware приветствие**: на `/property/:id` AI открывается с заготовкой «Расскажи про этот объект», на `/flowers/order` — «Помоги с букетом», и т.д. (передаём `pathname` + краткий `pageContext` в системный промпт `ai-support-chat`).
-5. **На operational-маршрутах** (`/mc/*`, `/admin/*`, `/operate/*`, `/auth`) FAB прячется — там свой UX.
-
-## Изменения в коде
-
-### 1. Чистим правый нижний угол
-- `src/components/layout/AppLayout.tsx`: убрать рендер `FloatingInstallButton` и `FloatingWhatsAppContact`. Добавить `<UnifiedChatFAB />` под тем же `consumerChrome`-гейтом + список скрытий (`HIDDEN_ROUTES` расширить: `/auth`, `^/admin`, `^/mc`, `^/operate`, `^/vendor`).
-- `FloatingConcierge.tsx`, `FloatingWhatsAppContact.tsx`, `FloatingInstallButton.tsx` — пометить `@deprecated`, удалить импорты; файлы оставить на 1 релиз для безопасного отката.
-- `floatingStack.ts` упростить: остаются только `chatFab` (z-50) и `contextualFab` (z-70 для wizard-страниц). `pwaInstall` удалить.
-
-### 2. Прокачиваем `UnifiedChatFAB`
-- Добавить в drawer:
-  - **Line**-кнопку (рядом с WhatsApp/Telegram), скрывать если пусто.
-  - **«Установить приложение»**-строку (использует `usePWAInstall().install()`); на iOS — инструкция «Поделиться → На экран „Домой“».
-  - **Телефон + e-mail + рабочие часы** мелким блоком внизу — единый source-of-truth.
-- AI-вью:
-  - При открытии передавать `pageContext = { path: location.pathname, title: document.title }` в первый запрос; в `supabase/functions/ai-support-chat/index.ts` системный промпт расширить «текущая страница пользователя: …».
-  - Заменить однократный `messages`-стейт на `localStorage`-историю (последние 20 сообщений per-session) — пользователь сможет вернуться к диалогу.
-  - На главной (`/` и `/index`) добавить **proactive nudge** через 12с простоя: маленький bubble «Помочь подобрать?» — снимается dismiss-cookie на 7 дней.
-- Иконка FAB: меняем `MessageCircle` на `Sparkles` (✨) — визуально считывается как AI, а не как «ещё один WhatsApp».
-- Зелёная точка-индикатор остаётся как «онлайн 24/7».
-
-### 3. Контакты — единый контракт
-- `src/lib/config/contacts.ts`: добавить `line: { id: '@myuno', link: 'https://line.me/R/ti/p/@myuno' }`, хелпер `getLineUrl()`.
-- Все одиночные «связаться в WhatsApp»-кнопки на landings/детальных страницах заменяем на общий `<ContactChannelsRow variant="inline" />` (3-4 иконки), который читает `COMPANY_CONTACTS` и открывает тот же drawer что FAB (через event-bus или `useContactDrawer()` контекст). Это нужно делать **постепенно** — в этой итерации только новый компонент + замена в 3 самых видимых местах (`CompactFooter`, `Support.tsx`, главные landings).
-- В `CompactFooter` ряд социалок остаётся, но «Связаться» вынесена в основной CTA, открывающий тот же drawer.
-
-### 4. AI-ассистент как «основной» — задел под загрузку данных
-Пользователь сказал, что **«загрузит много данных» — пусть AI будет основной**. В этой итерации только подготавливаем фундамент, без больших миграций:
-
-- В `ai-support-chat` Edge Function переключиться на модель по умолчанию `google/gemini-3-flash-preview` (быстро, мультиязычно), оставить системный промпт расширяемым.
-- Добавить таблицу `ai_knowledge_documents` (id, title, content_md, tags[], embedding vector(1536), updated_at) + RLS «admin write, anon read». Это куда будете загружать данные.
-- Добавить Edge Function `ai-knowledge-search` — semantic search по embedding (модель `google/gemini-embedding-001`), вызывается из `ai-support-chat` как retrieval-step перед стримом ответа.
-- Админ-страница `/admin/ai-knowledge` для загрузки документов (markdown / pdf-to-text) — в этой итерации **только заглушка с upload-формой**, реальную обработку embeddings оставляем на следующий шаг (требует отдельного подтверждения объёма и формата данных).
-
-### 5. Скрытие на operational-routes
-- В `UnifiedChatFAB` расширить `HIDDEN_ROUTES` (regex-список) — синхронизировать с правилом «hide global nav on operational routes» из ARCHITECTURE.
-
-## Что НЕ делаю в этой итерации
-- Не трогаю десятки existing «Связаться» кнопок на landings — заменю только 3 ключевые точки + предоставлю готовый `ContactChannelsRow` для постепенной миграции.
-- Не реализую полноценный RAG-pipeline (embeddings + chunking) — только схема таблицы + админка-заглушка. Полная реализация требует решения: какие данные грузим, объём, RU/EN, как часто обновлять.
-- Не меняю `CompactFooter` визуально — только заменяю обработчик кнопки «Связаться».
-
-## Файлы, которые поменяются
-- edit `src/components/layout/AppLayout.tsx`
-- edit `src/components/chat/UnifiedChatFAB.tsx`
-- edit `src/lib/nav/floatingStack.ts`
-- edit `src/lib/config/contacts.ts`
-- edit `supabase/functions/ai-support-chat/index.ts`
-- edit `src/components/layout/CompactFooter.tsx`
-- edit `src/pages/Support.tsx`
-- new  `src/components/contact/ContactChannelsRow.tsx`
-- new  `src/contexts/ContactDrawerContext.tsx`
-- new  `src/pages/admin/AdminAIKnowledge.tsx` (stub)
-- new  `supabase/migrations/<ts>_ai_knowledge_documents.sql` (table + RLS + grants + pgvector)
-- new  `supabase/functions/ai-knowledge-search/index.ts` (stub returning empty matches)
-- deprecate (оставить файл, убрать импорты): `FloatingWhatsAppContact.tsx`, `FloatingInstallButton.tsx`, `FloatingConcierge.tsx`
-
-## Проверки после внедрения
-1. На `/`, `/property`, `/flowers`, `/market` в правом нижнем углу — **ровно одна** иконка-искра над bottom-nav, ничего не наезжает.
-2. На `/admin`, `/mc`, `/operate`, `/auth` — FAB отсутствует.
-3. Tap по FAB → drawer с AI primary + WhatsApp/Telegram/Line/Install внизу.
-4. Отправка сообщения → стрим из `ai-support-chat`, история сохраняется в localStorage.
-5. На `/property/:id` первое сообщение AI содержит контекст страницы в системе.
-6. Lighthouse PWA-install ещё ловится (offerInstall работает из drawer).
+### Шаг 6. Финальный re-check
+Запускаю снова:
+- `security--run_security_scan` → сравнение числа находок.
+- `browser--performance_profile` на `/` → сравнение LCP/initial JS.
+- Reconciliation SQL → сравнение.
+- Обновляю `.lovable/plan.md` с честным launch-readiness status.
 
 ---
 
-**Подтвердите два момента перед билдом:**
-1. **Line-аккаунт** — у вас уже есть `@myuno` в Line или нужно зарегистрировать/скрыть кнопку пока что?
-2. **AI-knowledge — заглушку или сразу с pgvector + embedding-пайплайном?** Рекомендую **заглушку сейчас** (schema + admin upload form), а embeddings включить отдельным шагом, когда вы скажете формат данных — иначе рискуем построить не то.
+## Что НЕ делаю в этой сессии (требует твоего решения отдельно)
+
+1. **Фикс 5 bug-блоков платежей** — после Шага 2 ты решаешь по каждому: чинить сейчас или релиз без него.
+2. **Stripe test → live** — переключение режима ты делаешь сам, я только подготовлю чек-лист.
+3. **Удаление 30 тестовых properties** — нужен твой OK на конкретный SQL.
+4. **WorldCheck integration** — нужен API-ключ от тебя.
+5. **E2E прогон vertical-loops** — это в GitHub Actions, не в чате.
+
+---
+
+## Технические детали
+
+**Шаг 1 SQL pattern:**
+```sql
+ALTER FUNCTION public.<name>(...) SET search_path = public;
+-- для DEFINER views:
+DROP VIEW IF EXISTS public.<view> CASCADE;
+CREATE VIEW public.<view> WITH (security_invoker=on) AS SELECT ...;
+```
+
+**Шаг 4 файл:** `src/components/ComingSoonGate.tsx` (или эквивалент по memory `security/global-authentication-gate`).
+
+**Шаг 5 файл:** `src/main.tsx` — обернуть `Sentry.init` в `requestIdleCallback`.
+
+---
+
+## Время и риски
+
+- Phase 1 ≈ 30–45 минут моих + ~5 мин твоего ревью результатов.
+- **Риск регрессий:** низкий (никаких изменений в бизнес-логике, бэке транзакций, RLS).
+- **Что НЕ улучшится:** Stripe-баги, тестовые данные в проде, отсутствие WorldCheck. Это явно остаётся в TODO после Phase 1.
+
+После Phase 1 у тебя будет: чистый security baseline, документированный список реальных платёжных багов с приоритетом, и реалистичный чек-лист до live launch.
+
+---
+
+## Рекомендация
+
+**Рекомендую: одобрить Phase 1 как есть.** Это даёт максимум измеримой ценности без касания денег и без риска сломать прод; платёжные баги получают честный приоритет на основе данных, а не догадок.
