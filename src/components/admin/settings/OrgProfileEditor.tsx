@@ -283,6 +283,12 @@ export function OrgProfileEditor() {
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {field("org_telephone", "Телефон", "Telephone", "+66922407355")}
+        {field(
+          "admin_whatsapp",
+          "WhatsApp",
+          "WhatsApp",
+          "+66922407355 or https://wa.me/66922407355",
+        )}
         {field("org_email", "Email", "Email", "pi@myuno.app", "email")}
       </section>
 
