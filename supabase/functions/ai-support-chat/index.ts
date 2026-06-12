@@ -3,7 +3,7 @@ import { withRateLimit, RATE_LIMITS, getClientIdentifier } from "../_shared/rate
 import { createClient } from "../_shared/supabase.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
@@ -65,19 +65,30 @@ Deno.serve(async (req) => {
       });
     }
     
-    const { messages } = body;
-    
+    const { messages, pageContext } = body ?? {};
+
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "Messages array is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
+
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // Build a context-aware system prompt so the AI knows which page the user is on.
+    let systemPrompt = SYSTEM_PROMPT;
+    if (pageContext && typeof pageContext === "object") {
+      const path = typeof pageContext.path === "string" ? pageContext.path : "";
+      const title = typeof pageContext.title === "string" ? pageContext.title : "";
+      const lang = typeof pageContext.lang === "string" ? pageContext.lang : "";
+      if (path || title) {
+        systemPrompt += `\n\nКонтекст пользователя: страница "${title}" (${path}), язык интерфейса: ${lang || "auto"}. Если вопрос относится к этой странице — используй её контекст в ответе.`;
+      }
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -89,7 +100,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           ...messages,
         ],
         stream: true,

@@ -12,8 +12,7 @@ import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBann
 import { useUserTracking } from '@/hooks/useUserTracking';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { MobileInstallSheet } from '@/components/pwa/MobileInstallSheet';
-import { FloatingInstallButton } from '@/components/pwa/FloatingInstallButton';
-import { FloatingWhatsAppContact } from '@/components/contact/FloatingWhatsAppContact';
+import { UnifiedChatFAB } from '@/components/chat/UnifiedChatFAB';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { NavShell } from '@/components/nav/NavShell';
 import { useUserContext } from '@/hooks/useUserContext';
@@ -121,8 +120,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
 
           {finalShowFooter && <Footer />}
           {consumerChrome && <MobileInstallSheet />}
-          {consumerChrome && <FloatingInstallButton />}
-          {consumerChrome && <FloatingWhatsAppContact />}
+          {consumerChrome && <UnifiedChatFAB />}
         </div>
       </NavShell>
     );

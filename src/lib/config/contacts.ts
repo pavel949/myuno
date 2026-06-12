@@ -24,6 +24,14 @@ export const COMPANY_CONTACTS = {
     // Telegram number link
     number: 'https://t.me/+66922407355',
   },
+  line: {
+    // LINE Official Account id (placeholder until registered).
+    // When the @myuno LINE OA is live, this URL works as a direct chat link.
+    id: '@myuno',
+    link: 'https://line.me/R/ti/p/@myuno',
+    // Toggle to false to hide the Line button across the platform until the OA is live.
+    enabled: true,
+  },
   email: {
     support: 'support@uno.ae',
     partners: 'partners@uno.ae',
@@ -68,3 +76,7 @@ export const getTelLink = (): string => {
 export const getMailtoLink = (type: keyof typeof COMPANY_CONTACTS.email = 'support'): string => {
   return `mailto:${COMPANY_CONTACTS.email[type]}`;
 };
+
+// Helper for LINE chat link
+export const getLineUrl = (): string => COMPANY_CONTACTS.line.link;
+
