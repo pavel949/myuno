@@ -17,6 +17,7 @@ import { ActiveFilters, FilterValues } from '@/components/filters/UniversalFilte
 import { mapBouquetToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 export default function FlowersIndex() {
   const navigate = useNavigate();
@@ -49,9 +50,11 @@ export default function FlowersIndex() {
     return count;
   }, [filterValues]);
 
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 250);
+
   const filteredBouquets = useMemo(() => {
     let result = bouquets;
-    const q = searchQuery.trim().toLowerCase();
+    const q = debouncedSearchQuery.trim().toLowerCase();
     if (q) {
       result = result.filter(b => {
         const haystack = [
@@ -99,7 +102,7 @@ export default function FlowersIndex() {
       const tags = (b.occasion_tags as string[] | null) ?? [];
       return [...tags, b.style].filter(Boolean) as string[];
     });
-  }, [bouquets, searchQuery, filterValues, activeFilterCount, applyPersonaFilter]);
+  }, [bouquets, debouncedSearchQuery, filterValues, activeFilterCount, applyPersonaFilter]);
 
   const handleRemoveFilter = useCallback((sectionId: string, optionId?: string) => {
     setFilterValues(prev => {
