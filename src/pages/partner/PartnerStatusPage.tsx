@@ -115,15 +115,18 @@ const PartnerStatusPage: React.FC = () => {
 
   if (authLoading || loading) {
     return (
-      <PageContainer>
-        <div className="flex items-center justify-center py-32">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      </PageContainer>
+      <AppLayout showHeader={false}>
+        <PageContainer>
+          <div className="flex items-center justify-center py-32">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        </PageContainer>
+      </AppLayout>
     );
   }
 
   return (
+    <AppLayout showHeader={false}>
     <PageContainer>
       <PageHeader
         title={isRu ? 'Мои заявки партнёра' : 'My partner applications'}
@@ -297,6 +300,7 @@ const PartnerStatusPage: React.FC = () => {
         </div>
       )}
     </PageContainer>
+    </AppLayout>
   );
 };
 
