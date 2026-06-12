@@ -580,7 +580,9 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Delivery ── */}
         <Route path="/delivery" element={<LazyPage><Pages.DeliveryIndex /></LazyPage>} />
         
-        {/* ── Market ── */}
+        {/* ── Market (+ /marketplace alias) ── */}
+        <Route path="/marketplace" element={<Navigate to="/market" replace />} />
+        <Route path="/marketplace/*" element={<Navigate to="/market" replace />} />
         <Route path="/market" element={<LazyPage><Pages.MarketIndex /></LazyPage>} />
         <Route path="/market/categories" element={<LazyPage><Pages.MarketCatalogPage /></LazyPage>} />
         <Route path="/market/category/:categoryId" element={<LazyPage><Pages.MarketCategoryPage /></LazyPage>} />
