@@ -23,6 +23,7 @@ export default function FlowersIndex() {
   const { language } = useLanguage();
   const { getItemsByType } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const isRu = language === 'ru';
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
