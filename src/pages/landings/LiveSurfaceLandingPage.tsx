@@ -8,13 +8,13 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const SERVICES = [
-  { icon: Home, labelEn: 'Long-stay housing', labelRu: 'Долгосрочная аренда', descEn: 'Condos & villas 1–12 months', descRu: 'Кондо и виллы 1–12 месяцев', path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`, color: 'primary' },
-  { icon: Landmark, labelEn: 'Thai bank account', labelRu: 'Тайский счёт', descEn: 'Bangkok Bank, Kasikorn, SCB', descRu: 'Bangkok Bank, Kasikorn, SCB', path: APP_ROUTES.BANKING, color: 'cluster-invest' },
-  { icon: GraduationCap, labelEn: 'Schools & kindergartens', labelRu: 'Школы и сады', descEn: '15+ international schools', descRu: '15+ международных школ', path: '/school-finder', color: 'accent-amber' },
-  { icon: Stethoscope, labelEn: 'Medical & insurance', labelRu: 'Медицина и страховка', descEn: 'Bangkok Hospital cashless', descRu: 'Bangkok Hospital cashless', path: APP_ROUTES.MEDICAL, color: 'destructive' },
-  { icon: Car, labelEn: 'Transport & licence', labelRu: 'Транспорт и права', descEn: 'Lease, buy, Thai licence', descRu: 'Аренда, покупка, тайские права', path: APP_ROUTES.TRANSPORT, color: 'cluster-arrive' },
-  { icon: Wifi, labelEn: 'Home internet', labelRu: 'Домашний интернет', descEn: '500 Mbps fibre from ฿790/mo', descRu: '500 Mbps fiber от ฿790/мес', path: '/services/utilities/internet', color: 'accent-cyan' },
-  { icon: ShoppingBag, labelEn: 'Furniture & delivery', labelRu: 'Мебель и доставка', descEn: 'IKEA, Index, local makers', descRu: 'IKEA, Index, локальные мастера', path: '/delivery', color: 'accent-purple' },
+  { icon: Home, labelEn: 'Long-stay housing', labelRu: 'Долгосрочная аренда', descEn: 'Condos & villas 1–12 months', descRu: 'Кондо и виллы 1–12 месяцев', path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`, color: 'primary', external: false },
+  { icon: Landmark, labelEn: 'Thai bank account', labelRu: 'Тайский счёт', descEn: 'Bangkok Bank, Kasikorn, SCB', descRu: 'Bangkok Bank, Kasikorn, SCB', path: APP_ROUTES.BANKING, color: 'cluster-invest', external: false },
+  { icon: GraduationCap, labelEn: 'Schools & kindergartens', labelRu: 'Школы и сады', descEn: '15+ international schools', descRu: '15+ международных школ', path: APP_ROUTES.SCHOOL_FINDER, color: 'accent-amber', external: false },
+  { icon: Stethoscope, labelEn: 'Medical & insurance', labelRu: 'Медицина и страховка', descEn: 'Bangkok Hospital cashless', descRu: 'Bangkok Hospital cashless', path: APP_ROUTES.MEDICAL, color: 'destructive', external: false },
+  { icon: Car, labelEn: 'Transport & licence', labelRu: 'Транспорт и права', descEn: 'Lease, buy, Thai licence', descRu: 'Аренда, покупка, тайские права', path: APP_ROUTES.TRANSPORT, color: 'cluster-arrive', external: false },
+  { icon: Wifi, labelEn: 'Home internet', labelRu: 'Домашний интернет', descEn: '500 Mbps fibre from ฿790/mo', descRu: '500 Mbps fiber от ฿790/мес', path: APP_ROUTES.DELIVERY, color: 'accent-cyan', external: true },
+  { icon: ShoppingBag, labelEn: 'Furniture & delivery', labelRu: 'Мебель и доставка', descEn: 'IKEA, Index, local makers', descRu: 'IKEA, Index, локальные мастера', path: APP_ROUTES.DELIVERY, color: 'accent-purple', external: false },
 ];
 
 const STATS = [
@@ -60,8 +60,13 @@ export default function LiveSurfaceLandingPage() {
           </h2>
           {SERVICES.map((s, i) => {
             const Icon = s.icon;
+            const onClick = () => {
+              // Internet provisioning flow not yet built — route to WhatsApp coordinator.
+              if (s.external) window.open(whatsappUrl, '_blank');
+              else navigate(s.path);
+            };
             return (
-              <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)]">
+              <button key={i} onClick={onClick} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)]">
                 <div className="w-11 h-11 rounded-none flex items-center justify-center shrink-0" style={{ background: tokenColor(s.color, 0.15) }}>
                   <Icon className="w-5 h-5" style={{ color: tokenColor(s.color) }} />
                 </div>

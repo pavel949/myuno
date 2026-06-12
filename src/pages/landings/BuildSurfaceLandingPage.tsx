@@ -8,12 +8,12 @@ import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 const STEPS = [
-  { icon: MapPin, labelEn: 'Land plot search', labelRu: 'Подбор земли', descEn: 'Chanote / Nor Sor 3 Gor — clean title only', descRu: 'Chanote / Nor Sor 3 Gor — только чистый титул', path: '/property/browse?type=land', color: 'primary' },
-  { icon: FileSignature, labelEn: 'Title & ownership', labelRu: 'Титул и оформление', descEn: 'Thai company, lease 30+30+30, due diligence', descRu: 'Тайская компания, lease 30+30+30, due diligence', path: APP_ROUTES.LEGAL, color: 'accent-purple' },
-  { icon: Ruler, labelEn: 'Architect & permits', labelRu: 'Архитектор и разрешения', descEn: 'EIA, building permit, utility hookup', descRu: 'EIA, building permit, подключение коммуникаций', path: '/services/architecture', color: 'cluster-arrive' },
-  { icon: Hammer, labelEn: 'Build & contractor', labelRu: 'Строительство и подрядчик', descEn: 'Vetted contractors, milestone escrow', descRu: 'Проверенные подрядчики, эскроу по этапам', path: '/services/construction', color: 'accent-amber' },
-  { icon: ShieldCheck, labelEn: 'Independent supervision', labelRu: 'Независимый надзор', descEn: 'Inspector on site, photo report monthly', descRu: 'Инспектор на стройке, ежемесячный фото-отчёт', path: '/services/property/inspection', color: 'cluster-manage' },
-  { icon: KeyRound, labelEn: 'Handover & PM', labelRu: 'Сдача и управление', descEn: 'Snag list, warranty, then we run the rentals', descRu: 'Snag list, гарантия, затем сдача в управление', path: '/owner/landing', color: 'cluster-invest' },
+  { icon: MapPin, labelEn: 'Land plot search', labelRu: 'Подбор земли', descEn: 'Chanote / Nor Sor 3 Gor — clean title only', descRu: 'Chanote / Nor Sor 3 Gor — только чистый титул', path: '/property/browse?type=land', color: 'primary', external: false },
+  { icon: FileSignature, labelEn: 'Title & ownership', labelRu: 'Титул и оформление', descEn: 'Thai company, lease 30+30+30, due diligence', descRu: 'Тайская компания, lease 30+30+30, due diligence', path: APP_ROUTES.LEGAL, color: 'accent-purple', external: false },
+  { icon: Ruler, labelEn: 'Architect & permits', labelRu: 'Архитектор и разрешения', descEn: 'EIA, building permit, utility hookup', descRu: 'EIA, building permit, подключение коммуникаций', path: APP_ROUTES.LEGAL, color: 'cluster-arrive', external: true },
+  { icon: Hammer, labelEn: 'Build & contractor', labelRu: 'Строительство и подрядчик', descEn: 'Vetted contractors, milestone escrow', descRu: 'Проверенные подрядчики, эскроу по этапам', path: APP_ROUTES.LEGAL, color: 'accent-amber', external: true },
+  { icon: ShieldCheck, labelEn: 'Independent supervision', labelRu: 'Независимый надзор', descEn: 'Inspector on site, photo report monthly', descRu: 'Инспектор на стройке, ежемесячный фото-отчёт', path: APP_ROUTES.LEGAL, color: 'cluster-manage', external: true },
+  { icon: KeyRound, labelEn: 'Handover & PM', labelRu: 'Сдача и управление', descEn: 'Snag list, warranty, then we run the rentals', descRu: 'Snag list, гарантия, затем сдача в управление', path: '/mc', color: 'cluster-invest', external: false },
 ];
 
 const STATS = [
@@ -59,8 +59,13 @@ export default function BuildSurfaceLandingPage() {
           </h2>
           {STEPS.map((s, i) => {
             const Icon = s.icon;
+            const onClick = () => {
+              // Service flow not yet implemented for some steps — route to WhatsApp advisor.
+              if (s.external) window.open(whatsappUrl, '_blank');
+              else navigate(s.path);
+            };
             return (
-              <button key={i} onClick={() => navigate(s.path)} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)]">
+              <button key={i} onClick={onClick} className="w-full flex items-center gap-4 p-4 rounded-none border border-border bg-card text-left transition-all hover:[box-shadow:var(--shadow-elevation-2)]">
                 <div className="w-11 h-11 rounded-none flex items-center justify-center shrink-0 relative" style={{ background: tokenColor(s.color, 0.15) }}>
                   <Icon className="w-5 h-5" style={{ color: tokenColor(s.color) }} />
                   <span className="absolute -top-2 -left-2 w-5 h-5 rounded-full bg-foreground text-background text-[10px] font-bold flex items-center justify-center tabular-nums">{i + 1}</span>
