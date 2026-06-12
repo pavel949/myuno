@@ -58,7 +58,7 @@ const ProviderOnboarding = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      const { data: inserted, error } = await supabase
         .from('partner_applications')
         .insert({
           user_id: user?.id || null,
@@ -74,9 +74,18 @@ const ProviderOnboarding = () => {
             source: 'provider_onboarding',
             language: language,
           },
-        });
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
+
+      // Fire-and-forget: notify admins + acknowledge applicant
+      if (inserted?.id) {
+        supabase.functions.invoke('notify-admin-partner-application', {
+          body: { application_id: inserted.id },
+        }).catch(() => {});
+      }
 
       setStep('success');
     } catch (error) {

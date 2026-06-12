@@ -197,37 +197,42 @@ export default function PartnerApplicationsAdmin() {
 
     setIsProcessing(true);
     try {
-      if (newStatus === 'approved') {
+      if (newStatus === 'approved' || newStatus === 'rejected') {
         const { data, error } = await supabase.functions.invoke('approve-partner-application', {
-          body: { application_id: selectedApp.id },
+          body: {
+            application_id: selectedApp.id,
+            action: newStatus === 'approved' ? 'approve' : 'reject',
+            rejection_reason: newStatus === 'rejected' ? rejectionReason : undefined,
+          },
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
 
         const updateData = {
-          status: 'approved' as const,
+          status: newStatus,
           reviewed_by: user.id,
           reviewed_at: new Date().toISOString(),
+          ...(newStatus === 'rejected' && rejectionReason ? { rejection_reason: rejectionReason } : {}),
         };
         setApplications(prev =>
           prev.map(app =>
-            app.id === selectedApp.id ? { ...app, ...updateData, status: 'approved' } as PartnerApplication : app
+            app.id === selectedApp.id ? { ...app, ...updateData, status: newStatus } as PartnerApplication : app
           )
         );
         toast(language === 'ru' ? 'Успешно' : 'Success', {
-          description: data?.vendor_granted
-            ? (language === 'ru' ? 'Заявка одобрена, доступ вендора выдан' : 'Application approved, vendor access granted')
-            : (language === 'ru' ? 'Заявка одобрена (без user_id — доступ не создан)' : 'Application approved (no user_id — access not created)'),
+          description: newStatus === 'approved'
+            ? (data?.vendor_granted
+              ? (language === 'ru' ? 'Заявка одобрена, доступ вендора выдан, письмо отправлено' : 'Application approved, vendor access granted, email sent')
+              : (language === 'ru' ? 'Заявка одобрена (без user_id), письмо отправлено' : 'Application approved (no user_id), email sent'))
+            : (language === 'ru' ? 'Заявка отклонена, письмо отправлено' : 'Application rejected, email sent'),
         });
       } else {
+        // reviewing — простая смена статуса, без письма
         const updateData: Record<string, unknown> = {
           status: newStatus,
           reviewed_by: user.id,
           reviewed_at: new Date().toISOString(),
         };
-        if (newStatus === 'rejected' && rejectionReason) {
-          updateData.rejection_reason = rejectionReason;
-        }
         const { error } = await supabase
           .from('partner_applications')
           .update(updateData as never)
@@ -239,9 +244,7 @@ export default function PartnerApplicationsAdmin() {
           )
         );
         toast(language === 'ru' ? 'Успешно' : 'Success', {
-          description: newStatus === 'rejected'
-            ? (language === 'ru' ? 'Заявка отклонена' : 'Application rejected')
-            : (language === 'ru' ? 'Статус обновлён' : 'Status updated'),
+          description: language === 'ru' ? 'Статус обновлён' : 'Status updated',
         });
       }
 

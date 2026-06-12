@@ -1,5 +1,6 @@
 /**
  * Notify admin when a new partner application is submitted.
+ * Also sends a confirmation email to the applicant.
  * Called from frontend after successful insert into partner_applications.
  */
 import { createNotifyHandler, sendEmail, buildEmailHtml } from "../_shared/notify-utils.ts";
@@ -27,7 +28,8 @@ Deno.serve(createNotifyHandler("notify-admin-partner-application", async (body) 
 
   const contactValue = `${app.contact_name ?? "—"} · ${app.contact_email ?? "—"}${app.contact_phone ? ` · ${app.contact_phone}` : ""}`;
 
-  const html = buildEmailHtml({
+  // 1. Notify admins
+  const adminHtml = buildEmailHtml({
     title: "New Partner Application",
     subtitle: "myUNO Partner Applications",
     color: "#8b5cf6",
@@ -38,13 +40,42 @@ Deno.serve(createNotifyHandler("notify-admin-partner-application", async (body) 
       { label: "Submitted", value: created },
     ],
     ctaText: "Review in Admin",
-    ctaUrl: "https://uno.ae/admin/partner-applications",
+    ctaUrl: "https://myuno.app/admin/partner-applications",
   });
 
-  return await sendEmail({
+  const adminResult = await sendEmail({
     to: ADMIN_EMAILS,
     subject: `New partner application: ${app.business_name ?? "Unknown"}`,
-    html,
-    from: "myUNO Partners <noreply@resend.dev>",
+    html: adminHtml,
+    from: "myUNO Partners <onboarding@resend.dev>",
   });
+
+  // 2. Acknowledge to applicant (do not fail if missing email)
+  if (app.contact_email) {
+    try {
+      const ackHtml = buildEmailHtml({
+        title: "We received your application",
+        subtitle: "Заявка получена · Application received",
+        color: "#0ea5e9",
+        sections: [
+          { label: "Business", value: app.business_name ?? "—" },
+          { label: "Application ID", value: app.id.slice(0, 8).toUpperCase() },
+          { label: "Submitted", value: created },
+        ],
+        ctaText: "Visit myUNO",
+        ctaUrl: "https://myuno.app",
+        footer: "We typically review applications within 24 hours · Обычно рассматриваем заявки в течение 24 часов",
+      });
+      await sendEmail({
+        to: app.contact_email,
+        subject: `myUNO · Заявка получена / Application received — ${app.business_name ?? "your business"}`,
+        html: ackHtml,
+        from: "myUNO Partners <onboarding@resend.dev>",
+      });
+    } catch (e) {
+      console.error("[notify-admin-partner-application] applicant ack failed", e);
+    }
+  }
+
+  return adminResult;
 }));

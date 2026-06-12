@@ -1,15 +1,74 @@
 /**
- * Approve partner application: update status and grant vendor access.
- * When status is set to approved and application has user_id, creates
- * org (vendor), org_members, and user_roles.vendor so the user can access Vendor Dashboard.
+ * Decide on a partner application: approve or reject.
+ * - approve: updates status, creates org/org_members/user_roles.vendor, emails applicant.
+ * - reject: updates status with rejection_reason, emails applicant.
+ *
+ * Body: { application_id: string, action?: 'approve' | 'reject', rejection_reason?: string }
+ * Default action is 'approve' for backward compatibility.
  */
 import { createClient, createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
+import { sendEmail, buildEmailHtml } from "../_shared/notify-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+async function emailApplicant(
+  email: string | null,
+  businessName: string | null,
+  action: "approve" | "reject",
+  rejectionReason?: string,
+) {
+  if (!email) return;
+  try {
+    if (action === "approve") {
+      const html = buildEmailHtml({
+        title: "Your application is approved",
+        subtitle: "Заявка одобрена · myUNO",
+        color: "#10b981",
+        sections: [
+          { label: "Business", value: businessName ?? "—" },
+          { label: "Next step", value: "Sign in to your vendor dashboard and complete your profile." },
+          { label: "Следующий шаг", value: "Войдите в кабинет вендора и завершите профиль." },
+        ],
+        ctaText: "Open Vendor Dashboard",
+        ctaUrl: "https://myuno.app/vendor",
+        footer: "Welcome to myUNO · Добро пожаловать",
+      });
+      await sendEmail({
+        to: email,
+        subject: `myUNO · Заявка одобрена / Application approved — ${businessName ?? "your business"}`,
+        html,
+        from: "myUNO Partners <onboarding@resend.dev>",
+      });
+    } else {
+      const html = buildEmailHtml({
+        title: "Application update",
+        subtitle: "Решение по заявке · myUNO",
+        color: "#ef4444",
+        sections: [
+          { label: "Business", value: businessName ?? "—" },
+          { label: "Decision", value: "Unfortunately, we couldn't approve your application at this time." },
+          { label: "Решение", value: "К сожалению, сейчас мы не можем одобрить вашу заявку." },
+          ...(rejectionReason ? [{ label: "Reason · Причина", value: rejectionReason }] : []),
+        ],
+        ctaText: "Contact us",
+        ctaUrl: "https://myuno.app/contact",
+        footer: "You may reapply after addressing the items above · Вы можете подать заявку повторно",
+      });
+      await sendEmail({
+        to: email,
+        subject: `myUNO · Решение по заявке / Application update — ${businessName ?? "your business"}`,
+        html,
+        from: "myUNO Partners <onboarding@resend.dev>",
+      });
+    }
+  } catch (e) {
+    console.error("[approve-partner-application] applicant email failed", e);
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -37,10 +96,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { application_id } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { application_id, action = "approve", rejection_reason } = body as {
+      application_id?: string;
+      action?: "approve" | "reject";
+      rejection_reason?: string;
+    };
     if (!application_id) {
       return new Response(
         JSON.stringify({ error: "application_id required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if (action !== "approve" && action !== "reject") {
+      return new Response(
+        JSON.stringify({ error: "action must be 'approve' or 'reject'" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -60,15 +130,41 @@ Deno.serve(async (req) => {
       );
     }
 
-    const updateData: Record<string, unknown> = {
-      status: "approved",
-      reviewed_by: adminId,
-      reviewed_at: new Date().toISOString(),
-    };
+    // ── REJECT path ──
+    if (action === "reject") {
+      const { error: updateErr } = await sb
+        .from("partner_applications")
+        .update({
+          status: "rejected",
+          reviewed_by: adminId,
+          reviewed_at: new Date().toISOString(),
+          rejection_reason: rejection_reason ?? null,
+        })
+        .eq("id", application_id);
 
+      if (updateErr) {
+        return new Response(
+          JSON.stringify({ error: updateErr.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      await emailApplicant(app.contact_email, app.business_name, "reject", rejection_reason);
+
+      return new Response(
+        JSON.stringify({ success: true, application_id, action }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ── APPROVE path ──
     const { error: updateErr } = await sb
       .from("partner_applications")
-      .update(updateData)
+      .update({
+        status: "approved",
+        reviewed_by: adminId,
+        reviewed_at: new Date().toISOString(),
+      })
       .eq("id", application_id);
 
     if (updateErr) {
@@ -79,6 +175,31 @@ Deno.serve(async (req) => {
     }
 
     if (app.user_id) {
+      // If user is the source of a providers record from VendorOnboarding,
+      // mark it active now so listings become visible.
+      try {
+        await sb
+          .from("providers")
+          .update({ is_active: true })
+          .eq("created_by", app.user_id)
+          .eq("is_active", false);
+        // Also activate any pending vendor_services for this user
+        const { data: pvs } = await sb
+          .from("providers")
+          .select("id")
+          .eq("created_by", app.user_id);
+        const providerIds = (pvs ?? []).map((p: { id: string }) => p.id);
+        if (providerIds.length > 0) {
+          await sb
+            .from("vendor_services")
+            .update({ is_active: true })
+            .in("provider_id", providerIds)
+            .eq("is_active", false);
+        }
+      } catch (e) {
+        console.error("[approve-partner-application] activate provider failed", e);
+      }
+
       const { data: org, error: orgErr } = await sb
         .from("orgs")
         .insert({
@@ -127,10 +248,13 @@ Deno.serve(async (req) => {
       }
     }
 
+    await emailApplicant(app.contact_email, app.business_name, "approve");
+
     return new Response(
       JSON.stringify({
         success: true,
         application_id,
+        action,
         vendor_granted: !!app.user_id,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
