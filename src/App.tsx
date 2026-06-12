@@ -228,6 +228,7 @@ const App = () => (
       <QueryClientProvider client={queryClient}>
         <QueryProviders>
           <DeferredProvidersGate>
+            <OrganizationJsonLdHydrator />
             <AppContent />
           </DeferredProvidersGate>
         </QueryProviders>
