@@ -29,13 +29,11 @@ export default function InvestSurfaceLandingPage() {
   const navigate = useNavigate();
   const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Рассматриваю инвестиции в Пхукет' : 'Hello! I am considering investing in Phuket');
 
+  const seo = buildSurfaceSeo('invest', t ? 'ru' : 'en');
+
   return (
     <>
-      <SEOHead
-        title={t ? 'Инвестиции в Пхукет — недвижимость, бизнес, capital · myUNO' : 'Invest in Phuket — real estate, business, capital · myUNO'}
-        description={t ? 'Off-plan и готовая недвижимость, ClearView-рейтинг, due diligence, capital-сделки $2M+. Прозрачная доходность 6–9% годовых.' : 'Off-plan and resale property, ClearView ratings, due diligence, $2M+ capital deals. Transparent 6–9% net yield.'}
-        url="https://www.myuno.app/for/invest"
-      />
+      <SEOHead title={seo.title} description={seo.description} url={seo.url} jsonLd={seo.jsonLd} />
       <LandingLayout
         icon={TrendingUp}
         title={t ? 'Инвестиции на Пхукете' : 'Invest on Phuket'}
