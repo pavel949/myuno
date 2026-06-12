@@ -9,17 +9,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { normalizeWhatsapp } from "@/lib/seo/normalizeWhatsapp";
 
-const E164 = /^\+[1-9]\d{6,14}$/;
 const ISO2 = /^[A-Z]{2}$/;
 const OPENING_HOURS = /^[A-Za-z,\- 0-9:;]*$/;
 
-const schema = z.object({
-  org_telephone: z
+const whatsappField = (message: string) =>
+  z
     .string()
     .trim()
-    .regex(E164, "Phone must be E.164 (e.g. +66922407355)")
-    .or(z.literal("")),
+    .refine((v) => v === "" || normalizeWhatsapp(v) !== null, message);
+
+const schema = z.object({
+  org_telephone: whatsappField(
+    "Use E.164 phone (+66922407355) or wa.me URL",
+  ),
+  admin_whatsapp: whatsappField(
+    "Use E.164 phone (+66922407355) or wa.me URL",
+  ),
   org_email: z
     .string()
     .trim()
