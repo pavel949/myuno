@@ -29,13 +29,11 @@ export default function BuildSurfaceLandingPage() {
   const navigate = useNavigate();
   const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Хочу построить виллу на Пхукете' : 'Hello! I want to build a villa on Phuket');
 
+  const seo = buildSurfaceSeo('build', t ? 'ru' : 'en');
+
   return (
     <>
-      <SEOHead
-        title={t ? 'Строительство виллы на Пхукете — myUNO' : 'Custom villa build on Phuket — myUNO'}
-        description={t ? 'Земля, титул, архитектор, подрядчик, надзор, сдача — полный цикл строительства виллы с эскроу по этапам.' : 'Land, title, architect, contractor, supervision, handover — full villa build cycle with milestone escrow.'}
-        url="https://www.myuno.app/for/build"
-      />
+      <SEOHead title={seo.title} description={seo.description} url={seo.url} jsonLd={seo.jsonLd} />
       <LandingLayout
         icon={HardHat}
         title={t ? 'Построить виллу на Пхукете' : 'Build a villa on Phuket'}
