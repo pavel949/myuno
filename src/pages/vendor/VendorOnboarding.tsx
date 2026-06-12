@@ -470,12 +470,12 @@ const VendorOnboarding = () => {
                   </motion.div>
 
                   <h2 className="text-2xl font-bold mb-2">
-                    {isRu ? '🎉 Вы в деле!' : '🎉 You\'re Live!'}
+                    {isRu ? 'Заявка на модерации' : 'Application pending review'}
                   </h2>
                   <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
                     {isRu
-                      ? 'Объявление отправлено на модерацию. Завершите профиль, чтобы получить верификацию быстрее.'
-                      : 'Your listing is pending review. Complete your profile to get verified faster.'}
+                      ? 'Спасибо! Команда myUNO проверит заявку и ответит в течение 24 часов. Вы получите email с решением. Профиль и объявление появятся в каталоге после одобрения.'
+                      : 'Thanks! The myUNO team will review your application and reply within 24 hours. You will receive a decision by email. Your profile and listing will appear in the catalog after approval.'}
                   </p>
 
                   {/* Checklist */}
