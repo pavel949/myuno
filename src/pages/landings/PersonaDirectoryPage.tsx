@@ -20,6 +20,7 @@ import { getPersonaTheme } from '@/lib/landings/personaTheme';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { LandingContainer } from '@/components/landings';
 import { ArrowRight } from 'lucide-react';
+import { SURFACE_LANDINGS } from '@/lib/landings/surfaceLandings';
 
 interface Group {
   id: string;
