@@ -1,6 +1,5 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import * as Sentry from "@sentry/react";
 import "./index.css";
 import { reportWebVitals } from "./lib/webVitals";
 import App from "./App.tsx";
@@ -34,25 +33,36 @@ function renderBootstrapError(message: string) {
   root.replaceChildren(outer);
 }
 
-// Initialize Sentry for production error monitoring
+// Lazy-initialize Sentry AFTER first paint to keep ~250KB out of the critical path.
+// In DEV we skip entirely. In PROD we wait for `load` + idle so LCP isn't blocked.
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
-if (sentryDsn) {
-  Sentry.init({
-    dsn: sentryDsn,
-    environment: import.meta.env.MODE,
-    release: `myuno@${document.querySelector('meta[name="version"]')?.getAttribute('content') ?? 'unknown'}`,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
-    ],
-    tracesSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
-    replaysSessionSampleRate: 0.01,
-    replaysOnErrorSampleRate: 1.0,
-    beforeSend(event) {
-      if (import.meta.env.DEV) return null;
-      return event;
-    },
-  });
+if (sentryDsn && import.meta.env.PROD && typeof window !== "undefined") {
+  const initSentry = () => {
+    import("@sentry/react").then((Sentry) => {
+      Sentry.init({
+        dsn: sentryDsn,
+        environment: import.meta.env.MODE,
+        release: `myuno@${document.querySelector('meta[name="version"]')?.getAttribute('content') ?? 'unknown'}`,
+        integrations: [
+          Sentry.browserTracingIntegration(),
+          Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
+        ],
+        tracesSampleRate: 0.1,
+        replaysSessionSampleRate: 0.01,
+        replaysOnErrorSampleRate: 1.0,
+      });
+    }).catch(() => { /* Sentry is non-critical — silent fail */ });
+  };
+  const schedule = () => {
+    if ("requestIdleCallback" in window) {
+      (window as Window & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => void })
+        .requestIdleCallback(initSentry, { timeout: 3000 });
+    } else {
+      setTimeout(initSentry, 2000);
+    }
+  };
+  if (document.readyState === "complete") schedule();
+  else window.addEventListener("load", schedule, { once: true });
 }
 
 // Supabase URL/key are public (anon). Hardcoded fallback ensures the app boots

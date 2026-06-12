@@ -150,34 +150,41 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
     return isPreviewHost;
   }, []);
 
-  // Allow auth and public marketing routes through
-  const isPublicRoute = location.pathname.startsWith('/auth')
-    || location.pathname === '/start'
-    || location.pathname.startsWith('/start/')
-    || location.pathname.startsWith('/onboarding')
-    || location.pathname.startsWith('/reset-password')
-    || location.pathname.startsWith('/legal')
-    || location.pathname.startsWith('/for-management-companies')
-    || location.pathname === '/for-business'
-    || location.pathname === '/for-local-services'
-    || location.pathname.startsWith('/vendor/join')
-    || location.pathname.startsWith('/vendor/onboarding')
-    || location.pathname.startsWith('/developer-portal/apply')
-    || location.pathname.startsWith('/ref/')
-    || location.pathname.startsWith('/newbuilds')
-    || location.pathname.startsWith('/capital')
-    || location.pathname.startsWith('/clearview')
-    || location.pathname === '/invest/capital-advisory'
-    || location.pathname === '/invest/calculator'
-    || location.pathname === '/property/resale-landing'
-    || location.pathname === '/owner/management-landing'
-    || location.pathname === '/owner/storefront-demo'
-    || location.pathname === '/legal/tax-structuring'
-    || location.pathname.startsWith('/for/')
-    || location.pathname === '/for'
-    || location.pathname.startsWith('/cluster/')
-    || location.pathname.startsWith('/area/')
-    || location.pathname === '/area';
+  // Allow auth and public marketing routes through.
+  // Phase 1 launch-readiness expansion: also open production-ready verticals
+  // (home/discover/property/owner-landing) so non-logged visitors can browse
+  // without hitting the Coming Soon gate. Account/operate routes stay gated.
+  const path = location.pathname;
+  const isPublicRoute = path === '/'
+    || path === '/index'
+    || path === '/discover'
+    || path.startsWith('/auth')
+    || path === '/start'
+    || path.startsWith('/start/')
+    || path.startsWith('/onboarding')
+    || path.startsWith('/reset-password')
+    || path.startsWith('/legal')
+    || path.startsWith('/for-management-companies')
+    || path === '/for-business'
+    || path === '/for-local-services'
+    || path.startsWith('/vendor/join')
+    || path.startsWith('/vendor/onboarding')
+    || path.startsWith('/developer-portal/apply')
+    || path.startsWith('/ref/')
+    || path.startsWith('/newbuilds')
+    || path.startsWith('/capital')
+    || path.startsWith('/clearview')
+    || path.startsWith('/property')
+    || path === '/invest/capital-advisory'
+    || path === '/invest/calculator'
+    || path === '/owner/management-landing'
+    || path === '/owner/storefront-demo'
+    || path === '/legal/tax-structuring'
+    || path.startsWith('/for/')
+    || path === '/for'
+    || path.startsWith('/cluster/')
+    || path.startsWith('/area/')
+    || path === '/area';
 
   if (bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
   if (!user) return <UnderConstruction />;
