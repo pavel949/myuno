@@ -12981,6 +12981,48 @@ export type Database = {
         }
         Relationships: []
       }
+      official_news: {
+        Row: {
+          created_at: string
+          fetched_at: string
+          id: string
+          image_url: string | null
+          lang: string
+          published_at: string | null
+          source: string
+          source_label: string
+          summary: string | null
+          title: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          image_url?: string | null
+          lang?: string
+          published_at?: string | null
+          source: string
+          source_label: string
+          summary?: string | null
+          title: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          image_url?: string | null
+          lang?: string
+          published_at?: string | null
+          source?: string
+          source_label?: string
+          summary?: string | null
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
       order_addresses: {
         Row: {
           address_text: string
