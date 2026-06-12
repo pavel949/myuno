@@ -118,7 +118,8 @@ const OfficialNewsPage: React.FC = () => {
                 <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
               </div>
             </a>
-          ))}
+            );
+          })}
         </div>
 
         <section>
