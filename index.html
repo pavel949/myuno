@@ -65,22 +65,43 @@
       "@context": "https://schema.org",
       "@graph": [
         {
-          "@type": "Organization",
+          "@type": ["Organization", "LocalBusiness"],
           "@id": "https://www.myuno.app/#organization",
           "name": "myUNO",
           "alternateName": "myUNO Super-App",
           "url": "https://www.myuno.app/",
           "logo": "https://www.myuno.app/icons/icon-512x512.png",
+          "image": "https://myuno.app/og-image.png",
           "description": "Digital civic infrastructure for foreigners in Phuket: arrival, living, property management, investments, legal services and construction — under one account.",
+          "telephone": "+66922407355",
+          "email": "pi@myuno.app",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Phuket",
+            "addressRegion": "Phuket",
+            "addressCountry": "TH"
+          },
           "areaServed": [
             { "@type": "Place", "name": "Phuket", "address": { "@type": "PostalAddress", "addressCountry": "TH", "addressRegion": "Phuket" } },
             { "@type": "Country", "name": "Thailand" }
+          ],
+          "contactPoint": [
+            {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "telephone": "+66922407355",
+              "email": "pi@myuno.app",
+              "availableLanguage": ["ru", "en", "th"],
+              "areaServed": "TH",
+              "contactOption": "TollFree"
+            }
           ],
           "knowsLanguage": ["ru", "en", "th"],
           "founder": { "@type": "Person", "name": "Pavel Ignatev" },
           "parentOrganization": { "@type": "Organization", "name": "Ignatev Group" },
           "sameAs": [
             "https://t.me/myUNOapp",
+            "https://wa.me/66922407355",
             "https://www.instagram.com/myuno.app",
             "https://www.youtube.com/@myUNOapp",
             "https://x.com/myUNOapp"
