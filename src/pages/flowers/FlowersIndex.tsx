@@ -23,6 +23,7 @@ export default function FlowersIndex() {
   const { language } = useLanguage();
   const { getItemsByType } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const isRu = language === 'ru';
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
@@ -50,8 +51,25 @@ export default function FlowersIndex() {
 
   const filteredBouquets = useMemo(() => {
     let result = bouquets;
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      result = result.filter(b => {
+        const haystack = [
+          b.name_en, b.name_ru,
+          b.description_en, b.description_ru,
+          b.style, b.color_palette,
+          ...(b.flowers || []),
+          ...(b.colors || []),
+          ...(b.occasion_tags || []),
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(q);
+      });
+    }
     if (activeFilterCount > 0) {
-      result = bouquets.filter(b => {
+      result = result.filter(b => {
         const priceLevel = filterValues.priceLevel as string | null;
         if (priceLevel) {
           const ranges: Record<string, [number, number]> = { '1': [0, 1500], '2': [1500, 3000], '3': [3000, 5000], '4': [5000, Infinity] };
@@ -81,7 +99,7 @@ export default function FlowersIndex() {
       const tags = (b.occasion_tags as string[] | null) ?? [];
       return [...tags, b.style].filter(Boolean) as string[];
     });
-  }, [bouquets, filterValues, activeFilterCount, applyPersonaFilter]);
+  }, [bouquets, searchQuery, filterValues, activeFilterCount, applyPersonaFilter]);
 
   const handleRemoveFilter = useCallback((sectionId: string, optionId?: string) => {
     setFilterValues(prev => {
@@ -103,7 +121,10 @@ export default function FlowersIndex() {
       title={isRu ? 'Доставка цветов' : 'Flower Delivery'}
       subtitle={isRu ? `Найдено: ${filteredBouquets.length}` : `${filteredBouquets.length} results`}
       fallbackPath={APP_ROUTES.DISCOVER}
-      showSearch={false}
+      showSearch
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder={isRu ? 'Поиск букетов, цветов, поводов…' : 'Search bouquets, flowers, occasions…'}
       showHero={false}
       categories={categories}
       selectedCategory={selectedCategory}
