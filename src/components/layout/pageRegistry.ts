@@ -638,6 +638,10 @@ export const InvestorLandingPage = lazy(() => import('@/pages/landings/InvestorL
 export const AgentLandingPage = lazy(() => import('@/pages/landings/AgentLandingPage'));
 export const LiveSurfaceLandingPage = lazy(() => import('@/pages/landings/LiveSurfaceLandingPage'));
 export const BuildSurfaceLandingPage = lazy(() => import('@/pages/landings/BuildSurfaceLandingPage'));
+export const ArriveSurfaceLandingPage = lazy(() => import('@/pages/landings/ArriveSurfaceLandingPage'));
+export const ManageSurfaceLandingPage = lazy(() => import('@/pages/landings/ManageSurfaceLandingPage'));
+export const InvestSurfaceLandingPage = lazy(() => import('@/pages/landings/InvestSurfaceLandingPage'));
+export const LegalSurfaceLandingPage = lazy(() => import('@/pages/landings/LegalSurfaceLandingPage'));
 
 // ── Capital CRM ──
 export const CapitalNewbuildsDeals = lazy(() => import('@/pages/capital/CapitalNewbuildsDeals'));
