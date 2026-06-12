@@ -193,6 +193,21 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
         </div>
 
         <nav
+          aria-label={language === 'ru' ? 'Жизненный цикл' : 'Lifecycle'}
+          className="flex flex-wrap justify-center gap-x-3 gap-y-2 font-sans text-caption"
+        >
+          {SURFACE_LANDINGS.map((s) => (
+            <Link
+              key={s.slug}
+              to={s.href}
+              className="text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
+            >
+              {language === 'ru' ? s.titleRu : s.titleEn}
+            </Link>
+          ))}
+        </nav>
+
+        <nav
           aria-label={t(ECOSYSTEM_FOOTER_UI.companyHeading)}
           className="flex flex-wrap justify-center gap-x-3 gap-y-2 font-sans text-caption text-muted-foreground"
         >
