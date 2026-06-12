@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVendorProfile, useVendorServices } from '@/hooks/useVendor';
 import { useUserContext } from '@/hooks/useUserContext';
+import { supabase } from '@/integrations/supabase/client';
 import { OnboardingLayout } from '@/components/layout/OnboardingLayout';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Button } from '@/components/ui/button';
