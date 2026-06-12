@@ -92,7 +92,10 @@ const valueToString = (raw: unknown): string => {
   return "";
 };
 
-const stringToJson = (key: keyof FormValues, value: string): unknown => {
+const stringToJson = (
+  key: keyof FormValues,
+  value: string,
+): string | number | null => {
   if (key === "org_latitude" || key === "org_longitude") {
     return value === "" ? null : Number(value);
   }
