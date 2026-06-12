@@ -64,6 +64,7 @@ export const APP_ROUTES = {
   // ── List With Us ──
   LIST_WITH_US: '/list-with-us',
   BECOME_PARTNER: '/become-partner',
+  PARTNER_STATUS: '/partner/status',
 
   // ── B2B landing pages (public marketing) ──
   FOR_MANAGEMENT_COMPANIES: '/for-management-companies',

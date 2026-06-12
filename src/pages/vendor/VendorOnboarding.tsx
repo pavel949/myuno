@@ -503,14 +503,24 @@ const VendorOnboarding = () => {
                     ))}
                   </div>
 
-                  <Button
-                    onClick={() => navigate('/vendor')}
-                    className="w-full h-14 text-base font-semibold rounded-none"
-                    size="lg"
-                  >
-                    {isRu ? 'Перейти в панель управления' : 'Go to Dashboard'}
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      onClick={() => navigate('/partner/status')}
+                      className="w-full h-14 text-base font-semibold rounded-none"
+                      size="lg"
+                    >
+                      {isRu ? 'Отслеживать статус заявки' : 'Track application status'}
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                    <Button
+                      onClick={() => navigate('/vendor')}
+                      variant="outline"
+                      className="w-full h-14 text-base font-semibold rounded-none"
+                      size="lg"
+                    >
+                      {isRu ? 'В панель' : 'Dashboard'}
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             )}
