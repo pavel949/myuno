@@ -176,7 +176,7 @@ const VendorOnboarding = () => {
   const stepTitles = [
     { en: 'About You', ru: 'О вас' },
     { en: 'First Listing', ru: 'Первое объявление' },
-    { en: "You're Live!", ru: 'Вы на связи!' },
+    { en: 'Pending Review', ru: 'На модерации' },
   ];
 
   return (
