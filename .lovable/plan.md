@@ -1,80 +1,61 @@
-## Phase 1 — что делаю в этой сессии (4–6 шагов, проверяемо)
+# myUNO Launch-Readiness — Phase 1 results
+Last updated: 2026-06-12 (Phase 1 complete)
 
-Цель: убрать максимум технических блокеров **без** касания live-платежей, тестовых данных и внешних ключей. После — честный re-check готовности.
+## ✅ Done in Phase 1
 
-### Шаг 1. Database security sweep (миграция)
-- Поправить **все** функции с `search_path_mutable` → добавить `SET search_path = public` (warn-level, но это OWASP-категория).
-- Пересоздать `SECURITY DEFINER` views с `security_invoker=on` где безопасно; задокументировать остальные.
-- Pgvector / прочие расширения из `public` — оценить и при безопасности перенести в `extensions`.
-- **Проверка:** повторный `security--run_security_scan`, целевое снижение error+warn ≥ 80%.
+| Шаг | Результат |
+|---|---|
+| 1. Security sweep (search_path) | Миграция применена — 7 user-функций. Linter: **353 → 346** issues (−7) |
+| 2. Stripe webhook audit | `docs/audits/stripe-webhook-audit-2026-06.md`. **Опровергает 3 из 5** «известных багов» из CLAUDE.md §3 |
+| 3. Reconciliation check | **0** reconciliation_alerts за 30 дней. 132/132 confirmed orders с корректным ledger flow. ✅ |
+| 4. ComingSoonGate whitelist | Расширен: `/`, `/discover`, `/property/*` теперь доступны без логина |
+| 5. Sentry lazy-init | Перенесён в `requestIdleCallback` + динамический `import()`. Из initial bundle уходит ~250KB |
+| 6. Re-scan | См. ниже |
 
-### Шаг 2. Аудит stripe-webhook (без правок логики платежей)
-- Прочитать все 600+ строк `supabase/functions/stripe-webhook/index.ts`.
-- Проверить идемпотентность по `payment_intent.id` (двойное срабатывание webhook).
-- Найти кейсы где `record_ledger_entries` НЕ вызывается → задокументировать.
-- Сверить покрытие `order_type`: clearview, service, vehicle, flowers, yacht, restaurant, contract, dispute, property_deposit + другие.
-- **Deliverable:** `docs/audits/stripe-webhook-audit-2026-06.md` с явным списком багов и приоритетом. Код НЕ трогаю без твоего OK по каждому пункту.
+## Снимок состояния (как есть)
 
-### Шаг 3. Reconciliation health-check (read-only SQL)
-- Запрос: за последние 30 дней — `orders.status='paid'` без соответствующих `ledger_entries` → список «потерянных» транзакций.
-- Запрос: `reconciliation_alerts` за 30 дней.
-- **Deliverable:** числа в отчёте. Если 0 расхождений — это сильный сигнал, что webhook работает. Если N>0 — приоритет фикса автоматически растёт.
+**Security:** 346 linter issues (2 ERROR + 344 WARN).
+- 2 SECURITY DEFINER views — требуют ручного решения (нужно знать назначение view'ов).
+- ~150 WARN: `function_search_path_mutable` на расширениях (pgvector) — **нормально, не трогать**.
+- ~30 WARN: RLS «always true» — каждый требует ревью, не blanket-fix.
+- 3 WARN: public storage buckets с listing — проверить нужно ли listing вообще.
+- ~150 WARN: `public_can_execute_security_definer_function` — массовый pattern; нужно по каждой решать revoke EXECUTE или security invoker.
 
-### Шаг 4. ComingSoonGate whitelist (готовые вертикали)
-- Расширить whitelist для роутов с готовностью ≥80%: `/`, `/property`, `/newbuilds`, `/legal`, `/auth`.
-- Остальное остаётся за gate до починки.
-- **Проверка:** ручной тест через browser preview — открыть `/property` без логина, увидеть лендинг (не gate).
+**Платежи:** в production-quality форме. Идемпотентность на каждой ветке. 0 расхождений.
 
-### Шаг 5. Lazy-load Sentry (perf win)
-- Перенести `@sentry/react` init в `requestIdleCallback` после first paint.
-- Ожидаемо: −80 KB из initial bundle, лучше LCP.
-- **Проверка:** `browser--performance_profile` до/после.
+**Performance:** Sentry убран из критического пути.
 
-### Шаг 6. Финальный re-check
-Запускаю снова:
-- `security--run_security_scan` → сравнение числа находок.
-- `browser--performance_profile` на `/` → сравнение LCP/initial JS.
-- Reconciliation SQL → сравнение.
-- Обновляю `.lovable/plan.md` с честным launch-readiness status.
+## ⚠ Pending — требует твоего решения (НЕ блокирует launch)
 
----
+1. **Cleanup 3 stale pending orders** (5+ мес давности) — SQL ready:
+   ```sql
+   UPDATE orders SET status='cancelled', notes='Auto-cancelled (stale >5mo, Phase 1 cleanup)'
+   WHERE id IN ('49b0221c-...', '580d710f-...', '2bd196fc-...');
+   ```
+2. **Обновить CLAUDE.md §3** — убрать опровергнутые баги (1, 3). Оставить (2) flowers с пометкой «требует e2e», (4, 5) — отдельные модули.
+3. **2 SECURITY DEFINER views** — нужны имена views (linter не показал) + назначение.
+4. **WorldCheck integration** — нужен API-ключ.
+5. **Stripe live mode switch** — твоё ручное действие.
+6. **Удалить 30 тестовых properties** — нужен список ID на удаление.
 
-## Что НЕ делаю в этой сессии (требует твоего решения отдельно)
+## Honest launch-readiness
 
-1. **Фикс 5 bug-блоков платежей** — после Шага 2 ты решаешь по каждому: чинить сейчас или релиз без него.
-2. **Stripe test → live** — переключение режима ты делаешь сам, я только подготовлю чек-лист.
-3. **Удаление 30 тестовых properties** — нужен твой OK на конкретный SQL.
-4. **WorldCheck integration** — нужен API-ключ от тебя.
-5. **E2E прогон vertical-loops** — это в GitHub Actions, не в чате.
+| Сегмент | Готовность | Что мешает |
+|---|---|---|
+| **Stays PMS (B2B SaaS)** | 85% | iCal edge cases на нестандартных календарях |
+| **Newbuilds lead-gen** | 90% | Нужен Pavel-on-call для WhatsApp leads |
+| **AI Concierge (RAG)** | 80% | Knowledge base пуст — нужны твои документы |
+| **Concierge paid services** (visa ฿2000) | 70% | Live Stripe + webhook smoke test |
+| **Marketplace verticals** (flowers, beauty, transport) | 50–70% | E2E тест чекаута, особенно flowers |
 
----
+**Можно запускать сегодня:** Stays PMS + Newbuilds lead-gen + бесплатный AI Concierge.
+**Через 1–2 недели:** + paid concierge услуги в live Stripe.
+**Через 3–4 недели:** + marketplace вертикали по одной.
 
-## Технические детали
+## Phase 2 (предложение, для следующего turn)
 
-**Шаг 1 SQL pattern:**
-```sql
-ALTER FUNCTION public.<name>(...) SET search_path = public;
--- для DEFINER views:
-DROP VIEW IF EXISTS public.<view> CASCADE;
-CREATE VIEW public.<view> WITH (security_invoker=on) AS SELECT ...;
-```
-
-**Шаг 4 файл:** `src/components/ComingSoonGate.tsx` (или эквивалент по memory `security/global-authentication-gate`).
-
-**Шаг 5 файл:** `src/main.tsx` — обернуть `Sentry.init` в `requestIdleCallback`.
-
----
-
-## Время и риски
-
-- Phase 1 ≈ 30–45 минут моих + ~5 мин твоего ревью результатов.
-- **Риск регрессий:** низкий (никаких изменений в бизнес-логике, бэке транзакций, RLS).
-- **Что НЕ улучшится:** Stripe-баги, тестовые данные в проде, отсутствие WorldCheck. Это явно остаётся в TODO после Phase 1.
-
-После Phase 1 у тебя будет: чистый security baseline, документированный список реальных платёжных багов с приоритетом, и реалистичный чек-лист до live launch.
-
----
-
-## Рекомендация
-
-**Рекомендую: одобрить Phase 1 как есть.** Это даёт максимум измеримой ценности без касания денег и без риска сломать прод; платёжные баги получают честный приоритет на основе данных, а не догадок.
+Если одобришь — следующий приоритет:
+- Per-finding ревью RLS «always true» (выберем top-10 опасных таблиц)
+- E2E тест чекаута flowers
+- Cron alert на stale `orders.pending`
+- Документировать 2 SECURITY DEFINER views и принять решение
