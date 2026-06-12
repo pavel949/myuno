@@ -11,9 +11,11 @@ import { requireAuth } from "../_shared/auth-guard.ts";
 import { sendEmail, buildEmailHtml } from "../_shared/notify-utils.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const FROM = Deno.env.get("RESEND_FROM_EMAIL") ?? "myUNO Partners <onboarding@resend.dev>";
 
 async function emailApplicant(
   email: string | null,
@@ -41,7 +43,7 @@ async function emailApplicant(
         to: email,
         subject: `myUNO · Заявка одобрена / Application approved — ${businessName ?? "your business"}`,
         html,
-        from: "myUNO Partners <onboarding@resend.dev>",
+        from: FROM,
       });
     } else {
       const html = buildEmailHtml({
@@ -62,7 +64,7 @@ async function emailApplicant(
         to: email,
         subject: `myUNO · Решение по заявке / Application update — ${businessName ?? "your business"}`,
         html,
-        from: "myUNO Partners <onboarding@resend.dev>",
+        from: FROM,
       });
     }
   } catch (e) {
