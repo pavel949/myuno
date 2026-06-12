@@ -4,11 +4,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { SectionHeader } from '@/components/ds';
 import { Surface } from '@/components/ui/surface';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings, MapPin, Languages, History, FileText, FolderTree, Database, Bot, Brain, TestTube, Users, Scale, FileEdit, Key, Flag } from 'lucide-react';
+import { Settings, MapPin, Languages, History, FileText, FolderTree, Database, Bot, Brain, TestTube, Users, Scale, FileEdit, Key, Flag, Building2 } from 'lucide-react';
 import { ControlSystemTab } from '@/components/admin/control/ControlSystemTab';
 import { ControlAuditTab } from '@/components/admin/control/ControlAuditTab';
 import { ControlLogsTab } from '@/components/admin/control/ControlLogsTab';
 import { FeatureFlagManager } from '@/components/admin/settings/FeatureFlagManager';
+import { OrgProfileEditor } from '@/components/admin/settings/OrgProfileEditor';
 
 interface QuickLink {
   icon: React.ElementType;
