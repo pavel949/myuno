@@ -236,6 +236,7 @@ export const VeterinaryPage = lazy(() => import('@/pages/expat/VeterinaryPage'))
 export const ArriveClusterPage = lazy(() => import('@/pages/arrive/ArriveClusterPage'));
 export const SIMStartPage = lazy(() => import('@/pages/arrive/SIMStartPage'));
 export const ExchangeBotPage = lazy(() => import('@/pages/arrive/ExchangeBotPage'));
+export const OfficialNewsPage = lazy(() => import('@/pages/arrive/OfficialNewsPage'));
 
 // ── Utility Micro-apps ──
 export const VisaQuizPage = lazy(() => import('@/pages/legal/VisaQuizPage'));

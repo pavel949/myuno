@@ -19,6 +19,7 @@ import { ActiveSituation } from '@/components/home/ActiveSituation';
 import { NowInPhuket } from '@/components/home/NowInPhuket';
 import { RoleSheet } from '@/components/home/RoleSheet';
 import { PrimaryGrid } from '@/components/home/PrimaryGrid';
+import { OfficialNews } from '@/components/home/OfficialNews';
 
 const IndexSimplified: React.FC = () => {
   const { personas, togglePersona, setPersonas } = useUserPersonas();
@@ -55,6 +56,9 @@ const IndexSimplified: React.FC = () => {
 
         {/* 5. Now in Phuket — narrow ambient strip */}
         <NowInPhuket />
+
+        {/* 6. Official news — TAT/PRD/Phuket Gov/Nation/Bangkok Post */}
+        <OfficialNews />
 
         {/* 5. «Все приложения» — single explicit door to everything else */}
         <div className="px-4 mt-6">
