@@ -11,10 +11,11 @@
  import { Badge } from '@/components/ui/badge';
  import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
  import { useLanguage } from '@/contexts/LanguageContext';
- import { useServiceFunctions } from '@/hooks/useServiceFunctions';
- import { useUniversalLead } from '@/hooks/useUniversalLead';
- import { useGeolocation } from '@/hooks/useGeolocation';
- import { toast } from 'sonner';
+import { useServiceFunctions } from '@/hooks/useServiceFunctions';
+import { useOrders } from '@/hooks/useOrders';
+import { useAuth } from '@/contexts/AuthContext';
+import { useGeolocation } from '@/hooks/useGeolocation';
+import { toast } from 'sonner';
  import { format } from 'date-fns';
  
  export default function ServiceFunctionOrder() {
@@ -23,12 +24,13 @@
    const { language, t } = useLanguage();
    const isRu = language === 'ru';
    
-   const { getFunction, getRawFunction } = useServiceFunctions();
-   const { submitLead, isSubmitting } = useUniversalLead();
-   const { latitude, longitude, hasLocation, getPosition, loading: isGeoLoading } = useGeolocation();
-   
-   const fn = getFunction(functionId || '');
-   const rawFn = getRawFunction(functionId || '');
+  const { getFunction, getRawFunction } = useServiceFunctions();
+  const { createOrder, isCreating } = useOrders();
+  const { user } = useAuth();
+  const { latitude, longitude, hasLocation, getPosition, loading: isGeoLoading } = useGeolocation();
+
+  const fn = getFunction(functionId || '');
+  const rawFn = getRawFunction(functionId || '');
    
    const [formData, setFormData] = useState({
      name: '',
@@ -66,51 +68,83 @@
      getPosition();
    };
  
-   const handleSubmit = async (e: React.FormEvent) => {
-     e.preventDefault();
-     
-     if (!fn || !rawFn) return;
-     
-     if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
-       toast.error(isRu ? 'Заполните обязательные поля' : 'Please fill required fields');
-       return;
-     }
- 
-     try {
-       await submitLead.mutateAsync({
-         vertical_id: 'home_services',
-         request_type: 'service_order',
-         lead_source: 'cta',
-         entry_point: `/services/order/${functionId}`,
-         name: formData.name,
-         phone: formData.phone,
-         preferred_contact_method: formData.contactMethod,
-         notes: formData.problemDescription,
-         vertical_metadata: {
-           function_id: fn.id,
-           function_name_en: rawFn.nameEn,
-           function_name_ru: rawFn.nameRu,
-           category: fn.category,
-           service_address: formData.address,
-           preferred_date: formData.preferredDate,
-           preferred_time: formData.preferredTime,
-           base_price: fn.basePrice,
-           currency: fn.currency,
-           estimated_time: fn.estimatedTime,
-           includes: fn.includes,
-         },
-       });
-       
-       navigate('/services/order/success', { 
-         state: { 
-           functionName: fn.name,
-           functionIcon: fn.icon,
-         } 
-       });
-     } catch (error) {
-       console.error('Order submission failed:', error);
-     }
-   };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!fn || !rawFn) return;
+
+    if (!user) {
+      toast.error(isRu ? 'Войдите, чтобы оформить заказ' : 'Please sign in to place an order');
+      navigate('/auth?redirect=' + encodeURIComponent(`/services/order/${functionId}`));
+      return;
+    }
+
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
+      toast.error(isRu ? 'Заполните обязательные поля' : 'Please fill required fields');
+      return;
+    }
+
+    try {
+      // C6 FIX: Order-First — write to public.orders (visible in cabinets) instead of universal_leads.
+      const startAt = formData.preferredDate
+        ? new Date(`${formData.preferredDate}T09:00:00`)
+        : null;
+
+      const result = await createOrder({
+        order_type: 'service',
+        total_amount: fn.basePrice,
+        currency: fn.currency,
+        start_at: startAt ?? undefined,
+        notes: formData.problemDescription || undefined,
+        serviceName: fn.name,
+        items: [{
+          item_name: fn.name,
+          item_type: 'service',
+          qty: 1,
+          unit_price: fn.basePrice,
+          amount: fn.basePrice,
+          metadata: {
+            function_id: fn.id,
+            function_name_en: rawFn.nameEn,
+            function_name_ru: rawFn.nameRu,
+            category: fn.category,
+            estimated_time: fn.estimatedTime,
+            includes: fn.includes,
+          },
+        }],
+        participants: [{
+          role: 'primary',
+          name: formData.name,
+          phone: formData.phone,
+          email: user.email ?? null,
+        }],
+        addresses: [{
+          address_type: 'service',
+          address_text: formData.address,
+        }],
+        metadata: {
+          preferred_time: formData.preferredTime,
+          contact_method: formData.contactMethod,
+          function_id: fn.id,
+        },
+        payment: { method: 'cash', amount: fn.basePrice },
+        openWhatsAppOnCash: false,
+      });
+
+      if (result.success) {
+        navigate('/services/order/success', {
+          state: {
+            functionName: fn.name,
+            functionIcon: fn.icon,
+            orderId: result.order_id,
+            orderNumber: result.order_number,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Order submission failed:', error);
+    }
+  };
  
    if (!fn || !rawFn) {
      return (
