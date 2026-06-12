@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizeWhatsapp } from "@/lib/seo/normalizeWhatsapp";
 
 /**
  * OrganizationJsonLdHydrator
