@@ -542,6 +542,7 @@ export const APP_ROUTES = {
   ADMIN_LEADS: '/admin/leads',
   ADMIN_ANALYTICS: '/admin/analytics',
   ADMIN_AI_AGENTS: '/admin/ai-agents',
+  ADMIN_OFFICIAL_NEWS: '/admin/official-news',
   ADMIN_INTAKE_CONFIGS: '/admin/intake-configs',
   ADMIN_LEAD_CONFIGS: '/admin/lead-configs',
   ADMIN_CONSULTATIONS: '/admin/consultations',
