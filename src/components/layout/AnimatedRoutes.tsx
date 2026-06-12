@@ -422,8 +422,10 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/education/tutor/:id" element={<LazyPage><Pages.TutorDetail /></LazyPage>} />
         <Route path="/education/booking/:id" element={<LazyPage><Pages.EducationBooking /></LazyPage>} />
         
-        {/* ── Flowers ── */}
+        {/* ── Flowers (+ Bloom legacy alias) ── */}
         <Route path={APP_ROUTES.FLOWERS} element={<LazyPage><Pages.FlowersIndex /></LazyPage>} />
+        <Route path="/bloom" element={<Navigate to={APP_ROUTES.FLOWERS} replace />} />
+        <Route path="/bloom/*" element={<Navigate to={APP_ROUTES.FLOWERS} replace />} />
         <Route path="/flowers/bouquet/:id" element={<LazyPage><Pages.BouquetDetail /></LazyPage>} />
         <Route path="/flowers/shop" element={<Navigate to={APP_ROUTES.FLOWERS} replace />} />
         <Route path="/flowers/shop/:id" element={<LazyPage><Pages.FlowerShopDetail /></LazyPage>} />
@@ -578,7 +580,9 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Delivery ── */}
         <Route path="/delivery" element={<LazyPage><Pages.DeliveryIndex /></LazyPage>} />
         
-        {/* ── Market ── */}
+        {/* ── Market (+ /marketplace alias) ── */}
+        <Route path="/marketplace" element={<Navigate to="/market" replace />} />
+        <Route path="/marketplace/*" element={<Navigate to="/market" replace />} />
         <Route path="/market" element={<LazyPage><Pages.MarketIndex /></LazyPage>} />
         <Route path="/market/categories" element={<LazyPage><Pages.MarketCatalogPage /></LazyPage>} />
         <Route path="/market/category/:categoryId" element={<LazyPage><Pages.MarketCategoryPage /></LazyPage>} />
