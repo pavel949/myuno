@@ -17,6 +17,7 @@ import { ActiveFilters, FilterValues } from '@/components/filters/UniversalFilte
 import { mapBouquetToCatalogCard } from '@/lib/adapters/catalogCardAdapters';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 export default function FlowersIndex() {
   const navigate = useNavigate();
