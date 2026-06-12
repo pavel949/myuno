@@ -124,6 +124,45 @@ export default function PersonaDirectoryPage() {
         </LandingContainer>
       </header>
 
+      {/* SURFACES — Master Taxonomy v1.0 (6 canonical clusters) */}
+      <section aria-labelledby="surfaces-heading" className="border-b border-border bg-background">
+        <LandingContainer className="max-w-5xl py-8 sm:py-10">
+          <h2 id="surfaces-heading" className="mb-1 text-lg font-semibold text-foreground">
+            {t('По жизненному циклу', 'By lifecycle')}
+          </h2>
+          <p className="mb-4 text-sm text-muted-foreground">
+            {t('Шесть кластеров — от прибытия до строительства.', 'Six clusters — from arrival to building.')}
+          </p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {SURFACE_LANDINGS.map((s) => {
+              const Icon = s.icon;
+              return (
+                <Link
+                  key={s.slug}
+                  to={s.href}
+                  className="group relative flex flex-col gap-2 overflow-hidden border border-border bg-card p-3 transition-colors hover:border-foreground/30"
+                  style={{
+                    background: `linear-gradient(135deg, ${tokenColor(s.color, 0.10)} 0%, transparent 80%)`,
+                  }}
+                >
+                  <div
+                    className="inline-flex h-8 w-8 items-center justify-center"
+                    style={{ background: tokenColor(s.color, 0.15), color: tokenColor(s.color) }}
+                    aria-hidden
+                  >
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground">{t(s.titleRu, s.titleEn)}</p>
+                  <p className="line-clamp-2 text-[11px] text-muted-foreground">
+                    {t(s.taglineRu, s.taglineEn)}
+                  </p>
+                </Link>
+              );
+            })}
+          </div>
+        </LandingContainer>
+      </section>
+
       {/* GROUPS */}
       <main>
         <LandingContainer className="max-w-5xl py-8 sm:py-12">
