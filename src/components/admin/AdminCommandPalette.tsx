@@ -66,6 +66,7 @@ const navigationItems: CmdItem[] = [
   { id: 'data-import', titleEn: 'Data Import', titleRu: 'Импорт данных', path: '/admin/data-import', icon: Database, group: 'tools', keywords: ['csv', 'upload'] },
   { id: 'ai-ops', titleEn: 'AI Command Center', titleRu: 'AI Центр', path: '/admin/ai-ops', icon: Brain, group: 'tools', keywords: ['automation'] },
   { id: 'ai-agents', titleEn: 'AI Agents', titleRu: 'AI Агенты', path: '/admin/ai-agents', icon: Bot, group: 'tools', keywords: ['chatbot'] },
+  { id: 'official-news', titleEn: 'Official News Monitor', titleRu: 'Офиц. новости (монитор)', path: '/admin/official-news', icon: Bot, group: 'tools', keywords: ['news', 'firecrawl', 'aggregator', 'sync'] },
   { id: 'uno-team', titleEn: 'UNO Team', titleRu: 'Команда UNO', path: '/admin/uno-team', icon: Users, group: 'tools', keywords: ['staff'] },
   { id: 'qa', titleEn: 'QA Tests', titleRu: 'QA Тесты', path: '/admin/qa-test-runner', icon: TestTube, group: 'tools', keywords: ['test', 'quality'] },
   { id: 'operations', titleEn: 'Operations', titleRu: 'Операции', path: '/admin/operations', icon: ShoppingCart, group: 'tools', keywords: ['orders', 'tickets'] },
