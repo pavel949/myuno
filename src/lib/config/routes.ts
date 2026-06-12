@@ -562,7 +562,7 @@ export const APP_ROUTES = {
  * Maps old paths to new paths for backward compatibility
  */
 export const LEGACY_REDIRECTS: Record<string, string> = {
-  '/provider/onboarding': APP_ROUTES.VENDOR_ONBOARDING,
+  '/provider/onboarding': APP_ROUTES.BECOME_PARTNER,
   '/provider/dashboard': APP_ROUTES.VENDOR,
   '/become-provider': APP_ROUTES.BECOME_PARTNER,
   '/tours': `${APP_ROUTES.EXPERIENCES}?type=tour`,

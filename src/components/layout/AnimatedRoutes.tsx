@@ -666,7 +666,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/welcome/:bookingId" element={<LazyPage><Pages.WelcomeFlow /></LazyPage>} />
         
         {/* ── Provider/Vendor ── */}
-        <Route path="/provider/onboarding" element={<LazyPage><AuthGuard><Pages.ProviderOnboarding /></AuthGuard></LazyPage>} />
+        <Route path="/provider/onboarding" element={<Navigate to="/become-partner" replace />} />
         <Route path="/vendor/join" element={<LazyPage><Pages.VendorLanding /></LazyPage>} />
         <Route path="/vendor/onboarding" element={<LazyPage><AuthGuard><Pages.VendorOnboarding /></AuthGuard></LazyPage>} />
         
