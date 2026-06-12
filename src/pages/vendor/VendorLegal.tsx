@@ -18,6 +18,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner';
 import { Scale, Plus, MoreVertical, Edit, Trash2, Loader2, Star } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { VendorLegalInbox } from '@/components/vendor/VendorLegalInbox';
+
 
 const serviceTypes = [
   { value: 'law_firm', label: 'Law Firm', labelRu: 'Юридическая фирма' },
@@ -141,9 +143,12 @@ const VendorLegal = () => {
   return (
     <PageContainer>
 
+        <VendorLegalInbox providerId={profile?.id} />
+
         <Button className="w-full mb-4" onClick={() => { resetForm(); setIsDialogOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" />{isRussian ? 'Добавить' : 'Add'}
         </Button>
+
 
         {isLoading ? (
           <div className="space-y-4">{[1, 2].map(i => <Skeleton key={i} className="h-24" />)}</div>
