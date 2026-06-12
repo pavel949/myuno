@@ -64,6 +64,21 @@ const VendorOnboarding = () => {
       return;
     }
 
+    // BUG-01 (P0): partner_applications.contact_email is NOT NULL.
+    // Without a real email we cannot create the application; block before any DB write.
+    const email = user?.email?.trim();
+    if (!email) {
+      toast.error(
+        isRu ? 'Не удалось получить email' : 'Email is missing',
+        {
+          description: isRu
+            ? 'Подтвердите email в профиле и попробуйте снова.'
+            : 'Please confirm your email in your account and try again.',
+        },
+      );
+      return;
+    }
+
     if (createdProviderId) {
       setCurrentStep(1);
       return;
@@ -71,12 +86,35 @@ const VendorOnboarding = () => {
 
     setIsSubmitting(true);
     try {
+      // BUG-10 (P2): block obvious duplicates — active application for this user in last 7 days.
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: existing } = await supabase
+        .from('partner_applications')
+        .select('id')
+        .eq('user_id', user!.id)
+        .in('status', ['pending', 'reviewing'])
+        .gte('created_at', sevenDaysAgo)
+        .limit(1);
+      if (existing && existing.length > 0) {
+        toast(isRu ? 'У вас уже есть активная заявка' : 'You already have an active application', {
+          description: isRu
+            ? 'Перейдите в раздел статуса, чтобы посмотреть детали.'
+            : 'Open the status page to see the details.',
+          action: {
+            label: isRu ? 'Открыть' : 'Open',
+            onClick: () => navigate('/partner/status'),
+          },
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const { data, error } = await createProfile({
         business_name: businessName.trim(),
         business_category: category,
         verticals: [category],
         phone: phone.trim() || undefined,
-        email: user?.email || undefined,
+        email,
         commission_rate: 10,
         is_verified: false,
         // P0: vendor is NOT live until admin approves the partner_application below.
@@ -84,39 +122,43 @@ const VendorOnboarding = () => {
       });
 
       if (error) throw error;
-      setCreatedProviderId(data?.id || null);
+      const newProviderId = data?.id || null;
+      setCreatedProviderId(newProviderId);
 
       // P0: create a partner_application so the new vendor enters the moderation queue.
-      // Fire-and-forget — failure to insert shouldn't block onboarding UX.
-      try {
-        const { data: appRow } = await supabase
-          .from('partner_applications')
-          .insert({
-            user_id: user?.id ?? null,
-            business_name: businessName.trim(),
-            business_category: category,
-            contact_name: user?.user_metadata?.full_name || businessName.trim(),
-            contact_email: user?.email ?? null,
-            contact_phone: phone.trim() || null,
-            status: 'pending',
-            metadata: {
-              source: 'vendor_onboarding',
-              language,
-              provider_id: data?.id ?? null,
-              vertical: category,
-            },
-          })
-          .select('id')
-          .single();
+      const { data: appRow, error: appErr } = await supabase
+        .from('partner_applications')
+        .insert({
+          user_id: user!.id,
+          business_name: businessName.trim(),
+          business_category: category,
+          contact_name: user!.user_metadata?.full_name || businessName.trim(),
+          contact_email: email,
+          contact_phone: phone.trim() || null,
+          status: 'pending',
+          metadata: {
+            source: 'vendor_onboarding',
+            language,
+            provider_id: newProviderId,
+            vertical: category,
+          },
+        })
+        .select('id')
+        .single();
 
-        if (appRow?.id) {
-          supabase.functions
-            .invoke('notify-admin-partner-application', { body: { application_id: appRow.id } })
-            .catch(() => {});
+      if (appErr || !appRow?.id) {
+        // BUG-09 (P2): rollback the orphan provider row so admin queue stays clean.
+        if (newProviderId) {
+          await supabase.from('providers').delete().eq('id', newProviderId);
+          setCreatedProviderId(null);
         }
-      } catch (appErr) {
-        console.error('Could not create partner_application:', appErr);
+        throw appErr ?? new Error('Failed to create application');
       }
+
+      // Fire-and-forget admin notification.
+      supabase.functions
+        .invoke('notify-admin-partner-application', { body: { application_id: appRow.id } })
+        .catch(() => {});
 
       setCurrentStep(1);
     } catch (error) {
@@ -126,6 +168,7 @@ const VendorOnboarding = () => {
       setIsSubmitting(false);
     }
   };
+
 
   const handleStep2Submit = async () => {
     if (!serviceName.trim()) {
