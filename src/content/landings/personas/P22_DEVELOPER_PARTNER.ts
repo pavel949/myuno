@@ -25,7 +25,7 @@ export const P22_DEVELOPER_PARTNER: PersonaLanding = {
     { ru: 'Хотите управлять inventory и ценами в реальном времени, не через email.', en: 'You want to manage inventory and pricing in real-time, not via email.' },
   ],
   services: [
-    { slug: 'clearview-certification', label: { ru: 'ClearView™ сертификация проекта', en: 'ClearView™ project certification' }, oneLiner: { ru: 'Рейтинг AAA–BB по 8 категориям, отчёт за 5 рабочих дней.', en: 'AAA–BB rating across 8 categories, report in 5 working days.' }, href: '/property/clearview' },
+    { slug: 'clearview-certification', label: { ru: 'ClearView™ сертификация проекта', en: 'ClearView™ project certification' }, oneLiner: { ru: 'Рейтинг AAA–CCC по 8 категориям, отчёт за 5 рабочих дней.', en: 'AAA–CCC rating across 8 categories, report in 5 working days.' }, href: '/property/clearview' },
     { slug: 'developer-portal', label: { ru: 'Developer Portal', en: 'Developer Portal' }, oneLiner: { ru: 'Inventory, цены, лиды, аналитика — единый dashboard.', en: 'Inventory, pricing, leads, analytics — single dashboard.' }, href: '/developer-portal/apply' },
     { slug: 'verified-leads', label: { ru: 'Верифицированные лиды', en: 'Verified leads' }, oneLiner: { ru: 'Lead score 80+, проверенный бюджет, intent confirmed.', en: 'Lead score 80+, verified budget, intent confirmed.' }, href: '/developer-portal/apply' },
     { slug: 'commission-structure', label: { ru: 'Прозрачная commission structure', en: 'Transparent commission structure' }, oneLiner: { ru: '5–10% off-plan condo, 3–8% villa — без скрытых fees.', en: '5–10% off-plan condo, 3–8% villa — no hidden fees.' }, href: '/developer-portal/apply' },
