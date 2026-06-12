@@ -121,7 +121,10 @@ export default function FlowersIndex() {
       title={isRu ? 'Доставка цветов' : 'Flower Delivery'}
       subtitle={isRu ? `Найдено: ${filteredBouquets.length}` : `${filteredBouquets.length} results`}
       fallbackPath={APP_ROUTES.DISCOVER}
-      showSearch={false}
+      showSearch
+      searchValue={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder={isRu ? 'Поиск букетов, цветов, поводов…' : 'Search bouquets, flowers, occasions…'}
       showHero={false}
       categories={categories}
       selectedCategory={selectedCategory}
