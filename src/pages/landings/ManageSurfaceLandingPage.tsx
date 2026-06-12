@@ -4,6 +4,7 @@ import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Building2, Calendar, Wrench, Receipt, Users, BarChart3, ClipboardCheck, ArrowRight } from 'lucide-react';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { SEOHead } from '@/components/seo';
+import { buildSurfaceSeo } from '@/lib/landings/surfaceLandingSeo';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
