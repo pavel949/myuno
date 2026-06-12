@@ -102,7 +102,7 @@ export default function FlowersIndex() {
       const tags = (b.occasion_tags as string[] | null) ?? [];
       return [...tags, b.style].filter(Boolean) as string[];
     });
-  }, [bouquets, searchQuery, filterValues, activeFilterCount, applyPersonaFilter]);
+  }, [bouquets, debouncedSearchQuery, filterValues, activeFilterCount, applyPersonaFilter]);
 
   const handleRemoveFilter = useCallback((sectionId: string, optionId?: string) => {
     setFilterValues(prev => {
