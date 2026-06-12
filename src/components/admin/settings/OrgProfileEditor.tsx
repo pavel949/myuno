@@ -9,17 +9,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { normalizeWhatsapp } from "@/lib/seo/normalizeWhatsapp";
 
-const E164 = /^\+[1-9]\d{6,14}$/;
 const ISO2 = /^[A-Z]{2}$/;
 const OPENING_HOURS = /^[A-Za-z,\- 0-9:;]*$/;
 
-const schema = z.object({
-  org_telephone: z
+const whatsappField = (message: string) =>
+  z
     .string()
     .trim()
-    .regex(E164, "Phone must be E.164 (e.g. +66922407355)")
-    .or(z.literal("")),
+    .refine((v) => v === "" || normalizeWhatsapp(v) !== null, message);
+
+const schema = z.object({
+  org_telephone: whatsappField(
+    "Use E.164 phone (+66922407355) or wa.me URL",
+  ),
+  admin_whatsapp: whatsappField(
+    "Use E.164 phone (+66922407355) or wa.me URL",
+  ),
   org_email: z
     .string()
     .trim()
@@ -61,6 +68,7 @@ type FormValues = z.infer<typeof schema>;
 
 const FIELD_KEYS = [
   "org_telephone",
+  "admin_whatsapp",
   "org_email",
   "org_street_address",
   "org_postal_code",
@@ -74,6 +82,7 @@ const FIELD_KEYS = [
 
 const EMPTY: FormValues = {
   org_telephone: "",
+  admin_whatsapp: "",
   org_email: "",
   org_street_address: "",
   org_postal_code: "",
@@ -99,12 +108,18 @@ const stringToJson = (
   if (key === "org_latitude" || key === "org_longitude") {
     return value === "" ? null : Number(value);
   }
+  if (key === "org_telephone" || key === "admin_whatsapp") {
+    const normalized = normalizeWhatsapp(value);
+    return normalized ? normalized.e164 : "";
+  }
   return value;
 };
 
 const DESCRIPTIONS: Record<keyof FormValues, string> = {
   org_telephone:
-    "myUNO primary telephone (E.164). Used in Organization JSON-LD telephone.",
+    "myUNO primary telephone (E.164 or wa.me URL). Stored as E.164. Used in Organization JSON-LD telephone.",
+  admin_whatsapp:
+    "WhatsApp contact (E.164 or wa.me URL). Stored as E.164. Emitted as https://wa.me/<digits> in sameAs.",
   org_email:
     "myUNO primary contact email. Used in Organization JSON-LD email.",
   org_street_address: "myUNO street address line.",
@@ -268,6 +283,12 @@ export function OrgProfileEditor() {
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {field("org_telephone", "Телефон", "Telephone", "+66922407355")}
+        {field(
+          "admin_whatsapp",
+          "WhatsApp",
+          "WhatsApp",
+          "+66922407355 or https://wa.me/66922407355",
+        )}
         {field("org_email", "Email", "Email", "pi@myuno.app", "email")}
       </section>
 
