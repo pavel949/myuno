@@ -51,9 +51,9 @@ export default function StorefrontPage() {
         return;
       }
 
-      // Fetch company info
+      // Fetch company info (public-safe view — excludes bank/Stripe/legal fields)
       const { data: mc } = await supabase
-        .from('management_companies')
+        .from('management_companies_public')
         .select('id, name_en, name_ru, logo, description_en, description_ru, phone, email, whatsapp')
         .eq('id', sf.company_id)
         .single();
