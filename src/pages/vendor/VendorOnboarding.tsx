@@ -146,7 +146,8 @@ const VendorOnboarding = () => {
         currency: 'THB',
         category: category,
         images: servicePhoto ? [servicePhoto] : [],
-        is_active: true,
+        // P0: listing stays hidden until admin approves the partner_application.
+        is_active: false,
         max_capacity: 1,
       });
 
