@@ -20,6 +20,7 @@ import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { ECOSYSTEM_FOOTER_UI, pickTriplet } from '@/lib/ecosystemGlossary';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
+import { SURFACE_LANDINGS } from '@/lib/landings/surfaceLandings';
 
 export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
@@ -98,6 +99,25 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
             </div>
           </div>
 
+          {/* Row 1.5 — surface explore (Master Taxonomy v1.0) */}
+          <nav
+            aria-label={language === 'ru' ? 'Жизненный цикл' : 'Lifecycle'}
+            className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-caption"
+          >
+            <span className="text-muted-foreground/70">
+              {language === 'ru' ? 'Жизненный цикл:' : 'Lifecycle:'}
+            </span>
+            {SURFACE_LANDINGS.map((s) => (
+              <Link
+                key={s.slug}
+                to={s.href}
+                className="text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
+              >
+                {language === 'ru' ? s.titleRu : s.titleEn}
+              </Link>
+            ))}
+          </nav>
+
           {/* Row 2 — legal links */}
           <nav
             aria-label={t(ECOSYSTEM_FOOTER_UI.companyHeading)}
@@ -171,6 +191,21 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
             </a>
           ))}
         </div>
+
+        <nav
+          aria-label={language === 'ru' ? 'Жизненный цикл' : 'Lifecycle'}
+          className="flex flex-wrap justify-center gap-x-3 gap-y-2 font-sans text-caption"
+        >
+          {SURFACE_LANDINGS.map((s) => (
+            <Link
+              key={s.slug}
+              to={s.href}
+              className="text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
+            >
+              {language === 'ru' ? s.titleRu : s.titleEn}
+            </Link>
+          ))}
+        </nav>
 
         <nav
           aria-label={t(ECOSYSTEM_FOOTER_UI.companyHeading)}
