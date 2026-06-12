@@ -61,13 +61,17 @@ interface PartnerApplication {
   city: string | null;
   license_number: string | null;
   tax_id: string | null;
-  status: 'pending' | 'reviewing' | 'approved' | 'rejected' | 'suspended';
+  // BUG-11: DB column is `text` — keep widely typed and fall back in UI lookups.
+  status: string;
   rejection_reason: string | null;
   reviewed_at: string | null;
+  reviewed_by: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
 }
+
+type KnownStatus = 'pending' | 'reviewing' | 'approved' | 'rejected' | 'suspended';
 
 const statusConfig = {
   pending: { 
@@ -131,46 +135,7 @@ export default function PartnerApplicationsAdmin() {
 
   const isPageLoading = adminCheckLoading || (isAdmin && listLoading);
 
-  useEffect(() => {
-    if (!user?.id || !isAdmin || adminCheckLoading) {
-      if (!user?.id) setApplications([]);
-      return;
-    }
-
-    let cancelled = false;
-    setListLoading(true);
-
-    void (async () => {
-      try {
-        const { data, error } = await supabase
-          .from('partner_applications')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (cancelled) return;
-        if (error) throw error;
-        setApplications((data as PartnerApplication[]) || []);
-      } catch {
-        if (!cancelled) {
-          toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
-            description:
-              language === 'ru'
-                ? 'Не удалось загрузить заявки'
-                : 'Failed to load applications',
-          });
-          setApplications([]);
-        }
-      } finally {
-        if (!cancelled) setListLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user?.id, isAdmin, adminCheckLoading, language]);
-
-  const fetchApplications = async () => {
+  const fetchApplications = React.useCallback(async () => {
     if (!user?.id || !isAdmin) return;
     setListLoading(true);
     try {
@@ -178,19 +143,29 @@ export default function PartnerApplicationsAdmin() {
         .from('partner_applications')
         .select('*')
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       setApplications((data as PartnerApplication[]) || []);
     } catch {
       toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
-        description: language === 'ru' 
-          ? 'Не удалось загрузить заявки' 
-          : 'Failed to load applications',
+        description:
+          language === 'ru'
+            ? 'Не удалось загрузить заявки'
+            : 'Failed to load applications',
       });
+      setApplications([]);
     } finally {
       setListLoading(false);
     }
-  };
+  }, [user?.id, isAdmin, language]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setApplications([]);
+      return;
+    }
+    if (!isAdmin || adminCheckLoading) return;
+    void fetchApplications();
+  }, [user?.id, isAdmin, adminCheckLoading, fetchApplications]);
 
   const handleStatusChange = async (newStatus: 'approved' | 'rejected' | 'reviewing') => {
     if (!selectedApp || !user) return;
@@ -208,16 +183,14 @@ export default function PartnerApplicationsAdmin() {
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
 
-        const updateData = {
+        const patch: Partial<PartnerApplication> = {
           status: newStatus,
           reviewed_by: user.id,
           reviewed_at: new Date().toISOString(),
           ...(newStatus === 'rejected' && rejectionReason ? { rejection_reason: rejectionReason } : {}),
         };
         setApplications(prev =>
-          prev.map(app =>
-            app.id === selectedApp.id ? { ...app, ...updateData, status: newStatus } as PartnerApplication : app
-          )
+          prev.map(app => (app.id === selectedApp.id ? { ...app, ...patch } : app)),
         );
         toast(language === 'ru' ? 'Успешно' : 'Success', {
           description: newStatus === 'approved'
@@ -228,20 +201,18 @@ export default function PartnerApplicationsAdmin() {
         });
       } else {
         // reviewing — простая смена статуса, без письма
-        const updateData: Record<string, unknown> = {
+        const patch = {
           status: newStatus,
           reviewed_by: user.id,
           reviewed_at: new Date().toISOString(),
-        };
+        } satisfies Partial<PartnerApplication>;
         const { error } = await supabase
           .from('partner_applications')
-          .update(updateData as never)
+          .update(patch)
           .eq('id', selectedApp.id);
         if (error) throw error;
         setApplications(prev =>
-          prev.map(app =>
-            app.id === selectedApp.id ? { ...app, ...updateData, status: newStatus } as PartnerApplication : app
-          )
+          prev.map(app => (app.id === selectedApp.id ? { ...app, ...patch } : app)),
         );
         toast(language === 'ru' ? 'Успешно' : 'Success', {
           description: language === 'ru' ? 'Статус обновлён' : 'Status updated',
