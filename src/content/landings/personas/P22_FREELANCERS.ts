@@ -26,13 +26,13 @@ export const P22_FREELANCERS: PersonaLanding = {
   ],
   faq: [
     { q: { ru: 'Нужно ли быть юр.лицом?', en: 'Do I need a registered company?' }, a: { ru: 'Нет — фрилансеры работают как self-employed, нужен только work permit или соответствующая виза.', en: 'No — freelancers work as self-employed; only work permit or matching visa is required.' } },
-    { q: { ru: 'Сколько стоит размещение?', en: 'What does it cost?' }, a: { ru: 'Регистрация бесплатна. Платформа берёт 10% с выполненных заказов.', en: 'Sign-up is free. The platform charges 10% on completed orders.' } },
+    { q: { ru: 'Сколько стоит размещение?', en: 'What does it cost?' }, a: { ru: 'Регистрация бесплатна. Платформа берёт стандартную комиссию с выполненных заказов — актуальная ставка на /vendor/billing.', en: 'Sign-up is free. The platform charges its standard commission on completed orders — current rate on /vendor/billing.' } },
   ],
   primaryCta: { label: { ru: 'Создать профиль', en: 'Create a profile' }, href: '/vendor/apply' },
   secondaryCta: { label: { ru: 'Открыть объявления', en: 'Browse listings' }, href: '/classifieds' },
   seo: {
     metaTitle: { ru: 'Фрилансеры на Пхукете: клиенты, оплата, портфолио — myUNO', en: 'Phuket freelancers: clients, payments, portfolio — myUNO' },
-    metaDescription: { ru: 'Подключитесь к myUNO как фрилансер: публичный профиль, AI-консьерж, оплата картой и payout в THB. Комиссия 10%.', en: 'Join myUNO as a freelancer: public profile, AI concierge, card payments and THB payout. 10% commission.' },
+    metaDescription: { ru: 'Подключитесь к myUNO как фрилансер: публичный профиль, AI-консьерж, оплата картой и payout в THB. Прозрачная комиссия по вертикали.', en: 'Join myUNO as a freelancer: public profile, AI concierge, card payments and THB payout. Transparent per-vertical commission.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/freelancers',
     hreflangAlternates: [
