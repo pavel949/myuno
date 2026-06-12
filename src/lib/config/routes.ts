@@ -270,6 +270,7 @@ export const APP_ROUTES = {
   ARRIVE_CLUSTER: '/arrive',
   SIM_START: '/sim',
   EXCHANGE: '/exchange',
+  OFFICIAL_NEWS: '/arrive/news',
 
   // ── Utility Micro-apps ──
   VISA_QUIZ: '/visa/quiz',

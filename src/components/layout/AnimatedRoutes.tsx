@@ -462,6 +462,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.ARRIVE_CLUSTER} element={<LazyPage><Pages.ArriveClusterPage /></LazyPage>} />
         <Route path={APP_ROUTES.SIM_START} element={<LazyPage><Pages.SIMStartPage /></LazyPage>} />
         <Route path={APP_ROUTES.EXCHANGE} element={<LazyPage><Pages.ExchangeBotPage /></LazyPage>} />
+        <Route path={APP_ROUTES.OFFICIAL_NEWS} element={<LazyPage><Pages.OfficialNewsPage /></LazyPage>} />
         
         {/* ── Utility Micro-apps ── */}
         <Route path={APP_ROUTES.VISA_QUIZ} element={<LazyPage><Pages.VisaQuizPage /></LazyPage>} />
