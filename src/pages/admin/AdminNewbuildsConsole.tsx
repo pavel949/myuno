@@ -68,10 +68,10 @@ export default function AdminNewbuildsConsole() {
           <h3 className="font-semibold mb-1">Проекты</h3>
           <p className="text-sm text-muted-foreground">Все проекты, юниты, цены, статусы. Bulk-действия.</p>
         </Card></Link>
-        <Link to="/admin/newbuilds/documents"><Card className="p-6 hover:border-primary/50 transition-colors h-full">
+        <Link to="/admin/projects"><Card className="p-6 hover:border-primary/50 transition-colors h-full">
           <FileText className="w-8 h-8 text-primary mb-3" />
           <h3 className="font-semibold mb-1">Документы</h3>
-          <p className="text-sm text-muted-foreground">Vault документов проектов: ClearView checklist, версионирование.</p>
+          <p className="text-sm text-muted-foreground">Vault документов проектов: ClearView checklist, версионирование (открывается из карточки проекта).</p>
         </Card></Link>
       </div>
     </div>

@@ -618,7 +618,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/g-trust" element={<LazyPage><Pages.GTrustPage /></LazyPage>} />
         <Route path="/ip-policy" element={<LazyPage><Pages.IPPolicyPage /></LazyPage>} />
         <Route path="/partner-agreement" element={<LazyPage><Pages.PartnerAgreementPage /></LazyPage>} />
-        <Route path="/partner-terms" element={<LazyPage><Pages.PartnerAgreementPage /></LazyPage>} />
+        <Route path="/partner-terms" element={<Navigate to="/partner-agreement" replace />} />
         <Route path="/dispute-resolution" element={<LazyPage><Pages.DisputeResolutionPage /></LazyPage>} />
         <Route path="/view-history" element={<Navigate to="/history" replace />} />
         <Route path="/guide/:token" element={<LazyPage><Pages.PublicGuidebook /></LazyPage>} />

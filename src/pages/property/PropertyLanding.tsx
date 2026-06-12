@@ -294,7 +294,7 @@ export default function PropertyLanding() {
         </section>
 
         <Link
-          to="/property/my"
+          to="/my-property"
           className="mt-10 flex items-center gap-2 text-sm font-medium text-primary hover:underline"
         >
           <Home className="h-4 w-4" />
