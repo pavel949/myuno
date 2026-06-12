@@ -68,6 +68,7 @@ type FormValues = z.infer<typeof schema>;
 
 const FIELD_KEYS = [
   "org_telephone",
+  "admin_whatsapp",
   "org_email",
   "org_street_address",
   "org_postal_code",
@@ -81,6 +82,7 @@ const FIELD_KEYS = [
 
 const EMPTY: FormValues = {
   org_telephone: "",
+  admin_whatsapp: "",
   org_email: "",
   org_street_address: "",
   org_postal_code: "",
@@ -106,12 +108,18 @@ const stringToJson = (
   if (key === "org_latitude" || key === "org_longitude") {
     return value === "" ? null : Number(value);
   }
+  if (key === "org_telephone" || key === "admin_whatsapp") {
+    const normalized = normalizeWhatsapp(value);
+    return normalized ? normalized.e164 : "";
+  }
   return value;
 };
 
 const DESCRIPTIONS: Record<keyof FormValues, string> = {
   org_telephone:
-    "myUNO primary telephone (E.164). Used in Organization JSON-LD telephone.",
+    "myUNO primary telephone (E.164 or wa.me URL). Stored as E.164. Used in Organization JSON-LD telephone.",
+  admin_whatsapp:
+    "WhatsApp contact (E.164 or wa.me URL). Stored as E.164. Emitted as https://wa.me/<digits> in sameAs.",
   org_email:
     "myUNO primary contact email. Used in Organization JSON-LD email.",
   org_street_address: "myUNO street address line.",
