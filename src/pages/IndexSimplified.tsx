@@ -20,6 +20,10 @@ import { NowInPhuket } from '@/components/home/NowInPhuket';
 import { RoleSheet } from '@/components/home/RoleSheet';
 import { PrimaryGrid } from '@/components/home/PrimaryGrid';
 import { OfficialNews } from '@/components/home/OfficialNews';
+import { CLUSTERS, FLAT_SERVICES } from '@/lib/catalog/taxonomy';
+
+const TOTAL_CLUSTERS = CLUSTERS.length;
+const TOTAL_SERVICES = FLAT_SERVICES.length;
 
 const IndexSimplified: React.FC = () => {
   const { personas, togglePersona, setPersonas } = useUserPersonas();
