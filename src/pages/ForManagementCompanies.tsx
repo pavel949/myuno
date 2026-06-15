@@ -58,6 +58,7 @@ const modules: ModuleSpec[] = [
       { icon: ClipboardList, titleRu: 'CRM-задачи и встречи с напоминаниями', titleEn: 'CRM tasks & meetings with reminders', descRu: 'Звонки, показы и встречи с дедлайнами; просроченные задачи попадают в утренний брифинг с приоритетом.', descEn: 'Calls, viewings and meetings with deadlines; overdue tasks surface in the morning briefing with top priority.' },
       { icon: Mailbox, titleRu: 'Email-рассылки, шаблоны и автопоследовательности', titleEn: 'Email campaigns, templates & sequences', descRu: 'Письма собственникам и гостям по шаблонам, drip-последовательности для прогрева лидов.', descEn: 'Templated emails to owners and guests, drip sequences to warm up leads.' },
       { icon: FileSignature, titleRu: 'Портфель договоров управления', titleEn: 'Management contracts portfolio', descRu: 'Условия по каждому объекту: комиссия, распределение расходов, статус — с журналом изменений.', descEn: 'Terms per property: commission, expense split, status — with a full change log.' },
+      { icon: Activity, titleRu: 'Лог активностей и timeline по контакту', titleEn: 'Activity log & contact timeline', descRu: 'Все звонки, письма, встречи и изменения сделки на единой ленте — ничего не теряется при передаче.', descEn: 'Every call, email, meeting and deal change on a single feed — nothing is lost on hand-off.' },
     ],
   },
   {
