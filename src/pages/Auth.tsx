@@ -259,11 +259,74 @@ export default function Auth() {
           },
         }).catch(err => console.error('Signup notification error:', err));
 
-        // When email confirmation is required, Supabase returns no session.
-        // Navigating to a protected `redirectPath` would bounce back to /auth
-        // and trap the user in a loop. Stay on /auth, switch to login mode,
-        // and tell them to verify their inbox.
+        // Verify server-side artefacts (profile.phone + terms_acceptances).
+        // Uses service role inside the edge function, so it works even when
+        // the new user has no session yet (email-confirmation flow).
+        type IntegrityReport = {
+          ok: boolean;
+          profile_exists: boolean;
+          phone_saved: boolean;
+          phone_matches: boolean;
+          terms_accepted: boolean;
+          privacy_accepted: boolean;
+          warnings: string[];
+        };
+        let integrity: IntegrityReport | null = null;
+        let integrityError: string | null = null;
+        if (data?.user?.id) {
+          try {
+            const { data: verifyData, error: verifyErr } = await withTimeout(
+              supabase.functions.invoke('verify-signup-integrity', {
+                body: { user_id: data.user.id, expected_phone: normalisedPhone || undefined },
+              }),
+              8000,
+            );
+            if (verifyErr) integrityError = verifyErr.message || 'verify_failed';
+            else integrity = verifyData as IntegrityReport;
+          } catch (e) {
+            integrityError = e instanceof Error ? e.message : 'verify_failed';
+          }
+        }
+
+        const buildIntegrityDescription = (rpt: IntegrityReport | null): string => {
+          if (!rpt) return '';
+          const checks: string[] = [];
+          if (isRu) {
+            checks.push(rpt.phone_saved && rpt.phone_matches ? '✓ Телефон сохранён' : '⚠ Телефон не сохранён');
+            checks.push(rpt.terms_accepted ? '✓ Условия использования приняты' : '⚠ Условия не зафиксированы');
+            checks.push(rpt.privacy_accepted ? '✓ Политика конфиденциальности принята' : '⚠ Политика не зафиксирована');
+          } else if (isTh) {
+            checks.push(rpt.phone_saved && rpt.phone_matches ? '✓ บันทึกเบอร์โทรแล้ว' : '⚠ ไม่ได้บันทึกเบอร์โทร');
+            checks.push(rpt.terms_accepted ? '✓ ยอมรับเงื่อนไขแล้ว' : '⚠ ยังไม่ยอมรับเงื่อนไข');
+            checks.push(rpt.privacy_accepted ? '✓ ยอมรับนโยบายความเป็นส่วนตัวแล้ว' : '⚠ ยังไม่ยอมรับนโยบาย');
+          } else {
+            checks.push(rpt.phone_saved && rpt.phone_matches ? '✓ Phone saved' : '⚠ Phone not saved');
+            checks.push(rpt.terms_accepted ? '✓ Terms accepted' : '⚠ Terms not recorded');
+            checks.push(rpt.privacy_accepted ? '✓ Privacy accepted' : '⚠ Privacy not recorded');
+          }
+          return checks.join('\n');
+        };
+
         const hasSession = !!data?.session;
+
+        if (integrityError) {
+          toast.warning(
+            isTh ? 'ไม่สามารถยืนยันข้อมูลได้' : isRu ? 'Не удалось проверить данные' : 'Could not verify account data',
+            {
+              description: isTh
+                ? 'บัญชีถูกสร้างแล้ว แต่ไม่สามารถยืนยันการบันทึกเบอร์/เงื่อนไขได้'
+                : isRu
+                  ? 'Аккаунт создан, но не удалось подтвердить сохранение телефона/условий. Если возникнут проблемы — напишите в поддержку.'
+                  : "Account created, but we couldn't confirm phone/terms were stored. Contact support if anything is missing.",
+            },
+          );
+        } else if (integrity && !integrity.ok) {
+          toast.warning(
+            isTh ? 'บัญชีถูกสร้าง — มีคำเตือน' : isRu ? 'Аккаунт создан — есть предупреждения' : 'Account created — with warnings',
+            { description: buildIntegrityDescription(integrity), duration: 9000 },
+          );
+        }
+
         if (!hasSession) {
           toast(isTh ? 'ตรวจสอบอีเมลของคุณ' : isRu ? '📧 Подтвердите email' : '📧 Check your inbox', {
             description: isTh
@@ -272,18 +335,27 @@ export default function Auth() {
                 ? 'Мы отправили ссылку для подтверждения. После подтверждения войдите в аккаунт.'
                 : "We sent a verification link. Confirm your email, then sign in.",
           });
+          if (integrity?.ok) {
+            toast.success(
+              isTh ? 'ข้อมูลของคุณถูกบันทึก' : isRu ? '✅ Данные сохранены' : '✅ Your data is saved',
+              { description: buildIntegrityDescription(integrity), duration: 7000 },
+            );
+          }
           setIsLogin(true);
           setPassword('');
           setConfirmPassword('');
           return;
         }
 
-        toast(isTh ? 'ยินดีต้อนรับ!' : isRu ? '🎉 Добро пожаловать!' : '🎉 Welcome aboard!', {
-          description: isTh
-            ? 'สร้างบัญชีเรียบร้อยแล้ว'
-            : isRu
-              ? 'Аккаунт создан.'
-              : 'Account created.',
+        toast.success(isTh ? 'ยินดีต้อนรับ!' : isRu ? '🎉 Добро пожаловать!' : '🎉 Welcome aboard!', {
+          description: integrity?.ok
+            ? buildIntegrityDescription(integrity)
+            : isTh
+              ? 'สร้างบัญชีเรียบร้อยแล้ว'
+              : isRu
+                ? 'Аккаунт создан.'
+                : 'Account created.',
+          duration: 7000,
         });
         // With an active session, the redirect useEffect will pick up the new
         // `user` and route to the role-aware destination — no manual navigate

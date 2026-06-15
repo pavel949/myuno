@@ -178,3 +178,5 @@ verify_jwt = false
     verify_jwt = false
   [functions.handle-email-suppression]
     verify_jwt = false
+  [functions.verify-signup-integrity]
+    verify_jwt = false
