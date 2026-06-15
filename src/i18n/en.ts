@@ -522,18 +522,27 @@ export const en: Record<string, string> = {
   'welcome.persona.build.hint': 'Build / B2B portal',
   'welcome.persona.build.aria':
     'Developer and provider scenario: leads, project showcase, B2B portal. Open the Build section.',
-  'welcome.benefits.title': 'Why one account is easier',
+  'welcome.benefits.title': 'One account. One app — the whole world!',
   'welcome.benefits.lead':
-    'Less chat-thread chaos — more transparency in orders and assets.',
-  'welcome.benefits.oneAccount.title': 'Everything in one place',
+    'Digital infrastructure for foreigners: housing, paperwork, services, payments and support — in one place, in your language.',
+  'welcome.benefits.oneAccount.title': 'The world in one account',
   'welcome.benefits.oneAccount.body':
-    'Orders, provider chats, and role-based workspaces — in a single account, no scattered apps.',
-  'welcome.benefits.history.title': 'Your history stays put',
+    '40+ services behind a single login: transfer, SIM, visas, rentals, investments — no need for a dozen separate apps.',
+  'welcome.benefits.history.title': 'Your history stays with you',
   'welcome.benefits.history.body':
-    'Actions and links to your assets persist when you change phone — you never start from scratch.',
-  'welcome.benefits.ai.title': 'AI assembles the path',
+    'Documents, orders and asset links travel with you when you change country or phone — nothing gets lost.',
+  'welcome.benefits.ai.title': 'AI concierge 24/7',
   'welcome.benefits.ai.body':
-    'The assistant suggests a chain of services for your goal — you confirm each step.',
+    'The assistant builds a path for your goal, answers in your language and proposes the next step — you just confirm.',
+  'welcome.benefits.lang.title': 'EN · RU · TH',
+  'welcome.benefits.lang.body':
+    'Interface, contracts and provider chats in your language. Document translation and review built in.',
+  'welcome.benefits.trust.title': 'KYC & verified partners',
+  'welcome.benefits.trust.body':
+    'Every provider is vetted, payments are escrow-protected, disputes are handled inside the platform.',
+  'welcome.benefits.payments.title': 'Borderless payments',
+  'welcome.benefits.payments.body':
+    'Card, wire, crypto and local rails — we handle currencies and fees, you see one balance in one wallet.',
   'welcome.clusters.lead':
     'Each card opens a catalog area: direction → mini-app with a working path.',
   'welcome.closing.title.line1': 'One account.',
