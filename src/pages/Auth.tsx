@@ -246,14 +246,16 @@ export default function Auth() {
           description,
         });
       } else {
-        // Referral application — best-effort. Will only succeed if a session
-        // already exists (auto-confirm on). With email confirmation enabled
-        // this silently no-ops; a dedicated edge function is tracked as a
-        // follow-up. Code intentionally left to preserve existing happy path.
+        // Referral application — routed through `apply-referral` edge function
+        // which uses the service role and works in the email-confirmation flow
+        // (no client session yet). Authorised by user_id matching a recent
+        // unconfirmed signup window inside the function.
         if (referralCode && data?.user) {
-          try {
-            await supabase.rpc('apply_referral_code', { p_referred_id: data.user.id, p_code: referralCode.toUpperCase() });
-          } catch (refError) { console.error('Error applying referral code:', refError); }
+          supabase.functions
+            .invoke('apply-referral', {
+              body: { user_id: data.user.id, code: referralCode.toUpperCase() },
+            })
+            .catch((refError) => console.error('Error applying referral code:', refError));
         }
 
         // NOTE: terms_acceptances is now written by the `handle_new_user`
