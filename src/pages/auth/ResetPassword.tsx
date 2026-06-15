@@ -195,7 +195,7 @@ export default function ResetPassword() {
           ) : (
             <div className="space-y-8">
               <div className="text-center space-y-2">
-                <h1 className="text-3xl font-display font-bold text-gradient-gold">
+                <h1 className="text-3xl font-display font-bold text-primary">
                   {language === 'ru' ? 'Новый пароль' : 'New password'}
                 </h1>
                 <p className="text-muted-foreground">

@@ -104,10 +104,10 @@ export function UnderConstruction() {
           className="flex items-center justify-center gap-2"
         >
           <span className="text-xl font-medium text-muted-foreground">my</span>
-          <div className="w-10 h-10 rounded-none gradient-gold flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 rounded-none bg-primary flex items-center justify-center shadow-lg">
             <span className="text-lg font-bold text-primary-foreground">U</span>
           </div>
-          <span className="text-2xl font-display font-bold text-gradient-gold">UNO</span>
+          <span className="text-2xl font-display font-bold text-primary">UNO</span>
         </motion.div>
 
         {/* Icon */}

@@ -404,7 +404,7 @@ export default function AdminQuickListings() {
                 {language === 'ru' ? 'Отклонить' : 'Reject'}
               </Button>
               <Button
-                className="gradient-gold text-primary-foreground"
+                className="bg-primary text-primary-foreground"
                 onClick={() => selectedListing && handleApprove(selectedListing)}
                 disabled={isProcessing}
               >

@@ -237,7 +237,7 @@ const navigate = useNavigate();
         animate={{ opacity: 1, y: 0 }}
         className="relative rounded-none overflow-hidden mb-8 p-6 sm:p-8"
       >
-        <div className="absolute inset-0 gradient-gold opacity-10" />
+        <div className="absolute inset-0 bg-primary/10" />
         <div className="relative">
           <h1 className="text-2xl sm:text-3xl font-bold mb-4">
             {language === 'ru' 
