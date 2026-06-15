@@ -118,6 +118,8 @@ function DeferredProvidersGate({ children }: { children: React.ReactNode }) {
 function ComingSoonGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
+  const publicAccessEnabled = useFeatureFlag('PUBLIC_ACCESS');
+
 
   const bypassComingSoon = React.useMemo(() => {
     if (import.meta.env.VITE_BYPASS_COMING_SOON === 'true') return true;
