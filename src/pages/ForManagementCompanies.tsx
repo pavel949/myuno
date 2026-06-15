@@ -103,18 +103,18 @@ const ForManagementCompanies: React.FC = () => {
           </div>
         </section>
 
-        {/* Social proof */}
+        {/* Core capabilities */}
         <section className="py-12 border-y border-border/50">
-          <div className="max-w-4xl mx-auto px-4 flex flex-wrap justify-center gap-8 text-center">
+          <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { value: '50+', labelEn: 'Properties Managed', labelRu: 'Объектов в управлении' },
-              { value: '₿2M+', labelEn: 'Revenue Tracked', labelRu: 'Оборот отслежен' },
-              { value: '24/7', labelEn: 'Guest Support', labelRu: 'Поддержка гостей' },
-              { value: '95%', labelEn: 'Owner Satisfaction', labelRu: 'Довольных владельцев' },
+              { value: 'PMS', labelEn: 'Bookings, calendar, channel sync', labelRu: 'Брони, календарь, синхронизация каналов' },
+              { value: 'CRM', labelEn: 'Owners, guests, leads in one place', labelRu: 'Собственники, гости и лиды в одном месте' },
+              { value: 'Finance', labelEn: 'P&L, owner statements, payouts', labelRu: 'P&L, отчёты владельцам, выплаты' },
+              { value: 'Ops', labelEn: 'Tasks, cleaning, maintenance', labelRu: 'Задачи, уборка, обслуживание' },
             ].map((stat) => (
               <div key={stat.value}>
-                <div className="text-3xl font-bold text-primary">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{isRu ? stat.labelRu : stat.labelEn}</div>
+                <div className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
+                <div className="text-sm text-muted-foreground mt-1">{isRu ? stat.labelRu : stat.labelEn}</div>
               </div>
             ))}
           </div>
