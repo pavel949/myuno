@@ -33,14 +33,21 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <Plane className="w-4 h-4" />
           {language === 'ru' ? 'Номер рейса' : 'Flight Number'}
+          <span className="text-accent">*</span>
         </Label>
         <Input
           value={formData.flightNumber}
           onChange={(e) => setFormData(prev => ({ ...prev, flightNumber: e.target.value.toUpperCase() }))}
-          placeholder="TG 925"
+          placeholder={language === 'ru' ? 'например, TG 925' : 'e.g. TG 925'}
           className="h-11"
         />
+        <p className="text-[11px] text-muted-foreground">
+          {language === 'ru'
+            ? 'Обязательное поле — водитель отслеживает рейс по номеру'
+            : 'Required — the driver tracks your flight by number'}
+        </p>
       </div>
+
 
       {/* Date / Time */}
       <div className="grid grid-cols-2 gap-3">
