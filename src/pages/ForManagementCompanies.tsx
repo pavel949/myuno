@@ -241,7 +241,7 @@ const ForManagementCompanies: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-80px' }}
                   transition={{ duration: 0.5 }}
-                  className="scroll-mt-32"
+                  className="scroll-mt-28"
                 >
                   <div className="mb-8 flex items-start gap-4">
                     <div className="hidden md:flex items-center justify-center w-12 h-12 border border-primary/30 text-primary font-mono text-lg shrink-0">
