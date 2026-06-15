@@ -180,3 +180,7 @@ verify_jwt = false
     verify_jwt = false
   [functions.verify-signup-integrity]
     verify_jwt = false
+  [functions.send-welcome-email]
+    verify_jwt = false
+  [functions.apply-referral]
+    verify_jwt = false
