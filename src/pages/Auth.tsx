@@ -54,6 +54,15 @@ export default function Auth() {
   const [signupStep, setSignupStep] = useState<SignupStep>('phone');
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [integrityModal, setIntegrityModal] = useState<{
+    open: boolean;
+    userId: string | null;
+    expectedPhone: string | null;
+    report: IntegrityReport | null;
+    error: string | null;
+    emailConfirmationRequired: boolean;
+    redirectToLoginOnClose: boolean;
+  }>({ open: false, userId: null, expectedPhone: null, report: null, error: null, emailConfirmationRequired: false, redirectToLoginOnClose: false });
   const SHOW_FORGOT_AFTER = 3;
 
   const { user, signIn, signUp, isLoading: authLoading } = useAuth();
