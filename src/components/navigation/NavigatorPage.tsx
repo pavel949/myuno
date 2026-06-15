@@ -53,22 +53,22 @@ import { cn } from '@/lib/utils';
 
 /** Cluster accent — semantic cluster tokens (DS 2.1, matches ClusterAppCard). */
 const CAT_COLOR_DARK: Record<string, { dot: string; iconBg: string; iconFg: string }> = {
-  arrive: { dot: 'bg-cluster-arrive', iconBg: 'bg-cluster-arrive/20', iconFg: 'text-cluster-arrive' },
-  live:   { dot: 'bg-cluster-live', iconBg: 'bg-cluster-live/20', iconFg: 'text-cluster-live' },
-  manage: { dot: 'bg-cluster-manage', iconBg: 'bg-cluster-manage/20', iconFg: 'text-cluster-manage' },
-  invest: { dot: 'bg-cluster-invest', iconBg: 'bg-cluster-invest/20', iconFg: 'text-cluster-invest' },
-  legal:  { dot: 'bg-cluster-legal', iconBg: 'bg-cluster-legal/20', iconFg: 'text-cluster-legal' },
-  build:  { dot: 'bg-cluster-build', iconBg: 'bg-cluster-build/25', iconFg: 'text-cluster-build' },
+  arrive: { dot: 'bg-cluster-arrive', iconBg: 'bg-cluster-arrive', iconFg: 'text-primary-foreground' },
+  live:   { dot: 'bg-cluster-live',   iconBg: 'bg-cluster-live',   iconFg: 'text-primary-foreground' },
+  manage: { dot: 'bg-cluster-manage', iconBg: 'bg-cluster-manage', iconFg: 'text-primary-foreground' },
+  invest: { dot: 'bg-cluster-invest', iconBg: 'bg-cluster-invest', iconFg: 'text-primary-foreground' },
+  legal:  { dot: 'bg-cluster-legal',  iconBg: 'bg-cluster-legal',  iconFg: 'text-primary-foreground' },
+  build:  { dot: 'bg-cluster-build',  iconBg: 'bg-cluster-build',  iconFg: 'text-primary-foreground' },
 };
 
 /** Light shell: cluster tints on card / muted surfaces. */
 const CAT_COLOR_LIGHT: Record<string, { dot: string; iconBg: string; iconFg: string }> = {
-  arrive: { dot: 'bg-cluster-arrive', iconBg: 'bg-cluster-arrive/15', iconFg: 'text-cluster-arrive' },
-  live:   { dot: 'bg-cluster-live', iconBg: 'bg-cluster-live/15', iconFg: 'text-cluster-live' },
-  manage: { dot: 'bg-cluster-manage', iconBg: 'bg-cluster-manage/15', iconFg: 'text-cluster-manage' },
-  invest: { dot: 'bg-cluster-invest', iconBg: 'bg-cluster-invest/15', iconFg: 'text-cluster-invest' },
-  legal:  { dot: 'bg-cluster-legal', iconBg: 'bg-cluster-legal/15', iconFg: 'text-cluster-legal' },
-  build:  { dot: 'bg-cluster-build', iconBg: 'bg-cluster-build/15', iconFg: 'text-cluster-build' },
+  arrive: { dot: 'bg-cluster-arrive', iconBg: 'bg-cluster-arrive', iconFg: 'text-primary-foreground' },
+  live:   { dot: 'bg-cluster-live',   iconBg: 'bg-cluster-live',   iconFg: 'text-primary-foreground' },
+  manage: { dot: 'bg-cluster-manage', iconBg: 'bg-cluster-manage', iconFg: 'text-primary-foreground' },
+  invest: { dot: 'bg-cluster-invest', iconBg: 'bg-cluster-invest', iconFg: 'text-primary-foreground' },
+  legal:  { dot: 'bg-cluster-legal',  iconBg: 'bg-cluster-legal',  iconFg: 'text-primary-foreground' },
+  build:  { dot: 'bg-cluster-build',  iconBg: 'bg-cluster-build',  iconFg: 'text-primary-foreground' },
 };
 
 function catColor(clusterId: string, shell: NavigatorShell) {
