@@ -65,11 +65,12 @@ export function ClusterAppCard({
       <div className="flex items-start gap-3">
         <div
           className={cn(
-            'grid h-10 w-10 shrink-0 place-items-center rounded-none border border-border',
+            'grid h-10 w-10 shrink-0 place-items-center rounded-none border',
             ACCENT_BG[clusterId],
+            ACCENT_BORDER[clusterId],
           )}
         >
-          <Icon className={cn('h-[18px] w-[18px]', ACCENT_TEXT[clusterId])} strokeWidth={1.75} />
+          <Icon className="h-[18px] w-[18px] text-primary-foreground" strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
