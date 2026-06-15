@@ -152,7 +152,7 @@ export function ExploreMoreRail({ clusterId, currentPath, className }: ExploreMo
         to="/discover"
         className="flex items-center justify-center gap-1.5 text-[13px] text-primary font-semibold hover:text-primary/80 transition-colors min-h-[44px]"
       >
-        {isRu ? 'Смотреть все 6 кластеров' : 'View all 6 clusters'} <ChevronRight className="w-3.5 h-3.5" />
+        {isRu ? `Смотреть все ${TOTAL_CLUSTERS} кластеров` : `View all ${TOTAL_CLUSTERS} clusters`} <ChevronRight className="w-3.5 h-3.5" />
       </Link>
     </div>
   );
