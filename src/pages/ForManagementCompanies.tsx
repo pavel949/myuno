@@ -74,6 +74,7 @@ const modules: ModuleSpec[] = [
       { icon: AlertTriangle, titleRu: 'Дебиторка (AR Aging) с ведёрной разбивкой', titleEn: 'AR Aging with bucket breakdown', descRu: 'Кто и сколько должен по срокам 0–30 / 31–60 / 61–90 / 90+ дней — должники видны сразу.', descEn: 'Who owes what across 0–30 / 31–60 / 61–90 / 90+ day buckets — debtors surface instantly.' },
       { icon: Shield, titleRu: 'Сверка заказов с леджером', titleEn: 'Order-to-ledger reconciliation', descRu: 'Автоматически сравнивает подтверждённые заказы с записями в ledger_entries и подсвечивает расхождения.', descEn: 'Automatically compares confirmed orders against ledger entries and flags any discrepancy.' },
       { icon: Receipt, titleRu: 'Налоговый центр и экспорт отчётов', titleEn: 'Tax center & report exports', descRu: 'Документы по WHT и VAT в одном месте, выгрузка отчётов в Excel для бухгалтера и налоговой.', descEn: 'WHT and VAT docs in one place, Excel exports for accountants and tax filings.' },
+      { icon: Percent, titleRu: 'Комиссии маркетплейса с авторасчётом', titleEn: 'Marketplace commissions, auto-calculated', descRu: 'Платформенная комиссия и выплата вендору считаются автоматически и попадают в леджер на каждом заказе.', descEn: 'Platform fee and vendor payout are calculated automatically and recorded in the ledger on every order.' },
     ],
   },
   {
