@@ -11,10 +11,10 @@
  *  6. Closing CTA + footer (Privacy · Terms · Support · Contact).
  *  7. Sticky signup bar on mobile.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight, Shield, Globe, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Shield, Globe, Sparkles, Plane, ChevronDown, Car, Compass, Anchor, ShieldCheck, Smartphone, Wallet, Zap } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { useCatalogFromDB } from '@/lib/catalog/useCatalogFromDB';
@@ -60,6 +60,21 @@ export default function WelcomeLanding() {
   const { language, t } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
+  const [tripOpen, setTripOpen] = useState(false);
+
+  const tripServices = useMemo(
+    () => [
+      { icon: Plane, label: t('welcome.hero.pickTrip.svc.transfer'), href: APP_ROUTES.AIRPORT_TRANSFER },
+      { icon: Car, label: t('welcome.hero.pickTrip.svc.car'), href: APP_ROUTES.TRANSPORT },
+      { icon: Compass, label: t('welcome.hero.pickTrip.svc.tours'), href: APP_ROUTES.EXPERIENCES },
+      { icon: Anchor, label: t('welcome.hero.pickTrip.svc.yachts'), href: APP_ROUTES.YACHTS },
+      { icon: ShieldCheck, label: t('welcome.hero.pickTrip.svc.insurance'), href: APP_ROUTES.INSURANCE_TRAVEL },
+      { icon: Smartphone, label: t('welcome.hero.pickTrip.svc.sim'), href: APP_ROUTES.SIM_START },
+      { icon: Wallet, label: t('welcome.hero.pickTrip.svc.exchange'), href: APP_ROUTES.EXCHANGE },
+      { icon: Zap, label: t('welcome.hero.pickTrip.svc.fasttrack'), href: APP_ROUTES.FAST_TRACK },
+    ],
+    [t],
+  );
   const {
     byCluster,
     totalEligibleServices,
@@ -166,6 +181,71 @@ export default function WelcomeLanding() {
             <p className="mb-3 font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
               {t('welcome.hero.pickIntro')}
             </p>
+
+            {/* Trip planner — expandable, top-priority entry */}
+            <div className="mb-2 overflow-hidden border border-border bg-card">
+              <button
+                type="button"
+                data-testid="welcome-cta-trip"
+                aria-expanded={tripOpen}
+                onClick={() => {
+                  try { localStorage.setItem('intent_segment', 'trip'); } catch { /* noop */ }
+                  setTripOpen((v) => !v);
+                }}
+                className={cn(
+                  'group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
+                  'hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                )}
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-border bg-background">
+                  <Plane className="h-4 w-4 text-primary" strokeWidth={2} />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="font-sans text-body font-semibold text-foreground">
+                    {t('welcome.hero.pickTrip.title')}
+                  </span>
+                  <span className="font-sans text-caption text-muted-foreground">
+                    {t('welcome.hero.pickTrip.sub')}
+                  </span>
+                </span>
+                <span className="flex shrink-0 items-center gap-1 font-sans text-caption uppercase tracking-[0.12em] text-muted-foreground">
+                  {tripOpen ? t('welcome.hero.pickTrip.collapse') : t('welcome.hero.pickTrip.expand')}
+                  <ChevronDown
+                    className={cn('h-4 w-4 transition-transform', tripOpen && 'rotate-180')}
+                    strokeWidth={2}
+                  />
+                </span>
+              </button>
+              <AnimatePresence initial={false}>
+                {tripOpen && (
+                  <motion.div
+                    key="trip-services"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                    className="border-t border-border"
+                  >
+                    <div className="grid grid-cols-2 gap-px bg-border sm:grid-cols-4">
+                      {tripServices.map((svc) => (
+                        <Link
+                          key={svc.href}
+                          to={svc.href}
+                          data-testid={`welcome-trip-svc-${svc.href}`}
+                          className="group flex items-center gap-2 bg-card px-3 py-3 transition-colors hover:bg-card/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                        >
+                          <svc.icon className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" strokeWidth={2} />
+                          <span className="font-sans text-body-sm text-foreground">
+                            {svc.label}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               {[
                 {
