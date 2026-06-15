@@ -198,6 +198,59 @@ const ForManagementCompanies: React.FC = () => {
           </div>
         </section>
 
+        {/* Modules deep-dive */}
+        <section className="py-20 px-4 bg-muted/20">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+              {isRu ? 'Что именно делает платформа' : 'What the platform actually does'}
+            </h2>
+            <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+              {isRu
+                ? 'Четыре модуля, каждый собран на реальной работе нашей УК. Ниже — конкретные функции, не лозунги.'
+                : 'Four modules, each built on the real work of our own MC. Below — concrete features, not slogans.'}
+            </p>
+
+            <div className="space-y-12">
+              {modules.map((m) => (
+                <motion.div
+                  key={m.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-80px' }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="mb-6">
+                    <Badge variant="outline" className="mb-3 text-primary border-primary/30">
+                      {m.badge}
+                    </Badge>
+                    <h3 className="text-2xl md:text-3xl font-bold mb-2">
+                      {isRu ? m.titleRu : m.titleEn}
+                    </h3>
+                    <p className="text-muted-foreground max-w-3xl">
+                      {isRu ? m.leadRu : m.leadEn}
+                    </p>
+                  </div>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {m.items.map((item, idx) => (
+                      <Card key={idx} className="h-full hover:shadow-md transition-shadow">
+                        <CardContent className="p-5">
+                          <item.icon className="w-6 h-6 text-primary mb-3" />
+                          <h4 className="font-semibold mb-2 text-base leading-snug">
+                            {isRu ? item.titleRu : item.titleEn}
+                          </h4>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {isRu ? item.descRu : item.descEn}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Features Grid */}
         <section className="py-20 px-4">
           <div className="max-w-6xl mx-auto">
