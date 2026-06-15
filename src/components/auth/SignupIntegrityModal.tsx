@@ -218,6 +218,13 @@ export function SignupIntegrityModal({
           </>
         )}
 
+        {lastCheckedAt && (
+          <p className="text-xs text-muted-foreground">
+            {language === 'ru' ? 'Обновлено: ' : language === 'th' ? 'อัปเดต: ' : 'Last checked: '}
+            {new Date(lastCheckedAt).toLocaleTimeString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-US')}
+          </p>
+        )}
+
         <DialogFooter className="gap-2 sm:gap-2">
           <Button variant="outline" onClick={handleRefresh} disabled={refreshing || !userId}>
             {refreshing ? (
