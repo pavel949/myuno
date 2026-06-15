@@ -14,8 +14,10 @@ import {
   Globe, Smartphone, Clock, DollarSign,
   KanbanSquare, Wrench, ClipboardList, Sun, Receipt, Wallet,
   RefreshCw, Sparkles, CalendarRange, Mailbox, FileSignature,
-  AlertTriangle, ShoppingCart, ScrollText
+  AlertTriangle, ShoppingCart, ScrollText,
+  List, CheckSquare, Activity, Percent, Gauge
 } from 'lucide-react';
+
 
 type ModuleFeature = { icon: React.ComponentType<{ className?: string }>; titleRu: string; titleEn: string; descRu: string; descEn: string };
 type ModuleSpec = {
