@@ -129,16 +129,16 @@ const tiers = [
   },
 ];
 
+// Cross-module qualities — НЕ дублируют PMS/CRM/Finance/Ops deep-dive выше
 const features = [
-  { icon: Building2, titleEn: 'Property Management', titleRu: 'Управление объектами', descEn: 'Track all properties, units, meters, inventory in one place', descRu: 'Все объекты, юниты, счётчики и инвентарь в одном месте' },
-  { icon: Calendar, titleEn: 'Booking Calendar', titleRu: 'Календарь бронирований', descEn: 'iCal sync, Airbnb integration, availability management', descRu: 'Синхронизация iCal, интеграция с Airbnb, управление доступностью' },
-  { icon: BarChart3, titleEn: 'Financial Reports', titleRu: 'Финансовые отчёты', descEn: 'Auto P&L statements, revenue tracking, expense management', descRu: 'Автоматические P&L, отслеживание дохода, управление расходами' },
   { icon: FileText, titleEn: 'Owner Portal', titleRu: 'Портал владельца', descEn: 'Transparent reporting, documents, real-time occupancy', descRu: 'Прозрачная отчётность, документы, occupancy в реальном времени' },
-  { icon: Users, titleEn: 'Team & Staff', titleRu: 'Команда', descEn: 'Roles, task assignment, performance tracking', descRu: 'Роли, назначение задач, отслеживание производительности' },
+  { icon: Users, titleEn: 'Team & Staff', titleRu: 'Команда и роли', descEn: 'Roles, task assignment, performance tracking', descRu: 'Роли, назначение задач, отслеживание производительности' },
   { icon: MessageSquare, titleEn: 'Guest Communication', titleRu: 'Связь с гостями', descEn: 'Welcome messages, auto check-in reminders, review requests', descRu: 'Welcome-сообщения, напоминания о заезде, запросы отзывов' },
-  { icon: Smartphone, titleEn: 'Mobile-First', titleRu: 'Мобильная версия', descEn: 'Full functionality on any device, PWA support', descRu: 'Полная функциональность на любом устройстве, PWA' },
+  { icon: Smartphone, titleEn: 'Mobile-First & PWA', titleRu: 'Mobile-first и PWA', descEn: 'Full functionality on any device, installable PWA', descRu: 'Полная функциональность на любом устройстве, ставится как PWA' },
   { icon: Shield, titleEn: 'Security & Compliance', titleRu: 'Безопасность', descEn: 'Role-based access, audit logs, data encryption', descRu: 'Доступ по ролям, журнал действий, шифрование данных' },
+  { icon: Globe, titleEn: 'Bilingual RU / EN', titleRu: 'Двуязычный RU / EN', descEn: 'Every screen, email and owner report in both languages', descRu: 'Все экраны, письма и отчёты владельцу — на двух языках' },
 ];
+
 
 const ForManagementCompanies: React.FC = () => {
   const { language } = useLanguage();
