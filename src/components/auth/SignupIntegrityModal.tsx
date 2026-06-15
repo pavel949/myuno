@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, AlertTriangle, RefreshCw, Loader2, Mail } from 'lucide-react';
@@ -106,30 +106,72 @@ export function SignupIntegrityModal({
   const [report, setReport] = useState<IntegrityReport | null>(initialReport);
   const [error, setError] = useState<string | null>(initialError);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastCheckedAt, setLastCheckedAt] = useState<number | null>(initialReport || initialError ? Date.now() : null);
+  const lastFetchRef = useRef<number>(0);
 
-  const handleRefresh = async () => {
-    if (!userId) return;
-    setRefreshing(true);
-    setError(null);
-    try {
-      const { data, error: invErr } = await supabase.functions.invoke('verify-signup-integrity', {
-        body: { user_id: userId, expected_phone: expectedPhone || undefined },
-      });
-      if (invErr) {
-        setError(invErr.message || 'verify_failed');
-        toast.error(t.verifyError);
-      } else {
-        setReport(data as IntegrityReport);
-        if ((data as IntegrityReport)?.ok) toast.success(t.okBanner);
+  // Sync when parent passes fresh initial values (e.g. modal re-opened after a new signUp)
+  useEffect(() => {
+    setReport(initialReport);
+    setError(initialError);
+    if (initialReport || initialError) setLastCheckedAt(Date.now());
+  }, [initialReport, initialError]);
+
+  const fetchStatus = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!userId) return;
+      // Throttle: ignore calls within 2s of the previous one
+      const now = Date.now();
+      if (now - lastFetchRef.current < 2000) return;
+      lastFetchRef.current = now;
+
+      setRefreshing(true);
+      if (!opts?.silent) setError(null);
+      try {
+        const { data, error: invErr } = await supabase.functions.invoke('verify-signup-integrity', {
+          body: { user_id: userId, expected_phone: expectedPhone || undefined },
+        });
+        if (invErr) {
+          setError(invErr.message || 'verify_failed');
+          if (!opts?.silent) toast.error(t.verifyError);
+        } else {
+          setReport(data as IntegrityReport);
+          setError(null);
+          if (!opts?.silent && (data as IntegrityReport)?.ok) toast.success(t.okBanner);
+        }
+        setLastCheckedAt(Date.now());
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'verify_failed';
+        setError(msg);
+        if (!opts?.silent) toast.error(t.verifyError);
+      } finally {
+        setRefreshing(false);
       }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : 'verify_failed';
-      setError(msg);
-      toast.error(t.verifyError);
-    } finally {
-      setRefreshing(false);
-    }
-  };
+    },
+    [userId, expectedPhone, t.verifyError, t.okBanner],
+  );
+
+  const handleRefresh = () => fetchStatus();
+
+  // Auto-refresh when modal opens
+  useEffect(() => {
+    if (open && userId) fetchStatus({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, userId]);
+
+  // Auto-refresh on tab focus / visibility return while modal is open
+  useEffect(() => {
+    if (!open || !userId) return;
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') fetchStatus({ silent: true });
+    };
+    const onFocus = () => fetchStatus({ silent: true });
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [open, userId, fetchStatus]);
 
   const phoneOk = !!report && report.phone_saved && (expectedPhone ? report.phone_matches : true);
   const allOk = !!report && report.ok;
@@ -174,6 +216,13 @@ export function SignupIntegrityModal({
               <Row ok={report.privacy_accepted} label={t.privacy} />
             </div>
           </>
+        )}
+
+        {lastCheckedAt && (
+          <p className="text-xs text-muted-foreground">
+            {language === 'ru' ? 'Обновлено: ' : language === 'th' ? 'อัปเดต: ' : 'Last checked: '}
+            {new Date(lastCheckedAt).toLocaleTimeString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-US')}
+          </p>
         )}
 
         <DialogFooter className="gap-2 sm:gap-2">
