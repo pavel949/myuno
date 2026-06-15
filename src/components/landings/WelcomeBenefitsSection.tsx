@@ -29,11 +29,11 @@ export function WelcomeBenefitsSection() {
             {t('welcome.benefits.lead')}
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-none border border-border bg-border/50 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-none border border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-3">
           {items.map(({ title, body, Icon }) => (
             <div key={title} className="bg-background p-6 sm:p-7">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-none border border-border bg-card">
-                <Icon className="h-5 w-5 text-primary" strokeWidth={1.75} aria-hidden />
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-none bg-primary">
+                <Icon className="h-5 w-5 text-primary-foreground" strokeWidth={2} aria-hidden />
               </div>
               <h3 className="font-sans text-h4 font-medium tracking-tight text-foreground">{title}</h3>
               <p className="mt-2 font-sans text-body-sm leading-relaxed text-muted-foreground">{body}</p>
