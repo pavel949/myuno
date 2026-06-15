@@ -863,6 +863,21 @@ export default function Auth() {
               : 'By continuing, you agree to our Terms of Service'}
         </p>
       </footer>
+      <SignupIntegrityModal
+        open={integrityModal.open}
+        userId={integrityModal.userId}
+        expectedPhone={integrityModal.expectedPhone}
+        initialReport={integrityModal.report}
+        initialError={integrityModal.error}
+        emailConfirmationRequired={integrityModal.emailConfirmationRequired}
+        language={isRu ? 'ru' : isTh ? 'th' : 'en'}
+        onClose={() => {
+          const redirectToLogin = integrityModal.redirectToLoginOnClose;
+          setIntegrityModal((s) => ({ ...s, open: false }));
+          if (redirectToLogin) setIsLogin(true);
+        }}
+      />
     </div>
   );
 }
+
