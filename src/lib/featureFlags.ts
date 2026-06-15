@@ -145,6 +145,14 @@ const FLAGS: Record<string, FeatureFlag> = {
     enabled: true,
     description: 'Tours & experiences vertical',
   },
+
+  // Global access gate — when ON, anonymous visitors bypass ComingSoonGate
+  // and can access all routes without login. Toggle from Admin → System → Flags.
+  PUBLIC_ACCESS: {
+    key: 'public_access',
+    enabled: false,
+    description: 'Open the entire app to anonymous visitors (disables Coming Soon gate)',
+  },
 } as const;
 
 /**

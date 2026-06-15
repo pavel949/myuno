@@ -20,6 +20,10 @@ import { NowInPhuket } from '@/components/home/NowInPhuket';
 import { RoleSheet } from '@/components/home/RoleSheet';
 import { PrimaryGrid } from '@/components/home/PrimaryGrid';
 import { OfficialNews } from '@/components/home/OfficialNews';
+import { CLUSTERS, FLAT_SERVICES } from '@/lib/catalog/taxonomy';
+
+const TOTAL_CLUSTERS = CLUSTERS.length;
+const TOTAL_SERVICES = FLAT_SERVICES.length;
 
 const IndexSimplified: React.FC = () => {
   const { personas, togglePersona, setPersonas } = useUserPersonas();
@@ -72,7 +76,9 @@ const IndexSimplified: React.FC = () => {
                 {isRu ? 'Все приложения' : 'All apps'}
               </span>
               <span className="block text-[12px] text-muted-foreground mt-0.5">
-                {isRu ? '6 кластеров · 80+ сервисов' : '6 clusters · 80+ services'}
+                {isRu
+                  ? `${TOTAL_CLUSTERS} кластеров · ${TOTAL_SERVICES} сервисов`
+                  : `${TOTAL_CLUSTERS} clusters · ${TOTAL_SERVICES} services`}
               </span>
             </span>
             <ArrowRight className="w-5 h-5 text-muted-foreground" strokeWidth={2} />

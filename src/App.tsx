@@ -43,6 +43,7 @@ import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 import { VersionWatcher } from "@/components/pwa/VersionWatcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
+import { useFeatureFlag } from "@/hooks/useFeatureFlags";
 import { composeProviders } from "@/lib/composeProviders";
 import { useEnsureMultiRoleQaBundle } from "@/hooks/useEnsureMultiRoleQaBundle";
 import { PlatformViewAsBanner } from "@/components/layout/PlatformViewAsBanner";
@@ -117,6 +118,8 @@ function DeferredProvidersGate({ children }: { children: React.ReactNode }) {
 function ComingSoonGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const location = useLocation();
+  const publicAccessEnabled = useFeatureFlag('PUBLIC_ACCESS');
+
 
   const bypassComingSoon = React.useMemo(() => {
     if (import.meta.env.VITE_BYPASS_COMING_SOON === 'true') return true;
@@ -186,7 +189,7 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
     || path.startsWith('/area/')
     || path === '/area';
 
-  if (bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
+  if (publicAccessEnabled || bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
   if (!user) return <UnderConstruction />;
   return <>{children}</>;
 }
