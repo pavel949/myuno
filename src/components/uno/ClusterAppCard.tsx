@@ -7,21 +7,21 @@ import type { ClusterId, ServiceStatus } from '@/lib/catalog';
 import { cn } from '@/lib/utils';
 
 const ACCENT_BG: Record<ClusterId, string> = {
-  arrive: 'bg-cluster-arrive/10',
-  live: 'bg-cluster-live/10',
-  manage: 'bg-cluster-manage/10',
-  invest: 'bg-cluster-invest/10',
-  legal: 'bg-cluster-legal/10',
-  build: 'bg-cluster-build/10',
+  arrive: 'bg-cluster-arrive',
+  live: 'bg-cluster-live',
+  manage: 'bg-cluster-manage',
+  invest: 'bg-cluster-invest',
+  legal: 'bg-cluster-legal',
+  build: 'bg-cluster-build',
 };
 
-const ACCENT_TEXT: Record<ClusterId, string> = {
-  arrive: 'text-cluster-arrive',
-  live: 'text-cluster-live',
-  manage: 'text-cluster-manage',
-  invest: 'text-cluster-invest',
-  legal: 'text-cluster-legal',
-  build: 'text-cluster-build',
+const ACCENT_BORDER: Record<ClusterId, string> = {
+  arrive: 'border-cluster-arrive',
+  live: 'border-cluster-live',
+  manage: 'border-cluster-manage',
+  invest: 'border-cluster-invest',
+  legal: 'border-cluster-legal',
+  build: 'border-cluster-build',
 };
 
 export interface ClusterAppCardProps {
@@ -65,11 +65,12 @@ export function ClusterAppCard({
       <div className="flex items-start gap-3">
         <div
           className={cn(
-            'grid h-10 w-10 shrink-0 place-items-center rounded-none border border-border',
+            'grid h-10 w-10 shrink-0 place-items-center rounded-none border',
             ACCENT_BG[clusterId],
+            ACCENT_BORDER[clusterId],
           )}
         >
-          <Icon className={cn('h-[18px] w-[18px]', ACCENT_TEXT[clusterId])} strokeWidth={1.75} />
+          <Icon className="h-[18px] w-[18px] text-primary-foreground" strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
