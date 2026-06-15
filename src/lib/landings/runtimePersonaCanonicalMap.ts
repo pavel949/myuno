@@ -69,3 +69,25 @@ export function getCanonicalForRuntime(p: UserPersona): MasterPersonaCode {
 export function getAllCanonicalForRuntime(p: UserPersona): readonly MasterPersonaCode[] {
   return RUNTIME_TO_CANONICAL_ALL[p] ?? [];
 }
+
+/**
+ * Map a stack of runtime personas to canonical P-codes, de-duplicating while
+ * preserving stable order. Replaces the former `personaBridge.ts`
+ * `mapLegacyPersonasToCodes` helper (removed 2026-06-15 — it was a second,
+ * conflicting copy of this same 1↔2 bridge). This module is the single SSOT
+ * for `UserPersona` → Master `PersonaCode`.
+ */
+export function mapRuntimePersonasToCanonical(
+  personas: readonly UserPersona[],
+): MasterPersonaCode[] {
+  const seen = new Set<MasterPersonaCode>();
+  const out: MasterPersonaCode[] = [];
+  for (const p of personas) {
+    const code = RUNTIME_TO_CANONICAL[p];
+    if (code && !seen.has(code)) {
+      seen.add(code);
+      out.push(code);
+    }
+  }
+  return out;
+}

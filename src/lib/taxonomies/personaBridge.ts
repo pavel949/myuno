@@ -1,62 +1,34 @@
 /**
- * Persona Bridge — мост между legacy `UserPersona` (14 строковых ID)
- * и каноническим Master Taxonomy v1.0 `PersonaCode` (P01..P25).
+ * @deprecated 2026-06-15 — DO NOT ADD NEW MAPPINGS HERE.
  *
- * Wave-1 IA cleanup (2026-06): БД-enum `user_persona` пока остаётся
- * legacy-формате (миграция = отдельная Wave). Этот мап позволяет новым
- * компонентам (Discover v3, AI-routing, lifecycle messaging) работать
- * с P-кодами уже сейчас, читая legacy-значения из `useUserPersonas`.
- *
- * Источник истины: `src/lib/taxonomies/master.ts` (PERSONAS, P01..P25).
- *
- * Правила маппинга:
- *  - Если у legacy-значения нет очевидного P-аналога — возвращаем `null`
- *    (не угадываем).
- *  - Mapping — many-to-one в сторону Master Taxonomy: legacy `family` и
- *    `couple` оба → P05/P02 в зависимости от долгосрочности, поэтому
- *    выбираем «наиболее частый» P-код, а нюансы решает persona-detector.
+ * This module used to hold a SECOND, independent `UserPersona` → Master
+ * `PersonaCode` table (`LEGACY_TO_PCODE`) that had drifted out of sync with
+ * the canonical one in `src/lib/landings/runtimePersonaCanonicalMap.ts`
+ * (they disagreed on `resident`, `couple`, `nightlife`, `pet_owner`). Both
+ * were orphaned. The bridge now has a single source of truth; this file is a
+ * thin compatibility shim that re-exports it and can be removed entirely once
+ * no branch references `personaBridge`.
  */
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import type { PersonaCode } from '@/lib/taxonomies/master';
+import {
+  getCanonicalForRuntime,
+  mapRuntimePersonasToCanonical,
+} from '@/lib/landings/runtimePersonaCanonicalMap';
 
 /**
- * Legacy 14-value enum → canonical P-code.
- * Returns `null` for legacy values без однозначного соответствия.
+ * @deprecated Use `getCanonicalForRuntime` from
+ * `@/lib/landings/runtimePersonaCanonicalMap`. The canonical map resolves
+ * every legacy value, so this never returns `null` anymore.
  */
-const LEGACY_TO_PCODE: Record<UserPersona, PersonaCode | null> = {
-  tourist: 'P01_first_time_tourist',
-  resident: 'P09_relocator_solo',
-  property_owner: 'P23_property_owner',
-  investor: 'P20_passive_investor',
-  family: 'P08_relocator_family',
-  couple: 'P02_repeat_tourist',
-  nightlife: 'P03_long_stay_tourist',
-  active: 'P16_athlete_training',
-  business: 'P12_business_owner_local',
-  nomad: 'P04_digital_nomad',
-  pet_owner: 'P05_remote_worker_family',
-  relocation: 'P09_relocator_solo',
-  real_estate_developer: 'P22_developer_partner',
-  local_services_provider: 'P25_service_vendor',
-};
-
 export function mapLegacyPersonaToCode(legacy: UserPersona): PersonaCode | null {
-  return LEGACY_TO_PCODE[legacy] ?? null;
+  return getCanonicalForRuntime(legacy) ?? null;
 }
 
 /**
- * Map a stack of legacy personas to canonical P-codes, dropping nulls
- * and de-duplicating while preserving stable order.
+ * @deprecated Use `mapRuntimePersonasToCanonical` from
+ * `@/lib/landings/runtimePersonaCanonicalMap`.
  */
 export function mapLegacyPersonasToCodes(legacy: UserPersona[]): PersonaCode[] {
-  const seen = new Set<PersonaCode>();
-  const out: PersonaCode[] = [];
-  for (const p of legacy) {
-    const code = mapLegacyPersonaToCode(p);
-    if (code && !seen.has(code)) {
-      seen.add(code);
-      out.push(code);
-    }
-  }
-  return out;
+  return mapRuntimePersonasToCanonical(legacy);
 }

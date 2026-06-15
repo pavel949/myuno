@@ -3,15 +3,22 @@
  * @description Canonical segmentation framework types (M3).
  *
  * Source of truth for the 6-role canonical taxonomy, lifecycle stages,
- * personas (P1..P25), household types, clusters and triggers defined in
+ * personas (P1..P26 — §4 of the framework defines 26, incl. P26 conscious-eater),
+ * household types, clusters and triggers defined in
  * `/docs/canonical/01-segmentation-framework.md`.
+ *
+ * ⚠️ These short codes (P1..P26) are a DIFFERENT persona catalog from the
+ * Master Taxonomy long codes (`P01_*..P25_*` in `src/lib/taxonomies/master.ts`).
+ * The numbering does NOT align positionally (e.g. short P20=retiree vs long
+ * P20=passive-investor) and NO automatic bridge exists between them. Do not
+ * cast/strip-underscore one into the other.
  *
  * These types map onto the **smart-additive** Supabase schema introduced
  * in M2 (see `docs/canonical/audits/M2-schema-extension.md`):
  *  - `profiles.lifecycle_stage`           → enum `lifecycle_stage`
  *  - `profiles.household_type`            → enum `household_type_enum`
  *  - `profiles.preferred_language`        → enum `language_code` (existing)
- *  - `profiles.detected_persona`          → text (free-form `P1`..`P25`)
+ *  - `profiles.detected_persona`          → text (free-form `P1`..`P26`)
  *  - `profiles.active_clusters` / triggers / special_status → text[]
  *  - `profiles.kids_ages`                 → int[]
  *  - `profiles.visits_count` / total_days_in_thailand → int
@@ -191,7 +198,7 @@ export const CLUSTER_META: Record<ClusterId, { labelEn: string; labelRu: string;
 };
 
 /* ------------------------------------------------------------------ */
-/*  Personas — § 0.6 (P1..P25 free-form text in DB)                   */
+/*  Personas — § 4 (P1..P26 free-form text in DB)                     */
 /* ------------------------------------------------------------------ */
 
 export type PersonaCode =

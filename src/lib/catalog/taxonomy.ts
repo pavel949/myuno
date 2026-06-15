@@ -4,8 +4,8 @@
  *
  * Hierarchy:
  *
- *   Cluster (6)  →  Category (18)  →  Service / App (~68 active in code)
- *   Per cluster: arrive=3 · live=10 · manage=0 (workspace) · invest=1 · legal=3 · build=1
+ *   Cluster (6)  →  Category (18)  →  Service / App (68 total · 67 available)
+ *   Categories per cluster: arrive=3 · live=10 · manage=0 (workspace) · invest=1 · legal=3 · build=1
  *        │
  *        └────────►  LifeSituation[] (M:N via DB table `cluster_life_situations`)
  *
@@ -27,7 +27,8 @@
  * **Drift note (2026-05-21):** the live `category_groups` / `categories`
  * tables on the production Supabase project diverge from this static SSOT.
  * Drawer currently shows `Arrive=14 · Live=27 · Invest=7 · Legal=7 · Build=4`
- * (DB) vs `12 / 30 / 9 / 11 / 4` here. DB reconciliation deferred until a
+ * (DB) vs `13 / 31 / 9 / 11 / 4` here (static service counts per cluster,
+ * recounted 2026-06-15). DB reconciliation deferred until a
  * live-data audit can run (writing a blind UPSERT migration risks
  * overwriting curated DB rows). Sports & Athletic Training (spec §15,
  * 14 services) is fully absent in both — see canonical doc §15 for the
@@ -279,7 +280,7 @@ export const CLUSTERS: ClusterEntry[] = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────
-// Categories with Services (18 categories, ~80 active services)
+// Categories with Services (18 categories, 68 services · 67 available)
 // ─────────────────────────────────────────────────────────────────────────
 
 const SERVICES_URL = APP_ROUTES.SERVICES;
