@@ -14,8 +14,10 @@ import {
   Globe, Smartphone, Clock, DollarSign,
   KanbanSquare, Wrench, ClipboardList, Sun, Receipt, Wallet,
   RefreshCw, Sparkles, CalendarRange, Mailbox, FileSignature,
-  AlertTriangle, ShoppingCart, ScrollText
+  AlertTriangle, ShoppingCart, ScrollText,
+  List, CheckSquare, Activity, Percent, Gauge
 } from 'lucide-react';
+
 
 type ModuleFeature = { icon: React.ComponentType<{ className?: string }>; titleRu: string; titleEn: string; descRu: string; descEn: string };
 type ModuleSpec = {
@@ -39,7 +41,7 @@ const modules: ModuleSpec[] = [
       { icon: CalendarRange, titleRu: 'iCal-синхронизация любых внешних календарей', titleEn: 'iCal sync for any external calendar', descRu: 'Импорт чужих iCal-ссылок и экспорт своих — занятость подтягивается из всех источников автоматически.', descEn: 'Import external iCal links and export your own — availability flows in from every source automatically.' },
       { icon: Sparkles, titleRu: 'AI-ценообразование с рекомендациями по датам', titleEn: 'AI pricing with date-by-date suggestions', descRu: 'ИИ анализирует сезон и спрос, предлагает цену на каждую ночь — менеджер принимает или отклоняет одним кликом.', descEn: 'AI reads the season and demand, suggests a price per night — the manager accepts or dismisses in one click.' },
       { icon: Calendar, titleRu: 'Единый календарь всего портфеля', titleEn: 'Portfolio-wide unified calendar', descRu: 'Timeline-вид по всем объектам сразу: заезды, выезды, уборки и задачи в одной картине.', descEn: 'Timeline view across all properties: check-ins, check-outs, cleanings and tasks in a single picture.' },
-      { icon: ClipboardList, titleRu: 'Все бронирования в одном списке', titleEn: 'All bookings in one list', descRu: 'Фильтры по статусам confirmed / pending / checked-in / completed, bulk-действия и детальная карточка брони.', descEn: 'Filters by confirmed / pending / checked-in / completed, bulk actions and a detailed booking sheet.' },
+      { icon: List, titleRu: 'Все бронирования в одном списке', titleEn: 'All bookings in one list', descRu: 'Фильтры по статусам confirmed / pending / checked-in / completed, bulk-действия и детальная карточка брони.', descEn: 'Filters by confirmed / pending / checked-in / completed, bulk actions and a detailed booking sheet.' },
       { icon: Building2, titleRu: 'Онбординг объекта с импортом из Airbnb', titleEn: 'Onboarding wizard with Airbnb import', descRu: 'Мастер заводит новый объект пошагово и подтягивает название, фото, описание и цены прямо из листинга OTA.', descEn: 'Wizard onboards a new property step-by-step and pulls title, photos, description and prices from the OTA listing.' },
     ],
   },
@@ -56,6 +58,7 @@ const modules: ModuleSpec[] = [
       { icon: ClipboardList, titleRu: 'CRM-задачи и встречи с напоминаниями', titleEn: 'CRM tasks & meetings with reminders', descRu: 'Звонки, показы и встречи с дедлайнами; просроченные задачи попадают в утренний брифинг с приоритетом.', descEn: 'Calls, viewings and meetings with deadlines; overdue tasks surface in the morning briefing with top priority.' },
       { icon: Mailbox, titleRu: 'Email-рассылки, шаблоны и автопоследовательности', titleEn: 'Email campaigns, templates & sequences', descRu: 'Письма собственникам и гостям по шаблонам, drip-последовательности для прогрева лидов.', descEn: 'Templated emails to owners and guests, drip sequences to warm up leads.' },
       { icon: FileSignature, titleRu: 'Портфель договоров управления', titleEn: 'Management contracts portfolio', descRu: 'Условия по каждому объекту: комиссия, распределение расходов, статус — с журналом изменений.', descEn: 'Terms per property: commission, expense split, status — with a full change log.' },
+      { icon: Activity, titleRu: 'Лог активностей и timeline по контакту', titleEn: 'Activity log & contact timeline', descRu: 'Все звонки, письма, встречи и изменения сделки на единой ленте — ничего не теряется при передаче.', descEn: 'Every call, email, meeting and deal change on a single feed — nothing is lost on hand-off.' },
     ],
   },
   {
@@ -71,6 +74,7 @@ const modules: ModuleSpec[] = [
       { icon: AlertTriangle, titleRu: 'Дебиторка (AR Aging) с ведёрной разбивкой', titleEn: 'AR Aging with bucket breakdown', descRu: 'Кто и сколько должен по срокам 0–30 / 31–60 / 61–90 / 90+ дней — должники видны сразу.', descEn: 'Who owes what across 0–30 / 31–60 / 61–90 / 90+ day buckets — debtors surface instantly.' },
       { icon: Shield, titleRu: 'Сверка заказов с леджером', titleEn: 'Order-to-ledger reconciliation', descRu: 'Автоматически сравнивает подтверждённые заказы с записями в ledger_entries и подсвечивает расхождения.', descEn: 'Automatically compares confirmed orders against ledger entries and flags any discrepancy.' },
       { icon: Receipt, titleRu: 'Налоговый центр и экспорт отчётов', titleEn: 'Tax center & report exports', descRu: 'Документы по WHT и VAT в одном месте, выгрузка отчётов в Excel для бухгалтера и налоговой.', descEn: 'WHT and VAT docs in one place, Excel exports for accountants and tax filings.' },
+      { icon: Percent, titleRu: 'Комиссии маркетплейса с авторасчётом', titleEn: 'Marketplace commissions, auto-calculated', descRu: 'Платформенная комиссия и выплата вендору считаются автоматически и попадают в леджер на каждом заказе.', descEn: 'Platform fee and vendor payout are calculated automatically and recorded in the ledger on every order.' },
     ],
   },
   {
@@ -81,11 +85,13 @@ const modules: ModuleSpec[] = [
     leadRu: 'День менеджера начинается с брифинга, заканчивается без пропусков. Уборки, ТО и закупки — под контролем.',
     leadEn: 'The manager starts the day with a briefing and ends it without misses. Cleaning, maintenance and procurement under control.',
     items: [
-      { icon: ClipboardList, titleRu: 'Операционные задачи по объектам', titleEn: 'Operational tasks per property', descRu: 'Уборки, заезды, выезды, инспекции и снятие показаний — с приоритетом и ответственным исполнителем.', descEn: 'Cleaning, check-ins, check-outs, inspections and meter readings — each with priority and an assignee.' },
+      { icon: CheckSquare, titleRu: 'Операционные задачи по объектам', titleEn: 'Operational tasks per property', descRu: 'Уборки, заезды, выезды, инспекции и снятие показаний — с приоритетом и ответственным исполнителем.', descEn: 'Cleaning, check-ins, check-outs, inspections and meter readings — each with priority and an assignee.' },
       { icon: Sun, titleRu: 'Утренний брифинг — сводка дня менеджеру', titleEn: 'Morning briefing — the manager\'s day at a glance', descRu: 'Заезды и выезды дня, просроченные задачи, активности CRM и дни рождения — одной лентой по приоритету.', descEn: 'Today\'s check-ins/outs, overdue tasks, CRM activities and birthdays — one prioritized feed.' },
       { icon: Wrench, titleRu: 'Плановое техническое обслуживание', titleEn: 'Preventive maintenance schedules', descRu: 'Расписание ТО по объекту: частота, следующая дата, подрядчик, бюджет и приоритет.', descEn: 'Maintenance schedule per property: frequency, next due date, contractor, budget and priority.' },
       { icon: ShoppingCart, titleRu: 'Закупки с 3-сторонним matching', titleEn: 'Procurement with 3-way match', descRu: 'Заявка на закупку → приёмка товаров → сверка с инвойсом поставщика. Без переплат и потерянных позиций.', descEn: 'Purchase order → goods receipt → vendor invoice match. No overpayments, no missed line items.' },
       { icon: Clock, titleRu: 'Расписание смен команды', titleEn: 'Team shift scheduling', descRu: 'Кто из сотрудников на каком объекте и в какое время — график на всю команду в одном экране.', descEn: 'Who is on which property and when — the full team\'s schedule on a single screen.' },
+      { icon: Gauge, titleRu: 'Portfolio Health — индекс готовности портфеля', titleEn: 'Portfolio Health score', descRu: '0–100% по 8 проверкам каждого объекта (документы, фото, цены, ТО) — слабые места видны сразу.', descEn: '0–100% across 8 checks per property (docs, photos, pricing, maintenance) — weak spots surface instantly.' },
+
     ],
   },
 ];
@@ -123,16 +129,16 @@ const tiers = [
   },
 ];
 
+// Cross-module qualities — НЕ дублируют PMS/CRM/Finance/Ops deep-dive выше
 const features = [
-  { icon: Building2, titleEn: 'Property Management', titleRu: 'Управление объектами', descEn: 'Track all properties, units, meters, inventory in one place', descRu: 'Все объекты, юниты, счётчики и инвентарь в одном месте' },
-  { icon: Calendar, titleEn: 'Booking Calendar', titleRu: 'Календарь бронирований', descEn: 'iCal sync, Airbnb integration, availability management', descRu: 'Синхронизация iCal, интеграция с Airbnb, управление доступностью' },
-  { icon: BarChart3, titleEn: 'Financial Reports', titleRu: 'Финансовые отчёты', descEn: 'Auto P&L statements, revenue tracking, expense management', descRu: 'Автоматические P&L, отслеживание дохода, управление расходами' },
   { icon: FileText, titleEn: 'Owner Portal', titleRu: 'Портал владельца', descEn: 'Transparent reporting, documents, real-time occupancy', descRu: 'Прозрачная отчётность, документы, occupancy в реальном времени' },
-  { icon: Users, titleEn: 'Team & Staff', titleRu: 'Команда', descEn: 'Roles, task assignment, performance tracking', descRu: 'Роли, назначение задач, отслеживание производительности' },
+  { icon: Users, titleEn: 'Team & Staff', titleRu: 'Команда и роли', descEn: 'Roles, task assignment, performance tracking', descRu: 'Роли, назначение задач, отслеживание производительности' },
   { icon: MessageSquare, titleEn: 'Guest Communication', titleRu: 'Связь с гостями', descEn: 'Welcome messages, auto check-in reminders, review requests', descRu: 'Welcome-сообщения, напоминания о заезде, запросы отзывов' },
-  { icon: Smartphone, titleEn: 'Mobile-First', titleRu: 'Мобильная версия', descEn: 'Full functionality on any device, PWA support', descRu: 'Полная функциональность на любом устройстве, PWA' },
+  { icon: Smartphone, titleEn: 'Mobile-First & PWA', titleRu: 'Mobile-first и PWA', descEn: 'Full functionality on any device, installable PWA', descRu: 'Полная функциональность на любом устройстве, ставится как PWA' },
   { icon: Shield, titleEn: 'Security & Compliance', titleRu: 'Безопасность', descEn: 'Role-based access, audit logs, data encryption', descRu: 'Доступ по ролям, журнал действий, шифрование данных' },
+  { icon: Globe, titleEn: 'Bilingual RU / EN', titleRu: 'Двуязычный RU / EN', descEn: 'Every screen, email and owner report in both languages', descRu: 'Все экраны, письма и отчёты владельцу — на двух языках' },
 ];
+
 
 const ForManagementCompanies: React.FC = () => {
   const { language } = useLanguage();
@@ -210,31 +216,53 @@ const ForManagementCompanies: React.FC = () => {
                 : 'Four modules, each built on the real work of our own MC. Below — concrete features, not slogans.'}
             </p>
 
-            <div className="space-y-12">
-              {modules.map((m) => (
+            {/* Sticky module nav */}
+            <div className="sticky top-16 z-20 -mx-4 mb-10 bg-muted/20 backdrop-blur supports-[backdrop-filter]:bg-muted/40 border-y border-border/50">
+              <div className="max-w-6xl mx-auto px-4 flex gap-2 overflow-x-auto py-3 scrollbar-none">
+                {modules.map((m) => (
+                  <a
+                    key={m.id}
+                    href={`#module-${m.id}`}
+                    className="shrink-0 text-sm font-medium px-4 py-2 border border-border hover:border-primary hover:text-primary text-foreground/80 transition-colors"
+                  >
+                    {m.badge}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-16">
+              {modules.map((m, mIdx) => (
                 <motion.div
                   key={m.id}
+                  id={`module-${m.id}`}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-80px' }}
                   transition={{ duration: 0.5 }}
+                  className="scroll-mt-32"
                 >
-                  <div className="mb-6">
-                    <Badge variant="outline" className="mb-3 text-primary border-primary/30">
-                      {m.badge}
-                    </Badge>
-                    <h3 className="text-2xl md:text-3xl font-bold mb-2">
-                      {isRu ? m.titleRu : m.titleEn}
-                    </h3>
-                    <p className="text-muted-foreground max-w-3xl">
-                      {isRu ? m.leadRu : m.leadEn}
-                    </p>
+                  <div className="mb-8 flex items-start gap-4">
+                    <div className="hidden md:flex items-center justify-center w-12 h-12 border border-primary/30 text-primary font-mono text-lg shrink-0">
+                      {String(mIdx + 1).padStart(2, '0')}
+                    </div>
+                    <div>
+                      <Badge variant="outline" className="mb-3 text-primary border-primary/30">
+                        {m.badge}
+                      </Badge>
+                      <h3 className="text-2xl md:text-4xl font-bold mb-3 tracking-tight">
+                        {isRu ? m.titleRu : m.titleEn}
+                      </h3>
+                      <p className="text-base md:text-lg text-muted-foreground max-w-3xl">
+                        {isRu ? m.leadRu : m.leadEn}
+                      </p>
+                    </div>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {m.items.map((item, idx) => (
-                      <Card key={idx} className="h-full hover:shadow-md transition-shadow">
+                      <Card key={idx} className="h-full border-border hover:border-primary/40 transition-colors">
                         <CardContent className="p-5">
-                          <item.icon className="w-6 h-6 text-primary mb-3" />
+                          <item.icon className="w-7 h-7 text-primary mb-3" />
                           <h4 className="font-semibold mb-2 text-base leading-snug">
                             {isRu ? item.titleRu : item.titleEn}
                           </h4>
@@ -248,6 +276,7 @@ const ForManagementCompanies: React.FC = () => {
                 </motion.div>
               ))}
             </div>
+
           </div>
         </section>
 
