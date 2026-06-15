@@ -2,31 +2,20 @@
  * WelcomeBenefitsSection — “Why one account is easier” block on WelcomeLanding.
  */
 import React from 'react';
-import { LayoutGrid, History, Bot } from 'lucide-react';
+import { Globe2, History, Bot, Languages, ShieldCheck, Wallet } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LandingContainer, LandingSection } from './LandingPrimitives';
-
-const BENEFIT_ICONS = [LayoutGrid, History, Bot] as const;
 
 export function WelcomeBenefitsSection() {
   const { t } = useLanguage();
 
   const items = [
-    {
-      title: t('welcome.benefits.oneAccount.title'),
-      body: t('welcome.benefits.oneAccount.body'),
-      Icon: BENEFIT_ICONS[0],
-    },
-    {
-      title: t('welcome.benefits.history.title'),
-      body: t('welcome.benefits.history.body'),
-      Icon: BENEFIT_ICONS[1],
-    },
-    {
-      title: t('welcome.benefits.ai.title'),
-      body: t('welcome.benefits.ai.body'),
-      Icon: BENEFIT_ICONS[2],
-    },
+    { title: t('welcome.benefits.oneAccount.title'), body: t('welcome.benefits.oneAccount.body'), Icon: Globe2 },
+    { title: t('welcome.benefits.lang.title'), body: t('welcome.benefits.lang.body'), Icon: Languages },
+    { title: t('welcome.benefits.ai.title'), body: t('welcome.benefits.ai.body'), Icon: Bot },
+    { title: t('welcome.benefits.trust.title'), body: t('welcome.benefits.trust.body'), Icon: ShieldCheck },
+    { title: t('welcome.benefits.payments.title'), body: t('welcome.benefits.payments.body'), Icon: Wallet },
+    { title: t('welcome.benefits.history.title'), body: t('welcome.benefits.history.body'), Icon: History },
   ];
 
   return (
