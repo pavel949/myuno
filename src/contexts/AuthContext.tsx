@@ -180,13 +180,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    // If signup successful and we have phone, update profile
-    if (!error && data?.user && phone) {
-      await supabase
-        .from('profiles')
-        .update({ phone })
-        .eq('id', data.user.id);
-    }
+    // NOTE: phone is persisted to profiles by the `handle_new_user` trigger
+    // (it reads NEW.phone OR raw_user_meta_data.phone). Previous client-side
+    // `profiles.update({ phone })` silently failed under RLS when email
+    // confirmation was required (no active session yet) and is now removed.
 
     // Anon id is now claimed by the trigger — clear local copy so future
     // sessions on this device start fresh.
