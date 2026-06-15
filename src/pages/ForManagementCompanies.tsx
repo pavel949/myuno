@@ -216,31 +216,53 @@ const ForManagementCompanies: React.FC = () => {
                 : 'Four modules, each built on the real work of our own MC. Below — concrete features, not slogans.'}
             </p>
 
-            <div className="space-y-12">
-              {modules.map((m) => (
+            {/* Sticky module nav */}
+            <div className="sticky top-16 z-20 -mx-4 mb-10 bg-muted/20 backdrop-blur supports-[backdrop-filter]:bg-muted/40 border-y border-border/50">
+              <div className="max-w-6xl mx-auto px-4 flex gap-2 overflow-x-auto py-3 scrollbar-none">
+                {modules.map((m) => (
+                  <a
+                    key={m.id}
+                    href={`#module-${m.id}`}
+                    className="shrink-0 text-sm font-medium px-4 py-2 border border-border hover:border-primary hover:text-primary text-foreground/80 transition-colors"
+                  >
+                    {m.badge}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-16">
+              {modules.map((m, mIdx) => (
                 <motion.div
                   key={m.id}
+                  id={`module-${m.id}`}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-80px' }}
                   transition={{ duration: 0.5 }}
+                  className="scroll-mt-32"
                 >
-                  <div className="mb-6">
-                    <Badge variant="outline" className="mb-3 text-primary border-primary/30">
-                      {m.badge}
-                    </Badge>
-                    <h3 className="text-2xl md:text-3xl font-bold mb-2">
-                      {isRu ? m.titleRu : m.titleEn}
-                    </h3>
-                    <p className="text-muted-foreground max-w-3xl">
-                      {isRu ? m.leadRu : m.leadEn}
-                    </p>
+                  <div className="mb-8 flex items-start gap-4">
+                    <div className="hidden md:flex items-center justify-center w-12 h-12 border border-primary/30 text-primary font-mono text-lg shrink-0">
+                      {String(mIdx + 1).padStart(2, '0')}
+                    </div>
+                    <div>
+                      <Badge variant="outline" className="mb-3 text-primary border-primary/30">
+                        {m.badge}
+                      </Badge>
+                      <h3 className="text-2xl md:text-4xl font-bold mb-3 tracking-tight">
+                        {isRu ? m.titleRu : m.titleEn}
+                      </h3>
+                      <p className="text-base md:text-lg text-muted-foreground max-w-3xl">
+                        {isRu ? m.leadRu : m.leadEn}
+                      </p>
+                    </div>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {m.items.map((item, idx) => (
-                      <Card key={idx} className="h-full hover:shadow-md transition-shadow">
+                      <Card key={idx} className="h-full border-border hover:border-primary/40 transition-colors">
                         <CardContent className="p-5">
-                          <item.icon className="w-6 h-6 text-primary mb-3" />
+                          <item.icon className="w-7 h-7 text-primary mb-3" />
                           <h4 className="font-semibold mb-2 text-base leading-snug">
                             {isRu ? item.titleRu : item.titleEn}
                           </h4>
@@ -254,6 +276,7 @@ const ForManagementCompanies: React.FC = () => {
                 </motion.div>
               ))}
             </div>
+
           </div>
         </section>
 
