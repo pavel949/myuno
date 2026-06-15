@@ -43,6 +43,7 @@ import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 import { VersionWatcher } from "@/components/pwa/VersionWatcher";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
+import { useFeatureFlag } from "@/hooks/useFeatureFlags";
 import { composeProviders } from "@/lib/composeProviders";
 import { useEnsureMultiRoleQaBundle } from "@/hooks/useEnsureMultiRoleQaBundle";
 import { PlatformViewAsBanner } from "@/components/layout/PlatformViewAsBanner";
