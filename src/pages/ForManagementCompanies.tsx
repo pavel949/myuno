@@ -85,11 +85,13 @@ const modules: ModuleSpec[] = [
     leadRu: 'День менеджера начинается с брифинга, заканчивается без пропусков. Уборки, ТО и закупки — под контролем.',
     leadEn: 'The manager starts the day with a briefing and ends it without misses. Cleaning, maintenance and procurement under control.',
     items: [
-      { icon: ClipboardList, titleRu: 'Операционные задачи по объектам', titleEn: 'Operational tasks per property', descRu: 'Уборки, заезды, выезды, инспекции и снятие показаний — с приоритетом и ответственным исполнителем.', descEn: 'Cleaning, check-ins, check-outs, inspections and meter readings — each with priority and an assignee.' },
+      { icon: CheckSquare, titleRu: 'Операционные задачи по объектам', titleEn: 'Operational tasks per property', descRu: 'Уборки, заезды, выезды, инспекции и снятие показаний — с приоритетом и ответственным исполнителем.', descEn: 'Cleaning, check-ins, check-outs, inspections and meter readings — each with priority and an assignee.' },
       { icon: Sun, titleRu: 'Утренний брифинг — сводка дня менеджеру', titleEn: 'Morning briefing — the manager\'s day at a glance', descRu: 'Заезды и выезды дня, просроченные задачи, активности CRM и дни рождения — одной лентой по приоритету.', descEn: 'Today\'s check-ins/outs, overdue tasks, CRM activities and birthdays — one prioritized feed.' },
       { icon: Wrench, titleRu: 'Плановое техническое обслуживание', titleEn: 'Preventive maintenance schedules', descRu: 'Расписание ТО по объекту: частота, следующая дата, подрядчик, бюджет и приоритет.', descEn: 'Maintenance schedule per property: frequency, next due date, contractor, budget and priority.' },
       { icon: ShoppingCart, titleRu: 'Закупки с 3-сторонним matching', titleEn: 'Procurement with 3-way match', descRu: 'Заявка на закупку → приёмка товаров → сверка с инвойсом поставщика. Без переплат и потерянных позиций.', descEn: 'Purchase order → goods receipt → vendor invoice match. No overpayments, no missed line items.' },
       { icon: Clock, titleRu: 'Расписание смен команды', titleEn: 'Team shift scheduling', descRu: 'Кто из сотрудников на каком объекте и в какое время — график на всю команду в одном экране.', descEn: 'Who is on which property and when — the full team\'s schedule on a single screen.' },
+      { icon: Gauge, titleRu: 'Portfolio Health — индекс готовности портфеля', titleEn: 'Portfolio Health score', descRu: '0–100% по 8 проверкам каждого объекта (документы, фото, цены, ТО) — слабые места видны сразу.', descEn: '0–100% across 8 checks per property (docs, photos, pricing, maintenance) — weak spots surface instantly.' },
+
     ],
   },
 ];
