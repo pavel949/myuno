@@ -217,8 +217,8 @@ const ForManagementCompanies: React.FC = () => {
             </p>
 
             {/* Sticky module nav */}
-            <div className="sticky top-16 z-20 -mx-4 mb-10 bg-muted/20 backdrop-blur supports-[backdrop-filter]:bg-muted/40 border-y border-border/50">
-              <div className="max-w-6xl mx-auto px-4 flex gap-2 overflow-x-auto py-3 scrollbar-none">
+            <div className="sticky top-14 z-20 -mx-4 mb-10 bg-muted/40 backdrop-blur supports-[backdrop-filter]:bg-muted/60 border-y border-border/50">
+              <div className="max-w-6xl mx-auto px-4 flex gap-2 overflow-x-auto py-3 scrollbar-hide">
                 {modules.map((m) => (
                   <a
                     key={m.id}
@@ -231,6 +231,7 @@ const ForManagementCompanies: React.FC = () => {
               </div>
             </div>
 
+
             <div className="space-y-16">
               {modules.map((m, mIdx) => (
                 <motion.div
@@ -240,7 +241,7 @@ const ForManagementCompanies: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-80px' }}
                   transition={{ duration: 0.5 }}
-                  className="scroll-mt-32"
+                  className="scroll-mt-28"
                 >
                   <div className="mb-8 flex items-start gap-4">
                     <div className="hidden md:flex items-center justify-center w-12 h-12 border border-primary/30 text-primary font-mono text-lg shrink-0">
