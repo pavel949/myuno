@@ -247,11 +247,11 @@ const ForManagementCompanies: React.FC = () => {
                     <div className="hidden md:flex items-center justify-center w-12 h-12 border border-primary/30 text-primary font-mono text-lg shrink-0">
                       {String(mIdx + 1).padStart(2, '0')}
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <Badge variant="outline" className="mb-3 text-primary border-primary/30">
                         {m.badge}
                       </Badge>
-                      <h3 className="text-2xl md:text-4xl font-bold mb-3 tracking-tight">
+                      <h3 className="text-2xl md:text-4xl font-bold mb-3 tracking-tight break-words hyphens-auto">
                         {isRu ? m.titleRu : m.titleEn}
                       </h3>
                       <p className="text-base md:text-lg text-muted-foreground max-w-3xl">
@@ -259,15 +259,15 @@ const ForManagementCompanies: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {m.items.map((item, idx) => (
                       <Card key={idx} className="h-full border-border hover:border-primary/40 transition-colors">
                         <CardContent className="p-5">
                           <item.icon className="w-7 h-7 text-primary mb-3" />
-                          <h4 className="font-semibold mb-2 text-base leading-snug">
+                          <h4 className="font-semibold mb-2 text-base leading-snug break-words hyphens-auto">
                             {isRu ? item.titleRu : item.titleEn}
                           </h4>
-                          <p className="text-sm text-muted-foreground leading-relaxed">
+                          <p className="text-sm text-muted-foreground leading-relaxed break-words">
                             {isRu ? item.descRu : item.descEn}
                           </p>
                         </CardContent>
