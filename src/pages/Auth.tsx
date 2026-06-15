@@ -204,10 +204,17 @@ export default function Auth() {
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
 
+    // E.164 normalisation: keep a leading '+' if user typed one, strip
+    // everything non-digit. Previously `.replace(/\D/g,'')` dropped the '+'
+    // and broke WhatsApp/SMS routing.
+    const trimmedPhone = phone.trim();
+    const digits = trimmedPhone.replace(/\D/g, '');
+    const normalisedPhone = trimmedPhone.startsWith('+') ? `+${digits}` : digits;
+
     try {
       const { error, data } = await withTimeout(signUp({
         email, password, fullName,
-        phone: phone.replace(/\D/g, '')
+        phone: normalisedPhone,
       }), 15000);
 
       if (error) {
@@ -229,23 +236,24 @@ export default function Auth() {
           description,
         });
       } else {
+        // Referral application — best-effort. Will only succeed if a session
+        // already exists (auto-confirm on). With email confirmation enabled
+        // this silently no-ops; a dedicated edge function is tracked as a
+        // follow-up. Code intentionally left to preserve existing happy path.
         if (referralCode && data?.user) {
           try {
             await supabase.rpc('apply_referral_code', { p_referred_id: data.user.id, p_code: referralCode.toUpperCase() });
           } catch (refError) { console.error('Error applying referral code:', refError); }
         }
 
-        if (data?.user) {
-          supabase.from('terms_acceptances').insert([
-            { user_id: data.user.id, document_type: 'terms', document_version: '1.0' },
-            { user_id: data.user.id, document_type: 'privacy', document_version: '1.0' },
-          ]).then(({ error }) => { if (error) console.error('Terms acceptance log error:', error); });
-        }
+        // NOTE: terms_acceptances is now written by the `handle_new_user`
+        // trigger server-side. No client-side insert needed (and it would
+        // silently fail under RLS when email confirmation is required).
 
         supabase.functions.invoke('notify-new-signup', {
           body: {
             user_email: email, user_name: fullName,
-            user_phone: phone.replace(/\D/g, '') || undefined,
+            user_phone: normalisedPhone || undefined,
             referral_code: referralCode || undefined,
             signup_source: 'auth_page',
           },
