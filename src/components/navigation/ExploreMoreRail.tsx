@@ -28,6 +28,9 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { CLUSTERS } from '@/lib/catalog/taxonomy';
+
+const TOTAL_CLUSTERS = CLUSTERS.length;
 import { APP_ROUTES } from '@/lib/config/routes';
 
 // Static icon map — keep tree-shakable. Adding a new icon here requires
