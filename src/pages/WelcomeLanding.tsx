@@ -60,6 +60,21 @@ export default function WelcomeLanding() {
   const { language, t } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
+  const [tripOpen, setTripOpen] = useState(false);
+
+  const tripServices = useMemo(
+    () => [
+      { icon: Plane, label: t('welcome.hero.pickTrip.svc.transfer'), href: APP_ROUTES.AIRPORT_TRANSFER },
+      { icon: Car, label: t('welcome.hero.pickTrip.svc.car'), href: APP_ROUTES.TRANSPORT },
+      { icon: Compass, label: t('welcome.hero.pickTrip.svc.tours'), href: APP_ROUTES.EXPERIENCES },
+      { icon: Anchor, label: t('welcome.hero.pickTrip.svc.yachts'), href: APP_ROUTES.YACHTS },
+      { icon: ShieldCheck, label: t('welcome.hero.pickTrip.svc.insurance'), href: APP_ROUTES.INSURANCE_TRAVEL },
+      { icon: Smartphone, label: t('welcome.hero.pickTrip.svc.sim'), href: APP_ROUTES.SIM_START },
+      { icon: Wallet, label: t('welcome.hero.pickTrip.svc.exchange'), href: APP_ROUTES.EXCHANGE },
+      { icon: Zap, label: t('welcome.hero.pickTrip.svc.fasttrack'), href: APP_ROUTES.FAST_TRACK },
+    ],
+    [t],
+  );
   const {
     byCluster,
     totalEligibleServices,
