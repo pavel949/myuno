@@ -19,6 +19,7 @@ import { AuthValuePanel } from '@/components/auth/AuthValuePanel';
 import { AuthTrustFooter } from '@/components/auth/AuthTrustFooter';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SignupIntegrityModal, type IntegrityReport } from '@/components/auth/SignupIntegrityModal';
 
 // Timeout helper — prevents infinite spinner when Supabase is unreachable
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
