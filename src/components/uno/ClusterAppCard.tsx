@@ -7,21 +7,21 @@ import type { ClusterId, ServiceStatus } from '@/lib/catalog';
 import { cn } from '@/lib/utils';
 
 const ACCENT_BG: Record<ClusterId, string> = {
-  arrive: 'bg-cluster-arrive/10',
-  live: 'bg-cluster-live/10',
-  manage: 'bg-cluster-manage/10',
-  invest: 'bg-cluster-invest/10',
-  legal: 'bg-cluster-legal/10',
-  build: 'bg-cluster-build/10',
+  arrive: 'bg-cluster-arrive',
+  live: 'bg-cluster-live',
+  manage: 'bg-cluster-manage',
+  invest: 'bg-cluster-invest',
+  legal: 'bg-cluster-legal',
+  build: 'bg-cluster-build',
 };
 
-const ACCENT_TEXT: Record<ClusterId, string> = {
-  arrive: 'text-cluster-arrive',
-  live: 'text-cluster-live',
-  manage: 'text-cluster-manage',
-  invest: 'text-cluster-invest',
-  legal: 'text-cluster-legal',
-  build: 'text-cluster-build',
+const ACCENT_BORDER: Record<ClusterId, string> = {
+  arrive: 'border-cluster-arrive',
+  live: 'border-cluster-live',
+  manage: 'border-cluster-manage',
+  invest: 'border-cluster-invest',
+  legal: 'border-cluster-legal',
+  build: 'border-cluster-build',
 };
 
 export interface ClusterAppCardProps {
