@@ -15865,6 +15865,7 @@ export type Database = {
           user_type: Database["public"]["Enums"]["user_type"] | null
           vault_pin_set: boolean
           visits_count: number
+          welcome_sent_at: string | null
         }
         Insert: {
           active_clusters?: string[]
@@ -15926,6 +15927,7 @@ export type Database = {
           user_type?: Database["public"]["Enums"]["user_type"] | null
           vault_pin_set?: boolean
           visits_count?: number
+          welcome_sent_at?: string | null
         }
         Update: {
           active_clusters?: string[]
@@ -15987,6 +15989,7 @@ export type Database = {
           user_type?: Database["public"]["Enums"]["user_type"] | null
           vault_pin_set?: boolean
           visits_count?: number
+          welcome_sent_at?: string | null
         }
         Relationships: []
       }
