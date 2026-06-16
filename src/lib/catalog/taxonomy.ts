@@ -40,10 +40,10 @@ import {
   Smartphone, ArrowLeftRight, Car, Landmark, Zap, Plug,
   Utensils, Sparkles, Stethoscope, ClipboardList, ShoppingBag, Users,
   FileSearch, Calculator, Shield, ShieldCheck, AlertTriangle, LifeBuoy,
-  Calendar, BarChart3, Wrench, PenTool, DollarSign, LayoutGrid,
+  Calendar, BarChart3, Wrench, PenTool, DollarSign,
   Building, Search, LineChart, Palette, Scissors, Crown, Bike, Shirt,
   Compass, Anchor, Dumbbell, CalendarDays, GraduationCap, PawPrint,
-  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Truck, Package, Route, Waves, Bandage, Pill, Flower2,
+  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Route, Waves, Pill, Flower2,
   Briefcase, Globe, BookOpen, Heart as HeartIcon,
   Stethoscope as VetIcon,
 } from 'lucide-react';
@@ -59,17 +59,13 @@ export type ClusterId = 'arrive' | 'live' | 'manage' | 'invest' | 'legal' | 'bui
 export type CategoryId =
   // Arrive (3)
   | 'cat-emergency' | 'cat-transport' | 'cat-tourism'
-  // Live (10) — повседневная жизнь, разбитая на узкие подгруппы вместо «свалки»
-  | 'cat-home-cleaning'      // Уборка и быт
-  | 'cat-home-repair'        // Ремонт и техника
-  | 'cat-home-outdoor'       // Двор, сад, цветы
-  | 'cat-home-logistics'     // Логистика и хранение
+  // Live (6) — повседневная жизнь, одна зонтик-категория для дома
+  | 'cat-home-services'      // Услуги для дома (cleaning + repair + outdoor + storage)
   | 'cat-food-delivery'      // Еда и доставка
   | 'cat-health-wellness'    // Здоровье и велнес
   | 'cat-family-kids'        // Семья и дети
-  | 'cat-pet-services'       // Питомцы
-  | 'cat-leisure'            // Досуг, события, спорт, сообщество
-  | 'cat-wedding-events'     // Свадьбы и премиум-события
+  | 'cat-pet-services'       // Уход за питомцами
+  | 'cat-leisure'            // Досуг, события, подарки, сообщество (вкл. wedding + flowers)
   // Manage (0 public — workspace-only cluster, see /mc/* routes)
   // Invest (1)
   | 'cat-real-estate'
@@ -392,72 +388,44 @@ export const CATEGORIES: CategoryEntry[] = [
     ],
   },
 
-  // ============== LIVE — повседневность, разбитая на узкие категории ==============
-  // Дом и быт раньше был одной свалкой из 12 сервисов в одну ленту.
-  // Теперь — 4 отдельные категории: Уборка / Ремонт / Двор / Логистика.
+  // ============== LIVE — повседневность ==============
+  // 2026-06-16 consolidation: 4 home-* categories (cleaning / repair / outdoor /
+  // logistics) collapsed into one "Услуги для дома" umbrella. Before, the Live
+  // cluster carried 10 categories, 4 of them about the home with overlapping
+  // semantics and a 1-service `cat-home-logistics` orphan. Users couldn't tell
+  // why "уборка" and "ремонт" were separate top-level rubrics when the deeper
+  // taxonomy on /services already covers everything. `flowers` was the one
+  // member of the old `cat-home-outdoor` that isn't maintenance — it moved
+  // into `cat-leisure` as a gift/lifestyle item.
   {
-    id: 'cat-home-cleaning',
+    id: 'cat-home-services',
     clusterId: 'live',
-    labelRu: 'Уборка и быт',
-    labelEn: 'Cleaning & Household',
-    valueRu: 'Регулярная уборка, прачечная, дезинсекция.',
-    valueEn: 'Regular cleaning, laundry, pest control.',
-    icon: Sparkles,
+    labelRu: 'Услуги для дома',
+    labelEn: 'Home services',
+    valueRu: 'Уборка, ремонт, сантехника, электрика, сад, хранение — одной точкой.',
+    valueEn: 'Cleaning, repair, plumbing, electrical, garden, storage — one umbrella.',
+    icon: Wrench,
     color: '#10B981',
     services: [
+      // Cleaning trio
       { id: 'cleaning',     path: APP_ROUTES.CLEANING,                       labelRu: 'Уборка',      labelEn: 'Cleaning',     icon: Sparkles, status: 'available', verticalId: 'cleaning', personaTags: ['resident','family','property_owner','nomad'], jtbdClusters: ['C'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing','property_owner','departure'] },
       { id: 'laundry',      path: `${SERVICES_URL}?category=laundry`,        labelRu: 'Прачечная',   labelEn: 'Laundry',      icon: Shirt,    status: 'info',      personaTags: ['tourist','resident','nomad','family'], jtbdClusters: ['C'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['living','resident','tourist'] },
       { id: 'pest-control', path: `${SERVICES_URL}?category=pest-control`,   labelRu: 'Дезинсекция', labelEn: 'Pest control', icon: Bug,      status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
-    ],
-  },
-  {
-    id: 'cat-home-repair',
-    clusterId: 'live',
-    labelRu: 'Ремонт и техника',
-    labelEn: 'Repair & Maintenance',
-    valueRu: 'Мастер на час, сантехник, электрик, кондиционеры, замки.',
-    valueEn: 'Handyman, plumber, electrician, AC, locksmith.',
-    icon: Wrench,
-    color: '#3B82F6',
-    services: [
+      // Repair / trade trades (former cat-home-repair)
       { id: 'handyman',   path: `${SERVICES_URL}?category=handyman`,   labelRu: 'Мастер на час', labelEn: 'Handyman',    icon: Hammer,   status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
       { id: 'plumbing',   path: `${SERVICES_URL}?category=plumbing`,   labelRu: 'Сантехника',    labelEn: 'Plumbing',    icon: Wrench,   status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
       { id: 'electrical', path: `${SERVICES_URL}?category=electrical`, labelRu: 'Электрика',     labelEn: 'Electrical',  icon: Plug,     status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
       { id: 'ac-repair',  path: `${SERVICES_URL}?category=ac-repair`,  labelRu: 'Кондиционеры',  labelEn: 'AC repair',   icon: Wind,     status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
       { id: 'locksmith',  path: `${SERVICES_URL}?category=locksmith`,  labelRu: 'Замки',         labelEn: 'Locksmith',   icon: KeyRound, status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','H'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing','emergency'] },
+      // Outdoor
+      { id: 'gardening',  path: `${SERVICES_URL}?category=gardening`,  labelRu: 'Сад',           labelEn: 'Gardening',   icon: TreePine, status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      // Storage (former cat-home-logistics)
+      { id: 'storage',    path: `${SERVICES_URL}?category=storage`,    labelRu: 'Хранение',      labelEn: 'Storage',     icon: Warehouse,status: 'info',      personaTags: ['resident','nomad','relocation','family'], jtbdClusters: ['C','B'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['living','resident','departure','relocation'] },
       // Home-services hub: deep catalogue of trades (handyman + plumber + electrician +
       // AC + cleaning + pool + garden + pest + security + moving) via
-      // src/lib/config/homeServiceFunctions.ts. Lives in `cat-home-repair` because
-      // 7 of its 10 sub-categories are repair-trades; renamed from the misleading
-      // "Все услуги" / "Services hub" to honestly describe the content.
-      { id: 'services',   path: SERVICES_URL,                          labelRu: 'Услуги для дома', labelEn: 'Home services hub', icon: Wrench, status: 'info',      personaTags: ['resident','property_owner','family','nomad'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
-    ],
-  },
-  {
-    id: 'cat-home-outdoor',
-    clusterId: 'live',
-    labelRu: 'Двор и сад',
-    labelEn: 'Garden & Outdoor',
-    valueRu: 'Сад, бассейн, цветы — внешняя территория.',
-    valueEn: 'Garden, pool, flowers — outside the home.',
-    icon: TreePine,
-    color: '#22C55E',
-    services: [
-      { id: 'gardening', path: `${SERVICES_URL}?category=gardening`, labelRu: 'Сад',    labelEn: 'Gardening', icon: TreePine, status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
-      { id: 'flowers',   path: APP_ROUTES.FLOWERS,                   labelRu: 'Цветы',  labelEn: 'Flowers',   icon: Flower2,  status: 'available', verticalId: 'flower', personaTags: ['tourist','resident','couple','family','business'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
-    ],
-  },
-  {
-    id: 'cat-home-logistics',
-    clusterId: 'live',
-    labelRu: 'Логистика и хранение',
-    labelEn: 'Logistics & Storage',
-    valueRu: 'Хранение вещей, переезды, все домашние услуги одной точкой.',
-    valueEn: 'Storage, moving, all home services in one place.',
-    icon: Truck,
-    color: '#0EA5E9',
-    services: [
-      { id: 'storage',  path: `${SERVICES_URL}?category=storage`, labelRu: 'Хранение',   labelEn: 'Storage',      icon: Warehouse,  status: 'info',      personaTags: ['resident','nomad','relocation','family'], jtbdClusters: ['C','B'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['living','resident','departure','relocation'] },
+      // src/lib/config/homeServiceFunctions.ts. Keeps the LayoutGrid-of-trades
+      // pattern as an explicit umbrella inside the umbrella category.
+      { id: 'services',   path: SERVICES_URL,                          labelRu: 'Каталог трейдов', labelEn: 'Trades catalogue', icon: Wrench, status: 'info', personaTags: ['resident','property_owner','family','nomad'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
     ],
   },
   {
@@ -533,12 +501,12 @@ export const CATEGORIES: CategoryEntry[] = [
     clusterId: 'live',
     labelRu: 'Досуг и события',
     labelEn: 'Leisure & Events',
-    valueRu: 'Что делать вечером и на выходных: события, активности, сообщество.',
-    valueEn: 'What to do tonight or this weekend: events, activities, community.',
+    valueRu: 'Что делать вечером и на выходных: события, активности, подарки, сообщество.',
+    valueEn: 'What to do tonight or this weekend: events, activities, gifts, community.',
     icon: CalendarDays,
     color: '#0EA5E9',
     services: [
-      // Сat-leisure-в-кластере-Live versions of event/experience target residents,
+      // Cat-leisure (Live cluster) versions of event/experience target residents,
       // not tourists — same listing pages but contextual framing. Labels are
       // intentionally differentiated from the cat-tourism originals (line ~370)
       // so /discover-from-Live doesn't show two identically-named cards.
@@ -546,25 +514,13 @@ export const CATEGORIES: CategoryEntry[] = [
       { id: 'experience-live', path: EXPERIENCES_URL,                   labelRu: 'Локальные впечатления', labelEn: 'Local experiences', icon: Compass,      status: 'available', verticalId: 'experience', personaTags: ['resident','couple','active','family','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
       { id: 'water-live',   path: `${EXPERIENCES_URL}?type=activity`,   labelRu: 'Активности',   labelEn: 'Activities',       icon: Waves,        status: 'available', verticalId: 'water_activity', personaTags: ['resident','active','family'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
       { id: 'community',    path: APP_ROUTES.HOME,                      labelRu: 'Сообщество',   labelEn: 'Community',        icon: Users,        status: 'soon', personaTags: ['resident','family','relocation','nomad'], jtbdClusters: ['I','C'], lifecycleStages: ['settler','resident','nomad','snowbird','returnee'], roleTags: ['consumer','resident-user'], situationCodes: ['living','resident','family'] },
-    ],
-  },
-
-  // ─── Wedding & Events sits in LIVE (lifestyle / family celebration),
-  //     not MANAGE. The MANAGE cluster is workspace-only (PMS, finance,
-  //     team, bookings) and is exposed via /mc/* routes, not the public
-  //     services catalog. Persona system (detectPersona.ts) and the
-  //     legacy appRegistry adapter mirror this 'live' assignment.
-  {
-    id: 'cat-wedding-events',
-    clusterId: 'live',
-    labelRu: 'Свадьбы и события',
-    labelEn: 'Wedding & Events',
-    valueRu: 'Destination-свадьбы, корпоративы, MICE — координация поставщиков.',
-    valueEn: 'Destination weddings, corporate events, MICE coordination.',
-    icon: CalendarDays,
-    color: '#F43F5E',
-    services: [
-      { id: 'wedding', path: APP_ROUTES.WEDDING, labelRu: 'Свадьбы', labelEn: 'Weddings', icon: CalendarDays, status: 'available', personaTags: ['couple','family','business','tourist'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['family','leisure'] },
+      // Wedding (moved from former cat-wedding-events, 2026-06-16) — destination
+      // ceremonies and family celebrations fit the lifestyle/leisure umbrella.
+      { id: 'wedding',      path: APP_ROUTES.WEDDING, labelRu: 'Свадьбы', labelEn: 'Weddings', icon: CalendarDays, status: 'available', personaTags: ['couple','family','business','tourist'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['family','leisure'] },
+      // Flowers (moved from former cat-home-outdoor, 2026-06-16) — gift/lifestyle,
+      // not home maintenance. Lives next to wedding and event-live where the
+      // intent is celebration rather than property upkeep.
+      { id: 'flowers',      path: APP_ROUTES.FLOWERS,                   labelRu: 'Цветы',  labelEn: 'Flowers',   icon: Flower2,  status: 'available', verticalId: 'flower', personaTags: ['tourist','resident','couple','family','business'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
     ],
   },
 
