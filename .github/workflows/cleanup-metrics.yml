@@ -79,7 +79,7 @@ jobs:
         env:
           # Update these whenever baseline-2026-04.md is refreshed
           BASELINE_ANY: 745
-          BASELINE_ROUTES: 419
+          BASELINE_ROUTES: 450
           # Wave 4+5 (2026-04-29): после чистки таблиц/edge fn
           BASELINE_TABLES: 386
           BASELINE_ACTIVE_EDGE_FN: 124
