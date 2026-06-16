@@ -75,6 +75,8 @@ const PersonaDirectoryPage = React.lazy(() => import('@/pages/landings/PersonaDi
 const PersonaAreaLandingPage = React.lazy(() => import('@/pages/landings/PersonaAreaLandingPage'));
 // M6 · Track B.5 — cluster landing route `/cluster/:cluster`
 const ClusterLandingPage = React.lazy(() => import('@/pages/landings/ClusterLandingPage'));
+// Cluster overview pages for /live · /manage · /build — SSOT-driven generic shell
+const ClusterOverviewPage = React.lazy(() => import('@/pages/cluster/ClusterOverviewPage'));
 // M10b · IPP §4G — Deal Room stub
 const MandateLanding = React.lazy(() => import('@/pages/property/MandateLanding'));
 // Magnet visual-builder landings (`/l/:slug`)
@@ -465,6 +467,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.SIM_START} element={<LazyPage><Pages.SIMStartPage /></LazyPage>} />
         <Route path={APP_ROUTES.EXCHANGE} element={<LazyPage><Pages.ExchangeBotPage /></LazyPage>} />
         <Route path={APP_ROUTES.OFFICIAL_NEWS} element={<LazyPage><Pages.OfficialNewsPage /></LazyPage>} />
+
+        {/* ── LIVE / MANAGE / BUILD cluster overviews (SSOT-driven generic shell) ── */}
+        <Route path="/live"   element={<LazyPage><ClusterOverviewPage clusterId="live" /></LazyPage>} />
+        <Route path="/manage" element={<LazyPage><ClusterOverviewPage clusterId="manage" /></LazyPage>} />
+        <Route path="/build"  element={<LazyPage><ClusterOverviewPage clusterId="build" /></LazyPage>} />
         
         {/* ── Utility Micro-apps ── */}
         <Route path={APP_ROUTES.VISA_QUIZ} element={<LazyPage><Pages.VisaQuizPage /></LazyPage>} />

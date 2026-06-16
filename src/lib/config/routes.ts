@@ -273,6 +273,11 @@ export const APP_ROUTES = {
   EXCHANGE: '/exchange',
   OFFICIAL_NEWS: '/arrive/news',
 
+  // ── Generic cluster overviews (SSOT-driven; see ClusterOverviewPage) ──
+  LIVE_CLUSTER: '/live',
+  MANAGE_CLUSTER: '/manage',
+  BUILD_CLUSTER: '/build',
+
   // ── Utility Micro-apps ──
   VISA_QUIZ: '/visa/quiz',
   SCHOOL_FINDER: '/school-finder',
