@@ -78,7 +78,17 @@ export type CategoryId =
   // Build (1)
   | 'cat-partner-portal';
 
-export type ServiceStatus = 'available' | 'soon' | 'pro';
+/**
+ * Service availability state.
+ *  - `available` — fully wired: dedicated page + booking form.
+ *  - `soon`      — visible in catalog, "Coming soon" badge, click goes nowhere meaningful.
+ *  - `pro`       — gated to professional / workspace users.
+ *  - `info`      — informational entry that maps to a generic `/services?category=X` hub
+ *                   (or a coordinator WhatsApp link) rather than a per-service booking page.
+ *                   Used for trades like laundry/plumbing/handyman where the path is the
+ *                   coordinator-route, not a self-service form. UI hides booking CTA for these.
+ */
+export type ServiceStatus = 'available' | 'soon' | 'pro' | 'info';
 
 export type Audience = 'public' | 'workspace';
 
@@ -133,6 +143,18 @@ export interface ServiceEntry {
   lifecycleStages?: LifecycleStage[];
   /** Functional role tags. Required for AI routing per canon §22. */
   roleTags?: RoleTag[];
+  /**
+   * Life-situation codes this service maps to (codes from LIFE_SITUATIONS).
+   *
+   * This is the SSOT for the `entity_type='service'` rows in `catalog_life_map`.
+   * When non-empty, the validate-catalog-life-map script enforces:
+   *   - every code in this list exists in LIFE_SITUATIONS,
+   *   - every (service.id, code) pair has a matching DB row after sync.
+   *
+   * Vertical entities (property/yacht/transfer/etc.) are seeded separately by
+   * `seed_catalog_life_map_full_coverage.sql` and do not need entries here.
+   */
+  situationCodes?: string[];
 }
 
 export interface CategoryEntry {
@@ -330,11 +352,11 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Car,
     color: '#3B82F6',
     services: [
-      { id: 'transfer',   path: APP_ROUTES.AIRPORT_TRANSFER, labelRu: 'Трансферы',  labelEn: 'Transfers',  icon: PlaneLanding, status: 'available', verticalId: 'transfer', personaTags: ['tourist','relocation','family','nomad'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','settler','returnee'], roleTags: ['consumer'] },
-      { id: 'fast-track', path: APP_ROUTES.FAST_TRACK,        labelRu: 'Fast Track',  labelEn: 'Fast Track', icon: Zap,         status: 'available', personaTags: ['tourist','business','relocation'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird'], roleTags: ['consumer'] },
-      { id: 'vehicle',    path: APP_ROUTES.TRANSPORT,         labelRu: 'Авто и байки',labelEn: 'Car & bike', icon: Car,         status: 'available', verticalId: 'vehicle', personaTags: ['tourist','resident','nomad','active','family'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'] },
-      { id: 'sim',        path: APP_ROUTES.SIM_START,         labelRu: 'SIM-карты',   labelEn: 'SIM cards',  icon: Smartphone,  status: 'available', personaTags: ['tourist','relocation','nomad'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','settler'], roleTags: ['consumer'] },
-      { id: 'exchange',   path: APP_ROUTES.EXCHANGE,          labelRu: 'Курсы валют', labelEn: 'Exchange',   icon: ArrowLeftRight, status: 'available', personaTags: ['tourist','resident','nomad','investor','business'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident','absentee'], roleTags: ['consumer','investor-passive'] },
+      { id: 'transfer',   path: APP_ROUTES.AIRPORT_TRANSFER, labelRu: 'Трансферы',  labelEn: 'Transfers',  icon: PlaneLanding, status: 'available', verticalId: 'transfer', personaTags: ['tourist','relocation','family','nomad'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','settler','returnee'], roleTags: ['consumer'], situationCodes: ['arrival','first_time','transit','tourist','emergency'] },
+      { id: 'fast-track', path: APP_ROUTES.FAST_TRACK,        labelRu: 'Fast Track',  labelEn: 'Fast Track', icon: Zap,         status: 'available', personaTags: ['tourist','business','relocation'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird'], roleTags: ['consumer'], situationCodes: ['arrival','tourist','transit'] },
+      { id: 'vehicle',    path: APP_ROUTES.TRANSPORT,         labelRu: 'Авто и байки',labelEn: 'Car & bike', icon: Car,         status: 'available', verticalId: 'vehicle', personaTags: ['tourist','resident','nomad','active','family'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['arrival','tourist','living','resident','leisure'] },
+      { id: 'sim',        path: APP_ROUTES.SIM_START,         labelRu: 'SIM-карты',   labelEn: 'SIM cards',  icon: Smartphone,  status: 'available', personaTags: ['tourist','relocation','nomad'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','settler'], roleTags: ['consumer'], situationCodes: ['arrival','tourist','first_time','transit'] },
+      { id: 'exchange',   path: APP_ROUTES.EXCHANGE,          labelRu: 'Курсы валют', labelEn: 'Exchange',   icon: ArrowLeftRight, status: 'available', personaTags: ['tourist','resident','nomad','investor','business'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident','absentee'], roleTags: ['consumer','investor-passive'], situationCodes: ['arrival','tourist','investing','investor'] },
     ],
   },
   {
@@ -347,11 +369,11 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Compass,
     color: '#06B6D4',
     services: [
-      { id: 'experience', path: EXPERIENCES_URL,                          labelRu: 'Впечатления',  labelEn: 'Experiences',   icon: Compass,      status: 'available', verticalId: 'experience', personaTags: ['tourist','active','couple','family','nightlife'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','nomad','resident'], roleTags: ['consumer'] },
-      { id: 'tours',      path: `${EXPERIENCES_URL}?type=tour`,           labelRu: 'Туры',          labelEn: 'Tours',         icon: Route,        status: 'available', personaTags: ['tourist','family','active'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird'], roleTags: ['consumer'] },
-      { id: 'water',      path: `${EXPERIENCES_URL}?type=activity`,       labelRu: 'Вода и активности', labelEn: 'Water & activities', icon: Waves, status: 'available', verticalId: 'water_activity', personaTags: ['tourist','active','family'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','resident'], roleTags: ['consumer'] },
-      { id: 'yacht',      path: APP_ROUTES.YACHTS,                        labelRu: 'Яхты',          labelEn: 'Yachts',        icon: Anchor,       status: 'available', verticalId: 'yacht', personaTags: ['tourist','couple','nightlife','business','active'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','nomad','resident','absentee'], roleTags: ['consumer'] },
-      { id: 'event',      path: APP_ROUTES.EVENTS,                        labelRu: 'События',       labelEn: 'Events',        icon: CalendarDays, status: 'available', verticalId: 'event', personaTags: ['tourist','nightlife','couple','active'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','nomad','resident'], roleTags: ['consumer'] },
+      { id: 'experience', path: EXPERIENCES_URL,                          labelRu: 'Впечатления',  labelEn: 'Experiences',   icon: Compass,      status: 'available', verticalId: 'experience', personaTags: ['tourist','active','couple','family','nightlife'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','nomad','resident'], roleTags: ['consumer'], situationCodes: ['tourist','leisure','first_time','transit'] },
+      { id: 'tours',      path: `${EXPERIENCES_URL}?type=tour`,           labelRu: 'Туры',          labelEn: 'Tours',         icon: Route,        status: 'available', personaTags: ['tourist','family','active'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird'], roleTags: ['consumer'], situationCodes: ['tourist','leisure','first_time'] },
+      { id: 'water',      path: `${EXPERIENCES_URL}?type=activity`,       labelRu: 'Вода и активности', labelEn: 'Water & activities', icon: Waves, status: 'available', verticalId: 'water_activity', personaTags: ['tourist','active','family'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','resident'], roleTags: ['consumer'], situationCodes: ['tourist','leisure'] },
+      { id: 'yacht',      path: APP_ROUTES.YACHTS,                        labelRu: 'Яхты',          labelEn: 'Yachts',        icon: Anchor,       status: 'available', verticalId: 'yacht', personaTags: ['tourist','couple','nightlife','business','active'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','nomad','resident','absentee'], roleTags: ['consumer'], situationCodes: ['tourist','leisure','nightlife'] },
+      { id: 'event',      path: APP_ROUTES.EVENTS,                        labelRu: 'События',       labelEn: 'Events',        icon: CalendarDays, status: 'available', verticalId: 'event', personaTags: ['tourist','nightlife','couple','active'], jtbdClusters: ['A','I'], lifecycleStages: ['tourist','snowbird','nomad','resident'], roleTags: ['consumer'], situationCodes: ['tourist','leisure','nightlife'] },
     ],
   },
   {
@@ -364,9 +386,9 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: AlertTriangle,
     color: '#EF4444',
     services: [
-      { id: 'sos',           path: APP_ROUTES.SOS,           labelRu: 'SOS',           labelEn: 'SOS',           icon: AlertTriangle, status: 'available', personaTags: ['tourist','resident','family','pet_owner','property_owner','investor','relocation'], jtbdClusters: ['H','A'], lifecycleStages: ['all'], roleTags: ['all'] },
-      { id: 'vip-concierge', path: APP_ROUTES.VIP_CONCIERGE, labelRu: 'VIP-консьерж',   labelEn: 'VIP Concierge', icon: Crown,         status: 'available', personaTags: ['tourist','couple','business','nightlife','family','investor'], jtbdClusters: ['H','I'], lifecycleStages: ['tourist','snowbird','nomad','absentee'], roleTags: ['consumer','investor-active'] },
-      { id: 'support',       path: APP_ROUTES.SUPPORT,       labelRu: 'Поддержка',      labelEn: 'Support',       icon: LifeBuoy,      status: 'available', personaTags: ['tourist','resident','family','pet_owner','property_owner','investor','business','relocation'], jtbdClusters: ['H','A'], lifecycleStages: ['all'], roleTags: ['all'] },
+      { id: 'sos',           path: APP_ROUTES.SOS,           labelRu: 'SOS',           labelEn: 'SOS',           icon: AlertTriangle, status: 'available', personaTags: ['tourist','resident','family','pet_owner','property_owner','investor','relocation'], jtbdClusters: ['H','A'], lifecycleStages: ['all'], roleTags: ['all'], situationCodes: ['emergency'] },
+      { id: 'vip-concierge', path: APP_ROUTES.VIP_CONCIERGE, labelRu: 'VIP-консьерж',   labelEn: 'VIP Concierge', icon: Crown,         status: 'available', personaTags: ['tourist','couple','business','nightlife','family','investor'], jtbdClusters: ['H','I'], lifecycleStages: ['tourist','snowbird','nomad','absentee'], roleTags: ['consumer','investor-active'], situationCodes: ['emergency','arrival','tourist'] },
+      { id: 'support',       path: APP_ROUTES.SUPPORT,       labelRu: 'Поддержка',      labelEn: 'Support',       icon: LifeBuoy,      status: 'available', personaTags: ['tourist','resident','family','pet_owner','property_owner','investor','business','relocation'], jtbdClusters: ['H','A'], lifecycleStages: ['all'], roleTags: ['all'], situationCodes: ['emergency','arrival','living','resident'] },
     ],
   },
 
@@ -383,9 +405,9 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Sparkles,
     color: '#10B981',
     services: [
-      { id: 'cleaning',     path: APP_ROUTES.CLEANING,                       labelRu: 'Уборка',      labelEn: 'Cleaning',     icon: Sparkles, status: 'available', verticalId: 'cleaning', personaTags: ['resident','family','property_owner','nomad'], jtbdClusters: ['C'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer','operator'] },
-      { id: 'laundry',      path: `${SERVICES_URL}?category=laundry`,        labelRu: 'Прачечная',   labelEn: 'Laundry',      icon: Shirt,    status: 'available', personaTags: ['tourist','resident','nomad','family'], jtbdClusters: ['C'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'] },
-      { id: 'pest-control', path: `${SERVICES_URL}?category=pest-control`,   labelRu: 'Дезинсекция', labelEn: 'Pest control', icon: Bug,      status: 'available', personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'] },
+      { id: 'cleaning',     path: APP_ROUTES.CLEANING,                       labelRu: 'Уборка',      labelEn: 'Cleaning',     icon: Sparkles, status: 'available', verticalId: 'cleaning', personaTags: ['resident','family','property_owner','nomad'], jtbdClusters: ['C'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing','property_owner','departure'] },
+      { id: 'laundry',      path: `${SERVICES_URL}?category=laundry`,        labelRu: 'Прачечная',   labelEn: 'Laundry',      icon: Shirt,    status: 'info',      personaTags: ['tourist','resident','nomad','family'], jtbdClusters: ['C'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['living','resident','tourist'] },
+      { id: 'pest-control', path: `${SERVICES_URL}?category=pest-control`,   labelRu: 'Дезинсекция', labelEn: 'Pest control', icon: Bug,      status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
     ],
   },
   {
@@ -398,11 +420,11 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Wrench,
     color: '#3B82F6',
     services: [
-      { id: 'handyman',   path: `${SERVICES_URL}?category=handyman`,   labelRu: 'Мастер на час', labelEn: 'Handyman',    icon: Hammer,   status: 'available', personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'] },
-      { id: 'plumbing',   path: `${SERVICES_URL}?category=plumbing`,   labelRu: 'Сантехника',    labelEn: 'Plumbing',    icon: Wrench,   status: 'available', personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'] },
-      { id: 'electrical', path: `${SERVICES_URL}?category=electrical`, labelRu: 'Электрика',     labelEn: 'Electrical',  icon: Plug,     status: 'available', personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'] },
-      { id: 'ac-repair',  path: `${SERVICES_URL}?category=ac-repair`,  labelRu: 'Кондиционеры',  labelEn: 'AC repair',   icon: Wind,     status: 'available', personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'] },
-      { id: 'locksmith',  path: `${SERVICES_URL}?category=locksmith`,  labelRu: 'Замки',         labelEn: 'Locksmith',   icon: KeyRound, status: 'available', personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','H'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'] },
+      { id: 'handyman',   path: `${SERVICES_URL}?category=handyman`,   labelRu: 'Мастер на час', labelEn: 'Handyman',    icon: Hammer,   status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      { id: 'plumbing',   path: `${SERVICES_URL}?category=plumbing`,   labelRu: 'Сантехника',    labelEn: 'Plumbing',    icon: Wrench,   status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      { id: 'electrical', path: `${SERVICES_URL}?category=electrical`, labelRu: 'Электрика',     labelEn: 'Electrical',  icon: Plug,     status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      { id: 'ac-repair',  path: `${SERVICES_URL}?category=ac-repair`,  labelRu: 'Кондиционеры',  labelEn: 'AC repair',   icon: Wind,     status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      { id: 'locksmith',  path: `${SERVICES_URL}?category=locksmith`,  labelRu: 'Замки',         labelEn: 'Locksmith',   icon: KeyRound, status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','H'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing','emergency'] },
     ],
   },
   {
@@ -415,8 +437,8 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: TreePine,
     color: '#22C55E',
     services: [
-      { id: 'gardening', path: `${SERVICES_URL}?category=gardening`, labelRu: 'Сад',    labelEn: 'Gardening', icon: TreePine, status: 'available', personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'] },
-      { id: 'flowers',   path: APP_ROUTES.FLOWERS,                   labelRu: 'Цветы',  labelEn: 'Flowers',   icon: Flower2,  status: 'available', verticalId: 'flower', personaTags: ['tourist','resident','couple','family','business'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'] },
+      { id: 'gardening', path: `${SERVICES_URL}?category=gardening`, labelRu: 'Сад',    labelEn: 'Gardening', icon: TreePine, status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      { id: 'flowers',   path: APP_ROUTES.FLOWERS,                   labelRu: 'Цветы',  labelEn: 'Flowers',   icon: Flower2,  status: 'available', verticalId: 'flower', personaTags: ['tourist','resident','couple','family','business'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
     ],
   },
   {
@@ -429,8 +451,8 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Truck,
     color: '#0EA5E9',
     services: [
-      { id: 'storage',  path: `${SERVICES_URL}?category=storage`, labelRu: 'Хранение',   labelEn: 'Storage',      icon: Warehouse,  status: 'available', personaTags: ['resident','nomad','relocation','family'], jtbdClusters: ['C','B'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'] },
-      { id: 'services', path: SERVICES_URL,                        labelRu: 'Все услуги', labelEn: 'Services hub', icon: LayoutGrid, status: 'available', personaTags: ['tourist','resident','family','nomad','property_owner'], jtbdClusters: ['C','I'], lifecycleStages: ['all'], roleTags: ['consumer'] },
+      { id: 'storage',  path: `${SERVICES_URL}?category=storage`, labelRu: 'Хранение',   labelEn: 'Storage',      icon: Warehouse,  status: 'info',      personaTags: ['resident','nomad','relocation','family'], jtbdClusters: ['C','B'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['living','resident','departure','relocation'] },
+      { id: 'services', path: SERVICES_URL,                        labelRu: 'Все услуги', labelEn: 'Services hub', icon: LayoutGrid, status: 'info',      personaTags: ['tourist','resident','family','nomad','property_owner'], jtbdClusters: ['C','I'], lifecycleStages: ['all'], roleTags: ['consumer'], situationCodes: ['living','resident','managing'] },
     ],
   },
   {
@@ -443,9 +465,9 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Utensils,
     color: '#F59E0B',
     services: [
-      { id: 'restaurant', path: APP_ROUTES.RESTAURANTS, labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils,    status: 'available', verticalId: 'restaurant', personaTags: ['tourist','resident','couple','family','nightlife','business','active'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'] },
-      { id: 'delivery',   path: APP_ROUTES.DELIVERY,    labelRu: 'Доставка',  labelEn: 'Delivery',    icon: Bike,        status: 'available', personaTags: ['resident','nomad','family','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'] },
-      { id: 'market',     path: APP_ROUTES.MARKET,      labelRu: 'Маркет',    labelEn: 'Market',      icon: ShoppingBag, status: 'available', personaTags: ['resident','family','couple','active','nomad'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','snowbird','nomad'], roleTags: ['consumer'] },
+      { id: 'restaurant', path: APP_ROUTES.RESTAURANTS, labelRu: 'Рестораны', labelEn: 'Restaurants', icon: Utensils,    status: 'available', verticalId: 'restaurant', personaTags: ['tourist','resident','couple','family','nightlife','business','active'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['food','living','resident','tourist','nightlife','leisure'] },
+      { id: 'delivery',   path: APP_ROUTES.DELIVERY,    labelRu: 'Доставка',  labelEn: 'Delivery',    icon: Bike,        status: 'available', personaTags: ['resident','nomad','family','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['food','living','resident'] },
+      { id: 'market',     path: APP_ROUTES.MARKET,      labelRu: 'Маркет',    labelEn: 'Market',      icon: ShoppingBag, status: 'available', personaTags: ['resident','family','couple','active','nomad'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','snowbird','nomad'], roleTags: ['consumer'], situationCodes: ['food','living','resident'] },
     ],
   },
   {
@@ -458,11 +480,11 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Stethoscope,
     color: '#EC4899',
     services: [
-      { id: 'medical',   path: APP_ROUTES.MEDICAL,   labelRu: 'Медицина',  labelEn: 'Medical',   icon: Stethoscope, status: 'available', verticalId: 'medical', personaTags: ['tourist','resident','family','active','pet_owner'], jtbdClusters: ['C','H'], lifecycleStages: ['all'], roleTags: ['consumer'] },
-      { id: 'pharmacy',  path: APP_ROUTES.PHARMACY,  labelRu: 'Аптеки',    labelEn: 'Pharmacy',  icon: Pill,        status: 'available', verticalId: 'pharmacy', personaTags: ['tourist','resident','family','pet_owner'], jtbdClusters: ['C'], lifecycleStages: ['all'], roleTags: ['consumer'] },
-      { id: 'beauty',    path: APP_ROUTES.BEAUTY,    labelRu: 'Красота',   labelEn: 'Beauty',    icon: Scissors,    status: 'available', verticalId: 'beauty', personaTags: ['tourist','resident','couple','nightlife','family'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'] },
-      { id: 'fitness',   path: APP_ROUTES.FITNESS,   labelRu: 'Фитнес',    labelEn: 'Fitness',   icon: Dumbbell,    status: 'available', verticalId: 'fitness', personaTags: ['tourist','resident','active','nomad','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'] },
-      { id: 'insurance', path: APP_ROUTES.INSURANCE, labelRu: 'Страховка', labelEn: 'Insurance', icon: ShieldCheck, status: 'available', verticalId: 'insurance', personaTags: ['resident','family','property_owner','investor','relocation','nomad'], jtbdClusters: ['G','C'], lifecycleStages: ['settler','resident','snowbird','absentee','returnee'], roleTags: ['consumer','investor-passive','operator'] },
+      { id: 'medical',   path: APP_ROUTES.MEDICAL,   labelRu: 'Медицина',  labelEn: 'Medical',   icon: Stethoscope, status: 'available', verticalId: 'medical', personaTags: ['tourist','resident','family','active','pet_owner'], jtbdClusters: ['C','H'], lifecycleStages: ['all'], roleTags: ['consumer'], situationCodes: ['health','family','emergency','living','resident'] },
+      { id: 'pharmacy',  path: APP_ROUTES.PHARMACY,  labelRu: 'Аптеки',    labelEn: 'Pharmacy',  icon: Pill,        status: 'available', verticalId: 'pharmacy', personaTags: ['tourist','resident','family','pet_owner'], jtbdClusters: ['C'], lifecycleStages: ['all'], roleTags: ['consumer'], situationCodes: ['health','family','living','resident','emergency','settling'] },
+      { id: 'beauty',    path: APP_ROUTES.BEAUTY,    labelRu: 'Красота',   labelEn: 'Beauty',    icon: Scissors,    status: 'available', verticalId: 'beauty', personaTags: ['tourist','resident','couple','nightlife','family'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['health','leisure','living','resident'] },
+      { id: 'fitness',   path: APP_ROUTES.FITNESS,   labelRu: 'Фитнес',    labelEn: 'Fitness',   icon: Dumbbell,    status: 'available', verticalId: 'fitness', personaTags: ['tourist','resident','active','nomad','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['health','living','resident','leisure'] },
+      { id: 'insurance', path: APP_ROUTES.INSURANCE, labelRu: 'Страховка', labelEn: 'Insurance', icon: ShieldCheck, status: 'available', verticalId: 'insurance', personaTags: ['resident','family','property_owner','investor','relocation','nomad'], jtbdClusters: ['G','C'], lifecycleStages: ['settler','resident','snowbird','absentee','returnee'], roleTags: ['consumer','investor-passive','operator'], situationCodes: ['health','settling','family','relocation','managing','departure'] },
     ],
   },
   {
@@ -475,10 +497,10 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Baby,
     color: '#F472B6',
     services: [
-      { id: 'babysitter',     path: APP_ROUTES.BABYSITTER,     labelRu: 'Няни',         labelEn: 'Babysitters',  icon: Baby,          status: 'available', verticalId: 'babysitter', personaTags: ['family','couple','tourist'], jtbdClusters: ['C','I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'] },
-      { id: 'school-finder',  path: APP_ROUTES.SCHOOL_FINDER,  labelRu: 'Школы',        labelEn: 'School finder',icon: Search,        status: 'available', personaTags: ['family','relocation'], jtbdClusters: ['C','B'], lifecycleStages: ['scout','settler','resident'], roleTags: ['consumer'] },
-      { id: 'education',      path: APP_ROUTES.EDUCATION,      labelRu: 'Образование',  labelEn: 'Education',    icon: GraduationCap, status: 'available', verticalId: 'education', personaTags: ['family','resident','relocation','active'], jtbdClusters: ['C'], lifecycleStages: ['settler','resident','snowbird'], roleTags: ['consumer'] },
-      { id: 'kids',           path: APP_ROUTES.KIDS,           labelRu: 'Дети',         labelEn: 'Kids',         icon: Baby,          status: 'available', personaTags: ['family','tourist'], jtbdClusters: ['I','C'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'] },
+      { id: 'babysitter',     path: APP_ROUTES.BABYSITTER,     labelRu: 'Няни',         labelEn: 'Babysitters',  icon: Baby,          status: 'available', verticalId: 'babysitter', personaTags: ['family','couple','tourist'], jtbdClusters: ['C','I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['family','living','resident'] },
+      { id: 'school-finder',  path: APP_ROUTES.SCHOOL_FINDER,  labelRu: 'Школы',        labelEn: 'School finder',icon: Search,        status: 'available', personaTags: ['family','relocation'], jtbdClusters: ['C','B'], lifecycleStages: ['scout','settler','resident'], roleTags: ['consumer'], situationCodes: ['family','relocation','settling'] },
+      { id: 'education',      path: APP_ROUTES.EDUCATION,      labelRu: 'Образование',  labelEn: 'Education',    icon: GraduationCap, status: 'available', verticalId: 'education', personaTags: ['family','resident','relocation','active'], jtbdClusters: ['C'], lifecycleStages: ['settler','resident','snowbird'], roleTags: ['consumer'], situationCodes: ['family','living','resident','settling'] },
+      { id: 'kids',           path: APP_ROUTES.KIDS,           labelRu: 'Дети',         labelEn: 'Kids',         icon: Baby,          status: 'available', personaTags: ['family','tourist'], jtbdClusters: ['I','C'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['family','leisure','living'] },
     ],
   },
   {
@@ -491,8 +513,8 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: PawPrint,
     color: '#A78BFA',
     services: [
-      { id: 'pets',       path: APP_ROUTES.PETS,       labelRu: 'Питомцы',    labelEn: 'Pets',        icon: PawPrint, status: 'available', verticalId: 'pet_service', personaTags: ['pet_owner','family'], jtbdClusters: ['C','I'], lifecycleStages: ['tourist','snowbird','settler','resident','absentee'], roleTags: ['consumer'] },
-      { id: 'veterinary', path: APP_ROUTES.VETERINARY, labelRu: 'Ветеринары', labelEn: 'Veterinary',  icon: Stethoscope, status: 'available', personaTags: ['pet_owner','family'], jtbdClusters: ['C','H'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer'] },
+      { id: 'pets',       path: APP_ROUTES.PETS,       labelRu: 'Питомцы',    labelEn: 'Pets',        icon: PawPrint, status: 'available', verticalId: 'pet_service', personaTags: ['pet_owner','family'], jtbdClusters: ['C','I'], lifecycleStages: ['tourist','snowbird','settler','resident','absentee'], roleTags: ['consumer'], situationCodes: ['pet_owner','living','resident'] },
+      { id: 'veterinary', path: APP_ROUTES.VETERINARY, labelRu: 'Ветеринары', labelEn: 'Veterinary',  icon: Stethoscope, status: 'available', personaTags: ['pet_owner','family'], jtbdClusters: ['C','H'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer'], situationCodes: ['pet_owner','emergency','health'] },
     ],
   },
   // События и досуг — теперь часть повседневной ЖИЗНИ резидента (а не только
@@ -508,10 +530,10 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: CalendarDays,
     color: '#0EA5E9',
     services: [
-      { id: 'event-live',   path: APP_ROUTES.EVENTS,                    labelRu: 'События',      labelEn: 'Events',           icon: CalendarDays, status: 'available', verticalId: 'event', personaTags: ['resident','couple','nightlife','active','family'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'] },
-      { id: 'experience-live', path: EXPERIENCES_URL,                   labelRu: 'Впечатления',  labelEn: 'Experiences',      icon: Compass,      status: 'available', verticalId: 'experience', personaTags: ['resident','couple','active','family','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'] },
-      { id: 'water-live',   path: `${EXPERIENCES_URL}?type=activity`,   labelRu: 'Активности',   labelEn: 'Activities',       icon: Waves,        status: 'available', verticalId: 'water_activity', personaTags: ['resident','active','family'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'] },
-      { id: 'community',    path: APP_ROUTES.HOME,                      labelRu: 'Сообщество',   labelEn: 'Community',        icon: Users,        status: 'soon', personaTags: ['resident','family','relocation','nomad'], jtbdClusters: ['I','C'], lifecycleStages: ['settler','resident','nomad','snowbird','returnee'], roleTags: ['consumer','resident-user'] },
+      { id: 'event-live',   path: APP_ROUTES.EVENTS,                    labelRu: 'События',      labelEn: 'Events',           icon: CalendarDays, status: 'available', verticalId: 'event', personaTags: ['resident','couple','nightlife','active','family'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident','nightlife'] },
+      { id: 'experience-live', path: EXPERIENCES_URL,                   labelRu: 'Впечатления',  labelEn: 'Experiences',      icon: Compass,      status: 'available', verticalId: 'experience', personaTags: ['resident','couple','active','family','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
+      { id: 'water-live',   path: `${EXPERIENCES_URL}?type=activity`,   labelRu: 'Активности',   labelEn: 'Activities',       icon: Waves,        status: 'available', verticalId: 'water_activity', personaTags: ['resident','active','family'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
+      { id: 'community',    path: APP_ROUTES.HOME,                      labelRu: 'Сообщество',   labelEn: 'Community',        icon: Users,        status: 'soon', personaTags: ['resident','family','relocation','nomad'], jtbdClusters: ['I','C'], lifecycleStages: ['settler','resident','nomad','snowbird','returnee'], roleTags: ['consumer','resident-user'], situationCodes: ['living','resident','family'] },
     ],
   },
 
@@ -530,7 +552,7 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: CalendarDays,
     color: '#F43F5E',
     services: [
-      { id: 'wedding', path: APP_ROUTES.WEDDING, labelRu: 'Свадьбы', labelEn: 'Weddings', icon: CalendarDays, status: 'available', personaTags: ['couple','family','business','tourist'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'] },
+      { id: 'wedding', path: APP_ROUTES.WEDDING, labelRu: 'Свадьбы', labelEn: 'Weddings', icon: CalendarDays, status: 'available', personaTags: ['couple','family','business','tourist'], jtbdClusters: ['I'], lifecycleStages: ['tourist','snowbird','settler','resident'], roleTags: ['consumer'], situationCodes: ['family','leisure'] },
     ],
   },
 
@@ -549,15 +571,15 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Building2,
     color: '#8B5CF6',
     services: [
-      { id: 'property',     path: APP_ROUTES.PROPERTY,    labelRu: 'Поиск',          labelEn: 'Property',     icon: Search,    status: 'available', verticalId: 'property', personaTags: ['investor','property_owner','family','relocation','resident'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','settler','resident','absentee','returnee'], roleTags: ['consumer','investor-active','investor-passive','operator'] },
-      { id: 'rent-short',   path: APP_ROUTES.PROPERTY_RENT_SHORT, labelRu: 'Краткосрочная аренда', labelEn: 'Short rent', icon: KeyRound, status: 'available', personaTags: ['tourist','relocation','nomad','family'], jtbdClusters: ['D','A'], lifecycleStages: ['scout','tourist','snowbird','settler'], roleTags: ['consumer'] },
-      { id: 'rent-long',    path: APP_ROUTES.PROPERTY_RENT_LONG,  labelRu: 'Долгосрочная аренда',  labelEn: 'Long rent',  icon: HomeIcon, status: 'available', personaTags: ['resident','family','relocation','nomad'], jtbdClusters: ['C','D'], lifecycleStages: ['settler','resident','snowbird','nomad'], roleTags: ['consumer'] },
-      { id: 'offplan',      path: APP_ROUTES.OFFPLAN,     labelRu: 'Новостройки',    labelEn: 'Off-plan',     icon: Building2, status: 'available', personaTags: ['investor','property_owner'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'] },
-      { id: 'resale',       path: APP_ROUTES.RESALE,      labelRu: 'Вторичка',       labelEn: 'Resale',       icon: Building2, status: 'available', personaTags: ['investor','property_owner','family','relocation'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','consumer'] },
-      { id: 'developers',   path: APP_ROUTES.DEVELOPERS,  labelRu: 'Застройщики',    labelEn: 'Developers',   icon: Users,     status: 'available', personaTags: ['investor','property_owner','real_estate_developer'], jtbdClusters: ['D'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive','provider'] },
-      { id: 'business-invest', path: APP_ROUTES.INVEST_BUSINESS, labelRu: 'Бизнес и франшизы', labelEn: 'Business & franchises', icon: Briefcase, status: 'available', personaTags: ['investor','business','property_owner'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','operator'] },
-      { id: 'roi-hub',      path: APP_ROUTES.INVEST_DASHBOARD, labelRu: 'Портфель и ROI', labelEn: 'Portfolio & ROI', icon: BarChart3, status: 'available', personaTags: ['investor','property_owner'], jtbdClusters: ['F'], lifecycleStages: ['resident','absentee'], roleTags: ['investor-active','investor-passive','operator'] },
-      { id: 'due-diligence',path: APP_ROUTES.INVEST_KNOWLEDGE, labelRu: 'База знаний',    labelEn: 'Knowledge base', icon: BookOpen, status: 'available', personaTags: ['investor','property_owner','business'], jtbdClusters: ['D','G'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'] },
+      { id: 'property',     path: APP_ROUTES.PROPERTY,    labelRu: 'Поиск',          labelEn: 'Property',     icon: Search,    status: 'available', verticalId: 'property', personaTags: ['investor','property_owner','family','relocation','resident'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','settler','resident','absentee','returnee'], roleTags: ['consumer','investor-active','investor-passive','operator'], situationCodes: ['investing','investor','managing','property_owner','relocation','departure'] },
+      { id: 'rent-short',   path: APP_ROUTES.PROPERTY_RENT_SHORT, labelRu: 'Краткосрочная аренда', labelEn: 'Short rent', icon: KeyRound, status: 'available', personaTags: ['tourist','relocation','nomad','family'], jtbdClusters: ['D','A'], lifecycleStages: ['scout','tourist','snowbird','settler'], roleTags: ['consumer'], situationCodes: ['tourist','first_time','transit','relocation'] },
+      { id: 'rent-long',    path: APP_ROUTES.PROPERTY_RENT_LONG,  labelRu: 'Долгосрочная аренда',  labelEn: 'Long rent',  icon: HomeIcon, status: 'available', personaTags: ['resident','family','relocation','nomad'], jtbdClusters: ['C','D'], lifecycleStages: ['settler','resident','snowbird','nomad'], roleTags: ['consumer'], situationCodes: ['relocation','living','resident','family','settling'] },
+      { id: 'offplan',      path: APP_ROUTES.OFFPLAN,     labelRu: 'Новостройки',    labelEn: 'Off-plan',     icon: Building2, status: 'available', personaTags: ['investor','property_owner'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'], situationCodes: ['investing','investor','developer'] },
+      { id: 'resale',       path: APP_ROUTES.RESALE,      labelRu: 'Вторичка',       labelEn: 'Resale',       icon: Building2, status: 'available', personaTags: ['investor','property_owner','family','relocation'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','consumer'], situationCodes: ['investing','investor','departure'] },
+      { id: 'developers',   path: APP_ROUTES.DEVELOPERS,  labelRu: 'Застройщики',    labelEn: 'Developers',   icon: Users,     status: 'available', personaTags: ['investor','property_owner','real_estate_developer'], jtbdClusters: ['D'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive','provider'], situationCodes: ['investing','investor','developer'] },
+      { id: 'business-invest', path: APP_ROUTES.INVEST_BUSINESS, labelRu: 'Бизнес и франшизы', labelEn: 'Business & franchises', icon: Briefcase, status: 'available', personaTags: ['investor','business','property_owner'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','operator'], situationCodes: ['business','investing','investor'] },
+      { id: 'roi-hub',      path: APP_ROUTES.INVEST_DASHBOARD, labelRu: 'Портфель и ROI', labelEn: 'Portfolio & ROI', icon: BarChart3, status: 'available', personaTags: ['investor','property_owner'], jtbdClusters: ['F'], lifecycleStages: ['resident','absentee'], roleTags: ['investor-active','investor-passive','operator'], situationCodes: ['investing','investor','property_owner','managing'] },
+      { id: 'due-diligence',path: APP_ROUTES.INVEST_KNOWLEDGE, labelRu: 'База знаний',    labelEn: 'Knowledge base', icon: BookOpen, status: 'available', personaTags: ['investor','property_owner','business'], jtbdClusters: ['D','G'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'], situationCodes: ['investing','investor'] },
     ],
   },
 
@@ -572,11 +594,11 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Scale,
     color: '#6366F1',
     services: [
-      { id: 'visa',        path: APP_ROUTES.VISA_IMMIGRATION,  labelRu: 'Визы',        labelEn: 'Visas',       icon: Globe,      status: 'available', personaTags: ['tourist','resident','relocation','nomad','family','business'], jtbdClusters: ['G'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'] },
-      { id: 'legal',       path: APP_ROUTES.LEGAL,             labelRu: 'Юристы',      labelEn: 'Legal',       icon: Scale,      status: 'available', verticalId: 'legal', personaTags: ['resident','property_owner','investor','business','family','relocation'], jtbdClusters: ['G'], lifecycleStages: ['all'], roleTags: ['consumer','operator','investor-active','investor-passive'] },
-      { id: 'contract-ai', path: APP_ROUTES.CONTRACT_ANALYSIS, labelRu: 'ContractAI',   labelEn: 'ContractAI',  icon: FileSearch, status: 'available', personaTags: ['resident','property_owner','investor','business'], jtbdClusters: ['G','E'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','investor-active','investor-passive','operator'] },
-      { id: 'relocate',    path: APP_ROUTES.RELOCATE,          labelRu: 'Релокация',   labelEn: 'Relocation',  icon: Briefcase,  status: 'available', personaTags: ['relocation','family','nomad','business'], jtbdClusters: ['B','C'], lifecycleStages: ['scout','settler','returnee'], roleTags: ['consumer'] },
-      { id: 'knowledge',   path: APP_ROUTES.KNOWLEDGE,         labelRu: 'База знаний', labelEn: 'Knowledge',   icon: BookOpen,   status: 'available', personaTags: ['tourist','resident','property_owner','investor','family','relocation','business'], jtbdClusters: ['G'], lifecycleStages: ['all'], roleTags: ['all'] },
+      { id: 'visa',        path: APP_ROUTES.VISA_IMMIGRATION,  labelRu: 'Визы',        labelEn: 'Visas',       icon: Globe,      status: 'available', personaTags: ['tourist','resident','relocation','nomad','family','business'], jtbdClusters: ['G'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['settling','visa_renewal','relocation','departure','arrival'] },
+      { id: 'legal',       path: APP_ROUTES.LEGAL,             labelRu: 'Юристы',      labelEn: 'Legal',       icon: Scale,      status: 'available', verticalId: 'legal', personaTags: ['resident','property_owner','investor','business','family','relocation'], jtbdClusters: ['G'], lifecycleStages: ['all'], roleTags: ['consumer','operator','investor-active','investor-passive'], situationCodes: ['settling','visa_renewal','investing','departure','managing','business','emergency'] },
+      { id: 'contract-ai', path: APP_ROUTES.CONTRACT_ANALYSIS, labelRu: 'ContractAI',   labelEn: 'ContractAI',  icon: FileSearch, status: 'available', personaTags: ['resident','property_owner','investor','business'], jtbdClusters: ['G','E'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','investor-active','investor-passive','operator'], situationCodes: ['settling','investing','business','managing'] },
+      { id: 'relocate',    path: APP_ROUTES.RELOCATE,          labelRu: 'Релокация',   labelEn: 'Relocation',  icon: Briefcase,  status: 'available', personaTags: ['relocation','family','nomad','business'], jtbdClusters: ['B','C'], lifecycleStages: ['scout','settler','returnee'], roleTags: ['consumer'], situationCodes: ['relocation','settling'] },
+      { id: 'knowledge',   path: APP_ROUTES.KNOWLEDGE,         labelRu: 'База знаний', labelEn: 'Knowledge',   icon: BookOpen,   status: 'available', personaTags: ['tourist','resident','property_owner','investor','family','relocation','business'], jtbdClusters: ['G'], lifecycleStages: ['all'], roleTags: ['all'], situationCodes: ['settling','visa_renewal','investing','managing'] },
     ],
   },
   {
@@ -589,8 +611,8 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: DollarSign,
     color: '#14B8A6',
     services: [
-      { id: 'banking', path: APP_ROUTES.BANKING, labelRu: 'Банк',     labelEn: 'Banking', icon: Landmark,   status: 'available', verticalId: 'bank', personaTags: ['resident','property_owner','investor','nomad','relocation','business'], jtbdClusters: ['G'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer','investor-passive','investor-active','operator'] },
-      { id: 'tax',     path: APP_ROUTES.TAX_NAV, labelRu: 'Налоги',   labelEn: 'Taxes',   icon: Calculator, status: 'available', personaTags: ['resident','property_owner','investor','business'], jtbdClusters: ['G'], lifecycleStages: ['settler','resident','absentee','returnee'], roleTags: ['consumer','investor-passive','investor-active','operator'] },
+      { id: 'banking', path: APP_ROUTES.BANKING, labelRu: 'Банк',     labelEn: 'Banking', icon: Landmark,   status: 'available', verticalId: 'bank', personaTags: ['resident','property_owner','investor','nomad','relocation','business'], jtbdClusters: ['G'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer','investor-passive','investor-active','operator'], situationCodes: ['settling','visa_renewal','investing','investor','business','managing','departure'] },
+      { id: 'tax',     path: APP_ROUTES.TAX_NAV, labelRu: 'Налоги',   labelEn: 'Taxes',   icon: Calculator, status: 'available', personaTags: ['resident','property_owner','investor','business'], jtbdClusters: ['G'], lifecycleStages: ['settler','resident','absentee','returnee'], roleTags: ['consumer','investor-passive','investor-active','operator'], situationCodes: ['settling','investing','managing','business','property_owner'] },
     ],
   },
   // IA: Halal & Faith stays under the Legal surface (six surfaces / canon 02
@@ -617,6 +639,7 @@ export const CATEGORIES: CategoryEntry[] = [
         jtbdClusters: ['I'],
         lifecycleStages: ['tourist','snowbird','settler','resident'],
         roleTags: ['consumer'],
+        situationCodes: ['arrival','tourist','first_time','settling'],
       },
       {
         id: 'halal-stay',
@@ -629,6 +652,7 @@ export const CATEGORIES: CategoryEntry[] = [
         jtbdClusters: ['A', 'I'],
         lifecycleStages: ['tourist','snowbird','settler','resident'],
         roleTags: ['consumer'],
+        situationCodes: ['arrival','tourist','living','resident'],
       },
       {
         id: 'halal-dining',
@@ -641,6 +665,7 @@ export const CATEGORIES: CategoryEntry[] = [
         jtbdClusters: ['I'],
         lifecycleStages: ['tourist','snowbird','settler','resident'],
         roleTags: ['consumer'],
+        situationCodes: ['tourist','living','resident','food'],
       },
       {
         id: 'halal-knowledge',
@@ -653,6 +678,7 @@ export const CATEGORIES: CategoryEntry[] = [
         jtbdClusters: ['I','G'],
         lifecycleStages: ['all'],
         roleTags: ['all'],
+        situationCodes: ['arrival','first_time','settling'],
       },
     ],
   },
@@ -668,10 +694,10 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: Building,
     color: '#F97316',
     services: [
-      { id: 'developer-portal', path: APP_ROUTES.DEVELOPER_PORTAL,           labelRu: 'Портал',       labelEn: 'Portal',    icon: Building,  status: 'available', personaTags: ['real_estate_developer','business'], jtbdClusters: ['F'], lifecycleStages: ['all'], roleTags: ['provider','operator'] },
-      { id: 'program',          path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, labelRu: 'Программа',    labelEn: 'Program',   icon: LineChart, status: 'available', personaTags: ['real_estate_developer','business','investor'], jtbdClusters: ['D','E'], lifecycleStages: ['all'], roleTags: ['provider','investor-active'] },
-      { id: 'newbuilds',        path: APP_ROUTES.NEWBUILDS,                  labelRu: 'Витрина',      labelEn: 'Showcase',  icon: Building2, status: 'available', personaTags: ['investor','property_owner','relocation'], jtbdClusters: ['D'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive','consumer'] },
-      { id: 'advisory',         path: APP_ROUTES.PROPERTY_CONSULTATION,      labelRu: 'Консультация', labelEn: 'Advisory',  icon: PenTool,   status: 'available', personaTags: ['investor','property_owner','business'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'] },
+      { id: 'developer-portal', path: APP_ROUTES.DEVELOPER_PORTAL,           labelRu: 'Портал',       labelEn: 'Portal',    icon: Building,  status: 'available', personaTags: ['real_estate_developer','business'], jtbdClusters: ['F'], lifecycleStages: ['all'], roleTags: ['provider','operator'], situationCodes: ['developer','business'] },
+      { id: 'program',          path: APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS, labelRu: 'Программа',    labelEn: 'Program',   icon: LineChart, status: 'available', personaTags: ['real_estate_developer','business','investor'], jtbdClusters: ['D','E'], lifecycleStages: ['all'], roleTags: ['provider','investor-active'], situationCodes: ['developer','business'] },
+      { id: 'newbuilds',        path: APP_ROUTES.NEWBUILDS,                  labelRu: 'Витрина',      labelEn: 'Showcase',  icon: Building2, status: 'available', personaTags: ['investor','property_owner','relocation'], jtbdClusters: ['D'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive','consumer'], situationCodes: ['investing','investor','developer'] },
+      { id: 'advisory',         path: APP_ROUTES.PROPERTY_CONSULTATION,      labelRu: 'Консультация', labelEn: 'Advisory',  icon: PenTool,   status: 'available', personaTags: ['investor','property_owner','business'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'], situationCodes: ['investing','investor','developer','departure'] },
     ],
   },
 ];
@@ -795,6 +821,11 @@ export const LIFE_SITUATIONS: LifeSituationEntry[] = [
   { code: 'relocation',     titleRu: 'Релокация',               titleEn: 'Relocation',        icon: 'Truck',         color: '#14B8A6', priority: 90,  isActive: true },
   // Build
   { code: 'developer',      titleRu: 'Застройщик',              titleEn: 'Developer',         icon: 'HardHat',       color: '#F97316', priority: 100, isActive: true },
+  // Emergency (JTBD H) — SOS, medical, accident, lost docs. Primary on Arrive cluster
+  // (first-hour-on-island reflex), secondary on Legal (insurance / police follow-up).
+  { code: 'emergency',      titleRu: 'Срочная помощь',          titleEn: 'Emergency',         icon: 'AlertTriangle', color: '#DC2626', priority: 100, isActive: true },
+  // Exit (JTBD J) — leaving Phuket: visa closure, PM hand-off, asset sale, deposit return.
+  { code: 'departure',      titleRu: 'Уезжаю с острова',        titleEn: 'Leaving Phuket',    icon: 'LogOut',        color: '#78716C', priority: 80,  isActive: true },
 ];
 
 /**
@@ -833,6 +864,14 @@ export const CLUSTER_LIFE_SITUATIONS: ClusterLifeSituationLink[] = [
   // BUILD
   { clusterId: 'build',  situationCode: 'developer',      weight: 100, isPrimary: true  },
   { clusterId: 'build',  situationCode: 'business',       weight: 60,  isPrimary: false },
+  // EMERGENCY — primary on Arrive (SOS reflex when something goes wrong), secondary on Legal.
+  { clusterId: 'arrive', situationCode: 'emergency',      weight: 100, isPrimary: true  },
+  { clusterId: 'legal',  situationCode: 'emergency',      weight: 70,  isPrimary: false },
+  // DEPARTURE — primary on Legal (visa exit, paperwork), with Manage (PM hand-off)
+  // and Invest (property sale / capital repatriation) as secondary anchors.
+  { clusterId: 'legal',  situationCode: 'departure',      weight: 100, isPrimary: true  },
+  { clusterId: 'manage', situationCode: 'departure',      weight: 80,  isPrimary: false },
+  { clusterId: 'invest', situationCode: 'departure',      weight: 60,  isPrimary: false },
 ];
 
 /**
