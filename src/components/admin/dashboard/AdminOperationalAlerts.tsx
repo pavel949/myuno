@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { SectionHeader } from '@/components/ds';
-import { 
-  AlertTriangle, Clock, MessageSquare, FileText, 
-  Users, ChevronRight, CheckCircle 
+import {
+  AlertTriangle, Clock, MessageSquare, FileText,
+  Users, ChevronRight, CheckCircle,
+  Scale, Inbox, CreditCard, FileCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,14 +24,73 @@ interface AlertConfig {
   warningThreshold: number;
 }
 
+/**
+ * ALERTS — every actionable «needs your attention» source surfaced
+ * on the admin dashboard inbox. Ordered roughly by typical urgency
+ * (disputes → unpaid orders → applications → moderation → providers
+ * → tickets → bookings → manual payments).
+ *
+ * Add a new alert by appending to this list AND extending
+ * useAdminDashboardStats with the corresponding count.
+ */
 const ALERTS: AlertConfig[] = [
+  {
+    id: 'disputes',
+    icon: Scale,
+    label: 'Open Disputes',
+    labelRu: 'Открытые споры',
+    href: '/admin/disputes',
+    getCount: (d) => d?.openDisputes || 0,
+    urgentThreshold: 3,
+    warningThreshold: 1,
+  },
+  {
+    id: 'unpaidOrders',
+    icon: CreditCard,
+    label: 'Unpaid > 24h',
+    labelRu: 'Не оплачено > 24ч',
+    href: '/admin/operations?tab=orders&status=pending',
+    getCount: (d) => d?.unpaidOrders24h || 0,
+    urgentThreshold: 5,
+    warningThreshold: 1,
+  },
+  {
+    id: 'partnerApplications',
+    icon: FileCheck,
+    label: 'Partner Applications',
+    labelRu: 'Заявки партнёров',
+    href: '/admin/partner-applications',
+    getCount: (d) => d?.pendingPartnerApplications || 0,
+    urgentThreshold: 5,
+    warningThreshold: 1,
+  },
   {
     id: 'moderation',
     icon: FileText,
     label: 'Pending Moderation',
     labelRu: 'На модерации',
-    href: '/admin/moderation',
+    href: '/admin/operations?tab=moderation',
     getCount: (d) => d?.pendingContent || 0,
+    urgentThreshold: 10,
+    warningThreshold: 3,
+  },
+  {
+    id: 'providers',
+    icon: Users,
+    label: 'Unverified Providers',
+    labelRu: 'Непроверенные провайдеры',
+    href: '/admin/providers',
+    getCount: (d) => d?.pendingProviders || 0,
+    urgentThreshold: 5,
+    warningThreshold: 1,
+  },
+  {
+    id: 'tickets',
+    icon: MessageSquare,
+    label: 'Open Tickets',
+    labelRu: 'Открытые тикеты',
+    href: '/admin/tickets',
+    getCount: (d) => d?.openTickets || 0,
     urgentThreshold: 10,
     warningThreshold: 3,
   },
@@ -45,12 +105,12 @@ const ALERTS: AlertConfig[] = [
     warningThreshold: 1,
   },
   {
-    id: 'providers',
-    icon: Users,
-    label: 'Unverified Providers',
-    labelRu: 'Непроверенные провайдеры',
-    href: '/admin/providers',
-    getCount: (d) => d?.pendingProviders || 0,
+    id: 'manualPayments',
+    icon: Inbox,
+    label: 'Manual Payments',
+    labelRu: 'Ручные оплаты',
+    href: '/admin/operations?tab=manual_payments',
+    getCount: (d) => d?.pendingManualPayments || 0,
     urgentThreshold: 5,
     warningThreshold: 1,
   },
@@ -97,7 +157,7 @@ export function AdminOperationalAlerts() {
     <Surface variant="card" padding="md" radius="xl">
       <div className="flex items-center justify-between mb-4">
         <SectionHeader
-          title={isRu ? 'Требует внимания' : 'Needs Attention'}
+          title={isRu ? 'Что требует внимания' : 'Action Inbox'}
           icon={AlertTriangle}
           iconClassName={totalAlerts > 0 ? 'text-warning' : undefined}
           size="sm"

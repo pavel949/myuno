@@ -37,6 +37,11 @@ export interface DashboardStats {
   pendingContent: number;
   // Support
   openTickets: number;
+  // Inbox sources (commit 3 — Action Inbox)
+  openDisputes: number;
+  pendingPartnerApplications: number;
+  pendingManualPayments: number;
+  unpaidOrders24h: number;
 }
 
 export function useAdminDashboardStats() {
@@ -92,11 +97,24 @@ export function useAdminDashboardStats() {
         supabase.from('flower_shops').select('id', countOptions).limit(1),
       ]);
 
-      // Pending moderation
-      const [pendingPropertiesRes, pendingListingsRes, openTicketsRes] = await Promise.all([
+      // Pending moderation + Inbox sources (commit 3)
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const [
+        pendingPropertiesRes,
+        pendingListingsRes,
+        openTicketsRes,
+        openDisputesRes,
+        pendingPartnerAppsRes,
+        pendingManualPaymentsRes,
+        unpaidOrdersRes,
+      ] = await Promise.all([
         supabase.from('properties').select('id', countOptions).eq('approval_status', 'pending').limit(1),
         supabase.from('listings').select('id', countOptions).eq('approval_status', 'pending').limit(1),
         supabase.from('support_tickets').select('id', countOptions).in('status', ['open', 'in_progress']).limit(1),
+        supabase.from('disputes').select('id', countOptions).eq('status', 'open').limit(1),
+        supabase.from('partner_applications').select('id', countOptions).eq('status', 'pending').limit(1),
+        supabase.from('manual_payment_requests').select('id', countOptions).in('status', ['pending', 'awaiting_review']).limit(1),
+        supabase.from('orders').select('id', countOptions).eq('status', 'pending').lt('created_at', oneDayAgo).limit(1),
       ]);
 
       // Active/pending providers
@@ -144,6 +162,11 @@ export function useAdminDashboardStats() {
         pendingProperties,
         pendingContent: totalPendingContent,
         openTickets: openTicketsRes.count || 0,
+        // Inbox sources
+        openDisputes: openDisputesRes.count || 0,
+        pendingPartnerApplications: pendingPartnerAppsRes.count || 0,
+        pendingManualPayments: pendingManualPaymentsRes.count || 0,
+        unpaidOrders24h: unpaidOrdersRes.count || 0,
       };
     },
     ...CACHE_PROFILES.ADMIN,

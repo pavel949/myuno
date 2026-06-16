@@ -36,6 +36,15 @@ export default function AdminDashboard() {
 
       <GoLiveChecklist />
 
+      {/*
+        Inbox first: the one section that answers «что мне делать
+        прямо сейчас». KPIs/revenue/verticals are useful context but
+        secondary — they don't change what the admin does today.
+      */}
+      <PageSection>
+        <AdminOperationalAlerts />
+      </PageSection>
+
       <PageSection>
         <AdminKPIGrid />
       </PageSection>
@@ -50,10 +59,6 @@ export default function AdminDashboard() {
 
       <PageSection title={isRussian ? 'Все вертикали' : 'All verticals'}>
         <AdminAllVerticalsGrid />
-      </PageSection>
-
-      <PageSection title={isRussian ? 'Операционные алерты' : 'Operational alerts'}>
-        <AdminOperationalAlerts />
       </PageSection>
 
       <PageSection title={isRussian ? 'Лента активности' : 'Activity feed'}>
