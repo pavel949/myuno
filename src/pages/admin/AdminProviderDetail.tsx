@@ -20,6 +20,7 @@ import {
   ProviderContractsTab,
   ProviderBookingsTab,
 } from '@/components/admin/provider-detail';
+import { AdminNotesWidget } from '@/components/admin/AdminNotesWidget';
 
 export default function AdminProviderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -62,6 +63,7 @@ export default function AdminProviderDetail() {
     <div className="p-4 md:p-6 space-y-4">
       <ProviderDetailHeader provider={provider} onUpdate={refetch} />
       <ProviderQuickStats provider={provider} services={services} products={products} contracts={contracts} />
+      <AdminNotesWidget entityType="provider" entityId={provider.id} defaultOpen={false} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex flex-wrap h-auto gap-1 w-full max-w-3xl">
