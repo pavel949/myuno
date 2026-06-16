@@ -143,6 +143,23 @@ export function StepRoute({
             </button>
           ))}
         </div>
+
+        {/* International terminal meeting point — Tourist Police desk (1155).
+            Shown only for from-airport+international so the customer knows
+            where to find the driver. Same string is persisted into the order
+            metadata.meeting_point and surfaced in the operator email. */}
+        {formData.terminal === 'international' && formData.direction === 'from-airport' && (
+          <div className="rounded-none border border-primary/30 bg-primary/[0.04] p-3 mt-2">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground font-semibold mb-1">
+              {language === 'ru' ? 'Место встречи' : 'Meeting point'}
+            </p>
+            <p className="text-[13px] text-foreground leading-snug">
+              {language === 'ru'
+                ? 'Стойка туристической полиции (Tourist Police 1155) в зоне прилёта международного терминала.'
+                : 'Tourist Police desk (1155) in the international arrivals hall.'}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Address */}

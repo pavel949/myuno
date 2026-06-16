@@ -233,6 +233,13 @@ export default function AirportTransferBooking() {
       ? (language === 'ru' ? 'Внутренний терминал' : 'Domestic Terminal')
       : (language === 'ru' ? 'Международный терминал' : 'International Terminal');
     const airportLabel = language === 'ru' ? 'Аэропорт Пхукета' : 'Phuket Airport';
+    // International-terminal meeting point — Tourist Police desk at HKT arrivals.
+    // For domestic terminal we don't pin a specific spot (curbside pickup).
+    const meetingPoint = formData.terminal === 'international' && formData.direction === 'from-airport'
+      ? (language === 'ru'
+          ? 'Стойка туристической полиции (Tourist Police 1155) в зоне прилёта'
+          : 'Tourist Police desk (1155) in the arrivals hall')
+      : null;
 
     const result = await createOrder({
       order_type: 'vehicle',
@@ -259,6 +266,7 @@ export default function AirportTransferBooking() {
         platform_fee_amount: platformFee,
         pickup_lat: formData.direction === 'to-airport' ? pickupCoords?.lat ?? null : null,
         pickup_lng: formData.direction === 'to-airport' ? pickupCoords?.lng ?? null : null,
+        meeting_point: meetingPoint,
       },
       items: [{
         item_name: `Airport Transfer - ${vehicleName}`,
@@ -370,6 +378,32 @@ export default function AirportTransferBooking() {
           return;
         }
       } else {
+        // myUNO advance ("concierge_advance") / cash:
+        // notification email + WhatsApp to admin/operator already fired via
+        // notify-transfer-booking above. Now also open the customer's own
+        // WhatsApp so they can confirm the trip and arrange settlement —
+        // matches the «выход на WhatsApp с просьбой оплатить» flow.
+        if (formData.paymentMethod === 'concierge_advance') {
+          const adminWa = '66922407355'; // _shared/admin-config.ts default
+          const orderRef = result.order_number || result.order_id;
+          const summaryLines = [
+            language === 'ru'
+              ? `Здравствуйте! Бронирую трансфер через myUNO. Заказ #${orderRef}.`
+              : `Hello! I'm booking an airport transfer via myUNO. Order #${orderRef}.`,
+            '',
+            `${vehicleName} · ${formData.passengers} pax${formData.luggage ? ` · ${formData.luggage} bags` : ''}`,
+            `${airportLabel} — ${terminalLabel}  ${formData.direction === 'from-airport' ? '→' : '←'}  ${formData.destinationAddress}`,
+            `${formData.arrivalDate} ${formData.arrivalTime}` + (formData.flightNumber ? ` · ${formData.flightNumber}` : ''),
+            `฿${totalPrice.toLocaleString()}`,
+            '',
+            language === 'ru'
+              ? 'Прошу подтвердить и выставить счёт через myUNO. Спасибо!'
+              : 'Please confirm and issue the invoice via myUNO. Thanks!',
+          ];
+          const waUrl = `https://wa.me/${adminWa}?text=${encodeURIComponent(summaryLines.join('\n'))}`;
+          // Open in new tab — user keeps the booking-success page in this tab.
+          window.open(waUrl, '_blank', 'noopener,noreferrer');
+        }
         setIsSuccess(true);
       }
     }
