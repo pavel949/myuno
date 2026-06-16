@@ -9,13 +9,16 @@
  * existing NavigatorPage renders instead. See `NavigatorEntry`.
  */
 import React, { useMemo, useState } from 'react';
-import { Search, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MapPin, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLifeSituations } from '@/hooks/useLifeOS';
 import { useSituationServiceCounts } from '@/hooks/useSituationServiceCounts';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
+import { ROLE_META, personaColor } from '@/lib/roleBlend';
+import { RoleSheet } from '@/components/home/RoleSheet';
 import { SituationCard } from './SituationCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -25,8 +28,9 @@ export default function NavigatorPageV3() {
   const isRu = language === 'ru';
   const { data: situations, isLoading, isError } = useLifeSituations();
   const { data: counts } = useSituationServiceCounts();
-  const { effectivePersonas } = useUserPersonas();
+  const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
   const [query, setQuery] = useState('');
+  const [roleSheetOpen, setRoleSheetOpen] = useState(false);
 
   // Role-aware ordering: rank by persona×cluster fit, fall back to DB priority.
   const rankedSituations = useMemo(() => {
@@ -52,13 +56,28 @@ export default function NavigatorPageV3() {
     });
   }, [rankedSituations, query]);
 
+  const hasRealPersonas = personas.length > 0;
+
   return (
     <AppLayout>
       <div className="px-4 pt-6 pb-24 md:px-6 md:pt-10 max-w-6xl mx-auto">
-        <header className="mb-8 md:mb-10">
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-3">
-            {isRu ? 'Навигатор' : 'Navigator'}
-          </p>
+        <header className="mb-6 md:mb-8">
+          <div className="flex items-start justify-between gap-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-3">
+              {isRu ? 'Навигатор' : 'Navigator'}
+            </p>
+            <Link
+              to="/map"
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-2 -mt-1 text-[12px] font-medium',
+                'border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors',
+              )}
+              aria-label={isRu ? 'Карта Пхукета' : 'Phuket map'}
+            >
+              <MapPin className="w-3.5 h-3.5" strokeWidth={1.75} />
+              <span className="hidden sm:inline">{isRu ? 'На карте' : 'Map'}</span>
+            </Link>
+          </div>
           <h1 className="text-[28px] sm:text-[36px] lg:text-[40px] font-serif font-semibold leading-[1.1] tracking-[-0.02em] text-foreground max-w-3xl">
             {isRu ? (
               <>Что у тебя сейчас <span className="italic text-accent">в жизни</span>?</>
@@ -72,7 +91,47 @@ export default function NavigatorPageV3() {
               : 'Pick a situation — we show services, contacts and next steps.'}
           </p>
 
-          <div className="mt-6 relative max-w-xl">
+          {/* Persona chip-row — explains the ordering and exposes the role editor. */}
+          <div className="mt-5 flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">
+              {isRu ? 'Для роли:' : 'For role:'}
+            </span>
+            {hasRealPersonas ? (
+              effectivePersonas.slice(0, 4).map((persona) => {
+                const meta = ROLE_META[persona];
+                if (!meta) return null;
+                return (
+                  <span
+                    key={persona}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium text-foreground"
+                    style={{
+                      background: personaColor(persona, 0.12),
+                      borderLeft: `2px solid ${personaColor(persona)}`,
+                    }}
+                  >
+                    {isRu ? meta.labelRu : meta.label}
+                  </span>
+                );
+              })
+            ) : (
+              <span className="text-[12px] italic text-muted-foreground">
+                {isRu ? 'роль не выбрана — показываем универсальный набор' : 'no role yet — generic order'}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => setRoleSheetOpen(true)}
+              className={cn(
+                'inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium',
+                'border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors',
+              )}
+            >
+              <SlidersHorizontal className="w-3 h-3" strokeWidth={2} />
+              {isRu ? 'Изменить' : 'Edit'}
+            </button>
+          </div>
+
+          <div className="mt-5 relative max-w-xl">
             <Search
               className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground pointer-events-none"
               strokeWidth={1.75}
@@ -140,6 +199,14 @@ export default function NavigatorPageV3() {
           </div>
         )}
       </div>
+
+      <RoleSheet
+        open={roleSheetOpen}
+        personas={personas}
+        onClose={() => setRoleSheetOpen(false)}
+        onToggle={togglePersona}
+        onReorder={setPersonas}
+      />
     </AppLayout>
   );
 }
