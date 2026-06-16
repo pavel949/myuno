@@ -30,69 +30,97 @@ export default function AdminUnoTeam() {
   const [selectedMember, setSelectedMember] = useState<UnoTeamMember | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [addEmail, setAddEmail] = useState('');
+  const [addFullName, setAddFullName] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
+  // Two-mode flow:
+  //   1. If a profile with that email already exists → just grant the
+  //      uno_team role (cheap, no email sent).
+  //   2. If not → call the admin-invite-user Edge Function which
+  //      creates the auth.users row, fires the magic-link email, and
+  //      grants the uno_team role at insert time. The new member then
+  //      lands on /auth/setup-password to pick their password.
   const handleAddMember = async () => {
-    if (!addEmail.trim()) {
+    const email = addEmail.trim().toLowerCase();
+    const fullName = addFullName.trim();
+    if (!email) {
       toast.error(isRu ? 'Ошибка' : 'Error', {
         description: isRu ? 'Введите email' : 'Enter email',
       });
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error(isRu ? 'Некорректный email' : 'Invalid email');
+      return;
+    }
 
     setIsAdding(true);
     try {
-      // Find user by email
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from('profiles')
         .select('id, email, full_name')
-        .eq('email', addEmail.trim().toLowerCase())
-        .single();
+        .eq('email', email)
+        .maybeSingle();
 
-      if (profileError || !profile) {
-        toast.error(isRu ? 'Пользователь не найден' : 'User not found', {
-          description: isRu ? 'Убедитесь, что пользователь зарегистрирован' : 'Make sure the user is registered',
+      if (profile) {
+        // Path 1 — promote existing user.
+        const { data: existingRole } = await supabase
+          .from('user_roles')
+          .select('id')
+          .eq('user_id', profile.id)
+          .eq('role', 'uno_team')
+          .maybeSingle();
+
+        if (existingRole) {
+          toast.error(isRu ? 'Уже в команде' : 'Already in team', {
+            description: isRu ? 'Этот пользователь уже является членом myUNO Team' : 'This user is already a myUNO Team member',
+          });
+          return;
+        }
+
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({ user_id: profile.id, role: 'uno_team' });
+        if (roleError) throw roleError;
+
+        toast.success(isRu ? 'Успешно' : 'Success', {
+          description: isRu
+            ? `${profile.full_name || profile.email} добавлен в myUNO Team`
+            : `${profile.full_name || profile.email} added to myUNO Team`,
         });
-        setIsAdding(false);
-        return;
-      }
-
-      // Check if already has uno_team role
-      const { data: existingRole } = await supabase
-        .from('user_roles')
-        .select('id')
-        .eq('user_id', profile.id)
-        .eq('role', 'uno_team')
-        .single();
-
-      if (existingRole) {
-        toast.error(isRu ? 'Уже в команде' : 'Already in team', {
-          description: isRu ? 'Этот пользователь уже является членом myUNO Team' : 'This user is already a myUNO Team member',
+      } else {
+        // Path 2 — invite a net-new user with uno_team role.
+        const { data, error } = await supabase.functions.invoke('admin-invite-user', {
+          body: {
+            email,
+            full_name: fullName || undefined,
+            role: 'uno_team',
+          },
         });
-        setIsAdding(false);
-        return;
+        if (error) throw error;
+        const inviteError = (data as { error?: string; message?: string } | null)?.error;
+        if (inviteError) {
+          const msg = (data as { message?: string } | null)?.message || inviteError;
+          throw new Error(msg);
+        }
+        toast.success(isRu ? 'Приглашение отправлено' : 'Invite sent', {
+          description: isRu
+            ? `Письмо отправлено на ${email}. После установки пароля сотрудник появится в списке.`
+            : `Email sent to ${email}. The member will appear in the list after they set their password.`,
+        });
       }
-
-      // Add uno_team role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({ user_id: profile.id, role: 'uno_team' });
-
-      if (roleError) throw roleError;
-
-      toast(isRu ? 'Успешно' : 'Success', {
-        description: isRu ? `${profile.full_name || profile.email} добавлен в myUNO Team` : `${profile.full_name || profile.email} added to myUNO Team`,
-      });
 
       queryClient.invalidateQueries({ queryKey: ['uno-team-members'] });
       setShowAddDialog(false);
       setAddEmail('');
+      setAddFullName('');
     } catch (err) {
       console.error('Error adding member:', err);
+      const message = err instanceof Error ? err.message : String(err);
       toast.error(isRu ? 'Ошибка' : 'Error', {
-        description: isRu ? 'Не удалось добавить сотрудника' : 'Failed to add member',
+        description: message || (isRu ? 'Не удалось добавить сотрудника' : 'Failed to add member'),
       });
     } finally {
       setIsAdding(false);
@@ -194,30 +222,42 @@ const queryClient = useQueryClient();
               <DialogHeader>
                 <DialogTitle>{isRu ? 'Добавить сотрудника myUNO Team' : 'Add myUNO Team Member'}</DialogTitle>
                 <DialogDescription>
-                  {isRu 
-                    ? 'Введите email зарегистрированного пользователя для добавления в команду' 
-                    : 'Enter the email of a registered user to add them to the team'}
+                  {isRu
+                    ? 'Если у сотрудника уже есть аккаунт — он получит роль uno_team. Если нет — система отправит ему приглашение по email на установку пароля.'
+                    : 'If the person already has an account, they get the uno_team role. If not, the system sends them an email invite to set a password.'}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">{isRu ? 'Email пользователя' : 'User Email'}</Label>
+                  <Label htmlFor="email">{isRu ? 'Email сотрудника' : 'Member email'} *</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
-                      placeholder="email@example.com"
+                      placeholder="member@example.com"
                       value={addEmail}
                       onChange={(e) => setAddEmail(e.target.value)}
                       className="pl-10"
                       onKeyDown={(e) => e.key === 'Enter' && handleAddMember()}
                     />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="full-name">
+                    {isRu ? 'Имя (опционально)' : 'Full name (optional)'}
+                  </Label>
+                  <Input
+                    id="full-name"
+                    placeholder={isRu ? 'Например, Klod' : 'e.g. Klod'}
+                    value={addFullName}
+                    onChange={(e) => setAddFullName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddMember()}
+                  />
                   <p className="text-xs text-muted-foreground">
-                    {isRu 
-                      ? 'Пользователь должен быть зарегистрирован в системе' 
-                      : 'User must be registered in the system'}
+                    {isRu
+                      ? 'Используется только если отправляется приглашение новому email.'
+                      : 'Used only when sending an invite to a new email.'}
                   </p>
                 </div>
               </div>
@@ -226,7 +266,9 @@ const queryClient = useQueryClient();
                   {isRu ? 'Отмена' : 'Cancel'}
                 </Button>
                 <Button onClick={handleAddMember} disabled={isAdding}>
-                  {isAdding ? (isRu ? 'Добавление...' : 'Adding...') : (isRu ? 'Добавить' : 'Add')}
+                  {isAdding
+                    ? (isRu ? 'Добавление...' : 'Adding...')
+                    : (isRu ? 'Добавить / Пригласить' : 'Add / Invite')}
                 </Button>
               </DialogFooter>
             </DialogContent>

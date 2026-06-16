@@ -31,10 +31,11 @@ const corsHeaders = {
 
 const PUBLIC_APP_URL = Deno.env.get("PUBLIC_APP_URL") || "https://myuno.app";
 
-// app_role enum values that the caller may grant on behalf of the invitee.
-// Other values (admin, uno_team) intentionally not in this list — promotion
-// to admin must go through the dedicated admin-manage-user `add_role` flow
-// with explicit audit.
+// app_role enum values the caller may grant on the invite.
+// `uno_team` requires the caller to be `admin` (verified below).
+// `admin` itself is intentionally NOT grantable here — promotion to
+// admin must go through the dedicated `admin-manage-user.add_role`
+// flow with explicit audit + 2-admin chain.
 const GRANTABLE_ROLES = new Set([
   "user",
   "staff",
@@ -42,7 +43,11 @@ const GRANTABLE_ROLES = new Set([
   "partner",
   "owner",
   "broker",
+  "uno_team",
 ]);
+
+// Roles that require the caller to be `admin` (not just `uno_team`).
+const ADMIN_ONLY_ROLES = new Set(["uno_team"]);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -88,6 +93,15 @@ Deno.serve(async (req) => {
           message: `role must be one of: ${Array.from(GRANTABLE_ROLES).join(", ")}`,
         }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    if (role && ADMIN_ONLY_ROLES.has(role) && !isAdmin) {
+      return new Response(
+        JSON.stringify({
+          error: "Forbidden",
+          message: `Granting role '${role}' requires admin caller`,
+        }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
