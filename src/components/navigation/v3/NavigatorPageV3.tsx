@@ -14,6 +14,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLifeSituations } from '@/hooks/useLifeOS';
 import { useSituationServiceCounts } from '@/hooks/useSituationServiceCounts';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { rankSituationsByPersonas } from '@/lib/situationBlend';
 import { SituationCard } from './SituationCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -23,13 +25,19 @@ export default function NavigatorPageV3() {
   const isRu = language === 'ru';
   const { data: situations, isLoading, isError } = useLifeSituations();
   const { data: counts } = useSituationServiceCounts();
+  const { effectivePersonas } = useUserPersonas();
   const [query, setQuery] = useState('');
 
-  const filteredSituations = useMemo(() => {
+  // Role-aware ordering: rank by persona×cluster fit, fall back to DB priority.
+  const rankedSituations = useMemo(() => {
     if (!situations) return [];
+    return rankSituationsByPersonas(situations, effectivePersonas);
+  }, [situations, effectivePersonas]);
+
+  const filteredSituations = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return situations;
-    return situations.filter((s) => {
+    if (!q) return rankedSituations;
+    return rankedSituations.filter((s) => {
       const haystack = [
         s.title_ru,
         s.title_en,
@@ -42,7 +50,7 @@ export default function NavigatorPageV3() {
         .toLowerCase();
       return haystack.includes(q);
     });
-  }, [situations, query]);
+  }, [rankedSituations, query]);
 
   return (
     <AppLayout>
