@@ -44,31 +44,35 @@ export function ProviderDetailHeader({ provider, onUpdate }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-4">
-        <BackButton fallbackPath={APP_ROUTES.ADMIN_PROVIDERS} variant="ghost" size="md" />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-xl font-bold truncate">{provider.name}</h1>
-            {provider.is_verified ? (
-              <Badge variant="default" className="gap-1">
-                <CheckCircle className="h-3 w-3" />
-                {isRu ? 'Верифицирован' : 'Verified'}
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="gap-1">
-                <XCircle className="h-3 w-3" />
-                {isRu ? 'Не верифицирован' : 'Not Verified'}
-              </Badge>
-            )}
-            {!provider.is_active && (
-              <Badge variant="destructive">{isRu ? 'Неактивен' : 'Inactive'}</Badge>
-            )}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <div className="flex items-start gap-3 min-w-0 sm:flex-1">
+          <BackButton fallbackPath={APP_ROUTES.ADMIN_PROVIDERS} variant="ghost" size="md" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl font-bold truncate min-w-0">{provider.name}</h1>
+              {provider.is_verified ? (
+                <Badge variant="default" className="gap-1 whitespace-nowrap shrink-0">
+                  <CheckCircle className="h-3 w-3" />
+                  {isRu ? 'Верифицирован' : 'Verified'}
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="gap-1 whitespace-nowrap shrink-0">
+                  <XCircle className="h-3 w-3" />
+                  {isRu ? 'Не верифицирован' : 'Not Verified'}
+                </Badge>
+              )}
+              {!provider.is_active && (
+                <Badge variant="destructive" className="whitespace-nowrap shrink-0">
+                  {isRu ? 'Неактивен' : 'Inactive'}
+                </Badge>
+              )}
+            </div>
+            <p className="text-muted-foreground text-sm break-words mt-1">{provider.business_category}</p>
           </div>
-          <p className="text-muted-foreground text-sm">{provider.business_category}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <ContentCreatorMenu 
-            providerId={provider.id} 
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <ContentCreatorMenu
+            providerId={provider.id}
             providerName={provider.name}
             size="sm"
           />
