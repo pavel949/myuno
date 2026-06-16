@@ -37,6 +37,7 @@ import {
   Phone,
   Send,
   Link as LinkIcon,
+  FlaskConical,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -223,6 +224,47 @@ export default function AdminTransferOperators() {
     },
     onError: (err) => {
       toast.error(isRu ? 'Не удалось удалить' : 'Delete failed', {
+        description: err instanceof Error ? err.message : String(err),
+      });
+    },
+  });
+
+  const smokeTest = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('transfer-smoke-test', { body: {} });
+      if (error) throw error;
+      const responseError = (data as { error?: string; message?: string } | null)?.error;
+      if (responseError) throw new Error((data as { message?: string } | null)?.message || responseError);
+      return data as {
+        success: boolean;
+        operator: { name: string; phone_whatsapp: string };
+        results: {
+          operator_whatsapp: { ok: boolean; detail?: string };
+          admin_whatsapp: { ok: boolean; detail?: string };
+        };
+      };
+    },
+    onSuccess: (res) => {
+      const opOk = res.results.operator_whatsapp.ok;
+      const adminOk = res.results.admin_whatsapp.ok;
+      if (opOk && adminOk) {
+        toast.success(isRu ? 'Тест отправлен оператору и админу' : 'Test sent to operator + admin', {
+          description: `${res.operator.name} · ${res.operator.phone_whatsapp}`,
+        });
+      } else if (opOk) {
+        toast.success(isRu ? 'Тест отправлен оператору' : 'Test sent to operator', {
+          description: isRu
+            ? `Админ: ${res.results.admin_whatsapp.detail || 'не доставлено'}`
+            : `Admin: ${res.results.admin_whatsapp.detail || 'not delivered'}`,
+        });
+      } else {
+        toast.error(isRu ? 'Доставка не подтверждена' : 'Delivery not confirmed', {
+          description: res.results.operator_whatsapp.detail || '—',
+        });
+      }
+    },
+    onError: (err) => {
+      toast.error(isRu ? 'Smoke test провалился' : 'Smoke test failed', {
         description: err instanceof Error ? err.message : String(err),
       });
     },
@@ -425,10 +467,28 @@ export default function AdminTransferOperators() {
             : 'Who receives WhatsApp for new transfer orders. One primary = SSOT for notify-transfer-booking.'
         }
         actions={
-          <Button onClick={openAddForm} className="gap-2">
-            <Plus className="h-4 w-4" />
-            {isRu ? 'Добавить оператора' : 'Add operator'}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={smokeTest.isPending || !stats.active}
+              onClick={() => smokeTest.mutate()}
+              title={
+                stats.active
+                  ? (isRu ? 'Отправить тестовое WhatsApp на primary оператора и админа' : 'Send test WhatsApp to primary operator + admin')
+                  : (isRu ? 'Нет активных операторов' : 'No active operators')
+              }
+            >
+              {smokeTest.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <FlaskConical className="h-4 w-4" />}
+              {isRu ? 'Тест WA' : 'Test WA'}
+            </Button>
+            <Button onClick={openAddForm} className="gap-2">
+              <Plus className="h-4 w-4" />
+              {isRu ? 'Добавить оператора' : 'Add operator'}
+            </Button>
+          </div>
         }
       />
 
