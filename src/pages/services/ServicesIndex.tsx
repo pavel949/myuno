@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Wrench, Zap, ChevronRight } from "lucide-react";
+import { MessageCircle, Wrench, Zap, ChevronRight } from "lucide-react";
 import { MiniAppLayout } from "@/components/miniapp/MiniAppLayout";
 import { EmptyState } from "@/components/uno/EmptyState";
 import { useServiceFunctions, type LocalizedServiceFunction } from "@/hooks/useServiceFunctions";
@@ -9,7 +9,70 @@ import { ServiceFunctionCard } from "@/components/services";
 import { CrossSellSection } from "@/components/crosssell";
 import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/config/homeServiceFunctions";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { usePersonaFilter } from "@/hooks/usePersonaFilter";
+
+/**
+ * URL-slug → SERVICE_CATEGORIES.id normaliser.
+ *
+ * The catalog SSOT (`src/lib/catalog/taxonomy.ts`) routes 9 "info" services
+ * to `/services?category=<slug>`, but SERVICE_CATEGORIES uses underscores +
+ * different keys. Without this mapping every deep link from Discover landed
+ * on "all services" and looked broken. Keep new aliases here.
+ */
+const CATEGORY_ALIAS: Record<string, ServiceCategory> = {
+  laundry: 'cleaning',
+  'pest-control': 'pest_control',
+  pest_control: 'pest_control',
+  'ac-repair': 'ac',
+  gardening: 'garden',
+  locksmith: 'security',
+  storage: 'moving',
+};
+
+/**
+ * Bilingual one-liner shown above the grid when the user lands on a
+ * category-deep-linked page from Discover. Covers the 9 "info" categories
+ * that don't have a per-service booking flow today.
+ */
+const CATEGORY_INTRO: Record<string, { titleRu: string; titleEn: string; descRu: string; descEn: string }> = {
+  laundry:        { titleRu: 'Прачечная с доставкой', titleEn: 'Laundry & dry-cleaning',
+                    descRu: 'Опишите задачу — координатор найдёт проверенную прачечную и привезёт чистое.',
+                    descEn: 'Tell us what you need — our coordinator picks a vetted laundry and delivers.' },
+  pest_control:   { titleRu: 'Дезинсекция',           titleEn: 'Pest control',
+                    descRu: 'Опишите проблему — пришлём специалиста с сертификатом в течение 24 ч.',
+                    descEn: 'Describe the pest — we send a certified specialist within 24 h.' },
+  handyman:       { titleRu: 'Мастер на час',         titleEn: 'Handyman',
+                    descRu: 'Опишите, что нужно сделать — мастер с инструментами приедет в течение 2 ч.',
+                    descEn: 'Describe the task — a handyman with tools shows up within 2 hours.' },
+  plumbing:       { titleRu: 'Сантехника',            titleEn: 'Plumbing',
+                    descRu: 'Опишите проблему — фотофиксация, смета до выезда, работа в день обращения.',
+                    descEn: 'Describe the issue — photo quote up front, work the same day.' },
+  electrical:     { titleRu: 'Электрика',             titleEn: 'Electrical',
+                    descRu: 'Опишите задачу — лицензированный электрик с протоколом безопасности.',
+                    descEn: 'Describe the job — licensed electrician with safety protocol.' },
+  ac:             { titleRu: 'Кондиционеры',          titleEn: 'Air conditioning',
+                    descRu: 'Чистка, дозаправка фреона, ремонт — фикс-ставки, без сюрпризов.',
+                    descEn: 'Cleaning, refrigerant top-up, repair — fixed rates, no surprises.' },
+  security:       { titleRu: 'Замки',                 titleEn: 'Locksmith',
+                    descRu: 'Срочно — на месте за час. Плановая замена — в удобное время.',
+                    descEn: 'Urgent — on-site within an hour. Planned change — at your time.' },
+  garden:         { titleRu: 'Сад и двор',            titleEn: 'Garden & yard',
+                    descRu: 'Стрижка, полив, уход за пальмами и орхидеями. Разово или по графику.',
+                    descEn: 'Trimming, watering, palm and orchid care. One-off or scheduled.' },
+  moving:         { titleRu: 'Переезд и хранение',    titleEn: 'Moving & storage',
+                    descRu: 'Локальные переезды и склад для вещей. Опишите объём — пришлём смету.',
+                    descEn: 'Local moves and storage. Tell us the volume — we send a quote.' },
+};
+
+const COORDINATOR_WHATSAPP = '66922407355';
+
+function whatsappLink(categoryLabel: string, language: 'ru' | 'en'): string {
+  const summary = language === 'ru'
+    ? `Здравствуйте! Нужна помощь по категории «${categoryLabel}». Опишу детали в ответ.`
+    : `Hello! I need help with "${categoryLabel}". I'll describe the details in a follow-up.`;
+  return `https://wa.me/${COORDINATOR_WHATSAPP}?text=${encodeURIComponent(summary)}`;
+}
 
 export default function ServicesIndex() {
   const { language } = useLanguage();
@@ -25,8 +88,18 @@ export default function ServicesIndex() {
 
   useEffect(() => {
     const categoryParam = searchParams.get('category');
-    setSelectedCategory(categoryParam || 'all');
+    if (!categoryParam) {
+      setSelectedCategory('all');
+      return;
+    }
+    // Normalise legacy/discovery slugs to the canonical SERVICE_CATEGORIES id.
+    const aliased = CATEGORY_ALIAS[categoryParam] ?? categoryParam;
+    setSelectedCategory(aliased);
   }, [searchParams]);
+
+  const introCategoryKey = selectedCategory === 'all' ? null : selectedCategory;
+  const intro = introCategoryKey ? CATEGORY_INTRO[introCategoryKey] : null;
+  const introCategoryLabel = intro ? (isRu ? intro.titleRu : intro.titleEn) : '';
 
   const filteredFunctions = useMemo(() => {
     let result: LocalizedServiceFunction[] = [];
@@ -124,6 +197,34 @@ export default function ServicesIndex() {
           <Badge variant="secondary" className="ml-auto">
             {filteredFunctions.length} {isRu ? 'услуг' : 'services'}
           </Badge>
+        </div>
+      )}
+
+      {/* Category landing card — shown for the 9 "info" categories that
+          arrive here from /discover deep links. Gives users a path even
+          when the per-service grid is empty: describe the task via
+          WhatsApp coordinator, response within 2 hours. */}
+      {intro && (
+        <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-3">
+          <div className="space-y-1">
+            <h4 className="font-display text-[17px] font-semibold tracking-tight text-foreground">
+              {isRu ? intro.titleRu : intro.titleEn}
+            </h4>
+            <p className="text-[13px] text-muted-foreground leading-snug">
+              {isRu ? intro.descRu : intro.descEn}
+            </p>
+          </div>
+          <Button asChild className="w-full sm:w-auto" size="lg">
+            <a
+              href={whatsappLink(introCategoryLabel, language as 'ru' | 'en')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2"
+            >
+              <MessageCircle className="h-4 w-4" />
+              {isRu ? 'Описать задачу в WhatsApp' : 'Describe the task on WhatsApp'}
+            </a>
+          </Button>
         </div>
       )}
 
