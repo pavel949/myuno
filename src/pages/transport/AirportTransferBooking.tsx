@@ -14,6 +14,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { transliterate } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
+import { pickClosest } from '@/lib/geo';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { AnimatePresence } from 'framer-motion';
 import { BookingStepProgress, type BookingStep } from '@/components/booking/BookingStepProgress';
@@ -161,6 +162,38 @@ export default function AirportTransferBooking() {
       setFormData(prev => ({ ...prev, meetingSignName: transliterate(formData.name) }));
     }
   }, [formData.name]);
+
+  // Zone-aware pricing for hotel picks via AddressAutocomplete.
+  // When the user types a hotel name and selects a Google Places suggestion,
+  // StepRoute clears `selectedDestinationId` (so the manual-address text wins)
+  // and forwards `destinationCoords`. Without this effect the price falls back
+  // to the vehicle's default base_price (800 ฿). Here we find the nearest
+  // pricing zone within 12 km and pre-select it so the correct route rate
+  // applies — toast notifies the customer so the change is not silent.
+  const lastAutoMatchedCoordsRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!destinationCoords) {
+      lastAutoMatchedCoordsRef.current = null;
+      return;
+    }
+    if (formData.selectedDestinationId) return;
+    const coordsKey = `${destinationCoords.lat.toFixed(5)},${destinationCoords.lng.toFixed(5)}`;
+    if (coordsKey === lastAutoMatchedCoordsRef.current) return;
+    const match = pickClosest(destinationCoords, destinations, 12);
+    if (!match) return;
+    lastAutoMatchedCoordsRef.current = coordsKey;
+    setFormData(prev => ({ ...prev, selectedDestinationId: match.item.id }));
+    const zoneLabel = language === 'ru' ? match.item.name_ru : match.item.name_en;
+    const priceLabel = `฿${match.item.base_price.toLocaleString()}`;
+    toast.info(
+      language === 'ru' ? `Зона: ${zoneLabel}` : `Zone: ${zoneLabel}`,
+      {
+        description: language === 'ru'
+          ? `Стоимость рассчитана по тарифу зоны (${priceLabel}).`
+          : `Price computed from the zone rate (${priceLabel}).`,
+      },
+    );
+  }, [destinationCoords, destinations, formData.selectedDestinationId, language]);
 
   // Pricing
   const routeBasePrice = selectedDestination?.base_price || 0;
