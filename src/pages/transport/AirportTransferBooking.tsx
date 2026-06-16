@@ -13,6 +13,7 @@ import { useVehicleTypes, useTransportDestinations } from '@/hooks/useTransportC
 import { useProfile } from '@/hooks/useProfile';
 import { transliterate } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { AnimatePresence } from 'framer-motion';
 import { BookingStepProgress, type BookingStep } from '@/components/booking/BookingStepProgress';
@@ -76,7 +77,8 @@ export default function AirportTransferBooking() {
     paymentMethod: 'stripe' as TransferPaymentMethod,
   });
 
-  // Load night surcharge config once
+  // Load night surcharge config once. If the fetch fails or there's no active
+  // row the price falls back to the day rate — never silently overcharge.
   useEffect(() => {
     supabase
       .from('transfer_night_surcharge_config')
@@ -84,7 +86,11 @@ export default function AirportTransferBooking() {
       .eq('is_active', true)
       .limit(1)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) {
+          logger.warn('[Transfer] night surcharge config fetch failed; using day rate', error);
+          return;
+        }
         if (data) {
           setNightSurchargeCfg({
             start: data.start_time,
@@ -223,6 +229,10 @@ export default function AirportTransferBooking() {
 
     const scheduledAt = `${formData.arrivalDate}T${formData.arrivalTime}:00+07:00`;
     const vehicleName = language === 'ru' ? selectedVehicle?.name_ru : selectedVehicle?.name_en;
+    const terminalLabel = formData.terminal === 'domestic'
+      ? (language === 'ru' ? 'Внутренний терминал' : 'Domestic Terminal')
+      : (language === 'ru' ? 'Международный терминал' : 'International Terminal');
+    const airportLabel = language === 'ru' ? 'Аэропорт Пхукета' : 'Phuket Airport';
 
     const result = await createOrder({
       order_type: 'vehicle',
@@ -267,7 +277,7 @@ export default function AirportTransferBooking() {
       addresses: [
         {
           address_type: formData.direction === 'from-airport' ? 'pickup' : 'dropoff',
-          address_text: `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`,
+          address_text: `${airportLabel} — ${terminalLabel}`,
           lat: 8.1132,
           lng: 98.3169,
         },
@@ -287,12 +297,13 @@ export default function AirportTransferBooking() {
     if (result.success && result.order_id) {
       setCreatedOrderNumber(result.order_number || null);
 
+      const airportFull = `${airportLabel} — ${terminalLabel}`;
       const pickupAddr = formData.direction === 'from-airport'
-        ? `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`
+        ? airportFull
         : formData.destinationAddress;
       const dropoffAddr = formData.direction === 'from-airport'
         ? formData.destinationAddress
-        : `Phuket Airport - ${formData.terminal === 'domestic' ? 'Domestic' : 'International'} Terminal`;
+        : airportFull;
 
       const notifyPayload = {
         order_id: result.order_id,
@@ -319,11 +330,11 @@ export default function AirportTransferBooking() {
       const sendNotify = async (attempt = 0): Promise<void> => {
         const { error } = await supabase.functions.invoke('notify-transfer-booking', { body: notifyPayload });
         if (error && attempt < 1) {
-          console.warn('[Notify] retry transfer notification', error);
+          logger.warn('[Notify] retry transfer notification', error);
           await new Promise(r => setTimeout(r, 1200));
           return sendNotify(attempt + 1);
         }
-        if (error) console.error('[Notify] Transfer notification failed (giving up):', error);
+        if (error) logger.error('[Notify] Transfer notification failed (giving up):', error);
       };
       if (formData.paymentMethod === 'stripe') {
         sendNotify().catch(() => {});
@@ -351,7 +362,7 @@ export default function AirportTransferBooking() {
             return;
           }
         } catch (err) {
-          console.error('Stripe checkout error:', err);
+          logger.error('Stripe checkout error:', err);
           toast.error(language === 'ru' ? 'Ошибка оплаты' : 'Payment Error', {
             description: language === 'ru' ? 'Попробуйте другой способ оплаты' : 'Please try another payment method',
           });

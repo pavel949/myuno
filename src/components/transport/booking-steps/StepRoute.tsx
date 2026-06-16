@@ -154,12 +154,12 @@ export function StepRoute({
             : (language === 'ru' ? 'Откуда забрать' : 'Pick-up Address')}
         </Label>
 
-        {destinations.length > 0 && (
+        {destinations.length > 0 ? (
           <div className="space-y-1.5">
             <p className="text-xs text-muted-foreground">
               {language === 'ru' ? 'Популярные направления' : 'Popular destinations'}
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {destinations
                 .slice()
                 .sort((a, b) => (b.is_popular ? 1 : 0) - (a.is_popular ? 1 : 0))
@@ -173,20 +173,20 @@ export function StepRoute({
                       destinationAddress: language === 'ru' ? dest.name_ru : dest.name_en,
                     }))}
                     className={cn(
-                      'p-3 rounded-none border-2 transition-all text-left relative',
+                      'p-4 min-h-[64px] rounded-none border-2 transition-all text-left relative',
                       formData.selectedDestinationId === dest.id
                         ? 'border-primary bg-primary/10'
                         : 'border-border/50 bg-card hover:border-primary/30',
                     )}
                   >
                     {formData.selectedDestinationId === dest.id && (
-                      <div className="absolute top-2 right-2"><Check className="w-3 h-3 text-primary" /></div>
+                      <div className="absolute top-2 right-2"><Check className="w-3.5 h-3.5 text-primary" /></div>
                     )}
                     <p className="font-medium text-sm mb-1">
                       {language === 'ru' ? dest.name_ru : dest.name_en}
                     </p>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-primary">฿{dest.base_price.toLocaleString()}</span>
+                      <span className="text-xs font-mono font-semibold text-primary">฿{dest.base_price.toLocaleString()}</span>
                       {dest.duration_minutes && (
                         <span className="text-[10px] text-muted-foreground">~{dest.duration_minutes} {language === 'ru' ? 'мин' : 'min'}</span>
                       )}
@@ -194,6 +194,14 @@ export function StepRoute({
                   </button>
                 ))}
             </div>
+          </div>
+        ) : (
+          <div className="rounded-none border border-dashed border-border/60 bg-muted/30 p-4 text-center">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {language === 'ru'
+                ? 'Популярные направления ещё не загружены. Введите адрес назначения в поле ниже.'
+                : 'Popular destinations are not loaded yet. Enter the destination address in the field below.'}
+            </p>
           </div>
         )}
 
