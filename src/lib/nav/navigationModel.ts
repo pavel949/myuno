@@ -316,6 +316,7 @@ const ADMIN_SIDEBAR: SidebarNavGroup[] = [
       { path: '/admin/operations',      labelEn: 'Operations',         labelRu: 'Операции',      icon: CalendarCheck },
       { path: '/admin/crm',             labelEn: 'CRM',                labelRu: 'CRM',           icon: UserCheck },
       { path: '/admin/providers',       labelEn: 'Partners',           labelRu: 'Партнёры',      icon: Building2, badgeKey: 'pendingProviders' },
+      { path: '/admin/transfer-operators', labelEn: 'Transfer operators', labelRu: 'Операторы трансферов', icon: Users },
     ],
   },
   {

@@ -44,6 +44,7 @@ export const adminRoutes = (
     <Route path="/admin/vehicles" element={<Pages.AdminVehicles />} />
     <Route path="/admin/transfers" element={<Pages.AdminTransfers />} />
     <Route path="/admin/transfers/sla" element={<Pages.AdminTransferSLA />} />
+    <Route path="/admin/transfer-operators" element={<Pages.AdminTransferOperators />} />
     <Route path="/admin/events" element={<Pages.AdminEvents />} />
     <Route path="/admin/education" element={<Pages.AdminEducation />} />
     <Route path="/admin/legal" element={<Pages.AdminLegal />} />
