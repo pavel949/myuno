@@ -56,7 +56,7 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
           {isRu ? 'Все сервисы. Сортировка по вашему профилю.' : 'All services. Sorted by your profile.'}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {clusters.map((c) => {
           const availableCount = c.services.filter((s) => s.status !== 'soon').length;
           return (

@@ -142,13 +142,13 @@ export function PrimaryGrid() {
         </h2>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        {/* HERO TILE — col-span-1, row-span-2 (tall) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* HERO TILE — col-span-1, row-span-2 (tall) on sm+, full-width on mobile */}
         <Link
           to={hero.to}
           className={cn(
-            'group relative row-span-2 flex flex-col justify-between',
-            'rounded-2xl p-5 min-h-[260px] overflow-hidden',
+            'group relative sm:row-span-2 flex flex-col justify-between',
+            'rounded-2xl p-5 min-h-[200px] sm:min-h-[260px] overflow-hidden',
             'bg-primary text-primary-foreground',
             'transition-all hover:shadow-lg active:scale-[0.99]',
           )}
