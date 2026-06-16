@@ -27,6 +27,9 @@ import {
   Key, Webhook, Rocket, Settings, MapPin, Sparkles,
   Stethoscope, GraduationCap, PawPrint, Flower2, UtensilsCrossed,
   Scale, Baby, Ship, Store, Dumbbell,
+  // admin sidebar extras
+  Pill, Globe, Trash2, Database, Languages, Sliders, Newspaper,
+  AlertTriangle, Briefcase, Heart, Camera, Waves, Wrench, ListChecks,
   // fab
   Plus, Receipt as ReceiptIcon, ListTodo, CalendarPlus,
 } from 'lucide-react';
@@ -306,33 +309,128 @@ export function getOwnerSidebarForRole(
     .filter((g): g is SidebarNavGroup => g !== null);
 }
 
+/**
+ * ADMIN sidebar — full surfaced map.
+ *
+ * Previously exposed only 13 of ~67 working admin pages, forcing admins
+ * to memorize URLs or rely on Cmd-K. The new shape covers every routed
+ * admin page in 7 collapsible groups; daily-use groups default to open,
+ * deep-tool groups stay collapsed to keep the rail scannable.
+ *
+ * Group ordering follows admin workflow priority:
+ *   Platform → Verticals → Properties → Finance → Support → AI/Tools → System
+ *
+ * `/admin/analytics` is retained as a back-compat redirect in
+ * adminRoutes.tsx but the sidebar now points «Control Center» at the
+ * real route (`/admin/control`) so the rail no longer routes through a
+ * redirect.
+ */
 const ADMIN_SIDEBAR: SidebarNavGroup[] = [
   {
     labelEn: 'Platform', labelRu: 'Платформа', defaultOpen: true,
     items: [
-      { path: '/admin/add',             labelEn: 'Add',                labelRu: 'Добавить',      icon: Plus },
-      { path: '/admin',                 labelEn: 'Dashboard',          labelRu: 'Обзор',         icon: LayoutDashboard },
-      { path: '/admin/catalog',         labelEn: 'Catalog & Content',  labelRu: 'Каталог',       icon: Package, badgeKey: 'pendingContent' },
-      { path: '/admin/operations',      labelEn: 'Operations',         labelRu: 'Операции',      icon: CalendarCheck },
-      { path: '/admin/crm',             labelEn: 'CRM',                labelRu: 'CRM',           icon: UserCheck },
-      { path: '/admin/providers',       labelEn: 'Partners',           labelRu: 'Партнёры',      icon: Building2, badgeKey: 'pendingProviders' },
-      { path: '/admin/transfer-operators', labelEn: 'Transfer operators', labelRu: 'Операторы трансферов', icon: Users },
+      { path: '/admin/add',                labelEn: 'Add',                labelRu: 'Добавить',                  icon: Plus },
+      { path: '/admin',                    labelEn: 'Dashboard',          labelRu: 'Обзор',                     icon: LayoutDashboard },
+      { path: '/admin/catalog',            labelEn: 'Catalog & Content',  labelRu: 'Каталог',                   icon: Package, badgeKey: 'pendingContent' },
+      { path: '/admin/operations',         labelEn: 'Operations',         labelRu: 'Операции',                  icon: CalendarCheck },
+      { path: '/admin/crm',                labelEn: 'CRM',                labelRu: 'CRM',                       icon: UserCheck },
+      { path: '/admin/providers',          labelEn: 'Partners',           labelRu: 'Партнёры',                  icon: Building2, badgeKey: 'pendingProviders' },
+      { path: '/admin/transfer-operators', labelEn: 'Transfer operators', labelRu: 'Операторы трансферов',      icon: Users },
+      { path: '/admin/partner-applications', labelEn: 'Applications',     labelRu: 'Заявки партнёров',          icon: FileCheck },
+    ],
+  },
+  {
+    labelEn: 'Content verticals', labelRu: 'Вертикали',
+    items: [
+      { path: '/admin/restaurants',        labelEn: 'Restaurants',        labelRu: 'Рестораны',                 icon: UtensilsCrossed },
+      { path: '/admin/salons',             labelEn: 'Salons',             labelRu: 'Салоны',                    icon: Sparkles },
+      { path: '/admin/clinics',            labelEn: 'Clinics',            labelRu: 'Клиники',                   icon: Stethoscope },
+      { path: '/admin/gyms',               labelEn: 'Gyms',               labelRu: 'Фитнес',                    icon: Dumbbell },
+      { path: '/admin/vehicles',           labelEn: 'Vehicles',           labelRu: 'Транспорт',                 icon: Truck },
+      { path: '/admin/transfers',          labelEn: 'Transfers',          labelRu: 'Трансферы',                 icon: ArrowLeftRight },
+      { path: '/admin/yachts',             labelEn: 'Yachts',             labelRu: 'Яхты',                      icon: Ship },
+      { path: '/admin/water-activities',   labelEn: 'Water activities',   labelRu: 'Водные активности',         icon: Waves },
+      { path: '/admin/experiences',        labelEn: 'Experiences',        labelRu: 'Впечатления',               icon: Star },
+      { path: '/admin/activities',         labelEn: 'Activities',         labelRu: 'Активности',                icon: Compass },
+      { path: '/admin/events',             labelEn: 'Events',             labelRu: 'События',                   icon: CalendarDays },
+      { path: '/admin/education',          labelEn: 'Education',          labelRu: 'Образование',               icon: GraduationCap },
+      { path: '/admin/legal',              labelEn: 'Legal',              labelRu: 'Юридические',               icon: Scale },
+      { path: '/admin/insurance',          labelEn: 'Insurance',          labelRu: 'Страхование',               icon: ShieldCheck },
+      { path: '/admin/pharmacies',         labelEn: 'Pharmacies',         labelRu: 'Аптеки',                    icon: Pill },
+      { path: '/admin/stores',             labelEn: 'Stores',             labelRu: 'Магазины',                  icon: Store },
+      { path: '/admin/pets',               labelEn: 'Pets',               labelRu: 'Питомцы',                   icon: PawPrint },
+      { path: '/admin/cleaning',           labelEn: 'Cleaning',           labelRu: 'Уборка',                    icon: Wrench },
+      { path: '/admin/babysitters',        labelEn: 'Babysitters',        labelRu: 'Няни',                      icon: Baby },
+      { path: '/admin/flowers',            labelEn: 'Flowers',            labelRu: 'Цветы',                     icon: Flower2 },
+      { path: '/admin/consultations',      labelEn: 'Consultations',      labelRu: 'Консультации',              icon: MessageCircle },
+    ],
+  },
+  {
+    labelEn: 'Properties & Projects', labelRu: 'Недвижимость и проекты',
+    items: [
+      { path: '/admin/properties',         labelEn: 'Properties',         labelRu: 'Объекты',                   icon: Building2 },
+      { path: '/admin/projects',           labelEn: 'Projects',           labelRu: 'Проекты',                   icon: Layers },
+      { path: '/admin/newbuilds',          labelEn: 'New developments',   labelRu: 'Новостройки',               icon: Crown },
+      { path: '/admin/developers',         labelEn: 'Developers',         labelRu: 'Девелоперы',                icon: Briefcase },
+      { path: '/admin/pm-companies',       labelEn: 'PM companies',       labelRu: 'Управляющие компании',      icon: ContactRound },
+      { path: '/admin/mc-dashboard',       labelEn: 'MC dashboard',       labelRu: 'Дашборд УК',                icon: BarChart3 },
+      { path: '/admin/investments',        labelEn: 'Investments',        labelRu: 'Инвестиции',                icon: TrendingUp },
+      { path: '/admin/nb-leads',           labelEn: 'NB leads',           labelRu: 'Лиды новостроек',           icon: ListChecks },
+      { path: '/admin/contracts',          labelEn: 'Contracts',          labelRu: 'Контракты',                 icon: FileCheck },
     ],
   },
   {
     labelEn: 'Finance & Analytics', labelRu: 'Финансы и аналитика',
     items: [
-      { path: '/admin/finance',         labelEn: 'Finance',            labelRu: 'Финансы',       icon: DollarSign },
-      { path: '/admin/analytics',       labelEn: 'Analytics',          labelRu: 'Аналитика',     icon: BarChart3 },
+      { path: '/admin/finance',            labelEn: 'Finance',            labelRu: 'Финансы',                   icon: DollarSign },
+      { path: '/admin/control',            labelEn: 'Control Center',     labelRu: 'Центр управления',          icon: Sliders },
+      { path: '/admin/acquisition-metrics', labelEn: 'Acquisition',       labelRu: 'Привлечение',               icon: Target },
+      { path: '/admin/investor-metrics',   labelEn: 'Investor metrics',   labelRu: 'Метрики инвесторов',        icon: LineChart },
+      { path: '/admin/disputes',           labelEn: 'Disputes',           labelRu: 'Споры',                     icon: AlertTriangle },
+      { path: '/admin/marketing',          labelEn: 'Marketing',          labelRu: 'Маркетинг',                 icon: Megaphone },
+      { path: '/admin/lifecycle-messaging', labelEn: 'Lifecycle',         labelRu: 'Lifecycle-рассылки',        icon: Radio },
+    ],
+  },
+  {
+    labelEn: 'Support & Ops', labelRu: 'Поддержка и операции',
+    items: [
+      { path: '/admin/tickets',            labelEn: 'Support tickets',    labelRu: 'Тикеты',                    icon: MessageSquare },
+      { path: '/admin/quick-listings',     labelEn: 'Quick listings',     labelRu: 'Быстрые листинги',          icon: Zap },
+      { path: '/admin/bulk-publish',       labelEn: 'Bulk publish',       labelRu: 'Массовая публикация',       icon: Rocket },
+      { path: '/admin/vendor-prospects',   labelEn: 'Vendor prospects',   labelRu: 'Кандидаты в вендоры',       icon: Target },
+      { path: '/admin/vendor-content',     labelEn: 'Vendor content',     labelRu: 'Контент вендоров',          icon: Camera },
+      { path: '/admin/intake',             labelEn: 'Intake',             labelRu: 'Прием данных',              icon: PackageOpen },
+      { path: '/admin/data-import',        labelEn: 'Data import',        labelRu: 'Импорт данных',             icon: Database },
+      { path: '/admin/trash',              labelEn: 'Trash',              labelRu: 'Корзина',                   icon: Trash2 },
+    ],
+  },
+  {
+    labelEn: 'AI & Tools', labelRu: 'ИИ и инструменты',
+    items: [
+      { path: '/admin/ai-agents',          labelEn: 'AI agents',          labelRu: 'AI-агенты',                 icon: Sparkles },
+      { path: '/admin/ai-ops',             labelEn: 'AI ops',             labelRu: 'AI-операции',               icon: Zap },
+      { path: '/admin/ai-knowledge',       labelEn: 'AI knowledge',       labelRu: 'AI-знания',                 icon: BookOpen },
+      { path: '/admin/qa-test-runner',     labelEn: 'QA runner',          labelRu: 'QA-тесты',                  icon: ListChecks },
+      { path: '/admin/master-catalog',     labelEn: 'Master catalog',     labelRu: 'Мастер-каталог',            icon: Layers },
+      { path: '/admin/taxonomy',           labelEn: 'Taxonomy',           labelRu: 'Таксономия',                icon: Tag },
+      { path: '/admin/lookups',            labelEn: 'Lookups',            labelRu: 'Справочники',               icon: BookOpen },
+      { path: '/admin/official-news',      labelEn: 'Official news',      labelRu: 'Официальные новости',       icon: Newspaper },
+      { path: '/admin/legal-documents',    labelEn: 'Legal docs',         labelRu: 'Юр. документы',             icon: FileText },
+      { path: '/admin/experience-categories', labelEn: 'Exp. categories', labelRu: 'Категории впечатлений',     icon: Tag },
     ],
   },
   {
     labelEn: 'System', labelRu: 'Система',
     items: [
-      { path: '/admin/life-situations', labelEn: 'LifeOS',             labelRu: 'LifeOS',        icon: Sparkles },
-      { path: '/admin/newbuilds',       labelEn: 'New Developments',   labelRu: 'Новостройки',   icon: Building2 },
-      { path: '/admin/users',           labelEn: 'Users & Access',     labelRu: 'Пользователи',  icon: Users },
-      { path: '/admin/settings',        labelEn: 'System Settings',    labelRu: 'Настройки',     icon: Settings },
+      { path: '/admin/life-situations',    labelEn: 'LifeOS',             labelRu: 'LifeOS',                    icon: Heart },
+      { path: '/admin/users',              labelEn: 'Users & access',     labelRu: 'Пользователи',              icon: Users },
+      { path: '/admin/uno-team',           labelEn: 'UNO team',           labelRu: 'Команда UNO',               icon: ShieldCheck },
+      { path: '/admin/cities',             labelEn: 'Cities',             labelRu: 'Города',                    icon: MapPin },
+      { path: '/admin/location-knowledge', labelEn: 'Location knowledge', labelRu: 'База локаций',              icon: Globe },
+      { path: '/admin/translations',       labelEn: 'Translations',       labelRu: 'Переводы',                  icon: Languages },
+      { path: '/admin/relocation-articles', labelEn: 'Relocation guides', labelRu: 'Гайды по переезду',         icon: BookOpen },
+      { path: '/admin/api-keys',           labelEn: 'API keys',           labelRu: 'API-ключи',                 icon: Key },
+      { path: '/admin/settings',           labelEn: 'System settings',    labelRu: 'Настройки',                 icon: Settings },
     ],
   },
 ];
