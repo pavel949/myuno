@@ -15,7 +15,7 @@ import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from './PageTransition';
 import { ScrollToTop } from './ScrollToTop';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard } from '@/components/auth';
+import { AdminGuard, VendorGuard, TeamGuard, AuthGuard, StaffGuard, MCGuard, InvestorGuard } from '@/components/auth';
 import { MCPortalGuard } from '@/components/auth/MCPortalGuard';
 import ManageHubGate from '@/components/layout/ManageHubGate';
 
@@ -498,7 +498,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_KNOWLEDGE} element={<LazyPage><Pages.InvestmentKnowledgeZone /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_SERVICES} element={<LazyPage><Pages.InvestmentServicesZone /></LazyPage>} />
         <Route path={APP_ROUTES.INVEST_QUIZ} element={<LazyPage><Pages.InvestorQuiz /></LazyPage>} />
-        <Route path={APP_ROUTES.INVEST_DASHBOARD} element={<LazyPage><Pages.InvestorDashboard /></LazyPage>} />
+        <Route path={APP_ROUTES.INVEST_DASHBOARD} element={<InvestorGuard><LazyPage><Pages.InvestorDashboard /></LazyPage></InvestorGuard>} />
         {/* Wave 1 IA consolidation: /invest/raise = canonical 5-step submit form.
             Legacy /invest/pitch and /invest/articles redirect to canonical entries. */}
         <Route path={APP_ROUTES.INVEST_RAISE} element={<LazyPage><Pages.InvestmentSubmit /></LazyPage>} />
@@ -725,7 +725,7 @@ export const AnimatedRoutes: React.FC = () => {
         </Route>
 
         {/* ── Capital CRM ── */}
-        <Route path="/capital" element={<AuthGuard><CapitalLayout /></AuthGuard>}>
+        <Route path="/capital" element={<InvestorGuard><CapitalLayout /></InvestorGuard>}>
           <Route index element={<LazyPage><Pages.CapitalDashboard /></LazyPage>} />
           <Route path="contacts" element={<LazyPage><Pages.CapitalContacts /></LazyPage>} />
           <Route path="contacts/:id" element={<LazyPage><Pages.CapitalContactDetail /></LazyPage>} />

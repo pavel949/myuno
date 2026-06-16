@@ -270,6 +270,7 @@ export function useUserPersonas() {
   if (!user) {
     return {
       personas: guestHook.personas,
+      effectivePersonas: effective(guestHook.personas),
       isLoading: false,
       error: null,
       isAuthenticated: false,
@@ -282,6 +283,7 @@ export function useUserPersonas() {
 
   return {
     personas: dbPersonas,
+    effectivePersonas: effective(dbPersonas),
     isLoading,
     error,
     isAuthenticated: true,
@@ -290,6 +292,17 @@ export function useUserPersonas() {
     isToggling: togglePersonaMutation.isPending,
     isSetting: setPersonasMutation.isPending,
   };
+}
+
+/**
+ * Resolve a role stack for content filtering / role-aware ranking.
+ * - Role editors should keep using `personas` (raw, may be empty).
+ * - Anywhere that asks "what does this user see?" uses `effectivePersonas`
+ *   so a fresh-auth user with no persona row still gets the tourist feed
+ *   instead of a blank page.
+ */
+function effective(personas: UserPersona[]): UserPersona[] {
+  return personas.length > 0 ? personas : (['tourist'] as UserPersona[]);
 }
 
 export function hasPersona(personas: UserPersona[], persona: UserPersona): boolean {

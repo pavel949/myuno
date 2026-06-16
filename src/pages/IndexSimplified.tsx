@@ -26,12 +26,12 @@ const TOTAL_CLUSTERS = CLUSTERS.length;
 const TOTAL_SERVICES = FLAT_SERVICES.length;
 
 const IndexSimplified: React.FC = () => {
-  const { personas, togglePersona, setPersonas } = useUserPersonas();
+  const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
   const { language } = useLanguage();
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
   const [appDrawerOpen, setAppDrawerOpen] = useState(false);
 
-  const activePersonas = personas.length > 0 ? personas : (['tourist'] as const);
+  const activePersonas = effectivePersonas;
   const isRu = language === 'ru';
 
   return (
