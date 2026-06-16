@@ -509,10 +509,13 @@ export const CATEGORIES: CategoryEntry[] = [
     ],
   },
   {
+    // Renamed from "Питомцы" → "Уход за питомцами" so the category header
+    // doesn't echo the flagship "Питомцы" service inside it. Same icon
+    // (PawPrint) is fine — the icon belongs to the topic, not the label.
     id: 'cat-pet-services',
     clusterId: 'live',
-    labelRu: 'Питомцы',
-    labelEn: 'Pets',
+    labelRu: 'Уход за питомцами',
+    labelEn: 'Pet care',
     valueRu: 'Уход, ветеринары, груминг, ввоз/вывоз питомца.',
     valueEn: 'Pet care, veterinary, grooming, import/export.',
     icon: PawPrint,
@@ -535,8 +538,12 @@ export const CATEGORIES: CategoryEntry[] = [
     icon: CalendarDays,
     color: '#0EA5E9',
     services: [
-      { id: 'event-live',   path: APP_ROUTES.EVENTS,                    labelRu: 'События',      labelEn: 'Events',           icon: CalendarDays, status: 'available', verticalId: 'event', personaTags: ['resident','couple','nightlife','active','family'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident','nightlife'] },
-      { id: 'experience-live', path: EXPERIENCES_URL,                   labelRu: 'Впечатления',  labelEn: 'Experiences',      icon: Compass,      status: 'available', verticalId: 'experience', personaTags: ['resident','couple','active','family','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
+      // Сat-leisure-в-кластере-Live versions of event/experience target residents,
+      // not tourists — same listing pages but contextual framing. Labels are
+      // intentionally differentiated from the cat-tourism originals (line ~370)
+      // so /discover-from-Live doesn't show two identically-named cards.
+      { id: 'event-live',   path: APP_ROUTES.EVENTS,                    labelRu: 'Местные события',     labelEn: 'Local events',      icon: CalendarDays, status: 'available', verticalId: 'event', personaTags: ['resident','couple','nightlife','active','family'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident','nightlife'] },
+      { id: 'experience-live', path: EXPERIENCES_URL,                   labelRu: 'Локальные впечатления', labelEn: 'Local experiences', icon: Compass,      status: 'available', verticalId: 'experience', personaTags: ['resident','couple','active','family','nightlife'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
       { id: 'water-live',   path: `${EXPERIENCES_URL}?type=activity`,   labelRu: 'Активности',   labelEn: 'Activities',       icon: Waves,        status: 'available', verticalId: 'water_activity', personaTags: ['resident','active','family'], jtbdClusters: ['I'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['leisure','living','resident'] },
       { id: 'community',    path: APP_ROUTES.HOME,                      labelRu: 'Сообщество',   labelEn: 'Community',        icon: Users,        status: 'soon', personaTags: ['resident','family','relocation','nomad'], jtbdClusters: ['I','C'], lifecycleStages: ['settler','resident','nomad','snowbird','returnee'], roleTags: ['consumer','resident-user'], situationCodes: ['living','resident','family'] },
     ],
@@ -584,7 +591,11 @@ export const CATEGORIES: CategoryEntry[] = [
       { id: 'developers',   path: APP_ROUTES.DEVELOPERS,  labelRu: 'Застройщики',    labelEn: 'Developers',   icon: Users,     status: 'available', personaTags: ['investor','property_owner','real_estate_developer'], jtbdClusters: ['D'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive','provider'], situationCodes: ['investing','investor','developer'] },
       { id: 'business-invest', path: APP_ROUTES.INVEST_BUSINESS, labelRu: 'Бизнес и франшизы', labelEn: 'Business & franchises', icon: Briefcase, status: 'available', personaTags: ['investor','business','property_owner'], jtbdClusters: ['D','E'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','operator'], situationCodes: ['business','investing','investor'] },
       { id: 'roi-hub',      path: APP_ROUTES.INVEST_DASHBOARD, labelRu: 'Портфель и ROI', labelEn: 'Portfolio & ROI', icon: BarChart3, status: 'available', personaTags: ['investor','property_owner'], jtbdClusters: ['F'], lifecycleStages: ['resident','absentee'], roleTags: ['investor-active','investor-passive','operator'], situationCodes: ['investing','investor','property_owner','managing'] },
-      { id: 'due-diligence',path: APP_ROUTES.INVEST_KNOWLEDGE, labelRu: 'База знаний',    labelEn: 'Knowledge base', icon: BookOpen, status: 'available', personaTags: ['investor','property_owner','business'], jtbdClusters: ['D','G'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'], situationCodes: ['investing','investor'] },
+      // Renamed from generic "База знаний" (which clashed with the legal
+      // knowledge entry below at line ~606) to "Инвест-база знаний" so
+      // /discover-from-Invest doesn't show two BookOpen cards with identical
+      // labels routing to different content (INVEST_KNOWLEDGE vs KNOWLEDGE).
+      { id: 'due-diligence',path: APP_ROUTES.INVEST_KNOWLEDGE, labelRu: 'Инвест-база знаний', labelEn: 'Investment knowledge', icon: BookOpen, status: 'available', personaTags: ['investor','property_owner','business'], jtbdClusters: ['D','G'], lifecycleStages: ['scout','resident','absentee'], roleTags: ['investor-active','investor-passive'], situationCodes: ['investing','investor'] },
     ],
   },
 
