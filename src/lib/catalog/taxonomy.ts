@@ -425,6 +425,12 @@ export const CATEGORIES: CategoryEntry[] = [
       { id: 'electrical', path: `${SERVICES_URL}?category=electrical`, labelRu: 'Электрика',     labelEn: 'Electrical',  icon: Plug,     status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
       { id: 'ac-repair',  path: `${SERVICES_URL}?category=ac-repair`,  labelRu: 'Кондиционеры',  labelEn: 'AC repair',   icon: Wind,     status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
       { id: 'locksmith',  path: `${SERVICES_URL}?category=locksmith`,  labelRu: 'Замки',         labelEn: 'Locksmith',   icon: KeyRound, status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','H'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing','emergency'] },
+      // Home-services hub: deep catalogue of trades (handyman + plumber + electrician +
+      // AC + cleaning + pool + garden + pest + security + moving) via
+      // src/lib/config/homeServiceFunctions.ts. Lives in `cat-home-repair` because
+      // 7 of its 10 sub-categories are repair-trades; renamed from the misleading
+      // "Все услуги" / "Services hub" to honestly describe the content.
+      { id: 'services',   path: SERVICES_URL,                          labelRu: 'Услуги для дома', labelEn: 'Home services hub', icon: Wrench, status: 'info',      personaTags: ['resident','property_owner','family','nomad'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
     ],
   },
   {
@@ -452,7 +458,6 @@ export const CATEGORIES: CategoryEntry[] = [
     color: '#0EA5E9',
     services: [
       { id: 'storage',  path: `${SERVICES_URL}?category=storage`, labelRu: 'Хранение',   labelEn: 'Storage',      icon: Warehouse,  status: 'info',      personaTags: ['resident','nomad','relocation','family'], jtbdClusters: ['C','B'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['living','resident','departure','relocation'] },
-      { id: 'services', path: SERVICES_URL,                        labelRu: 'Все услуги', labelEn: 'Services hub', icon: LayoutGrid, status: 'info',      personaTags: ['tourist','resident','family','nomad','property_owner'], jtbdClusters: ['C','I'], lifecycleStages: ['all'], roleTags: ['consumer'], situationCodes: ['living','resident','managing'] },
     ],
   },
   {

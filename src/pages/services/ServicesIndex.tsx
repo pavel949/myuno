@@ -150,10 +150,18 @@ export default function ServicesIndex() {
     setSearchParams(newParams);
   };
 
+  // Subtitle honestly describes what this hub covers: home/property maintenance
+  // trades sourced from `HOME_SERVICE_FUNCTIONS` (homeServiceFunctions.ts).
+  // The platform-wide "All apps" experience lives in AppDrawer (BottomBar
+  // LayoutGrid icon / Home "Все приложения" button), not here.
+  const subtitle = isRu
+    ? `Сантехника · электрика · уборка · ремонт · сад. ${filteredFunctions.length} услуг.`
+    : `Plumbing · electrical · cleaning · repair · garden. ${filteredFunctions.length} services.`;
+
   return (
     <MiniAppLayout
-      title={isRu ? 'Домашние услуги' : 'Home Services'}
-      subtitle={`${filteredFunctions.length} ${isRu ? 'услуг' : 'services'}`}
+      title={isRu ? 'Услуги для дома' : 'Home services'}
+      subtitle={subtitle}
       fallbackPath="/discover"
       categories={categoryRibbon}
       selectedCategory={selectedCategory}
