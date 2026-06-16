@@ -30,9 +30,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import { 
-  Building2, 
-  Plus, 
+import {
+  Building2,
+  Plus,
   MoreVertical,
   Edit,
   Trash2,
@@ -46,8 +46,10 @@ import {
   Languages,
   Eye,
   Sparkles,
-  Star
+  Star,
+  Download,
 } from 'lucide-react';
+import Papa from 'papaparse';
 import { cn } from '@/lib/utils';
 import { BusinessCardScanButton, ScannedProviderData } from '@/components/admin/BusinessCardScanButton';
 import { 
@@ -85,7 +87,6 @@ const LANGUAGE_OPTIONS = [
 
 export default function AdminProviders() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
@@ -95,8 +96,36 @@ export default function AdminProviders() {
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'all' | 'active' | 'verified' | 'inactive'>('all');
+
+  // URL-persisted filter + search so navigating away (provider detail
+  // page) and back keeps the admin's view intact. Same search-params
+  // hook also drives the legacy `?action=new` open-on-load behaviour
+  // wired in the useEffect below.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchQuery = searchParams.get('q') || '';
+  const filter = (searchParams.get('filter') as 'all' | 'active' | 'verified' | 'inactive') || 'all';
+  const setSearchQuery = (val: string) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (val) next.set('q', val);
+        else next.delete('q');
+        return next;
+      },
+      { replace: true },
+    );
+  };
+  const setFilter = (val: 'all' | 'active' | 'verified' | 'inactive') => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (val === 'all') next.delete('filter');
+        else next.set('filter', val);
+        return next;
+      },
+      { replace: true },
+    );
+  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -255,6 +284,43 @@ export default function AdminProviders() {
     return true;
   });
 
+  const handleExportCsv = () => {
+    if (filteredProviders.length === 0) {
+      toast.info(isRussian ? 'Нечего экспортировать' : 'Nothing to export');
+      return;
+    }
+    const rows = filteredProviders.map((p) => ({
+      id: p.id,
+      name: p.name,
+      business_category: p.business_category || '',
+      provider_type: p.provider_type || '',
+      email: p.email || '',
+      phone: p.phone || '',
+      website: p.website || '',
+      address: p.address || '',
+      is_active: p.is_active ? 'yes' : 'no',
+      is_verified: p.is_verified ? 'yes' : 'no',
+      languages: Array.isArray(p.languages) ? p.languages.join(';') : '',
+      created_at: p.created_at || '',
+    }));
+    const csv = Papa.unparse(rows);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `providers-${filter}-${ts}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success(
+      isRussian
+        ? `Экспортировано ${rows.length} записей`
+        : `Exported ${rows.length} rows`,
+    );
+  };
+
   if (authLoading || adminLoading) {
     return (
       <>
@@ -291,6 +357,14 @@ export default function AdminProviders() {
               className="pl-9"
             />
           </div>
+          <Button
+            variant="outline"
+            onClick={handleExportCsv}
+            disabled={filteredProviders.length === 0}
+            title={isRussian ? 'Экспорт текущей выборки в CSV' : 'Export current selection as CSV'}
+          >
+            <Download className="h-4 w-4" />
+          </Button>
           <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
             <Plus className="h-4 w-4" />
           </Button>
