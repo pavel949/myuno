@@ -41,7 +41,10 @@ type SignupStep = 'phone' | 'register';
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(!searchParams.get('ref') && searchParams.get('mode') !== 'signup');
-  const [email, setEmail] = useState('');
+  // Pre-fill email from a shareable signup link (?prefill_email=...) — admin
+  // can WhatsApp / message a /auth?mode=signup&prefill_email=<addr> URL and
+  // the recipient lands with the field ready to go.
+  const [email, setEmail] = useState(() => searchParams.get('prefill_email') || '');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');

@@ -10,6 +10,7 @@ import { lazyWithRetry as lazy } from '@/lib/lazyWithRetry';
 export const AccountTypeSelection = lazy(() => import('@/pages/auth/AccountTypeSelection'));
 export const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'));
 export const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
+export const SetupPassword = lazy(() => import('@/pages/auth/SetupPassword'));
 
 // ── Core ──
 export const ForManagementCompanies = lazy(() => import('@/pages/ForManagementCompanies'));

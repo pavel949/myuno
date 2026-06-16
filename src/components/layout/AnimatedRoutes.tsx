@@ -210,6 +210,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.AUTH_ACCOUNT_TYPE} element={<LazyPage><Pages.AccountTypeSelection /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_FORGOT_PASSWORD} element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_RESET_PASSWORD} element={<LazyPage><Pages.ResetPassword /></LazyPage>} />
+        <Route path="/auth/setup-password" element={<LazyPage><Pages.SetupPassword /></LazyPage>} />
         
         {/* ── User ── */}
         {/* Wave-1 IA cleanup: /discover — единственная каноническая «дверь» в каталог.
