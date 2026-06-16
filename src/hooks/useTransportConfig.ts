@@ -9,6 +9,10 @@ export interface VehicleType {
   description_en?: string;
   description_ru?: string;
   icon?: string;
+  /** Public Supabase Storage URL — preferred over `icon` when set. */
+  cover_image?: string | null;
+  /** Additional gallery images (used by detail / picker carousel). */
+  images?: string[];
   max_passengers: number;
   base_price: number;
   price_per_km: number;

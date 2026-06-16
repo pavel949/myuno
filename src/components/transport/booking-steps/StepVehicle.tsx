@@ -16,6 +16,7 @@ interface VehicleType {
   name_ru: string;
   name_en: string;
   icon?: string | null;
+  cover_image?: string | null;
   base_price: number;
   price_multiplier: number;
   max_passengers: number;
@@ -62,12 +63,26 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
                   : 'border-border/50 bg-card hover:border-primary/30',
               )}
             >
-              <div className={cn(
-                'w-12 h-12 rounded-none flex items-center justify-center shrink-0',
-                isSelected ? 'bg-primary/20' : 'bg-muted',
-              )}>
-                <Icon className="w-6 h-6 text-primary" />
-              </div>
+              {vehicle.cover_image ? (
+                <div className={cn(
+                  'w-16 h-12 rounded-none overflow-hidden shrink-0 border',
+                  isSelected ? 'border-primary' : 'border-border/50',
+                )}>
+                  <img
+                    src={vehicle.cover_image}
+                    alt={language === 'ru' ? vehicle.name_ru : vehicle.name_en}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className={cn(
+                  'w-12 h-12 rounded-none flex items-center justify-center shrink-0',
+                  isSelected ? 'bg-primary/20' : 'bg-muted',
+                )}>
+                  <Icon className="w-6 h-6 text-primary" />
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm">
                   {language === 'ru' ? vehicle.name_ru : vehicle.name_en}
