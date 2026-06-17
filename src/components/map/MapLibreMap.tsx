@@ -290,7 +290,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
     } else if (fitToMarkers && markers.length === 1) {
       map.flyTo({ center: [markers[0].lng, markers[0].lat], zoom: 14, duration: 600 });
     }
-  }, [markers, fitToMarkers, onMarkerClick]);
+  }, [markers, fitToMarkers, onMarkerClick, activeMarkerId]);
 
   // React to center prop changes when no markers drive the view.
   useEffect(() => {
