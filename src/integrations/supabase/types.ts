@@ -27816,6 +27816,13 @@ export type Database = {
             referencedRelation: "webhook_endpoints"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "webhook_deliveries_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_endpoints_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       webhook_endpoints: {
@@ -31212,6 +31219,69 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_endpoints_safe: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          events: string[] | null
+          failure_count: number | null
+          id: string | null
+          is_active: boolean | null
+          last_failure_at: string | null
+          last_success_at: string | null
+          secret_hint: string | null
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          events?: string[] | null
+          failure_count?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          secret_hint?: never
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          events?: string[] | null
+          failure_count?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          secret_hint?: never
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_endpoints_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_endpoints_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
             referencedColumns: ["id"]
           },
         ]
