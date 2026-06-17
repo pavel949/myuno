@@ -25,8 +25,10 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
   const [results, setResults] = useState<MapSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(-1);
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
 
   // Close on outside click
   useEffect(() => {
@@ -43,6 +45,7 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
     if (q.length < 2) {
       setResults([]);
       setLoading(false);
+      setActiveIdx(-1);
       return;
     }
     setLoading(true);
@@ -55,7 +58,6 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
           searchLocal(q),
           searchNominatim(q, ctrl.signal),
         ]);
-        // Dedup: prefer local POIs by name
         const seen = new Set<string>();
         const merged: MapSearchResult[] = [];
         [...local, ...remote].forEach((r) => {
@@ -65,6 +67,7 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
           merged.push(r);
         });
         setResults(merged.slice(0, 8));
+        setActiveIdx(merged.length > 0 ? 0 : -1);
         setOpen(true);
       } catch (err) {
         if ((err as Error).name !== 'AbortError') console.warn('search error', err);
@@ -75,10 +78,42 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
     return () => clearTimeout(timer);
   }, [query]);
 
+  // Scroll active item into view
+  useEffect(() => {
+    if (activeIdx < 0 || !listRef.current) return;
+    const el = listRef.current.querySelectorAll('li')[activeIdx] as HTMLElement | undefined;
+    el?.scrollIntoView({ block: 'nearest' });
+  }, [activeIdx]);
+
   const handlePick = (r: MapSearchResult) => {
     setQuery(r.label);
     setOpen(false);
     onSelect(r);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!open && results.length > 0) setOpen(true);
+      setActiveIdx((i) => (results.length === 0 ? -1 : (i + 1) % results.length));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!open && results.length > 0) setOpen(true);
+      setActiveIdx((i) => (results.length === 0 ? -1 : (i - 1 + results.length) % results.length));
+    } else if (e.key === 'Enter') {
+      if (open && activeIdx >= 0 && results[activeIdx]) {
+        e.preventDefault();
+        handlePick(results[activeIdx]);
+      }
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+    } else if (e.key === 'Home' && open) {
+      e.preventDefault();
+      setActiveIdx(0);
+    } else if (e.key === 'End' && open) {
+      e.preventDefault();
+      setActiveIdx(results.length - 1);
+    }
   };
 
   const placeholder = language === 'ru' ? 'Поиск адреса или места…' : 'Search address or place…';
@@ -96,8 +131,14 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
           value={query}
           onChange={(e) => setQuery(e.target.value.slice(0, 120))}
           onFocus={() => results.length > 0 && setOpen(true)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           aria-label={placeholder}
+          role="combobox"
+          aria-expanded={open}
+          aria-controls="map-search-listbox"
+          aria-autocomplete="list"
+          aria-activedescendant={activeIdx >= 0 ? `map-search-opt-${activeIdx}` : undefined}
           className="w-full h-10 pl-9 pr-9 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
         {loading ? (
@@ -105,7 +146,7 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
         ) : query ? (
           <button
             type="button"
-            onClick={() => { setQuery(''); setResults([]); setOpen(false); }}
+            onClick={() => { setQuery(''); setResults([]); setOpen(false); setActiveIdx(-1); }}
             aria-label="Clear"
             className="absolute right-2 p-1 rounded hover:bg-muted"
           >
@@ -119,27 +160,32 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
           {results.length === 0 && !loading ? (
             <div className="px-3 py-2 text-xs text-muted-foreground">{emptyText}</div>
           ) : (
-            <ul role="listbox">
-              {results.map((r) => (
-                <li key={r.id}>
-                  <button
-                    type="button"
-                    onClick={() => handlePick(r)}
-                    className="w-full text-left px-3 py-2 flex items-start gap-2 hover:bg-muted focus:bg-muted focus:outline-none"
-                  >
-                    <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm text-foreground truncate">{r.label}</span>
-                      {r.sublabel && (
-                        <span className="block text-[11px] text-muted-foreground truncate">{r.sublabel}</span>
-                      )}
-                    </span>
-                    <span className="text-[10px] uppercase text-muted-foreground/70 shrink-0 mt-1">
-                      {r.source === 'local' ? 'POI' : 'OSM'}
-                    </span>
-                  </button>
-                </li>
-              ))}
+            <ul ref={listRef} id="map-search-listbox" role="listbox">
+              {results.map((r, idx) => {
+                const active = idx === activeIdx;
+                return (
+                  <li key={r.id} id={`map-search-opt-${idx}`} role="option" aria-selected={active}>
+                    <button
+                      type="button"
+                      onMouseEnter={() => setActiveIdx(idx)}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => handlePick(r)}
+                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none ${active ? 'bg-muted' : 'hover:bg-muted'}`}
+                    >
+                      <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm text-foreground truncate">{r.label}</span>
+                        {r.sublabel && (
+                          <span className="block text-[11px] text-muted-foreground truncate">{r.sublabel}</span>
+                        )}
+                      </span>
+                      <span className="text-[10px] uppercase text-muted-foreground/70 shrink-0 mt-1">
+                        {r.source === 'local' ? 'POI' : 'OSM'}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
