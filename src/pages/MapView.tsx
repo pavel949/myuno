@@ -497,7 +497,9 @@ export default function MapView() {
               fitToMarkers={mlMarkers.length > 0 && mlMarkers.length < 200 && !searchPin}
               className="absolute inset-0"
               locateLabel={language === 'ru' ? 'Найти меня' : 'Find me'}
+              activeMarkerId={activeMarkerId}
             />
+
           )}
 
           {searchPin && (
