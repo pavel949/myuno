@@ -1,92 +1,84 @@
-## Проблема
+# План: закрытие 4 P0 security-ERRORs
 
-В `src/pages/transport/AirportTransferBooking.tsx` (handleSubmit, строка 241) — если пользователь не залогинен, его выкидывает на `/auth` и вся заполненная форма теряется. Профиль уже подставляется автоматически (useEffect на `profile`, строка 137), но для гостя — пусто, и в конце происходит редирект.
+Цель — устранить критические утечки данных, чтобы можно было приглашать поставщиков и открывать публичный доступ. Каждое исправление = отдельная миграция + проверка кода, который читает затронутые объекты.
 
-## Цель
+---
 
-1. Залогиненный — данные подставляются автоматически, поля редактируемые (уже работает, оставляем).
-2. Гость — может полностью пройти форму без логина; перед оплатой ему предлагается **один из трёх путей**, без потери данных.
-3. Никаких принудительных редиректов на `/auth` с очисткой стейта.
+## P0-1. `properties.public_view_active` — утечка PII/финансов владельцев
 
-## Решение
+**Проблема:** view с `security_invoker=off` (или GRANT для anon) отдаёт анонимам колонки `actual_owner_phone/email/name`, `purchase_price`, `mortgage_amount`, lock-коды, wifi-поля. 32 объекта.
 
-### 1. Персистентность формы (страховка)
-- Сохранять `formData` + `step` в `sessionStorage` под ключом `transfer_booking_draft` на каждом изменении (debounced).
-- Восстанавливать при монтировании страницы.
-- Очищать после успешной оплаты / в `TransferSuccess`.
-- Это гарантирует: даже если что-то пойдёт не так (refresh, случайный редирект, OAuth callback) — форма не теряется.
+**Фикс (миграция):**
+1. `DROP VIEW public.public_view_active`.
+2. `CREATE VIEW public.public_view_active` с явным whitelist безопасных колонок: `id, slug, title, description_*, city, district, lat, lng, bedrooms, bathrooms, area_sqm, property_type, listing_type, base_price_night, sale_price, currency, cover_image_url, gallery, amenities, status, published_at`.
+3. `ALTER VIEW … SET (security_invoker = true)`.
+4. `GRANT SELECT ON public.public_view_active TO anon, authenticated`.
 
-### 2. Новый шаг "Контакт и аккаунт" (заменяет блокирующий редирект)
+**Проверка кода:** `rg "public_view_active"` в `src/` и `supabase/functions/` — убедиться, что фронт не запрашивает удалённые колонки; при необходимости переключить на `properties` (под RLS) для авторизованных владельцев/MC.
 
-В `StepDetails` (или новый мини-блок перед StepPayment) для **гостя** показываем компонент `GuestAuthChoice` с тремя вариантами в одном экране:
+---
 
-```text
-┌─────────────────────────────────────┐
-│  Как оформить бронирование?         │
-├─────────────────────────────────────┤
-│ ○ Войти (есть аккаунт)              │
-│   → inline email+password,          │
-│     при успехе профиль подтянется   │
-│                                     │
-│ ● Создать аккаунт за 10 секунд      │
-│   (рекомендуется)                   │
-│   email, пароль (или Google)        │
-│   → автосоздание через signUp,      │
-│     профиль заполняется из формы    │
-│                                     │
-│ ○ Продолжить как гость              │
-│   → заказ создаётся с               │
-│     guest_email/guest_phone,        │
-│     потом ссылка на claim в email   │
-└─────────────────────────────────────┘
-```
+## P0-2. `property_guidebook` — wifi/door/lockbox коды по email гостя
 
-Все три варианта работают **внутри страницы** (никаких `navigate('/auth')`), формдата сохраняется.
+**Проблема:** RLS-политика разрешает `SELECT` если `auth.email() = property_bookings.guest_email` — любой залогиненный с произвольным email может получить коды.
 
-### 3. Поведение по веткам
+**Фикс (миграция):**
+1. `DROP POLICY` текущей email-based политики на `property_guidebook`.
+2. Новая политика: SELECT только если есть active `property_bookings` где `user_id = auth.uid()` (а не email-match) и `check_out >= now() - interval '1 day'`.
+3. Доступ владельцу/MC через существующий `has_property_access(auth.uid(), property_id)`.
 
-**Sign in (есть аккаунт):**
-- `supabase.auth.signInWithPassword` inline → onAuthStateChange подхватит профиль → `useEffect [profile]` смержит данные (с приоритетом уже заполненных формой) → дальше оплата.
+**Проверка:** хук гостевого portal — заменить запрос с email-match на `user_id`-match; гостям без аккаунта guidebook отдавать через signed edge function с одноразовым токеном (вне scope этой PR — отдельный TODO).
 
-**Quick signup (рекомендуем):**
-- `supabase.auth.signUp({ email: formData.email, password, options: { data: { full_name: formData.name, phone: formData.phone }}})` — `emailRedirectTo: window.location.href` чтобы вернуться на эту же страницу с восстановленным draft.
-- Сразу после signUp создаём заказ (не ждём верификации email — заказ принадлежит уже созданному auth.user.id).
-- Опционально Google OAuth кнопка: `signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href }})` — после возврата draft восстановится из sessionStorage.
+---
 
-**Guest checkout:**
-- Снимаем требование `if (!user)` в handleSubmit.
-- В `createOrder` передаём `user_id: null` + поля `guest_email`, `guest_phone` в metadata.
-- Проверяем что RLS на `orders` / `order_participants` / `order_addresses` позволяет INSERT для anon (если нет — добавляем edge function `create-guest-order` с service-role).
-- В письме-подтверждении даём magic-link на claim заказа в будущий аккаунт.
+## P0-3. Storage `property-images` / `property-reports` — анонимная запись
 
-### 4. Залогиненный — никаких изменений в UX
-- Уже работает (строки 137–148): из profile подставляется name/phone/email, поля остаются редактируемыми. Дополнительно: при пустом profile.phone дёргать `user_addresses` / последний заказ как fallback.
+**Проблема:** policies на `storage.objects` для этих bucket с ролью `{public}` на INSERT/UPDATE/DELETE — любой может перезаписать фото.
 
-## Технические детали
+**Фикс (миграция):**
+1. `DROP POLICY` всех `public`-write политик на этих двух bucket в `storage.objects`.
+2. Новые политики: INSERT/UPDATE/DELETE только `authenticated` И `has_property_access(auth.uid(), (storage.foldername(name))[1]::uuid)`.
+3. SELECT: `property-images` — `public` (галерея публична), `property-reports` — только `authenticated` + access check.
+4. `UPDATE storage.buckets SET public = false WHERE id = 'property-reports'`.
 
-**Файлы для правки:**
-- `src/pages/transport/AirportTransferBooking.tsx` — убрать редирект, добавить draft-persistence, ветвление guest/user в submit
-- `src/components/transport/booking-steps/StepDetails.tsx` — для гостя показать `GuestAuthChoice`
-- `src/components/transport/booking-steps/GuestAuthChoice.tsx` — **новый** компонент (3 варианта auth inline)
-- `src/hooks/useBookingDraft.ts` — **новый** generic хук `(key) => { draft, save, clear }` (пригодится для других букингов: цветы, экскурсии)
-- `src/hooks/useOrders.ts` — поддержать `guest_email`/`guest_phone` (проверить, есть ли уже)
-- Возможно `supabase/functions/create-guest-order/index.ts` — если RLS не пускает anon insert
+**Проверка:** компоненты загрузки фото — проверить, что используют `supabase.auth.getUser()` перед upload.
 
-**RLS / БД:**
-- Проверить политики `orders`, `order_participants`, `order_addresses`, `order_items` для `anon`. Если INSERT запрещён — едж-функция `create-guest-order` с service_role.
-- Поле для гостевого заказа: либо `orders.guest_email`/`guest_phone` (если есть), либо metadata jsonb.
+---
 
-**Тексты RU/EN:** все строки в `useLanguage`.
+## P0-4. `crm_email_accounts` — OAuth refresh tokens в plaintext
 
-**Generic reuse:** `useBookingDraft` + `GuestAuthChoice` спроектировать так, чтобы потом применить к `FlowerCheckout`, `TaxiBooking`, `ExperienceBooking` (там та же боль).
+**Проблема:** колонки `access_token`, `refresh_token` хранятся как text, читаются обычным SELECT.
 
-## Что НЕ делаем в этом PR
-- Не трогаем другие букинги (цветы и т.д.) — только трансфер. Но хуки делаем переиспользуемыми для следующего PR.
-- Не делаем кастомный auth UI с подтверждением email — используем `auto_confirm_email` по текущей конфигурации (если выключено — quick signup всё равно работает, заказ создаётся, email с верификацией приходит параллельно).
+**Фикс (миграция):**
+1. Включить `pgsodium` (если не включено) или использовать Supabase Vault.
+2. Создать `vault.secrets` записи для существующих токенов, заменить колонки на `token_secret_id uuid` references vault.
+3. RPC `get_crm_email_token(account_id)` SECURITY DEFINER — отдаёт расшифрованный токен только если `auth.uid() = owner_id`.
+4. `REVOKE SELECT (access_token, refresh_token)` или удалить колонки после миграции значений.
+5. RLS уже есть, но добавить column-level: GRANT SELECT (всё кроме токенов) authenticated.
 
-## Acceptance criteria
-1. Гость заходит на `/transport/airport-transfer`, проходит шаги 1–3, на шаге 4 видит выбор: login / signup / гость. Без редиректа.
-2. После refresh страницы на любом шаге — данные восстановлены.
-3. Залогиненный видит свои name/phone/email подставленными, может править.
-4. Quick signup создаёт аккаунт и заказ без ухода со страницы.
-5. Guest checkout создаёт заказ, привязанный к email, magic-link на claim приходит в письме.
+**Проверка:** edge functions, которые отправляют email от имени пользователя — переписать на вызов RPC `get_crm_email_token`.
+
+---
+
+## Порядок исполнения
+
+1. Сначала P0-3 (storage) — самый изолированный, минимум фронт-изменений.
+2. P0-1 (view) — затем, проверка `rg` по фронту.
+3. P0-2 (guidebook) — с обновлением хука гостевого portal.
+4. P0-4 (CRM tokens) — последним, требует миграции данных + правки edge functions.
+
+После каждой миграции — `supabase--linter` + `security--run_security_scan` чтобы убедиться, что ERROR ушёл и не появилось regressions.
+
+## Что НЕ входит в эту PR
+
+- 96 мест с `navigate('/auth')` (UX-blocker) — следующая итерация.
+- WARN-уровень (`buyers`, realtime, `management_companies`, `webhook_endpoints.secret`) — отдельная PR.
+- Guest-checkout для guidebook без аккаунта — отдельный TODO.
+
+## Acceptance
+
+- `security--run_security_scan` показывает 0 ERROR (было 5; одна — `auth-otp-long-expiry` — конфиг, не код).
+- Анонимный `curl` к `public_view_active` не возвращает `purchase_price`/`actual_owner_*`.
+- Анонимный upload в `property-images` отклоняется 403.
+- Гостевой запрос guidebook с чужим email возвращает 0 строк.
+- `SELECT access_token FROM crm_email_accounts` для обычного пользователя возвращает NULL/permission denied.
