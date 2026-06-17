@@ -3,6 +3,5 @@ export { MuunoScoreWidget } from './MuunoScoreWidget';
 export { FundingProgress } from './FundingProgress';
 export { ScoreBreakdown } from './ScoreBreakdown';
 export { InterestForm } from './InterestForm';
-export { InvestorLeadForm } from './InvestorLeadForm';
 export { AnonymizedListingCard } from './AnonymizedListingCard';
 export { CapitalIntroForm } from './CapitalIntroForm';

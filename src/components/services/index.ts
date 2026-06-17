@@ -5,7 +5,6 @@ export { ServiceProviderCard } from './ServiceProviderCard';
 export { ServiceFunctionCard, ServiceFunctionQuickCard } from './ServiceFunctionCard';
 
 // New marketplace components
-export { ServiceCategoryDrawer } from './ServiceCategoryDrawer';
 export { ServicePromoCarousel } from './ServicePromoCarousel';
 export { FeaturedProvidersCarousel } from './FeaturedProvidersCarousel';
 export { PopularServicesSection, ServiceCard } from './PopularServicesSection';
