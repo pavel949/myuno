@@ -343,7 +343,8 @@ export function useVendorProfile() {
             description_en: profileData.description || null,
             description_ru: profileData.description_ru || null,
             logo_url: null,
-            is_active: true,
+            // P0: hidden from public storefront until admin approves the partner_application.
+            is_active: false,
             is_verified: false,
             approval_status: 'pending',
           })
@@ -375,7 +376,8 @@ export function useVendorProfile() {
           email: profileData.email || null,
           address: profileData.address || null,
           is_verified: false,
-          is_active: true,
+          // P0: org is inactive until approve-partner-application flips it on.
+          is_active: false,
           metadata: { 
             legacy_provider_id: providerData.id,
             marketplace_vendor_id: marketplaceVendorId,
@@ -387,7 +389,7 @@ export function useVendorProfile() {
 
       if (orgError) throw orgError;
 
-      // 3. Add current user as org owner
+      // 3. Add current user as org owner (membership row only — org itself stays inactive).
       const { error: memberError } = await supabase
         .from('org_members')
         .insert({
@@ -399,14 +401,13 @@ export function useVendorProfile() {
 
       if (memberError) throw memberError;
 
-      // 4. Add vendor role to user if not exists
-      await supabase
-        .from('user_roles')
-        .upsert({ user_id: user.id, role: 'vendor' }, { onConflict: 'user_id,role' })
-        .select();
+      // P0: do NOT add user_roles.vendor here. The vendor role is granted by
+      // the approve-partner-application edge function only after admin approval,
+      // so that pending applicants cannot access the vendor cabinet.
 
       await fetchProfile();
       return { data: providerData, error: null };
+
     } catch (error) {
       errorLog.silent(error, 'create_vendor_profile');
       return { data: null, error: error as Error };
