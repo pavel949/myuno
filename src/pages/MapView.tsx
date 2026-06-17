@@ -397,7 +397,7 @@ export default function MapView() {
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-8rem)]">
         <div className="px-4 py-3 bg-background/95 border-b border-border z-10 space-y-2">
-          <MapSearchBox onSelect={handleSearchSelect} language={language as 'ru' | 'en'} />
+          <MapSearchBox ref={searchBoxRef} onSelect={handleSearchSelect} language={language as 'ru' | 'en'} />
 
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
