@@ -209,7 +209,7 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
   });
 
   it('plain umbrella route /services keeps its catalog SSOT label', () => {
-    const cat = CATEGORIES.find((c) => c.id === 'cat-home-logistics')!;
+    const cat = CATEGORIES.find((c) => c.id === 'cat-home-services')!;
     const umbrella = cat.services.find((s) => s.path === '/services');
     expect(umbrella, '/services umbrella entry missing from SSOT').toBeTruthy();
     const label = getClusterServiceLocalizedLabel(
