@@ -28,7 +28,8 @@ type VerticalFilter =
   | 'pharmacy'
   | 'vet'
   | 'flowers'
-  | 'venue';
+  | 'venue'
+  | 'event';
 type PriceFilter = 'all' | 'budget' | 'mid' | 'premium' | 'luxury';
 type AvailabilityFilter = 'all' | 'open_now';
 
