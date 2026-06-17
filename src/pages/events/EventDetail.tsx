@@ -271,9 +271,9 @@ const EventDetail = () => {
                 <p className="font-medium truncate">{organizer.name}</p>
               </div>
               <div className="flex gap-2">
-                {organizer.whatsapp && (
+                {organizer.phone && (
                   <Button size="icon" variant="outline" asChild>
-                    <a href={`https://wa.me/${organizer.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi! I'm interested in your event "${event.title_en}".`)}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                    <a href={`https://wa.me/${organizer.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi! I'm interested in your event "${event.title_en}".`)}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
                       <MessageCircle className="w-4 h-4" />
                     </a>
                   </Button>
