@@ -10,5 +10,5 @@ export { ProviderDashboardLayout, DashboardSection, DashboardGrid, EmptyState } 
 export { ProviderListingsManager } from './ProviderListingsManager';
 
 // Wizard components
-export { UnifiedVendorWizard, VendorQuickCreateFAB, BulkImportSheet, CanonicalListingWizard } from './wizard';
-export type { VerticalConfig, WizardFormData, EntryType, ImportVertical, CategoryNode, CategorySchema, CanonicalListingData } from './wizard';
+export { VendorQuickCreateFAB, BulkImportSheet, CanonicalListingWizard } from './wizard';
+export type { ImportVertical, CategoryNode, CategorySchema, CanonicalListingData } from './wizard';

@@ -7,12 +7,10 @@ export { ServiceFunctionCard, ServiceFunctionQuickCard } from './ServiceFunction
 // New marketplace components
 export { ServiceCategoryDrawer } from './ServiceCategoryDrawer';
 export { ServicePromoCarousel } from './ServicePromoCarousel';
-export { QuickServiceIcons } from './QuickServiceIcons';
 export { FeaturedProvidersCarousel } from './FeaturedProvidersCarousel';
 export { PopularServicesSection, ServiceCard } from './PopularServicesSection';
 export { RecentlyViewedServices } from './RecentlyViewedServices';
 export { AllProvidersGrid } from './AllProvidersGrid';
 
 // Premium sections
-export { VerticalShowcaseSection } from './VerticalShowcaseSection';
 export { PartnerCTACard } from './PartnerCTACard';
