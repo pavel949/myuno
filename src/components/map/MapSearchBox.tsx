@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Search, Loader2, X, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -11,6 +11,13 @@ export interface MapSearchResult {
   source: 'local' | 'osm';
 }
 
+export interface MapSearchBoxHandle {
+  /** Fill the input with a label and (optionally) highlight a matching result by id. */
+  setSelection: (label: string, matchId?: string) => void;
+  /** Clear the input and close dropdown. */
+  clear: () => void;
+}
+
 interface MapSearchBoxProps {
   onSelect: (result: MapSearchResult) => void;
   language?: 'ru' | 'en';
@@ -20,7 +27,10 @@ interface MapSearchBoxProps {
 // Phuket bbox (south,west,north,east) for Nominatim viewbox bias
 const PHUKET_VIEWBOX = '98.20,7.70,98.55,8.25';
 
-export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearchBoxProps) {
+export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(function MapSearchBox(
+  { onSelect, language = 'ru', className },
+  ref,
+) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<MapSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -31,6 +41,9 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
   const listRef = useRef<HTMLUListElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const skipNextSearchRef = useRef(false);
+  /** When set, after results arrive we highlight an item with matching id (or label fallback). */
+  const pendingMatchRef = useRef<{ id?: string; label?: string } | null>(null);
+
 
   // Close on outside click
   useEffect(() => {
@@ -40,6 +53,30 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
     document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
   }, []);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      setSelection: (label, matchId) => {
+        pendingMatchRef.current = { id: matchId, label };
+        // allow search effect to run and apply the highlight
+        skipNextSearchRef.current = false;
+        setQuery(label);
+        setOpen(true);
+      },
+      clear: () => {
+        skipNextSearchRef.current = true;
+        setQuery('');
+        setResults([]);
+        setActiveIdx(-1);
+        setOpen(false);
+        pendingMatchRef.current = null;
+      },
+    }),
+    [],
+  );
+
+
 
   // Debounced search
   useEffect(() => {
@@ -72,8 +109,22 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
           seen.add(key);
           merged.push(r);
         });
-        setResults(merged.slice(0, 8));
-        setActiveIdx(merged.length > 0 ? 0 : -1);
+        const sliced = merged.slice(0, 8);
+        setResults(sliced);
+        const pending = pendingMatchRef.current;
+        if (pending) {
+          let idx = -1;
+          if (pending.id) idx = sliced.findIndex((r) => r.id === pending.id);
+          if (idx < 0 && pending.label) {
+            const needle = pending.label.toLowerCase();
+            idx = sliced.findIndex((r) => r.label.toLowerCase() === needle);
+            if (idx < 0) idx = sliced.findIndex((r) => r.label.toLowerCase().includes(needle));
+          }
+          setActiveIdx(idx >= 0 ? idx : sliced.length > 0 ? 0 : -1);
+          pendingMatchRef.current = null;
+        } else {
+          setActiveIdx(sliced.length > 0 ? 0 : -1);
+        }
         setOpen(true);
       } catch (err) {
         if ((err as Error).name !== 'AbortError') console.warn('search error', err);
@@ -205,7 +256,7 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
       )}
     </div>
   );
-}
+});
 
 async function searchLocal(q: string): Promise<MapSearchResult[]> {
   const pattern = `%${q.replace(/[%_]/g, (m) => `\\${m}`)}%`;

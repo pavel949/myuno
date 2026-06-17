@@ -14,7 +14,7 @@ import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { isOpenNow } from '@/lib/filterUtils';
 import { MapLibreMap, MapMarker, MapLibreMapHandle } from '@/components/map/MapLibreMap';
-import { MapSearchBox, MapSearchResult } from '@/components/map/MapSearchBox';
+import { MapSearchBox, MapSearchResult, MapSearchBoxHandle } from '@/components/map/MapSearchBox';
 
 
 type VerticalFilter =
@@ -120,6 +120,7 @@ export default function MapView() {
   const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
   const [selected, setSelected] = useState<ClickedMarker>(null);
   const mapRef = useRef<MapLibreMapHandle | null>(null);
+  const searchBoxRef = useRef<MapSearchBoxHandle | null>(null);
   const [searchPin, setSearchPin] = useState<MapSearchResult | null>(null);
 
   const handleSearchSelect = useCallback((r: MapSearchResult) => {
@@ -347,7 +348,15 @@ export default function MapView() {
     if (!d) return;
     setSelected(d);
     if (d.kind === 'osm') setPlaceDetails(null);
-  }, []);
+    // Sync search input with the clicked marker and try to highlight matching result.
+    const label =
+      d.kind === 'vendor'
+        ? (language === 'ru' ? d.marker.nameRu : d.marker.name) || d.marker.name
+        : (d.poi.name || d.poi.category || '');
+    const matchId = d.kind === 'osm' ? `local:${d.poi.id}` : undefined;
+    if (label) searchBoxRef.current?.setSelection(label, matchId);
+    mapRef.current?.flyTo(m.lat, m.lng, Math.max(14, 11));
+  }, [language]);
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -388,7 +397,7 @@ export default function MapView() {
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-8rem)]">
         <div className="px-4 py-3 bg-background/95 border-b border-border z-10 space-y-2">
-          <MapSearchBox onSelect={handleSearchSelect} language={language as 'ru' | 'en'} />
+          <MapSearchBox ref={searchBoxRef} onSelect={handleSearchSelect} language={language as 'ru' | 'en'} />
 
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
