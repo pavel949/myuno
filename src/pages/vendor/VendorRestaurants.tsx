@@ -167,6 +167,8 @@ const VendorRestaurants = () => {
         cuisine: formData.cuisine,
         address: formData.address || undefined,
         district: formData.district || undefined,
+        lat: formData.lat ?? undefined,
+        lng: formData.lng ?? undefined,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
         cover_image: formData.cover_image || undefined,
