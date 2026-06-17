@@ -60,6 +60,8 @@ export default function AirportTransferBooking() {
   const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [destinationCoords, setDestinationCoords] = useState<{ lat: number; lng: number; placeId?: string } | null>(null);
   const [nightSurchargeCfg, setNightSurchargeCfg] = useState<{ start: string; end: string; sedan: number; van: number } | null>(null);
+  const [authGateOpen, setAuthGateOpen] = useState(false);
+  const pendingSubmitRef = useRef(false);
 
   const [formData, setFormData] = useState<TransferFormData>({
     direction: (searchParams.get('direction') as TransferDirection) || 'from-airport',
