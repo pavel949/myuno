@@ -119,14 +119,19 @@ export default function MapView() {
   const [selectedPrice, setSelectedPrice] = useState<PriceFilter>(initialPrice);
   const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
   const [selected, setSelected] = useState<ClickedMarker>(null);
+  const [activeMarkerId, setActiveMarkerId] = useState<string | undefined>(undefined);
   const mapRef = useRef<MapLibreMapHandle | null>(null);
   const searchBoxRef = useRef<MapSearchBoxHandle | null>(null);
   const [searchPin, setSearchPin] = useState<MapSearchResult | null>(null);
+  const pendingSearchPickRef = useRef<MapSearchResult | null>(null);
 
   const handleSearchSelect = useCallback((r: MapSearchResult) => {
     setSearchPin(r);
     mapRef.current?.flyTo(r.lat, r.lng, 16);
+    pendingSearchPickRef.current = r;
+    setActiveMarkerId(undefined);
   }, []);
+
 
 
   // Fetch data from all verticals
