@@ -59,6 +59,23 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
     return () => document.removeEventListener('mousedown', onDocClick);
   }, []);
 
+  const triggerFlash = (id: string) => {
+    if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+    setFlashId(id);
+    flashTimerRef.current = setTimeout(() => setFlashId(null), 1400);
+  };
+
+  // Auto-scroll the selected item into view whenever selection/results change.
+  useEffect(() => {
+    if (!selectedId || !open || !listRef.current) return;
+    const idx = results.findIndex((r) => r.id === selectedId);
+    if (idx < 0) return;
+    const el = listRef.current.querySelectorAll('li')[idx] as HTMLElement | undefined;
+    el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [selectedId, results, open]);
+
+  useEffect(() => () => { if (flashTimerRef.current) clearTimeout(flashTimerRef.current); }, []);
+
   useImperativeHandle(
     ref,
     () => ({
