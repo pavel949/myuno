@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
       utm_term: utm.utm_term ?? null,
       referer: body.referer ?? null,
       landing_path: body.landing_path ?? null,
-      user_id: body.user_id ?? null,
+      user_id: verifiedUserId,
       score: magnet.default_score ?? 20,
       status: 'new',
     })
