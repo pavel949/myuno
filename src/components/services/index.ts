@@ -14,6 +14,5 @@ export { RecentlyViewedServices } from './RecentlyViewedServices';
 export { AllProvidersGrid } from './AllProvidersGrid';
 
 // Premium sections
-export { FlashServicesSection } from './FlashServicesSection';
 export { VerticalShowcaseSection } from './VerticalShowcaseSection';
 export { PartnerCTACard } from './PartnerCTACard';
