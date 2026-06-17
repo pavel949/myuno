@@ -56,13 +56,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create contact from form data
+    // Create contact from form data — sanitize lengths to prevent abuse
+    const email = clean(data.email, 254);
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return new Response(JSON.stringify({ error: 'Invalid email' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const contactPayload: any = {
       company_id: form.company_id,
-      first_name: data.first_name || data.name || 'Web Lead',
-      last_name: data.last_name || '',
-      email: data.email || null,
-      phone: data.phone || null,
+      first_name: clean(data.first_name, 100) || clean(data.name, 100) || 'Web Lead',
+      last_name: clean(data.last_name, 100) || '',
+      email,
+      phone: clean(data.phone, 32),
       source: 'web_form',
       lifecycle_stage: 'lead',
       lead_score: 10,
