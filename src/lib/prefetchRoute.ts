@@ -46,7 +46,7 @@ const ROUTE_CHUNKS: Record<string, () => Promise<unknown>> = {
   '/newbuilds': () => import('@/pages/newbuilds/NewbuildsLanding'),
 
   // Discovery & nav hubs
-  '/discover': () => import('@/components/navigation/NavigatorPage'),
+  '/discover': () => import('@/components/navigation/v3/NavigatorPageV3'),
   '/map': () => import('@/pages/MapView'),
   '/bookings': () => import('@/pages/Bookings'),
 

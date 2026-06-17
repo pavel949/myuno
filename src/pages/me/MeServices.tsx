@@ -8,7 +8,7 @@ import { MeShellLayout } from '@/components/layout/MeShellLayout';
 import { LoadingState } from '@/components/page';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-const NavigatorPage = React.lazy(() => import('@/components/navigation/NavigatorPage'));
+const Navigator = React.lazy(() => import('@/components/navigation/v3/NavigatorPageV3'));
 
 export default function MeServices() {
   const { language } = useLanguage();
@@ -16,7 +16,7 @@ export default function MeServices() {
   return (
     <MeShellLayout title={isRu ? 'Услуги' : 'Services'}>
       <Suspense fallback={<LoadingState />}>
-        <NavigatorPage />
+        <Navigator />
       </Suspense>
     </MeShellLayout>
   );
