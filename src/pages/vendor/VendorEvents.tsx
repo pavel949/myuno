@@ -288,9 +288,15 @@ const VendorEvents = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>{isRussian ? 'Место проведения' : 'Venue'}</Label>
-                  <Input value={formData.location_name} onChange={(e) => setFormData(prev => ({ ...prev, location_name: e.target.value }))} />
+                  <Label>{isRussian ? 'Название места' : 'Venue name'}</Label>
+                  <Input value={formData.location_name} onChange={(e) => setFormData(prev => ({ ...prev, location_name: e.target.value }))} placeholder={isRussian ? 'Например: Catch Beach Club' : 'e.g. Catch Beach Club'} />
                 </div>
+                <VendorLocationField
+                  value={{ address: formData.address, lat: formData.lat, lng: formData.lng }}
+                  onChange={(loc: VendorLocationValue) => setFormData(prev => ({ ...prev, address: loc.address, lat: loc.lat, lng: loc.lng }))}
+                  label={isRussian ? 'Адрес проведения' : 'Event address'}
+                />
+
                 {/* is_hot removed - admin only */}
               </div>
             </ScrollArea>
