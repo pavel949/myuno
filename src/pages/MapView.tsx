@@ -243,8 +243,23 @@ export default function MapView() {
     pushGeoLayer(flowerShops, 'flowers');
     pushGeoLayer(venues, 'venue');
 
+    (events || []).forEach((e: any) => {
+      if (e.lat == null || e.lng == null) return;
+      markers.push({
+        id: e.id,
+        name: e.title_en,
+        nameRu: e.title_ru || e.title_en,
+        lat: Number(e.lat),
+        lng: Number(e.lng),
+        rating: 0,
+        priceFrom: e.price ? Number(e.price) : 0,
+        image: e.cover_image || undefined,
+        vertical: 'event',
+      });
+    });
+
     return markers;
-  }, [properties, salons, restaurants, gyms, pharmacies, vets, flowerShops, venues]);
+  }, [properties, salons, restaurants, gyms, pharmacies, vets, flowerShops, venues, events]);
 
   const filteredMarkers = useMemo(() => {
     return allMarkers.filter((m) => {
