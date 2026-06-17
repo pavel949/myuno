@@ -14,7 +14,7 @@ import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { isOpenNow } from '@/lib/filterUtils';
 import { MapLibreMap, MapMarker, MapLibreMapHandle } from '@/components/map/MapLibreMap';
-import { MapSearchBox, MapSearchResult } from '@/components/map/MapSearchBox';
+import { MapSearchBox, MapSearchResult, MapSearchBoxHandle } from '@/components/map/MapSearchBox';
 
 
 type VerticalFilter =
