@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
+import { useQuery } from '@tanstack/react-query';
+import {
   ArrowLeft, Star, MapPin, Clock, Calendar, Users,
   Share2, CheckCircle, AlertCircle, Building2, ChevronRight,
-  ExternalLink, ShieldCheck, Tag
+  ExternalLink, ShieldCheck, Tag, MessageCircle, Phone, Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,7 @@ import { useVenue, VENUE_TYPES } from '@/hooks/useVenues';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { useViewHistory } from '@/hooks/useViewHistory';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { supabase } from '@/integrations/supabase/client';
 
 const AGE_POLICY_LABELS: Record<string, { en: string; ru: string }> = {
   'all_ages': { en: 'All Ages', ru: 'Все возрасты' },
