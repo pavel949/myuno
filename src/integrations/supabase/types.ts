@@ -31743,6 +31743,24 @@ export type Database = {
         Args: { p_base?: string; p_target?: string }
         Returns: number
       }
+      get_management_company_sensitive: {
+        Args: { _company_id: string }
+        Returns: {
+          bank_account: string
+          bank_name: string
+          dbd_card_url: string
+          documents: Json
+          id: string
+          legal_address: string
+          legal_name: string
+          license_number: string
+          registration_number: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          swift_code: string
+          tax_id: string
+        }[]
+      }
       get_or_create_loyalty_status: {
         Args: { p_user_id: string }
         Returns: Json
