@@ -353,6 +353,13 @@ Deno.serve(async (req) => {
     for (const adminEmail of adminEmails) {
       await sendEmail('transfer-operator-new', adminEmail, `transfer-admin-${p.order_id}-${adminEmail}`, operatorTemplateData);
     }
+    // Extra operator inbox(es) — Klod ops, sskk253722@gmail.com etc.
+    const dedupExtra = extraOperatorEmails.filter(
+      (e) => e !== op?.email && !adminEmails.includes(e),
+    );
+    for (const extraEmail of dedupExtra) {
+      await sendEmail('transfer-operator-new', extraEmail, `transfer-opx-${p.order_id}-${extraEmail}`, operatorTemplateData);
+    }
 
     // Customer "received" — localized
     if (p.customer_email) {
