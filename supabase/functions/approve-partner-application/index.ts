@@ -191,10 +191,28 @@ Deno.serve(async (req) => {
         if (mvIds.length > 0) {
           await sb
             .from("marketplace_vendors")
-            .update({ approval_status: "approved" })
-            .in("id", mvIds)
-            .neq("approval_status", "approved");
+            .update({ approval_status: "approved", is_active: true })
+            .in("id", mvIds);
         }
+
+        // Activate any vendor orgs the applicant owns that were created inactive
+        // during VendorOnboarding (P0: orgs.is_active is false until approval).
+        const { data: ownedOrgs } = await sb
+          .from("org_members")
+          .select("org_id, orgs!inner(id, org_type, is_active)")
+          .eq("user_id", app.user_id)
+          .eq("orgs.org_type", "vendor");
+        const inactiveOrgIds = (ownedOrgs ?? [])
+          .map((m: { orgs: { id: string; is_active: boolean } | null }) => m.orgs)
+          .filter((o): o is { id: string; is_active: boolean } => !!o && !o.is_active)
+          .map((o) => o.id);
+        if (inactiveOrgIds.length > 0) {
+          await sb
+            .from("orgs")
+            .update({ is_active: true })
+            .in("id", inactiveOrgIds);
+        }
+
       } catch (e) {
         console.error("[approve-partner-application] activate provider failed", e);
       }
