@@ -635,6 +635,23 @@ export default function AirportTransferBooking() {
           )}
         </div>
       </div>
+
+      <InlineAuthGate
+        open={authGateOpen}
+        onOpenChange={(open) => {
+          setAuthGateOpen(open);
+          if (!open) pendingSubmitRef.current = false;
+        }}
+        language={language}
+        defaultEmail={formData.email}
+        defaultName={formData.name}
+        defaultPhone={formData.phone}
+        onAuthenticated={() => { /* resume happens via useEffect when `user` flips */ }}
+        contextLine={language === 'ru'
+          ? `Трансфер · ฿${totalPrice.toLocaleString()}`
+          : `Transfer · ฿${totalPrice.toLocaleString()}`}
+      />
     </AppLayout>
   );
 }
+
