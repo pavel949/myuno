@@ -104,22 +104,24 @@ export const CatalogCard = memo(function CatalogCard({
           quality={80}
         />
 
-        {/* Top-left badges (max 2 to avoid overflow) */}
+        {/* Top-left badges (max 2 to avoid overflow). Pill style matches
+            statusBadge on the right so both corners read as one visual
+            language and don't fight each other on narrow (mobile 2-col) cards. */}
         {badges && badges.length > 0 && (
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
+          <div className="absolute top-2 left-2 flex flex-col gap-1 max-w-[55%]">
             {badges.slice(0, 2).map((badge, i) => {
               const Icon = badge.icon;
               return (
-                <Badge
+                <span
                   key={i}
                   className={cn(
-                    "text-[10px]",
+                    "inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm",
                     badge.className || "bg-primary text-primary-foreground"
                   )}
                 >
-                  {Icon && <Icon className="w-2.5 h-2.5 mr-0.5" />}
-                  {badge.text}
-                </Badge>
+                  {Icon && <Icon className="w-2.5 h-2.5 shrink-0" />}
+                  <span className="truncate">{badge.text}</span>
+                </span>
               );
             })}
           </div>
@@ -128,11 +130,11 @@ export const CatalogCard = memo(function CatalogCard({
         {/* Top-right status badge */}
         {statusBadge && (
           <span className={cn(
-            "absolute top-2 right-2 flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap",
+            "absolute top-2 right-2 inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm max-w-[45%]",
             statusBadge.className || "bg-muted/90 text-foreground"
           )}>
             {statusBadge.icon && <statusBadge.icon className="w-2.5 h-2.5 shrink-0" />}
-            {statusBadge.text}
+            <span className="truncate">{statusBadge.text}</span>
           </span>
         )}
 
@@ -151,23 +153,27 @@ export const CatalogCard = memo(function CatalogCard({
       <div className="space-y-0.5">
         {/* Meta row: rating + meta items */}
         {(rating !== undefined || (meta && meta.length > 0)) && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
             {rating !== undefined && rating > 0 && (
               <>
-                <span className="flex items-center gap-0.5">
-                  <Star className="w-3.5 h-3.5 fill-warning text-warning" />
-                  <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
-                  {reviewCount !== undefined && <span>({reviewCount})</span>}
+                <span className="flex items-center gap-0.5 whitespace-nowrap">
+                  <Star className="w-3.5 h-3.5 fill-warning text-warning shrink-0" />
+                  <span className="font-medium text-foreground">
+                    {rating.toFixed(1)}
+                    {reviewCount !== undefined && ` (${reviewCount})`}
+                  </span>
                 </span>
-                {meta && meta.length > 0 && <span>·</span>}
+                {meta && meta.length > 0 && <span aria-hidden>·</span>}
               </>
             )}
-            {meta?.slice(0, 2).map((m, i) => (
-              <span key={i} className="flex items-center gap-0.5">
-                <m.icon className="w-3 h-3" />
-                {m.label}
-                {i < Math.min((meta?.length || 0), 2) - 1 && <span className="ml-1">·</span>}
-              </span>
+            {meta?.slice(0, 2).map((m, i, arr) => (
+              <React.Fragment key={i}>
+                <span className="flex items-center gap-0.5 whitespace-nowrap">
+                  <m.icon className="w-3 h-3 shrink-0" />
+                  {m.label}
+                </span>
+                {i < arr.length - 1 && <span aria-hidden>·</span>}
+              </React.Fragment>
             ))}
           </div>
         )}
