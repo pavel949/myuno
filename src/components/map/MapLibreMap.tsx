@@ -123,6 +123,8 @@ export interface MapLibreMapProps {
   showLocateButton?: boolean;
   /** Localized label for the locate button. */
   locateLabel?: string;
+  /** Id of the currently active marker — visually highlighted with a ring + scale. */
+  activeMarkerId?: string;
 }
 
 export interface MapLibreMapHandle {
@@ -141,6 +143,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
     minimal = false,
     showLocateButton = true,
     locateLabel = 'Найти меня',
+    activeMarkerId,
   },
   ref,
 ) {
