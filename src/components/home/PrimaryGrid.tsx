@@ -48,9 +48,9 @@ const SETS: Record<string, TileSet> = {
       hintRu: 'Виллы · кондо · краткосрочная',
     },
     mini: [
-      { to: APP_ROUTES.EVENTS,           icon: Calendar, labelEn: 'Events',   labelRu: 'События' },
-      { to: APP_ROUTES.AIRPORT_TRANSFER, icon: Car,      labelEn: 'Transfer', labelRu: 'Трансфер' },
-      { to: APP_ROUTES.SOS,              icon: LifeBuoy, labelEn: 'Help',     labelRu: 'Помощь' },
+      { to: APP_ROUTES.EVENTS,           icon: Calendar, labelEn: 'Events',   labelRu: 'События',  hintEn: 'concerts · markets · nightlife', hintRu: 'концерты · маркеты · вечеринки' },
+      { to: APP_ROUTES.AIRPORT_TRANSFER, icon: Car,      labelEn: 'Transfer', labelRu: 'Трансфер', hintEn: 'airport · taxi · driver',         hintRu: 'аэропорт · такси · водитель' },
+      { to: APP_ROUTES.SOS,              icon: LifeBuoy, labelEn: 'Help',     labelRu: 'Помощь',   hintEn: '24/7 concierge SOS',              hintRu: 'консьерж 24/7' },
     ],
   },
   live: {
@@ -63,9 +63,9 @@ const SETS: Record<string, TileSet> = {
       hintRu: 'Уборка · стирка · ремонт',
     },
     mini: [
-      { to: APP_ROUTES.DELIVERY,     icon: ShoppingBag, labelEn: 'Delivery',  labelRu: 'Доставка' },
-      { to: APP_ROUTES.ME_DOCUMENTS, icon: FileText,    labelEn: 'Documents', labelRu: 'Документы' },
-      { to: APP_ROUTES.BEAUTY,       icon: HeartPulse,  labelEn: 'Wellness',  labelRu: 'Здоровье' },
+      { to: APP_ROUTES.DELIVERY,     icon: ShoppingBag, labelEn: 'Delivery',  labelRu: 'Доставка',  hintEn: 'food · groceries · pharmacy', hintRu: 'еда · продукты · аптека' },
+      { to: APP_ROUTES.ME_DOCUMENTS, icon: FileText,    labelEn: 'Documents', labelRu: 'Документы', hintEn: 'visa · contracts · receipts', hintRu: 'визы · договоры · чеки' },
+      { to: APP_ROUTES.BEAUTY,       icon: HeartPulse,  labelEn: 'Wellness',  labelRu: 'Здоровье',  hintEn: 'salons · clinics · fitness',  hintRu: 'салоны · клиники · фитнес' },
     ],
   },
   invest: {
@@ -78,9 +78,9 @@ const SETS: Record<string, TileSet> = {
       hintRu: 'Off-plan · resale · капитал',
     },
     mini: [
-      { to: APP_ROUTES.CLEARVIEW, icon: ScanSearch, labelEn: 'ClearView', labelRu: 'ClearView' },
-      { to: APP_ROUTES.PROPERTY,  icon: TrendingUp, labelEn: 'Returns',   labelRu: 'Доходность' },
-      { to: APP_ROUTES.SUPPORT,   icon: Banknote,   labelEn: 'Capital',   labelRu: 'Капитал' },
+      { to: APP_ROUTES.CLEARVIEW, icon: ScanSearch, labelEn: 'ClearView', labelRu: 'ClearView',  hintEn: 'off-plan project rating', hintRu: 'рейтинг off-plan' },
+      { to: APP_ROUTES.PROPERTY,  icon: TrendingUp, labelEn: 'Returns',   labelRu: 'Доходность', hintEn: 'rental yields · ROI',     hintRu: 'доходность · ROI' },
+      { to: APP_ROUTES.SUPPORT,   icon: Banknote,   labelEn: 'Capital',   labelRu: 'Капитал',    hintEn: 'advisory · structuring',  hintRu: 'advisory · структуры' },
     ],
   },
   business: {
@@ -93,9 +93,9 @@ const SETS: Record<string, TileSet> = {
       hintRu: 'Управляйте своими услугами',
     },
     mini: [
-      { to: APP_ROUTES.PROPERTY,             icon: Building2, labelEn: 'Property',  labelRu: 'Объекты' },
-      { to: APP_ROUTES.ME_DOCUMENTS,         icon: FileText,  labelEn: 'Docs',      labelRu: 'Документы' },
-      { to: APP_ROUTES.SUPPORT,              icon: LifeBuoy,  labelEn: 'Support',   labelRu: 'Поддержка' },
+      { to: APP_ROUTES.PROPERTY,     icon: Building2, labelEn: 'Property', labelRu: 'Объекты',    hintEn: 'listings · bookings · rates', hintRu: 'объекты · брони · ставки' },
+      { to: APP_ROUTES.ME_DOCUMENTS, icon: FileText,  labelEn: 'Docs',     labelRu: 'Документы',  hintEn: 'contracts · invoices · KYC',  hintRu: 'договоры · счета · KYC' },
+      { to: APP_ROUTES.SUPPORT,      icon: LifeBuoy,  labelEn: 'Support',  labelRu: 'Поддержка',  hintEn: 'account help · escalation',   hintRu: 'поддержка аккаунта' },
     ],
   },
   universal: {
@@ -108,9 +108,9 @@ const SETS: Record<string, TileSet> = {
       hintRu: 'Где будете жить на Пхукете?',
     },
     mini: [
-      { to: APP_ROUTES.SEARCH, icon: Search,   labelEn: 'Search', labelRu: 'Поиск' },
-      { to: APP_ROUTES.MAP,    icon: MapPin,   labelEn: 'Map',    labelRu: 'Карта' },
-      { to: APP_ROUTES.SOS,    icon: LifeBuoy, labelEn: 'Help',   labelRu: 'Помощь' },
+      { to: APP_ROUTES.SEARCH, icon: Search,   labelEn: 'Search', labelRu: 'Поиск',  hintEn: 'services · places · people', hintRu: 'сервисы · места · люди' },
+      { to: APP_ROUTES.MAP,    icon: MapPin,   labelEn: 'Map',    labelRu: 'Карта',  hintEn: 'Phuket map view',            hintRu: 'карта Пхукета' },
+      { to: APP_ROUTES.SOS,    icon: LifeBuoy, labelEn: 'Help',   labelRu: 'Помощь', hintEn: '24/7 concierge SOS',         hintRu: 'консьерж 24/7' },
     ],
   },
 };
@@ -223,11 +223,18 @@ export function PrimaryGrid() {
               >
                 <Icon className="w-5 h-5" strokeWidth={2} />
               </span>
-              <div className="flex items-end justify-between gap-1">
-                <span className="text-[14px] font-semibold tracking-tight text-foreground leading-tight">
-                  {isRu ? tile.labelRu : tile.labelEn}
-                </span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0 transition-all group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.2} />
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-end justify-between gap-1">
+                  <span className="text-[14px] font-semibold tracking-tight text-foreground leading-tight">
+                    {isRu ? tile.labelRu : tile.labelEn}
+                  </span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground/50 flex-shrink-0 transition-all group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.2} />
+                </div>
+                {(tile.hintEn || tile.hintRu) && (
+                  <p className="text-[11px] leading-tight text-muted-foreground line-clamp-1">
+                    {isRu ? tile.hintRu : tile.hintEn}
+                  </p>
+                )}
               </div>
             </Link>
           );
