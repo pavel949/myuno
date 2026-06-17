@@ -28,7 +28,8 @@ type VerticalFilter =
   | 'pharmacy'
   | 'vet'
   | 'flowers'
-  | 'venue';
+  | 'venue'
+  | 'event';
 type PriceFilter = 'all' | 'budget' | 'mid' | 'premium' | 'luxury';
 type AvailabilityFilter = 'all' | 'open_now';
 
@@ -79,6 +80,7 @@ const VERTICAL_CONFIG: Record<
   vet: { icon: '🐾', color: '#db2777', labelEn: 'Vet', labelRu: 'Ветклиники', route: (id) => `/pets/vet/${id}` },
   flowers: { icon: '💐', color: '#e11d48', labelEn: 'Flowers', labelRu: 'Цветы', route: (id) => `/flowers/shop/${id}` },
   venue: { icon: '🏛️', color: '#7c3aed', labelEn: 'Venues', labelRu: 'Площадки', route: (id) => `/venues/${id}` },
+  event: { icon: '🎉', color: '#f59e0b', labelEn: 'Events', labelRu: 'События', route: (id) => APP_ROUTES.EVENT_DETAIL(id) },
 };
 
 const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string; icon: string }[] = [
@@ -93,6 +95,7 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
   { value: 'vet', labelEn: 'Vet', labelRu: 'Ветклиники', icon: '🐾' },
   { value: 'flowers', labelEn: 'Flowers', labelRu: 'Цветы', icon: '💐' },
   { value: 'venue', labelEn: 'Venues', labelRu: 'Площадки', icon: '🏛️' },
+  { value: 'event', labelEn: 'Events', labelRu: 'События', icon: '🎉' },
 ];
 
 const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
@@ -154,8 +157,24 @@ export default function MapView() {
   const { data: flowerShops, isLoading: flowerLoading } = useGeoLayer('flower_shops');
   const { data: venues, isLoading: venueLoading } = useGeoLayer('venues');
 
+  const { data: events, isLoading: eventLoading } = useQuery({
+    queryKey: ['events-map'],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, title_en, title_ru, lat, lng, cover_image, price, event_date')
+        .eq('is_active', true)
+        .not('lat', 'is', null)
+        .not('lng', 'is', null)
+        .or(`event_date.is.null,event_date.gte.${today}`);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const isDataLoading =
-    propLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading;
+    propLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading || eventLoading;
 
   const allMarkers = useMemo<UniversalMarker[]>(() => {
     const markers: UniversalMarker[] = [];
@@ -224,8 +243,23 @@ export default function MapView() {
     pushGeoLayer(flowerShops, 'flowers');
     pushGeoLayer(venues, 'venue');
 
+    (events || []).forEach((e: any) => {
+      if (e.lat == null || e.lng == null) return;
+      markers.push({
+        id: e.id,
+        name: e.title_en,
+        nameRu: e.title_ru || e.title_en,
+        lat: Number(e.lat),
+        lng: Number(e.lng),
+        rating: 0,
+        priceFrom: e.price ? Number(e.price) : 0,
+        image: e.cover_image || undefined,
+        vertical: 'event',
+      });
+    });
+
     return markers;
-  }, [properties, salons, restaurants, gyms, pharmacies, vets, flowerShops, venues]);
+  }, [properties, salons, restaurants, gyms, pharmacies, vets, flowerShops, venues, events]);
 
   const filteredMarkers = useMemo(() => {
     return allMarkers.filter((m) => {

@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { Calendar, Plus, MoreVertical, Edit, Trash2, Clock, Users, MapPin, Loader2 } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
+import { VendorLocationField, VendorLocationValue } from '@/components/vendor/VendorLocationField';
 import { format } from 'date-fns';
 
 const eventCategories = [
@@ -56,6 +57,8 @@ const VendorEvents = () => {
     max_spots: '50',
     location_name: '',
     address: '',
+    lat: null as number | null,
+    lng: null as number | null,
     cover_image: '',
     is_active: true,
     is_hot: false,
@@ -75,7 +78,8 @@ const VendorEvents = () => {
     setFormData({
       title_en: '', title_ru: '', description_en: '', description_ru: '',
       category: 'party', event_date: '', event_time: '', duration_hours: '3',
-      price: '', max_spots: '50', location_name: '', address: '', cover_image: '',
+      price: '', max_spots: '50', location_name: '', address: '',
+      lat: null, lng: null, cover_image: '',
       is_active: true, is_hot: false,
     });
     setEditingItem(null);
@@ -96,6 +100,8 @@ const VendorEvents = () => {
       max_spots: (item.max_spots || 50).toString(),
       location_name: item.location_name || '',
       address: item.address || '',
+      lat: item.lat ?? null,
+      lng: item.lng ?? null,
       cover_image: item.cover_image || '',
       is_active: item.is_active ?? true,
       is_hot: item.is_hot || false,
@@ -126,6 +132,8 @@ const VendorEvents = () => {
         spots_left: editingItem ? undefined : parseInt(formData.max_spots) || 50,
         location_name: formData.location_name || null,
         address: formData.address || null,
+        lat: formData.lat,
+        lng: formData.lng,
         cover_image: formData.cover_image || null,
         is_active: formData.is_active,
         is_hot: formData.is_hot,
@@ -280,9 +288,15 @@ const VendorEvents = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>{isRussian ? 'Место проведения' : 'Venue'}</Label>
-                  <Input value={formData.location_name} onChange={(e) => setFormData(prev => ({ ...prev, location_name: e.target.value }))} />
+                  <Label>{isRussian ? 'Название места' : 'Venue name'}</Label>
+                  <Input value={formData.location_name} onChange={(e) => setFormData(prev => ({ ...prev, location_name: e.target.value }))} placeholder={isRussian ? 'Например: Catch Beach Club' : 'e.g. Catch Beach Club'} />
                 </div>
+                <VendorLocationField
+                  value={{ address: formData.address, lat: formData.lat, lng: formData.lng }}
+                  onChange={(loc: VendorLocationValue) => setFormData(prev => ({ ...prev, address: loc.address, lat: loc.lat, lng: loc.lng }))}
+                  label={isRussian ? 'Адрес проведения' : 'Event address'}
+                />
+
                 {/* is_hot removed - admin only */}
               </div>
             </ScrollArea>
