@@ -501,23 +501,25 @@ const VendorClinics = () => {
                   </div>
                 </div>
 
-                {/* Contact Info */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Адрес' : 'Address'}</Label>
-                    <Input
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Район' : 'District'}</Label>
-                    <Input
-                      value={formData.district}
-                      onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                    />
-                  </div>
-                </div>
+                {/* Location */}
+                <VendorLocationField
+                  value={{
+                    address: formData.address,
+                    lat: formData.lat,
+                    lng: formData.lng,
+                    district: formData.district,
+                  }}
+                  onChange={(v) =>
+                    setFormData({
+                      ...formData,
+                      address: v.address,
+                      lat: v.lat,
+                      lng: v.lng,
+                      district: v.district ?? formData.district,
+                    })
+                  }
+                />
+
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
