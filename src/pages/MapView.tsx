@@ -80,6 +80,7 @@ const VERTICAL_CONFIG: Record<
   vet: { icon: '🐾', color: '#db2777', labelEn: 'Vet', labelRu: 'Ветклиники', route: (id) => `/pets/vet/${id}` },
   flowers: { icon: '💐', color: '#e11d48', labelEn: 'Flowers', labelRu: 'Цветы', route: (id) => `/flowers/shop/${id}` },
   venue: { icon: '🏛️', color: '#7c3aed', labelEn: 'Venues', labelRu: 'Площадки', route: (id) => `/venues/${id}` },
+  event: { icon: '🎉', color: '#f59e0b', labelEn: 'Events', labelRu: 'События', route: (id) => APP_ROUTES.EVENT_DETAIL(id) },
 };
 
 const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string; icon: string }[] = [
