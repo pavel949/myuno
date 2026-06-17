@@ -1,7 +1,12 @@
 /**
  * @deprecated Use `useMagnetLandings` (table `magnet_landings`) for new landing pages.
- * This hook reads from legacy `mcc_landing_registry` (5 records, frozen).
- * Slated for removal after data migration in Wave 3 cleanup (2026-Q2).
+ * This hook reads from legacy `mcc_landing_registry` (5 rows, frozen).
+ *
+ * Kept in tree because the MCC* marketing-dashboard tabs still consume it
+ * (`MCCUserStatesTab`, `MCCLandingControlTab`, `MCCFunnelDiagnosticsTab`,
+ * `useMCCControlTower`). Migrating those tabs to `magnet_landings` is a
+ * product decision, not a code-only cleanup — until that happens, this
+ * file is the active data source for the legacy landings list.
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
