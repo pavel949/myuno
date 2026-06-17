@@ -1,7 +1,9 @@
 // Edge function: receive lead-magnet submissions, persist, optionally mirror to nb_leads,
-// and notify staff (Telegram if configured). Public endpoint (no JWT required).
+// and notify staff (Telegram if configured). Public endpoint (no JWT required); if a valid
+// JWT is provided the verified user.id is recorded.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { optionalAuth } from '../_shared/auth-guard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
