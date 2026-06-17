@@ -197,6 +197,8 @@ const VendorBeauty = () => {
         images: formData.images,
         address: formData.address || null,
         district: formData.district || null,
+        lat: formData.lat,
+        lng: formData.lng,
         phone: formData.phone || null,
         email: formData.email || null,
         website: formData.website || null,
