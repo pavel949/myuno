@@ -100,6 +100,8 @@ const VendorEvents = () => {
       max_spots: (item.max_spots || 50).toString(),
       location_name: item.location_name || '',
       address: item.address || '',
+      lat: item.lat ?? null,
+      lng: item.lng ?? null,
       cover_image: item.cover_image || '',
       is_active: item.is_active ?? true,
       is_hot: item.is_hot || false,
