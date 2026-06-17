@@ -352,6 +352,7 @@ export default function MapView() {
     const d = m.data as ClickedMarker;
     if (!d) return;
     setSelected(d);
+    setActiveMarkerId(m.id);
     if (d.kind === 'osm') setPlaceDetails(null);
     // Sync search input with the clicked marker and try to highlight matching result.
     const label =
@@ -362,6 +363,22 @@ export default function MapView() {
     if (label) searchBoxRef.current?.setSelection(label, matchId);
     mapRef.current?.flyTo(m.lat, m.lng, Math.max(14, 11));
   }, [language]);
+
+  // After mlMarkers update, if user picked a search result, find the nearest marker and activate it.
+  React.useEffect(() => {
+    const pick = pendingSearchPickRef.current;
+    if (!pick || mlMarkers.length === 0) return;
+    const EPS = 0.0005; // ~50m
+    const match = mlMarkers.find(
+      (mm) => Math.abs(mm.lat - pick.lat) < EPS && Math.abs(mm.lng - pick.lng) < EPS,
+    );
+    if (match) {
+      setActiveMarkerId(match.id);
+      setSelected(match.data as ClickedMarker);
+    }
+    pendingSearchPickRef.current = null;
+  }, [mlMarkers]);
+
 
   const updateParam = useCallback(
     (key: string, value: string) => {
