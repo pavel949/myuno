@@ -50,7 +50,7 @@ const EventDetail = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('providers')
-        .select('id, name, email, phone, whatsapp, logo_url, slug')
+        .select('id, name, email, phone, logo_url')
         .eq('id', event!.provider_id!)
         .maybeSingle();
       if (error) throw error;
