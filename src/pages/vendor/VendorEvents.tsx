@@ -57,6 +57,8 @@ const VendorEvents = () => {
     max_spots: '50',
     location_name: '',
     address: '',
+    lat: null as number | null,
+    lng: null as number | null,
     cover_image: '',
     is_active: true,
     is_hot: false,
