@@ -92,6 +92,8 @@ const VendorPharmacy = () => {
         description_en: formData.description_en || null,
         description_ru: formData.description_ru || null,
         address: formData.address || null,
+        lat: formData.lat,
+        lng: formData.lng,
         phone: formData.phone || null,
         email: formData.email || null,
         website: formData.website || null,
