@@ -343,7 +343,8 @@ export function useVendorProfile() {
             description_en: profileData.description || null,
             description_ru: profileData.description_ru || null,
             logo_url: null,
-            is_active: true,
+            // P0: hidden from public storefront until admin approves the partner_application.
+            is_active: false,
             is_verified: false,
             approval_status: 'pending',
           })
