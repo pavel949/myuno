@@ -1,21 +1,19 @@
-import React, { useRef, useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
-import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import { Loader2, X } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useLocation as useLocationContext } from '@/contexts/LocationContext';
-import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { usePropertiesForMap, transformPropertiesToMarkers } from '@/hooks/useProperties';
 import { useRestaurants } from '@/hooks/useRestaurants';
-import { createMapPopupHtml } from '@/lib/sanitize';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { isOpenNow } from '@/lib/filterUtils';
+import { MapLibreMap, MapMarker } from '@/components/map/MapLibreMap';
 
 type VerticalFilter =
   | 'all'
@@ -98,13 +96,17 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
   { value: 'event', labelEn: 'Events', labelRu: 'События', icon: '🎉' },
 ];
 
-const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
+const OSM_CATEGORIES = ['all','hotel','restaurant','pharmacy','clinic','attraction','beach','park','shop','finance','fuel','education','worship','civic','fitness','vet'];
+
+type ClickedMarker =
+  | { kind: 'vendor'; marker: UniversalMarker }
+  | { kind: 'osm'; poi: any }
+  | null;
 
 export default function MapView() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { getCityConfig } = useLocationContext();
-  const { hasKey, isLoaded, loadError } = useGoogleMaps();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -114,8 +116,7 @@ export default function MapView() {
   const [selectedVertical, setSelectedVertical] = useState<VerticalFilter>(initialVertical);
   const [selectedPrice, setSelectedPrice] = useState<PriceFilter>(initialPrice);
   const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
-  const [selectedMarker, setSelectedMarker] = useState<UniversalMarker | null>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
+  const [selected, setSelected] = useState<ClickedMarker>(null);
 
   // Fetch data from all verticals
   const { data: properties, isLoading: propLoading } = usePropertiesForMap({});
@@ -173,10 +174,10 @@ export default function MapView() {
     },
   });
 
-  // OSM POI layer (OpenStreetMap, ODbL licensed). Loaded on toggle.
+  // OSM POI layer (OpenStreetMap, ODbL). Loaded on toggle.
   const [showOsm, setShowOsm] = useState(false);
   const [osmCategory, setOsmCategory] = useState<string>('all');
-  const { data: osmPois, isLoading: osmLoading } = useQuery({
+  const { data: osmPois } = useQuery({
     queryKey: ['osm-pois', osmCategory],
     enabled: showOsm,
     staleTime: 5 * 60 * 1000,
@@ -194,7 +195,6 @@ export default function MapView() {
     },
   });
 
-  const [selectedOsm, setSelectedOsm] = useState<any | null>(null);
   const [placeDetails, setPlaceDetails] = useState<any | null>(null);
   const [placeLoading, setPlaceLoading] = useState(false);
 
@@ -230,28 +230,19 @@ export default function MapView() {
     (salons || []).forEach((s) => {
       if (s.lat != null && s.lng != null) {
         markers.push({
-          id: s.id,
-          name: s.name_en,
-          nameRu: s.name_ru,
-          lat: Number(s.lat),
-          lng: Number(s.lng),
-          rating: s.rating || 0,
-          priceFrom: s.price_from || 0,
-          image: s.cover_image || undefined,
-          vertical: 'beauty',
+          id: s.id, name: s.name_en, nameRu: s.name_ru,
+          lat: Number(s.lat), lng: Number(s.lng),
+          rating: s.rating || 0, priceFrom: s.price_from || 0,
+          image: s.cover_image || undefined, vertical: 'beauty',
         });
       }
     });
     (restaurants || []).forEach((r) => {
       if (r.lat != null && r.lng != null) {
         markers.push({
-          id: r.id,
-          name: r.name_en,
-          nameRu: r.name_ru,
-          lat: Number(r.lat),
-          lng: Number(r.lng),
-          rating: r.rating || 0,
-          priceFrom: 0,
+          id: r.id, name: r.name_en, nameRu: r.name_ru,
+          lat: Number(r.lat), lng: Number(r.lng),
+          rating: r.rating || 0, priceFrom: 0,
           image: r.cover_image || undefined,
           vertical: 'restaurant',
           workingHours: r.working_hours ?? null,
@@ -266,15 +257,10 @@ export default function MapView() {
       (rows || []).forEach((row) => {
         if (row.lat == null || row.lng == null) return;
         markers.push({
-          id: row.id,
-          name: row.name_en,
-          nameRu: row.name_ru || row.name_en,
-          lat: Number(row.lat),
-          lng: Number(row.lng),
-          rating: 0,
-          priceFrom: 0,
-          image: row.cover_image || undefined,
-          vertical,
+          id: row.id, name: row.name_en, nameRu: row.name_ru || row.name_en,
+          lat: Number(row.lat), lng: Number(row.lng),
+          rating: 0, priceFrom: 0,
+          image: row.cover_image || undefined, vertical,
         });
       });
     };
@@ -287,15 +273,10 @@ export default function MapView() {
     (events || []).forEach((e: any) => {
       if (e.lat == null || e.lng == null) return;
       markers.push({
-        id: e.id,
-        name: e.title_en,
-        nameRu: e.title_ru || e.title_en,
-        lat: Number(e.lat),
-        lng: Number(e.lng),
-        rating: 0,
-        priceFrom: e.price ? Number(e.price) : 0,
-        image: e.cover_image || undefined,
-        vertical: 'event',
+        id: e.id, name: e.title_en, nameRu: e.title_ru || e.title_en,
+        lat: Number(e.lat), lng: Number(e.lng),
+        rating: 0, priceFrom: e.price ? Number(e.price) : 0,
+        image: e.cover_image || undefined, vertical: 'event',
       });
     });
 
@@ -307,12 +288,9 @@ export default function MapView() {
       if (selectedVertical !== 'all' && m.vertical !== selectedVertical) return false;
       if (selectedPrice !== 'all') {
         const [min, max] = PRICE_RANGES[selectedPrice];
-        // Only filter by price when the marker actually has a price (>0).
-        // Verticals without pricing data (e.g. restaurants) are kept visible.
         if (m.priceFrom > 0 && (m.priceFrom < min || m.priceFrom >= max)) return false;
       }
       if (selectedAvailability === 'open_now') {
-        // Only restaurants currently expose working hours; others fall through.
         if (m.workingHours && !isOpenNow(m.workingHours)) return false;
       }
       return true;
@@ -326,21 +304,40 @@ export default function MapView() {
     return { lat: c[1], lng: c[0] };
   }, [getCityConfig]);
 
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-  }, []);
+  // Adapt vendor + OSM markers to MapLibre format.
+  const mlMarkers = useMemo<MapMarker[]>(() => {
+    const vendor: MapMarker[] = filteredMarkers.map((m) => {
+      const cfg = VERTICAL_CONFIG[m.vertical as Exclude<VerticalFilter, 'all'>];
+      return {
+        id: `${m.vertical}-${m.id}`,
+        lat: m.lat,
+        lng: m.lng,
+        color: cfg?.color,
+        icon: cfg?.icon,
+        title: language === 'ru' ? m.nameRu : m.name,
+        data: { kind: 'vendor', marker: m },
+      };
+    });
+    const osm: MapMarker[] = showOsm
+      ? (osmPois || []).map((p: any) => ({
+          id: `osm-${p.source_id}`,
+          lat: Number(p.lat),
+          lng: Number(p.lng),
+          color: '#0A2240',
+          icon: '·',
+          title: p.name || p.category,
+          data: { kind: 'osm', poi: p },
+        }))
+      : [];
+    return [...vendor, ...osm];
+  }, [filteredMarkers, osmPois, showOsm, language]);
 
-  const onMapUnmount = useCallback(() => {
-    mapRef.current = null;
+  const handleMarkerClick = useCallback((m: MapMarker) => {
+    const d = m.data as ClickedMarker;
+    if (!d) return;
+    setSelected(d);
+    if (d.kind === 'osm') setPlaceDetails(null);
   }, []);
-
-  // Fit bounds when markers change
-  React.useEffect(() => {
-    if (!mapRef.current || filteredMarkers.length === 0) return;
-    const bounds = new google.maps.LatLngBounds();
-    filteredMarkers.forEach((m) => bounds.extend({ lat: m.lat, lng: m.lng }));
-    mapRef.current.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
-  }, [filteredMarkers]);
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -359,18 +356,8 @@ export default function MapView() {
 
   const handleFilterChange = (value: VerticalFilter) => {
     setSelectedVertical(value);
-    setSelectedMarker(null);
+    setSelected(null);
     updateParam('vertical', value);
-  };
-
-  const handlePriceChange = (value: PriceFilter) => {
-    setSelectedPrice(value);
-    updateParam('price', value);
-  };
-
-  const handleAvailabilityChange = (value: AvailabilityFilter) => {
-    setSelectedAvailability(value);
-    updateParam('availability', value);
   };
 
   const activeFilterCount =
@@ -385,91 +372,53 @@ export default function MapView() {
     setSearchParams(new URLSearchParams(), { replace: true });
   };
 
-  const mapError = !hasKey ? (language === 'ru' ? 'Ключ Google Maps не задан' : 'Google Maps key not set') : loadError?.message ?? null;
-  const showLoading = !hasKey || !isLoaded || (isDataLoading && allMarkers.length === 0);
+  const showLoading = isDataLoading && allMarkers.length === 0;
 
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-8rem)]">
         <div className="px-4 py-3 bg-background/95 border-b border-border z-10 space-y-2">
-          {/* Category */}
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
               {language === 'ru' ? 'Категория' : 'Category'}
             </p>
             <FilterChipGroup scrollable>
               {FILTER_OPTIONS.map((opt) => (
-                <FilterChip
-                  key={opt.value}
-                  label={language === 'ru' ? opt.labelRu : opt.labelEn}
-                  icon={opt.icon}
-                  isActive={selectedVertical === opt.value}
-                  onToggle={() => handleFilterChange(opt.value)}
-                  size="md"
-                />
+                <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedVertical === opt.value} onToggle={() => handleFilterChange(opt.value)} size="md" />
               ))}
             </FilterChipGroup>
           </div>
 
-          {/* Price range */}
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
               {language === 'ru' ? 'Цена' : 'Price'}
             </p>
             <FilterChipGroup scrollable>
               {PRICE_OPTIONS.map((opt) => (
-                <FilterChip
-                  key={opt.value}
-                  label={language === 'ru' ? opt.labelRu : opt.labelEn}
-                  icon={opt.icon}
-                  isActive={selectedPrice === opt.value}
-                  onToggle={() => handlePriceChange(opt.value)}
-                  size="md"
-                />
+                <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedPrice === opt.value} onToggle={() => { setSelectedPrice(opt.value); updateParam('price', opt.value); }} size="md" />
               ))}
             </FilterChipGroup>
           </div>
 
-          {/* Availability */}
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
               {language === 'ru' ? 'Доступность' : 'Availability'}
             </p>
             <FilterChipGroup scrollable>
               {AVAILABILITY_OPTIONS.map((opt) => (
-                <FilterChip
-                  key={opt.value}
-                  label={language === 'ru' ? opt.labelRu : opt.labelEn}
-                  icon={opt.icon}
-                  isActive={selectedAvailability === opt.value}
-                  onToggle={() => handleAvailabilityChange(opt.value)}
-                  size="md"
-                />
+                <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedAvailability === opt.value} onToggle={() => { setSelectedAvailability(opt.value); updateParam('availability', opt.value); }} size="md" />
               ))}
             </FilterChipGroup>
           </div>
 
-          {/* OSM POI layer toggle (OpenStreetMap data, ODbL) */}
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
               {language === 'ru' ? 'OSM места (OpenStreetMap)' : 'OSM places (OpenStreetMap)'}
             </p>
             <FilterChipGroup scrollable>
-              <FilterChip
-                label={language === 'ru' ? (showOsm ? 'Скрыть OSM' : 'Показать OSM') : (showOsm ? 'Hide OSM' : 'Show OSM')}
-                icon="🗺️"
-                isActive={showOsm}
-                onToggle={() => setShowOsm((v) => !v)}
-                size="md"
-              />
-              {showOsm && ['all','hotel','restaurant','pharmacy','clinic','attraction','beach','park','shop','finance','fuel','education','worship','civic','fitness','vet'].map((c) => (
-                <FilterChip
-                  key={c}
-                  label={c === 'all' ? (language === 'ru' ? 'Все OSM' : 'All OSM') : c}
-                  isActive={osmCategory === c}
-                  onToggle={() => setOsmCategory(c)}
-                  size="md"
-                />
+              <FilterChip label={language === 'ru' ? (showOsm ? 'Скрыть OSM' : 'Показать OSM') : (showOsm ? 'Hide OSM' : 'Show OSM')} icon="🗺️" isActive={showOsm} onToggle={() => setShowOsm((v) => !v)} size="md" />
+              {showOsm && OSM_CATEGORIES.map((c) => (
+                <FilterChip key={c} label={c === 'all' ? (language === 'ru' ? 'Все OSM' : 'All OSM') : c} isActive={osmCategory === c} onToggle={() => setOsmCategory(c)} size="md" />
               ))}
             </FilterChipGroup>
           </div>
@@ -482,176 +431,100 @@ export default function MapView() {
                 {language === 'ru' ? 'локаций' : 'locations'}
               </p>
               {activeFilterCount > 0 && (
-                <button
-                  type="button"
-                  onClick={resetAllFilters}
-                  className="text-xs text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-sm px-1"
-                >
-                  {language === 'ru'
-                    ? `Сбросить (${activeFilterCount})`
-                    : `Clear (${activeFilterCount})`}
+                <button type="button" onClick={resetAllFilters} className="text-xs text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-sm px-1">
+                  {language === 'ru' ? `Сбросить (${activeFilterCount})` : `Clear (${activeFilterCount})`}
                 </button>
               )}
             </div>
           )}
         </div>
 
-
         <div className="flex-1 relative min-h-0">
           {showLoading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-card">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : mapError ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-card p-6 text-center">
-              <p className="text-muted-foreground">{mapError}</p>
-              <p className="text-sm text-muted-foreground max-w-sm">
-                {language === 'ru'
-                  ? 'Задайте VITE_GOOGLE_MAPS_API_KEY в .env и включите Maps JavaScript API в Google Cloud.'
-                  : 'Set VITE_GOOGLE_MAPS_API_KEY in .env and enable Maps JavaScript API in Google Cloud.'}
-              </p>
-              <a
-                href="https://www.google.com/maps/search/?api=1&query=7.8804,98.3923"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
-              >
-                {language === 'ru' ? 'Открыть карту Пхукета в Google Maps' : 'Open Phuket in Google Maps'}
-              </a>
-            </div>
           ) : (
-            <GoogleMap
-              mapContainerStyle={mapContainerStyle}
+            <MapLibreMap
               center={defaultCenter}
               zoom={11}
-              onLoad={onMapLoad}
-              onUnmount={onMapUnmount}
-              options={{
-                mapTypeControl: true,
-                streetViewControl: false,
-                fullscreenControl: true,
-                zoomControl: true,
-                styles: [
-                  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'simplified' }] },
-                  { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-                ],
-              }}
-            >
-              {filteredMarkers.map((marker) => {
-                const cfg = VERTICAL_CONFIG[marker.vertical as Exclude<VerticalFilter, 'all'>];
-                if (!cfg) return null;
-                const displayName = language === 'ru' ? marker.nameRu : marker.name;
+              markers={mlMarkers}
+              onMarkerClick={handleMarkerClick}
+              fitToMarkers={mlMarkers.length > 0 && mlMarkers.length < 200}
+              className="absolute inset-0"
+            />
+          )}
+
+          {/* Marker detail panel */}
+          {selected && (
+            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-sm bg-card border border-border rounded-lg shadow-xl p-3 z-20">
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => { setSelected(null); setPlaceDetails(null); }}
+                className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {selected.kind === 'vendor' && (() => {
+                const m = selected.marker;
+                const cfg = VERTICAL_CONFIG[m.vertical as Exclude<VerticalFilter, 'all'>];
                 return (
-                  <Marker
-                    key={`${marker.vertical}-${marker.id}`}
-                    position={{ lat: marker.lat, lng: marker.lng }}
-                    label={{ text: cfg.icon, color: 'white', fontWeight: 'bold', fontSize: '12px' }}
-                    title={displayName}
-                    onClick={() => setSelectedMarker(marker)}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => cfg && navigate(cfg.route(m.id))}
+                    className="text-left w-full pr-6"
+                  >
+                    {m.image && (
+                      <img src={m.image} alt="" className="w-full h-32 object-cover rounded mb-2" loading="lazy" />
+                    )}
+                    <div className="font-semibold text-sm">{language === 'ru' ? m.nameRu : m.name}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {cfg?.icon} {language === 'ru' ? cfg?.labelRu : cfg?.labelEn}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 text-xs">
+                      {m.rating > 0 && <span>⭐ {m.rating.toFixed(1)}</span>}
+                      {m.priceFrom > 0 && <span className="text-primary font-medium">{formatPrice(m.priceFrom)}+</span>}
+                    </div>
+                  </button>
                 );
-              })}
-              {showOsm && (osmPois || []).map((p: any) => (
-                <Marker
-                  key={`osm-${p.source_id}`}
-                  position={{ lat: Number(p.lat), lng: Number(p.lng) }}
-                  title={p.name || p.category}
-                  icon={{
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 5,
-                    fillColor: '#0A2240',
-                    fillOpacity: 0.85,
-                    strokeColor: '#fff',
-                    strokeWeight: 1.5,
-                  }}
-                  onClick={() => {
-                    setSelectedOsm(p);
-                    setPlaceDetails(null);
-                  }}
-                />
-              ))}
-              {selectedMarker && (
-                <InfoWindow
-                  position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
-                  onCloseClick={() => setSelectedMarker(null)}
-                >
-                  <div
-                    className="min-w-[200px] max-w-[240px] text-left cursor-pointer"
-                    onClick={() => {
-                      const cfg = VERTICAL_CONFIG[selectedMarker.vertical as Exclude<VerticalFilter, 'all'>];
-                      if (cfg) navigate(cfg.route(selectedMarker.id));
-                    }}
-                    dangerouslySetInnerHTML={{
-                      __html: createMapPopupHtml({
-                        name: language === 'ru' ? selectedMarker.nameRu : selectedMarker.name,
-                        rating: selectedMarker.rating,
-                        price: selectedMarker.priceFrom > 0 ? `${formatPrice(selectedMarker.priceFrom)}+` : '',
-                        image: selectedMarker.image,
-                      }),
-                    }}
-                  />
-                </InfoWindow>
-              )}
-              {selectedOsm && (
-                <InfoWindow
-                  position={{ lat: Number(selectedOsm.lat), lng: Number(selectedOsm.lng) }}
-                  onCloseClick={() => { setSelectedOsm(null); setPlaceDetails(null); }}
-                >
-                  <div className="min-w-[220px] max-w-[280px] text-left space-y-2">
-                    <div className="font-semibold text-sm">{selectedOsm.name || selectedOsm.category}</div>
+              })()}
+
+              {selected.kind === 'osm' && (() => {
+                const p = selected.poi;
+                return (
+                  <div className="space-y-2 pr-6">
+                    <div className="font-semibold text-sm">{p.name || p.category}</div>
                     <div className="text-xs text-muted-foreground capitalize">
-                      {selectedOsm.category}{selectedOsm.subcategory ? ` · ${selectedOsm.subcategory}` : ''}
+                      {p.category}{p.subcategory ? ` · ${p.subcategory}` : ''}
                     </div>
                     {!placeDetails && !placeLoading && (
-                      <button
-                        type="button"
-                        onClick={() => loadPlaceDetails(selectedOsm)}
-                        className="text-xs text-primary hover:underline"
-                      >
+                      <button type="button" onClick={() => loadPlaceDetails(p)} className="text-xs text-primary hover:underline">
                         {language === 'ru' ? 'Загрузить детали Google' : 'Load Google details'}
                       </button>
                     )}
                     {placeLoading && (
-                      <div className="text-xs text-muted-foreground">
-                        {language === 'ru' ? 'Загрузка…' : 'Loading…'}
-                      </div>
+                      <div className="text-xs text-muted-foreground">{language === 'ru' ? 'Загрузка…' : 'Loading…'}</div>
                     )}
                     {placeDetails && (
                       <div className="space-y-1 text-xs">
-                        {placeDetails.rating && (
-                          <div>⭐ {placeDetails.rating} ({placeDetails.user_ratings_total ?? 0})</div>
-                        )}
-                        {placeDetails.formatted_address && (
-                          <div className="text-muted-foreground">{placeDetails.formatted_address}</div>
-                        )}
+                        {placeDetails.rating && <div>⭐ {placeDetails.rating} ({placeDetails.user_ratings_total ?? 0})</div>}
+                        {placeDetails.formatted_address && <div className="text-muted-foreground">{placeDetails.formatted_address}</div>}
                         {placeDetails.formatted_phone_number && (
-                          <a href={`tel:${placeDetails.formatted_phone_number}`} className="text-primary block">
-                            📞 {placeDetails.formatted_phone_number}
-                          </a>
+                          <a href={`tel:${placeDetails.formatted_phone_number}`} className="text-primary block">📞 {placeDetails.formatted_phone_number}</a>
                         )}
                         {placeDetails.website && (
-                          <a href={placeDetails.website} target="_blank" rel="noopener noreferrer" className="text-primary block truncate">
-                            🌐 {placeDetails.website}
-                          </a>
+                          <a href={placeDetails.website} target="_blank" rel="noopener noreferrer" className="text-primary block truncate">🌐 {placeDetails.website}</a>
                         )}
                         {placeDetails.opening_hours?.open_now != null && (
                           <div>{placeDetails.opening_hours.open_now ? '🟢 Open now' : '🔴 Closed'}</div>
                         )}
-                        {placeDetails.url && (
-                          <a href={placeDetails.url} target="_blank" rel="noopener noreferrer" className="text-primary block">
-                            {language === 'ru' ? 'Открыть в Google Maps' : 'Open in Google Maps'}
-                          </a>
-                        )}
                       </div>
                     )}
                   </div>
-                </InfoWindow>
-              )}
-            </GoogleMap>
-          )}
-          {showOsm && (
-            <div className="absolute bottom-1 right-1 bg-background/80 text-[10px] text-muted-foreground px-2 py-0.5 rounded">
-              © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="underline">OpenStreetMap</a> contributors
+                );
+              })()}
             </div>
           )}
         </div>

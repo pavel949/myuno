@@ -1,113 +1,105 @@
-# Локальная карта Пхукета — что реально можно сделать
+# План: офлайн-карта Пхукета на MapLibre
 
-## Короткий ответ
+## Цель
+Заменить Google Maps на `/map` на MapLibre GL JS с локальными векторными тайлами Пхукета, чтобы карта работала полностью офлайн (PWA precache) без зависимости от Google.
 
-**Скачать и хранить «всю Google Maps Пхукета» нельзя** — это прямо запрещено Google Maps Platform Terms (§3.2.3 (a),(b),(e)): запрет на pre-fetching, кэширование > 30 дней, массовое скачивание и создание производного датасета. Нарушение = блокировка ключа + штрафы.
-
-**Что можно и нужно сделать** — собрать собственную локальную карту Пхукета из трёх легальных источников и закэшировать её в PWA так, чтобы пользователь видел весь остров, свою геопозицию и наши объекты даже офлайн.
-
-**Рекомендую: Вариант B (гибрид OSM + наш POI-индекс + Google по запросу).** Это единственный путь, который даёт «офлайн-карту Пхукета» без юридических рисков и без bill-shock от Google (сейчас все 11 слоёв карты тянут Google JS — это дорого и не работает офлайн).
-
----
-
-## Три источника данных (легальные)
-
-| Источник | Что берём | Лицензия | Где живёт |
-|---|---|---|---|
-| **OpenStreetMap (Phuket extract)** | дороги, береговая линия, здания, ~50–80k POI (отели, рестораны, банкоматы, больницы, школы, пляжи, храмы) | ODbL — bulk-download разрешён, нужен attribution | `phuket_osm_pois` + векторные тайлы в Storage |
-| **Наша БД (`properties`, `salons`, `restaurants`, `gyms`, `pharmacies`, `vets`, `flower_shops`, `venues`, `events`, `nb_*` newbuilds)** | всё, что вендоры/девелоперы добавили через `VendorLocationField` | Наше | как есть |
-| **Google Places (по запросу)** | догрузка деталей конкретного места, фото, отзывы, "open now" | ToS: кэш ≤30 дней, нельзя сохранять координаты/имена надолго | `google_place_cache` с TTL 30 дней + автоочистка cron |
-
-OSM покрывает Пхукет очень плотно — для пользовательской цели «найти ближайшую аптеку / банкомат / 7-eleven / пляж» этого достаточно без Google.
-
----
-
-## Варианты реализации
-
-### Вариант A — только догрузка через Google по запросу
-Оставить как есть, добавить только кэш Google Places на 30 дней.
-- ➕ Минимум работы (~1 день)
-- ➖ Не решает запрос: офлайна нет, карта Пхукета не «своя», bill Google растёт линейно
-- Подходит, если задача только «снизить расход на Google API»
-
-### Вариант B — гибрид OSM + наш POI-индекс + Google по запросу ⭐ Рекомендую
-1. Один раз импортировать Phuket OSM extract → таблица `phuket_osm_pois` (id, type, name_en, name_th, lat, lng, tags jsonb, h3_index) — ~50–80k строк, ~30 МБ
-2. Сгенерировать **векторные MVT-тайлы Пхукета** (zoom 10–16) через `tippecanoe`, загрузить в Storage bucket `map-tiles` как статику → MapLibre GL читает их напрямую, **без Google JS**, без оплаты за просмотр карты
-3. PWA service worker предкэширует тайлы Пхукета (bbox 7.7,98.2 → 8.2,98.5) — ~40 МБ — при первом запуске. После этого карта работает офлайн
-4. Слои на карте: OSM POI + наши `properties/events/...` + Google детали по тапу
-5. Поиск «найти ближайший X» работает локально через PostGIS `ST_DWithin` + H3 индекс — мгновенно, без API
-
-- ➕ Полный офлайн Пхукета, мгновенный поиск, нулевая стоимость просмотра карты, юридически чисто
-- ➕ Geolocation API браузера уже работает офлайн — «где я» не зависит ни от Google, ни от нас
-- ➖ Объём работ ~5–7 дней; первый раз PWA скачивает 40 МБ тайлов (показываем прогресс-бар на онбординге)
-
-### Вариант C — полностью своя карта без Google вообще
-Убрать `@react-google-maps/api`, перевести `VendorLocationField`, `/map`, все `MapView` на MapLibre + Nominatim для геокодинга.
-- ➕ Ноль зависимости от Google, ноль bill
-- ➖ Nominatim бесплатный, но капризный по rate-limit; качество автокомплита адресов хуже Google Places (особенно по тайским адресам и новым ЖК)
-- Нерекомендуемо без острой необходимости — теряем UX автокомплита в вендорских формах
-
----
-
-## Технический план (Вариант B)
+## Архитектура
 
 ```text
-1. Импорт OSM
-   ├─ Качаем geofabrik thailand-latest.osm.pbf, режем по bbox Пхукета
-   ├─ osm2pgsql → временная схема
-   └─ Edge fn import-phuket-osm: проецирует нужные категории
-      (amenity, shop, tourism, leisure, healthcare, place) →
-      public.phuket_osm_pois (~50–80k rows)
-
-2. Векторные тайлы
-   ├─ tippecanoe -o phuket.mbtiles --minimum-zoom=10 --maximum-zoom=16
-   ├─ Распаковка в .pbf файлы по zxy
-   └─ Загрузка в Storage bucket "map-tiles" (public, immutable cache 30 days)
-
-3. Frontend
-   ├─ Новый компонент <LocalMap/> на MapLibre GL JS
-   │  стиль = OSM Bright адаптированный под наш design system
-   ├─ Источники: tiles из Storage + 3 GeoJSON слоя
-   │  (наши properties/services/events через PostGIS RPC nearby_pois)
-   └─ Замена в /map, опционально в VendorLocationField (Google остаётся
-      для автокомплита адреса, MapLibre для отображения)
-
-4. PWA офлайн
-   ├─ vite-plugin-pwa: precache манифест тайлов Пхукета (~40 МБ)
-   ├─ Runtime cache для GeoJSON наших слоёв (stale-while-revalidate, 1h)
-   └─ Прогресс-бар «Загружаем карту Пхукета для офлайн» на онбординге
-
-5. Google Places — только догрузка
-   ├─ Edge fn place-details: при тапе на POI → проверяет
-   │  google_place_cache (TTL 30 дней) → если нет/устарел, идёт в Google
-   └─ Автоудаление строк старше 30 дней (pg_cron, 1×/день)
-
-6. Геопозиция «где я»
-   └─ navigator.geolocation.watchPosition — уже работает офлайн.
-      Добавить кнопку «центрировать на мне» и сохранение последней позиции
-      в localStorage для cold-start.
+┌─ Сборка тайлов (one-off, локально/CI) ─┐
+│ Geofabrik thailand-latest.osm.pbf      │
+│   ↓ osmium extract (Phuket bbox)       │
+│ phuket.osm.pbf (~15 MB)                │
+│   ↓ tilemaker + OpenMapTiles schema    │
+│ phuket.mbtiles (z6–z14, ~25–40 MB)     │
+│   ↓ mb-util / pmtiles convert          │
+│ phuket.pmtiles (один файл, range-req)  │
+└────────────────────────────────────────┘
+                  ↓ upload
+        Supabase Storage: map-tiles/phuket.pmtiles (public bucket)
+                  ↓
+┌─ Frontend ─────────────────────────────┐
+│ MapLibre GL JS + pmtiles protocol      │
+│ Style: OSM Bright (self-hosted JSON)   │
+│ Glyphs/sprites: Storage map-assets/    │
+│ Слои поверх: vendor markers + OSM POI  │
+│   (через nearby_pois RPC)              │
+└────────────────────────────────────────┘
+                  ↓
+┌─ Офлайн (PWA) ─────────────────────────┐
+│ vite-plugin-pwa: precache pmtiles +    │
+│ style.json + glyphs/sprites            │
+│ Workbox CacheFirst для tiles URL       │
+└────────────────────────────────────────┘
 ```
 
-### База данных
-- `phuket_osm_pois` (id, osm_id, category, subcategory, name_en, name_th, lat, lng, h3_r9, tags jsonb, updated_at) + GiST индекс по `(lat,lng)` + индекс по `category`
-- `google_place_cache` (place_id, payload jsonb, fetched_at) + TTL trigger
-- RPC `nearby_pois(lat, lng, radius_m, categories[])` → union OSM + наши таблицы
+## Шаги
 
-### Юридически
-- В футер карты добавить «© OpenStreetMap contributors» (требование ODbL)
-- В Privacy: упомянуть, что геопозиция обрабатывается на устройстве, тайлы кэшируются локально
+### 1. Сборка тайлов (выполняется один раз в sandbox)
+Скрипт `scripts/build-phuket-tiles.sh`:
+- `curl` Geofabrik thailand-latest.osm.pbf (~700 MB)
+- `nix run nixpkgs#osmium-tool -- extract --bbox 98.2,7.7,98.5,8.2 -o phuket.osm.pbf`
+- `nix run nixpkgs#tilemaker -- --input phuket.osm.pbf --output phuket.mbtiles` (OpenMapTiles config)
+- `nix run nixpkgs#go-pmtiles -- convert phuket.mbtiles phuket.pmtiles`
+- Залить в Supabase Storage `map-tiles` через `supabase--storage_upload`
 
----
+Тайлы z6–z14 покрывают остров целиком до уровня улиц. Размер ~25–40 MB — приемлемо для PWA precache на мобильном.
 
-## Что НЕ войдёт в этот план
-- Скачивание/зеркалирование Google Maps данных — запрещено ToS
-- Кэш Google имён/координат дольше 30 дней — запрещено ToS
-- Импорт `booking.com` / `agoda` отелей — отдельная задача, нужен партнёрский фид или ручной импорт; в OSM отели есть, но без цен/наличия
+### 2. Storage buckets
+- `map-tiles` (public, immutable cache headers) — pmtiles
+- `map-assets` (public) — style.json, glyphs (PBF шрифты Noto Sans), sprites
 
----
+### 3. Зависимости
+```
+bun add maplibre-gl pmtiles
+```
 
-## Если согласны на Вариант B — что нужно от вас
+### 4. Новый компонент `src/components/map/MapLibreMap.tsx`
+- Регистрирует `pmtiles` protocol
+- Загружает style.json (self-hosted OSM Bright адаптированный под deep-sea тему)
+- Принимает `markers`, `onMarkerClick`, `center`, `zoom`
+- Layer для vendor markers (GeoJSON source из props)
+- Layer для OSM POI (из `nearby_pois` RPC)
+- Кнопка "Center on me" (`navigator.geolocation`)
+- Attribution: «© OpenStreetMap contributors»
 
-1. Подтверждение объёма (5–7 дней работы)
-2. Решение по PWA-precache: 40 МБ при первом запуске — ок, или делаем lazy («скачать офлайн-карту» — отдельной кнопкой в Settings)?
-3. Готов сразу начать с шага 1 (импорт OSM в `phuket_osm_pois`) — это даёт мгновенный выигрыш для существующего `/map` без ожидания тайлов
+### 5. Рефакторинг `src/pages/MapView.tsx`
+- Заменить `@react-google-maps/api` `<GoogleMap/>` на `<MapLibreMap/>`
+- Убрать `loadScript`/API key зависимости
+- Сохранить существующие фильтры, попапы, интеграцию с `place-details` (Google details по тапу остаются опциональной обогащающей деталью)
+
+### 6. PWA precache
+- Подключить `vite-plugin-pwa` (если не подключён) с `generateSW`
+- `workbox.runtimeCaching`:
+  - `phuket.pmtiles` → CacheFirst, 90 дней
+  - `map-assets/*` → CacheFirst, 90 дней
+- Следовать skill/pwa: registration только в prod, guard для Lovable preview
+- Размер precache: ~40 MB pmtiles + ~2 MB assets
+
+### 7. Удалить/деприкейтить
+- Не удаляем Google Maps SDK сразу — оставляем для `place-details` обогащения и других страниц (`property/*`, и т.д.)
+- На `/map` Google больше не грузится
+
+## Технические детали
+
+**pmtiles vs mbtiles в браузере:** pmtiles работает через HTTP Range requests, не требует серверной части. mbtiles — это SQLite, нужен либо backend, либо предварительная конверсия в pmtiles. Выбираем pmtiles.
+
+**Стиль:** берём OSM Bright за основу (open source, BSD-3), модифицируем под токены `--background #08101E`, accent `#00D68F`. Файл `public/map-style/phuket-dark.json`.
+
+**Шрифты для labels:** Noto Sans Regular + Bold в PBF формате (~500 KB), хостим в `map-assets`.
+
+**Размер бандла:** maplibre-gl ~200 KB gz, pmtiles ~15 KB gz. Лениво грузим только на `/map`.
+
+## Что НЕ входит
+- Полнотекстовый поиск по тайлам (используем существующий Super Search)
+- Routing/навигация (отдельная задача, нужен OSRM)
+- 3D-здания (z14 максимум, плоская карта)
+- Замена Google Maps на других страницах (`property/*`, owner views) — отдельная итерация
+
+## Риски
+- **Сборка тайлов в sandbox долгая** (5–10 мин на thailand.osm.pbf). Если timeout — режем bbox раньше через Overpass.
+- **40 MB precache** — на медленном 3G первая загрузка PWA займёт минуту. Делаем lazy precache: тайлы кэшируются по факту использования, не на install.
+- **Стиль OSM Bright** требует кастомизации, чтобы соответствовать deep-sea theme — отдельная работа дизайнера, на старте отдадим базовый dark.
+
+## Готовность к итерациям
+После MVP можно добавить: маршрутизация (OSRM), геокодинг офлайн (Pelias-lite), сателлитный слой (Maxar tiles по подписке).
