@@ -48,6 +48,7 @@ import {
   Clock
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { VendorLocationField } from '@/components/vendor/VendorLocationField';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 
 const salonTypes = [
