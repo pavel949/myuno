@@ -92,8 +92,14 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
   }, [activeIdx]);
 
   const handlePick = (r: MapSearchResult) => {
+    skipNextSearchRef.current = true;
+    abortRef.current?.abort();
     setQuery(r.label);
+    setResults([]);
+    setActiveIdx(-1);
     setOpen(false);
+    setLoading(false);
+    inputRef.current?.blur();
     onSelect(r);
   };
 
