@@ -266,6 +266,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
               {results.map((r, idx) => {
                 const active = idx === activeIdx;
                 const isSelected = r.id === selectedId;
+                const isFlash = r.id === flashId;
                 return (
                   <li key={r.id} id={`map-search-opt-${idx}`} role="option" aria-selected={active || isSelected}>
                     <button
@@ -273,9 +274,9 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
                       onMouseEnter={() => setActiveIdx(idx)}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handlePick(r)}
-                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none border-l-2 ${
+                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none border-l-2 transition-colors duration-500 ${
                         isSelected ? 'border-l-primary bg-primary/5' : 'border-l-transparent'
-                      } ${active ? 'bg-muted' : 'hover:bg-muted'}`}
+                      } ${active ? 'bg-muted' : 'hover:bg-muted'} ${isFlash ? 'ring-2 ring-primary/60 ring-inset bg-primary/10' : ''}`}
                     >
                       <MapPin className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-primary' : 'text-primary'}`} />
                       <span className="min-w-0 flex-1">
