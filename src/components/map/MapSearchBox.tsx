@@ -25,8 +25,10 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
   const [results, setResults] = useState<MapSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(-1);
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
 
   // Close on outside click
   useEffect(() => {
@@ -43,6 +45,7 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
     if (q.length < 2) {
       setResults([]);
       setLoading(false);
+      setActiveIdx(-1);
       return;
     }
     setLoading(true);
@@ -55,7 +58,6 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
           searchLocal(q),
           searchNominatim(q, ctrl.signal),
         ]);
-        // Dedup: prefer local POIs by name
         const seen = new Set<string>();
         const merged: MapSearchResult[] = [];
         [...local, ...remote].forEach((r) => {
@@ -65,6 +67,7 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
           merged.push(r);
         });
         setResults(merged.slice(0, 8));
+        setActiveIdx(merged.length > 0 ? 0 : -1);
         setOpen(true);
       } catch (err) {
         if ((err as Error).name !== 'AbortError') console.warn('search error', err);
@@ -75,10 +78,42 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
     return () => clearTimeout(timer);
   }, [query]);
 
+  // Scroll active item into view
+  useEffect(() => {
+    if (activeIdx < 0 || !listRef.current) return;
+    const el = listRef.current.querySelectorAll('li')[activeIdx] as HTMLElement | undefined;
+    el?.scrollIntoView({ block: 'nearest' });
+  }, [activeIdx]);
+
   const handlePick = (r: MapSearchResult) => {
     setQuery(r.label);
     setOpen(false);
     onSelect(r);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!open && results.length > 0) setOpen(true);
+      setActiveIdx((i) => (results.length === 0 ? -1 : (i + 1) % results.length));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!open && results.length > 0) setOpen(true);
+      setActiveIdx((i) => (results.length === 0 ? -1 : (i - 1 + results.length) % results.length));
+    } else if (e.key === 'Enter') {
+      if (open && activeIdx >= 0 && results[activeIdx]) {
+        e.preventDefault();
+        handlePick(results[activeIdx]);
+      }
+    } else if (e.key === 'Escape') {
+      setOpen(false);
+    } else if (e.key === 'Home' && open) {
+      e.preventDefault();
+      setActiveIdx(0);
+    } else if (e.key === 'End' && open) {
+      e.preventDefault();
+      setActiveIdx(results.length - 1);
+    }
   };
 
   const placeholder = language === 'ru' ? 'Поиск адреса или места…' : 'Search address or place…';
