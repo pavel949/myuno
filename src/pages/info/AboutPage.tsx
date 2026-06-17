@@ -175,16 +175,16 @@ export default function AboutPage() {
               {t('Контакты', 'Contacts')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            {COMPANY_CONTACTS.supportEmail && (
+            {COMPANY_CONTACTS.email.support && (
               <Button variant="outline" asChild>
-                <a href={`mailto:${COMPANY_CONTACTS.supportEmail}`}>
-                  {COMPANY_CONTACTS.supportEmail}
+                <a href={`mailto:${COMPANY_CONTACTS.email.support}`}>
+                  {COMPANY_CONTACTS.email.support}
                 </a>
               </Button>
             )}
-            {COMPANY_CONTACTS.phone && (
+            {COMPANY_CONTACTS.phone.display && (
               <Button variant="outline" asChild>
-                <a href={getTelLink(COMPANY_CONTACTS.phone)}>{COMPANY_CONTACTS.phone}</a>
+                <a href={getTelLink()}>{COMPANY_CONTACTS.phone.display}</a>
               </Button>
             )}
           </div>
