@@ -98,6 +98,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_notes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          note: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          note: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          note?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agent_deal_activities: {
         Row: {
           activity_type: string
@@ -25299,6 +25329,7 @@ export type Database = {
       transport_vehicle_types: {
         Row: {
           base_price: number | null
+          cover_image: string | null
           created_at: string
           description_en: string | null
           description_ru: string | null
@@ -25306,6 +25337,7 @@ export type Database = {
           features: string[] | null
           icon: string | null
           id: string
+          images: string[] | null
           is_active: boolean | null
           markup_pct: number
           max_passengers: number | null
@@ -25319,6 +25351,7 @@ export type Database = {
         }
         Insert: {
           base_price?: number | null
+          cover_image?: string | null
           created_at?: string
           description_en?: string | null
           description_ru?: string | null
@@ -25326,6 +25359,7 @@ export type Database = {
           features?: string[] | null
           icon?: string | null
           id?: string
+          images?: string[] | null
           is_active?: boolean | null
           markup_pct?: number
           max_passengers?: number | null
@@ -25339,6 +25373,7 @@ export type Database = {
         }
         Update: {
           base_price?: number | null
+          cover_image?: string | null
           created_at?: string
           description_en?: string | null
           description_ru?: string | null
@@ -25346,6 +25381,7 @@ export type Database = {
           features?: string[] | null
           icon?: string | null
           id?: string
+          images?: string[] | null
           is_active?: boolean | null
           markup_pct?: number
           max_passengers?: number | null
