@@ -23,6 +23,8 @@ import { StepVehicle } from '@/components/transport/booking-steps/StepVehicle';
 import { StepDetails } from '@/components/transport/booking-steps/StepDetails';
 import { StepPayment } from '@/components/transport/booking-steps/StepPayment';
 import { TransferSuccess } from '@/components/transport/booking-steps/TransferSuccess';
+import { InlineAuthGate } from '@/components/auth/InlineAuthGate';
+import { useBookingDraft } from '@/hooks/useBookingDraft';
 import type {
   TransferDirection,
   TransferFormData,
