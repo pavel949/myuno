@@ -32,7 +32,7 @@ interface MapSearchBoxProps {
 const PHUKET_VIEWBOX = '98.20,7.70,98.55,8.25';
 
 export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(function MapSearchBox(
-  { onSelect, language = 'ru', className },
+  { onSelect, language = 'ru', className, listOffsetTop = 0, listOffsetBottom = 0 },
   ref,
 ) {
   const [query, setQuery] = useState('');
@@ -46,12 +46,50 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
   const [flashId, setFlashId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const skipNextSearchRef = useRef(false);
   /** When set, after results arrive we highlight an item with matching id (or label fallback). */
   const pendingMatchRef = useRef<{ id?: string; label?: string } | null>(null);
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /**
+   * Smoothly scroll the dropdown so that the item at `idx` is fully visible,
+   * honouring the internal sticky header height plus external sticky offsets.
+   */
+  const scrollItemIntoView = (idx: number) => {
+    const scroller = scrollRef.current;
+    const list = listRef.current;
+    if (!scroller || !list || idx < 0) return;
+    const item = list.querySelectorAll('li')[idx] as HTMLElement | undefined;
+    if (!item) return;
+
+    const headerH = headerRef.current?.offsetHeight ?? 0;
+    const padTop = headerH + listOffsetTop + 8;
+    const padBottom = listOffsetBottom + 8;
+
+    const itemTop = item.offsetTop;
+    const itemBottom = itemTop + item.offsetHeight;
+    const viewTop = scroller.scrollTop;
+    const viewBottom = viewTop + scroller.clientHeight;
+
+    let target: number | null = null;
+    if (itemTop < viewTop + padTop) {
+      target = Math.max(0, itemTop - padTop);
+    } else if (itemBottom > viewBottom - padBottom) {
+      target = itemBottom - scroller.clientHeight + padBottom;
+    }
+    if (target == null) return;
+
+    const reduce =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    scroller.scrollTo({ top: target, behavior: reduce ? 'auto' : 'smooth' });
+  };
+
+
 
 
   // Close on outside click
