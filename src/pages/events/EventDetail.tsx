@@ -43,6 +43,21 @@ const EventDetail = () => {
   const [tickets, setTickets] = useState(1);
   const { trackView } = useViewHistory();
 
+  // Organizer / creator (vendor) — surfaced as a contact card.
+  const { data: organizer } = useQuery({
+    queryKey: ['event-organizer', event?.provider_id],
+    enabled: !!event?.provider_id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('providers')
+        .select('id, name, email, phone, whatsapp, logo_url, slug')
+        .eq('id', event!.provider_id!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (event) {
       trackView(event.id, 'event', {
