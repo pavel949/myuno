@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 const logStep = (step: string, details?: unknown) => {
-  console.log(`[VENDOR-PORTAL] ${step}`, details ? JSON.stringify(details) : '');
+  console.info(`[VENDOR-PORTAL] ${step}`, details ? JSON.stringify(details) : '');
 };
 
 Deno.serve(async (req) => {

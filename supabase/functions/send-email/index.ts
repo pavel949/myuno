@@ -417,7 +417,7 @@ Deno.serve(async (req) => {
 
     const recipients = Array.isArray(to) ? to : [to];
 
-    console.log(`[send-email] Sending "${template_id}" to ${recipients.length} recipient(s)`);
+    console.info(`[send-email] Sending "${template_id}" to ${recipients.length} recipient(s)`);
 
     const emailResponse = await resend.emails.send({
       from: 'myUNO <noreply@resend.dev>',
@@ -426,7 +426,7 @@ Deno.serve(async (req) => {
       html,
     });
 
-    console.log(`[send-email] Sent successfully, id=${emailResponse.data?.id}`);
+    console.info(`[send-email] Sent successfully, id=${emailResponse.data?.id}`);
 
     return new Response(
       JSON.stringify({ success: true, email_id: emailResponse.data?.id }),

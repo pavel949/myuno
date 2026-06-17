@@ -168,7 +168,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`[LIFEOS-AI-ANALYST] Mode: ${mode}, Processing...`);
+    console.info(`[LIFEOS-AI-ANALYST] Mode: ${mode}, Processing...`);
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -273,7 +273,7 @@ Deno.serve(async (req) => {
         : "AI provides recommendations only. Human review required.",
     };
 
-    console.log(`[LIFEOS-AI-ANALYST] Completed in ${Date.now() - startTime}ms, ${suggestions.length} suggestions`);
+    console.info(`[LIFEOS-AI-ANALYST] Completed in ${Date.now() - startTime}ms, ${suggestions.length} suggestions`);
 
     return new Response(
       JSON.stringify(result),

@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log('Starting booking reminders check...')
+    console.info('Starting booking reminders check...')
 
     const now = new Date()
     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000)
@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
       throw bookingsError
     }
 
-    console.log(`Found ${upcomingBookings?.length || 0} upcoming bookings`)
+    console.info(`Found ${upcomingBookings?.length || 0} upcoming bookings`)
 
     if (!upcomingBookings || upcomingBookings.length === 0) {
       return new Response(
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
         .single()
 
       if (preferences && preferences.booking_reminders === false) {
-        console.log(`User ${booking.user_id} has disabled booking reminders`)
+        console.info(`User ${booking.user_id} has disabled booking reminders`)
         continue
       }
 
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
         .single()
 
       if (existingNotification) {
-        console.log(`${reminderType} reminder already sent for booking ${booking.id}`)
+        console.info(`${reminderType} reminder already sent for booking ${booking.id}`)
         continue
       }
 
@@ -145,11 +145,11 @@ Deno.serve(async (req) => {
         console.error(`Error creating ${reminderType} notification for booking ${booking.id}:`, notifError)
       } else {
         notificationsSent++
-        console.log(`${reminderType} reminder sent for booking ${booking.id}`)
+        console.info(`${reminderType} reminder sent for booking ${booking.id}`)
       }
     }
 
-    console.log(`Booking reminders completed. Sent ${notificationsSent} notifications`)
+    console.info(`Booking reminders completed. Sent ${notificationsSent} notifications`)
 
     return new Response(
       JSON.stringify({ 

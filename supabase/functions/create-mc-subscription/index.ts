@@ -9,7 +9,7 @@ const corsHeaders = {
 const MC_SLOT_PRICE_ID = "price_1T5gU5CHg9N6Yle1cghVJcy9";
 
 const logStep = (step: string, details?: unknown) => {
-  console.log(`[CREATE-MC-SUB] ${step}`, details ? JSON.stringify(details) : "");
+  console.info(`[CREATE-MC-SUB] ${step}`, details ? JSON.stringify(details) : "");
 };
 
 Deno.serve(async (req) => {

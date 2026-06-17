@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
       status: 'suppressed',
     })
 
-    console.log('Email suppressed', { effectiveRecipient, templateName })
+    console.info('Email suppressed', { effectiveRecipient, templateName })
     return new Response(
       JSON.stringify({ success: false, reason: 'email_suppressed' }),
       {
@@ -342,7 +342,7 @@ Deno.serve(async (req) => {
     })
   }
 
-  console.log('Transactional email enqueued', { templateName, effectiveRecipient })
+  console.info('Transactional email enqueued', { templateName, effectiveRecipient })
 
   return new Response(
     JSON.stringify({ success: true, queued: true }),

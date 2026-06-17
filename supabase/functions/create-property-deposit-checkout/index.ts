@@ -25,7 +25,7 @@ interface PropertyDepositRequest {
 
 const logStep = (step: string, details?: Record<string, unknown>) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
-  console.log(`[PROPERTY-DEPOSIT] ${step}${detailsStr}`);
+  console.info(`[PROPERTY-DEPOSIT] ${step}${detailsStr}`);
 };
 
 Deno.serve(async (req) => {

@@ -160,7 +160,7 @@ Instructions:
       }
     }
 
-    console.log(`Enriched ${results.length}/${projects.length} projects`);
+    console.info(`Enriched ${results.length}/${projects.length} projects`);
 
     return new Response(
       JSON.stringify({ enriched: results.length, total: projects.length, results }),

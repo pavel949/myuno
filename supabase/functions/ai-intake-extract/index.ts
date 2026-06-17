@@ -412,7 +412,7 @@ Rules:
       if (coords) {
         extracted.lat = coords.lat;
         extracted.lng = coords.lng;
-        console.log("Resolved Maps coords:", coords);
+        console.info("Resolved Maps coords:", coords);
       }
     }
 
@@ -436,7 +436,7 @@ Rules:
       driveStats.error = "Storage not configured";
     }
 
-    console.log("AI Intake extracted:", entityType, Object.keys(extracted), "drive:", driveStats);
+    console.info("AI Intake extracted:", entityType, Object.keys(extracted), "drive:", driveStats);
 
     return new Response(
       JSON.stringify({

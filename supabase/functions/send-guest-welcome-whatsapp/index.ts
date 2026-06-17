@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
     // Need guest phone to send WhatsApp
     const guestPhone = booking.guest_phone;
     if (!guestPhone) {
-      console.log("[Welcome WA] No guest phone for booking:", booking_id);
+      console.info("[Welcome WA] No guest phone for booking:", booking_id);
       return new Response(
         JSON.stringify({ ok: true, skipped: true, reason: "no_guest_phone" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (existingMsg) {
-      console.log("[Welcome WA] Already sent for booking:", booking_id);
+      console.info("[Welcome WA] Already sent for booking:", booking_id);
       return new Response(
         JSON.stringify({ ok: true, skipped: true, reason: "already_sent" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

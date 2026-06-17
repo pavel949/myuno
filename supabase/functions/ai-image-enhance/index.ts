@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Enhancing image:', imageUrl.substring(0, 100));
+    console.info('Enhancing image:', imageUrl.substring(0, 100));
 
     let prompt = '';
     switch (enhancement) {
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
       throw new Error('No enhanced image returned');
     }
 
-    console.log('Image enhanced successfully');
+    console.info('Image enhanced successfully');
 
     return new Response(
       JSON.stringify({ 

@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`[LIFEOS-FIX] Type: ${suggestion.suggestion_type}, Entity: ${suggestion.entity_id || 'N/A'}`);
+    console.info(`[LIFEOS-FIX] Type: ${suggestion.suggestion_type}, Entity: ${suggestion.entity_id || 'N/A'}`);
 
     const actions: string[] = [];
     let success = true;
@@ -280,7 +280,7 @@ Deno.serve(async (req) => {
       new_data: { suggestion, actions, success },
     });
 
-    console.log(`[LIFEOS-FIX] Done. Success: ${success}, Actions: ${actions.length}`);
+    console.info(`[LIFEOS-FIX] Done. Success: ${success}, Actions: ${actions.length}`);
 
     return new Response(
       JSON.stringify({ success, actions }),

@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
     const userLanguage = context?.language || "ru";
     systemPrompt += `\n\nRESPOND IN: ${userLanguage === "ru" ? "Russian" : "English"}`;
 
-    console.log(`[AI-AGENT] Processing request for agent: ${agentSlug}, model: ${agent.model}`);
+    console.info(`[AI-AGENT] Processing request for agent: ${agentSlug}, model: ${agent.model}`);
 
     // Call Lovable AI Gateway
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");

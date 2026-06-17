@@ -64,7 +64,7 @@ async function loadVerticalConfigs(supabase: any): Promise<VerticalConfig[]> {
       .order('sort_order');
 
     if (error || !data || data.length === 0) {
-      console.log('[INTAKE] Using static verticals fallback');
+      console.info('[INTAKE] Using static verticals fallback');
       cachedVerticals = STATIC_VERTICALS;
       return STATIC_VERTICALS;
     }
@@ -76,7 +76,7 @@ async function loadVerticalConfigs(supabase: any): Promise<VerticalConfig[]> {
     }));
 
     cachedVerticals = loaded;
-    console.log(`[INTAKE] Loaded ${loaded.length} verticals from DB`);
+    console.info(`[INTAKE] Loaded ${loaded.length} verticals from DB`);
     return loaded;
   } catch (err) {
     console.error('[INTAKE] Error loading verticals:', err);
@@ -355,7 +355,7 @@ async function extractImagesFromCloudLinks(
 
   for (const url of cloudUrls) {
     try {
-      console.log(`[INTAKE] Extracting images from cloud link: ${url}`);
+      console.info(`[INTAKE] Extracting images from cloud link: ${url}`);
       const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
         method: 'POST',
         headers: {
@@ -395,10 +395,10 @@ async function extractImagesFromCloudLinks(
       const foundImages = [...new Set([...directImages, ...htmlImages])];
       
       if (foundImages.length > 0) {
-        console.log(`[INTAKE] Found ${foundImages.length} images from ${url}`);
+        console.info(`[INTAKE] Found ${foundImages.length} images from ${url}`);
         imageUrls.push(...foundImages.slice(0, 20)); // Limit to 20 images per link
       } else {
-        console.log(`[INTAKE] No images found in cloud link, keeping original: ${url}`);
+        console.info(`[INTAKE] No images found in cloud link, keeping original: ${url}`);
         imageUrls.push(url); // Keep original as reference
       }
     } catch (err) {
@@ -460,7 +460,7 @@ async function scrapeUrls(urls: string[], firecrawlApiKey?: string): Promise<Rec
         metadata: scraped.metadata || {},
       };
 
-      console.log(`[INTAKE] Scraped ${url}: ${content.length} chars`);
+      console.info(`[INTAKE] Scraped ${url}: ${content.length} chars`);
     } catch (error) {
       console.error(`[INTAKE] Firecrawl exception for ${url}:`, error);
     }
@@ -822,7 +822,7 @@ Deno.serve(async (req) => {
     // Support both "images" and "uploadedImages" from frontend
     const images = body.images || body.uploadedImages || [];
 
-    console.log(`[INTAKE] Processing request: mode=${mode}, sessionId=${sessionId || 'new'}`);
+    console.info(`[INTAKE] Processing request: mode=${mode}, sessionId=${sessionId || 'new'}`);
 
     // Initialize Supabase
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -944,7 +944,7 @@ Deno.serve(async (req) => {
         // Default to properties vertical for rental agent posts
         const agentVertical = forceVertical || 'properties';
         const textItems = splitAgentMessage(rawText);
-        console.log(`[INTAKE] Agent message split into ${textItems.length} items`);
+        console.info(`[INTAKE] Agent message split into ${textItems.length} items`);
         for (const text of textItems) {
           // Extract per-item image URLs (Yandex Disk, Google Drive, etc.)
           const itemUrls = extractUrls(text);
@@ -1045,7 +1045,7 @@ Deno.serve(async (req) => {
       })();
     }
 
-    console.log(`[INTAKE] Completed in ${Date.now() - startTime}ms: ${items.length} items processed`);
+    console.info(`[INTAKE] Completed in ${Date.now() - startTime}ms: ${items.length} items processed`);
 
     return new Response(
       JSON.stringify(response),

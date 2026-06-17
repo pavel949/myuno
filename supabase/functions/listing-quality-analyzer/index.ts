@@ -225,7 +225,7 @@ async function enhanceWithAI(
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   
   if (!LOVABLE_API_KEY) {
-    console.log("[LISTING-QUALITY] No Lovable API key, skipping AI enhancement");
+    console.info("[LISTING-QUALITY] No Lovable API key, skipping AI enhancement");
     return { explanation: "", confidence: 0.5 };
   }
 
@@ -351,7 +351,7 @@ Deno.serve(async (req) => {
       data = fetchedData as ListingData;
     }
 
-    console.log(`[LISTING-QUALITY] Analyzing ${entityType}/${entityId}, correlation: ${correlationId}`);
+    console.info(`[LISTING-QUALITY] Analyzing ${entityType}/${entityId}, correlation: ${correlationId}`);
 
     // Run rule-based analysis
     const ruleBasedReport = analyzeQualityRuleBased(data);
@@ -424,7 +424,7 @@ Deno.serve(async (req) => {
       if (error) console.error("[LISTING-QUALITY] Failed to log:", error);
     });
 
-    console.log(`[LISTING-QUALITY] Analysis complete. Score: ${report.overall_score}, Verdict: ${verdict}`);
+    console.info(`[LISTING-QUALITY] Analysis complete. Score: ${report.overall_score}, Verdict: ${verdict}`);
 
     return new Response(
       JSON.stringify({

@@ -27,7 +27,7 @@ function escapeICalText(text: string): string {
 }
 
 Deno.serve(async (req) => {
-  console.log('Calendar export request received');
+  console.info('Calendar export request received');
   
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`Generating iCal for property: ${property.title || property.title_ru}`);
+    console.info(`Generating iCal for property: ${property.title || property.title_ru}`);
 
     // Fetch bookings for this property
     const { data: bookings, error: bookingsError } = await supabase
@@ -271,7 +271,7 @@ Deno.serve(async (req) => {
 
     const icalString = icalContent.join('\r\n');
 
-    console.log(`Generated iCal with ${bookings?.length || 0} events`);
+    console.info(`Generated iCal with ${bookings?.length || 0} events`);
 
     return new Response(icalString, {
       headers: {

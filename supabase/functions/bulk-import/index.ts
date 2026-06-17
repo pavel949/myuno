@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
       throw new Error("Maximum 1000 records per import");
     }
 
-    console.log(`Bulk import: ${records.length} records to ${table}`);
+    console.info(`Bulk import: ${records.length} records to ${table}`);
 
     // Process in batches of 100
     const batchSize = 100;
@@ -168,7 +168,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`Import complete: ${results.inserted} inserted, ${results.failed} failed`);
+    console.info(`Import complete: ${results.inserted} inserted, ${results.failed} failed`);
 
     return new Response(JSON.stringify(results), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

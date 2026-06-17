@@ -153,7 +153,7 @@ export async function withRateLimit(
   const result = await checkRateLimit(identifier, endpoint, config);
   
   if (!result.allowed) {
-    console.log(`[RATE-LIMIT] Blocked: ${identifier} on ${endpoint}`);
+    console.info(`[RATE-LIMIT] Blocked: ${identifier} on ${endpoint}`);
     return rateLimitResponse(result, corsHeaders);
   }
   

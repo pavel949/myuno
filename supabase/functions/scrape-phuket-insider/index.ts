@@ -240,7 +240,7 @@ Deno.serve(async (req) => {
     const maxBatch = batch_size || 10;
     const batchUrls = urls.slice(0, maxBatch);
 
-    console.log(`Processing ${batchUrls.length} URLs in mode=${mode} for city=${targetSlug}`);
+    console.info(`Processing ${batchUrls.length} URLs in mode=${mode} for city=${targetSlug}`);
 
     let results;
     switch (mode) {
@@ -268,7 +268,7 @@ Deno.serve(async (req) => {
     const okCount = results.filter((r) => r.status === "ok").length;
     const failCount = results.length - okCount;
 
-    console.log(`Done: ${okCount} ok, ${failCount} failed out of ${results.length}`);
+    console.info(`Done: ${okCount} ok, ${failCount} failed out of ${results.length}`);
 
     return new Response(
       JSON.stringify({

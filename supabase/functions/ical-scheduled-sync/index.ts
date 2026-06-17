@@ -265,7 +265,7 @@ async function upsertOrderForEvent(
 
   // Skip creating orders with zero amount
   if (totalAmount === 0 && !existingOrderId) {
-    console.log(`Skipping order creation: zero total for property ${calendar.property_id}`);
+    console.info(`Skipping order creation: zero total for property ${calendar.property_id}`);
     return '';
   }
 
@@ -383,7 +383,7 @@ async function syncCalendar(
   const newOrderIds: string[] = [];
   
   try {
-    console.log(`Fetching iCal from: ${calendar.name} (${calendar.ical_url})`);
+    console.info(`Fetching iCal from: ${calendar.name} (${calendar.ical_url})`);
     
     const response = await fetch(calendar.ical_url, {
       headers: { 'User-Agent': 'UNO Calendar Sync/2.0' },
@@ -396,7 +396,7 @@ async function syncCalendar(
     const icalContent = await response.text();
     const events = parseICalEvents(icalContent, calendar.ical_url);
     
-    console.log(`Parsed ${events.length} events from ${calendar.name}`);
+    console.info(`Parsed ${events.length} events from ${calendar.name}`);
 
     // Get existing orders from this calendar (stored in metadata)
     const { data: existingOrders } = await supabase
@@ -430,7 +430,7 @@ async function syncCalendar(
         .from('orders')
         .update({ deleted_at: new Date().toISOString() })
         .in('id', toDelete.map((o: any) => o.id));
-      console.log(`Soft-deleted ${toDelete.length} cancelled bookings`);
+      console.info(`Soft-deleted ${toDelete.length} cancelled bookings`);
     }
 
     // Insert or update events
@@ -461,7 +461,7 @@ async function syncCalendar(
             order_id_b: overlap.orderId,
             resolved: false,
           });
-          console.log(`Conflict detected: iCal ${channelIcal} overlaps order ${overlap.orderId} (${overlap.channel}). Skipping order creation.`);
+          console.info(`Conflict detected: iCal ${channelIcal} overlaps order ${overlap.orderId} (${overlap.channel}). Skipping order creation.`);
           continue;
         }
       }
@@ -565,7 +565,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`Scheduled sync: ${calendars?.length || 0} calendars`);
+    console.info(`Scheduled sync: ${calendars?.length || 0} calendars`);
 
     const results: Array<{
       calendar_id: string;
@@ -637,7 +637,7 @@ Deno.serve(async (req) => {
       total_new_orders: results.reduce((sum, r) => sum + r.new_order_ids.length, 0),
     };
 
-    console.log('Scheduled sync completed:', summary);
+    console.info('Scheduled sync completed:', summary);
 
     return new Response(JSON.stringify({ summary, results }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

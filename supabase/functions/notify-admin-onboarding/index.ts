@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
         });
         const body = await r.text();
         if (!r.ok) throw new Error(`send-transactional-email ${r.status}: ${body}`);
-        console.log(`[notify-admin-onboarding] queued for ${to}: ${body}`);
+        console.info(`[notify-admin-onboarding] queued for ${to}: ${body}`);
         return body;
       }),
     );

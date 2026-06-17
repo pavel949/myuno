@@ -140,7 +140,7 @@ export function createCheckoutHandler(config: CheckoutConfig) {
       const rlResponse = await withRateLimit(req, config.endpoint, RATE_LIMITS.payment, CORS_HEADERS, user.id);
       if (rlResponse) return rlResponse;
 
-      console.log(`[${config.endpoint}] User authenticated: ${user.id}`);
+      console.info(`[${config.endpoint}] User authenticated: ${user.id}`);
 
       // 3. Parse body & build vertical-specific data
       const body = await req.json();
@@ -188,7 +188,7 @@ export function createCheckoutHandler(config: CheckoutConfig) {
 
         orderId = order.id;
         orderNumber = order.order_number;
-        console.log(`[${config.endpoint}] Order created: ${orderId} ${orderNumber}`);
+        console.info(`[${config.endpoint}] Order created: ${orderId} ${orderNumber}`);
 
         // Insert order items
         if (result.items.length > 0) {
@@ -290,7 +290,7 @@ export function createCheckoutHandler(config: CheckoutConfig) {
         metadata: sessionMetadata,
       });
 
-      console.log(`[${config.endpoint}] Checkout session created: ${session.id}`);
+      console.info(`[${config.endpoint}] Checkout session created: ${session.id}`);
 
       // Update payment intent with Stripe session ref
       if (paymentIntentId) {

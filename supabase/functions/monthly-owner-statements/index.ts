@@ -35,7 +35,7 @@ Deno.serve(async (req: Request) => {
     const periodStartStr = periodStart.toISOString().split("T")[0];
     const periodEndStr = periodEnd.toISOString().split("T")[0];
 
-    console.log(`Generating monthly statements for ${periodStartStr} — ${periodEndStr}`);
+    console.info(`Generating monthly statements for ${periodStartStr} — ${periodEndStr}`);
 
     // Get all active MCs with auto-send enabled properties
     const { data: mcs, error: mcError } = await supabase
@@ -194,7 +194,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    console.log(`Monthly statements complete: ${generated} generated, ${errors} errors`);
+    console.info(`Monthly statements complete: ${generated} generated, ${errors} errors`);
 
     return new Response(
       JSON.stringify({

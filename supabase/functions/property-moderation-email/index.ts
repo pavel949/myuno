@@ -341,7 +341,7 @@ const handler = async (req: Request): Promise<Response> => {
       html: emailContent.html,
     });
 
-    console.log("Property moderation email sent:", emailResponse);
+    console.info("Property moderation email sent:", emailResponse);
 
     return new Response(
       JSON.stringify({ success: true, emailId: (emailResponse as any).id }),

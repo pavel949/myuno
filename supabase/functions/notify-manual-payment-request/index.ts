@@ -22,8 +22,8 @@ async function sendWhatsApp(message: string, toPhone: string): Promise<void> {
   const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
   const ultraMsgToken = Deno.env.get('ULTRAMSG_TOKEN');
   if (!ultraMsgInstance || !ultraMsgToken) {
-    console.log('[WA] UltraMsg not configured, message would be sent to', toPhone);
-    console.log(message);
+    console.info('[WA] UltraMsg not configured, message would be sent to', toPhone);
+    console.info(message);
     return;
   }
   try {
@@ -37,7 +37,7 @@ async function sendWhatsApp(message: string, toPhone: string): Promise<void> {
       }),
     });
     const out = await r.json();
-    console.log('[WA] sent to', toPhone, out);
+    console.info('[WA] sent to', toPhone, out);
   } catch (err) {
     console.error('[WA] error:', err);
   }
@@ -189,7 +189,7 @@ Deno.serve(async (req) => {
         console.error('[notify-manual-payment-request] resend error:', e);
       }
     } else {
-      console.log('[notify-manual-payment-request] RESEND_API_KEY not set, skipping email');
+      console.info('[notify-manual-payment-request] RESEND_API_KEY not set, skipping email');
     }
 
     // ── In-app notifications for admins ──
