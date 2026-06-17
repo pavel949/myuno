@@ -642,7 +642,7 @@ export default function AirportTransferBooking() {
           setAuthGateOpen(open);
           if (!open) pendingSubmitRef.current = false;
         }}
-        language={language}
+        language={language === 'ru' ? 'ru' : 'en'}
         defaultEmail={formData.email}
         defaultName={formData.name}
         defaultPhone={formData.phone}
