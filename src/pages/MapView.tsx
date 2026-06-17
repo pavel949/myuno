@@ -95,6 +95,7 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
   { value: 'vet', labelEn: 'Vet', labelRu: 'Ветклиники', icon: '🐾' },
   { value: 'flowers', labelEn: 'Flowers', labelRu: 'Цветы', icon: '💐' },
   { value: 'venue', labelEn: 'Venues', labelRu: 'Площадки', icon: '🏛️' },
+  { value: 'event', labelEn: 'Events', labelRu: 'События', icon: '🎉' },
 ];
 
 const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
