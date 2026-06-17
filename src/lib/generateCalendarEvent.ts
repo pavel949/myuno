@@ -54,7 +54,7 @@ export function generatePropertyBookingICS(data: CalendarEventData): string {
     data.hostContact ? `Host: ${data.hostContact}` : '',
     data.bookingId ? `Booking: ${data.bookingId}` : '',
     '',
-    'Powered by myUNO - uno.ae',
+    'Powered by myUNO — myuno.app',
   ].filter(Boolean).join('\\n');
 
   const icsContent = [
