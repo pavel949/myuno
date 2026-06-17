@@ -29,6 +29,8 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const skipNextSearchRef = useRef(false);
 
   // Close on outside click
   useEffect(() => {
