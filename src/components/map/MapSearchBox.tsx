@@ -38,6 +38,8 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
   const [activeIdx, setActiveIdx] = useState(-1);
   /** Persistent id of the user-confirmed selection, drives the visual active badge. */
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  /** Temporary flash highlight after auto-sync (search↔map). */
+  const [flashId, setFlashId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -45,6 +47,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
   const skipNextSearchRef = useRef(false);
   /** When set, after results arrive we highlight an item with matching id (or label fallback). */
   const pendingMatchRef = useRef<{ id?: string; label?: string } | null>(null);
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 
   // Close on outside click
@@ -55,6 +58,23 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
     document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
   }, []);
+
+  const triggerFlash = (id: string) => {
+    if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+    setFlashId(id);
+    flashTimerRef.current = setTimeout(() => setFlashId(null), 1400);
+  };
+
+  // Auto-scroll the selected item into view whenever selection/results change.
+  useEffect(() => {
+    if (!selectedId || !open || !listRef.current) return;
+    const idx = results.findIndex((r) => r.id === selectedId);
+    if (idx < 0) return;
+    const el = listRef.current.querySelectorAll('li')[idx] as HTMLElement | undefined;
+    el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [selectedId, results, open]);
+
+  useEffect(() => () => { if (flashTimerRef.current) clearTimeout(flashTimerRef.current); }, []);
 
   useImperativeHandle(
     ref,
@@ -125,6 +145,10 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
             if (idx < 0) idx = sliced.findIndex((r) => r.label.toLowerCase().includes(needle));
           }
           setActiveIdx(idx >= 0 ? idx : sliced.length > 0 ? 0 : -1);
+          if (idx >= 0) {
+            setSelectedId(sliced[idx].id);
+            triggerFlash(sliced[idx].id);
+          }
           pendingMatchRef.current = null;
         } else {
           setActiveIdx(sliced.length > 0 ? 0 : -1);
@@ -153,6 +177,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
     setResults([]);
     setActiveIdx(-1);
     setSelectedId(r.id);
+    triggerFlash(r.id);
     setOpen(false);
     setLoading(false);
     inputRef.current?.blur();
@@ -241,6 +266,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
               {results.map((r, idx) => {
                 const active = idx === activeIdx;
                 const isSelected = r.id === selectedId;
+                const isFlash = r.id === flashId;
                 return (
                   <li key={r.id} id={`map-search-opt-${idx}`} role="option" aria-selected={active || isSelected}>
                     <button
@@ -248,9 +274,9 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
                       onMouseEnter={() => setActiveIdx(idx)}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handlePick(r)}
-                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none border-l-2 ${
+                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none border-l-2 transition-colors duration-500 ${
                         isSelected ? 'border-l-primary bg-primary/5' : 'border-l-transparent'
-                      } ${active ? 'bg-muted' : 'hover:bg-muted'}`}
+                      } ${active ? 'bg-muted' : 'hover:bg-muted'} ${isFlash ? 'ring-2 ring-primary/60 ring-inset bg-primary/10' : ''}`}
                     >
                       <MapPin className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-primary' : 'text-primary'}`} />
                       <span className="min-w-0 flex-1">
