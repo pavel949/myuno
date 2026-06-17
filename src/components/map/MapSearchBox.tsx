@@ -218,8 +218,6 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
             {language === 'ru' ? 'Актив' : 'Active'}
           </span>
         )}
-        <span style={{ display: 'none' }} aria-hidden="true">
-          {/* original input className kept above; padding tokens swap based on selectedId */}
         {loading ? (
           <Loader2 className="absolute right-3 w-4 h-4 animate-spin text-muted-foreground" />
         ) : query ? (
