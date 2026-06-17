@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { Calendar, Plus, MoreVertical, Edit, Trash2, Clock, Users, MapPin, Loader2 } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
+import { VendorLocationField, VendorLocationValue } from '@/components/vendor/VendorLocationField';
 import { format } from 'date-fns';
 
 const eventCategories = [
