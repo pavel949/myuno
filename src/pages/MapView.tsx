@@ -119,6 +119,14 @@ export default function MapView() {
   const [selectedPrice, setSelectedPrice] = useState<PriceFilter>(initialPrice);
   const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
   const [selected, setSelected] = useState<ClickedMarker>(null);
+  const mapRef = useRef<MapLibreMapHandle | null>(null);
+  const [searchPin, setSearchPin] = useState<MapSearchResult | null>(null);
+
+  const handleSearchSelect = useCallback((r: MapSearchResult) => {
+    setSearchPin(r);
+    mapRef.current?.flyTo(r.lat, r.lng, 16);
+  }, []);
+
 
   // Fetch data from all verticals
   const { data: properties, isLoading: propLoading } = usePropertiesForMap({});
