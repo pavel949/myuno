@@ -29,6 +29,8 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const skipNextSearchRef = useRef(false);
 
   // Close on outside click
   useEffect(() => {
@@ -41,6 +43,10 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
 
   // Debounced search
   useEffect(() => {
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false;
+      return;
+    }
     const q = query.trim();
     if (q.length < 2) {
       setResults([]);
@@ -86,8 +92,14 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
   }, [activeIdx]);
 
   const handlePick = (r: MapSearchResult) => {
+    skipNextSearchRef.current = true;
+    abortRef.current?.abort();
     setQuery(r.label);
+    setResults([]);
+    setActiveIdx(-1);
     setOpen(false);
+    setLoading(false);
+    inputRef.current?.blur();
     onSelect(r);
   };
 
@@ -124,6 +136,7 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
       <div className="relative flex items-center">
         <Search className="absolute left-3 w-4 h-4 text-muted-foreground pointer-events-none" />
         <input
+          ref={inputRef}
           type="text"
           inputMode="search"
           autoComplete="off"
