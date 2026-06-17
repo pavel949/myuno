@@ -458,18 +458,39 @@ export default function MapView() {
             </div>
           ) : (
             <MapLibreMap
+              ref={mapRef}
               center={defaultCenter}
               zoom={11}
               markers={mlMarkers}
               onMarkerClick={handleMarkerClick}
-              fitToMarkers={mlMarkers.length > 0 && mlMarkers.length < 200}
+              fitToMarkers={mlMarkers.length > 0 && mlMarkers.length < 200 && !searchPin}
               className="absolute inset-0"
               locateLabel={language === 'ru' ? 'Найти меня' : 'Find me'}
             />
+          )}
 
+          {searchPin && (
+            <div className="absolute top-3 left-3 right-3 md:right-auto md:max-w-sm bg-card border border-border rounded-md shadow-lg px-3 py-2 z-20 flex items-start gap-2">
+              <span className="text-primary">📍</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-foreground truncate">{searchPin.label}</p>
+                {searchPin.sublabel && (
+                  <p className="text-[11px] text-muted-foreground truncate">{searchPin.sublabel}</p>
+                )}
+              </div>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setSearchPin(null)}
+                className="p-1 rounded hover:bg-muted shrink-0"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           )}
 
           {/* Marker detail panel */}
+
           {selected && (
             <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-sm bg-card border border-border rounded-lg shadow-xl p-3 z-20">
               <button
