@@ -135,6 +135,8 @@ const VendorRestaurants = () => {
       cuisine: (item as any).cuisine || 'thai',
       address: item.address || '',
       district: item.district || '',
+      lat: (item as { lat?: number | null }).lat ?? null,
+      lng: (item as { lng?: number | null }).lng ?? null,
       phone: item.phone || '',
       email: item.email || '',
       cover_image: item.cover_image || '',
