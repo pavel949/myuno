@@ -36,6 +36,8 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(-1);
+  /** Persistent id of the user-confirmed selection, drives the visual active badge. */
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -59,6 +61,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
     () => ({
       setSelection: (label, matchId) => {
         pendingMatchRef.current = { id: matchId, label };
+        if (matchId) setSelectedId(matchId);
         // allow search effect to run and apply the highlight
         skipNextSearchRef.current = false;
         setQuery(label);
@@ -69,6 +72,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
         setQuery('');
         setResults([]);
         setActiveIdx(-1);
+        setSelectedId(null);
         setOpen(false);
         pendingMatchRef.current = null;
       },
@@ -148,6 +152,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
     setQuery(r.label);
     setResults([]);
     setActiveIdx(-1);
+    setSelectedId(r.id);
     setOpen(false);
     setLoading(false);
     inputRef.current?.blur();
@@ -203,8 +208,16 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
           aria-controls="map-search-listbox"
           aria-autocomplete="list"
           aria-activedescendant={activeIdx >= 0 ? `map-search-opt-${activeIdx}` : undefined}
-          className="w-full h-10 pl-9 pr-9 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className={`w-full h-10 pl-9 ${selectedId ? 'pr-20' : 'pr-9'} rounded-md bg-card border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 ${selectedId ? 'border-primary' : 'border-border'}`}
         />
+        {selectedId && !loading && (
+          <span
+            className="absolute right-9 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm bg-primary text-primary-foreground pointer-events-none"
+            aria-label={language === 'ru' ? 'Активный результат' : 'Active result'}
+          >
+            {language === 'ru' ? 'Актив' : 'Active'}
+          </span>
+        )}
         {loading ? (
           <Loader2 className="absolute right-3 w-4 h-4 animate-spin text-muted-foreground" />
         ) : query ? (
@@ -227,25 +240,34 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
             <ul ref={listRef} id="map-search-listbox" role="listbox">
               {results.map((r, idx) => {
                 const active = idx === activeIdx;
+                const isSelected = r.id === selectedId;
                 return (
-                  <li key={r.id} id={`map-search-opt-${idx}`} role="option" aria-selected={active}>
+                  <li key={r.id} id={`map-search-opt-${idx}`} role="option" aria-selected={active || isSelected}>
                     <button
                       type="button"
                       onMouseEnter={() => setActiveIdx(idx)}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handlePick(r)}
-                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none ${active ? 'bg-muted' : 'hover:bg-muted'}`}
+                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none border-l-2 ${
+                        isSelected ? 'border-l-primary bg-primary/5' : 'border-l-transparent'
+                      } ${active ? 'bg-muted' : 'hover:bg-muted'}`}
                     >
-                      <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <MapPin className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-primary' : 'text-primary'}`} />
                       <span className="min-w-0 flex-1">
-                        <span className="block text-sm text-foreground truncate">{r.label}</span>
+                        <span className={`block text-sm truncate ${isSelected ? 'text-foreground font-semibold' : 'text-foreground'}`}>{r.label}</span>
                         {r.sublabel && (
                           <span className="block text-[11px] text-muted-foreground truncate">{r.sublabel}</span>
                         )}
                       </span>
-                      <span className="text-[10px] uppercase text-muted-foreground/70 shrink-0 mt-1">
-                        {r.source === 'local' ? 'POI' : 'OSM'}
-                      </span>
+                      {isSelected ? (
+                        <span className="text-[10px] uppercase font-semibold tracking-wider shrink-0 mt-1 px-1.5 py-0.5 rounded-sm bg-primary text-primary-foreground">
+                          {language === 'ru' ? 'Актив' : 'Active'}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] uppercase text-muted-foreground/70 shrink-0 mt-1">
+                          {r.source === 'local' ? 'POI' : 'OSM'}
+                        </span>
+                      )}
                     </button>
                   </li>
                 );

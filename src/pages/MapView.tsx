@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Loader2, X } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -119,14 +119,19 @@ export default function MapView() {
   const [selectedPrice, setSelectedPrice] = useState<PriceFilter>(initialPrice);
   const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
   const [selected, setSelected] = useState<ClickedMarker>(null);
+  const [activeMarkerId, setActiveMarkerId] = useState<string | undefined>(undefined);
   const mapRef = useRef<MapLibreMapHandle | null>(null);
   const searchBoxRef = useRef<MapSearchBoxHandle | null>(null);
   const [searchPin, setSearchPin] = useState<MapSearchResult | null>(null);
+  const pendingSearchPickRef = useRef<MapSearchResult | null>(null);
 
   const handleSearchSelect = useCallback((r: MapSearchResult) => {
     setSearchPin(r);
     mapRef.current?.flyTo(r.lat, r.lng, 16);
+    pendingSearchPickRef.current = r;
+    setActiveMarkerId(undefined);
   }, []);
+
 
 
   // Fetch data from all verticals
@@ -347,6 +352,7 @@ export default function MapView() {
     const d = m.data as ClickedMarker;
     if (!d) return;
     setSelected(d);
+    setActiveMarkerId(m.id);
     if (d.kind === 'osm') setPlaceDetails(null);
     // Sync search input with the clicked marker and try to highlight matching result.
     const label =
@@ -357,6 +363,22 @@ export default function MapView() {
     if (label) searchBoxRef.current?.setSelection(label, matchId);
     mapRef.current?.flyTo(m.lat, m.lng, Math.max(14, 11));
   }, [language]);
+
+  // After mlMarkers update, if user picked a search result, find the nearest marker and activate it.
+  useEffect(() => {
+    const pick = pendingSearchPickRef.current;
+    if (!pick || mlMarkers.length === 0) return;
+    const EPS = 0.0005; // ~50m
+    const match = mlMarkers.find(
+      (mm) => Math.abs(mm.lat - pick.lat) < EPS && Math.abs(mm.lng - pick.lng) < EPS,
+    );
+    if (match) {
+      setActiveMarkerId(match.id);
+      setSelected(match.data as ClickedMarker);
+    }
+    pendingSearchPickRef.current = null;
+  }, [mlMarkers]);
+
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -475,7 +497,9 @@ export default function MapView() {
               fitToMarkers={mlMarkers.length > 0 && mlMarkers.length < 200 && !searchPin}
               className="absolute inset-0"
               locateLabel={language === 'ru' ? 'Найти меня' : 'Find me'}
+              activeMarkerId={activeMarkerId}
             />
+
           )}
 
           {searchPin && (
@@ -501,15 +525,19 @@ export default function MapView() {
           {/* Marker detail panel */}
 
           {selected && (
-            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-sm bg-card border border-border rounded-lg shadow-xl p-3 z-20">
+            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-sm bg-card border-2 border-primary rounded-lg shadow-xl p-3 z-20 ring-2 ring-primary/20">
+              <span className="absolute -top-2 left-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm bg-primary text-primary-foreground">
+                {language === 'ru' ? 'Активный' : 'Active'}
+              </span>
               <button
                 type="button"
                 aria-label="Close"
-                onClick={() => { setSelected(null); setPlaceDetails(null); }}
+                onClick={() => { setSelected(null); setPlaceDetails(null); setActiveMarkerId(undefined); searchBoxRef.current?.clear(); }}
                 className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
               >
                 <X className="w-4 h-4" />
               </button>
+
 
               {selected.kind === 'vendor' && (() => {
                 const m = selected.marker;
