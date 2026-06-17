@@ -240,25 +240,34 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
             <ul ref={listRef} id="map-search-listbox" role="listbox">
               {results.map((r, idx) => {
                 const active = idx === activeIdx;
+                const isSelected = r.id === selectedId;
                 return (
-                  <li key={r.id} id={`map-search-opt-${idx}`} role="option" aria-selected={active}>
+                  <li key={r.id} id={`map-search-opt-${idx}`} role="option" aria-selected={active || isSelected}>
                     <button
                       type="button"
                       onMouseEnter={() => setActiveIdx(idx)}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => handlePick(r)}
-                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none ${active ? 'bg-muted' : 'hover:bg-muted'}`}
+                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none border-l-2 ${
+                        isSelected ? 'border-l-primary bg-primary/5' : 'border-l-transparent'
+                      } ${active ? 'bg-muted' : 'hover:bg-muted'}`}
                     >
-                      <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <MapPin className={`w-4 h-4 mt-0.5 shrink-0 ${isSelected ? 'text-primary' : 'text-primary'}`} />
                       <span className="min-w-0 flex-1">
-                        <span className="block text-sm text-foreground truncate">{r.label}</span>
+                        <span className={`block text-sm truncate ${isSelected ? 'text-foreground font-semibold' : 'text-foreground'}`}>{r.label}</span>
                         {r.sublabel && (
                           <span className="block text-[11px] text-muted-foreground truncate">{r.sublabel}</span>
                         )}
                       </span>
-                      <span className="text-[10px] uppercase text-muted-foreground/70 shrink-0 mt-1">
-                        {r.source === 'local' ? 'POI' : 'OSM'}
-                      </span>
+                      {isSelected ? (
+                        <span className="text-[10px] uppercase font-semibold tracking-wider shrink-0 mt-1 px-1.5 py-0.5 rounded-sm bg-primary text-primary-foreground">
+                          {language === 'ru' ? 'Актив' : 'Active'}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] uppercase text-muted-foreground/70 shrink-0 mt-1">
+                          {r.source === 'local' ? 'POI' : 'OSM'}
+                        </span>
+                      )}
                     </button>
                   </li>
                 );
