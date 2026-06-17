@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { VendorLocationField } from '@/components/vendor/VendorLocationField';
 import { 
   UtensilsCrossed, 
   Plus, 
