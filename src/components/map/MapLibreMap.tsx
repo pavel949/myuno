@@ -2,6 +2,7 @@ import { useEffect, useRef, useMemo } from 'react';
 import maplibregl, { Map as MlMap, MapGeoJSONFeature, StyleSpecification } from 'maplibre-gl';
 import { Protocol } from 'pmtiles';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import phuketPmtilesAsset from '@/assets/map/phuket.pmtiles.asset.json';
 
 // ---------- pmtiles protocol registration (once per page) ----------
 let protocolRegistered = false;
@@ -14,10 +15,12 @@ function ensurePmtilesProtocol() {
 
 // ---------- Style resolution ----------
 // Priority:
-//   1. VITE_PHUKET_PMTILES_URL → self-hosted Phuket pmtiles (full offline-ready)
-//   2. OpenFreeMap public vector tiles (free, no API key, MapLibre native)
-// Both render via MapLibre GL — no Google dependency.
-const PHUKET_PMTILES_URL = (import.meta.env.VITE_PHUKET_PMTILES_URL as string | undefined) || '';
+//   1. VITE_PHUKET_PMTILES_URL override (custom self-hosted)
+//   2. Bundled CDN asset (Lovable assets-v1 — works offline once cached)
+//   3. OpenFreeMap public vector tiles (network fallback)
+const PHUKET_PMTILES_URL =
+  (import.meta.env.VITE_PHUKET_PMTILES_URL as string | undefined) ||
+  (phuketPmtilesAsset?.url ?? '');
 const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 
 function buildPmtilesStyle(pmtilesUrl: string): StyleSpecification {
