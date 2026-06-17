@@ -365,7 +365,7 @@ export default function MapView() {
   }, [language]);
 
   // After mlMarkers update, if user picked a search result, find the nearest marker and activate it.
-  React.useEffect(() => {
+  useEffect(() => {
     const pick = pendingSearchPickRef.current;
     if (!pick || mlMarkers.length === 0) return;
     const EPS = 0.0005; // ~50m
