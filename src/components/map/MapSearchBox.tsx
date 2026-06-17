@@ -36,6 +36,8 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(-1);
+  /** Persistent id of the user-confirmed selection, drives the visual active badge. */
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
