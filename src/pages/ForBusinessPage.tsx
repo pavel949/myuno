@@ -380,6 +380,13 @@ export default function ForBusinessPage() {
         <html lang={language} />
         <title>{t(UI.metaTitle)}</title>
         <meta name="description" content={t(UI.metaDesc)} />
+        <link rel="canonical" href="https://www.myuno.app/for-business" />
+        <meta property="og:title" content={t(UI.metaTitle)} />
+        <meta property="og:description" content={t(UI.metaDesc)} />
+        <meta property="og:url" content="https://www.myuno.app/for-business" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:title" content={t(UI.metaTitle)} />
+        <meta name="twitter:description" content={t(UI.metaDesc)} />
       </Helmet>
 
       <div className="min-h-screen bg-background">
