@@ -133,7 +133,29 @@ export default function MapView() {
 
   const { restaurants, isLoading: restLoading } = useRestaurants({});
 
-  const isDataLoading = propLoading || salonLoading || restLoading;
+  const useGeoLayer = (table: 'gyms' | 'pharmacies' | 'veterinary_clinics' | 'flower_shops' | 'venues') =>
+    useQuery({
+      queryKey: [`${table}-map`],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from(table)
+          .select('id, name_en, name_ru, lat, lng, cover_image')
+          .eq('is_active', true)
+          .not('lat', 'is', null)
+          .not('lng', 'is', null);
+        if (error) throw error;
+        return data || [];
+      },
+    });
+
+  const { data: gyms, isLoading: gymLoading } = useGeoLayer('gyms');
+  const { data: pharmacies, isLoading: pharmLoading } = useGeoLayer('pharmacies');
+  const { data: vets, isLoading: vetLoading } = useGeoLayer('veterinary_clinics');
+  const { data: flowerShops, isLoading: flowerLoading } = useGeoLayer('flower_shops');
+  const { data: venues, isLoading: venueLoading } = useGeoLayer('venues');
+
+  const isDataLoading =
+    propLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading;
 
   const allMarkers = useMemo<UniversalMarker[]>(() => {
     const markers: UniversalMarker[] = [];
@@ -176,8 +198,34 @@ export default function MapView() {
         });
       }
     });
+
+    const pushGeoLayer = (
+      rows: Array<{ id: string; name_en: string; name_ru: string | null; lat: number | null; lng: number | null; cover_image: string | null }> | undefined,
+      vertical: VerticalFilter,
+    ) => {
+      (rows || []).forEach((row) => {
+        if (row.lat == null || row.lng == null) return;
+        markers.push({
+          id: row.id,
+          name: row.name_en,
+          nameRu: row.name_ru || row.name_en,
+          lat: Number(row.lat),
+          lng: Number(row.lng),
+          rating: 0,
+          priceFrom: 0,
+          image: row.cover_image || undefined,
+          vertical,
+        });
+      });
+    };
+    pushGeoLayer(gyms, 'fitness');
+    pushGeoLayer(pharmacies, 'pharmacy');
+    pushGeoLayer(vets, 'vet');
+    pushGeoLayer(flowerShops, 'flowers');
+    pushGeoLayer(venues, 'venue');
+
     return markers;
-  }, [properties, salons, restaurants]);
+  }, [properties, salons, restaurants, gyms, pharmacies, vets, flowerShops, venues]);
 
   const filteredMarkers = useMemo(() => {
     return allMarkers.filter((m) => {
