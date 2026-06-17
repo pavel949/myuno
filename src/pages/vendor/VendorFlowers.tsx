@@ -215,10 +215,11 @@ const VendorFlowers = () => {
                   <div className="space-y-2"><Label>{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label><Textarea value={formData.description_en} onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))} /></div>
                   <div className="space-y-2"><Label>{isRussian ? 'Описание (RU)' : 'Description (RU)'}</Label><Textarea value={formData.description_ru} onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))} /></div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2"><Label>{isRussian ? 'Адрес' : 'Address'}</Label><Input value={formData.address} onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))} /></div>
-                  <div className="space-y-2"><Label>{isRussian ? 'Телефон' : 'Phone'}</Label><Input value={formData.phone} onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))} /></div>
-                </div>
+                <VendorLocationField
+                  value={{ address: formData.address, lat: formData.lat, lng: formData.lng }}
+                  onChange={(v) => setFormData(prev => ({ ...prev, address: v.address, lat: v.lat, lng: v.lng }))}
+                />
+                <div className="space-y-2"><Label>{isRussian ? 'Телефон' : 'Phone'}</Label><Input value={formData.phone} onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))} /></div>
                 <div className="flex items-center justify-between"><Label>{isRussian ? 'Доставка' : 'Delivery Available'}</Label><Switch checked={formData.delivery_available} onCheckedChange={(v) => setFormData(prev => ({ ...prev, delivery_available: v }))} /></div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2"><Label>{isRussian ? 'Стоимость доставки' : 'Delivery Fee'}</Label><Input type="number" value={formData.delivery_fee} onChange={(e) => setFormData(prev => ({ ...prev, delivery_fee: e.target.value }))} /></div>
