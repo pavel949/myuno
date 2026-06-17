@@ -303,11 +303,29 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
       </div>
 
       {open && (
-        <div className="absolute left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-xl z-30 max-h-80 overflow-y-auto">
+        <div
+          ref={scrollRef}
+          className="absolute left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-xl z-30 max-h-80 overflow-y-auto"
+          style={{ scrollPaddingTop: listOffsetTop, scrollPaddingBottom: listOffsetBottom }}
+        >
+          {results.length > 0 && (
+            <div
+              ref={headerRef}
+              className="sticky top-0 z-10 px-3 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground bg-card/95 backdrop-blur border-b border-border flex items-center justify-between"
+            >
+              <span>
+                {language === 'ru'
+                  ? `${results.length} ${results.length === 1 ? 'результат' : 'результатов'}`
+                  : `${results.length} ${results.length === 1 ? 'result' : 'results'}`}
+              </span>
+              {loading && <Loader2 className="w-3 h-3 animate-spin" />}
+            </div>
+          )}
           {results.length === 0 && !loading ? (
             <div className="px-3 py-2 text-xs text-muted-foreground">{emptyText}</div>
           ) : (
             <ul ref={listRef} id="map-search-listbox" role="listbox">
+
               {results.map((r, idx) => {
                 const active = idx === activeIdx;
                 const isSelected = r.id === selectedId;
