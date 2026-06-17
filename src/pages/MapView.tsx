@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Loader2, X } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -13,7 +13,9 @@ import { useRestaurants } from '@/hooks/useRestaurants';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { isOpenNow } from '@/lib/filterUtils';
-import { MapLibreMap, MapMarker } from '@/components/map/MapLibreMap';
+import { MapLibreMap, MapMarker, MapLibreMapHandle } from '@/components/map/MapLibreMap';
+import { MapSearchBox, MapSearchResult } from '@/components/map/MapSearchBox';
+
 
 type VerticalFilter =
   | 'all'
