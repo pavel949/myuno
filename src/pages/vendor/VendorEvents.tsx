@@ -132,6 +132,8 @@ const VendorEvents = () => {
         spots_left: editingItem ? undefined : parseInt(formData.max_spots) || 50,
         location_name: formData.location_name || null,
         address: formData.address || null,
+        lat: formData.lat,
+        lng: formData.lng,
         cover_image: formData.cover_image || null,
         is_active: formData.is_active,
         is_hot: formData.is_hot,
