@@ -337,15 +337,26 @@ const VendorRestaurants = () => {
                     <Textarea value={formData.description_ru} onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))} />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Адрес' : 'Address'}</Label>
-                    <Input value={formData.address} onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Телефон' : 'Phone'}</Label>
-                    <Input value={formData.phone} onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))} />
-                  </div>
+                <VendorLocationField
+                  value={{
+                    address: formData.address,
+                    lat: formData.lat,
+                    lng: formData.lng,
+                    district: formData.district,
+                  }}
+                  onChange={(v) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      address: v.address,
+                      lat: v.lat,
+                      lng: v.lng,
+                      district: v.district ?? prev.district,
+                    }))
+                  }
+                />
+                <div className="space-y-2">
+                  <Label>{isRussian ? 'Телефон' : 'Phone'}</Label>
+                  <Input value={formData.phone} onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))} />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label>{isRussian ? 'Доставка' : 'Delivery'}</Label>
