@@ -56,6 +56,7 @@ const VendorFlowers = () => {
     setFormData({
       name_en: '', name_ru: '', description_en: '', description_ru: '',
       address: '', phone: '', email: '',
+      lat: null, lng: null,
       cover_image: '',
       delivery_available: true, delivery_fee: '', min_order_amount: '',
       is_active: true,
