@@ -78,7 +78,8 @@ const VendorEvents = () => {
     setFormData({
       title_en: '', title_ru: '', description_en: '', description_ru: '',
       category: 'party', event_date: '', event_time: '', duration_hours: '3',
-      price: '', max_spots: '50', location_name: '', address: '', cover_image: '',
+      price: '', max_spots: '50', location_name: '', address: '',
+      lat: null, lng: null, cover_image: '',
       is_active: true, is_hot: false,
     });
     setEditingItem(null);
