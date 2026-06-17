@@ -1,90 +1,92 @@
+## Проблема
+
+В `src/pages/transport/AirportTransferBooking.tsx` (handleSubmit, строка 241) — если пользователь не залогинен, его выкидывает на `/auth` и вся заполненная форма теряется. Профиль уже подставляется автоматически (useEffect на `profile`, строка 137), но для гостя — пусто, и в конце происходит редирект.
+
 ## Цель
-Дать чёткий ответ: можно ли начинать приглашать поставщиков на платформу прямо сейчас. Аудит, без правок кода — правки оформим отдельной итерацией только если найдём блокеры.
 
-## Что я уже проверил (по коду)
+1. Залогиненный — данные подставляются автоматически, поля редактируемые (уже работает, оставляем).
+2. Гость — может полностью пройти форму без логина; перед оплатой ему предлагается **один из трёх путей**, без потери данных.
+3. Никаких принудительных редиректов на `/auth` с очисткой стейта.
 
-**Точки входа и flow:**
-- `/vendor/join` → `VendorLanding` (преимущества, 4-шаговое объяснение, уровни верификации). Если уже vendor — редирект на `/vendor`.
-- `/vendor/onboarding` → `VendorOnboarding` за `AuthGuard`. Wizard на 3 шага:
-  1. О бизнесе (имя, категория через `CategoryPicker`, телефон) → создаёт `providers` (is_active=false) + `partner_applications` (status=pending) + fire-and-forget `notify-admin-partner-application`.
-  2. Первый листинг (имя, цена, описание, фото) → создаёт `vendor_services` (is_active=false).
-  3. Pending review — статус ожидания модерации.
-- Альтернативная B2C-точка: `/become-partner` (`BecomePartnerPage`) и `/partner/status` для отслеживания.
+## Решение
 
-**Защита от ошибок (уже в коде):**
-- BUG-01: блок на отсутствие email.
-- BUG-09: rollback `providers` если `partner_applications` insert упал.
-- BUG-10: блок дубль-заявок за 7 дней.
+### 1. Персистентность формы (страховка)
+- Сохранять `formData` + `step` в `sessionStorage` под ключом `transfer_booking_draft` на каждом изменении (debounced).
+- Восстанавливать при монтировании страницы.
+- Очищать после успешной оплаты / в `TransferSuccess`.
+- Это гарантирует: даже если что-то пойдёт не так (refresh, случайный редирект, OAuth callback) — форма не теряется.
 
-**Админская модерация:**
-- `/admin/partner-applications` → `PartnerApplicationsAdmin` (фильтры по статусам, статистика, диалог approve/reject).
-- Approve вызывает edge function `approve-partner-application` (C2-fix: сначала активирует `providers.is_active=true` + `vendor_services.is_active=true` + `marketplace_vendors`, создаёт/находит vendor org, добавляет `user_roles.vendor`, и только потом помечает заявку approved). Логика корректная, атомарная по смыслу.
+### 2. Новый шаг "Контакт и аккаунт" (заменяет блокирующий редирект)
 
-## Что нужно проверить вживую (это и есть план)
+В `StepDetails` (или новый мини-блок перед StepPayment) для **гостя** показываем компонент `GuestAuthChoice` с тремя вариантами в одном экране:
 
-### 1. Сквозной прогон Vendor flow на preview (390×800)
-- [ ] Открыть `/vendor/join` неавторизованным → CTA ведёт на `/auth?redirect=/vendor/onboarding`.
-- [ ] Зарегистрироваться тестовым email → редирект в wizard.
-- [ ] Шаг 1: заполнить имя/категорию/телефон → submit. Проверить:
-  - `providers` row создан с `is_active=false`.
-  - `partner_applications` row создан со `status=pending`, `metadata.provider_id` совпадает.
-  - В UI шаг переключился на 2.
-- [ ] Шаг 2: добавить услугу с ценой → `vendor_services` row с `is_active=false`.
-- [ ] Шаг 3: показан экран Pending Review. Кнопки/линки на `/partner/status` работают.
-- [ ] `/partner/status` отображает поданную заявку и текущий статус.
+```text
+┌─────────────────────────────────────┐
+│  Как оформить бронирование?         │
+├─────────────────────────────────────┤
+│ ○ Войти (есть аккаунт)              │
+│   → inline email+password,          │
+│     при успехе профиль подтянется   │
+│                                     │
+│ ● Создать аккаунт за 10 секунд      │
+│   (рекомендуется)                   │
+│   email, пароль (или Google)        │
+│   → автосоздание через signUp,      │
+│     профиль заполняется из формы    │
+│                                     │
+│ ○ Продолжить как гость              │
+│   → заказ создаётся с               │
+│     guest_email/guest_phone,        │
+│     потом ссылка на claim в email   │
+└─────────────────────────────────────┘
+```
 
-### 2. Сквозной прогон админ-модерации
-- [ ] Залогиниться админом, открыть `/admin/partner-applications`.
-- [ ] Найти тест-заявку, нажать Approve.
-- [ ] Проверить в БД:
-  - `partner_applications.status='approved'`.
-  - `providers.is_active=true`.
-  - `vendor_services.is_active=true`.
-  - `user_roles` содержит `role='vendor'` для user_id.
-  - `orgs` / `org_members` — vendor org привязан.
-- [ ] Логи `approve-partner-application` без ошибок.
-- [ ] Письмо одобрения (Resend) ушло — проверить лог.
-- [ ] Сразу после approve: тест-юзер при логине попадает в `/vendor` дашборд и видит свою услугу.
+Все три варианта работают **внутри страницы** (никаких `navigate('/auth')`), формдата сохраняется.
 
-### 3. Прогон Reject-сценария
-- [ ] Подать вторую тест-заявку, отклонить с причиной.
-- [ ] Проверить email отклонения и `rejection_reason` в `partner_applications`.
+### 3. Поведение по веткам
 
-### 4. Видимость на витрине
-- [ ] После approve услуга появляется в публичном каталоге своей категории (например, `/services/<vertical>` или универсальный поиск).
-- [ ] До approve услуга нигде не светится (RLS + is_active=false).
+**Sign in (есть аккаунт):**
+- `supabase.auth.signInWithPassword` inline → onAuthStateChange подхватит профиль → `useEffect [profile]` смержит данные (с приоритетом уже заполненных формой) → дальше оплата.
 
-### 5. Edge cases и риски
-- [ ] Что происходит, если юзер закрыл вкладку между шагом 1 и шагом 2? (`providers` уже есть → при следующем заходе wizard должен корректно подхватить). Проверить ветку `if (createdProviderId) setCurrentStep(1)`.
-- [ ] Двойной submit (защита от спама заявок) — есть anti-dup за 7 дней, ок.
-- [ ] `CategoryPicker` — все 6 кластеров и подкатегории присутствуют, активные, без пустых.
-- [ ] Mobile 375px — формы не ломаются, кнопки ≥44px.
+**Quick signup (рекомендуем):**
+- `supabase.auth.signUp({ email: formData.email, password, options: { data: { full_name: formData.name, phone: formData.phone }}})` — `emailRedirectTo: window.location.href` чтобы вернуться на эту же страницу с восстановленным draft.
+- Сразу после signUp создаём заказ (не ждём верификации email — заказ принадлежит уже созданному auth.user.id).
+- Опционально Google OAuth кнопка: `signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href }})` — после возврата draft восстановится из sessionStorage.
 
-### 6. Сопровождающие материалы (нужны до рассылки приглашений)
-- [ ] Текст инвайт-сообщения для поставщиков (RU/EN) — короткое описание условий, ссылка на `/vendor/join`.
-- [ ] FAQ или раздел Help для поставщика (комиссии, выплаты, сроки модерации, escrow).
-- [ ] Договор партнёра / оферта на `/partner-agreement` — проверить актуальность.
+**Guest checkout:**
+- Снимаем требование `if (!user)` в handleSubmit.
+- В `createOrder` передаём `user_id: null` + поля `guest_email`, `guest_phone` в metadata.
+- Проверяем что RLS на `orders` / `order_participants` / `order_addresses` позволяет INSERT для anon (если нет — добавляем edge function `create-guest-order` с service-role).
+- В письме-подтверждении даём magic-link на claim заказа в будущий аккаунт.
 
-## Технические детали (для разработчика)
+### 4. Залогиненный — никаких изменений в UX
+- Уже работает (строки 137–148): из profile подставляется name/phone/email, поля остаются редактируемыми. Дополнительно: при пустом profile.phone дёргать `user_addresses` / последний заказ как fallback.
 
-- Файлы: `src/pages/vendor/VendorLanding.tsx`, `src/pages/vendor/VendorOnboarding.tsx`, `src/pages/admin/PartnerApplicationsAdmin.tsx`, `supabase/functions/approve-partner-application/`, `supabase/functions/notify-admin-partner-application/`.
-- Таблицы: `providers`, `partner_applications`, `vendor_services`, `marketplace_vendors`, `orgs`, `org_members`, `user_roles`.
-- Edge: `approve-partner-application`, `notify-admin-partner-application`.
-- Что проверять SQL-ами: запросы на `partner_applications`, `providers`, `vendor_services`, `user_roles` после каждого шага.
+## Технические детали
 
-## Деливерабл
+**Файлы для правки:**
+- `src/pages/transport/AirportTransferBooking.tsx` — убрать редирект, добавить draft-persistence, ветвление guest/user в submit
+- `src/components/transport/booking-steps/StepDetails.tsx` — для гостя показать `GuestAuthChoice`
+- `src/components/transport/booking-steps/GuestAuthChoice.tsx` — **новый** компонент (3 варианта auth inline)
+- `src/hooks/useBookingDraft.ts` — **новый** generic хук `(key) => { draft, save, clear }` (пригодится для других букингов: цветы, экскурсии)
+- `src/hooks/useOrders.ts` — поддержать `guest_email`/`guest_phone` (проверить, есть ли уже)
+- Возможно `supabase/functions/create-guest-order/index.ts` — если RLS не пускает anon insert
 
-После прогона я выдам короткий отчёт:
-- **GREEN / YELLOW / RED** по каждому из 6 пунктов.
-- Список багов с приоритетом (P0 = блокер для рассылки, P1 = починить в первой неделе, P2 = бэклог).
-- Рекомендация: «можно начинать инвайтить» / «нужны такие-то P0-фиксы сначала».
+**RLS / БД:**
+- Проверить политики `orders`, `order_participants`, `order_addresses`, `order_items` для `anon`. Если INSERT запрещён — едж-функция `create-guest-order` с service_role.
+- Поле для гостевого заказа: либо `orders.guest_email`/`guest_phone` (если есть), либо metadata jsonb.
 
-## Что НЕ делаю в этой итерации
+**Тексты RU/EN:** все строки в `useLanguage`.
 
-- Никаких правок кода до согласования с тобой по итогам отчёта.
-- Не трогаю дизайн-токены и компоненты вне vendor-flow.
-- Не меняю схему БД и RLS.
+**Generic reuse:** `useBookingDraft` + `GuestAuthChoice` спроектировать так, чтобы потом применить к `FlowerCheckout`, `TaxiBooking`, `ExperienceBooking` (там та же боль).
 
----
+## Что НЕ делаем в этом PR
+- Не трогаем другие букинги (цветы и т.д.) — только трансфер. Но хуки делаем переиспользуемыми для следующего PR.
+- Не делаем кастомный auth UI с подтверждением email — используем `auto_confirm_email` по текущей конфигурации (если выключено — quick signup всё равно работает, заказ создаётся, email с верификацией приходит параллельно).
 
-**Рекомендую:** дай аппрув на этот аудит — я прогоню всё и пришлю отчёт со светофором и списком багов. Если найду P0-блокеры, отдельным сообщением предложу минимальный фикс-пак до публичной рассылки приглашений.
+## Acceptance criteria
+1. Гость заходит на `/transport/airport-transfer`, проходит шаги 1–3, на шаге 4 видит выбор: login / signup / гость. Без редиректа.
+2. После refresh страницы на любом шаге — данные восстановлены.
+3. Залогиненный видит свои name/phone/email подставленными, может править.
+4. Quick signup создаёт аккаунт и заказ без ухода со страницы.
+5. Guest checkout создаёт заказ, привязанный к email, magic-link на claim приходит в письме.

@@ -23,6 +23,8 @@ import { StepVehicle } from '@/components/transport/booking-steps/StepVehicle';
 import { StepDetails } from '@/components/transport/booking-steps/StepDetails';
 import { StepPayment } from '@/components/transport/booking-steps/StepPayment';
 import { TransferSuccess } from '@/components/transport/booking-steps/TransferSuccess';
+import { InlineAuthGate } from '@/components/auth/InlineAuthGate';
+import { useBookingDraft } from '@/hooks/useBookingDraft';
 import type {
   TransferDirection,
   TransferFormData,
@@ -58,6 +60,8 @@ export default function AirportTransferBooking() {
   const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [destinationCoords, setDestinationCoords] = useState<{ lat: number; lng: number; placeId?: string } | null>(null);
   const [nightSurchargeCfg, setNightSurchargeCfg] = useState<{ start: string; end: string; sedan: number; van: number } | null>(null);
+  const [authGateOpen, setAuthGateOpen] = useState(false);
+  const pendingSubmitRef = useRef(false);
 
   const [formData, setFormData] = useState<TransferFormData>({
     direction: (searchParams.get('direction') as TransferDirection) || 'from-airport',
@@ -77,6 +81,22 @@ export default function AirportTransferBooking() {
     meetingSignName: '',
     paymentMethod: 'stripe' as TransferPaymentMethod,
   });
+
+  // Persist the draft so a refresh, OAuth callback, or accidental nav doesn't wipe what the user typed.
+  const { clear: clearDraft } = useBookingDraft(
+    'transfer_airport',
+    { formData, step },
+    (draft) => {
+      if (draft.formData && typeof draft.formData === 'object') {
+        setFormData((prev) => ({ ...prev, ...(draft.formData as TransferFormData) }));
+      }
+      if (typeof draft.step === 'number') {
+        setStep(Math.min(Math.max(draft.step, 0), transferSteps.length - 1));
+      }
+    },
+  );
+
+
 
   // Load night surcharge config once. If the fetch fails or there's no active
   // row the price falls back to the day rate — never silently overcharge.
@@ -239,10 +259,16 @@ export default function AirportTransferBooking() {
 
   const handleSubmit = async () => {
     if (!user) {
-      toast.error(language === 'ru' ? 'Требуется авторизация' : 'Login Required');
-      navigate(APP_ROUTES.AUTH);
+      // Guest reached payment — show inline auth gate instead of redirecting
+      // (which would nuke all the form data they just typed). The draft stays
+      // in sessionStorage; after sign-in/sign-up onAuthStateChange flips
+      // `user`, the effect below auto-resumes handleSubmit.
+      pendingSubmitRef.current = true;
+      setAuthGateOpen(true);
       return;
     }
+
+
 
     // Contact validation (E.164-ish phone + RFC-lite email)
     const phoneDigits = (formData.phone || '').replace(/[^\d]/g, '');
@@ -437,14 +463,28 @@ export default function AirportTransferBooking() {
           // Open in new tab — user keeps the booking-success page in this tab.
           window.open(waUrl, '_blank', 'noopener,noreferrer');
         }
+        clearDraft();
         setIsSuccess(true);
       }
     }
   };
 
+  // Auto-resume submit once the user successfully signs in / signs up via the gate.
+  // pendingSubmitRef guards against double-fire on session refresh.
+  useEffect(() => {
+    if (user && pendingSubmitRef.current && !authGateOpen) {
+      pendingSubmitRef.current = false;
+      // Small tick so any profile-prefill effect lands before submit.
+      setTimeout(() => { handleSubmit(); }, 50);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authGateOpen]);
+
   if (isSuccess) {
     return <TransferSuccess language={language} formData={formData} createdOrderNumber={createdOrderNumber} />;
   }
+
+
 
   if (isLoadingVehicles) {
     return (
@@ -595,6 +635,23 @@ export default function AirportTransferBooking() {
           )}
         </div>
       </div>
+
+      <InlineAuthGate
+        open={authGateOpen}
+        onOpenChange={(open) => {
+          setAuthGateOpen(open);
+          if (!open) pendingSubmitRef.current = false;
+        }}
+        language={language === 'ru' ? 'ru' : 'en'}
+        defaultEmail={formData.email}
+        defaultName={formData.name}
+        defaultPhone={formData.phone}
+        onAuthenticated={() => { /* resume happens via useEffect when `user` flips */ }}
+        contextLine={language === 'ru'
+          ? `Трансфер · ฿${totalPrice.toLocaleString()}`
+          : `Transfer · ฿${totalPrice.toLocaleString()}`}
+      />
     </AppLayout>
   );
 }
+
