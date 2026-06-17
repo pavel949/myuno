@@ -1,8 +1,10 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState, forwardRef, useImperativeHandle } from 'react';
 import maplibregl, { Map as MlMap, MapGeoJSONFeature, StyleSpecification } from 'maplibre-gl';
 import { Protocol } from 'pmtiles';
+import { Crosshair, Loader2 } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import phuketPmtilesAsset from '@/assets/map/phuket.pmtiles.asset.json';
+
 
 // ---------- pmtiles protocol registration (once per page) ----------
 let protocolRegistered = false;
