@@ -72,6 +72,8 @@ const VendorRestaurants = () => {
     cuisine: 'thai',
     address: '',
     district: '',
+    lat: null as number | null,
+    lng: null as number | null,
     phone: '',
     email: '',
     cover_image: '',
