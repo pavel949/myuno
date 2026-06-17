@@ -165,6 +165,8 @@ const VendorBeauty = () => {
       images: salon.images || [],
       address: salon.address || '',
       district: salon.district || '',
+      lat: (salon as { lat?: number | null }).lat ?? null,
+      lng: (salon as { lng?: number | null }).lng ?? null,
       phone: salon.phone || '',
       email: salon.email || '',
       website: salon.website || '',
