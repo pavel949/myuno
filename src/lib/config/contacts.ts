@@ -33,11 +33,11 @@ export const COMPANY_CONTACTS = {
     enabled: true,
   },
   email: {
-    support: 'support@uno.ae',
-    partners: 'partners@uno.ae',
-    press: 'press@uno.ae',
-    privacy: 'privacy@uno.ae',
-    info: 'info@uno.ae',
+    support: 'support@myuno.app',
+    partners: 'partners@myuno.app',
+    press: 'press@myuno.app',
+    privacy: 'privacy@myuno.app',
+    info: 'info@myuno.app',
   },
   social: {
     instagram: 'https://instagram.com/myuno.app',
