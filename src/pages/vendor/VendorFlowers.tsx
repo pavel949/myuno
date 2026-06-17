@@ -94,6 +94,8 @@ const VendorFlowers = () => {
         description_en: formData.description_en || undefined,
         description_ru: formData.description_ru || undefined,
         address: formData.address || undefined,
+        lat: formData.lat ?? undefined,
+        lng: formData.lng ?? undefined,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
         cover_image: formData.cover_image || undefined,
