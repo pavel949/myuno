@@ -170,6 +170,8 @@ const VendorClinics = () => {
       images: clinic.images || [],
       address: clinic.address || '',
       district: clinic.district || '',
+      lat: (clinic as { lat?: number | null }).lat ?? null,
+      lng: (clinic as { lng?: number | null }).lng ?? null,
       phone: clinic.phone || '',
       email: clinic.email || '',
       website: clinic.website || '',
