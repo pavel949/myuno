@@ -1,21 +1,19 @@
 -- Sync catalog_life_map for `entity_type='service'` from the SSOT
 -- `situationCodes` on each ServiceEntry in src/lib/catalog/taxonomy.ts.
 --
--- Until this migration the service-level entries in catalog_life_map were
--- hand-rolled (admin INSERT per new service). The SSOT now declares every
--- (service.id, situation_code) pair via the `situationCodes?: string[]`
--- field, and this migration mirrors it to the DB.
---
--- Idempotent — UNIQUE (entity_type, entity_id, life_situation_id) gates
--- duplicates. Re-running after taxonomy edits will only insert net-new
--- pairs; deletions in the SSOT are NOT mirrored here (a follow-up DELETE
--- can run separately when needed).
+-- catalog_life_map.entity_id is a UUID column (shared with property/bank/etc.
+-- where entity_id references a real table row). Services in the SSOT are
+-- identified by text slugs ('transfer', 'cleaning', …) and do not have a
+-- corresponding table — so we deterministically derive a UUID per slug via
+-- md5('service:' || slug)::uuid. The same slug always maps to the same UUID,
+-- which keeps the UNIQUE (entity_type, entity_id, life_situation_id) gate
+-- idempotent across re-runs and across environments.
 --
 -- weight defaulted to 60 for service entries (between the 80-primary and
 -- 50-tangential bands used by the full-coverage seed). role_scope left
 -- NULL = visible to guest / resident / owner / investor.
 
-WITH pairs (entity_id, code) AS (
+WITH pairs (slug, code) AS (
   VALUES
     -- Arrive cluster
     ('transfer','arrival'),('transfer','first_time'),('transfer','transit'),('transfer','tourist'),('transfer','emergency'),
@@ -92,7 +90,7 @@ WITH pairs (entity_id, code) AS (
     ('advisory','investing'),('advisory','investor'),('advisory','developer'),('advisory','departure')
 )
 INSERT INTO public.catalog_life_map (entity_type, entity_id, life_situation_id, weight, role_scope)
-SELECT 'service', p.entity_id, s.id, 60, NULL
+SELECT 'service', md5('service:' || p.slug)::uuid, s.id, 60, NULL
 FROM pairs p
 JOIN public.life_situations s ON s.code = p.code AND s.is_active = true
 ON CONFLICT (entity_type, entity_id, life_situation_id) DO NOTHING;
