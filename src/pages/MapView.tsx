@@ -120,6 +120,7 @@ export default function MapView() {
   const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
   const [selected, setSelected] = useState<ClickedMarker>(null);
   const mapRef = useRef<MapLibreMapHandle | null>(null);
+  const searchBoxRef = useRef<MapSearchBoxHandle | null>(null);
   const [searchPin, setSearchPin] = useState<MapSearchResult | null>(null);
 
   const handleSearchSelect = useCallback((r: MapSearchResult) => {
