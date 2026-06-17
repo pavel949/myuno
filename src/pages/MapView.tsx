@@ -173,6 +173,47 @@ export default function MapView() {
     },
   });
 
+  // OSM POI layer (OpenStreetMap, ODbL licensed). Loaded on toggle.
+  const [showOsm, setShowOsm] = useState(false);
+  const [osmCategory, setOsmCategory] = useState<string>('all');
+  const { data: osmPois, isLoading: osmLoading } = useQuery({
+    queryKey: ['osm-pois', osmCategory],
+    enabled: showOsm,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const cats = osmCategory === 'all' ? null : [osmCategory];
+      const { data, error } = await supabase.rpc('nearby_pois', {
+        in_lat: 7.88,
+        in_lng: 98.39,
+        in_radius_m: 30000,
+        in_categories: cats,
+        in_limit: 600,
+      });
+      if (error) throw error;
+      return (data || []).filter((p: any) => p.source === 'osm');
+    },
+  });
+
+  const [selectedOsm, setSelectedOsm] = useState<any | null>(null);
+  const [placeDetails, setPlaceDetails] = useState<any | null>(null);
+  const [placeLoading, setPlaceLoading] = useState(false);
+
+  const loadPlaceDetails = useCallback(async (poi: any) => {
+    setPlaceLoading(true);
+    setPlaceDetails(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('place-details', {
+        body: { query: { name: poi.name, lat: poi.lat, lng: poi.lng } },
+      });
+      if (error) throw error;
+      setPlaceDetails((data as any)?.place ?? null);
+    } catch (e) {
+      console.error('[place-details]', e);
+    } finally {
+      setPlaceLoading(false);
+    }
+  }, []);
+
   const isDataLoading =
     propLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading || eventLoading;
 
