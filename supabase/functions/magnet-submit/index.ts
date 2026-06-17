@@ -26,7 +26,8 @@ interface SubmitPayload {
   utm?: Record<string, string | undefined>;
   referer?: string;
   landing_path?: string;
-  user_id?: string | null;
+  // user_id is intentionally NOT accepted from the request body — it would allow
+  // anonymous callers to spoof submissions as any user. Use a verified JWT instead.
 }
 
 function bad(message: string, status = 400) {
