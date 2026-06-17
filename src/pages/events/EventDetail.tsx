@@ -255,6 +255,44 @@ const EventDetail = () => {
           </div>
         )}
 
+        {/* Organizer / creator */}
+        {organizer && (
+          <Card className="mb-6">
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-muted flex-shrink-0 flex items-center justify-center">
+                {organizer.logo_url ? (
+                  <img src={organizer.logo_url} alt={organizer.name} className="w-full h-full object-cover" />
+                ) : (
+                  <Users className="w-5 h-5 text-muted-foreground" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Организатор' : 'Organizer'}</p>
+                <p className="font-medium truncate">{organizer.name}</p>
+              </div>
+              <div className="flex gap-2">
+                {organizer.whatsapp && (
+                  <Button size="icon" variant="outline" asChild>
+                    <a href={`https://wa.me/${organizer.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi! I'm interested in your event "${event.title_en}".`)}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                      <MessageCircle className="w-4 h-4" />
+                    </a>
+                  </Button>
+                )}
+                {organizer.phone && (
+                  <Button size="icon" variant="outline" asChild>
+                    <a href={`tel:${organizer.phone}`} aria-label="Phone"><Phone className="w-4 h-4" /></a>
+                  </Button>
+                )}
+                {organizer.email && (
+                  <Button size="icon" variant="outline" asChild>
+                    <a href={`mailto:${organizer.email}?subject=${encodeURIComponent(`Inquiry: ${event.title_en}`)}`} aria-label="Email"><Mail className="w-4 h-4" /></a>
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Description */}
         <div className="mb-6">
           <h3 className="font-semibold mb-2">{language === 'ru' ? 'Описание' : 'Description'}</h3>
