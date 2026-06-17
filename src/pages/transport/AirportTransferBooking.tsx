@@ -259,10 +259,16 @@ export default function AirportTransferBooking() {
 
   const handleSubmit = async () => {
     if (!user) {
-      toast.error(language === 'ru' ? 'Требуется авторизация' : 'Login Required');
-      navigate(APP_ROUTES.AUTH);
+      // Guest reached payment — show inline auth gate instead of redirecting
+      // (which would nuke all the form data they just typed). The draft stays
+      // in sessionStorage; after sign-in/sign-up onAuthStateChange flips
+      // `user`, the effect below auto-resumes handleSubmit.
+      pendingSubmitRef.current = true;
+      setAuthGateOpen(true);
       return;
     }
+
+
 
     // Contact validation (E.164-ish phone + RFC-lite email)
     const phoneDigits = (formData.phone || '').replace(/[^\d]/g, '');
