@@ -38,6 +38,8 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
   const [activeIdx, setActiveIdx] = useState(-1);
   /** Persistent id of the user-confirmed selection, drives the visual active badge. */
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  /** Temporary flash highlight after auto-sync (search↔map). */
+  const [flashId, setFlashId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -45,6 +47,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
   const skipNextSearchRef = useRef(false);
   /** When set, after results arrive we highlight an item with matching id (or label fallback). */
   const pendingMatchRef = useRef<{ id?: string; label?: string } | null>(null);
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 
   // Close on outside click
