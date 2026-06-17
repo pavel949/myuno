@@ -252,15 +252,25 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
     markersRef.current = [];
 
     markers.forEach((m) => {
+      const isActive = activeMarkerId === m.id;
       const el = document.createElement('button');
       el.type = 'button';
       el.setAttribute('aria-label', m.title || m.id);
+      el.setAttribute('data-marker-id', m.id);
+      if (isActive) el.setAttribute('data-active', 'true');
+      const size = isActive ? 36 : 28;
+      const ring = isActive
+        ? 'box-shadow: 0 0 0 3px hsl(var(--primary)), 0 0 0 6px hsl(var(--background)), 0 4px 10px rgba(0,0,0,0.5);'
+        : 'box-shadow: 0 2px 6px rgba(0,0,0,0.4);';
       el.style.cssText = `
-        width: 28px; height: 28px; border-radius: 9999px; cursor: pointer;
-        background: ${m.color || '#00D68F'}; color: #08101E; font-size: 14px;
+        width: ${size}px; height: ${size}px; border-radius: 9999px; cursor: pointer;
+        background: ${m.color || '#00D68F'}; color: #08101E; font-size: ${isActive ? 16 : 14}px;
         display: flex; align-items: center; justify-content: center;
-        border: 2px solid rgba(255,255,255,0.85); box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        border: 2px solid rgba(255,255,255,0.95);
+        ${ring}
         padding: 0; line-height: 1;
+        transition: width 150ms ease, height 150ms ease, box-shadow 150ms ease;
+        z-index: ${isActive ? 10 : 1};
       `;
       el.textContent = m.icon || '•';
       el.addEventListener('click', (e) => {
