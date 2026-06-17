@@ -43,6 +43,10 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
 
   // Debounced search
   useEffect(() => {
+    if (skipNextSearchRef.current) {
+      skipNextSearchRef.current = false;
+      return;
+    }
     const q = query.trim();
     if (q.length < 2) {
       setResults([]);
