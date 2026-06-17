@@ -1,105 +1,35 @@
-# План: офлайн-карта Пхукета на MapLibre
-
 ## Цель
-Заменить Google Maps на `/map` на MapLibre GL JS с локальными векторными тайлами Пхукета, чтобы карта работала полностью офлайн (PWA precache) без зависимости от Google.
+Сделать прокрутку списка результатов поиска (`MapSearchBox`) плавной и убедиться, что активный пункт никогда не оказывается под верхним/нижним sticky-элементом или заголовком выпадашки.
 
-## Архитектура
+## Что меняется (только `src/components/map/MapSearchBox.tsx`)
 
-```text
-┌─ Сборка тайлов (one-off, локально/CI) ─┐
-│ Geofabrik thailand-latest.osm.pbf      │
-│   ↓ osmium extract (Phuket bbox)       │
-│ phuket.osm.pbf (~15 MB)                │
-│   ↓ tilemaker + OpenMapTiles schema    │
-│ phuket.mbtiles (z6–z14, ~25–40 MB)     │
-│   ↓ mb-util / pmtiles convert          │
-│ phuket.pmtiles (один файл, range-req)  │
-└────────────────────────────────────────┘
-                  ↓ upload
-        Supabase Storage: map-tiles/phuket.pmtiles (public bucket)
-                  ↓
-┌─ Frontend ─────────────────────────────┐
-│ MapLibre GL JS + pmtiles protocol      │
-│ Style: OSM Bright (self-hosted JSON)   │
-│ Glyphs/sprites: Storage map-assets/    │
-│ Слои поверх: vendor markers + OSM POI  │
-│   (через nearby_pois RPC)              │
-└────────────────────────────────────────┘
-                  ↓
-┌─ Офлайн (PWA) ─────────────────────────┐
-│ vite-plugin-pwa: precache pmtiles +    │
-│ style.json + glyphs/sprites            │
-│ Workbox CacheFirst для tiles URL       │
-└────────────────────────────────────────┘
-```
+1. **Единый помощник `scrollItemIntoView(idx)`**
+   - Заменяет два текущих эффекта (`activeIdx`-scroll и `selectedId`-scroll), которые сейчас вызывают `el.scrollIntoView({ block: 'nearest' })` без `behavior: 'smooth'` и без учёта офсетов.
+   - Считает позицию вручную через `offsetTop` / `offsetHeight` относительно scroll-контейнера (`<div class="max-h-80 overflow-y-auto">`), а не через `scrollIntoView` — это позволяет корректно учитывать офсеты и не «дёргать» внешнюю страницу (родительский скролл не трогается).
+   - Использует `scrollTo({ top, behavior: 'smooth' })`. Если у пользователя включено `prefers-reduced-motion: reduce` — fallback на `behavior: 'auto'`.
 
-## Шаги
+2. **Учёт sticky-офсетов сверху/снизу**
+   - Добавляю новые опциональные пропсы:
+     - `listOffsetTop?: number` (по умолчанию `0`) — высота sticky-шапки/бейджа над списком.
+     - `listOffsetBottom?: number` (по умолчанию `0`) — высота sticky-футера/safe-area.
+   - В `scrollItemIntoView` пункт считается «видимым», только если
+     `item.top >= scrollTop + offsetTop` и `item.bottom <= scrollTop + clientHeight - offsetBottom`.
+     Иначе доскролл: если выше — `scrollTop = item.top - offsetTop - 8` (8px воздуха); если ниже — `scrollTop = item.bottom - clientHeight + offsetBottom + 8`.
 
-### 1. Сборка тайлов (выполняется один раз в sandbox)
-Скрипт `scripts/build-phuket-tiles.sh`:
-- `curl` Geofabrik thailand-latest.osm.pbf (~700 MB)
-- `nix run nixpkgs#osmium-tool -- extract --bbox 98.2,7.7,98.5,8.2 -o phuket.osm.pbf`
-- `nix run nixpkgs#tilemaker -- --input phuket.osm.pbf --output phuket.mbtiles` (OpenMapTiles config)
-- `nix run nixpkgs#go-pmtiles -- convert phuket.mbtiles phuket.pmtiles`
-- Залить в Supabase Storage `map-tiles` через `supabase--storage_upload`
+3. **Sticky-заголовок внутри dropdown (счётчик результатов)**
+   - Чтобы офсет реально что-то значил, добавляю компактную sticky-шапку `position: sticky; top: 0` высотой ~28px со счётчиком («N результатов» / «N results») и индикатором загрузки.
+   - Передаю её высоту во внутренний расчёт через ref (`headerRef.current?.offsetHeight`), плюс прибавляется внешний `listOffsetTop` пропс — итоговый офсет = sticky-шапка + внешний.
 
-Тайлы z6–z14 покрывают остров целиком до уровня улиц. Размер ~25–40 MB — приемлемо для PWA precache на мобильном.
+4. **Совместимость с keyboard-навигацией и flash**
+   - `scrollItemIntoView` вызывается из трёх мест: смена `activeIdx` (стрелки/hover), смена `selectedId` (sync из карты), `triggerFlash` (после `handlePick`).
+   - Все три ветки получают одинаковую плавную прокрутку с офсетами.
 
-### 2. Storage buckets
-- `map-tiles` (public, immutable cache headers) — pmtiles
-- `map-assets` (public) — style.json, glyphs (PBF шрифты Noto Sans), sprites
+## Что НЕ меняется
+- API `MapSearchBoxHandle`, логика поиска, сетевые запросы, разметка карточек результатов, визуальный «Актив» бейдж и flash-стили.
+- `MapView.tsx` — изменений не требуется; новые пропсы опциональны.
 
-### 3. Зависимости
-```
-bun add maplibre-gl pmtiles
-```
-
-### 4. Новый компонент `src/components/map/MapLibreMap.tsx`
-- Регистрирует `pmtiles` protocol
-- Загружает style.json (self-hosted OSM Bright адаптированный под deep-sea тему)
-- Принимает `markers`, `onMarkerClick`, `center`, `zoom`
-- Layer для vendor markers (GeoJSON source из props)
-- Layer для OSM POI (из `nearby_pois` RPC)
-- Кнопка "Center on me" (`navigator.geolocation`)
-- Attribution: «© OpenStreetMap contributors»
-
-### 5. Рефакторинг `src/pages/MapView.tsx`
-- Заменить `@react-google-maps/api` `<GoogleMap/>` на `<MapLibreMap/>`
-- Убрать `loadScript`/API key зависимости
-- Сохранить существующие фильтры, попапы, интеграцию с `place-details` (Google details по тапу остаются опциональной обогащающей деталью)
-
-### 6. PWA precache
-- Подключить `vite-plugin-pwa` (если не подключён) с `generateSW`
-- `workbox.runtimeCaching`:
-  - `phuket.pmtiles` → CacheFirst, 90 дней
-  - `map-assets/*` → CacheFirst, 90 дней
-- Следовать skill/pwa: registration только в prod, guard для Lovable preview
-- Размер precache: ~40 MB pmtiles + ~2 MB assets
-
-### 7. Удалить/деприкейтить
-- Не удаляем Google Maps SDK сразу — оставляем для `place-details` обогащения и других страниц (`property/*`, и т.д.)
-- На `/map` Google больше не грузится
-
-## Технические детали
-
-**pmtiles vs mbtiles в браузере:** pmtiles работает через HTTP Range requests, не требует серверной части. mbtiles — это SQLite, нужен либо backend, либо предварительная конверсия в pmtiles. Выбираем pmtiles.
-
-**Стиль:** берём OSM Bright за основу (open source, BSD-3), модифицируем под токены `--background #08101E`, accent `#00D68F`. Файл `public/map-style/phuket-dark.json`.
-
-**Шрифты для labels:** Noto Sans Regular + Bold в PBF формате (~500 KB), хостим в `map-assets`.
-
-**Размер бандла:** maplibre-gl ~200 KB gz, pmtiles ~15 KB gz. Лениво грузим только на `/map`.
-
-## Что НЕ входит
-- Полнотекстовый поиск по тайлам (используем существующий Super Search)
-- Routing/навигация (отдельная задача, нужен OSRM)
-- 3D-здания (z14 максимум, плоская карта)
-- Замена Google Maps на других страницах (`property/*`, owner views) — отдельная итерация
-
-## Риски
-- **Сборка тайлов в sandbox долгая** (5–10 мин на thailand.osm.pbf). Если timeout — режем bbox раньше через Overpass.
-- **40 MB precache** — на медленном 3G первая загрузка PWA займёт минуту. Делаем lazy precache: тайлы кэшируются по факту использования, не на install.
-- **Стиль OSM Bright** требует кастомизации, чтобы соответствовать deep-sea theme — отдельная работа дизайнера, на старте отдадим базовый dark.
-
-## Готовность к итерациям
-После MVP можно добавить: маршрутизация (OSRM), геокодинг офлайн (Pelias-lite), сателлитный слой (Maxar tiles по подписке).
+## Acceptance criteria
+- При перемещении стрелками вниз за пределы видимой части список доскролливается плавно, активный пункт оказывается полностью под sticky-счётчиком (не перекрыт).
+- При клике на маркер карты соответствующая карточка подсвечивается и плавно прокручивается в видимую зону с зазором ≥8px от верхнего и нижнего края.
+- Если пользователь включил «уменьшить движение» — анимация отключается, но офсеты по-прежнему учитываются.
+- Внешний скролл страницы не двигается, когда автоскролл срабатывает внутри dropdown.

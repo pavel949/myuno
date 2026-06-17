@@ -22,13 +22,17 @@ interface MapSearchBoxProps {
   onSelect: (result: MapSearchResult) => void;
   language?: 'ru' | 'en';
   className?: string;
+  /** Extra px reserved at the top of the dropdown scroll area (e.g. external sticky header). */
+  listOffsetTop?: number;
+  /** Extra px reserved at the bottom of the dropdown scroll area (e.g. safe area / sticky footer). */
+  listOffsetBottom?: number;
 }
 
 // Phuket bbox (south,west,north,east) for Nominatim viewbox bias
 const PHUKET_VIEWBOX = '98.20,7.70,98.55,8.25';
 
 export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(function MapSearchBox(
-  { onSelect, language = 'ru', className },
+  { onSelect, language = 'ru', className, listOffsetTop = 0, listOffsetBottom = 0 },
   ref,
 ) {
   const [query, setQuery] = useState('');
@@ -42,12 +46,50 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
   const [flashId, setFlashId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const skipNextSearchRef = useRef(false);
   /** When set, after results arrive we highlight an item with matching id (or label fallback). */
   const pendingMatchRef = useRef<{ id?: string; label?: string } | null>(null);
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /**
+   * Smoothly scroll the dropdown so that the item at `idx` is fully visible,
+   * honouring the internal sticky header height plus external sticky offsets.
+   */
+  const scrollItemIntoView = (idx: number) => {
+    const scroller = scrollRef.current;
+    const list = listRef.current;
+    if (!scroller || !list || idx < 0) return;
+    const item = list.querySelectorAll('li')[idx] as HTMLElement | undefined;
+    if (!item) return;
+
+    const headerH = headerRef.current?.offsetHeight ?? 0;
+    const padTop = headerH + listOffsetTop + 8;
+    const padBottom = listOffsetBottom + 8;
+
+    const itemTop = item.offsetTop;
+    const itemBottom = itemTop + item.offsetHeight;
+    const viewTop = scroller.scrollTop;
+    const viewBottom = viewTop + scroller.clientHeight;
+
+    let target: number | null = null;
+    if (itemTop < viewTop + padTop) {
+      target = Math.max(0, itemTop - padTop);
+    } else if (itemBottom > viewBottom - padBottom) {
+      target = itemBottom - scroller.clientHeight + padBottom;
+    }
+    if (target == null) return;
+
+    const reduce =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    scroller.scrollTo({ top: target, behavior: reduce ? 'auto' : 'smooth' });
+  };
+
+
 
 
   // Close on outside click
@@ -67,12 +109,14 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
 
   // Auto-scroll the selected item into view whenever selection/results change.
   useEffect(() => {
-    if (!selectedId || !open || !listRef.current) return;
+    if (!selectedId || !open) return;
     const idx = results.findIndex((r) => r.id === selectedId);
     if (idx < 0) return;
-    const el = listRef.current.querySelectorAll('li')[idx] as HTMLElement | undefined;
-    el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    // Wait a frame so the dropdown / sticky header has its final layout.
+    const raf = requestAnimationFrame(() => scrollItemIntoView(idx));
+    return () => cancelAnimationFrame(raf);
   }, [selectedId, results, open]);
+
 
   useEffect(() => () => { if (flashTimerRef.current) clearTimeout(flashTimerRef.current); }, []);
 
@@ -163,12 +207,13 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Scroll active item into view
+  // Scroll active (keyboard / hover) item into view, smoothly + offset-aware.
   useEffect(() => {
-    if (activeIdx < 0 || !listRef.current) return;
-    const el = listRef.current.querySelectorAll('li')[activeIdx] as HTMLElement | undefined;
-    el?.scrollIntoView({ block: 'nearest' });
-  }, [activeIdx]);
+    if (activeIdx < 0 || !open) return;
+    const raf = requestAnimationFrame(() => scrollItemIntoView(activeIdx));
+    return () => cancelAnimationFrame(raf);
+  }, [activeIdx, open]);
+
 
   const handlePick = (r: MapSearchResult) => {
     skipNextSearchRef.current = true;
@@ -258,11 +303,29 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
       </div>
 
       {open && (
-        <div className="absolute left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-xl z-30 max-h-80 overflow-y-auto">
+        <div
+          ref={scrollRef}
+          className="absolute left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-xl z-30 max-h-80 overflow-y-auto"
+          style={{ scrollPaddingTop: listOffsetTop, scrollPaddingBottom: listOffsetBottom }}
+        >
+          {results.length > 0 && (
+            <div
+              ref={headerRef}
+              className="sticky top-0 z-10 px-3 py-1.5 text-[11px] uppercase tracking-wider text-muted-foreground bg-card/95 backdrop-blur border-b border-border flex items-center justify-between"
+            >
+              <span>
+                {language === 'ru'
+                  ? `${results.length} ${results.length === 1 ? 'результат' : 'результатов'}`
+                  : `${results.length} ${results.length === 1 ? 'result' : 'results'}`}
+              </span>
+              {loading && <Loader2 className="w-3 h-3 animate-spin" />}
+            </div>
+          )}
           {results.length === 0 && !loading ? (
             <div className="px-3 py-2 text-xs text-muted-foreground">{emptyText}</div>
           ) : (
             <ul ref={listRef} id="map-search-listbox" role="listbox">
+
               {results.map((r, idx) => {
                 const active = idx === activeIdx;
                 const isSelected = r.id === selectedId;
