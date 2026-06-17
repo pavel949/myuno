@@ -232,7 +232,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
       )}
     </div>
   );
-}
+});
 
 async function searchLocal(q: string): Promise<MapSearchResult[]> {
   const pattern = `%${q.replace(/[%_]/g, (m) => `\\${m}`)}%`;
