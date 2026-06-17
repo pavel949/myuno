@@ -136,6 +136,7 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
       <div className="relative flex items-center">
         <Search className="absolute left-3 w-4 h-4 text-muted-foreground pointer-events-none" />
         <input
+          ref={inputRef}
           type="text"
           inputMode="search"
           autoComplete="off"
