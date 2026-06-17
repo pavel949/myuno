@@ -109,12 +109,14 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
 
   // Auto-scroll the selected item into view whenever selection/results change.
   useEffect(() => {
-    if (!selectedId || !open || !listRef.current) return;
+    if (!selectedId || !open) return;
     const idx = results.findIndex((r) => r.id === selectedId);
     if (idx < 0) return;
-    const el = listRef.current.querySelectorAll('li')[idx] as HTMLElement | undefined;
-    el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    // Wait a frame so the dropdown / sticky header has its final layout.
+    const raf = requestAnimationFrame(() => scrollItemIntoView(idx));
+    return () => cancelAnimationFrame(raf);
   }, [selectedId, results, open]);
+
 
   useEffect(() => () => { if (flashTimerRef.current) clearTimeout(flashTimerRef.current); }, []);
 
