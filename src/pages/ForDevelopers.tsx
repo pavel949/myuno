@@ -55,21 +55,28 @@ export default function ForDevelopers() {
 
   return (
     <AppLayout showHeader={false}>
-      <Helmet>
-        <title>
-          {isRu
-            ? 'Застройщикам Пхукета — myUNO | Проекты и лиды'
-            : 'Phuket developers — myUNO | Projects & leads'}
-        </title>
-        <meta
-          name="description"
-          content={
-            isRu
-              ? 'Размещение проектов, лиды инвесторов и релокантов, премиальная витрина новостроек на myUNO.'
-              : 'List projects, capture investor and relocator leads, premium newbuilds placement on myUNO.'
-          }
-        />
-      </Helmet>
+      {(() => {
+        const title = isRu
+          ? 'Застройщикам Пхукета — myUNO | Проекты и лиды'
+          : 'Phuket developers — myUNO | Projects & leads';
+        const description = isRu
+          ? 'Размещение проектов, лиды инвесторов и релокантов, премиальная витрина новостроек на myUNO.'
+          : 'List projects, capture investor and relocator leads, premium newbuilds placement on myUNO.';
+        const url = 'https://www.myuno.app/for-developers';
+        return (
+          <Helmet>
+            <title>{title}</title>
+            <meta name="description" content={description} />
+            <link rel="canonical" href={url} />
+            <meta property="og:title" content={title} />
+            <meta property="og:description" content={description} />
+            <meta property="og:url" content={url} />
+            <meta property="og:type" content="website" />
+            <meta name="twitter:title" content={title} />
+            <meta name="twitter:description" content={description} />
+          </Helmet>
+        );
+      })()}
 
       <div className="min-h-screen bg-background">
         <LandingChrome isRu={isRu} />

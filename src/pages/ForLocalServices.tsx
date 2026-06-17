@@ -54,21 +54,28 @@ export default function ForLocalServices() {
 
   return (
     <AppLayout showHeader={false}>
-      <Helmet>
-        <title>
-          {isRu
-            ? 'Локальным сервисам Пхукета — myUNO | Партнёрская программа'
-            : 'Local services Phuket — myUNO | Partner program'}
-        </title>
-        <meta
-          name="description"
-          content={
-            isRu
-              ? 'Подключайте клининг, ремонт, туры и другие услуги к маркетплейсу myUNO. Заявка и онбординг партнёра.'
-              : 'Connect cleaning, repairs, tours and more to the myUNO marketplace. Partner application and onboarding.'
-          }
-        />
-      </Helmet>
+      {(() => {
+        const title = isRu
+          ? 'Локальным сервисам Пхукета — myUNO | Партнёрская программа'
+          : 'Local services Phuket — myUNO | Partner program';
+        const description = isRu
+          ? 'Подключайте клининг, ремонт, туры и другие услуги к маркетплейсу myUNO. Заявка и онбординг партнёра.'
+          : 'Connect cleaning, repairs, tours and more to the myUNO marketplace. Partner application and onboarding.';
+        const url = 'https://www.myuno.app/for-local-services';
+        return (
+          <Helmet>
+            <title>{title}</title>
+            <meta name="description" content={description} />
+            <link rel="canonical" href={url} />
+            <meta property="og:title" content={title} />
+            <meta property="og:description" content={description} />
+            <meta property="og:url" content={url} />
+            <meta property="og:type" content="website" />
+            <meta name="twitter:title" content={title} />
+            <meta name="twitter:description" content={description} />
+          </Helmet>
+        );
+      })()}
 
       <div className="min-h-screen bg-background">
         <LandingChrome isRu={isRu} />
