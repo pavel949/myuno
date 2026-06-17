@@ -19,6 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner';
 import { Flower2, Plus, MoreVertical, Edit, Trash2, Loader2, Star, MapPin, Truck } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { VendorLocationField } from '@/components/vendor/VendorLocationField';
 
 const VendorFlowers = () => {
   const navigate = useNavigate();
