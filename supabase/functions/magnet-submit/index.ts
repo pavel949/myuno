@@ -70,6 +70,10 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(supabaseUrl, serviceKey);
 
+  // Derive user_id from a verified JWT only — never trust the request body.
+  const authUser = await optionalAuth(req);
+  const verifiedUserId = authUser?.id ?? null;
+
   // Look up magnet
   const { data: magnet } = await supabase
     .from('lead_magnets')
