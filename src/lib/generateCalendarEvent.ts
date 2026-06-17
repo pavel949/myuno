@@ -26,7 +26,7 @@ function formatICSDate(date: Date, time?: string): string {
 }
 
 function generateUID(): string {
-  return `${Date.now()}-${crypto.randomUUID().slice(0, 12)}@myuno.ae`;
+  return `${Date.now()}-${crypto.randomUUID().slice(0, 12)}@myuno.app`;
 }
 
 function escapeICS(text: string): string {
