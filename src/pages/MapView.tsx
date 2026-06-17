@@ -449,10 +449,37 @@ export default function MapView() {
             </FilterChipGroup>
           </div>
 
+          {/* OSM POI layer toggle (OpenStreetMap data, ODbL) */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              {language === 'ru' ? 'OSM места (OpenStreetMap)' : 'OSM places (OpenStreetMap)'}
+            </p>
+            <FilterChipGroup scrollable>
+              <FilterChip
+                label={language === 'ru' ? (showOsm ? 'Скрыть OSM' : 'Показать OSM') : (showOsm ? 'Hide OSM' : 'Show OSM')}
+                icon="🗺️"
+                isActive={showOsm}
+                onToggle={() => setShowOsm((v) => !v)}
+                size="md"
+              />
+              {showOsm && ['all','hotel','restaurant','pharmacy','clinic','attraction','beach','park','shop','finance','fuel','education','worship','civic','fitness','vet'].map((c) => (
+                <FilterChip
+                  key={c}
+                  label={c === 'all' ? (language === 'ru' ? 'Все OSM' : 'All OSM') : c}
+                  isActive={osmCategory === c}
+                  onToggle={() => setOsmCategory(c)}
+                  size="md"
+                />
+              ))}
+            </FilterChipGroup>
+          </div>
+
           {!showLoading && (
             <div className="flex items-center justify-between gap-2 pt-1">
               <p className="text-xs text-muted-foreground">
-                {filteredMarkers.length} {language === 'ru' ? 'локаций' : 'locations'}
+                {filteredMarkers.length}
+                {showOsm ? ` + ${osmPois?.length ?? 0} OSM` : ''}{' '}
+                {language === 'ru' ? 'локаций' : 'locations'}
               </p>
               {activeFilterCount > 0 && (
                 <button
@@ -468,6 +495,20 @@ export default function MapView() {
             </div>
           )}
         </div>
+
+        <div className="flex-1 relative min-h-0">
+          {showLoading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-card">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : mapError ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-card p-6 text-center">
+              <p className="text-muted-foreground">{mapError}</p>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                {language === 'ru'
+                  ? 'Задайте VITE_GOOGLE_MAPS_API_KEY в .env и включите Maps JavaScript API в Google Cloud.'
+                  : 'Set VITE_GOOGLE_MAPS_API_KEY in .env and enable Maps JavaScript API in Google Cloud.'}
+              </p>
 
         <div className="flex-1 relative min-h-0">
           {showLoading ? (
