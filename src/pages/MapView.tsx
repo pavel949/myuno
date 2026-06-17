@@ -157,8 +157,24 @@ export default function MapView() {
   const { data: flowerShops, isLoading: flowerLoading } = useGeoLayer('flower_shops');
   const { data: venues, isLoading: venueLoading } = useGeoLayer('venues');
 
+  const { data: events, isLoading: eventLoading } = useQuery({
+    queryKey: ['events-map'],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, title_en, title_ru, lat, lng, cover_image, price, event_date')
+        .eq('is_active', true)
+        .not('lat', 'is', null)
+        .not('lng', 'is', null)
+        .or(`event_date.is.null,event_date.gte.${today}`);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const isDataLoading =
-    propLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading;
+    propLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading || eventLoading;
 
   const allMarkers = useMemo<UniversalMarker[]>(() => {
     const markers: UniversalMarker[] = [];
