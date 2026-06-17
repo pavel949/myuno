@@ -649,6 +649,11 @@ export default function MapView() {
               )}
             </GoogleMap>
           )}
+          {showOsm && (
+            <div className="absolute bottom-1 right-1 bg-background/80 text-[10px] text-muted-foreground px-2 py-0.5 rounded">
+              © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="underline">OpenStreetMap</a> contributors
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>
