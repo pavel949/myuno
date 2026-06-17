@@ -170,6 +170,8 @@ const VendorFitness = () => {
       images: gym.images || [],
       address: gym.address || '',
       district: gym.district || '',
+      lat: (gym as { lat?: number | null }).lat ?? null,
+      lng: (gym as { lng?: number | null }).lng ?? null,
       phone: gym.phone || '',
       email: gym.email || '',
       website: gym.website || '',
