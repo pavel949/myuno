@@ -463,14 +463,28 @@ export default function AirportTransferBooking() {
           // Open in new tab — user keeps the booking-success page in this tab.
           window.open(waUrl, '_blank', 'noopener,noreferrer');
         }
+        clearDraft();
         setIsSuccess(true);
       }
     }
   };
 
+  // Auto-resume submit once the user successfully signs in / signs up via the gate.
+  // pendingSubmitRef guards against double-fire on session refresh.
+  useEffect(() => {
+    if (user && pendingSubmitRef.current && !authGateOpen) {
+      pendingSubmitRef.current = false;
+      // Small tick so any profile-prefill effect lands before submit.
+      setTimeout(() => { handleSubmit(); }, 50);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authGateOpen]);
+
   if (isSuccess) {
     return <TransferSuccess language={language} formData={formData} createdOrderNumber={createdOrderNumber} />;
   }
+
+
 
   if (isLoadingVehicles) {
     return (
