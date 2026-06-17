@@ -525,15 +525,19 @@ export default function MapView() {
           {/* Marker detail panel */}
 
           {selected && (
-            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-sm bg-card border border-border rounded-lg shadow-xl p-3 z-20">
+            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-sm bg-card border-2 border-primary rounded-lg shadow-xl p-3 z-20 ring-2 ring-primary/20">
+              <span className="absolute -top-2 left-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm bg-primary text-primary-foreground">
+                {language === 'ru' ? 'Активный' : 'Active'}
+              </span>
               <button
                 type="button"
                 aria-label="Close"
-                onClick={() => { setSelected(null); setPlaceDetails(null); }}
+                onClick={() => { setSelected(null); setPlaceDetails(null); setActiveMarkerId(undefined); searchBoxRef.current?.clear(); }}
                 className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
               >
                 <X className="w-4 h-4" />
               </button>
+
 
               {selected.kind === 'vendor' && (() => {
                 const m = selected.marker;
