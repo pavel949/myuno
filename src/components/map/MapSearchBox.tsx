@@ -54,6 +54,30 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
     return () => document.removeEventListener('mousedown', onDocClick);
   }, []);
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      setSelection: (label, matchId) => {
+        pendingMatchRef.current = { id: matchId, label };
+        // allow search effect to run and apply the highlight
+        skipNextSearchRef.current = false;
+        setQuery(label);
+        setOpen(true);
+      },
+      clear: () => {
+        skipNextSearchRef.current = true;
+        setQuery('');
+        setResults([]);
+        setActiveIdx(-1);
+        setOpen(false);
+        pendingMatchRef.current = null;
+      },
+    }),
+    [],
+  );
+
+
+
   // Debounced search
   useEffect(() => {
     if (skipNextSearchRef.current) {
