@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
             message: `Magnet: ${magnet.title_en} (${body.magnet_slug})`,
             source: `magnet:${body.magnet_slug}`,
             score: magnet.default_score ?? 20,
-            user_id: body.user_id ?? null,
+            user_id: verifiedUserId,
           })
           .select('id')
           .single();
