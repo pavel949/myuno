@@ -164,8 +164,8 @@ export default function CookiePolicyPage() {
           <CardContent className="pt-6 text-center">
             <p className="text-sm text-muted-foreground">
               {isRu 
-                ? 'Вопросы о cookie? Свяжитесь с нами: privacy@uno.ae'
-                : 'Questions about cookies? Contact us: privacy@uno.ae'}
+                ? 'Вопросы о cookie? Свяжитесь с нами: privacy@myuno.app'
+                : 'Questions about cookies? Contact us: privacy@myuno.app'}
             </p>
           </CardContent>
         </Card>
