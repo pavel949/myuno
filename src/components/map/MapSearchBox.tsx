@@ -208,8 +208,18 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
           aria-controls="map-search-listbox"
           aria-autocomplete="list"
           aria-activedescendant={activeIdx >= 0 ? `map-search-opt-${activeIdx}` : undefined}
-          className="w-full h-10 pl-9 pr-9 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className={`w-full h-10 pl-9 ${selectedId ? 'pr-20' : 'pr-9'} rounded-md bg-card border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 ${selectedId ? 'border-primary' : 'border-border'}`}
         />
+        {selectedId && !loading && (
+          <span
+            className="absolute right-9 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm bg-primary text-primary-foreground pointer-events-none"
+            aria-label={language === 'ru' ? 'Активный результат' : 'Active result'}
+          >
+            {language === 'ru' ? 'Актив' : 'Active'}
+          </span>
+        )}
+        <span style={{ display: 'none' }} aria-hidden="true">
+          {/* original input className kept above; padding tokens swap based on selectedId */}
         {loading ? (
           <Loader2 className="absolute right-3 w-4 h-4 animate-spin text-muted-foreground" />
         ) : query ? (
