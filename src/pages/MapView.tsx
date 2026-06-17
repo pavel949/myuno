@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Loader2, X } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -13,7 +13,9 @@ import { useRestaurants } from '@/hooks/useRestaurants';
 import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { isOpenNow } from '@/lib/filterUtils';
-import { MapLibreMap, MapMarker } from '@/components/map/MapLibreMap';
+import { MapLibreMap, MapMarker, MapLibreMapHandle } from '@/components/map/MapLibreMap';
+import { MapSearchBox, MapSearchResult } from '@/components/map/MapSearchBox';
+
 
 type VerticalFilter =
   | 'all'
@@ -117,6 +119,14 @@ export default function MapView() {
   const [selectedPrice, setSelectedPrice] = useState<PriceFilter>(initialPrice);
   const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
   const [selected, setSelected] = useState<ClickedMarker>(null);
+  const mapRef = useRef<MapLibreMapHandle | null>(null);
+  const [searchPin, setSearchPin] = useState<MapSearchResult | null>(null);
+
+  const handleSearchSelect = useCallback((r: MapSearchResult) => {
+    setSearchPin(r);
+    mapRef.current?.flyTo(r.lat, r.lng, 16);
+  }, []);
+
 
   // Fetch data from all verticals
   const { data: properties, isLoading: propLoading } = usePropertiesForMap({});
@@ -378,6 +388,8 @@ export default function MapView() {
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-8rem)]">
         <div className="px-4 py-3 bg-background/95 border-b border-border z-10 space-y-2">
+          <MapSearchBox onSelect={handleSearchSelect} language={language as 'ru' | 'en'} />
+
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
               {language === 'ru' ? 'Категория' : 'Category'}
@@ -446,18 +458,39 @@ export default function MapView() {
             </div>
           ) : (
             <MapLibreMap
+              ref={mapRef}
               center={defaultCenter}
               zoom={11}
               markers={mlMarkers}
               onMarkerClick={handleMarkerClick}
-              fitToMarkers={mlMarkers.length > 0 && mlMarkers.length < 200}
+              fitToMarkers={mlMarkers.length > 0 && mlMarkers.length < 200 && !searchPin}
               className="absolute inset-0"
               locateLabel={language === 'ru' ? 'Найти меня' : 'Find me'}
             />
+          )}
 
+          {searchPin && (
+            <div className="absolute top-3 left-3 right-3 md:right-auto md:max-w-sm bg-card border border-border rounded-md shadow-lg px-3 py-2 z-20 flex items-start gap-2">
+              <span className="text-primary">📍</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-foreground truncate">{searchPin.label}</p>
+                {searchPin.sublabel && (
+                  <p className="text-[11px] text-muted-foreground truncate">{searchPin.sublabel}</p>
+                )}
+              </div>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setSearchPin(null)}
+                className="p-1 rounded hover:bg-muted shrink-0"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           )}
 
           {/* Marker detail panel */}
+
           {selected && (
             <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-sm bg-card border border-border rounded-lg shadow-xl p-3 z-20">
               <button
