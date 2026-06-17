@@ -83,7 +83,7 @@ export function usePipelineStages(companyId: string | undefined, dealType?: stri
       const { data, error } = await query;
       if (error) throw error;
 
-      let rows = (data || []) as PipelineStage[];
+      const rows = (data || []) as PipelineStage[];
 
       if (dealType && rows.length === 0) {
         const slice = getDefaultStagesForDealType(dealType);

@@ -45,7 +45,7 @@ export function DeveloperDocumentUpload({
       setIsUploading(true);
       try {
         const ext = file.name.split('.').pop() ?? 'bin';
-        const safeName = file.name.replace(/[^\w.\-]/g, '_').slice(0, 80);
+        const safeName = file.name.replace(/[^\w.-]/g, '_').slice(0, 80);
         const storagePath = `${developerId}/${projectId}/${Date.now()}-${safeName}`;
 
         const { error: upErr } = await supabase.storage
