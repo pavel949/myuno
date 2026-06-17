@@ -282,6 +282,22 @@ Deno.serve(async (req) => {
       ? (typeof secondaryWaRow.value === 'string' ? secondaryWaRow.value : JSON.parse(JSON.stringify(secondaryWaRow.value)))
       : null;
 
+    // Extra operator email recipients (e.g. Klod ops mailbox). Stored in
+    // system_settings.transfer_operator_emails as a jsonb array of strings.
+    // Defaults include sskk253722@gmail.com so notifications never silently drop.
+    const { data: opEmailsRow } = await sb().from('system_settings').select('value').eq('key', 'transfer_operator_emails').maybeSingle();
+    let extraOperatorEmails: string[] = ['sskk253722@gmail.com'];
+    try {
+      const v = opEmailsRow?.value;
+      const parsed = typeof v === 'string' ? JSON.parse(v) : v;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        extraOperatorEmails = parsed.filter((e: unknown) => typeof e === 'string' && e.includes('@'));
+        if (!extraOperatorEmails.includes('sskk253722@gmail.com')) {
+          extraOperatorEmails.push('sskk253722@gmail.com');
+        }
+      }
+    } catch { /* fall back to default */ }
+
     const baseUrl = Deno.env.get('PUBLIC_APP_URL') || 'https://myuno.app';
     const token = await generateConfirmToken(p.order_id);
     const confirmUrl = `${baseUrl}/operate/transfers/confirm?id=${p.order_id}&t=${token}`;
@@ -336,6 +352,13 @@ Deno.serve(async (req) => {
     // Admin — always
     for (const adminEmail of adminEmails) {
       await sendEmail('transfer-operator-new', adminEmail, `transfer-admin-${p.order_id}-${adminEmail}`, operatorTemplateData);
+    }
+    // Extra operator inbox(es) — Klod ops, sskk253722@gmail.com etc.
+    const dedupExtra = extraOperatorEmails.filter(
+      (e) => e !== op?.email && !adminEmails.includes(e),
+    );
+    for (const extraEmail of dedupExtra) {
+      await sendEmail('transfer-operator-new', extraEmail, `transfer-opx-${p.order_id}-${extraEmail}`, operatorTemplateData);
     }
 
     // Customer "received" — localized
