@@ -61,6 +61,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
     () => ({
       setSelection: (label, matchId) => {
         pendingMatchRef.current = { id: matchId, label };
+        if (matchId) setSelectedId(matchId);
         // allow search effect to run and apply the highlight
         skipNextSearchRef.current = false;
         setQuery(label);
@@ -71,6 +72,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
         setQuery('');
         setResults([]);
         setActiveIdx(-1);
+        setSelectedId(null);
         setOpen(false);
         pendingMatchRef.current = null;
       },
