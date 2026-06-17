@@ -374,7 +374,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Auth guard: allow internal calls (service role) or authenticated users
+    // Auth guard: allow service-role calls (internal) OR validated user JWTs
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(
@@ -382,7 +382,15 @@ Deno.serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
+    const token = authHeader.slice('Bearer '.length).trim();
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const isServiceRole = serviceRoleKey && token === serviceRoleKey;
+    if (!isServiceRole) {
+      const { requireAuth } = await import('../_shared/auth-guard.ts');
+      const auth = await requireAuth(req, corsHeaders);
+      if (auth instanceof Response) return auth;
+    }
+
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (!resendKey) {
       console.error('[send-email] RESEND_API_KEY not configured');

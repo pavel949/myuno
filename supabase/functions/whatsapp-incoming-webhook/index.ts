@@ -27,6 +27,27 @@ Deno.serve(async (req) => {
     return new Response("OK", { status: 200, headers: corsHeaders });
   }
 
+  // Webhook signature/token verification — protects against spoofed callbacks.
+  // Configure ULTRAMSG_WEBHOOK_TOKEN in Supabase Edge Function secrets and set the
+  // same token in the UltraMSG dashboard.
+  const expectedToken = Deno.env.get("ULTRAMSG_WEBHOOK_TOKEN");
+  if (expectedToken) {
+    const provided =
+      req.headers.get("x-ultramsg-token") ??
+      req.headers.get("x-webhook-token") ??
+      new URL(req.url).searchParams.get("token") ??
+      "";
+    if (provided !== expectedToken) {
+      console.warn("[WhatsApp Incoming] Rejected request with invalid/missing token");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+  } else {
+    console.warn("[WhatsApp Incoming] ULTRAMSG_WEBHOOK_TOKEN not set — webhook is unauthenticated");
+  }
+
   const ADMIN_PHONE = await getAdminWhatsApp();
 
   try {

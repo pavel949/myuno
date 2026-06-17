@@ -1,7 +1,9 @@
 // Edge function: receive lead-magnet submissions, persist, optionally mirror to nb_leads,
-// and notify staff (Telegram if configured). Public endpoint (no JWT required).
+// and notify staff (Telegram if configured). Public endpoint (no JWT required); if a valid
+// JWT is provided the verified user.id is recorded.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { optionalAuth } from '../_shared/auth-guard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,7 +26,8 @@ interface SubmitPayload {
   utm?: Record<string, string | undefined>;
   referer?: string;
   landing_path?: string;
-  user_id?: string | null;
+  // user_id is intentionally NOT accepted from the request body — it would allow
+  // anonymous callers to spoof submissions as any user. Use a verified JWT instead.
 }
 
 function bad(message: string, status = 400) {
@@ -67,6 +70,10 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(supabaseUrl, serviceKey);
 
+  // Derive user_id from a verified JWT only — never trust the request body.
+  const authUser = await optionalAuth(req);
+  const verifiedUserId = authUser?.id ?? null;
+
   // Look up magnet
   const { data: magnet } = await supabase
     .from('lead_magnets')
@@ -100,7 +107,7 @@ Deno.serve(async (req) => {
       utm_term: utm.utm_term ?? null,
       referer: body.referer ?? null,
       landing_path: body.landing_path ?? null,
-      user_id: body.user_id ?? null,
+      user_id: verifiedUserId,
       score: magnet.default_score ?? 20,
       status: 'new',
     })
@@ -133,7 +140,7 @@ Deno.serve(async (req) => {
             message: `Magnet: ${magnet.title_en} (${body.magnet_slug})`,
             source: `magnet:${body.magnet_slug}`,
             score: magnet.default_score ?? 20,
-            user_id: body.user_id ?? null,
+            user_id: verifiedUserId,
           })
           .select('id')
           .single();
