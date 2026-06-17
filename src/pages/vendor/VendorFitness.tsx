@@ -142,6 +142,8 @@ const VendorFitness = () => {
       images: [],
       address: '',
       district: '',
+      lat: null,
+      lng: null,
       phone: '',
       email: '',
       website: '',
