@@ -85,8 +85,22 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
           seen.add(key);
           merged.push(r);
         });
-        setResults(merged.slice(0, 8));
-        setActiveIdx(merged.length > 0 ? 0 : -1);
+        const sliced = merged.slice(0, 8);
+        setResults(sliced);
+        const pending = pendingMatchRef.current;
+        if (pending) {
+          let idx = -1;
+          if (pending.id) idx = sliced.findIndex((r) => r.id === pending.id);
+          if (idx < 0 && pending.label) {
+            const needle = pending.label.toLowerCase();
+            idx = sliced.findIndex((r) => r.label.toLowerCase() === needle);
+            if (idx < 0) idx = sliced.findIndex((r) => r.label.toLowerCase().includes(needle));
+          }
+          setActiveIdx(idx >= 0 ? idx : sliced.length > 0 ? 0 : -1);
+          pendingMatchRef.current = null;
+        } else {
+          setActiveIdx(sliced.length > 0 ? 0 : -1);
+        }
         setOpen(true);
       } catch (err) {
         if ((err as Error).name !== 'AbortError') console.warn('search error', err);
