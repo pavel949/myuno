@@ -177,6 +177,7 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
     setResults([]);
     setActiveIdx(-1);
     setSelectedId(r.id);
+    triggerFlash(r.id);
     setOpen(false);
     setLoading(false);
     inputRef.current?.blur();
