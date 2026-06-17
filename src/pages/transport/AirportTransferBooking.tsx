@@ -82,6 +82,22 @@ export default function AirportTransferBooking() {
     paymentMethod: 'stripe' as TransferPaymentMethod,
   });
 
+  // Persist the draft so a refresh, OAuth callback, or accidental nav doesn't wipe what the user typed.
+  const { clear: clearDraft } = useBookingDraft(
+    'transfer_airport',
+    { formData, step },
+    (draft) => {
+      if (draft.formData && typeof draft.formData === 'object') {
+        setFormData((prev) => ({ ...prev, ...(draft.formData as TransferFormData) }));
+      }
+      if (typeof draft.step === 'number') {
+        setStep(Math.min(Math.max(draft.step, 0), transferSteps.length - 1));
+      }
+    },
+  );
+
+
+
   // Load night surcharge config once. If the fetch fails or there's no active
   // row the price falls back to the day rate — never silently overcharge.
   useEffect(() => {
