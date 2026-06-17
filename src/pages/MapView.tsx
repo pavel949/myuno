@@ -17,7 +17,18 @@ import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { isOpenNow } from '@/lib/filterUtils';
 
-type VerticalFilter = 'all' | 'property' | 'commercial' | 'land' | 'beauty' | 'restaurant';
+type VerticalFilter =
+  | 'all'
+  | 'property'
+  | 'commercial'
+  | 'land'
+  | 'beauty'
+  | 'restaurant'
+  | 'fitness'
+  | 'pharmacy'
+  | 'vet'
+  | 'flowers'
+  | 'venue';
 type PriceFilter = 'all' | 'budget' | 'mid' | 'premium' | 'luxury';
 type AvailabilityFilter = 'all' | 'open_now';
 
@@ -63,6 +74,11 @@ const VERTICAL_CONFIG: Record<
   land: { icon: '🌾', color: '#A0784A', labelEn: 'Land', labelRu: 'Земля', route: (id) => `/property/land/${id}` },
   beauty: { icon: '💇', color: '#6366f1', labelEn: 'Beauty', labelRu: 'Красота', route: (id) => `/beauty/salon/${id}` },
   restaurant: { icon: '🍽️', color: '#ea580c', labelEn: 'Restaurants', labelRu: 'Рестораны', route: (id) => `/restaurants/${id}` },
+  fitness: { icon: '🏋️', color: '#0ea5e9', labelEn: 'Fitness', labelRu: 'Фитнес', route: (id) => `/fitness/${id}` },
+  pharmacy: { icon: '💊', color: '#16a34a', labelEn: 'Pharmacy', labelRu: 'Аптеки', route: (id) => `/pharmacy/${id}` },
+  vet: { icon: '🐾', color: '#db2777', labelEn: 'Vet', labelRu: 'Ветклиники', route: (id) => `/pets/vet/${id}` },
+  flowers: { icon: '💐', color: '#e11d48', labelEn: 'Flowers', labelRu: 'Цветы', route: (id) => `/flowers/shop/${id}` },
+  venue: { icon: '🏛️', color: '#7c3aed', labelEn: 'Venues', labelRu: 'Площадки', route: (id) => `/venues/${id}` },
 };
 
 const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string; icon: string }[] = [
@@ -72,6 +88,11 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
   { value: 'land', labelEn: 'Land', labelRu: 'Земля', icon: '🌾' },
   { value: 'beauty', labelEn: 'Beauty', labelRu: 'Красота', icon: '💇' },
   { value: 'restaurant', labelEn: 'Restaurants', labelRu: 'Рестораны', icon: '🍽️' },
+  { value: 'fitness', labelEn: 'Fitness', labelRu: 'Фитнес', icon: '🏋️' },
+  { value: 'pharmacy', labelEn: 'Pharmacy', labelRu: 'Аптеки', icon: '💊' },
+  { value: 'vet', labelEn: 'Vet', labelRu: 'Ветклиники', icon: '🐾' },
+  { value: 'flowers', labelEn: 'Flowers', labelRu: 'Цветы', icon: '💐' },
+  { value: 'venue', labelEn: 'Venues', labelRu: 'Площадки', icon: '🏛️' },
 ];
 
 const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
@@ -112,7 +133,29 @@ export default function MapView() {
 
   const { restaurants, isLoading: restLoading } = useRestaurants({});
 
-  const isDataLoading = propLoading || salonLoading || restLoading;
+  const useGeoLayer = (table: 'gyms' | 'pharmacies' | 'veterinary_clinics' | 'flower_shops' | 'venues') =>
+    useQuery({
+      queryKey: [`${table}-map`],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from(table)
+          .select('id, name_en, name_ru, lat, lng, cover_image')
+          .eq('is_active', true)
+          .not('lat', 'is', null)
+          .not('lng', 'is', null);
+        if (error) throw error;
+        return data || [];
+      },
+    });
+
+  const { data: gyms, isLoading: gymLoading } = useGeoLayer('gyms');
+  const { data: pharmacies, isLoading: pharmLoading } = useGeoLayer('pharmacies');
+  const { data: vets, isLoading: vetLoading } = useGeoLayer('veterinary_clinics');
+  const { data: flowerShops, isLoading: flowerLoading } = useGeoLayer('flower_shops');
+  const { data: venues, isLoading: venueLoading } = useGeoLayer('venues');
+
+  const isDataLoading =
+    propLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading;
 
   const allMarkers = useMemo<UniversalMarker[]>(() => {
     const markers: UniversalMarker[] = [];
@@ -155,8 +198,34 @@ export default function MapView() {
         });
       }
     });
+
+    const pushGeoLayer = (
+      rows: Array<{ id: string; name_en: string; name_ru: string | null; lat: number | null; lng: number | null; cover_image: string | null }> | undefined,
+      vertical: VerticalFilter,
+    ) => {
+      (rows || []).forEach((row) => {
+        if (row.lat == null || row.lng == null) return;
+        markers.push({
+          id: row.id,
+          name: row.name_en,
+          nameRu: row.name_ru || row.name_en,
+          lat: Number(row.lat),
+          lng: Number(row.lng),
+          rating: 0,
+          priceFrom: 0,
+          image: row.cover_image || undefined,
+          vertical,
+        });
+      });
+    };
+    pushGeoLayer(gyms, 'fitness');
+    pushGeoLayer(pharmacies, 'pharmacy');
+    pushGeoLayer(vets, 'vet');
+    pushGeoLayer(flowerShops, 'flowers');
+    pushGeoLayer(venues, 'venue');
+
     return markers;
-  }, [properties, salons, restaurants]);
+  }, [properties, salons, restaurants, gyms, pharmacies, vets, flowerShops, venues]);
 
   const filteredMarkers = useMemo(() => {
     return allMarkers.filter((m) => {

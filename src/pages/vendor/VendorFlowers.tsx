@@ -19,6 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner';
 import { Flower2, Plus, MoreVertical, Edit, Trash2, Loader2, Star, MapPin, Truck } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { VendorLocationField } from '@/components/vendor/VendorLocationField';
 
 const VendorFlowers = () => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ const VendorFlowers = () => {
   const [formData, setFormData] = useState({
     name_en: '', name_ru: '', description_en: '', description_ru: '',
     address: '', phone: '', email: '',
+    lat: null as number | null, lng: null as number | null,
     cover_image: '',
     delivery_available: true, delivery_fee: '', min_order_amount: '',
     is_active: true,
@@ -54,6 +56,7 @@ const VendorFlowers = () => {
     setFormData({
       name_en: '', name_ru: '', description_en: '', description_ru: '',
       address: '', phone: '', email: '',
+      lat: null, lng: null,
       cover_image: '',
       delivery_available: true, delivery_fee: '', min_order_amount: '',
       is_active: true,
@@ -67,6 +70,8 @@ const VendorFlowers = () => {
       name_en: item.name_en, name_ru: item.name_ru || '',
       description_en: item.description_en || '', description_ru: item.description_ru || '',
       address: item.address || '', phone: item.phone || '', email: item.email || '',
+      lat: (item as { lat?: number | null }).lat ?? null,
+      lng: (item as { lng?: number | null }).lng ?? null,
       cover_image: item.cover_image || '',
       delivery_available: item.delivery_available ?? true,
       delivery_fee: (item.delivery_fee || '').toString(),
@@ -89,6 +94,8 @@ const VendorFlowers = () => {
         description_en: formData.description_en || undefined,
         description_ru: formData.description_ru || undefined,
         address: formData.address || undefined,
+        lat: formData.lat ?? undefined,
+        lng: formData.lng ?? undefined,
         phone: formData.phone || undefined,
         email: formData.email || undefined,
         cover_image: formData.cover_image || undefined,
@@ -208,10 +215,11 @@ const VendorFlowers = () => {
                   <div className="space-y-2"><Label>{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label><Textarea value={formData.description_en} onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))} /></div>
                   <div className="space-y-2"><Label>{isRussian ? 'Описание (RU)' : 'Description (RU)'}</Label><Textarea value={formData.description_ru} onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))} /></div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2"><Label>{isRussian ? 'Адрес' : 'Address'}</Label><Input value={formData.address} onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))} /></div>
-                  <div className="space-y-2"><Label>{isRussian ? 'Телефон' : 'Phone'}</Label><Input value={formData.phone} onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))} /></div>
-                </div>
+                <VendorLocationField
+                  value={{ address: formData.address, lat: formData.lat, lng: formData.lng }}
+                  onChange={(v) => setFormData(prev => ({ ...prev, address: v.address, lat: v.lat, lng: v.lng }))}
+                />
+                <div className="space-y-2"><Label>{isRussian ? 'Телефон' : 'Phone'}</Label><Input value={formData.phone} onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))} /></div>
                 <div className="flex items-center justify-between"><Label>{isRussian ? 'Доставка' : 'Delivery Available'}</Label><Switch checked={formData.delivery_available} onCheckedChange={(v) => setFormData(prev => ({ ...prev, delivery_available: v }))} /></div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2"><Label>{isRussian ? 'Стоимость доставки' : 'Delivery Fee'}</Label><Input type="number" value={formData.delivery_fee} onChange={(e) => setFormData(prev => ({ ...prev, delivery_fee: e.target.value }))} /></div>

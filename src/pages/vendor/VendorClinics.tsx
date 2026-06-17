@@ -49,6 +49,7 @@ import {
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
+import { VendorLocationField } from '@/components/vendor/VendorLocationField';
 
 const clinicTypes = [
   { value: 'general', label: 'General Clinic', labelRu: 'Общая клиника' },
@@ -104,6 +105,8 @@ const VendorClinics = () => {
     images: [] as string[],
     address: '',
     district: '',
+    lat: null as number | null,
+    lng: null as number | null,
     phone: '',
     email: '',
     website: '',
@@ -140,6 +143,8 @@ const VendorClinics = () => {
       images: [],
       address: '',
       district: '',
+      lat: null,
+      lng: null,
       phone: '',
       email: '',
       website: '',
@@ -165,6 +170,8 @@ const VendorClinics = () => {
       images: clinic.images || [],
       address: clinic.address || '',
       district: clinic.district || '',
+      lat: (clinic as { lat?: number | null }).lat ?? null,
+      lng: (clinic as { lng?: number | null }).lng ?? null,
       phone: clinic.phone || '',
       email: clinic.email || '',
       website: clinic.website || '',
@@ -196,6 +203,8 @@ const VendorClinics = () => {
         images: formData.images,
         address: formData.address || null,
         district: formData.district || null,
+        lat: formData.lat,
+        lng: formData.lng,
         phone: formData.phone || null,
         email: formData.email || null,
         website: formData.website || null,
@@ -492,23 +501,25 @@ const VendorClinics = () => {
                   </div>
                 </div>
 
-                {/* Contact Info */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Адрес' : 'Address'}</Label>
-                    <Input
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{isRussian ? 'Район' : 'District'}</Label>
-                    <Input
-                      value={formData.district}
-                      onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                    />
-                  </div>
-                </div>
+                {/* Location */}
+                <VendorLocationField
+                  value={{
+                    address: formData.address,
+                    lat: formData.lat,
+                    lng: formData.lng,
+                    district: formData.district,
+                  }}
+                  onChange={(v) =>
+                    setFormData({
+                      ...formData,
+                      address: v.address,
+                      lat: v.lat,
+                      lng: v.lng,
+                      district: v.district ?? formData.district,
+                    })
+                  }
+                />
+
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">

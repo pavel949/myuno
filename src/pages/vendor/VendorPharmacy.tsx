@@ -20,10 +20,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner';
 import { Pill, Plus, MoreVertical, Edit, Trash2, Loader2, MapPin, Truck, Clock } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { VendorLocationField } from '@/components/vendor/VendorLocationField';
 
 const initialForm = {
   name_en: '', name_ru: '', description_en: '', description_ru: '',
   address: '', phone: '', email: '', website: '',
+  lat: null as number | null, lng: null as number | null,
   cover_image: '',
   delivery_available: true, delivery_fee: '', delivery_radius_km: '', min_order_amount: '',
   is_24h: false, has_pharmacist: true,
@@ -62,6 +64,8 @@ const VendorPharmacy = () => {
       name_en: item.name_en, name_ru: item.name_ru || '',
       description_en: item.description_en || '', description_ru: item.description_ru || '',
       address: item.address || '', phone: item.phone || '', email: item.email || '', website: item.website || '',
+      lat: (item as { lat?: number | null }).lat ?? null,
+      lng: (item as { lng?: number | null }).lng ?? null,
       cover_image: item.cover_image || '',
       delivery_available: item.delivery_available ?? true,
       delivery_fee: (item.delivery_fee || '').toString(),
@@ -88,6 +92,8 @@ const VendorPharmacy = () => {
         description_en: formData.description_en || null,
         description_ru: formData.description_ru || null,
         address: formData.address || null,
+        lat: formData.lat,
+        lng: formData.lng,
         phone: formData.phone || null,
         email: formData.email || null,
         website: formData.website || null,
@@ -201,10 +207,11 @@ const VendorPharmacy = () => {
                 <div className="space-y-2"><Label>{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label><Textarea value={formData.description_en} onChange={(e) => setFormData(p => ({ ...p, description_en: e.target.value }))} /></div>
                 <div className="space-y-2"><Label>{isRu ? 'Описание (RU)' : 'Description (RU)'}</Label><Textarea value={formData.description_ru} onChange={(e) => setFormData(p => ({ ...p, description_ru: e.target.value }))} /></div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>{isRu ? 'Адрес' : 'Address'}</Label><Input value={formData.address} onChange={(e) => setFormData(p => ({ ...p, address: e.target.value }))} /></div>
-                <div className="space-y-2"><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={formData.phone} onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))} /></div>
-              </div>
+              <VendorLocationField
+                value={{ address: formData.address, lat: formData.lat, lng: formData.lng }}
+                onChange={(v) => setFormData(p => ({ ...p, address: v.address, lat: v.lat, lng: v.lng }))}
+              />
+              <div className="space-y-2"><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={formData.phone} onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))} /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2"><Label>Email</Label><Input value={formData.email} onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))} /></div>
                 <div className="space-y-2"><Label>{isRu ? 'Сайт' : 'Website'}</Label><Input value={formData.website} onChange={(e) => setFormData(p => ({ ...p, website: e.target.value }))} /></div>
