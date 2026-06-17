@@ -348,7 +348,15 @@ export default function MapView() {
     if (!d) return;
     setSelected(d);
     if (d.kind === 'osm') setPlaceDetails(null);
-  }, []);
+    // Sync search input with the clicked marker and try to highlight matching result.
+    const label =
+      d.kind === 'vendor'
+        ? (language === 'ru' ? d.marker.nameRu : d.marker.name) || d.marker.name
+        : (d.poi.name || d.poi.category || '');
+    const matchId = d.kind === 'osm' ? `local:${d.poi.id}` : undefined;
+    if (label) searchBoxRef.current?.setSelection(label, matchId);
+    mapRef.current?.flyTo(m.lat, m.lng, Math.max(14, 11));
+  }, [language]);
 
   const updateParam = useCallback(
     (key: string, value: string) => {
