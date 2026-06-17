@@ -8003,6 +8003,33 @@ export type Database = {
           },
         ]
       }
+      google_place_cache: {
+        Row: {
+          expires_at: string
+          fetched_at: string
+          lat: number | null
+          lng: number | null
+          payload: Json
+          place_id: string
+        }
+        Insert: {
+          expires_at?: string
+          fetched_at?: string
+          lat?: number | null
+          lng?: number | null
+          payload: Json
+          place_id: string
+        }
+        Update: {
+          expires_at?: string
+          fetched_at?: string
+          lat?: number | null
+          lng?: number | null
+          payload?: Json
+          place_id?: string
+        }
+        Relationships: []
+      }
       guest_check_in_data: {
         Row: {
           arrival_flight: string | null
@@ -15367,6 +15394,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      phuket_osm_pois: {
+        Row: {
+          category: string
+          id: string
+          imported_at: string
+          lat: number
+          lng: number
+          name_en: string | null
+          name_ru: string | null
+          name_th: string | null
+          osm_id: number
+          osm_type: string
+          source: string
+          subcategory: string | null
+          tags: Json
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          id?: string
+          imported_at?: string
+          lat: number
+          lng: number
+          name_en?: string | null
+          name_ru?: string | null
+          name_th?: string | null
+          osm_id: number
+          osm_type: string
+          source?: string
+          subcategory?: string | null
+          tags?: Json
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          id?: string
+          imported_at?: string
+          lat?: number
+          lng?: number
+          name_en?: string | null
+          name_ru?: string | null
+          name_th?: string | null
+          osm_id?: number
+          osm_type?: string
+          source?: string
+          subcategory?: string | null
+          tags?: Json
+          updated_at?: string
+        }
+        Relationships: []
       }
       platform_events: {
         Row: {
@@ -31689,6 +31767,7 @@ export type Database = {
         Args: { p_anon_session_id: string }
         Returns: undefined
       }
+      cleanup_expired_google_place_cache: { Args: never; Returns: number }
       clearview_grade_to_recommendation: {
         Args: { _grade: string }
         Returns: string
@@ -31999,6 +32078,26 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      nearby_pois: {
+        Args: {
+          in_categories?: string[]
+          in_lat: number
+          in_limit?: number
+          in_lng: number
+          in_radius_m?: number
+        }
+        Returns: {
+          category: string
+          distance_m: number
+          lat: number
+          lng: number
+          name: string
+          payload: Json
+          source: string
+          source_id: string
+          subcategory: string
+        }[]
       }
       normalize_phone: { Args: { p: string }; Returns: string }
       normalize_phone_text: { Args: { p: string }; Returns: string }

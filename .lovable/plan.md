@@ -1,101 +1,113 @@
-## Цель
-1. Дать локальному бизнесу (салоны, рестораны, фитнес, аптеки, ветеринары, цветочные, магазины, площадки) возможность ставить точку на карте через Google Places, чтобы они появлялись слоями на единой карте Пхукета.
-2. Привести в порядок футер и инфо-страницы (About / Contact / Privacy / Terms): убрать «дичь», единый tone-of-voice уровня региональной инфраструктуры, RU + EN.
-3. Заменить все контактные e-mail на домен `myuno.app`.
+# Локальная карта Пхукета — что реально можно сделать
+
+## Короткий ответ
+
+**Скачать и хранить «всю Google Maps Пхукета» нельзя** — это прямо запрещено Google Maps Platform Terms (§3.2.3 (a),(b),(e)): запрет на pre-fetching, кэширование > 30 дней, массовое скачивание и создание производного датасета. Нарушение = блокировка ключа + штрафы.
+
+**Что можно и нужно сделать** — собрать собственную локальную карту Пхукета из трёх легальных источников и закэшировать её в PWA так, чтобы пользователь видел весь остров, свою геопозицию и наши объекты даже офлайн.
+
+**Рекомендую: Вариант B (гибрид OSM + наш POI-индекс + Google по запросу).** Это единственный путь, который даёт «офлайн-карту Пхукета» без юридических рисков и без bill-shock от Google (сейчас все 11 слоёв карты тянут Google JS — это дорого и не работает офлайн).
 
 ---
 
-## Что обнаружено
+## Три источника данных (легальные)
 
-**Геолокация вендоров**
-- В БД у `salons`, `restaurants`, `gyms`, `pharmacies`, `veterinary_clinics`, `flower_shops`, `stores`, `venues`, `vendor_locations`, `providers`, `listings` уже есть колонки `address`, `lat`, `lng`.
-- В формах вендоров (`VendorBeauty.tsx`, `VendorRestaurants.tsx`, `VendorPharmacy.tsx`, `VendorFitness.tsx` и т.д.) `address` — обычный `<Input>` без геокодинга. `lat`/`lng` **не заполняются** → точки не попадают на карту (`UnifiedCatalogMap` фильтрует `lat===0`).
-- Готовый компонент `src/components/shared/GooglePlacesAutocomplete.tsx` (Places API New + геокодер) уже существует и используется в недвижимости/трансфере. Его нужно переиспользовать.
-- `MapView.tsx` поддерживает только `property | commercial | land | beauty | restaurant`. Нужно расширить слоями для остальных вертикалей.
+| Источник | Что берём | Лицензия | Где живёт |
+|---|---|---|---|
+| **OpenStreetMap (Phuket extract)** | дороги, береговая линия, здания, ~50–80k POI (отели, рестораны, банкоматы, больницы, школы, пляжи, храмы) | ODbL — bulk-download разрешён, нужен attribution | `phuket_osm_pois` + векторные тайлы в Storage |
+| **Наша БД (`properties`, `salons`, `restaurants`, `gyms`, `pharmacies`, `vets`, `flower_shops`, `venues`, `events`, `nb_*` newbuilds)** | всё, что вендоры/девелоперы добавили через `VendorLocationField` | Наше | как есть |
+| **Google Places (по запросу)** | догрузка деталей конкретного места, фото, отзывы, "open now" | ToS: кэш ≤30 дней, нельзя сохранять координаты/имена надолго | `google_place_cache` с TTL 30 дней + автоочистка cron |
 
-**Контакты (`src/lib/config/contacts.ts`)**
-- E-mail’ы на домене `uno.ae` (`support@uno.ae`, `partners@uno.ae`, `press@uno.ae`, `privacy@uno.ae`, `info@uno.ae`) → нужно перевести на `myuno.app`.
-- Телефон/WhatsApp `+66 92 240 7355` — совпадает с `system_settings.org_telephone`, OK.
-
-**Футер и инфо-страницы**
-- `CompactFooter` — структура нормальная.
-- `AboutPage` перегружена: «500+ верифицированных партнёров», «50K+ активных пользователей», «100K+ успешных бронирований», SOS-кнопка, VIP-менеджеры — вымышленные цифры и обещания, не соответствуют статусу платформы. Подлежит переписи.
-- `ContactPage` тянет `uno.ae` e-mail’ы.
-- `Privacy`/`Terms`/`Cookies`/`Refund` — нужно проверить на ту же «дичь» и согласовать с реальной моделью (Lovable Cloud + Stripe, Чалонг/Пхукет).
+OSM покрывает Пхукет очень плотно — для пользовательской цели «найти ближайшую аптеку / банкомат / 7-eleven / пляж» этого достаточно без Google.
 
 ---
 
-## План работ
+## Варианты реализации
 
-### Шаг 1. Reusable LocationField для вендоров
-Новый компонент `src/components/vendor/VendorLocationField.tsx`:
-- Поле адреса с `GooglePlacesAutocomplete` (Phuket bias).
-- Мини-карта (`GoogleMap` + draggable `Marker`) под полем для уточнения точки.
-- Кнопка «Использовать моё местоположение» (`navigator.geolocation`).
-- Выдаёт наружу `{ address, lat, lng, district? }`.
-- Локализация RU/EN.
+### Вариант A — только догрузка через Google по запросу
+Оставить как есть, добавить только кэш Google Places на 30 дней.
+- ➕ Минимум работы (~1 день)
+- ➖ Не решает запрос: офлайна нет, карта Пхукета не «своя», bill Google растёт линейно
+- Подходит, если задача только «снизить расход на Google API»
 
-### Шаг 2. Подключить поле к вендор-формам
-В формах добавить `VendorLocationField`, писать `lat`/`lng` в БД:
-- `src/pages/vendor/VendorBeauty.tsx` (salons)
-- `src/pages/vendor/VendorRestaurants.tsx` (restaurants)
-- `src/pages/vendor/VendorFitness.tsx` (gyms)
-- `src/pages/vendor/VendorPharmacy.tsx` (pharmacies)
-- + `flower_shops`, `veterinary_clinics`, `stores`, `venues`, `vendor_locations` — там, где есть формы.
-Сейчас они шлют только `address`; добавим `lat`, `lng` в payload `insert/update`.
+### Вариант B — гибрид OSM + наш POI-индекс + Google по запросу ⭐ Рекомендую
+1. Один раз импортировать Phuket OSM extract → таблица `phuket_osm_pois` (id, type, name_en, name_th, lat, lng, tags jsonb, h3_index) — ~50–80k строк, ~30 МБ
+2. Сгенерировать **векторные MVT-тайлы Пхукета** (zoom 10–16) через `tippecanoe`, загрузить в Storage bucket `map-tiles` как статику → MapLibre GL читает их напрямую, **без Google JS**, без оплаты за просмотр карты
+3. PWA service worker предкэширует тайлы Пхукета (bbox 7.7,98.2 → 8.2,98.5) — ~40 МБ — при первом запуске. После этого карта работает офлайн
+4. Слои на карте: OSM POI + наши `properties/events/...` + Google детали по тапу
+5. Поиск «найти ближайший X» работает локально через PostGIS `ST_DWithin` + H3 индекс — мгновенно, без API
 
-### Шаг 3. Единая карта Пхукета со слоями
-`src/pages/MapView.tsx`:
-- Расширить `VerticalFilter` до: `property | restaurant | beauty | fitness | pharmacy | vet | flowers | shop | venue`.
-- Добавить хуки `useSalons`, `useGyms`, `usePharmacies`, `useVeterinaryClinics`, `useFlowerShops`, `useStores`, `useVenues` (часть уже есть, недостающие — тонкие React Query обёртки).
-- Маркеры с разными иконками/цветом по `VERTICAL_CONFIG`, кластеризация при >200 точек.
-- Чипсы фильтров «слоёв» сверху + сохранение в URL (`?layers=beauty,restaurant`).
-- InfoWindow ведёт на canonical detail-страницу вертикали.
+- ➕ Полный офлайн Пхукета, мгновенный поиск, нулевая стоимость просмотра карты, юридически чисто
+- ➕ Geolocation API браузера уже работает офлайн — «где я» не зависит ни от Google, ни от нас
+- ➖ Объём работ ~5–7 дней; первый раз PWA скачивает 40 МБ тайлов (показываем прогресс-бар на онбординге)
 
-### Шаг 4. Контакты → `myuno.app`
-В `src/lib/config/contacts.ts` заменить все `@uno.ae` на `@myuno.app`:
-`support@`, `partners@`, `press@`, `privacy@`, `info@`. Прочие ссылки оставить.
-Проверить `rg "uno\.ae"` — добить остатки в коде/документации.
-
-### Шаг 5. Перепись AboutPage
-Короткая, спокойно-уверенная подача (canon §03 Tone of Voice):
-- Кто мы: цифровая инфраструктура для иностранцев на Пхукете (жильё, услуги, юр.вопросы, образ жизни).
-- Что делаем: единый аккаунт, проверенные локальные партнёры, прозрачные платежи, поддержка RU/EN/TH.
-- Принципы: доверие, локальность, прозрачность, забота.
-- **Убрать вымышленные метрики** (500+/50K+/100K+) и нереализованные фичи (SOS-кнопка, VIP-менеджер) — заменить на честные формулировки («каталог растёт», «партнёры проходят верификацию» и т.п.).
-- CTA: «Связаться», «Стать партнёром», «Установить приложение».
-
-### Шаг 6. ContactPage, Privacy, Terms, Cookies, Refund
-- ContactPage: автоматически подтянет новые e-mail’ы. Перепроверить тексты на «дичь».
-- Privacy/Terms/Cookies/Refund: пройтись, синхронизировать с реальностью (Чалонг/Пхукет, юр.лицо из `system_settings`, Stripe-платежи, домен `myuno.app`), убрать пустые обещания, оставить чёткие формулировки RU + EN.
-
-### Шаг 7. Проверка
-- Build + ESLint.
-- Ручной smoke: создать тестовую запись салона → она появляется на `/map` с правильной иконкой.
-- `rg "uno\.ae"` → 0 совпадений.
-- Linter Supabase: 0 новых warnings.
+### Вариант C — полностью своя карта без Google вообще
+Убрать `@react-google-maps/api`, перевести `VendorLocationField`, `/map`, все `MapView` на MapLibre + Nominatim для геокодинга.
+- ➕ Ноль зависимости от Google, ноль bill
+- ➖ Nominatim бесплатный, но капризный по rate-limit; качество автокомплита адресов хуже Google Places (особенно по тайским адресам и новым ЖК)
+- Нерекомендуемо без острой необходимости — теряем UX автокомплита в вендорских формах
 
 ---
 
-## Технические детали
+## Технический план (Вариант B)
 
-**Расширение `VERTICAL_CONFIG` в `MapView.tsx`**
-```ts
-beauty:   { icon: '💇', route: id => APP_ROUTES.BEAUTY_DETAIL(id) }
-restaurant:{ icon: '🍽', route: id => APP_ROUTES.RESTAURANT_DETAIL(id) }
-fitness:  { icon: '🏋', route: id => APP_ROUTES.GYM_DETAIL(id) }
-pharmacy: { icon: '💊', route: id => APP_ROUTES.PHARMACY_DETAIL(id) }
-vet:      { icon: '🐾', route: id => APP_ROUTES.VET_DETAIL(id) }
-flowers:  { icon: '💐', route: id => APP_ROUTES.FLOWER_DETAIL(id) }
-shop:     { icon: '🛍', route: id => APP_ROUTES.STORE_DETAIL(id) }
-venue:    { icon: '🎪', route: id => APP_ROUTES.VENUE_DETAIL(id) }
+```text
+1. Импорт OSM
+   ├─ Качаем geofabrik thailand-latest.osm.pbf, режем по bbox Пхукета
+   ├─ osm2pgsql → временная схема
+   └─ Edge fn import-phuket-osm: проецирует нужные категории
+      (amenity, shop, tourism, leisure, healthcare, place) →
+      public.phuket_osm_pois (~50–80k rows)
+
+2. Векторные тайлы
+   ├─ tippecanoe -o phuket.mbtiles --minimum-zoom=10 --maximum-zoom=16
+   ├─ Распаковка в .pbf файлы по zxy
+   └─ Загрузка в Storage bucket "map-tiles" (public, immutable cache 30 days)
+
+3. Frontend
+   ├─ Новый компонент <LocalMap/> на MapLibre GL JS
+   │  стиль = OSM Bright адаптированный под наш design system
+   ├─ Источники: tiles из Storage + 3 GeoJSON слоя
+   │  (наши properties/services/events через PostGIS RPC nearby_pois)
+   └─ Замена в /map, опционально в VendorLocationField (Google остаётся
+      для автокомплита адреса, MapLibre для отображения)
+
+4. PWA офлайн
+   ├─ vite-plugin-pwa: precache манифест тайлов Пхукета (~40 МБ)
+   ├─ Runtime cache для GeoJSON наших слоёв (stale-while-revalidate, 1h)
+   └─ Прогресс-бар «Загружаем карту Пхукета для офлайн» на онбординге
+
+5. Google Places — только догрузка
+   ├─ Edge fn place-details: при тапе на POI → проверяет
+   │  google_place_cache (TTL 30 дней) → если нет/устарел, идёт в Google
+   └─ Автоудаление строк старше 30 дней (pg_cron, 1×/день)
+
+6. Геопозиция «где я»
+   └─ navigator.geolocation.watchPosition — уже работает офлайн.
+      Добавить кнопку «центрировать на мне» и сохранение последней позиции
+      в localStorage для cold-start.
 ```
 
-**Источник Google Maps** — уже подключённый коннектор `google_maps` через `GoogleMapsContext`. Никаких новых ключей не требуется.
+### База данных
+- `phuket_osm_pois` (id, osm_id, category, subcategory, name_en, name_th, lat, lng, h3_r9, tags jsonb, updated_at) + GiST индекс по `(lat,lng)` + индекс по `category`
+- `google_place_cache` (place_id, payload jsonb, fetched_at) + TTL trigger
+- RPC `nearby_pois(lat, lng, radius_m, categories[])` → union OSM + наши таблицы
 
-**Безопасность** — `lat`/`lng` запись через RLS, которая уже есть у вендорских таблиц (вендор пишет только свою запись). Дополнительных миграций не нужно.
+### Юридически
+- В футер карты добавить «© OpenStreetMap contributors» (требование ODbL)
+- В Privacy: упомянуть, что геопозиция обрабатывается на устройстве, тайлы кэшируются локально
 
 ---
 
-## Рекомендую
-Сделать всё одной итерацией в указанном порядке — изменения слабо связаны, но дают связный публичный эффект к запуску: вендоры видят себя на карте → доверие, инфо-страницы перестают звучать «маркетингово» → доверие к платформе, e-mail на `myuno.app` → бренд-консистентность.
+## Что НЕ войдёт в этот план
+- Скачивание/зеркалирование Google Maps данных — запрещено ToS
+- Кэш Google имён/координат дольше 30 дней — запрещено ToS
+- Импорт `booking.com` / `agoda` отелей — отдельная задача, нужен партнёрский фид или ручной импорт; в OSM отели есть, но без цен/наличия
+
+---
+
+## Если согласны на Вариант B — что нужно от вас
+
+1. Подтверждение объёма (5–7 дней работы)
+2. Решение по PWA-precache: 40 МБ при первом запуске — ок, или делаем lazy («скачать офлайн-карту» — отдельной кнопкой в Settings)?
+3. Готов сразу начать с шага 1 (импорт OSM в `phuket_osm_pois`) — это даёт мгновенный выигрыш для существующего `/map` без ожидания тайлов
