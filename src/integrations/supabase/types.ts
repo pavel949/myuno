@@ -27816,6 +27816,13 @@ export type Database = {
             referencedRelation: "webhook_endpoints"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "webhook_deliveries_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_endpoints_safe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       webhook_endpoints: {
@@ -31216,6 +31223,69 @@ export type Database = {
           },
         ]
       }
+      webhook_endpoints_safe: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          events: string[] | null
+          failure_count: number | null
+          id: string | null
+          is_active: boolean | null
+          last_failure_at: string | null
+          last_success_at: string | null
+          secret_hint: string | null
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          events?: string[] | null
+          failure_count?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          secret_hint?: never
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          events?: string[] | null
+          failure_count?: number | null
+          id?: string | null
+          is_active?: boolean | null
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          secret_hint?: never
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_endpoints_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_endpoints_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       yachts: {
         Row: {
           addons: Json | null
@@ -31742,6 +31812,24 @@ export type Database = {
       get_currency_rate: {
         Args: { p_base?: string; p_target?: string }
         Returns: number
+      }
+      get_management_company_sensitive: {
+        Args: { _company_id: string }
+        Returns: {
+          bank_account: string
+          bank_name: string
+          dbd_card_url: string
+          documents: Json
+          id: string
+          legal_address: string
+          legal_name: string
+          license_number: string
+          registration_number: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          swift_code: string
+          tax_id: string
+        }[]
       }
       get_or_create_loyalty_status: {
         Args: { p_user_id: string }

@@ -1,84 +1,125 @@
-# План: закрытие 4 P0 security-ERRORs
 
-Цель — устранить критические утечки данных, чтобы можно было приглашать поставщиков и открывать публичный доступ. Каждое исправление = отдельная миграция + проверка кода, который читает затронутые объекты.
+# Финальный аудит перед публичным запуском
 
----
-
-## P0-1. `properties.public_view_active` — утечка PII/финансов владельцев
-
-**Проблема:** view с `security_invoker=off` (или GRANT для anon) отдаёт анонимам колонки `actual_owner_phone/email/name`, `purchase_price`, `mortgage_amount`, lock-коды, wifi-поля. 32 объекта.
-
-**Фикс (миграция):**
-1. `DROP VIEW public.public_view_active`.
-2. `CREATE VIEW public.public_view_active` с явным whitelist безопасных колонок: `id, slug, title, description_*, city, district, lat, lng, bedrooms, bathrooms, area_sqm, property_type, listing_type, base_price_night, sale_price, currency, cover_image_url, gallery, amenities, status, published_at`.
-3. `ALTER VIEW … SET (security_invoker = true)`.
-4. `GRANT SELECT ON public.public_view_active TO anon, authenticated`.
-
-**Проверка кода:** `rg "public_view_active"` в `src/` и `supabase/functions/` — убедиться, что фронт не запрашивает удалённые колонки; при необходимости переключить на `properties` (под RLS) для авторизованных владельцев/MC.
+Свежие проверки `supabase--linter`, `security--get_scan_results`, `seo--list_findings` и прямые запросы к БД дали следующую картину. Ниже — что чинить, что игнорировать с обоснованием, что проверить вручную.
 
 ---
 
-## P0-2. `property_guidebook` — wifi/door/lockbox коды по email гостя
+## 1. БЛОКЕРЫ — фиксим перед запуском
 
-**Проблема:** RLS-политика разрешает `SELECT` если `auth.email() = property_bookings.guest_email` — любой залогиненный с произвольным email может получить коды.
+### 1.1 `ERROR` × 2 — Security Definer View
+Линтер Supabase нашёл 2 view в `public` без `security_invoker=on`. Такие view исполняют RLS от имени владельца (postgres), а не вызывающего пользователя — это обход RLS.
+**Действие:** найти оба view (`SELECT viewname FROM pg_views WHERE schemaname='public' AND definition ILIKE '%security_definer%'` + проверка `reloptions`), пересоздать с `WITH (security_invoker = on)`, прогнать линтер до зелёного.
 
-**Фикс (миграция):**
-1. `DROP POLICY` текущей email-based политики на `property_guidebook`.
-2. Новая политика: SELECT только если есть active `property_bookings` где `user_id = auth.uid()` (а не email-match) и `check_out >= now() - interval '1 day'`.
-3. Доступ владельцу/MC через существующий `has_property_access(auth.uid(), property_id)`.
+### 1.2 `WARN` (sec-scan) — Buyers KYC доступен любому broker/admin
+`buyers` (passport_number, passport_expiry, DOB, passport_scan_url, sanctions_flag, pep_flag, kyc_status, funds_source_*) — политика `devmod: broker admin full access buyers` даёт **ALL** любому `broker`/`admin`. Любой брокер видит KYC всех клиентов платформы, не только своих.
+**Действие:** заменить политику на scoped — broker видит только buyers, привязанных к его лидам/девелоперу (через `agent_deals.broker_user_id` или `developer_users`). Полный доступ — только `admin`.
 
-**Проверка:** хук гостевого portal — заменить запрос с email-match на `user_id`-match; гостям без аккаунта guidebook отдавать через signed edge function с одноразовым токеном (вне scope этой PR — отдельный TODO).
+### 1.3 `WARN` (sec-scan) — Банковские реквизиты MC видны всем активным членам
+`management_companies.bank_account/swift_code/bank_name/stripe_customer_id/stripe_subscription_id` — SELECT-политика «Members and admins can view their companies» открывает поля любому активному `member`/`staff`.
+**Действие:** либо вынести banking-поля в отдельную таблицу `management_company_banking` с RLS на `director`+`admin`, либо создать view `management_companies_public` без banking и заменить запросы во фронте + закрыть SELECT базовой таблицы для не-директоров.
 
----
+### 1.4 `WARN` (sec-scan) — Realtime `public:*` канал = чужие заказы/чаты
+Realtime-политика разрешает любому авторизованному подписаться на `public:%`. Если где-то бродкастим `public:orders`, `public:bookings`, `public:property_chat_messages` — данные утекают.
+**Действие:** аудит всех `supabase.channel('public:...')` в `src/`, перевод на `user:{auth.uid()}` / `org:{id}` топики, политика — `topic LIKE 'user:' || auth.uid()::text || '%'`.
 
-## P0-3. Storage `property-images` / `property-reports` — анонимная запись
-
-**Проблема:** policies на `storage.objects` для этих bucket с ролью `{public}` на INSERT/UPDATE/DELETE — любой может перезаписать фото.
-
-**Фикс (миграция):**
-1. `DROP POLICY` всех `public`-write политик на этих двух bucket в `storage.objects`.
-2. Новые политики: INSERT/UPDATE/DELETE только `authenticated` И `has_property_access(auth.uid(), (storage.foldername(name))[1]::uuid)`.
-3. SELECT: `property-images` — `public` (галерея публична), `property-reports` — только `authenticated` + access check.
-4. `UPDATE storage.buckets SET public = false WHERE id = 'property-reports'`.
-
-**Проверка:** компоненты загрузки фото — проверить, что используют `supabase.auth.getUser()` перед upload.
+### 1.5 `WARN` (sec-scan) — Webhook signing secrets читаемы owner/admin MC
+`webhook_endpoints.secret` (HMAC) виден через SELECT любому owner/admin MC. Достаточно подделать payload и отправить на их же endpoint.
+**Действие:** revoke SELECT на колонке `secret` для `authenticated`; добавить view `webhook_endpoints_safe` с `LEFT(secret, 4) || '…'`; полный secret — только service_role + одноразовый показ при создании.
 
 ---
 
-## P0-4. `crm_email_accounts` — OAuth refresh tokens в plaintext
+## 2. WARN — оставляем (с обоснованием в security-memory)
 
-**Проблема:** колонки `access_token`, `refresh_token` хранятся как text, читаются обычным SELECT.
+### 2.1 `RLS Policy Always True` × 3 — намеренно
+- `email_subscriptions` (INSERT) — подписка на рассылку без авторизации.
+- `lead_magnet_submissions` (INSERT) — публичные формы захвата лидов.
+- `mcc_landing_events` (INSERT) — лендинг-аналитика без логина.
+Все три — **только INSERT** (не SELECT/UPDATE/DELETE), что соответствует use-case'у публичных форм. **Действие:** добавить rate-limit edge function перед каждым (если ещё нет) и зафиксировать в `update_memory`.
 
-**Фикс (миграция):**
-1. Включить `pgsodium` (если не включено) или использовать Supabase Vault.
-2. Создать `vault.secrets` записи для существующих токенов, заменить колонки на `token_secret_id uuid` references vault.
-3. RPC `get_crm_email_token(account_id)` SECURITY DEFINER — отдаёт расшифрованный токен только если `auth.uid() = owner_id`.
-4. `REVOKE SELECT (access_token, refresh_token)` или удалить колонки после миграции значений.
-5. RLS уже есть, но добавить column-level: GRANT SELECT (всё кроме токенов) authenticated.
+### 2.2 `Public Bucket Allows Listing` × N — намеренно для CDN
+Публичные бакеты (`bouquet-images`, `company-logos`, `property-images`, `property-videos`, `experience-images`, `project-images`, `tour-media`, `yacht-images`, `vendor-uploads`, `complex-media`, `company-assets`, `magnet-landings`, `intake-uploads`, `property-care`) — это контент-CDN, listing допустим. **Действие:** проверить, что в этих бакетах нет приватных файлов (быстрый sample-аудит storage), зафиксировать в memory.
 
-**Проверка:** edge functions, которые отправляют email от имени пользователя — переписать на вызов RPC `get_crm_email_token`.
+### 2.3 `Extension in Public` × 2
+Старые расширения в `public` (вероятно `pg_trgm`, `uuid-ossp`). Миграция в `extensions` schema ломает совместимость со старыми migrations. **Действие:** зафиксировать в memory как «accepted risk», поднять в Q3 backlog.
+
+### 2.4 `Public Can Execute SECURITY DEFINER Function` × ~50 (anon + auth)
+Огромный набор `has_role`, `has_property_access`, `is_admin` и т.п. — намеренно SECURITY DEFINER, потому что они нужны в RLS-политиках. **Действие:** пройтись по списку, для каждой проверить, что внутри есть `auth.uid()`-проверка или функция действительно публична (sitemap/seo helpers). Точечно `REVOKE EXECUTE ... FROM anon` там, где anon не нужен.
 
 ---
 
-## Порядок исполнения
+## 3. SEO
 
-1. Сначала P0-3 (storage) — самый изолированный, минимум фронт-изменений.
-2. P0-1 (view) — затем, проверка `rg` по фронту.
-3. P0-2 (guidebook) — с обновлением хука гостевого portal.
-4. P0-4 (CRM tokens) — последним, требует миграции данных + правки edge functions.
+### 3.1 Google Search Console не подключен (`failing`, level=mid)
+Без GSC мы вслепую — нет данных по индексации, кликам, ошибкам crawl.
+**Действие:** подключить `google_search_console` через `standard_connectors--connect`, верифицировать `https://www.myuno.app/`, отправить `sitemap.xml`. Это user-action (OAuth), агент только инициирует.
 
-После каждой миграции — `supabase--linter` + `security--run_security_scan` чтобы убедиться, что ERROR ушёл и не появилось regressions.
+### 3.2 Per-route Helmet — выборочно
+В прошлой итерации добавлены og/canonical на `/for-developers`, `/for-local-services`, `/for-business`. **Действие:** пройтись по топ-10 индексируемых страниц (главная, `/property`, `/newbuilds`, `/relocate`, `/wedding`, `/sim`, `/exchange`, `/legal`, `/visa`, `/account/auth`) — убедиться, что у каждой уникальные `title`, `description`, `canonical`, `og:*`. Сейчас многие наследуют sitewide из `index.html`.
 
-## Что НЕ входит в эту PR
+### 3.3 Sitemap consistency
+Проверить `scripts/generate-sitemap.ts` (или статический `public/sitemap.xml`) — что все live-маршруты из `src/lib/config/routes.ts` присутствуют, а deprecated (`/lifehub/*`, killed lifestyle apps) — исключены.
 
-- 96 мест с `navigate('/auth')` (UX-blocker) — следующая итерация.
-- WARN-уровень (`buyers`, realtime, `management_companies`, `webhook_endpoints.secret`) — отдельная PR.
-- Guest-checkout для guidebook без аккаунта — отдельный TODO.
+---
 
-## Acceptance
+## 4. Data consistency — ручной spot-check
 
-- `security--run_security_scan` показывает 0 ERROR (было 5; одна — `auth-otp-long-expiry` — конфиг, не код).
-- Анонимный `curl` к `public_view_active` не возвращает `purchase_price`/`actual_owner_*`.
-- Анонимный upload в `property-images` отклоняется 403.
-- Гостевой запрос guidebook с чужим email возвращает 0 строк.
-- `SELECT access_token FROM crm_email_accounts` для обычного пользователя возвращает NULL/permission denied.
+```text
+ledger ↔ orders          : SELECT order_id FROM orders WHERE status='paid'
+                           EXCEPT
+                           SELECT order_id FROM ledger_entries → должно быть 0
+property_bookings RLS    : залогиниться гостем A, попытаться SELECT букинг гостя B
+properties col-whitelist : anon curl /rest/v1/properties?select=actual_owner_*
+                           → permission denied
+storage upload anon      : curl POST /storage/v1/object/property-images/test.jpg без JWT
+                           → 401
+guidebook                : guest без брони → /rest/v1/property_guidebook → 0 rows
+crm_email_accounts.token : authenticated SELECT access_token → permission denied
+```
+
+Все 5 проверок должны пройти — это P0 из предыдущей итерации, нужно подтвердить, что миграции применились на prod.
+
+---
+
+## 5. Pre-launch checklist (для тебя руками)
+
+- [ ] **Auth providers:** Email+Password + Google включены, "Confirm email" — ON, HIBP — ON.
+- [ ] **Stripe:** переключить с test на live (`stripe_mode=live` в `system_settings`), проверить webhook endpoint и signing secret.
+- [ ] **`system_settings.org_*`** заполнены (телефон, адрес, lat/lng, opening hours) — сделано в прошлой итерации, проверить prod.
+- [ ] **`feature_flag:*`** — пройтись и отключить всё, что не готово (`navigator_v3`, экспериментальные lifestyle apps).
+- [ ] **Robots.txt** — `Allow: /` (не `Disallow: /`); preview-домен `id-preview--*.lovable.app` должен быть `Disallow` или иметь `X-Robots-Tag: noindex`.
+- [ ] **`ComingSoonGate`** — отключить или открыть только нужные cluster'ы.
+- [ ] **Sentry DSN** + release version (`appVersion.ts` 3.55.3) подняты в prod env.
+- [ ] **Backup** — снять snapshot БД перед запуском (Lovable Cloud auto, но проверить дату последнего).
+
+---
+
+## 6. Порядок выполнения
+
+```text
+Step 1 (миграция #1): Security Definer Views → invoker
+Step 2 (миграция #2): buyers RLS scoping (broker → свои лиды)
+Step 3 (миграция #3): management_companies banking split + view
+Step 4 (миграция #4): webhook_endpoints.secret column-RLS + safe view
+Step 5 (миграция #5): realtime channel rename audit + policy
+Step 6 (frontend):     заменить supabase.channel('public:*') → user-scoped
+Step 7 (frontend):     заменить запросы management_companies / webhook_endpoints на _safe views
+Step 8 (SEO):          per-route Helmet на топ-10 + sitemap diff
+Step 9 (security-memory update): зафиксировать accepted WARN-ы
+Step 10 (verify):      supabase--linter → 0 ERROR; security--run_security_scan → 0 critical
+Step 11 (manual QA):   data-consistency checks из раздела 4
+Step 12:               publish
+```
+
+**Рекомендую: пройти steps 1–7 в этом PR (это закрывает все 2 ERROR + 4 critical WARN). SEO (8) и memory (9) можно отдельным PR-ом параллельно — они не блокируют запуск, но желательны до анонса. Шаги 10–12 — обязательны перед `preview_ui--publish`.**
+
+---
+
+## 7. Что НЕ входит в этот аудит
+
+- Performance / bundle-size аудит (отдельная задача для `performance-optimizer`).
+- Финансовая сверка ledger × Stripe payouts за прошлые периоды (отдельный finance job).
+- A11y-проход — рекомендую сделать после запуска beta.
+- Полный ручной QA всех 40+ микро-аппов — нереально в рамках одного PR; делаем sample по top-revenue вертикалям (Stays, Transfer, Newbuilds, Visa, Yacht).
+
+После approve этого плана — переключайся в build mode, и я выкачу миграции по очереди с approval после каждой.
