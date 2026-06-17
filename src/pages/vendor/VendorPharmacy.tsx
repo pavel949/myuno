@@ -64,6 +64,8 @@ const VendorPharmacy = () => {
       name_en: item.name_en, name_ru: item.name_ru || '',
       description_en: item.description_en || '', description_ru: item.description_ru || '',
       address: item.address || '', phone: item.phone || '', email: item.email || '', website: item.website || '',
+      lat: (item as { lat?: number | null }).lat ?? null,
+      lng: (item as { lng?: number | null }).lng ?? null,
       cover_image: item.cover_image || '',
       delivery_available: item.delivery_available ?? true,
       delivery_fee: (item.delivery_fee || '').toString(),
