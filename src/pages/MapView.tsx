@@ -17,7 +17,18 @@ import { getMapCenter, DEFAULT_CITY } from '@/lib/config';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { isOpenNow } from '@/lib/filterUtils';
 
-type VerticalFilter = 'all' | 'property' | 'commercial' | 'land' | 'beauty' | 'restaurant';
+type VerticalFilter =
+  | 'all'
+  | 'property'
+  | 'commercial'
+  | 'land'
+  | 'beauty'
+  | 'restaurant'
+  | 'fitness'
+  | 'pharmacy'
+  | 'vet'
+  | 'flowers'
+  | 'venue';
 type PriceFilter = 'all' | 'budget' | 'mid' | 'premium' | 'luxury';
 type AvailabilityFilter = 'all' | 'open_now';
 
@@ -63,6 +74,11 @@ const VERTICAL_CONFIG: Record<
   land: { icon: '🌾', color: '#A0784A', labelEn: 'Land', labelRu: 'Земля', route: (id) => `/property/land/${id}` },
   beauty: { icon: '💇', color: '#6366f1', labelEn: 'Beauty', labelRu: 'Красота', route: (id) => `/beauty/salon/${id}` },
   restaurant: { icon: '🍽️', color: '#ea580c', labelEn: 'Restaurants', labelRu: 'Рестораны', route: (id) => `/restaurants/${id}` },
+  fitness: { icon: '🏋️', color: '#0ea5e9', labelEn: 'Fitness', labelRu: 'Фитнес', route: (id) => `/fitness/${id}` },
+  pharmacy: { icon: '💊', color: '#16a34a', labelEn: 'Pharmacy', labelRu: 'Аптеки', route: (id) => `/pharmacy/${id}` },
+  vet: { icon: '🐾', color: '#db2777', labelEn: 'Vet', labelRu: 'Ветклиники', route: (id) => `/pets/vet/${id}` },
+  flowers: { icon: '💐', color: '#e11d48', labelEn: 'Flowers', labelRu: 'Цветы', route: (id) => `/flowers/shop/${id}` },
+  venue: { icon: '🏛️', color: '#7c3aed', labelEn: 'Venues', labelRu: 'Площадки', route: (id) => `/venues/${id}` },
 };
 
 const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string; icon: string }[] = [
@@ -72,6 +88,11 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
   { value: 'land', labelEn: 'Land', labelRu: 'Земля', icon: '🌾' },
   { value: 'beauty', labelEn: 'Beauty', labelRu: 'Красота', icon: '💇' },
   { value: 'restaurant', labelEn: 'Restaurants', labelRu: 'Рестораны', icon: '🍽️' },
+  { value: 'fitness', labelEn: 'Fitness', labelRu: 'Фитнес', icon: '🏋️' },
+  { value: 'pharmacy', labelEn: 'Pharmacy', labelRu: 'Аптеки', icon: '💊' },
+  { value: 'vet', labelEn: 'Vet', labelRu: 'Ветклиники', icon: '🐾' },
+  { value: 'flowers', labelEn: 'Flowers', labelRu: 'Цветы', icon: '💐' },
+  { value: 'venue', labelEn: 'Venues', labelRu: 'Площадки', icon: '🏛️' },
 ];
 
 const mapContainerStyle: React.CSSProperties = { width: '100%', height: '100%' };
