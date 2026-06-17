@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Search, Loader2, X, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -11,6 +11,13 @@ export interface MapSearchResult {
   source: 'local' | 'osm';
 }
 
+export interface MapSearchBoxHandle {
+  /** Fill the input with a label and (optionally) highlight a matching result by id. */
+  setSelection: (label: string, matchId?: string) => void;
+  /** Clear the input and close dropdown. */
+  clear: () => void;
+}
+
 interface MapSearchBoxProps {
   onSelect: (result: MapSearchResult) => void;
   language?: 'ru' | 'en';
@@ -20,7 +27,10 @@ interface MapSearchBoxProps {
 // Phuket bbox (south,west,north,east) for Nominatim viewbox bias
 const PHUKET_VIEWBOX = '98.20,7.70,98.55,8.25';
 
-export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearchBoxProps) {
+export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(function MapSearchBox(
+  { onSelect, language = 'ru', className },
+  ref,
+) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<MapSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -31,6 +41,9 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
   const listRef = useRef<HTMLUListElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const skipNextSearchRef = useRef(false);
+  /** When set, after results arrive we highlight an item with matching id (or label fallback). */
+  const pendingMatchRef = useRef<{ id?: string; label?: string } | null>(null);
+
 
   // Close on outside click
   useEffect(() => {
