@@ -496,19 +496,6 @@ export default function MapView() {
           )}
         </div>
 
-        <div className="flex-1 relative min-h-0">
-          {showLoading ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-card">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
-          ) : mapError ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-card p-6 text-center">
-              <p className="text-muted-foreground">{mapError}</p>
-              <p className="text-sm text-muted-foreground max-w-sm">
-                {language === 'ru'
-                  ? 'Задайте VITE_GOOGLE_MAPS_API_KEY в .env и включите Maps JavaScript API в Google Cloud.'
-                  : 'Set VITE_GOOGLE_MAPS_API_KEY in .env and enable Maps JavaScript API in Google Cloud.'}
-              </p>
 
         <div className="flex-1 relative min-h-0">
           {showLoading ? (
