@@ -452,7 +452,9 @@ export default function MapView() {
               onMarkerClick={handleMarkerClick}
               fitToMarkers={mlMarkers.length > 0 && mlMarkers.length < 200}
               className="absolute inset-0"
+              locateLabel={language === 'ru' ? 'Найти меня' : 'Find me'}
             />
+
           )}
 
           {/* Marker detail panel */}
