@@ -173,6 +173,47 @@ export default function MapView() {
     },
   });
 
+  // OSM POI layer (OpenStreetMap, ODbL licensed). Loaded on toggle.
+  const [showOsm, setShowOsm] = useState(false);
+  const [osmCategory, setOsmCategory] = useState<string>('all');
+  const { data: osmPois, isLoading: osmLoading } = useQuery({
+    queryKey: ['osm-pois', osmCategory],
+    enabled: showOsm,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const cats = osmCategory === 'all' ? null : [osmCategory];
+      const { data, error } = await supabase.rpc('nearby_pois', {
+        in_lat: 7.88,
+        in_lng: 98.39,
+        in_radius_m: 30000,
+        in_categories: cats,
+        in_limit: 600,
+      });
+      if (error) throw error;
+      return (data || []).filter((p: any) => p.source === 'osm');
+    },
+  });
+
+  const [selectedOsm, setSelectedOsm] = useState<any | null>(null);
+  const [placeDetails, setPlaceDetails] = useState<any | null>(null);
+  const [placeLoading, setPlaceLoading] = useState(false);
+
+  const loadPlaceDetails = useCallback(async (poi: any) => {
+    setPlaceLoading(true);
+    setPlaceDetails(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('place-details', {
+        body: { query: { name: poi.name, lat: poi.lat, lng: poi.lng } },
+      });
+      if (error) throw error;
+      setPlaceDetails((data as any)?.place ?? null);
+    } catch (e) {
+      console.error('[place-details]', e);
+    } finally {
+      setPlaceLoading(false);
+    }
+  }, []);
+
   const isDataLoading =
     propLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading || eventLoading;
 
@@ -408,10 +449,37 @@ export default function MapView() {
             </FilterChipGroup>
           </div>
 
+          {/* OSM POI layer toggle (OpenStreetMap data, ODbL) */}
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              {language === 'ru' ? 'OSM места (OpenStreetMap)' : 'OSM places (OpenStreetMap)'}
+            </p>
+            <FilterChipGroup scrollable>
+              <FilterChip
+                label={language === 'ru' ? (showOsm ? 'Скрыть OSM' : 'Показать OSM') : (showOsm ? 'Hide OSM' : 'Show OSM')}
+                icon="🗺️"
+                isActive={showOsm}
+                onToggle={() => setShowOsm((v) => !v)}
+                size="md"
+              />
+              {showOsm && ['all','hotel','restaurant','pharmacy','clinic','attraction','beach','park','shop','finance','fuel','education','worship','civic','fitness','vet'].map((c) => (
+                <FilterChip
+                  key={c}
+                  label={c === 'all' ? (language === 'ru' ? 'Все OSM' : 'All OSM') : c}
+                  isActive={osmCategory === c}
+                  onToggle={() => setOsmCategory(c)}
+                  size="md"
+                />
+              ))}
+            </FilterChipGroup>
+          </div>
+
           {!showLoading && (
             <div className="flex items-center justify-between gap-2 pt-1">
               <p className="text-xs text-muted-foreground">
-                {filteredMarkers.length} {language === 'ru' ? 'локаций' : 'locations'}
+                {filteredMarkers.length}
+                {showOsm ? ` + ${osmPois?.length ?? 0} OSM` : ''}{' '}
+                {language === 'ru' ? 'локаций' : 'locations'}
               </p>
               {activeFilterCount > 0 && (
                 <button
@@ -427,6 +495,7 @@ export default function MapView() {
             </div>
           )}
         </div>
+
 
         <div className="flex-1 relative min-h-0">
           {showLoading ? (
@@ -482,13 +551,36 @@ export default function MapView() {
                   />
                 );
               })}
+              {showOsm && (osmPois || []).map((p: any) => (
+                <Marker
+                  key={`osm-${p.source_id}`}
+                  position={{ lat: Number(p.lat), lng: Number(p.lng) }}
+                  title={p.name || p.category}
+                  icon={{
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 5,
+                    fillColor: '#0A2240',
+                    fillOpacity: 0.85,
+                    strokeColor: '#fff',
+                    strokeWeight: 1.5,
+                  }}
+                  onClick={() => {
+                    setSelectedOsm(p);
+                    setPlaceDetails(null);
+                  }}
+                />
+              ))}
               {selectedMarker && (
                 <InfoWindow
                   position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
                   onCloseClick={() => setSelectedMarker(null)}
                 >
                   <div
-                    className="min-w-[200px] max-w-[240px] text-left"
+                    className="min-w-[200px] max-w-[240px] text-left cursor-pointer"
+                    onClick={() => {
+                      const cfg = VERTICAL_CONFIG[selectedMarker.vertical as Exclude<VerticalFilter, 'all'>];
+                      if (cfg) navigate(cfg.route(selectedMarker.id));
+                    }}
                     dangerouslySetInnerHTML={{
                       __html: createMapPopupHtml({
                         name: language === 'ru' ? selectedMarker.nameRu : selectedMarker.name,
@@ -500,7 +592,67 @@ export default function MapView() {
                   />
                 </InfoWindow>
               )}
+              {selectedOsm && (
+                <InfoWindow
+                  position={{ lat: Number(selectedOsm.lat), lng: Number(selectedOsm.lng) }}
+                  onCloseClick={() => { setSelectedOsm(null); setPlaceDetails(null); }}
+                >
+                  <div className="min-w-[220px] max-w-[280px] text-left space-y-2">
+                    <div className="font-semibold text-sm">{selectedOsm.name || selectedOsm.category}</div>
+                    <div className="text-xs text-muted-foreground capitalize">
+                      {selectedOsm.category}{selectedOsm.subcategory ? ` · ${selectedOsm.subcategory}` : ''}
+                    </div>
+                    {!placeDetails && !placeLoading && (
+                      <button
+                        type="button"
+                        onClick={() => loadPlaceDetails(selectedOsm)}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        {language === 'ru' ? 'Загрузить детали Google' : 'Load Google details'}
+                      </button>
+                    )}
+                    {placeLoading && (
+                      <div className="text-xs text-muted-foreground">
+                        {language === 'ru' ? 'Загрузка…' : 'Loading…'}
+                      </div>
+                    )}
+                    {placeDetails && (
+                      <div className="space-y-1 text-xs">
+                        {placeDetails.rating && (
+                          <div>⭐ {placeDetails.rating} ({placeDetails.user_ratings_total ?? 0})</div>
+                        )}
+                        {placeDetails.formatted_address && (
+                          <div className="text-muted-foreground">{placeDetails.formatted_address}</div>
+                        )}
+                        {placeDetails.formatted_phone_number && (
+                          <a href={`tel:${placeDetails.formatted_phone_number}`} className="text-primary block">
+                            📞 {placeDetails.formatted_phone_number}
+                          </a>
+                        )}
+                        {placeDetails.website && (
+                          <a href={placeDetails.website} target="_blank" rel="noopener noreferrer" className="text-primary block truncate">
+                            🌐 {placeDetails.website}
+                          </a>
+                        )}
+                        {placeDetails.opening_hours?.open_now != null && (
+                          <div>{placeDetails.opening_hours.open_now ? '🟢 Open now' : '🔴 Closed'}</div>
+                        )}
+                        {placeDetails.url && (
+                          <a href={placeDetails.url} target="_blank" rel="noopener noreferrer" className="text-primary block">
+                            {language === 'ru' ? 'Открыть в Google Maps' : 'Open in Google Maps'}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </InfoWindow>
+              )}
             </GoogleMap>
+          )}
+          {showOsm && (
+            <div className="absolute bottom-1 right-1 bg-background/80 text-[10px] text-muted-foreground px-2 py-0.5 rounded">
+              © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" className="underline">OpenStreetMap</a> contributors
+            </div>
           )}
         </div>
       </div>
