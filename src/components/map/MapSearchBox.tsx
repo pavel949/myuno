@@ -131,8 +131,14 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
           value={query}
           onChange={(e) => setQuery(e.target.value.slice(0, 120))}
           onFocus={() => results.length > 0 && setOpen(true)}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           aria-label={placeholder}
+          role="combobox"
+          aria-expanded={open}
+          aria-controls="map-search-listbox"
+          aria-autocomplete="list"
+          aria-activedescendant={activeIdx >= 0 ? `map-search-opt-${activeIdx}` : undefined}
           className="w-full h-10 pl-9 pr-9 rounded-md bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
         {loading ? (
@@ -140,7 +146,7 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
         ) : query ? (
           <button
             type="button"
-            onClick={() => { setQuery(''); setResults([]); setOpen(false); }}
+            onClick={() => { setQuery(''); setResults([]); setOpen(false); setActiveIdx(-1); }}
             aria-label="Clear"
             className="absolute right-2 p-1 rounded hover:bg-muted"
           >
@@ -154,27 +160,32 @@ export function MapSearchBox({ onSelect, language = 'ru', className }: MapSearch
           {results.length === 0 && !loading ? (
             <div className="px-3 py-2 text-xs text-muted-foreground">{emptyText}</div>
           ) : (
-            <ul role="listbox">
-              {results.map((r) => (
-                <li key={r.id}>
-                  <button
-                    type="button"
-                    onClick={() => handlePick(r)}
-                    className="w-full text-left px-3 py-2 flex items-start gap-2 hover:bg-muted focus:bg-muted focus:outline-none"
-                  >
-                    <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm text-foreground truncate">{r.label}</span>
-                      {r.sublabel && (
-                        <span className="block text-[11px] text-muted-foreground truncate">{r.sublabel}</span>
-                      )}
-                    </span>
-                    <span className="text-[10px] uppercase text-muted-foreground/70 shrink-0 mt-1">
-                      {r.source === 'local' ? 'POI' : 'OSM'}
-                    </span>
-                  </button>
-                </li>
-              ))}
+            <ul ref={listRef} id="map-search-listbox" role="listbox">
+              {results.map((r, idx) => {
+                const active = idx === activeIdx;
+                return (
+                  <li key={r.id} id={`map-search-opt-${idx}`} role="option" aria-selected={active}>
+                    <button
+                      type="button"
+                      onMouseEnter={() => setActiveIdx(idx)}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => handlePick(r)}
+                      className={`w-full text-left px-3 py-2 flex items-start gap-2 focus:outline-none ${active ? 'bg-muted' : 'hover:bg-muted'}`}
+                    >
+                      <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm text-foreground truncate">{r.label}</span>
+                        {r.sublabel && (
+                          <span className="block text-[11px] text-muted-foreground truncate">{r.sublabel}</span>
+                        )}
+                      </span>
+                      <span className="text-[10px] uppercase text-muted-foreground/70 shrink-0 mt-1">
+                        {r.source === 'local' ? 'POI' : 'OSM'}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
