@@ -128,6 +128,10 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
             if (idx < 0) idx = sliced.findIndex((r) => r.label.toLowerCase().includes(needle));
           }
           setActiveIdx(idx >= 0 ? idx : sliced.length > 0 ? 0 : -1);
+          if (idx >= 0) {
+            setSelectedId(sliced[idx].id);
+            triggerFlash(sliced[idx].id);
+          }
           pendingMatchRef.current = null;
         } else {
           setActiveIdx(sliced.length > 0 ? 0 : -1);
