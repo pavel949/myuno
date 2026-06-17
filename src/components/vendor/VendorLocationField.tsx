@@ -106,7 +106,7 @@ export function VendorLocationField({
           address: result?.address || value.address,
           lat,
           lng,
-          district: result?.district ?? value.district ?? null,
+          district: value.district ?? null,
         });
       } catch (err) {
         logger.warn('[VendorLocationField] reverse geocode failed', err);
