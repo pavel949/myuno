@@ -207,10 +207,11 @@ const VendorPharmacy = () => {
                 <div className="space-y-2"><Label>{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label><Textarea value={formData.description_en} onChange={(e) => setFormData(p => ({ ...p, description_en: e.target.value }))} /></div>
                 <div className="space-y-2"><Label>{isRu ? 'Описание (RU)' : 'Description (RU)'}</Label><Textarea value={formData.description_ru} onChange={(e) => setFormData(p => ({ ...p, description_ru: e.target.value }))} /></div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>{isRu ? 'Адрес' : 'Address'}</Label><Input value={formData.address} onChange={(e) => setFormData(p => ({ ...p, address: e.target.value }))} /></div>
-                <div className="space-y-2"><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={formData.phone} onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))} /></div>
-              </div>
+              <VendorLocationField
+                value={{ address: formData.address, lat: formData.lat, lng: formData.lng }}
+                onChange={(v) => setFormData(p => ({ ...p, address: v.address, lat: v.lat, lng: v.lng }))}
+              />
+              <div className="space-y-2"><Label>{isRu ? 'Телефон' : 'Phone'}</Label><Input value={formData.phone} onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value }))} /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2"><Label>Email</Label><Input value={formData.email} onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))} /></div>
                 <div className="space-y-2"><Label>{isRu ? 'Сайт' : 'Website'}</Label><Input value={formData.website} onChange={(e) => setFormData(p => ({ ...p, website: e.target.value }))} /></div>
