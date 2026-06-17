@@ -551,13 +551,36 @@ export default function MapView() {
                   />
                 );
               })}
+              {showOsm && (osmPois || []).map((p: any) => (
+                <Marker
+                  key={`osm-${p.source_id}`}
+                  position={{ lat: Number(p.lat), lng: Number(p.lng) }}
+                  title={p.name || p.category}
+                  icon={{
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 5,
+                    fillColor: '#0A2240',
+                    fillOpacity: 0.85,
+                    strokeColor: '#fff',
+                    strokeWeight: 1.5,
+                  }}
+                  onClick={() => {
+                    setSelectedOsm(p);
+                    setPlaceDetails(null);
+                  }}
+                />
+              ))}
               {selectedMarker && (
                 <InfoWindow
                   position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
                   onCloseClick={() => setSelectedMarker(null)}
                 >
                   <div
-                    className="min-w-[200px] max-w-[240px] text-left"
+                    className="min-w-[200px] max-w-[240px] text-left cursor-pointer"
+                    onClick={() => {
+                      const cfg = VERTICAL_CONFIG[selectedMarker.vertical as Exclude<VerticalFilter, 'all'>];
+                      if (cfg) navigate(cfg.route(selectedMarker.id));
+                    }}
                     dangerouslySetInnerHTML={{
                       __html: createMapPopupHtml({
                         name: language === 'ru' ? selectedMarker.nameRu : selectedMarker.name,
@@ -567,6 +590,61 @@ export default function MapView() {
                       }),
                     }}
                   />
+                </InfoWindow>
+              )}
+              {selectedOsm && (
+                <InfoWindow
+                  position={{ lat: Number(selectedOsm.lat), lng: Number(selectedOsm.lng) }}
+                  onCloseClick={() => { setSelectedOsm(null); setPlaceDetails(null); }}
+                >
+                  <div className="min-w-[220px] max-w-[280px] text-left space-y-2">
+                    <div className="font-semibold text-sm">{selectedOsm.name || selectedOsm.category}</div>
+                    <div className="text-xs text-muted-foreground capitalize">
+                      {selectedOsm.category}{selectedOsm.subcategory ? ` · ${selectedOsm.subcategory}` : ''}
+                    </div>
+                    {!placeDetails && !placeLoading && (
+                      <button
+                        type="button"
+                        onClick={() => loadPlaceDetails(selectedOsm)}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        {language === 'ru' ? 'Загрузить детали Google' : 'Load Google details'}
+                      </button>
+                    )}
+                    {placeLoading && (
+                      <div className="text-xs text-muted-foreground">
+                        {language === 'ru' ? 'Загрузка…' : 'Loading…'}
+                      </div>
+                    )}
+                    {placeDetails && (
+                      <div className="space-y-1 text-xs">
+                        {placeDetails.rating && (
+                          <div>⭐ {placeDetails.rating} ({placeDetails.user_ratings_total ?? 0})</div>
+                        )}
+                        {placeDetails.formatted_address && (
+                          <div className="text-muted-foreground">{placeDetails.formatted_address}</div>
+                        )}
+                        {placeDetails.formatted_phone_number && (
+                          <a href={`tel:${placeDetails.formatted_phone_number}`} className="text-primary block">
+                            📞 {placeDetails.formatted_phone_number}
+                          </a>
+                        )}
+                        {placeDetails.website && (
+                          <a href={placeDetails.website} target="_blank" rel="noopener noreferrer" className="text-primary block truncate">
+                            🌐 {placeDetails.website}
+                          </a>
+                        )}
+                        {placeDetails.opening_hours?.open_now != null && (
+                          <div>{placeDetails.opening_hours.open_now ? '🟢 Open now' : '🔴 Closed'}</div>
+                        )}
+                        {placeDetails.url && (
+                          <a href={placeDetails.url} target="_blank" rel="noopener noreferrer" className="text-primary block">
+                            {language === 'ru' ? 'Открыть в Google Maps' : 'Open in Google Maps'}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </InfoWindow>
               )}
             </GoogleMap>
