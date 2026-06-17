@@ -166,12 +166,9 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
     );
   }
 
-  const HOME_CATEGORY_IDS = [
-    'cat-home-cleaning',
-    'cat-home-repair',
-    'cat-home-outdoor',
-    'cat-home-logistics',
-  ] as const;
+  // 2026-06-16: the 4 home-* categories were consolidated into a single
+  // `cat-home-services` umbrella. The label-uniqueness invariant still holds.
+  const HOME_CATEGORY_IDS = ['cat-home-services'] as const;
 
   it.each(HOME_CATEGORY_IDS)('home category %s renders distinct EN labels', (id) => {
     const labels = labelsFor(id, 'en');
@@ -185,14 +182,14 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
     expect(new Set(labels).size, `dup labels in ${id}: ${labels.join(' | ')}`).toBe(labels.length);
   });
 
-  it('Cleaning category exposes Laundry as a distinct label', () => {
-    expect(labelsFor('cat-home-cleaning', 'en')).toContain('Laundry');
-    expect(labelsFor('cat-home-cleaning', 'ru')).toContain('Прачечная');
+  it('Home services category exposes Laundry as a distinct label', () => {
+    expect(labelsFor('cat-home-services', 'en')).toContain('Laundry');
+    expect(labelsFor('cat-home-services', 'ru')).toContain('Прачечная');
   });
 
-  it('Logistics category exposes the Services hub umbrella label', () => {
-    expect(labelsFor('cat-home-logistics', 'en')).toContain('Services hub');
-    expect(labelsFor('cat-home-logistics', 'ru')).toContain('Все услуги');
+  it('Home services category exposes the Services hub umbrella label', () => {
+    expect(labelsFor('cat-home-services', 'en')).toContain('Services hub');
+    expect(labelsFor('cat-home-services', 'ru')).toContain('Все услуги');
   });
 
   it('Tourism & Activities renders distinct EN labels (no "Experiences" duplication)', () => {
@@ -212,7 +209,7 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
   });
 
   it('plain umbrella route /services keeps its catalog SSOT label', () => {
-    const cat = CATEGORIES.find((c) => c.id === 'cat-home-logistics')!;
+    const cat = CATEGORIES.find((c) => c.id === 'cat-home-services')!;
     const umbrella = cat.services.find((s) => s.path === '/services');
     expect(umbrella, '/services umbrella entry missing from SSOT').toBeTruthy();
     const label = getClusterServiceLocalizedLabel(
