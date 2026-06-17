@@ -1,8 +1,10 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState, forwardRef, useImperativeHandle } from 'react';
 import maplibregl, { Map as MlMap, MapGeoJSONFeature, StyleSpecification } from 'maplibre-gl';
 import { Protocol } from 'pmtiles';
+import { Crosshair, Loader2 } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import phuketPmtilesAsset from '@/assets/map/phuket.pmtiles.asset.json';
+
 
 // ---------- pmtiles protocol registration (once per page) ----------
 let protocolRegistered = false;
@@ -117,20 +119,37 @@ export interface MapLibreMapProps {
   className?: string;
   /** Disable controls (zoom, geolocate). Default false. */
   minimal?: boolean;
+  /** Show large floating "Find me" button (bottom-right). Default true. */
+  showLocateButton?: boolean;
+  /** Localized label for the locate button. */
+  locateLabel?: string;
 }
 
-export function MapLibreMap({
-  center,
-  zoom = 11,
-  markers = [],
-  onMarkerClick,
-  fitToMarkers = true,
-  className,
-  minimal = false,
-}: MapLibreMapProps) {
+export interface MapLibreMapHandle {
+  locate: () => void;
+  flyTo: (lat: number, lng: number, zoom?: number) => void;
+}
+
+export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(function MapLibreMap(
+  {
+    center,
+    zoom = 11,
+    markers = [],
+    onMarkerClick,
+    fitToMarkers = true,
+    className,
+    minimal = false,
+    showLocateButton = true,
+    locateLabel = 'Найти меня',
+  },
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MlMap | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const userMarkerRef = useRef<maplibregl.Marker | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locateError, setLocateError] = useState<string | null>(null);
 
   const style = useMemo<string | StyleSpecification>(() => {
     if (PHUKET_PMTILES_URL) {
@@ -139,6 +158,57 @@ export function MapLibreMap({
     }
     return OPENFREEMAP_STYLE;
   }, []);
+
+  const showUserPosition = (lat: number, lng: number, accuracy?: number) => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (!userMarkerRef.current) {
+      const el = document.createElement('div');
+      el.style.cssText = `
+        width: 18px; height: 18px; border-radius: 9999px;
+        background: #1a73e8; border: 3px solid #fff;
+        box-shadow: 0 0 0 4px rgba(26,115,232,0.25), 0 2px 6px rgba(0,0,0,0.4);
+      `;
+      el.setAttribute('aria-label', 'Your location');
+      userMarkerRef.current = new maplibregl.Marker({ element: el })
+        .setLngLat([lng, lat])
+        .addTo(map);
+    } else {
+      userMarkerRef.current.setLngLat([lng, lat]);
+    }
+    const targetZoom = accuracy && accuracy > 500 ? 13 : 15;
+    map.flyTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), targetZoom), duration: 700 });
+  };
+
+  const locate = () => {
+    if (!('geolocation' in navigator)) {
+      setLocateError('Геолокация недоступна');
+      return;
+    }
+    setLocating(true);
+    setLocateError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        showUserPosition(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+      },
+      (err) => {
+        setLocating(false);
+        setLocateError(err.code === err.PERMISSION_DENIED ? 'Доступ запрещён' : 'Не удалось определить');
+        setTimeout(() => setLocateError(null), 3000);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
+    );
+  };
+
+  useImperativeHandle(ref, () => ({
+    locate,
+    flyTo: (lat, lng, z) => {
+      const map = mapRef.current;
+      if (!map) return;
+      map.flyTo({ center: [lng, lat], zoom: z ?? map.getZoom(), duration: 600 });
+    },
+  }));
 
   // Init map once.
   useEffect(() => {
@@ -154,13 +224,6 @@ export function MapLibreMap({
 
     if (!minimal) {
       map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), 'top-right');
-      map.addControl(
-        new maplibregl.GeolocateControl({
-          positionOptions: { enableHighAccuracy: true },
-          trackUserLocation: true,
-        }),
-        'top-right',
-      );
       map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
     }
 
@@ -169,6 +232,8 @@ export function MapLibreMap({
     return () => {
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
+      userMarkerRef.current?.remove();
+      userMarkerRef.current = null;
       map.remove();
       mapRef.current = null;
     };
@@ -221,7 +286,35 @@ export function MapLibreMap({
     map.flyTo({ center: [center.lng, center.lat], zoom, duration: 400 });
   }, [center.lat, center.lng, zoom, markers.length]);
 
-  return <div ref={containerRef} className={className} style={{ width: '100%', height: '100%' }} />;
-}
+  return (
+    <div className={className} style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+      {showLocateButton && !minimal && (
+        <div className="absolute right-3 bottom-20 z-10 flex flex-col items-end gap-2 pointer-events-none">
+          {locateError && (
+            <div className="pointer-events-auto bg-card text-foreground text-xs px-3 py-1.5 rounded-md border border-border shadow-md">
+              {locateError}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={locate}
+            disabled={locating}
+            aria-label={locateLabel}
+            title={locateLabel}
+            className="pointer-events-auto h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg border-2 border-background flex items-center justify-center hover:brightness-110 active:scale-95 transition disabled:opacity-70"
+          >
+            {locating ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Crosshair className="w-5 h-5" />
+            )}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+});
+
 
 export type { MapGeoJSONFeature };
