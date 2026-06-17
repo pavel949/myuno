@@ -207,12 +207,13 @@ export const MapSearchBox = forwardRef<MapSearchBoxHandle, MapSearchBoxProps>(fu
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Scroll active item into view
+  // Scroll active (keyboard / hover) item into view, smoothly + offset-aware.
   useEffect(() => {
-    if (activeIdx < 0 || !listRef.current) return;
-    const el = listRef.current.querySelectorAll('li')[activeIdx] as HTMLElement | undefined;
-    el?.scrollIntoView({ block: 'nearest' });
-  }, [activeIdx]);
+    if (activeIdx < 0 || !open) return;
+    const raf = requestAnimationFrame(() => scrollItemIntoView(activeIdx));
+    return () => cancelAnimationFrame(raf);
+  }, [activeIdx, open]);
+
 
   const handlePick = (r: MapSearchResult) => {
     skipNextSearchRef.current = true;
