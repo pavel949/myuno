@@ -22,6 +22,10 @@ interface MapSearchBoxProps {
   onSelect: (result: MapSearchResult) => void;
   language?: 'ru' | 'en';
   className?: string;
+  /** Extra px reserved at the top of the dropdown scroll area (e.g. external sticky header). */
+  listOffsetTop?: number;
+  /** Extra px reserved at the bottom of the dropdown scroll area (e.g. safe area / sticky footer). */
+  listOffsetBottom?: number;
 }
 
 // Phuket bbox (south,west,north,east) for Nominatim viewbox bias
