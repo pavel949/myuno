@@ -1,154 +1,136 @@
-## Что сделаем
 
-Четыре связанных блока: 1) кнопка «Помощь myUNO» на сервисных страницах, 2) новая вертикаль «Переезд» + 5 поставщиков в БД, 3) скрытие контактов вендоров во всём публичном UI, 4) аудит иконок мини-аппов.
+# План: главный лендинг как «гражданская инфраструктура для жизни на Пхукете»
 
----
+## Цель страницы
+Две конверсии равного веса (не одна!):
+1. **Частный пользователь → создаёт аккаунт.**
+2. **Локальный бизнес → оставляет заявку «хочу оказывать услуги».**
 
-### 1. CTA «Помощь myUNO» — единая точка обращений
+Всё остальное (читабельность, доверие, охват аудиторий) — служит этим двум действиям. Тон: спокойная гражданская инфраструктура (GOV.UK, e-Estonia), без продающей лексики.
 
-**База:**
-- Новая таблица `help_requests`: `topic` (visa | invest | business | relocation | property | legal | finance | general), `subject`, `message`, `urgency`, `user_id` (nullable — гостям тоже можно), `contact_email`, `contact_phone`, `preferred_channel` (in_app | whatsapp | email), `source_page`, `source_route`, `referral_code`, `status` (new/triaged/in_progress/closed), `assigned_to`, `language`. RLS: владелец видит свои + автор; staff/admin — все.
-- Edge-функция `submit-help-request`:
-  1. валидирует Zod-схему,
-  2. INSERT в `help_requests`,
-  3. UPSERT в `crm_contacts` по email/phone и создаёт `crm_tasks` (или `agent_deals` для invest/business) на менеджера через `crm_assignment_rules`,
-  4. шлёт WhatsApp-алерт через существующий UltraMSG (admin number из `system_settings.admin_whatsapp`) + email менеджеру через Resend,
-  5. возвращает `request_id` для UI.
-- analytics events: `help_request_open`, `help_request_submit` с `topic` и `source_route`.
-
-**UI:**
-- Новый компонент `<ConciergeHelpCTA topic="visa" variant="card|inline|fab" />`:
-  - card — большой блок «Нужна помощь с визой? Эксперт myUNO ответит в течение часа» + кнопка «Запросить помощь».
-  - inline — компактная плашка после hero.
-  - fab — плавающая кнопка снизу справа для длинных страниц.
-- Открывает `<ConciergeHelpSheet>` (shadcn Sheet): topic уже выбран, поля subject/message/urgency/preferred_channel, для гостя — email + phone. Success-state «Менеджер свяжется через myUNO», ссылка на `/me/requests`.
-
-**Куда встраиваем (приоритет):**
-- Visa: `legal/VisaComparePage`, `legal/TaxStructuringLanding`, `legal/LegalServicesIndex`, все `/legal/visa/*` детальные.
-- Invest: `invest/InvestInThailand`, `InvestmentHub`, `InvestmentProjectDetail`, `property/OffplanIndex`, `property/OffplanDetail`.
-- Business: `ForBusinessPage`, `ForDevelopers`, `services/legal-services` (incorporation).
-- Relocation: новая `relocate/MoversIndex`, `relocate/RelocationDashboard`.
-- Общий fab — на всех `/*Index` каталогах (через `MiniAppLayout`-проп `helpTopic`).
-
----
-
-### 2. Вертикаль «Переезд» (movers, packing, storage transfer)
-
-**Таксономия и роутинг:**
-- В `src/lib/catalog/taxonomy.ts` в кластер `live` добавить категорию `relocation-services` → сервисы `movers`, `packing`, `storage-transfer`, `international-moving`, `pet-relocation` с тегами persona=`relocation,family`, jtbd=`B`.
-- Routes: `/relocate/movers` (`MoversIndex`), `/relocate/movers/:slug` (`MoverDetail` — без контактов), `/relocate/movers/book` (`MoversBookingForm` — заявка через единый ConciergeHelp флоу с topic=relocation).
-- Регистрация в `pageRegistry.ts` + `AnimatedRoutes.tsx`.
-
-**Контент-страница `MoversIndex`:**
-- Hero «Переезд под ключ» + список 5 типов услуг (упаковка, локальные перевозки, международный переезд, хранение, питомцы).
-- Карточки 5 поставщиков (имя, район, специализация, бейдж «Проверен myUNO») **без контактов** — кнопка «Запросить через myUNO» вместо телефона/email.
-- Блок «Как это работает» (3 шага) + CTA-форма.
-
-**База — 5 реальных поставщиков:**
-- Через Firecrawl (web search «moving company Phuket» + scrape) собираем 5 компаний: Allied Pickfords Thailand, Asian Tigers Mobility, Santa Fe Relocation, AGS Movers Thailand, Crown Relocations.
-- INSERT в `vendor_prospects` с `category='relocation-services'`, `status='prospect'`, заполненными `business_name/website/phone/email/address/district`, `ai_recommended_plan='outreach'`.
-- На фронте `MoversIndex` показывает их через VIEW `v_public_movers` (SELECT business_name, district, source_data->'specialties' — БЕЗ phone/email/whatsapp), которая отдаётся anon-роли.
-
----
-
-### 3. Скрытие контактов поставщиков во всём B2C-UI
-
-**Принцип:** на публичных страницах (anon + authenticated consumer) кнопка `«Запросить через myUNO»` вместо телефона/email/whatsapp. Контакты остаются доступны staff/admin/management_company через свои дашборды.
-
-**Скоуп правок (по результатам аудита `rg`):**
-- `src/pages/market/VendorPage.tsx`
-- `src/pages/services/ServiceProviderDetail.tsx`
-- `src/pages/classifieds/ClassifiedDetailPage.tsx`
-- `src/pages/property/DeveloperDetail.tsx` (телефон/whatsapp застройщика → CTA)
-- `src/pages/property/PropertyDetail*` (контакты управляющей компании)
-- Карточки в `src/components/listings/*`, `src/components/services/ServiceProviderCard.tsx`, `src/components/vendor/*Card.tsx`
-- Везде, где есть `WhatsAppOrderContact` для B2C-флоу — заменить на `<ConciergeRequestButton listingId vendorId topic="services">`.
-- Исключения (не трогаем): `owner/VendorDirectoryPage`, `admin/*`, `mc/*`, partner-onboarding, support-страницы.
-
-**Единый компонент `<ConciergeRequestButton>`** — обёртка над `ConciergeHelpSheet`, прокидывает `listing_id`/`vendor_id` в `source_data`, чтобы менеджер видел контекст. После отправки — сам выдёргивает контакт вендора и связывает обе стороны.
-
----
-
-### 4. Аудит иконок мини-аппов на главной
-
-- Скрипт-проверка `scripts/audit-icons.ts`: проходит по `FLAT_SERVICES` из `taxonomy.ts`, сверяет с маршрутами в `APP_ROUTES`, проверяет наличие `icon`-поля. Выводит таблицу: сервис → есть ли в PersonalGrid → есть ли в ClusterRail → есть ли в AppDrawer → есть ли иконка.
-- На основании отчёта: добавляем недостающие entries в `taxonomy.ts` (movers и др. новые), назначаем lucide-иконки, фиксим персонные теги для visibility в `ROLE_VISIBLE_CLUSTERS`.
-- Проверка покрытия: `AppDrawer` (универсальный launcher) должен показывать **все** доступные `FLAT_SERVICES` с фильтром по поиску и кластеру — если каких-то нет, добавляем.
-- Добавить в `AppDrawer` явный быстрый доступ к «Помощь myUNO» (отдельная закреплённая иконка сверху).
-
----
-
-## Технические детали
-
-**Таблицы (migration #1):**
-
-```sql
-CREATE TABLE public.help_requests (
-  id uuid pk, user_id uuid (nullable, FK auth.users),
-  topic text NOT NULL CHECK (topic IN ('visa','invest','business','relocation','property','legal','finance','general')),
-  subject text, message text NOT NULL,
-  urgency text DEFAULT 'normal',
-  contact_email text, contact_phone text,
-  preferred_channel text DEFAULT 'in_app',
-  language text DEFAULT 'ru',
-  source_page text, source_route text, referral_code text,
-  vendor_id uuid (nullable), listing_id uuid (nullable),
-  status text DEFAULT 'new',
-  assigned_to uuid (nullable),
-  crm_contact_id uuid, crm_task_id uuid,
-  created_at, updated_at
-);
-GRANT SELECT, INSERT ON public.help_requests TO authenticated;
-GRANT INSERT ON public.help_requests TO anon;  -- гостевые заявки
-GRANT ALL ON public.help_requests TO service_role;
--- RLS: INSERT всем; SELECT — только owner (user_id = auth.uid()) или staff (has_role).
-```
-
-**Edge function:** `supabase/functions/submit-help-request/index.ts` (Deno 2.0, CORS, Zod-валидация, использует `_shared/admin-config.ts` для admin контактов).
-
-**VIEW для публичного списка movers (migration #2):**
-
-```sql
-CREATE VIEW public.v_public_movers AS
-SELECT id, business_name, business_name_ru, district, city, website,
-       source_data->'specialties' AS specialties,
-       source_data->'languages' AS languages
-FROM public.vendor_prospects
-WHERE category='relocation-services' AND status IN ('prospect','active');
-GRANT SELECT ON public.v_public_movers TO anon, authenticated;
-```
-
-**Список новых/изменённых файлов:**
-- `supabase/migrations/*_help_requests.sql`, `*_movers_view.sql`
-- `supabase/functions/submit-help-request/index.ts`
-- `src/components/concierge/ConciergeHelpSheet.tsx`, `ConciergeHelpCTA.tsx`, `ConciergeRequestButton.tsx`
-- `src/hooks/useHelpRequest.ts`
-- `src/pages/relocate/MoversIndex.tsx`, `MoverDetail.tsx`
-- `src/lib/catalog/taxonomy.ts` (правка), `pageRegistry.ts`, `AnimatedRoutes.tsx`, `routes.ts`
-- Точечные правки ~12 страниц/карточек для скрытия контактов
-- `scripts/audit-icons.ts` (одноразовый), `AppDrawer.tsx` (доработка)
-
-**Аналитика:** все события (`help_request_open/submit`, `concierge_request_click`, `mover_view`) пишутся в `analytics_events` и появятся в существующем `AdminAnalyticsDashboard`.
-
----
-
-## Что НЕ делаем сейчас (вне скоупа)
-
-- Не подключаем Stripe для платных консультаций (топик `help_request` — бесплатный pre-sale).
-- Не пишем outreach-кампанию к 5 movers — только заносим в БД как `prospect`, дальше ваш существующий `outreach-agent`.
-- Не меняем 5-зонную структуру Home — только улучшаем покрытие иконок и `AppDrawer`.
-- Не трогаем admin/MC/staff экраны — там контакты остаются видимыми.
-
----
-
-## Порядок реализации (4 этапа)
+## Структура страницы (top → bottom)
 
 ```text
-1. DB: миграции help_requests + v_public_movers           (≈1 шаг)
-2. Backend: edge function submit-help-request             (≈1 шаг)
-3. Frontend: ConciergeHelpSheet + Sheet + кнопки          (≈1 шаг)
-4. Контент: MoversIndex + 5 prospects + аудит иконок     (≈1 шаг)
-5. Скрытие контактов: точечные правки ~12 страниц         (≈1 шаг)
+1. HERO — двойной CTA
+   Заголовок: «Инфраструктура для жизни на Пхукете»
+   Подзаголовок: «Экосистема myUNO объединяет {N} проверенных сервисов
+     для иностранцев и местных бизнесов, готовых их обслуживать —
+     в одном аккаунте, на русском, английском и тайском.»
+   Счётчики из useCatalogFromDB: {услуг} · {разделов} · {ситуаций} · 24/7
+   Две равные кнопки:
+     — «Создать аккаунт»       (primary, для частного пользователя)
+     — «Стать партнёром»       (secondary, для бизнеса → /vendor/join)
+   Под кнопками — одна строка «Уже есть аккаунт — войти».
+
+2. КОРОТКАЯ РАЗВИЛКА «Я пришёл за…»
+   Две колонки одинакового веса:
+     A. «Решить свой вопрос»  → якорь к блоку аудиторий
+     B. «Предложить услуги»   → якорь к блоку «Для бизнеса»
+   Это якорная навигация, а не отдельные страницы.
+
+3. «ДЛЯ КОГО ЭКОСИСТЕМА» — 6 аудиторий
+   Карточки одного веса, нейтральные lucide-иконки. Каждая = 1 абзац +
+   3–5 типичных задач + якорь в соответствующий кластер.
+     • Турист / гость
+     • Резидент
+     • Инвестор
+     • Собственник жилья (в т.ч. удалённо из другой страны)
+     • Застройщик / девелопер
+     • Бизнес и предприниматель
+   Тон: «здесь вы можете оформить…», «получить сопровождение…»,
+   а не «мы поможем», «лучший выбор».
+
+4. «ЧТО ВХОДИТ В ЭКОСИСТЕМУ» — 6 кластеров Master Taxonomy v1.0
+   Arrive · Live · Manage · Invest · Legal · Build.
+   Реальные счётчики из useCatalogFromDB (без хардкода, без «0»).
+   Заголовок: «{N} разделов, {M} сервисов — один аккаунт».
+
+5. «КАК ЭТО РАБОТАЕТ» — 3 пункта
+   1) Один аккаунт и один профиль для всех сервисов.
+   2) Исполнители проходят KYC и проверку документов; оплата защищена
+      до получения услуги; спор решает платформа.
+   3) Запрос идёт через myUNO — координацию, перевод и контроль ведёт
+      консьерж. Прямые контакты исполнителей не показываем.
+
+6. «ДОВЕРИЕ И ДАННЫЕ»
+   Сухой перечень фактов: KYC уровня банка · юр. лицо в Таиланде ·
+   хранение данных по PDPA · поддержка 24/7 на RU/EN/TH ·
+   открытые цены в ฿, $, ₽, € · аудит-метка на каждой транзакции.
+
+7. «ПОМОЩЬ В ЭКСТРЕННОЙ СИТУАЦИИ»
+   Медицина, авария, потеря документов, правовая защита, эвакуация.
+   Кнопка «Запросить помощь» → открывает ConciergeHelpSheet
+   (topic=emergency). Доступно гостю без аккаунта.
+
+8. «ДЛЯ МЕСТНЫХ БИЗНЕСОВ» — вторая ключевая конверсия, полноценный блок
+   Заголовок: «Работайте с иностранной аудиторией по прозрачным правилам».
+   3 короткие выгоды (без восклицаний):
+     — Поток заявок от верифицированных клиентов экосистемы.
+     — Прозрачные комиссии и защищённая оплата вместо договорённостей
+       в мессенджерах.
+     — Профиль, отзывы и история сделок — единая репутация на платформе.
+   Кому подходит: услуги для жилья, перевозки, медицина, юристы, ремонт,
+   транспорт, экскурсии, образование, бьюти, IT и др. (короткий список).
+   CTA: «Стать партнёром» → /vendor/join.
+
+9. «ДЛЯ ЗАСТРОЙЩИКОВ» — отдельный короткий блок
+   Один абзац + кнопка «Портал застройщика» → /for-developers
+   (соответствует ранее принятому роутингу по статусу).
+
+10. ФИНАЛЬНЫЙ CTA — снова двойной
+    «Создать аккаунт» + «Стать партнёром».
+    Ниже LandingChrome footer (Privacy · Terms · Support · Contact).
+
+11. Sticky bar на мобильном — переключатель: по умолчанию «Создать аккаунт»;
+    в зоне блоков 8–9 меняется на «Стать партнёром» (по IntersectionObserver).
 ```
 
-**Рекомендую:** идти в указанном порядке. После шага 2 кнопки можно вставлять параллельно с moving-вертикалью.
+## Тон и язык (RU)
+- Убрать: «всего», «прямо сейчас», «уникально», «лучший», «успейте», восклицательные знаки, эмодзи, английские кавычки `"…"` (использовать «…»).
+- Использовать: «оформить», «подать заявку», «получить услугу», «сопровождение», «реестр», «проверка», «обращение», «единый аккаунт», «экосистема».
+- Слово **экосистема** — в hero, в названии секции 4, в блоке для бизнесов.
+- Двуязычность: каждая строка RU + EN через `t()`.
+- Финальная вычитка вручную перед мержем.
+
+## Реальные цифры
+`useCatalogFromDB` уже отдаёт `totalEligibleServices`, `clustersCount`, `totalActiveLifeSituations`, `byCluster[id].count`. Используем их в hero, заголовке секции 4 и карточках кластеров. Если число у кластера = 0 — скрываем строку, а не показываем «0».
+
+## Что НЕ меняется
+- Маршрутизация: `/` остаётся `WelcomeLanding`, `/join` остаётся коротким invite.
+- DS 2.1: цвета и шрифты только из `src/styles/tokens.css`. Никаких хардкод-hex и `text-white`/`bg-black`.
+- Существующие примитивы `LandingChrome`, `LandingSection`, `LandingHero`, `LandingTrustRow`, `ConciergeHelpSheet` — переиспользуем.
+- Никаких новых таблиц, Edge Functions, feature-flags.
+
+## Технические детали
+**Правим:**
+- `src/pages/WelcomeLanding.tsx` — полная переработка контента под 11-блочную структуру.
+- `src/pages/JoinInvite.tsx` — точечная вычитка лексики (~10 строк), выравнивание hero-заголовка с главным.
+- `src/i18n/*` — добавить/обновить ключи `welcome.hero.*`, `welcome.split.*`, `welcome.audiences.*`, `welcome.clusters.*`, `welcome.howItWorks.*`, `welcome.trust.*`, `welcome.emergency.*`, `welcome.partners.*`, `welcome.developers.*`, `welcome.finalCta.*`.
+
+**Новые компоненты (в `src/components/landings/`):**
+- `WelcomeAudienceGrid.tsx` — 6 карточек аудиторий с якорями.
+- `WelcomeEcosystemClusters.tsx` — 6 кластеров с реальными счётчиками.
+- `WelcomePartnersBlock.tsx` — блок для бизнесов (секция 8).
+- `WelcomeDevelopersBlock.tsx` — блок для застройщиков (секция 9).
+- `WelcomeStickyMobileBar.tsx` — sticky-бар с переключением CTA по скроллу.
+
+**Источники данных:** `useCatalogFromDB()`, `src/lib/taxonomies/master.ts`, `ConciergeHelpSheet`.
+
+## Что НЕ делаем в этой итерации
+- Не трогаем `/index` (`Index.tsx` для авторизованных).
+- Не редизайним `/for-developers` и `/vendor/join` — только ведём ссылки.
+- Не добавляем A/B-тесты, не подключаем новые источники аналитики (используем существующий `trackEvent`).
+
+## Контрольные критерии готовности
+1. Hero и счётчики берутся из БД, не из строковых констант.
+2. Все 6 аудиторий присутствуют, у каждой ≥3 примера задач.
+3. Двойной CTA («Создать аккаунт» + «Стать партнёром») виден в hero, в финальном блоке и в sticky-bar на мобильном.
+4. На странице нет ни одного хардкод-hex и ни одного `text-white`/`bg-black`.
+5. Слово «экосистема» встречается минимум в hero, в названии секции 4 и в блоке для бизнесов.
+6. Русские строки прошли вычитку: нет восклицательных знаков, английских кавычек, «всего/успейте/лучший».
+7. Лендинг открывается на 375px без горизонтального скролла, touch target кнопок ≥44px.
+8. Кнопка «Запросить помощь» в блоке 7 открывает `ConciergeHelpSheet` без логина.
+
+---
+
+**Рекомендую:** утвердить план как есть и начать сборку. Двойной CTA с равным весом + якорная развилка «решить вопрос / предложить услуги» — единственный способ обслужить обе целевые конверсии на одной странице, не превращая её в две разные.
