@@ -116,7 +116,7 @@ export default function BudgetPage() {
   };
 
   const formatAmount = (n: number) =>
-    new Intl.NumberFormat(isRu ? 'ru-RU' : 'en-US', { style: 'currency', currency: 'THB', minimumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat(isRu ? 'ru-RU' : 'en-US', { style: 'currency', currency: cityCurrencyCode, minimumFractionDigits: 0 }).format(n);
 
   const getCatLabel = (cat: string, type: string) => {
     const list = type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
