@@ -29,7 +29,7 @@ export interface AreaLanding {
     metaDescription: { ru: string; en: string };
     ogImage: string;
     canonicalPath: string;
-    hreflangAlternates: { lang: 'ru' | 'en'; href: string }[];
+    hreflangAlternates: { lang: 'ru' | 'en' | 'th' | 'zh-CN'; href: string }[];
   };
 }
 

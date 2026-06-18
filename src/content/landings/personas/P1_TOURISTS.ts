@@ -108,6 +108,8 @@ export const P1_TOURISTS: PersonaLanding = {
     hreflangAlternates: [
       { lang: 'ru', href: 'https://www.myuno.app/for/tourists?lang=ru' },
       { lang: 'en', href: 'https://www.myuno.app/for/tourists?lang=en' },
+      { lang: 'th', href: 'https://www.myuno.app/for/tourists?lang=th' },
+      { lang: 'zh-CN', href: 'https://www.myuno.app/for/tourists?lang=zh-CN' },
     ],
   },
 };

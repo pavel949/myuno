@@ -57,6 +57,8 @@ export const P14_MEDICAL: PersonaLanding = {
     hreflangAlternates: [
       { lang: 'ru', href: 'https://www.myuno.app/for/medical?lang=ru' },
       { lang: 'en', href: 'https://www.myuno.app/for/medical?lang=en' },
+      { lang: 'th', href: 'https://www.myuno.app/for/medical?lang=th' },
+      { lang: 'zh-CN', href: 'https://www.myuno.app/for/medical?lang=zh-CN' },
     ],
   },
 };
