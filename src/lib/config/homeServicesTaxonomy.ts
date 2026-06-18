@@ -34,7 +34,7 @@ export const SERVICE_DOMAINS: ServiceDomainConfig[] = [
       { id: 'handyman', labelEn: 'Handyman', labelRu: 'Мастер на час', icon: '🔨', domain: 'maintenance' },
       { id: 'plumbing', labelEn: 'Plumbing', labelRu: 'Сантехник', icon: '🚿', domain: 'maintenance' },
       { id: 'electrical', labelEn: 'Electrical', labelRu: 'Электрик', icon: '⚡', domain: 'maintenance' },
-      { id: 'ac', labelEn: 'AC Service', labelRu: 'Кондиционеры', icon: '❄️', domain: 'maintenance' },
+      { id: 'ac-repair', labelEn: 'AC Service', labelRu: 'Кондиционеры', icon: '❄️', domain: 'maintenance' },
       { id: 'repair', labelEn: 'Appliance Repair', labelRu: 'Ремонт техники', icon: '🔧', domain: 'maintenance' },
       { id: 'security', labelEn: 'Security', labelRu: 'Безопасность', icon: '🔒', domain: 'maintenance' },
     ],
@@ -45,10 +45,9 @@ export const SERVICE_DOMAINS: ServiceDomainConfig[] = [
     labelRu: 'Уборка',
     icon: '✨',
     categories: [
-      { id: 'home-cleaning', labelEn: 'Home Cleaning', labelRu: 'Уборка дома', icon: '🏠', domain: 'cleaning' },
-      { id: 'deep-cleaning', labelEn: 'Deep Cleaning', labelRu: 'Генеральная', icon: '🧹', domain: 'cleaning' },
+      { id: 'cleaning', labelEn: 'Home Cleaning', labelRu: 'Уборка', icon: '🏠', domain: 'cleaning' },
       { id: 'laundry', labelEn: 'Laundry', labelRu: 'Прачечная', icon: '👔', domain: 'cleaning' },
-      { id: 'pest', labelEn: 'Pest Control', labelRu: 'Дезинсекция', icon: '🐜', domain: 'cleaning' },
+      { id: 'pest-control', labelEn: 'Pest Control', labelRu: 'Дезинсекция', icon: '🐜', domain: 'cleaning' },
     ],
   },
   {
@@ -57,7 +56,7 @@ export const SERVICE_DOMAINS: ServiceDomainConfig[] = [
     labelRu: 'Двор',
     icon: '🌿',
     categories: [
-      { id: 'garden', labelEn: 'Gardening', labelRu: 'Садовник', icon: '🌱', domain: 'outdoor' },
+      { id: 'gardening', labelEn: 'Gardening', labelRu: 'Садовник', icon: '🌱', domain: 'outdoor' },
       { id: 'pool', labelEn: 'Pool Service', labelRu: 'Бассейн', icon: '🏊', domain: 'outdoor' },
       { id: 'exterior', labelEn: 'Exterior Wash', labelRu: 'Мойка фасадов', icon: '🏢', domain: 'outdoor' },
     ],
@@ -91,14 +90,32 @@ export const DOMAIN_MAP: Record<ServiceDomain, ServiceDomainConfig> = Object.fro
 // ====== CATEGORY IDS FOR DB QUERIES ======
 export const HOME_SERVICE_CATEGORY_IDS = ALL_SERVICE_CATEGORIES.map(c => c.id);
 
-// ====== LEGACY MAPPING (for backwards compatibility) ======
+// ====== LEGACY MAPPING — mirrors public.canonical_provider_category() in DB ======
+// Migration 2026-06-18: providers.business_category was normalised to match
+// categories.slug. Old code paths passing legacy slugs get resolved to the
+// canonical SSOT slug here so both client and DB agree.
 export const LEGACY_CATEGORY_MAP: Record<string, string> = {
-  'hvac': 'ac',
+  // AC
+  'hvac': 'ac-repair',
+  'ac': 'ac-repair',
+  'ac-service': 'ac-repair',
+  // Repair
   'tech': 'repair',
-  'gardening': 'garden',
-  'pest-control': 'pest',
-  'ac-service': 'ac',
-  'cleaning': 'home-cleaning',
+  // Outdoor
+  'garden': 'gardening',
+  // Cleaning
+  'pest': 'pest-control',
+  'home-cleaning': 'cleaning',
+  'home_cleaning': 'cleaning',
+  'deep-cleaning': 'cleaning',
+  'deep_cleaning': 'cleaning',
+  // Catalog-wide (non-home but used elsewhere)
+  'yacht_charter': 'yacht',
+  'yacht-charter': 'yacht',
+  'events': 'event',
+  'transport': 'vehicle',
+  'water': 'water-delivery',
+  'property_management': 'property-management',
 };
 
 // ====== PROVIDER TYPE OPTIONS ======
