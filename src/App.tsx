@@ -189,8 +189,9 @@ function ComingSoonGate({ children }: { children: React.ReactNode }) {
     || path.startsWith('/area/')
     || path === '/area';
 
-  if (publicAccessEnabled || bypassComingSoon || isPublicRoute || isLoading) return <>{children}</>;
-  if (!user) return <UnderConstruction />;
+  // Coming Soon gate disabled (2026-06-18): app is fully public.
+  // Keep the wrapper for backwards compat; always pass through.
+  void publicAccessEnabled; void bypassComingSoon; void isPublicRoute; void isLoading; void user;
   return <>{children}</>;
 }
 
