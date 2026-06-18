@@ -39,6 +39,7 @@ async function geocode(query) {
     headers: {
       'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
       'Content-Type': 'application/json',
+      'Referer': 'https://uno-connect-hub.lovable.app/',
       'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location',
     },
     body: JSON.stringify({ textQuery: query, maxResultCount: 1, regionCode: 'TH' }),
