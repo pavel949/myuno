@@ -299,11 +299,11 @@ export const en: Record<string, string> = {
   'sos.survivalTips': 'Survival Tips',
   
   // VIP Concierge
-  'vip.title': 'VIP Concierge',
+  'vip.title': 'myUNO VIP',
   'vip.subtitle': 'Luxury Concierge Service',
   'vip.description': 'Exclusive premium services for discerning clients. Helicopters, private jets, personal chefs, yachts, luxury cars and full range of VIP services.',
   'vip.callUs': 'Call Us',
-  'vip.whyVip': 'Why UNO VIP?',
+  'vip.whyVip': 'Why myUNO VIP?',
   'vip.support247': '24/7 support around the clock',
   'vip.personalManager': 'Personal manager',
   'vip.exclusiveAccess': 'Exclusive access',
