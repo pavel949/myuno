@@ -43,7 +43,7 @@ import {
   Calendar, BarChart3, Wrench, PenTool, DollarSign,
   Building, Search, LineChart, Palette, Scissors, Crown, Bike, Shirt,
   Compass, Anchor, Dumbbell, CalendarDays, GraduationCap, PawPrint,
-  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Route, Waves, Pill, Flower2,
+  Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Route, Waves, Pill, Flower2, Truck,
   Briefcase, Globe, BookOpen, Heart as HeartIcon,
   Stethoscope as VetIcon,
 } from 'lucide-react';
