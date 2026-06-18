@@ -102,7 +102,7 @@ export default function JuristicRequestsPage() {
                         </Badge>
                         {req.requires_payment && req.total_amount && (
                           <Badge variant="outline" className="text-xs text-success">
-                            ฿{req.total_amount.toLocaleString()}
+                            {curSym}{req.total_amount.toLocaleString()}
                           </Badge>
                         )}
                       </div>
