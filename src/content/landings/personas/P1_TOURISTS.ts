@@ -96,12 +96,12 @@ export const P1_TOURISTS: PersonaLanding = {
   },
   seo: {
     metaTitle: {
-      ru: 'Пхукет по-русски: трансфер, eSIM, виллы, экскурсии — myUNO',
-      en: 'Phuket in Russian: transfer, eSIM, villas, tours — myUNO',
+      ru: 'Пхукет для туристов: трансфер, eSIM, виллы, экскурсии — myUNO',
+      en: 'Phuket for travellers: transfer, eSIM, villas, tours — myUNO',
     },
     metaDescription: {
-      ru: 'Трансфер из аэропорта, eSIM, аренда виллы и экскурсии. Поддержка по-русски, оплата в THB. Без посредников у стойки.',
-      en: 'Airport transfer, eSIM, villa rental and tours on Phuket. Russian-speaking support, THB payments, no street vendors.',
+      ru: 'Трансфер из аэропорта, eSIM, аренда виллы и экскурсии. Многоязычная поддержка (EN/RU/TH), оплата в THB. Без посредников у стойки.',
+      en: 'Airport transfer, eSIM, villa rental and tours on Phuket. Multilingual support (EN/RU/TH), THB payments, no street vendors.',
     },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/tourists',
