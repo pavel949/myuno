@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
 import { NavigatorClusterSection } from './NavigatorClusterSection';
+import { PersonalGrid } from '@/components/superapp/PersonalGrid';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 const CLUSTER_ORDER: ClusterId[] = ['arrive', 'live', 'legal', 'manage', 'invest', 'build'];
@@ -241,7 +242,14 @@ export default function NavigatorPageV3() {
           </div>
         )}
 
-        {/* "For you" section */}
+        {/* Personalized mini-apps grid (superapp surface) */}
+        {!isLoading && !query && (
+          <div className="-mx-4 md:-mx-6 mb-8">
+            <PersonalGrid limit={8} />
+          </div>
+        )}
+
+        {/* "For you" situations */}
         {!isLoading && !query && forYou.length > 0 && (
           <section className="mb-10" aria-labelledby="for-you-title">
             <header className="flex items-baseline justify-between gap-3 pb-3 mb-1 border-b-2 border-primary">
@@ -249,7 +257,7 @@ export default function NavigatorPageV3() {
                 id="for-you-title"
                 className="font-mono text-[11px] uppercase tracking-[0.18em] text-primary"
               >
-                {isRu ? 'Для вас сейчас' : 'For you now'}
+                {isRu ? 'Ситуации для вас' : 'Situations for you'}
               </h2>
               <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
                 {forYou.length}
@@ -318,6 +326,7 @@ export default function NavigatorPageV3() {
                   clusterId={cid}
                   situations={grouped[cid]}
                   counts={counts}
+                  hideAppGrid
                 />
               ))}
             </div>

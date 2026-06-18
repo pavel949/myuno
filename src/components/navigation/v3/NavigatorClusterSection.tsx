@@ -6,17 +6,27 @@
  * situation rows. No coloured tiles, no grid clutter — every row answers a
  * single question: "what should I do here?".
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { CLUSTERS, type ClusterId } from '@/lib/catalog/taxonomy';
+import {
+  CLUSTERS,
+  AVAILABLE_SERVICES,
+  type ClusterId,
+} from '@/lib/catalog/taxonomy';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { useLifeOSRole } from '@/hooks/useLifeOS';
+import { rankServices } from '@/lib/superapp/rankServices';
+import { AppTile } from '@/components/superapp/AppTile';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface NavigatorClusterSectionProps {
   clusterId: ClusterId;
   situations: LifeSituation[];
   counts?: Record<string, number>;
+  /** When true, hide the top icon-grid of mini-apps (used in "Other areas"). */
+  hideAppGrid?: boolean;
 }
 
 const CLUSTER_LABEL_RU: Record<ClusterId, string> = {
@@ -52,10 +62,20 @@ export function NavigatorClusterSection({
   clusterId,
   situations,
   counts,
+  hideAppGrid,
 }: NavigatorClusterSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { effectivePersonas } = useUserPersonas();
+  const role = useLifeOSRole();
   const cluster = CLUSTERS.find((c) => c.id === clusterId);
+
+  const topServices = useMemo(() => {
+    if (hideAppGrid) return [];
+    const inCluster = AVAILABLE_SERVICES.filter((s) => s.clusterId === clusterId);
+    return rankServices(inCluster, { role, personas: effectivePersonas }).slice(0, 8);
+  }, [clusterId, role, effectivePersonas, hideAppGrid]);
+
   if (!cluster || situations.length === 0) return null;
 
   const label = isRu ? CLUSTER_LABEL_RU[clusterId] : CLUSTER_LABEL_EN[clusterId];
@@ -77,6 +97,26 @@ export function NavigatorClusterSection({
           {situations.length}
         </span>
       </header>
+
+      {topServices.length > 0 && (
+        <div className="mt-4 mb-5">
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 mb-2">
+            {isRu ? 'Мини-приложения' : 'Mini-apps'}
+          </p>
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-x-1 gap-y-3">
+            {topServices.map((svc) => (
+              <AppTile
+                key={svc.id}
+                to={svc.path}
+                icon={svc.icon}
+                label={isRu ? svc.labelRu : svc.labelEn}
+                status={svc.status}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
 
       <ul className="divide-y divide-border">
         {situations.map((s) => {
