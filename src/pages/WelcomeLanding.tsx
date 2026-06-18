@@ -293,32 +293,30 @@ export default function WelcomeLanding() {
     return () => io.disconnect();
   }, []);
 
+  const statLabel = (ru: string, en: string, th: string) =>
+    language === 'ru' ? ru : language === 'th' ? th : en;
+
   const heroStats = [
-    {
-      num: String(totalEligibleServices),
-      label: isRu ? 'сервисов' : 'services',
-    },
-    {
-      num: String(clustersCount),
-      label: isRu ? 'разделов' : 'sections',
-    },
-    {
-      num: String(totalActiveLifeSituations),
-      label: isRu ? 'жизненных ситуаций' : 'life situations',
-    },
-    { num: '24/7', label: isRu ? 'поддержка' : 'support' },
+    { num: String(totalEligibleServices), label: statLabel('сервисов', 'services', 'บริการ') },
+    { num: String(clustersCount), label: statLabel('разделов', 'sections', 'หมวด') },
+    { num: String(totalActiveLifeSituations), label: statLabel('жизненных ситуаций', 'life situations', 'สถานการณ์ชีวิต') },
+    { num: '24/7', label: statLabel('поддержка', 'support', 'ตลอด 24 ชม.') },
   ];
 
-  const ecosystemHeading = isRu
-    ? `${pluralRu(clustersCount, ['раздел', 'раздела', 'разделов'])}, ${pluralRu(
-        totalEligibleServices,
-        ['сервис', 'сервиса', 'сервисов'],
-      )} — один аккаунт`
-    : `${clustersCount} sections, ${totalEligibleServices} services — one account`;
+  const ecosystemHeading =
+    language === 'ru'
+      ? `${pluralRu(clustersCount, ['раздел', 'раздела', 'разделов'])}, ${pluralRu(
+          totalEligibleServices,
+          ['сервис', 'сервиса', 'сервисов'],
+        )} — один аккаунт`
+      : language === 'th'
+        ? `${clustersCount} หมวด, ${totalEligibleServices} บริการ — บัญชีเดียว`
+        : `${clustersCount} sections, ${totalEligibleServices} services — one account`;
 
   const heroSubtitle: Bi = {
     ru: `Экосистема myUNO объединяет ${totalEligibleServices} проверенных сервисов для иностранцев и местных бизнесов, готовых их обслуживать — в одном аккаунте, на русском, английском и тайском.`,
     en: `The myUNO ecosystem brings together ${totalEligibleServices} vetted services for foreigners and the local businesses that serve them — in one account, in Russian, English and Thai.`,
+    th: `ระบบนิเวศ myUNO รวบรวม ${totalEligibleServices} บริการที่ได้รับการตรวจสอบสำหรับชาวต่างชาติ และธุรกิจท้องถิ่นที่พร้อมให้บริการ — ในบัญชีเดียว ทั้งภาษารัสเซีย อังกฤษ และไทย`,
   };
 
   return (
