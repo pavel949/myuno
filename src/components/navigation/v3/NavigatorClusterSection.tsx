@@ -18,7 +18,7 @@ import {
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLifeOSRole } from '@/hooks/useLifeOS';
 import { rankServices } from '@/lib/superapp/rankServices';
-import { AppTile } from '@/components/superapp/AppTile';
+import { MiniAppCard } from '@/components/superapp/MiniAppCard';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface NavigatorClusterSectionProps {
@@ -27,6 +27,8 @@ interface NavigatorClusterSectionProps {
   counts?: Record<string, number>;
   /** When true, hide the top icon-grid of mini-apps (used in "Other areas"). */
   hideAppGrid?: boolean;
+  /** code -> {ru,en} map for hint resolution inside MiniAppCard. */
+  situationLabels?: Record<string, { ru: string; en: string }>;
 }
 
 const CLUSTER_LABEL_RU: Record<ClusterId, string> = {
