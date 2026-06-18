@@ -84,7 +84,7 @@ function useWelcomeMetrics() {
 
 const AUDIENCES: Array<{
   id: string;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
   title: Bi;
   lead: Bi;
   tasks: Bi[];
