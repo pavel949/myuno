@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useOwnerProperty, useUpdateOwnerProperty } from '@/hooks/usePropertyCare';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
