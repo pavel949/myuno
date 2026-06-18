@@ -124,7 +124,8 @@ export default function MapView() {
   const [selectedPrice, setSelectedPrice] = useState<PriceFilter>(initialPrice);
   const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
   const [selected, setSelected] = useState<ClickedMarker>(null);
-  const [activeMarkerId, setActiveMarkerId] = useState<string | undefined>(undefined);
+  const { selectedId: focusedMarkerId, select: selectMarker } = useMapListSync();
+  const activeMarkerId = focusedMarkerId ?? undefined;
   const mapRef = useRef<MapLibreMapHandle | null>(null);
   const searchBoxRef = useRef<MapSearchBoxHandle | null>(null);
   const [searchPin, setSearchPin] = useState<MapSearchResult | null>(null);
