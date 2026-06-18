@@ -26,29 +26,81 @@ export function StripeConnectCard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpening, setIsOpening] = useState(false);
 
-  const loadStatus = useCallback(async () => {
-    setIsLoading(true);
+  const loadStatus = useCallback(async (): Promise<Status | null> => {
     try {
       const { data, error } = await supabase.functions.invoke('vendor-stripe-onboard', {
         body: { action: 'status' },
       });
       if (error) throw error;
-      setStatus(data as Status);
+      const next = data as Status;
+      setStatus(next);
+      return next;
     } catch (err) {
       console.error('[StripeConnect] status error', err);
       setStatus({ connected: false, charges_enabled: false, payouts_enabled: false, account_id: null });
+      return null;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
+  // Poll status a few times after returning from Stripe — capabilities
+  // can take a few seconds to propagate after onboarding completes.
+  const pollStatus = useCallback(async () => {
+    setIsLoading(true);
+    const delays = [0, 1500, 3000, 5000, 8000];
+    let last: Status | null = null;
+    for (const ms of delays) {
+      if (ms) await new Promise((r) => setTimeout(r, ms));
+      last = await loadStatus();
+      if (last?.charges_enabled && last?.payouts_enabled) break;
+    }
+    if (last?.charges_enabled && last?.payouts_enabled) {
+      toast.success(isRu ? 'Stripe подключён' : 'Stripe connected', {
+        description: isRu
+          ? 'Платежи и выплаты активированы.'
+          : 'Charges and payouts are now enabled.',
+      });
+    } else if (last?.connected) {
+      toast.message(isRu ? 'Onboarding не завершён' : 'Onboarding incomplete', {
+        description: isRu
+          ? 'Stripe ещё проверяет данные или запросил дополнительные документы.'
+          : 'Stripe is still verifying or has requested more details.',
+      });
+    }
+  }, [loadStatus, isRu]);
+
   useEffect(() => {
-    loadStatus();
-    // Refresh when user returns after onboarding redirect
+    // Handle return from Stripe onboarding redirect
+    const params = new URLSearchParams(window.location.search);
+    const stripeParam = params.get('stripe');
+    if (stripeParam === 'return' || stripeParam === 'refresh') {
+      // Clean URL so reloads don't re-trigger polling
+      params.delete('stripe');
+      const qs = params.toString();
+      window.history.replaceState(
+        {},
+        '',
+        window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash,
+      );
+      pollStatus();
+    } else {
+      loadStatus();
+    }
+
+    // Refresh when tab regains focus (covers manual back-navigation cases)
     const onFocus = () => loadStatus();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') loadStatus();
+    };
     window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
-  }, [loadStatus]);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [loadStatus, pollStatus]);
+
 
   const handleConnect = async () => {
     setIsOpening(true);
