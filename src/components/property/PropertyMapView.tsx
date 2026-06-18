@@ -57,6 +57,8 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   properties,
   hoveredProperty,
   onHover,
+  selectedId = null,
+  onSelect,
   mode = 'rent',
   className,
 }, ref) {
@@ -66,7 +68,11 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   const { language } = useLanguage();
   const { hasKey, isLoaded, loadError } = useGoogleMaps();
   const isRu = language === 'ru';
-  const [openId, setOpenId] = useState<string | null>(null);
+  // External selection wins; fall back to local state for standalone usage.
+  const [localOpenId, setLocalOpenId] = useState<string | null>(null);
+  const openId = onSelect ? selectedId : localOpenId;
+  const setOpenId = (id: string | null) => (onSelect ? onSelect(id) : setLocalOpenId(id));
+
 
   const validProps = useMemo(() => {
     return properties.filter((p) => {
