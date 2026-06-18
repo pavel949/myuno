@@ -368,7 +368,7 @@ export default function SOS() {
             </div>
             <div className="text-left">
               <div className="font-semibold text-sm flex items-center gap-1">
-                {language === 'ru' ? 'VIP Консьерж' : 'VIP Concierge'}
+                myUNO VIP
                 <Sparkles className="w-3 h-3 text-primary" />
               </div>
               <div className="text-xs text-muted-foreground">
