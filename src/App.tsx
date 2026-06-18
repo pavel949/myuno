@@ -218,13 +218,20 @@ function AppContent() {
         <LegalComplianceModal />
         <BrowserRouter>
           <ComingSoonGate>
-            <main
+            {/*
+              Outer wrapper acts as the SkipToContent target. It's a <div>, NOT a <main>,
+              because NavShell renders the canonical <main> landmark for every route
+              that uses AppLayout/MCLayout/etc. (a11y: only one <main> per page).
+              Pages that bypass NavShell (auth, error pages) are short enough to not
+              require their own <main> landmark.
+            */}
+            <div
               id="main-content"
               tabIndex={-1}
               className="flex min-h-0 min-w-0 flex-1 flex-col outline-none focus:outline-none"
             >
               <AnimatedRoutes />
-            </main>
+            </div>
             <UnifiedChatFAB />
             <CookieConsentBanner />
           </ComingSoonGate>
