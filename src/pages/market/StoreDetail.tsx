@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Star, 
-  MapPin, 
+import {
+  ArrowLeft,
+  Star,
+  MapPin,
   Search,
   Plus,
   Minus,
-  Heart
+  Heart,
+  PackageOpen,
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,61 +16,26 @@ import { useCart } from '@/contexts/CartContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/hooks/useStores';
+import { useVendorProducts } from '@/hooks/useMarketplaceVendors';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { StickyCartBar } from '@/components/cart/StickyCartBar';
 import { useCartToast } from '@/hooks/useCartToast';
 import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
 
-// TODO: Replace mock product data with database queries
-// Products data
-const storeProducts: Record<string, Array<{
+interface StoreProduct {
   id: string;
   nameEn: string;
   nameRu: string;
-  category: string;
   price: number;
   originalPrice?: number;
   image: string;
   unit: string;
   unitRu: string;
   inStock: boolean;
-}>> = {
-  'villa-market': [
-    { id: 'vm-1', nameEn: 'Organic Avocado', nameRu: 'Органическое авокадо', category: 'fruits', price: 89, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
-    { id: 'vm-2', nameEn: 'Australian Beef Steak', nameRu: 'Австралийский стейк', category: 'meat', price: 890, originalPrice: 1100, image: PLACEHOLDER_IMAGES.store, unit: '500g', unitRu: '500г', inStock: true },
-    { id: 'vm-3', nameEn: 'French Cheese Selection', nameRu: 'Французские сыры', category: 'dairy', price: 650, image: PLACEHOLDER_IMAGES.store, unit: '300g', unitRu: '300г', inStock: true },
-    { id: 'vm-4', nameEn: 'Italian Olive Oil', nameRu: 'Итальянское оливковое масло', category: 'pantry', price: 450, image: PLACEHOLDER_IMAGES.store, unit: '500ml', unitRu: '500мл', inStock: true },
-  ],
-  'thai-souvenirs': [
-    { id: 'ts-1', nameEn: 'Elephant Figurine', nameRu: 'Фигурка слона', category: 'figurines', price: 450, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
-    { id: 'ts-2', nameEn: 'Thai Silk Scarf', nameRu: 'Шёлковый шарф', category: 'textiles', price: 890, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
-  ],
-  'pearl-gallery': [
-    { id: 'pg-1', nameEn: 'Pearl Necklace Classic', nameRu: 'Жемчужное ожерелье классика', category: 'necklaces', price: 8900, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
-    { id: 'pg-2', nameEn: 'Pearl Earrings Drop', nameRu: 'Серьги с жемчугом капля', category: 'earrings', price: 4500, image: PLACEHOLDER_IMAGES.store, unit: 'pair', unitRu: 'пара', inStock: true },
-  ],
-  'thai-cosmetics': [
-    { id: 'tc-1', nameEn: 'Coconut Oil Hair Mask', nameRu: 'Маска для волос с кокосом', category: 'hair', price: 320, image: PLACEHOLDER_IMAGES.store, unit: '200ml', unitRu: '200мл', inStock: true },
-    { id: 'tc-2', nameEn: 'Aloe Vera Gel', nameRu: 'Гель алоэ вера', category: 'skincare', price: 180, image: PLACEHOLDER_IMAGES.store, unit: '250ml', unitRu: '250мл', inStock: true },
-  ],
-  'home-decor': [
-    { id: 'hd-1', nameEn: 'Rattan Pendant Lamp', nameRu: 'Подвесной светильник из ротанга', category: 'lighting', price: 2800, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
-  ],
-  'thai-silk': [
-    { id: 'silk-1', nameEn: 'Silk Sarong', nameRu: 'Шёлковый саронг', category: 'clothing', price: 1500, image: PLACEHOLDER_IMAGES.store, unit: 'piece', unitRu: 'шт', inStock: true },
-  ],
-  'wine-cellar': [
-    { id: 'wine-1', nameEn: 'French Bordeaux Red', nameRu: 'Французское красное Бордо', category: 'wine', price: 1800, image: PLACEHOLDER_IMAGES.store, unit: '750ml', unitRu: '750мл', inStock: true },
-  ],
-  'thai-sweets': [
-    { id: 'sw-1', nameEn: 'Mango Sticky Rice Box', nameRu: 'Манго с клейким рисом', category: 'desserts', price: 180, image: PLACEHOLDER_IMAGES.store, unit: 'box', unitRu: 'коробка', inStock: true },
-  ],
-  'makro': [
-    { id: 'mk-1', nameEn: 'Rice 5kg', nameRu: 'Рис 5 кг', category: 'staples', price: 220, image: PLACEHOLDER_IMAGES.store, unit: '5kg', unitRu: '5кг', inStock: true },
-  ],
-};
+}
 
 const StoreDetail = () => {
   const navigate = useNavigate();
@@ -81,15 +47,37 @@ const StoreDetail = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const { showAddedToast } = useCartToast();
 
-  const products = storeProducts[id || ''] || [];
+  // Real products from DB: stores.provider_id → marketplace_products.vendor_id
+  const { products: dbProducts, isLoading: productsLoading } = useVendorProducts(
+    store?.provider_id ?? undefined
+  );
+
+  const products = useMemo<StoreProduct[]>(
+    () =>
+      (dbProducts ?? []).map((p: any) => ({
+        id: p.id,
+        nameEn: p.name_en,
+        nameRu: p.name_ru ?? p.name_en,
+        price: Number(p.price ?? 0),
+        originalPrice: p.original_price ? Number(p.original_price) : undefined,
+        image:
+          (Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : undefined) ??
+          PLACEHOLDER_IMAGES.store,
+        unit: p.unit ?? 'piece',
+        unitRu: p.unit_ru ?? 'шт',
+        inStock: p.in_stock ?? true,
+      })),
+    [dbProducts]
+  );
+
   const cartItems = getItemsByType('product');
 
   const getProductQuantity = (productId: string) => {
-    const item = cartItems.find(i => i.id === productId);
+    const item = cartItems.find((i) => i.id === productId);
     return item?.quantity || 0;
   };
 
-  const handleAddToCart = (product: typeof products[0]) => {
+  const handleAddToCart = (product: StoreProduct) => {
     const item = {
       id: product.id,
       type: 'product' as const,
@@ -110,10 +98,11 @@ const StoreDetail = () => {
     removeItem(productId);
   };
 
-  const filteredProducts = products.filter(p => 
-    searchQuery === '' ||
-    p.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.nameRu.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = products.filter(
+    (p) =>
+      searchQuery === '' ||
+      p.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.nameRu.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (isLoading) {
@@ -143,7 +132,7 @@ const StoreDetail = () => {
         <div className="relative h-48">
           <img src={store.cover_image || PLACEHOLDER_IMAGES.store} alt={language === 'ru' ? store.name_ru : store.name_en} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          
+
           <div className="absolute top-4 left-4 right-4 flex justify-between">
             <Button variant="secondary" size="icon" className="rounded-full bg-white/90" onClick={() => navigate('/market')}>
               <ArrowLeft className="h-5 w-5" />
@@ -180,18 +169,40 @@ const StoreDetail = () => {
 
         {/* Products */}
         <div className="px-4">
-          <div className="grid grid-cols-2 gap-3">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                language={language}
-                quantity={getProductQuantity(product.id)}
-                onAdd={() => handleAddToCart(product)}
-                onRemove={() => handleRemoveFromCart(product.id)}
-              />
-            ))}
-          </div>
+          {productsLoading ? (
+            <div className="grid grid-cols-2 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="aspect-square w-full" />
+              ))}
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="py-16 flex flex-col items-center justify-center text-center text-muted-foreground">
+              <PackageOpen className="h-10 w-10 mb-3 opacity-60" />
+              <p className="text-sm font-medium">
+                {searchQuery
+                  ? language === 'ru' ? 'Ничего не найдено' : 'No matches'
+                  : language === 'ru' ? 'Магазин ещё не добавил товары' : 'This store has no products yet'}
+              </p>
+              {!searchQuery && (
+                <p className="text-xs mt-1">
+                  {language === 'ru' ? 'Загляните позже' : 'Check back later'}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  language={language}
+                  quantity={getProductQuantity(product.id)}
+                  onAdd={() => handleAddToCart(product)}
+                  onRemove={() => handleRemoveFromCart(product.id)}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <StickyCartBar
@@ -212,7 +223,7 @@ const StoreDetail = () => {
 };
 
 interface ProductCardProps {
-  product: { id: string; nameEn: string; nameRu: string; price: number; originalPrice?: number; image: string; unit: string; unitRu: string; inStock: boolean };
+  product: StoreProduct;
   language: string;
   quantity: number;
   onAdd: () => void;
