@@ -116,8 +116,12 @@ export function WelcomePersonaRouter() {
         <button
           key={id}
           type="button"
-          aria-label={aria}
+          // aria-label intentionally omitted: accessible name comes from visible h3 + p
+          // text below, which prevents axe `label-content-name-mismatch` and keeps
+          // voice-control commands (e.g. "tap Я обустраиваю жизнь") working.
+          // The `aria` field is kept in i18n for future tooltips/SR-only descriptions.
           data-testid={`welcome-persona-${id}`}
+          data-aria-description={aria}
           onClick={() => navigate(target)}
           className={cn(
             'group bg-background p-6 text-left transition-colors sm:p-7',
