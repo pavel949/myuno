@@ -36,6 +36,7 @@ import {
   Loader2, Star, Shield, ExternalLink, Image, Truck, Globe,
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { cn } from '@/lib/utils';
 
 type ViewType = 'all' | 'tour' | 'activity';
@@ -76,7 +77,7 @@ type ExperiencePayload = {
   source_page_url: string | null;
 };
 
-const getEmptyFormData = () => ({
+const getEmptyFormData = (defaultCurrency = 'USD') => ({
   provider_id: '',
   experience_type: 'tour' as ExperienceType,
   title_en: '',
@@ -88,7 +89,7 @@ const getEmptyFormData = () => ({
   duration_minutes: '240',
   price: '',
   price_per: 'person',
-  currency: 'THB',
+  currency: defaultCurrency,
   min_participants: '1',
   max_participants: '10',
   meeting_point: '',
@@ -109,6 +110,7 @@ export default function AdminExperiences() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   const isRu = language === 'ru';
   const importMedia = useImportExperienceMedia();
