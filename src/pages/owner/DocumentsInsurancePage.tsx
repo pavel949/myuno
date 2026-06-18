@@ -37,6 +37,8 @@ const DOC_TYPES = [
 export default function DocumentsInsurancePage() {
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isRu = language === 'ru';
