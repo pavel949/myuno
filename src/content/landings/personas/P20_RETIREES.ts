@@ -22,7 +22,7 @@ export const P20_RETIREES: PersonaLanding = {
     { ru: 'Не понятно, какая виза подходит и какие финансовые требования.', en: 'Unclear which visa suits you and what finances are required.' },
     { ru: 'Сложно найти страховку, которая принимает заявителей 60+.', en: 'Hard to find insurance that accepts 60+ applicants.' },
     { ru: 'Боитесь жить в condo с лестницей и без лифта в 30°C.', en: 'Worried about stairs and no-lift condos in 30°C heat.' },
-    { ru: 'Хочется русскоязычное комьюнити рядом, не одному.', en: 'You want a Russian-speaking community nearby, not isolation.' },
+    { ru: 'Хочется международное комьюнити рядом, не одному.', en: 'You want an international community nearby, not isolation.' },
   ],
   services: [
     { slug: 'retirement-visa', label: { ru: 'Retirement visa O-A', en: 'Retirement O-A visa' }, oneLiner: { ru: '1 год + продление, ฿800 000 на счету или ฿65 000/мес.', en: '1 year + renewal, ฿800,000 on deposit or ฿65,000/mo.' }, href: '/legal/retirement-visa' },
