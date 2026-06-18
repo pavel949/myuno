@@ -206,7 +206,7 @@ for (const [name, s] of stats) {
   perEp[name] = errPct;
   const statusStr = Object.entries(s.statuses).map(([k, v]) => `${k}:${v}`).join(' ');
   console.log(
-    `  ${name.padEnd(30)} reqs=${s.samples.length} err=${s.errors}(${errPct}%) ` +
+    `  ${name.padEnd(38)} reqs=${s.samples.length} err=${s.errors}(${errPct}%) ` +
     `avg=${avg(s.samples).toFixed(1)}ms p95=${pct(s.samples, 95).toFixed(1)}ms p99=${pct(s.samples, 99).toFixed(1)}ms [${statusStr}]`
   );
   if (s.sample404) console.log(`      ↳ sample error: ${s.sample404}`);
@@ -221,7 +221,7 @@ const checks = [
 for (const [name, errP] of Object.entries(perEp)) {
   checks.push({ name: `${name} err < ${THRESHOLDS.perEndpointErrorPct}%`, pass: errP < THRESHOLDS.perEndpointErrorPct, actual: `${errP}%` });
 }
-for (const c of checks) console.log(`  ${c.pass ? '✓' : '✗'}  ${c.name.padEnd(46)} → ${c.actual}`);
+for (const c of checks) console.log(`  ${c.pass ? '✓' : '✗'}  ${c.name.padEnd(54)} → ${c.actual}`);
 
 const failed = checks.filter((c) => !c.pass);
 console.log('');
