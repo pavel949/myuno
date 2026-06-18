@@ -272,7 +272,7 @@ export default function PropertyInquiry() {
             last_minute_days: rentalExt?.last_minute_days,
             custom_length_discounts: rentalExt?.custom_length_discounts,
             deposit_amount: rentalTerms?.deposit_amount,
-            deposit_currency: rentalTerms?.deposit_currency || 'THB',
+            deposit_currency: rentalTerms?.deposit_currency || listingCurrency,
             payment_policy: rentalExt?.payment_policy || 'prepay_10',
             prepay_percent: rentalExt?.prepay_percent,
           },
