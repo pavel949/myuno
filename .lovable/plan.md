@@ -1,66 +1,173 @@
-# План: аудит таксономии + симуляция 50 пользователей
+# План: довести симуляцию до 90+/100 по всем параметрам QA
 
-## Что я уже увидел (быстрый срез)
+**Текущий baseline (отчёт `docs/audit/2026-06-18-taxonomy-simulation.md`):**
 
-**Сильное расхождение SSOT ↔ БД ↔ UI:**
-
-| Источник | Кластеров | Категорий |
+| Параметр | Сейчас | Цель |
 |---|---|---|
-| `src/lib/catalog/taxonomy.ts` (SSOT) | 6 (arrive/live/manage/invest/legal/build) | 18 |
-| `category_groups` (БД) | **15** (включая `home-maintenance`, `leisure`, `professional`, `life-admin`, `water`, `other` — НЕ в SSOT) | 81 |
-| `marketplace_categories` | — | 12 (магазин товаров, параллельная иерархия) |
-| `listings.category` | свободный текст | ~50+ значений (`motor_yacht`, `roses`, `clinic`, `mixed`…) — **без enum, не привязано к taxonomy** |
-| `life_situations` | — | 37 шт, маппинг через `cluster_life_situations` (31 связь) |
+| Закрытые сценарии 50 персон | 17 / 50 (34%) | **≥ 45 / 50 (90%)** |
+| Покрытие ролей (owner/vendor/developer) | 0 / 22 | **≥ 20 / 22** |
+| Сирота-ситуации `life_situations` | 12 / 37 | **0** |
+| Кластеры в БД vs SSOT | 15 vs 6 | **6 = 6** |
+| Локализация TH (DB + UI) | ~10% | **≥ 90%** |
+| Нормализация `providers.business_category` | done (48/48) | держать через trigger |
+| Vendor onboarding: поиск + «другое» | нет | есть |
+| Единая модерация (`moderation_queue`) | 2 ленты | 1 лента |
 
-**Видимые проблемы:**
-1. В БД 9 кластеров с **0 категорий** (мёртвые группы в навигации, если они где-то рендерятся).
-2. `listings.category` — свободная строка, не нормализована (`mixed`, `boxes`, `premium` — это не категории).
-3. 74 листинга вообще без категории.
-4. `marketplace_categories` (товары) живёт отдельно от `categories`/`category_groups` (услуги) — две таксономии, мост не очевиден.
-5. `VendorOnboarding.tsx` использует `CategoryPicker` — нужно проверить, из какого источника он берёт категории и попадают ли заявки в `listing_applications` / на модерацию.
-6. Канонический док (`02-service-catalogue-v2.md`) обещает 16 категорий × 230 услуг — фактически в SSOT 18×68, в БД 81 категория. Расхождение со спекой.
+---
 
-## Что сделаю
+## Волна 1 — P0 «Разблокировать каталог» (цель: 17→38/50)
 
-### Шаг 1 — Полный structural audit (read-only)
-- Сверить **SSOT ↔ `category_groups`/`categories` ↔ `marketplace_categories` ↔ канонический док §02** — таблица соответствия, missing/extra/renamed.
-- Прогнать `listings.category` через нормализатор → сколько листингов не маппятся ни на одну категорию SSOT.
-- Проверить `cluster_life_situations`: все ли 37 situations имеют ≥1 кластер; нет ли осиротевших; покрывают ли все 6 surfaces Master Taxonomy.
-- Проверить роли (`personaBridge.ts`, `master.ts` P01–P25) ↔ life situations ↔ кластеры: матрица покрытия по 25 персонам.
-- Проверить vendor-онбоардинг: какие категории видит поставщик в `CategoryPicker`, что сохраняется (`providers` / `marketplace_vendors` / `listing_applications`), уходит ли это в `moderation_queue` / админку.
+### 1.1 Наполнить кластер `manage` категориями (миграция)
+В `category_groups` (cluster=`manage`) сейчас 0 категорий. Завести 6:
+`cleaning`, `maintenance`, `pool`, `garden`, `accounting`, `channel-management`.
+Существующие провайдеры (уже нормализованы в прошлой волне) автоматически попадут в счётчики через `v_provider_catalog_match`.
 
-### Шаг 2 — Симуляция 50 пользователей
-Сгенерирую матрицу 50 персон с осями:
-- **Роль:** турист (10), резидент (10), инвестор (8), собственник жилья (8), застройщик (4), бизнес-владелец/поставщик (10)
-- **Язык:** ru (25), en (15), th (10)
-- **Намерение (JTBD A–J):** распределю по 10 кластерам JTBD
-- **Жизненная ситуация:** выберу из 37 `life_situations` (по 1–2 на персону)
-- **Источник входа:** `/`, `/discover`, `/vendor/join`, deep-link на конкретную услугу
+**Эффект:** owner (8) + vendor (10) = **+18 ✅**.
 
-Для каждой персоны прогоню **скриптовый flow** (Node + Supabase client, read-only где можно):
-1. Lands on `/` → видит ли свой surface/JTBD в hero и audience-картах?
-2. `useSituationServiceCounts` для своей ситуации — есть ли ≥1 сервис?
-3. Если поставщик — пройти `VendorOnboarding`: находит ли свою категорию в `CategoryPicker` (поиск по ru/en/th-синонимам)? Сохраняется ли заявка? Видна ли в админ-модерации?
-4. Если потребитель — найти услугу через `/discover` или search → доходит ли до landing/booking?
-5. Залогировать **gaps** (категория не найдена, situation без сервисов, ConciergeHelpSheet topic mismatch, UI на нужном языке, etc.).
+### 1.2 Привязать 12 сирот-ситуаций к кластерам
+Один SQL-инсёрт в `cluster_life_situations`:
+```text
+planning           → arrive, live, invest
+pre_trip_planning  → arrive
+digital_nomad      → live, legal
+shopping           → live
+pets               → live
+sports             → live
+retirement_living  → live, legal
+property           → invest, manage
+relocation         → arrive, legal, live
+health             → live
+emergency          → live
+visa_renewal       → legal
+```
+**Эффект:** **+12 ✅** (закрывает все «сирота-ситуация»).
 
-### Шаг 3 — Отчёт `docs/audit/2026-06-18-taxonomy-simulation.md`
-- Сводка структурных расхождений (с конкретными SQL и file:line).
-- Матрица 50 персон × 5 метрик (found-category / found-service / language-ok / onboarding-ok / moderation-ok).
-- Top-N gaps с приоритетом (P0 ломает онбоардинг → P3 косметика).
-- Конкретные рекомендации (например: мерж `home-maintenance` + `home-living` → `cat-home-services` SSOT; добавить enum для `listings.category`; пробросить ru/en/th в `categories.name_*`; завести модерацию через `listing_applications` если её нет).
+### 1.3 Удалить/смержить 9 фантомных БД-кластеров
+`home-maintenance`, `home-living`, `leisure`, `professional`, `life-admin`, `water`, `transport`, `health-wellness`, `other` → перенести их категории в SSOT-кластеры (`arrive`/`live`/`manage`) и пометить cluster='deprecated' (мягкий delete, без потери истории).
 
-### Что НЕ буду делать в этом проходе
-- Не правлю SSOT и БД — это аудит. Любые правки — отдельным планом после твоего ревью отчёта.
-- Не запускаю настоящих юзеров через UI (Playwright × 50 слишком дорого). Симуляция — на уровне данных + точечный browser-проход 3–5 ключевых сценариев для верификации.
+**Эффект:** Drawer/footer/Discover перестают показывать пустые разделы; SSOT = БД.
 
-## Технические детали
+**Контроль волны 1:** прогнать `/tmp/sim2.mjs` — ожидание ≥ 38/50.
 
-- **Чтение БД:** `psql` (read-only) + `supabase--read_query` для RLS-aware запросов.
-- **Симулятор:** Node-скрипт `scripts/audit/simulate-users.ts` (не коммитим, временный) с фикстурой персон.
-- **Browser-проверка:** 5 spot-checks через `browser--view_preview` на разных языках/ролях.
-- **Артефакт:** Markdown-отчёт в `docs/audit/` + CSV с результатами по 50 персонам.
+---
 
-**Оценка:** ~25–35 минут работы агента, основная стоимость — структурный анализ; симуляция параллелится.
+## Волна 2 — P1 «Тайская локализация» (цель: 38→42/50 + язык)
 
-**Рекомендую:** одобрить план как есть — он чисто read-only, ничего не ломает, на выходе получаешь приоритизированный список фиксов, по которому я отдельным заходом сделаю правки.
+### 2.1 Расширить схему под TH
+- `life_situations`: добавить `title_th text`, `description_th text`.
+- `categories`: добавить `name_th text`, `description_th text`.
+- `category_groups`: `name_th text`.
+
+### 2.2 Перевести контент
+- 37 ситуаций — TH через переводчика/LLM (один edge-call `translate-batch`).
+- 18 SSOT-категорий + 6 новых `manage` — TH.
+- 6 кластеров — TH.
+
+### 2.3 Протянуть `labelTh` в UI
+- `CategoryPicker` уже принимает `labelTh` в типе, но не рендерит → исправить.
+- `useSituationServiceCounts`, `SituationCard`, `SituationDetailPage`, `useNavigatorContent` — выбирать поле по `language`.
+- Fallback цепочка: `th → en → ru`.
+
+**Контроль волны 2:** прогнать симуляцию с `language='th'` по 17 персонам — все строки TH, ни одного `[missing]`.
+
+---
+
+## Волна 3 — P1 «Vendor onboarding до 10/10» (цель: 42→45/50)
+
+### 3.1 Поиск в `CategoryPicker`
+`<Input>` сверху + fuzzy-match по `labelRu/En/Th` + `keywords`. Скролл к первому совпадению.
+
+### 3.2 «Моей категории нет»
+Кнопка → modal → запись в `category_suggestions` (status=`pending`, source=`vendor_onboarding`) + админ-уведомление.
+
+### 3.3 Единая модерация
+Edge-trigger: на `INSERT INTO partner_applications` дублировать запись в `moderation_queue` (kind=`partner_application`, ref_id=…). Админ видит всё в одной ленте `/admin/moderation`.
+
+### 3.4 CHECK + trigger на `providers.business_category`
+Trigger из прошлой волны уже нормализует, добавить `CHECK (business_category IN (SELECT slug FROM categories))` через FK или валидатор, чтобы новые insert'ы не сломали маппинг.
+
+**Контроль волны 3:** пройти flow `/vendor/join` вручную (3 кейса: cleaning / yacht / «не нашёл — предложил»), проверить, что заявка падает и в `partner_applications`, и в `moderation_queue`.
+
+---
+
+## Волна 4 — P2 «Целостность данных» (цель: 45→47/50 + 90+ по чистоте)
+
+### 4.1 Enum для `listings.category`
+- Добавить FK `listings.category → categories.slug`.
+- 74 листинга без категории → backfill скриптом по `title`/`type` + ручная разметка топ-20.
+- Мусорные значения (`mixed`, `premium`, `boxes`) — перенести в `listings.tier`/`listings.tags`.
+
+### 4.2 Мост `marketplace_categories` ↔ `categories`
+Добавить колонку `marketplace_categories.service_category_slug` (FK). Создать view `v_unified_catalog` (UNION services + products) для глобального поиска.
+
+### 4.3 `user_personas` ↔ `life_situations`
+Создать `persona_situations (persona_id, situation_id, weight)`. Засеять из Master Taxonomy (P01–P25). Это нужно AI-роутеру и `useSituationServiceCounts` для персонализации.
+
+---
+
+## Волна 5 — QA-прогон и метрика (цель: подтвердить 90+/100)
+
+### 5.1 Автоматизированный прогон
+Скрипт `scripts/qa/simulate-50.mjs`:
+- 50 персон × {role, lang, situation}.
+- Для каждой: ищет кластер → категории → провайдеров → SSOT-метки → локализацию → vendor-onboarding-ready.
+- Результат → `docs/audit/2026-06-18-qa-after.md` с теми же колонками, что в baseline.
+
+### 5.2 Целевая таблица
+```text
+Сценариев OK            ≥ 45/50   (90%)
+Owner OK                ≥ 7/8
+Vendor OK               ≥ 9/10
+Developer OK            ≥ 4/4
+Тайские строки missing  = 0
+Фантомные кластеры      = 0
+Сироты-ситуации         = 0
+Counter mismatch        = 0
+```
+
+### 5.3 Регресс-гард
+Добавить в CI (`.github/workflows/qa-taxonomy.yml`) шаг, который падает, если:
+- появилась сирота-ситуация,
+- провайдер с `business_category NOT IN categories.slug`,
+- категория без `name_th`.
+
+---
+
+## Технические артефакты
+
+**Миграции (примерные имена):**
+1. `20260618130000_manage_cluster_categories.sql`
+2. `20260618130100_link_orphan_situations.sql`
+3. `20260618130200_deprecate_phantom_clusters.sql`
+4. `20260618140000_th_localization_columns.sql`
+5. `20260618140100_th_localization_data.sql`
+6. `20260618150000_moderation_queue_unify.sql`
+7. `20260618150100_listings_category_fk.sql`
+8. `20260618150200_marketplace_bridge_view.sql`
+9. `20260618150300_persona_situations.sql`
+
+**Код:**
+- `src/components/vendor/onboarding/CategoryPicker.tsx` — поиск + «другое» + `labelTh`.
+- `src/hooks/useSituationServiceCounts.ts` — fallback chain.
+- `src/lib/i18n/getLocalizedField.ts` — единый helper `pickLocale(record, lang)`.
+- `scripts/qa/simulate-50.mjs` — автотест.
+- `.github/workflows/qa-taxonomy.yml` — регресс-гард.
+
+---
+
+## Порядок исполнения и итерации
+
+```text
+W1 (P0)  ──►  prog 38/50  ──►  go
+W2 (TH)  ──►  TH 100%      ──►  prog 42/50
+W3 (V)   ──►  vendor 9/10  ──►  prog 45/50
+W4 (D)   ──►  data clean   ──►  prog 47/50
+W5 (QA)  ──►  report + CI  ──►  ✅ 90+/100
+```
+
+**Рекомендую** стартовать с Волны 1 (P0) — она самая дешёвая (3 миграции, без кода) и даёт скачок 17→38/50 за один заход. После неё имеет смысл показать промежуточный прогон и решать, идти ли сразу в TH-локализацию (Волна 2) или в vendor onboarding (Волна 3), потому что они независимы и могут идти параллельно.
+
+**Что НЕ входит в план (сознательно):**
+- Реальные браузерные сессии × 50 (Playwright) — дорого, не ловит структурных багов лучше SQL-симуляции.
+- Перепроектирование Master Taxonomy v1.0 — она утверждена.
+- Изменение SSOT (`taxonomy.ts`) — мы подгоняем БД к SSOT, не наоборот.
