@@ -5,6 +5,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useMyProperties, type UnifiedProperty } from '@/hooks/useMyProperties';
 import {
   usePropertyReports,
