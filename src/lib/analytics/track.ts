@@ -27,17 +27,48 @@ function getSessionId(): string | null {
 }
 
 let cachedUserId: string | null = null;
+let cachedRole: string | null = null;
+
 function getUserIdSync(): string | null {
   return cachedUserId;
 }
+
+async function refreshRole(userId: string | null): Promise<void> {
+  if (!userId) {
+    cachedRole = null;
+    return;
+  }
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('primary_role')
+      .eq('id', userId)
+      .maybeSingle();
+    cachedRole = (data?.primary_role as string | null) ?? null;
+  } catch {
+    cachedRole = null;
+  }
+}
+
 // Refresh cached user id on auth changes so trackEvent does not need to await.
 if (typeof window !== 'undefined') {
   void supabase.auth.getUser().then(({ data }) => {
     cachedUserId = data.user?.id ?? null;
+    void refreshRole(cachedUserId);
   });
   supabase.auth.onAuthStateChange((_event, session) => {
     cachedUserId = session?.user?.id ?? null;
+    void refreshRole(cachedUserId);
   });
+}
+
+function getLanguageSync(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem('myuno-language');
+  } catch {
+    return null;
+  }
 }
 
 export function trackEvent(
@@ -46,6 +77,11 @@ export function trackEvent(
 ): void {
   void (async () => {
     try {
+      const enriched = {
+        language: getLanguageSync(),
+        role: cachedRole,
+        ...(data ?? {}),
+      };
       await supabase.from('analytics_events').insert([{
         event_name: eventName,
         session_id: getSessionId(),
@@ -53,13 +89,14 @@ export function trackEvent(
         page_path: typeof window !== 'undefined' ? window.location.pathname + window.location.search : null,
         referrer: typeof document !== 'undefined' ? document.referrer || null : null,
         user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
-        event_data: (data ?? {}) as never,
+        event_data: enriched as never,
       }]);
     } catch {
       /* never block UX */
     }
   })();
 }
+
 
 export interface SituationClickContext {
   /** Where the click originated, e.g. 'navigator_v3_for_you', 'cluster_section', 'situation_card', 'related_situations'. */
