@@ -137,16 +137,17 @@ export function useResolveLifeOSContext(
   const role = options?.role ?? defaultRole;
   const limit = options?.limit ?? 50;
   const locale = language === 'ru' ? 'ru' : 'en';
+  const scope = lifeOSRoleToScope(role);
 
   return useQuery({
-    queryKey: ['life-os-context', lifeCode, role, locale, limit],
+    queryKey: ['life-os-context', lifeCode, scope, locale, limit],
     queryFn: async () => {
       if (!lifeCode) return [];
-      
+
       const { data, error } = await supabase
         .rpc('resolve_life_os_context', {
           p_life_code: lifeCode,
-          p_user_role: role,
+          p_user_role: scope,
           p_locale: locale,
           p_limit: limit,
         });
