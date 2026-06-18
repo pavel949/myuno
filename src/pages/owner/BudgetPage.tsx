@@ -42,6 +42,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function BudgetPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const { user } = useAuth();
   const isRu = language === 'ru';
 
