@@ -102,8 +102,8 @@ const OVERRIDES: OverrideMap = {
     },
     families: {
       intro: {
-        ru: 'Bang Tao — район №1 для семей с детьми на Пхукете: UWC International School в 5 минутах, парк Blue Tree, безопасный пляж с пологим входом и плотное русскоязычное комьюнити.',
-        en: 'Bang Tao is Phuket\'s #1 family district: UWC International School 5 minutes away, Blue Tree water park, gentle family beach and a dense Russian-speaking expat community.',
+        ru: 'Bang Tao — район №1 для семей с детьми на Пхукете: UWC International School в 5 минутах, парк Blue Tree, безопасный пляж с пологим входом и плотное международное экспат-комьюнити (EN/RU/TH).',
+        en: 'Bang Tao is Phuket\'s #1 family district: UWC International School 5 minutes away, Blue Tree water park, gentle family beach and a dense international expat community (EN/RU/TH).',
       },
       reasons: {
         ru: [
