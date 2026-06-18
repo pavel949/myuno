@@ -23,6 +23,7 @@ export const adminRoutes = (
     <Route path="/admin/providers/:id" element={<Pages.AdminProviderDetail />} />
     <Route path="/admin/services" element={<Pages.AdminServices />} />
     <Route path="/admin/partner-applications" element={<Pages.PartnerApplicationsAdmin />} />
+    <Route path="/admin/claims" element={<Pages.AdminPoiClaims />} />
     <Route path="/admin/pitch-deck" element={<Navigate to="/admin" replace />} />
     <Route path="/admin/investor-demo" element={<Navigate to="/admin" replace />} />
     <Route path="/admin/operations" element={<Pages.AdminOperations />} />
