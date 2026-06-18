@@ -155,12 +155,11 @@ export default function AdminOperations() {
 
       {/* Quick Actions Bar */}
       <Card className="border-dashed">
-        <CardContent className="p-3">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
-              {isRu ? 'Быстрые действия' : 'Quick actions'}
-            </span>
-            <div className="h-4 w-px bg-border shrink-0" />
+        <CardContent className="p-3 space-y-2">
+          <span className="text-xs text-muted-foreground font-medium block">
+            {isRu ? 'Быстрые действия' : 'Quick actions'}
+          </span>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
             {quickActions.map((action) => (
               <Button
                 key={action.path}
@@ -180,18 +179,18 @@ export default function AdminOperations() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 w-full">
+        <TabsList className="flex w-full overflow-x-auto h-auto gap-1 bg-muted/50 p-1 justify-start sm:flex-wrap">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="gap-2 data-[state=active]:bg-background flex-1 sm:flex-none"
+              className="gap-1.5 data-[state=active]:bg-background shrink-0 whitespace-nowrap"
             >
-              <tab.icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{tab.label}</span>
+              <tab.icon className="h-4 w-4 shrink-0" />
+              <span>{tab.label}</span>
               {tab.badge != null && tab.badge > 0 && (
-                <Badge 
-                  variant="destructive" 
+                <Badge
+                  variant="destructive"
                   className="h-5 min-w-[20px] px-1.5 text-xs font-bold"
                 >
                   {tab.badge}

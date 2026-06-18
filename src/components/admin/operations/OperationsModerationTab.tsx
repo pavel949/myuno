@@ -199,14 +199,14 @@ export function OperationsModerationTab() {
 
   const renderTable = (items: ModerationItem[], showActions: boolean) => (
     <div className="rounded-none border overflow-x-auto">
-      <Table>
+      <Table className="min-w-[640px]">
         <TableHeader>
           <TableRow>
-            <TableHead>{isRussian ? 'Тип' : 'Type'}</TableHead>
-            <TableHead>{isRussian ? 'Название' : 'Name'}</TableHead>
-            <TableHead>{isRussian ? 'Провайдер' : 'Provider'}</TableHead>
-            <TableHead>{isRussian ? 'Дата создания' : 'Created'}</TableHead>
-            {showActions && <TableHead className="w-[120px]">{isRussian ? 'Действия' : 'Actions'}</TableHead>}
+            <TableHead className="whitespace-nowrap">{isRussian ? 'Тип' : 'Type'}</TableHead>
+            <TableHead className="whitespace-nowrap">{isRussian ? 'Название' : 'Name'}</TableHead>
+            <TableHead className="whitespace-nowrap">{isRussian ? 'Провайдер' : 'Provider'}</TableHead>
+            <TableHead className="whitespace-nowrap">{isRussian ? 'Дата создания' : 'Created'}</TableHead>
+            {showActions && <TableHead className="w-[120px] whitespace-nowrap">{isRussian ? 'Действия' : 'Actions'}</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -309,7 +309,7 @@ export function OperationsModerationTab() {
                 <Clock className="h-4 w-4" />
                 {isRussian ? 'Ожидают' : 'Pending'}
                 {pendingItems.length > 0 && (
-                  <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 justify-center">
+                  <Badge variant="destructive" className="ml-1 h-5 min-w-[20px] px-1.5 justify-center text-xs">
                     {pendingItems.length}
                   </Badge>
                 )}
