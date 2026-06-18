@@ -96,13 +96,16 @@ export const RelatedServicesSection = memo(function RelatedServicesSection({
   };
 
   return (
-    <section className={cn('py-6', className)}>
+    <section className={cn('py-6 px-4', className)}>
       <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
         <span className="text-lg">✨</span>
         {language === 'ru' ? sectionTitle.ru : sectionTitle.en}
       </h3>
 
-      <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide -mx-4 px-4 touch-pan-y snap-x snap-proximity">
+      <div
+        className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide -mx-4 px-4 touch-pan-y snap-x snap-mandatory"
+        style={{ scrollPaddingLeft: '1rem' }}
+      >
         {entities.map((entity, index) => (
           <RelatedServicesCard
             key={`${entity.vertical}-${entity.id}`}
