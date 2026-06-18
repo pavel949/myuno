@@ -11,12 +11,12 @@ export const P1_TOURISTS: PersonaLanding = {
   slug: 'tourists',
   status: 'live',
   h1: {
-    ru: 'Пхукет для русскоязычных туристов',
-    en: 'Phuket for Russian-speaking travellers',
+    ru: 'Пхукет для иностранных туристов',
+    en: 'Phuket for international travellers',
   },
   subtitle: {
-    ru: 'Трансфер из аэропорта, eSIM, аренда виллы, экскурсии и помощь по-русски — в одном приложении.',
-    en: 'Airport transfer, eSIM, villa rental, tours and Russian-speaking support — in one app.',
+    ru: 'Трансфер из аэропорта, eSIM, аренда виллы, экскурсии и многоязычная поддержка (EN/RU/TH) — в одном приложении.',
+    en: 'Airport transfer, eSIM, villa rental, tours and multilingual support (EN/RU/TH) — in one app.',
   },
   pains: [
     {
