@@ -46,7 +46,7 @@ export default function InvoicesPage() {
   const [recipientName, setRecipientName] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
   const [invoiceType, setInvoiceType] = useState<string>('tenant_billing');
-  const [currency, setCurrency] = useState('THB');
+  const [currency, setCurrency] = useState(cityCurrencyCode);
   const [dueDate, setDueDate] = useState('');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState<InvoiceItem[]>([
