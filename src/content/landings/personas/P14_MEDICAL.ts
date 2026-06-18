@@ -15,8 +15,8 @@ export const P14_MEDICAL: PersonaLanding = {
     en: 'Medical tourism on Phuket: clinics and concierge',
   },
   subtitle: {
-    ru: 'JCI-аккредитованные госпитали, координатор по-русски, страховой cashless и пакеты check-up — лечение и обследование без языкового барьера и переплат.',
-    en: 'JCI-accredited hospitals, Russian-speaking coordinator, cashless insurance and check-up packages — treatment and diagnostics without language barrier or markup.',
+    ru: 'JCI-аккредитованные госпитали, многоязычный координатор (EN/RU/TH), страховой cashless и пакеты check-up — лечение и обследование без языкового барьера и переплат.',
+    en: 'JCI-accredited hospitals, multilingual coordinator (EN/RU/TH), cashless insurance and check-up packages — treatment and diagnostics without language barrier or markup.',
   },
   pains: [
     { ru: 'Не понятно, в какую клинику с какой проблемой ехать.', en: 'Unclear which hospital to choose for which condition.' },
