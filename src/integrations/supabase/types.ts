@@ -21438,6 +21438,10 @@ export type Database = {
           review_count: number | null
           service_domains: string[] | null
           source_urls: string[] | null
+          stripe_account_id: string | null
+          stripe_charges_enabled: boolean
+          stripe_onboarded_at: string | null
+          stripe_payouts_enabled: boolean
           total_earnings: number | null
           trust_score: number | null
           uno_team_creator_id: string | null
@@ -21480,6 +21484,10 @@ export type Database = {
           review_count?: number | null
           service_domains?: string[] | null
           source_urls?: string[] | null
+          stripe_account_id?: string | null
+          stripe_charges_enabled?: boolean
+          stripe_onboarded_at?: string | null
+          stripe_payouts_enabled?: boolean
           total_earnings?: number | null
           trust_score?: number | null
           uno_team_creator_id?: string | null
@@ -21522,6 +21530,10 @@ export type Database = {
           review_count?: number | null
           service_domains?: string[] | null
           source_urls?: string[] | null
+          stripe_account_id?: string | null
+          stripe_charges_enabled?: boolean
+          stripe_onboarded_at?: string | null
+          stripe_payouts_enabled?: boolean
           total_earnings?: number | null
           trust_score?: number | null
           uno_team_creator_id?: string | null
