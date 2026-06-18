@@ -279,6 +279,10 @@ export const APP_ROUTES = {
   MANAGE_CLUSTER: '/manage',
   BUILD_CLUSTER: '/build',
 
+  // ── Communities (churches, temples, clubs, consulates) — LIVE cluster ──
+  COMMUNITIES: '/communities',
+  COMMUNITY_DETAIL: '/communities/:slug',
+
   // ── Utility Micro-apps ──
   VISA_QUIZ: '/visa/quiz',
   SCHOOL_FINDER: '/school-finder',
