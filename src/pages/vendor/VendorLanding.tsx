@@ -44,7 +44,7 @@ export default function VendorLanding() {
     {
       icon: Users,
       title: isRu ? 'Платёжеспособная аудитория' : 'Premium Audience',
-      desc: isRu ? 'Русскоязычные экспаты и туристы с высоким чеком' : 'Russian-speaking expats & tourists with high spending',
+      desc: isRu ? 'Иностранные экспаты и туристы с высоким чеком (EN/RU/TH)' : 'International expats & tourists with high spending (EN/RU/TH)',
     },
     {
       icon: Shield,
