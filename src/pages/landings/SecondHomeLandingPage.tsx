@@ -79,7 +79,7 @@ export default function SecondHomeLandingPage() {
           <p className="text-sm text-muted-foreground mb-2">{t ? 'Средний чек второго дома' : 'Typical second-home ticket'}</p>
           <p className="text-3xl font-bold font-display text-foreground tabular-nums">$200K — $500K</p>
           <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
-            {t ? 'Комиссия 5% за сделку, прозрачные условия, договор на русском и английском.' : '5% commission per deal, transparent terms, contract in English and Russian.'}
+            {t ? 'Комиссия 5% за сделку, прозрачные условия, договор на нескольких языках (EN/RU/TH).' : '5% commission per deal, transparent terms, multilingual contract (EN/RU/TH).'}
           </p>
         </div>
       </LandingLayout>
