@@ -617,6 +617,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.RELOCATION_MY_PLAN} element={<LazyPage><Pages.RelocationDashboard /></LazyPage>} />
         <Route path={APP_ROUTES.RELOCATION_AREAS} element={<LazyPage><Pages.RelocationAreasPage /></LazyPage>} />
         <Route path={APP_ROUTES.RELOCATE} element={<LazyPage><Pages.RelocateLandingPage /></LazyPage>} />
+        <Route path={APP_ROUTES.RELOCATION_MOVERS} element={<LazyPage><Pages.MoversIndex /></LazyPage>} />
+        <Route path="/me/requests" element={<LazyPage><Pages.MyHelpRequests /></LazyPage>} />
         <Route path={APP_ROUTES.WEDDING} element={<LazyPage><Pages.WeddingLandingPage /></LazyPage>} />
         <Route path={APP_ROUTES.KIDS} element={<LazyPage><Pages.KidsLandingPage /></LazyPage>} />
         <Route path={APP_ROUTES.NOMAD_GUIDE} element={<LazyPage><Pages.NomadGuidePage /></LazyPage>} />
