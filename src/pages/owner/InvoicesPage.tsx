@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { useOwnerInvoices, useCreateInvoice, useUpdateInvoiceStatus, useDeleteInvoice, InvoiceItem } from '@/hooks/useOwnerInvoices';
