@@ -280,7 +280,7 @@ export default function SituationDetailPage() {
                     return (
                       <Link
                         key={rel.id}
-                        to={`/discover/${rel.code}`}
+                        to={resolveSituationHref(rel.code)}
                         className={cn(
                           'group flex items-start gap-3 p-4 min-h-[88px]',
                           'border border-border bg-card text-card-foreground',
