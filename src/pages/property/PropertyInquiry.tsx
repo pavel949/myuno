@@ -5,6 +5,8 @@ import { Users, AlertCircle, Zap, ChevronRight, ChevronDown, ChevronUp, Calendar
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLocation as useLocationCity } from '@/contexts/LocationContext';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuthSheet } from '@/contexts/AuthSheetContext';
 import { Button } from '@/components/ui/button';
@@ -37,6 +39,8 @@ export default function PropertyInquiry() {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { currentCity } = useLocationCity();
+
   const { user } = useAuth();
   const { openAuthSheet } = useAuthSheet();
   const { profile } = useProfile();
@@ -161,9 +165,11 @@ export default function PropertyInquiry() {
     () =>
       (propertyExt?.currency?.trim?.() ||
         rentalExt?.currency?.trim?.() ||
-        'THB') as string,
-    [property, rentalTerms],
+        currentCity?.default_currency ||
+        'USD') as string,
+    [property, rentalTerms, currentCity?.default_currency],
   );
+
   const { data: isRareFind } = useRareFindBadge(id);
 
   // Persist form draft on every change, with current URL context attached
@@ -266,7 +272,7 @@ export default function PropertyInquiry() {
             last_minute_days: rentalExt?.last_minute_days,
             custom_length_discounts: rentalExt?.custom_length_discounts,
             deposit_amount: rentalTerms?.deposit_amount,
-            deposit_currency: rentalTerms?.deposit_currency || 'THB',
+            deposit_currency: rentalTerms?.deposit_currency || listingCurrency,
             payment_policy: rentalExt?.payment_policy || 'prepay_10',
             prepay_percent: rentalExt?.prepay_percent,
           },
@@ -283,7 +289,7 @@ export default function PropertyInquiry() {
           customLengthDiscounts: rentalExt?.custom_length_discounts,
           seasonalPricing: propertyExt?.seasonal_pricing,
           depositAmount: rentalTerms?.deposit_amount,
-          depositCurrency: rentalTerms?.deposit_currency || 'THB',
+          depositCurrency: rentalTerms?.deposit_currency || listingCurrency,
           paymentPolicy: rentalExt?.payment_policy || 'prepay_10',
           prepayPercent: rentalExt?.prepay_percent,
         };
@@ -292,7 +298,7 @@ export default function PropertyInquiry() {
       return calculatePricing(baseRules, new Date(), new Date()); // empty breakdown
     }
     return calculatePricing(baseRules, checkIn, checkOut);
-  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property]);
+  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property, listingCurrency]);
 
   const validationErrors = useMemo(() => {
     const errors: string[] = [];

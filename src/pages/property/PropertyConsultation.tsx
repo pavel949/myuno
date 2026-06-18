@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLocation as useLocationCity } from '@/contexts/LocationContext';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useConsultationRequests } from '@/hooks/useConsultationRequests';
@@ -212,6 +214,12 @@ function GuestCounter({
 export default function PropertyConsultation() {
   const { language } = useLanguage();
   const { currencyInfo } = useCurrency();
+  const { currentCity } = useLocationCity();
+  // City default currency — used as fallback when the user submits a lead/consultation
+  // without an explicit currency picker. Phase 1 multi-location.
+
+  const leadCurrency = (currentCity?.default_currency || 'USD').toUpperCase();
+
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
@@ -348,7 +356,8 @@ export default function PropertyConsultation() {
           },
           entry_point: '/property/consultation',
           lead_source: 'developer_persona',
-          currency: 'THB',
+          currency: leadCurrency,
+
         });
         setIsSuccess(true);
         return;
@@ -383,7 +392,8 @@ export default function PropertyConsultation() {
           ...basePayload,
           budget_min: formData.budget_min ? Number(formData.budget_min) : undefined,
           budget_max: formData.budget_max ? Number(formData.budget_max) : undefined,
-          currency: 'THB',
+          currency: leadCurrency,
+
           bedrooms_min: formData.bedrooms_min ? Number(formData.bedrooms_min) : undefined,
           bedrooms_max: formData.bedrooms_max ? Number(formData.bedrooms_max) : undefined,
           purpose: formData.purpose || undefined,
@@ -395,7 +405,7 @@ export default function PropertyConsultation() {
           ...basePayload,
           budget_min: formData.budget_min ? Number(formData.budget_min) : undefined,
           budget_max: formData.budget_max ? Number(formData.budget_max) : undefined,
-          currency: 'THB',
+          currency: leadCurrency,
         });
       }
 

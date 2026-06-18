@@ -11,6 +11,8 @@ import { CompareButton, type CompareProperty } from '@/components/property/Prope
 import { PropertyPdfButton } from '@/components/property/PropertyPdfBrochure';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLocation as useLocationCity } from '@/contexts/LocationContext';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -76,7 +78,9 @@ export default function PropertyDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+
 
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -153,8 +157,12 @@ export default function PropertyDetail() {
   const amenities = property.amenities || [];
 
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
+  // City-aware currency: prefer listing-level currency, else current city default, else USD.
+  const listingCurrency =
+    ((property as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase();
   const isSaleListing = property.listing_type === 'sale' || Boolean(property.is_for_sale);
   const salePrice = property.sale_price ?? (isSaleListing ? property.price : undefined) ?? 0;
+
   // 6-tracks: detect short/medium/long rental support. When tenancy_modes is
   // explicitly set, respect it; otherwise fall back to legacy nightly-price
   // signal so existing listings keep showing the booking card.
@@ -210,7 +218,7 @@ export default function PropertyDetail() {
           name: propertyTitle || '',
           description: propertyDesc.slice(0, 300),
           price: pricePerNight || undefined,
-          currency: 'THB',
+          currency: listingCurrency,
           image: property.cover_image || undefined,
           url: `https://www.myuno.app/property/${id}`,
           bedrooms: property.bedrooms || undefined,
@@ -452,7 +460,7 @@ export default function PropertyDetail() {
               {extraServices.length > 0 && (
                 <>
                   <Separator />
-                  <ExtraServices services={extraServices} currency="THB" />
+                  <ExtraServices services={extraServices} currency={listingCurrency} />
                 </>
               )}
 
@@ -516,7 +524,8 @@ export default function PropertyDetail() {
                       lineId: rentalTerms.manager_line_id,
                       languages: rentalTerms.host_languages,
                     }}
-                    currency="THB"
+                    currency={listingCurrency}
+
                     showPricingDeposit={Boolean(
                       rentalTerms.deposit_amount != null && rentalTerms.deposit_amount > 0,
                     )}
@@ -661,7 +670,7 @@ export default function PropertyDetail() {
                     propertyId={id || 'prop-1'}
                     pricePerNight={pricePerNight}
                     rentalTerms={rentalTerms}
-                    currency="THB"
+                    currency={listingCurrency}
                     earlyBookingDiscount={property?.early_booking_discount ?? undefined}
                     earlyBookingDays={property?.early_booking_days ?? undefined}
                     lastMinuteDiscount={property?.last_minute_discount ?? undefined}

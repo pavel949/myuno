@@ -39,6 +39,8 @@ import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { SEOHead, createRealEstateListingSchema, createBreadcrumbSchema } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLocation as useLocationCity } from '@/contexts/LocationContext';
+
 import { useOffplanProject, type ProjectStatus } from '@/hooks/useOffplanProjects';
 import { useProjectDocuments, DOCUMENT_CATEGORIES } from '@/hooks/useProjectDocuments';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
@@ -79,7 +81,9 @@ export default function OffplanDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+
   const [showLeadForm, setShowLeadForm] = useState(false);
   const { data: project, isLoading } = useOffplanProject(id);
   const { data: developer } = useDeveloper(project?.developerId || '');
@@ -126,7 +130,7 @@ export default function OffplanDetail() {
     name,
     description: seoDescription,
     price: project.priceFrom ?? undefined,
-    currency: 'THB',
+    currency: ((project as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase(),
     image: seoImage,
     url: canonicalUrl,
     address: project.district ?? undefined,
