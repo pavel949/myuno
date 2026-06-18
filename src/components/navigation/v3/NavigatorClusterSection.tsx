@@ -65,6 +65,7 @@ export function NavigatorClusterSection({
   situations,
   counts,
   hideAppGrid,
+  situationLabels,
 }: NavigatorClusterSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -75,7 +76,7 @@ export function NavigatorClusterSection({
   const topServices = useMemo(() => {
     if (hideAppGrid) return [];
     const inCluster = AVAILABLE_SERVICES.filter((s) => s.clusterId === clusterId);
-    return rankServices(inCluster, { role, personas: effectivePersonas }).slice(0, 8);
+    return rankServices(inCluster, { role, personas: effectivePersonas }).slice(0, 6);
   }, [clusterId, role, effectivePersonas, hideAppGrid]);
 
   if (!cluster || situations.length === 0) return null;
@@ -103,21 +104,22 @@ export function NavigatorClusterSection({
       {topServices.length > 0 && (
         <div className="mt-4 mb-5">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 mb-2">
-            {isRu ? 'Мини-приложения' : 'Mini-apps'}
+            {isRu ? 'Мини-приложения для вас' : 'Mini-apps for you'}
           </p>
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-x-1 gap-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {topServices.map((svc) => (
-              <AppTile
+              <MiniAppCard
                 key={svc.id}
-                to={svc.path}
-                icon={svc.icon}
-                label={isRu ? svc.labelRu : svc.labelEn}
-                status={svc.status}
+                svc={svc}
+                personas={effectivePersonas}
+                role={role}
+                situationLabels={situationLabels}
               />
             ))}
           </div>
         </div>
       )}
+
 
 
       <ul className="divide-y divide-border">
