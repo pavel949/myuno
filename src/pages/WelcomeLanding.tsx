@@ -59,8 +59,15 @@ import {
 } from '@/components/landings/LandingPrimitives';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 
-type Bi = { ru: string; en: string };
-const tx = (isRu: boolean, v: Bi) => (isRu ? v.ru : v.en);
+type Bi = { ru: string; en: string; th?: string };
+type Lang = 'ru' | 'en' | 'th';
+/** Pick localized string. Fallback chain: requested → en → ru. */
+const tx = (lang: Lang, v: Bi): string => {
+  if (lang === 'th' && v.th) return v.th;
+  if (lang === 'en') return v.en;
+  if (lang === 'ru') return v.ru;
+  return v.en || v.ru;
+};
 
 /** Russian plural for «N сервис(а/ов)». */
 function pluralRu(n: number, forms: [string, string, string]): string {
