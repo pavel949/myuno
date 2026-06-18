@@ -6,17 +6,27 @@
  * situation rows. No coloured tiles, no grid clutter — every row answers a
  * single question: "what should I do here?".
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { CLUSTERS, type ClusterId } from '@/lib/catalog/taxonomy';
+import {
+  CLUSTERS,
+  AVAILABLE_SERVICES,
+  type ClusterId,
+} from '@/lib/catalog/taxonomy';
+import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { useLifeOSRole } from '@/hooks/useLifeOS';
+import { rankServices } from '@/lib/superapp/rankServices';
+import { AppTile } from '@/components/superapp/AppTile';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface NavigatorClusterSectionProps {
   clusterId: ClusterId;
   situations: LifeSituation[];
   counts?: Record<string, number>;
+  /** When true, hide the top icon-grid of mini-apps (used in "Other areas"). */
+  hideAppGrid?: boolean;
 }
 
 const CLUSTER_LABEL_RU: Record<ClusterId, string> = {
