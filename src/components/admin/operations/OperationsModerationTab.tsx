@@ -199,14 +199,14 @@ export function OperationsModerationTab() {
 
   const renderTable = (items: ModerationItem[], showActions: boolean) => (
     <div className="rounded-none border overflow-x-auto">
-      <Table>
+      <Table className="min-w-[640px]">
         <TableHeader>
           <TableRow>
-            <TableHead>{isRussian ? 'Тип' : 'Type'}</TableHead>
-            <TableHead>{isRussian ? 'Название' : 'Name'}</TableHead>
-            <TableHead>{isRussian ? 'Провайдер' : 'Provider'}</TableHead>
-            <TableHead>{isRussian ? 'Дата создания' : 'Created'}</TableHead>
-            {showActions && <TableHead className="w-[120px]">{isRussian ? 'Действия' : 'Actions'}</TableHead>}
+            <TableHead className="whitespace-nowrap">{isRussian ? 'Тип' : 'Type'}</TableHead>
+            <TableHead className="whitespace-nowrap">{isRussian ? 'Название' : 'Name'}</TableHead>
+            <TableHead className="whitespace-nowrap">{isRussian ? 'Провайдер' : 'Provider'}</TableHead>
+            <TableHead className="whitespace-nowrap">{isRussian ? 'Дата создания' : 'Created'}</TableHead>
+            {showActions && <TableHead className="w-[120px] whitespace-nowrap">{isRussian ? 'Действия' : 'Actions'}</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
