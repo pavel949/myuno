@@ -358,7 +358,7 @@ export default function MapView() {
     const d = m.data as ClickedMarker;
     if (!d) return;
     setSelected(d);
-    setActiveMarkerId(m.id);
+    selectMarker(m.id);
     if (d.kind === 'osm') setPlaceDetails(null);
     // Sync search input with the clicked marker and try to highlight matching result.
     const label =
@@ -368,7 +368,7 @@ export default function MapView() {
     const matchId = d.kind === 'osm' ? `local:${d.poi.id}` : undefined;
     if (label) searchBoxRef.current?.setSelection(label, matchId);
     mapRef.current?.flyTo(m.lat, m.lng, Math.max(14, 11));
-  }, [language]);
+  }, [language, selectMarker]);
 
   // After mlMarkers update, if user picked a search result, find the nearest marker and activate it.
   useEffect(() => {
@@ -379,7 +379,7 @@ export default function MapView() {
       (mm) => Math.abs(mm.lat - pick.lat) < EPS && Math.abs(mm.lng - pick.lng) < EPS,
     );
     if (match) {
-      setActiveMarkerId(match.id);
+      selectMarker(match.id);
       setSelected(match.data as ClickedMarker);
     }
     pendingSearchPickRef.current = null;
