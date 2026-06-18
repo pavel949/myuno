@@ -34,7 +34,8 @@ type VerticalFilter =
   | 'vet'
   | 'flowers'
   | 'venue'
-  | 'event';
+  | 'event'
+  | 'community';
 type PriceFilter = 'all' | 'budget' | 'mid' | 'premium' | 'luxury';
 type AvailabilityFilter = 'all' | 'open_now';
 
@@ -86,6 +87,7 @@ const VERTICAL_CONFIG: Record<
   flowers: { icon: '💐', color: '#e11d48', labelEn: 'Flowers', labelRu: 'Цветы', route: (id) => `/flowers/shop/${id}` },
   venue: { icon: '🏛️', color: '#7c3aed', labelEn: 'Venues', labelRu: 'Площадки', route: (id) => `/venues/${id}` },
   event: { icon: '🎉', color: '#f59e0b', labelEn: 'Events', labelRu: 'События', route: (id) => APP_ROUTES.EVENT_DETAIL(id) },
+  community: { icon: '🛕', color: '#0A2240', labelEn: 'Communities', labelRu: 'Сообщества', route: (id) => `/communities/${id}` },
 };
 
 const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string; icon: string }[] = [
@@ -101,6 +103,7 @@ const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string;
   { value: 'flowers', labelEn: 'Flowers', labelRu: 'Цветы', icon: '💐' },
   { value: 'venue', labelEn: 'Venues', labelRu: 'Площадки', icon: '🏛️' },
   { value: 'event', labelEn: 'Events', labelRu: 'События', icon: '🎉' },
+  { value: 'community', labelEn: 'Communities', labelRu: 'Сообщества', icon: '🛕' },
 ];
 
 const OSM_CATEGORIES = ['all','hotel','restaurant','pharmacy','clinic','attraction','beach','park','shop','finance','fuel','education','worship','civic','fitness','vet'];
