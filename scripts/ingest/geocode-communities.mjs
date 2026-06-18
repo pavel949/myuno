@@ -3,11 +3,9 @@
 // Writes lat/lng/google_place_id/address back into public.communities.
 import { execFileSync } from 'node:child_process';
 
-const GATEWAY = 'https://connector-gateway.lovable.dev/google_maps';
-const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
-if (!LOVABLE_API_KEY || !GOOGLE_MAPS_API_KEY) {
-  console.error('Missing LOVABLE_API_KEY or GOOGLE_MAPS_API_KEY');
+if (!GOOGLE_MAPS_API_KEY) {
+  console.error('Missing GOOGLE_MAPS_API_KEY');
   process.exit(1);
 }
 
