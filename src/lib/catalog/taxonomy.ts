@@ -821,9 +821,11 @@ export const CLUSTER_LIFE_SITUATIONS: ClusterLifeSituationLink[] = [
   { clusterId: 'live',   situationCode: 'food',           weight: 70,  isPrimary: false },
   { clusterId: 'live',   situationCode: 'nightlife',      weight: 60,  isPrimary: false },
   // MANAGE
-  { clusterId: 'manage', situationCode: 'managing',       weight: 100, isPrimary: true  },
-  { clusterId: 'manage', situationCode: 'property_owner', weight: 95,  isPrimary: true  },
-  { clusterId: 'manage', situationCode: 'business',       weight: 90,  isPrimary: false },
+  { clusterId: 'manage', situationCode: 'managing',           weight: 100, isPrimary: true  },
+  { clusterId: 'manage', situationCode: 'management_company', weight: 100, isPrimary: true  },
+  { clusterId: 'manage', situationCode: 'property_owner',     weight: 95,  isPrimary: true  },
+  { clusterId: 'manage', situationCode: 'business',           weight: 90,  isPrimary: false },
+  { clusterId: 'manage', situationCode: 'vendor_onboarding',  weight: 80,  isPrimary: false },
   // INVEST
   { clusterId: 'invest', situationCode: 'investing',      weight: 100, isPrimary: true  },
   { clusterId: 'invest', situationCode: 'investor',       weight: 95,  isPrimary: true  },
