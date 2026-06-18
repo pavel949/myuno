@@ -105,6 +105,8 @@ function ProjectCard({
   statusLabel: (s?: string) => React.ReactNode;
 }) {
   const navigate = useNavigate();
+  const { symbol: curSym } = useCityCurrency();
+
 
   return (
     <button
