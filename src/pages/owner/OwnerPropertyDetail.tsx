@@ -1,5 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useOwnerProperty, useServiceRequests, usePropertyInspections } from '@/hooks/usePropertyCare';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { BackButton } from '@/components/uno/BackButton';
