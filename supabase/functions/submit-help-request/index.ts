@@ -143,84 +143,9 @@ Deno.serve(async (req) => {
     });
   }
 
-  // 2) UPSERT crm_contacts (best-effort)
-  let crmContactId: string | null = null;
-  try {
-    let existing: { id: string } | null = null;
-    if (finalEmail) {
-      const { data } = await sb
-        .from("crm_contacts")
-        .select("id")
-        .eq("email", finalEmail)
-        .maybeSingle();
-      existing = data;
-    }
-    if (!existing && finalPhone) {
-      const { data } = await sb
-        .from("crm_contacts")
-        .select("id")
-        .eq("phone", finalPhone)
-        .maybeSingle();
-      existing = data;
-    }
-
-    if (existing) {
-      crmContactId = existing.id;
-    } else {
-      const { data: created } = await sb
-        .from("crm_contacts")
-        .insert({
-          email: finalEmail,
-          phone: finalPhone,
-          first_name: userName ?? null,
-          source: "help_request",
-          source_details: { topic: input.topic, route: input.source_route },
-          language: input.language,
-          user_id: userId,
-        })
-        .select("id")
-        .single();
-      crmContactId = created?.id ?? null;
-    }
-  } catch (e) {
-    console.warn("[submit-help-request] crm upsert failed:", e);
-  }
-
-  // 3) Create CRM task for managers (best-effort)
-  let crmTaskId: string | null = null;
-  try {
-    const { data: task } = await sb
-      .from("crm_tasks")
-      .insert({
-        title: `[${TOPIC_LABEL_RU[input.topic]}] ${input.subject ?? input.message.slice(0, 80)}`,
-        description: input.message,
-        priority: input.urgency === "urgent" ? "high" : input.urgency,
-        status: "todo",
-        contact_id: crmContactId,
-        due_at: input.urgency === "urgent"
-          ? new Date(Date.now() + 60 * 60 * 1000).toISOString()
-          : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        metadata: {
-          source: "help_request",
-          help_request_id: hr.id,
-          topic: input.topic,
-          preferred_channel: input.preferred_channel,
-        },
-      })
-      .select("id")
-      .single();
-    crmTaskId = task?.id ?? null;
-  } catch (e) {
-    console.warn("[submit-help-request] crm_tasks insert failed:", e);
-  }
-
-  // Update help_request with CRM refs
-  if (crmContactId || crmTaskId) {
-    await sb.from("help_requests").update({
-      crm_contact_id: crmContactId,
-      crm_task_id: crmTaskId,
-    }).eq("id", hr.id);
-  }
+  // CRM auto-routing is multi-tenant (company_id required) and handled by
+  // a separate workflow. For now we only persist help_requests + alert admins;
+  // /admin/help-requests dashboard converts to CRM tasks manually.
 
   // 4) Notify admins — WhatsApp + email (fire and forget)
   try {
