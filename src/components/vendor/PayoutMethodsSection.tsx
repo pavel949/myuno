@@ -28,6 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { usePayoutMethods, PayoutMethod, CreatePayoutMethodData } from '@/hooks/usePayoutMethods';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
+import { StripeConnectCard } from '@/components/vendor/StripeConnectCard';
 import { cn } from '@/lib/utils';
 
 const bankLogos: Record<string, string> = {
@@ -183,6 +184,7 @@ export function PayoutMethodsSection() {
 
   return (
     <div className="space-y-4">
+      <StripeConnectCard />
       <div className="flex items-center justify-between">
         <h3 className="font-semibold flex items-center gap-2">
           <Building2 className="w-5 h-5" />
