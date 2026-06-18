@@ -458,7 +458,7 @@ const isRu = language === 'ru';
           availability={localAvailability}
           onChange={setLocalAvailability}
           basePrice={Number(formData?.price_per_night) || 0}
-          currency="THB"
+          currency={formData?.currency || cityCurrencyCode}
         />
       ),
     },
