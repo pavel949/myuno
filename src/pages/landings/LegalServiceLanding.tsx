@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useParams, useNavigate, Navigate } from 'react-router-dom';
+import { useParams, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -11,12 +11,15 @@ import { getLegalService } from '@/lib/landings/legalServices';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 export default function LegalServiceLanding() {
-  const { service } = useParams<{ service: string }>();
+  const params = useParams<{ service?: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const cfg = useMemo(() => getLegalService(service), [service]);
+  // Service id comes from :service param OR derived from /legal/<id> pathname.
+  const serviceId = params.service ?? location.pathname.split('/').filter(Boolean)[1];
+  const cfg = useMemo(() => getLegalService(serviceId), [serviceId]);
   if (!cfg) return <Navigate to="/legal" replace />;
 
   const hero = isRu ? cfg.hero.ru : cfg.hero.en;
