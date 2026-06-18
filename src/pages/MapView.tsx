@@ -199,6 +199,20 @@ export default function MapView() {
     },
   });
 
+  const { data: communities, isLoading: communityLoading } = useQuery({
+    queryKey: ['communities-map'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('communities')
+        .select('slug, name_en, name_ru, lat, lng, cover_image_url')
+        .eq('is_active', true)
+        .not('lat', 'is', null)
+        .not('lng', 'is', null);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   // OSM POI layer (OpenStreetMap, ODbL). Loaded on toggle.
   const [showOsm, setShowOsm] = useState(false);
   const [osmCategory, setOsmCategory] = useState<string>('all');
@@ -240,7 +254,7 @@ export default function MapView() {
   }, []);
 
   const isDataLoading =
-    propLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading || eventLoading;
+    propLoading || salonLoading || restLoading || gymLoading || pharmLoading || vetLoading || flowerLoading || venueLoading || eventLoading || communityLoading;
 
   const allMarkers = useMemo<UniversalMarker[]>(() => {
     const markers: UniversalMarker[] = [];
@@ -305,8 +319,18 @@ export default function MapView() {
       });
     });
 
+    (communities || []).forEach((c: any) => {
+      if (c.lat == null || c.lng == null) return;
+      markers.push({
+        id: c.slug, name: c.name_en, nameRu: c.name_ru || c.name_en,
+        lat: Number(c.lat), lng: Number(c.lng),
+        rating: 0, priceFrom: 0,
+        image: c.cover_image_url || undefined, vertical: 'community',
+      });
+    });
+
     return markers;
-  }, [properties, salons, restaurants, gyms, pharmacies, vets, flowerShops, venues, events]);
+  }, [properties, salons, restaurants, gyms, pharmacies, vets, flowerShops, venues, events, communities]);
 
   const filteredMarkers = useMemo(() => {
     return allMarkers.filter((m) => {
