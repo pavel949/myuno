@@ -309,7 +309,7 @@ export function OperationsModerationTab() {
                 <Clock className="h-4 w-4" />
                 {isRussian ? 'Ожидают' : 'Pending'}
                 {pendingItems.length > 0 && (
-                  <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 justify-center">
+                  <Badge variant="destructive" className="ml-1 h-5 min-w-[20px] px-1.5 justify-center text-xs">
                     {pendingItems.length}
                   </Badge>
                 )}
