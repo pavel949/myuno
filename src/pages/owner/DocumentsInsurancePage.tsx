@@ -308,7 +308,7 @@ function DocSheet({ open, onOpenChange, editingDoc, properties, userId }: {
             <div><Label>{isRu ? 'Дата выдачи' : 'Issue Date'}</Label><Input type="date" value={form.issue_date} onChange={e => setForm(f => ({ ...f, issue_date: e.target.value }))} /></div>
             <div><Label>{isRu ? 'Срок действия' : 'Expiry'}</Label><Input type="date" value={form.expiry_date} onChange={e => setForm(f => ({ ...f, expiry_date: e.target.value }))} /></div>
           </div>
-          <div><Label>{isRu ? 'Сумма покрытия (฿)' : 'Coverage (฿)'}</Label><Input type="number" value={form.coverage_amount} onChange={e => setForm(f => ({ ...f, coverage_amount: e.target.value }))} /></div>
+          <div><Label>{isRu ? `Сумма покрытия (${curSym})` : `Coverage (${curSym})`}</Label><Input type="number" value={form.coverage_amount} onChange={e => setForm(f => ({ ...f, coverage_amount: e.target.value }))} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>{isRu ? 'Провайдер' : 'Provider'}</Label><Input value={form.provider_name} onChange={e => setForm(f => ({ ...f, provider_name: e.target.value }))} /></div>
             <div><Label>{isRu ? '№ полиса' : 'Policy #'}</Label><Input value={form.policy_number} onChange={e => setForm(f => ({ ...f, policy_number: e.target.value }))} /></div>
