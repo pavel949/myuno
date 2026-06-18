@@ -425,7 +425,6 @@ export default function MapView() {
 
   const handleFilterChange = (value: VerticalFilter) => {
     setSelectedVertical(value);
-    setSelected(null);
     updateParam('vertical', value);
   };
 
