@@ -32,7 +32,7 @@ const LIMIT = Number(args.limit || 20);
 const ENDPOINTS = [
   {
     name: '/rest/v1/communities',
-    path: `/rest/v1/communities?select=slug,name_ru,name_en,category,lat,lng,cover_image_url&is_active=eq.true&limit=${LIMIT}`,
+    path: `/rest/v1/communities?select=slug,name_ru,name_en,lat,lng,cover_image_url&is_active=eq.true&limit=${LIMIT}`,
   },
   {
     name: '/rest/v1/communities (geo)',
@@ -40,11 +40,11 @@ const ENDPOINTS = [
   },
   {
     name: '/rest/v1/properties',
-    path: `/rest/v1/properties?select=id,title,price,bedrooms,city,property_type&is_published=eq.true&limit=${LIMIT}`,
+    path: `/rest/v1/properties?select=id,title,price,property_type,address&is_active=eq.true&limit=${LIMIT}`,
   },
   {
     name: '/rest/v1/properties (count)',
-    path: `/rest/v1/properties?select=id&is_published=eq.true&limit=1`,
+    path: `/rest/v1/properties?select=id&is_active=eq.true&limit=1`,
     extraHeaders: { Prefer: 'count=exact' },
   },
 ];
