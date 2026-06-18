@@ -81,7 +81,9 @@ export default function OffplanDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+
   const [showLeadForm, setShowLeadForm] = useState(false);
   const { data: project, isLoading } = useOffplanProject(id);
   const { data: developer } = useDeveloper(project?.developerId || '');
