@@ -122,12 +122,9 @@ if (typeof window !== 'undefined') {
 function AppContent() {
   useGlobalErrorHandler();
   useEnsureMultiRoleQaBundle();
-  const { isMaintenanceMode, canBypass } = useMaintenance();
+  // Coming Soon / maintenance gate retired 2026-06-18 — site is fully public.
+  // Toggle preserved in admin UI for emergency only (no-op at the context level).
   
-  // Show maintenance page if enabled and user can't bypass
-  if (isMaintenanceMode && !canBypass) {
-    return <UnderConstruction />;
-  }
   
     return (
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">

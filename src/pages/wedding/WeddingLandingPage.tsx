@@ -4,6 +4,7 @@ import { LandingLayout } from '@/components/miniapp/LandingLayout';
 import { Button } from '@/components/ui/button';
 import { Heart, MapPin, Camera, Anchor, Utensils, Flower2, Music, Car, ArrowRight } from 'lucide-react';
 import { tokenColor } from '@/lib/utils/hslAlpha';
+import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const SERVICES = [
   { icon: MapPin, labelEn: 'Venues', labelRu: 'Площадки', descEn: 'Beachfront, cliff-top, garden', descRu: 'У океана, на утёсе, в саду', path: '/experiences?tag=wedding-venue', color: 'destructive' },
@@ -19,7 +20,7 @@ export default function WeddingLandingPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
   const navigate = useNavigate();
-  const whatsappUrl = 'https://wa.me/66800000000?text=' + encodeURIComponent(t ? 'Здравствуйте! Интересует организация свадьбы' : 'Hello! I am interested in a wedding in Phuket');
+  const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Интересует организация свадьбы' : 'Hello! I am interested in a wedding in Phuket');
 
   return (
     <LandingLayout
