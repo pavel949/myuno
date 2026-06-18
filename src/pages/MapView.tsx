@@ -565,7 +565,7 @@ export default function MapView() {
               <button
                 type="button"
                 aria-label="Close"
-                onClick={() => { setSelected(null); setPlaceDetails(null); setActiveMarkerId(undefined); searchBoxRef.current?.clear(); }}
+                onClick={() => { setSelected(null); setPlaceDetails(null); selectMarker(null); searchBoxRef.current?.clear(); }}
                 className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
               >
                 <X className="w-4 h-4" />
