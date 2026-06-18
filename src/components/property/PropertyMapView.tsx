@@ -28,10 +28,13 @@ interface PropertyMapViewProps {
   properties: Property[];
   hoveredProperty: string | null;
   onHover: (id: string | null) => void;
+  selectedId?: string | null;
+  onSelect?: (id: string | null) => void;
   mode?: 'rent' | 'buy';
   nights?: number;
   className?: string;
 }
+
 
 function shortPrice(price: number): string {
   if (price >= 1_000_000) return `${(price / 1_000_000).toFixed(1)}M`;
