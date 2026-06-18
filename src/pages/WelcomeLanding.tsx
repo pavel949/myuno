@@ -534,6 +534,54 @@ export default function WelcomeLanding() {
         </LandingContainer>
       </LandingSection>
 
+      {/* ============================ 3.5 СООБЩЕСТВА ============================ */}
+      <LandingSection>
+        <LandingContainer className="py-10 sm:py-14">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_auto] md:items-end">
+            <div className="space-y-3">
+              <span className="inline-flex items-center gap-2 border border-border bg-card px-3 py-1 font-sans text-caption uppercase tracking-[0.12em] text-foreground">
+                {tx(language, { ru: 'Новое', en: 'New', th: 'ใหม่' })}
+              </span>
+              <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
+                {tx(language, { ru: 'Найти своих', en: 'Find your community', th: 'หาชุมชนของคุณ' })}
+              </h2>
+              <p className="max-w-2xl font-sans text-body-sm leading-relaxed text-muted-foreground">
+                {tx(language, {
+                  ru: 'Церкви, храмы и мечети, экспат-клубы по интересам и языкам, дипломатические миссии и почётные консулы — всё в одном справочнике с контактами и маршрутами.',
+                  en: 'Churches, temples and mosques, expat clubs by language and interest, diplomatic missions and honorary consuls — all in one directory with contacts and directions.',
+                  th: 'โบสถ์ วัด มัสยิด ชมรมชาวต่างชาติตามภาษาและความสนใจ คณะผู้แทนทางการทูตและสถานกงสุล — รวมไว้ในที่เดียวพร้อมข้อมูลติดต่อและเส้นทาง',
+                })}
+              </p>
+              <ul className="flex flex-wrap gap-2 pt-2 font-sans text-caption text-muted-foreground">
+                {[
+                  { ru: '80+ посольств', en: '80+ embassies', th: 'สถานทูต 80+ แห่ง' },
+                  { ru: '4 консульства на Пхукете', en: '4 consulates in Phuket', th: 'สถานกงสุล 4 แห่งในภูเก็ต' },
+                  { ru: 'Храмы, церкви, мечети', en: 'Temples · churches · mosques', th: 'วัด · โบสถ์ · มัสยิด' },
+                  { ru: 'Экспат-клубы', en: 'Expat clubs', th: 'ชมรมชาวต่างชาติ' },
+                ].map((chip, i) => (
+                  <li key={i} className="border border-border bg-card px-2 py-1">
+                    {tx(language, chip)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <Link
+              to={APP_ROUTES.COMMUNITIES}
+              data-testid="welcome-cta-communities"
+              className={cn(
+                'inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none border border-foreground px-5 font-sans text-body font-medium text-foreground',
+                'hover:bg-foreground hover:text-background transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+              )}
+            >
+              {tx(language, { ru: 'Открыть справочник', en: 'Open directory', th: 'เปิดสารบัญ' })}
+              <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+            </Link>
+          </div>
+        </LandingContainer>
+      </LandingSection>
+
       {/* ============================ 4. КЛАСТЕРЫ ============================ */}
       <LandingSection>
         <LandingContainer className="py-14 sm:py-20">
