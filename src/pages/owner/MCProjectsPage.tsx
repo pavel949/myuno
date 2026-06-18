@@ -132,9 +132,10 @@ function ProjectCard({
         )}
         {(project.price_from || project.price_to) && (
           <p className="text-sm font-medium text-primary">
-            {project.price_from ? `฿${(project.price_from / 1e6).toFixed(1)}M` : ''}
+            {project.price_from ? `${curSym}${(project.price_from / 1e6).toFixed(1)}M` : ''}
             {project.price_from && project.price_to ? ' – ' : ''}
-            {project.price_to ? `฿${(project.price_to / 1e6).toFixed(1)}M` : ''}
+            {project.price_to ? `${curSym}${(project.price_to / 1e6).toFixed(1)}M` : ''}
+
           </p>
         )}
       </div>
