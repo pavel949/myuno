@@ -25,7 +25,7 @@ function categorize(tags: Record<string, string>): {
   if (t.amenity === "clinic" || t.amenity === "doctors" || t.healthcare)
     return { category: "clinic", subcategory: t.healthcare ?? "clinic" };
   if (t.amenity === "veterinary") return { category: "vet", subcategory: null };
-  if (t.amenity === "restaurant" || t.amenity === "cafe" || t.amenity === "fast_food" || t.amenity === "bar" || t.amenity === "pub")
+  if (t.amenity === "restaurant" || t.amenity === "cafe" || t.amenity === "fast_food" || t.amenity === "bar" || t.amenity === "pub" || t.amenity === "food_court" || t.amenity === "ice_cream")
     return { category: "restaurant", subcategory: t.amenity };
   if (t.amenity === "atm" || t.amenity === "bank")
     return { category: "finance", subcategory: t.amenity };
@@ -35,24 +35,39 @@ function categorize(tags: Record<string, string>): {
   if (t.amenity === "place_of_worship") return { category: "worship", subcategory: t.religion ?? null };
   if (t.amenity === "police" || t.amenity === "fire_station")
     return { category: "civic", subcategory: t.amenity };
-  if (t.amenity === "post_office" || t.amenity === "townhall" || t.amenity === "embassy")
+  if (t.amenity === "post_office" || t.amenity === "townhall" || t.amenity === "embassy" || t.amenity === "courthouse" || t.amenity === "community_centre")
     return { category: "civic", subcategory: t.amenity };
-  if (t.tourism === "hotel" || t.tourism === "hostel" || t.tourism === "guest_house" || t.tourism === "apartment" || t.tourism === "resort")
+  if (t.amenity === "spa" || t.shop === "massage" || t.leisure === "spa" || t.shop === "beauty")
+    return { category: "spa", subcategory: t.amenity ?? t.leisure ?? t.shop };
+  if (t.shop === "hairdresser" || t.shop === "tattoo" || t.shop === "nails")
+    return { category: "beauty", subcategory: t.shop };
+  if (t.tourism === "hotel" || t.tourism === "hostel" || t.tourism === "guest_house" || t.tourism === "apartment" || t.tourism === "resort" || t.tourism === "motel" || t.tourism === "chalet")
     return { category: "hotel", subcategory: t.tourism };
-  if (t.tourism === "attraction" || t.tourism === "viewpoint" || t.tourism === "museum" || t.tourism === "gallery" || t.tourism === "zoo")
+  if (t.tourism === "attraction" || t.tourism === "viewpoint" || t.tourism === "museum" || t.tourism === "gallery" || t.tourism === "zoo" || t.tourism === "theme_park" || t.tourism === "aquarium")
     return { category: "attraction", subcategory: t.tourism };
-  if (t.leisure === "fitness_centre" || t.leisure === "sports_centre")
+  if (t.tourism === "information")
+    return { category: "civic", subcategory: "tourist_info" };
+  if (t.leisure === "marina" || t.waterway === "dock")
+    return { category: "marina", subcategory: null };
+  if (t.leisure === "fitness_centre" || t.leisure === "sports_centre" || t.leisure === "swimming_pool" || t.leisure === "pitch")
     return { category: "fitness", subcategory: t.leisure };
   if (t.leisure === "beach_resort" || t.natural === "beach")
     return { category: "beach", subcategory: null };
-  if (t.leisure === "park" || t.leisure === "garden")
+  if (t.leisure === "park" || t.leisure === "garden" || t.leisure === "nature_reserve")
     return { category: "park", subcategory: t.leisure };
+  if (t.amenity === "events_venue" || t.amenity === "conference_centre" || t.amenity === "theatre" || t.amenity === "cinema" || t.amenity === "nightclub")
+    return { category: "venue", subcategory: t.amenity };
+  if (t.office === "coworking" || t.amenity === "coworking_space")
+    return { category: "coworking", subcategory: null };
+  if (t.office)
+    return { category: "office", subcategory: t.office };
   if (t.shop === "supermarket" || t.shop === "convenience" || t.shop === "mall" || t.shop === "department_store")
     return { category: "shop", subcategory: t.shop };
   if (t.shop === "florist") return { category: "flowers", subcategory: null };
+  if (t.craft) return { category: "service", subcategory: t.craft };
   if (t.shop) return { category: "shop", subcategory: t.shop };
-  if (t.public_transport || t.amenity === "bus_station" || t.aeroway === "aerodrome")
-    return { category: "transport", subcategory: t.public_transport ?? t.amenity ?? t.aeroway };
+  if (t.public_transport || t.amenity === "bus_station" || t.aeroway === "aerodrome" || t.amenity === "ferry_terminal")
+    return { category: "transport", subcategory: t.public_transport ?? t.amenity ?? t.aeroway });
   return null;
 }
 
