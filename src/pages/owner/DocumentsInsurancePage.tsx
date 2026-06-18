@@ -210,7 +210,9 @@ function DocSheet({ open, onOpenChange, editingDoc, properties, userId }: {
   open: boolean; onOpenChange: (v: boolean) => void; editingDoc: any; properties: any[]; userId: string;
 }) {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
   const isRu = language === 'ru';
+
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
     property_id: '',
