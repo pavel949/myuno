@@ -24,13 +24,14 @@ export function pickLocalized(
   base: 'title' | 'name' | 'description' = 'name'
 ): string {
   if (!record) return '';
+  const rec = record as Record<string, unknown>;
   const norm: Lang = lang === 'th' || lang === 'en' || lang === 'ru' ? lang : 'en';
   for (const l of ORDER[norm]) {
-    const v = record[base + '_' + l];
+    const v = rec[base + '_' + l];
     if (typeof v === 'string' && v.trim().length > 0) return v;
   }
   for (const k of [base + '_en', base + '_ru', base + '_th']) {
-    const v = record[k];
+    const v = rec[k];
     if (typeof v === 'string' && v.trim()) return v;
   }
   return '';
