@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { useOwnerInvoices, useCreateInvoice, useUpdateInvoiceStatus, useDeleteInvoice, InvoiceItem } from '@/hooks/useOwnerInvoices';
@@ -27,6 +29,8 @@ const STATUS_COLORS: Record<string, string> = {
 export default function InvoicesPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
   const [filter, setFilter] = useState('all');
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -42,7 +46,7 @@ export default function InvoicesPage() {
   const [recipientName, setRecipientName] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
   const [invoiceType, setInvoiceType] = useState<string>('tenant_billing');
-  const [currency, setCurrency] = useState('THB');
+  const [currency, setCurrency] = useState(cityCurrencyCode);
   const [dueDate, setDueDate] = useState('');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState<InvoiceItem[]>([
@@ -105,7 +109,7 @@ export default function InvoicesPage() {
     setRecipientName('');
     setRecipientEmail('');
     setInvoiceType('tenant_billing');
-    setCurrency('THB');
+    setCurrency(cityCurrencyCode);
     setDueDate('');
     setNotes('');
     setItems([{ description: '', quantity: 1, unit_price: 0, amount: 0 }]);

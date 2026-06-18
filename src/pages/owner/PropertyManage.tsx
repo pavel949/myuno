@@ -1,6 +1,8 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useOwnerProperty, useUpdateOwnerProperty } from '@/hooks/usePropertyCare';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -62,6 +64,8 @@ export default function PropertyManage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
   const errorLog = createErrorHandler('PropertyManage');
   const activeSection = searchParams.get('section') || 'listing';
@@ -100,7 +104,7 @@ export default function PropertyManage() {
         rooms: property.rooms || [],
         price_per_night: property.price_per_night,
         deposit_amount: property.deposit_amount,
-        deposit_currency: property.deposit_currency || 'THB',
+        deposit_currency: property.deposit_currency || cityCurrencyCode,
         deposit_type: property.deposit_type || 'fixed',
         weekly_discount: property.weekly_discount || 0,
         monthly_discount: property.monthly_discount || 0,
@@ -218,7 +222,7 @@ export default function PropertyManage() {
               setHasChanges(true);
             }}
             basePrice={formData.price_per_night || 0}
-            currency={formData.deposit_currency || 'THB'}
+            currency={formData.deposit_currency || cityCurrencyCode}
           />
         );
       case 'pricing':

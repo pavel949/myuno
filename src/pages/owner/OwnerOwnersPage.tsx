@@ -4,6 +4,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useOwnerAccounts } from '@/hooks/useOwnerAccounts';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,6 +30,8 @@ import { ru } from 'date-fns/locale';
 
 export default function OwnerOwnersPage() {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
+
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const { data: owners, isLoading } = useOwnerAccounts();
@@ -239,7 +243,7 @@ export default function OwnerOwnersPage() {
                       )}
                       {owner.total_revenue > 0 && (
                         <Badge variant="outline" className="text-[10px]">
-                          ฿{owner.total_revenue.toLocaleString()}
+                          {curSym}{owner.total_revenue.toLocaleString()}
                         </Badge>
                       )}
                       {!owner.has_contract && (

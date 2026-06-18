@@ -1,6 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+import { CURRENCIES } from '@/lib/config/currencies';
+
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,6 +40,8 @@ const PRICING_ACTIONS = ['price_override', 'base_price_changed', 'season_created
 export default function RateManagementPage() {
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isRu = language === 'ru';
@@ -229,7 +235,7 @@ export default function RateManagementPage() {
                 propertyId={prop.property_id}
                 title={isRu ? (prop.title_ru || prop.title) : prop.title}
                 pricePerNight={prop.price_per_night || 0}
-                currency={prop.currency || 'THB'}
+                currency={prop.currency || cityCurrencyCode}
                 seasonCount={seasonCount}
                 isRu={isRu}
                 userId={user?.id}
@@ -321,7 +327,7 @@ export default function RateManagementPage() {
                       <div className="text-right space-y-1">
                         <div className="flex items-center gap-1 justify-end">
                           <Moon className="h-3 w-3 text-muted-foreground" />
-                          <span className="font-semibold">฿{rate.nightly_rate.toLocaleString()}</span>
+                          <span className="font-semibold">{curSym}{rate.nightly_rate.toLocaleString()}</span>
                           <span className="text-xs text-muted-foreground">/{t('night', 'ночь')}</span>
                         </div>
                         {diff !== 0 && (
@@ -432,7 +438,9 @@ function ActivityActionBadge({ action, isRu }: { action: string; isRu: boolean }
 }
 
 function ActivityDetails({ details, action, isRu }: { details: any; action: string; isRu: boolean }) {
+  const { symbol: curSym } = useCityCurrency();
   if (!details) return null;
+
   
   if (action === 'price_override' && details.old_value !== undefined) {
     return (
@@ -451,7 +459,7 @@ function ActivityDetails({ details, action, isRu }: { details: any; action: stri
   if ((action === 'season_created' || action === 'season_updated') && details.name) {
     return (
       <p className="text-xs text-muted-foreground mt-0.5">
-        {details.name}: ฿{details.nightly_rate?.toLocaleString()}/{isRu ? 'ночь' : 'night'} ({details.start_date} — {details.end_date})
+        {details.name}: {curSym}{details.nightly_rate?.toLocaleString()}/{isRu ? 'ночь' : 'night'} ({details.start_date} — {details.end_date})
       </p>
     );
   }
@@ -483,6 +491,11 @@ function PropertyPriceRow({
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(String(pricePerNight));
   const queryClient = useQueryClient();
+  // Derive symbol from passed currency code; fallback to currency code itself.
+  const propSym = (CURRENCIES as Record<string, { symbol: string }>)[
+    (currency || '').toUpperCase()
+  ]?.symbol ?? currency;
+
 
   const save = async () => {
     const num = Number(value);
@@ -548,7 +561,7 @@ function PropertyPriceRow({
             </>
           ) : (
             <>
-              <span className="font-semibold text-sm">฿{pricePerNight.toLocaleString()}</span>
+              <span className="font-semibold text-sm">{propSym}{pricePerNight.toLocaleString()}</span>
               <span className="text-xs text-muted-foreground">/{isRu ? 'ночь' : 'night'}</span>
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setValue(String(pricePerNight)); setEditing(true); }}>
                 <Pencil className="h-3 w-3" />
@@ -573,9 +586,11 @@ function RateSeasonSheet({
   onSaved?: () => void;
 }) {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
   const isRu = language === 'ru';
   const t = (en: string, rur: string) => isRu ? rur : en;
   const saveMutation = useSaveRateSeason();
+
 
   const [form, setForm] = useState(getDefaultForm(editingRate, properties));
 
@@ -650,7 +665,7 @@ function RateSeasonSheet({
             </Select>
             {basePrice > 0 && (
               <p className="text-xs text-muted-foreground mt-1">
-                {t('Base price', 'Базовая цена')}: ฿{basePrice.toLocaleString()}/{t('night', 'ночь')}
+                {t('Base price', 'Базовая цена')}: {curSym}{basePrice.toLocaleString()}/{t('night', 'ночь')}
               </p>
             )}
           </div>
@@ -681,7 +696,7 @@ function RateSeasonSheet({
 
           {/* Nightly rate */}
           <div>
-            <Label>{t('Nightly Rate (฿)', 'Цена за ночь (฿)')}</Label>
+            <Label>{t(`Nightly Rate (${curSym})`, `Цена за ночь (${curSym})`)}</Label>
             <Input type="number" value={form.nightly_rate} onChange={e => setForm(f => ({ ...f, nightly_rate: e.target.value }))} />
             {diff !== 0 && (
               <p className={cn("text-xs mt-1", diff > 0 ? "text-warning" : "text-success")}>

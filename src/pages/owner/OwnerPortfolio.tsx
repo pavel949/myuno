@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useOwnerProperties } from '@/hooks/usePropertyCare';
 import { usePropertyFinancialsFull, useFinancialStats, EXPENSE_CATEGORIES } from '@/hooks/usePropertyFinancials';
@@ -32,6 +34,8 @@ const CHART_COLORS = CHART_THEME.palette;
 
 export default function OwnerPortfolio() {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
+
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
@@ -156,10 +160,11 @@ export default function OwnerPortfolio() {
   }, [propertyMetrics, properties]);
 
   const formatCurrency = (value: number) => {
-    if (value >= 1000000) return `฿${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `฿${(value / 1000).toFixed(0)}K`;
-    return `฿${value.toFixed(0)}`;
+    if (value >= 1000000) return `${curSym}${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `${curSym}${(value / 1000).toFixed(0)}K`;
+    return `${curSym}${value.toFixed(0)}`;
   };
+
 
   if (!user) {
     navigate('/auth');
@@ -308,7 +313,7 @@ export default function OwnerPortfolio() {
                         </div>
                         <div>
                           <p className="text-muted-foreground">{isRu ? 'Ночь' : 'Night'}</p>
-                          <p className="font-medium">฿{property.avgNightlyRate.toFixed(0)}</p>
+                          <p className="font-medium">{curSym}{property.avgNightlyRate.toFixed(0)}</p>
                         </div>
                       </div>
                       

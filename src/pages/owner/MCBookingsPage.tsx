@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAllPropertyBookings, type PropertyBooking } from '@/hooks/usePropertyBookings';
@@ -55,6 +57,8 @@ export default function MCBookingsPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const { user } = useAuth();
   const isRu = language === 'ru';
 
@@ -171,7 +175,7 @@ export default function MCBookingsPage() {
       nights: differenceInDays(new Date(b.check_out), new Date(b.check_in)),
       guests: b.guests_count || '',
       amount: b.total_amount || 0,
-      currency: b.currency || 'THB',
+      currency: b.currency || cityCurrencyCode,
       status: b.status || 'pending',
       property: (b as any).owner_properties?.title || b.property_id,
       source: b.source || 'manual',

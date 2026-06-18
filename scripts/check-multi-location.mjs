@@ -27,6 +27,8 @@ const ALLOWLIST = [
   /src\/integrations\/supabase\/types\.ts$/,
   /src\/content\/landings\//, // Phase 2 will move these to DB
   /src\/hooks\/useCities/, // city catalog hooks
+  /src\/hooks\/useCityCurrency\.ts$/, // city-aware currency helper
+
   /scripts\//,
   // legacy table name — to be renamed in Phase 4
   /phuket_osm_pois/,

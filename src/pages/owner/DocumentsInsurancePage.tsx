@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,6 +37,8 @@ const DOC_TYPES = [
 export default function DocumentsInsurancePage() {
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isRu = language === 'ru';
@@ -183,7 +187,7 @@ export default function DocumentsInsurancePage() {
                          (isRu ? 'Активен' : 'Active')}
                       </Badge>
                       {doc.expiry_date && <p className="text-xs text-muted-foreground">{format(new Date(doc.expiry_date), 'dd MMM yyyy', { locale: isRu ? ru : undefined })}</p>}
-                      {doc.coverage_amount && <p className="text-xs font-medium">฿{doc.coverage_amount.toLocaleString()}</p>}
+                      {doc.coverage_amount && <p className="text-xs font-medium">{curSym}{doc.coverage_amount.toLocaleString()}</p>}
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
@@ -206,7 +210,9 @@ function DocSheet({ open, onOpenChange, editingDoc, properties, userId }: {
   open: boolean; onOpenChange: (v: boolean) => void; editingDoc: any; properties: any[]; userId: string;
 }) {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
   const isRu = language === 'ru';
+
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
     property_id: '',
@@ -302,7 +308,7 @@ function DocSheet({ open, onOpenChange, editingDoc, properties, userId }: {
             <div><Label>{isRu ? 'Дата выдачи' : 'Issue Date'}</Label><Input type="date" value={form.issue_date} onChange={e => setForm(f => ({ ...f, issue_date: e.target.value }))} /></div>
             <div><Label>{isRu ? 'Срок действия' : 'Expiry'}</Label><Input type="date" value={form.expiry_date} onChange={e => setForm(f => ({ ...f, expiry_date: e.target.value }))} /></div>
           </div>
-          <div><Label>{isRu ? 'Сумма покрытия (฿)' : 'Coverage (฿)'}</Label><Input type="number" value={form.coverage_amount} onChange={e => setForm(f => ({ ...f, coverage_amount: e.target.value }))} /></div>
+          <div><Label>{isRu ? `Сумма покрытия (${curSym})` : `Coverage (${curSym})`}</Label><Input type="number" value={form.coverage_amount} onChange={e => setForm(f => ({ ...f, coverage_amount: e.target.value }))} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label>{isRu ? 'Провайдер' : 'Provider'}</Label><Input value={form.provider_name} onChange={e => setForm(f => ({ ...f, provider_name: e.target.value }))} /></div>
             <div><Label>{isRu ? '№ полиса' : 'Policy #'}</Label><Input value={form.policy_number} onChange={e => setForm(f => ({ ...f, policy_number: e.target.value }))} /></div>

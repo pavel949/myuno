@@ -1,6 +1,8 @@
 import { useState, lazy, Suspense, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTab';
 import { PageContainer } from '@/components/uno/PageContainer';
@@ -269,15 +271,17 @@ function StaffCard({
   canManage: boolean;
 }) {
   const t = (en: string, ru: string) => isRu ? ru : en;
+  const { symbol: curSym } = useCityCurrency();
   const roleLabel = STAFF_ROLES.find(r => r.value === staff.role)?.[isRu ? 'labelRu' : 'labelEn'] ?? staff.role;
   const colorClass = ROLE_COLORS[staff.role] ?? 'text-muted-foreground bg-muted';
   const { data: assignments } = useStaffPropertyAssignments(staff.id);
   
   const payLabel = (() => {
-    if (staff.monthly_salary) return `฿${staff.monthly_salary.toLocaleString()}/${t('mo', 'мес')}`;
-    if (staff.daily_rate) return `฿${staff.daily_rate.toLocaleString()}/${t('day', 'день')}`;
-    if (staff.hourly_rate) return `฿${staff.hourly_rate.toLocaleString()}/${t('hr', 'ч')}`;
+    if (staff.monthly_salary) return `${curSym}${staff.monthly_salary.toLocaleString()}/${t('mo', 'мес')}`;
+    if (staff.daily_rate) return `${curSym}${staff.daily_rate.toLocaleString()}/${t('day', 'день')}`;
+    if (staff.hourly_rate) return `${curSym}${staff.hourly_rate.toLocaleString()}/${t('hr', 'ч')}`;
     return null;
+
   })();
 
   const hireDate = format(new Date(staff.created_at), isRu ? 'd MMM yyyy' : 'MMM d, yyyy', {
@@ -455,7 +459,9 @@ function StaffCard({
 
 export default function StaffPage() {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
   const isRu = language === 'ru';
+
 
   const { data: staff, isLoading } = useAllStaffMembers();
   const createMutation = useCreateStaffMember();
@@ -818,25 +824,26 @@ export default function StaffPage() {
               </Select>
               {form.pay_type === 'salary' && (
                 <div>
-                  <Label className="mb-1 block text-xs">{t('Monthly Salary (฿)', 'Оклад в месяц (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t(`Monthly Salary (${curSym})`, `Оклад в месяц (${curSym})`)}</Label>
                   <Input type="number" value={form.monthly_salary} onChange={e => setForm(f => ({ ...f, monthly_salary: e.target.value }))} placeholder="15000" />
                 </div>
               )}
               {form.pay_type === 'hourly' && (
                 <div>
-                  <Label className="mb-1 block text-xs">{t('Hourly Rate (฿)', 'Ставка в час (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t(`Hourly Rate (${curSym})`, `Ставка в час (${curSym})`)}</Label>
                   <Input type="number" value={form.hourly_rate} onChange={e => setForm(f => ({ ...f, hourly_rate: e.target.value }))} placeholder="200" />
                 </div>
               )}
               {form.pay_type === 'daily' && (
                 <div>
-                  <Label className="mb-1 block text-xs">{t('Daily Rate (฿)', 'Дневная ставка (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t(`Daily Rate (${curSym})`, `Дневная ставка (${curSym})`)}</Label>
                   <Input type="number" value={form.daily_rate} onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))} placeholder="1000" />
                 </div>
               )}
               {form.pay_type === 'per_task' && (
                 <div>
-                  <Label className="mb-1 block text-xs">{t('Rate per Task (฿)', 'Ставка за задачу (฿)')}</Label>
+                  <Label className="mb-1 block text-xs">{t(`Rate per Task (${curSym})`, `Ставка за задачу (${curSym})`)}</Label>
+
                   <Input type="number" value={form.daily_rate} onChange={e => setForm(f => ({ ...f, daily_rate: e.target.value }))} placeholder="500" />
                 </div>
               )}

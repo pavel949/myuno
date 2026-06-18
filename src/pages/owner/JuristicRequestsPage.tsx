@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { useJuristicRequests, requestStatusLabels, requestTypeLabels } from '@/hooks/useJuristicRequests';
 import { JuristicRequestForm } from '@/components/owner/JuristicRequestForm';
@@ -15,6 +17,8 @@ import { format } from 'date-fns';
 export default function JuristicRequestsPage() {
   const { id: propertyId } = useParams<{ id: string }>();
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
+
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -98,7 +102,7 @@ export default function JuristicRequestsPage() {
                         </Badge>
                         {req.requires_payment && req.total_amount && (
                           <Badge variant="outline" className="text-xs text-success">
-                            ฿{req.total_amount.toLocaleString()}
+                            {curSym}{req.total_amount.toLocaleString()}
                           </Badge>
                         )}
                       </div>

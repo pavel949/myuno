@@ -5,6 +5,8 @@ import React, { useMemo } from 'react';
 import OwnerPortalSetupCard from '@/components/owner/owners/OwnerPortalSetupCard';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useOwnerAccounts, useOwnerAccountDetail } from '@/hooks/useOwnerAccounts';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,6 +46,8 @@ export default function OwnerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
+
   const isRu = language === 'ru';
   const { data: owners, isLoading: ownersLoading } = useOwnerAccounts();
   const { data: detail, isLoading: detailLoading } = useOwnerAccountDetail(id || null);
@@ -284,7 +288,7 @@ export default function OwnerDetailPage() {
             <Card>
               <CardContent className="p-3 text-center">
                 <p className="text-2xl font-bold text-primary">
-                  ฿{owner.total_revenue.toLocaleString()}
+                  {curSym}{owner.total_revenue.toLocaleString()}
                 </p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Доход' : 'Revenue'}</p>
               </CardContent>
@@ -292,7 +296,7 @@ export default function OwnerDetailPage() {
             <Card>
               <CardContent className="p-3 text-center">
                 <p className="text-2xl font-bold text-accent-foreground">
-                  ฿{owner.total_commission.toLocaleString()}
+                  {curSym}{owner.total_commission.toLocaleString()}
                 </p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Комиссия УК' : 'MC Commission'}</p>
               </CardContent>
@@ -409,7 +413,7 @@ export default function OwnerDetailPage() {
                             </p>
                           </div>
                           <span className={`text-sm font-semibold ${f.transaction_type === 'income' ? 'text-success' : 'text-red-500'}`}>
-                            {f.transaction_type === 'income' ? '+' : '-'}฿{Math.abs(f.amount || 0).toLocaleString()}
+                            {f.transaction_type === 'income' ? '+' : '-'}{curSym}{Math.abs(f.amount || 0).toLocaleString()}
                           </span>
                         </div>
                       ))}
@@ -443,7 +447,7 @@ export default function OwnerDetailPage() {
                           </div>
                           <div className="text-right">
                             <span className="text-sm font-semibold">
-                              ฿{(b.total_amount || 0).toLocaleString()}
+                              {curSym}{(b.total_amount || 0).toLocaleString()}
                             </span>
                             <Badge variant="outline" className="ml-2 text-[10px]">{b.status}</Badge>
                           </div>

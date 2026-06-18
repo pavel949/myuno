@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useAgentDeal, useUpdateDeal, useDeleteDeal, DEAL_STAGE_LABELS, DealStage, daysSince, DEAL_TYPE_LABELS, DealType, DEAL_STATUS_LABELS, DealStatus } from '@/hooks/useAgentDeals';
 import { useDealActivities, useAddDealActivity } from '@/hooks/useAgentDealActivities';
@@ -56,6 +58,8 @@ export default function SalesDealDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
   const { user } = useAuth();
@@ -319,8 +323,9 @@ export default function SalesDealDetail() {
           <span className="font-medium text-foreground">{isRu ? 'Контекст:' : 'Context:'}</span> {typeNote}
           {deal.deal_value && (
             <span className="block mt-1 text-success">
-              {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} {deal.currency || 'THB'}
-              {deal.commission_amount && ` · ${isRu ? 'Комиссия' : 'Commission'}: ${Number(deal.commission_amount).toLocaleString()} ${deal.currency || 'THB'}`}
+              {isRu ? 'Сумма' : 'Value'}: {Number(deal.deal_value).toLocaleString()} {deal.currency || cityCurrencyCode}
+              {deal.commission_amount && ` · ${isRu ? 'Комиссия' : 'Commission'}: ${Number(deal.commission_amount).toLocaleString()} ${deal.currency || cityCurrencyCode}`}
+
             </span>
           )}
           {(deal.preferred_types?.length || deal.preferred_districts?.length || deal.bedrooms_min) && (

@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useMyPropertyProjects, type PropertyProject } from '@/hooks/usePropertyProjects';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -103,6 +105,8 @@ function ProjectCard({
   statusLabel: (s?: string) => React.ReactNode;
 }) {
   const navigate = useNavigate();
+  const { symbol: curSym } = useCityCurrency();
+
 
   return (
     <button
@@ -128,9 +132,10 @@ function ProjectCard({
         )}
         {(project.price_from || project.price_to) && (
           <p className="text-sm font-medium text-primary">
-            {project.price_from ? `฿${(project.price_from / 1e6).toFixed(1)}M` : ''}
+            {project.price_from ? `${curSym}${(project.price_from / 1e6).toFixed(1)}M` : ''}
             {project.price_from && project.price_to ? ' – ' : ''}
-            {project.price_to ? `฿${(project.price_to / 1e6).toFixed(1)}M` : ''}
+            {project.price_to ? `${curSym}${(project.price_to / 1e6).toFixed(1)}M` : ''}
+
           </p>
         )}
       </div>

@@ -5,6 +5,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useMyProperties, type UnifiedProperty } from '@/hooks/useMyProperties';
 import {
   usePropertyReports,
@@ -136,6 +138,8 @@ function useManagedProperties() {
 export default function ReportsPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
 
   const { allProperties: ownedProperties } = useMyProperties();
@@ -362,7 +366,7 @@ export default function ReportsPage() {
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat(isRu ? 'ru-RU' : 'en-US', {
-      style: 'currency', currency: 'THB', minimumFractionDigits: 0,
+      style: 'currency', currency: cityCurrencyCode, minimumFractionDigits: 0,
     }).format(amount);
 
   const portfolioRows = (managedProperties || []).map((mp: ReportableProperty) => {

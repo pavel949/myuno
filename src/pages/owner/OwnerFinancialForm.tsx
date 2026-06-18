@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { 
@@ -39,6 +41,8 @@ import { format } from 'date-fns';
 export default function OwnerFinancialForm() {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const navigate = useNavigate();
   const { id } = useParams();
   const isRu = language === 'ru';
@@ -58,7 +62,7 @@ export default function OwnerFinancialForm() {
     property_id: '',
     category: '',
     amount: '',
-    currency: 'THB',
+    currency: cityCurrencyCode,
     description: '',
     description_ru: '',
     transaction_date: format(new Date(), 'yyyy-MM-dd'),
@@ -81,7 +85,7 @@ export default function OwnerFinancialForm() {
         property_id: existingItem.property_id || '',
         category: existingItem.category || '',
         amount: existingItem.amount.toString(),
-        currency: existingItem.currency || 'THB',
+        currency: existingItem.currency || cityCurrencyCode,
         description: existingItem.description || '',
         description_ru: existingItem.description_ru || '',
         transaction_date: existingItem.transaction_date.split('T')[0],
@@ -113,7 +117,7 @@ export default function OwnerFinancialForm() {
       property_id: formData.property_id,
       transaction_type: transactionType,
       amount: parseFloat(formData.amount),
-      currency: formData.currency || 'THB',
+      currency: formData.currency || cityCurrencyCode,
       transaction_date: formData.transaction_date,
       category: formData.category || null,
       description: formData.description || null,
