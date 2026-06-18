@@ -10,6 +10,7 @@ import { getCurrencySymbol } from '@/lib/config/currencies';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -76,6 +77,7 @@ export default function AdminQuickListings() {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   
   const [listings, setListings] = useState<QuickListing[]>([]);
@@ -295,7 +297,7 @@ export default function AdminQuickListings() {
                     {listing.price && (
                       <div className="text-right">
                         <p className="font-bold text-primary">
-                          {getCurrencySymbol(listing.currency || 'THB')}
+                          {getCurrencySymbol(listing.currency || cityCurrencyCode)}
                           {listing.price.toLocaleString()}
                         </p>
                       </div>
@@ -338,7 +340,7 @@ export default function AdminQuickListings() {
                   <div>
                     <span className="text-muted-foreground">{language === 'ru' ? 'Цена:' : 'Price:'}</span>
                     <p className="font-semibold">
-                      {selectedListing.currency === 'THB' ? '฿' : selectedListing.currency === 'USD' ? '$' : '€'}
+                      {getCurrencySymbol(selectedListing.currency || cityCurrencyCode)}
                       {selectedListing.price.toLocaleString()}
                     </p>
                   </div>

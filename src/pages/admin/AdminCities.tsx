@@ -67,7 +67,7 @@ const initialFormData: CityFormData = {
   lat: '',
   lng: '',
   timezone: 'Asia/Bangkok',
-  default_currency: 'THB',
+  default_currency: 'USD',
   is_active: false,
   is_coming_soon: true,
   launch_date: '',
