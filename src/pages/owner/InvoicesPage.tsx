@@ -109,7 +109,7 @@ export default function InvoicesPage() {
     setRecipientName('');
     setRecipientEmail('');
     setInvoiceType('tenant_billing');
-    setCurrency('THB');
+    setCurrency(cityCurrencyCode);
     setDueDate('');
     setNotes('');
     setItems([{ description: '', quantity: 1, unit_price: 0, amount: 0 }]);
