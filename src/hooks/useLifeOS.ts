@@ -135,7 +135,7 @@ export function useResolveLifeOSContext(
   const { language } = useLanguage();
   const defaultRole = useLifeOSRole();
   const role = options?.role ?? defaultRole;
-  const limit = options?.limit ?? 50;
+  const limit = options?.limit ?? 200;
   const locale = language === 'ru' ? 'ru' : 'en';
   const scope = lifeOSRoleToScope(role);
 
