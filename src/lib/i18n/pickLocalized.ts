@@ -10,7 +10,7 @@
  */
 export type Lang = 'ru' | 'en' | 'th';
 
-type LocalizedRecord = Record<string, unknown>;
+type LocalizedRecord = Record<string, unknown> | object;
 
 const ORDER: Record<Lang, Lang[]> = {
   th: ['th', 'en', 'ru'],
