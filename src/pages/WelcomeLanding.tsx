@@ -34,6 +34,7 @@ import {
   Languages,
   Wallet,
   FileCheck2,
+  ClipboardCheck,
   Headphones,
   Database,
   LifeBuoy,
