@@ -157,8 +157,12 @@ export default function PropertyDetail() {
   const amenities = property.amenities || [];
 
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
+  // City-aware currency: prefer listing-level currency, else current city default, else USD.
+  const listingCurrency =
+    ((property as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase();
   const isSaleListing = property.listing_type === 'sale' || Boolean(property.is_for_sale);
   const salePrice = property.sale_price ?? (isSaleListing ? property.price : undefined) ?? 0;
+
   // 6-tracks: detect short/medium/long rental support. When tenancy_modes is
   // explicitly set, respect it; otherwise fall back to legacy nightly-price
   // signal so existing listings keep showing the booking card.
