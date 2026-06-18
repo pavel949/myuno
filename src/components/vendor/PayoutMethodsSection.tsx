@@ -28,6 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { usePayoutMethods, PayoutMethod, CreatePayoutMethodData } from '@/hooks/usePayoutMethods';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ContentSkeleton } from '@/components/ui/ContentSkeleton';
+import { StripeConnectCard } from '@/components/vendor/StripeConnectCard';
 import { cn } from '@/lib/utils';
 
 const bankLogos: Record<string, string> = {
@@ -128,10 +129,6 @@ export function PayoutMethodsSection() {
     deletePayoutMethod,
     isAdding,
   } = usePayoutMethods();
-  // Stripe Connect card is rendered above the bank-method list so vendors
-  // can enable automated payouts as the first onboarding step.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { StripeConnectCard } = require('@/components/vendor/StripeConnectCard');
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState<CreatePayoutMethodData>({
