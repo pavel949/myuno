@@ -7,12 +7,14 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const q = (sql) =>
-  execSync(`psql -At -F '|' -c ${JSON.stringify(sql)}`, { encoding: 'utf8' })
+const q = (sql) => {
+  const flat = sql.replace(/\s+/g, ' ').trim();
+  return execSync(`psql -At -F '|' -c ${JSON.stringify(flat)}`, { encoding: 'utf8' })
     .trim()
     .split('\n')
     .filter(Boolean)
     .map((l) => l.split('|'));
+};
 
 // 1) Pull live state
 const SSOT = ['arrive', 'live', 'manage', 'invest', 'legal', 'build'];
