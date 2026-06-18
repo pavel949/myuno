@@ -12,6 +12,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 
 type EventRow = {
   id: string;
@@ -132,6 +147,51 @@ export default function AdminAnalyticsDashboard() {
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15);
   }, [filtered]);
 
+  // Daily series: page_view vs situation_click per day
+  const dailySeries = useMemo(() => {
+    const map = new Map<string, { date: string; page_view: number; situation_click: number; other: number }>();
+    // Pre-fill range so empty days render
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      map.set(key, { date: key, page_view: 0, situation_click: 0, other: 0 });
+    }
+    filtered.forEach((r) => {
+      const key = new Date(r.created_at).toISOString().slice(0, 10);
+      const bucket = map.get(key) ?? { date: key, page_view: 0, situation_click: 0, other: 0 };
+      if (r.event_name === 'page_view') bucket.page_view++;
+      else if (r.event_name === 'situation_click') bucket.situation_click++;
+      else bucket.other++;
+      map.set(key, bucket);
+    });
+    return [...map.values()].sort((a, b) => a.date.localeCompare(b.date));
+  }, [filtered, days]);
+
+  // Source distribution (situation_click only)
+  const sourceDistribution = useMemo(() => {
+    const counts = new Map<string, number>();
+    filtered
+      .filter((r) => r.event_name === 'situation_click')
+      .forEach((r) => {
+        const s = ((r.event_data as Record<string, unknown>)?.source as string) ?? '(unknown)';
+        counts.set(s, (counts.get(s) ?? 0) + 1);
+      });
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, value]) => ({ name, value }));
+  }, [filtered]);
+
+  const PIE_COLORS = [
+    'hsl(var(--primary))',
+    'hsl(var(--accent))',
+    'hsl(var(--chart-3, 220 70% 50%))',
+    'hsl(var(--chart-4, 30 80% 55%))',
+    'hsl(var(--chart-5, 280 60% 55%))',
+    'hsl(var(--muted-foreground))',
+  ];
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div>
@@ -208,6 +268,94 @@ export default function AdminAnalyticsDashboard() {
         <StatCard label="Юзеров" value={stats.users} />
         <StatCard label="situation_click" value={stats.clicks} />
         <StatCard label="page_view" value={stats.views} />
+      </div>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base">Дневная динамика</CardTitle></CardHeader>
+        <CardContent className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={dailySeries} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+              <Tooltip
+                contentStyle={{
+                  background: 'hsl(var(--card))',
+                  border: '1px solid hsl(var(--border))',
+                  fontSize: 12,
+                }}
+              />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Line type="monotone" dataKey="page_view" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="situation_click" stroke="hsl(var(--accent))" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader><CardTitle className="text-base">Распределение по источникам клика</CardTitle></CardHeader>
+          <CardContent className="h-72">
+            {sourceDistribution.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Нет данных</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={sourceDistribution}
+                    dataKey="value"
+                    nameKey="name"
+                    outerRadius={90}
+                    innerRadius={45}
+                    paddingAngle={2}
+                  >
+                    {sourceDistribution.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      fontSize: 12,
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="text-base">Топ ситуаций (бары)</CardTitle></CardHeader>
+          <CardContent className="h-72">
+            {topSituations.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Нет данных</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={topSituations.map(([name, value]) => ({ name, value }))}
+                  layout="vertical"
+                  margin={{ top: 4, right: 16, left: 8, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+                  <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} width={120} />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      fontSize: 12,
+                    }}
+                  />
+                  <Bar dataKey="value" fill="hsl(var(--accent))" radius={[0, 2, 2, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
