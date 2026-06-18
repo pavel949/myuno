@@ -462,6 +462,10 @@ export default function RelocateLandingPage() {
             </AccordionItem>
           ))}
         </Accordion>
+
+        <div className="mt-8">
+          <ConciergeHelpCTA topic="relocation" variant="card" />
+        </div>
       </div>
     </LandingLayout>
     </>
