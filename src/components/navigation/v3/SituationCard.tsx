@@ -35,7 +35,7 @@ export function SituationCard({
 
   return (
     <Link
-      to={`/discover/${situation.code}`}
+      to={resolveSituationHref(situation.code)}
       className={cn(
         'group relative flex flex-col gap-4 p-5 min-h-[180px]',
         'border border-border bg-card text-card-foreground',
