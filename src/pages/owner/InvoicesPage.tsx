@@ -29,6 +29,8 @@ const STATUS_COLORS: Record<string, string> = {
 export default function InvoicesPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
   const [filter, setFilter] = useState('all');
   const [sheetOpen, setSheetOpen] = useState(false);
