@@ -5,6 +5,8 @@ import { Users, AlertCircle, Zap, ChevronRight, ChevronDown, ChevronUp, Calendar
 import { BackButton } from '@/components/uno/BackButton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLocation as useLocationCity } from '@/contexts/LocationContext';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuthSheet } from '@/contexts/AuthSheetContext';
 import { Button } from '@/components/ui/button';
