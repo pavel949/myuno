@@ -54,8 +54,8 @@ export const P08_RELOCATOR_FAMILY: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/relocator-family',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/relocator-family?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/relocator-family?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/relocator-family?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/relocator-family?lang=en' },
     ],
   },
 };

@@ -106,8 +106,8 @@ export const P1_TOURISTS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/tourists',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/tourists?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/tourists?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/tourists?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/tourists?lang=en' },
     ],
   },
 };

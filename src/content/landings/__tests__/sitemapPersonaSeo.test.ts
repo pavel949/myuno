@@ -24,7 +24,7 @@ import {
 const SITEMAP_PATH = resolve(__dirname, '../../../../public/sitemap-landings.xml');
 const SITEMAP_XML = readFileSync(SITEMAP_PATH, 'utf-8');
 
-const ORIGIN = 'https://myuno.app';
+const ORIGIN = 'https://www.myuno.app';
 
 interface SitemapEntry {
   loc: string;

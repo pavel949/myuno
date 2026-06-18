@@ -55,8 +55,8 @@ export const P14_MEDICAL: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/medical',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/medical?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/medical?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/medical?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/medical?lang=en' },
     ],
   },
 };

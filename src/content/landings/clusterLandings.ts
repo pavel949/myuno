@@ -38,7 +38,7 @@ function draftCluster(
   };
 }
 
-const OG_DEFAULT = 'https://myuno.app/og/default-og.jpg';
+const OG_DEFAULT = 'https://www.myuno.app/og/default-og.jpg';
 
 // ──────────────────────────────────────────────────────────────────────
 //  LIVE: A — Arrival & Orientation
@@ -168,8 +168,8 @@ const A_ARRIVAL: ClusterLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/arrival',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/cluster/arrival?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/cluster/arrival?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/cluster/arrival?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/cluster/arrival?lang=en' },
     ],
   },
 };
@@ -302,8 +302,8 @@ const D_INVESTMENT: ClusterLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/investment',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/cluster/investment?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/cluster/investment?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/cluster/investment?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/cluster/investment?lang=en' },
     ],
   },
 };
@@ -436,8 +436,8 @@ const F_OPERATIONS: ClusterLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/operations',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/cluster/operations?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/cluster/operations?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/cluster/operations?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/cluster/operations?lang=en' },
     ],
   },
 };
@@ -498,8 +498,8 @@ const G_COMPLIANCE: ClusterLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/compliance',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/cluster/compliance?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/cluster/compliance?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/cluster/compliance?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/cluster/compliance?lang=en' },
     ],
   },
 };
@@ -560,8 +560,8 @@ const H_EMERGENCY: ClusterLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/emergency',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/cluster/emergency?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/cluster/emergency?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/cluster/emergency?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/cluster/emergency?lang=en' },
     ],
   },
 };
@@ -622,8 +622,8 @@ const B_EXTENSION: ClusterLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/extension',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/cluster/extension?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/cluster/extension?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/cluster/extension?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/cluster/extension?lang=en' },
     ],
   },
 };
@@ -684,8 +684,8 @@ const C_SETTLEMENT: ClusterLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/settlement',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/cluster/settlement?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/cluster/settlement?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/cluster/settlement?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/cluster/settlement?lang=en' },
     ],
   },
 };
@@ -746,8 +746,8 @@ const E_TRANSACTION: ClusterLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/transaction',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/cluster/transaction?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/cluster/transaction?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/cluster/transaction?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/cluster/transaction?lang=en' },
     ],
   },
 };
@@ -808,8 +808,8 @@ const I_LIFESTYLE: ClusterLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/lifestyle',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/cluster/lifestyle?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/cluster/lifestyle?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/cluster/lifestyle?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/cluster/lifestyle?lang=en' },
     ],
   },
 };
@@ -864,8 +864,8 @@ const J_EXIT: ClusterLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/exit',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/cluster/exit?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/cluster/exit?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/cluster/exit?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/cluster/exit?lang=en' },
     ],
   },
 };

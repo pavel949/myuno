@@ -184,7 +184,7 @@ export default function AdminAIKnowledge() {
                 </div>
                 <div>
                   <Label htmlFor="kb-source">Источник (URL/файл)</Label>
-                  <Input id="kb-source" value={source} onChange={(e) => setSource(e.target.value)} placeholder="https://myuno.app/visa или visa-faq.md" />
+                  <Input id="kb-source" value={source} onChange={(e) => setSource(e.target.value)} placeholder="https://www.myuno.app/visa или visa-faq.md" />
                 </div>
                 <div>
                   <Label htmlFor="kb-tags">Теги (через запятую)</Label>

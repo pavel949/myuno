@@ -56,7 +56,7 @@ const PersonaAreaLandingPage = () => {
     areaName: isRu ? a.name_ru : a.name_en,
     lang: isRu ? 'ru' : 'en',
   });
-  const canonical = `https://myuno.app/for/${persona.slug}/in/${a.slug}`;
+  const canonical = `https://www.myuno.app/for/${persona.slug}/in/${a.slug}`;
   const titleRu = `${t(persona.h1)} в ${a.name_ru} · myUNO`;
   const titleEn = `${t(persona.h1)} in ${a.name_en} · myUNO`;
   const title = (isRu ? titleRu : titleEn).slice(0, 60);

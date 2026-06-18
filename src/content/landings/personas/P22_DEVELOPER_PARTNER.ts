@@ -50,8 +50,8 @@ export const P22_DEVELOPER_PARTNER: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/developer-partner',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/developer-partner?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/developer-partner?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/developer-partner?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/developer-partner?lang=en' },
     ],
   },
 };

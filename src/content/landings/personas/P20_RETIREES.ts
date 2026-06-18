@@ -55,8 +55,8 @@ export const P20_RETIREES: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/retirees',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/retirees?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/retirees?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/retirees?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/retirees?lang=en' },
     ],
   },
 };

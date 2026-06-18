@@ -15,7 +15,7 @@ import { PHUKET_AREAS, type PhuketArea } from '@/lib/config/phuketAreas';
 import { LIVE_PERSONA_SLUGS } from './personaLandings';
 import { LIVE_CLUSTER_SLUGS } from './clusterLandings';
 
-const OG_DEFAULT = 'https://myuno.app/og/default-og.jpg';
+const OG_DEFAULT = 'https://www.myuno.app/og/default-og.jpg';
 
 export interface AreaLanding {
   slug: string;
@@ -76,8 +76,8 @@ function buildSeo(area: PhuketArea): AreaLanding['seo'] {
     ogImage: OG_DEFAULT,
     canonicalPath: path,
     hreflangAlternates: [
-      { lang: 'ru', href: `https://myuno.app${path}?lang=ru` },
-      { lang: 'en', href: `https://myuno.app${path}?lang=en` },
+      { lang: 'ru', href: `https://www.myuno.app${path}?lang=ru` },
+      { lang: 'en', href: `https://www.myuno.app${path}?lang=en` },
     ],
   };
 }

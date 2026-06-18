@@ -36,8 +36,8 @@ export const P2_CN_INVESTORS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/cn-investors',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/cn-investors?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/cn-investors?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/cn-investors?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/cn-investors?lang=en' },
     ],
   },
 };

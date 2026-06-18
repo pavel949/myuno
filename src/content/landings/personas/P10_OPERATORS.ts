@@ -51,8 +51,8 @@ export const P10_OPERATORS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/operators',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/operators?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/operators?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/operators?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/operators?lang=en' },
     ],
   },
 };

@@ -55,8 +55,8 @@ export const P7_FAMILIES: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/families',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/families?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/families?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/families?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/families?lang=en' },
     ],
   },
 };

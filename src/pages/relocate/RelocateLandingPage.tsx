@@ -175,7 +175,7 @@ export default function RelocateLandingPage() {
         title={seoTitle}
         description={seoDescription}
         type="website"
-        url="https://myuno.app/relocate"
+        url="https://www.myuno.app/relocate"
         jsonLd={faqJsonLd}
       />
     <LandingLayout

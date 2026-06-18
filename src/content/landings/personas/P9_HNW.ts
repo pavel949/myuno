@@ -55,8 +55,8 @@ export const P9_HNW: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/hnw',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/hnw?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/hnw?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/hnw?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/hnw?lang=en' },
     ],
   },
 };

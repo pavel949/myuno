@@ -42,8 +42,8 @@ export const P3_EU_GUESTS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/eu-guests',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/eu-guests?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/eu-guests?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/eu-guests?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/eu-guests?lang=en' },
     ],
   },
 };

@@ -25,7 +25,7 @@ const defaultMeta = {
 export function SEOHead({
   title,
   description,
-  image = 'https://myuno.app/og-image.png',
+  image = 'https://www.myuno.app/og-image.png',
   url,
   type = 'website',
   noindex = false,
@@ -41,7 +41,7 @@ export function SEOHead({
   const finalDescription = description || defaultMeta[lang].description;
   
   // Always use production domain for canonical/OG URLs
-  const BASE = 'https://myuno.app';
+  const BASE = 'https://www.myuno.app';
   const basePath = typeof window !== 'undefined' ? window.location.pathname : '/';
   const canonicalUrl = url || `${BASE}${basePath}`;
   
@@ -107,8 +107,8 @@ export const createOrganizationSchema = () => ({
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'myUNO',
-  url: 'https://myuno.app',
-  logo: 'https://myuno.app/icons/icon-512x512.png',
+  url: 'https://www.myuno.app',
+  logo: 'https://www.myuno.app/icons/icon-512x512.png',
   sameAs: [
     'https://twitter.com/myUNOapp',
   ],

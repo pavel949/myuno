@@ -40,7 +40,7 @@ export default function RelocationDashboard() {
 
   return (
     <AppLayout>
-      <SEOHead title={title} description={description} url="https://myuno.app/relocate/my-plan" />
+      <SEOHead title={title} description={description} url="https://www.myuno.app/relocate/my-plan" />
       <div className="px-4 pb-28 pt-4 max-w-lg mx-auto">
         <div className="flex items-center gap-3 mb-4">
           <BackButton fallbackPath={APP_ROUTES.RELOCATE} variant="ghost" />

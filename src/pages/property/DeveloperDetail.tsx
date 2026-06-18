@@ -68,7 +68,7 @@ export default function DeveloperDetail() {
     || (isRu
       ? `${name} — застройщик Пхукета. ${developer.projectsCompleted} проектов, ${developer.totalUnitsSold} юнитов продано.${developer.foundedYear ? ` Основано в ${developer.foundedYear}.` : ''}`
       : `${name} — Phuket developer. ${developer.projectsCompleted} projects, ${developer.totalUnitsSold} units sold.${developer.foundedYear ? ` Founded ${developer.foundedYear}.` : ''}`);
-  const canonicalUrl = `https://myuno.app${APP_ROUTES.DEVELOPER_DETAIL(developer.id)}`;
+  const canonicalUrl = `https://www.myuno.app${APP_ROUTES.DEVELOPER_DETAIL(developer.id)}`;
   const orgSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -80,8 +80,8 @@ export default function DeveloperDetail() {
     ...(developer.website && { sameAs: [developer.website] }),
   };
   const breadcrumbSchema = createBreadcrumbSchema([
-    { name: 'Property', url: 'https://myuno.app/property' },
-    { name: isRu ? 'Застройщики' : 'Developers', url: 'https://myuno.app/property/developers' },
+    { name: 'Property', url: 'https://www.myuno.app/property' },
+    { name: isRu ? 'Застройщики' : 'Developers', url: 'https://www.myuno.app/property/developers' },
     { name, url: canonicalUrl },
   ]);
 
@@ -90,7 +90,7 @@ export default function DeveloperDetail() {
       <SEOHead
         title={seoTitle}
         description={seoDescription}
-        image={developer.logoUrl || 'https://myuno.app/og-image.png'}
+        image={developer.logoUrl || 'https://www.myuno.app/og-image.png'}
         url={canonicalUrl}
         jsonLd={{ '@context': 'https://schema.org', '@graph': [orgSchema, breadcrumbSchema] }}
       />

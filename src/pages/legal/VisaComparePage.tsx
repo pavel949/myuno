@@ -158,7 +158,7 @@ export default function VisaComparePage() {
 
   return (
     <AppLayout>
-      <SEOHead title={title} description={description} url="https://myuno.app/visa/compare" />
+      <SEOHead title={title} description={description} url="https://www.myuno.app/visa/compare" />
       <div className="px-4 pb-28 pt-4 max-w-3xl mx-auto">
         <div className="flex items-center gap-3 mb-4">
           <BackButton fallbackPath={APP_ROUTES.VISA_IMMIGRATION} variant="ghost" />

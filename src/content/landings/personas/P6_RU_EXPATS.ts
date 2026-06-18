@@ -112,8 +112,8 @@ export const P6_RU_EXPATS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/ru-expats',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/ru-expats?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/ru-expats?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/ru-expats?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/ru-expats?lang=en' },
     ],
   },
 };

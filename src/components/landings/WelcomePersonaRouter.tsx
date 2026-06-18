@@ -30,7 +30,7 @@ export function buildWelcomeNavigatorHref(path: string, entry: WelcomeEntryId): 
     const base =
       typeof window !== 'undefined' && window.location?.origin
         ? window.location.origin
-        : 'https://myuno.app';
+        : 'https://www.myuno.app';
     const url = new URL(path, base);
     url.searchParams.set('from', 'welcome');
     url.searchParams.set('entry', entry);

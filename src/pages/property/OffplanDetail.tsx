@@ -120,8 +120,8 @@ export default function OffplanDetail() {
   const seoDescription = isRu
     ? `${name} — ${project.district || 'Пхукет'}. ${status.label.ru}. ${project.priceFrom ? `Цена от ${formatPrice(project.priceFrom)}.` : ''} ${project.roiProjected ? `ROI ${project.roiProjected}%.` : ''} muUNO Score, due diligence, инвестиционная аналитика.`.trim()
     : `${name} — ${project.district || 'Phuket'}. ${status.label.en}. ${project.priceFrom ? `From ${formatPrice(project.priceFrom)}.` : ''} ${project.roiProjected ? `${project.roiProjected}% projected ROI.` : ''} muUNO Score, due diligence, investment analytics.`.trim();
-  const seoImage = project.coverImage || 'https://myuno.app/og-image.png';
-  const canonicalUrl = `https://myuno.app${APP_ROUTES.OFFPLAN_DETAIL(project.id)}`;
+  const seoImage = project.coverImage || 'https://www.myuno.app/og-image.png';
+  const canonicalUrl = `https://www.myuno.app${APP_ROUTES.OFFPLAN_DETAIL(project.id)}`;
   const listingSchema = createRealEstateListingSchema({
     name,
     description: seoDescription,
@@ -132,8 +132,8 @@ export default function OffplanDetail() {
     address: project.district ?? undefined,
   });
   const breadcrumbSchema = createBreadcrumbSchema([
-    { name: 'Property', url: 'https://myuno.app/property' },
-    { name: isRu ? 'Новостройки' : 'Off-Plan', url: 'https://myuno.app/property/offplan' },
+    { name: 'Property', url: 'https://www.myuno.app/property' },
+    { name: isRu ? 'Новостройки' : 'Off-Plan', url: 'https://www.myuno.app/property/offplan' },
     { name, url: canonicalUrl },
   ]);
 

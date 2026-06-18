@@ -36,8 +36,8 @@ export const P21_PROVIDERS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/providers',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/providers?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/providers?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/providers?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/providers?lang=en' },
     ],
   },
 };

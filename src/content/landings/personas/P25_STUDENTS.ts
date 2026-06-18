@@ -36,8 +36,8 @@ export const P25_STUDENTS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/students',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/students?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/students?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/students?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/students?lang=en' },
     ],
   },
 };
