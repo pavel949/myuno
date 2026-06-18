@@ -31,9 +31,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 export default function AdminNewbuilds() {
   const qc = useQueryClient();
+  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [editingId, setEditingId] = useState<string | null>(null);
