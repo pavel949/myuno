@@ -365,6 +365,7 @@ export const NewTicket = lazy(() => import('@/pages/support/NewTicket'));
 export const MyTickets = lazy(() => import('@/pages/support/MyTickets'));
 export const TicketDetail = lazy(() => import('@/pages/support/TicketDetail'));
 export const WhatIfFAQ = lazy(() => import('@/pages/support/WhatIfFAQ'));
+export const MoversIndex = lazy(() => import('@/pages/relocate/MoversIndex'));
 
 // ── Admin ──
 export const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));

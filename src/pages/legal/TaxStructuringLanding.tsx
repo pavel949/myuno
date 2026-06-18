@@ -6,6 +6,7 @@
  * are routed to the booking flow for paid consultation.
  */
 import { useNavigate } from 'react-router-dom';
+import { ConciergeHelpCTA } from '@/components/concierge/ConciergeHelpCTA';
 import {
   Calculator,
   Building2,
@@ -135,6 +136,10 @@ export default function TaxStructuringLanding() {
           <Button variant="outline" onClick={() => navigate(APP_ROUTES.TAX_NAV)}>
             {t({ ru: 'Пройти tax quiz', en: 'Take the tax quiz' })}
           </Button>
+        </div>
+
+        <div className="mt-8">
+          <ConciergeHelpCTA topic="business" variant="card" />
         </div>
       </div>
     </LandingShell>

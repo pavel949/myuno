@@ -9,6 +9,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { useRelocationPlan } from '@/hooks/useRelocationPlan';
 import { cn } from '@/lib/utils';
 import type { RelocationPlanStep } from '@/lib/relocation/planFromQuiz';
+import { ConciergeHelpCTA } from '@/components/concierge/ConciergeHelpCTA';
 
 export default function RelocationDashboard() {
   const { language } = useLanguage();
@@ -126,6 +127,10 @@ export default function RelocationDashboard() {
             </Button>
           </>
         )}
+
+        <div className="mt-6">
+          <ConciergeHelpCTA topic="relocation" variant="card" />
+        </div>
       </div>
     </AppLayout>
   );

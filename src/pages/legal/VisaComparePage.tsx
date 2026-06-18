@@ -7,6 +7,7 @@ import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
+import { ConciergeHelpCTA } from '@/components/concierge/ConciergeHelpCTA';
 
 type Nationality = 'cis' | 'western' | 'other';
 type Purpose = 'remote' | 'local_job' | 'retire' | 'study' | 'tourism';
@@ -224,6 +225,10 @@ export default function VisaComparePage() {
           <Button asChild variant="outline">
             <Link to={APP_ROUTES.VISA_IMMIGRATION}>{isRu ? 'Все визовые сервисы' : 'All visa services'}</Link>
           </Button>
+        </div>
+
+        <div className="mt-6">
+          <ConciergeHelpCTA topic="visa" variant="card" />
         </div>
       </div>
     </AppLayout>

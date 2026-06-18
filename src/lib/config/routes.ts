@@ -361,6 +361,7 @@ export const APP_ROUTES = {
   RELOCATION_GUIDE: (slug: string) => `/relocate/guides/${slug}`,
   RELOCATION_MY_PLAN: '/relocate/my-plan',
   RELOCATION_AREAS: '/relocate/areas',
+  RELOCATION_MOVERS: '/relocate/movers',
   WEDDING: '/wedding',
   KIDS: '/kids',
   NOMAD_GUIDE: '/nomad-guide',
