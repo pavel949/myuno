@@ -524,7 +524,8 @@ export default function PropertyDetail() {
                       lineId: rentalTerms.manager_line_id,
                       languages: rentalTerms.host_languages,
                     }}
-                    currency="THB"
+                    currency={listingCurrency}
+
                     showPricingDeposit={Boolean(
                       rentalTerms.deposit_amount != null && rentalTerms.deposit_amount > 0,
                     )}
