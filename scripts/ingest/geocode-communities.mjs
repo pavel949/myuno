@@ -1,15 +1,11 @@
 #!/usr/bin/env node
-// Geocode top-20 communities via Google Places API (New) text search through Lovable gateway.
-// Writes lat/lng/google_place_id/address back into public.communities.
+// Geocode top-20 communities via Google Places API (New) text search.
+// Uses Referer: https://myuno.app/ to satisfy the referrer-restricted API key.
 import { execFileSync } from 'node:child_process';
 
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
-if (!GOOGLE_MAPS_API_KEY) {
-  console.error('Missing GOOGLE_MAPS_API_KEY');
-  process.exit(1);
-}
+if (!GOOGLE_MAPS_API_KEY) { console.error('Missing GOOGLE_MAPS_API_KEY'); process.exit(1); }
 
-// Curated top-20: 11 Phuket religious + 1 Phuket consulate + 8 key Bangkok embassies.
 const TARGETS = [
   { slug: 'wat-chalong', query: 'Wat Chalong, Phuket, Thailand' },
   { slug: 'big-buddha-phuket', query: 'Big Buddha Phuket, Thailand' },
@@ -33,19 +29,18 @@ const TARGETS = [
   { slug: 'embassy-jp-bangkok', query: 'Embassy of Japan in Bangkok, Thailand' },
 ];
 
-async function geocode(query) {
-  const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
-    method: 'POST',
-    headers: {
-      'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
-      'Content-Type': 'application/json',
-      'Referer': 'https://uno-connect-hub.lovable.app/',
-      'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location',
-    },
-    body: JSON.stringify({ textQuery: query, maxResultCount: 1, regionCode: 'TH' }),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-  const data = await res.json();
+function geocode(query) {
+  const body = JSON.stringify({ textQuery: query, maxResultCount: 1, regionCode: 'TH' });
+  const out = execFileSync('curl', [
+    '-s', '-X', 'POST', 'https://places.googleapis.com/v1/places:searchText',
+    '-H', `X-Goog-Api-Key: ${GOOGLE_MAPS_API_KEY}`,
+    '-H', 'Content-Type: application/json',
+    '-H', 'Referer: https://myuno.app/',
+    '-H', 'X-Goog-FieldMask: places.id,places.formattedAddress,places.location',
+    '--data-binary', body,
+  ], { encoding: 'utf8' });
+  const data = JSON.parse(out);
+  if (data.error) throw new Error(data.error.message);
   return data.places?.[0] ?? null;
 }
 
@@ -60,7 +55,6 @@ for (const t of TARGETS) {
     rows.push(`(${esc(t.slug)}, ${lat}, ${lng}, ${esc(place.id)}, ${esc(place.formattedAddress)})`);
     console.log(`✓ ${t.slug}  ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
     ok++;
-    await new Promise(r => setTimeout(r, 150));
   } catch (e) {
     console.error(`✗ ${t.slug}: ${e.message}`);
     fail++;
