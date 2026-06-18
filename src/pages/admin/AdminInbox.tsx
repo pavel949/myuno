@@ -59,11 +59,11 @@ function normalizeStatus(source: InboxSource, raw: string | null): InboxStatus {
 
 async function fetchInbox(): Promise<InboxItem[]> {
   const [partners, listings, consults, nbLeads, propertyInq] = await Promise.all([
-    supabase.from('partner_applications').select('id, status, created_at, company_name, contact_name, contact_email, business_type, business_category').order('created_at', { ascending: false }).limit(200),
+    supabase.from('partner_applications').select('id, status, created_at, business_name, contact_name, contact_email, business_category').order('created_at', { ascending: false }).limit(200),
     supabase.from('listing_applications').select('id, status, created_at, applicant_name, applicant_email, listing_type, service_category, product_category, property_type, city').order('created_at', { ascending: false }).limit(200),
     supabase.from('consultation_requests').select('id, status, created_at, name, email, request_type, vertical_id').order('created_at', { ascending: false }).limit(200),
     supabase.from('nb_leads').select('id, status, created_at, full_name, email, phone, project_id').order('created_at', { ascending: false }).limit(200),
-    supabase.from('property_inquiries').select('id, status, created_at, name, email, phone, property_id, inquiry_type').order('created_at', { ascending: false }).limit(200),
+    supabase.from('property_inquiries').select('id, status, created_at, name, email, phone, property_id, message').order('created_at', { ascending: false }).limit(200),
   ]);
 
   const items: InboxItem[] = [];
@@ -72,8 +72,8 @@ async function fetchInbox(): Promise<InboxItem[]> {
     items.push({
       id: r.id, source: 'partner_applications',
       rawStatus: r.status ?? 'new', status: normalizeStatus('partner_applications', r.status),
-      createdAt: r.created_at!, title: r.company_name || r.contact_name || 'Partner',
-      subtitle: r.business_type || r.business_category || null,
+      createdAt: r.created_at!, title: r.business_name || r.contact_name || 'Partner',
+      subtitle: r.business_category || null,
       contact: r.contact_email || null,
       href: '/admin/partner-applications',
       vertical: r.business_category,
@@ -116,7 +116,7 @@ async function fetchInbox(): Promise<InboxItem[]> {
       id: r.id, source: 'property_inquiries',
       rawStatus: r.status ?? 'new', status: normalizeStatus('property_inquiries', r.status),
       createdAt: r.created_at!, title: r.name || 'Property inquiry',
-      subtitle: r.inquiry_type,
+      subtitle: r.message ? r.message.slice(0, 80) : null,
       contact: r.email || r.phone || null,
       href: '/admin/properties',
     });
