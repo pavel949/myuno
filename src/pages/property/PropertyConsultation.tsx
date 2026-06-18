@@ -391,7 +391,8 @@ export default function PropertyConsultation() {
           ...basePayload,
           budget_min: formData.budget_min ? Number(formData.budget_min) : undefined,
           budget_max: formData.budget_max ? Number(formData.budget_max) : undefined,
-          currency: 'THB',
+          currency: leadCurrency,
+
           bedrooms_min: formData.bedrooms_min ? Number(formData.bedrooms_min) : undefined,
           bedrooms_max: formData.bedrooms_max ? Number(formData.bedrooms_max) : undefined,
           purpose: formData.purpose || undefined,
