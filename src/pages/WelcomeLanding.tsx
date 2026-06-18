@@ -722,7 +722,7 @@ export default function WelcomeLanding() {
             data-testid="welcome-cta-partner-bottom"
             className="inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none bg-primary px-5 font-sans text-body font-semibold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            {tx(language, { ru: 'Стать партнёром', en: 'Become a partner' })}
+            {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
             <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
           </Link>
         </LandingContainer>
@@ -785,7 +785,7 @@ export default function WelcomeLanding() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
-              {tx(language, { ru: 'Создать аккаунт', en: 'Create account' })}
+              {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
             <Link
@@ -796,7 +796,7 @@ export default function WelcomeLanding() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
-              {tx(language, { ru: 'Стать партнёром', en: 'Become a partner' })}
+              {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
             </Link>
           </div>
 
@@ -836,7 +836,7 @@ export default function WelcomeLanding() {
             data-testid="welcome-sticky-partner"
             className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-none border border-foreground bg-foreground font-sans text-body font-semibold text-background"
           >
-            {tx(language, { ru: 'Стать партнёром', en: 'Become a partner' })}
+            {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
             <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
           </Link>
         ) : (
@@ -845,7 +845,7 @@ export default function WelcomeLanding() {
             data-testid="welcome-sticky-signup"
             className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-none bg-primary font-sans text-body font-semibold text-primary-foreground"
           >
-            {tx(language, { ru: 'Создать аккаунт', en: 'Create account' })}
+            {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
             <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
           </Link>
         )}
