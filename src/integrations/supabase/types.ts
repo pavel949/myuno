@@ -32200,6 +32200,13 @@ export type Database = {
         Returns: Json
       }
       rotate_ical_token: { Args: { p_property_id: string }; Returns: string }
+      run_reconciliation_check: {
+        Args: never
+        Returns: {
+          orders_checked: number
+          unresolved_alerts: number
+        }[]
+      }
       set_user_pin: {
         Args: { p_device_id?: string; p_pin: string; p_user_id: string }
         Returns: boolean
