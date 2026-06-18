@@ -174,7 +174,7 @@ export function OperationsBookingsTab() {
             </div>
           ) : (
             <div className="rounded-none border overflow-x-auto">
-              <Table>
+              <Table className="min-w-[720px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{isRu ? '№ Заказа' : 'Order #'}</TableHead>
