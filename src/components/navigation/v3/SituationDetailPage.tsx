@@ -20,6 +20,7 @@ import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useSituationServiceCounts } from '@/hooks/useSituationServiceCounts';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
+import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getEntityType, getEntityTypeLabel } from '@/lib/config/entityTypes';
