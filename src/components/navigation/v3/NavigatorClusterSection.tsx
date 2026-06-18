@@ -131,7 +131,7 @@ export function NavigatorClusterSection({
           return (
             <li key={s.id}>
               <Link
-                to={`/discover/${s.code}`}
+                to={resolveSituationHref(s.code)}
                 className="group flex items-center gap-4 py-4 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[56px]"
               >
                 <div className="flex-1 min-w-0">
