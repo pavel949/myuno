@@ -39,6 +39,8 @@ import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { SEOHead, createRealEstateListingSchema, createBreadcrumbSchema } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLocation as useLocationCity } from '@/contexts/LocationContext';
+
 import { useOffplanProject, type ProjectStatus } from '@/hooks/useOffplanProjects';
 import { useProjectDocuments, DOCUMENT_CATEGORIES } from '@/hooks/useProjectDocuments';
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
