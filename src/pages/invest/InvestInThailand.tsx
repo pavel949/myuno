@@ -201,6 +201,9 @@ export default function InvestInThailand() {
             </CardContent>
           </Card>
         </div>
+        <div className="mt-6">
+          <ConciergeHelpCTA topic="invest" variant="card" />
+        </div>
       </MiniAppLayout>
     </>
   );
