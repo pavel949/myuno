@@ -605,11 +605,11 @@ export const th: Record<string, string> = {
   'sos.survivalTips': 'เคล็ดลับการเอาตัวรอด',
   
   // VIP Concierge
-  'vip.title': 'VIP คอนเซียร์จ',
+  'vip.title': 'myUNO VIP',
   'vip.subtitle': 'บริการคอนเซียร์จระดับลักซ์ชัวรี่',
   'vip.description': 'บริการระดับพรีเมียมพิเศษสำหรับลูกค้าพิถีพิถัน เฮลิคอปเตอร์ เครื่องบินส่วนตัว เชฟส่วนตัว เรือยอร์ช รถหรู และบริการ VIP ครบวงจร',
   'vip.callUs': 'โทรหาเรา',
-  'vip.whyVip': 'ทำไมต้อง UNO VIP?',
+  'vip.whyVip': 'ทำไมต้อง myUNO VIP?',
   'vip.support247': 'สนับสนุน 24/7 ตลอดเวลา',
   'vip.personalManager': 'ผู้จัดการส่วนตัว',
   'vip.exclusiveAccess': 'การเข้าถึงพิเศษ',
