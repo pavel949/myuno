@@ -348,11 +348,14 @@ export default function PropertySearchPage() {
               properties={properties}
               hoveredProperty={hoveredProperty}
               onHover={setHoveredProperty}
+              selectedId={focusedId}
+              onSelect={selectFocused}
               mode={propertyMode}
               nights={nights > 0 ? nights : undefined}
             />
           </div>
         )}
+
 
         <main className="px-4 pb-24">
           {isLoading && (
