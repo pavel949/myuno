@@ -7,6 +7,7 @@ import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
+import { ConciergeHelpCTA } from '@/components/concierge/ConciergeHelpCTA';
 
 type Nationality = 'cis' | 'western' | 'other';
 type Purpose = 'remote' | 'local_job' | 'retire' | 'study' | 'tourism';
