@@ -50,8 +50,23 @@ export interface CatalogLifeMap {
   rules: Record<string, unknown>;
 }
 
-// User role type for LIFE OS
-export type LifeOSRole = 'guest' | 'resident' | 'owner' | 'investor';
+// User role type for LIFE OS — 7 audiences (Navigator v3 architecture)
+export type LifeOSRole =
+  | 'guest'
+  | 'resident'
+  | 'owner'
+  | 'mc'
+  | 'investor'
+  | 'developer'
+  | 'vendor';
+
+/** Reduce LifeOSRole to the 4 role_scope values stored in catalog_life_map. */
+export function lifeOSRoleToScope(role: LifeOSRole): 'guest' | 'resident' | 'owner' | 'investor' {
+  if (role === 'guest') return 'guest';
+  if (role === 'investor' || role === 'developer') return 'investor';
+  if (role === 'owner' || role === 'mc' || role === 'vendor') return 'owner';
+  return 'resident';
+}
 
 /**
  * Fetch all active life situations
@@ -69,13 +84,13 @@ export function useLifeSituations() {
       if (error) throw error;
       return data as LifeSituation[];
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }
 
 /**
- * Get current user's LIFE OS role based on their actual roles
- * Maps AppRole -> LifeOSRole for catalog filtering
+ * Map authenticated user's `app_role` rows to a single LifeOSRole.
+ * Priority: developer > investor > mc > owner > vendor > resident > guest.
  */
 export function useLifeOSRole(): LifeOSRole {
   const { user } = useAuth();
@@ -95,12 +110,14 @@ export function useLifeOSRole(): LifeOSRole {
   });
 
   if (!user) return 'guest';
-  if (!roles?.length) return 'resident'; // default for authenticated users
+  if (!roles?.length) return 'resident';
 
-  // Priority: investor > owner > resident > guest
-  const roleStrings = roles as string[];
-  if (roleStrings.includes('investor')) return 'investor';
-  if (roleStrings.includes('owner') || roleStrings.includes('property_manager')) return 'owner';
+  const r = roles as string[];
+  if (r.includes('real_estate_developer') || r.includes('developer')) return 'developer';
+  if (r.includes('investor') || r.includes('broker')) return 'investor';
+  if (r.includes('property_manager')) return 'mc';
+  if (r.includes('owner') || r.includes('property_owner')) return 'owner';
+  if (r.includes('vendor') || r.includes('partner') || r.includes('local_services_provider')) return 'vendor';
   return 'resident';
 }
 
