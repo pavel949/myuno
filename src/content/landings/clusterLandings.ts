@@ -494,7 +494,7 @@ const G_COMPLIANCE: ClusterLanding = {
   relatedPersonas: ['P6', 'P7', 'P8', 'P9', 'P10', 'P20', 'P23'],
   seo: {
     metaTitle: { ru: 'Налоги и право для иностранцев на Пхукете — myUNO', en: 'Tax & legal for foreigners on Phuket — myUNO' },
-    metaDescription: { ru: 'Tax residency, налог с аренды, контракты, due diligence, тайская компания. Цены в THB, юрист по-русски.', en: 'Tax residency, rental tax, contracts, due diligence, Thai company. THB pricing, English-speaking lawyer.' },
+    metaDescription: { ru: 'Tax residency, налог с аренды, контракты, due diligence, тайская компания. Цены в THB, многоязычный юрист (EN/RU/TH).', en: 'Tax residency, rental tax, contracts, due diligence, Thai company. THB pricing, multilingual lawyer (EN/RU/TH).' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/compliance',
     hreflangAlternates: [
