@@ -421,6 +421,8 @@ export const CATEGORIES: CategoryEntry[] = [
       { id: 'gardening',  path: `${SERVICES_URL}?category=gardening`,  labelRu: 'Сад',           labelEn: 'Gardening',   icon: TreePine, status: 'info',      personaTags: ['resident','property_owner','family'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
       // Storage (former cat-home-logistics)
       { id: 'storage',    path: `${SERVICES_URL}?category=storage`,    labelRu: 'Хранение',      labelEn: 'Storage',     icon: Warehouse,status: 'info',      personaTags: ['resident','nomad','relocation','family'], jtbdClusters: ['C','B'], lifecycleStages: ['settler','resident','nomad','snowbird'], roleTags: ['consumer'], situationCodes: ['living','resident','departure','relocation'] },
+      // Movers — turnkey relocation (packing, local + international moves, pet relocation).
+      { id: 'movers',     path: APP_ROUTES.RELOCATION_MOVERS,           labelRu: 'Переезд',       labelEn: 'Movers',      icon: Truck,    status: 'available', personaTags: ['resident','nomad','relocation','family','property_owner'], jtbdClusters: ['B','C'], lifecycleStages: ['scout','settler','resident','nomad','returnee'], roleTags: ['consumer'], situationCodes: ['relocation','settling','departure'] },
       // Home-services hub: deep catalogue of trades (handyman + plumber + electrician +
       // AC + cleaning + pool + garden + pest + security + moving) via
       // src/lib/config/homeServiceFunctions.ts. Keeps the LayoutGrid-of-trades
