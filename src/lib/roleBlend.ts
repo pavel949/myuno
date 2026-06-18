@@ -91,7 +91,7 @@ export const SIGNAL_ROUTE: Record<UserPersona, string> = {
   resident:                '/life/relocation',
   property_owner:          '/mc',
   investor:                '/invest',
-  real_estate_developer:   '/property/offplan',
+  real_estate_developer:   '/developer-portal',
   local_services_provider: '/vendor',
   family:                  '/discover',
   couple:                  '/discover',
