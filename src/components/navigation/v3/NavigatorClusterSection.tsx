@@ -20,6 +20,7 @@ import { useLifeOSRole } from '@/hooks/useLifeOS';
 import { rankServices } from '@/lib/superapp/rankServices';
 import { MiniAppCard } from '@/components/superapp/MiniAppCard';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
+import { trackSituationClick } from '@/lib/analytics/track';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface NavigatorClusterSectionProps {
@@ -132,6 +133,12 @@ export function NavigatorClusterSection({
             <li key={s.id}>
               <Link
                 to={resolveSituationHref(s.code)}
+                onClick={() => trackSituationClick(s.code, {
+                  source: 'cluster_section',
+                  cluster: clusterId,
+                  href: resolveSituationHref(s.code),
+                  count,
+                })}
                 className="group flex items-center gap-4 py-4 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[56px]"
               >
                 <div className="flex-1 min-w-0">

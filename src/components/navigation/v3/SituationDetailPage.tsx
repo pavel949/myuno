@@ -21,6 +21,7 @@ import { useSituationServiceCounts } from '@/hooks/useSituationServiceCounts';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
+import { trackSituationClick } from '@/lib/analytics/track';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getEntityType, getEntityTypeLabel } from '@/lib/config/entityTypes';
@@ -281,6 +282,11 @@ export default function SituationDetailPage() {
                       <Link
                         key={rel.id}
                         to={resolveSituationHref(rel.code)}
+                        onClick={() => trackSituationClick(rel.code, {
+                          source: 'related_situations',
+                          href: resolveSituationHref(rel.code),
+                          count,
+                        })}
                         className={cn(
                           'group flex items-start gap-3 p-4 min-h-[88px]',
                           'border border-border bg-card text-card-foreground',
