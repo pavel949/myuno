@@ -184,6 +184,7 @@ export function PayoutMethodsSection() {
 
   return (
     <div className="space-y-4">
+      <StripeConnectCard />
       <div className="flex items-center justify-between">
         <h3 className="font-semibold flex items-center gap-2">
           <Building2 className="w-5 h-5" />
