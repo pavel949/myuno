@@ -54,7 +54,7 @@ const rows = [];
 let ok = 0, fail = 0;
 for (const t of TARGETS) {
   try {
-    const place = await geocode(t.query);
+    const place = geocode(t.query);
     if (!place?.location) { console.warn(`✗ ${t.slug}: no result`); fail++; continue; }
     const { latitude: lat, longitude: lng } = place.location;
     rows.push(`(${esc(t.slug)}, ${lat}, ${lng}, ${esc(place.id)}, ${esc(place.formattedAddress)})`);
