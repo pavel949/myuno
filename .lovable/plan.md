@@ -1,35 +1,83 @@
+# План: свести всё в `main` и сделать его актуальной версией
+
 ## Цель
-Сделать прокрутку списка результатов поиска (`MapSearchBox`) плавной и убедиться, что активный пункт никогда не оказывается под верхним/нижним sticky-элементом или заголовком выпадашки.
+Один рабочий branch — `main`. В нём:
+- все правки из Lovable (уже там),
+- все правки из Claude Code (сейчас в `pavel/wip-current-version-20260318`).
 
-## Что меняется (только `src/components/map/MapSearchBox.tsx`)
+После — приложение деплоится с `main`, ветка WIP закрывается.
 
-1. **Единый помощник `scrollItemIntoView(idx)`**
-   - Заменяет два текущих эффекта (`activeIdx`-scroll и `selectedId`-scroll), которые сейчас вызывают `el.scrollIntoView({ block: 'nearest' })` без `behavior: 'smooth'` и без учёта офсетов.
-   - Считает позицию вручную через `offsetTop` / `offsetHeight` относительно scroll-контейнера (`<div class="max-h-80 overflow-y-auto">`), а не через `scrollIntoView` — это позволяет корректно учитывать офсеты и не «дёргать» внешнюю страницу (родительский скролл не трогается).
-   - Использует `scrollTo({ top, behavior: 'smooth' })`. Если у пользователя включено `prefers-reduced-motion: reduce` — fallback на `behavior: 'auto'`.
+## Текущая картина
+| Где | Что лежит | Куда пушится |
+|---|---|---|
+| Lovable sandbox | security-миграция 2026-06-18 + 5 edge-функций + `AIAdvisorPanel.tsx` + `MapSearchBox.tsx` | `main` (автосинк) |
+| Claude Code (локально у Павла) | session work, CRM, Edge Functions Deno 2.0, design tokens, merge-conflict resolves | `pavel/wip-current-version-20260318` |
 
-2. **Учёт sticky-офсетов сверху/снизу**
-   - Добавляю новые опциональные пропсы:
-     - `listOffsetTop?: number` (по умолчанию `0`) — высота sticky-шапки/бейджа над списком.
-     - `listOffsetBottom?: number` (по умолчанию `0`) — высота sticky-футера/safe-area.
-   - В `scrollItemIntoView` пункт считается «видимым», только если
-     `item.top >= scrollTop + offsetTop` и `item.bottom <= scrollTop + clientHeight - offsetBottom`.
-     Иначе доскролл: если выше — `scrollTop = item.top - offsetTop - 8` (8px воздуха); если ниже — `scrollTop = item.bottom - clientHeight + offsetBottom + 8`.
+Два потока разошлись. Надо слить WIP → main, не потеряв ни одной стороны.
 
-3. **Sticky-заголовок внутри dropdown (счётчик результатов)**
-   - Чтобы офсет реально что-то значил, добавляю компактную sticky-шапку `position: sticky; top: 0` высотой ~28px со счётчиком («N результатов» / «N results») и индикатором загрузки.
-   - Передаю её высоту во внутренний расчёт через ref (`headerRef.current?.offsetHeight`), плюс прибавляется внешний `listOffsetTop` пропс — итоговый офсет = sticky-шапка + внешний.
+## Ограничение sandbox
+Lovable не имеет прав на `git merge`/`push`/PR — это запрещено системно. Поэтому слияние делается **локально у Павла** или через GitHub UI. Я готовлю всё, что нужно, чтобы это заняло 5 минут.
 
-4. **Совместимость с keyboard-навигацией и flash**
-   - `scrollItemIntoView` вызывается из трёх мест: смена `activeIdx` (стрелки/hover), смена `selectedId` (sync из карты), `triggerFlash` (после `handlePick`).
-   - Все три ветки получают одинаковую плавную прокрутку с офсетами.
+## Что я сделаю в build mode
 
-## Что НЕ меняется
-- API `MapSearchBoxHandle`, логика поиска, сетевые запросы, разметка карточек результатов, визуальный «Актив» бейдж и flash-стили.
-- `MapView.tsx` — изменений не требуется; новые пропсы опциональны.
+### 1. Манифест Lovable-правок
+`docs/handoff/2026-06-18-lovable-on-main.md`:
+- 8 файлов (миграция + 5 edge fn + 2 frontend), SHA-256 каждого,
+- краткое назначение,
+- маркер «эти файлы УЖЕ в main, при merge — keep theirs из main».
 
-## Acceptance criteria
-- При перемещении стрелками вниз за пределы видимой части список доскролливается плавно, активный пункт оказывается полностью под sticky-счётчиком (не перекрыт).
-- При клике на маркер карты соответствующая карточка подсвечивается и плавно прокручивается в видимую зону с зазором ≥8px от верхнего и нижнего края.
-- Если пользователь включил «уменьшить движение» — анимация отключается, но офсеты по-прежнему учитываются.
-- Внешний скролл страницы не двигается, когда автоскролл срабатывает внутри dropdown.
+### 2. Runbook на 3 варианта (от простого к сложному)
+
+**Вариант A — GitHub UI (рекомендую, без терминала):**
+1. GitHub → репо → Pull requests → **New PR**
+2. base: `main` ← compare: `pavel/wip-current-version-20260318`
+3. Review → Merge pull request → Confirm merge
+4. Удалить WIP-ветку кнопкой «Delete branch»
+5. Lovable автоматически подтянет merged `main`
+
+**Вариант B — Claude Code / терминал:**
+```bash
+git fetch origin
+git checkout main
+git pull origin main                     # подтянуть Lovable-фиксы
+git merge pavel/wip-current-version-20260318 --no-ff \
+  -m "merge: consolidate WIP into main 2026-06-18"
+# при конфликте по 8 файлам из манифеста:
+git checkout --ours <file> && git add <file>
+git commit
+git push origin main
+git push origin --delete pavel/wip-current-version-20260318
+```
+
+**Вариант C — если конфликтов слишком много:**
+Сначала смержить main → WIP локально, разрешить там, потом fast-forward WIP → main.
+
+### 3. Скрипт верификации
+`scripts/verify-main-sync.sh`:
+- считает SHA-256 8 файлов после merge,
+- сверяет с манифестом,
+- зелёный лог = Lovable-фиксы выжили в `main`.
+
+### 4. Post-merge проверка приложения
+Чек-лист в том же документе:
+- [ ] `npm run build` зелёный
+- [ ] `/owner/financial-planning` открывает `AIAdvisorPanel` без ошибок
+- [ ] `/map` — autoscroll `MapSearchBox` работает
+- [ ] Edge fn `send-email` / `submit-web-form` отвечают 200 на smoke-тест
+- [ ] Lovable preview (id-preview…lovable.app) показывает версию 3.55.3 и выше
+
+### 5. Обновить `CLAUDE.md` и `security-memory`
+- В CLAUDE.md §2 поменять «Текущая ветка: pavel/wip-…» → `main`.
+- В security-memory зафиксировать миграцию 2026-06-18 как принятую.
+
+## Рекомендую: Вариант A (GitHub UI)
+Один клик, видна полная diff перед merge, конфликты решаются прямо в браузере, не нужно ставить git локально. Если PR покажет «no conflicts» — это done за 30 секунд.
+
+## Чего я **не** делаю
+- Не пушу в git (запрещено системой).
+- Не создаю PR через API (нет токена в sandbox).
+- Лишь готовлю манифест + runbook + verify-скрипт, которые Павел запускает у себя.
+
+---
+
+**Подтверди → переключаешь в build mode → я создаю manifest, runbook и verify-script. Дальше ты делаешь Вариант A в GitHub (1 минута).**
