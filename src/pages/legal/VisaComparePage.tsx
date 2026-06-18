@@ -225,6 +225,10 @@ export default function VisaComparePage() {
             <Link to={APP_ROUTES.VISA_IMMIGRATION}>{isRu ? 'Все визовые сервисы' : 'All visa services'}</Link>
           </Button>
         </div>
+
+        <div className="mt-6">
+          <ConciergeHelpCTA topic="visa" variant="card" />
+        </div>
       </div>
     </AppLayout>
   );
