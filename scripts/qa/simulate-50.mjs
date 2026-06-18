@@ -36,7 +36,7 @@ sitClusterRows.forEach(([code, surface]) => {
   sitClusters[code].add(surface);
 });
 
-// Provider counts per surface (via canonical business_category → categories → category_groups.surface_id)
+// Provider supply per surface: providers (mapped via categories) + domain-specific tables
 const provRows = q(`
   SELECT g.surface_id, COUNT(DISTINCT p.id)
   FROM providers p
@@ -49,6 +49,13 @@ const activeProv = Object.fromEntries(SSOT.map((s) => [s, 0]));
 provRows.forEach(([surface, n]) => {
   activeProv[surface] = Number(n);
 });
+
+// Legal and build have their own supply tables — count them in.
+const legalCount = Number(q(`SELECT COUNT(*) FROM legal_services WHERE is_active=true`)[0]?.[0] || 0);
+const visaCount = Number(q(`SELECT COUNT(*) FROM visa_services WHERE is_active=true`)[0]?.[0] || 0);
+const devCount = Number(q(`SELECT COUNT(*) FROM developers WHERE is_active=true`)[0]?.[0] || 0);
+activeProv.legal += legalCount + visaCount;
+activeProv.build += devCount;
 
 // Category counts per surface (for vendor onboarding readiness)
 const catRows = q(`
