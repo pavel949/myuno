@@ -376,6 +376,7 @@ export const MoversIndex = lazy(() => import('@/pages/relocate/MoversIndex'));
 export const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
 export const AdminInbox = lazy(() => import('@/pages/admin/AdminInbox'));
 export const PartnerApplicationsAdmin = lazy(() => import('@/pages/admin/PartnerApplicationsAdmin'));
+export const AdminPoiClaims = lazy(() => import('@/pages/admin/AdminPoiClaims'));
 export const AdminProviders = lazy(() => import('@/pages/admin/AdminProviders'));
 export const AdminServices = lazy(() => import('@/pages/admin/AdminServices'));
 export const AdminOperations = lazy(() => import('@/pages/admin/AdminOperations'));
