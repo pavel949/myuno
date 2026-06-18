@@ -109,6 +109,17 @@ export default function NavigatorPageV3() {
     return buckets;
   }, [filteredSituations, situationClusterMap]);
 
+  // code -> {ru,en} label map for MiniAppCard hint resolution
+  const situationLabels = useMemo(() => {
+    const m: Record<string, { ru: string; en: string }> = {};
+    for (const s of situations ?? []) {
+      m[s.code] = { ru: s.title_ru, en: s.title_en };
+    }
+    return m;
+  }, [situations]);
+
+
+
   // Role-gated cluster order — hidden clusters disappear entirely
   const roleClusters = ROLE_VISIBLE_CLUSTERS[role];
   const hiddenClusters = ROLE_HIDDEN_CLUSTERS[role];
@@ -308,6 +319,7 @@ export default function NavigatorPageV3() {
                 clusterId={cid}
                 situations={grouped[cid]}
                 counts={counts}
+                situationLabels={situationLabels}
               />
             ))}
           </div>
