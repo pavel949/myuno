@@ -461,6 +461,9 @@ export const AdminApiKeys = lazy(() => import('@/pages/admin/AdminApiKeys'));
 // ── Vendor ──
 export const VendorDashboard = lazy(() => import('@/pages/vendor/VendorDashboard'));
 export const VendorLanding = lazy(() => import('@/pages/vendor/VendorLanding'));
+export const VendorCategoryLandingPage = lazy(() => import('@/pages/landings/VendorCategoryLandingPage'));
+export const StaysSubscriptionLanding = lazy(() => import('@/pages/landings/StaysSubscriptionLanding'));
+export const LegalServiceLanding = lazy(() => import('@/pages/landings/LegalServiceLanding'));
 export const VendorOnboarding = lazy(() => import('@/pages/vendor/VendorOnboarding'));
 export const VendorBookings = lazy(() => import('@/pages/vendor/VendorBookings'));
 export const VendorServices = lazy(() => import('@/pages/vendor/VendorServices'));
