@@ -17,6 +17,9 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { isOpenNow } from '@/lib/filterUtils';
 import { MapLibreMap, MapMarker, MapLibreMapHandle } from '@/components/map/MapLibreMap';
 import { MapSearchBox, MapSearchResult, MapSearchBoxHandle } from '@/components/map/MapSearchBox';
+import { MapListBottomSheet } from '@/components/map/MapListBottomSheet';
+import { MapListItem } from '@/components/map/MapListItem';
+import { useMapListSync } from '@/hooks/useMapListSync';
 
 
 type VerticalFilter =
@@ -121,7 +124,8 @@ export default function MapView() {
   const [selectedPrice, setSelectedPrice] = useState<PriceFilter>(initialPrice);
   const [selectedAvailability, setSelectedAvailability] = useState<AvailabilityFilter>(initialAvailability);
   const [selected, setSelected] = useState<ClickedMarker>(null);
-  const [activeMarkerId, setActiveMarkerId] = useState<string | undefined>(undefined);
+  const { selectedId: focusedMarkerId, select: selectMarker } = useMapListSync();
+  const activeMarkerId = focusedMarkerId ?? undefined;
   const mapRef = useRef<MapLibreMapHandle | null>(null);
   const searchBoxRef = useRef<MapSearchBoxHandle | null>(null);
   const [searchPin, setSearchPin] = useState<MapSearchResult | null>(null);
@@ -131,8 +135,8 @@ export default function MapView() {
     setSearchPin(r);
     mapRef.current?.flyTo(r.lat, r.lng, 16);
     pendingSearchPickRef.current = r;
-    setActiveMarkerId(undefined);
-  }, []);
+    selectMarker(null);
+  }, [selectMarker]);
 
 
 
@@ -354,7 +358,7 @@ export default function MapView() {
     const d = m.data as ClickedMarker;
     if (!d) return;
     setSelected(d);
-    setActiveMarkerId(m.id);
+    selectMarker(m.id);
     if (d.kind === 'osm') setPlaceDetails(null);
     // Sync search input with the clicked marker and try to highlight matching result.
     const label =
@@ -364,7 +368,7 @@ export default function MapView() {
     const matchId = d.kind === 'osm' ? `local:${d.poi.id}` : undefined;
     if (label) searchBoxRef.current?.setSelection(label, matchId);
     mapRef.current?.flyTo(m.lat, m.lng, Math.max(14, 11));
-  }, [language]);
+  }, [language, selectMarker]);
 
   // After mlMarkers update, if user picked a search result, find the nearest marker and activate it.
   useEffect(() => {
@@ -375,11 +379,33 @@ export default function MapView() {
       (mm) => Math.abs(mm.lat - pick.lat) < EPS && Math.abs(mm.lng - pick.lng) < EPS,
     );
     if (match) {
-      setActiveMarkerId(match.id);
+      selectMarker(match.id);
       setSelected(match.data as ClickedMarker);
     }
     pendingSearchPickRef.current = null;
-  }, [mlMarkers]);
+  }, [mlMarkers, selectMarker]);
+
+  // Drive selection from URL (?focus=<id>) and list clicks → set `selected` and fly to marker.
+  useEffect(() => {
+    if (!focusedMarkerId) {
+      setSelected(null);
+      return;
+    }
+    const match = mlMarkers.find((mm) => mm.id === focusedMarkerId);
+    if (!match) return;
+    setSelected(match.data as ClickedMarker);
+    mapRef.current?.flyTo(match.lat, match.lng, Math.max(14, 11));
+  }, [focusedMarkerId, mlMarkers]);
+
+  // If active filter removes selected marker — clear selection.
+  useEffect(() => {
+    if (!focusedMarkerId) return;
+    if (!mlMarkers.find((mm) => mm.id === focusedMarkerId)) {
+      selectMarker(null);
+    }
+  }, [mlMarkers, focusedMarkerId, selectMarker]);
+
+
 
 
   const updateParam = useCallback(
@@ -399,7 +425,6 @@ export default function MapView() {
 
   const handleFilterChange = (value: VerticalFilter) => {
     setSelectedVertical(value);
-    setSelected(null);
     updateParam('vertical', value);
   };
 
@@ -561,7 +586,7 @@ export default function MapView() {
               <button
                 type="button"
                 aria-label="Close"
-                onClick={() => { setSelected(null); setPlaceDetails(null); setActiveMarkerId(undefined); searchBoxRef.current?.clear(); }}
+                onClick={() => { setSelected(null); setPlaceDetails(null); selectMarker(null); searchBoxRef.current?.clear(); }}
                 className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
               >
                 <X className="w-4 h-4" />
@@ -630,6 +655,57 @@ export default function MapView() {
           )}
         </div>
       </div>
+
+      <MapListBottomSheet
+        title={
+          <span>
+            {mlMarkers.length}{' '}
+            {language === 'ru' ? 'локаций' : 'locations'}
+          </span>
+        }
+      >
+        {mlMarkers.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            {language === 'ru' ? 'Ничего не найдено — измените фильтры' : 'Nothing found — adjust filters'}
+          </div>
+        ) : (
+          <div role="listbox" aria-label={language === 'ru' ? 'Список локаций' : 'Locations list'}>
+            {mlMarkers.map((m) => {
+              const d = m.data as ClickedMarker;
+              const isVendor = d?.kind === 'vendor';
+              const vendor = isVendor ? d.marker : null;
+              const cfg = vendor ? VERTICAL_CONFIG[vendor.vertical as Exclude<VerticalFilter, 'all'>] : null;
+              const title = m.title || '—';
+              const subtitle = vendor
+                ? (language === 'ru' ? cfg?.labelRu : cfg?.labelEn) || ''
+                : (d?.kind === 'osm' ? `${d.poi.category}${d.poi.subcategory ? ' · ' + d.poi.subcategory : ''}` : '');
+              return (
+                <MapListItem
+                  key={m.id}
+                  id={m.id}
+                  icon={m.icon}
+                  color={m.color}
+                  title={title}
+                  subtitle={subtitle}
+                  rating={vendor?.rating}
+                  priceLabel={vendor && vendor.priceFrom > 0 ? `${formatPrice(vendor.priceFrom)}+` : undefined}
+                  isSelected={activeMarkerId === m.id}
+                  onSelect={(id) => {
+                    selectMarker(id);
+                    // also trigger same flyTo path as marker click
+                    const mm = mlMarkers.find((x) => x.id === id);
+                    if (mm) {
+                      setSelected(mm.data as ClickedMarker);
+                      mapRef.current?.flyTo(mm.lat, mm.lng, Math.max(14, 11));
+                    }
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
+      </MapListBottomSheet>
     </AppLayout>
   );
 }
+

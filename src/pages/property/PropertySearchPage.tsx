@@ -22,6 +22,7 @@ import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues } from '@/lib/propertyCatalogServerFilters';
 import { comparePropertiesForSort } from '@/lib/propertySortPrice';
+import { useMapListSync } from '@/hooks/useMapListSync';
 import type { PropertyFilters } from '@/hooks/useProperties';
 import { CrossSellSection } from '@/components/crosssell';
 import { PropertySortSelect, PropertySortKey } from '@/components/property/PropertySortSelect';
@@ -64,6 +65,7 @@ export default function PropertySearchPage() {
 
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
+  const { selectedId: focusedId, select: selectFocused } = useMapListSync();
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
@@ -346,11 +348,14 @@ export default function PropertySearchPage() {
               properties={properties}
               hoveredProperty={hoveredProperty}
               onHover={setHoveredProperty}
+              selectedId={focusedId}
+              onSelect={selectFocused}
               mode={propertyMode}
               nights={nights > 0 ? nights : undefined}
             />
           </div>
         )}
+
 
         <main className="px-4 pb-24">
           {isLoading && (
@@ -384,12 +389,15 @@ export default function PropertySearchPage() {
                       mode={propertyMode}
                       isHovered={hoveredProperty === property.id}
                       onHover={setHoveredProperty}
+                      isSelected={focusedId === property.id}
+                      onSelect={showMap ? selectFocused : undefined}
                       companyName={mc?.name}
                       companySlug={mc?.slug}
                       nights={nights > 0 ? nights : undefined}
                     />
                   );
                 })}
+
               </div>
             </>
           )}

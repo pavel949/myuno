@@ -1,108 +1,128 @@
-## Что есть сейчас (аудит)
 
-| Слой | Файл | Что делает | Оценка |
-|---|---|---|---|
-| Хук | `src/hooks/useGlobalSearch.ts` (455) | ilike по 12 таблицам + `listings` + `categories` + 60+ синонимов, кэш 5с, debounce 300мс | работает, но «глупый» |
-| Модалка | `src/components/search/GlobalSearchModal.tsx` (269) | UI диалога, Recent/Trending/Quick categories | ОК |
-| Страница | `src/pages/Search.tsx` (271) | Полнокран. результаты | ОК |
-| Вход | `src/components/nav/TopBar.tsx` | Иконка + ⌘K + desktop fake-input | **на мобиле есть, но непостоянно** |
-| Edge fn | `supabase/functions/ai-smart-search/` | Persona-aware AI-ответ, JSON {answer, categories, services} | **ORPHAN — нигде не вызывается** |
-| Edge fn | `supabase/functions/ai-knowledge-search/` + pgvector + RPC `match_ai_knowledge` | Семантика по `ai_knowledge_documents` | используется только в Admin |
-| Admin | `src/components/admin/AdminCommandPalette.tsx` | Отдельный командный палет | вне scope |
+## Цель
 
-**Главные проблемы:**
-1. AI infra существует, но не подключена → пользователь видит «тупой» ilike.
-2. `useGlobalSearch` игнорирует роль / персону / активную ситуацию.
-3. Нет навигационных шорткатов (нельзя «открыть страховку», «invest dashboard», «мои заказы»).
-4. Источники неполные (нет страниц/маршрутов, нет статей `knowledge_pillars`, нет личного контекста).
-5. На мобильном Bottom nav нет search-entry — поиск доступен только когда виден `TopBar`.
-6. CORS edge fn зашит на `https://myuno.app` → сломается на preview/localhost.
+Клик по карточке выделяет pin на карте (и наоборот). На мобильном — карта на весь экран, список открывается draggable bottom sheet'ом с peek-режимом. Фильтры уже едины через URL — закрепляем это поведение.
+
+## Объём
+
+Две поверхности:
+1. **`/property` (PropertySearchPage + PropertyMapView)** — есть список + опциональная карта, сейчас работает только hover-подсветка.
+2. **`/map` (MapView + MapLibreMap)** — сейчас только карта + детальная панель, списка нет.
+
+Общий хук + UI-компонент для шторки переиспользуется.
 
 ---
 
-## План — M1 (быстрые победы, 1 PR)
+## Шаг 1. Общая инфраструктура
 
-### 1. Добавить навигационный реестр (новый файл `src/lib/search/navigationIndex.ts`)
-Статический список 60–80 точек назначения: `{ id, titleRu, titleEn, path, keywords[], cluster, requiresRole?, icon }`. Источник — `APP_ROUTES` + Master Taxonomy v1.0 (`src/lib/taxonomies/master.ts`) + `clusterCatalog`. Включает мини-аппы (sim, exchange, transfer, sos), личные хабы (orders, vault, properties), админ/owner-разделы (фильтруются по роли).
+**Новый хук** `src/hooks/useMapListSync.ts`:
+- состояние `selectedId: string | null` + `hoveredId: string | null` (раздельные — hover для desktop, select для тапа/клика);
+- `selectedId` хранится в URL `?focus=<id>` (через `useSearchParams`) — sharing/deep-linking;
+- API: `{ selectedId, hoveredId, select(id), hover(id), clear() }`.
 
-### 2. Расширить `useGlobalSearch`
-- Добавить **layer 0**: матч по `navigationIndex` (титулы + keywords + cluster) — фуззи через `fuzzysort` (lib уже в проекте, иначе тривиальный bigram-скор).
-- Прокинуть текущую **роль / персону / активную ситуацию** (через `usePersonaContext` / `useActiveContext`) в ранкинг: совпадение по `cluster`/`role` поднимает результат вверх.
-- Расширить источники: `knowledge_pillars` (статьи-ответы), `orders` (только мои, через RLS), `crm_contacts` (только если у юзера роль mc/admin).
-- Сгруппировать результаты по секциям в фиксированном порядке: **AI-ответ → Действия (navigation) → Каталоги → Статьи → Мои данные**.
+**Новый компонент** `src/components/map/MapListBottomSheet.tsx`:
+- мобильный bottom sheet (375–768px) поверх карты;
+- 3 snap-точки: `peek` (~100px, видно «N локаций» + первая карточка-превью), `half` (~50dvh), `full` (~85dvh);
+- драг через `framer-motion` (уже в стеке) или `vaul` (легче — рекомендую `vaul`, оно уже используется в shadcn-drawer);
+- внутри — виртуализованный список (`@tanstack/react-virtual`, уже в зависимостях) с `data-listing-id` для scrollIntoView;
+- при `selectedId` авто-скроллит выбранную карточку в видимую часть и переводит sheet в `half` если был `peek`.
 
-### 3. Подключить `ai-smart-search`
-- Чинить CORS: `Access-Control-Allow-Origin: *` (или из allow-list `myuno.app`, `*.lovable.app`, `localhost`).
-- В `GlobalSearchModal` вызывать `ai-smart-search` параллельно с DB-поиском, debounce 500мс, только если query > 6 символов или содержит вопросительные слова.
-- Рендерить AI-ответ верхним блоком с цитатами (типа карточки, не путать с результатами).
-- Записывать запрос/ответ в `concierge_sessions` (insert через RLS — юзерский session_id).
-
-### 4. UI/доступность
-- **Bottom nav**: добавить 5-й/центральный CTA «Поиск» (Sheet, не Dialog — mobile-first) в `AdaptiveBottomNav`. Поиск доступен с любого экрана.
-- Голосовой ввод (Web Speech API) — иконка микрофона рядом с инпутом.
-- Скелетон-стейт + zero-state с примерами вопросов под персону.
-
-### 5. Аналитика
-- Logging в `analytics_events` (`search_query`, `search_click`, `search_zero_result`, `search_ai_used`) для будущего ранкинга.
+**Desktop (≥1024px)** — sheet не используется, список рендерится в обычной колонке слева/справа от карты (как сейчас на `/property`).
 
 ---
 
-## План — M2 (семантика, 2-й PR)
+## Шаг 2. `/property` — закрыть петлю выбора
 
-### 6. Edge function `semantic-catalog-search` (новая)
-- На запрос: embed query через AI Gateway (`google/gemini-embedding-001`, 3072 dims; или `openai/text-embedding-3-small` 1536 если хотим использовать существующий HNSW). **Рекомендую: `text-embedding-3-small`** — уже есть `vector(1536)` колонка и HNSW индекс, не нужно мигрировать схему.
-- Векторный поиск по 4 индексам (см. ниже) + score-fusion с BM25/ilike результатами (RRF — reciprocal rank fusion).
-- Возвращает топ-20 с типами и score; клиент мержит с layer 0/1.
+`src/pages/property/PropertySearchPage.tsx`:
+- Подключить `useMapListSync` (вместо локального `hoveredProperty`).
+- Передать `selectedId`, `onSelect`, `hoveredId`, `onHover` в `PropertyMapView` и `PropertyListingCard`.
+- При наличии `?focus=<id>` в URL сразу скроллить и подсвечивать карточку.
+- Добавить в `PropertyListingCard` data-атрибут `data-listing-id={property.id}` и визуальное состояние `isSelected` (рамка `ring-2 ring-primary`, отличается от `isHovered`).
+- Сохранить toggle «Список/Карта», но добавить третий режим **«Split»** на ≥`lg` (50/50 split). На мобильном Split = карта + BottomSheet.
 
-### 7. Embeddings pipeline
-- Колонка `embedding vector(1536)` в:
-  - `listings` (name + description + category)
-  - `properties` (title + district + amenities)
-  - `knowledge_pillars` + `relocation_articles` + `investment_articles`
-  - `navigationIndex` дублировать в БД как `navigation_targets` для семантики
-- HNSW индекс `vector_cosine_ops` для каждой.
-- Cron-функция `embed-content-batch` (раз в час): берёт строки с `embedding IS NULL OR updated_at > embedded_at`, бьёт батчами по 50, embed → upsert. Дедуп по хэшу контента.
-- Backfill-скрипт для первичной заливки (запускается из admin once).
-
-### 8. Intent routing (упрощённо)
-- В `ai-smart-search` добавить классификацию интента: `navigate | search | ask | personal`. Решает, какие источники приоритизировать. Используем тот же model call, добавляем `intent` в JSON-output.
-- `navigate` → сразу подсветить top-1 действие и предложить Enter для перехода.
-- `ask` → показать AI-ответ с источниками из knowledge_pillars (через `ai-knowledge-search`).
-
-### 9. Связь с concierge
-- При нажатии «Спросить подробнее» в AI-ответе → редирект на `/concierge?seed=<sessionId>` (страница уже есть). История поиска поднимается как стартовый turn.
+`src/components/property/PropertyMapView.tsx`:
+- Новый prop `selectedId` + `onSelect`.
+- Pin выбранного объекта: увеличенный лейбл, фон `--primary`, текст `--primary-foreground`, z-index выше.
+- `useEffect` на `selectedId` — `map.panTo()` к координате (только если pin вне видимой области), без forced zoom.
+- `InfoWindow` открывается по `selectedId` (а не локальному `openId`), `onCloseClick` → `clear()`.
 
 ---
 
-## Что НЕ делаем (out of scope)
+## Шаг 3. `/map` — список + sync
 
-- Не строим полноценный chat-UI внутри поиска — для глубокой беседы есть `/concierge`.
-- Не переписываем `AdminCommandPalette` — он отдельный case.
-- Не трогаем `LOVABLE_API_KEY` — он уже есть.
-- Не вводим новый top-level route — поиск открывается как Sheet/Dialog поверх любого экрана.
+`src/pages/MapView.tsx`:
+- Импортировать `useMapListSync` (тот же), `MapListBottomSheet`.
+- Передавать `selectedId` в `MapLibreMap` через уже существующий проп `activeMarkerId` (просто использовать общий стейт).
+- Существующая панель `selected` (vendor/OSM детали) триггерится тем же `selectedId` — мёрджим состояние.
+- Под картой/поверх неё на мобильном — `MapListBottomSheet`:
+  - содержимое: единый плоский список из `mlMarkers` (vendor + OSM), сгруппированный заголовками по `vertical` (Жильё / Рестораны / Красота / … / OSM);
+  - каждая карточка: иконка вертикали + название + расстояние от центра карты + рейтинг/цена (если есть);
+  - тап по карточке → `select(id)` → карта `flyTo` + открывает существующую детальную панель.
+- На desktop (≥`lg`): добавить левую колонку 360–400px со списком, карта — справа на flex-1.
+- Клик по pin (`handleMarkerClick`) уже работает — добавить вызов `select(id)` и убрать локальный `selected`/`activeMarkerId` (заменить общим хуком).
+
+`src/components/map/MapLibreMap.tsx`:
+- `flyTo` при изменении `activeMarkerId` — добавить (сейчас программный `flyTo` зовётся снаружи; перенесём в `useEffect` хука внутри компонента, чтобы и список, и search вели себя одинаково).
+- Активный pin: `transform: scale(1.25)`, ring через `box-shadow: 0 0 0 4px hsl(var(--primary) / 0.35)`.
 
 ---
 
-## Проверка (после M1)
+## Шаг 4. Фильтры
 
-1. ⌘K / mobile bottom-CTA → открывается поиск с любого экрана.
-2. Запрос «страховка» → top-1 «Открыть Страхование», далее провайдеры из `insurance_providers`.
-3. Запрос «как продлить визу» → AI-ответ + citations из `knowledge_pillars/visa`.
-4. Запрос «мои заказы» → секция «Мои данные» с последними `orders`.
-5. У роли `owner` запрос «выручка» → top-1 «Owner P&L Dashboard»; у анонима — нет.
-6. Zero-result показывает 4 примера вопросов под персону.
+Уже синхронизируются через URL (`?vertical&price&availability&category&...`). Закрепляем:
+- При смене фильтра `selectedId` не сбрасывается, если выбранный объект всё ещё в `filteredMarkers`. Если выпал — `clear()`.
+- При клике по pin вертикали, отличной от текущего фильтра, не меняем фильтр (это destructive); вместо этого селектим как есть.
 
-## Проверка (после M2)
+---
 
-7. Запрос «вилла у океана с бассейном» → семантические `properties` в топе, даже если в title нет этих слов.
-8. Запрос «найти няню англоязычную для 4-летнего» → `listings` (babysitter) + статья в knowledge_pillars.
-9. Лог в `analytics_events` показывает rate использования AI vs ilike-fallback.
+## Шаг 5. Доступность и мелочи
+
+- `aria-selected` на карточке и pin'е, `role="option"` в списке.
+- Клавиатура: `↑/↓` в списке двигает selection, `Esc` — clear.
+- Анимация pin'а — `prefers-reduced-motion: reduce` отключает.
+- На мобильном при открытии sheet'а в `full` — карта остаётся интерактивной (sheet полупрозрачный backdrop отсутствует).
 
 ---
 
 ## Технические детали
 
-- **Файлы M1:** `src/lib/search/navigationIndex.ts` (new), `src/hooks/useGlobalSearch.ts` (расш.), `src/components/search/GlobalSearchModal.tsx` (AI-блок + voice), `src/components/navigation/AdaptiveBottomNav.tsx` (CTA), `supabase/functions/ai-smart-search/index.ts` (CORS-fix + concierge_sessions write).
-- **Файлы M2:** `supabase/functions/semantic-catalog-search/index.ts` (new), `supabase/functions/embed-content-batch/index.ts` (new), миграция на `embedding` колонки + индексы, `supabase/functions/ai-smart-search/index.ts` (intent classifier).
-- **Модели:** chat — `google/gemini-3-flash-preview`; embeddings — `openai/text-embedding-3-small` (1536, переиспользует существующую инфру pgvector).
-- **Кэш:** в-памяти TTL 5с (уже есть) + Supabase-side через `query_embedding` хэш в `google_place_cache`-style таблице (опц. в M2).
+Зависимости:
+- **Рекомендую: `vaul`** для bottom sheet — нативная физика, snap-points из коробки, уже совместим с shadcn (есть `drawer.tsx`). Альтернатива — `framer-motion` руками, дольше.
+- `@tanstack/react-virtual` уже установлен — используем без `bun add`.
+
+URL-стейт:
+- `?focus=<id>` — выбранный объект;
+- остальные параметры (vertical/price/…) уже работают.
+
+Файлы:
+```text
+NEW src/hooks/useMapListSync.ts
+NEW src/components/map/MapListBottomSheet.tsx
+NEW src/components/map/MapListItem.tsx           // мини-карточка для /map
+MOD src/pages/MapView.tsx
+MOD src/components/map/MapLibreMap.tsx           // flyTo on activeMarkerId, активный стиль pin
+MOD src/pages/property/PropertySearchPage.tsx
+MOD src/components/property/PropertyMapView.tsx  // selectedId + крупный активный pin
+MOD src/components/property/PropertyListingCard.tsx  // isSelected, data-listing-id
+```
+
+Тесты (минимум):
+- `useMapListSync` — select/clear, sync с URL.
+- Smoke на `/property?focus=<id>` — карточка в DOM с `aria-selected="true"`.
+
+---
+
+## Не входит
+
+- Полноценная виртуализация карты (кластеризация pin'ов) — отдельная задача.
+- Сохранение позиции скролла между навигациями.
+- Перенос фильтров `/property` в общий URL-схему с `/map` (сейчас они разные).
+
+## Acceptance
+
+1. На `/property` тап по карточке: pin становится крупнее, карта пан-ится к нему, InfoWindow открывается.
+2. На `/property` клик по pin: соответствующая карточка получает рамку и скроллится в видимую область.
+3. На `/map` тап по pin: открывается детальная панель + соответствующая карточка в bottom sheet подсвечена.
+4. На `/map` тап по карточке в sheet: карта летит к pin, pin активный, sheet схлопывается в `half`.
+5. Открытие ссылки `/property?focus=abc123` или `/map?focus=abc123` сразу подсвечивает объект.
+6. Смена фильтра не «теряет» выбор, если объект всё ещё проходит фильтр.

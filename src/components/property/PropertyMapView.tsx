@@ -28,10 +28,13 @@ interface PropertyMapViewProps {
   properties: Property[];
   hoveredProperty: string | null;
   onHover: (id: string | null) => void;
+  selectedId?: string | null;
+  onSelect?: (id: string | null) => void;
   mode?: 'rent' | 'buy';
   nights?: number;
   className?: string;
 }
+
 
 function shortPrice(price: number): string {
   if (price >= 1_000_000) return `${(price / 1_000_000).toFixed(1)}M`;
@@ -54,6 +57,8 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   properties,
   hoveredProperty,
   onHover,
+  selectedId = null,
+  onSelect,
   mode = 'rent',
   className,
 }, ref) {
@@ -63,7 +68,11 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   const { language } = useLanguage();
   const { hasKey, isLoaded, loadError } = useGoogleMaps();
   const isRu = language === 'ru';
-  const [openId, setOpenId] = useState<string | null>(null);
+  // External selection wins; fall back to local state for standalone usage.
+  const [localOpenId, setLocalOpenId] = useState<string | null>(null);
+  const openId = onSelect ? selectedId : localOpenId;
+  const setOpenId = (id: string | null) => (onSelect ? onSelect(id) : setLocalOpenId(id));
+
 
   const validProps = useMemo(() => {
     return properties.filter((p) => {
@@ -87,6 +96,20 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
     validProps.forEach((p) => bounds.extend({ lat: p.lat!, lng: p.lng! }));
     mapRef.current.fitBounds(bounds, 60);
   }, [validProps]);
+
+  // Pan to selected pin (only if it's outside current viewport).
+  React.useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !openId) return;
+    const p = validProps.find((x) => x.id === openId);
+    if (!p || p.lat == null || p.lng == null) return;
+    const bounds = map.getBounds();
+    const pos = new google.maps.LatLng(p.lat, p.lng);
+    if (!bounds || !bounds.contains(pos)) {
+      map.panTo(pos);
+    }
+  }, [openId, validProps]);
+
 
   const noKey = !hasKey || loadError;
   const isLoading = hasKey && !isLoaded;
@@ -149,6 +172,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
               ? (ext.sale_price || property.price || 0)
               : property.price || 0;
           const priceLabel = `฿${shortPrice(price)}`;
+          const isActive = openId === property.id;
 
           return (
             <Marker
@@ -156,10 +180,23 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
               position={{ lat: property.lat!, lng: property.lng! }}
               label={{
                 text: priceLabel,
-                color: 'hsl(var(--foreground))',
-                fontWeight: '600',
-                fontSize: '12px',
+                color: isActive ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))',
+                fontWeight: isActive ? '700' : '600',
+                fontSize: isActive ? '13px' : '12px',
               }}
+              icon={
+                isActive
+                  ? {
+                      path: google.maps.SymbolPath.CIRCLE,
+                      scale: 22,
+                      fillColor: 'hsl(var(--primary))',
+                      fillOpacity: 1,
+                      strokeColor: 'hsl(var(--background))',
+                      strokeWeight: 3,
+                    }
+                  : undefined
+              }
+              zIndex={isActive ? 999 : undefined}
               title={isRu ? property.title_ru : property.title_en}
               onClick={() => {
                 setOpenId(property.id);
@@ -168,6 +205,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
             />
           );
         })}
+
 
         {openProperty && (
           <InfoWindow
