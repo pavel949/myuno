@@ -8286,6 +8286,84 @@ export type Database = {
           },
         ]
       }
+      help_requests: {
+        Row: {
+          assigned_to: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          crm_contact_id: string | null
+          crm_task_id: string | null
+          id: string
+          internal_notes: string | null
+          language: string
+          listing_id: string | null
+          message: string
+          preferred_channel: string
+          referral_code: string | null
+          source_data: Json
+          source_page: string | null
+          source_route: string | null
+          status: string
+          subject: string | null
+          topic: string
+          updated_at: string
+          urgency: string
+          user_id: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          crm_task_id?: string | null
+          id?: string
+          internal_notes?: string | null
+          language?: string
+          listing_id?: string | null
+          message: string
+          preferred_channel?: string
+          referral_code?: string | null
+          source_data?: Json
+          source_page?: string | null
+          source_route?: string | null
+          status?: string
+          subject?: string | null
+          topic: string
+          updated_at?: string
+          urgency?: string
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          crm_contact_id?: string | null
+          crm_task_id?: string | null
+          id?: string
+          internal_notes?: string | null
+          language?: string
+          listing_id?: string | null
+          message?: string
+          preferred_channel?: string
+          referral_code?: string | null
+          source_data?: Json
+          source_page?: string | null
+          source_route?: string | null
+          status?: string
+          subject?: string | null
+          topic?: string
+          updated_at?: string
+          urgency?: string
+          user_id?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
       insurance_plans: {
         Row: {
           coverage_amount: number | null
@@ -26818,6 +26896,13 @@ export type Database = {
             foreignKeyName: "vendor_outreach_log_vendor_prospect_id_fkey"
             columns: ["vendor_prospect_id"]
             isOneToOne: false
+            referencedRelation: "v_public_movers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_outreach_log_vendor_prospect_id_fkey"
+            columns: ["vendor_prospect_id"]
+            isOneToOne: false
             referencedRelation: "vendor_prospects"
             referencedColumns: ["id"]
           },
@@ -26950,6 +27035,13 @@ export type Database = {
           prospect_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vendor_prospect_activity_prospect_id_fkey"
+            columns: ["prospect_id"]
+            isOneToOne: false
+            referencedRelation: "v_public_movers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vendor_prospect_activity_prospect_id_fkey"
             columns: ["prospect_id"]
@@ -31127,6 +31219,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      v_public_movers: {
+        Row: {
+          ai_priority: string | null
+          business_name: string | null
+          business_name_ru: string | null
+          city: string | null
+          created_at: string | null
+          district: string | null
+          id: string | null
+          languages: Json | null
+          service_areas: Json | null
+          specialties: Json | null
+          status: string | null
+          verified: boolean | null
+          website: string | null
+        }
+        Insert: {
+          ai_priority?: string | null
+          business_name?: string | null
+          business_name_ru?: string | null
+          city?: string | null
+          created_at?: string | null
+          district?: string | null
+          id?: string | null
+          languages?: never
+          service_areas?: never
+          specialties?: never
+          status?: string | null
+          verified?: never
+          website?: string | null
+        }
+        Update: {
+          ai_priority?: string | null
+          business_name?: string | null
+          business_name_ru?: string | null
+          city?: string | null
+          created_at?: string | null
+          district?: string | null
+          id?: string | null
+          languages?: never
+          service_areas?: never
+          specialties?: never
+          status?: string | null
+          verified?: never
+          website?: string | null
+        }
+        Relationships: []
       }
       v_unified_contacts: {
         Row: {
