@@ -44,7 +44,7 @@ export default function VendorLanding() {
     {
       icon: Users,
       title: isRu ? 'Платёжеспособная аудитория' : 'Premium Audience',
-      desc: isRu ? 'Русскоязычные экспаты и туристы с высоким чеком' : 'Russian-speaking expats & tourists with high spending',
+      desc: isRu ? 'Иностранные экспаты и туристы с высоким чеком (EN/RU/TH)' : 'International expats & tourists with high spending (EN/RU/TH)',
     },
     {
       icon: Shield,
@@ -141,8 +141,8 @@ export default function VendorLanding() {
             </h1>
             <p className="text-muted-foreground text-base md:text-lg max-w-md mx-auto mb-6">
               {isRu 
-                ? 'myUNO — маркетплейс для русскоязычных жителей Пхукета. Зарегистрируйтесь за 2 минуты и начните получать заказы.'
-                : 'myUNO is a marketplace for Russian-speaking Phuket residents. Register in 2 minutes and start receiving orders.'}
+                ? 'myUNO — маркетплейс для иностранных жителей и гостей Пхукета (EN/RU/TH). Зарегистрируйтесь за 2 минуты и начните получать заказы.'
+                : 'myUNO is a marketplace for international residents and visitors of Phuket (EN/RU/TH). Register in 2 minutes and start receiving orders.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button size="lg" onClick={handleStart} className="h-12 text-base font-semibold px-8">

@@ -33,8 +33,8 @@ export default function ClearViewForDevelopersLanding() {
         en: 'ClearView™ — independent rating for your project',
       }}
       subtitle={{
-        ru: 'Получите независимую оценку проекта по 8 критериям и публичный бейдж AAA–CCC. Это снимает 70% возражений русскоязычного покупателя ещё до встречи.',
-        en: 'Get an independent 8-criteria project rating and a public AAA–CCC badge. Removes 70% of Russian-speaking buyers’ objections before the first meeting.',
+        ru: 'Получите независимую оценку проекта по 8 критериям и публичный бейдж AAA–CCC. Это снимает 70% возражений иностранного покупателя ещё до встречи.',
+        en: 'Get an independent 8-criteria project rating and a public AAA–CCC badge. Removes 70% of international buyers’ objections before the first meeting.',
       }}
       badges={[
         { ru: 'Отчёт за 15 рабочих дней', en: 'Report in 15 business days' },
