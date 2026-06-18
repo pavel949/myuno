@@ -745,6 +745,7 @@ export default function MapView() {
           </div>
         )}
       </MapListBottomSheet>
+      <PoiClaimSheet open={!!claimPoi} onOpenChange={(v) => !v && setClaimPoi(null)} poi={claimPoi} />
     </AppLayout>
   );
 }
