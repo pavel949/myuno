@@ -58,8 +58,8 @@ export default function OwnerManagementLanding() {
           icon: Users,
           title: { ru: 'Поток гостей', en: 'Guest pipeline' },
           desc: {
-            ru: 'Booking, Airbnb, Agoda, прямые продажи myUNO и русскоязычные каналы.',
-            en: 'Booking, Airbnb, Agoda, direct myUNO sales and Russian-speaking channels.',
+            ru: 'Booking, Airbnb, Agoda, прямые продажи myUNO и международные каналы (RU/EN/TH).',
+            en: 'Booking, Airbnb, Agoda, direct myUNO sales and international channels (EN/RU/TH).',
           },
         },
         {
@@ -130,7 +130,7 @@ export default function OwnerManagementLanding() {
             { ru: 'Мелкий ремонт и эксплуатация', en: 'Minor repairs and ops' },
             { ru: 'Динамические цены и каналы продаж', en: 'Dynamic pricing and sales channels' },
             { ru: 'Финансовый отчёт и выплаты', en: 'Financial reporting and payouts' },
-            { ru: 'Поддержка владельца на русском', en: 'Russian-speaking owner support' },
+            { ru: 'Многоязычная поддержка владельца (RU / EN / TH)', en: 'Multilingual owner support (EN / RU / TH)' },
           ]}
         />
         <div className="mt-6 flex flex-wrap gap-3">

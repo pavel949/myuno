@@ -40,8 +40,8 @@ const DEFAULT_VPS: ValueProp[] = [
   {
     iconName: 'Users',
     text: {
-      ru: { title: 'Поток клиентов', desc: 'Иностранцы на Пхукете уже ищут вас в myUNO — без затрат на рекламу.' },
-      en: { title: 'Customer flow', desc: 'Foreigners on Phuket already search for you inside myUNO — no ad spend needed.' },
+      ru: { title: 'Поток клиентов', desc: 'Иностранцы со всего мира на Пхукете уже ищут вас в myUNO — без затрат на рекламу.' },
+      en: { title: 'Customer flow', desc: 'International residents and visitors on Phuket already search for you inside myUNO — no ad spend needed.' },
       th: { title: 'กระแสลูกค้า', desc: 'ชาวต่างชาติบนภูเก็ตกำลังค้นหาคุณใน myUNO อยู่แล้ว — ไม่ต้องเสียค่าโฆษณา' },
     },
   },
@@ -156,9 +156,9 @@ export const VENDOR_CATEGORIES: Record<VendorCategoryId, VendorCategoryConfig> =
   medical: {
     id: 'medical', emoji: '🏥', commissionPct: 8,
     hero: {
-      ru: { eyebrow: 'MEDICAL · ПХУКЕТ', title: 'Клиники и доктора — медицинский туризм 2.0', subtitle: 'Русскоязычные пациенты ищут стоматологию, чек-апы, эстетику. Запись через приложение с переводом.' },
-      en: { eyebrow: 'MEDICAL · PHUKET', title: 'Clinics & doctors — medical tourism 2.0', subtitle: 'Russian-speaking patients search for dentistry, check-ups and aesthetics. In-app booking with built-in translation.' },
-      th: { eyebrow: 'การแพทย์ · ภูเก็ต', title: 'คลินิกและแพทย์ — ท่องเที่ยวเชิงการแพทย์ 2.0', subtitle: 'คนไข้ต่างชาติมองหาทันตกรรม ตรวจสุขภาพ และความงาม จองนัดผ่านแอปพร้อมระบบแปลภาษา' },
+      ru: { eyebrow: 'MEDICAL · ПХУКЕТ', title: 'Клиники и доктора — медицинский туризм 2.0', subtitle: 'Иностранные пациенты ищут стоматологию, чек-апы и эстетику. Запись через приложение со встроенным переводом на 3 языка.' },
+      en: { eyebrow: 'MEDICAL · PHUKET', title: 'Clinics & doctors — medical tourism 2.0', subtitle: 'International patients search for dentistry, check-ups and aesthetics. In-app booking with built-in 3-language translation.' },
+      th: { eyebrow: 'การแพทย์ · ภูเก็ต', title: 'คลินิกและแพทย์ — ท่องเที่ยวเชิงการแพทย์ 2.0', subtitle: 'คนไข้ต่างชาติมองหาทันตกรรม ตรวจสุขภาพ และความงาม จองนัดผ่านแอปพร้อมระบบแปล 3 ภาษา' },
     },
     audience: {
       ru: 'Клиники, стоматологи, врачи, эстетическая медицина',
@@ -240,9 +240,9 @@ export const VENDOR_CATEGORIES: Record<VendorCategoryId, VendorCategoryConfig> =
   babysitter: {
     id: 'babysitter', emoji: '👶', commissionPct: 10,
     hero: {
-      ru: { eyebrow: 'BABYSITTER · ПХУКЕТ', title: 'Няни и детские центры', subtitle: 'Родители ищут проверенных нянь с английским и русским. Профиль — в первой пятёрке выдачи.' },
-      en: { eyebrow: 'BABYSITTER · PHUKET', title: 'Babysitters and kids clubs', subtitle: 'Parents look for vetted sitters with English & Russian. Be in the top 5 of results.' },
-      th: { eyebrow: 'พี่เลี้ยงเด็ก · ภูเก็ต', title: 'พี่เลี้ยงและเนิร์สเซอรี่', subtitle: 'พ่อแม่มองหาพี่เลี้ยงที่ผ่านการตรวจสอบและพูดอังกฤษ/รัสเซียได้ ติดอันดับ 5 อันดับแรกในผลค้นหา' },
+      ru: { eyebrow: 'BABYSITTER · ПХУКЕТ', title: 'Няни и детские центры', subtitle: 'Иностранные семьи ищут проверенных нянь с английским и другими языками. Профиль — в первой пятёрке выдачи.' },
+      en: { eyebrow: 'BABYSITTER · PHUKET', title: 'Babysitters and kids clubs', subtitle: 'Expat families look for vetted multilingual sitters. Be in the top 5 of results.' },
+      th: { eyebrow: 'พี่เลี้ยงเด็ก · ภูเก็ต', title: 'พี่เลี้ยงและเนิร์สเซอรี่', subtitle: 'ครอบครัวต่างชาติมองหาพี่เลี้ยงที่ผ่านการตรวจสอบและพูดได้หลายภาษา ติดอันดับ 5 อันดับแรกในผลค้นหา' },
     },
     audience: {
       ru: 'Няни, гувернантки, детские центры, аниматоры',
