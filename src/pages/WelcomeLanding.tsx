@@ -387,7 +387,7 @@ export default function WelcomeLanding() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
-              {tx(language, { ru: 'Создать аккаунт', en: 'Create account' })}
+              {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
             <Link
@@ -399,17 +399,17 @@ export default function WelcomeLanding() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
-              {tx(language, { ru: 'Стать партнёром', en: 'Become a partner' })}
+              {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
             </Link>
           </motion.div>
 
           <p className="mt-3 font-sans text-caption text-muted-foreground">
-            {tx(language, { ru: 'Уже есть аккаунт — ', en: 'Already registered — ' })}
+            {tx(language, { ru: 'Уже есть аккаунт — ', en: 'Already registered — ', th: 'มีบัญชีอยู่แล้ว — ' })}
             <Link
               to={APP_ROUTES.AUTH}
               className="underline underline-offset-4 hover:text-foreground"
             >
-              {tx(language, { ru: 'войти', en: 'sign in' })}
+              {tx(language, { ru: 'войти', en: 'sign in', th: 'เข้าสู่ระบบ' })}
             </Link>
           </p>
 
