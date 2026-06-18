@@ -19,6 +19,7 @@ import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLifeOSRole } from '@/hooks/useLifeOS';
 import { rankServices } from '@/lib/superapp/rankServices';
 import { MiniAppCard } from '@/components/superapp/MiniAppCard';
+import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface NavigatorClusterSectionProps {
