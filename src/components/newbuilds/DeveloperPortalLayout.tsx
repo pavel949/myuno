@@ -11,7 +11,7 @@ import { LayoutDashboard, FolderKanban, Users, BarChart3, Building2, ArrowLeft, 
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
-import { Button } from '@/components/ui/button';
+
 import { PROPERTY_VERTICAL_MUTED_LINK } from '@/design-system/propertyVertical';
 
 const navItems = [
