@@ -46,7 +46,7 @@ export const P13_PET_OWNERS: PersonaLanding = {
   },
   seo: {
     metaTitle: { ru: 'Пхукет с питомцем: ввоз, виллы, ветеринар — myUNO', en: 'Phuket with a pet: import, villas, vet — myUNO' },
-    metaDescription: { ru: 'Pet-friendly виллы, ввоз собаки или кошки по правилам DLD, ветеринар по-русски и груминг. Чек-листы, цены в THB.', en: 'Pet-friendly villas, DLD-compliant cat or dog import, Russian-speaking vet and grooming. Checklists, THB pricing.' },
+    metaDescription: { ru: 'Pet-friendly виллы, ввоз собаки или кошки по правилам DLD, многоязычный ветеринар (EN/RU/TH) и груминг. Чек-листы, цены в THB.', en: 'Pet-friendly villas, DLD-compliant cat or dog import, multilingual vet (EN/RU/TH) and grooming. Checklists, THB pricing.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/pet-owners',
     hreflangAlternates: [
