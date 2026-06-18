@@ -180,8 +180,8 @@ export default function AdminTickets() {
 
         {/* Tickets Table */}
         <Card>
-          <CardContent className="p-0">
-            <Table>
+          <CardContent className="p-0 overflow-x-auto">
+            <Table className="min-w-[820px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Номер</TableHead>

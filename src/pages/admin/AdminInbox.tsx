@@ -214,7 +214,7 @@ export default function AdminInbox() {
 
         {/* Source filter + search */}
         <div className="flex gap-3 mb-4 flex-wrap items-center">
-          <div className="flex gap-1.5 items-center">
+          <div className="flex gap-1.5 items-center flex-wrap">
             <Filter className="w-3.5 h-3.5 text-muted-foreground" />
             <button
               type="button"

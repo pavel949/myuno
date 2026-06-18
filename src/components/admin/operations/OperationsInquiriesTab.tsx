@@ -149,7 +149,7 @@ export function OperationsInquiriesTab() {
             </div>
           ) : (
             <div className="rounded-none border overflow-x-auto">
-              <Table>
+              <Table className="min-w-[720px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{isRussian ? '№ тикета' : 'Ticket #'}</TableHead>

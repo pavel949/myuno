@@ -145,7 +145,7 @@ export function OperationsLeadsTab() {
             </div>
           ) : (
             <div className="rounded-none border overflow-x-auto">
-              <Table>
+              <Table className="min-w-[720px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{isRussian ? 'Компания' : 'Company'}</TableHead>
