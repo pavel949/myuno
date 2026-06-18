@@ -110,8 +110,8 @@ export default function TaxStructuringLanding() {
         en: 'Tax & Structuring in Phuket — myUNO advisory',
       }}
       seoDescription={{
-        ru: 'Налоги, тайская компания, структура владения и международный контекст. Лицензированные юристы myUNO на русском и английском.',
-        en: 'Tax, Thai company, ownership structure and cross-border setup. Licensed myUNO lawyers in English and Russian.',
+        ru: 'Налоги, тайская компания, структура владения и международный контекст. Лицензированные юристы myUNO на нескольких языках (EN/RU/TH).',
+        en: 'Tax, Thai company, ownership structure and cross-border setup. Licensed myUNO lawyers — multilingual support (EN/RU/TH).',
       }}
     >
       <div className="rounded-none border border-border bg-card p-6">
