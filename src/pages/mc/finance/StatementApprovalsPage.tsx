@@ -12,10 +12,12 @@ import { FileCheck, Clock, CheckCircle2, XCircle, ExternalLink } from 'lucide-re
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 export default function StatementApprovalsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { code: cityCurrencyCode } = useCityCurrency();
   const { data: items = [], isLoading } = useCompanyStatementApprovals();
 
   if (isLoading) {
@@ -101,7 +103,7 @@ export default function StatementApprovalsPage() {
                   </div>
                   {item.net_amount != null && (
                     <span className="text-sm font-semibold tabular-nums">
-                      {item.net_amount.toLocaleString()} {item.currency || 'THB'}
+                      {item.net_amount.toLocaleString()} {item.currency || cityCurrencyCode}
                     </span>
                   )}
                   {item.statement_url && (

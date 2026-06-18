@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calculator, Plus, FileCheck2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 const STATUS_COLORS: Record<TaxFilingStatus, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -23,6 +24,7 @@ const STATUS_COLORS: Record<TaxFilingStatus, string> = {
 export default function TaxCenterPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { symbol: curSym } = useCityCurrency();
   const { data: filings, isLoading } = useTaxFilings('all');
   const create = useCreateTaxFiling();
   const updateStatus = useUpdateTaxFilingStatus();
@@ -75,11 +77,11 @@ export default function TaxCenterPage() {
                 <div><Label>{isRu ? 'С даты' : 'From'}</Label><Input type="date" value={form.period_start} onChange={e => setForm({ ...form, period_start: e.target.value })} /></div>
                 <div><Label>{isRu ? 'По дату' : 'To'}</Label><Input type="date" value={form.period_end} onChange={e => setForm({ ...form, period_end: e.target.value })} /></div>
               </div>
-              <div><Label>{isRu ? 'База, ฿' : 'Taxable base, ฿'}</Label><Input type="number" value={form.taxable_base} onChange={e => setForm({ ...form, taxable_base: Number(e.target.value) })} /></div>
+              <div><Label>{isRu ? `База, ${curSym}` : `Taxable base, ${curSym}`}</Label><Input type="number" value={form.taxable_base} onChange={e => setForm({ ...form, taxable_base: Number(e.target.value) })} /></div>
               <div><Label>{isRu ? 'Ставка, %' : 'Rate, %'}</Label><Input type="number" step="0.1" value={form.tax_rate} onChange={e => setForm({ ...form, tax_rate: Number(e.target.value) })} /></div>
               <Card className="p-3 bg-primary/5">
                 <div className="text-xs text-muted-foreground">{isRu ? 'Налог к уплате' : 'Tax due'}</div>
-                <div className="text-2xl font-bold tabular-nums">{fmt((form.taxable_base * form.tax_rate) / 100)} ฿</div>
+                <div className="text-2xl font-bold tabular-nums">{fmt((form.taxable_base * form.tax_rate) / 100)} {curSym}</div>
               </Card>
               <Button className="w-full" disabled={!form.taxable_base} onClick={async () => {
                 await create.mutateAsync(form);
