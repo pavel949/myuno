@@ -18,7 +18,7 @@ export const P13_PET_OWNERS: PersonaLanding = {
   pains: [
     { ru: 'Не знаете, какие документы нужны для ввоза питомца в Таиланд.', en: 'You don’t know which papers are required to import a pet to Thailand.' },
     { ru: 'Большинство вилл и кондо отказывают животным или требуют большой депозит.', en: 'Most villas and condos refuse pets or demand a large deposit.' },
-    { ru: 'Нужен ветеринар по-русски с круглосуточным дежурством.', en: 'You need a Russian-speaking vet on 24/7 standby.' },
+    { ru: 'Нужен многоязычный ветеринар (EN/RU/TH) с круглосуточным дежурством.', en: 'You need a multilingual vet (EN/RU/TH) on 24/7 standby.' },
     { ru: 'Хотите гулять, плавать и есть в кафе с питомцем — не везде это разрешено.', en: 'You want to walk, swim and eat out with your pet — but rules differ per spot.' },
   ],
   services: [
