@@ -127,6 +127,10 @@ export default function RelocationDashboard() {
             </Button>
           </>
         )}
+
+        <div className="mt-6">
+          <ConciergeHelpCTA topic="relocation" variant="card" />
+        </div>
       </div>
     </AppLayout>
   );
