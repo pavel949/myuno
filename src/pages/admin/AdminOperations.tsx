@@ -179,18 +179,18 @@ export default function AdminOperations() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-        <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 w-full">
+        <TabsList className="flex w-full overflow-x-auto h-auto gap-1 bg-muted/50 p-1 justify-start sm:flex-wrap">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.id}
               value={tab.id}
-              className="gap-2 data-[state=active]:bg-background flex-1 sm:flex-none"
+              className="gap-1.5 data-[state=active]:bg-background shrink-0 whitespace-nowrap"
             >
-              <tab.icon className="h-4 w-4" />
-              <span className="hidden sm:inline">{tab.label}</span>
+              <tab.icon className="h-4 w-4 shrink-0" />
+              <span>{tab.label}</span>
               {tab.badge != null && tab.badge > 0 && (
-                <Badge 
-                  variant="destructive" 
+                <Badge
+                  variant="destructive"
                   className="h-5 min-w-[20px] px-1.5 text-xs font-bold"
                 >
                   {tab.badge}
