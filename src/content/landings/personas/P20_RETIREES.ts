@@ -30,7 +30,7 @@ export const P20_RETIREES: PersonaLanding = {
     { slug: 'senior-housing', label: { ru: 'Comfort condo и виллы', en: 'Comfort condos & villas' }, oneLiner: { ru: 'Один уровень, лифт, рядом hospital и market.', en: 'Single level, lift, near hospital and market.' }, href: '/property?audience=senior' },
     { slug: 'thai-healthcare', label: { ru: 'Тайская медицина', en: 'Thai healthcare' }, oneLiner: { ru: 'Bangkok Hospital, BIH, многоязычные кардиологи (EN/RU/TH).', en: 'Bangkok Hospital, BIH, multilingual cardiologists (EN/RU/TH).' }, href: '/services/health/hospitals' },
     { slug: 'senior-community', label: { ru: 'Комьюнити и события', en: 'Community & events' }, oneLiner: { ru: 'Бридж-клуб, шахматы, Telegram-группа 800+.', en: 'Bridge club, chess, 800+ member Telegram group.' }, href: '/community/seniors' },
-    { slug: 'home-help', label: { ru: 'Помощь по дому', en: 'Home help' }, oneLiner: { ru: 'Уборка ฿500/раз, готовка по-русски, ремонт.', en: 'Cleaning ฿500/visit, Russian cooking, repairs.' }, href: '/services/home/cleaning' },
+    { slug: 'home-help', label: { ru: 'Помощь по дому', en: 'Home help' }, oneLiner: { ru: 'Уборка ฿500/раз, домашняя кухня, ремонт.', en: 'Cleaning ฿500/visit, home-style cooking, repairs.' }, href: '/services/home/cleaning' },
   ],
   faq: [
     { q: { ru: 'Какая разница между O-A и O-X visa?', en: 'O-A vs O-X — what is the difference?' }, a: { ru: 'O-A — 1 год + продление, ฿800 000 на счету или ฿65 000/мес дохода. O-X — 5+5 лет, ฿3 млн на счету. Для большинства снежных птиц достаточно O-A.', en: 'O-A — 1 year + renewable, ฿800,000 deposit or ฿65,000/mo income. O-X — 5+5 years, ฿3M deposit. O-A suffices for most snowbirds.' } },
