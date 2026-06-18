@@ -2905,6 +2905,7 @@ export type Database = {
           app_path: string | null
           color: string | null
           created_at: string
+          description_th: string | null
           group_id: string | null
           icon: string | null
           id: string
@@ -2915,6 +2916,7 @@ export type Database = {
           mini_app_type: string | null
           name_en: string
           name_ru: string
+          name_th: string | null
           parent_id: string | null
           persona_codes: Database["public"]["Enums"]["app_persona"][]
           slug: string
@@ -2925,6 +2927,7 @@ export type Database = {
           app_path?: string | null
           color?: string | null
           created_at?: string
+          description_th?: string | null
           group_id?: string | null
           icon?: string | null
           id?: string
@@ -2935,6 +2938,7 @@ export type Database = {
           mini_app_type?: string | null
           name_en: string
           name_ru: string
+          name_th?: string | null
           parent_id?: string | null
           persona_codes?: Database["public"]["Enums"]["app_persona"][]
           slug: string
@@ -2945,6 +2949,7 @@ export type Database = {
           app_path?: string | null
           color?: string | null
           created_at?: string
+          description_th?: string | null
           group_id?: string | null
           icon?: string | null
           id?: string
@@ -2955,6 +2960,7 @@ export type Database = {
           mini_app_type?: string | null
           name_en?: string
           name_ru?: string
+          name_th?: string | null
           parent_id?: string | null
           persona_codes?: Database["public"]["Enums"]["app_persona"][]
           slug?: string
@@ -2998,12 +3004,14 @@ export type Database = {
           created_at: string
           description_en: string | null
           description_ru: string | null
+          description_th: string | null
           icon: string | null
           id: string
           is_active: boolean | null
           is_surface: boolean
           name_en: string
           name_ru: string
+          name_th: string | null
           slug: string
           sort_order: number | null
           surface_id: string | null
@@ -3013,12 +3021,14 @@ export type Database = {
           created_at?: string
           description_en?: string | null
           description_ru?: string | null
+          description_th?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
           is_surface?: boolean
           name_en: string
           name_ru: string
+          name_th?: string | null
           slug: string
           sort_order?: number | null
           surface_id?: string | null
@@ -3028,12 +3038,14 @@ export type Database = {
           created_at?: string
           description_en?: string | null
           description_ru?: string | null
+          description_th?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
           is_surface?: boolean
           name_en?: string
           name_ru?: string
+          name_th?: string | null
           slug?: string
           sort_order?: number | null
           surface_id?: string | null
@@ -3575,6 +3587,117 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      communities: {
+        Row: {
+          address: string | null
+          city: string | null
+          consulate_type: string | null
+          country_code: string | null
+          cover_image_url: string | null
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          description_th: string | null
+          email: string | null
+          gallery: Json | null
+          google_place_id: string | null
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["community_kind"]
+          language_primary: string | null
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string | null
+          name_th: string | null
+          phone: string | null
+          province: string | null
+          religion: Database["public"]["Enums"]["religion_branch"] | null
+          schedule: Json | null
+          slug: string
+          social_links: Json | null
+          source_url: string | null
+          tags: string[] | null
+          telegram: string | null
+          updated_at: string
+          verified_at: string | null
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          consulate_type?: string | null
+          country_code?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          description_th?: string | null
+          email?: string | null
+          gallery?: Json | null
+          google_place_id?: string | null
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["community_kind"]
+          language_primary?: string | null
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru?: string | null
+          name_th?: string | null
+          phone?: string | null
+          province?: string | null
+          religion?: Database["public"]["Enums"]["religion_branch"] | null
+          schedule?: Json | null
+          slug: string
+          social_links?: Json | null
+          source_url?: string | null
+          tags?: string[] | null
+          telegram?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          consulate_type?: string | null
+          country_code?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          description_th?: string | null
+          email?: string | null
+          gallery?: Json | null
+          google_place_id?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["community_kind"]
+          language_primary?: string | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string | null
+          name_th?: string | null
+          phone?: string | null
+          province?: string | null
+          religion?: Database["public"]["Enums"]["religion_branch"] | null
+          schedule?: Json | null
+          slug?: string
+          social_links?: Json | null
+          source_url?: string | null
+          tags?: string[] | null
+          telegram?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
       }
       company_category_settings: {
         Row: {
@@ -10333,12 +10456,14 @@ export type Database = {
           created_at: string | null
           description_en: string | null
           description_ru: string | null
+          description_th: string | null
           icon: string | null
           id: string
           is_active: boolean | null
           priority: number | null
           title_en: string
           title_ru: string
+          title_th: string | null
           updated_at: string | null
         }
         Insert: {
@@ -10347,12 +10472,14 @@ export type Database = {
           created_at?: string | null
           description_en?: string | null
           description_ru?: string | null
+          description_th?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
           priority?: number | null
           title_en: string
           title_ru: string
+          title_th?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -10361,12 +10488,14 @@ export type Database = {
           created_at?: string | null
           description_en?: string | null
           description_ru?: string | null
+          description_th?: string | null
           icon?: string | null
           id?: string
           is_active?: boolean | null
           priority?: number | null
           title_en?: string
           title_ru?: string
+          title_th?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -32818,6 +32947,7 @@ export type Database = {
         | "10m_plus"
       clearview_grade: "AAA" | "AA" | "A" | "BBB" | "B" | "BB" | "CCC"
       clearview_recommendation: "BUY" | "WATCH" | "AVOID"
+      community_kind: "religion" | "club" | "consulate" | "meetup"
       crm_document_type:
         | "passport"
         | "id_card"
@@ -32963,6 +33093,16 @@ export type Database = {
         | "completed"
         | "failed"
         | "cancelled"
+      religion_branch:
+        | "buddhist"
+        | "christian_catholic"
+        | "christian_orthodox"
+        | "christian_protestant"
+        | "muslim"
+        | "jewish"
+        | "hindu"
+        | "sikh"
+        | "other"
       signature_request_status:
         | "draft"
         | "sent"
@@ -33214,6 +33354,7 @@ export const Constants = {
       capital_range: ["sub_100k", "100k_500k", "500k_2m", "2m_10m", "10m_plus"],
       clearview_grade: ["AAA", "AA", "A", "BBB", "B", "BB", "CCC"],
       clearview_recommendation: ["BUY", "WATCH", "AVOID"],
+      community_kind: ["religion", "club", "consulate", "meetup"],
       crm_document_type: [
         "passport",
         "id_card",
@@ -33368,6 +33509,17 @@ export const Constants = {
         "completed",
         "failed",
         "cancelled",
+      ],
+      religion_branch: [
+        "buddhist",
+        "christian_catholic",
+        "christian_orthodox",
+        "christian_protestant",
+        "muslim",
+        "jewish",
+        "hindu",
+        "sikh",
+        "other",
       ],
       signature_request_status: [
         "draft",
