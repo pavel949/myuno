@@ -51,7 +51,7 @@ export const P14_MEDICAL: PersonaLanding = {
   },
   seo: {
     metaTitle: { ru: 'Медицинский туризм на Пхукете: JCI-клиники — myUNO', en: 'Medical tourism on Phuket: JCI hospitals — myUNO' },
-    metaDescription: { ru: 'Bangkok Hospital, BIH, координатор по-русски, cashless страховка и пакеты check-up. Без языкового барьера и переплат.', en: 'Bangkok Hospital, BIH, Russian-speaking coordinator, cashless insurance and check-up packages. No language barrier, no markup.' },
+    metaDescription: { ru: 'Bangkok Hospital, BIH, многоязычный координатор (EN/RU/TH), cashless страховка и пакеты check-up. Без языкового барьера и переплат.', en: 'Bangkok Hospital, BIH, multilingual coordinator (EN/RU/TH), cashless insurance and check-up packages. No language barrier, no markup.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/medical',
     hreflangAlternates: [
