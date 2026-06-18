@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   MessageCircle, 
   Phone, 
@@ -167,6 +167,28 @@ export default function Support() {
           title={isRu ? 'Поддержка' : 'Support'} 
           showBack 
         />
+
+        {/* What to do if… FAQ entry */}
+        <Link
+          to="/support/what-if"
+          className="mb-4 flex items-center justify-between rounded-md border border-border bg-card p-4 transition-colors hover:bg-accent/5"
+        >
+          <div className="flex items-center gap-3">
+            <HelpCircle className="h-5 w-5 text-primary" aria-hidden />
+            <div>
+              <div className="text-sm font-semibold text-foreground">
+                {isRu ? 'Что делать, если…' : 'What to do if…'}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {isRu
+                  ? '40 типовых ситуаций: медицина, дорога, документы, безопасность'
+                  : '40 common situations: medical, road, documents, safety'}
+              </div>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+        </Link>
+
 
         {/* Main WhatsApp CTA */}
         <SectionCard className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">

@@ -1,49 +1,96 @@
-# Фикс B-1/B-2: отсутствующие LIFE_SITUATIONS
 
-## Контекст
+## Цель
 
-В `src/lib/catalog/taxonomy.ts` массив `CLUSTER_LIFE_SITUATIONS` (manage-кластер) ссылается на коды `management_company` и `vendor_onboarding`, которых **нет** в static-массиве `LIFE_SITUATIONS`. Хелпер `buildStaticClusterLifeSituationsMap()` тихо отбрасывает такие записи (имитирует `JOIN ... ON s.code = p.situation_code`), и /discover теряет первичную ситуацию «Управляющая компания» и вторичную «Поставщик услуг» в кластере manage.
+Опубликовать готовый контент «Что делать, если…» (9 категорий, 40 вопросов) внутри уже существующего раздела `/support`. Контент хранится сразу в трёх языках (RU / EN / TH) и переключается через уже существующий в проекте глобальный `LanguageContext` — отдельного локального переключателя не делаем, просто реагируем на текущий язык приложения.
 
-**Проверил БД** (`public.life_situations`): обе ситуации **уже существуют** и активны:
+## Структура
 
-| code | title_ru | title_en | icon | color | priority |
-|---|---|---|---|---|---|
-| management_company | Управляющая компания | Management Company | Building2 | #0A2240 | 100 |
-| vendor_onboarding | Поставщик услуг | Service Provider | Handshake | #D96B1A | 80 |
-
-Значит это **чистый дрейф static SSOT ↔ DB**, а не отсутствующие в системе ситуации. Фикс — синхронизировать static-массив с DB. Миграция не нужна.
-
-## Изменения
-
-**Файл:** `src/lib/catalog/taxonomy.ts`
-
-В блок `// Manage` массива `LIFE_SITUATIONS` (после строки 786 `business`) добавить 2 записи, скопированные 1-в-1 из БД:
+### 1. Данные (single source of truth)
+Новый файл `src/data/whatIfFaq.ts`:
 
 ```ts
-{ code: 'management_company', titleRu: 'Управляющая компания', titleEn: 'Management Company', icon: 'Building2', color: '#0A2240', priority: 100, isActive: true },
-{ code: 'vendor_onboarding',  titleRu: 'Поставщик услуг',     titleEn: 'Service Provider',   icon: 'Handshake', color: '#D96B1A', priority: 80,  isActive: true },
+export type WhatIfLang = 'ru' | 'en' | 'th';
+
+export interface WhatIfItem {
+  id: string;                     // '1.1', '2.3' …
+  q: Record<WhatIfLang, string>;
+  a: Record<WhatIfLang, string>;  // \n для абзацев, '– ' в начале строки → <li>
+}
+
+export interface WhatIfCategory {
+  id: string;                     // medical | beach | road | documents |
+                                  // animals | weather | safety | housing | essentials
+  icon: LucideIcon;               // Stethoscope, Waves, Car, FileText, PawPrint,
+                                  // CloudRain, ShieldAlert, Home, Info
+  title: Record<WhatIfLang, string>;
+  items: WhatIfItem[];
+}
+
+export const WHAT_IF_FAQ: WhatIfCategory[] = [...];
 ```
 
-Других правок не требуется — `CLUSTER_LIFE_SITUATIONS` уже содержит корректные ссылки (строки 825 и 828), `buildStaticClusterLifeSituationsMap()` подхватит их автоматически.
+Контент берётся **1-в-1 из брифа пользователя** (медицина 7, пляж 5, дорога 5, документы 4, животные 4, погода 3, безопасность 5, жильё 3, важное 4 = 40 вопросов). Только лёгкая нормализация переносов строк, без переписывания.
 
-## Почему именно так (а не «перепривязать к managing/business»)
+Тип `Record<WhatIfLang, string>` гарантирует, что **все три языка обязательны** для каждой строки — пропуск перевода = ошибка TypeScript.
 
-| Вариант | Плюсы | Минусы |
+### 2. Страница
+Новый файл `src/pages/support/WhatIfFAQ.tsx`:
+
+- Layout: `MiniAppLayout` (как у остальных support-страниц; не создаём новый shell).
+- `const { language } = useLanguage()` — берём текущий язык глобально, без локального переключателя.
+- H1 + интро из i18n-ключей.
+- Sticky горизонтальный TabsBar с 9 категориями (scrollable на mobile, иконка + название).
+- Внутри каждой категории — shadcn `<Accordion type="single" collapsible>`. Открыт по умолчанию первый вопрос текущей категории.
+- Рендер ответа через локальный `<WhatIfAnswer text={item.a[language]} />`: split по `\n`, строки на `– ` → `<ul><li>`.
+- Каждый `<AccordionItem>` имеет якорь `id="q-1-1"` для глубоких ссылок.
+- SEO: `<SEOHead title=... description=... lang={language} />` (трёхъязычные варианты).
+
+### 3. UI-лейблы оболочки
+В `src/i18n/{ru,en,th}.ts` добавить **только** ключи оболочки (контент вопросов/ответов в i18n не дублируем — он живёт в data-файле):
+- `whatif.title` — «Что делать, если…» / «What to do if…» / «ต้องทำอย่างไรหาก…»
+- `whatif.subtitle`
+- `whatif.emergency.cta` — «Экстренные номера» / «Emergency numbers» / «เบอร์ฉุกเฉิน»
+
+### 4. Роутинг
+`src/components/layout/pageRegistry.ts`:
+```ts
+WhatIfFAQ: lazy(() => import('@/pages/support/WhatIfFAQ')),
+```
+Route в существующем support-блоке: `/support/what-if` + alias `/faq` → редирект на `/support/what-if`.
+
+### 5. Точки входа
+- На `/support` — карточка «Что делать, если…» в верхнем блоке.
+- В `/sos` — ссылка «Подробные инструкции» → `/support/what-if#medical`.
+- В футере раздела помощи — пункт FAQ.
+
+### 6. Аналитика
+Существующий `trackEvent` (`src/lib/analytics/track.ts`):
+- `faq_category_open` { category, language }
+- `faq_question_open` { id, category, language }
+- `faq_emergency_click` { number: '1669' | '191' | '1155' | '199' }
+
+## Техническая дисциплина
+
+- Семантические токены, без хардкода цветов (icon = `text-primary`, акценты = `text-accent`).
+- Touch target ≥44px на `pointer:coarse`.
+- Без новых top-level routes; без новых shell-ов (CLAUDE.md §1.5 hard rules #1–#2).
+- Никаких новых таблиц / Edge Functions — это статичный контент.
+
+## Объём работы
+
+| Файл | Действие | ~строк |
 |---|---|---|
-| **A. Добавить ситуации в static SSOT** ✅ | Сохраняет семантику персон P22 (MC operator) и P25 (service vendor) из Master Taxonomy v1.0. Устраняет дрейф static↔DB. Нулевой риск — данные уже в БД, формат match. | — |
-| B. Заменить коды на `managing`/`business` | Меньше строк | Схлопывает 4 разные JTBD-ситуации в 2, ломает Master Taxonomy v1.0, маскирует дрейф вместо его устранения. |
+| `src/data/whatIfFaq.ts` | создать (контент 40×3) | ~1100 |
+| `src/pages/support/WhatIfFAQ.tsx` | создать | ~180 |
+| `src/components/layout/pageRegistry.ts` | +1 import | +1 |
+| support routes | +1 route + redirect `/faq` | +2 |
+| `src/i18n/{ru,en,th}.ts` | +3 ключа × 3 языка | +9 |
+| `src/pages/Support.tsx` | +карточка-ссылка | +10 |
 
-**Рекомендую: вариант A** — он восстанавливает соответствие канону и устраняет первопричину (рассинхрон static↔DB), а не симптом.
+## Что **не** делаем
 
-## Acceptance
+- Не добавляем локальный переключатель языка на странице — используем глобальный `LanguageContext`.
+- Не выносим FAQ в Supabase (можно позже, если потребуется редактировать без деплоя).
+- Без поиска / PDF-экспорта в MVP.
 
-- `LIFE_SITUATIONS.length` = 23 (было 21).
-- `buildStaticClusterLifeSituationsMap().get('manage')` содержит обе ситуации.
-- /discover для кластера manage показывает «Управляющая компания» (primary) и «Поставщик услуг» (secondary).
-- 🔴 B-1 и B-2 из аудита закрыты.
-
-## Out of scope
-
-- Остальные orphan-сервисы (cost-of-living, halal-*, storage, support, nomad-guide) — отдельная итерация O-1…O-7.
-- Унификация APP_REGISTRY ↔ taxonomy IDs (I-2) и системы персон (I-1).
-- Автоматическая sync-валидация static SSOT ↔ DB (предложить в I-4 отдельно).
+Готов имплементировать по этому плану.
