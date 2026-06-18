@@ -494,7 +494,7 @@ const G_COMPLIANCE: ClusterLanding = {
   relatedPersonas: ['P6', 'P7', 'P8', 'P9', 'P10', 'P20', 'P23'],
   seo: {
     metaTitle: { ru: 'Налоги и право для иностранцев на Пхукете — myUNO', en: 'Tax & legal for foreigners on Phuket — myUNO' },
-    metaDescription: { ru: 'Tax residency, налог с аренды, контракты, due diligence, тайская компания. Цены в THB, юрист по-русски.', en: 'Tax residency, rental tax, contracts, due diligence, Thai company. THB pricing, English-speaking lawyer.' },
+    metaDescription: { ru: 'Tax residency, налог с аренды, контракты, due diligence, тайская компания. Цены в THB, многоязычный юрист (EN/RU/TH).', en: 'Tax residency, rental tax, contracts, due diligence, Thai company. THB pricing, multilingual lawyer (EN/RU/TH).' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/compliance',
     hreflangAlternates: [
@@ -517,8 +517,8 @@ const H_EMERGENCY: ClusterLanding = {
     en: 'Emergency support on Phuket',
   },
   subtitle: {
-    ru: 'Один номер, один чат, чек-листы по ситуациям: ДТП, госпитализация, потеря документов, юридический инцидент. Помогаем по-русски и по-английски 24/7.',
-    en: 'One number, one chat, checklists for accidents, hospital admission, lost documents and legal incidents. Russian and English support 24/7.',
+    ru: 'Один номер, один чат, чек-листы по ситуациям: ДТП, госпитализация, потеря документов, юридический инцидент. Многоязычная поддержка (EN/RU/TH) 24/7.',
+    en: 'One number, one chat, checklists for accidents, hospital admission, lost documents and legal incidents. Multilingual support (EN/RU/TH) 24/7.',
   },
   jobs: [
     { ru: 'Вызвать скорую и попасть в правильную клинику.', en: 'Call an ambulance and reach the right hospital.' },
@@ -556,7 +556,7 @@ const H_EMERGENCY: ClusterLanding = {
   relatedPersonas: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P13', 'P14', 'P19', 'P20', 'P25'],
   seo: {
     metaTitle: { ru: 'Экстренная помощь на Пхукете 24/7 — myUNO', en: 'Emergency support on Phuket 24/7 — myUNO' },
-    metaDescription: { ru: 'Скорая, полиция, потеря документов, ДТП, страховая. Чек-листы по-русски и SOS-чат с ответом за 10 минут.', en: 'Ambulance, police, lost documents, accidents, insurance. Checklists and SOS chat with 10-minute response.' },
+    metaDescription: { ru: 'Скорая, полиция, потеря документов, ДТП, страховая. Многоязычные чек-листы (EN/RU/TH) и SOS-чат с ответом за 10 минут.', en: 'Ambulance, police, lost documents, accidents, insurance. Multilingual checklists (EN/RU/TH) and SOS chat with 10-minute response.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/emergency',
     hreflangAlternates: [
@@ -703,8 +703,8 @@ const E_TRANSACTION: ClusterLanding = {
     en: 'Property transactions on Phuket',
   },
   subtitle: {
-    ru: 'От задатка до Land Office: due diligence, эскроу, перевод средств, налоги и регистрация. Сопровождение юристом по-русски на каждом шаге.',
-    en: 'From deposit to Land Office: due diligence, escrow, FX transfer, taxes and registration. Russian-speaking lawyer at every step.',
+    ru: 'От задатка до Land Office: due diligence, эскроу, перевод средств, налоги и регистрация. Сопровождение многоязычным юристом (EN/RU/TH) на каждом шаге.',
+    en: 'From deposit to Land Office: due diligence, escrow, FX transfer, taxes and registration. Multilingual lawyer (EN/RU/TH) at every step.',
   },
   jobs: [
     { ru: 'Подписать reservation agreement и внести задаток без рисков.', en: 'Sign a reservation agreement and pay the deposit safely.' },
@@ -742,7 +742,7 @@ const E_TRANSACTION: ClusterLanding = {
   relatedPersonas: ['P2', 'P8', 'P9', 'P11', 'P12'],
   seo: {
     metaTitle: { ru: 'Сделка с недвижимостью на Пхукете: due diligence — myUNO', en: 'Phuket property deals: due diligence to closing — myUNO' },
-    metaDescription: { ru: 'Reservation, due diligence, FET, SPA и Land Office, налоги. Сопровождение юристом по-русски от задатка до ключей.', en: 'Reservation, due diligence, FET, SPA, Land Office and taxes. Russian-speaking lawyer from deposit to keys.' },
+    metaDescription: { ru: 'Reservation, due diligence, FET, SPA и Land Office, налоги. Многоязычный юрист (EN/RU/TH) от задатка до ключей.', en: 'Reservation, due diligence, FET, SPA, Land Office and taxes. Multilingual lawyer (EN/RU/TH) from deposit to keys.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/transaction',
     hreflangAlternates: [

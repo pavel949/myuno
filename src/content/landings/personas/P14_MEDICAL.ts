@@ -15,8 +15,8 @@ export const P14_MEDICAL: PersonaLanding = {
     en: 'Medical tourism on Phuket: clinics and concierge',
   },
   subtitle: {
-    ru: 'JCI-аккредитованные госпитали, координатор по-русски, страховой cashless и пакеты check-up — лечение и обследование без языкового барьера и переплат.',
-    en: 'JCI-accredited hospitals, Russian-speaking coordinator, cashless insurance and check-up packages — treatment and diagnostics without language barrier or markup.',
+    ru: 'JCI-аккредитованные госпитали, многоязычный координатор (EN/RU/TH), страховой cashless и пакеты check-up — лечение и обследование без языкового барьера и переплат.',
+    en: 'JCI-accredited hospitals, multilingual coordinator (EN/RU/TH), cashless insurance and check-up packages — treatment and diagnostics without language barrier or markup.',
   },
   pains: [
     { ru: 'Не понятно, в какую клинику с какой проблемой ехать.', en: 'Unclear which hospital to choose for which condition.' },
@@ -26,7 +26,7 @@ export const P14_MEDICAL: PersonaLanding = {
   ],
   services: [
     { slug: 'hospital-match', label: { ru: 'Подбор клиники', en: 'Hospital matching' }, oneLiner: { ru: 'Bangkok Hospital, BIH, Mission, Vachira — под диагноз и бюджет.', en: 'Bangkok Hospital, BIH, Mission, Vachira — by diagnosis and budget.' }, href: '/services/health/hospitals' },
-    { slug: 'medical-coordinator', label: { ru: 'Координатор по-русски', en: 'Russian-speaking coordinator' }, oneLiner: { ru: 'Сопровождение на приёмы, перевод заключений.', en: 'Appointment escort, report translation.' }, href: '/concierge?topic=medical' },
+    { slug: 'medical-coordinator', label: { ru: 'Многоязычный координатор', en: 'Multilingual coordinator' }, oneLiner: { ru: 'Сопровождение на приёмы, перевод заключений (EN/RU/TH).', en: 'Appointment escort, report translation (EN/RU/TH).' }, href: '/concierge?topic=medical' },
     { slug: 'insurance-liaison', label: { ru: 'Связь со страховой', en: 'Insurance liaison' }, oneLiner: { ru: 'Cashless approval и работа с ассистансом.', en: 'Cashless approval and assistance coordination.' }, href: '/services/insurance/liaison' },
     { slug: 'checkup', label: { ru: 'Пакеты check-up', en: 'Check-up packages' }, oneLiner: { ru: 'Executive ฿18 000, кардио ฿28 000, женский ฿22 000.', en: 'Executive ฿18,000, cardio ฿28,000, women’s ฿22,000.' }, href: '/services/health/checkup' },
     { slug: 'dental', label: { ru: 'Стоматология', en: 'Dentistry' }, oneLiner: { ru: 'Имплантация Straumann ฿55 000, виниры ฿18 000.', en: 'Straumann implants ฿55,000, veneers ฿18,000.' }, href: '/services/health/dental' },
@@ -51,7 +51,7 @@ export const P14_MEDICAL: PersonaLanding = {
   },
   seo: {
     metaTitle: { ru: 'Медицинский туризм на Пхукете: JCI-клиники — myUNO', en: 'Medical tourism on Phuket: JCI hospitals — myUNO' },
-    metaDescription: { ru: 'Bangkok Hospital, BIH, координатор по-русски, cashless страховка и пакеты check-up. Без языкового барьера и переплат.', en: 'Bangkok Hospital, BIH, Russian-speaking coordinator, cashless insurance and check-up packages. No language barrier, no markup.' },
+    metaDescription: { ru: 'Bangkok Hospital, BIH, многоязычный координатор (EN/RU/TH), cashless страховка и пакеты check-up. Без языкового барьера и переплат.', en: 'Bangkok Hospital, BIH, multilingual coordinator (EN/RU/TH), cashless insurance and check-up packages. No language barrier, no markup.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/medical',
     hreflangAlternates: [

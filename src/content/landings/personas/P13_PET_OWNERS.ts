@@ -12,19 +12,19 @@ export const P13_PET_OWNERS: PersonaLanding = {
   status: 'live',
   h1: { ru: 'Пхукет с питомцем: ввоз, виллы, ветеринар', en: 'Phuket with a pet: import, villas, vet' },
   subtitle: {
-    ru: 'Помогаем оформить ввоз собаки или кошки, найти pet-friendly виллу и подключить ветеринара по-русски.',
-    en: 'We help you import a dog or cat, find a pet-friendly villa and connect with a Russian-speaking vet.',
+    ru: 'Помогаем оформить ввоз собаки или кошки, найти pet-friendly виллу и подключить многоязычного ветеринара (EN/RU/TH).',
+    en: 'We help you import a dog or cat, find a pet-friendly villa and connect with a multilingual vet (EN/RU/TH).',
   },
   pains: [
     { ru: 'Не знаете, какие документы нужны для ввоза питомца в Таиланд.', en: 'You don’t know which papers are required to import a pet to Thailand.' },
     { ru: 'Большинство вилл и кондо отказывают животным или требуют большой депозит.', en: 'Most villas and condos refuse pets or demand a large deposit.' },
-    { ru: 'Нужен ветеринар по-русски с круглосуточным дежурством.', en: 'You need a Russian-speaking vet on 24/7 standby.' },
+    { ru: 'Нужен многоязычный ветеринар (EN/RU/TH) с круглосуточным дежурством.', en: 'You need a multilingual vet (EN/RU/TH) on 24/7 standby.' },
     { ru: 'Хотите гулять, плавать и есть в кафе с питомцем — не везде это разрешено.', en: 'You want to walk, swim and eat out with your pet — but rules differ per spot.' },
   ],
   services: [
     { slug: 'pet-import', label: { ru: 'Ввоз питомца', en: 'Pet import' }, oneLiner: { ru: 'Полный пакет: чип, прививки, R7, перевозка из аэропорта.', en: 'Full pack: chip, shots, R7, airport pickup.' }, href: '/pets/import' },
     { slug: 'pet-friendly-villas', label: { ru: 'Pet-friendly виллы', en: 'Pet-friendly villas' }, oneLiner: { ru: 'Каталог проверенных вилл, где питомца действительно ждут.', en: 'Verified villas where pets are actually welcome.' }, href: '/property?petFriendly=1' },
-    { slug: 'vet-network', label: { ru: 'Ветеринары по-русски', en: 'Russian-speaking vets' }, oneLiner: { ru: 'Сеть из 6 клиник, доступ 24/7, скидка участникам.', en: '6-clinic network, 24/7 access, member discount.' }, href: '/pets/vets' },
+    { slug: 'vet-network', label: { ru: 'Многоязычные ветеринары', en: 'Multilingual vets' }, oneLiner: { ru: 'Сеть из 6 клиник (EN/RU/TH), доступ 24/7, скидка участникам.', en: '6-clinic network (EN/RU/TH), 24/7 access, member discount.' }, href: '/pets/vets' },
     { slug: 'grooming-care', label: { ru: 'Груминг и зоомагазины', en: 'Grooming & pet shops' }, oneLiner: { ru: 'Премиум-уход в Раваи и Чалонге, доставка корма.', en: 'Premium care in Rawai and Chalong, pet-food delivery.' }, href: '/pets/care' },
   ],
   faq: [
@@ -46,7 +46,7 @@ export const P13_PET_OWNERS: PersonaLanding = {
   },
   seo: {
     metaTitle: { ru: 'Пхукет с питомцем: ввоз, виллы, ветеринар — myUNO', en: 'Phuket with a pet: import, villas, vet — myUNO' },
-    metaDescription: { ru: 'Pet-friendly виллы, ввоз собаки или кошки по правилам DLD, ветеринар по-русски и груминг. Чек-листы, цены в THB.', en: 'Pet-friendly villas, DLD-compliant cat or dog import, Russian-speaking vet and grooming. Checklists, THB pricing.' },
+    metaDescription: { ru: 'Pet-friendly виллы, ввоз собаки или кошки по правилам DLD, многоязычный ветеринар (EN/RU/TH) и груминг. Чек-листы, цены в THB.', en: 'Pet-friendly villas, DLD-compliant cat or dog import, multilingual vet (EN/RU/TH) and grooming. Checklists, THB pricing.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/pet-owners',
     hreflangAlternates: [

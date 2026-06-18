@@ -83,12 +83,12 @@ const OVERRIDES: OverrideMap = {
         ru: [
           'Бренд-резиденции (Banyan Tree, Angsana, Dusit) — управление всё включено, можно оставить ключи и улететь.',
           'Спокойная северная сторона: семейный пляж 6 км, без ночных клубов, прямые такси до аэропорта 25 мин.',
-          'Готовое русскоязычное комьюнити: врачи, репетиторы, фитнес — мягкая адаптация при сезонном проживании.',
+          'Готовое международное комьюнити (EN/RU/TH): врачи, репетиторы, фитнес — мягкая адаптация при сезонном проживании.',
         ],
         en: [
           'Branded residences (Banyan Tree, Angsana, Dusit) — fully managed, lock-up-and-leave with hotel-grade service.',
           'Quiet north-shore: 6 km family beach, no nightclubs, 25-min direct airport transfer.',
-          'Established Russian-speaking community — doctors, tutors, fitness — soft landing for seasonal residents.',
+          'Established international community (EN/RU/TH) — doctors, tutors, fitness — soft landing for seasonal residents.',
         ],
       },
       whatsappMessage: {
@@ -102,8 +102,8 @@ const OVERRIDES: OverrideMap = {
     },
     families: {
       intro: {
-        ru: 'Bang Tao — район №1 для семей с детьми на Пхукете: UWC International School в 5 минутах, парк Blue Tree, безопасный пляж с пологим входом и плотное русскоязычное комьюнити.',
-        en: 'Bang Tao is Phuket\'s #1 family district: UWC International School 5 minutes away, Blue Tree water park, gentle family beach and a dense Russian-speaking expat community.',
+        ru: 'Bang Tao — район №1 для семей с детьми на Пхукете: UWC International School в 5 минутах, парк Blue Tree, безопасный пляж с пологим входом и плотное международное экспат-комьюнити (EN/RU/TH).',
+        en: 'Bang Tao is Phuket\'s #1 family district: UWC International School 5 minutes away, Blue Tree water park, gentle family beach and a dense international expat community (EN/RU/TH).',
       },
       reasons: {
         ru: [
