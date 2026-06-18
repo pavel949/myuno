@@ -36,6 +36,17 @@ const ROLE_VISIBLE_CLUSTERS: Record<LifeOSRole, ClusterId[]> = {
   vendor:    ['manage', 'legal', 'live'],
 };
 
+/** Clusters explicitly hidden per role — never shown, even in "Other areas". */
+const ROLE_HIDDEN_CLUSTERS: Record<LifeOSRole, ClusterId[]> = {
+  guest:     ['manage', 'build', 'invest'],
+  resident:  ['manage', 'build'],
+  owner:     ['build'],
+  mc:        ['build'],
+  investor:  [],
+  developer: [],
+  vendor:    ['build', 'invest'],
+};
+
 /** Build situationCode -> primary clusterId map from SSOT. */
 function buildSituationClusterMap(): Record<string, ClusterId> {
   const map: Record<string, { clusterId: ClusterId; weight: number; isPrimary: boolean }> = {};
