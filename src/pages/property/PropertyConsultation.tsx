@@ -355,7 +355,8 @@ export default function PropertyConsultation() {
           },
           entry_point: '/property/consultation',
           lead_source: 'developer_persona',
-          currency: 'THB',
+          currency: leadCurrency,
+
         });
         setIsSuccess(true);
         return;
