@@ -147,6 +147,7 @@ export default function ServicesIndex() {
 
   const handleCategoryChange = (cat: string) => {
     setSelectedCategory(cat);
+    setOriginalSlug(null);
     const newParams = new URLSearchParams(searchParams);
     if (cat === 'all') {
       newParams.delete('category');
