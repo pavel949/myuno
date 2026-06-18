@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { AgentDeal } from '@/hooks/useAgentDeals';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useCrmContact, useUpdateContact, useDeleteContact } from '@/hooks/useCrmContacts';
 import { supabase } from '@/integrations/supabase/client';
@@ -189,6 +191,8 @@ export default function ContactDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
   const { user } = useAuth();
@@ -380,7 +384,7 @@ export default function ContactDetail() {
   const opportunityCount = deals.filter(d => !['closed_won', 'closed_lost'].includes(d.stage)).length;
   const wonDealCount = deals.filter(d => d.stage === 'closed_won').length;
 
-  const dealCurrency = deals[0]?.currency || 'THB';
+  const dealCurrency = deals[0]?.currency || cityCurrencyCode;
 
 
 
@@ -981,7 +985,8 @@ export default function ContactDetail() {
                                 <Badge variant="secondary" className="text-[10px]">{stLabel || stage}</Badge>
                                 {(d.deal_value != null || d.budget_max != null) && (
                                   <span className="text-[11px] text-muted-foreground">
-                                    {Number(d.deal_value ?? d.budget_max ?? 0).toLocaleString()} {d.currency || contact.currency || 'THB'}
+                                    {Number(d.deal_value ?? d.budget_max ?? 0).toLocaleString()} {d.currency || contact.currency || cityCurrencyCode}
+
                                   </span>
                                 )}
                               </div>
@@ -1404,7 +1409,7 @@ export default function ContactDetail() {
                             <Badge variant="secondary" className="text-[10px]">{stLabel || stage}</Badge>
                             {(d.deal_value != null || d.budget_max != null) && (
                               <span className="text-[11px] text-muted-foreground">
-                                {Number(d.deal_value ?? d.budget_max ?? 0).toLocaleString()} {d.currency || contact.currency || 'THB'}
+                                {Number(d.deal_value ?? d.budget_max ?? 0).toLocaleString()} {d.currency || contact.currency || cityCurrencyCode}
                               </span>
                             )}
                           </div>

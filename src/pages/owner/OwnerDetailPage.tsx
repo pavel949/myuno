@@ -5,6 +5,8 @@ import React, { useMemo } from 'react';
 import OwnerPortalSetupCard from '@/components/owner/owners/OwnerPortalSetupCard';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useOwnerAccounts, useOwnerAccountDetail } from '@/hooks/useOwnerAccounts';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,6 +46,8 @@ export default function OwnerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
+
   const isRu = language === 'ru';
   const { data: owners, isLoading: ownersLoading } = useOwnerAccounts();
   const { data: detail, isLoading: detailLoading } = useOwnerAccountDetail(id || null);
