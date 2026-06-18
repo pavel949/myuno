@@ -41,12 +41,43 @@ const normalizeLanguage = (value: string | null): Language => {
   return 'ru';
 };
 
-function readLanguageFromLocalStorage(): Language {
+/**
+ * Detect a sensible default language for first-time visitors:
+ *   1) explicit choice stored in localStorage wins,
+ *   2) otherwise look at navigator.languages (browser preference order),
+ *   3) fall back to Russian (исторический дефолт платформы).
+ * The detected language is persisted so subsequent visits skip detection.
+ */
+function detectInitialLanguage(): Language {
   try {
-    return normalizeLanguage(localStorage.getItem(LANGUAGE_LS_KEY));
+    const stored = localStorage.getItem(LANGUAGE_LS_KEY);
+    if (isValidLanguage(stored)) return stored;
   } catch {
-    return 'ru';
+    /* private mode */
   }
+  try {
+    const candidates: readonly string[] =
+      typeof navigator !== 'undefined' && Array.isArray(navigator.languages) && navigator.languages.length > 0
+        ? navigator.languages
+        : typeof navigator !== 'undefined' && navigator.language
+          ? [navigator.language]
+          : [];
+    for (const raw of candidates) {
+      const tag = raw.toLowerCase().split('-')[0];
+      if (tag === 'ru') return 'ru';
+      if (tag === 'th') return 'th';
+      if (tag === 'en') return 'en';
+    }
+    // Anything else (es/fr/de/zh/…) → English is the safer international default.
+    if (candidates.length > 0) return 'en';
+  } catch {
+    /* SSR / restricted env */
+  }
+  return 'ru';
+}
+
+function readLanguageFromLocalStorage(): Language {
+  return detectInitialLanguage();
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
