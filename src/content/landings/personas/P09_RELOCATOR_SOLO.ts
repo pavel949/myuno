@@ -30,7 +30,7 @@ export const P09_RELOCATOR_SOLO: PersonaLanding = {
     { slug: 'bank-account', label: { ru: 'Тайский банк', en: 'Thai bank account' }, oneLiner: { ru: 'Kasikorn / Bangkok Bank — за один визит.', en: 'Kasikorn / Bangkok Bank — opened in one visit.' }, href: '/banking' },
     { slug: 'tax-consultation', label: { ru: 'Налоговая консультация', en: 'Tax consultation' }, oneLiner: { ru: 'Резидентство, DTA, отчётность — ฿3 500.', en: 'Residency, DTA, reporting — ฿3,500.' }, href: '/legal/tax' },
     { slug: 'expat-insurance', label: { ru: 'Страховка для экспата', en: 'Expat insurance' }, oneLiner: { ru: 'От ฿35 000/год с эвакуацией.', en: 'From ฿35,000/year with evacuation.' }, href: '/legal/insurance' },
-    { slug: 'lawyer-consultation', label: { ru: 'Консультация юриста', en: 'Lawyer consultation' }, oneLiner: { ru: '60 минут по-русски, ฿2 000.', en: '60 minutes in English/Russian, ฿2,000.' }, href: '/legal/consultation' },
+    { slug: 'lawyer-consultation', label: { ru: 'Консультация юриста', en: 'Lawyer consultation' }, oneLiner: { ru: '60 минут (EN/RU/TH), ฿2 000.', en: '60 minutes (EN/RU/TH), ฿2,000.' }, href: '/legal/consultation' },
   ],
   faq: [
     { q: { ru: 'DTV или Non-B — что лучше для фрилансера?', en: 'DTV or Non-B for a freelancer?' }, a: { ru: 'DTV (Destination Thailand Visa) — 5 лет, дешевле, для удалёнки и фрилансеров без локального дохода. Non-B — если планируете оформлять Work Permit и работать на тайскую компанию. Подбор — в Visa Quiz.', en: 'DTV (Destination Thailand Visa) — 5 years, cheaper, for remote workers/freelancers without Thai income. Non-B — if you plan a Work Permit and Thai employment. Use Visa Quiz.' } },
