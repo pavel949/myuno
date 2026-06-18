@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
     })
   }
 
-  console.log('Suppression processed', {
+  console.info('Suppression processed', {
     email_redacted: normalizedEmail[0] + '***@' + normalizedEmail.split('@')[1],
     reason: payload.reason,
     is_retry: payload.is_retry,

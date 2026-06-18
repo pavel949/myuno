@@ -191,7 +191,7 @@ async function sendEmail(
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
   
   if (!RESEND_API_KEY) {
-    console.log("[Email] RESEND_API_KEY not configured");
+    console.info("[Email] RESEND_API_KEY not configured");
     return false;
   }
 
@@ -238,7 +238,7 @@ async function processOutreach(
     const channel: "email" | "whatsapp" = contact.phone ? "whatsapp" : "email";
     
     if (channel === "email" && !contact.email) {
-      console.log(`[Outreach] Skipping ${contact.id} — no contact info`);
+      console.info(`[Outreach] Skipping ${contact.id} — no contact info`);
       continue;
     }
 
@@ -354,7 +354,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`[Outreach] Processing ${contacts.length} contacts (sequence ${sequence})`);
+    console.info(`[Outreach] Processing ${contacts.length} contacts (sequence ${sequence})`);
 
     const results = await processOutreach(supabase, contacts, sequence);
     const successful = results.filter(r => r.success).length;

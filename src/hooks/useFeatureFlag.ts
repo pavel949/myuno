@@ -4,7 +4,7 @@
  * Source of truth: `system_settings.value` (jsonb). Accepts boolean/"true"/"on"/1.
  * Default = `false` (gates the feature off until explicitly enabled in DB).
  *
- * Used by RERE blocks (RealEstateEntry, TrustAsAService) and ClearView/Pricing
+ * Used by RERE blocks (RealEstateEntry) and ClearView/Pricing
  * surfaces to honour rule §13.7 (every new feature gated until GA).
  */
 import { useQuery } from '@tanstack/react-query';

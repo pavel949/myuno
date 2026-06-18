@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const logStep = (step: string, details?: unknown) => {
-  console.log(`[CHECK-MC-SUB] ${step}`, details ? JSON.stringify(details) : "");
+  console.info(`[CHECK-MC-SUB] ${step}`, details ? JSON.stringify(details) : "");
 };
 
 Deno.serve(async (req) => {

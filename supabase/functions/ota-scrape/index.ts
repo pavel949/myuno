@@ -105,7 +105,7 @@ async function extractWithAI(markdown: string, platform: string, platformName: s
   
   const apiKey = Deno.env.get('LOVABLE_API_KEY');
   if (!apiKey) {
-    console.log('No LOVABLE_API_KEY, falling back to regex parsing');
+    console.info('No LOVABLE_API_KEY, falling back to regex parsing');
     return parseWithRegex(markdown);
   }
 
@@ -475,7 +475,7 @@ Deno.serve(async (req) => {
       formattedUrl = `https://${formattedUrl}`;
     }
 
-    console.log(`Scraping ${platform_name || platform} listing: ${formattedUrl}`);
+    console.info(`Scraping ${platform_name || platform} listing: ${formattedUrl}`);
 
     // Scrape the page
     const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
@@ -504,7 +504,7 @@ Deno.serve(async (req) => {
     }
 
     const markdown = scrapeData.data?.markdown || '';
-    console.log(`Scraped ${markdown.length} chars from ${platform_name}`);
+    console.info(`Scraped ${markdown.length} chars from ${platform_name}`);
 
     // Extract listing data (AI-enhanced or regex fallback)
     const listing = await extractWithAI(markdown, platform || 'generic', platform_name || 'OTA');
@@ -520,7 +520,7 @@ Deno.serve(async (req) => {
       listing.cover_photo = photos[0].url;
     }
 
-    console.log('Extracted listing:', JSON.stringify({
+    console.info('Extracted listing:', JSON.stringify({
       fields: Object.keys(listing).sort(),
       title: listing.title,
       descriptionLength: listing.description?.length || 0,

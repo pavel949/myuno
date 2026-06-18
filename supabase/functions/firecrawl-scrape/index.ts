@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
       formattedUrl = `https://${formattedUrl}`;
     }
 
-    console.log('Scraping URL:', formattedUrl);
+    console.info('Scraping URL:', formattedUrl);
 
     const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
       method: 'POST',
@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Scrape successful');
+    console.info('Scrape successful');
     return new Response(
       JSON.stringify(data),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

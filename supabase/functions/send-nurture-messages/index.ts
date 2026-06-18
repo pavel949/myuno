@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`[Nurture] Processed: ${sentCount} sent, ${failCount} failed`);
+    console.info(`[Nurture] Processed: ${sentCount} sent, ${failCount} failed`);
 
     return new Response(
       JSON.stringify({ ok: true, processed: pendingMessages.length, sent: sentCount, failed: failCount }),

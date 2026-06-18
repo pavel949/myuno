@@ -50,7 +50,7 @@ export function buildPropertyPayload({
     is_active: approvalStatus === 'draft' ? false : undefined,
     rental_platform: rental_platforms?.length ? rental_platforms[0] : undefined,
     // listing_modes is a denormalised cache mirrored from tenancy_modes/sale_intent
-    // so legacy consumers (useStaysSearch, PropertyCard) keep working.
+    // so the PropertyCard renderer can read intent without joining two columns.
     listing_modes: Array.from(new Set([
       ...(platform_listed ? ['platform'] : []),
       ...((is_for_sale || (cleanData as any).sale_intent) ? ['sale'] : []),

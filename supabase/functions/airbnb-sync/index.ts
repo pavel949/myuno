@@ -387,10 +387,10 @@ Deno.serve(async (req) => {
     // CRITICAL: Normalize URL — convert hosting/editor URLs to public listing URLs
     const originalUrl = url;
     url = normalizeAirbnbUrl(url);
-    console.log(`Normalized URL: ${originalUrl} -> ${url}`);
+    console.info(`Normalized URL: ${originalUrl} -> ${url}`);
 
     const listingId = extractAirbnbListingId(url);
-    console.log(`Syncing Airbnb listing: ${url} (ID: ${listingId})`);
+    console.info(`Syncing Airbnb listing: ${url} (ID: ${listingId})`);
 
     // Create sync log entry
     const { data: syncLog, error: logError } = await supabase
@@ -408,7 +408,7 @@ Deno.serve(async (req) => {
     }
 
     // Scrape the Airbnb listing using Firecrawl
-    console.log('Calling Firecrawl API...');
+    console.info('Calling Firecrawl API...');
     const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
       method: 'POST',
       headers: {
@@ -465,7 +465,7 @@ Deno.serve(async (req) => {
 
     const markdown = scrapeData.data?.markdown || '';
     const html = scrapeData.data?.html || '';
-    console.log(`Scraped ${markdown.length} chars markdown, ${html.length} chars HTML`);
+    console.info(`Scraped ${markdown.length} chars markdown, ${html.length} chars HTML`);
 
     // Parse the listing data from both markdown and HTML
     const listingData = parseAirbnbListing(markdown, html, url);
@@ -524,7 +524,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log('Parsed listing data:', JSON.stringify({
+    console.info('Parsed listing data:', JSON.stringify({
       title: listingData.title,
       bedrooms: listingData.bedrooms,
       bathrooms: listingData.bathrooms,
@@ -610,7 +610,7 @@ Deno.serve(async (req) => {
         .eq('id', connectionId);
     }
 
-    console.log(`Sync complete in ${Date.now() - startTime}ms`);
+    console.info(`Sync complete in ${Date.now() - startTime}ms`);
 
     return new Response(
       JSON.stringify({

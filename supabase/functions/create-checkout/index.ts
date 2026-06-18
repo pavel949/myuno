@@ -46,7 +46,7 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
  
      if (!order_id || !amount) throw new Error("Missing order_id or amount");
  
-     console.log(`[create-checkout] Processing ${order_type} order ${order_id} for ${amount} ${currency}`);
+     console.info(`[create-checkout] Processing ${order_type} order ${order_id} for ${amount} ${currency}`);
  
      const stripe = createStripeClient();
  
@@ -101,7 +101,7 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
        .update({ metadata: { stripe_session_id: session.id } })
        .eq('id', order_id);
  
-     console.log(`[create-checkout] Session created: ${session.id}`);
+     console.info(`[create-checkout] Session created: ${session.id}`);
  
      return new Response(
        JSON.stringify({ url: session.url, sessionId: session.id }),

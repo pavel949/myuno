@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
       ? `Напиши описание для: "${name}"\n\n${contextInfo ? `Дополнительная информация:\n${contextInfo}` : ''}`
       : `Write a description for: "${name}"\n\n${contextInfo ? `Additional information:\n${contextInfo}` : ''}`;
 
-    console.log(`Generating ${type} description for: ${name} (${language})`);
+    console.info(`Generating ${type} description for: ${name} (${language})`);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
     const data = await response.json();
     const description = data.choices?.[0]?.message?.content || "";
 
-    console.log(`Generated description (${description.length} chars)`);
+    console.info(`Generated description (${description.length} chars)`);
 
     // Log usage asynchronously (non-blocking)
     if (agentConfig?.id) {

@@ -145,7 +145,7 @@ export function createNotifyHandler(name: string, handler: NotifyHandler) {
     }
     try {
       const body = await req.json();
-      console.log(`[${name}] Processing notification`);
+      console.info(`[${name}] Processing notification`);
       const result = await handler(body);
       return new Response(JSON.stringify(result), {
         status: result.success ? 200 : 500,

@@ -171,8 +171,10 @@ export function GoogleMapsProvider({ children }: { children: React.ReactNode }) 
 
 export function useGoogleMaps() {
   const ctx = useContext(GoogleMapsContext);
-  if (!ctx) {
-    throw new Error('useGoogleMaps must be used within GoogleMapsProvider');
-  }
-  return ctx;
+  // GoogleMapsProvider lives in DeferredProviders (one paint after first
+  // render) so any component that calls this hook before the gate flips
+  // would otherwise crash its subtree. Return a stable "no key / not
+  // loaded" fallback instead — matches the contract in App.tsx that
+  // every deferred provider's hook handles the undefined-context case.
+  return ctx ?? noKeyValue;
 }

@@ -1,12 +1,13 @@
 /**
  * NavigatorPage v3 — situation-first discovery.
  *
- * Replaces the v2 cluster/persona grid with a flat grid of life situations
+ * Canonical /discover surface. Renders a flat grid of life situations
  * sourced from `life_situations` (admin-managed). Each card navigates to
  * `/discover/:code` where services are listed via `resolve_life_os_context`.
  *
- * Gated by `feature_flag:navigator_v3` (system_settings). When OFF, the
- * existing NavigatorPage renders instead. See `NavigatorEntry`.
+ * GA on 2026-06-16 (migration 20260616013024). The previous cluster-grid
+ * variant (v2 `NavigatorPage.tsx`) and the feature-flag switch
+ * (`NavigatorEntry.tsx`) were retired in the cleanup that followed.
  */
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';

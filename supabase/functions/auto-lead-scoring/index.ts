@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`[AUTO-LEAD-SCORING] Found ${unscoredLeads.length} unscored leads`);
+    console.info(`[AUTO-LEAD-SCORING] Found ${unscoredLeads.length} unscored leads`);
 
     // 2. Score each lead via leads-factory/batch-score
     const { data: batchResult, error: batchError } = await supabase.functions.invoke(
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
                 },
               },
             });
-            console.log(`[AUTO-LEAD-SCORING] Notified admin about ${hotLeads.length} hot leads`);
+            console.info(`[AUTO-LEAD-SCORING] Notified admin about ${hotLeads.length} hot leads`);
           } catch (notifyErr) {
             console.error("[AUTO-LEAD-SCORING] Notification error:", notifyErr);
           }
@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
       results.scored += contactedResult.processed || 0;
     }
 
-    console.log(`[AUTO-LEAD-SCORING] Done:`, results);
+    console.info(`[AUTO-LEAD-SCORING] Done:`, results);
 
     return new Response(
       JSON.stringify({ success: true, results }),

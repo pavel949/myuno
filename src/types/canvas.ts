@@ -26,7 +26,6 @@
  *
  * Adoption status (as of 2026-05-20 taxonomy audit, obs 3101):
  *  - ✅ Runtime classifier — `canvasFromPath()` below; consumed by
- *    `useCurrentCanvas()` (`src/hooks/useCurrentCanvas.ts`) and by
  *    `NavShell` as a `data-canvas` attribute for CSS / analytics targeting.
  *  - 🚧 Route-tree typing — `AnimatedRoutes.tsx` / `pageRegistry.ts` still
  *    use plain `<Route>` definitions, not `CanvasId`-keyed groups. Migrate

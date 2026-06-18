@@ -109,6 +109,6 @@ Deno.serve(createNotifyHandler("notify-vendor-order", async (body) => {
     }
   }
 
-  console.log(`[notify-vendor-order] Results for order ${order_id}:`, results);
+  console.info(`[notify-vendor-order] Results for order ${order_id}:`, results);
   return { success: true, results };
 }));

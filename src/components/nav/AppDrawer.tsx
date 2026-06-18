@@ -5,7 +5,7 @@
  *  - Secondary navigation surface that exposes the FULL platform map in
  *    one tap from any consumer screen, without crowding the 5-slot
  *    bottom-bar or top header.
- *  - Reads from SSOT (`navigationModel.ts` + `NavigatorPage` clusters)
+ *  - Reads from SSOT (`navigationModel.ts` + catalog taxonomies)
  *    so adding a new app/route never requires editing the drawer.
  *
  * Composition (top → bottom):

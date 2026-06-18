@@ -57,8 +57,8 @@ ${payload.special_notes ? `\n📝 *Заметки:* ${payload.special_notes}` : 
 
 🔗 ID: ${bookingId}`;
 
-    console.log('[WhatsApp] Fast Track notification for:', ADMIN_WHATSAPP);
-    console.log('[WhatsApp] Message:', message);
+    console.info('[WhatsApp] Fast Track notification for:', ADMIN_WHATSAPP);
+    console.info('[WhatsApp] Message:', message);
 
     // Try UltraMsg if configured
     const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
@@ -75,9 +75,9 @@ ${payload.special_notes ? `\n📝 *Заметки:* ${payload.special_notes}` : 
         }),
       });
       const result = await response.json();
-      console.log('[WhatsApp] UltraMsg response:', result);
+      console.info('[WhatsApp] UltraMsg response:', result);
     } else {
-      console.log('[WhatsApp] No API configured, logged message only');
+      console.info('[WhatsApp] No API configured, logged message only');
     }
   } catch (error) {
     console.error('[WhatsApp] Error:', error);
@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
     const supabase = createServiceClient();
     const payload: FastTrackBookingPayload = await req.json();
 
-    console.log('[FastTrack] Creating booking for flight:', payload.flight_number);
+    console.info('[FastTrack] Creating booking for flight:', payload.flight_number);
 
     // 1. Insert airport_bookings
     const { data: booking, error: bookingError } = await supabase
@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
     }
 
     const bookingId = booking.id;
-    console.log('[FastTrack] Booking created:', bookingId);
+    console.info('[FastTrack] Booking created:', bookingId);
 
     // 2. Insert passengers
     const passengersToInsert = payload.passengers.map((p, i) => ({
@@ -248,12 +248,12 @@ Deno.serve(async (req) => {
           html: emailHtml,
         });
 
-        console.log('[Email] Sent to', ADMIN_EMAIL);
+        console.info('[Email] Sent to', ADMIN_EMAIL);
       } catch (emailErr) {
         console.error('[Email] Error:', emailErr);
       }
     } else {
-      console.log('[Email] RESEND_API_KEY not configured');
+      console.info('[Email] RESEND_API_KEY not configured');
     }
 
     return new Response(

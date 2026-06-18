@@ -85,7 +85,7 @@ const handler = async (req: Request): Promise<Response> => {
       html,
     });
 
-    console.log("Report email sent:", emailResponse);
+    console.info("Report email sent:", emailResponse);
 
     // Update report status
     await supabase

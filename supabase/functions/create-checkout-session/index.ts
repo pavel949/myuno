@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     );
     if (rateLimitResponse) return rateLimitResponse;
 
-    console.log("Authenticated user:", user.id, user.email);
+    console.info("Authenticated user:", user.id, user.email);
 
     // Parse request body
     const { amount, currency = "rub" } = await req.json();
@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
       throw new Error("Minimum amount is 100");
     }
 
-    console.log("Creating checkout session for amount:", amount, currency);
+    console.info("Creating checkout session for amount:", amount, currency);
 
     // Initialize Stripe
     const stripe = createStripeClient();
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
     let customerId: string;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
-      console.log("Found existing customer:", customerId);
+      console.info("Found existing customer:", customerId);
     } else {
       const customer = await stripe.customers.create({
         email: user.email,
@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
         },
       });
       customerId = customer.id;
-      console.log("Created new customer:", customerId);
+      console.info("Created new customer:", customerId);
     }
 
     // Get origin for redirect URLs
@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
       },
     });
 
-    console.log("Checkout session created:", session.id);
+    console.info("Checkout session created:", session.id);
 
     return new Response(
       JSON.stringify({ url: session.url, sessionId: session.id }),

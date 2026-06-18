@@ -29,6 +29,13 @@ import {
   User as UserIcon,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+// admin_notes was added in supabase/migrations/20260616072908_admin_notes.sql
+// but src/integrations/supabase/types.ts hasn't been regenerated against the
+// new schema yet, so the `from('admin_notes')` chain types out to `never`.
+// Cast once locally to keep the rest of this file readable; remove once
+// `supabase gen types` is run from a machine with prod access.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const sb = supabase as any;
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
@@ -97,7 +104,7 @@ export function AdminNotesWidget({
   const { data: notes, isLoading } = useQuery({
     queryKey,
     queryFn: async (): Promise<AdminNoteRow[]> => {
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from('admin_notes')
         .select('*, profiles!admin_notes_created_by_fkey(full_name, email)')
         .eq('entity_type', entityType)
@@ -115,7 +122,7 @@ export function AdminNotesWidget({
 
   const addNote = useMutation({
     mutationFn: async (note: string) => {
-      const { error } = await supabase.from('admin_notes').insert({
+      const { error } = await sb.from('admin_notes').insert({
         entity_type: entityType,
         entity_id: entityId,
         note,
@@ -137,7 +144,7 @@ export function AdminNotesWidget({
 
   const updateNote = useMutation({
     mutationFn: async ({ id, note }: { id: string; note: string }) => {
-      const { error } = await supabase
+      const { error } = await sb
         .from('admin_notes')
         .update({ note })
         .eq('id', id);
@@ -158,7 +165,7 @@ export function AdminNotesWidget({
 
   const deleteNote = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('admin_notes').delete().eq('id', id);
+      const { error } = await sb.from('admin_notes').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {

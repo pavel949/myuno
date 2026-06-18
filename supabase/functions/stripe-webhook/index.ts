@@ -19,12 +19,12 @@ const redactId = (id?: string | null): string => {
 
 const logStep = (step: string, details?: string | Record<string, unknown>) => {
   if (!details) {
-    console.log(`[STRIPE-WEBHOOK] ${step}`);
+    console.info(`[STRIPE-WEBHOOK] ${step}`);
     return;
   }
   if (typeof details === 'string') {
     // Error messages — no sensitive data redaction needed, they're internal
-    console.log(`[STRIPE-WEBHOOK] ${step}`, details);
+    console.info(`[STRIPE-WEBHOOK] ${step}`, details);
     return;
   }
   // Redact sensitive keys from structured logs
@@ -37,7 +37,7 @@ const logStep = (step: string, details?: string | Record<string, unknown>) => {
       safe[k] = v;
     }
   }
-  console.log(`[STRIPE-WEBHOOK] ${step}`, JSON.stringify(safe));
+  console.info(`[STRIPE-WEBHOOK] ${step}`, JSON.stringify(safe));
 };
 
 Deno.serve(async (req) => {

@@ -29,7 +29,6 @@ export { BookingTermsCard } from './BookingTermsCard';
 export { BookingConditionsChips } from './BookingConditionsChips';
 export { PhotoLightbox } from './PhotoLightbox';
 export { PropertySortSelect } from './PropertySortSelect';
-export { PropertyBookingSuccess } from './PropertyBookingSuccess';
 // ProjectCarouselCard / ProjectPromoSection removed — superseded by OffplanProjectCard / OffplanPromoSection
 export { OffplanProjectCard } from './OffplanProjectCard';
 export { OffplanPromoSection } from './OffplanPromoSection';

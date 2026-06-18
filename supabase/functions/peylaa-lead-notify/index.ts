@@ -35,7 +35,7 @@ interface Lead {
 
 async function sendWhatsApp(to: string, body: string): Promise<boolean> {
   if (!ULTRAMSG_INSTANCE || !ULTRAMSG_TOKEN) {
-    console.log("[PEYLAA WA] Not configured. Message to", to, ":", body);
+    console.info("[PEYLAA WA] Not configured. Message to", to, ":", body);
     return false;
   }
 
@@ -53,7 +53,7 @@ async function sendWhatsApp(to: string, body: string): Promise<boolean> {
       }
     );
     const result = await response.json();
-    console.log("[PEYLAA WA] Response:", result);
+    console.info("[PEYLAA WA] Response:", result);
     return response.ok;
   } catch (err) {
     console.error("[PEYLAA WA] Error:", err);
@@ -128,7 +128,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`[PEYLAA] New lead: ${lead.full_name} (${lead.phone})`);
+    console.info(`[PEYLAA] New lead: ${lead.full_name} (${lead.phone})`);
 
     // Send both notifications in parallel
     const [adminSent, welcomeSent] = await Promise.all([

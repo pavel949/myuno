@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
       // Reverse geocoding via Google Geocoding API
       const reverseUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${googleApiKey}&language=${language}`;
 
-      console.log(`[geocode-address] Reverse geocoding: ${lat},${lng}`);
+      console.info(`[geocode-address] Reverse geocoding: ${lat},${lng}`);
 
       const response = await fetch(reverseUrl);
       if (!response.ok) {
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     const encodedQuery = encodeURIComponent(query);
     const searchUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedQuery}&key=${googleApiKey}&language=${language}&region=TH&bounds=7.7,98.2|8.2,98.5`;
 
-    console.log(`[geocode-address] Searching: "${query}" via Google Geocoding API`);
+    console.info(`[geocode-address] Searching: "${query}" via Google Geocoding API`);
 
     const response = await fetch(searchUrl);
     
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log(`[geocode-address] Got ${data.results?.length || 0} results`);
+    console.info(`[geocode-address] Got ${data.results?.length || 0} results`);
 
     const results = (data.results || []).slice(0, 5).map((r: any) => ({
       mapbox_id: r.place_id,

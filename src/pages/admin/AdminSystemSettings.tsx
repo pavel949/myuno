@@ -10,6 +10,7 @@ import { ControlAuditTab } from '@/components/admin/control/ControlAuditTab';
 import { ControlLogsTab } from '@/components/admin/control/ControlLogsTab';
 import { FeatureFlagManager } from '@/components/admin/settings/FeatureFlagManager';
 import { OrgProfileEditor } from '@/components/admin/settings/OrgProfileEditor';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 interface QuickLink {
   icon: React.ElementType;
@@ -91,19 +92,29 @@ export default function AdminSystemSettings() {
         </TabsList>
 
         <TabsContent value="system" className="mt-4">
-          <ControlSystemTab />
+          <ErrorBoundary>
+            <ControlSystemTab />
+          </ErrorBoundary>
         </TabsContent>
         <TabsContent value="audit" className="mt-4">
-          <ControlAuditTab />
+          <ErrorBoundary>
+            <ControlAuditTab />
+          </ErrorBoundary>
         </TabsContent>
         <TabsContent value="logs" className="mt-4">
-          <ControlLogsTab />
+          <ErrorBoundary>
+            <ControlLogsTab />
+          </ErrorBoundary>
         </TabsContent>
         <TabsContent value="flags" className="mt-4">
-          <FeatureFlagManager />
+          <ErrorBoundary>
+            <FeatureFlagManager />
+          </ErrorBoundary>
         </TabsContent>
         <TabsContent value="org" className="mt-4">
-          <OrgProfileEditor />
+          <ErrorBoundary>
+            <OrgProfileEditor />
+          </ErrorBoundary>
         </TabsContent>
       </Tabs>
     </div>

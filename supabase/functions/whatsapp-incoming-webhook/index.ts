@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    console.log("[WhatsApp Incoming] Payload:", JSON.stringify(body));
+    console.info("[WhatsApp Incoming] Payload:", JSON.stringify(body));
 
     // UltraMSG sends: { event_type, data: { from, pushName, body, ... } }
     // Or direct: { from, body, pushName, ... }
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (existingLead) {
-      console.log(`[WhatsApp Incoming] Duplicate within 24h for ${phone}, skipping lead creation`);
+      console.info(`[WhatsApp Incoming] Duplicate within 24h for ${phone}, skipping lead creation`);
       // Still notify admin about the follow-up message
       await sendWhatsApp({
         to: ADMIN_PHONE,
@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`[WhatsApp Incoming] Lead created: ${lead.id} from ${phone}`);
+    console.info(`[WhatsApp Incoming] Lead created: ${lead.id} from ${phone}`);
 
     // Notify Pavel immediately
     const adminMessage = `📩 *НОВЫЙ ЛИД ИЗ WHATSAPP*
@@ -160,7 +160,7 @@ ${messageBody.slice(0, 500)}
       .maybeSingle();
 
     if (existingContact) {
-      console.log(`[WhatsApp Incoming] Matched existing CRM contact: ${existingContact.id}`);
+      console.info(`[WhatsApp Incoming] Matched existing CRM contact: ${existingContact.id}`);
       // Add activity to existing contact
       try {
         await supabase.from("crm_activities").insert({

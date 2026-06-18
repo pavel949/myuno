@@ -19,7 +19,7 @@ interface ImageResult {
 
 // Handle Yandex Disk URLs
 async function extractFromYandexDisk(publicUrl: string): Promise<ImageResult[]> {
-  console.log('Extracting from Yandex Disk:', publicUrl);
+  console.info('Extracting from Yandex Disk:', publicUrl);
   
   const apiUrl = `https://cloud-api.yandex.net/v1/disk/public/resources?public_key=${encodeURIComponent(publicUrl)}&limit=100&preview_size=M`;
   
@@ -36,7 +36,7 @@ async function extractFromYandexDisk(publicUrl: string): Promise<ImageResult[]> 
   
   // If it's a folder - get list of files
   if (data._embedded?.items) {
-    console.log(`Found ${data._embedded.items.length} items in folder`);
+    console.info(`Found ${data._embedded.items.length} items in folder`);
     
     for (const item of data._embedded.items) {
       if (item.media_type === 'image') {
@@ -69,7 +69,7 @@ async function extractFromYandexDisk(publicUrl: string): Promise<ImageResult[]> 
   }
   // If it's a single file
   else if (data.media_type === 'image') {
-    console.log('Found single image file');
+    console.info('Found single image file');
     
     const downloadApiUrl = `https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key=${encodeURIComponent(publicUrl)}`;
     
@@ -95,13 +95,13 @@ async function extractFromYandexDisk(publicUrl: string): Promise<ImageResult[]> 
     }
   }
   
-  console.log(`Extracted ${images.length} images from Yandex Disk`);
+  console.info(`Extracted ${images.length} images from Yandex Disk`);
   return images;
 }
 
 // Handle Google Drive shared links
 async function extractFromGoogleDrive(publicUrl: string): Promise<ImageResult[]> {
-  console.log('Extracting from Google Drive:', publicUrl);
+  console.info('Extracting from Google Drive:', publicUrl);
   
   // Extract folder/file ID from various Google Drive URL formats
   let fileId: string | null = null;
@@ -166,7 +166,7 @@ async function extractFromGoogleDrive(publicUrl: string): Promise<ImageResult[]>
     // Fallback: use thumbnail URLs (works for publicly shared files without API key)
     if (isFolder) {
       // For folders without API key, we can't list files — inform user
-      console.log('No GOOGLE_API_KEY, trying to scrape folder page');
+      console.info('No GOOGLE_API_KEY, trying to scrape folder page');
       // Try fetching the folder page HTML
       const resp = await fetch(publicUrl, {
         headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Lovable/1.0)' },
@@ -198,13 +198,13 @@ async function extractFromGoogleDrive(publicUrl: string): Promise<ImageResult[]>
     }
   }
   
-  console.log(`Extracted ${images.length} images from Google Drive`);
+  console.info(`Extracted ${images.length} images from Google Drive`);
   return images;
 }
 
 // Handle regular websites via Firecrawl
 async function extractFromWebsite(url: string, apiKey: string): Promise<ImageResult[]> {
-  console.log('Extracting images from website:', url);
+  console.info('Extracting images from website:', url);
 
   const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
     method: 'POST',
@@ -345,7 +345,7 @@ Deno.serve(async (req) => {
       formattedUrl = `https://${formattedUrl}`;
     }
 
-    console.log('Processing URL:', formattedUrl);
+    console.info('Processing URL:', formattedUrl);
 
     // Check source type
     const isYandexDisk = formattedUrl.includes('disk.yandex.ru') || 
@@ -358,12 +358,12 @@ Deno.serve(async (req) => {
     let source = 'firecrawl';
 
     if (isYandexDisk) {
-      console.log('Detected Yandex Disk URL');
+      console.info('Detected Yandex Disk URL');
       images = await extractFromYandexDisk(formattedUrl);
       pageTitle = 'Yandex Disk';
       source = 'yandex_disk';
     } else if (isGoogleDrive) {
-      console.log('Detected Google Drive URL');
+      console.info('Detected Google Drive URL');
       images = await extractFromGoogleDrive(formattedUrl);
       pageTitle = 'Google Drive';
       source = 'google_drive';
@@ -389,7 +389,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`Found ${images.length} images`);
+    console.info(`Found ${images.length} images`);
 
     return new Response(
       JSON.stringify({ 

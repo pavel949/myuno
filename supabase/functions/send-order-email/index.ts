@@ -29,7 +29,7 @@ interface SendOrderEmailPayload {
 }
 
 const logStep = (step: string, details?: unknown) => {
-  console.log(`[SEND-ORDER-EMAIL] ${step}`, details ? JSON.stringify(details) : '');
+  console.info(`[SEND-ORDER-EMAIL] ${step}`, details ? JSON.stringify(details) : '');
 };
 
 Deno.serve(async (req) => {

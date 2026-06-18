@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const experienceSlug = exp.slug || exp.id;
 
-    console.log(`Fetching images from: ${exp.source_page_url}`);
+    console.info(`Fetching images from: ${exp.source_page_url}`);
 
     // Step 1: Fetch the page HTML directly (no Firecrawl dependency)
     let html = '';
@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
       if (filtered.length >= 12) break;
     }
 
-    console.log(`Found ${filtered.length} candidate images`);
+    console.info(`Found ${filtered.length} candidate images`);
 
     if (filtered.length === 0) {
       const notes = (exp.notes as Record<string, unknown>) || {};

@@ -59,14 +59,14 @@ Deno.serve(async (req) => {
     }
 
     results.matched = workflows.length;
-    console.log(`[EXECUTE-CRM-WORKFLOW] Found ${workflows.length} workflows for trigger '${trigger_type}'`);
+    console.info(`[EXECUTE-CRM-WORKFLOW] Found ${workflows.length} workflows for trigger '${trigger_type}'`);
 
     // 2. For each workflow, fetch and execute actions
     for (const wf of workflows) {
       // Check trigger_config conditions if any
       if (wf.trigger_config && Object.keys(wf.trigger_config).length > 0) {
         if (!matchesTriggerConfig(wf.trigger_config, metadata)) {
-          console.log(`[EXECUTE-CRM-WORKFLOW] Workflow ${wf.id} trigger config did not match, skipping`);
+          console.info(`[EXECUTE-CRM-WORKFLOW] Workflow ${wf.id} trigger config did not match, skipping`);
           continue;
         }
       }
@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`[EXECUTE-CRM-WORKFLOW] Done:`, results);
+    console.info(`[EXECUTE-CRM-WORKFLOW] Done:`, results);
 
     return new Response(
       JSON.stringify({ success: true, results }),
@@ -213,7 +213,7 @@ async function executeAction(
       status: "deferred",
       created_by: context.created_by,
     });
-    console.log(`[EXECUTE-CRM-WORKFLOW] Action ${action.id} deferred until ${executeAt} (${action.delay_minutes}min delay)`);
+    console.info(`[EXECUTE-CRM-WORKFLOW] Action ${action.id} deferred until ${executeAt} (${action.delay_minutes}min delay)`);
     return;
   }
 
@@ -233,7 +233,7 @@ async function executeAction(
         status: "pending",
         created_by: context.created_by,
       });
-      console.log(`[EXECUTE-CRM-WORKFLOW] Created task for ${context.entity_type} ${context.entity_id}`);
+      console.info(`[EXECUTE-CRM-WORKFLOW] Created task for ${context.entity_type} ${context.entity_id}`);
       break;
     }
 
@@ -245,7 +245,7 @@ async function executeAction(
       }
       if (Object.keys(updates).length > 0) {
         await supabase.from(table).update(updates).eq("id", context.entity_id);
-        console.log(`[EXECUTE-CRM-WORKFLOW] Updated ${config.field_name} on ${table}`);
+        console.info(`[EXECUTE-CRM-WORKFLOW] Updated ${config.field_name} on ${table}`);
       }
       break;
     }
@@ -260,7 +260,7 @@ async function executeAction(
         description: config.message || `Workflow notification: ${context.trigger_type}`,
         performed_by: context.created_by,
       });
-      console.log(`[EXECUTE-CRM-WORKFLOW] Sent notification`);
+      console.info(`[EXECUTE-CRM-WORKFLOW] Sent notification`);
       break;
     }
 
@@ -287,7 +287,7 @@ async function executeAction(
           "X-Internal-Secret": Deno.env.get("INTERNAL_SECRET") || "",
         },
       });
-      console.log(`[EXECUTE-CRM-WORKFLOW] Sent email to ${to_email}`);
+      console.info(`[EXECUTE-CRM-WORKFLOW] Sent email to ${to_email}`);
       break;
     }
 
@@ -296,7 +296,7 @@ async function executeAction(
         const table = context.entity_type === "deal" ? "agent_deals" : "crm_contacts";
         const field = context.entity_type === "deal" ? "agent_id" : "created_by";
         await supabase.from(table).update({ [field]: config.owner_id }).eq("id", context.entity_id);
-        console.log(`[EXECUTE-CRM-WORKFLOW] Assigned owner ${config.owner_id}`);
+        console.info(`[EXECUTE-CRM-WORKFLOW] Assigned owner ${config.owner_id}`);
       }
       break;
     }
@@ -315,13 +315,13 @@ async function executeAction(
           }),
           signal: AbortSignal.timeout(8000),
         });
-        console.log(`[EXECUTE-CRM-WORKFLOW] Webhook ${config.url} -> ${resp.status}`);
+        console.info(`[EXECUTE-CRM-WORKFLOW] Webhook ${config.url} -> ${resp.status}`);
         await resp.text(); // consume body
       }
       break;
     }
 
     default:
-      console.log(`[EXECUTE-CRM-WORKFLOW] Unknown action type: ${action.action_type}`);
+      console.info(`[EXECUTE-CRM-WORKFLOW] Unknown action type: ${action.action_type}`);
   }
 }

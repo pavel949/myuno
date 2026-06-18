@@ -103,8 +103,8 @@ ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
 
     const targetPhone = phoneOverride || ADMIN_WHATSAPP;
     
-    console.log('[WhatsApp] Notification prepared for:', targetPhone);
-    console.log('[WhatsApp] Message:', message);
+    console.info('[WhatsApp] Notification prepared for:', targetPhone);
+    console.info('[WhatsApp] Message:', message);
     
     // Try to send via UltraMsg API if configured
     const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
@@ -122,9 +122,9 @@ ${payload.notes ? `\n📝 *Notes:* ${payload.notes}` : ''}
       });
       
       const result = await response.json();
-      console.log('[WhatsApp] UltraMsg response:', result);
+      console.info('[WhatsApp] UltraMsg response:', result);
     } else {
-      console.log('[WhatsApp] No API configured, logging message only');
+      console.info('[WhatsApp] No API configured, logging message only');
     }
   } catch (error) {
     console.error('[WhatsApp] Error sending notification:', error);
@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
     const resend = new Resend(resendKey);
     const payload: OrderNotificationPayload = await req.json();
 
-    console.log('Sending admin notification for order:', payload.order_number);
+    console.info('Sending admin notification for order:', payload.order_number);
 
     // Send WhatsApp notification to admin (non-blocking)
     sendWhatsAppNotification(payload).catch(err => 
@@ -322,7 +322,7 @@ Deno.serve(async (req) => {
       html: emailHtml,
     });
 
-    console.log('Email sent successfully:', emailResponse);
+    console.info('Email sent successfully:', emailResponse);
 
     return new Response(
       JSON.stringify({ success: true, email_id: emailResponse.data?.id }),

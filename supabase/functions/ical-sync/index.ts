@@ -246,13 +246,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`Syncing ${calendars?.length || 0} external calendars`);
+    console.info(`Syncing ${calendars?.length || 0} external calendars`);
 
     const results: Array<Record<string, unknown>> = [];
 
     for (const calendar of calendars || []) {
       try {
-        console.log(`Fetching iCal: ${calendar.name}`);
+        console.info(`Fetching iCal: ${calendar.name}`);
         const response = await fetch(calendar.ical_url, {
           headers: { 'User-Agent': 'UNO Calendar Sync/1.0' },
         });
@@ -260,7 +260,7 @@ Deno.serve(async (req) => {
 
         const icalContent = await response.text();
         const events = parseICalEvents(icalContent);
-        console.log(`Parsed ${events.length} events from ${calendar.name}`);
+        console.info(`Parsed ${events.length} events from ${calendar.name}`);
 
         // Existing bookings from this calendar
         const { data: existingBookings } = await supabase
@@ -284,7 +284,7 @@ Deno.serve(async (req) => {
             .from('property_bookings')
             .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
             .in('id', toCancel.map((b: any) => b.id));
-          console.log(`Cancelled ${toCancel.length} removed bookings`);
+          console.info(`Cancelled ${toCancel.length} removed bookings`);
         }
 
         let syncedCount = 0;

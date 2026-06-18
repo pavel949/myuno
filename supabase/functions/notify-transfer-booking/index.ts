@@ -85,7 +85,7 @@ async function sendWhatsApp(to: string, body: string): Promise<void> {
   const ultraMsgInstance = Deno.env.get('ULTRAMSG_INSTANCE');
   const ultraMsgToken = Deno.env.get('ULTRAMSG_TOKEN');
   if (!ultraMsgInstance || !ultraMsgToken) {
-    console.log('[WA] no UltraMSG config, skipping ->', to);
+    console.info('[WA] no UltraMSG config, skipping ->', to);
     return;
   }
   try {
@@ -95,7 +95,7 @@ async function sendWhatsApp(to: string, body: string): Promise<void> {
       body: new URLSearchParams({ token: ultraMsgToken, to: `+${to.replace(/[^0-9]/g, '')}`, body }),
     });
     const json = await res.json();
-    console.log('[WA] sent to', to, JSON.stringify(json).slice(0, 200));
+    console.info('[WA] sent to', to, JSON.stringify(json).slice(0, 200));
   } catch (e) {
     console.error('[WA] error', e);
   }
@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
   try {
     const p: TransferNotifyPayload = await req.json();
     const customerLang: Lang = p.customer_language || 'ru';
-    console.log('[Transfer] notify', p.order_number, 'lang=', customerLang);
+    console.info('[Transfer] notify', p.order_number, 'lang=', customerLang);
 
     // Always produce EN+TH for operator; also produce customer-language version
     const langsNeeded: Lang[] = Array.from(new Set<Lang>(['ru', 'en', 'th']));

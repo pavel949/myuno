@@ -19,13 +19,15 @@ import { supabase } from '@/integrations/supabase/client';
 // ============= Generic typed accessor =============
 
 /**
- * Type-safe query builder for tables missing from auto-generated types.
- * Casts once here so consumers get proper intellisense for Row type.
- * 
- * The return type is intentionally broad to avoid coupling to
- * internal PostgREST generics that change between SDK versions.
- * Consumers cast the result via `as T[]` after `.select()`.
- * 
+ * Canonical escape hatch for tables missing from the auto-generated Supabase
+ * Database type. Returns `any` deliberately — deep PostgREST generics blow
+ * up tsc when a table is unknown, and per-call casting balloons the diff.
+ *
+ * Use this anywhere you need to query a table that hasn't been re-typed
+ * yet; do not roll a local `function from(table): any` clone. Cast the
+ * result of `.select()` via `as T[]` (or via one of the Row interfaces
+ * exported below) at the call site so consumers stay typed.
+ *
  * @example
  *   const { data } = await typedFrom('my_table').select('*');
  */
