@@ -383,7 +383,29 @@ export default function MapView() {
       setSelected(match.data as ClickedMarker);
     }
     pendingSearchPickRef.current = null;
-  }, [mlMarkers]);
+  }, [mlMarkers, selectMarker]);
+
+  // Drive selection from URL (?focus=<id>) and list clicks → set `selected` and fly to marker.
+  useEffect(() => {
+    if (!focusedMarkerId) {
+      setSelected(null);
+      return;
+    }
+    const match = mlMarkers.find((mm) => mm.id === focusedMarkerId);
+    if (!match) return;
+    setSelected(match.data as ClickedMarker);
+    mapRef.current?.flyTo(match.lat, match.lng, Math.max(14, 11));
+  }, [focusedMarkerId, mlMarkers]);
+
+  // If active filter removes selected marker — clear selection.
+  useEffect(() => {
+    if (!focusedMarkerId) return;
+    if (!mlMarkers.find((mm) => mm.id === focusedMarkerId)) {
+      selectMarker(null);
+    }
+  }, [mlMarkers, focusedMarkerId, selectMarker]);
+
+
 
 
   const updateParam = useCallback(
