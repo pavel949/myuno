@@ -40,22 +40,36 @@ interface LocationProviderProps {
   children: React.ReactNode;
 }
 
+// Read user-saved slug only; do NOT hardcode a default city.
+// Resolution waterfall (effect below): saved slug → first active city → null.
+function readStoredSlug(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(STORAGE_KEY);
+}
+
 export function LocationProvider({ children }: LocationProviderProps) {
-  const [currentCitySlug, setCurrentCitySlug] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem(STORAGE_KEY) || 'phuket';
-    }
-    return 'phuket';
-  });
+  const [currentCitySlug, setCurrentCitySlug] = useState<string | null>(readStoredSlug);
 
   const { cities, activeCities, comingSoonCities, isLoading } = useCities();
   const { city: currentCity, isLoading: isCityLoading } = useCity(currentCitySlug);
+
+  // Auto-pick first active city when nothing is stored.
+  // Phase 1: deterministic fallback (sort_order). Phase 2 will add IP/geo detection.
+  useEffect(() => {
+    if (currentCitySlug || isLoading || activeCities.length === 0) return;
+    const firstActive = activeCities[0];
+    if (firstActive) {
+      setCurrentCitySlug(firstActive.slug);
+      localStorage.setItem(STORAGE_KEY, firstActive.slug);
+    }
+  }, [currentCitySlug, isLoading, activeCities]);
 
   // Set city and persist to localStorage
   const setCity = useCallback((slug: string) => {
     setCurrentCitySlug(slug);
     localStorage.setItem(STORAGE_KEY, slug);
   }, []);
+
 
   // Get localized city name
   const getCityName = useCallback((lang: 'en' | 'ru' | 'th'): string => {

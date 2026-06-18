@@ -970,6 +970,7 @@ export type Database = {
           bundle_components: Json | null
           bundle_savings_text_en: string | null
           bundle_savings_text_ru: string | null
+          city_id: string | null
           created_at: string | null
           currency: string
           cutoff_hours: number | null
@@ -1000,6 +1001,7 @@ export type Database = {
           bundle_components?: Json | null
           bundle_savings_text_en?: string | null
           bundle_savings_text_ru?: string | null
+          city_id?: string | null
           created_at?: string | null
           currency?: string
           cutoff_hours?: number | null
@@ -1030,6 +1032,7 @@ export type Database = {
           bundle_components?: Json | null
           bundle_savings_text_en?: string | null
           bundle_savings_text_ru?: string | null
+          city_id?: string | null
           created_at?: string | null
           currency?: string
           cutoff_hours?: number | null
@@ -1055,6 +1058,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "airport_services_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "airport_services_supplier_id_fkey"
             columns: ["supplier_id"]
@@ -1901,6 +1911,7 @@ export type Database = {
           ask_amount: number | null
           asset_class: string
           asset_value: number | null
+          city_id: string | null
           cover_image_url: string | null
           created_at: string
           currency: string | null
@@ -1939,6 +1950,7 @@ export type Database = {
           ask_amount?: number | null
           asset_class: string
           asset_value?: number | null
+          city_id?: string | null
           cover_image_url?: string | null
           created_at?: string
           currency?: string | null
@@ -1977,6 +1989,7 @@ export type Database = {
           ask_amount?: number | null
           asset_class?: string
           asset_value?: number | null
+          city_id?: string | null
           cover_image_url?: string | null
           created_at?: string
           currency?: string | null
@@ -2011,7 +2024,15 @@ export type Database = {
           view_count?: number | null
           visibility?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "business_listings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       buyers: {
         Row: {
@@ -3211,6 +3232,7 @@ export type Database = {
           launch_date: string | null
           lng: number
           mapbox_bounds: Json | null
+          metadata: Json
           name_en: string
           name_ru: string | null
           name_th: string | null
@@ -3233,6 +3255,7 @@ export type Database = {
           launch_date?: string | null
           lng: number
           mapbox_bounds?: Json | null
+          metadata?: Json
           name_en: string
           name_ru?: string | null
           name_th?: string | null
@@ -3255,6 +3278,7 @@ export type Database = {
           launch_date?: string | null
           lng?: number
           mapbox_bounds?: Json | null
+          metadata?: Json
           name_en?: string
           name_ru?: string | null
           name_th?: string | null
@@ -3265,10 +3289,111 @@ export type Database = {
         }
         Relationships: []
       }
+      city_areas: {
+        Row: {
+          bounds: Json | null
+          city_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          lat: number | null
+          lng: number | null
+          name_en: string
+          name_ru: string | null
+          name_th: string | null
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          bounds?: Json | null
+          city_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lat?: number | null
+          lng?: number | null
+          name_en: string
+          name_ru?: string | null
+          name_th?: string | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          bounds?: Json | null
+          city_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          lat?: number | null
+          lng?: number | null
+          name_en?: string
+          name_ru?: string | null
+          name_th?: string | null
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "city_areas_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      city_content: {
+        Row: {
+          city_id: string
+          created_at: string
+          id: string
+          key: string
+          metadata: Json
+          updated_at: string
+          value_en: string | null
+          value_ru: string | null
+          value_th: string | null
+        }
+        Insert: {
+          city_id: string
+          created_at?: string
+          id?: string
+          key: string
+          metadata?: Json
+          updated_at?: string
+          value_en?: string | null
+          value_ru?: string | null
+          value_th?: string | null
+        }
+        Update: {
+          city_id?: string
+          created_at?: string
+          id?: string
+          key?: string
+          metadata?: Json
+          updated_at?: string
+          value_en?: string | null
+          value_ru?: string | null
+          value_th?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "city_content_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cleaning_services: {
         Row: {
           approval_status: string | null
           areas_served: string[] | null
+          city_id: string | null
           cover_image: string | null
           created_at: string | null
           created_by_uno_team: boolean | null
@@ -3299,6 +3424,7 @@ export type Database = {
         Insert: {
           approval_status?: string | null
           areas_served?: string[] | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -3329,6 +3455,7 @@ export type Database = {
         Update: {
           approval_status?: string | null
           areas_served?: string[] | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -3357,6 +3484,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "cleaning_services_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cleaning_services_provider_id_fkey"
             columns: ["provider_id"]
@@ -4689,6 +4823,7 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          city_id: string | null
           company_id: string
           country: string | null
           created_at: string | null
@@ -4710,6 +4845,7 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          city_id?: string | null
           company_id: string
           country?: string | null
           created_at?: string | null
@@ -4731,6 +4867,7 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          city_id?: string | null
           company_id?: string
           country?: string | null
           created_at?: string | null
@@ -4750,6 +4887,13 @@ export type Database = {
           website?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "crm_companies_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "crm_companies_company_id_fkey"
             columns: ["company_id"]
@@ -4817,6 +4961,7 @@ export type Database = {
           birthday: string | null
           budget_max: number | null
           budget_min: number | null
+          city_id: string | null
           company_entity_id: string | null
           company_id: string
           company_name: string | null
@@ -4898,6 +5043,7 @@ export type Database = {
           birthday?: string | null
           budget_max?: number | null
           budget_min?: number | null
+          city_id?: string | null
           company_entity_id?: string | null
           company_id: string
           company_name?: string | null
@@ -4979,6 +5125,7 @@ export type Database = {
           birthday?: string | null
           budget_max?: number | null
           budget_min?: number | null
+          city_id?: string | null
           company_entity_id?: string | null
           company_id?: string
           company_name?: string | null
@@ -5046,6 +5193,13 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "crm_contacts_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "crm_contacts_company_entity_id_fkey"
             columns: ["company_entity_id"]
@@ -6756,6 +6910,7 @@ export type Database = {
         Row: {
           address: string | null
           average_rating: number | null
+          city_id: string | null
           country: string | null
           cover_image: string | null
           created_at: string | null
@@ -6792,6 +6947,7 @@ export type Database = {
         Insert: {
           address?: string | null
           average_rating?: number | null
+          city_id?: string | null
           country?: string | null
           cover_image?: string | null
           created_at?: string | null
@@ -6828,6 +6984,7 @@ export type Database = {
         Update: {
           address?: string | null
           average_rating?: number | null
+          city_id?: string | null
           country?: string | null
           cover_image?: string | null
           created_at?: string | null
@@ -6861,7 +7018,15 @@ export type Database = {
           verified_by?: string | null
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "developers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       development_units: {
         Row: {
@@ -6869,6 +7034,7 @@ export type Database = {
           available_units: number | null
           bathrooms: number | null
           bedrooms: number | null
+          city_id: string | null
           created_at: string | null
           development_id: string
           features: string[] | null
@@ -6890,6 +7056,7 @@ export type Database = {
           available_units?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
+          city_id?: string | null
           created_at?: string | null
           development_id: string
           features?: string[] | null
@@ -6911,6 +7078,7 @@ export type Database = {
           available_units?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
+          city_id?: string | null
           created_at?: string | null
           development_id?: string
           features?: string[] | null
@@ -6928,6 +7096,13 @@ export type Database = {
           views?: string[] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "development_units_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "development_units_development_id_fkey"
             columns: ["development_id"]
@@ -7076,6 +7251,7 @@ export type Database = {
         Row: {
           available_days: string[] | null
           available_times: Json | null
+          city_id: string | null
           clinic_id: string
           consultation_price: number | null
           created_at: string
@@ -7099,6 +7275,7 @@ export type Database = {
         Insert: {
           available_days?: string[] | null
           available_times?: Json | null
+          city_id?: string | null
           clinic_id: string
           consultation_price?: number | null
           created_at?: string
@@ -7122,6 +7299,7 @@ export type Database = {
         Update: {
           available_days?: string[] | null
           available_times?: Json | null
+          city_id?: string | null
           clinic_id?: string
           consultation_price?: number | null
           created_at?: string
@@ -7142,7 +7320,15 @@ export type Database = {
           specialty_ru?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "doctors_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       drive_import_jobs: {
         Row: {
@@ -7349,6 +7535,7 @@ export type Database = {
           address: string | null
           age_groups: string[] | null
           approval_status: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string | null
           created_by_uno_team: boolean | null
@@ -7389,6 +7576,7 @@ export type Database = {
           address?: string | null
           age_groups?: string[] | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -7429,6 +7617,7 @@ export type Database = {
           address?: string | null
           age_groups?: string[] | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -7466,6 +7655,13 @@ export type Database = {
           website?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "education_providers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "education_providers_provider_id_fkey"
             columns: ["provider_id"]
@@ -7600,6 +7796,7 @@ export type Database = {
           approval_status: string | null
           booking_flow: string | null
           category: string
+          city_id: string | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
@@ -7655,6 +7852,7 @@ export type Database = {
           approval_status?: string | null
           booking_flow?: string | null
           category?: string
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -7710,6 +7908,7 @@ export type Database = {
           approval_status?: string | null
           booking_flow?: string | null
           category?: string
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -7760,6 +7959,13 @@ export type Database = {
           venue_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "events_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "events_provider_id_fkey"
             columns: ["provider_id"]
@@ -8011,6 +8217,7 @@ export type Database = {
         Row: {
           address: string | null
           approval_status: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
@@ -8043,6 +8250,7 @@ export type Database = {
         Insert: {
           address?: string | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -8075,6 +8283,7 @@ export type Database = {
         Update: {
           address?: string | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -8105,6 +8314,13 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "flower_shops_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "flower_shops_provider_id_fkey"
             columns: ["provider_id"]
@@ -8345,6 +8561,7 @@ export type Database = {
           address: string | null
           amenities: string[] | null
           approval_status: string | null
+          city_id: string | null
           classes: string[] | null
           cover_image: string | null
           created_at: string | null
@@ -8383,6 +8600,7 @@ export type Database = {
           address?: string | null
           amenities?: string[] | null
           approval_status?: string | null
+          city_id?: string | null
           classes?: string[] | null
           cover_image?: string | null
           created_at?: string | null
@@ -8421,6 +8639,7 @@ export type Database = {
           address?: string | null
           amenities?: string[] | null
           approval_status?: string | null
+          city_id?: string | null
           classes?: string[] | null
           cover_image?: string | null
           created_at?: string | null
@@ -8456,6 +8675,13 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "gyms_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "gyms_provider_id_fkey"
             columns: ["provider_id"]
@@ -8637,6 +8863,7 @@ export type Database = {
         Row: {
           address: string | null
           approval_status: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string | null
           created_by_uno_team: boolean | null
@@ -8676,6 +8903,7 @@ export type Database = {
         Insert: {
           address?: string | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -8715,6 +8943,7 @@ export type Database = {
         Update: {
           address?: string | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -8752,6 +8981,13 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "insurance_providers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "insurance_providers_provider_id_fkey"
             columns: ["provider_id"]
@@ -9960,6 +10196,7 @@ export type Database = {
       lead_magnets: {
         Row: {
           asset_url: string | null
+          city_id: string | null
           created_at: string
           default_score: number
           description_en: string | null
@@ -9974,6 +10211,7 @@ export type Database = {
         }
         Insert: {
           asset_url?: string | null
+          city_id?: string | null
           created_at?: string
           default_score?: number
           description_en?: string | null
@@ -9988,6 +10226,7 @@ export type Database = {
         }
         Update: {
           asset_url?: string | null
+          city_id?: string | null
           created_at?: string
           default_score?: number
           description_en?: string | null
@@ -10000,7 +10239,15 @@ export type Database = {
           title_ru?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lead_magnets_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lead_score_events: {
         Row: {
@@ -10277,6 +10524,7 @@ export type Database = {
         Row: {
           address: string | null
           approval_status: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
@@ -10311,6 +10559,7 @@ export type Database = {
         Insert: {
           address?: string | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -10345,6 +10594,7 @@ export type Database = {
         Update: {
           address?: string | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -10377,6 +10627,13 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "legal_services_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "legal_services_provider_id_fkey"
             columns: ["provider_id"]
@@ -10901,6 +11158,7 @@ export type Database = {
           approval_status: string | null
           attributes: Json | null
           category: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string | null
           created_by_uno_team: boolean | null
@@ -10944,6 +11202,7 @@ export type Database = {
           approval_status?: string | null
           attributes?: Json | null
           category?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -10987,6 +11246,7 @@ export type Database = {
           approval_status?: string | null
           attributes?: Json | null
           category?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -11026,6 +11286,13 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "listings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
@@ -11215,6 +11482,7 @@ export type Database = {
       magnet_landings: {
         Row: {
           blocks: Json
+          city_id: string | null
           created_at: string
           created_by: string | null
           hero_image_url: string | null
@@ -11237,6 +11505,7 @@ export type Database = {
         }
         Insert: {
           blocks?: Json
+          city_id?: string | null
           created_at?: string
           created_by?: string | null
           hero_image_url?: string | null
@@ -11259,6 +11528,7 @@ export type Database = {
         }
         Update: {
           blocks?: Json
+          city_id?: string | null
           created_at?: string
           created_by?: string | null
           hero_image_url?: string | null
@@ -11281,6 +11551,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "magnet_landings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "magnet_landings_magnet_slug_fkey"
             columns: ["magnet_slug"]
             isOneToOne: false
@@ -11296,6 +11573,7 @@ export type Database = {
           bank_account: string | null
           bank_name: string | null
           brand_color: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string
           created_by: string | null
@@ -11351,6 +11629,7 @@ export type Database = {
           bank_account?: string | null
           bank_name?: string | null
           brand_color?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by?: string | null
@@ -11406,6 +11685,7 @@ export type Database = {
           bank_account?: string | null
           bank_name?: string | null
           brand_color?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by?: string | null
@@ -11456,6 +11736,13 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "management_companies_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "management_companies_provider_id_fkey"
             columns: ["provider_id"]
@@ -12243,6 +12530,7 @@ export type Database = {
           address: string | null
           address_ru: string | null
           approval_status: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
@@ -12269,6 +12557,7 @@ export type Database = {
           address?: string | null
           address_ru?: string | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -12295,6 +12584,7 @@ export type Database = {
           address?: string | null
           address_ru?: string | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -12317,7 +12607,15 @@ export type Database = {
           verified?: boolean
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_vendors_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mc_onboarding_progress: {
         Row: {
@@ -12767,6 +13065,7 @@ export type Database = {
       medical_services: {
         Row: {
           category: string
+          city_id: string | null
           clinic_id: string
           created_at: string
           currency: string | null
@@ -12782,6 +13081,7 @@ export type Database = {
         }
         Insert: {
           category: string
+          city_id?: string | null
           clinic_id: string
           created_at?: string
           currency?: string | null
@@ -12797,6 +13097,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          city_id?: string | null
           clinic_id?: string
           created_at?: string
           currency?: string | null
@@ -12810,7 +13111,15 @@ export type Database = {
           price?: number
           specialty?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "medical_services_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message_templates: {
         Row: {
@@ -13400,6 +13709,7 @@ export type Database = {
       }
       official_news: {
         Row: {
+          city_id: string | null
           created_at: string
           fetched_at: string
           id: string
@@ -13416,6 +13726,7 @@ export type Database = {
           url: string
         }
         Insert: {
+          city_id?: string | null
           created_at?: string
           fetched_at?: string
           id?: string
@@ -13432,6 +13743,7 @@ export type Database = {
           url: string
         }
         Update: {
+          city_id?: string | null
           created_at?: string
           fetched_at?: string
           id?: string
@@ -13447,7 +13759,15 @@ export type Database = {
           translated_at?: string | null
           url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "official_news_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_addresses: {
         Row: {
@@ -15516,6 +15836,7 @@ export type Database = {
         Row: {
           address: string | null
           approval_status: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string
           delivery_available: boolean | null
@@ -15550,6 +15871,7 @@ export type Database = {
         Insert: {
           address?: string | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           delivery_available?: boolean | null
@@ -15584,6 +15906,7 @@ export type Database = {
         Update: {
           address?: string | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           delivery_available?: boolean | null
@@ -15616,6 +15939,13 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pharmacies_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pharmacies_provider_id_fkey"
             columns: ["provider_id"]
@@ -15703,6 +16033,7 @@ export type Database = {
       phuket_osm_pois: {
         Row: {
           category: string
+          city_id: string | null
           id: string
           imported_at: string
           lat: number
@@ -15719,6 +16050,7 @@ export type Database = {
         }
         Insert: {
           category: string
+          city_id?: string | null
           id?: string
           imported_at?: string
           lat: number
@@ -15735,6 +16067,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          city_id?: string | null
           id?: string
           imported_at?: string
           lat?: number
@@ -15749,7 +16082,15 @@ export type Database = {
           tags?: Json
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "phuket_osm_pois_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_events: {
         Row: {
@@ -15877,6 +16218,7 @@ export type Database = {
       platform_news: {
         Row: {
           category: string
+          city_id: string | null
           cover_image: string | null
           created_at: string
           created_by: string | null
@@ -15893,6 +16235,7 @@ export type Database = {
         }
         Insert: {
           category?: string
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by?: string | null
@@ -15909,6 +16252,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by?: string | null
@@ -15923,7 +16267,15 @@ export type Database = {
           title_en?: string
           title_ru?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "platform_news_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_recommendations: {
         Row: {
@@ -16622,6 +16974,7 @@ export type Database = {
           bathrooms: number | null
           bedrooms: number | null
           buyer_contact_id: string | null
+          city_id: string | null
           created_at: string | null
           created_by: string | null
           currency: string | null
@@ -16659,6 +17012,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           buyer_contact_id?: string | null
+          city_id?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
@@ -16696,6 +17050,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           buyer_contact_id?: string | null
+          city_id?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
@@ -16734,6 +17089,13 @@ export type Database = {
             columns: ["buyer_contact_id"]
             isOneToOne: false
             referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
             referencedColumns: ["id"]
           },
           {
@@ -16875,6 +17237,7 @@ export type Database = {
           check_in_time: string | null
           check_out_time: string | null
           children_friendly: boolean | null
+          city_id: string | null
           cleaning_frequency: string | null
           cleaning_included: boolean | null
           clearview_badge: string | null
@@ -17158,6 +17521,7 @@ export type Database = {
           check_in_time?: string | null
           check_out_time?: string | null
           children_friendly?: boolean | null
+          city_id?: string | null
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
           clearview_badge?: string | null
@@ -17441,6 +17805,7 @@ export type Database = {
           check_in_time?: string | null
           check_out_time?: string | null
           children_friendly?: boolean | null
+          city_id?: string | null
           cleaning_frequency?: string | null
           cleaning_included?: boolean | null
           clearview_badge?: string | null
@@ -17692,6 +18057,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "property_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
             referencedColumns: ["id"]
           },
           {
@@ -18526,6 +18898,7 @@ export type Database = {
           amenities: string[] | null
           cam_fee_per_sqm: number | null
           cam_includes: string[] | null
+          city_id: string | null
           complex_type: string | null
           cover_image: string | null
           created_at: string
@@ -18560,6 +18933,7 @@ export type Database = {
           amenities?: string[] | null
           cam_fee_per_sqm?: number | null
           cam_includes?: string[] | null
+          city_id?: string | null
           complex_type?: string | null
           cover_image?: string | null
           created_at?: string
@@ -18594,6 +18968,7 @@ export type Database = {
           amenities?: string[] | null
           cam_fee_per_sqm?: number | null
           cam_includes?: string[] | null
+          city_id?: string | null
           complex_type?: string | null
           cover_image?: string | null
           created_at?: string
@@ -18624,6 +18999,13 @@ export type Database = {
           year_built?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_complexes_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_complexes_management_company_id_fkey"
             columns: ["management_company_id"]
@@ -20563,6 +20945,7 @@ export type Database = {
           cam_fee_per_sqm: number | null
           cam_includes: string[] | null
           cam_payment_day: number | null
+          city_id: string | null
           commission_pct: number | null
           completion_date: string | null
           construction_phase: string | null
@@ -20663,6 +21046,7 @@ export type Database = {
           cam_fee_per_sqm?: number | null
           cam_includes?: string[] | null
           cam_payment_day?: number | null
+          city_id?: string | null
           commission_pct?: number | null
           completion_date?: string | null
           construction_phase?: string | null
@@ -20763,6 +21147,7 @@ export type Database = {
           cam_fee_per_sqm?: number | null
           cam_includes?: string[] | null
           cam_payment_day?: number | null
+          city_id?: string | null
           commission_pct?: number | null
           completion_date?: string | null
           construction_phase?: string | null
@@ -20856,6 +21241,13 @@ export type Database = {
           yield_estimate?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_projects_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_projects_developer_id_fkey"
             columns: ["developer_id"]
@@ -21819,6 +22211,7 @@ export type Database = {
           approval_status: string | null
           booking_flow: string | null
           business_category: string | null
+          city_id: string | null
           commission_rate: number | null
           cover_image: string | null
           coverage_areas: string[] | null
@@ -21865,6 +22258,7 @@ export type Database = {
           approval_status?: string | null
           booking_flow?: string | null
           business_category?: string | null
+          city_id?: string | null
           commission_rate?: number | null
           cover_image?: string | null
           coverage_areas?: string[] | null
@@ -21911,6 +22305,7 @@ export type Database = {
           approval_status?: string | null
           booking_flow?: string | null
           business_category?: string | null
+          city_id?: string | null
           commission_rate?: number | null
           cover_image?: string | null
           coverage_areas?: string[] | null
@@ -21953,6 +22348,13 @@ export type Database = {
           website?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "providers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "providers_marketplace_vendor_id_fkey"
             columns: ["marketplace_vendor_id"]
@@ -22592,6 +22994,7 @@ export type Database = {
           assignment_premium: number | null
           bathrooms: number | null
           bedrooms: number | null
+          city_id: string | null
           condition: string | null
           cover_image: string | null
           created_at: string | null
@@ -22642,6 +23045,7 @@ export type Database = {
           assignment_premium?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
+          city_id?: string | null
           condition?: string | null
           cover_image?: string | null
           created_at?: string | null
@@ -22692,6 +23096,7 @@ export type Database = {
           assignment_premium?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
+          city_id?: string | null
           condition?: string | null
           cover_image?: string | null
           created_at?: string | null
@@ -22734,6 +23139,13 @@ export type Database = {
           zone?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "resale_properties_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "resale_properties_development_id_fkey"
             columns: ["development_id"]
@@ -23343,6 +23755,7 @@ export type Database = {
           address: string | null
           amenities: string[] | null
           approval_status: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string | null
           created_by_uno_team: boolean | null
@@ -23380,6 +23793,7 @@ export type Database = {
           address?: string | null
           amenities?: string[] | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -23417,6 +23831,7 @@ export type Database = {
           address?: string | null
           amenities?: string[] | null
           approval_status?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           created_by_uno_team?: boolean | null
@@ -23451,6 +23866,13 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "salons_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "salons_provider_id_fkey"
             columns: ["provider_id"]
@@ -25608,6 +26030,7 @@ export type Database = {
           availability_note: string | null
           booking_flow: string | null
           child_seat_available: boolean | null
+          city_id: string | null
           comfort_level: string
           cover_image: string | null
           created_at: string | null
@@ -25659,6 +26082,7 @@ export type Database = {
           availability_note?: string | null
           booking_flow?: string | null
           child_seat_available?: boolean | null
+          city_id?: string | null
           comfort_level?: string
           cover_image?: string | null
           created_at?: string | null
@@ -25710,6 +26134,7 @@ export type Database = {
           availability_note?: string | null
           booking_flow?: string | null
           child_seat_available?: boolean | null
+          city_id?: string | null
           comfort_level?: string
           cover_image?: string | null
           created_at?: string | null
@@ -25758,6 +26183,13 @@ export type Database = {
           wheelchair_access?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "transfers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transfers_provider_id_fkey"
             columns: ["provider_id"]
@@ -26375,6 +26807,7 @@ export type Database = {
       user_listings: {
         Row: {
           category_slug: string | null
+          city_id: string | null
           condition: string | null
           contact_phone: string | null
           contact_whatsapp: string | null
@@ -26406,6 +26839,7 @@ export type Database = {
         }
         Insert: {
           category_slug?: string | null
+          city_id?: string | null
           condition?: string | null
           contact_phone?: string | null
           contact_whatsapp?: string | null
@@ -26437,6 +26871,7 @@ export type Database = {
         }
         Update: {
           category_slug?: string | null
+          city_id?: string | null
           condition?: string | null
           contact_phone?: string | null
           contact_whatsapp?: string | null
@@ -26466,7 +26901,15 @@ export type Database = {
           user_id?: string
           views_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_listings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_loyalty_status: {
         Row: {
@@ -27748,6 +28191,7 @@ export type Database = {
           address_ru: string | null
           amenities: Json | null
           capacity: number | null
+          city_id: string | null
           cover_image: string | null
           created_at: string
           description_en: string | null
@@ -27774,6 +28218,7 @@ export type Database = {
           address_ru?: string | null
           amenities?: Json | null
           capacity?: number | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           description_en?: string | null
@@ -27800,6 +28245,7 @@ export type Database = {
           address_ru?: string | null
           amenities?: Json | null
           capacity?: number | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           description_en?: string | null
@@ -27821,7 +28267,15 @@ export type Database = {
           venue_type?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "venues_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vertical_commission_rules: {
         Row: {
@@ -27865,6 +28319,7 @@ export type Database = {
       veterinary_clinics: {
         Row: {
           address: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string | null
           currency: string | null
@@ -27898,6 +28353,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -27931,6 +28387,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string | null
           currency?: string | null
@@ -27963,6 +28420,13 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "veterinary_clinics_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "veterinary_clinics_provider_id_fkey"
             columns: ["provider_id"]
@@ -28059,6 +28523,7 @@ export type Database = {
       }
       visa_services: {
         Row: {
+          city_id: string | null
           created_at: string | null
           currency: string | null
           description_en: string | null
@@ -28083,6 +28548,7 @@ export type Database = {
           visa_type: string
         }
         Insert: {
+          city_id?: string | null
           created_at?: string | null
           currency?: string | null
           description_en?: string | null
@@ -28107,6 +28573,7 @@ export type Database = {
           visa_type: string
         }
         Update: {
+          city_id?: string | null
           created_at?: string | null
           currency?: string | null
           description_en?: string | null
@@ -28131,6 +28598,13 @@ export type Database = {
           visa_type?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "visa_services_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "visa_services_provider_id_fkey"
             columns: ["provider_id"]
@@ -28228,6 +28702,7 @@ export type Database = {
           available_times: string[] | null
           category: string
           certification_details: string | null
+          city_id: string | null
           cover_image: string | null
           created_at: string
           created_by_uno_team: boolean | null
@@ -28271,6 +28746,7 @@ export type Database = {
           available_times?: string[] | null
           category?: string
           certification_details?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -28314,6 +28790,7 @@ export type Database = {
           available_times?: string[] | null
           category?: string
           certification_details?: string | null
+          city_id?: string | null
           cover_image?: string | null
           created_at?: string
           created_by_uno_team?: boolean | null
@@ -28351,6 +28828,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "water_activities_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "water_activities_provider_id_fkey"
             columns: ["provider_id"]
