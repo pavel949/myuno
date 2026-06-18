@@ -14,6 +14,7 @@ export const SetupPassword = lazy(() => import('@/pages/auth/SetupPassword'));
 
 // ── Core ──
 export const ForManagementCompanies = lazy(() => import('@/pages/ForManagementCompanies'));
+export const ForOwners = lazy(() => import('@/pages/ForOwners'));
 export const ForDevelopers = lazy(() => import('@/pages/ForDevelopers'));
 export const ForLocalServiceProviders = lazy(() => import('@/pages/ForLocalServices'));
 export const ForBusinessPage = lazy(() => import('@/pages/ForBusinessPage'));

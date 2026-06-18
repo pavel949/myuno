@@ -269,6 +269,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.BOOKING_ADVANCE_REQUESTED} element={<LazyPage><Pages.AdvanceRequested /></LazyPage>} />
         <Route path="/ref/:code" element={<LazyPage><Pages.ReferralLanding /></LazyPage>} />
         {/* Wave 3 stabilize: Manage cluster routes role-aware (operators → portal, guests → landing) */}
+        <Route path={APP_ROUTES.FOR_OWNERS} element={<LazyPage><Pages.ForOwners /></LazyPage>} />
         <Route path="/for-management-companies" element={<ManageHubGate />} />
         <Route path={APP_ROUTES.FOR_REAL_ESTATE_DEVELOPERS} element={<LazyPage><Pages.ForDevelopers /></LazyPage>} />
         <Route path={APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS} element={<LazyPage><Pages.ForLocalServiceProviders /></LazyPage>} />

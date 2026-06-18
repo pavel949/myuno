@@ -1,17 +1,17 @@
 /**
- * NavigatorClusterSection — renders a section of life situations grouped under
- * a single Master-Taxonomy cluster (Arrive / Live / Manage / Invest / Legal / Build).
+ * NavigatorClusterSection — civic-style compact section for one Master-Taxonomy
+ * cluster (Arrive / Live / Manage / Invest / Legal / Build).
  *
- * Used by NavigatorPageV3 to give clients a clear "where am I / why these cards"
- * structure instead of a flat 20-card grid.
+ * Renders a quiet header (small label + count) and a vertical list of
+ * situation rows. No coloured tiles, no grid clutter — every row answers a
+ * single question: "what should I do here?".
  */
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { CLUSTERS, type ClusterId } from '@/lib/catalog/taxonomy';
 import type { LifeSituation } from '@/hooks/useLifeOS';
-import { SituationCard } from './SituationCard';
-import { cn } from '@/lib/utils';
 
 interface NavigatorClusterSectionProps {
   clusterId: ClusterId;
@@ -19,14 +19,34 @@ interface NavigatorClusterSectionProps {
   counts?: Record<string, number>;
 }
 
-const CLUSTER_ICON_NAMES: Record<ClusterId, string> = {
-  arrive: 'Plane',
-  live: 'Home',
-  manage: 'Building2',
-  invest: 'TrendingUp',
-  legal: 'Scale',
-  build: 'HardHat',
+const CLUSTER_LABEL_RU: Record<ClusterId, string> = {
+  arrive: 'Прибытие',
+  live: 'Жизнь',
+  manage: 'Управление',
+  invest: 'Инвестиции',
+  legal: 'Документы и право',
+  build: 'Девелопмент',
 };
+
+const CLUSTER_LABEL_EN: Record<ClusterId, string> = {
+  arrive: 'Arrive',
+  live: 'Live',
+  manage: 'Manage',
+  invest: 'Invest',
+  legal: 'Legal',
+  build: 'Build',
+};
+
+function formatCount(n: number, isRu: boolean): string {
+  if (isRu) {
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return `${n} услуга`;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${n} услуги`;
+    return `${n} услуг`;
+  }
+  return `${n} ${n === 1 ? 'service' : 'services'}`;
+}
 
 export function NavigatorClusterSection({
   clusterId,
@@ -38,8 +58,7 @@ export function NavigatorClusterSection({
   const cluster = CLUSTERS.find((c) => c.id === clusterId);
   if (!cluster || situations.length === 0) return null;
 
-  const label = isRu ? cluster.labelRu : cluster.labelEn;
-  const value = isRu ? cluster.valueRu : cluster.valueEn;
+  const label = isRu ? CLUSTER_LABEL_RU[clusterId] : CLUSTER_LABEL_EN[clusterId];
 
   return (
     <section
@@ -47,47 +66,51 @@ export function NavigatorClusterSection({
       className="scroll-mt-24"
       aria-labelledby={`cluster-${clusterId}-title`}
     >
-      <header className="mb-4 flex items-start gap-3 border-l-2 pl-4" style={{ borderColor: cluster.color }}>
-        <div
-          className="w-10 h-10 flex items-center justify-center shrink-0 mt-0.5"
-          style={{ backgroundColor: `${cluster.color.replace('hsl', 'hsla').replace(')', ' / 0.12)')}` }}
+      <header className="flex items-baseline justify-between gap-3 pb-3 mb-1 border-b border-border">
+        <h2
+          id={`cluster-${clusterId}-title`}
+          className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground"
         >
-          <DynamicIcon
-            name={CLUSTER_ICON_NAMES[clusterId]}
-            className="w-5 h-5"
-            style={{ color: cluster.color }}
-            strokeWidth={1.75}
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-2 flex-wrap">
-            <h2
-              id={`cluster-${clusterId}-title`}
-              className="text-[18px] sm:text-[20px] font-serif font-semibold tracking-[-0.01em] text-foreground"
-            >
-              {label}
-            </h2>
-            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              {situations.length} {isRu ? 'ситуац.' : 'situations'}
-            </span>
-          </div>
-          <p className="mt-1 text-[12.5px] leading-[1.5] text-muted-foreground line-clamp-2">
-            {value}
-          </p>
-        </div>
+          {label}
+        </h2>
+        <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+          {situations.length}
+        </span>
       </header>
 
-      <div className={cn('grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4')}>
-        {situations.map((s) => (
-          <SituationCard
-            key={s.id}
-            situation={s}
-            serviceCount={counts?.[s.id]}
-            clusterId={clusterId}
-            clusterColor={cluster.color}
-          />
-        ))}
-      </div>
+      <ul className="divide-y divide-border">
+        {situations.map((s) => {
+          const title = isRu ? s.title_ru : s.title_en;
+          const desc = isRu ? s.description_ru : s.description_en;
+          const count = counts?.[s.id];
+          return (
+            <li key={s.id}>
+              <Link
+                to={`/discover/${s.code}`}
+                className="group flex items-center gap-4 py-4 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[56px]"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="text-[15px] font-medium text-foreground leading-tight">
+                    {title}
+                  </div>
+                  {desc && (
+                    <div className="mt-0.5 text-[12.5px] text-muted-foreground leading-snug line-clamp-1">
+                      {desc}
+                    </div>
+                  )}
+                </div>
+                <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
+                  {typeof count === 'number' && count > 0 ? formatCount(count, isRu) : (isRu ? 'открыть' : 'open')}
+                </span>
+                <ArrowRight
+                  className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors"
+                  strokeWidth={1.75}
+                />
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }

@@ -1,41 +1,40 @@
 /**
- * NavigatorPage v3 — situation-first discovery, grouped by Master-Taxonomy cluster.
+ * NavigatorPage v3 — civic-grade /discover surface.
  *
- * Canonical /discover surface. Renders life situations sourced from
- * `life_situations` (admin-managed) AND groups them under the 6 Master-Taxonomy
- * surface clusters (Arrive / Live / Manage / Invest / Legal / Build) using the
- * static SSOT `CLUSTER_LIFE_SITUATIONS`. Each card navigates to
- * `/discover/:code` where services are listed via `resolve_life_os_context`.
- *
- * Why grouped: the previous flat 20-card grid had no context — clients couldn't
- * understand "why these cards / where am I". Cluster sections provide
- * navigational anchors and explain the surface intent.
- *
- * GA on 2026-06-16 (migration 20260616013024). Cluster grouping added
- * 2026-06-18 as part of admin/navigator UX pass.
+ * Single vertical column: persona chip-row → "For you" top-3 → clusters as
+ * compact lists, role-gated. One source of truth for service counts (RPC).
+ * Calm, authoritative, GOV-style — answers one question per screen:
+ * "what should I do next?".
  */
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Search, SlidersHorizontal, X } from 'lucide-react';
+import { MapPin, Search, SlidersHorizontal, X, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useLifeSituations } from '@/hooks/useLifeOS';
+import { useLifeSituations, useLifeOSRole, type LifeOSRole } from '@/hooks/useLifeOS';
 import { useSituationServiceCounts } from '@/hooks/useSituationServiceCounts';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
-import { ROLE_META, personaColor } from '@/lib/roleBlend';
+import { ROLE_META } from '@/lib/roleBlend';
 import { RoleSheet } from '@/components/home/RoleSheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import {
-  CLUSTERS,
-  CLUSTER_LIFE_SITUATIONS,
-  type ClusterId,
-} from '@/lib/catalog/taxonomy';
+import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
 import { NavigatorClusterSection } from './NavigatorClusterSection';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
-const CLUSTER_ORDER: ClusterId[] = ['arrive', 'live', 'legal', 'invest', 'manage', 'build'];
+const CLUSTER_ORDER: ClusterId[] = ['arrive', 'live', 'legal', 'manage', 'invest', 'build'];
+
+/** Which clusters each LifeOSRole sees, in order (first = default emphasis). */
+const ROLE_VISIBLE_CLUSTERS: Record<LifeOSRole, ClusterId[]> = {
+  guest:     ['arrive', 'live', 'legal'],
+  resident:  ['live', 'legal', 'arrive'],
+  owner:     ['manage', 'live', 'legal', 'invest'],
+  mc:        ['manage', 'legal', 'invest'],
+  investor:  ['invest', 'manage', 'legal', 'build'],
+  developer: ['build', 'invest', 'manage', 'legal'],
+  vendor:    ['manage', 'legal', 'live'],
+};
 
 /** Build situationCode -> primary clusterId map from SSOT. */
 function buildSituationClusterMap(): Record<string, ClusterId> {
@@ -63,9 +62,9 @@ export default function NavigatorPageV3() {
   const { data: situations, isLoading, isError } = useLifeSituations();
   const { data: counts } = useSituationServiceCounts();
   const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
+  const role = useLifeOSRole();
   const [query, setQuery] = useState('');
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
-  const [activeCluster, setActiveCluster] = useState<ClusterId | 'all'>('all');
 
   const situationClusterMap = useMemo(buildSituationClusterMap, []);
 
@@ -86,7 +85,7 @@ export default function NavigatorPageV3() {
     });
   }, [rankedSituations, query]);
 
-  // Group by primary cluster from SSOT; unknown codes fall into 'live' bucket.
+  // Group situations by primary cluster
   const grouped = useMemo(() => {
     const buckets: Record<ClusterId, LifeSituation[]> = {
       arrive: [], live: [], manage: [], invest: [], legal: [], build: [],
@@ -98,73 +97,69 @@ export default function NavigatorPageV3() {
     return buckets;
   }, [filteredSituations, situationClusterMap]);
 
-  const visibleClusters = useMemo(
-    () => CLUSTER_ORDER.filter((cid) => grouped[cid].length > 0),
-    [grouped],
-  );
+  // Role-gated cluster order
+  const roleClusters = ROLE_VISIBLE_CLUSTERS[role];
+  const visibleClusters = useMemo(() => {
+    // primary clusters per role (top), then any non-empty remaining clusters (muted)
+    const primary = roleClusters.filter((cid) => grouped[cid].length > 0);
+    const rest = CLUSTER_ORDER.filter(
+      (cid) => !primary.includes(cid) && grouped[cid].length > 0,
+    );
+    return { primary, rest };
+  }, [roleClusters, grouped]);
+
+  // Top-3 "For you" — first 3 ranked situations matching a visible cluster
+  const forYou = useMemo(() => {
+    const allowed = new Set([...visibleClusters.primary, ...visibleClusters.rest]);
+    return filteredSituations.filter((s) => allowed.has(situationClusterMap[s.code] ?? 'live')).slice(0, 3);
+  }, [filteredSituations, visibleClusters, situationClusterMap]);
 
   const hasRealPersonas = personas.length > 0;
 
-  const scrollToCluster = useCallback((cid: ClusterId) => {
-    setActiveCluster(cid);
-    const el = document.getElementById(`cluster-${cid}`);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
-
   return (
     <AppLayout>
-      <div className="px-4 pt-6 pb-24 md:px-6 md:pt-10 max-w-6xl mx-auto">
-        <header className="mb-6 md:mb-8">
-          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-3">
+      <div className="px-4 pt-6 pb-24 md:px-6 md:pt-10 max-w-3xl mx-auto">
+        {/* Header */}
+        <header className="mb-8 md:mb-10">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
             {isRu ? 'Навигатор' : 'Navigator'}
           </p>
-          <h1 className="text-[28px] sm:text-[36px] lg:text-[40px] font-serif font-semibold leading-[1.1] tracking-[-0.02em] text-foreground max-w-3xl">
-            {isRu ? (
-              <>Что у тебя сейчас <span className="italic text-accent">в жизни</span>?</>
-            ) : (
-              <>What&apos;s happening in <span className="italic text-accent">your life</span>?</>
-            )}
+          <h1 className="text-[28px] sm:text-[34px] font-serif font-semibold leading-[1.1] tracking-[-0.02em] text-foreground">
+            {isRu ? 'Что вам сейчас нужно?' : 'What do you need now?'}
           </h1>
-          <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground max-w-xl leading-[1.5]">
+          <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground leading-[1.5] max-w-2xl">
             {isRu
-              ? 'Выберите ситуацию — покажем нужные сервисы, контакты и шаги. Карточки сгруппированы по сферам жизни.'
-              : 'Pick a situation — we show services, contacts and next steps. Cards are grouped by life area.'}
+              ? 'Выберите ситуацию — покажем сервисы, контакты и понятные шаги. Сгруппировано по сферам жизни и адаптировано под вашу роль.'
+              : 'Pick a situation — we surface services, contacts and clear next steps, grouped by life area and tuned to your role.'}
           </p>
 
           {/* Persona chip-row */}
-          <div className="mt-5 flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">
-              {isRu ? 'Для роли:' : 'For role:'}
+          <div className="mt-6 flex items-center gap-2 flex-wrap">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              {isRu ? 'Роль' : 'Role'}
             </span>
             {hasRealPersonas ? (
-              effectivePersonas.slice(0, 4).map((persona) => {
+              effectivePersonas.slice(0, 3).map((persona) => {
                 const meta = ROLE_META[persona];
                 if (!meta) return null;
                 return (
                   <span
                     key={persona}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium text-foreground"
-                    style={{
-                      background: personaColor(persona, 0.12),
-                      borderLeft: `2px solid ${personaColor(persona)}`,
-                    }}
+                    className="inline-flex items-center px-2.5 py-1 text-[12px] font-medium text-foreground bg-muted border-l-2 border-primary"
                   >
                     {isRu ? meta.labelRu : meta.label}
                   </span>
                 );
               })
             ) : (
-              <span className="text-[12px] italic text-muted-foreground">
-                {isRu ? 'роль не выбрана — показываем универсальный набор' : 'no role yet — generic order'}
+              <span className="text-[12px] text-muted-foreground italic">
+                {isRu ? 'не выбрана' : 'not set'}
               </span>
             )}
             <button
               type="button"
               onClick={() => setRoleSheetOpen(true)}
-              className={cn(
-                'inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium',
-                'border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors',
-              )}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors min-h-[28px]"
             >
               <SlidersHorizontal className="w-3 h-3" strokeWidth={2} />
               {isRu ? 'Изменить' : 'Edit'}
@@ -172,7 +167,7 @@ export default function NavigatorPageV3() {
           </div>
 
           {/* Search */}
-          <div className="mt-5 relative max-w-xl">
+          <div className="mt-5 relative">
             <Search
               className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground pointer-events-none"
               strokeWidth={1.75}
@@ -201,91 +196,86 @@ export default function NavigatorPageV3() {
             )}
           </div>
 
-          {/* Map link — moved to hero area, no longer floating in corner */}
+          {/* Map link */}
           <div className="mt-4">
             <Link
               to="/map"
-              className={cn(
-                'inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium',
-                'border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors',
-              )}
-              aria-label={isRu ? 'Карта Пхукета' : 'Phuket map'}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
             >
               <MapPin className="w-3.5 h-3.5" strokeWidth={1.75} />
-              {isRu ? 'Показать на карте Пхукета' : 'See on Phuket map'}
+              {isRu ? 'Показать на карте' : 'See on map'}
             </Link>
           </div>
         </header>
 
-        {/* Sticky cluster tabs — quick scroll to section */}
-        {!isLoading && visibleClusters.length > 1 && (
-          <div
-            className="sticky top-[56px] z-20 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-6 bg-background/95 backdrop-blur border-b border-border"
-            role="tablist"
-            aria-label={isRu ? 'Сферы жизни' : 'Life areas'}
-          >
-            <div className="flex gap-2 overflow-x-auto no-scrollbar">
-              <button
-                type="button"
-                onClick={() => { setActiveCluster('all'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                role="tab"
-                aria-selected={activeCluster === 'all'}
-                className={cn(
-                  'shrink-0 px-3 py-1.5 text-[12px] font-medium border whitespace-nowrap transition-colors',
-                  activeCluster === 'all'
-                    ? 'border-primary text-primary bg-primary/5'
-                    : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40',
-                )}
-              >
-                {isRu ? 'Все' : 'All'}
-                <span className="ml-1.5 font-mono text-[10px] opacity-60">{filteredSituations.length}</span>
-              </button>
-              {visibleClusters.map((cid) => {
-                const cluster = CLUSTERS.find((c) => c.id === cid)!;
-                const label = isRu ? cluster.labelRu : cluster.labelEn;
-                const isActive = activeCluster === cid;
-                return (
-                  <button
-                    key={cid}
-                    type="button"
-                    onClick={() => scrollToCluster(cid)}
-                    role="tab"
-                    aria-selected={isActive}
-                    className={cn(
-                      'shrink-0 px-3 py-1.5 text-[12px] font-medium border whitespace-nowrap transition-colors',
-                      isActive
-                        ? 'border-primary text-primary bg-primary/5'
-                        : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40',
-                    )}
-                    style={isActive ? undefined : { borderLeftWidth: 2, borderLeftColor: cluster.color }}
-                  >
-                    {label}
-                    <span className="ml-1.5 font-mono text-[10px] opacity-60">{grouped[cid].length}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {isError && (
-          <div className="border border-destructive/40 bg-destructive/5 text-destructive p-4 text-sm">
+          <div className="border border-destructive/40 bg-destructive/5 text-destructive p-4 text-sm mb-6">
             {isRu ? 'Не удалось загрузить ситуации.' : 'Failed to load situations.'}
           </div>
         )}
 
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <Skeleton key={i} className="h-[180px] rounded-none" />
+          <div className="space-y-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-14 w-full rounded-none" />
             ))}
           </div>
         )}
 
-        {/* Grouped sections by cluster */}
-        {!isLoading && situations && situations.length > 0 && filteredSituations.length > 0 && (
-          <div className="space-y-10 md:space-y-12">
-            {visibleClusters.map((cid) => (
+        {/* "For you" section */}
+        {!isLoading && !query && forYou.length > 0 && (
+          <section className="mb-10" aria-labelledby="for-you-title">
+            <header className="flex items-baseline justify-between gap-3 pb-3 mb-1 border-b-2 border-primary">
+              <h2
+                id="for-you-title"
+                className="font-mono text-[11px] uppercase tracking-[0.18em] text-primary"
+              >
+                {isRu ? 'Для вас сейчас' : 'For you now'}
+              </h2>
+              <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+                {forYou.length}
+              </span>
+            </header>
+            <ul className="divide-y divide-border">
+              {forYou.map((s) => {
+                const title = isRu ? s.title_ru : s.title_en;
+                const desc = isRu ? s.description_ru : s.description_en;
+                const c = counts?.[s.id];
+                return (
+                  <li key={s.id}>
+                    <Link
+                      to={`/discover/${s.code}`}
+                      className="group flex items-center gap-4 py-5 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[64px]"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[17px] font-semibold text-foreground leading-tight tracking-[-0.005em]">
+                          {title}
+                        </div>
+                        {desc && (
+                          <div className="mt-1 text-[13px] text-muted-foreground leading-snug line-clamp-2">
+                            {desc}
+                          </div>
+                        )}
+                      </div>
+                      <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
+                        {typeof c === 'number' && c > 0 ? c : '—'}
+                      </span>
+                      <ArrowRight
+                        className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors"
+                        strokeWidth={1.75}
+                      />
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+
+        {/* Primary clusters */}
+        {!isLoading && filteredSituations.length > 0 && (
+          <div className="space-y-10">
+            {visibleClusters.primary.map((cid) => (
               <NavigatorClusterSection
                 key={cid}
                 clusterId={cid}
@@ -296,9 +286,28 @@ export default function NavigatorPageV3() {
           </div>
         )}
 
+        {/* Other clusters (muted, expandable) */}
+        {!isLoading && visibleClusters.rest.length > 0 && (
+          <div className="mt-12 pt-8 border-t border-border">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
+              {isRu ? 'Другие сферы' : 'Other areas'}
+            </p>
+            <div className="space-y-10">
+              {visibleClusters.rest.map((cid) => (
+                <NavigatorClusterSection
+                  key={cid}
+                  clusterId={cid}
+                  situations={grouped[cid]}
+                  counts={counts}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Empty search */}
         {!isLoading && situations && situations.length > 0 && filteredSituations.length === 0 && (
-          <div className="text-center py-16">
+          <div className="text-center py-16 border border-border">
             <p className="text-muted-foreground text-sm mb-4">
               {isRu ? `Ничего не найдено по запросу «${query}».` : `No matches for "${query}".`}
             </p>
@@ -312,41 +321,17 @@ export default function NavigatorPageV3() {
           </div>
         )}
 
-        {/* Empty DB — fallback to 6 cluster CTAs */}
+        {/* Empty DB */}
         {!isLoading && situations && situations.length === 0 && (
-          <div className="border border-border bg-card p-8 text-center space-y-6">
-            <div>
-              <h2 className="text-[20px] font-serif font-semibold text-foreground mb-2">
-                {isRu ? 'Ситуации скоро появятся' : 'Situations are coming soon'}
-              </h2>
-              <p className="text-[13px] text-muted-foreground max-w-md mx-auto">
-                {isRu
-                  ? 'Пока выберите сферу жизни — мы покажем все доступные сервисы.'
-                  : 'Meanwhile pick a life area — we will show all available services.'}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto">
-              {CLUSTER_ORDER.map((cid) => {
-                const c = CLUSTERS.find((x) => x.id === cid)!;
-                return (
-                  <Link
-                    key={cid}
-                    to={c.homeRoute ?? '/'}
-                    className="border border-border hover:border-primary/40 p-4 text-left transition-colors"
-                    style={{ borderLeftWidth: 3, borderLeftColor: c.color }}
-                  >
-                    <div className="text-[13px] font-semibold text-foreground">
-                      {isRu ? c.labelRu : c.labelEn}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+          <div className="border border-border bg-card p-8 text-center">
+            <h2 className="text-[18px] font-serif font-semibold text-foreground mb-2">
+              {isRu ? 'Ситуации скоро появятся' : 'Situations are coming soon'}
+            </h2>
             <a
               href="https://wa.me/66922407355"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-[13px] underline text-primary hover:no-underline"
+              className="inline-block mt-4 text-[13px] underline text-primary hover:no-underline"
             >
               {isRu ? 'Связаться с консьержем' : 'Talk to concierge'}
             </a>
