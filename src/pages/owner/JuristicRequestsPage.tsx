@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { useJuristicRequests, requestStatusLabels, requestTypeLabels } from '@/hooks/useJuristicRequests';
 import { JuristicRequestForm } from '@/components/owner/JuristicRequestForm';
