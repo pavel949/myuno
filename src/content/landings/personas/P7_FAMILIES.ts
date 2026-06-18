@@ -15,8 +15,8 @@ export const P7_FAMILIES: PersonaLanding = {
     en: 'Phuket with kids: schools, villas, safety',
   },
   subtitle: {
-    ru: 'Международные школы, family-villas с бассейном и кухней, педиатры по-русски, экскурсии для детей — выстраиваем переезд или зимовку под ваш состав семьи.',
-    en: 'International schools, family villas with pool and kitchen, Russian-speaking paediatricians and kid-friendly tours — we plan your move or winter stay around your family.',
+    ru: 'Международные школы, family-villas с бассейном и кухней, многоязычные педиатры (EN/RU/TH), экскурсии для детей — выстраиваем переезд или зимовку под ваш состав семьи.',
+    en: 'International schools, family villas with pool and kitchen, multilingual paediatricians (EN/RU/TH) and kid-friendly tours — we plan your move or winter stay around your family.',
   },
   pains: [
     { ru: 'Не понимаете, какая школа подходит ребёнку: British, IB, Russian curriculum.', en: 'Unclear which school fits your child: British, IB, Russian curriculum.' },
