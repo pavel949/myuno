@@ -435,7 +435,7 @@ export default function WelcomeLanding() {
       <LandingSection>
         <LandingContainer className="py-8 sm:py-10">
           <p className="mb-4 font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-            {tx(language, { ru: 'Я пришёл за…', en: 'I am here to…' })}
+            {tx(language, { ru: 'Я пришёл за…', en: 'I am here to…', th: 'ฉันมาเพื่อ…' })}
           </p>
           <div className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2">
             <a
@@ -445,7 +445,7 @@ export default function WelcomeLanding() {
               <Compass className="mt-1 h-5 w-5 shrink-0 text-primary" strokeWidth={1.75} />
               <div className="min-w-0 flex-1">
                 <div className="font-sans text-h4 font-medium tracking-tight text-foreground">
-                  {tx(language, { ru: 'Решить свой вопрос', en: 'Resolve my own matter' })}
+                  {tx(language, { ru: 'Решить свой вопрос', en: 'Resolve my own matter', th: 'แก้ไขเรื่องของฉัน' })}
                 </div>
                 <div className="mt-1 font-sans text-body-sm text-muted-foreground">
                   {tx(language, {
@@ -463,7 +463,7 @@ export default function WelcomeLanding() {
               <Briefcase className="mt-1 h-5 w-5 shrink-0 text-primary" strokeWidth={1.75} />
               <div className="min-w-0 flex-1">
                 <div className="font-sans text-h4 font-medium tracking-tight text-foreground">
-                  {tx(language, { ru: 'Предложить свои услуги', en: 'Offer my services' })}
+                  {tx(language, { ru: 'Предложить свои услуги', en: 'Offer my services', th: 'เสนอบริการของฉัน' })}
                 </div>
                 <div className="mt-1 font-sans text-body-sm text-muted-foreground">
                   {tx(language, {
@@ -484,7 +484,7 @@ export default function WelcomeLanding() {
           <span id="for-audiences" className="block -mt-20 pt-20" aria-hidden />
           <div className="mb-8 max-w-2xl space-y-3">
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(language, { ru: 'Для кого экосистема', en: 'Who the ecosystem is for' })}
+              {tx(language, { ru: 'Для кого экосистема', en: 'Who the ecosystem is for', th: 'ระบบนิเวศนี้สำหรับใคร' })}
             </h2>
             <p className="font-sans text-body-sm font-normal leading-relaxed text-muted-foreground">
               {tx(language, {
@@ -539,7 +539,7 @@ export default function WelcomeLanding() {
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(language, { ru: 'Что входит в экосистему', en: 'What the ecosystem includes' })}
+              {tx(language, { ru: 'Что входит в экосистему', en: 'What the ecosystem includes', th: 'สิ่งที่อยู่ในระบบนิเวศ' })}
             </h2>
             <p className="font-sans text-body-sm font-normal leading-relaxed text-muted-foreground">
               {ecosystemHeading}.
@@ -589,7 +589,7 @@ export default function WelcomeLanding() {
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl">
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(language, { ru: 'Как это работает', en: 'How it works' })}
+              {tx(language, { ru: 'Как это работает', en: 'How it works', th: 'ทำงานอย่างไร' })}
             </h2>
           </div>
           <ol className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-3">
@@ -612,7 +612,7 @@ export default function WelcomeLanding() {
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl">
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(language, { ru: 'Доверие и данные', en: 'Trust & data' })}
+              {tx(language, { ru: 'Доверие и данные', en: 'Trust & data', th: 'ความน่าเชื่อถือและข้อมูล' })}
             </h2>
             <p className="mt-3 font-sans text-body-sm leading-relaxed text-muted-foreground">
               {tx(language, {
@@ -641,7 +641,7 @@ export default function WelcomeLanding() {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_minmax(0,1.2fr)]">
             <div className="space-y-3">
               <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-                {tx(language, { ru: 'Помощь в экстренной ситуации', en: 'Help in an emergency' })}
+                {tx(language, { ru: 'Помощь в экстренной ситуации', en: 'Help in an emergency', th: 'ความช่วยเหลือฉุกเฉิน' })}
               </h2>
               <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
                 {tx(language, {
@@ -656,7 +656,7 @@ export default function WelcomeLanding() {
                 className="mt-2 inline-flex h-11 items-center gap-2 rounded-none border border-foreground bg-foreground px-5 font-sans text-body font-semibold text-background hover:bg-foreground/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <LifeBuoy className="h-4 w-4" strokeWidth={2} />
-                {tx(language, { ru: 'Запросить помощь', en: 'Request help' })}
+                {tx(language, { ru: 'Запросить помощь', en: 'Request help', th: 'ขอความช่วยเหลือ' })}
               </button>
             </div>
             <ul className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2">
@@ -681,7 +681,7 @@ export default function WelcomeLanding() {
           <span id="for-partners" className="block -mt-20 pt-20" aria-hidden />
           <div className="mb-8 max-w-3xl space-y-3">
             <p className="font-sans text-caption uppercase tracking-[0.14em] text-primary">
-              {tx(language, { ru: 'Для местных бизнесов', en: 'For local businesses' })}
+              {tx(language, { ru: 'Для местных бизнесов', en: 'For local businesses', th: 'สำหรับธุรกิจท้องถิ่น' })}
             </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
               {tx(language, {
@@ -734,7 +734,7 @@ export default function WelcomeLanding() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="max-w-2xl space-y-3">
               <p className="font-sans text-caption uppercase tracking-[0.14em] text-primary">
-                {tx(language, { ru: 'Для застройщиков', en: 'For developers' })}
+                {tx(language, { ru: 'Для застройщиков', en: 'For developers', th: 'สำหรับผู้พัฒนาโครงการ' })}
               </p>
               <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
                 {tx(language, {
@@ -766,9 +766,9 @@ export default function WelcomeLanding() {
       <LandingSection border={false}>
         <LandingContainer className="mx-auto max-w-3xl py-16 text-center sm:py-24">
           <h2 className="font-display text-h1 font-normal leading-[1.05] tracking-tight sm:text-display">
-            {tx(language, { ru: 'Один аккаунт —', en: 'One account —' })}
+            {tx(language, { ru: 'Один аккаунт —', en: 'One account —', th: 'บัญชีเดียว —' })}
             <br />
-            {tx(language, { ru: 'вся жизнь на Пхукете', en: 'a full life on Phuket' })}
+            {tx(language, { ru: 'вся жизнь на Пхукете', en: 'a full life on Phuket', th: 'ชีวิตทั้งหมดบนภูเก็ต' })}
           </h2>
           <p className="mt-4 font-sans text-body-sm text-muted-foreground sm:text-body">
             {tx(language, {
