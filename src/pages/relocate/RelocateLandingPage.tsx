@@ -12,6 +12,7 @@ import { tokenColor } from '@/lib/utils/hslAlpha';
 import { SEOHead } from '@/components/seo';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { useRelocationPlan } from '@/hooks/useRelocationPlan';
+import { ConciergeHelpCTA } from '@/components/concierge/ConciergeHelpCTA';
 
 const STEPS = [
   { id: 'visa', icon: FileText, labelEn: 'Visas & Documents', labelRu: 'Визы и документы', descEn: 'Compare DTV, ED, Non-B — then book legal help', descRu: 'Сравните DTV, ED, Non-B — затем юрист', path: APP_ROUTES.VISA_COMPARE, color: 'cluster-live' },
