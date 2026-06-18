@@ -51,7 +51,7 @@ export const P20_RETIREES: PersonaLanding = {
   },
   seo: {
     metaTitle: { ru: 'Пенсия и зимовка на Пхукете: O-A visa, страховка — myUNO', en: 'Retirement on Phuket: O-A visa, insurance, housing — myUNO' },
-    metaDescription: { ru: 'Retirement visa O-A, страховка 60+, comfort condo, тайская медицина и русскоязычное комьюнити. Устойчивая жизнь после 50.', en: 'Retirement O-A visa, 60+ insurance, comfort condo, Thai healthcare and Russian-speaking community. Sustainable life after 50.' },
+    metaDescription: { ru: 'Retirement visa O-A, страховка 60+, comfort condo, тайская медицина и международное комьюнити (EN/RU/TH). Устойчивая жизнь после 50.', en: 'Retirement O-A visa, 60+ insurance, comfort condo, Thai healthcare and international community (EN/RU/TH). Sustainable life after 50.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/retirees',
     hreflangAlternates: [
