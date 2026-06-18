@@ -211,6 +211,7 @@ function PODetail({ poId, onClose }: { poId: string; onClose: () => void }) {
 function CreatePOForm({ onClose }: { onClose: () => void }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { code: cityCurrencyCode } = useCityCurrency();
   const create = useCreatePurchaseOrder();
   const [vendor, setVendor] = useState('');
   const [expected, setExpected] = useState('');
@@ -270,7 +271,7 @@ function CreatePOForm({ onClose }: { onClose: () => void }) {
       </div>
       <div className="flex items-center justify-between p-2 rounded-none bg-muted/40">
         <span className="text-sm font-medium">{isRu ? 'Итого' : 'Total'}</span>
-        <span className="text-base font-bold tabular-nums">{total.toLocaleString()} THB</span>
+        <span className="text-base font-bold tabular-nums">{total.toLocaleString()} {cityCurrencyCode}</span>
       </div>
       <Button type="submit" className="w-full" disabled={create.isPending}>
         <Check className="w-4 h-4 mr-1.5" />
