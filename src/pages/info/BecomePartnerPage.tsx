@@ -227,7 +227,7 @@ const navigate = useNavigate();
     <AppLayout showHeader={false}>
     <PageContainer>
       <PageHeader 
-        title={language === 'ru' ? 'Станьте партнёром UNO' : 'Become a UNO Partner'}
+        title={language === 'ru' ? 'Станьте партнёром myUNO' : 'Become a myUNO Partner'}
         showBack
       />
 
@@ -241,13 +241,13 @@ const navigate = useNavigate();
         <div className="relative">
           <h1 className="text-2xl sm:text-3xl font-bold mb-4">
             {language === 'ru' 
-              ? 'Развивайте бизнес вместе с UNO' 
-              : 'Grow Your Business with UNO'}
+              ? 'Развивайте бизнес вместе с myUNO' 
+              : 'Grow Your Business with myUNO'}
           </h1>
           <p className="text-muted-foreground max-w-2xl mb-6">
             {language === 'ru' 
-              ? 'Присоединяйтесь к экосистеме UNO и получите доступ к миллионам активных пользователей. Мы поможем вам увеличить продажи и расширить клиентскую базу.' 
-              : 'Join the UNO ecosystem and get access to millions of active users. We will help you increase sales and expand your customer base.'}
+              ? 'Присоединяйтесь к экосистеме myUNO и получите доступ к миллионам активных пользователей. Мы поможем вам увеличить продажи и расширить клиентскую базу.' 
+              : 'Join the myUNO ecosystem and get access to millions of active users. We will help you increase sales and expand your customer base.'}
           </p>
 
           {/* Benefits */}

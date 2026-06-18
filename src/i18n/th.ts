@@ -218,7 +218,7 @@ export const th: Record<string, string> = {
   'message.loginRequired': 'กรุณาเข้าสู่ระบบ',
   
   // Home page
-  'home.welcome': 'ยินดีต้อนรับสู่ UNO',
+  'home.welcome': 'ยินดีต้อนรับสู่ myUNO',
   'home.subtitle': 'ไกด์ส่วนตัวของคุณในภูเก็ต',
   'home.featuredServices': 'บริการยอดนิยม',
   'home.categories': 'หมวดหมู่',
@@ -504,7 +504,7 @@ export const th: Record<string, string> = {
   // Payment
   'payment.card': 'บัตรเครดิต/เดบิต',
   'payment.cash': 'เงินสด',
-  'payment.wallet': 'กระเป๋า UNO',
+  'payment.wallet': 'กระเป๋า myUNO',
   'payment.promptpay': 'พร้อมเพย์',
   'payment.processing': 'กำลังดำเนินการ...',
   'payment.success': 'ชำระเงินสำเร็จ',
@@ -605,11 +605,11 @@ export const th: Record<string, string> = {
   'sos.survivalTips': 'เคล็ดลับการเอาตัวรอด',
   
   // VIP Concierge
-  'vip.title': 'VIP คอนเซียร์จ',
+  'vip.title': 'myUNO VIP',
   'vip.subtitle': 'บริการคอนเซียร์จระดับลักซ์ชัวรี่',
   'vip.description': 'บริการระดับพรีเมียมพิเศษสำหรับลูกค้าพิถีพิถัน เฮลิคอปเตอร์ เครื่องบินส่วนตัว เชฟส่วนตัว เรือยอร์ช รถหรู และบริการ VIP ครบวงจร',
   'vip.callUs': 'โทรหาเรา',
-  'vip.whyVip': 'ทำไมต้อง UNO VIP?',
+  'vip.whyVip': 'ทำไมต้อง myUNO VIP?',
   'vip.support247': 'สนับสนุน 24/7 ตลอดเวลา',
   'vip.personalManager': 'ผู้จัดการส่วนตัว',
   'vip.exclusiveAccess': 'การเข้าถึงพิเศษ',
@@ -697,7 +697,7 @@ export const th: Record<string, string> = {
   'account.menu.support': 'ช่วยเหลือและสนับสนุน',
   'account.menu.mcWorkspace': 'พื้นที่นิติบุคคล',
   'account.menu.ownerProperties': 'อสังหาของฉัน',
-  'account.menu.listWithUno': 'ลงประกาศกับ UNO',
+  'account.menu.listWithUno': 'ลงประกาศกับ myUNO',
 
   'developerPortal.backToProperty': 'ศูนย์อสังหาริมทรัพย์',
 

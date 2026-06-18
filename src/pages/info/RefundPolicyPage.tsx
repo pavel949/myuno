@@ -351,15 +351,15 @@ export default function RefundPolicyPage() {
       icon: Clock,
       title: isRu ? 'Сроки возврата' : 'Refund Timeline',
       content: isRu 
-        ? 'Escrow-возвраты: 5-10 рабочих дней на карту. UNO Кошелёк — мгновенно.'
-        : 'Escrow refunds: 5-10 business days to card. UNO Wallet — instant.',
+        ? 'Escrow-возвраты: 5-10 рабочих дней на карту. myUNO Кошелёк — мгновенно.'
+        : 'Escrow refunds: 5-10 business days to card. myUNO Wallet — instant.',
     },
     {
       icon: CreditCard,
       title: isRu ? 'Способ возврата' : 'Refund Method',
       content: isRu 
-        ? 'Возврат тем же способом оплаты. Можно выбрать UNO Кошелёк для мгновенного зачисления.'
-        : 'Refund via same payment method. Choose UNO Wallet for instant credit.',
+        ? 'Возврат тем же способом оплаты. Можно выбрать myUNO Кошелёк для мгновенного зачисления.'
+        : 'Refund via same payment method. Choose myUNO Wallet for instant credit.',
     },
     {
       icon: AlertTriangle,

@@ -23,9 +23,9 @@ const RelatedServicesCard = memo(function RelatedServicesCard({ entity, index }:
 
   return (
     <motion.button
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.08, duration: 0.3 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: index * 0.06, duration: 0.25 }}
       onClick={() => navigate(entity.path)}
       className="flex-shrink-0 w-[200px] bg-card border border-border rounded-none overflow-hidden hover:shadow-lg hover:border-primary/30 transition-all duration-200 text-left snap-start"
     >
@@ -96,13 +96,16 @@ export const RelatedServicesSection = memo(function RelatedServicesSection({
   };
 
   return (
-    <section className={cn('py-6', className)}>
+    <section className={cn('py-6 px-4', className)}>
       <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
         <span className="text-lg">✨</span>
         {language === 'ru' ? sectionTitle.ru : sectionTitle.en}
       </h3>
 
-      <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide -mx-4 px-4 touch-pan-y snap-x snap-proximity">
+      <div
+        className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide -mx-4 px-4 touch-pan-y snap-x snap-mandatory"
+        style={{ scrollPaddingLeft: '1rem' }}
+      >
         {entities.map((entity, index) => (
           <RelatedServicesCard
             key={`${entity.vertical}-${entity.id}`}

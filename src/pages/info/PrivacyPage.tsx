@@ -194,8 +194,8 @@ export default function PrivacyPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   {isRu 
-                    ? 'myUNO Limited серьёзно относится к защите ваших данных. Эта политика соответствует PDPA (Thailand), GDPR (EU) и другим применимым законам.'
-                    : 'myUNO Limited takes your data protection seriously. This policy complies with PDPA (Thailand), GDPR (EU), and other applicable laws.'}
+                    ? 'myUNO Pte. Ltd. серьёзно относится к защите ваших данных. Эта политика соответствует PDPA (Thailand), GDPR (EU) и другим применимым законам.'
+                    : 'myUNO Pte. Ltd. takes your data protection seriously. This policy complies with PDPA (Thailand), GDPR (EU), and other applicable laws.'}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
                   <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-none">PDPA Compliant</span>
@@ -217,7 +217,7 @@ export default function PrivacyPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              <strong>myUNO Limited</strong><br />
+              <strong>myUNO Pte. Ltd.</strong><br />
               {isRu ? 'Адрес: ' : 'Address: '}Thailand / UAE<br />
               {isRu ? 'Email DPO: ' : 'DPO Email: '}dpo@myuno.app<br />
               {isRu ? 'Общие вопросы: ' : 'General inquiries: '}privacy@myuno.app
