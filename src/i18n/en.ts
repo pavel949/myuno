@@ -424,7 +424,7 @@ export const en: Record<string, string> = {
   'account.menu.support': 'Help & Support',
   'account.menu.mcWorkspace': 'MC Workspace',
   'account.menu.ownerProperties': 'My Properties',
-  'account.menu.listWithUno': 'List with UNO',
+  'account.menu.listWithUno': 'List with myUNO',
 
   'developerPortal.backToProperty': 'Property hub',
 
