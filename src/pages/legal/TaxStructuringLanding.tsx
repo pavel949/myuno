@@ -6,6 +6,7 @@
  * are routed to the booking flow for paid consultation.
  */
 import { useNavigate } from 'react-router-dom';
+import { ConciergeHelpCTA } from '@/components/concierge/ConciergeHelpCTA';
 import {
   Calculator,
   Building2,
