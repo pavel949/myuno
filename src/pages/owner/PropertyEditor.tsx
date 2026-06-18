@@ -106,6 +106,8 @@ function mapPropertyToInitialData(property: any) {
 export default function PropertyEditor() {
   const { id } = useParams();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const navigate = useNavigate();
 const isRu = language === 'ru';
 
