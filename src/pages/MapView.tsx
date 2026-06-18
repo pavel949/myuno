@@ -20,6 +20,7 @@ import { MapSearchBox, MapSearchResult, MapSearchBoxHandle } from '@/components/
 import { MapListBottomSheet } from '@/components/map/MapListBottomSheet';
 import { MapListItem } from '@/components/map/MapListItem';
 import { useMapListSync } from '@/hooks/useMapListSync';
+import { PoiClaimSheet, type ClaimablePoi } from '@/components/map/PoiClaimSheet';
 
 
 type VerticalFilter =
@@ -236,6 +237,7 @@ export default function MapView() {
 
   const [placeDetails, setPlaceDetails] = useState<any | null>(null);
   const [placeLoading, setPlaceLoading] = useState(false);
+  const [claimPoi, setClaimPoi] = useState<ClaimablePoi | null>(null);
 
   const loadPlaceDetails = useCallback(async (poi: any) => {
     setPlaceLoading(true);
@@ -654,7 +656,7 @@ export default function MapView() {
                     </div>
                     {!placeDetails && !placeLoading && (
                       <button type="button" onClick={() => loadPlaceDetails(p)} className="text-xs text-primary hover:underline">
-                        {language === 'ru' ? 'Загрузить детали Google' : 'Load Google details'}
+                        {language === 'ru' ? 'Загрузить детали' : 'Load details'}
                       </button>
                     )}
                     {placeLoading && (
@@ -664,17 +666,28 @@ export default function MapView() {
                       <div className="space-y-1 text-xs">
                         {placeDetails.rating && <div>⭐ {placeDetails.rating} ({placeDetails.user_ratings_total ?? 0})</div>}
                         {placeDetails.formatted_address && <div className="text-muted-foreground">{placeDetails.formatted_address}</div>}
-                        {placeDetails.formatted_phone_number && (
-                          <a href={`tel:${placeDetails.formatted_phone_number}`} className="text-primary block">📞 {placeDetails.formatted_phone_number}</a>
-                        )}
-                        {placeDetails.website && (
-                          <a href={placeDetails.website} target="_blank" rel="noopener noreferrer" className="text-primary block truncate">🌐 {placeDetails.website}</a>
-                        )}
                         {placeDetails.opening_hours?.open_now != null && (
                           <div>{placeDetails.opening_hours.open_now ? '🟢 Open now' : '🔴 Closed'}</div>
                         )}
                       </div>
                     )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setClaimPoi({
+                          name: p.name || p.category,
+                          category: p.category ?? null,
+                          lat: p.lat != null ? Number(p.lat) : null,
+                          lng: p.lng != null ? Number(p.lng) : null,
+                          osm_type: p.source === 'osm' ? (p.osm_type ?? 'node') : null,
+                          osm_id: p.source === 'osm' && p.source_id ? Number(p.source_id) : null,
+                          google_place_id: placeDetails?.place_id ?? null,
+                        })
+                      }
+                      className="mt-2 w-full text-xs font-semibold py-2 rounded-sm bg-primary text-primary-foreground hover:opacity-90"
+                    >
+                      {language === 'ru' ? '🛡 Это ваш бизнес? Заявить бесплатно' : '🛡 Is this your business? Claim free'}
+                    </button>
                   </div>
                 );
               })()}
@@ -732,6 +745,7 @@ export default function MapView() {
           </div>
         )}
       </MapListBottomSheet>
+      <PoiClaimSheet open={!!claimPoi} onOpenChange={(v) => !v && setClaimPoi(null)} poi={claimPoi} />
     </AppLayout>
   );
 }
