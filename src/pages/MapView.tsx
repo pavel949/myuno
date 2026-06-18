@@ -655,6 +655,57 @@ export default function MapView() {
           )}
         </div>
       </div>
+
+      <MapListBottomSheet
+        title={
+          <span>
+            {mlMarkers.length}{' '}
+            {language === 'ru' ? 'локаций' : 'locations'}
+          </span>
+        }
+      >
+        {mlMarkers.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            {language === 'ru' ? 'Ничего не найдено — измените фильтры' : 'Nothing found — adjust filters'}
+          </div>
+        ) : (
+          <div role="listbox" aria-label={language === 'ru' ? 'Список локаций' : 'Locations list'}>
+            {mlMarkers.map((m) => {
+              const d = m.data as ClickedMarker;
+              const isVendor = d?.kind === 'vendor';
+              const vendor = isVendor ? d.marker : null;
+              const cfg = vendor ? VERTICAL_CONFIG[vendor.vertical as Exclude<VerticalFilter, 'all'>] : null;
+              const title = m.title || '—';
+              const subtitle = vendor
+                ? (language === 'ru' ? cfg?.labelRu : cfg?.labelEn) || ''
+                : (d?.kind === 'osm' ? `${d.poi.category}${d.poi.subcategory ? ' · ' + d.poi.subcategory : ''}` : '');
+              return (
+                <MapListItem
+                  key={m.id}
+                  id={m.id}
+                  icon={m.icon}
+                  color={m.color}
+                  title={title}
+                  subtitle={subtitle}
+                  rating={vendor?.rating}
+                  priceLabel={vendor && vendor.priceFrom > 0 ? `${formatPrice(vendor.priceFrom)}+` : undefined}
+                  isSelected={activeMarkerId === m.id}
+                  onSelect={(id) => {
+                    selectMarker(id);
+                    // also trigger same flyTo path as marker click
+                    const mm = mlMarkers.find((x) => x.id === id);
+                    if (mm) {
+                      setSelected(mm.data as ClickedMarker);
+                      mapRef.current?.flyTo(mm.lat, mm.lng, Math.max(14, 11));
+                    }
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
+      </MapListBottomSheet>
     </AppLayout>
   );
 }
+
