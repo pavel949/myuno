@@ -48,6 +48,9 @@ const Index: React.FC = () => {
   const activePersonas = effectivePersonas;
   const isRu = language === 'ru';
 
+  const role = useLifeOSRole();
+  const visibleClusters = ROLE_VISIBLE_CLUSTERS[role] ?? ['live', 'arrive', 'legal'];
+
   return (
     <AppLayout showHeader={false} showFooter={false}>
       <div className="pb-24">
@@ -69,13 +72,18 @@ const Index: React.FC = () => {
           onRoleSheetOpen={() => setRoleSheetOpen(true)}
         />
 
-        {/* 4. PrimaryGrid — Bento: 1 hero CTA + 3 mini tiles */}
-        <PrimaryGrid />
+        {/* 4. PersonalGrid — top-8 mini-apps ranked by role + personas */}
+        <PersonalGrid />
 
-        {/* 5. Now in Phuket — narrow ambient strip */}
+        {/* 5. Cluster rails — role-gated icon grids */}
+        {visibleClusters.map((cid) => (
+          <ClusterRail key={cid} clusterId={cid} />
+        ))}
+
+        {/* 6. Now in Phuket — narrow ambient strip */}
         <NowInPhuket />
 
-        {/* 6. Official news — TAT/PRD/Phuket Gov/Nation/Bangkok Post */}
+        {/* 7. Official news — TAT/PRD/Phuket Gov/Nation/Bangkok Post */}
         <OfficialNews />
 
         {/* 5. «Все приложения» — single explicit door to everything else */}
