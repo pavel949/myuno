@@ -34,6 +34,7 @@ import {
   Languages,
   Wallet,
   FileCheck2,
+  ClipboardCheck,
   Headphones,
   Database,
   LifeBuoy,
@@ -211,7 +212,7 @@ const TRUST_FACTS: { icon: React.ComponentType<{ className?: string }>; text: Bi
   { icon: Database, text: { ru: 'Хранение данных по PDPA', en: 'Data stored in line with PDPA' } },
   { icon: Headphones, text: { ru: 'Поддержка 24/7 — RU · EN · TH', en: '24/7 support — RU · EN · TH' } },
   { icon: Wallet, text: { ru: 'Открытые цены в ฿, $, ₽, €', en: 'Transparent prices in ฿, $, ₽, €' } },
-  { icon: FileCheck2, text: { ru: 'Аудит-метка на каждой транзакции', en: 'Audit marker on every transaction' } },
+  { icon: ClipboardCheck, text: { ru: 'Аудит-метка на каждой транзакции', en: 'Audit marker on every transaction' } },
 ];
 
 const EMERGENCY_ITEMS: { icon: React.ComponentType<{ className?: string }>; text: Bi }[] = [
@@ -258,8 +259,16 @@ export default function WelcomeLanding() {
   const isRu = language === 'ru';
   const navigate = useNavigate();
 
-  const { byCluster, totalEligibleServices, clustersCount, totalActiveLifeSituations } =
+  const { byCluster, totalEligibleServices, clustersCount: _allClusters, totalActiveLifeSituations } =
     useWelcomeMetrics();
+  // Гость видит только accessible-кластеры (manage/workspace скрыт). Считаем по факту,
+  // чтобы цифра в hero совпадала с тем, что реально отрендерено в секции «Что входит».
+  const visibleClusters = useMemo(
+    () => byCluster.filter((c) => c.isAccessibleToViewer && c.servicesCount > 0),
+    [byCluster],
+  );
+  const clustersCount = visibleClusters.length;
+  void _allClusters;
 
   const [helpOpen, setHelpOpen] = useState(false);
 
