@@ -171,7 +171,7 @@ export default function VipConcierge() {
               </div>
               <div>
                 <h2 className="font-bold text-2xl bg-gradient-to-r from-accent-purple to-accent-purple/80 bg-clip-text text-transparent">
-                  UNO VIP
+                  myUNO VIP
                 </h2>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Sparkles className="w-4 h-4 text-accent-purple" />
