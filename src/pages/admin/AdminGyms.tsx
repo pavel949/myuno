@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Dumbbell } from 'lucide-react';
 import { AdminVerticalCRUD, type AdminVerticalConfig } from '@/components/admin/AdminVerticalCRUD';
 import { useAdminGyms } from '@/hooks/useAdminContent';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 const gymTypes = [
   { value: 'gym', label: 'Gym', labelRu: 'Спортзал' },
@@ -12,7 +13,7 @@ const gymTypes = [
   { value: 'pool', label: 'Swimming Pool', labelRu: 'Бассейн' },
 ];
 
-const config: AdminVerticalConfig = {
+const buildConfig = (sym: string): AdminVerticalConfig => ({
   titleEn: 'Gym Management',
   titleRu: 'Управление залами',
   icon: Dumbbell,
@@ -30,18 +31,20 @@ const config: AdminVerticalConfig = {
     { key: 'images', type: 'multi-image', labelEn: 'Gallery', labelRu: 'Галерея', colSpan: 12 },
     { key: 'address', type: 'text', labelEn: 'Address', labelRu: 'Адрес' },
     { key: 'district', type: 'text', labelEn: 'District', labelRu: 'Район' },
-    { key: 'price_day_pass', type: 'number', labelEn: 'Day Pass ฿', labelRu: 'День ฿' },
-    { key: 'price_week_pass', type: 'number', labelEn: 'Week Pass ฿', labelRu: 'Неделя ฿' },
-    { key: 'price_month_pass', type: 'number', labelEn: 'Month Pass ฿', labelRu: 'Месяц ฿' },
+    { key: 'price_day_pass', type: 'number', labelEn: `Day Pass ${sym}`, labelRu: `День ${sym}` },
+    { key: 'price_week_pass', type: 'number', labelEn: `Week Pass ${sym}`, labelRu: `Неделя ${sym}` },
+    { key: 'price_month_pass', type: 'number', labelEn: `Month Pass ${sym}`, labelRu: `Месяц ${sym}` },
     { key: 'amenities', type: 'comma-list', labelEn: 'Amenities', labelRu: 'Удобства' },
     { key: 'classes', type: 'comma-list', labelEn: 'Classes', labelRu: 'Классы' },
     { key: 'is_featured', type: 'switch', labelEn: 'Featured', labelRu: 'Рекомендуем' },
     { key: 'is_active', type: 'switch', labelEn: 'Active', labelRu: 'Активно', defaultValue: true },
   ],
-};
+});
 
 export default function AdminGyms() {
   const hook = useAdminGyms();
+  const { symbol } = useCityCurrency();
+  const config = useMemo(() => buildConfig(symbol), [symbol]);
   const adapted = {
     items: (hook as any).gyms || (hook as any).items || [],
     isLoading: hook.isLoading,

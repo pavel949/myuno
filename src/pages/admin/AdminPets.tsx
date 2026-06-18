@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { PawPrint } from 'lucide-react';
 import { AdminVerticalCRUD, type AdminVerticalConfig } from '@/components/admin/AdminVerticalCRUD';
 import { useAdminPets } from '@/hooks/useAdminContent';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 const serviceTypes = [
   { value: 'grooming', label: 'Grooming', labelRu: 'Груминг' },
@@ -12,7 +13,7 @@ const serviceTypes = [
   { value: 'hotel', label: 'Pet Hotel', labelRu: 'Зоогостиница' },
 ];
 
-const config: AdminVerticalConfig = {
+const buildConfig = (code: string): AdminVerticalConfig => ({
   titleEn: 'Pet Service Management',
   titleRu: 'Управление зоосервисами',
   icon: PawPrint,
@@ -35,13 +36,15 @@ const config: AdminVerticalConfig = {
     { key: 'email', type: 'text', labelEn: 'Email', labelRu: 'Email' },
     { key: 'price_per_hour', type: 'number', labelEn: 'Price/hour', labelRu: 'Цена/час' },
     { key: 'price_per_day', type: 'number', labelEn: 'Price/day', labelRu: 'Цена/день' },
-    { key: 'currency', type: 'text', labelEn: 'Currency', labelRu: 'Валюта', defaultValue: 'THB' },
+    { key: 'currency', type: 'text', labelEn: 'Currency', labelRu: 'Валюта', defaultValue: code },
     { key: 'is_featured', type: 'switch', labelEn: 'Featured', labelRu: 'Рекомендуем' },
     { key: 'is_active', type: 'switch', labelEn: 'Active', labelRu: 'Активно', defaultValue: true },
   ],
-};
+});
 
 export default function AdminPets() {
   const hook = useAdminPets();
+  const { code } = useCityCurrency();
+  const config = useMemo(() => buildConfig(code), [code]);
   return <AdminVerticalCRUD config={config} hook={hook} />;
 }

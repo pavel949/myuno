@@ -14,6 +14,7 @@ import {
 import { format } from 'date-fns';
 import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 type OrderStatus = Database['public']['Enums']['order_status'];
 
@@ -52,7 +53,7 @@ interface StatusHistory {
   created_at: string;
 }
 
-function fmtMoney(amt: number | null | undefined, ccy = 'THB') {
+function fmtMoney(amt: number | null | undefined, ccy = 'USD') {
   if (amt == null) return '—';
   return `${ccy} ${Number(amt).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 }
@@ -178,6 +179,7 @@ function OrderDetail({ orderId, currency, isRu }: { orderId: string; currency: s
 export default function AdminTransfers() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { code: cityCurrencyCode } = useCityCurrency();
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -309,7 +311,7 @@ export default function AdminTransfers() {
             const scheduledDate = order.start_at
               ? new Date(order.start_at).toLocaleString('en-GB', { timeZone: 'Asia/Bangkok', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) + ' ICT'
               : '—';
-            const ccy = order.currency || 'THB';
+            const ccy = order.currency || cityCurrencyCode;
             const sale = Number(order.total_amount) || 0;
             const cost = Number(order.vendor_payout_amount) || 0;
             const fee = Number(order.platform_fee_amount) || (sale - cost);

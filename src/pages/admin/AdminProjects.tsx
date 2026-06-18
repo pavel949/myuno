@@ -12,6 +12,7 @@ import {
 import { useAdminDevelopers } from '@/hooks/useAdminDevelopers';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -101,6 +102,7 @@ const getEmptyProject = (): Partial<CreatePropertyProjectData> => ({
 
 export default function AdminProjects() {
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
   const isRu = language === 'ru';
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   const { data: projects, isLoading } = useAdminPropertyProjects();
@@ -1045,7 +1047,7 @@ export default function AdminProjects() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>{isRu ? 'Ставка за м²' : 'Fee per sqm'} (THB)</Label>
+                        <Label>{isRu ? 'Ставка за м²' : 'Fee per sqm'} ({cityCurrencyCode})</Label>
                         <Input
                           type="number"
                           value={juristicData.cam_fee_per_sqm}

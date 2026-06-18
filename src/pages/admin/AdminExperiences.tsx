@@ -36,6 +36,7 @@ import {
   Loader2, Star, Shield, ExternalLink, Image, Truck, Globe,
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { cn } from '@/lib/utils';
 
 type ViewType = 'all' | 'tour' | 'activity';
@@ -76,7 +77,7 @@ type ExperiencePayload = {
   source_page_url: string | null;
 };
 
-const getEmptyFormData = () => ({
+const getEmptyFormData = (defaultCurrency = 'USD') => ({
   provider_id: '',
   experience_type: 'tour' as ExperienceType,
   title_en: '',
@@ -88,7 +89,7 @@ const getEmptyFormData = () => ({
   duration_minutes: '240',
   price: '',
   price_per: 'person',
-  currency: 'THB',
+  currency: defaultCurrency,
   min_participants: '1',
   max_participants: '10',
   meeting_point: '',
@@ -109,6 +110,7 @@ export default function AdminExperiences() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   const isRu = language === 'ru';
   const importMedia = useImportExperienceMedia();
@@ -126,7 +128,7 @@ export default function AdminExperiences() {
   const [editingItem, setEditingItem] = useState<AdminExperience | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [formData, setFormData] = useState(getEmptyFormData());
+  const [formData, setFormData] = useState(getEmptyFormData(cityCurrencyCode));
 
   const stats = useMemo(() => {
     const tours = experiences.filter(e => e.experience_type === 'tour').length;
@@ -144,7 +146,7 @@ export default function AdminExperiences() {
 
   const openCreateDialog = () => {
     setEditingItem(null);
-    setFormData(getEmptyFormData());
+    setFormData(getEmptyFormData(cityCurrencyCode));
     setIsDialogOpen(true);
   };
 
@@ -162,7 +164,7 @@ export default function AdminExperiences() {
       duration_minutes: String(item.duration_minutes || 240),
       price: String(item.price || ''),
       price_per: item.price_per || 'person',
-      currency: item.currency || 'THB',
+      currency: item.currency || cityCurrencyCode,
       min_participants: String(item.min_participants || 1),
       max_participants: String(item.max_participants || 10),
       meeting_point: item.meeting_point || '',
@@ -225,7 +227,7 @@ export default function AdminExperiences() {
         toast.success(isRu ? 'Создано' : 'Created');
       }
       setIsDialogOpen(false);
-      setFormData(getEmptyFormData());
+      setFormData(getEmptyFormData(cityCurrencyCode));
       setEditingItem(null);
     } catch (err) {
       console.error('Submit error:', err);
@@ -410,7 +412,7 @@ export default function AdminExperiences() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-primary">
-                          {item.price ? `฿${item.price.toLocaleString()}` : 'See pricing'}
+                          {item.price ? `${curSym}${item.price.toLocaleString()}` : 'See pricing'}
                         </span>
                         {item.booking_url && (
                           <a
@@ -515,7 +517,7 @@ export default function AdminExperiences() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
-                  <div><Label>Price (THB)</Label><Input type="number" value={formData.price} onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))} /></div>
+                  <div><Label>Price ({curSym})</Label><Input type="number" value={formData.price} onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))} /></div>
                   <div><Label>Duration (min)</Label><Input type="number" value={formData.duration_minutes} onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: e.target.value }))} /></div>
                   <div>
                     <Label>Difficulty</Label>

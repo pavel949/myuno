@@ -7,6 +7,7 @@ import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminProperties } from '@/hooks/useAdminContent';
 import { useManagementCompanies } from '@/hooks/useManagementCompanies';
 import { VendorProperty } from '@/hooks/useVendorProperties';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -43,6 +44,7 @@ export default function AdminProperties() {
   const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   
   const [filterProviderId, setFilterProviderId] = useState<string>(searchParams.get('provider') || '');
@@ -274,7 +276,7 @@ export default function AdminProperties() {
         price: data.price || (data.price_per_night ? parseFloat(data.price_per_night) : undefined),
         price_period: data.price_period || 'month',
         sale_price: data.sale_price ? parseFloat(data.sale_price) : undefined,
-        currency: 'THB',
+        currency: cityCurrencyCode,
         bedrooms: data.bedrooms || 1,
         bathrooms: data.bathrooms || 1,
         area_sqm: data.area_sqm ? parseInt(String(data.area_sqm)) : undefined,

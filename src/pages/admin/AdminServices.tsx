@@ -7,6 +7,7 @@ import { useAdminCheck, useAdminProviders, useAdminServices, useAdminCategories,
 import { useAdminFormHotkeys, useFormProgress } from '@/hooks/useAdminFormHotkeys';
 import { useAutoTranslate } from '@/hooks/useAutoTranslate';
 import { useOnBehalfContext } from '@/hooks/useAdminContentCreation';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -69,6 +70,7 @@ export default function AdminServices() {
   const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   const { providers } = useAdminProviders();
   const { categories } = useAdminCategories();
@@ -216,7 +218,7 @@ export default function AdminServices() {
         description_en: formData.description_en || undefined,
         description_ru: formData.description_ru || undefined,
         price: parseFloat(formData.price),
-        currency: 'THB',
+        currency: cityCurrencyCode,
         duration_minutes: formData.duration_minutes ? parseInt(formData.duration_minutes) : undefined,
         max_capacity: parseInt(formData.max_capacity) || 1,
         images: formData.images.length > 0 ? formData.images : undefined,
@@ -444,7 +446,7 @@ export default function AdminServices() {
                       
                       <div className="flex items-center gap-4 text-sm">
                         <span className="font-bold text-primary">
-                          ฿{service.price?.toLocaleString()}
+                          {curSym}{service.price?.toLocaleString()}
                         </span>
                         {service.duration_minutes && (
                           <span className="flex items-center gap-1 text-muted-foreground">
@@ -677,7 +679,7 @@ export default function AdminServices() {
                 >
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label>{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
+                      <Label>{isRussian ? `Цена (${curSym}) *` : `Price (${curSym}) *`}</Label>
                       <Input
                         type="number"
                         value={formData.price}

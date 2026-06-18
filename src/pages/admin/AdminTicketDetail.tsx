@@ -29,11 +29,13 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdminTickets } from '@/hooks/useAdminTickets';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 import type { SupportTicket, TicketMessage, TicketStatus, TicketPriority, ResolutionType } from '@/hooks/useTickets';
 
 export default function AdminTicketDetail() {
   const { ticketId } = useParams<{ ticketId: string }>();
   const navigate = useNavigate();
+  const { symbol: curSym } = useCityCurrency();
   const { 
     updateTicketStatus, 
     updatePriority, 
@@ -193,7 +195,7 @@ export default function AdminTicketDetail() {
 
                     {['refund_full', 'refund_partial', 'compensation'].includes(resolutionType) && (
                       <div>
-                        <Label>Сумма возврата (฿)</Label>
+                        <Label>Сумма возврата ({curSym})</Label>
                         <Input
                           type="number"
                           value={refundAmount}
@@ -356,7 +358,7 @@ export default function AdminTicketDetail() {
                   <p className="text-sm text-success">{ticket.resolution}</p>
                   {ticket.refund_amount && (
                     <p className="text-sm font-medium text-success">
-                      Возврат: ฿{ticket.refund_amount.toLocaleString()}
+                      Возврат: {curSym}{ticket.refund_amount.toLocaleString()}
                     </p>
                   )}
                   {ticket.resolved_at && (

@@ -154,7 +154,7 @@ const FEATURE_SECTIONS: FeatureSection[] = [
       { en: 'Monthly owner financial statements', ru: 'Ежемесячные финансовые отчёты для собственников' },
       { en: 'Budget planning and variance analysis', ru: 'Планирование бюджета и анализ отклонений' },
       { en: 'Invoice generation and payment tracking', ru: 'Генерация счетов и отслеживание оплат' },
-      { en: 'Multi-currency support (THB, USD, EUR, RUB)', ru: 'Мультивалютная поддержка (THB, USD, EUR, RUB)' },
+      { en: 'Multi-currency support for global operations', ru: 'Мультивалютная поддержка для международных операций' },
       { en: 'Customizable financial categories', ru: 'Настраиваемые финансовые категории' },
     ],
   },

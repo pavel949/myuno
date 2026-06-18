@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminEvents } from '@/hooks/useAdminContent';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
@@ -40,6 +41,7 @@ export default function AdminEvents() {
   const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   
   const [filterProviderId, setFilterProviderId] = useState<string>('');
@@ -174,7 +176,7 @@ export default function AdminEvents() {
                             {item.is_hot && <Badge className="bg-destructive">HOT</Badge>}
                             {item.event_date && <span>{item.event_date}</span>}
                           </div>
-                          {item.price && <p className="text-sm mt-1 text-primary font-medium">฿{item.price.toLocaleString()}</p>}
+                          {item.price && <p className="text-sm mt-1 text-primary font-medium">{curSym}{item.price.toLocaleString()}</p>}
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
@@ -228,7 +230,7 @@ export default function AdminEvents() {
                 </div>
                 <div><Label>Address</Label><Input value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} /></div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div><Label>Price ฿</Label><Input type="number" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} /></div>
+                  <div><Label>Price {curSym}</Label><Input type="number" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} /></div>
                   <div><Label>Max Spots</Label><Input type="number" value={formData.max_spots} onChange={(e) => setFormData({...formData, max_spots: e.target.value})} /></div>
                 </div>
                 <div className="flex gap-6">

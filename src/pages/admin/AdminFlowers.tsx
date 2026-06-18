@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Pencil, Trash2, Flower2, TrendingUp, DollarSign, Save } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { useAdminFlowers } from '@/hooks/useAdminContent';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
@@ -100,6 +101,7 @@ type PriceEdit = { S: number; M: number; L: number; margin: number; [k: string]:
 
 export default function AdminFlowers() {
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
   const isRu = language === 'ru';
   const { items, isLoading: shopsLoading, createItem, updateItem, deleteItem } = useAdminFlowers();
   const { bouquets, isLoading: bouquetsLoading, toggleActive, updateField } = useBouquetsAdmin();
@@ -204,7 +206,7 @@ export default function AdminFlowers() {
         </Card>
         <Card className="p-3">
           <p className="text-xs text-muted-foreground">{isRu ? 'Ср. цена' : 'Avg Price'}</p>
-          <p className="text-2xl font-bold">฿{avgPrice}</p>
+          <p className="text-2xl font-bold">{curSym}{avgPrice}</p>
         </Card>
       </div>
 
@@ -280,7 +282,7 @@ export default function AdminFlowers() {
                                 </div>
                               ) : (
                                 <span className="text-xs">
-                                  ฿{sPrice} / ฿{mPrice} / ฿{lPrice}
+                                  {curSym}{sPrice} / {curSym}{mPrice} / {curSym}{lPrice}
                                 </span>
                               )}
                             </TableCell>

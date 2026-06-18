@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Car } from 'lucide-react';
 import { AdminVerticalCRUD, type AdminVerticalConfig } from '@/components/admin/AdminVerticalCRUD';
 import { useAdminVehicles } from '@/hooks/useAdminContent';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 const vehicleTypes = [
   { value: 'car', label: 'Car', labelRu: 'Автомобиль' },
@@ -12,7 +13,7 @@ const vehicleTypes = [
   { value: 'luxury', label: 'Luxury', labelRu: 'Люкс' },
 ];
 
-const config: AdminVerticalConfig = {
+const buildConfig = (sym: string): AdminVerticalConfig => ({
   titleEn: 'Vehicle Management',
   titleRu: 'Управление транспортом',
   icon: Car,
@@ -32,16 +33,18 @@ const config: AdminVerticalConfig = {
     { key: 'model', type: 'text', labelEn: 'Model', labelRu: 'Модель' },
     { key: 'year', type: 'number', labelEn: 'Year', labelRu: 'Год' },
     { key: 'seats', type: 'number', labelEn: 'Seats', labelRu: 'Мест' },
-    { key: 'price_per_day', type: 'number', labelEn: 'Price/Day ฿', labelRu: 'Цена/день ฿' },
-    { key: 'price_per_week', type: 'number', labelEn: 'Price/Week ฿', labelRu: 'Цена/неделя ฿' },
-    { key: 'price_per_month', type: 'number', labelEn: 'Price/Month ฿', labelRu: 'Цена/месяц ฿' },
+    { key: 'price_per_day', type: 'number', labelEn: `Price/Day ${sym}`, labelRu: `Цена/день ${sym}` },
+    { key: 'price_per_week', type: 'number', labelEn: `Price/Week ${sym}`, labelRu: `Цена/неделя ${sym}` },
+    { key: 'price_per_month', type: 'number', labelEn: `Price/Month ${sym}`, labelRu: `Цена/месяц ${sym}` },
     { key: 'is_featured', type: 'switch', labelEn: 'Featured', labelRu: 'Рекомендуем' },
     { key: 'is_active', type: 'switch', labelEn: 'Active', labelRu: 'Активно', defaultValue: true },
   ],
-};
+});
 
 export default function AdminVehicles() {
   const hook = useAdminVehicles();
+  const { symbol } = useCityCurrency();
+  const config = useMemo(() => buildConfig(symbol), [symbol]);
   const adapted = {
     items: (hook as any).vehicles || (hook as any).items || [],
     isLoading: hook.isLoading,
