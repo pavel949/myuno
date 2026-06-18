@@ -362,7 +362,6 @@ export const APP_ROUTES = {
   RELOCATION_MY_PLAN: '/relocate/my-plan',
   RELOCATION_AREAS: '/relocate/areas',
   RELOCATION_MOVERS: '/relocate/movers',
-  ME_REQUESTS: '/me/requests',
   WEDDING: '/wedding',
   KIDS: '/kids',
   NOMAD_GUIDE: '/nomad-guide',
