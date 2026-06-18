@@ -53,10 +53,15 @@ function ServiceCard({ item, isRu }: { item: LifeOSCatalogItem; isRu: boolean })
   const typeLabel = getEntityTypeLabel(item.entity_type, isRu ? 'ru' : 'en');
   const price = formatPrice(item, isRu);
   const isVerified = item.trust_level === 'verified';
+  const href = resolveItemHref(item);
+  const title = item.title_localized || item.title;
+
+  // Defensive: drop cards with no title or no resolvable destination
+  if (!title || !href) return null;
 
   return (
     <Link
-      to={resolveItemHref(item)}
+      to={href}
       className={cn(
         'group flex flex-col gap-3 p-4 min-h-[140px]',
         'border border-border bg-card text-card-foreground',
@@ -76,7 +81,7 @@ function ServiceCard({ item, isRu }: { item: LifeOSCatalogItem; isRu: boolean })
       </div>
 
       <h3 className="text-[15px] font-semibold leading-snug tracking-[-0.005em] text-foreground line-clamp-2">
-        {item.title_localized || item.title}
+        {title}
       </h3>
 
       <div className="mt-auto flex items-end justify-between gap-2 pt-2">
