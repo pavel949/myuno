@@ -53,6 +53,8 @@ type PropertyExt = {
 export default function OwnerPropertyDetail() {
   const { id } = useParams<{ id: string }>();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
