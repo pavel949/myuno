@@ -31784,6 +31784,13 @@ export type Database = {
         Args: { _grade: string }
         Returns: string
       }
+      count_life_os_context: {
+        Args: { p_user_role?: string }
+        Returns: {
+          item_count: number
+          life_situation_id: string
+        }[]
+      }
       create_booking_with_wallet_payment: {
         Args: {
           p_booking_type: string
