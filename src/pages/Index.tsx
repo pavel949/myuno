@@ -19,12 +19,25 @@ import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
 import { ActiveSituation } from '@/components/home/ActiveSituation';
 import { NowInPhuket } from '@/components/home/NowInPhuket';
 import { RoleSheet } from '@/components/home/RoleSheet';
-import { PrimaryGrid } from '@/components/home/PrimaryGrid';
 import { OfficialNews } from '@/components/home/OfficialNews';
-import { CLUSTERS, FLAT_SERVICES } from '@/lib/catalog/taxonomy';
+import { PersonalGrid } from '@/components/superapp/PersonalGrid';
+import { ClusterRail } from '@/components/superapp/ClusterRail';
+import { CLUSTERS, FLAT_SERVICES, type ClusterId } from '@/lib/catalog/taxonomy';
+import { useLifeOSRole, type LifeOSRole } from '@/hooks/useLifeOS';
 
 const TOTAL_CLUSTERS = CLUSTERS.length;
 const TOTAL_SERVICES = FLAT_SERVICES.length;
+
+/** Same gating as Navigator v3 — what each role sees on Home as icon rails. */
+const ROLE_VISIBLE_CLUSTERS: Record<LifeOSRole, ClusterId[]> = {
+  guest:     ['arrive', 'live', 'legal'],
+  resident:  ['live', 'legal', 'arrive'],
+  owner:     ['manage', 'live', 'legal', 'invest'],
+  mc:        ['manage', 'legal', 'invest'],
+  investor:  ['invest', 'manage', 'legal', 'build'],
+  developer: ['build', 'invest', 'manage', 'legal'],
+  vendor:    ['manage', 'legal', 'live'],
+};
 
 const Index: React.FC = () => {
   const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
