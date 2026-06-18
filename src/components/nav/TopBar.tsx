@@ -69,7 +69,12 @@ export const TopBar = memo(function TopBar({
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    const openHandler = () => setSearchOpen(true);
+    window.addEventListener('myuno:open-search', openHandler);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('myuno:open-search', openHandler);
+    };
   }, [handleKeyDown]);
 
   const isActive = (path: string, exact?: boolean) => {

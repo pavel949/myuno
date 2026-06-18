@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
+import { searchNavigationIndex, type NavSearchContext } from '@/lib/search/navigationIndex';
+import { useSearchContext } from './useSearchContext';
 
 export interface SearchResult {
   id: string;
@@ -16,7 +18,19 @@ export interface SearchResult {
   rating: number | null;
   path: string;
   isCategory?: boolean;
+  /** Set on navigation-index hits ("action" rows). */
+  isAction?: boolean;
+  /** Optional one-line description, used by action rows. */
+  descriptionEn?: string | null;
+  descriptionRu?: string | null;
 }
+
+export interface AiSmartAnswer {
+  answer: string;
+  suggestedCategories: string[];
+  suggestedServices: Array<{ type: string; query: string; reason: string }>;
+}
+
 
 interface TableConfig {
   table: string;
@@ -211,9 +225,17 @@ const CACHE_TTL_MS = 5000;
 export function useGlobalSearch(query: string, enabled: boolean = true) {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [aiAnswer, setAiAnswer] = useState<AiSmartAnswer | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const { language } = useLanguage();
+  const searchCtx = useSearchContext();
   const cacheRef = useRef<Map<string, { results: SearchResult[]; timestamp: number }>>(new Map());
   const abortRef = useRef<AbortController | null>(null);
+  const aiAbortRef = useRef<AbortController | null>(null);
+  // Stable ref to the context — used inside performSearch without retriggering
+  // the memoised callback every render.
+  const ctxRef = useRef<NavSearchContext>(searchCtx);
+  ctxRef.current = searchCtx;
 
   const performSearch = useCallback(async (searchTerm: string) => {
     // Cancel any in-flight search
@@ -224,6 +246,26 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
     const searchTermLower = sanitizeSearchTerm(searchTerm.toLowerCase());
     const allResults: SearchResult[] = [];
 
+    // 0. Navigation index — actions/pages/mini-apps (persona/role aware)
+    const navHits = searchNavigationIndex(searchTerm, ctxRef.current, 6);
+    for (const hit of navHits) {
+      allResults.push({
+        id: hit.target.id,
+        type: 'action',
+        titleEn: hit.target.titleEn,
+        titleRu: hit.target.titleRu,
+        descriptionEn: hit.target.descriptionEn ?? null,
+        descriptionRu: hit.target.descriptionRu ?? null,
+        image: null,
+        price: null,
+        locationEn: null,
+        locationRu: null,
+        rating: null,
+        path: hit.target.path,
+        isAction: true,
+      });
+    }
+
     // 1. Synonym matches — pick highest-priority entries where ALL keywords match
     const matchedSynonyms: SynonymEntry[] = [];
     for (const entry of SEARCH_SYNONYM_ENTRIES) {
@@ -232,9 +274,8 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
         matchedSynonyms.push(entry);
       }
     }
-    // Sort by priority desc, deduplicate by result id
     matchedSynonyms.sort((a, b) => b.priority - a.priority);
-    const seenIds = new Set<string>();
+    const seenIds = new Set<string>(allResults.map((r) => r.id));
     for (const entry of matchedSynonyms) {
       if (!seenIds.has(entry.result.id)) {
         seenIds.add(entry.result.id);
@@ -352,7 +393,6 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
           const uniqueFields = [...new Set(selectFields)];
 
-          // Build OR filter — title fields + optional extra fields per table
           const orFields = [config.titleEn, config.titleRu, ...(config.extraSearchFields ?? [])];
           const uniqueOr = [...new Set(orFields)];
           const orParts = uniqueOr.map((f) => `${f}.ilike.%${searchTermLower}%`);
@@ -369,7 +409,7 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
           }
 
           const { data, error } = await queryBuilder;
-          
+
           if (error) return [];
           if (!data) return [];
 
@@ -392,21 +432,23 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
       });
 
       const tableResults = await Promise.all(searchPromises);
-      
+
       if (controller.signal.aborted) return;
-      
+
       tableResults.forEach(items => allResults.push(...items));
 
-      // Sort: categories first, then by rating
+      // Sort: actions → categories → entities (entities by rating desc)
+      const sectionRank = (r: SearchResult) =>
+        r.isAction ? 0 : r.isCategory ? 1 : 2;
       allResults.sort((a, b) => {
-        if (a.isCategory && !b.isCategory) return -1;
-        if (!a.isCategory && b.isCategory) return 1;
+        const sa = sectionRank(a);
+        const sb = sectionRank(b);
+        if (sa !== sb) return sa - sb;
         return (b.rating || 0) - (a.rating || 0);
       });
 
       const finalResults = allResults.slice(0, 25);
 
-      // Cache results
       cacheRef.current.set(searchTerm, { results: finalResults, timestamp: Date.now() });
 
       if (!controller.signal.aborted) {
@@ -421,35 +463,87 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
     }
   }, []);
 
+  // Optional AI smart-search call (only for question-shaped or long queries).
+  const callAiSmartSearch = useCallback(async (searchTerm: string) => {
+    aiAbortRef.current?.abort();
+    const controller = new AbortController();
+    aiAbortRef.current = controller;
+
+    const QUESTION_HINTS = /\?|^(где|как|что|куда|когда|почему|какой|какая|какие|можно|посоветуй|помоги|нужн|ищу|where|how|what|when|why|which|recommend|help|find|need|looking)/i;
+    const isQuestion = QUESTION_HINTS.test(searchTerm) || searchTerm.trim().split(/\s+/).length >= 4;
+    if (!isQuestion) {
+      setAiAnswer(null);
+      setAiLoading(false);
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-smart-search', {
+        body: {
+          query: searchTerm,
+          language,
+          personas: ctxRef.current.personas,
+        },
+      });
+      if (controller.signal.aborted) return;
+      if (error) {
+        setAiAnswer(null);
+      } else if (data && data.type === 'ai_answer' && data.answer) {
+        setAiAnswer({
+          answer: data.answer,
+          suggestedCategories: data.suggestedCategories ?? [],
+          suggestedServices: data.suggestedServices ?? [],
+        });
+      } else {
+        setAiAnswer(null);
+      }
+    } catch {
+      if (!controller.signal.aborted) setAiAnswer(null);
+    } finally {
+      if (!controller.signal.aborted) setAiLoading(false);
+    }
+  }, [language]);
+
   useEffect(() => {
     const trimmed = query.trim();
 
     if (!trimmed || trimmed.length < 2 || !enabled) {
       setResults([]);
+      setAiAnswer(null);
       setIsLoading(false);
+      setAiLoading(false);
       abortRef.current?.abort();
+      aiAbortRef.current?.abort();
       return;
     }
 
-    // Check cache first
+    // Cache hit — instant
     const cached = cacheRef.current.get(trimmed);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
       setResults(cached.results);
       setIsLoading(false);
-      return;
+    } else {
+      setIsLoading(true);
     }
 
-    // Set loading IMMEDIATELY (not inside timeout) to prevent "no results" flash
-    setIsLoading(true);
-
-    const timeout = setTimeout(() => {
-      performSearch(trimmed);
+    const dbTimeout = setTimeout(() => {
+      if (!cached || Date.now() - cached.timestamp >= CACHE_TTL_MS) {
+        performSearch(trimmed);
+      }
     }, 300);
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [query, enabled, performSearch]);
+    // AI call has its own (longer) debounce and only fires for questions
+    const aiTimeout = setTimeout(() => {
+      callAiSmartSearch(trimmed);
+    }, 600);
 
-  return { results, isLoading };
+    return () => {
+      clearTimeout(dbTimeout);
+      clearTimeout(aiTimeout);
+    };
+  }, [query, enabled, performSearch, callAiSmartSearch]);
+
+  return { results, isLoading, aiAnswer, aiLoading };
 }
+
