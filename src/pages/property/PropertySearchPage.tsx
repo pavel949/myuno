@@ -389,12 +389,15 @@ export default function PropertySearchPage() {
                       mode={propertyMode}
                       isHovered={hoveredProperty === property.id}
                       onHover={setHoveredProperty}
+                      isSelected={focusedId === property.id}
+                      onSelect={showMap ? selectFocused : undefined}
                       companyName={mc?.name}
                       companySlug={mc?.slug}
                       nights={nights > 0 ? nights : undefined}
                     />
                   );
                 })}
+
               </div>
             </>
           )}
