@@ -26,8 +26,8 @@ export function useProviderCatalogCounts() {
     queryKey: ['provider-catalog-counts'],
     staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<ProviderCatalogCounts> => {
-      const { data, error } = await supabase
-        .from('v_provider_catalog_match' as any)
+      const { data, error } = await (supabase as any)
+        .from('v_provider_catalog_match')
         .select('cluster_slug, category_slug, is_active')
         .eq('is_active', true);
 
@@ -37,11 +37,12 @@ export function useProviderCatalogCounts() {
       const activeByCategory: Record<string, number> = {};
       let totalActive = 0;
 
-      for (const row of (data ?? []) as Array<{
+      const rows = (data ?? []) as Array<{
         cluster_slug: string | null;
         category_slug: string | null;
         is_active: boolean | null;
-      }>) {
+      }>;
+      for (const row of rows) {
         if (!row.is_active) continue;
         totalActive += 1;
         if (row.cluster_slug) {
