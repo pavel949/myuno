@@ -8,41 +8,48 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getLegalService } from '@/lib/landings/legalServices';
+import { pickLocale } from '@/lib/landings/vendorCategories';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
+import type { Language } from '@/i18n';
+
+const WA_MSG: Record<Language, (id: string) => string> = {
+  ru: (id) => `Здравствуйте! Нужна юридическая консультация: ${id}`,
+  en: (id) => `Hi! Need legal consultation: ${id}`,
+  th: (id) => `สวัสดีครับ/ค่ะ ต้องการปรึกษาด้านกฎหมาย: ${id}`,
+};
 
 export default function LegalServiceLanding() {
   const params = useParams<{ service?: string }>();
   const location = useLocation();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const lang = language as Language;
 
-  // Service id comes from :service param OR derived from /legal/<id> pathname.
   const serviceId = params.service ?? location.pathname.split('/').filter(Boolean)[1];
   const cfg = useMemo(() => getLegalService(serviceId), [serviceId]);
   if (!cfg) return <Navigate to="/legal" replace />;
 
-  const hero = isRu ? cfg.hero.ru : cfg.hero.en;
-  const bullets = isRu ? cfg.bullets.ru : cfg.bullets.en;
-  const ctaLabel = isRu ? cfg.ctaPrimary.ru : cfg.ctaPrimary.en;
+  const hero = pickLocale(lang, cfg.hero);
+  const bullets = pickLocale(lang, cfg.bullets);
+  const ctaLabel = pickLocale(lang, cfg.ctaPrimary.label);
 
-  const waUrl = getWhatsAppUrl(
-    isRu ? `Здравствуйте! Нужна юридическая консультация: ${cfg.id}` : `Hi! Need legal consultation: ${cfg.id}`
-  );
+  const waUrl = getWhatsAppUrl((WA_MSG[lang] ?? WA_MSG.en)(cfg.id));
 
   const canonicalPath = `/legal/${cfg.id}`;
-  const pageTitle = isRu ? `${hero.title} — myUNO Legal` : `${hero.title} — myUNO Legal`;
+  const pageTitle = `${hero.title} — myUNO Legal`;
   const pageDesc = hero.subtitle.slice(0, 155);
 
   return (
     <AppLayout>
       <Helmet>
+        <html lang={lang} />
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
         <link rel="canonical" href={`https://www.myuno.app${canonicalPath}`} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDesc} />
         <meta property="og:url" content={`https://www.myuno.app${canonicalPath}`} />
+        <meta property="og:locale" content={lang === 'ru' ? 'ru_RU' : lang === 'th' ? 'th_TH' : 'en_US'} />
       </Helmet>
 
       <div className="min-h-screen bg-background">
@@ -82,8 +89,8 @@ export default function LegalServiceLanding() {
             {cfg.faq.map((item, i) => (
               <Card key={i}>
                 <CardContent className="p-5">
-                  <h3 className="font-semibold text-foreground mb-2">{isRu ? item.q_ru : item.q_en}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{isRu ? item.a_ru : item.a_en}</p>
+                  <h3 className="font-semibold text-foreground mb-2">{pickLocale(lang, item.q)}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{pickLocale(lang, item.a)}</p>
                 </CardContent>
               </Card>
             ))}
