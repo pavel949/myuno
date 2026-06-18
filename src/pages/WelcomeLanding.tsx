@@ -259,8 +259,16 @@ export default function WelcomeLanding() {
   const isRu = language === 'ru';
   const navigate = useNavigate();
 
-  const { byCluster, totalEligibleServices, clustersCount, totalActiveLifeSituations } =
+  const { byCluster, totalEligibleServices, clustersCount: _allClusters, totalActiveLifeSituations } =
     useWelcomeMetrics();
+  // Гость видит только accessible-кластеры (manage/workspace скрыт). Считаем по факту,
+  // чтобы цифра в hero совпадала с тем, что реально отрендерено в секции «Что входит».
+  const visibleClusters = useMemo(
+    () => byCluster.filter((c) => c.isAccessibleToViewer && c.servicesCount > 0),
+    [byCluster],
+  );
+  const clustersCount = visibleClusters.length;
+  void _allClusters;
 
   const [helpOpen, setHelpOpen] = useState(false);
 
