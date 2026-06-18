@@ -1,87 +1,132 @@
+# План: Phase 1 — фундамент мульти-локационности
 
-# Карта как точка входа в myUNO — стратегия наполнения и монетизации
+**Цель:** убрать архитектурные блокеры, после которых добавление новой локации (Бали, Дубай, Дананг, Гонконг — уже есть в `cities` как coming-soon) станет вопросом контента и сидинга, а не рефакторинга.
 
-## Что уже есть в коде (важно для решения)
+**Что НЕ входит в Phase 1:** локализация контента лендингов, partner network в новом городе, compliance/visa справочники, домены/субдомены. Это Phase 2/3 — отдельный план для каждой новой локации.
 
-- `public.phuket_osm_pois` — таблица для базовых POI из OpenStreetMap. **0 записей** (импортер написан, но ни разу не запущен).
-- `supabase/functions/import-phuket-osm` — готовый Overpass-импортер: hotels, restaurants, pharmacies, clinics, vet, schools, worship, embassies, fuel, banks. Идемпотентный UPSERT.
-- `supabase/functions/place-details` — прокси Google Places Details с **30-дневным кэшем** в `google_place_cache`. Уже соблюдает Google ToS §3.2.3.
-- `public.nearby_pois` RPC — выдаёт ближайшие POI (используется в `/map`).
-- Свои вертикали с координатами: `properties` (32), `salons` (27), `gyms` (18), `pharmacies` (3), `venues` (6), `restaurants`, `communities` (107, из них 20 геокодировано).
-
-Карта уже умеет показывать все эти слои — проблема не в технике, а в **наполнении** и **поведении при клике** (сейчас часто открывается Google Maps вместо нашей карточки).
+**Текущее состояние (по аудиту):** `cities`, `LocationContext`, `CurrencyContext`, `currency_rates`, `AdminCities`, `geography.ts` уже есть. Блокеры: 1 225 хардкодов `'THB'`, 265 файлов c "Phuket", `city` хранится как свободный текст на ~30 таблицах вместо FK, URL без префикса локации.
 
 ---
 
-## Что НЕЛЬЗЯ делать (юридический фильтр)
+## Шаги (порядок важен — каждый разблокирует следующий)
 
-Google Maps Platform ToS §3.2.3:
-- **Запрещено** массово выкачивать и постоянно хранить Places-данные (name, address, phone, photo, rating, hours).
-- Разрешено кэшировать до **30 дней** только для повторного показа тому же пользователю.
-- Permanently можно хранить **только `place_id`**.
+### 1. БД: добавить `city_id` на доменные таблицы + бэкфилл
 
-Это значит: «спарсить всё Google Places один раз и забыть» = риск бана API-ключа и иск. Поэтому стратегия должна сочетать **постоянный** свободный слой (OSM, ODbL) + **on-demand** Google слой (по клику, с кэшем).
+Одна миграция, добавляет `city_id uuid REFERENCES cities(id)` + индекс на каждую таблицу из списка. Бэкфилл — все существующие записи получают `city_id = (select id from cities where slug='phuket')`. NOT NULL после бэкфилла там, где можно.
+
+Таблицы первой волны (бизнес-критичные):
+- `properties`, `property_projects`, `property_complexes`, `project_units`, `development_units`, `resale_properties`
+- `providers`, `marketplace_vendors`, `listings`, `business_listings`, `user_listings`
+- `restaurants`, `salons`, `gyms`, `flower_shops`, `pharmacies`, `veterinary_clinics`, `doctors`, `education_providers`, `insurance_providers`
+- `events`, `venues`, `experience_categories`, `water_activities`, `transfers`, `airport_services`, `legal_services`, `medical_services`, `visa_services`, `cleaning_services`
+- `developers`, `management_companies`, `crm_companies`, `crm_contacts`
+- `official_news`, `platform_news`, `lead_magnets`, `magnet_landings`
+- `phuket_osm_pois` → переименовать в `osm_pois` + `city_id`
+
+Существующий `city` text-столбец **не удаляем** — оставляем как human-readable label, добавляем `city_id` поверх. Удалим в Phase 4 после полной миграции консьюмеров.
+
+RLS не меняем (всё остаётся как есть). Только GRANT не нужен — это ALTER, не CREATE.
+
+### 2. БД: вспомогательные таблицы для мульти-локационности
+
+- `city_areas` (id, city_id, slug, name_en/ru/th, lat, lng, polygon) — заменит хардкод `src/lib/config/phuketAreas.ts`. Бэкфилл из существующего файла для Пхукета.
+- `city_content` (city_id, key, value_en, value_ru, value_th) — локализованные тексты (адрес офиса, контакты, hero копирайт), заменит хардкод в `src/lib/config/contacts.ts`.
+- `cities.metadata` jsonb — расширение под per-city конфиг (compliance flags, sources, default zoom, og_image_url) без миграций на каждый чих.
+
+### 3. Контекст локации: убрать хардкод `'phuket'`
+
+`src/contexts/LocationContext.tsx`:
+- Дефолт через детекцию: localStorage → IP geo (есть edge function `ip-geolocate`? если нет — `navigator.geolocation` с timeout 1.5s) → ближайший активный город из `cities` по координатам → фолбэк на первый `is_active=true` город по `sort_order`.
+- Если детекция дала coming-soon город — открыть `CitySwitcherSheet` с CTA «Уведомить о запуске» + выбор активного города.
+- Все компоненты, которые сейчас читают `currentCitySlug === 'phuket'`, переходят на `currentCity.slug` (без сравнений с литералом).
+
+### 4. Унификация валют: codemod `'THB'` → city default
+
+Хелпер `src/lib/format/price.ts`:
+```ts
+formatPrice(amount, { from?: Currency, to?: Currency }) // to = currentCity.default_currency
+```
+Использует существующий `currency_rates` через `useCurrencyConversion`.
+
+Codemod-скрипт (jscodeshift или ручной find-replace по паттернам):
+- `'THB'` literal → `currentCity.default_currency` где есть контекст
+- `฿{amount}` → `<Price amount={amount} />` компонент
+- `Intl.NumberFormat('th-TH', { currency: 'THB' })` → `formatPrice(...)`
+
+Ожидаемый охват: ~80% из 1225 случаев автоматом, остальные руками. Отдельным PR-ом, маленькими порциями (по 50 файлов), чтобы review был возможен.
+
+### 5. City-aware queries: фильтрация хуков по `currentCity.id`
+
+Шаблон-хук `useCityScopedQuery`:
+```ts
+useCityScopedQuery(['properties'], (cityId) => 
+  supabase.from('properties').select('*').eq('city_id', cityId)
+)
+```
+Рефакторим в первую очередь хуки маркетплейса/discovery: `useProperties`, `useProviders`, `useListings`, `useRestaurants`, `useExperiences`, `useEvents`, `useTransfers`. CRM/owner/admin хуки — после, они tenant-scoped и менее срочны.
+
+### 6. URL-структура: опциональный префикс `/:city`
+
+`src/lib/config/routes.ts` + `AnimatedRoutes.tsx`:
+- Все публичные маркетинговые/discovery маршруты получают опциональный префикс: `/:city?/property`, `/:city?/restaurants`, `/:city?/for/:slug`.
+- Без префикса = currentCity по контексту (как сейчас).
+- С префиксом = override + автоматический `setCity(slug)`.
+- Legacy редиректы: `/property/...` → 301 → `/phuket/property/...` через middleware (или клиентский redirect в роутере), чтобы существующие беклинки и SEO не сломались.
+- `hreflang`/canonical в `LandingSeoHead` обновить под `/:city/` префикс.
+
+### 7. Расхардкод оставшихся `'phuket'` literals
+
+15 string-литералов `'phuket'` в коде (после п.3 их станет меньше). Заменить на `currentCity.slug` или удалить условные ветки. Контент-файлы (`src/content/landings/personas/*`) — оставляем как есть в Phase 1, они и так Phuket-only (Phase 2 вынесет в БД per-city).
+
+### 8. Launch checklist в админке
+
+`src/pages/admin/AdminCities.tsx`:
+- Кнопка «Запустить город»: чек-лист с проверками (есть ≥1 partner в каждом ключевом кластере, есть city_content для contacts/hero, есть translations покрытие ≥80%, geography заполнен, default_currency есть в `currency_rates`).
+- При всех зелёных — флипает `is_active=true, is_coming_soon=false`.
+- Read-only до Phase 2 контента, но фреймворк готов.
+
+### 9. CI guard
+
+Eslint-правило или скрипт в `predev`: запрет на новые литералы `'THB'`, `'phuket'`, `'Thailand'`, `'฿'` в `src/` (кроме whitelist: `geography.ts`, `i18n/`, `cities` seed). Не даст откатить прогресс.
 
 ---
 
-## Три варианта стратегии
+## Технические детали
 
-### Вариант A — «Только Google, массовый парсинг»
-Скрипты ежемесячно скачивают все POI Пхукета через Places API.
-- ➕ Самые свежие данные, фото, рейтинги.
-- ➖ Нарушает ToS, стоит ~$17 / 1000 Place Details (≈ $5–10k только на seed).
-- ➖ Контакты по ToS нельзя хранить → мы всё равно не сможем сделать лид-кнопку из них.
+**Стэк:** существующий — Supabase, React Query, LocationContext, CurrencyContext. Никаких новых зависимостей.
 
-### Вариант B — «Только OSM + ручное наполнение»
-Запускаем Overpass-импорт раз в неделю; всё, что не в OSM, заводим вручную/через claim-флоу.
-- ➕ Бесплатно, легально, ~15–25 тыс. POI Пхукета сразу.
-- ➖ В OSM мало фото, рейтингов и часов работы; данные неравномерные.
+**Что НЕ трогаем в Phase 1:**
+- Auth/wallet/CRM — cross-city by design, остаются глобальными
+- Контент персональных лендингов — Phase 2 per-city
+- Compliance/visa/tax справочники — Phase 2 per-country (нужны отдельные таблицы `visa_types_by_country`, `tax_rates_by_country`)
+- Партнёрская сеть — Phase 3, контентная работа
+- Edge functions scraping (TAT/Bangkok Post) — Phase 2, per-city source configs
+- Lifecycle messaging шаблоны — Phase 2, per-city контент
 
-### Вариант C — «Гибрид: OSM фундамент + Google on-demand + claim-монетизация» ⭐
-Три слоя на одной карте, каждый со своей ролью.
+**Риски:**
+- Бэкфилл `city_id` на `properties` (281 колонка) — самая большая таблица, миграция может занять минуту. Делаем с `CONCURRENTLY` на индексе и батч-апдейтом.
+- Codemod на 1225 случаях `'THB'` — высокий риск регрессий в форматировании цен. Тесты на `formatPrice` обязательны, PR-ы по 50 файлов с visual review каждого экрана с ценами.
+- Legacy 301-редиректы могут просесть SEO — за неделю до накатки добавить `<link rel="canonical">` с новой URL-схемой на старых маршрутах, чтобы Google переиндексировал плавно.
 
-**Рекомендую: Вариант C** — единственный, который одновременно соблюдает Google ToS, даёт массовое покрытие бесплатно и превращает карту в воронку лидов вместо энциклопедии.
+**Оценка трудоёмкости (один разработчик):**
+- Шаги 1–2 (миграции): 2 дня
+- Шаг 3 (LocationContext): 1 день
+- Шаг 4 (codemod валют): 5–7 дней (растянуто по PR-ам)
+- Шаг 5 (city-aware hooks): 3 дня
+- Шаг 6 (URL prefix): 3 дня
+- Шаги 7–9: 2 дня
+- **Итого:** ~3 недели чистой работы + неделя на стабилизацию.
 
----
-
-## План реализации Варианта C
-
-### Слой 1 — OSM Foundation (бесплатно, постоянно)
-1. Включить cron на `import-phuket-osm` (раз в неделю, ночью).
-2. Расширить категории импортера: `tourism=attraction`, `leisure=marina/spa/fitness_centre/beach_resort`, `shop=mall/supermarket/convenience`, `office=*`, `craft=*`. → ожидаем 18–25 тыс. POI Пхукета.
-3. Аналогичный импортер для Бангкока и Самуи (тот же код, другой bbox) — для посольств и переезда.
-4. Слои на `/map` уже есть; добавить новые категории в `OSM_CATEGORIES` и в фильтр.
-
-### Слой 2 — Google Places Enrichment (on-demand, кэш 30 дней)
-1. **При клике на любой OSM-маркер** в `/map` сейчас уже зовётся `place-details` — но интерфейс показывает данные сыро. Сделать карточку: фото (Google Photos через прокси), часы, рейтинг, телефон-маска, кнопка «Открыть в myUNO».
-2. **Не показывать «Open in Google Maps»** — только наш CTA. Если нужны directions, открываем нашу карточку + кнопка «Маршрут» внутри.
-3. **Никаких contact-кликов наружу** — телефон/сайт только для claimed-листингов из нашей БД. У Google-обогащённых: «Это ваш бизнес? Заявить и получать клиентов бесплатно» → claim-флоу.
-4. Бюджет: ~$200/мес на 12k Place Details (с кэшем достаточно).
-
-### Слой 3 — Claimed Listings (наш контент, монетизация)
-1. **Claim-флоу:** на любой OSM/Google-карточке кнопка «Я владелец» → форма → модерация админом → POI переезжает в `providers` или соответствующую вертикальную таблицу (`salons`, `gyms`, `flower_shops`, `restaurants`).
-2. Claimed маркеры рендерятся **поверх** OSM (другой цвет/иконка/бейдж «Verified»), скрывают OSM-копию по `osm_id` matching.
-3. Только claimed получают CTA «Книга / Лид / Whatsapp» — лиды попадают в `crm_contacts` + `agent_deals`.
-4. Для **недвижимости**: `properties` и `property_projects` остаются ручным/парсинговым источником (девелоперские сайты через Firecrawl, как уже делается в `agent-intake-automation`). Google здесь не нужен.
-
-### Технические правки в коде
-- `src/pages/MapView.tsx`: убрать кнопки «Open in Google Maps», везде вести в наши `/communities/:slug`, `/property/:id`, `/restaurants/:id`, и т.д.
-- `supabase/functions/import-phuket-osm`: расширить категории + добавить вторую функцию для других bbox.
-- Новый компонент `PoiClaimSheet` — bottom-sheet с формой claim, прогрев лид-формы.
-- Новая таблица `poi_claim_requests` (provider_id NULL до approve, osm_id / google_place_id, owner_email, status).
-- Edge function `place-photo-proxy` для фотографий (Google Photos не отдают URL напрямую, нужен прокси с ключом).
-- Cron: pg_cron → еженедельный вызов `import-phuket-osm`.
-
-### Метрики, по которым меряем успех
-- Доля кликов на маркер, которые приводят к нашей карточке (а не наружу): **target 100%**.
-- Conversion: OSM-маркер → claim-запрос: target ≥ 1.5% в месяц.
-- Лиды с карты в `agent_deals`/бронирования: считать через `lead_attributions` с `source='map'`.
+**Критерий готовности Phase 1:**
+1. `UPDATE cities SET is_active=true WHERE slug='bali'` + seed 10 fake properties с `city_id=<bali>` → на `/bali/property` видны только эти 10, цены в IDR, карта центрирована на Бали. Phuket не задет.
+2. CI guard блокирует PR с новыми `'THB'` литералами.
+3. Все существующие пользователи и URL продолжают работать без изменений (Phuket = дефолт).
 
 ---
 
-## Что нужно от вас, прежде чем уходить в build
+## Что дальше (вне Phase 1, для контекста)
 
-1. **Бюджет на Google Places API:** ок ли $150–250/мес на старте?
-2. **Порядок городов:** только Пхукет в фазе 1, или сразу + Бангкок (для посольств) + Самуи?
-3. **Claim-модерация:** ручная админом или авто по email-домену совпадающему с website?
-4. **Кому показывать «Open in Google Maps» fallback:** убираем полностью или оставляем как admin-only debug?
+- **Phase 2 (per-locale контент, 2–3 недели на каждую новую локацию):** вынос лендингов в БД, локальные FAQ/visa/tax, источники новостей, OG-images, hreflang per-city.
+- **Phase 3 (launch playbook, 1 неделя на город):** seed партнёров, активация, домен/субдомен, маркетинг.
+
+Когда Phase 1 готов — спросишь меня про Phase 2 для конкретной локации (Бали? Дубай?), я составлю отдельный план с учётом местной специфики.
