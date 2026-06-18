@@ -307,6 +307,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
   onEdit: () => void;
   onUpdate: (updates: ProjectUpdate) => void;
 }) {
+  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
   const [edits, setEdits] = useState<ProjectEdits>({});
   const catalog = (p.offplan_catalog as CatalogShape | null) || {};
 
@@ -340,7 +341,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
         <td className="p-3 text-muted-foreground text-xs">{p.district || p.location_area || '—'}</td>
         <td className="p-3"><NbProjectStatusBadge status={p.project_status || 'under_construction'} /></td>
         <td className="p-3 text-xs">{catalog.type || '—'}</td>
-        <td className="p-3 text-xs">{p.price_from ? `฿${(p.price_from / 1e6).toFixed(1)}M` : '—'}</td>
+        <td className="p-3 text-xs">{p.price_from ? `${curSym}${(p.price_from / 1e6).toFixed(1)}M` : '—'}</td>
         <td className="p-3 text-xs font-mono">{p.muuno_score || '—'}</td>
         <td className="p-3">
           <div className="flex gap-1">
@@ -369,7 +370,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
                 <Input size={1} value={edits.developer_name ?? p.developer_name ?? ''} onChange={e => setEdits({ ...edits, developer_name: e.target.value })} />
               </div>
               <div>
-                <Label className="text-xs">Цена от (THB)</Label>
+                <Label className="text-xs">Цена от ({cityCurrencyCode})</Label>
                 <Input type="number" value={edits.price_from ?? p.price_from ?? ''} onChange={e => setEdits({ ...edits, price_from: Number(e.target.value) || null })} />
               </div>
               <div>

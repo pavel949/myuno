@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useProviderContracts, ProviderContract, ContractInsert } from '@/hooks/useProviderContracts';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { useContractEntities } from '@/hooks/useContractEntities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,6 +77,7 @@ const PAYMENT_TERMS_OPTIONS = [
 
 export default function AdminContracts() {
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
   const isRu = language === 'ru';
   const { contracts, isLoading, createContract, updateContract, deleteContract, activateContract } = useProviderContracts();
    const { getEntityName, getEntitiesByType, isLoading: entitiesLoading } = useContractEntities();
@@ -472,7 +474,7 @@ export default function AdminContracts() {
                   type="number"
                   value={formData.min_commission_amount || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, min_commission_amount: e.target.value ? Number(e.target.value) : undefined }))}
-                  placeholder="THB"
+                  placeholder={cityCurrencyCode}
                 />
               </div>
               <div>
@@ -481,7 +483,7 @@ export default function AdminContracts() {
                   type="number"
                   value={formData.max_commission_amount || ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, max_commission_amount: e.target.value ? Number(e.target.value) : undefined }))}
-                  placeholder="THB"
+                  placeholder={cityCurrencyCode}
                 />
               </div>
             </div>
