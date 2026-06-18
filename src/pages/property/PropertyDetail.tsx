@@ -670,7 +670,7 @@ export default function PropertyDetail() {
                     propertyId={id || 'prop-1'}
                     pricePerNight={pricePerNight}
                     rentalTerms={rentalTerms}
-                    currency="THB"
+                    currency={listingCurrency}
                     earlyBookingDiscount={property?.early_booking_discount ?? undefined}
                     earlyBookingDays={property?.early_booking_days ?? undefined}
                     lastMinuteDiscount={property?.last_minute_discount ?? undefined}
