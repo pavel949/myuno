@@ -55,6 +55,8 @@ export function PropertyListingCard({
   mode = 'rent',
   isHovered = false,
   onHover,
+  isSelected = false,
+  onSelect,
   companyName,
   companySlug,
   className,
@@ -64,6 +66,7 @@ export function PropertyListingCard({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const rootRef = React.useRef<HTMLDivElement | null>(null);
 
   const surface = useMemo(() => surfaceFromProperty(property, mode), [property, mode]);
   const title = isRu ? surface.titleRu : surface.titleEn;
@@ -92,12 +95,34 @@ export function PropertyListingCard({
     ? unitPrice * nights
     : null;
 
+  // Scroll into view when selected externally (e.g. pin click on map).
+  React.useEffect(() => {
+    if (isSelected && rootRef.current) {
+      rootRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [isSelected]);
+
+  const handleClick = () => {
+    if (onSelect) {
+      // In split/map mode, primary action is to select on the map, not navigate.
+      onSelect(property.id);
+    } else {
+      navigate(surface.href);
+    }
+  };
+
   return (
     <div
+      ref={rootRef}
       data-catalog-kind={surface.kind}
       data-listing-id={surface.id}
-      className={cn("group cursor-pointer", className)}
-      onClick={() => navigate(surface.href)}
+      aria-selected={isSelected}
+      className={cn(
+        "group cursor-pointer transition-shadow",
+        isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background rounded-sm",
+        className,
+      )}
+      onClick={handleClick}
       onMouseEnter={() => onHover?.(property.id)}
       onMouseLeave={() => onHover?.(null)}
     >
@@ -108,6 +133,7 @@ export function PropertyListingCard({
           alt={title}
           isHovered={isHovered}
         />
+
 
         {/* Favorite — Airbnb heart */}
         <div className="absolute top-2 right-2 z-10">
