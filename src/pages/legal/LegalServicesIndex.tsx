@@ -147,6 +147,7 @@ export default function LegalServicesIndex() {
           )}
 
           <VerticalInsightPanel verticalId="legal" />
+          <ConciergeHelpCTA topic="visa" variant="card" className="my-6" />
           <VerticalCTA vertical="legal" className="my-6" />
         </>
       )}
