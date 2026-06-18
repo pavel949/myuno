@@ -130,7 +130,7 @@ export default function OffplanDetail() {
     name,
     description: seoDescription,
     price: project.priceFrom ?? undefined,
-    currency: 'THB',
+    currency: ((project as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase(),
     image: seoImage,
     url: canonicalUrl,
     address: project.district ?? undefined,
