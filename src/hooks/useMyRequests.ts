@@ -20,7 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export type RequestStatus = 'new' | 'in_progress' | 'waiting' | 'done';
-export type RequestSource = 'concierge' | 'visa' | 'order';
+export type RequestSource = 'concierge' | 'visa' | 'order' | 'help';
 
 export interface MyRequest {
   id: string;
