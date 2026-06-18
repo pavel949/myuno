@@ -165,9 +165,11 @@ export default function PropertyInquiry() {
     () =>
       (propertyExt?.currency?.trim?.() ||
         rentalExt?.currency?.trim?.() ||
-        'THB') as string,
-    [property, rentalTerms],
+        currentCity?.default_currency ||
+        'USD') as string,
+    [property, rentalTerms, currentCity?.default_currency],
   );
+
   const { data: isRareFind } = useRareFindBadge(id);
 
   // Persist form draft on every change, with current URL context attached
