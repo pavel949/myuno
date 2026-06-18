@@ -298,7 +298,7 @@ export default function PropertyInquiry() {
       return calculatePricing(baseRules, new Date(), new Date()); // empty breakdown
     }
     return calculatePricing(baseRules, checkIn, checkOut);
-  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property]);
+  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property, listingCurrency]);
 
   const validationErrors = useMemo(() => {
     const errors: string[] = [];
