@@ -155,12 +155,11 @@ export default function AdminOperations() {
 
       {/* Quick Actions Bar */}
       <Card className="border-dashed">
-        <CardContent className="p-3">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
-              {isRu ? 'Быстрые действия' : 'Quick actions'}
-            </span>
-            <div className="h-4 w-px bg-border shrink-0" />
+        <CardContent className="p-3 space-y-2">
+          <span className="text-xs text-muted-foreground font-medium block">
+            {isRu ? 'Быстрые действия' : 'Quick actions'}
+          </span>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
             {quickActions.map((action) => (
               <Button
                 key={action.path}
