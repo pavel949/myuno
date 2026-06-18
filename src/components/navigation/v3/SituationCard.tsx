@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface SituationCardProps {
@@ -34,7 +35,7 @@ export function SituationCard({
 
   return (
     <Link
-      to={`/discover/${situation.code}`}
+      to={resolveSituationHref(situation.code)}
       className={cn(
         'group relative flex flex-col gap-4 p-5 min-h-[180px]',
         'border border-border bg-card text-card-foreground',

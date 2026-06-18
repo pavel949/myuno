@@ -20,6 +20,7 @@ import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useSituationServiceCounts } from '@/hooks/useSituationServiceCounts';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
+import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getEntityType, getEntityTypeLabel } from '@/lib/config/entityTypes';
@@ -279,7 +280,7 @@ export default function SituationDetailPage() {
                     return (
                       <Link
                         key={rel.id}
-                        to={`/discover/${rel.code}`}
+                        to={resolveSituationHref(rel.code)}
                         className={cn(
                           'group flex items-start gap-3 p-4 min-h-[88px]',
                           'border border-border bg-card text-card-foreground',

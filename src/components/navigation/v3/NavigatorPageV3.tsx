@@ -20,6 +20,7 @@ import { RoleSheet } from '@/components/home/RoleSheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
+import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import { NavigatorClusterSection } from './NavigatorClusterSection';
 import { PersonalGrid } from '@/components/superapp/PersonalGrid';
 import type { LifeSituation } from '@/hooks/useLifeOS';
@@ -282,7 +283,7 @@ export default function NavigatorPageV3() {
                 return (
                   <li key={s.id}>
                     <Link
-                      to={`/discover/${s.code}`}
+                      to={resolveSituationHref(s.code)}
                       className="group flex items-center gap-4 py-5 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[64px]"
                     >
                       <div className="flex-1 min-w-0">
