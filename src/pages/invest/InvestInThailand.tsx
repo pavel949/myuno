@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Globe2, Building2, Plane, Banknote, ShieldCheck, ArrowRight, Briefcase, BookOpen } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { ConciergeHelpCTA } from '@/components/concierge/ConciergeHelpCTA';
 
 const MACRO = [
   { icon: TrendingUp, key: 'gdp', en: 'GDP growth +3% (2024)', ru: 'Рост ВВП +3% (2024)' },
