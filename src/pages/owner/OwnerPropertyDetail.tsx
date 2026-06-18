@@ -115,7 +115,7 @@ export default function OwnerPropertyDetail() {
     house: { en: 'House', ru: 'Дом' },
   };
 
-  const listingCurrency = (property.currency?.trim() || 'THB');
+  const listingCurrency = (property.currency?.trim() || cityCurrencyCode);
   const depositCurrency = (property.deposit_currency?.trim() || listingCurrency);
 
   return (
