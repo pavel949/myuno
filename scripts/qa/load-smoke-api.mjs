@@ -29,21 +29,76 @@ const CONCURRENCY = Number(args.concurrency || 40);
 const LIMIT = Number(args.limit || 20);
 
 // Realistic queries (similar to what the app actually issues)
+// Realistic filter/sort combinations the app actually issues.
+// Each scenario gets its own latency/error bucket.
 const ENDPOINTS = [
+  // ─── communities ─────────────────────────────────────────────
   {
-    name: '/rest/v1/communities',
-    path: `/rest/v1/communities?select=slug,name_ru,name_en,lat,lng,cover_image_url&is_active=eq.true&limit=${LIMIT}`,
+    name: 'communities · list active',
+    path: `/rest/v1/communities?select=slug,name_ru,name_en,kind,city,lat,lng,cover_image_url&is_active=eq.true&order=name_en.asc&limit=${LIMIT}`,
   },
   {
-    name: '/rest/v1/communities (geo)',
-    path: `/rest/v1/communities?select=slug,name_ru,name_en,lat,lng&lat=not.is.null&lng=not.is.null&limit=${LIMIT}`,
+    name: 'communities · kind=religion',
+    path: `/rest/v1/communities?select=slug,name_ru,name_en,religion,city,lat,lng&is_active=eq.true&kind=eq.religion&order=name_en.asc&limit=${LIMIT}`,
   },
   {
-    name: '/rest/v1/properties',
-    path: `/rest/v1/properties?select=id,title,price,property_type,address&is_active=eq.true&limit=${LIMIT}`,
+    name: 'communities · kind=consulate',
+    path: `/rest/v1/communities?select=slug,name_ru,name_en,country_code,consulate_type,city&is_active=eq.true&kind=eq.consulate&order=country_code.asc&limit=${LIMIT}`,
   },
   {
-    name: '/rest/v1/properties (count)',
+    name: 'communities · kind=club',
+    path: `/rest/v1/communities?select=slug,name_ru,name_en,tags,language_primary,city&is_active=eq.true&kind=eq.club&limit=${LIMIT}`,
+  },
+  {
+    name: 'communities · city=Phuket',
+    path: `/rest/v1/communities?select=slug,name_ru,name_en,kind,lat,lng&is_active=eq.true&city=in.("Phuket","Phuket Town","Chalong","Kamala","Thalang","Cherng Talay")&limit=${LIMIT}`,
+  },
+  {
+    name: 'communities · geo bbox (Phuket)',
+    // Patong/Karon area bbox
+    path: `/rest/v1/communities?select=slug,name_ru,name_en,lat,lng&is_active=eq.true&lat=gte.7.7&lat=lte.8.2&lng=gte.98.2&lng=lte.98.5&order=name_en.asc&limit=${LIMIT}`,
+  },
+  {
+    name: 'communities · search "wat"',
+    path: `/rest/v1/communities?select=slug,name_ru,name_en,kind&is_active=eq.true&or=(name_en.ilike.*wat*,name_ru.ilike.*ват*)&limit=${LIMIT}`,
+  },
+  {
+    name: 'communities · count exact',
+    path: `/rest/v1/communities?select=id&is_active=eq.true&limit=1`,
+    extraHeaders: { Prefer: 'count=exact' },
+  },
+
+  // ─── properties ──────────────────────────────────────────────
+  {
+    name: 'properties · list active',
+    path: `/rest/v1/properties?select=id,title,price,property_type,bedrooms,address&is_active=eq.true&order=created_at.desc&limit=${LIMIT}`,
+  },
+  {
+    name: 'properties · type=villa',
+    path: `/rest/v1/properties?select=id,title,price,bedrooms,area_sqm,address&is_active=eq.true&property_type=eq.villa&order=price.desc&limit=${LIMIT}`,
+  },
+  {
+    name: 'properties · type=condo+apartment',
+    path: `/rest/v1/properties?select=id,title,price,bedrooms,property_type,address&is_active=eq.true&property_type=in.(condo,apartment,studio)&order=price.asc&limit=${LIMIT}`,
+  },
+  {
+    name: 'properties · 2+ bedrooms',
+    path: `/rest/v1/properties?select=id,title,price,bedrooms,property_type&is_active=eq.true&bedrooms=gte.2&order=bedrooms.asc&limit=${LIMIT}`,
+  },
+  {
+    name: 'properties · price 5-25M',
+    path: `/rest/v1/properties?select=id,title,price,property_type&is_active=eq.true&price=gte.5000000&price=lte.25000000&order=price.asc&limit=${LIMIT}`,
+  },
+  {
+    name: 'properties · listing_type filter',
+    path: `/rest/v1/properties?select=id,title,price,listing_type,property_type&is_active=eq.true&listing_type=not.is.null&order=created_at.desc&limit=${LIMIT}`,
+  },
+  {
+    name: 'properties · sort price.desc',
+    path: `/rest/v1/properties?select=id,title,price,property_type&is_active=eq.true&order=price.desc.nullslast&limit=${LIMIT}`,
+  },
+  {
+    name: 'properties · count exact',
     path: `/rest/v1/properties?select=id&is_active=eq.true&limit=1`,
     extraHeaders: { Prefer: 'count=exact' },
   },
