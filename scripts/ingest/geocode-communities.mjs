@@ -34,11 +34,10 @@ const TARGETS = [
 ];
 
 async function geocode(query) {
-  const res = await fetch(`${GATEWAY}/places/v1/places:searchText`, {
+  const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-      'X-Connection-Api-Key': GOOGLE_MAPS_API_KEY,
+      'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
       'Content-Type': 'application/json',
       'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location',
     },
