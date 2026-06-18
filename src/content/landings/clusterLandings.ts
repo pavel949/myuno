@@ -517,8 +517,8 @@ const H_EMERGENCY: ClusterLanding = {
     en: 'Emergency support on Phuket',
   },
   subtitle: {
-    ru: 'Один номер, один чат, чек-листы по ситуациям: ДТП, госпитализация, потеря документов, юридический инцидент. Помогаем по-русски и по-английски 24/7.',
-    en: 'One number, one chat, checklists for accidents, hospital admission, lost documents and legal incidents. Russian and English support 24/7.',
+    ru: 'Один номер, один чат, чек-листы по ситуациям: ДТП, госпитализация, потеря документов, юридический инцидент. Многоязычная поддержка (EN/RU/TH) 24/7.',
+    en: 'One number, one chat, checklists for accidents, hospital admission, lost documents and legal incidents. Multilingual support (EN/RU/TH) 24/7.',
   },
   jobs: [
     { ru: 'Вызвать скорую и попасть в правильную клинику.', en: 'Call an ambulance and reach the right hospital.' },
