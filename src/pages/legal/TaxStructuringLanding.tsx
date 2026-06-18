@@ -136,6 +136,10 @@ export default function TaxStructuringLanding() {
             {t({ ru: 'Пройти tax quiz', en: 'Take the tax quiz' })}
           </Button>
         </div>
+
+        <div className="mt-8">
+          <ConciergeHelpCTA topic="business" variant="card" />
+        </div>
       </div>
     </LandingShell>
   );
