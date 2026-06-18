@@ -82,6 +82,11 @@ export default function ServicesIndex() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  // Original URL slug, preserved for intro-card lookup. The chip ribbon uses
+  // the aliased SERVICE_CATEGORIES id (e.g. laundry → cleaning), but the
+  // intro card is keyed by the discovery slug so /services?category=laundry
+  // still shows the laundry-specific WhatsApp landing copy.
+  const [originalSlug, setOriginalSlug] = useState<string | null>(null);
 
   const { functions, categories, popular, search, getFunctionsByCategory } = useServiceFunctions();
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
@@ -90,14 +95,15 @@ export default function ServicesIndex() {
     const categoryParam = searchParams.get('category');
     if (!categoryParam) {
       setSelectedCategory('all');
+      setOriginalSlug(null);
       return;
     }
-    // Normalise legacy/discovery slugs to the canonical SERVICE_CATEGORIES id.
     const aliased = CATEGORY_ALIAS[categoryParam] ?? categoryParam;
     setSelectedCategory(aliased);
+    setOriginalSlug(categoryParam);
   }, [searchParams]);
 
-  const introCategoryKey = selectedCategory === 'all' ? null : selectedCategory;
+  const introCategoryKey = originalSlug ?? (selectedCategory === 'all' ? null : selectedCategory);
   const intro = introCategoryKey ? CATEGORY_INTRO[introCategoryKey] : null;
   const introCategoryLabel = intro ? (isRu ? intro.titleRu : intro.titleEn) : '';
 
