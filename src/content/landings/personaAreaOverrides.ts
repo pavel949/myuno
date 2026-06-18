@@ -88,7 +88,7 @@ const OVERRIDES: OverrideMap = {
         en: [
           'Branded residences (Banyan Tree, Angsana, Dusit) — fully managed, lock-up-and-leave with hotel-grade service.',
           'Quiet north-shore: 6 km family beach, no nightclubs, 25-min direct airport transfer.',
-          'Established Russian-speaking community — doctors, tutors, fitness — soft landing for seasonal residents.',
+          'Established international community (EN/RU/TH) — doctors, tutors, fitness — soft landing for seasonal residents.',
         ],
       },
       whatsappMessage: {
