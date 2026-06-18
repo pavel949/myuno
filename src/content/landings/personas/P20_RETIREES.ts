@@ -57,6 +57,8 @@ export const P20_RETIREES: PersonaLanding = {
     hreflangAlternates: [
       { lang: 'ru', href: 'https://www.myuno.app/for/retirees?lang=ru' },
       { lang: 'en', href: 'https://www.myuno.app/for/retirees?lang=en' },
+      { lang: 'th', href: 'https://www.myuno.app/for/retirees?lang=th' },
+      { lang: 'zh-CN', href: 'https://www.myuno.app/for/retirees?lang=zh-CN' },
     ],
   },
 };

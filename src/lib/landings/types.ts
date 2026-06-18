@@ -118,8 +118,8 @@ export interface LandingSeo {
   ogImage: string;
   /** Канонический URL без trailing slash. Используется hreflang. */
   canonicalPath: string;
-  /** Ссылки на альтернативные языки. RU↔EN обязательно. */
-  hreflangAlternates: { lang: 'ru' | 'en'; href: string }[];
+  /** Ссылки на альтернативные языки. RU↔EN обязательно; TH/zh-CN — для мультиязычной SEO-разметки. */
+  hreflangAlternates: { lang: 'ru' | 'en' | 'th' | 'zh-CN'; href: string }[];
 }
 
 /* ------------------------------------------------------------------ */

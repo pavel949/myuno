@@ -139,6 +139,8 @@ export const P8_PASSIVE_INVESTORS: PersonaLanding = {
     hreflangAlternates: [
       { lang: 'ru', href: 'https://www.myuno.app/for/passive-investors?lang=ru' },
       { lang: 'en', href: 'https://www.myuno.app/for/passive-investors?lang=en' },
+      { lang: 'th', href: 'https://www.myuno.app/for/passive-investors?lang=th' },
+      { lang: 'zh-CN', href: 'https://www.myuno.app/for/passive-investors?lang=zh-CN' },
     ],
   },
 };

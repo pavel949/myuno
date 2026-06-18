@@ -52,6 +52,8 @@ export const P13_PET_OWNERS: PersonaLanding = {
     hreflangAlternates: [
       { lang: 'ru', href: 'https://www.myuno.app/for/pet-owners?lang=ru' },
       { lang: 'en', href: 'https://www.myuno.app/for/pet-owners?lang=en' },
+      { lang: 'th', href: 'https://www.myuno.app/for/pet-owners?lang=th' },
+      { lang: 'zh-CN', href: 'https://www.myuno.app/for/pet-owners?lang=zh-CN' },
     ],
   },
 };

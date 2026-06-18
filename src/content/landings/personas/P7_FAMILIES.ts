@@ -57,6 +57,8 @@ export const P7_FAMILIES: PersonaLanding = {
     hreflangAlternates: [
       { lang: 'ru', href: 'https://www.myuno.app/for/families?lang=ru' },
       { lang: 'en', href: 'https://www.myuno.app/for/families?lang=en' },
+      { lang: 'th', href: 'https://www.myuno.app/for/families?lang=th' },
+      { lang: 'zh-CN', href: 'https://www.myuno.app/for/families?lang=zh-CN' },
     ],
   },
 };
