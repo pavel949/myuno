@@ -855,7 +855,7 @@ export default function WelcomeLanding() {
         open={helpOpen}
         onOpenChange={setHelpOpen}
         topic="general"
-        initialSubject={isRu ? 'Экстренная помощь' : 'Emergency assistance'}
+        initialSubject={language === 'ru' ? 'Экстренная помощь' : language === 'th' ? 'ความช่วยเหลือฉุกเฉิน' : 'Emergency assistance'}
         sourceData={{ source_page: 'welcome_landing', emergency: true }}
       />
     </div>
