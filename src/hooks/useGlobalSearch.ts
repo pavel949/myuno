@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
+import { searchNavigationIndex, type NavSearchContext } from '@/lib/search/navigationIndex';
+import { useSearchContext } from './useSearchContext';
 
 export interface SearchResult {
   id: string;
@@ -16,7 +18,19 @@ export interface SearchResult {
   rating: number | null;
   path: string;
   isCategory?: boolean;
+  /** Set on navigation-index hits ("action" rows). */
+  isAction?: boolean;
+  /** Optional one-line description, used by action rows. */
+  descriptionEn?: string | null;
+  descriptionRu?: string | null;
 }
+
+export interface AiSmartAnswer {
+  answer: string;
+  suggestedCategories: string[];
+  suggestedServices: Array<{ type: string; query: string; reason: string }>;
+}
+
 
 interface TableConfig {
   table: string;
