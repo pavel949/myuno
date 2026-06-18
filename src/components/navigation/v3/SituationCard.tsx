@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface SituationCardProps {
