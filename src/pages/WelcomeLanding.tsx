@@ -466,7 +466,8 @@ export default function WelcomeLanding() {
 
       {/* ============================ 3. АУДИТОРИИ ============================ */}
       <LandingSection>
-        <LandingContainer id="for-audiences" className="py-14 sm:py-20 scroll-mt-20">
+        <LandingContainer className="py-14 sm:py-20 scroll-mt-20">
+          <span id="for-audiences" className="block -mt-20 pt-20" aria-hidden />
           <div className="mb-8 max-w-2xl space-y-3">
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
               {tx(isRu, { ru: 'Для кого экосистема', en: 'Who the ecosystem is for' })}
