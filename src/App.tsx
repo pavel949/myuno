@@ -153,6 +153,7 @@ function AppContent() {
             <AnimatedRoutes />
           </div>
           <UnifiedChatFAB />
+          <InstallAppButton />
           <CookieConsentBanner />
         </BrowserRouter>
       </div>
