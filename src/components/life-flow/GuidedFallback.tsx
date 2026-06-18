@@ -99,7 +99,7 @@ export const GuidedFallback = memo(function GuidedFallback({
           </div>
           <div>
             <p className="text-sm font-semibold">
-              {isRussian ? 'VIP Консьерж' : 'VIP Concierge'}
+              myUNO VIP
             </p>
             <p className="text-xs text-muted-foreground">
               {isRussian ? 'Персональный помощник' : 'Personal assistant'}
