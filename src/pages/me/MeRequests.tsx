@@ -27,9 +27,10 @@ const SOURCE_LABEL: Record<RequestSource, { en: string; ru: string }> = {
   concierge: { en: 'Concierge', ru: 'Консьерж' },
   visa: { en: 'Visa', ru: 'Виза' },
   order: { en: 'Orders', ru: 'Заказы' },
+  help: { en: 'myUNO Help', ru: 'Помощь myUNO' },
 };
 
-const VALID_SOURCES: RequestSource[] = ['concierge', 'visa', 'order'];
+const VALID_SOURCES: RequestSource[] = ['concierge', 'visa', 'order', 'help'];
 
 function RequestCard({ r }: { r: MyRequest }) {
   const { language } = useLanguage();
