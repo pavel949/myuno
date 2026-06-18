@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
+
 import { useMyPropertyProjects, type PropertyProject } from '@/hooks/usePropertyProjects';
 import { APP_ROUTES } from '@/lib/config/routes';
 
