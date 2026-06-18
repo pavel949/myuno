@@ -703,8 +703,8 @@ const E_TRANSACTION: ClusterLanding = {
     en: 'Property transactions on Phuket',
   },
   subtitle: {
-    ru: 'От задатка до Land Office: due diligence, эскроу, перевод средств, налоги и регистрация. Сопровождение юристом по-русски на каждом шаге.',
-    en: 'From deposit to Land Office: due diligence, escrow, FX transfer, taxes and registration. Russian-speaking lawyer at every step.',
+    ru: 'От задатка до Land Office: due diligence, эскроу, перевод средств, налоги и регистрация. Сопровождение многоязычным юристом (EN/RU/TH) на каждом шаге.',
+    en: 'From deposit to Land Office: due diligence, escrow, FX transfer, taxes and registration. Multilingual lawyer (EN/RU/TH) at every step.',
   },
   jobs: [
     { ru: 'Подписать reservation agreement и внести задаток без рисков.', en: 'Sign a reservation agreement and pay the deposit safely.' },
