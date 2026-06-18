@@ -556,7 +556,7 @@ const H_EMERGENCY: ClusterLanding = {
   relatedPersonas: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P13', 'P14', 'P19', 'P20', 'P25'],
   seo: {
     metaTitle: { ru: 'Экстренная помощь на Пхукете 24/7 — myUNO', en: 'Emergency support on Phuket 24/7 — myUNO' },
-    metaDescription: { ru: 'Скорая, полиция, потеря документов, ДТП, страховая. Чек-листы по-русски и SOS-чат с ответом за 10 минут.', en: 'Ambulance, police, lost documents, accidents, insurance. Checklists and SOS chat with 10-minute response.' },
+    metaDescription: { ru: 'Скорая, полиция, потеря документов, ДТП, страховая. Многоязычные чек-листы (EN/RU/TH) и SOS-чат с ответом за 10 минут.', en: 'Ambulance, police, lost documents, accidents, insurance. Multilingual checklists (EN/RU/TH) and SOS chat with 10-minute response.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/emergency',
     hreflangAlternates: [
