@@ -39,27 +39,27 @@ function buildPmtilesStyle(pmtilesUrl: string): StyleSpecification {
       },
     },
     layers: [
-      { id: 'bg', type: 'background', paint: { 'background-color': '#08101E' } },
+      { id: 'bg', type: 'background', paint: { 'background-color': '#F2EFE9' } },
       {
         id: 'water',
         type: 'fill',
         source: 'omt',
         'source-layer': 'water',
-        paint: { 'fill-color': '#0a1a30' },
+        paint: { 'fill-color': '#C9D7E4' },
       },
       {
         id: 'landcover',
         type: 'fill',
         source: 'omt',
         'source-layer': 'landcover',
-        paint: { 'fill-color': '#0d1a26', 'fill-opacity': 0.6 },
+        paint: { 'fill-color': '#E4E8D8', 'fill-opacity': 0.6 },
       },
       {
         id: 'landuse',
         type: 'fill',
         source: 'omt',
         'source-layer': 'landuse',
-        paint: { 'fill-color': '#0e1f2e', 'fill-opacity': 0.5 },
+        paint: { 'fill-color': '#ECE7DC', 'fill-opacity': 0.5 },
       },
       {
         id: 'roads',
@@ -67,7 +67,7 @@ function buildPmtilesStyle(pmtilesUrl: string): StyleSpecification {
         source: 'omt',
         'source-layer': 'transportation',
         paint: {
-          'line-color': '#2a3a52',
+          'line-color': '#B6AFA1',
           'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.4, 14, 2, 18, 6],
         },
       },
@@ -77,7 +77,7 @@ function buildPmtilesStyle(pmtilesUrl: string): StyleSpecification {
         source: 'omt',
         'source-layer': 'building',
         minzoom: 13,
-        paint: { 'fill-color': '#13243a', 'fill-outline-color': '#1c2f48' },
+        paint: { 'fill-color': '#E6DFD1', 'fill-outline-color': '#C9C0AE' },
       },
       {
         id: 'place-labels',
@@ -89,9 +89,10 @@ function buildPmtilesStyle(pmtilesUrl: string): StyleSpecification {
           'text-font': ['Noto Sans Regular'],
           'text-size': 12,
         },
-        paint: { 'text-color': '#c8d2e0', 'text-halo-color': '#08101E', 'text-halo-width': 1.2 },
+        paint: { 'text-color': '#1C1916', 'text-halo-color': '#F7F5F1', 'text-halo-width': 1.2 },
       },
     ],
+
   };
 }
 

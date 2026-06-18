@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, SlidersHorizontal } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -415,59 +417,85 @@ export default function MapView() {
 
   const showLoading = isDataLoading && allMarkers.length === 0;
 
+  const secondaryFilterCount =
+    (selectedPrice !== 'all' ? 1 : 0) +
+    (selectedAvailability !== 'all' ? 1 : 0) +
+    (showOsm ? 1 : 0);
+
   return (
     <AppLayout>
-      <div className="flex flex-col h-[calc(100vh-8rem)]">
-        <div className="px-4 py-3 bg-background/95 border-b border-border z-10 space-y-2">
-          <MapSearchBox ref={searchBoxRef} onSelect={handleSearchSelect} language={language as 'ru' | 'en'} />
-
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-              {language === 'ru' ? 'Категория' : 'Category'}
-            </p>
-            <FilterChipGroup scrollable>
-              {FILTER_OPTIONS.map((opt) => (
-                <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedVertical === opt.value} onToggle={() => handleFilterChange(opt.value)} size="md" />
-              ))}
-            </FilterChipGroup>
+      <div className="flex flex-col h-[calc(100dvh-3.5rem-var(--bottom-nav-h,4rem))]">
+        <div className="px-3 pt-2 pb-2 bg-background/95 border-b border-border z-10 space-y-2 shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <MapSearchBox ref={searchBoxRef} onSelect={handleSearchSelect} language={language as 'ru' | 'en'} />
+            </div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="relative shrink-0 h-10 w-10"
+                  aria-label={language === 'ru' ? 'Фильтры' : 'Filters'}
+                >
+                  <SlidersHorizontal className="w-4 h-4" />
+                  {secondaryFilterCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-accent text-accent-foreground text-[10px] font-semibold flex items-center justify-center">
+                      {secondaryFilterCount}
+                    </span>
+                  )}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>{language === 'ru' ? 'Фильтры карты' : 'Map filters'}</SheetTitle>
+                </SheetHeader>
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                      {language === 'ru' ? 'Цена' : 'Price'}
+                    </p>
+                    <FilterChipGroup scrollable>
+                      {PRICE_OPTIONS.map((opt) => (
+                        <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedPrice === opt.value} onToggle={() => { setSelectedPrice(opt.value); updateParam('price', opt.value); }} size="md" />
+                      ))}
+                    </FilterChipGroup>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                      {language === 'ru' ? 'Доступность' : 'Availability'}
+                    </p>
+                    <FilterChipGroup scrollable>
+                      {AVAILABILITY_OPTIONS.map((opt) => (
+                        <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedAvailability === opt.value} onToggle={() => { setSelectedAvailability(opt.value); updateParam('availability', opt.value); }} size="md" />
+                      ))}
+                    </FilterChipGroup>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                      {language === 'ru' ? 'OSM места (OpenStreetMap)' : 'OSM places (OpenStreetMap)'}
+                    </p>
+                    <FilterChipGroup scrollable>
+                      <FilterChip label={language === 'ru' ? (showOsm ? 'Скрыть OSM' : 'Показать OSM') : (showOsm ? 'Hide OSM' : 'Show OSM')} icon="🗺️" isActive={showOsm} onToggle={() => setShowOsm((v) => !v)} size="md" />
+                      {showOsm && OSM_CATEGORIES.map((c) => (
+                        <FilterChip key={c} label={c === 'all' ? (language === 'ru' ? 'Все OSM' : 'All OSM') : c} isActive={osmCategory === c} onToggle={() => setOsmCategory(c)} size="md" />
+                      ))}
+                    </FilterChipGroup>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
 
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-              {language === 'ru' ? 'Цена' : 'Price'}
-            </p>
-            <FilterChipGroup scrollable>
-              {PRICE_OPTIONS.map((opt) => (
-                <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedPrice === opt.value} onToggle={() => { setSelectedPrice(opt.value); updateParam('price', opt.value); }} size="md" />
-              ))}
-            </FilterChipGroup>
-          </div>
-
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-              {language === 'ru' ? 'Доступность' : 'Availability'}
-            </p>
-            <FilterChipGroup scrollable>
-              {AVAILABILITY_OPTIONS.map((opt) => (
-                <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedAvailability === opt.value} onToggle={() => { setSelectedAvailability(opt.value); updateParam('availability', opt.value); }} size="md" />
-              ))}
-            </FilterChipGroup>
-          </div>
-
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-              {language === 'ru' ? 'OSM места (OpenStreetMap)' : 'OSM places (OpenStreetMap)'}
-            </p>
-            <FilterChipGroup scrollable>
-              <FilterChip label={language === 'ru' ? (showOsm ? 'Скрыть OSM' : 'Показать OSM') : (showOsm ? 'Hide OSM' : 'Show OSM')} icon="🗺️" isActive={showOsm} onToggle={() => setShowOsm((v) => !v)} size="md" />
-              {showOsm && OSM_CATEGORIES.map((c) => (
-                <FilterChip key={c} label={c === 'all' ? (language === 'ru' ? 'Все OSM' : 'All OSM') : c} isActive={osmCategory === c} onToggle={() => setOsmCategory(c)} size="md" />
-              ))}
-            </FilterChipGroup>
-          </div>
+          <FilterChipGroup scrollable>
+            {FILTER_OPTIONS.map((opt) => (
+              <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedVertical === opt.value} onToggle={() => handleFilterChange(opt.value)} size="md" />
+            ))}
+          </FilterChipGroup>
 
           {!showLoading && (
-            <div className="flex items-center justify-between gap-2 pt-1">
+            <div className="flex items-center justify-between gap-2">
               <p className="text-xs text-muted-foreground">
                 {filteredMarkers.length}
                 {showOsm ? ` + ${osmPois?.length ?? 0} OSM` : ''}{' '}
@@ -481,6 +509,7 @@ export default function MapView() {
             </div>
           )}
         </div>
+
 
         <div className="flex-1 relative min-h-0">
           {showLoading ? (
