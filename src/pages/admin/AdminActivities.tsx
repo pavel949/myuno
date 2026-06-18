@@ -70,6 +70,7 @@ export default function AdminActivities() {
   const [searchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode, symbol: curSym } = useCityCurrency();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
   
   const [filterProviderId, setFilterProviderId] = useState<string>('');
@@ -201,7 +202,7 @@ export default function AdminActivities() {
         duration_minutes: parseInt(formData.duration_minutes) || 60,
         price: parseFloat(formData.price),
         price_per: formData.price_per,
-        currency: 'THB',
+        currency: cityCurrencyCode,
         min_participants: parseInt(formData.min_participants) || 1,
         max_participants: parseInt(formData.max_participants) || 10,
         age_restriction: formData.age_restriction ? parseInt(formData.age_restriction) : undefined,
@@ -353,7 +354,7 @@ export default function AdminActivities() {
                             </p>
                           )}
                           <p className="font-bold text-primary">
-                            ฿{activity.price?.toLocaleString()}/{activity.price_per || 'person'}
+                            {curSym}{activity.price?.toLocaleString()}/{activity.price_per || 'person'}
                           </p>
                         </div>
 
@@ -494,7 +495,7 @@ export default function AdminActivities() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>{isRussian ? 'Цена (฿) *' : 'Price (฿) *'}</Label>
+                  <Label>{isRussian ? `Цена (${curSym}) *` : `Price (${curSym}) *`}</Label>
                   <Input
                     type="number"
                     value={formData.price}
