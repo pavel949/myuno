@@ -87,8 +87,16 @@ export default function VehicleDetail() {
   const currencySymbol = getCurrencySymbol(vehicle.currency || 'THB');
   const transmissionLabel = getTransmissionLabel(vehicle.transmission, lang);
   const fuelLabel = getFuelLabel(vehicle.fuel_type, lang);
-  const localizedFeatures = getLocalizedFeatures(vehicle.features, lang);
   const categoryConfig = getCategoryConfig(vehicle.vehicle_type);
+  // Bike-only features should never appear on cars/vans/etc.
+  const BIKE_ONLY = new Set(['helmet', 'helmet_included']);
+  const isBike = categoryConfig.id === 'scooter' || categoryConfig.id === 'motorcycle';
+  const filteredFeatures = (vehicle.features || []).filter((f) => {
+    if (!f) return false;
+    const norm = String(f).toLowerCase().trim();
+    return isBike || !BIKE_ONLY.has(norm);
+  });
+  const localizedFeatures = getLocalizedFeatures(filteredFeatures, lang);
 
   return (
     <AppLayout showBottomNav={false}>
