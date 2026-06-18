@@ -319,6 +319,7 @@ export default function NavigatorPageV3() {
                 clusterId={cid}
                 situations={grouped[cid]}
                 counts={counts}
+                situationLabels={situationLabels}
               />
             ))}
           </div>
