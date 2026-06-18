@@ -299,11 +299,11 @@ export const ru: Record<string, string> = {
   'sos.survivalTips': 'Советы по выживанию',
   
   // VIP Concierge
-  'vip.title': 'VIP Консьерж',
+  'vip.title': 'myUNO VIP',
   'vip.subtitle': 'Люкс консьерж сервис',
   'vip.description': 'Эксклюзивные услуги премиум-класса для взыскательных клиентов. Вертолёты, частные самолёты, персональные повара, яхты, люксовые автомобили и полный спектр VIP-сервисов.',
   'vip.callUs': 'Позвонить',
-  'vip.whyVip': 'Почему UNO VIP?',
+  'vip.whyVip': 'Почему myUNO VIP?',
   'vip.support247': 'Круглосуточная поддержка 24/7',
   'vip.personalManager': 'Персональный менеджер',
   'vip.exclusiveAccess': 'Эксклюзивный доступ',
