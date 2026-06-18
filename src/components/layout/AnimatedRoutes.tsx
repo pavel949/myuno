@@ -795,7 +795,9 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/stays" element={<LazyPage><Pages.StaysSubscriptionLanding /></LazyPage>} />
 
         {/* Legal vertical sub-landings (visa / company / tax). */}
-        <Route path="/legal/:service(visa|company|tax)" element={<LazyPage><Pages.LegalServiceLanding /></LazyPage>} />
+        <Route path="/legal/visa" element={<LazyPage><Pages.LegalServiceLanding /></LazyPage>} />
+        <Route path="/legal/company" element={<LazyPage><Pages.LegalServiceLanding /></LazyPage>} />
+        <Route path="/legal/tax" element={<LazyPage><Pages.LegalServiceLanding /></LazyPage>} />
 
         {/* Magnet visual-builder landings */}
         <Route path="/l/:slug" element={<LazyPage><MagnetLandingPage /></LazyPage>} />
