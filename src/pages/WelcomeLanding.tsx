@@ -663,7 +663,8 @@ export default function WelcomeLanding() {
       {/* ============================ 8. ДЛЯ БИЗНЕСОВ ============================ */}
       <div ref={partnerRef}>
       <LandingSection>
-        <LandingContainer id="for-partners" className="py-14 sm:py-20 scroll-mt-20">
+        <LandingContainer className="py-14 sm:py-20 scroll-mt-20">
+          <span id="for-partners" className="block -mt-20 pt-20" aria-hidden />
           <div className="mb-8 max-w-3xl space-y-3">
             <p className="font-sans text-caption uppercase tracking-[0.14em] text-primary">
               {tx(isRu, { ru: 'Для местных бизнесов', en: 'For local businesses' })}
