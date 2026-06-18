@@ -142,10 +142,10 @@ export default function FAQPage() {
         {
           q: isRu ? 'Как организовать уборку квартиры, если я не в Таиланде?' : isTh ? 'จะจัดการทำความสะอาดอพาร์ตเมนต์ได้อย่างไรถ้าฉันไม่ได้อยู่ในประเทศไทย?' : 'How do I organize apartment cleaning if I\'m not in Thailand?',
           a: isRu 
-            ? 'Через myUNO вы можете заказать регулярную или разовую уборку с любой точки мира. Все клининг-партнёры проверены G-Trust. Вы получите фото-отчёт после уборки. Команда UNO Team может проконтролировать качество на месте.'
+            ? 'Через myUNO вы можете заказать регулярную или разовую уборку с любой точки мира. Все клининг-партнёры проверены G-Trust. Вы получите фото-отчёт после уборки. Команда myUNO Team может проконтролировать качество на месте.'
             : isTh 
-            ? 'ผ่าน myUNO คุณสามารถสั่งทำความสะอาดประจำหรือครั้งเดียวจากที่ไหนก็ได้ในโลก พันธมิตรทำความสะอาดทั้งหมดได้รับการตรวจสอบ G-Trust คุณจะได้รับรายงานรูปถ่ายหลังทำความสะอาด ทีม UNO Team สามารถตรวจสอบคุณภาพในพื้นที่ได้'
-            : 'Through myUNO you can order regular or one-time cleaning from anywhere in the world. All cleaning partners are G-Trust verified. You\'ll receive a photo report after cleaning. UNO Team can verify quality on-site.',
+            ? 'ผ่าน myUNO คุณสามารถสั่งทำความสะอาดประจำหรือครั้งเดียวจากที่ไหนก็ได้ในโลก พันธมิตรทำความสะอาดทั้งหมดได้รับการตรวจสอบ G-Trust คุณจะได้รับรายงานรูปถ่ายหลังทำความสะอาด ทีม myUNO Team สามารถตรวจสอบคุณภาพในพื้นที่ได้'
+            : 'Through myUNO you can order regular or one-time cleaning from anywhere in the world. All cleaning partners are G-Trust verified. You\'ll receive a photo report after cleaning. myUNO Team can verify quality on-site.',
         },
         {
           q: isRu ? 'Можно ли сдавать недвижимость через myUNO?' : isTh ? 'สามารถให้เช่าอสังหาริมทรัพย์ผ่าน myUNO ได้หรือไม่?' : 'Can I rent out property through myUNO?',
@@ -170,12 +170,12 @@ export default function FAQPage() {
       icon: Users2,
       items: [
         {
-          q: isRu ? 'Что такое UNO Team?' : isTh ? 'UNO Team คืออะไร?' : 'What is UNO Team?',
+          q: isRu ? 'Что такое myUNO Team?' : isTh ? 'myUNO Team คืออะไร?' : 'What is myUNO Team?',
           a: isRu 
-            ? 'UNO Team — это наша команда на местах в Таиланде. Они обеспечивают оффлайн-поддержку: физическая проверка партнёров, SOS-выезд при экстренных ситуациях, личное сопровождение VIP-клиентов, контроль качества услуг, помощь с документами.'
+            ? 'myUNO Team — это наша команда на местах в Таиланде. Они обеспечивают оффлайн-поддержку: физическая проверка партнёров, SOS-выезд при экстренных ситуациях, личное сопровождение VIP-клиентов, контроль качества услуг, помощь с документами.'
             : isTh 
-            ? 'UNO Team คือทีมของเราในพื้นที่ในประเทศไทย พวกเขาให้การสนับสนุนออฟไลน์: การตรวจสอบพันธมิตรทางกายภาพ, SOS ออกบริการในสถานการณ์ฉุกเฉิน, การดูแลส่วนตัวสำหรับลูกค้า VIP, การควบคุมคุณภาพบริการ, ช่วยเหลือเรื่องเอกสาร'
-            : 'UNO Team is our on-the-ground team in Thailand. They provide offline support: physical partner verification, SOS dispatch in emergencies, personal VIP client assistance, service quality control, document assistance.',
+            ? 'myUNO Team คือทีมของเราในพื้นที่ในประเทศไทย พวกเขาให้การสนับสนุนออฟไลน์: การตรวจสอบพันธมิตรทางกายภาพ, SOS ออกบริการในสถานการณ์ฉุกเฉิน, การดูแลส่วนตัวสำหรับลูกค้า VIP, การควบคุมคุณภาพบริการ, ช่วยเหลือเรื่องเอกสาร'
+            : 'myUNO Team is our on-the-ground team in Thailand. They provide offline support: physical partner verification, SOS dispatch in emergencies, personal VIP client assistance, service quality control, document assistance.',
         },
         {
           q: isRu ? 'Как работает SOS-кнопка?' : isTh ? 'ปุ่ม SOS ทำงานอย่างไร?' : 'How does the SOS button work?',

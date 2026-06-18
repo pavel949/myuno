@@ -138,8 +138,8 @@ export default function TermsPage() {
     {
       title: isRu ? 'Собственность myUNO' : 'myUNO Ownership',
       content: isRu 
-        ? 'Весь Контент Платформы, включая описания, фотографии, отзывы, данные о ценах, алгоритмы и аналитику, является исключительной собственностью myUNO Limited.'
-        : 'All Platform Content, including descriptions, photos, reviews, pricing data, algorithms, and analytics, is the exclusive property of myUNO Limited.',
+        ? 'Весь Контент Платформы, включая описания, фотографии, отзывы, данные о ценах, алгоритмы и аналитику, является исключительной собственностью myUNO Pte. Ltd..'
+        : 'All Platform Content, including descriptions, photos, reviews, pricing data, algorithms, and analytics, is the exclusive property of myUNO Pte. Ltd..',
     },
     {
       title: isRu ? 'Лицензия пользователя' : 'User License',
@@ -161,8 +161,8 @@ export default function TermsPage() {
       icon: FileText,
       title: isRu ? '1. Общие положения' : '1. General Provisions',
       content: isRu 
-        ? 'Настоящие Условия использования («Условия») представляют собой юридически обязывающее соглашение между вами и myUNO Limited (регистрация: Thailand/UAE). Используя Платформу, вы подтверждаете, что прочитали, поняли и согласны соблюдать эти Условия. Если вы не согласны — не используйте Платформу.'
-        : 'These Terms of Use ("Terms") constitute a legally binding agreement between you and myUNO Limited (registration: Thailand/UAE). By using the Platform, you confirm that you have read, understood, and agree to comply with these Terms. If you disagree — do not use the Platform.',
+        ? 'Настоящие Условия использования («Условия») представляют собой юридически обязывающее соглашение между вами и myUNO Pte. Ltd. (регистрация: Thailand/UAE). Используя Платформу, вы подтверждаете, что прочитали, поняли и согласны соблюдать эти Условия. Если вы не согласны — не используйте Платформу.'
+        : 'These Terms of Use ("Terms") constitute a legally binding agreement between you and myUNO Pte. Ltd. (registration: Thailand/UAE). By using the Platform, you confirm that you have read, understood, and agree to comply with these Terms. If you disagree — do not use the Platform.',
     },
     {
       id: 'updates',
