@@ -29,7 +29,7 @@ export default function NomadGuidePage() {
 
   return (
     <>
-      <SEOHead title={seoTitle} description={seoDescription} url="https://myuno.app/nomad-guide" />
+      <SEOHead title={seoTitle} description={seoDescription} url="https://www.myuno.app/nomad-guide" />
       <LandingLayout
         icon={Laptop}
         title={t ? 'Гид для номадов' : 'Digital Nomad Guide'}

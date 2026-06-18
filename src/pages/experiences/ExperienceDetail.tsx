@@ -82,7 +82,7 @@ export default function ExperienceDetail() {
           price: experience.price || undefined,
           currency: 'THB',
           image: experience.cover_image || undefined,
-          url: `https://myuno.app/experiences/${id}`,
+          url: `https://www.myuno.app/experiences/${id}`,
           rating: experience.rating || undefined,
           reviewCount: experience.review_count || undefined,
         })}

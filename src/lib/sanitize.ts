@@ -38,7 +38,7 @@ const ALLOWED_IMAGE_PROTOCOLS = ['https:', 'http:', 'data:'];
 function isAllowedImageUrl(url: string | null | undefined): boolean {
   if (url == null || url === '') return false;
   try {
-    const base = typeof window !== 'undefined' ? window.location.href : 'https://myuno.app';
+    const base = typeof window !== 'undefined' ? window.location.href : 'https://www.myuno.app';
     const parsed = new URL(url, base);
     return ALLOWED_IMAGE_PROTOCOLS.includes(parsed.protocol);
   } catch {

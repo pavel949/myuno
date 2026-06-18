@@ -54,8 +54,8 @@ export const P13_EMPLOYEE_EXPAT: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/employee-expat',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/employee-expat?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/employee-expat?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/employee-expat?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/employee-expat?lang=en' },
     ],
   },
 };

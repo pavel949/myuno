@@ -116,8 +116,8 @@ export const P5_SNOWBIRDS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/snowbirds',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/snowbirds?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/snowbirds?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/snowbirds?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/snowbirds?lang=en' },
     ],
   },
 };

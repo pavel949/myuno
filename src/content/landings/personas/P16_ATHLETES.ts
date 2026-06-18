@@ -47,8 +47,8 @@ export const P16_ATHLETES: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/athletes',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/athletes?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/athletes?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/athletes?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/athletes?lang=en' },
     ],
   },
 };

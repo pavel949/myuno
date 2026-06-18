@@ -47,8 +47,8 @@ export const P18_LGBTQ: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/lgbtq',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/lgbtq?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/lgbtq?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/lgbtq?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/lgbtq?lang=en' },
     ],
   },
 };

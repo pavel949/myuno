@@ -151,9 +151,9 @@ export default function OffplanIndex() {
   const seoDescription = isRu
     ? 'Каталог новостроек Пхукета: BUY/WATCH/AVOID рейтинг ClearView V3, due diligence, ROI, фильтры по району и застройщику. Независимая аналитика myUNO.'
     : 'Phuket off-plan property catalog with ClearView V3 BUY/WATCH/AVOID ratings, due diligence, ROI, filters by district and developer. Independent myUNO analytics.';
-  const canonicalUrl = 'https://myuno.app/property/offplan';
+  const canonicalUrl = 'https://www.myuno.app/property/offplan';
   const breadcrumbSchema = createBreadcrumbSchema([
-    { name: 'Property', url: 'https://myuno.app/property' },
+    { name: 'Property', url: 'https://www.myuno.app/property' },
     { name: isRu ? 'Новостройки' : 'Off-Plan', url: canonicalUrl },
   ]);
 

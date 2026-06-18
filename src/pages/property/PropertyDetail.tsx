@@ -212,7 +212,7 @@ export default function PropertyDetail() {
           price: pricePerNight || undefined,
           currency: 'THB',
           image: property.cover_image || undefined,
-          url: `https://myuno.app/property/${id}`,
+          url: `https://www.myuno.app/property/${id}`,
           bedrooms: property.bedrooms || undefined,
           bathrooms: property.bathrooms || undefined,
           area: property.area_sqm || undefined,

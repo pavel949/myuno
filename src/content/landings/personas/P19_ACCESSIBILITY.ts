@@ -47,8 +47,8 @@ export const P19_ACCESSIBILITY: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/accessibility',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/accessibility?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/accessibility?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/accessibility?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/accessibility?lang=en' },
     ],
   },
 };

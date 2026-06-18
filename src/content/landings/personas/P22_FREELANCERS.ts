@@ -36,8 +36,8 @@ export const P22_FREELANCERS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/freelancers',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/freelancers?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/freelancers?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/freelancers?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/freelancers?lang=en' },
     ],
   },
 };

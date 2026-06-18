@@ -54,8 +54,8 @@ export const P23_PROPERTY_OWNER: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/property-owner',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/property-owner?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/property-owner?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/property-owner?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/property-owner?lang=en' },
     ],
   },
 };

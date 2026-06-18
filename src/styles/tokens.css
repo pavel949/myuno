@@ -101,7 +101,7 @@
   --destructive-foreground: 0 0% 100%;
 
   --muted:                30  8% 96%;       /* border-subtle as surface */
-  --muted-foreground:     24  5% 46%;       /* text-muted */
+  --muted-foreground:     24  8% 38%;       /* text-muted — WCAG AA on cream (≥4.5:1), tightened from 46% (2026-06-18 Lighthouse) */
 
   --card:                 0   0% 100%;      /* white card on cream page */
   --card-foreground:      24 10% 10%;

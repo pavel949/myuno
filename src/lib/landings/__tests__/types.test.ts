@@ -22,8 +22,8 @@ const baseSeo = {
   ogImage: 'https://example.com/og.jpg',
   canonicalPath: '/for/x',
   hreflangAlternates: [
-    { lang: 'ru' as const, href: 'https://myuno.app/for/x' },
-    { lang: 'en' as const, href: 'https://myuno.app/en/for/x' },
+    { lang: 'ru' as const, href: 'https://www.myuno.app/for/x' },
+    { lang: 'en' as const, href: 'https://www.myuno.app/en/for/x' },
   ],
 };
 

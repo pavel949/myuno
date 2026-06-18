@@ -54,8 +54,8 @@ export const P03_LONG_STAY_TOURIST: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/long-stay',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/long-stay?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/long-stay?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/long-stay?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/long-stay?lang=en' },
     ],
   },
 };

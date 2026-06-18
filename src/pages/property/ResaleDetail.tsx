@@ -72,8 +72,8 @@ export default function ResaleDetail() {
   const seoDescription = isRu
     ? `${title} в ${property.zone || 'Пхукет'}. Цена ${formatPrice(property.asking_price)}. ${property.estimated_roi ? `ROI ${property.estimated_roi}%.` : ''} ${property.is_assignment ? 'Переуступка прав.' : 'Вторичный рынок.'}`.trim()
     : `${title} in ${property.zone || 'Phuket'}. Asking ${formatPrice(property.asking_price)}. ${property.estimated_roi ? `${property.estimated_roi}% ROI.` : ''} ${property.is_assignment ? 'Assignment.' : 'Secondary market.'}`.trim();
-  const seoImage = (typeof images[0] === 'string' && images[0]) || 'https://myuno.app/og-image.png';
-  const canonicalUrl = `https://myuno.app${APP_ROUTES.RESALE_DETAIL(property.id)}`;
+  const seoImage = (typeof images[0] === 'string' && images[0]) || 'https://www.myuno.app/og-image.png';
+  const canonicalUrl = `https://www.myuno.app${APP_ROUTES.RESALE_DETAIL(property.id)}`;
   const jsonLd = createRealEstateListingSchema({
     name: title,
     description: seoDescription,

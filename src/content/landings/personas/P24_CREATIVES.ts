@@ -36,8 +36,8 @@ export const P24_CREATIVES: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/creatives',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/creatives?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/creatives?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/creatives?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/creatives?lang=en' },
     ],
   },
 };

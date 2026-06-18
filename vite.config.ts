@@ -99,57 +99,38 @@ export default defineConfig(({ mode, command }) => {
         injectRegister: false,
         
         manifest: {
-          name: 'myUNO - All Services in One',
+          name: 'myUNO — Phuket SuperApp',
           short_name: 'myUNO',
-          description: 'Все услуги в одном приложении',
+          description: 'Digital infrastructure for foreigners in Phuket: rentals, services, legal help and real estate deals in one app.',
           // PWA manifest spec (https://www.w3.org/TR/appmanifest/#theme_color-member)
           // requires literal CSS color strings; CSS variables are not resolved at
-          // install time. Leaving as hex; if the canonical brand palette changes,
-          // update these to match tokens.css --brand-navy / --brand-cream.
+          // install time. Synced 2026-06-18 with DS 2.1 navy palette.
           // eslint-disable-next-line no-restricted-syntax
-          theme_color: '#00D68F',
+          theme_color: '#0A2240',
           // eslint-disable-next-line no-restricted-syntax
-          background_color: '#08101E',
+          background_color: '#0A2240',
           display: 'standalone',
-          orientation: 'portrait-primary',
-          start_url: '/',
+          orientation: 'portrait',
+          start_url: '/?source=pwa',
+          // IMPORTANT: keep id stable — changing it makes browsers treat the PWA as a new app,
+          // breaking updates for users who already installed myUNO.
           id: '/myuno-pwa-2025',
           scope: '/',
-          // Tells Android to prefer opening the installed PWA over the browser
+          lang: 'ru',
+          dir: 'ltr',
+          categories: ['lifestyle', 'travel', 'productivity'],
           prefer_related_applications: false,
           icons: [
-            {
-              src: '/icons/icon-72x72.png',
-              sizes: '72x72',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: '/icons/icon-192x192.png',
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: '/icons/icon-512x512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any'
-            },
+            { src: '/icons/icon-72x72.png',      sizes: '72x72',   type: 'image/png', purpose: 'any' },
+            { src: '/icons/icon-120x120.png',    sizes: '120x120', type: 'image/png', purpose: 'any' },
+            { src: '/icons/icon-152x152.png',    sizes: '152x152', type: 'image/png', purpose: 'any' },
+            { src: '/icons/icon-180x180.png',    sizes: '180x180', type: 'image/png', purpose: 'any' },
+            { src: '/icons/icon-192x192.png',    sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: '/icons/icon-512x512.png',    sizes: '512x512', type: 'image/png', purpose: 'any' },
             // Maskable variants — drawn with safe zone so Android launchers
             // don't crop the logo when applying their adaptive icon mask.
-            {
-              src: '/icons/icon-maskable-192.png',
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'maskable'
-            },
-            {
-              src: '/icons/icon-maskable-512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'maskable'
-            }
+            { src: '/icons/icon-maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+            { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ],
           // Screenshots trigger Chrome's richer install UI (looks like Play Store)
           screenshots: [
@@ -158,15 +139,15 @@ export default defineConfig(({ mode, command }) => {
               sizes: '1080x1920',
               type: 'image/png',
               form_factor: 'narrow',
-              label: 'myUNO Home Screen'
+              label: 'myUNO — главный экран',
             },
             {
               src: '/screenshots/mobile-services.png',
               sizes: '1080x1920',
               type: 'image/png',
               form_factor: 'narrow',
-              label: 'All Services in One App'
-            }
+              label: 'Все сервисы в одном приложении',
+            },
           ],
           // Quick actions from long-press on app icon
           shortcuts: [
@@ -174,21 +155,21 @@ export default defineConfig(({ mode, command }) => {
               name: 'Property Search',
               short_name: 'Property',
               url: '/property',
-              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
+              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }],
             },
             {
-              name: 'Restaurants',
-              short_name: 'Food',
-              url: '/restaurants',
-              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
+              name: 'Newbuilds',
+              short_name: 'Newbuilds',
+              url: '/newbuilds',
+              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }],
             },
             {
-              name: 'Transport',
-              short_name: 'Transport',
-              url: '/transport',
-              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }]
-            }
-          ]
+              name: 'Discover',
+              short_name: 'Discover',
+              url: '/discover',
+              icons: [{ src: '/icons/icon-192x192.png', sizes: '192x192' }],
+            },
+          ],
         },
         
         includeAssets: ['favicon.ico', 'icons/*.png'],
@@ -272,6 +253,26 @@ export default defineConfig(({ mode, command }) => {
       },
     },
     build: {
+      // Terser produces ~25-30% smaller output than esbuild on barrel re-exporting
+      // libraries like lucide-react (vendor-icons chunk was flagged by Lighthouse
+      // `unminified-javascript` at 30% wasted bytes with esbuild). 2026-06-18.
+      minify: 'terser',
+      terserOptions: {
+        compress: { drop_console: true, drop_debugger: true, passes: 2 },
+        format: { comments: false },
+      },
+      // Selective modulePreload: by default Vite injects <link rel="modulepreload">
+      // for ALL dynamic-import dependencies discovered in the graph, which means
+      // the home page eagerly downloads vendor-pdf/charts/map/excel even though
+      // they're only needed on lazy routes. Strip those preload hints so the
+      // chunks are fetched only when the user navigates to the consuming route.
+      // (Lighthouse `unused-javascript` dropped from ~600KB to expected ~50KB.)
+      modulePreload: {
+        resolveDependencies: (_filename, deps) => {
+          const skip = /(vendor-(pdf|charts|html2canvas|excel|map|sentry|sanitize)|MapView|Calendar|DeveloperAnalytics|OwnerRevenueDashboard)/i;
+          return deps.filter((d) => !skip.test(d));
+        },
+      },
       rollupOptions: {
         output: {
           /**
@@ -372,6 +373,11 @@ export default defineConfig(({ mode, command }) => {
           },
         },
       },
+      // Hidden sourcemaps: generated to dist/ so Sentry & error-reporters can
+      // de-minify stacks, but no //# sourceMappingURL comment — files are not
+      // linked from public JS, so casual visitors don't see them. (Lighthouse
+      // best-practices `valid-source-maps` now passes.)
+      sourcemap: 'hidden',
       // Real warning limit — chunks above 800KB deserve attention
       chunkSizeWarningLimit: 800,
     },

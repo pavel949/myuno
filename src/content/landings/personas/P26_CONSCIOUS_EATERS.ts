@@ -43,8 +43,8 @@ export const P26_CONSCIOUS_EATERS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/conscious-eaters',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/conscious-eaters?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/conscious-eaters?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/conscious-eaters?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/conscious-eaters?lang=en' },
     ],
   },
 };

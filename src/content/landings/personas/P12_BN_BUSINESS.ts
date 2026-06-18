@@ -36,8 +36,8 @@ export const P12_BN_BUSINESS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/bn-business',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/bn-business?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/bn-business?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/bn-business?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/bn-business?lang=en' },
     ],
   },
 };

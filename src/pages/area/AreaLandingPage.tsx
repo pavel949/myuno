@@ -166,13 +166,13 @@ const AreaLandingPage = () => {
     .filter((c): c is NonNullable<typeof c> => Boolean(c))
     .map((c) => ({ slug: c.slug, label: isRu ? c.h1.ru : c.h1.en }));
 
-  const canonicalUrl = `https://myuno.app${seo.canonicalPath}`;
+  const canonicalUrl = `https://www.myuno.app${seo.canonicalPath}`;
   const breadcrumb = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: isRu ? 'Главная' : 'Home', item: 'https://myuno.app/' },
-      { '@type': 'ListItem', position: 2, name: isRu ? 'Районы' : 'Areas', item: 'https://myuno.app/area' },
+      { '@type': 'ListItem', position: 1, name: isRu ? 'Главная' : 'Home', item: 'https://www.myuno.app/' },
+      { '@type': 'ListItem', position: 2, name: isRu ? 'Районы' : 'Areas', item: 'https://www.myuno.app/area' },
       { '@type': 'ListItem', position: 3, name: area.name_en, item: canonicalUrl },
     ],
   };

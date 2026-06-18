@@ -96,13 +96,13 @@ export default function PersonaDirectoryPage() {
       <Helmet>
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
-        <link rel="canonical" href="https://myuno.app/for" />
-        <link rel="alternate" hrefLang="ru" href="https://myuno.app/for?lang=ru" />
-        <link rel="alternate" hrefLang="en" href="https://myuno.app/for?lang=en" />
-        <link rel="alternate" hrefLang="x-default" href="https://myuno.app/for" />
+        <link rel="canonical" href="https://www.myuno.app/for" />
+        <link rel="alternate" hrefLang="ru" href="https://www.myuno.app/for?lang=ru" />
+        <link rel="alternate" hrefLang="en" href="https://www.myuno.app/for?lang=en" />
+        <link rel="alternate" hrefLang="x-default" href="https://www.myuno.app/for" />
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
-        <meta property="og:url" content="https://myuno.app/for" />
+        <meta property="og:url" content="https://www.myuno.app/for" />
         <meta name="robots" content="index,follow" />
       </Helmet>
 

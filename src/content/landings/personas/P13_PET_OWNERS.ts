@@ -50,8 +50,8 @@ export const P13_PET_OWNERS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/pet-owners',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/pet-owners?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/pet-owners?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/pet-owners?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/pet-owners?lang=en' },
     ],
   },
 };

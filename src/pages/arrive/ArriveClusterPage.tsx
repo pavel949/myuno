@@ -302,7 +302,7 @@ export default function ArriveClusterPage() {
 
   return (
     <AppLayout>
-      <SEOHead title={seoTitle} description={seoDescription} url="https://myuno.app/arrive" />
+      <SEOHead title={seoTitle} description={seoDescription} url="https://www.myuno.app/arrive" />
       <div className="pb-24">
         <CalmClusterHero
           clusterId="arrive"

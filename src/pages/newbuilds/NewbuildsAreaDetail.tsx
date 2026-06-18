@@ -52,7 +52,7 @@ export default function NewbuildsAreaDetail() {
 
   const seoTitle = `${area.name_ru} (${area.name_en}) · ${AREA_TITLE_SUFFIX}`;
   const seoDescription = `${area.name_ru} — район Пхукета. Средняя цена ฿${(area.avg_price_sqm / 1000).toFixed(0)}K/м², доходность ${area.avg_yield}%, ${areaProjects.length} проектов. ${area.description_ru.slice(0, 120)}`;
-  const canonicalUrl = `https://myuno.app${APP_ROUTES.NEWBUILDS_AREA(area.slug)}`;
+  const canonicalUrl = `https://www.myuno.app${APP_ROUTES.NEWBUILDS_AREA(area.slug)}`;
   const placeSchema = {
     '@context': 'https://schema.org',
     '@type': 'Place',
@@ -62,8 +62,8 @@ export default function NewbuildsAreaDetail() {
     geo: { '@type': 'GeoCoordinates', latitude: area.lat, longitude: area.lng },
   };
   const breadcrumbSchema = createBreadcrumbSchema([
-    { name: 'New Builds', url: 'https://myuno.app/newbuilds' },
-    { name: 'Areas', url: 'https://myuno.app/newbuilds/areas' },
+    { name: 'New Builds', url: 'https://www.myuno.app/newbuilds' },
+    { name: 'Areas', url: 'https://www.myuno.app/newbuilds/areas' },
     { name: area.name_en, url: canonicalUrl },
   ]);
 
@@ -72,7 +72,7 @@ export default function NewbuildsAreaDetail() {
       <SEOHead
         title={seoTitle}
         description={seoDescription}
-        image={'https://myuno.app/og-image.png'}
+        image={'https://www.myuno.app/og-image.png'}
         url={canonicalUrl}
         jsonLd={{ '@context': 'https://schema.org', '@graph': [placeSchema, breadcrumbSchema] }}
       />

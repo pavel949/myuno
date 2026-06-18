@@ -52,8 +52,8 @@ export const P4_DIGITAL_NOMADS: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/digital-nomads',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/digital-nomads?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/digital-nomads?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/digital-nomads?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/digital-nomads?lang=en' },
     ],
   },
 };

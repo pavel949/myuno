@@ -53,8 +53,8 @@ export const P10_RETURNEE: PersonaLanding = {
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/returnee',
     hreflangAlternates: [
-      { lang: 'ru', href: 'https://myuno.app/for/returnee?lang=ru' },
-      { lang: 'en', href: 'https://myuno.app/for/returnee?lang=en' },
+      { lang: 'ru', href: 'https://www.myuno.app/for/returnee?lang=ru' },
+      { lang: 'en', href: 'https://www.myuno.app/for/returnee?lang=en' },
     ],
   },
 };

@@ -30,7 +30,7 @@ export function buildWelcomeNavigatorHref(path: string, entry: WelcomeEntryId): 
     const base =
       typeof window !== 'undefined' && window.location?.origin
         ? window.location.origin
-        : 'https://myuno.app';
+        : 'https://www.myuno.app';
     const url = new URL(path, base);
     url.searchParams.set('from', 'welcome');
     url.searchParams.set('entry', entry);
@@ -116,8 +116,12 @@ export function WelcomePersonaRouter() {
         <button
           key={id}
           type="button"
-          aria-label={aria}
+          // aria-label intentionally omitted: accessible name comes from visible h3 + p
+          // text below, which prevents axe `label-content-name-mismatch` and keeps
+          // voice-control commands (e.g. "tap Я обустраиваю жизнь") working.
+          // The `aria` field is kept in i18n for future tooltips/SR-only descriptions.
           data-testid={`welcome-persona-${id}`}
+          data-aria-description={aria}
           onClick={() => navigate(target)}
           className={cn(
             'group bg-background p-6 text-left transition-colors sm:p-7',

@@ -105,7 +105,7 @@ export default function PeylaaLanding() {
   const seoTitle = 'PEYLAA Phuket — Autograph Collection Residences | от ฿7.1M';
   const seoDesc = 'Первый проект Autograph Collection в Азии. 408 премиальных резиденций в Bang Tao, Пхукет. Marriott Bonvoy Gold Elite. Полная отделка. Рассрочка до передачи ключей. Финансирование до 50%.';
   const ogImage = HERO_BG;
-  const canonicalUrl = 'https://myuno.app/peylaa';
+  const canonicalUrl = 'https://www.myuno.app/peylaa';
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
