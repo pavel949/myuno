@@ -382,7 +382,7 @@ export default function PropertyQuickSetup() {
                   availability={localAvailability}
                   onChange={setLocalAvailability}
                   basePrice={Number(formData.price_per_night) || 0}
-                  currency="THB"
+                  currency={cityCurrencyCode}
                 />
               )}
             </CardContent>
