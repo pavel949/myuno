@@ -12,8 +12,8 @@ export const P13_PET_OWNERS: PersonaLanding = {
   status: 'live',
   h1: { ru: 'Пхукет с питомцем: ввоз, виллы, ветеринар', en: 'Phuket with a pet: import, villas, vet' },
   subtitle: {
-    ru: 'Помогаем оформить ввоз собаки или кошки, найти pet-friendly виллу и подключить ветеринара по-русски.',
-    en: 'We help you import a dog or cat, find a pet-friendly villa and connect with a Russian-speaking vet.',
+    ru: 'Помогаем оформить ввоз собаки или кошки, найти pet-friendly виллу и подключить многоязычного ветеринара (EN/RU/TH).',
+    en: 'We help you import a dog or cat, find a pet-friendly villa and connect with a multilingual vet (EN/RU/TH).',
   },
   pains: [
     { ru: 'Не знаете, какие документы нужны для ввоза питомца в Таиланд.', en: 'You don’t know which papers are required to import a pet to Thailand.' },
