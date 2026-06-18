@@ -137,6 +137,34 @@ async function fetchRequests(userId: string): Promise<MyRequest[]> {
     }
   } catch { /* silent */ }
 
+  try {
+    const { data } = await supabase
+      .from('help_requests')
+      .select('id, topic, subject, message, status, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(30);
+    for (const r of data ?? []) {
+      const s = (r.status as string) ?? 'new';
+      const status: RequestStatus =
+        s === 'closed' ? 'done' :
+        s === 'in_progress' ? 'in_progress' :
+        s === 'waiting_user' ? 'waiting' :
+        s === 'spam' ? 'done' :
+        'new';
+      const subj = (r.subject as string | null) ?? (r.message as string).slice(0, 60);
+      out.push({
+        id: `help-${r.id}`,
+        source: 'help',
+        status,
+        title: subj,
+        subtitle: (r.topic as string) ?? undefined,
+        createdAt: (r.created_at as string) ?? new Date().toISOString(),
+        detailPath: '/me/requests',
+      });
+    }
+  } catch { /* silent */ }
+
   out.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   return out;
 }
