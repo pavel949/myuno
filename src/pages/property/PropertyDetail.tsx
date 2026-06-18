@@ -78,7 +78,9 @@ export default function PropertyDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+
 
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
