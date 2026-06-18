@@ -39,6 +39,8 @@ export default function PropertyInquiry() {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { currentCity } = useLocationCity();
+
   const { user } = useAuth();
   const { openAuthSheet } = useAuthSheet();
   const { profile } = useProfile();
