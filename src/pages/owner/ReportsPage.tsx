@@ -366,7 +366,7 @@ export default function ReportsPage() {
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat(isRu ? 'ru-RU' : 'en-US', {
-      style: 'currency', currency: 'THB', minimumFractionDigits: 0,
+      style: 'currency', currency: cityCurrencyCode, minimumFractionDigits: 0,
     }).format(amount);
 
   const portfolioRows = (managedProperties || []).map((mp: ReportableProperty) => {
