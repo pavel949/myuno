@@ -135,8 +135,8 @@ export default function MapView() {
     setSearchPin(r);
     mapRef.current?.flyTo(r.lat, r.lng, 16);
     pendingSearchPickRef.current = r;
-    setActiveMarkerId(undefined);
-  }, []);
+    selectMarker(null);
+  }, [selectMarker]);
 
 
 
