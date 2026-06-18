@@ -191,6 +191,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.HOME} element={<PageTransition><Suspense fallback={<LoadingState />}><HomeRouter /></Suspense></PageTransition>} />
         <Route path="/index" element={<Navigate to={APP_ROUTES.HOME} replace />} />
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
+        <Route path="/join" element={<LazyPage><Pages.JoinInvite /></LazyPage>} />
+        <Route path="/invite" element={<Navigate to="/join" replace />} />
         {/* Wave-1 IA cleanup: /welcome-landing → /welcome (single canonical guest landing). */}
         <Route path="/welcome-landing" element={<Navigate to="/welcome" replace />} />
         {/* Onboarding canonical: /start renders V2 (M5 3-question flow).
