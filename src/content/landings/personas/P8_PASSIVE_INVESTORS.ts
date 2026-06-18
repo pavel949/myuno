@@ -90,8 +90,8 @@ export const P8_PASSIVE_INVESTORS: PersonaLanding = {
     {
       q: { ru: 'Можно ли купить удалённо?', en: 'Can I buy remotely?' },
       a: {
-        ru: 'Да. Видеотур объекта, юридические документы через DocuSign, FET через банк-партнёр, передача собственности — по доверенности. Поддержка по-русски на каждом этапе.',
-        en: 'Yes. Video tour, legal docs via DocuSign, FET through partner bank, ownership transfer via Power of Attorney. Russian-speaking support at every step.',
+        ru: 'Да. Видеотур объекта, юридические документы через DocuSign, FET через банк-партнёр, передача собственности — по доверенности. Многоязычная поддержка (EN/RU/TH) на каждом этапе.',
+        en: 'Yes. Video tour, legal docs via DocuSign, FET through partner bank, ownership transfer via Power of Attorney. Multilingual support (EN/RU/TH) at every step.',
       },
     },
     {
