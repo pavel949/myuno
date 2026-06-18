@@ -172,6 +172,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
               ? (ext.sale_price || property.price || 0)
               : property.price || 0;
           const priceLabel = `฿${shortPrice(price)}`;
+          const isActive = openId === property.id;
 
           return (
             <Marker
@@ -179,10 +180,23 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
               position={{ lat: property.lat!, lng: property.lng! }}
               label={{
                 text: priceLabel,
-                color: 'hsl(var(--foreground))',
-                fontWeight: '600',
-                fontSize: '12px',
+                color: isActive ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))',
+                fontWeight: isActive ? '700' : '600',
+                fontSize: isActive ? '13px' : '12px',
               }}
+              icon={
+                isActive
+                  ? {
+                      path: google.maps.SymbolPath.CIRCLE,
+                      scale: 22,
+                      fillColor: 'hsl(var(--primary))',
+                      fillOpacity: 1,
+                      strokeColor: 'hsl(var(--background))',
+                      strokeWeight: 3,
+                    }
+                  : undefined
+              }
+              zIndex={isActive ? 999 : undefined}
               title={isRu ? property.title_ru : property.title_en}
               onClick={() => {
                 setOpenId(property.id);
@@ -191,6 +205,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
             />
           );
         })}
+
 
         {openProperty && (
           <InfoWindow
