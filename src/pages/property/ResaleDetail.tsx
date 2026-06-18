@@ -27,7 +27,9 @@ export default function ResaleDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
+  const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
 
