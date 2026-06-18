@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Baby } from 'lucide-react';
 import { AdminVerticalCRUD, type AdminVerticalConfig } from '@/components/admin/AdminVerticalCRUD';
 import { useAdminBabysitters } from '@/hooks/useAdminContent';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
-const config: AdminVerticalConfig = {
+const buildConfig = (code: string): AdminVerticalConfig => ({
   titleEn: 'Babysitter Management',
   titleRu: 'Управление нянями',
   icon: Baby,
@@ -19,7 +20,7 @@ const config: AdminVerticalConfig = {
     { key: 'certifications', type: 'comma-list', labelEn: 'Certifications', labelRu: 'Сертификаты' },
     { key: 'price_per_hour', type: 'number', labelEn: 'Price/hour', labelRu: 'Цена/час' },
     { key: 'price_per_day', type: 'number', labelEn: 'Price/day', labelRu: 'Цена/день' },
-    { key: 'currency', type: 'text', labelEn: 'Currency', labelRu: 'Валюта', defaultValue: 'THB' },
+    { key: 'currency', type: 'text', labelEn: 'Currency', labelRu: 'Валюта', defaultValue: code },
     { key: 'photo', type: 'image', labelEn: 'Profile Photo', labelRu: 'Фото', colSpan: 12 },
     { key: 'images', type: 'multi-image', labelEn: 'Gallery', labelRu: 'Галерея', colSpan: 12 },
     { key: 'can_cook', type: 'switch', labelEn: 'Can Cook', labelRu: 'Готовит' },
@@ -29,9 +30,11 @@ const config: AdminVerticalConfig = {
     { key: 'is_featured', type: 'switch', labelEn: 'Featured', labelRu: 'Рекомендуем' },
     { key: 'is_active', type: 'switch', labelEn: 'Active', labelRu: 'Активно', defaultValue: true },
   ],
-};
+});
 
 export default function AdminBabysitters() {
   const hook = useAdminBabysitters();
+  const { code } = useCityCurrency();
+  const config = useMemo(() => buildConfig(code), [code]);
   return <AdminVerticalCRUD config={config} hook={hook} />;
 }

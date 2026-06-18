@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Stethoscope } from 'lucide-react';
 import { AdminVerticalCRUD, type AdminVerticalConfig } from '@/components/admin/AdminVerticalCRUD';
 import { useAdminClinics } from '@/hooks/useAdminContent';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 const clinicTypes = [
   { value: 'general', label: 'General Clinic', labelRu: 'Общая клиника' },
@@ -13,7 +14,7 @@ const clinicTypes = [
   { value: 'wellness', label: 'Wellness Center', labelRu: 'Велнес центр' },
 ];
 
-const config: AdminVerticalConfig = {
+const buildConfig = (sym: string): AdminVerticalConfig => ({
   titleEn: 'Clinic Management',
   titleRu: 'Управление клиниками',
   icon: Stethoscope,
@@ -33,17 +34,19 @@ const config: AdminVerticalConfig = {
     { key: 'district', type: 'text', labelEn: 'District', labelRu: 'Район' },
     { key: 'phone', type: 'text', labelEn: 'Phone', labelRu: 'Телефон' },
     { key: 'email', type: 'text', labelEn: 'Email', labelRu: 'Email' },
-    { key: 'consultation_price', type: 'number', labelEn: 'Consultation ฿', labelRu: 'Консультация ฿' },
+    { key: 'consultation_price', type: 'number', labelEn: `Consultation ${sym}`, labelRu: `Консультация ${sym}` },
     { key: 'specialty', type: 'comma-list', labelEn: 'Specialties', labelRu: 'Специализации' },
     { key: 'languages', type: 'comma-list', labelEn: 'Languages', labelRu: 'Языки' },
     { key: 'is_24h', type: 'switch', labelEn: '24/7', labelRu: '24/7' },
     { key: 'is_featured', type: 'switch', labelEn: 'Featured', labelRu: 'Рекомендуем' },
     { key: 'is_active', type: 'switch', labelEn: 'Active', labelRu: 'Активно', defaultValue: true },
   ],
-};
+});
 
 export default function AdminClinics() {
   const hook = useAdminClinics();
+  const { symbol } = useCityCurrency();
+  const config = useMemo(() => buildConfig(symbol), [symbol]);
   const adapted = {
     items: (hook as any).clinics || (hook as any).items || [],
     isLoading: hook.isLoading,

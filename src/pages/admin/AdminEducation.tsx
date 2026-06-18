@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { GraduationCap } from 'lucide-react';
 import { AdminVerticalCRUD, type AdminVerticalConfig } from '@/components/admin/AdminVerticalCRUD';
 import { useAdminEducation } from '@/hooks/useAdminContent';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 const providerTypes = [
   { value: 'tutor', label: 'Private Tutor', labelRu: 'Репетитор' },
@@ -12,7 +13,7 @@ const providerTypes = [
   { value: 'arts', label: 'Art School', labelRu: 'Школа искусств' },
 ];
 
-const config: AdminVerticalConfig = {
+const buildConfig = (sym: string): AdminVerticalConfig => ({
   titleEn: 'Education Management',
   titleRu: 'Управление образованием',
   icon: GraduationCap,
@@ -36,15 +37,17 @@ const config: AdminVerticalConfig = {
     { key: 'phone', type: 'text', labelEn: 'Phone', labelRu: 'Телефон' },
     { key: 'email', type: 'text', labelEn: 'Email', labelRu: 'Email' },
     { key: 'website', type: 'text', labelEn: 'Website', labelRu: 'Сайт' },
-    { key: 'price_per_hour', type: 'number', labelEn: 'Price/hour ฿', labelRu: 'Цена/час ฿' },
-    { key: 'price_per_course', type: 'number', labelEn: 'Price/course ฿', labelRu: 'Цена/курс ฿' },
+    { key: 'price_per_hour', type: 'number', labelEn: `Price/hour ${sym}`, labelRu: `Цена/час ${sym}` },
+    { key: 'price_per_course', type: 'number', labelEn: `Price/course ${sym}`, labelRu: `Цена/курс ${sym}` },
     { key: 'is_online', type: 'switch', labelEn: 'Online Available', labelRu: 'Онлайн' },
     { key: 'is_featured', type: 'switch', labelEn: 'Featured', labelRu: 'Рекомендуем' },
     { key: 'is_active', type: 'switch', labelEn: 'Active', labelRu: 'Активно', defaultValue: true },
   ],
-};
+});
 
 export default function AdminEducation() {
   const hook = useAdminEducation();
+  const { symbol } = useCityCurrency();
+  const config = useMemo(() => buildConfig(symbol), [symbol]);
   return <AdminVerticalCRUD config={config} hook={hook} />;
 }
