@@ -22,6 +22,7 @@ import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues } from '@/lib/propertyCatalogServerFilters';
 import { comparePropertiesForSort } from '@/lib/propertySortPrice';
+import { useMapListSync } from '@/hooks/useMapListSync';
 import type { PropertyFilters } from '@/hooks/useProperties';
 import { CrossSellSection } from '@/components/crosssell';
 import { PropertySortSelect, PropertySortKey } from '@/components/property/PropertySortSelect';
