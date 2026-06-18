@@ -783,7 +783,9 @@ export const LIFE_SITUATIONS: LifeSituationEntry[] = [
   // Manage
   { code: 'managing',       titleRu: 'Управление объектом',     titleEn: 'Managing property', icon: 'Building2',     color: '#0891B2', priority: 100, isActive: true },
   { code: 'property_owner', titleRu: 'Собственник',             titleEn: 'Property owner',    icon: 'KeyRound',      color: '#0891B2', priority: 95,  isActive: true },
-  { code: 'business',       titleRu: 'Бизнес и операции',       titleEn: 'Business',          icon: 'Briefcase',     color: '#6366F1', priority: 85,  isActive: true },
+  { code: 'business',           titleRu: 'Бизнес и операции',       titleEn: 'Business',           icon: 'Briefcase',     color: '#6366F1', priority: 85,  isActive: true },
+  { code: 'management_company', titleRu: 'Управляющая компания',    titleEn: 'Management Company', icon: 'Building2',     color: '#0A2240', priority: 100, isActive: true },
+  { code: 'vendor_onboarding',  titleRu: 'Поставщик услуг',         titleEn: 'Service Provider',   icon: 'Handshake',     color: '#D96B1A', priority: 80,  isActive: true },
   // Invest
   { code: 'investing',      titleRu: 'Инвестирование',          titleEn: 'Investing',         icon: 'TrendingUp',    color: '#8B5CF6', priority: 100, isActive: true },
   { code: 'investor',       titleRu: 'Инвестор',                titleEn: 'Investor',          icon: 'LineChart',     color: '#A855F7', priority: 95,  isActive: true },

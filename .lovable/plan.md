@@ -1,128 +1,49 @@
+# Фикс B-1/B-2: отсутствующие LIFE_SITUATIONS
 
-## Цель
+## Контекст
 
-Клик по карточке выделяет pin на карте (и наоборот). На мобильном — карта на весь экран, список открывается draggable bottom sheet'ом с peek-режимом. Фильтры уже едины через URL — закрепляем это поведение.
+В `src/lib/catalog/taxonomy.ts` массив `CLUSTER_LIFE_SITUATIONS` (manage-кластер) ссылается на коды `management_company` и `vendor_onboarding`, которых **нет** в static-массиве `LIFE_SITUATIONS`. Хелпер `buildStaticClusterLifeSituationsMap()` тихо отбрасывает такие записи (имитирует `JOIN ... ON s.code = p.situation_code`), и /discover теряет первичную ситуацию «Управляющая компания» и вторичную «Поставщик услуг» в кластере manage.
 
-## Объём
+**Проверил БД** (`public.life_situations`): обе ситуации **уже существуют** и активны:
 
-Две поверхности:
-1. **`/property` (PropertySearchPage + PropertyMapView)** — есть список + опциональная карта, сейчас работает только hover-подсветка.
-2. **`/map` (MapView + MapLibreMap)** — сейчас только карта + детальная панель, списка нет.
+| code | title_ru | title_en | icon | color | priority |
+|---|---|---|---|---|---|
+| management_company | Управляющая компания | Management Company | Building2 | #0A2240 | 100 |
+| vendor_onboarding | Поставщик услуг | Service Provider | Handshake | #D96B1A | 80 |
 
-Общий хук + UI-компонент для шторки переиспользуется.
+Значит это **чистый дрейф static SSOT ↔ DB**, а не отсутствующие в системе ситуации. Фикс — синхронизировать static-массив с DB. Миграция не нужна.
 
----
+## Изменения
 
-## Шаг 1. Общая инфраструктура
+**Файл:** `src/lib/catalog/taxonomy.ts`
 
-**Новый хук** `src/hooks/useMapListSync.ts`:
-- состояние `selectedId: string | null` + `hoveredId: string | null` (раздельные — hover для desktop, select для тапа/клика);
-- `selectedId` хранится в URL `?focus=<id>` (через `useSearchParams`) — sharing/deep-linking;
-- API: `{ selectedId, hoveredId, select(id), hover(id), clear() }`.
+В блок `// Manage` массива `LIFE_SITUATIONS` (после строки 786 `business`) добавить 2 записи, скопированные 1-в-1 из БД:
 
-**Новый компонент** `src/components/map/MapListBottomSheet.tsx`:
-- мобильный bottom sheet (375–768px) поверх карты;
-- 3 snap-точки: `peek` (~100px, видно «N локаций» + первая карточка-превью), `half` (~50dvh), `full` (~85dvh);
-- драг через `framer-motion` (уже в стеке) или `vaul` (легче — рекомендую `vaul`, оно уже используется в shadcn-drawer);
-- внутри — виртуализованный список (`@tanstack/react-virtual`, уже в зависимостях) с `data-listing-id` для scrollIntoView;
-- при `selectedId` авто-скроллит выбранную карточку в видимую часть и переводит sheet в `half` если был `peek`.
-
-**Desktop (≥1024px)** — sheet не используется, список рендерится в обычной колонке слева/справа от карты (как сейчас на `/property`).
-
----
-
-## Шаг 2. `/property` — закрыть петлю выбора
-
-`src/pages/property/PropertySearchPage.tsx`:
-- Подключить `useMapListSync` (вместо локального `hoveredProperty`).
-- Передать `selectedId`, `onSelect`, `hoveredId`, `onHover` в `PropertyMapView` и `PropertyListingCard`.
-- При наличии `?focus=<id>` в URL сразу скроллить и подсвечивать карточку.
-- Добавить в `PropertyListingCard` data-атрибут `data-listing-id={property.id}` и визуальное состояние `isSelected` (рамка `ring-2 ring-primary`, отличается от `isHovered`).
-- Сохранить toggle «Список/Карта», но добавить третий режим **«Split»** на ≥`lg` (50/50 split). На мобильном Split = карта + BottomSheet.
-
-`src/components/property/PropertyMapView.tsx`:
-- Новый prop `selectedId` + `onSelect`.
-- Pin выбранного объекта: увеличенный лейбл, фон `--primary`, текст `--primary-foreground`, z-index выше.
-- `useEffect` на `selectedId` — `map.panTo()` к координате (только если pin вне видимой области), без forced zoom.
-- `InfoWindow` открывается по `selectedId` (а не локальному `openId`), `onCloseClick` → `clear()`.
-
----
-
-## Шаг 3. `/map` — список + sync
-
-`src/pages/MapView.tsx`:
-- Импортировать `useMapListSync` (тот же), `MapListBottomSheet`.
-- Передавать `selectedId` в `MapLibreMap` через уже существующий проп `activeMarkerId` (просто использовать общий стейт).
-- Существующая панель `selected` (vendor/OSM детали) триггерится тем же `selectedId` — мёрджим состояние.
-- Под картой/поверх неё на мобильном — `MapListBottomSheet`:
-  - содержимое: единый плоский список из `mlMarkers` (vendor + OSM), сгруппированный заголовками по `vertical` (Жильё / Рестораны / Красота / … / OSM);
-  - каждая карточка: иконка вертикали + название + расстояние от центра карты + рейтинг/цена (если есть);
-  - тап по карточке → `select(id)` → карта `flyTo` + открывает существующую детальную панель.
-- На desktop (≥`lg`): добавить левую колонку 360–400px со списком, карта — справа на flex-1.
-- Клик по pin (`handleMarkerClick`) уже работает — добавить вызов `select(id)` и убрать локальный `selected`/`activeMarkerId` (заменить общим хуком).
-
-`src/components/map/MapLibreMap.tsx`:
-- `flyTo` при изменении `activeMarkerId` — добавить (сейчас программный `flyTo` зовётся снаружи; перенесём в `useEffect` хука внутри компонента, чтобы и список, и search вели себя одинаково).
-- Активный pin: `transform: scale(1.25)`, ring через `box-shadow: 0 0 0 4px hsl(var(--primary) / 0.35)`.
-
----
-
-## Шаг 4. Фильтры
-
-Уже синхронизируются через URL (`?vertical&price&availability&category&...`). Закрепляем:
-- При смене фильтра `selectedId` не сбрасывается, если выбранный объект всё ещё в `filteredMarkers`. Если выпал — `clear()`.
-- При клике по pin вертикали, отличной от текущего фильтра, не меняем фильтр (это destructive); вместо этого селектим как есть.
-
----
-
-## Шаг 5. Доступность и мелочи
-
-- `aria-selected` на карточке и pin'е, `role="option"` в списке.
-- Клавиатура: `↑/↓` в списке двигает selection, `Esc` — clear.
-- Анимация pin'а — `prefers-reduced-motion: reduce` отключает.
-- На мобильном при открытии sheet'а в `full` — карта остаётся интерактивной (sheet полупрозрачный backdrop отсутствует).
-
----
-
-## Технические детали
-
-Зависимости:
-- **Рекомендую: `vaul`** для bottom sheet — нативная физика, snap-points из коробки, уже совместим с shadcn (есть `drawer.tsx`). Альтернатива — `framer-motion` руками, дольше.
-- `@tanstack/react-virtual` уже установлен — используем без `bun add`.
-
-URL-стейт:
-- `?focus=<id>` — выбранный объект;
-- остальные параметры (vertical/price/…) уже работают.
-
-Файлы:
-```text
-NEW src/hooks/useMapListSync.ts
-NEW src/components/map/MapListBottomSheet.tsx
-NEW src/components/map/MapListItem.tsx           // мини-карточка для /map
-MOD src/pages/MapView.tsx
-MOD src/components/map/MapLibreMap.tsx           // flyTo on activeMarkerId, активный стиль pin
-MOD src/pages/property/PropertySearchPage.tsx
-MOD src/components/property/PropertyMapView.tsx  // selectedId + крупный активный pin
-MOD src/components/property/PropertyListingCard.tsx  // isSelected, data-listing-id
+```ts
+{ code: 'management_company', titleRu: 'Управляющая компания', titleEn: 'Management Company', icon: 'Building2', color: '#0A2240', priority: 100, isActive: true },
+{ code: 'vendor_onboarding',  titleRu: 'Поставщик услуг',     titleEn: 'Service Provider',   icon: 'Handshake', color: '#D96B1A', priority: 80,  isActive: true },
 ```
 
-Тесты (минимум):
-- `useMapListSync` — select/clear, sync с URL.
-- Smoke на `/property?focus=<id>` — карточка в DOM с `aria-selected="true"`.
+Других правок не требуется — `CLUSTER_LIFE_SITUATIONS` уже содержит корректные ссылки (строки 825 и 828), `buildStaticClusterLifeSituationsMap()` подхватит их автоматически.
 
----
+## Почему именно так (а не «перепривязать к managing/business»)
 
-## Не входит
+| Вариант | Плюсы | Минусы |
+|---|---|---|
+| **A. Добавить ситуации в static SSOT** ✅ | Сохраняет семантику персон P22 (MC operator) и P25 (service vendor) из Master Taxonomy v1.0. Устраняет дрейф static↔DB. Нулевой риск — данные уже в БД, формат match. | — |
+| B. Заменить коды на `managing`/`business` | Меньше строк | Схлопывает 4 разные JTBD-ситуации в 2, ломает Master Taxonomy v1.0, маскирует дрейф вместо его устранения. |
 
-- Полноценная виртуализация карты (кластеризация pin'ов) — отдельная задача.
-- Сохранение позиции скролла между навигациями.
-- Перенос фильтров `/property` в общий URL-схему с `/map` (сейчас они разные).
+**Рекомендую: вариант A** — он восстанавливает соответствие канону и устраняет первопричину (рассинхрон static↔DB), а не симптом.
 
 ## Acceptance
 
-1. На `/property` тап по карточке: pin становится крупнее, карта пан-ится к нему, InfoWindow открывается.
-2. На `/property` клик по pin: соответствующая карточка получает рамку и скроллится в видимую область.
-3. На `/map` тап по pin: открывается детальная панель + соответствующая карточка в bottom sheet подсвечена.
-4. На `/map` тап по карточке в sheet: карта летит к pin, pin активный, sheet схлопывается в `half`.
-5. Открытие ссылки `/property?focus=abc123` или `/map?focus=abc123` сразу подсвечивает объект.
-6. Смена фильтра не «теряет» выбор, если объект всё ещё проходит фильтр.
+- `LIFE_SITUATIONS.length` = 23 (было 21).
+- `buildStaticClusterLifeSituationsMap().get('manage')` содержит обе ситуации.
+- /discover для кластера manage показывает «Управляющая компания» (primary) и «Поставщик услуг» (secondary).
+- 🔴 B-1 и B-2 из аудита закрыты.
+
+## Out of scope
+
+- Остальные orphan-сервисы (cost-of-living, halal-*, storage, support, nomad-guide) — отдельная итерация O-1…O-7.
+- Унификация APP_REGISTRY ↔ taxonomy IDs (I-2) и системы персон (I-1).
+- Автоматическая sync-валидация static SSOT ↔ DB (предложить в I-4 отдельно).
