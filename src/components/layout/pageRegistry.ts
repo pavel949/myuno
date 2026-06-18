@@ -241,6 +241,11 @@ export const SIMStartPage = lazy(() => import('@/pages/arrive/SIMStartPage'));
 export const ExchangeBotPage = lazy(() => import('@/pages/arrive/ExchangeBotPage'));
 export const OfficialNewsPage = lazy(() => import('@/pages/arrive/OfficialNewsPage'));
 
+// ── Communities (churches, temples, expat clubs, consulates) — LIVE cluster ──
+export const CommunitiesIndex = lazy(() => import('@/pages/communities/CommunitiesIndex'));
+export const CommunityDetail = lazy(() => import('@/pages/communities/CommunityDetail'));
+
+
 // ── Utility Micro-apps ──
 export const VisaQuizPage = lazy(() => import('@/pages/legal/VisaQuizPage'));
 export const SchoolFinderPage = lazy(() => import('@/pages/education/SchoolFinderPage'));

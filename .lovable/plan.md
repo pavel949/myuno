@@ -1,173 +1,175 @@
-# План: довести симуляцию до 90+/100 по всем параметрам QA
+# План: Wave 2 (TH-локализация) + новый модуль «Сообщества & Консульства»
 
-**Текущий baseline (отчёт `docs/audit/2026-06-18-taxonomy-simulation.md`):**
-
-| Параметр | Сейчас | Цель |
-|---|---|---|
-| Закрытые сценарии 50 персон | 17 / 50 (34%) | **≥ 45 / 50 (90%)** |
-| Покрытие ролей (owner/vendor/developer) | 0 / 22 | **≥ 20 / 22** |
-| Сирота-ситуации `life_situations` | 12 / 37 | **0** |
-| Кластеры в БД vs SSOT | 15 vs 6 | **6 = 6** |
-| Локализация TH (DB + UI) | ~10% | **≥ 90%** |
-| Нормализация `providers.business_category` | done (48/48) | держать через trigger |
-| Vendor onboarding: поиск + «другое» | нет | есть |
-| Единая модерация (`moderation_queue`) | 2 ленты | 1 лента |
+Делаю два трека параллельно — они независимы.
 
 ---
 
-## Волна 1 — P0 «Разблокировать каталог» (цель: 17→38/50)
+## Трек A — Wave 2: Тайская локализация (DB + i18n + UI)
 
-### 1.1 Наполнить кластер `manage` категориями (миграция)
-В `category_groups` (cluster=`manage`) сейчас 0 категорий. Завести 6:
-`cleaning`, `maintenance`, `pool`, `garden`, `accounting`, `channel-management`.
-Существующие провайдеры (уже нормализованы в прошлой волне) автоматически попадут в счётчики через `v_provider_catalog_match`.
+### A1. Расширить схему БД
+Миграция добавляет `title_th`/`description_th`/`name_th` где их нет:
+- `life_situations`: `title_th`, `description_th`
+- `categories`: `name_th`, `description_th`
+- `category_groups`: `name_th`, `description_th`
 
-**Эффект:** owner (8) + vendor (10) = **+18 ✅**.
+CI-guard (Wave 5.3) затем не пропустит запись без TH-полей.
 
-### 1.2 Привязать 12 сирот-ситуаций к кластерам
-Один SQL-инсёрт в `cluster_life_situations`:
-```text
-planning           → arrive, live, invest
-pre_trip_planning  → arrive
-digital_nomad      → live, legal
-shopping           → live
-pets               → live
-sports             → live
-retirement_living  → live, legal
-property           → invest, manage
-relocation         → arrive, legal, live
-health             → live
-emergency          → live
-visa_renewal       → legal
+### A2. Перевести существующий контент через Lovable AI Gateway
+Один batch-скрипт `scripts/i18n/translate-to-th.mjs`:
+- Берёт все строки из `life_situations` / `categories` / `category_groups` с пустым `*_th`.
+- Шлёт в `google/gemini-2.5-flash` системным промптом «professional Thai translator for a luxury service marketplace on Phuket, keep proper nouns intact, return JSON».
+- Пишет результат обратно через `UPSERT`.
+- Итого ~70 строк × 3 поля ≈ 1 запрос batch'ем, ~5 секунд.
+
+### A3. Протянуть `title_th`/`name_th` в фронт
+Единый helper `src/lib/i18n/pickLocalized.ts`:
+```ts
+pickLocalized(record, lang, base)   // base='title' → ищет title_th / title_en / title_ru
+// fallback chain: th → en → ru
 ```
-**Эффект:** **+12 ✅** (закрывает все «сирота-ситуация»).
+Подключить в:
+- `src/hooks/useSituationServiceCounts.ts`
+- `src/components/situations/SituationCard.tsx`, `SituationDetailPage.tsx`
+- `src/hooks/useNavigatorContent.ts`
+- `src/components/vendor/onboarding/CategoryPicker.tsx` (уже принимает `labelTh` в типе — рендерить)
+- любые места где сейчас `record.title_en` хардкодом.
 
-### 1.3 Удалить/смержить 9 фантомных БД-кластеров
-`home-maintenance`, `home-living`, `leisure`, `professional`, `life-admin`, `water`, `transport`, `health-wellness`, `other` → перенести их категории в SSOT-кластеры (`arrive`/`live`/`manage`) и пометить cluster='deprecated' (мягкий delete, без потери истории).
+### A4. Покрыть статические UI-строки лендинга и каталога в `src/i18n/`
+- Сравнить `src/i18n/ru.json` ↔ `src/i18n/en.json` ↔ `src/i18n/th.json`: найти ключи отсутствующие в TH.
+- Заполнить недостающие через тот же batch-скрипт (или вручную ключи, где TH уже частично есть — догнать до 100%).
+- Целевые namespace для этого захода: `landing.*`, `navigator.*`, `catalog.*`, `vendor.onboarding.*`, `communities.*` (новый — см. трек B).
+- Гард в QA-симуляторе: «строк missing для th = 0».
 
-**Эффект:** Drawer/footer/Discover перестают показывать пустые разделы; SSOT = БД.
-
-**Контроль волны 1:** прогнать `/tmp/sim2.mjs` — ожидание ≥ 38/50.
-
----
-
-## Волна 2 — P1 «Тайская локализация» (цель: 38→42/50 + язык)
-
-### 2.1 Расширить схему под TH
-- `life_situations`: добавить `title_th text`, `description_th text`.
-- `categories`: добавить `name_th text`, `description_th text`.
-- `category_groups`: `name_th text`.
-
-### 2.2 Перевести контент
-- 37 ситуаций — TH через переводчика/LLM (один edge-call `translate-batch`).
-- 18 SSOT-категорий + 6 новых `manage` — TH.
-- 6 кластеров — TH.
-
-### 2.3 Протянуть `labelTh` в UI
-- `CategoryPicker` уже принимает `labelTh` в типе, но не рендерит → исправить.
-- `useSituationServiceCounts`, `SituationCard`, `SituationDetailPage`, `useNavigatorContent` — выбирать поле по `language`.
-- Fallback цепочка: `th → en → ru`.
-
-**Контроль волны 2:** прогнать симуляцию с `language='th'` по 17 персонам — все строки TH, ни одного `[missing]`.
+### A5. Контроль
+- Прогон `node scripts/qa/simulate-50.mjs` после.
+- Дополнительная проверка: `node scripts/qa/check-th-coverage.mjs` (новый скрипт, считает % покрытия TH по DB + i18n JSON и пишет в `docs/audit/qa-latest.md`).
 
 ---
 
-## Волна 3 — P1 «Vendor onboarding до 10/10» (цель: 42→45/50)
+## Трек B — Модуль «Сообщества и консульства»
 
-### 3.1 Поиск в `CategoryPicker`
-`<Input>` сверху + fuzzy-match по `labelRu/En/Th` + `keywords`. Скролл к первому совпадению.
+### B1. Скоуп контента (что показываем)
+4 типа точек на одной карте/каталоге:
+1. **Религиозные** — церкви, храмы (буддистские wat, христианские, мечети, синагоги).
+2. **Клубы и сообщества по интересам** — экспат-клубы (русский, британский, скандинавский), яхт-клубы, гольф-, MC-, фитнес-клубы.
+3. **Консульства и почётные консулы** на Пхукете + ближайшие посольства в Бангкоке (для всех стран нашей аудитории).
+4. **Регулярные мероприятия / митапы** — language exchanges, business breakfasts, Sunday services, Friday prayer (опционально, через расписание).
 
-### 3.2 «Моей категории нет»
-Кнопка → modal → запись в `category_suggestions` (status=`pending`, source=`vendor_onboarding`) + админ-уведомление.
+### B2. Схема БД (одна миграция)
+```sql
+-- enum
+CREATE TYPE community_kind AS ENUM ('religion','club','consulate','meetup');
+CREATE TYPE religion_branch AS ENUM ('buddhist','christian_catholic','christian_orthodox','christian_protestant','muslim','jewish','hindu','sikh','other');
 
-### 3.3 Единая модерация
-Edge-trigger: на `INSERT INTO partner_applications` дублировать запись в `moderation_queue` (kind=`partner_application`, ref_id=…). Админ видит всё в одной ленте `/admin/moderation`.
+-- core table
+CREATE TABLE public.communities (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug text UNIQUE NOT NULL,
+  kind community_kind NOT NULL,
+  name_en text NOT NULL,
+  name_ru text,
+  name_th text,
+  description_en text,
+  description_ru text,
+  description_th text,
+  -- typology
+  religion religion_branch,
+  country_code text,                 -- for consulates ('RU','GB','DE'...)
+  consulate_type text,               -- 'embassy' | 'consulate_general' | 'honorary'
+  language_primary text,             -- 'en','ru','th','de'...
+  -- location
+  address text,
+  city text,
+  province text,
+  lat numeric, lng numeric,
+  google_place_id text,
+  -- contacts
+  phone text, email text, website text, whatsapp text, telegram text,
+  -- schedule (jsonb): {mon:["09:00-17:00"], sun:["08:00","10:00"]}
+  schedule jsonb,
+  -- meta
+  source_url text,                   -- where we ingested it from
+  verified_at timestamptz,
+  is_active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
 
-### 3.4 CHECK + trigger на `providers.business_category`
-Trigger из прошлой волны уже нормализует, добавить `CHECK (business_category IN (SELECT slug FROM categories))` через FK или валидатор, чтобы новые insert'ы не сломали маппинг.
-
-**Контроль волны 3:** пройти flow `/vendor/join` вручную (3 кейса: cleaning / yacht / «не нашёл — предложил»), проверить, что заявка падает и в `partner_applications`, и в `moderation_queue`.
-
----
-
-## Волна 4 — P2 «Целостность данных» (цель: 45→47/50 + 90+ по чистоте)
-
-### 4.1 Enum для `listings.category`
-- Добавить FK `listings.category → categories.slug`.
-- 74 листинга без категории → backfill скриптом по `title`/`type` + ручная разметка топ-20.
-- Мусорные значения (`mixed`, `premium`, `boxes`) — перенести в `listings.tier`/`listings.tags`.
-
-### 4.2 Мост `marketplace_categories` ↔ `categories`
-Добавить колонку `marketplace_categories.service_category_slug` (FK). Создать view `v_unified_catalog` (UNION services + products) для глобального поиска.
-
-### 4.3 `user_personas` ↔ `life_situations`
-Создать `persona_situations (persona_id, situation_id, weight)`. Засеять из Master Taxonomy (P01–P25). Это нужно AI-роутеру и `useSituationServiceCounts` для персонализации.
-
----
-
-## Волна 5 — QA-прогон и метрика (цель: подтвердить 90+/100)
-
-### 5.1 Автоматизированный прогон
-Скрипт `scripts/qa/simulate-50.mjs`:
-- 50 персон × {role, lang, situation}.
-- Для каждой: ищет кластер → категории → провайдеров → SSOT-метки → локализацию → vendor-onboarding-ready.
-- Результат → `docs/audit/2026-06-18-qa-after.md` с теми же колонками, что в baseline.
-
-### 5.2 Целевая таблица
-```text
-Сценариев OK            ≥ 45/50   (90%)
-Owner OK                ≥ 7/8
-Vendor OK               ≥ 9/10
-Developer OK            ≥ 4/4
-Тайские строки missing  = 0
-Фантомные кластеры      = 0
-Сироты-ситуации         = 0
-Counter mismatch        = 0
+GRANT SELECT ON public.communities TO anon, authenticated;
+GRANT ALL ON public.communities TO service_role;
+ALTER TABLE public.communities ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "communities_public_read" ON public.communities FOR SELECT USING (is_active);
+CREATE POLICY "communities_admin_write" ON public.communities FOR ALL TO authenticated
+  USING (has_role(auth.uid(),'admin')) WITH CHECK (has_role(auth.uid(),'admin'));
 ```
+Привязки:
+- Новая `life_situations` запись `community` → кластер `live` (link + ru/en/th).
+- Новая `categories.communities` под `live` (для каталога/счётчика).
 
-### 5.3 Регресс-гард
-Добавить в CI (`.github/workflows/qa-taxonomy.yml`) шаг, который падает, если:
-- появилась сирота-ситуация,
-- провайдер с `business_category NOT IN categories.slug`,
-- категория без `name_th`.
+### B3. Сбор данных (Firecrawl + AI gateway)
+Источники, которые я планирую парсить через Firecrawl `scrape`/`map`:
+- **Буддистские храмы Пхукета** — официальный туристический портал Phuket Tourism, Wikipedia категория "Temples in Phuket Province", Google Maps Places API (тип `place_of_worship`).
+- **Христианские церкви** — phuketcatholic.com, redeemerphuket.com, anglican-phuket, ru-приходы РПЦ за рубежом.
+- **Мечети** — Wikipedia "Mosques in Phuket Province".
+- **Консульства на Пхукете** — официальный список Phuket Provincial Office of Foreign Affairs (есть PDF/HTML) + сайт МИД РФ (генконсульство Пхукет), GOV.UK, US Embassy BKK (рекомендации почётных консулов), German Auswärtiges Amt.
+- **Посольства в Бангкоке** — Wikipedia "List of diplomatic missions in Thailand" — полный список 60+ стран с адресами и контактами.
+- **Экспат-клубы и сообщества** — phuket-expats.com, internations.org/phuket, Russian Phuket community group landing pages.
+
+Скрипт `scripts/ingest/communities.mjs`:
+1. Для каждого URL → `firecrawlScrape` + format=`json` со schema под нашу `communities`.
+2. Дедупликация по `(name_en, address)` или `google_place_id`.
+3. Перевод `name`/`description` на отсутствующие языки через AI gateway.
+4. Геокодинг через Google Places API (уже подключён, см. `architecture/google-maps-integration-standard`).
+5. UPSERT в `communities` + лог в `docs/ingest/communities-{date}.json` для аудита.
+
+Ожидаемый объём (черновая оценка): ~40 храмов + 25 церквей/мечетей + 60 посольств + 15 консульств Пхукет + 30 клубов ≈ **170 записей**. Если Firecrawl-кредитов не хватит на всё — приоритет: консульства → клубы → религия.
+
+### B4. UI / навигация
+- Маршрут `/communities` (под surface `live`, использовать существующий `MiniAppLayout`).
+- Под-табы: «Все · Религия · Клубы · Консульства · События».
+- Карточка: имя (TH/RU/EN auto), тип-иконка, адрес, контакты, кнопка «Маршрут» (открывает Google Maps).
+- Фильтры: язык общины, страна (для консульств), религия (для культовых).
+- Карта `/communities/map` — переиспользует существующую `UniversalMap` (`architecture/universal-map-and-search-pipeline`) с новым слоем.
+- Детальная страница `/communities/:slug` — описание, расписание служб/встреч, контакты, similar.
+- Точка входа на лендинге (`WelcomeLanding`): тайл в блоке «Жизнь на Пхукете» рядом с уже существующими.
+- Поиск через ⌘K (Super Search) — `useGlobalSearch` дополнить таблицей `communities`.
+
+### B5. Memory (Master Taxonomy v1.0)
+Добавить запись в `src/lib/taxonomies/master.ts`: новая JTBD-метка не нужна — попадает в `J · Social/Belonging` (или ближайшую). Только обновить мемори-файл `mem://features/communities` после миграции.
 
 ---
 
-## Технические артефакты
-
-**Миграции (примерные имена):**
-1. `20260618130000_manage_cluster_categories.sql`
-2. `20260618130100_link_orphan_situations.sql`
-3. `20260618130200_deprecate_phantom_clusters.sql`
-4. `20260618140000_th_localization_columns.sql`
-5. `20260618140100_th_localization_data.sql`
-6. `20260618150000_moderation_queue_unify.sql`
-7. `20260618150100_listings_category_fk.sql`
-8. `20260618150200_marketplace_bridge_view.sql`
-9. `20260618150300_persona_situations.sql`
-
-**Код:**
-- `src/components/vendor/onboarding/CategoryPicker.tsx` — поиск + «другое» + `labelTh`.
-- `src/hooks/useSituationServiceCounts.ts` — fallback chain.
-- `src/lib/i18n/getLocalizedField.ts` — единый helper `pickLocale(record, lang)`.
-- `scripts/qa/simulate-50.mjs` — автотест.
-- `.github/workflows/qa-taxonomy.yml` — регресс-гард.
-
----
-
-## Порядок исполнения и итерации
+## Порядок исполнения
 
 ```text
-W1 (P0)  ──►  prog 38/50  ──►  go
-W2 (TH)  ──►  TH 100%      ──►  prog 42/50
-W3 (V)   ──►  vendor 9/10  ──►  prog 45/50
-W4 (D)   ──►  data clean   ──►  prog 47/50
-W5 (QA)  ──►  report + CI  ──►  ✅ 90+/100
+A1 (DB)   ───┐
+A2 (batch TH translate) ───┤   параллельно ──► A3+A4 (UI)  ──► A5 (QA)
+B2 (DB)   ───┘
+B3 (ingest) ─────► B4 (UI/route) ─────────────────────────► QA
 ```
 
-**Рекомендую** стартовать с Волны 1 (P0) — она самая дешёвая (3 миграции, без кода) и даёт скачок 17→38/50 за один заход. После неё имеет смысл показать промежуточный прогон и решать, идти ли сразу в TH-локализацию (Волна 2) или в vendor onboarding (Волна 3), потому что они независимы и могут идти параллельно.
+Запускаемые миграции (по порядку):
+1. `wave2_th_localization_columns.sql` (A1)
+2. `wave2_th_translation_data.sql` (A2, ставит уже переведённые значения; запускается после генерации)
+3. `communities_schema.sql` (B2)
+4. `communities_seed.sql` (B3, после ingest)
 
-**Что НЕ входит в план (сознательно):**
-- Реальные браузерные сессии × 50 (Playwright) — дорого, не ловит структурных багов лучше SQL-симуляции.
-- Перепроектирование Master Taxonomy v1.0 — она утверждена.
-- Изменение SSOT (`taxonomy.ts`) — мы подгоняем БД к SSOT, не наоборот.
+---
+
+## Что НЕ входит в этот заход (сознательно)
+
+- Авто-обновление расписания служб/встреч (нужен cron — отдельная история).
+- Заявки модераторам общин от самих общин (vendor-style onboarding) — следующая итерация.
+- Полная локализация админки на TH — пользовательский UI важнее.
+- Интеграция с религиозными календарями (Easter/Eid/Songkran service times) — после MVP.
+
+---
+
+## Оценка и рекомендация
+
+- Трек A — ~3-4 миграции/скрипта, 1 helper, ~6 файлов фронта. Низкий риск.
+- Трек B — крупнее: новая схема + ingest pipeline + новый раздел UI. Самое непредсказуемое — качество данных от Firecrawl (часть страниц защищена JS) и расход Firecrawl-кредитов.
+
+**Рекомендую** выполнять в такой последовательности: **A1+A2 (миграция и перевод) → B2 (схема communities) → A3+A4 (UI локализации) → B3 (ingest) → B4 (UI communities) → финальный QA-прогон**. Это даёт работающую TH-локализацию уже после ~30% работы и страхует, если Firecrawl-парсинг затянется.
+
+Подтверди — стартую с A1+A2+B2 одним заходом? Или хочешь, чтобы я сначала отдельно показал список источников и примерное количество записей для B3 до того, как тратить Firecrawl-кредиты?

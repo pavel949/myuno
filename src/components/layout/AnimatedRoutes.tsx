@@ -473,6 +473,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.EXCHANGE} element={<LazyPage><Pages.ExchangeBotPage /></LazyPage>} />
         <Route path={APP_ROUTES.OFFICIAL_NEWS} element={<LazyPage><Pages.OfficialNewsPage /></LazyPage>} />
 
+        {/* ── Communities (churches/temples/clubs/consulates) ── */}
+        <Route path={APP_ROUTES.COMMUNITIES} element={<LazyPage><Pages.CommunitiesIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.COMMUNITY_DETAIL} element={<LazyPage><Pages.CommunityDetail /></LazyPage>} />
+
+
         {/* ── LIVE / MANAGE / BUILD cluster overviews (SSOT-driven generic shell) ── */}
         <Route path="/live"   element={<LazyPage><ClusterOverviewPage clusterId="live" /></LazyPage>} />
         <Route path="/manage" element={<LazyPage><ClusterOverviewPage clusterId="manage" /></LazyPage>} />
