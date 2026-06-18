@@ -67,7 +67,7 @@ function categorize(tags: Record<string, string>): {
   if (t.craft) return { category: "service", subcategory: t.craft };
   if (t.shop) return { category: "shop", subcategory: t.shop };
   if (t.public_transport || t.amenity === "bus_station" || t.aeroway === "aerodrome" || t.amenity === "ferry_terminal")
-    return { category: "transport", subcategory: t.public_transport ?? t.amenity ?? t.aeroway });
+    return { category: "transport", subcategory: t.public_transport ?? t.amenity ?? t.aeroway };
   return null;
 }
 
