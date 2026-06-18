@@ -218,7 +218,7 @@ export default function PropertyDetail() {
           name: propertyTitle || '',
           description: propertyDesc.slice(0, 300),
           price: pricePerNight || undefined,
-          currency: 'THB',
+          currency: listingCurrency,
           image: property.cover_image || undefined,
           url: `https://www.myuno.app/property/${id}`,
           bedrooms: property.bedrooms || undefined,
