@@ -265,6 +265,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.SUPPORT_NEW_TICKET} element={<LazyPage><Pages.NewTicket /></LazyPage>} />
         <Route path={APP_ROUTES.SUPPORT_TICKETS} element={<LazyPage><Pages.MyTickets /></LazyPage>} />
         <Route path="/support/tickets/:ticketId" element={<LazyPage><Pages.TicketDetail /></LazyPage>} />
+        <Route path="/support/what-if" element={<LazyPage><Pages.WhatIfFAQ /></LazyPage>} />
         <Route path={APP_ROUTES.INSTALL} element={<LazyPage><Pages.Install /></LazyPage>} />
         <Route path={APP_ROUTES.BOOKING_ADVANCE_REQUESTED} element={<LazyPage><Pages.AdvanceRequested /></LazyPage>} />
         <Route path="/ref/:code" element={<LazyPage><Pages.ReferralLanding /></LazyPage>} />

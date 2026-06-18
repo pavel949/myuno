@@ -363,6 +363,7 @@ export const TripPlannerPage = lazy(() => import('@/pages/TripPlannerPage'));
 export const NewTicket = lazy(() => import('@/pages/support/NewTicket'));
 export const MyTickets = lazy(() => import('@/pages/support/MyTickets'));
 export const TicketDetail = lazy(() => import('@/pages/support/TicketDetail'));
+export const WhatIfFAQ = lazy(() => import('@/pages/support/WhatIfFAQ'));
 
 // ── Admin ──
 export const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
