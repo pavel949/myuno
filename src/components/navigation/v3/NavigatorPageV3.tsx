@@ -108,21 +108,29 @@ export default function NavigatorPageV3() {
     return buckets;
   }, [filteredSituations, situationClusterMap]);
 
-  // Role-gated cluster order
+  // Role-gated cluster order — hidden clusters disappear entirely
   const roleClusters = ROLE_VISIBLE_CLUSTERS[role];
+  const hiddenClusters = ROLE_HIDDEN_CLUSTERS[role];
   const visibleClusters = useMemo(() => {
-    // primary clusters per role (top), then any non-empty remaining clusters (muted)
-    const primary = roleClusters.filter((cid) => grouped[cid].length > 0);
+    const hidden = new Set(hiddenClusters);
+    const primary = roleClusters.filter(
+      (cid) => !hidden.has(cid) && grouped[cid].length > 0,
+    );
     const rest = CLUSTER_ORDER.filter(
-      (cid) => !primary.includes(cid) && grouped[cid].length > 0,
+      (cid) =>
+        !hidden.has(cid) &&
+        !primary.includes(cid) &&
+        grouped[cid].length > 0,
     );
     return { primary, rest };
-  }, [roleClusters, grouped]);
+  }, [roleClusters, hiddenClusters, grouped]);
 
   // Top-3 "For you" — first 3 ranked situations matching a visible cluster
   const forYou = useMemo(() => {
     const allowed = new Set([...visibleClusters.primary, ...visibleClusters.rest]);
-    return filteredSituations.filter((s) => allowed.has(situationClusterMap[s.code] ?? 'live')).slice(0, 3);
+    return filteredSituations
+      .filter((s) => allowed.has(situationClusterMap[s.code] ?? 'live'))
+      .slice(0, 3);
   }, [filteredSituations, visibleClusters, situationClusterMap]);
 
   const hasRealPersonas = personas.length > 0;
