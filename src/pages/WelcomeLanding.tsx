@@ -211,7 +211,7 @@ const TRUST_FACTS: { icon: React.ComponentType<{ className?: string }>; text: Bi
   { icon: Database, text: { ru: 'Хранение данных по PDPA', en: 'Data stored in line with PDPA' } },
   { icon: Headphones, text: { ru: 'Поддержка 24/7 — RU · EN · TH', en: '24/7 support — RU · EN · TH' } },
   { icon: Wallet, text: { ru: 'Открытые цены в ฿, $, ₽, €', en: 'Transparent prices in ฿, $, ₽, €' } },
-  { icon: FileCheck2, text: { ru: 'Аудит-метка на каждой транзакции', en: 'Audit marker on every transaction' } },
+  { icon: ClipboardCheck, text: { ru: 'Аудит-метка на каждой транзакции', en: 'Audit marker on every transaction' } },
 ];
 
 const EMERGENCY_ITEMS: { icon: React.ComponentType<{ className?: string }>; text: Bi }[] = [
