@@ -55,7 +55,7 @@ const STATUS_LABEL: Record<string, { ru: string; en: string }> = {
 
 export default function MyHelpRequests() {
   const { language } = useLanguage();
-  const { user, loading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const isRu = language === 'ru';
   const [requests, setRequests] = useState<HelpRequest[]>([]);
   const [loading, setLoading] = useState(true);
