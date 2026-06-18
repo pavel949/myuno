@@ -97,6 +97,20 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
     mapRef.current.fitBounds(bounds, 60);
   }, [validProps]);
 
+  // Pan to selected pin (only if it's outside current viewport).
+  React.useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !openId) return;
+    const p = validProps.find((x) => x.id === openId);
+    if (!p || p.lat == null || p.lng == null) return;
+    const bounds = map.getBounds();
+    const pos = new google.maps.LatLng(p.lat, p.lng);
+    if (!bounds || !bounds.contains(pos)) {
+      map.panTo(pos);
+    }
+  }, [openId, validProps]);
+
+
   const noKey = !hasKey || loadError;
   const isLoading = hasKey && !isLoaded;
 
