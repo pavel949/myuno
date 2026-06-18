@@ -5,6 +5,7 @@ import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
+import { trackSituationClick } from '@/lib/analytics/track';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface SituationCardProps {
@@ -36,6 +37,12 @@ export function SituationCard({
   return (
     <Link
       to={resolveSituationHref(situation.code)}
+      onClick={() => trackSituationClick(situation.code, {
+        source: 'situation_card',
+        cluster: clusterId,
+        href: resolveSituationHref(situation.code),
+        count: serviceCount,
+      })}
       className={cn(
         'group relative flex flex-col gap-4 p-5 min-h-[180px]',
         'border border-border bg-card text-card-foreground',

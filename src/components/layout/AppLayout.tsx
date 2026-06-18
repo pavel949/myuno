@@ -10,6 +10,7 @@ const ActiveSituationBanner = lazy(() =>
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { EmailVerificationBanner } from '@/components/auth/EmailVerificationBanner';
 import { useUserTracking } from '@/hooks/useUserTracking';
+import { usePlatformAnalytics } from '@/hooks/usePlatformAnalytics';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { MobileInstallSheet } from '@/components/pwa/MobileInstallSheet';
 import { UnifiedChatFAB } from '@/components/chat/UnifiedChatFAB';
@@ -73,6 +74,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
     const { activeRole } = useUserContext();
     const { isMCPortal } = useOwnerType();
     useUserTracking();
+    usePlatformAnalytics();
 
     const isWorkspace = variant === 'workspace';
     const usePageContainer = usePageContainerProp ?? !isWorkspace;
