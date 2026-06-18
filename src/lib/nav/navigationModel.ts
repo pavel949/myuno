@@ -331,7 +331,7 @@ const ADMIN_SIDEBAR: SidebarNavGroup[] = [
     items: [
       { path: '/admin/add',                labelEn: 'Add',                labelRu: 'Добавить',                  icon: Plus },
       { path: '/admin',                    labelEn: 'Dashboard',          labelRu: 'Обзор',                     icon: LayoutDashboard },
-      { path: '/admin/inbox',              labelEn: 'Inbox',              labelRu: 'Инбокс',                    icon: MessageSquare, badgeKey: 'pendingApplications' },
+      { path: '/admin/inbox',              labelEn: 'Inbox',              labelRu: 'Инбокс',                    icon: MessageSquare, badgeKey: 'pendingContent' },
       { path: '/admin/catalog',            labelEn: 'Catalog & Content',  labelRu: 'Каталог',                   icon: Package, badgeKey: 'pendingContent' },
       { path: '/admin/operations',         labelEn: 'Operations',         labelRu: 'Операции',                  icon: CalendarCheck },
       { path: '/admin/crm',                labelEn: 'CRM',                labelRu: 'CRM',                       icon: UserCheck },
