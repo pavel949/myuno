@@ -31,7 +31,10 @@ import { LandingChrome } from '@/components/landings';
 import { SEOHead } from '@/components/seo';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
-import { track } from '@/lib/analytics/track';
+import { trackEvent } from '@/lib/analytics/track';
+
+const track = (event: string, props: Record<string, unknown> = {}) =>
+  trackEvent(event, props);
 
 const REFERRAL_STORAGE_KEY = 'myuno_referral_code';
 
