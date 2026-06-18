@@ -15982,6 +15982,84 @@ export type Database = {
         }
         Relationships: []
       }
+      poi_claim_requests: {
+        Row: {
+          business_name: string | null
+          business_website: string | null
+          created_at: string
+          google_place_id: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          message: string | null
+          osm_id: number | null
+          osm_type: string | null
+          owner_email: string
+          owner_name: string
+          owner_phone: string | null
+          owner_user_id: string | null
+          poi_category: string | null
+          poi_name: string
+          resulting_provider_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          target_vertical: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string | null
+          business_website?: string | null
+          created_at?: string
+          google_place_id?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          message?: string | null
+          osm_id?: number | null
+          osm_type?: string | null
+          owner_email: string
+          owner_name: string
+          owner_phone?: string | null
+          owner_user_id?: string | null
+          poi_category?: string | null
+          poi_name: string
+          resulting_provider_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          target_vertical?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string | null
+          business_website?: string | null
+          created_at?: string
+          google_place_id?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          message?: string | null
+          osm_id?: number | null
+          osm_type?: string | null
+          owner_email?: string
+          owner_name?: string
+          owner_phone?: string | null
+          owner_user_id?: string | null
+          poi_category?: string | null
+          poi_name?: string
+          resulting_provider_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          target_vertical?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       portal_messages: {
         Row: {
           created_at: string
