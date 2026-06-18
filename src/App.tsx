@@ -41,9 +41,6 @@ import { AuthSheetProvider } from "@/contexts/AuthSheetContext";
 import { UnderConstruction } from "@/components/maintenance/UnderConstruction";
 import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 import { VersionWatcher } from "@/components/pwa/VersionWatcher";
-import { useAuth } from "@/contexts/AuthContext";
-import { useLocation } from "react-router-dom";
-import { useFeatureFlag } from "@/hooks/useFeatureFlags";
 import { composeProviders } from "@/lib/composeProviders";
 import { useEnsureMultiRoleQaBundle } from "@/hooks/useEnsureMultiRoleQaBundle";
 import { PlatformViewAsBanner } from "@/components/layout/PlatformViewAsBanner";
@@ -105,95 +102,19 @@ function DeferredProvidersGate({ children }: { children: React.ReactNode }) {
   return <DeferredProviders>{children}</DeferredProviders>;
 }
 
-/**
- * Gate that shows Coming Soon for unauthenticated users (except /auth routes).
- *
- * Ways to bypass for smoke tests / preview QA:
- *  - Build-time:  set `VITE_BYPASS_COMING_SOON=true` in .env (used by Playwright in playwright.config.ts)
- *  - Runtime URL: append `?smoke=1` (or `?bypass_gate=1`) to any URL — persists via localStorage
- *  - Runtime URL: append `?smoke=0` to clear the persisted bypass
- *  - Hostname:    automatic on `*.lovable.app` / `*.lovable.dev` / `localhost` previews
- *  - Manual:      `localStorage.setItem('myuno_bypass_coming_soon','true')` in DevTools
- */
-function ComingSoonGate({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
-  const location = useLocation();
-  const publicAccessEnabled = useFeatureFlag('PUBLIC_ACCESS');
-
-
-  const bypassComingSoon = React.useMemo(() => {
-    if (import.meta.env.VITE_BYPASS_COMING_SOON === 'true') return true;
-    if (typeof window === 'undefined') return false;
-
-    const BYPASS_KEY = 'myuno_bypass_coming_soon';
-    const params = new URLSearchParams(window.location.search);
-
-    // Explicit opt-out clears persisted bypass
-    if (params.get('smoke') === '0' || params.get('bypass_gate') === '0') {
-      try { localStorage.removeItem(BYPASS_KEY); } catch { /* noop */ }
-      return false;
+// Coming Soon gate retired on 2026-06-18 — the site is fully public.
+// Any old `myuno_bypass_coming_soon` / `myuno_maintenance_mode` localStorage
+// entries left over from earlier sessions are scrubbed on first load below.
+if (typeof window !== 'undefined') {
+  try {
+    localStorage.removeItem('myuno_bypass_coming_soon');
+    if (localStorage.getItem('myuno_maintenance_mode') === 'true') {
+      localStorage.setItem('myuno_maintenance_mode', 'false');
     }
-    // Explicit opt-in via query param — persist for the session
-    if (params.get('smoke') === '1' || params.get('bypass_gate') === '1') {
-      try { localStorage.setItem(BYPASS_KEY, 'true'); } catch { /* noop */ }
-      return true;
-    }
-    // Persisted opt-in
-    try {
-      if (localStorage.getItem(BYPASS_KEY) === 'true') return true;
-    } catch { /* noop */ }
-
-    // Auto-bypass on preview / local dev hostnames (never on myuno.app production)
-    const host = window.location.hostname;
-    const isPreviewHost =
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host.endsWith('.lovable.app') ||
-      host.endsWith('.lovable.dev');
-    return isPreviewHost;
-  }, []);
-
-  // Allow auth and public marketing routes through.
-  // Phase 1 launch-readiness expansion: also open production-ready verticals
-  // (home/discover/property/owner-landing) so non-logged visitors can browse
-  // without hitting the Coming Soon gate. Account/operate routes stay gated.
-  const path = location.pathname;
-  const isPublicRoute = path === '/'
-    || path === '/index'
-    || path === '/discover'
-    || path.startsWith('/auth')
-    || path === '/start'
-    || path.startsWith('/start/')
-    || path.startsWith('/onboarding')
-    || path.startsWith('/reset-password')
-    || path.startsWith('/legal')
-    || path.startsWith('/for-management-companies')
-    || path === '/for-business'
-    || path === '/for-local-services'
-    || path.startsWith('/vendor/join')
-    || path.startsWith('/vendor/onboarding')
-    || path.startsWith('/developer-portal/apply')
-    || path.startsWith('/ref/')
-    || path.startsWith('/newbuilds')
-    || path.startsWith('/capital')
-    || path.startsWith('/clearview')
-    || path.startsWith('/property')
-    || path === '/invest/capital-advisory'
-    || path === '/invest/calculator'
-    || path === '/owner/management-landing'
-    || path === '/owner/storefront-demo'
-    || path === '/legal/tax-structuring'
-    || path.startsWith('/for/')
-    || path === '/for'
-    || path.startsWith('/cluster/')
-    || path.startsWith('/area/')
-    || path === '/area';
-
-  // Coming Soon gate disabled (2026-06-18): app is fully public.
-  // Keep the wrapper for backwards compat; always pass through.
-  void publicAccessEnabled; void bypassComingSoon; void isPublicRoute; void isLoading; void user;
-  return <>{children}</>;
+  } catch { /* noop */ }
 }
+
+
 
 
 // Inner component to use hooks
@@ -217,24 +138,21 @@ function AppContent() {
         <VersionWatcher />
         <LegalComplianceModal />
         <BrowserRouter>
-          <ComingSoonGate>
-            {/*
-              Outer wrapper acts as the SkipToContent target. It's a <div>, NOT a <main>,
-              because NavShell renders the canonical <main> landmark for every route
-              that uses AppLayout/MCLayout/etc. (a11y: only one <main> per page).
-              Pages that bypass NavShell (auth, error pages) are short enough to not
-              require their own <main> landmark.
-            */}
-            <div
-              id="main-content"
-              tabIndex={-1}
-              className="flex min-h-0 min-w-0 flex-1 flex-col outline-none focus:outline-none"
-            >
-              <AnimatedRoutes />
-            </div>
-            <UnifiedChatFAB />
-            <CookieConsentBanner />
-          </ComingSoonGate>
+          {/*
+            Coming Soon gate retired 2026-06-18 — site is fully public.
+            Outer wrapper acts as the SkipToContent target. It's a <div>, NOT a <main>,
+            because NavShell renders the canonical <main> landmark for every route
+            that uses AppLayout/MCLayout/etc. (a11y: only one <main> per page).
+          */}
+          <div
+            id="main-content"
+            tabIndex={-1}
+            className="flex min-h-0 min-w-0 flex-1 flex-col outline-none focus:outline-none"
+          >
+            <AnimatedRoutes />
+          </div>
+          <UnifiedChatFAB />
+          <CookieConsentBanner />
         </BrowserRouter>
       </div>
     );
