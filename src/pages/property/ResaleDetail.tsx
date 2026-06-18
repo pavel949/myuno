@@ -16,6 +16,8 @@ import { SEOHead, createRealEstateListingSchema } from '@/components/seo';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLocation as useLocationCity } from '@/contexts/LocationContext';
+
 import { useResaleProperty } from '@/hooks/useResaleProperties';
 import { UniversalLeadForm } from '@/components/leads/UniversalLeadForm';
 import { cn } from '@/lib/utils';
