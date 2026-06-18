@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { MessageCircle, Wrench, Zap, ChevronRight } from "lucide-react";
+import { Info, MessageCircle, Wrench, Zap, ChevronRight } from "lucide-react";
 import { MiniAppLayout } from "@/components/miniapp/MiniAppLayout";
 import { EmptyState } from "@/components/uno/EmptyState";
 import { useServiceFunctions, type LocalizedServiceFunction } from "@/hooks/useServiceFunctions";
@@ -15,7 +15,8 @@ import { usePersonaFilter } from "@/hooks/usePersonaFilter";
 /**
  * URL-slug → SERVICE_CATEGORIES.id normaliser.
  *
- * The catalog SSOT (`src/lib/catalog/taxonomy.ts`) routes 9 "info" services
+ * The catalog SSOT (`src/lib/catalog/taxonomy.ts`) and various deep links
+ * (Discover, SOS, cross-sells, /wedding, /hooks/useCategories) route services
  * to `/services?category=<slug>`, but SERVICE_CATEGORIES uses underscores +
  * different keys. Without this mapping every deep link from Discover landed
  * on "all services" and looked broken. Keep new aliases here.
@@ -28,12 +29,20 @@ const CATEGORY_ALIAS: Record<string, ServiceCategory> = {
   gardening: 'garden',
   locksmith: 'security',
   storage: 'moving',
+  // Slugs referenced from SOS / wedding / global search / categories hook
+  // that have no dedicated SERVICE_CATEGORIES bucket: map to nearest trade
+  // so the chip lights up, and rely on CATEGORY_INTRO for the landing copy.
+  'road-assistance': 'handyman',
+  photography: 'handyman',
+  maintenance: 'handyman',
+  'property-management': 'cleaning',
 };
 
 /**
  * Bilingual one-liner shown above the grid when the user lands on a
- * category-deep-linked page from Discover. Covers the 9 "info" categories
- * that don't have a per-service booking flow today.
+ * category-deep-linked page from Discover. Covers categories that don't
+ * have a per-service booking flow today — gives users a WhatsApp path
+ * to the coordinator instead of an empty list.
  */
 const CATEGORY_INTRO: Record<string, { titleRu: string; titleEn: string; descRu: string; descEn: string }> = {
   laundry:        { titleRu: 'Прачечная с доставкой', titleEn: 'Laundry & dry-cleaning',
@@ -63,6 +72,20 @@ const CATEGORY_INTRO: Record<string, { titleRu: string; titleEn: string; descRu:
   moving:         { titleRu: 'Переезд и хранение',    titleEn: 'Moving & storage',
                     descRu: 'Локальные переезды и склад для вещей. Опишите объём — пришлём смету.',
                     descEn: 'Local moves and storage. Tell us the volume — we send a quote.' },
+  // Categories without dedicated inventory — chip points to nearest trade,
+  // intro card explains the real service path (coordinator dispatches).
+  'road-assistance':     { titleRu: 'Помощь на дороге',  titleEn: 'Roadside assistance',
+                            descRu: 'Замена колеса, прикурить, эвакуатор. Координатор подключит ближайшую бригаду 24/7.',
+                            descEn: 'Tyre change, jump-start, tow truck. Coordinator dispatches the nearest crew 24/7.' },
+  photography:           { titleRu: 'Фото и видео',       titleEn: 'Photo & video',
+                            descRu: 'Свадьба, семейная съёмка, контент для бизнеса. Подберём команду под бюджет и стиль.',
+                            descEn: 'Wedding, family shoot, business content. We match a team to your budget and style.' },
+  maintenance:           { titleRu: 'Обслуживание дома',  titleEn: 'Home maintenance',
+                            descRu: 'Регулярный осмотр и плановые работы. Опишите объект — соберём пакет.',
+                            descEn: 'Routine inspections and planned works. Tell us about the property — we build a package.' },
+  'property-management': { titleRu: 'Управление недвижимостью', titleEn: 'Property management',
+                            descRu: 'Уборка, чек-ин гостей, оплата счетов. Опишите задачу — подключим МС-партнёра.',
+                            descEn: 'Cleaning, guest check-in, bill pay. Tell us the scope — we plug in an MC partner.' },
 };
 
 const COORDINATOR_WHATSAPP = '66922407355';
@@ -73,6 +96,8 @@ function whatsappLink(categoryLabel: string, language: 'ru' | 'en'): string {
     : `Hello! I need help with "${categoryLabel}". I'll describe the details in a follow-up.`;
   return `https://wa.me/${COORDINATOR_WHATSAPP}?text=${encodeURIComponent(summary)}`;
 }
+
+type SortMode = 'default' | 'popular' | 'rating';
 
 export default function ServicesIndex() {
   const { language } = useLanguage();
@@ -87,20 +112,62 @@ export default function ServicesIndex() {
   // intro card is keyed by the discovery slug so /services?category=laundry
   // still shows the laundry-specific WhatsApp landing copy.
   const [originalSlug, setOriginalSlug] = useState<string | null>(null);
+  const [sortMode, setSortMode] = useState<SortMode>('default');
+  // True when the URL pointed to a slug we couldn't map anywhere — drives
+  // the "Не нашли категорию" banner so users aren't stuck on a silent page.
+  const [unknownSlug, setUnknownSlug] = useState<string | null>(null);
 
   const { functions, categories, popular, search, getFunctionsByCategory } = useServiceFunctions();
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
+  // Single source of truth for URL → state. Supports `category` (canonical)
+  // and `type` (legacy alias used by BookingCrossSellSheet, TripServicesGrid,
+  // crossSellConfig), plus `sort` and `q`.
   useEffect(() => {
-    const categoryParam = searchParams.get('category');
-    if (!categoryParam) {
+    const rawSlug = searchParams.get('category') ?? searchParams.get('type');
+    const sortParam = searchParams.get('sort');
+    const qParam = searchParams.get('q');
+
+    if (rawSlug) {
+      const aliased = CATEGORY_ALIAS[rawSlug] ?? rawSlug;
+      const knownInRibbon = SERVICE_CATEGORIES.some(c => c.id === aliased);
+      const knownInIntro = Boolean(CATEGORY_INTRO[rawSlug]);
+      if (knownInRibbon) {
+        setSelectedCategory(aliased);
+        setOriginalSlug(rawSlug);
+        setUnknownSlug(null);
+      } else if (knownInIntro) {
+        // No catalogue match but we have intro copy — keep chip on All so the
+        // user still sees the full grid, but render the targeted landing card.
+        setSelectedCategory('all');
+        setOriginalSlug(rawSlug);
+        setUnknownSlug(null);
+      } else {
+        // Completely unknown slug → fallback: All chip + auto-search.
+        setSelectedCategory('all');
+        setOriginalSlug(null);
+        setUnknownSlug(rawSlug);
+      }
+    } else {
       setSelectedCategory('all');
       setOriginalSlug(null);
-      return;
+      setUnknownSlug(null);
     }
-    const aliased = CATEGORY_ALIAS[categoryParam] ?? categoryParam;
-    setSelectedCategory(aliased);
-    setOriginalSlug(categoryParam);
+
+    if (sortParam === 'popular' || sortParam === 'rating') {
+      setSortMode(sortParam);
+    } else {
+      setSortMode('default');
+    }
+
+    // q wins over unknown-slug auto-search.
+    if (qParam) {
+      setSearchQuery(qParam);
+    } else if (rawSlug && !CATEGORY_ALIAS[rawSlug] && !SERVICE_CATEGORIES.some(c => c.id === rawSlug) && !CATEGORY_INTRO[rawSlug]) {
+      setSearchQuery(rawSlug.replace(/-/g, ' '));
+    } else {
+      setSearchQuery('');
+    }
   }, [searchParams]);
 
   const introCategoryKey = originalSlug ?? (selectedCategory === 'all' ? null : selectedCategory);
@@ -118,6 +185,9 @@ export default function ServicesIndex() {
 
     if (searchQuery.trim()) {
       result = search(searchQuery);
+      if (selectedCategory !== 'all') {
+        result = result.filter(fn => fn.category === selectedCategory);
+      }
     }
 
     result = applyPersonaFilter(result, (fn) => {
@@ -126,8 +196,13 @@ export default function ServicesIndex() {
       return [...tags, fn.category, fn.id].filter(Boolean) as string[];
     });
 
+    // `rating` is not yet on LocalizedServiceFunction — degrade to popular.
+    if (sortMode === 'popular' || sortMode === 'rating') {
+      result = [...result].sort((a, b) => Number(Boolean(b.isPopular)) - Number(Boolean(a.isPopular)));
+    }
+
     return result;
-  }, [functions, selectedCategory, searchQuery, getFunctionsByCategory, search, applyPersonaFilter]);
+  }, [functions, selectedCategory, searchQuery, sortMode, getFunctionsByCategory, search, applyPersonaFilter]);
 
   const categoryRibbon = useMemo(() => [
     { id: 'all', labelEn: 'All Services', labelRu: 'Все услуги' },
@@ -148,19 +223,32 @@ export default function ServicesIndex() {
   const handleCategoryChange = (cat: string) => {
     setSelectedCategory(cat);
     setOriginalSlug(null);
+    setUnknownSlug(null);
     const newParams = new URLSearchParams(searchParams);
     if (cat === 'all') {
       newParams.delete('category');
     } else {
       newParams.set('category', cat);
     }
+    newParams.delete('type');
     setSearchParams(newParams);
   };
 
-  // Subtitle honestly describes what this hub covers: home/property maintenance
-  // trades sourced from `HOME_SERVICE_FUNCTIONS` (homeServiceFunctions.ts).
-  // The platform-wide "All apps" experience lives in AppDrawer (BottomBar
-  // LayoutGrid icon / Home "Все приложения" button), not here.
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    const newParams = new URLSearchParams(searchParams);
+    if (value.trim()) {
+      newParams.set('q', value);
+    } else {
+      newParams.delete('q');
+    }
+    setSearchParams(newParams);
+  };
+
+  // Show the popular block when explicitly requested via ?sort=popular or
+  // on the default All-no-search view.
+  const showPopularBlock = sortMode === 'popular' || (selectedCategory === 'all' && !searchQuery);
+
   const subtitle = isRu
     ? `Сантехника · электрика · уборка · ремонт · сад. ${filteredFunctions.length} услуг.`
     : `Plumbing · electrical · cleaning · repair · garden. ${filteredFunctions.length} services.`;
@@ -174,13 +262,25 @@ export default function ServicesIndex() {
       selectedCategory={selectedCategory}
       onCategoryChange={handleCategoryChange}
       searchValue={searchQuery}
-      onSearchChange={setSearchQuery}
+      onSearchChange={handleSearchChange}
       searchPlaceholder={isRu ? 'Поиск услуг…' : 'Search services…'}
       showHero={false}
       showFilter={false}
     >
+      {/* Unknown-slug fallback banner */}
+      {unknownSlug && (
+        <div className="rounded-2xl border border-border bg-muted/40 p-4 flex items-start gap-3">
+          <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+          <p className="text-[13px] text-muted-foreground leading-snug">
+            {isRu
+              ? <>Не нашли категорию «{unknownSlug}» — показываем похожие услуги по поиску.</>
+              : <>Couldn't find category "{unknownSlug}" — showing similar services from search.</>}
+          </p>
+        </div>
+      )}
+
       {/* Popular Section */}
-      {selectedCategory === 'all' && !searchQuery && (
+      {showPopularBlock && (
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Zap className="h-4 w-4 text-primary" />
@@ -215,10 +315,9 @@ export default function ServicesIndex() {
         </div>
       )}
 
-      {/* Category landing card — shown for the 9 "info" categories that
-          arrive here from /discover deep links. Gives users a path even
-          when the per-service grid is empty: describe the task via
-          WhatsApp coordinator, response within 2 hours. */}
+      {/* Category landing card — shown for categories that arrive here from
+          /discover deep links. Gives users a path even when the per-service
+          grid is empty: describe the task via WhatsApp coordinator. */}
       {intro && (
         <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-3">
           <div className="space-y-1">
@@ -251,7 +350,7 @@ export default function ServicesIndex() {
       ) : (
         <>
           <div className="grid gap-3">
-            {(selectedCategory === 'all' && !searchQuery ? filteredFunctions.slice(0, 10) : filteredFunctions).map((fn) => (
+            {(selectedCategory === 'all' && !searchQuery && sortMode === 'default' ? filteredFunctions.slice(0, 10) : filteredFunctions).map((fn) => (
               <ServiceFunctionCard
                 key={fn.id}
                 fn={fn}
@@ -260,7 +359,7 @@ export default function ServicesIndex() {
             ))}
           </div>
 
-          {selectedCategory === 'all' && !searchQuery && (
+          {selectedCategory === 'all' && !searchQuery && sortMode === 'default' && (
             <div className="space-y-6">
               {categories.map(category => {
                 const categoryFunctions = getFunctionsByCategory(category.id);
