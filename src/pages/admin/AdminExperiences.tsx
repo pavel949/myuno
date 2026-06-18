@@ -128,7 +128,7 @@ export default function AdminExperiences() {
   const [editingItem, setEditingItem] = useState<AdminExperience | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [formData, setFormData] = useState(getEmptyFormData());
+  const [formData, setFormData] = useState(getEmptyFormData(cityCurrencyCode));
 
   const stats = useMemo(() => {
     const tours = experiences.filter(e => e.experience_type === 'tour').length;
@@ -146,7 +146,7 @@ export default function AdminExperiences() {
 
   const openCreateDialog = () => {
     setEditingItem(null);
-    setFormData(getEmptyFormData());
+    setFormData(getEmptyFormData(cityCurrencyCode));
     setIsDialogOpen(true);
   };
 
@@ -227,7 +227,7 @@ export default function AdminExperiences() {
         toast.success(isRu ? 'Создано' : 'Created');
       }
       setIsDialogOpen(false);
-      setFormData(getEmptyFormData());
+      setFormData(getEmptyFormData(cityCurrencyCode));
       setEditingItem(null);
     } catch (err) {
       console.error('Submit error:', err);
