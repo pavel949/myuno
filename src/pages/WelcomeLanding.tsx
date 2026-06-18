@@ -358,9 +358,9 @@ export default function WelcomeLanding() {
             transition={{ duration: 0.5, delay: 0.05 }}
             className="font-display mt-5 max-w-3xl text-h1 font-normal leading-[1.05] tracking-tight sm:text-display"
           >
-            {tx(language, { ru: 'Инфраструктура для жизни', en: 'Infrastructure for living' })}
+            {tx(language, { ru: 'Инфраструктура для жизни', en: 'Infrastructure for living', th: 'โครงสร้างพื้นฐานสำหรับการใช้ชีวิต' })}
             <br />
-            {tx(language, { ru: 'на Пхукете', en: 'on Phuket' })}
+            {tx(language, { ru: 'на Пхукете', en: 'on Phuket', th: 'บนเกาะภูเก็ต' })}
           </motion.h1>
 
           <motion.p
