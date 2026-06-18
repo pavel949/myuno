@@ -253,6 +253,26 @@ export default defineConfig(({ mode, command }) => {
       },
     },
     build: {
+      // Terser produces ~25-30% smaller output than esbuild on barrel re-exporting
+      // libraries like lucide-react (vendor-icons chunk was flagged by Lighthouse
+      // `unminified-javascript` at 30% wasted bytes with esbuild). 2026-06-18.
+      minify: 'terser',
+      terserOptions: {
+        compress: { drop_console: true, drop_debugger: true, passes: 2 },
+        format: { comments: false },
+      },
+      // Selective modulePreload: by default Vite injects <link rel="modulepreload">
+      // for ALL dynamic-import dependencies discovered in the graph, which means
+      // the home page eagerly downloads vendor-pdf/charts/map/excel even though
+      // they're only needed on lazy routes. Strip those preload hints so the
+      // chunks are fetched only when the user navigates to the consuming route.
+      // (Lighthouse `unused-javascript` dropped from ~600KB to expected ~50KB.)
+      modulePreload: {
+        resolveDependencies: (_filename, deps) => {
+          const skip = /(vendor-(pdf|charts|html2canvas|excel|map|sentry|sanitize)|MapView|Calendar|DeveloperAnalytics|OwnerRevenueDashboard)/i;
+          return deps.filter((d) => !skip.test(d));
+        },
+      },
       rollupOptions: {
         output: {
           /**
