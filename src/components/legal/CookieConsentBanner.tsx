@@ -171,8 +171,14 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
                   </Link>
                 </p>
               </div>
-              <button onClick={rejectOptional} className="text-muted-foreground hover:text-foreground p-1">
-                <X className="w-4 h-4" />
+              <button
+                type="button"
+                onClick={rejectOptional}
+                aria-label={isRu ? 'Закрыть баннер согласия на cookie' : 'Dismiss cookie consent banner'}
+                title={isRu ? 'Закрыть' : 'Dismiss'}
+                className="text-muted-foreground hover:text-foreground p-1"
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
           </div>
