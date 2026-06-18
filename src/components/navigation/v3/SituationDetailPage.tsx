@@ -25,8 +25,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getEntityType, getEntityTypeLabel } from '@/lib/config/entityTypes';
 import { cn } from '@/lib/utils';
 
-function resolveItemHref(item: LifeOSCatalogItem): string {
+function resolveItemHref(item: LifeOSCatalogItem): string | null {
   const def = getEntityType(item.entity_type);
+  // Guard: unknown entity types fall back to '/' — never link a service card to root
+  if (!def.detailRoute && def.route === '/') return null;
   if (def.detailRoute === null) return def.route;
   const base = def.detailRoute ?? def.route;
   return `${base}/${item.entity_id}`;
