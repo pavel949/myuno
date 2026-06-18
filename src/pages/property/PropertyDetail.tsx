@@ -460,7 +460,7 @@ export default function PropertyDetail() {
               {extraServices.length > 0 && (
                 <>
                   <Separator />
-                  <ExtraServices services={extraServices} currency="THB" />
+                  <ExtraServices services={extraServices} currency={listingCurrency} />
                 </>
               )}
 
