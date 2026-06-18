@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Geocode top-20 communities via Google Places API (New) text search through Lovable gateway.
 // Writes lat/lng/google_place_id/address back into public.communities.
-import pg from 'pg';
+import { execFileSync } from 'node:child_process';
 
 const GATEWAY = 'https://connector-gateway.lovable.dev/google_maps';
 const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
@@ -51,27 +51,15 @@ async function geocode(query) {
   return data.places?.[0] ?? null;
 }
 
-const client = new pg.Client();
-await client.connect();
-
+const esc = (s) => s == null ? 'NULL' : `'${String(s).replace(/'/g, "''")}'`;
+const rows = [];
 let ok = 0, fail = 0;
 for (const t of TARGETS) {
   try {
     const place = await geocode(t.query);
     if (!place?.location) { console.warn(`✗ ${t.slug}: no result`); fail++; continue; }
     const { latitude: lat, longitude: lng } = place.location;
-    const addr = place.formattedAddress || null;
-    const pid = place.id || null;
-    const r = await client.query(
-      `UPDATE public.communities
-         SET lat = $1, lng = $2, google_place_id = $3,
-             address = COALESCE(address, $4),
-             verified_at = COALESCE(verified_at, now())
-       WHERE slug = $5
-       RETURNING id`,
-      [lat, lng, pid, addr, t.slug]
-    );
-    if (r.rowCount === 0) { console.warn(`✗ ${t.slug}: slug not found`); fail++; continue; }
+    rows.push(`(${esc(t.slug)}, ${lat}, ${lng}, ${esc(place.id)}, ${esc(place.formattedAddress)})`);
     console.log(`✓ ${t.slug}  ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
     ok++;
     await new Promise(r => setTimeout(r, 150));
@@ -80,5 +68,16 @@ for (const t of TARGETS) {
     fail++;
   }
 }
-await client.end();
+if (rows.length) {
+  const sql = `
+WITH v(slug, lat, lng, place_id, addr) AS (VALUES ${rows.join(',\n')})
+UPDATE public.communities c
+   SET lat = v.lat::numeric,
+       lng = v.lng::numeric,
+       google_place_id = v.place_id,
+       address = COALESCE(c.address, v.addr),
+       verified_at = COALESCE(c.verified_at, now())
+  FROM v WHERE c.slug = v.slug;`;
+  execFileSync('psql', ['-v', 'ON_ERROR_STOP=1', '-c', sql], { stdio: 'inherit' });
+}
 console.log(`\nDone: ${ok} ok, ${fail} failed`);
