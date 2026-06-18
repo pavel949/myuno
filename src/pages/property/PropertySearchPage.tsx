@@ -65,6 +65,7 @@ export default function PropertySearchPage() {
 
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
+  const { selectedId: focusedId, select: selectFocused } = useMapListSync();
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
