@@ -46,6 +46,8 @@ export default function PropertyQuickSetup() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
 
   const { data: property, isLoading } = useOwnerProperty(id);
