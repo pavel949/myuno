@@ -9,10 +9,20 @@ import type { LifeSituation } from '@/hooks/useLifeOS';
 interface SituationCardProps {
   situation: LifeSituation;
   serviceCount?: number;
+  /** Optional Master-Taxonomy cluster ID for accent badge. */
+  clusterId?: string;
+  /** Cluster colour (hsl(...) token). Used for left-border accent. */
+  clusterColor?: string;
   className?: string;
 }
 
-export function SituationCard({ situation, serviceCount, className }: SituationCardProps) {
+export function SituationCard({
+  situation,
+  serviceCount,
+  clusterId,
+  clusterColor,
+  className,
+}: SituationCardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -33,6 +43,8 @@ export function SituationCard({ situation, serviceCount, className }: SituationC
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
         className,
       )}
+      style={clusterColor ? { borderLeftWidth: 3, borderLeftColor: clusterColor } : undefined}
+      aria-label={`${title}${typeof serviceCount === 'number' ? ` — ${serviceCount}` : ''}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div
@@ -63,13 +75,21 @@ export function SituationCard({ situation, serviceCount, className }: SituationC
         )}
       </div>
 
-      {typeof serviceCount === 'number' && serviceCount > 0 && (
-        <div className="pt-3 border-t border-border/60">
-          <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
-            {serviceCount} {isRu ? (serviceCount === 1 ? 'услуга' : serviceCount < 5 ? 'услуги' : 'услуг') : serviceCount === 1 ? 'service' : 'services'}
+      <div className="pt-3 border-t border-border/60 flex items-center justify-between gap-3">
+        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+          {typeof serviceCount === 'number' && serviceCount > 0
+            ? `${serviceCount} ${isRu ? (serviceCount === 1 ? 'услуга' : serviceCount < 5 ? 'услуги' : 'услуг') : serviceCount === 1 ? 'service' : 'services'}`
+            : isRu ? 'Открыть' : 'Open'}
+        </span>
+        {clusterId && (
+          <span
+            className="font-mono text-[9px] uppercase tracking-[0.14em] px-1.5 py-0.5"
+            style={clusterColor ? { color: clusterColor, borderLeft: `2px solid ${clusterColor}`, paddingLeft: 6 } : undefined}
+          >
+            {clusterId}
           </span>
-        </div>
-      )}
+        )}
+      </div>
     </Link>
   );
 }

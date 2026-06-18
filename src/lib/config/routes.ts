@@ -537,6 +537,7 @@ export const APP_ROUTES = {
 
   // ── Admin ──
   ADMIN: '/admin',
+  ADMIN_INBOX: '/admin/inbox',
   ADMIN_CATALOG: '/admin/catalog',
   ADMIN_FINANCE: '/admin/finance',
   ADMIN_OPERATIONS: '/admin/operations',
