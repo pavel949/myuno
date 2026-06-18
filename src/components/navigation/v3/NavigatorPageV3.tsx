@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
 import { NavigatorClusterSection } from './NavigatorClusterSection';
+import { PersonalGrid } from '@/components/superapp/PersonalGrid';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 const CLUSTER_ORDER: ClusterId[] = ['arrive', 'live', 'legal', 'manage', 'invest', 'build'];
