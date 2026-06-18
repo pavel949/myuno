@@ -138,6 +138,8 @@ function useManagedProperties() {
 export default function ReportsPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { code: cityCurrencyCode } = useCityCurrency();
+
   const isRu = language === 'ru';
 
   const { allProperties: ownedProperties } = useMyProperties();
