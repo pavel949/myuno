@@ -13,6 +13,7 @@ import { matchesFilter, matchesPriceLevel } from '@/lib/filterUtils';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { VerticalContextBanner } from '@/components/vertical/VerticalContextBanner';
+import { ConciergeHelpCTA } from '@/components/concierge/ConciergeHelpCTA';
 import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
 
 const categories = [
