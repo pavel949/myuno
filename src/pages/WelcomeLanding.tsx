@@ -59,8 +59,15 @@ import {
 } from '@/components/landings/LandingPrimitives';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 
-type Bi = { ru: string; en: string };
-const tx = (isRu: boolean, v: Bi) => (isRu ? v.ru : v.en);
+type Bi = { ru: string; en: string; th?: string };
+type Lang = 'ru' | 'en' | 'th';
+/** Pick localized string. Fallback chain: requested → en → ru. */
+const tx = (lang: Lang, v: Bi): string => {
+  if (lang === 'th' && v.th) return v.th;
+  if (lang === 'en') return v.en;
+  if (lang === 'ru') return v.ru;
+  return v.en || v.ru;
+};
 
 /** Russian plural for «N сервис(а/ов)». */
 function pluralRu(n: number, forms: [string, string, string]): string {
@@ -286,32 +293,30 @@ export default function WelcomeLanding() {
     return () => io.disconnect();
   }, []);
 
+  const statLabel = (ru: string, en: string, th: string) =>
+    language === 'ru' ? ru : language === 'th' ? th : en;
+
   const heroStats = [
-    {
-      num: String(totalEligibleServices),
-      label: isRu ? 'сервисов' : 'services',
-    },
-    {
-      num: String(clustersCount),
-      label: isRu ? 'разделов' : 'sections',
-    },
-    {
-      num: String(totalActiveLifeSituations),
-      label: isRu ? 'жизненных ситуаций' : 'life situations',
-    },
-    { num: '24/7', label: isRu ? 'поддержка' : 'support' },
+    { num: String(totalEligibleServices), label: statLabel('сервисов', 'services', 'บริการ') },
+    { num: String(clustersCount), label: statLabel('разделов', 'sections', 'หมวด') },
+    { num: String(totalActiveLifeSituations), label: statLabel('жизненных ситуаций', 'life situations', 'สถานการณ์ชีวิต') },
+    { num: '24/7', label: statLabel('поддержка', 'support', 'ตลอด 24 ชม.') },
   ];
 
-  const ecosystemHeading = isRu
-    ? `${pluralRu(clustersCount, ['раздел', 'раздела', 'разделов'])}, ${pluralRu(
-        totalEligibleServices,
-        ['сервис', 'сервиса', 'сервисов'],
-      )} — один аккаунт`
-    : `${clustersCount} sections, ${totalEligibleServices} services — one account`;
+  const ecosystemHeading =
+    language === 'ru'
+      ? `${pluralRu(clustersCount, ['раздел', 'раздела', 'разделов'])}, ${pluralRu(
+          totalEligibleServices,
+          ['сервис', 'сервиса', 'сервисов'],
+        )} — один аккаунт`
+      : language === 'th'
+        ? `${clustersCount} หมวด, ${totalEligibleServices} บริการ — บัญชีเดียว`
+        : `${clustersCount} sections, ${totalEligibleServices} services — one account`;
 
   const heroSubtitle: Bi = {
     ru: `Экосистема myUNO объединяет ${totalEligibleServices} проверенных сервисов для иностранцев и местных бизнесов, готовых их обслуживать — в одном аккаунте, на русском, английском и тайском.`,
     en: `The myUNO ecosystem brings together ${totalEligibleServices} vetted services for foreigners and the local businesses that serve them — in one account, in Russian, English and Thai.`,
+    th: `ระบบนิเวศ myUNO รวบรวม ${totalEligibleServices} บริการที่ได้รับการตรวจสอบสำหรับชาวต่างชาติ และธุรกิจท้องถิ่นที่พร้อมให้บริการ — ในบัญชีเดียว ทั้งภาษารัสเซีย อังกฤษ และไทย`,
   };
 
   return (
@@ -342,7 +347,7 @@ export default function WelcomeLanding() {
           >
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
             <span className="font-semibold text-foreground">myUNO</span>
-            <span>{tx(isRu, { ru: 'инфраструктура для жизни', en: 'infrastructure for living' })}</span>
+            <span>{tx(language, { ru: 'инфраструктура для жизни', en: 'infrastructure for living' })}</span>
           </motion.div>
 
           <motion.h1
@@ -351,9 +356,9 @@ export default function WelcomeLanding() {
             transition={{ duration: 0.5, delay: 0.05 }}
             className="font-display mt-5 max-w-3xl text-h1 font-normal leading-[1.05] tracking-tight sm:text-display"
           >
-            {tx(isRu, { ru: 'Инфраструктура для жизни', en: 'Infrastructure for living' })}
+            {tx(language, { ru: 'Инфраструктура для жизни', en: 'Infrastructure for living', th: 'โครงสร้างพื้นฐานสำหรับการใช้ชีวิต' })}
             <br />
-            {tx(isRu, { ru: 'на Пхукете', en: 'on Phuket' })}
+            {tx(language, { ru: 'на Пхукете', en: 'on Phuket', th: 'บนเกาะภูเก็ต' })}
           </motion.h1>
 
           <motion.p
@@ -362,7 +367,7 @@ export default function WelcomeLanding() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mt-4 max-w-2xl font-sans text-body-lg font-normal leading-relaxed text-muted-foreground"
           >
-            {tx(isRu, heroSubtitle)}
+            {tx(language, heroSubtitle)}
           </motion.p>
 
           <motion.div
@@ -380,7 +385,7 @@ export default function WelcomeLanding() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
-              {tx(isRu, { ru: 'Создать аккаунт', en: 'Create account' })}
+              {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
             <Link
@@ -392,17 +397,17 @@ export default function WelcomeLanding() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
-              {tx(isRu, { ru: 'Стать партнёром', en: 'Become a partner' })}
+              {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
             </Link>
           </motion.div>
 
           <p className="mt-3 font-sans text-caption text-muted-foreground">
-            {tx(isRu, { ru: 'Уже есть аккаунт — ', en: 'Already registered — ' })}
+            {tx(language, { ru: 'Уже есть аккаунт — ', en: 'Already registered — ', th: 'มีบัญชีอยู่แล้ว — ' })}
             <Link
               to={APP_ROUTES.AUTH}
               className="underline underline-offset-4 hover:text-foreground"
             >
-              {tx(isRu, { ru: 'войти', en: 'sign in' })}
+              {tx(language, { ru: 'войти', en: 'sign in', th: 'เข้าสู่ระบบ' })}
             </Link>
           </p>
 
@@ -430,7 +435,7 @@ export default function WelcomeLanding() {
       <LandingSection>
         <LandingContainer className="py-8 sm:py-10">
           <p className="mb-4 font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-            {tx(isRu, { ru: 'Я пришёл за…', en: 'I am here to…' })}
+            {tx(language, { ru: 'Я пришёл за…', en: 'I am here to…', th: 'ฉันมาเพื่อ…' })}
           </p>
           <div className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2">
             <a
@@ -440,10 +445,10 @@ export default function WelcomeLanding() {
               <Compass className="mt-1 h-5 w-5 shrink-0 text-primary" strokeWidth={1.75} />
               <div className="min-w-0 flex-1">
                 <div className="font-sans text-h4 font-medium tracking-tight text-foreground">
-                  {tx(isRu, { ru: 'Решить свой вопрос', en: 'Resolve my own matter' })}
+                  {tx(language, { ru: 'Решить свой вопрос', en: 'Resolve my own matter', th: 'แก้ไขเรื่องของฉัน' })}
                 </div>
                 <div className="mt-1 font-sans text-body-sm text-muted-foreground">
-                  {tx(isRu, {
+                  {tx(language, {
                     ru: 'Найти нужный сервис, получить сопровождение, оформить заявку.',
                     en: 'Find the right service, get support, submit a request.',
                   })}
@@ -458,10 +463,10 @@ export default function WelcomeLanding() {
               <Briefcase className="mt-1 h-5 w-5 shrink-0 text-primary" strokeWidth={1.75} />
               <div className="min-w-0 flex-1">
                 <div className="font-sans text-h4 font-medium tracking-tight text-foreground">
-                  {tx(isRu, { ru: 'Предложить свои услуги', en: 'Offer my services' })}
+                  {tx(language, { ru: 'Предложить свои услуги', en: 'Offer my services', th: 'เสนอบริการของฉัน' })}
                 </div>
                 <div className="mt-1 font-sans text-body-sm text-muted-foreground">
-                  {tx(isRu, {
+                  {tx(language, {
                     ru: 'Подключиться к экосистеме как проверенный исполнитель.',
                     en: 'Join the ecosystem as a verified provider.',
                   })}
@@ -479,10 +484,10 @@ export default function WelcomeLanding() {
           <span id="for-audiences" className="block -mt-20 pt-20" aria-hidden />
           <div className="mb-8 max-w-2xl space-y-3">
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(isRu, { ru: 'Для кого экосистема', en: 'Who the ecosystem is for' })}
+              {tx(language, { ru: 'Для кого экосистема', en: 'Who the ecosystem is for', th: 'ระบบนิเวศนี้สำหรับใคร' })}
             </h2>
             <p className="font-sans text-body-sm font-normal leading-relaxed text-muted-foreground">
-              {tx(isRu, {
+              {tx(language, {
                 ru: 'Каждая из аудиторий получает свой набор сервисов и сопровождение. Один аккаунт — для всех ролей в одной жизни.',
                 en: 'Each audience gets a tailored set of services and support. One account covers every role in one life.',
               })}
@@ -504,22 +509,22 @@ export default function WelcomeLanding() {
                       <Icon className="h-5 w-5" strokeWidth={1.75} />
                     </span>
                     <h3 className="font-sans text-h4 font-medium tracking-tight text-foreground">
-                      {tx(isRu, a.title)}
+                      {tx(language, a.title)}
                     </h3>
                   </div>
                   <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
-                    {tx(isRu, a.lead)}
+                    {tx(language, a.lead)}
                   </p>
                   <ul className="mt-1 space-y-1.5 font-sans text-body-sm text-foreground/85">
                     {a.tasks.map((task, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <CircleDot className="mt-1 h-3 w-3 shrink-0 text-muted-foreground" strokeWidth={2} />
-                        <span>{tx(isRu, task)}</span>
+                        <span>{tx(language, task)}</span>
                       </li>
                     ))}
                   </ul>
                   <span className="mt-auto inline-flex items-center gap-1 pt-3 font-sans text-caption font-medium uppercase tracking-[0.12em] text-foreground transition-transform group-hover:translate-x-0.5">
-                    {tx(isRu, { ru: 'Перейти в раздел', en: 'Open section' })}
+                    {tx(language, { ru: 'Перейти в раздел', en: 'Open section' })}
                     <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
                   </span>
                 </Link>
@@ -534,7 +539,7 @@ export default function WelcomeLanding() {
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(isRu, { ru: 'Что входит в экосистему', en: 'What the ecosystem includes' })}
+              {tx(language, { ru: 'Что входит в экосистему', en: 'What the ecosystem includes', th: 'สิ่งที่อยู่ในระบบนิเวศ' })}
             </h2>
             <p className="font-sans text-body-sm font-normal leading-relaxed text-muted-foreground">
               {ecosystemHeading}.
@@ -584,7 +589,7 @@ export default function WelcomeLanding() {
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl">
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(isRu, { ru: 'Как это работает', en: 'How it works' })}
+              {tx(language, { ru: 'Как это работает', en: 'How it works', th: 'ทำงานอย่างไร' })}
             </h2>
           </div>
           <ol className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-3">
@@ -594,7 +599,7 @@ export default function WelcomeLanding() {
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <p className="font-sans text-body leading-relaxed text-foreground">
-                  {tx(isRu, step)}
+                  {tx(language, step)}
                 </p>
               </li>
             ))}
@@ -607,10 +612,10 @@ export default function WelcomeLanding() {
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl">
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(isRu, { ru: 'Доверие и данные', en: 'Trust & data' })}
+              {tx(language, { ru: 'Доверие и данные', en: 'Trust & data', th: 'ความน่าเชื่อถือและข้อมูล' })}
             </h2>
             <p className="mt-3 font-sans text-body-sm leading-relaxed text-muted-foreground">
-              {tx(isRu, {
+              {tx(language, {
                 ru: 'Сухие факты, без обещаний. Подробнее — в разделах «Конфиденциальность» и «Условия».',
                 en: 'Facts, not promises. See Privacy and Terms for details.',
               })}
@@ -622,7 +627,7 @@ export default function WelcomeLanding() {
               return (
                 <div key={i} className="flex items-center gap-3 bg-background p-5">
                   <Icon className="h-5 w-5 shrink-0 text-foreground" />
-                  <span className="font-sans text-body-sm text-foreground">{tx(isRu, f.text)}</span>
+                  <span className="font-sans text-body-sm text-foreground">{tx(language, f.text)}</span>
                 </div>
               );
             })}
@@ -636,10 +641,10 @@ export default function WelcomeLanding() {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_minmax(0,1.2fr)]">
             <div className="space-y-3">
               <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-                {tx(isRu, { ru: 'Помощь в экстренной ситуации', en: 'Help in an emergency' })}
+                {tx(language, { ru: 'Помощь в экстренной ситуации', en: 'Help in an emergency', th: 'ความช่วยเหลือฉุกเฉิน' })}
               </h2>
               <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
-                {tx(isRu, {
+                {tx(language, {
                   ru: 'Доступно гостю без аккаунта. Запрос принимает дежурный консьерж — на русском, английском или тайском.',
                   en: 'Available without an account. A duty concierge receives the request — in Russian, English or Thai.',
                 })}
@@ -651,7 +656,7 @@ export default function WelcomeLanding() {
                 className="mt-2 inline-flex h-11 items-center gap-2 rounded-none border border-foreground bg-foreground px-5 font-sans text-body font-semibold text-background hover:bg-foreground/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <LifeBuoy className="h-4 w-4" strokeWidth={2} />
-                {tx(isRu, { ru: 'Запросить помощь', en: 'Request help' })}
+                {tx(language, { ru: 'Запросить помощь', en: 'Request help', th: 'ขอความช่วยเหลือ' })}
               </button>
             </div>
             <ul className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2">
@@ -660,7 +665,7 @@ export default function WelcomeLanding() {
                 return (
                   <li key={i} className="flex items-center gap-3 bg-background p-4">
                     <Icon className="h-4 w-4 shrink-0 text-foreground" />
-                    <span className="font-sans text-body-sm text-foreground">{tx(isRu, item.text)}</span>
+                    <span className="font-sans text-body-sm text-foreground">{tx(language, item.text)}</span>
                   </li>
                 );
               })}
@@ -676,16 +681,16 @@ export default function WelcomeLanding() {
           <span id="for-partners" className="block -mt-20 pt-20" aria-hidden />
           <div className="mb-8 max-w-3xl space-y-3">
             <p className="font-sans text-caption uppercase tracking-[0.14em] text-primary">
-              {tx(isRu, { ru: 'Для местных бизнесов', en: 'For local businesses' })}
+              {tx(language, { ru: 'Для местных бизнесов', en: 'For local businesses', th: 'สำหรับธุรกิจท้องถิ่น' })}
             </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(isRu, {
+              {tx(language, {
                 ru: 'Работайте с иностранной аудиторией по прозрачным правилам',
                 en: 'Work with an international audience by transparent rules',
               })}
             </h2>
             <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
-              {tx(isRu, {
+              {tx(language, {
                 ru: 'Экосистема myUNO открыта для проверенных исполнителей: подключение к потоку заявок, прозрачные комиссии, единая репутация.',
                 en: 'The myUNO ecosystem is open to verified providers: access to inbound, transparent fees, a single reputation across the platform.',
               })}
@@ -696,10 +701,10 @@ export default function WelcomeLanding() {
             {PARTNER_BENEFITS.map((b, i) => (
               <div key={i} className="bg-background p-6">
                 <h3 className="font-sans text-h4 font-medium tracking-tight text-foreground">
-                  {tx(isRu, b.title)}
+                  {tx(language, b.title)}
                 </h3>
                 <p className="mt-2 font-sans text-body-sm leading-relaxed text-muted-foreground">
-                  {tx(isRu, b.body)}
+                  {tx(language, b.body)}
                 </p>
               </div>
             ))}
@@ -707,9 +712,9 @@ export default function WelcomeLanding() {
 
           <div className="mb-6 border-l-2 border-border pl-4 font-sans text-body-sm leading-relaxed text-muted-foreground">
             <span className="font-medium text-foreground">
-              {tx(isRu, { ru: 'Кому подходит: ', en: 'Who can join: ' })}
+              {tx(language, { ru: 'Кому подходит: ', en: 'Who can join: ' })}
             </span>
-            {tx(isRu, PARTNER_CATEGORIES)}
+            {tx(language, PARTNER_CATEGORIES)}
           </div>
 
           <Link
@@ -717,7 +722,7 @@ export default function WelcomeLanding() {
             data-testid="welcome-cta-partner-bottom"
             className="inline-flex h-11 min-w-[200px] items-center justify-center gap-2 rounded-none bg-primary px-5 font-sans text-body font-semibold text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            {tx(isRu, { ru: 'Стать партнёром', en: 'Become a partner' })}
+            {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
             <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
           </Link>
         </LandingContainer>
@@ -729,16 +734,16 @@ export default function WelcomeLanding() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="max-w-2xl space-y-3">
               <p className="font-sans text-caption uppercase tracking-[0.14em] text-primary">
-                {tx(isRu, { ru: 'Для застройщиков', en: 'For developers' })}
+                {tx(language, { ru: 'Для застройщиков', en: 'For developers', th: 'สำหรับผู้พัฒนาโครงการ' })}
               </p>
               <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-                {tx(isRu, {
+                {tx(language, {
                   ru: 'Прозрачная витрина и независимая проверка проекта',
                   en: 'A transparent showcase and independent project review',
                 })}
               </h2>
               <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
-                {tx(isRu, {
+                {tx(language, {
                   ru: 'Профиль проекта, методология ClearView и поток квалифицированных заявок от иностранной аудитории. Регистрация — через лендинг для застройщиков.',
                   en: 'Project profile, ClearView methodology and qualified inbound from international buyers. Registration via the developer landing.',
                 })}
@@ -749,7 +754,7 @@ export default function WelcomeLanding() {
               data-testid="welcome-cta-developers"
               className="inline-flex h-11 items-center justify-center gap-2 rounded-none border border-foreground px-5 font-sans text-body font-medium text-foreground hover:bg-foreground hover:text-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
-              {tx(isRu, { ru: 'Портал застройщика', en: 'Developer portal' })}
+              {tx(language, { ru: 'Портал застройщика', en: 'Developer portal' })}
               <ArrowRight className="h-4 w-4" strokeWidth={2} />
             </Link>
           </div>
@@ -761,12 +766,12 @@ export default function WelcomeLanding() {
       <LandingSection border={false}>
         <LandingContainer className="mx-auto max-w-3xl py-16 text-center sm:py-24">
           <h2 className="font-display text-h1 font-normal leading-[1.05] tracking-tight sm:text-display">
-            {tx(isRu, { ru: 'Один аккаунт —', en: 'One account —' })}
+            {tx(language, { ru: 'Один аккаунт —', en: 'One account —', th: 'บัญชีเดียว —' })}
             <br />
-            {tx(isRu, { ru: 'вся жизнь на Пхукете', en: 'a full life on Phuket' })}
+            {tx(language, { ru: 'вся жизнь на Пхукете', en: 'a full life on Phuket', th: 'ชีวิตทั้งหมดบนภูเก็ต' })}
           </h2>
           <p className="mt-4 font-sans text-body-sm text-muted-foreground sm:text-body">
-            {tx(isRu, {
+            {tx(language, {
               ru: 'Создайте аккаунт за минуту или подайте заявку на подключение бизнеса. Без обязательств.',
               en: 'Create an account in a minute, or apply to join as a business. No commitments.',
             })}
@@ -780,7 +785,7 @@ export default function WelcomeLanding() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
-              {tx(isRu, { ru: 'Создать аккаунт', en: 'Create account' })}
+              {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
             <Link
@@ -791,7 +796,7 @@ export default function WelcomeLanding() {
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               )}
             >
-              {tx(isRu, { ru: 'Стать партнёром', en: 'Become a partner' })}
+              {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
             </Link>
           </div>
 
@@ -800,19 +805,19 @@ export default function WelcomeLanding() {
             className="mt-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 font-sans text-caption text-muted-foreground"
           >
             <Link to={APP_ROUTES.PRIVACY} className="hover:text-foreground transition-colors">
-              {tx(isRu, { ru: 'Конфиденциальность', en: 'Privacy' })}
+              {tx(language, { ru: 'Конфиденциальность', en: 'Privacy' })}
             </Link>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <Link to={APP_ROUTES.TERMS} className="hover:text-foreground transition-colors">
-              {tx(isRu, { ru: 'Условия', en: 'Terms' })}
+              {tx(language, { ru: 'Условия', en: 'Terms' })}
             </Link>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <Link to={APP_ROUTES.SUPPORT} className="hover:text-foreground transition-colors">
-              {tx(isRu, { ru: 'Поддержка', en: 'Support' })}
+              {tx(language, { ru: 'Поддержка', en: 'Support' })}
             </Link>
             <span aria-hidden className="text-muted-foreground/40">·</span>
             <Link to={APP_ROUTES.CONTACT} className="hover:text-foreground transition-colors">
-              {tx(isRu, { ru: 'Контакты', en: 'Contact' })}
+              {tx(language, { ru: 'Контакты', en: 'Contact' })}
             </Link>
           </nav>
 
@@ -831,7 +836,7 @@ export default function WelcomeLanding() {
             data-testid="welcome-sticky-partner"
             className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-none border border-foreground bg-foreground font-sans text-body font-semibold text-background"
           >
-            {tx(isRu, { ru: 'Стать партнёром', en: 'Become a partner' })}
+            {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
             <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
           </Link>
         ) : (
@@ -840,7 +845,7 @@ export default function WelcomeLanding() {
             data-testid="welcome-sticky-signup"
             className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-none bg-primary font-sans text-body font-semibold text-primary-foreground"
           >
-            {tx(isRu, { ru: 'Создать аккаунт', en: 'Create account' })}
+            {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
             <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
           </Link>
         )}
@@ -850,7 +855,7 @@ export default function WelcomeLanding() {
         open={helpOpen}
         onOpenChange={setHelpOpen}
         topic="general"
-        initialSubject={isRu ? 'Экстренная помощь' : 'Emergency assistance'}
+        initialSubject={language === 'ru' ? 'Экстренная помощь' : language === 'th' ? 'ความช่วยเหลือฉุกเฉิน' : 'Emergency assistance'}
         sourceData={{ source_page: 'welcome_landing', emergency: true }}
       />
     </div>
