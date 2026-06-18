@@ -1,102 +1,158 @@
 
-# План: финансы, админка, навигатор
+# План: Navigator + Owners Landing (Civic-grade SuperApp)
 
-Объём огромный (БД 400+ таблиц, 82 admin-страницы, 13 вертикалей). Разбиваю на 4 волны. Каждая волна — атомарный мердж, можно остановиться после любой.
+Принцип: спокойная авторитетность как GOV.UK / e-Estonia / Apple support. Минимум выбора, максимум ясности. Каждый экран отвечает на 1 вопрос: «что мне сейчас сделать?».
 
-## Текущее состояние (факты из БД)
-- `payment_intents`: 7 всего, **0 succeeded** → платёжный цикл не закрыт
-- `orders`: 217, из них 185 `confirmed`, но `vendor_payout_amount=0` и `ledger_entries` (88 шт.) не связаны с orders
-- `vendor_prospects` / `partner_applications`: **0 заявок за 30 дней** → онбоардинг не используется
-- `moderation_queue`: пустая → нет единой очереди модерации
-- 82 страницы `/admin/*` — фрагментировано, нет инбокса и единого списка партнёров
-- `/discover` (NavigatorPageV3): плоская сетка situations без группировки по кластерам и контекста выдачи — клиент не понимает что и почему ему показывается
+## 0. Дизайн-контракт (применяется ко всему ниже)
 
----
-
-## Волна 1 — Навигатор (UX critical, делаем первым)
-
-**Проблема:** плоский grid `life_situations` без структуры. Нет понимания «где я / зачем эта карточка / куда ведёт».
-
-**Что меняем в `NavigatorPageV3.tsx`:**
-1. Группировка situations по 6 surface-кластерам Master Taxonomy (Arrive / Live / Manage / Invest / Legal / Build) с заголовками-секциями и иконками.
-2. Над сеткой — sticky cluster-tabs (chip-row) для быстрого скролла к секции.
-3. Каждая `SituationCard` получает:
-   - бейдж кластера (цвет из `--accent-*`)
-   - явный счётчик услуг из `useSituationServiceCounts`
-   - короткий «outcome» (что получит клиент), а не описание ситуации
-4. Hero-блок сверху: «Что вам нужно сегодня?» + 3 promoted-карточки на основе persona + поисковая строка остаётся.
-5. Empty/error states: вместо «нет ситуаций» — fallback на 6 кластеров напрямую с CTA «связаться с консьержем».
-6. Map-link переезжает в hero (не в правый угол header).
-
-**Файлы:** `NavigatorPageV3.tsx`, `SituationCard.tsx`, `useSituationServiceCounts.ts` (добавить cluster-grouping), новый `src/components/navigation/v3/NavigatorClusterSection.tsx`.
+- Свет по умолчанию (`#F7F5F1` cream, `#1C1916` ink, navy primary, orange accent ≤3%).
+- Углы `--radius: 0`, без mint, без glow, без декоративных градиентов.
+- Source Serif 4 заголовки / Geist UI / IBM Plex Mono для цифр.
+- Один акцент на экран, один primary CTA, всё остальное secondary/ghost.
+- Все цифры (счётчики ситуаций, цены) — табличные mono, выровненные.
+- Мобильно: 375px first, touch ≥44px, Sheet вместо Dialog.
 
 ---
 
-## Волна 2 — P0: Финансы (критика)
+## 1. NAVIGATOR / DISCOVER — новая архитектура
 
-1. **Edge function `stripe-webhook`**: после `payment_intent.succeeded` гарантированно вызывать `record_ledger_entries(order_id)`. Проверить idempotency.
-2. **RPC `record_ledger_entries`**: убедиться что пишет 3 ноги — `platform_fee`, `vendor_payout`, опционально `mc_commission`. Связь с `orders.id` через `ledger_entries.reference_id`.
-3. **Backfill миграция**: для всех `orders.status='confirmed'` без `ledger_entries` — посчитать `vendor_payout_amount` из `vertical_commission_rules` и пересоздать записи.
-4. **`reconciliation_alerts` cron**: ежедневный edge function `reconciliation-daily` сравнивает orders vs ledger и пишет alerts.
+### 1.1. Что починим в данных (Wave 1, миграции)
 
-**Миграции:** `add_ledger_backfill`, `add_reconciliation_cron`.
+1. Засинхронить DB `cluster_life_situations` со статическим SSOT (добавить ~16 строк, проставить `is_primary`). После этого статический массив `CLUSTER_LIFE_SITUATIONS` помечается deprecated, навигатор читает из DB.
+2. Деактивировать дубликаты (`pets` vs `pet_owner`, `property` vs `property_owner`), удалить 129 orphan-маппингов на неактивные ситуации.
+3. Удалить 526 битых ссылок в `catalog_life_map` (entity_type `service`, `transfer` — 448 строк + 78 точечных). Гибрид: чистка сейчас, починка view — отдельной задачей.
+4. Добавить ситуацию `management_company` (для УК) и `vendor_onboarding` (для провайдеров).
+5. Проставить `role_scope` для критичных кластеров: `manage` → `['owner','mc']`, `build` → `['developer']`, `work` → `['vendor']`.
 
----
+### 1.2. Роли (Wave 2)
 
-## Волна 3 — P0/P1: Админка
+Расширить `useLifeOSRole` с 4 до 7 значений:
+```
+guest · resident · owner · mc · investor · developer · vendor
+```
+Маппинг 17 `app_role` → 7 LifeOSRole в одной функции (см. матрицу в аудите).
 
-**3.1 Унифицированный Inbox `/admin/inbox`** (новая страница)
-- Источники: `partner_applications`, `vendor_prospects`, `moderation_queue`, `listing_applications`, `property_inquiries`, `consultation_requests`, `nb_leads`
-- Tabs: «Новые / В работе / Эскалация / Закрытые»
-- Bulk-actions: approve / reject / assign / снять с очереди
-- Realtime через Supabase channel
-- Заменяет 6+ разрозненных страниц
+RPC `resolve_life_os_context` дополнить:
+- параметр `count_only` (bool) — для счётчиков карточек,
+- фильтр по `audience` кластера.
 
-**3.2 Унифицированный `/admin/providers`** (новая страница)
-- Single table: `providers` + join с `marketplace_vendors` + `vendor_subscriptions`
-- Фильтры по vertical, статусу, рейтингу ClearView, выручке
-- Inline-actions: pause / verify / open card
-- Заменяет AdminSalons / AdminCleaning / AdminClinics / AdminPharmacies / AdminGyms / AdminFlowers / AdminPets / AdminExperiences / AdminEvents / AdminTransport (~10 страниц)
+### 1.3. UX навигатора (Wave 3)
 
-**3.3 Унифицированный `<OfferCardEditor />`** компонент
-- Один редактор для всех вертикалей (медиа, цены, описания, ClearView, RU/EN/TH локали)
-- Подключается из карточки provider'а и из вертикальных страниц как fallback
-- Использует JSONB `listings.attributes` для vertical-specific полей
+`/discover` — одна вертикальная лента, без табов:
 
-**3.4 `/admin/dashboard` редизайн**
-- KPI ленты: GMV, заявки сегодня, payout pending, reconciliation alerts
-- Quick-links на Inbox + Providers + Finance
+```text
+┌─────────────────────────────────────┐
+│  Здравствуйте, [имя]                │  ← персонализация
+│  Ваши роли: [Собственник] [edit]    │  ← 1 chip-row, кнопка edit → Sheet
+│                                     │
+│  ── Для вас сейчас ─────────────    │  ← top-3 ranked, крупные карточки
+│  [ Ситуация А ]                     │
+│  [ Ситуация Б ]                     │
+│  [ Ситуация В ]                     │
+│                                     │
+│  ── Прибытие · 4 ──────────────     │  ← compact rows, не grid
+│   →  Турист              · 273      │
+│   →  Первый раз          ·  42      │
+│  ── Жизнь · 8 ─────────────────     │
+│   →  Резидент            · 156      │
+│   ...                               │
+│  ── Управление · 4 ────[owner]──    │  ← роле-гейт, скрыт у guest
+│  ── Инвестиции · 2 ────────────     │
+│  ── Документы · 3 ─────────────     │
+│  ── Девелопмент · 1 ──[dev]────     │
+└─────────────────────────────────────┘
+```
 
----
+Ключевое:
+- Никаких ярких цветных карточек на кластер — только нейтральный фон, тонкая линия-разделитель, mono-счётчик справа.
+- Один источник числа: badge = тот же RPC count, что детальная страница (никакого client-side aggregate из 1983 строк).
+- Скрытие кластеров по роли (manage скрыт от туриста, build от не-developer).
+- Связанные ситуации на детальной странице берут `next_routes` из `lifeos_routes` (16 строк, сейчас не используются).
 
-## Волна 4 — P2: Cleanup
-
-1. Пометить seed-данные: добавить `orders.is_seed` boolean, проставить true для всех существующих confirmed с `vendor_payout_amount=0` И `created_at < 2026-04-01`.
-2. Smoke-test lead-форм через `lead_magnet_submissions` insert + проверка RLS allow `anon`.
-3. Удалить (или редиректнуть) 10 устаревших vertical-admin страниц, заменённых Providers.
-
----
-
-## Технические детали
-- Все новые маршруты добавить в `src/lib/config/routes.ts` (`APP_ROUTES.admin.inbox`, `.providers`)
-- Reuse `MiniAppLayout` для админских страниц
-- React Query + Supabase generated types, никаких новых клиентов
-- Семантические токены DS 2.1, никаких хардкод-цветов
-- RLS: новые SELECT-запросы под `has_role(auth.uid(), 'admin')`
-- WhatsApp CTA — везде `+66922407355` (canonical)
-
-## Порядок мерджа
-1. Волна 1 (Навигатор) — самостоятельно, безопасно
-2. Волна 2 (Финансы) — backfill в read-only режиме сначала, потом write
-3. Волна 3.1 (Inbox) → 3.2 (Providers) → 3.3 (Editor) → 3.4 (Dashboard)
-4. Волна 4 (Cleanup) — после прохождения 1-2 недель на новых страницах
-
-## Что НЕ делаем сейчас
-- Не трогаем `/market` (по предыдущей договорённости)
-- Не меняем Stripe pricing/тарифы
-- Не мигрируем существующие 82 admin-страницы целиком — только консолидируем те, что покрыты Providers/Inbox
-- Не правим schema `properties` (281 колонка — отдельная задача)
+### 1.4. Что НЕ делаем сейчас (out of scope)
+- Бридж `UserPersona` (14) ↔ `PersonaCode` (25, P01–P25) — отдельная задача.
+- Починка view `life_os_catalog` (вернуть service + transfer как entity).
+- Полное удаление статического SSOT — только пометка deprecated.
 
 ---
 
-**Подтверди — стартую Волну 1 (Навигатор) сразу после approve.** Дальше волны идут последовательно, каждую закрываю отдельным сообщением чтобы можно было ревьюить.
+## 2. /FOR-OWNERS — единый landing для собственников и УК
+
+Один URL `/for-owners`, две дорожки на одной странице. `/for-management-companies` остаётся для глубокого B2B SaaS-пресейла и линкуется из секции «Управляю 5+ объектами».
+
+### 2.1. Структура страницы
+
+```text
+HERO
+  H1: Ваша недвижимость — под контролем
+  Sub: Сдавайте сами через myUNO PMS или передайте нам в управление.
+       Отчёты, гости, уборка, финансы — в одном месте.
+  [Передать в управление] [Управлять самому]   ← 1 primary + 1 secondary
+
+TWO PATHS  (2 равные колонки на desktop, stack на mobile)
+  ┌── Передать нам ──────────┐  ┌── Управлять самому ──┐
+  │ Full Management 70/30    │  │ myUNO PMS · $25/объект│
+  │ • Поиск гостей           │  │ • Календарь + iCal    │
+  │ • Уборка и checkin       │  │ • Финансы + отчёты    │
+  │ • Ежемесячный отчёт      │  │ • Channel manager     │
+  │ [Оставить заявку]        │  │ [Открыть кабинет]     │
+  └──────────────────────────┘  └───────────────────────┘
+
+WHAT YOU GET (6 строк, иконка + 1 предложение, без картинок)
+  Отчёты · Гости · Уборка · Финансы · Каналы · Команда
+
+PRICING (компактная таблица, mono цифры)
+  Self-Service   Starter $199/мес · до 5 объектов
+  Self-Service   Pro     $399/мес · до 15 объектов  [Рекомендуем]
+  Full Service   70/30   · мы делаем всё
+  → Сравнить с тарифами для УК (5+ объектов) → /for-management-companies
+
+REFERRAL (для залогиненных собственников)
+  «Пригласите соседа — получите 1 месяц PMS бесплатно»
+  [https://myuno.app/auth?ref=ABC123] [Скопировать] [Поделиться]
+  ← OwnerReferralCard, использует существующий useReferral
+
+FAQ (5 вопросов, accordion)
+
+CTA FOOTER
+  [Передать в управление]  ·  WhatsApp Pavel
+```
+
+### 2.2. Owner-to-Owner invite
+
+- Новый компонент `OwnerReferralCard` поверх существующего `useReferral` (RPC `generate_referral_code` уже есть, ничего на бэке менять не нужно).
+- Размещение: на `/for-owners` (для авторизованных), на `/owner` (dashboard), один раз в `OwnerPropertiesPage` после добавления первого объекта.
+- Скоуп `owner_referral` в `referral_codes` — для аналитики, без изменений схемы.
+
+### 2.3. Регистрация маршрута
+- `/for-owners` → `src/pages/ForOwners.tsx` (уже начат в предыдущей итерации, доделать по этому контракту).
+- Зарегистрировать в `AnimatedRoutes.tsx`, добавить в `APP_ROUTES`, в `pageRegistry`.
+- Поставить ссылку в:
+  - `WelcomePersonaRouter` (карточка «У меня есть недвижимость»),
+  - `AudienceEntries` (рейл «Собственникам»),
+  - `AccountFlatMenu` для роли owner.
+
+---
+
+## 3. Волны исполнения
+
+| Wave | Что | Файлы (ориентир) |
+|---|---|---|
+| **1. Data cleanup** | миграции: sync `cluster_life_situations`, чистка orphan-маппингов, новые ситуации `management_company`/`vendor_onboarding`, `role_scope` для manage/build | 1 SQL миграция |
+| **2. Role + RPC** | `useLifeOSRole` → 7 ролей; RPC `resolve_life_os_context` + `count_only`/`audience` | `src/hooks/useLifeOS.ts`, 1 SQL миграция |
+| **3. Navigator UI** | редизайн `NavigatorPageV3` под civic-стиль, role-gated кластеры, единый счётчик через RPC, секция «Для вас», `lifeos_routes` на детальной | `NavigatorPageV3.tsx`, `NavigatorClusterSection.tsx`, `SituationCard.tsx`, `SituationDetailPage.tsx`, `useSituationServiceCounts.ts` (удалить или переписать) |
+| **4. /for-owners** | landing + `OwnerReferralCard` + регистрация маршрута и ссылок | `src/pages/ForOwners.tsx`, `src/components/referral/OwnerReferralCard.tsx`, `AnimatedRoutes.tsx`, `routes.ts`, `pageRegistry.ts`, `AudienceEntries.tsx`, `WelcomePersonaRouter.tsx`, `AccountFlatMenu.tsx` |
+| **5. QA** | прогон 5 ролями (guest, resident, owner, mc, developer), mobile 375px | — |
+
+**Рекомендую:** делать строго по порядку Wave 1 → 5, в одном PR. Так данные, роли и UI согласованы в каждом коммите, и /for-owners выходит вместе с чистым навигатором. Альтернатива «landing сначала» оставит навигатор в текущем виде с битыми счётчиками — клиента это запутает сильнее, чем отсутствие landing'а.
+
+## 4. Acceptance criteria
+
+- Счётчик на карточке ситуации = количество карточек на её детальной странице. Всегда.
+- Турист (guest) не видит кластеры Manage, Build, Work.
+- Owner видит Manage по умолчанию первым.
+- MC (новая роль) видит ситуацию `management_company` в Manage.
+- `/for-owners` открывается с мобильного 375px без горизонтального скролла, primary CTA выше fold.
+- Авторизованный owner на `/for-owners` видит свой реферальный код в 1 клик копируется.
+- Все цвета через токены, ни одного hex в JSX.
+- Lighthouse mobile перфоманс ≥ 85 на `/discover` и `/for-owners`.
