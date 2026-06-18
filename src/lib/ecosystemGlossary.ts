@@ -149,7 +149,7 @@ export const ECOSYSTEM_APP_TRIPLET: Record<string, LocalizedTriplet> = {
   'services-pest': { ru: 'Дезинсекция', en: 'Pest control', th: 'กำจัดแมลง' },
   'services-handyman': { ru: 'Мастер на час', en: 'Handyman', th: 'ช่างซ่อม' },
   'services-locksmith': { ru: 'Замки и ключи', en: 'Locksmith', th: 'ช่างกุญแจ' },
-  'vip-concierge': { ru: 'VIP Консьерж', en: 'VIP Concierge', th: 'วีไอพี คอนเซียร์จ' },
+  'vip-concierge': { ru: 'myUNO VIP', en: 'myUNO VIP', th: 'myUNO VIP' },
   sos: { ru: 'Экстренная помощь', en: 'Emergency help', th: 'ช่วยเหลือฉุกเฉิน' },
   sim: { ru: 'SIM-карты', en: 'SIM cards', th: 'ซิมการ์ด' },
   exchange: { ru: 'Курсы валют', en: 'Exchange rates', th: 'อัตราแลกเปลี่ยน' },
