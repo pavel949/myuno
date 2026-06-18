@@ -787,7 +787,17 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/for/build" element={<LazyPage><Pages.BuildSurfaceLandingPage /></LazyPage>} />
         {/* Wave 4 — geo long-tail: must precede `/for/:persona` to match first. */}
         <Route path="/for/:persona/in/:area" element={<LazyPage><PersonaAreaLandingPage /></LazyPage>} />
+        {/* Wave 5 — vendor category landings (must precede `/for/:persona`). */}
+        <Route path="/for/vendor/:category" element={<LazyPage><Pages.VendorCategoryLandingPage /></LazyPage>} />
         <Route path="/for/:persona" element={<LazyPage><PersonaLandingPage /></LazyPage>} />
+
+        {/* STAYS subscription landing (PMS for management companies). */}
+        <Route path="/stays" element={<LazyPage><Pages.StaysSubscriptionLanding /></LazyPage>} />
+
+        {/* Legal vertical sub-landings (visa / company / tax). */}
+        <Route path="/legal/visa" element={<LazyPage><Pages.LegalServiceLanding /></LazyPage>} />
+        <Route path="/legal/company" element={<LazyPage><Pages.LegalServiceLanding /></LazyPage>} />
+        <Route path="/legal/tax" element={<LazyPage><Pages.LegalServiceLanding /></LazyPage>} />
 
         {/* Magnet visual-builder landings */}
         <Route path="/l/:slug" element={<LazyPage><MagnetLandingPage /></LazyPage>} />

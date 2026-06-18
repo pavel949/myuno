@@ -4,6 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 interface AdvanceRequestedState {
   orderNumber: string;
@@ -66,7 +67,7 @@ const AdvanceRequested = () => {
     const message = language === 'ru'
       ? `Здравствуйте! У меня вопрос по запросу на предоплату. Номер заказа: ${state.orderNumber}`
       : `Hello! I have a question about my advance payment request. Order number: ${state.orderNumber}`;
-    window.open(`https://wa.me/66123456789?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(getWhatsAppUrl(message), '_blank');
   };
 
   return (

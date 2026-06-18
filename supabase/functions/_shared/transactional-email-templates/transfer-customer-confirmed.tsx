@@ -108,8 +108,8 @@ export const template = {
     meetingPointMapUrl: 'https://maps.google.com/?q=8.1132,98.3169',
     operatorContactLabel: '📱 Контакт оператора',
     operatorName: 'Klod',
-    operatorWa: '66 99 999 9999',
-    operatorWaLink: 'https://wa.me/66999999999',
+    operatorWa: '+66 92 240 7355',
+    operatorWaLink: 'https://wa.me/66922407355',
   },
 } satisfies TemplateEntry
 

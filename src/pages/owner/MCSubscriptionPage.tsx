@@ -20,10 +20,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet-async';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { COMPANY_CONTACTS } from '@/lib/config/contacts';
 
 const PRICE_PER_SLOT = 25;
-const WHATSAPP_NUMBER = '022407355';
-const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}`;
+const WHATSAPP_NUMBER = COMPANY_CONTACTS.whatsapp.number;
+const WHATSAPP_LINK = COMPANY_CONTACTS.whatsapp.link;
 
 interface Plan {
   id: string;
