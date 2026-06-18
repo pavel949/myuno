@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLocation as useLocationCity } from '@/contexts/LocationContext';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useConsultationRequests } from '@/hooks/useConsultationRequests';
