@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck } from '@/hooks/useAdmin';
 import { useAdminActivities } from '@/hooks/useAdminContent';
 import { VendorActivity } from '@/hooks/useVendorActivities';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
