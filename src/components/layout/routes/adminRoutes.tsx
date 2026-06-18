@@ -17,7 +17,8 @@ export const adminRoutes = (
     <Route path="/admin/trash" element={<Pages.AdminTrash />} />
     <Route path="/admin/control" element={<Pages.AdminControlCenter />} />
     <Route path="/admin/vendor-content" element={<Pages.AdminVendorContentCreator />} />
-    <Route path="/admin/analytics" element={<Navigate to="/admin/control" replace />} />
+    <Route path="/admin/analytics" element={<Pages.AdminAnalyticsDashboard />} />
+    <Route path="/admin/analytics/events" element={<Pages.AdminAnalyticsDashboard />} />
     <Route path="/admin/providers" element={<Pages.AdminProviders />} />
     <Route path="/admin/providers/:id" element={<Pages.AdminProviderDetail />} />
     <Route path="/admin/services" element={<Pages.AdminServices />} />
