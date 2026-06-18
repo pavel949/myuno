@@ -17,6 +17,8 @@ import { format } from 'date-fns';
 export default function JuristicRequestsPage() {
   const { id: propertyId } = useParams<{ id: string }>();
   const { language } = useLanguage();
+  const { symbol: curSym } = useCityCurrency();
+
   const isRu = language === 'ru';
   const navigate = useNavigate();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
