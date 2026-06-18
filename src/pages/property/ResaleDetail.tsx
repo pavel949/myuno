@@ -82,7 +82,7 @@ export default function ResaleDetail() {
     name: title,
     description: seoDescription,
     price: property.asking_price ?? undefined,
-    currency: 'THB',
+    currency: ((property as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase(),
     image: seoImage as string,
     url: canonicalUrl,
     bedrooms: property.bedrooms ?? undefined,
