@@ -27,12 +27,15 @@ interface PropertyListingCardProps {
   mode?: 'rent' | 'buy';
   isHovered?: boolean;
   onHover?: (id: string | null) => void;
+  isSelected?: boolean;
+  onSelect?: (id: string | null) => void;
   companyName?: string;
   companySlug?: string;
   className?: string;
   /** Number of nights selected (to show total price) */
   nights?: number;
 }
+
 
 const FALLBACK_IMAGE = PLACEHOLDER_IMAGES.property;
 
