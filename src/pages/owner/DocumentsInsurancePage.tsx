@@ -187,7 +187,7 @@ export default function DocumentsInsurancePage() {
                          (isRu ? 'Активен' : 'Active')}
                       </Badge>
                       {doc.expiry_date && <p className="text-xs text-muted-foreground">{format(new Date(doc.expiry_date), 'dd MMM yyyy', { locale: isRu ? ru : undefined })}</p>}
-                      {doc.coverage_amount && <p className="text-xs font-medium">฿{doc.coverage_amount.toLocaleString()}</p>}
+                      {doc.coverage_amount && <p className="text-xs font-medium">{curSym}{doc.coverage_amount.toLocaleString()}</p>}
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
