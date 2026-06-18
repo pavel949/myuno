@@ -25,26 +25,40 @@ export function LandingChrome({
 }: LandingChromeProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border/40 bg-background/80 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-        <BrandWordmark />
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <GlobalPreferencesControls
-            size="sm"
-            showCurrency={showCurrency}
-            themeVariant={themeVariant}
-          />
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 sm:px-5">
+        <div className="min-w-0 shrink-0">
+          <BrandWordmark />
+        </div>
+        <div className="flex items-center gap-0.5 sm:gap-2 shrink-0">
+          {/* Mobile: compact dropdown theme + hide currency to free space */}
+          <div className="flex sm:hidden">
+            <GlobalPreferencesControls
+              size="sm"
+              showCurrency={false}
+              themeVariant="dropdown"
+            />
+          </div>
+          {/* Desktop / tablet: full controls */}
+          <div className="hidden sm:flex">
+            <GlobalPreferencesControls
+              size="sm"
+              showCurrency={showCurrency}
+              themeVariant={themeVariant}
+            />
+          </div>
           {endSlot ?? (
             <>
               <Link
                 to={APP_ROUTES.AUTH}
-                className="hidden sm:inline-flex h-8 items-center rounded-none px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="hidden sm:inline-flex h-8 items-center rounded-none px-3 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
               >
                 {isRu ? 'Войти' : 'Sign in'}
               </Link>
               <Link
                 to={`${APP_ROUTES.AUTH}?mode=signup`}
+                aria-label={isRu ? 'Создать аккаунт' : 'Get started'}
                 className={cn(
-                  'inline-flex h-8 items-center gap-1 rounded-none px-3 text-[13px] font-semibold',
+                  'inline-flex h-8 items-center justify-center gap-1 rounded-none px-3 text-[13px] font-semibold whitespace-nowrap shrink-0',
                   'bg-foreground text-background hover:bg-foreground/90 transition-colors',
                 )}
               >
