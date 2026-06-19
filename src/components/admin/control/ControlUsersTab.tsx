@@ -292,27 +292,25 @@ export function ControlUsersTab() {
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <Trash2 className="h-3 w-3" />
-                                    {isRu ? 'Удалить' : 'Delete'}
+                                    {t('admin.users.actions.delete')}
                                   </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>
-                                      {isRu ? 'Удалить пользователя?' : 'Delete user?'}
+                                      {t('admin.users.delete.title')}
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      {isRu
-                                        ? `${profile.full_name || profile.email} будет безвозвратно удалён.`
-                                        : `${profile.full_name || profile.email} will be permanently deleted.`}
+                                      {`${profile.full_name || profile.email} ${t('admin.users.delete.descSuffix')}`}
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
-                                    <AlertDialogCancel>{isRu ? 'Отмена' : 'Cancel'}</AlertDialogCancel>
+                                    <AlertDialogCancel>{t('admin.users.actions.cancel')}</AlertDialogCancel>
                                     <AlertDialogAction
                                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                       onClick={() => invokeAction('delete', profile.id, { hard_delete: true })}
                                     >
-                                      {isRu ? 'Удалить' : 'Delete'}
+                                      {t('admin.users.actions.delete')}
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
