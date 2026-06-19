@@ -13,6 +13,24 @@ import { logger } from '@/lib/logger';
 
 export type { Language };
 
+/** True if the current language was set explicitly by the user (UI switcher). */
+export function hasExplicitLanguagePreference(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.LANGUAGE_EXPLICIT) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Mark the current language as explicitly chosen (e.g. after writing to profile). */
+export function markLanguageExplicit(): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.LANGUAGE_EXPLICIT, '1');
+  } catch {
+    /* private mode */
+  }
+}
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
