@@ -344,7 +344,7 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
       <PageHeader title={isRu ? config.titleRu : config.titleEn} showBack />
       <Button className="w-full mb-4" onClick={openCreate}>
         <Plus className="h-4 w-4 mr-2" />
-        {isRu ? 'Добавить' : 'Add'}
+        {t('admin.crud.add')}
       </Button>
 
       {isLoading ? (
