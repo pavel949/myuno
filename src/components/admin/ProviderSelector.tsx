@@ -312,7 +312,7 @@ export function ProviderSelector({
                           <span className="truncate">{provider.name}</span>
                           {!provider.is_verified && (
                             <span className="ml-auto text-xs text-warning">
-                              {isRussian ? 'не верифицирован' : 'unverified'}
+                              {t('admin.providerSelector.unverified')}
                             </span>
                           )}
                         </button>
