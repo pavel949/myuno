@@ -188,7 +188,7 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
 
   const handleSubmit = async () => {
     if (!formData.name_en) {
-      toast.error(isRu ? 'Заполните название' : 'Fill in name');
+      toast.error(t('admin.crud.fillName'));
       return;
     }
     setIsSubmitting(true);
@@ -196,15 +196,15 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
       const payload = formDataToPayload(formData, config.fields);
       if (editingItem) {
         await updateItem({ id: editingItem.id, ...payload });
-        toast.success(isRu ? 'Обновлено' : 'Updated');
+        toast.success(t('admin.crud.updated'));
       } else {
         await createItem(payload);
-        toast.success(isRu ? 'Создано' : 'Created');
+        toast.success(t('admin.crud.created'));
       }
       setIsDialogOpen(false);
       resetForm();
     } catch {
-      toast.error(isRu ? 'Ошибка сохранения' : 'Save error');
+      toast.error(t('admin.crud.saveError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -213,10 +213,10 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
   const handleDelete = async (id: string) => {
     try {
       await deleteItem(id);
-      toast.success(isRu ? 'Удалено' : 'Deleted');
+      toast.success(t('admin.crud.deleted'));
       setDeleteConfirmId(null);
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast.error(t('admin.crud.error'));
     }
   };
 
