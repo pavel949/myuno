@@ -355,7 +355,7 @@ export function ControlUsersTab() {
                 })}
                 {(!profiles || profiles.length === 0) && (
                   <div className="text-center py-6 text-sm text-muted-foreground">
-                    {isRu ? 'Пользователи не найдены' : 'No users found'}
+                    {t('admin.users.empty')}
                   </div>
                 )}
               </div>
