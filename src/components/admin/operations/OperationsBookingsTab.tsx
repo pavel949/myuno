@@ -275,14 +275,4 @@ export function OperationsBookingsTab() {
     </div>
   );
 }
-      </Card>
 
-      {/* Order Detail Sheet */}
-      <AdminOrderDetailSheet
-        orderId={selectedOrderId}
-        onClose={() => setSelectedOrderId(null)}
-        onStatusChanged={() => refetch()}
-      />
-    </div>
-  );
-}
