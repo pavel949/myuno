@@ -1117,6 +1117,8 @@ export const th: Record<string, string> = {
   'admin.orders.col.amount': 'จำนวนเงิน',
   'admin.orders.col.status': 'สถานะ',
   'admin.orders.empty': 'ไม่พบคำสั่งซื้อ',
+  'admin.orders.noDate': 'ไม่มีวันที่',
+  'admin.orders.noCustomer': 'ไม่มีลูกค้า',
   'admin.orders.statusLabel.draft': 'ฉบับร่าง',
   'admin.orders.statusLabel.pending': 'รอดำเนินการ',
   'admin.orders.statusLabel.pending_advance': 'รอเงินมัดจำล่วงหน้า',

@@ -826,6 +826,8 @@ export const en: Record<string, string> = {
   'admin.orders.col.amount': 'Amount',
   'admin.orders.col.status': 'Status',
   'admin.orders.empty': 'No orders found',
+  'admin.orders.noDate': 'No date',
+  'admin.orders.noCustomer': 'No customer',
   'admin.orders.statusLabel.draft': 'Draft',
   'admin.orders.statusLabel.pending': 'Pending',
   'admin.orders.statusLabel.pending_advance': 'Awaiting Advance',
