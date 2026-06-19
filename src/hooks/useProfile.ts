@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { createErrorHandler } from '@/lib/errorHandler';
 
 /** @deprecated Use AppRole from user_roles table instead. Kept for backward compat only. */
