@@ -210,9 +210,28 @@ export function createCheckoutHandler(config: CheckoutConfig) {
         }
 
         // Insert participants
-        if (result.participants && result.participants.length > 0) {
+        const providedParticipants = result.participants ?? [];
+        const hasPrimary = providedParticipants.some((p) => p.role === 'primary');
+
+        // Auto-backfill primary participant from auth profile if vertical didn't provide one.
+        // This ensures admin order screens always show a customer instead of "Guest".
+        if (!hasPrimary) {
+          const { data: profile } = await supabaseAdmin
+            .from('profiles')
+            .select('full_name, phone')
+            .eq('id', user.id)
+            .maybeSingle();
+          providedParticipants.push({
+            role: 'primary',
+            name: profile?.full_name || user.email?.split('@')[0] || 'Customer',
+            phone: profile?.phone ?? null,
+            email: user.email ?? null,
+          });
+        }
+
+        if (providedParticipants.length > 0) {
           await supabaseAdmin.from("order_participants").insert(
-            result.participants.map((p) => ({ order_id: orderId!, ...p })),
+            providedParticipants.map((p) => ({ order_id: orderId!, ...p })),
           );
         }
 
