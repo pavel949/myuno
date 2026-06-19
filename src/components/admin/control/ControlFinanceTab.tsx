@@ -3,14 +3,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, TrendingUp, CreditCard, Wallet, ArrowUpRight, ArrowDownRight, BarChart3 } from 'lucide-react';
+import { DollarSign, TrendingUp, CreditCard, Wallet, BarChart3 } from 'lucide-react';
 import { useAdminFinance, getVerticalLabel } from '@/hooks/useAdminFinance';
 import { cn } from '@/lib/utils';
 
 export function ControlFinanceTab() {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const { formatPrice } = useCurrency();
-  const isRu = language === 'ru';
   const { summary, byVertical, isLoading } = useAdminFinance(30);
 
   if (isLoading) {
@@ -36,40 +35,39 @@ export function ControlFinanceTab() {
 
   const metrics = [
     {
-      label: isRu ? 'Оборот (GMV)' : 'GMV',
+      label: t('admin.finance.kpi.gmv'),
       value: formatPrice(gmv),
       icon: DollarSign,
       color: 'text-foreground',
-      sub: `${orderCount} ${isRu ? 'заказов' : 'orders'}`,
+      sub: `${orderCount} ${t('admin.finance.kpi.orders')}`,
     },
     {
-      label: isRu ? 'Доход платформы' : 'Platform Revenue',
+      label: t('admin.finance.kpi.platformRevenue'),
       value: formatPrice(platformRev),
       icon: TrendingUp,
       color: 'text-success',
-      sub: `${takeRate.toFixed(1)}% ${isRu ? 'комиссия' : 'take rate'}`,
+      sub: `${takeRate.toFixed(1)}% ${t('admin.finance.kpi.takeRate')}`,
     },
     {
-      label: isRu ? 'Выплаты вендорам' : 'Vendor Payouts',
+      label: t('admin.finance.kpi.vendorPayouts'),
       value: formatPrice(vendorPay),
       icon: CreditCard,
       color: 'text-info',
       sub: pendingPay > 0
-        ? `${formatPrice(pendingPay)} ${isRu ? 'ожидает' : 'pending'}`
-        : (isRu ? 'Всё выплачено' : 'All paid'),
+        ? `${formatPrice(pendingPay)} ${t('admin.finance.kpi.pending')}`
+        : t('admin.finance.kpi.allPaid'),
     },
     {
-      label: isRu ? 'Чистый доход' : 'Net Income',
+      label: t('admin.finance.kpi.netIncome'),
       value: formatPrice(netIncome),
       icon: Wallet,
       color: netIncome >= 0 ? 'text-success' : 'text-destructive',
-      sub: isRu ? 'за 30 дней' : 'last 30 days',
+      sub: t('admin.finance.kpi.last30Days'),
     },
   ];
 
   return (
     <div className="space-y-4">
-      {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map((metric) => (
           <Card key={metric.label}>
@@ -89,13 +87,12 @@ export function ControlFinanceTab() {
         ))}
       </div>
 
-      {/* Revenue by Vertical */}
       {byVertical.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
               <BarChart3 className="h-4 w-4" />
-              {isRu ? 'Доход по вертикалям' : 'Revenue by Vertical'}
+              {t('admin.finance.byVertical')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -120,10 +117,10 @@ export function ControlFinanceTab() {
                     </div>
                     <div className="flex items-center justify-between mt-0.5">
                       <span className="text-[10px] text-muted-foreground">
-                        {v.orderCount} {isRu ? 'заказов' : 'orders'}
+                        {v.orderCount} {t('admin.finance.kpi.orders')}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
-                        {isRu ? 'Комиссия' : 'Fee'}: {formatPrice(v.platformRevenue)} ({v.takeRate.toFixed(1)}%)
+                        {t('admin.finance.feeShort')}: {formatPrice(v.platformRevenue)} ({v.takeRate.toFixed(1)}%)
                       </span>
                     </div>
                   </div>
@@ -134,13 +131,10 @@ export function ControlFinanceTab() {
         </Card>
       )}
 
-      {/* Empty state */}
       {byVertical.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            {isRu
-              ? 'Нет подтверждённых заказов за последние 30 дней'
-              : 'No confirmed orders in the last 30 days'}
+            {t('admin.finance.emptyOrders')}
           </CardContent>
         </Card>
       )}
