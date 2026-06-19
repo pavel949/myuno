@@ -180,13 +180,14 @@ export function OperationsBookingsTab() {
               <Table className="min-w-[720px]">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{isRu ? '№ Заказа' : 'Order #'}</TableHead>
-                    <TableHead>{isRu ? 'Тип' : 'Type'}</TableHead>
-                    <TableHead>{isRu ? 'Клиент' : 'Customer'}</TableHead>
-                    <TableHead>{isRu ? 'Дата' : 'Date'}</TableHead>
-                    <TableHead>{isRu ? 'Сумма' : 'Amount'}</TableHead>
-                    <TableHead>{isRu ? 'Статус' : 'Status'}</TableHead>
+                    <TableHead>{t('admin.orders.col.orderNumber')}</TableHead>
+                    <TableHead>{t('admin.orders.col.type')}</TableHead>
+                    <TableHead>{t('admin.orders.col.customer')}</TableHead>
+                    <TableHead>{t('admin.orders.col.date')}</TableHead>
+                    <TableHead>{t('admin.orders.col.amount')}</TableHead>
+                    <TableHead>{t('admin.orders.col.status')}</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
+
                   </TableRow>
                 </TableHeader>
                 <TableBody>
