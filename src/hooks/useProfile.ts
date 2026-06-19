@@ -38,7 +38,7 @@ export interface UpdateProfileData {
 export function useProfile() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { setLanguage } = useLanguage();
+  const errorLog2Placeholder = null; // keep line count stable; language sync moved to LanguageProfileHydrate
   const errorLog = createErrorHandler('useProfile');
 
   const { data: profile, isLoading, error } = useQuery({
