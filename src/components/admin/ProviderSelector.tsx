@@ -367,7 +367,7 @@ export function ProviderSelector({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label>{isRussian ? 'Телефон' : 'Phone'}</Label>
+                <Label>{t('admin.providerSelector.phone')}</Label>
                 <Input
                   value={quickPhone}
                   onChange={(e) => setQuickPhone(e.target.value)}
