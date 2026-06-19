@@ -115,6 +115,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => readLanguageFromLocalStorage());
   const [customTranslations, setCustomTranslations] = useState<CachedTranslations>({});
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
+  // For non-RU languages we must wait for the static dictionary to load
+  // before exposing translations, otherwise `t()` falls back to keys.
+  const [staticReady, setStaticReady] = useState<boolean>(() => readLanguageFromLocalStorage() === 'ru');
 
   const setLanguage = useCallback((lang: Language) => {
     // Persist and update state immediately to avoid language flicker on fast navigation.
@@ -126,12 +129,21 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     } catch {
       // Private mode / quota — UI language still updates for this session.
     }
-    void loadI18n(lang);
+    if (lang !== 'ru') setStaticReady(false);
+    void loadI18n(lang).then(() => setStaticReady(true));
   }, []);
 
   // Eagerly load static translations for current language
   useEffect(() => {
-    loadI18n(language);
+    let cancelled = false;
+    if (language === 'ru') {
+      setStaticReady(true);
+      return;
+    }
+    void loadI18n(language).then(() => {
+      if (!cancelled) setStaticReady(true);
+    });
+    return () => { cancelled = true; };
   }, [language]);
 
   // Load translations from DB with caching
