@@ -286,7 +286,7 @@ export function ProviderSelector({
                   {filteredProviders.length > 0 && (
                     <>
                       <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                        {isRussian ? 'Провайдеры' : 'Providers'}
+                        {t('admin.providerSelector.providersGroup')}
                       </p>
                       {filteredProviders.map(provider => (
                         <button
