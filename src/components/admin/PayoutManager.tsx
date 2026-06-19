@@ -33,7 +33,7 @@ function formatCurrency(amount: number, locale: string, currency = 'THB'): strin
   }).format(amount);
 }
 
-const LOCALE_MAP: Record<string, Locale> = { ru, en: enUS, th };
+const LOCALE_MAP: Record<string, typeof enUS> = { ru, en: enUS, th };
 const INTL_LOCALE: Record<string, string> = { ru: 'ru-RU', en: 'en-US', th: 'th-TH' };
 
 export function PayoutManager() {
