@@ -36,7 +36,7 @@ export function OperationsBookingsTab() {
         `)
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
-        .limit(200);
+        .limit(1000);
 
       if (statusFilter && statusFilter !== 'all') {
         query = query.eq('status', statusFilter as any);
@@ -258,7 +258,23 @@ export function OperationsBookingsTab() {
               </Table>
             </div>
           )}
+          {orders && orders.length >= 1000 && (
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+              {t('admin.orders.limitNotice')}
+            </p>
+          )}
         </CardContent>
+      </Card>
+
+      {/* Order Detail Sheet */}
+      <AdminOrderDetailSheet
+        orderId={selectedOrderId}
+        onClose={() => setSelectedOrderId(null)}
+        onStatusChanged={() => refetch()}
+      />
+    </div>
+  );
+}
       </Card>
 
       {/* Order Detail Sheet */}
