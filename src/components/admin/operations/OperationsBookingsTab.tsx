@@ -15,8 +15,9 @@ import type { OrderStatus } from '@/types/orders';
 import { AdminOrderDetailSheet } from './AdminOrderDetailSheet';
 
 export function OperationsBookingsTab() {
-  const { language, t } = useLanguage();
-  const isRu = language === 'ru';
+  const { t } = useLanguage();
+
+
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
