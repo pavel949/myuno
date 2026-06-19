@@ -827,6 +827,8 @@ export const ru: Record<string, string> = {
   'admin.orders.col.amount': 'Сумма',
   'admin.orders.col.status': 'Статус',
   'admin.orders.empty': 'Заказы не найдены',
+  'admin.orders.noDate': 'Без даты',
+  'admin.orders.noCustomer': 'Без клиента',
   'admin.orders.statusLabel.draft': 'Черновик',
   'admin.orders.statusLabel.pending': 'Ожидание',
   'admin.orders.statusLabel.pending_advance': 'Ожидание аванса',
