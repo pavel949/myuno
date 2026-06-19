@@ -132,7 +132,7 @@ export function ProviderSelector({
 
       if (error) throw error;
 
-      toast.success(isRussian ? 'Провайдер создан' : 'Provider created');
+      toast.success(t('admin.providerSelector.created'));
       await refetch();
       onChange(data.id);
       setIsQuickCreateOpen(false);
