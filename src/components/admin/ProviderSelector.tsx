@@ -235,7 +235,7 @@ export function ProviderSelector({
                 ref={inputRef}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={isRussian ? 'Начните вводить название...' : 'Type provider name...'}
+                placeholder={t('admin.providerSelector.searchPlaceholder')}
                 className="flex h-10 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
               />
             </div>
