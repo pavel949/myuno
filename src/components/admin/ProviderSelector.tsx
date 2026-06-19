@@ -387,7 +387,7 @@ export function ProviderSelector({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsQuickCreateOpen(false)}>
-              {isRussian ? 'Отмена' : 'Cancel'}
+              {t('admin.providerSelector.cancel')}
             </Button>
             <Button onClick={handleQuickCreate} disabled={!quickName.trim() || isCreating}>
               {isCreating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
