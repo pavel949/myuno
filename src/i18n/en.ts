@@ -632,4 +632,15 @@ export const en: Record<string, string> = {
   'crm.pulse.pipelineValue': 'Pipeline value',
   'crm.pulse.weightedForecast': 'Weighted forecast',
   'crm.pulse.winRate': 'Win rate',
+
+  // Bookings / Orders / Pharmacy — used in toasts and lists
+  'booking.cancelled': 'Booking cancelled',
+  'booking.error': 'Could not create booking',
+  'booking.loginRequired': 'Please sign in to book',
+  'order.success': 'Order placed',
+  'order.error': 'Could not place order',
+  'order.cancelled': 'Order cancelled',
+  'order.loginRequired': 'Please sign in to order',
+  'pharmacy.consultation': 'Pharmacist consultation',
+  'pharmacy.noPharmaciesFound': 'No pharmacies found',
 };
