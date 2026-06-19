@@ -391,7 +391,7 @@ export function ProviderSelector({
             </Button>
             <Button onClick={handleQuickCreate} disabled={!quickName.trim() || isCreating}>
               {isCreating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {isRussian ? 'Создать' : 'Create'}
+              {t('admin.providerSelector.create')}
             </Button>
           </DialogFooter>
         </DialogContent>
