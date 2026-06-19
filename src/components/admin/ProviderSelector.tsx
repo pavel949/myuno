@@ -251,7 +251,7 @@ export function ProviderSelector({
                   {filteredMCs.length > 0 && (
                     <>
                       <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                        {isRussian ? 'Управляющие компании' : 'Management Companies'}
+                        {t('admin.providerSelector.mcGroup')}
                       </p>
                       {filteredMCs.map(mc => (
                         <button
