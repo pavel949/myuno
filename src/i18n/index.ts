@@ -39,10 +39,12 @@ export async function loadTranslations(lang: Language): Promise<Record<string, s
 
 /**
  * Synchronous access to already-loaded translations.
- * Returns empty object if language hasn't been loaded yet.
+ * Returns the requested language if loaded, otherwise an empty object.
+ * Callers (`LanguageContext.t()`) handle the fallback chain explicitly so
+ * a not-yet-loaded EN/TH session never flashes Russian strings.
  */
 export function getTranslations(lang: Language): Record<string, string> {
-  return translationCache[lang] ?? translationCache.ru ?? {};
+  return translationCache[lang] ?? {};
 }
 
 /** @deprecated Use loadTranslations() for lazy loading. Kept for backward compat. */
