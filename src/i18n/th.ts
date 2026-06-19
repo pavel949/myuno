@@ -909,4 +909,26 @@ export const th: Record<string, string> = {
   'crm.pulse.pipelineValue': 'มูลค่าไปป์ไลน์',
   'crm.pulse.weightedForecast': 'พยากรณ์ถ่วงน้ำหนัก',
   'crm.pulse.winRate': 'อัตราชนะ',
+
+  // Bookings / Orders / Pharmacy — used in toasts and lists
+  'booking.cancelled': 'ยกเลิกการจองแล้ว',
+  'booking.error': 'ไม่สามารถสร้างการจองได้',
+  'booking.loginRequired': 'กรุณาเข้าสู่ระบบเพื่อจอง',
+  'order.success': 'สั่งซื้อสำเร็จ',
+  'order.error': 'ไม่สามารถสั่งซื้อได้',
+  'order.cancelled': 'ยกเลิกคำสั่งซื้อแล้ว',
+  'order.loginRequired': 'กรุณาเข้าสู่ระบบเพื่อสั่งซื้อ',
+  'pharmacy.consultation': 'ปรึกษาเภสัชกร',
+  'pharmacy.noPharmaciesFound': 'ไม่พบร้านขายยา',
+
+  // Welcome benefits (parity with RU/EN)
+  'welcome.benefits.lang.title': 'TH · EN · RU',
+  'welcome.benefits.lang.body':
+    'อินเทอร์เฟซ สัญญา และการสื่อสารกับผู้ให้บริการเป็นภาษาของคุณ มีการแปลและตรวจสอบเอกสารในตัว',
+  'welcome.benefits.trust.title': 'KYC และพาร์ทเนอร์ที่ผ่านการตรวจสอบ',
+  'welcome.benefits.trust.body':
+    'ผู้ให้บริการทุกคนผ่านการตรวจสอบ การชำระเงินคุ้มครองด้วยเอสโครว์ ข้อพิพาทระงับผ่านแพลตฟอร์ม',
+  'welcome.benefits.payments.title': 'การชำระเงินไร้พรมแดน',
+  'welcome.benefits.payments.body':
+    'บัตร โอนเงิน คริปโต และวิธีการท้องถิ่น เรารับผิดชอบค่าธรรมเนียมและสกุลเงิน คุณเห็นยอดรวมในกระเป๋าเดียว',
 };
