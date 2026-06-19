@@ -227,8 +227,9 @@ export function OperationsBookingsTab() {
                         </TableCell>
                         <TableCell>
                           <Badge className={`${statusCfg.bgColor} ${statusCfg.color} border-0`}>
-                            {isRu ? statusCfg.labelRu : statusCfg.labelEn}
+                            {t(`admin.orders.statusLabel.${status}`)}
                           </Badge>
+
                         </TableCell>
                         <TableCell>
                           <Button
