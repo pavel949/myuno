@@ -353,7 +353,7 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
         <Card>
           <CardContent className="p-8 text-center">
             <Icon className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground">{isRu ? 'Нет данных' : 'No data'}</p>
+            <p className="text-muted-foreground">{t('admin.crud.noData')}</p>
           </CardContent>
         </Card>
       ) : (
