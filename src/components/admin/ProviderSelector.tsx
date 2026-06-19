@@ -170,7 +170,7 @@ export function ProviderSelector({
 
       if (error) throw error;
 
-      toast.success(isRussian ? 'Провайдер создан из визитки!' : 'Provider created from card!');
+      toast.success(t('admin.providerSelector.createdFromCard'));
       await refetch();
       onChange(created.id);
     } catch (err) {
