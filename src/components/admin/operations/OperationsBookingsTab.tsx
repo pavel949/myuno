@@ -15,8 +15,9 @@ import type { OrderStatus } from '@/types/orders';
 import { AdminOrderDetailSheet } from './AdminOrderDetailSheet';
 
 export function OperationsBookingsTab() {
-  const { language, t } = useLanguage();
-  const isRu = language === 'ru';
+  const { t } = useLanguage();
+
+
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -226,8 +227,9 @@ export function OperationsBookingsTab() {
                         </TableCell>
                         <TableCell>
                           <Badge className={`${statusCfg.bgColor} ${statusCfg.color} border-0`}>
-                            {isRu ? statusCfg.labelRu : statusCfg.labelEn}
+                            {t(`admin.orders.statusLabel.${status}`)}
                           </Badge>
+
                         </TableCell>
                         <TableCell>
                           <Button
