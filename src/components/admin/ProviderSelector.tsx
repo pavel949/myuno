@@ -175,7 +175,7 @@ export function ProviderSelector({
       onChange(created.id);
     } catch (err) {
       console.error('Create from scan error:', err);
-      toast.error(isRussian ? 'Ошибка создания' : 'Creation failed');
+      toast.error(t('admin.providerSelector.createError'));
     } finally {
       setIsCreating(false);
     }
