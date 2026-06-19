@@ -80,13 +80,12 @@ export function useProfile() {
 
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       queryClient.invalidateQueries({ queryKey: ['profile', 'core', user?.id] });
-      
-      // Sync language with context if it was updated
-      if (data?.preferred_language) {
-        setLanguage(data.preferred_language as 'ru' | 'en' | 'th');
-      }
+      // Language sync intentionally NOT done here — LanguageProfileHydrate is
+      // the single source of truth for UI ↔ profile language sync. Doing it
+      // here too caused the UI language to flip back unexpectedly after
+      // unrelated profile saves.
     },
     onError: (error) => {
       errorLog.silent(error, 'update_profile_mutation');
