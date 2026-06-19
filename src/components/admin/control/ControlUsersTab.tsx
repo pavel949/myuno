@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getPasswordResetRedirectUrl } from '@/lib/config/routes';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ru, th as thLocale } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -41,17 +41,17 @@ const ROLE_COLORS: Record<string, string> = {
 
 const ALL_ROLES = ['admin', 'uno_team', 'vendor', 'owner', 'finance', 'support', 'sales'] as const;
 
-const STATUS_MAP: Record<string, { status: 'active' | 'warning' | 'danger' | 'inactive'; labelEn: string; labelRu: string }> = {
-  active: { status: 'active', labelEn: 'Active', labelRu: 'Активен' },
-  suspended: { status: 'warning', labelEn: 'Suspended', labelRu: 'Приостановлен' },
-  deactivated: { status: 'danger', labelEn: 'Deactivated', labelRu: 'Деактивирован' },
+const STATUS_MAP: Record<string, { status: 'active' | 'warning' | 'danger' | 'inactive'; labelKey: string }> = {
+  active: { status: 'active', labelKey: 'admin.users.status.active' },
+  suspended: { status: 'warning', labelKey: 'admin.users.status.suspended' },
+  deactivated: { status: 'danger', labelKey: 'admin.users.status.deactivated' },
 };
 
 export function ControlUsersTab() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { user: currentUser } = useAuth();
-  const isRu = language === 'ru';
   const queryClient = useQueryClient();
+  const dateLocale = language === 'ru' ? ru : language === 'th' ? thLocale : undefined;
   const [searchQuery, setSearchQuery] = React.useState('');
   const [expandedUser, setExpandedUser] = React.useState<string | null>(null);
   const [loadingAction, setLoadingAction] = React.useState<string | null>(null);
@@ -65,10 +65,10 @@ export function ControlUsersTab() {
       });
       if (res.error) throw new Error(res.error.message || 'Function error');
       if (res.data?.error) throw new Error(res.data.message || res.data.error);
-      toast.success(isRu ? 'Действие выполнено' : 'Action completed');
+      toast.success(t('admin.users.toast.actionDone'));
       queryClient.invalidateQueries({ queryKey: ['admin-profiles-with-roles'] });
     } catch (e: any) {
-      toast.error(e.message || 'Error');
+      toast.error(e.message || t('admin.crud.error'));
     } finally {
       setLoadingAction(null);
     }
@@ -76,7 +76,7 @@ export function ControlUsersTab() {
 
   const handleResetPassword = async (email: string | null, userId: string) => {
     if (!email) {
-      toast.error(isRu ? 'У пользователя нет email' : 'User has no email');
+      toast.error(t('admin.users.toast.noEmail'));
       return;
     }
     setLoadingAction(`reset-${userId}`);
@@ -85,9 +85,9 @@ export function ControlUsersTab() {
         redirectTo: getPasswordResetRedirectUrl(),
       });
       if (error) throw error;
-      toast.success(isRu ? `Ссылка отправлена на ${email}` : `Reset link sent to ${email}`);
+      toast.success(`${t('admin.users.toast.resetSent')} ${email}`);
     } catch (e: any) {
-      toast.error(e.message || 'Error');
+      toast.error(e.message || t('admin.crud.error'));
     } finally {
       setLoadingAction(null);
     }
@@ -142,7 +142,7 @@ export function ControlUsersTab() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-base">
               <Users className="h-4 w-4" />
-              {isRu ? 'Пользователи' : 'Users'}
+              {t('admin.users.title')}
             </CardTitle>
             <Badge variant="secondary" className="text-xs">
               {profiles?.length || 0}
@@ -154,7 +154,7 @@ export function ControlUsersTab() {
             <div className="relative max-w-sm">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
-                placeholder={isRu ? 'Поиск...' : 'Search...'}
+                placeholder={t('admin.users.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8 h-8 text-sm"
@@ -163,7 +163,7 @@ export function ControlUsersTab() {
 
             {isLoading ? (
               <div className="text-center py-6 text-muted-foreground text-sm">
-                {isRu ? 'Загрузка...' : 'Loading...'}
+                {t('admin.users.loading')}
               </div>
             ) : (
               <div className="space-y-1">
@@ -183,7 +183,7 @@ export function ControlUsersTab() {
                                 {profile.full_name || '—'}
                               </span>
                               <StatusPill status={statusInfo.status} className="text-[10px]">
-                                {isRu ? statusInfo.labelRu : statusInfo.labelEn}
+                                {t(statusInfo.labelKey)}
                               </StatusPill>
                               {profile.roles.map(role => (
                                 <Badge
@@ -203,7 +203,7 @@ export function ControlUsersTab() {
                             {profile.created_at
                               ? formatDistanceToNow(new Date(profile.created_at), {
                                   addSuffix: false,
-                                  locale: isRu ? ru : undefined,
+                                  locale: dateLocale,
                                 })
                               : '—'}
                           </span>
@@ -225,7 +225,7 @@ export function ControlUsersTab() {
                             </div>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <Shield className="h-3 w-3" />
-                              <span>{isRu ? 'Роли' : 'Roles'}: {profile.roles.length > 0 ? profile.roles.join(', ') : (isRu ? 'нет' : 'none')}</span>
+                              <span>{t('admin.users.roles')}: {profile.roles.length > 0 ? profile.roles.join(', ') : t('admin.users.noRoles')}</span>
                             </div>
                             <p className="text-[11px] text-muted-foreground">
                               ID: <code className="bg-muted px-1 rounded-none text-[10px]">{profile.id.slice(0, 8)}…</code>
@@ -243,7 +243,7 @@ export function ControlUsersTab() {
                                 onClick={(e) => { e.stopPropagation(); invokeAction('activate', profile.id); }}
                               >
                                 <CheckCircle className="h-3 w-3" />
-                                {isRu ? 'Активировать' : 'Activate'}
+                                {t('admin.users.actions.activate')}
                               </Button>
                             )}
                             {profile.status !== 'suspended' && !isSelf(profile.id) && (
@@ -255,7 +255,7 @@ export function ControlUsersTab() {
                                 onClick={(e) => { e.stopPropagation(); invokeAction('suspend', profile.id); }}
                               >
                                 <Ban className="h-3 w-3" />
-                                {isRu ? 'Приостановить' : 'Suspend'}
+                                {t('admin.users.actions.suspend')}
                               </Button>
                             )}
                             {profile.status !== 'deactivated' && !isSelf(profile.id) && (
@@ -267,7 +267,7 @@ export function ControlUsersTab() {
                                 onClick={(e) => { e.stopPropagation(); invokeAction('deactivate', profile.id); }}
                               >
                                 <XCircle className="h-3 w-3" />
-                                {isRu ? 'Деактивировать' : 'Deactivate'}
+                                {t('admin.users.actions.deactivate')}
                               </Button>
                             )}
                             <Button
@@ -278,7 +278,7 @@ export function ControlUsersTab() {
                               onClick={(e) => { e.stopPropagation(); handleResetPassword(profile.email, profile.id); }}
                             >
                               <KeyRound className="h-3 w-3" />
-                              {isRu ? 'Сбросить пароль' : 'Reset Password'}
+                              {t('admin.users.actions.resetPassword')}
                             </Button>
 
                             {!isSelf(profile.id) && (
