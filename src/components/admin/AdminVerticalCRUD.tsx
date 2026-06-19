@@ -378,7 +378,7 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
                         <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                           {getTypeBadge(item) && <Badge variant="secondary">{getTypeBadge(item)}</Badge>}
                           <Badge variant={item.is_active !== false ? 'default' : 'secondary'}>
-                            {item.is_active !== false ? (isRu ? 'Активно' : 'Active') : (isRu ? 'Неактивно' : 'Inactive')}
+                            {item.is_active !== false ? t('admin.crud.active') : t('admin.crud.inactive')}
                           </Badge>
                           {item[config.subtitleField || 'district'] && (
                             <span className="truncate"><MapPin className="h-3 w-3 inline" /> {item[config.subtitleField || 'district']}</span>
