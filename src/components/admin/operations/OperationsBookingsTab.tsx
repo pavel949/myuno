@@ -149,7 +149,7 @@ export function OperationsBookingsTab() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={isRu ? 'Поиск по имени, номеру...' : 'Search by name, number...'}
+                placeholder={t('admin.orders.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -157,23 +157,24 @@ export function OperationsBookingsTab() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={isRu ? 'Статус' : 'Status'} />
+                <SelectValue placeholder={t('admin.orders.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{isRu ? 'Все' : 'All'}</SelectItem>
-                <SelectItem value="pending">{isRu ? 'Ожидают' : 'Pending'}</SelectItem>
-                <SelectItem value="confirmed">{isRu ? 'Подтверждённые' : 'Confirmed'}</SelectItem>
-                <SelectItem value="in_progress">{isRu ? 'В работе' : 'In Progress'}</SelectItem>
-                <SelectItem value="completed">{isRu ? 'Завершённые' : 'Completed'}</SelectItem>
-                <SelectItem value="cancelled">{isRu ? 'Отменённые' : 'Cancelled'}</SelectItem>
+                <SelectItem value="all">{t('admin.orders.filter.all')}</SelectItem>
+                <SelectItem value="pending">{t('admin.orders.filter.pending')}</SelectItem>
+                <SelectItem value="confirmed">{t('admin.orders.filter.confirmed')}</SelectItem>
+                <SelectItem value="in_progress">{t('admin.orders.filter.inProgress')}</SelectItem>
+                <SelectItem value="completed">{t('admin.orders.filter.completed')}</SelectItem>
+                <SelectItem value="cancelled">{t('admin.orders.filter.cancelled')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">
-              {isRu ? 'Загрузка...' : 'Loading...'}
+              {t('admin.orders.loading')}
             </div>
+
           ) : (
             <div className="rounded-none border overflow-x-auto">
               <Table className="min-w-[720px]">
