@@ -15,8 +15,9 @@ import type { OrderStatus } from '@/types/orders';
 import { AdminOrderDetailSheet } from './AdminOrderDetailSheet';
 
 export function OperationsBookingsTab() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRu = language === 'ru';
+
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -101,7 +102,7 @@ export function OperationsBookingsTab() {
             <AlertCircle className="h-8 w-8 text-warning" />
             <div>
               <p className="text-2xl font-bold">{stats.pending}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Ожидают' : 'Pending'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.pending')}</p>
             </div>
           </CardContent>
         </Card>
@@ -110,7 +111,7 @@ export function OperationsBookingsTab() {
             <Clock className="h-8 w-8 text-info" />
             <div>
               <p className="text-2xl font-bold">{stats.confirmed}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Подтверждено' : 'Confirmed'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.confirmed')}</p>
             </div>
           </CardContent>
         </Card>
@@ -119,7 +120,7 @@ export function OperationsBookingsTab() {
             <CheckCircle className="h-8 w-8 text-success" />
             <div>
               <p className="text-2xl font-bold">{stats.completed}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Завершено' : 'Completed'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.completed')}</p>
             </div>
           </CardContent>
         </Card>
@@ -128,7 +129,7 @@ export function OperationsBookingsTab() {
             <XCircle className="h-8 w-8 text-destructive" />
             <div>
               <p className="text-2xl font-bold">{stats.cancelled}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Отменено' : 'Cancelled'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.cancelled')}</p>
             </div>
           </CardContent>
         </Card>
@@ -139,7 +140,8 @@ export function OperationsBookingsTab() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            {isRu ? 'Все заказы' : 'All Orders'}
+            {t('admin.orders.title')}
+
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -147,7 +149,7 @@ export function OperationsBookingsTab() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={isRu ? 'Поиск по имени, номеру...' : 'Search by name, number...'}
+                placeholder={t('admin.orders.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -155,35 +157,37 @@ export function OperationsBookingsTab() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={isRu ? 'Статус' : 'Status'} />
+                <SelectValue placeholder={t('admin.orders.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{isRu ? 'Все' : 'All'}</SelectItem>
-                <SelectItem value="pending">{isRu ? 'Ожидают' : 'Pending'}</SelectItem>
-                <SelectItem value="confirmed">{isRu ? 'Подтверждённые' : 'Confirmed'}</SelectItem>
-                <SelectItem value="in_progress">{isRu ? 'В работе' : 'In Progress'}</SelectItem>
-                <SelectItem value="completed">{isRu ? 'Завершённые' : 'Completed'}</SelectItem>
-                <SelectItem value="cancelled">{isRu ? 'Отменённые' : 'Cancelled'}</SelectItem>
+                <SelectItem value="all">{t('admin.orders.filter.all')}</SelectItem>
+                <SelectItem value="pending">{t('admin.orders.filter.pending')}</SelectItem>
+                <SelectItem value="confirmed">{t('admin.orders.filter.confirmed')}</SelectItem>
+                <SelectItem value="in_progress">{t('admin.orders.filter.inProgress')}</SelectItem>
+                <SelectItem value="completed">{t('admin.orders.filter.completed')}</SelectItem>
+                <SelectItem value="cancelled">{t('admin.orders.filter.cancelled')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">
-              {isRu ? 'Загрузка...' : 'Loading...'}
+              {t('admin.orders.loading')}
             </div>
+
           ) : (
             <div className="rounded-none border overflow-x-auto">
               <Table className="min-w-[720px]">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{isRu ? '№ Заказа' : 'Order #'}</TableHead>
-                    <TableHead>{isRu ? 'Тип' : 'Type'}</TableHead>
-                    <TableHead>{isRu ? 'Клиент' : 'Customer'}</TableHead>
-                    <TableHead>{isRu ? 'Дата' : 'Date'}</TableHead>
-                    <TableHead>{isRu ? 'Сумма' : 'Amount'}</TableHead>
-                    <TableHead>{isRu ? 'Статус' : 'Status'}</TableHead>
+                    <TableHead>{t('admin.orders.col.orderNumber')}</TableHead>
+                    <TableHead>{t('admin.orders.col.type')}</TableHead>
+                    <TableHead>{t('admin.orders.col.customer')}</TableHead>
+                    <TableHead>{t('admin.orders.col.date')}</TableHead>
+                    <TableHead>{t('admin.orders.col.amount')}</TableHead>
+                    <TableHead>{t('admin.orders.col.status')}</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
+
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -244,7 +248,7 @@ export function OperationsBookingsTab() {
                   {(!filteredOrders || filteredOrders.length === 0) && (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        {isRu ? 'Заказы не найдены' : 'No orders found'}
+                        {t('admin.orders.empty')}
                       </TableCell>
                     </TableRow>
                   )}
