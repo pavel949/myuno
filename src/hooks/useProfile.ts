@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { createErrorHandler } from '@/lib/errorHandler';
 
 /** @deprecated Use AppRole from user_roles table instead. Kept for backward compat only. */
@@ -39,7 +38,7 @@ export interface UpdateProfileData {
 export function useProfile() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { setLanguage } = useLanguage();
+  // Language sync moved to LanguageProfileHydrate (single source of truth).
   const errorLog = createErrorHandler('useProfile');
 
   const { data: profile, isLoading, error } = useQuery({
@@ -81,13 +80,12 @@ export function useProfile() {
 
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       queryClient.invalidateQueries({ queryKey: ['profile', 'core', user?.id] });
-      
-      // Sync language with context if it was updated
-      if (data?.preferred_language) {
-        setLanguage(data.preferred_language as 'ru' | 'en' | 'th');
-      }
+      // Language sync intentionally NOT done here — LanguageProfileHydrate is
+      // the single source of truth for UI ↔ profile language sync. Doing it
+      // here too caused the UI language to flip back unexpectedly after
+      // unrelated profile saves.
     },
     onError: (error) => {
       errorLog.silent(error, 'update_profile_mutation');

@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 export const STORAGE_KEYS = {
   CART: 'uno-cart',
   LANGUAGE: 'myuno-language',
+  LANGUAGE_EXPLICIT: 'myuno-language-explicit',
   CURRENCY: 'uno-currency',
   THEME: 'uno-theme',
   VIEW_HISTORY: 'uno-view-history',

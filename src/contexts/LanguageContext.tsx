@@ -13,6 +13,24 @@ import { logger } from '@/lib/logger';
 
 export type { Language };
 
+/** True if the current language was set explicitly by the user (UI switcher). */
+export function hasExplicitLanguagePreference(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.LANGUAGE_EXPLICIT) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/** Mark the current language as explicitly chosen (e.g. after writing to profile). */
+export function markLanguageExplicit(): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.LANGUAGE_EXPLICIT, '1');
+  } catch {
+    /* private mode */
+  }
+}
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -32,14 +50,10 @@ interface CachedTranslations {
 }
 
 const LANGUAGE_LS_KEY = STORAGE_KEYS.LANGUAGE;
+const LANGUAGE_EXPLICIT_LS_KEY = STORAGE_KEYS.LANGUAGE_EXPLICIT;
 
 const isValidLanguage = (value: string | null | undefined): value is Language =>
   value === 'ru' || value === 'en' || value === 'th';
-
-const normalizeLanguage = (value: string | null): Language => {
-  if (isValidLanguage(value)) return value;
-  return 'ru';
-};
 
 /**
  * Detect a sensible default language for first-time visitors:
@@ -55,6 +69,7 @@ function detectInitialLanguage(): Language {
   } catch {
     /* private mode */
   }
+  let detected: Language = 'ru';
   try {
     const candidates: readonly string[] =
       typeof navigator !== 'undefined' && Array.isArray(navigator.languages) && navigator.languages.length > 0
@@ -62,43 +77,73 @@ function detectInitialLanguage(): Language {
         : typeof navigator !== 'undefined' && navigator.language
           ? [navigator.language]
           : [];
+    let matched = false;
     for (const raw of candidates) {
       const tag = raw.toLowerCase().split('-')[0];
-      if (tag === 'ru') return 'ru';
-      if (tag === 'th') return 'th';
-      if (tag === 'en') return 'en';
+      if (tag === 'ru') { detected = 'ru'; matched = true; break; }
+      if (tag === 'th') { detected = 'th'; matched = true; break; }
+      if (tag === 'en') { detected = 'en'; matched = true; break; }
     }
     // Anything else (es/fr/de/zh/…) → English is the safer international default.
-    if (candidates.length > 0) return 'en';
+    if (!matched && candidates.length > 0) detected = 'en';
   } catch {
     /* SSR / restricted env */
   }
-  return 'ru';
+  // Persist detection result so subsequent loads don't re-detect (locks the
+  // language to whatever we showed the user on their first visit).
+  try {
+    localStorage.setItem(LANGUAGE_LS_KEY, detected);
+  } catch {
+    /* private mode */
+  }
+  return detected;
 }
 
 function readLanguageFromLocalStorage(): Language {
   return detectInitialLanguage();
 }
 
+function readExplicitFlag(): boolean {
+  try {
+    return localStorage.getItem(LANGUAGE_EXPLICIT_LS_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => readLanguageFromLocalStorage());
   const [customTranslations, setCustomTranslations] = useState<CachedTranslations>({});
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
+  // For non-RU languages we must wait for the static dictionary to load
+  // before exposing translations, otherwise `t()` falls back to keys.
+  const [staticReady, setStaticReady] = useState<boolean>(() => readLanguageFromLocalStorage() === 'ru');
 
   const setLanguage = useCallback((lang: Language) => {
     // Persist and update state immediately to avoid language flicker on fast navigation.
     setLanguageState(lang);
     try {
       localStorage.setItem(LANGUAGE_LS_KEY, lang);
+      // Mark as an explicit user choice — profile hydration must not override it.
+      localStorage.setItem(LANGUAGE_EXPLICIT_LS_KEY, '1');
     } catch {
       // Private mode / quota — UI language still updates for this session.
     }
-    void loadI18n(lang);
+    if (lang !== 'ru') setStaticReady(false);
+    void loadI18n(lang).then(() => setStaticReady(true));
   }, []);
 
   // Eagerly load static translations for current language
   useEffect(() => {
-    loadI18n(language);
+    let cancelled = false;
+    if (language === 'ru') {
+      setStaticReady(true);
+      return;
+    }
+    void loadI18n(language).then(() => {
+      if (!cancelled) setStaticReady(true);
+    });
+    return () => { cancelled = true; };
   }, [language]);
 
   // Load translations from DB with caching
@@ -198,14 +243,22 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback((key: string): string => {
-    // Priority: DB translations -> static translations -> fallback to English -> key
+    // Priority: DB translations -> static(lang) -> static(en) -> static(ru) -> key.
+    // RU is kept as the final static fallback (instead of returning the raw key)
+    // because most missing translations are EN/TH gaps and showing a Russian
+    // string degrades better than a dotted.key.path for end users.
     const custom = customTranslations[key];
     if (custom) {
       const value = custom[language];
       if (value) return value;
     }
-    return getTranslations(language)[key] || getTranslations('en')[key] || key;
-  }, [language, customTranslations]);
+    return (
+      getTranslations(language)[key] ||
+      getTranslations('en')[key] ||
+      getTranslations('ru')[key] ||
+      key
+    );
+  }, [language, customTranslations, staticReady]);
 
   const value = useMemo(() => ({
     language, setLanguage, t, isLoadingTranslations,
