@@ -417,11 +417,9 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
         <DialogContent className="max-w-2xl max-h-[90vh] p-0">
           <DialogHeader className="p-6 pb-0">
             <DialogTitle>
-              {editingItem
-                ? (isRu ? 'Редактировать' : 'Edit')
-                : (isRu ? 'Добавить' : 'Add')}
+              {editingItem ? t('admin.crud.edit') : t('admin.crud.add')}
             </DialogTitle>
-            <DialogDescription>{isRu ? 'Заполните данные' : 'Fill in details'}</DialogDescription>
+            <DialogDescription>{t('admin.crud.fillDetails')}</DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[calc(90vh-140px)] px-6">
             <div className="space-y-4 py-4">
