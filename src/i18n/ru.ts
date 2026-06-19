@@ -632,4 +632,15 @@ export const ru: Record<string, string> = {
   'crm.pulse.pipelineValue': 'Объём воронки',
   'crm.pulse.weightedForecast': 'Взвеш. прогноз',
   'crm.pulse.winRate': 'Win-rate',
+
+  // Bookings / Orders / Pharmacy — used in toasts and lists
+  'booking.cancelled': 'Бронирование отменено',
+  'booking.error': 'Не удалось создать бронирование',
+  'booking.loginRequired': 'Войдите, чтобы оформить бронирование',
+  'order.success': 'Заказ создан',
+  'order.error': 'Не удалось оформить заказ',
+  'order.cancelled': 'Заказ отменён',
+  'order.loginRequired': 'Войдите, чтобы оформить заказ',
+  'pharmacy.consultation': 'Консультация фармацевта',
+  'pharmacy.noPharmaciesFound': 'Аптеки не найдены',
 };
