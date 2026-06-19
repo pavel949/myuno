@@ -243,7 +243,7 @@ export function ProviderSelector({
             <ScrollArea className="max-h-[300px]">
               {filteredMCs.length === 0 && filteredProviders.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">
-                  {isRussian ? 'Не найдено' : 'No results found'}
+                  {t('admin.providerSelector.noResults')}
                 </p>
               ) : (
                 <div className="p-1">
