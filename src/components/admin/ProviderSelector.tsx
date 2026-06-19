@@ -60,7 +60,7 @@ export function ProviderSelector({
   required = false,
   disabled = false
 }: ProviderSelectorProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { providers, isLoading, refetch } = useAdminProviders();
   const { data: managementCompanies, isLoading: mcLoading } = useManagementCompanies();
   const isRussian = language === 'ru';
@@ -132,7 +132,7 @@ export function ProviderSelector({
 
       if (error) throw error;
 
-      toast.success(isRussian ? 'Провайдер создан' : 'Provider created');
+      toast.success(t('admin.providerSelector.created'));
       await refetch();
       onChange(data.id);
       setIsQuickCreateOpen(false);
@@ -141,7 +141,7 @@ export function ProviderSelector({
       setQuickEmail('');
     } catch (err) {
       console.error('Quick create error:', err);
-      toast.error(isRussian ? 'Ошибка создания' : 'Creation failed');
+      toast.error(t('admin.providerSelector.createError'));
     } finally {
       setIsCreating(false);
     }
@@ -170,12 +170,12 @@ export function ProviderSelector({
 
       if (error) throw error;
 
-      toast.success(isRussian ? 'Провайдер создан из визитки!' : 'Provider created from card!');
+      toast.success(t('admin.providerSelector.createdFromCard'));
       await refetch();
       onChange(created.id);
     } catch (err) {
       console.error('Create from scan error:', err);
-      toast.error(isRussian ? 'Ошибка создания' : 'Creation failed');
+      toast.error(t('admin.providerSelector.createError'));
     } finally {
       setIsCreating(false);
     }
@@ -212,12 +212,12 @@ export function ProviderSelector({
                   <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
                   {selectedLabel}
                   {selectedMC && (
-                    <span className="text-xs text-muted-foreground">(УК)</span>
+                    <span className="text-xs text-muted-foreground">({t('admin.providerSelector.mcShort')})</span>
                   )}
                 </span>
               ) : (
                 <span className="text-muted-foreground">
-                  {isRussian ? 'Выберите провайдера / УК...' : 'Select provider / PM...'}
+                  {t('admin.providerSelector.placeholder')}
                 </span>
               )}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -235,7 +235,7 @@ export function ProviderSelector({
                 ref={inputRef}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={isRussian ? 'Начните вводить название...' : 'Type provider name...'}
+                placeholder={t('admin.providerSelector.searchPlaceholder')}
                 className="flex h-10 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
               />
             </div>
@@ -243,7 +243,7 @@ export function ProviderSelector({
             <ScrollArea className="max-h-[300px]">
               {filteredMCs.length === 0 && filteredProviders.length === 0 ? (
                 <p className="py-6 text-center text-sm text-muted-foreground">
-                  {isRussian ? 'Не найдено' : 'No results found'}
+                  {t('admin.providerSelector.noResults')}
                 </p>
               ) : (
                 <div className="p-1">
@@ -251,7 +251,7 @@ export function ProviderSelector({
                   {filteredMCs.length > 0 && (
                     <>
                       <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                        {isRussian ? 'Управляющие компании' : 'Management Companies'}
+                        {t('admin.providerSelector.mcGroup')}
                       </p>
                       {filteredMCs.map(mc => (
                         <button
@@ -277,7 +277,7 @@ export function ProviderSelector({
                           <span className="truncate">
                             {mc.name}
                           </span>
-                          <span className="ml-auto text-xs text-muted-foreground">УК</span>
+                          <span className="ml-auto text-xs text-muted-foreground">{t('admin.providerSelector.mcShort')}</span>
                         </button>
                       ))}
                     </>
@@ -286,7 +286,7 @@ export function ProviderSelector({
                   {filteredProviders.length > 0 && (
                     <>
                       <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                        {isRussian ? 'Провайдеры' : 'Providers'}
+                        {t('admin.providerSelector.providersGroup')}
                       </p>
                       {filteredProviders.map(provider => (
                         <button
@@ -312,7 +312,7 @@ export function ProviderSelector({
                           <span className="truncate">{provider.name}</span>
                           {!provider.is_verified && (
                             <span className="ml-auto text-xs text-warning">
-                              {isRussian ? 'не верифицирован' : 'unverified'}
+                              {t('admin.providerSelector.unverified')}
                             </span>
                           )}
                         </button>
@@ -332,7 +332,7 @@ export function ProviderSelector({
           size="icon"
           onClick={() => setIsQuickCreateOpen(true)}
           disabled={disabled || isCreating}
-          title={isRussian ? 'Создать поставщика' : 'Create provider'}
+          title={t('admin.providerSelector.createTitle')}
         >
           {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
         </Button>
@@ -351,13 +351,13 @@ export function ProviderSelector({
         <DialogContent className="sm:max-w-md" hideOverlay>
           <DialogHeader>
             <DialogTitle>
-              {isRussian ? 'Быстрое создание провайдера' : 'Quick Create Provider'}
+              {t('admin.providerSelector.quickCreateTitle')}
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>{isRussian ? 'Название *' : 'Name *'}</Label>
+              <Label>{t('admin.providerSelector.name')} *</Label>
               <Input
                 value={quickName}
                 onChange={(e) => setQuickName(e.target.value)}
@@ -367,7 +367,7 @@ export function ProviderSelector({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label>{isRussian ? 'Телефон' : 'Phone'}</Label>
+                <Label>{t('admin.providerSelector.phone')}</Label>
                 <Input
                   value={quickPhone}
                   onChange={(e) => setQuickPhone(e.target.value)}
@@ -387,11 +387,11 @@ export function ProviderSelector({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsQuickCreateOpen(false)}>
-              {isRussian ? 'Отмена' : 'Cancel'}
+              {t('admin.providerSelector.cancel')}
             </Button>
             <Button onClick={handleQuickCreate} disabled={!quickName.trim() || isCreating}>
               {isCreating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {isRussian ? 'Создать' : 'Create'}
+              {t('admin.providerSelector.create')}
             </Button>
           </DialogFooter>
         </DialogContent>
