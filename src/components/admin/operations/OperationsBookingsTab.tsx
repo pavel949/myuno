@@ -220,7 +220,7 @@ export function OperationsBookingsTab() {
                             ? format(new Date(order.start_at), 'dd.MM.yyyy HH:mm')
                             : order.created_at
                             ? format(new Date(order.created_at), 'dd.MM.yyyy HH:mm')
-                            : '—'}
+                            : t('admin.orders.noDate')}
                         </TableCell>
                         <TableCell className="font-medium">
                           {order.total_amount?.toLocaleString()} {order.currency || 'THB'}
