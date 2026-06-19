@@ -243,14 +243,22 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback((key: string): string => {
-    // Priority: DB translations -> static translations -> fallback to English -> key
+    // Priority: DB translations -> static(lang) -> static(en) -> static(ru) -> key.
+    // RU is kept as the final static fallback (instead of returning the raw key)
+    // because most missing translations are EN/TH gaps and showing a Russian
+    // string degrades better than a dotted.key.path for end users.
     const custom = customTranslations[key];
     if (custom) {
       const value = custom[language];
       if (value) return value;
     }
-    return getTranslations(language)[key] || getTranslations('en')[key] || key;
-  }, [language, customTranslations]);
+    return (
+      getTranslations(language)[key] ||
+      getTranslations('en')[key] ||
+      getTranslations('ru')[key] ||
+      key
+    );
+  }, [language, customTranslations, staticReady]);
 
   const value = useMemo(() => ({
     language, setLanguage, t, isLoadingTranslations,
