@@ -351,7 +351,7 @@ export function ProviderSelector({
         <DialogContent className="sm:max-w-md" hideOverlay>
           <DialogHeader>
             <DialogTitle>
-              {isRussian ? 'Быстрое создание провайдера' : 'Quick Create Provider'}
+              {t('admin.providerSelector.quickCreateTitle')}
             </DialogTitle>
           </DialogHeader>
 
