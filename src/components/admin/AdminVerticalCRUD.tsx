@@ -162,7 +162,7 @@ function formDataToPayload(formData: Record<string, any>, fields: FieldDef[]): R
 }
 
 export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRu = language === 'ru';
   const { items, isLoading, createItem, updateItem, deleteItem } = hook;
   const Icon = config.icon || Package;
