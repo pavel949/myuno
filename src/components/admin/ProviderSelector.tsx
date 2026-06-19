@@ -277,7 +277,7 @@ export function ProviderSelector({
                           <span className="truncate">
                             {mc.name}
                           </span>
-                          <span className="ml-auto text-xs text-muted-foreground">УК</span>
+                          <span className="ml-auto text-xs text-muted-foreground">{t('admin.providerSelector.mcShort')}</span>
                         </button>
                       ))}
                     </>
