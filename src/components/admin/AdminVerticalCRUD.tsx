@@ -396,10 +396,10 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEdit(item)}>
-                            <Edit className="h-4 w-4 mr-2" />{isRu ? 'Редактировать' : 'Edit'}
+                            <Edit className="h-4 w-4 mr-2" />{t('admin.crud.edit')}
                           </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirmId(item.id)}>
-                            <Trash2 className="h-4 w-4 mr-2" />{isRu ? 'Удалить' : 'Delete'}
+                            <Trash2 className="h-4 w-4 mr-2" />{t('admin.crud.delete')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
