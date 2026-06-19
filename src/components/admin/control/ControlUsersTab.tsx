@@ -321,7 +321,7 @@ export function ControlUsersTab() {
                           {/* Role Management */}
                           <div className="space-y-1.5">
                             <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                              {isRu ? 'Управление ролями' : 'Role Management'}
+                              {t('admin.users.roleManagement')}
                             </p>
                             <div className="flex flex-wrap gap-1">
                               {ALL_ROLES.map(role => {
