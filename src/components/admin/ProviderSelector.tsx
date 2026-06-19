@@ -212,12 +212,12 @@ export function ProviderSelector({
                   <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
                   {selectedLabel}
                   {selectedMC && (
-                    <span className="text-xs text-muted-foreground">(УК)</span>
+                    <span className="text-xs text-muted-foreground">({t('admin.providerSelector.mcShort')})</span>
                   )}
                 </span>
               ) : (
                 <span className="text-muted-foreground">
-                  {isRussian ? 'Выберите провайдера / УК...' : 'Select provider / PM...'}
+                  {t('admin.providerSelector.placeholder')}
                 </span>
               )}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
