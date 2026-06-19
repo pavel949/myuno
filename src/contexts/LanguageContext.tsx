@@ -32,14 +32,10 @@ interface CachedTranslations {
 }
 
 const LANGUAGE_LS_KEY = STORAGE_KEYS.LANGUAGE;
+const LANGUAGE_EXPLICIT_LS_KEY = STORAGE_KEYS.LANGUAGE_EXPLICIT;
 
 const isValidLanguage = (value: string | null | undefined): value is Language =>
   value === 'ru' || value === 'en' || value === 'th';
-
-const normalizeLanguage = (value: string | null): Language => {
-  if (isValidLanguage(value)) return value;
-  return 'ru';
-};
 
 /**
  * Detect a sensible default language for first-time visitors:
@@ -55,6 +51,7 @@ function detectInitialLanguage(): Language {
   } catch {
     /* private mode */
   }
+  let detected: Language = 'ru';
   try {
     const candidates: readonly string[] =
       typeof navigator !== 'undefined' && Array.isArray(navigator.languages) && navigator.languages.length > 0
@@ -62,22 +59,38 @@ function detectInitialLanguage(): Language {
         : typeof navigator !== 'undefined' && navigator.language
           ? [navigator.language]
           : [];
+    let matched = false;
     for (const raw of candidates) {
       const tag = raw.toLowerCase().split('-')[0];
-      if (tag === 'ru') return 'ru';
-      if (tag === 'th') return 'th';
-      if (tag === 'en') return 'en';
+      if (tag === 'ru') { detected = 'ru'; matched = true; break; }
+      if (tag === 'th') { detected = 'th'; matched = true; break; }
+      if (tag === 'en') { detected = 'en'; matched = true; break; }
     }
     // Anything else (es/fr/de/zh/…) → English is the safer international default.
-    if (candidates.length > 0) return 'en';
+    if (!matched && candidates.length > 0) detected = 'en';
   } catch {
     /* SSR / restricted env */
   }
-  return 'ru';
+  // Persist detection result so subsequent loads don't re-detect (locks the
+  // language to whatever we showed the user on their first visit).
+  try {
+    localStorage.setItem(LANGUAGE_LS_KEY, detected);
+  } catch {
+    /* private mode */
+  }
+  return detected;
 }
 
 function readLanguageFromLocalStorage(): Language {
   return detectInitialLanguage();
+}
+
+function readExplicitFlag(): boolean {
+  try {
+    return localStorage.getItem(LANGUAGE_EXPLICIT_LS_KEY) === '1';
+  } catch {
+    return false;
+  }
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
@@ -90,6 +103,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLanguageState(lang);
     try {
       localStorage.setItem(LANGUAGE_LS_KEY, lang);
+      // Mark as an explicit user choice — profile hydration must not override it.
+      localStorage.setItem(LANGUAGE_EXPLICIT_LS_KEY, '1');
     } catch {
       // Private mode / quota — UI language still updates for this session.
     }
