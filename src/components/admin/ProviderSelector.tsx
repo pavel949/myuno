@@ -60,7 +60,7 @@ export function ProviderSelector({
   required = false,
   disabled = false
 }: ProviderSelectorProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const { providers, isLoading, refetch } = useAdminProviders();
   const { data: managementCompanies, isLoading: mcLoading } = useManagementCompanies();
   const isRussian = language === 'ru';
