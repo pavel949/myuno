@@ -141,7 +141,7 @@ export function ProviderSelector({
       setQuickEmail('');
     } catch (err) {
       console.error('Quick create error:', err);
-      toast.error(isRussian ? 'Ошибка создания' : 'Creation failed');
+      toast.error(t('admin.providerSelector.createError'));
     } finally {
       setIsCreating(false);
     }
