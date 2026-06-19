@@ -432,11 +432,11 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
           </ScrollArea>
           <div className="p-6 pt-0 flex gap-2">
             <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
-              {isRu ? 'Отмена' : 'Cancel'}
+              {t('admin.crud.cancel')}
             </Button>
             <Button className="flex-1" onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {editingItem ? (isRu ? 'Обновить' : 'Update') : (isRu ? 'Создать' : 'Create')}
+              {editingItem ? t('admin.crud.update') : t('admin.crud.create')}
             </Button>
           </div>
         </DialogContent>
@@ -446,15 +446,15 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
       <Dialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{isRu ? 'Удалить?' : 'Delete?'}</DialogTitle>
-            <DialogDescription>{isRu ? 'Действие нельзя отменить' : 'Cannot undo'}</DialogDescription>
+            <DialogTitle>{t('admin.crud.deleteConfirm')}</DialogTitle>
+            <DialogDescription>{t('admin.crud.cannotUndo')}</DialogDescription>
           </DialogHeader>
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={() => setDeleteConfirmId(null)}>
-              {isRu ? 'Отмена' : 'Cancel'}
+              {t('admin.crud.cancel')}
             </Button>
             <Button variant="destructive" className="flex-1" onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}>
-              {isRu ? 'Удалить' : 'Delete'}
+              {t('admin.crud.delete')}
             </Button>
           </div>
         </DialogContent>
