@@ -357,7 +357,7 @@ export function ProviderSelector({
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>{isRussian ? 'Название *' : 'Name *'}</Label>
+              <Label>{t('admin.providerSelector.name')} *</Label>
               <Input
                 value={quickName}
                 onChange={(e) => setQuickName(e.target.value)}
