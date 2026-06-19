@@ -121,15 +121,22 @@ export function InlineAuthGate({
     setBusy(true);
     try {
       // Redirect back to the current page so the draft restores from sessionStorage.
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.href },
+      const result = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: window.location.href,
       });
-      if (error) {
-        toast.error(error.message);
+      if (result.error) {
+        toast.error(result.error.message ?? t(language, 'Ошибка входа через Google', 'Google sign-in failed'));
         setBusy(false);
+        return;
       }
-      // On success the page redirects — no need to clear busy.
+      if (result.redirected) {
+        // Browser will redirect to Google — nothing more to do here.
+        return;
+      }
+      // Tokens received and session set — proceed.
+      onAuthenticated();
+      onOpenChange(false);
+      setBusy(false);
     } catch (err) {
       logger.error('[InlineAuthGate] google', err);
       toast.error(t(language, 'Ошибка входа через Google', 'Google sign-in failed'));
