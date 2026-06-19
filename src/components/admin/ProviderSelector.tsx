@@ -332,7 +332,7 @@ export function ProviderSelector({
           size="icon"
           onClick={() => setIsQuickCreateOpen(true)}
           disabled={disabled || isCreating}
-          title={isRussian ? 'Создать поставщика' : 'Create provider'}
+          title={t('admin.providerSelector.createTitle')}
         >
           {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
         </Button>
