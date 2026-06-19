@@ -248,7 +248,7 @@ export function OperationsBookingsTab() {
                   {(!filteredOrders || filteredOrders.length === 0) && (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        {isRu ? 'Заказы не найдены' : 'No orders found'}
+                        {t('admin.orders.empty')}
                       </TableCell>
                     </TableRow>
                   )}
