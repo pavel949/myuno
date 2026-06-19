@@ -91,7 +91,7 @@ export function OperationsBookingsTab() {
     const primary = order.order_participants?.find((p: any) => p.role === 'primary');
     if (primary) return { name: primary.name, phone: primary.phone };
     const profile = profileMap.get(order.customer_user_id);
-    return { name: profile?.full_name || '—', phone: profile?.phone || null };
+    return { name: profile?.full_name || t('admin.orders.noCustomer'), phone: profile?.phone || null };
   };
 
   return (
