@@ -162,7 +162,7 @@ function formDataToPayload(formData: Record<string, any>, fields: FieldDef[]): R
 }
 
 export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRu = language === 'ru';
   const { items, isLoading, createItem, updateItem, deleteItem } = hook;
   const Icon = config.icon || Package;
@@ -188,7 +188,7 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
 
   const handleSubmit = async () => {
     if (!formData.name_en) {
-      toast.error(isRu ? 'Заполните название' : 'Fill in name');
+      toast.error(t('admin.crud.fillName'));
       return;
     }
     setIsSubmitting(true);
@@ -196,15 +196,15 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
       const payload = formDataToPayload(formData, config.fields);
       if (editingItem) {
         await updateItem({ id: editingItem.id, ...payload });
-        toast.success(isRu ? 'Обновлено' : 'Updated');
+        toast.success(t('admin.crud.updated'));
       } else {
         await createItem(payload);
-        toast.success(isRu ? 'Создано' : 'Created');
+        toast.success(t('admin.crud.created'));
       }
       setIsDialogOpen(false);
       resetForm();
     } catch {
-      toast.error(isRu ? 'Ошибка сохранения' : 'Save error');
+      toast.error(t('admin.crud.saveError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -213,10 +213,10 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
   const handleDelete = async (id: string) => {
     try {
       await deleteItem(id);
-      toast.success(isRu ? 'Удалено' : 'Deleted');
+      toast.success(t('admin.crud.deleted'));
       setDeleteConfirmId(null);
     } catch {
-      toast.error(isRu ? 'Ошибка' : 'Error');
+      toast.error(t('admin.crud.error'));
     }
   };
 
@@ -344,7 +344,7 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
       <PageHeader title={isRu ? config.titleRu : config.titleEn} showBack />
       <Button className="w-full mb-4" onClick={openCreate}>
         <Plus className="h-4 w-4 mr-2" />
-        {isRu ? 'Добавить' : 'Add'}
+        {t('admin.crud.add')}
       </Button>
 
       {isLoading ? (
@@ -353,7 +353,7 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
         <Card>
           <CardContent className="p-8 text-center">
             <Icon className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground">{isRu ? 'Нет данных' : 'No data'}</p>
+            <p className="text-muted-foreground">{t('admin.crud.noData')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -378,7 +378,7 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
                         <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                           {getTypeBadge(item) && <Badge variant="secondary">{getTypeBadge(item)}</Badge>}
                           <Badge variant={item.is_active !== false ? 'default' : 'secondary'}>
-                            {item.is_active !== false ? (isRu ? 'Активно' : 'Active') : (isRu ? 'Неактивно' : 'Inactive')}
+                            {item.is_active !== false ? t('admin.crud.active') : t('admin.crud.inactive')}
                           </Badge>
                           {item[config.subtitleField || 'district'] && (
                             <span className="truncate"><MapPin className="h-3 w-3 inline" /> {item[config.subtitleField || 'district']}</span>
@@ -396,10 +396,10 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEdit(item)}>
-                            <Edit className="h-4 w-4 mr-2" />{isRu ? 'Редактировать' : 'Edit'}
+                            <Edit className="h-4 w-4 mr-2" />{t('admin.crud.edit')}
                           </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive" onClick={() => setDeleteConfirmId(item.id)}>
-                            <Trash2 className="h-4 w-4 mr-2" />{isRu ? 'Удалить' : 'Delete'}
+                            <Trash2 className="h-4 w-4 mr-2" />{t('admin.crud.delete')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -417,11 +417,9 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
         <DialogContent className="max-w-2xl max-h-[90vh] p-0">
           <DialogHeader className="p-6 pb-0">
             <DialogTitle>
-              {editingItem
-                ? (isRu ? 'Редактировать' : 'Edit')
-                : (isRu ? 'Добавить' : 'Add')}
+              {editingItem ? t('admin.crud.edit') : t('admin.crud.add')}
             </DialogTitle>
-            <DialogDescription>{isRu ? 'Заполните данные' : 'Fill in details'}</DialogDescription>
+            <DialogDescription>{t('admin.crud.fillDetails')}</DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[calc(90vh-140px)] px-6">
             <div className="space-y-4 py-4">
@@ -434,11 +432,11 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
           </ScrollArea>
           <div className="p-6 pt-0 flex gap-2">
             <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
-              {isRu ? 'Отмена' : 'Cancel'}
+              {t('admin.crud.cancel')}
             </Button>
             <Button className="flex-1" onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {editingItem ? (isRu ? 'Обновить' : 'Update') : (isRu ? 'Создать' : 'Create')}
+              {editingItem ? t('admin.crud.update') : t('admin.crud.create')}
             </Button>
           </div>
         </DialogContent>
@@ -448,15 +446,15 @@ export function AdminVerticalCRUD({ config, hook }: AdminVerticalCRUDProps) {
       <Dialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{isRu ? 'Удалить?' : 'Delete?'}</DialogTitle>
-            <DialogDescription>{isRu ? 'Действие нельзя отменить' : 'Cannot undo'}</DialogDescription>
+            <DialogTitle>{t('admin.crud.deleteConfirm')}</DialogTitle>
+            <DialogDescription>{t('admin.crud.cannotUndo')}</DialogDescription>
           </DialogHeader>
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={() => setDeleteConfirmId(null)}>
-              {isRu ? 'Отмена' : 'Cancel'}
+              {t('admin.crud.cancel')}
             </Button>
             <Button variant="destructive" className="flex-1" onClick={() => deleteConfirmId && handleDelete(deleteConfirmId)}>
-              {isRu ? 'Удалить' : 'Delete'}
+              {t('admin.crud.delete')}
             </Button>
           </div>
         </DialogContent>

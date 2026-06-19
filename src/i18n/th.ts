@@ -1051,4 +1051,24 @@ export const th: Record<string, string> = {
   'welcome.benefits.payments.title': 'การชำระเงินไร้พรมแดน',
   'welcome.benefits.payments.body':
     'บัตร โอนเงิน คริปโต และวิธีการท้องถิ่น เรารับผิดชอบค่าธรรมเนียมและสกุลเงิน คุณเห็นยอดรวมในกระเป๋าเดียว',
+
+  // Admin · Vertical CRUD (generic)
+  'admin.crud.add': 'เพิ่ม',
+  'admin.crud.edit': 'แก้ไข',
+  'admin.crud.delete': 'ลบ',
+  'admin.crud.cancel': 'ยกเลิก',
+  'admin.crud.update': 'อัปเดต',
+  'admin.crud.create': 'สร้าง',
+  'admin.crud.fillName': 'กรอกชื่อ',
+  'admin.crud.fillDetails': 'กรอกรายละเอียด',
+  'admin.crud.updated': 'อัปเดตแล้ว',
+  'admin.crud.created': 'สร้างแล้ว',
+  'admin.crud.saveError': 'บันทึกไม่สำเร็จ',
+  'admin.crud.deleted': 'ลบแล้ว',
+  'admin.crud.error': 'ข้อผิดพลาด',
+  'admin.crud.noData': 'ไม่มีข้อมูล',
+  'admin.crud.active': 'ใช้งาน',
+  'admin.crud.inactive': 'ปิดใช้งาน',
+  'admin.crud.deleteConfirm': 'ลบ?',
+  'admin.crud.cannotUndo': 'ไม่สามารถยกเลิกได้',
 };
