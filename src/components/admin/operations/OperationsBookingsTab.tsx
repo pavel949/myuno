@@ -102,7 +102,7 @@ export function OperationsBookingsTab() {
             <AlertCircle className="h-8 w-8 text-warning" />
             <div>
               <p className="text-2xl font-bold">{stats.pending}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Ожидают' : 'Pending'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.pending')}</p>
             </div>
           </CardContent>
         </Card>
@@ -111,7 +111,7 @@ export function OperationsBookingsTab() {
             <Clock className="h-8 w-8 text-info" />
             <div>
               <p className="text-2xl font-bold">{stats.confirmed}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Подтверждено' : 'Confirmed'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.confirmed')}</p>
             </div>
           </CardContent>
         </Card>
@@ -120,7 +120,7 @@ export function OperationsBookingsTab() {
             <CheckCircle className="h-8 w-8 text-success" />
             <div>
               <p className="text-2xl font-bold">{stats.completed}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Завершено' : 'Completed'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.completed')}</p>
             </div>
           </CardContent>
         </Card>
@@ -129,7 +129,7 @@ export function OperationsBookingsTab() {
             <XCircle className="h-8 w-8 text-destructive" />
             <div>
               <p className="text-2xl font-bold">{stats.cancelled}</p>
-              <p className="text-sm text-muted-foreground">{isRu ? 'Отменено' : 'Cancelled'}</p>
+              <p className="text-sm text-muted-foreground">{t('admin.orders.stats.cancelled')}</p>
             </div>
           </CardContent>
         </Card>
@@ -140,7 +140,8 @@ export function OperationsBookingsTab() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            {isRu ? 'Все заказы' : 'All Orders'}
+            {t('admin.orders.title')}
+
           </CardTitle>
         </CardHeader>
         <CardContent>
