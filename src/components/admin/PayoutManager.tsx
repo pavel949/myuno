@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Wallet, Clock, CheckCircle2, XCircle, Send, Users,
-  ArrowRight, Building2, Calendar, CreditCard
+  Building2, Calendar
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAdminPayouts, VendorPayout } from '@/hooks/useAdminPayouts';
 import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ru, enUS, th } from 'date-fns/locale';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Dialog,
   DialogContent,
@@ -20,12 +21,11 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 
-function formatCurrency(amount: number, currency = 'THB'): string {
-  return new Intl.NumberFormat('ru-RU', {
+function formatCurrency(amount: number, locale: string, currency = 'THB'): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
@@ -33,27 +33,18 @@ function formatCurrency(amount: number, currency = 'THB'): string {
   }).format(amount);
 }
 
-function getStatusBadge(status: string) {
-  switch (status) {
-    case 'pending':
-      return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">Ожидает</Badge>;
-    case 'processing':
-      return <Badge variant="outline" className="bg-info/10 text-info border-info/30">В обработке</Badge>;
-    case 'completed':
-      return <Badge variant="outline" className="bg-success/10 text-success border-success/30">Выплачено</Badge>;
-    case 'failed':
-      return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">Ошибка</Badge>;
-    default:
-      return <Badge variant="outline">{status}</Badge>;
-  }
-}
+const LOCALE_MAP: Record<string, Locale> = { ru, en: enUS, th };
+const INTL_LOCALE: Record<string, string> = { ru: 'ru-RU', en: 'en-US', th: 'th-TH' };
 
 export function PayoutManager() {
+  const { t, language } = useLanguage();
+  const dateLocale = LOCALE_MAP[language] || enUS;
+  const intlLocale = INTL_LOCALE[language] || 'en-US';
+
   const { 
     payouts, 
     pendingProviders, 
     isLoading, 
-    createPayout,
     processPayout,
     createBulkPayouts,
     totalPendingAmount,
@@ -66,6 +57,21 @@ export function PayoutManager() {
 
   const pendingPayouts = payouts.filter(p => p.status === 'pending' || p.status === 'processing');
   const completedPayouts = payouts.filter(p => p.status === 'completed');
+
+  function getStatusBadge(status: string) {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30">{t('admin.payouts.status.pending')}</Badge>;
+      case 'processing':
+        return <Badge variant="outline" className="bg-info/10 text-info border-info/30">{t('admin.payouts.status.processing')}</Badge>;
+      case 'completed':
+        return <Badge variant="outline" className="bg-success/10 text-success border-success/30">{t('admin.payouts.status.completed')}</Badge>;
+      case 'failed':
+        return <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30">{t('admin.payouts.status.failed')}</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  }
 
   const toggleProvider = (providerId: string) => {
     setSelectedProviders(prev => 
@@ -117,8 +123,8 @@ export function PayoutManager() {
                 <Clock className="w-6 h-6 text-warning" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">К выплате</p>
-                <p className="text-2xl font-bold">{formatCurrency(totalPendingAmount)}</p>
+                <p className="text-sm text-muted-foreground">{t('admin.payouts.summary.toPay')}</p>
+                <p className="text-2xl font-bold">{formatCurrency(totalPendingAmount, intlLocale)}</p>
               </div>
             </div>
           </CardContent>
@@ -130,7 +136,7 @@ export function PayoutManager() {
                 <Users className="w-6 h-6 text-info" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Провайдеров</p>
+                <p className="text-sm text-muted-foreground">{t('admin.payouts.summary.providers')}</p>
                 <p className="text-2xl font-bold">{pendingProviders.length}</p>
               </div>
             </div>
@@ -143,7 +149,7 @@ export function PayoutManager() {
                 <Send className="w-6 h-6 text-accent-purple" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Ожидают обработки</p>
+                <p className="text-sm text-muted-foreground">{t('admin.payouts.summary.awaiting')}</p>
                 <p className="text-2xl font-bold">{pendingPayouts.length}</p>
               </div>
             </div>
@@ -153,23 +159,25 @@ export function PayoutManager() {
 
       <Tabs defaultValue="providers" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="providers">Провайдеры</TabsTrigger>
-          <TabsTrigger value="pending">Ожидающие выплаты</TabsTrigger>
-          <TabsTrigger value="history">История</TabsTrigger>
+          <TabsTrigger value="providers">{t('admin.payouts.tabs.providers')}</TabsTrigger>
+          <TabsTrigger value="pending">{t('admin.payouts.tabs.pending')}</TabsTrigger>
+          <TabsTrigger value="history">{t('admin.payouts.tabs.history')}</TabsTrigger>
         </TabsList>
 
         {/* Providers with pending payouts */}
         <TabsContent value="providers">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">Провайдеры с балансом к выплате</CardTitle>
+              <CardTitle className="text-lg">{t('admin.payouts.providers.title')}</CardTitle>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={selectAllProviders}
                 >
-                  {selectedProviders.length === pendingProviders.length ? 'Снять выбор' : 'Выбрать все'}
+                  {selectedProviders.length === pendingProviders.length
+                    ? t('admin.payouts.providers.deselectAll')
+                    : t('admin.payouts.providers.selectAll')}
                 </Button>
                 <Button
                   size="sm"
@@ -177,7 +185,7 @@ export function PayoutManager() {
                   onClick={handleBulkCreate}
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  Создать выплаты ({selectedProviders.length})
+                  {t('admin.payouts.providers.createPayouts')} ({selectedProviders.length})
                 </Button>
               </div>
             </CardHeader>
@@ -185,7 +193,7 @@ export function PayoutManager() {
               {pendingProviders.length === 0 ? (
                 <div className="text-center py-10">
                   <Wallet className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-                  <p className="text-muted-foreground">Нет провайдеров с балансом к выплате</p>
+                  <p className="text-muted-foreground">{t('admin.payouts.providers.empty')}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -215,17 +223,17 @@ export function PayoutManager() {
                           <p className="text-sm text-muted-foreground">
                             {provider.businessCategory}
                             {provider.lastPayoutDate && (
-                              <> • Посл. выплата: {format(new Date(provider.lastPayoutDate), 'd MMM yyyy', { locale: ru })}</>
+                              <> • {t('admin.payouts.providers.lastPayout')}: {format(new Date(provider.lastPayoutDate), 'd MMM yyyy', { locale: dateLocale })}</>
                             )}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-bold text-success">
-                          {formatCurrency(provider.pendingPayout)}
+                          {formatCurrency(provider.pendingPayout, intlLocale)}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Всего заработано: {formatCurrency(provider.totalEarnings)}
+                          {t('admin.payouts.providers.totalEarned')}: {formatCurrency(provider.totalEarnings, intlLocale)}
                         </p>
                       </div>
                     </motion.div>
@@ -240,13 +248,13 @@ export function PayoutManager() {
         <TabsContent value="pending">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Ожидающие обработки</CardTitle>
+              <CardTitle className="text-lg">{t('admin.payouts.pending.title')}</CardTitle>
             </CardHeader>
             <CardContent>
               {pendingPayouts.length === 0 ? (
                 <div className="text-center py-10">
                   <CheckCircle2 className="w-12 h-12 mx-auto text-success/50 mb-4" />
-                  <p className="text-muted-foreground">Все выплаты обработаны</p>
+                  <p className="text-muted-foreground">{t('admin.payouts.pending.empty')}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -263,15 +271,15 @@ export function PayoutManager() {
                           <Clock className="w-5 h-5 text-warning" />
                         </div>
                         <div>
-                          <p className="font-medium">{payout.provider?.name || 'Неизвестный провайдер'}</p>
+                          <p className="font-medium">{payout.provider?.name || t('admin.payouts.pending.unknownProvider')}</p>
                           <p className="text-sm text-muted-foreground">
-                            {format(new Date(payout.created_at), 'd MMM yyyy, HH:mm', { locale: ru })}
+                            {format(new Date(payout.created_at), 'd MMM yyyy, HH:mm', { locale: dateLocale })}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="text-lg font-bold">{formatCurrency(payout.amount)}</p>
+                          <p className="text-lg font-bold">{formatCurrency(payout.amount, intlLocale)}</p>
                           {getStatusBadge(payout.status)}
                         </div>
                         <div className="flex gap-2">
@@ -281,7 +289,7 @@ export function PayoutManager() {
                             onClick={() => openProcessDialog(payout)}
                           >
                             <CheckCircle2 className="w-4 h-4 mr-1" />
-                            Выплатить
+                            {t('admin.payouts.pending.payAction')}
                           </Button>
                         </div>
                       </div>
@@ -297,13 +305,13 @@ export function PayoutManager() {
         <TabsContent value="history">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">История выплат</CardTitle>
+              <CardTitle className="text-lg">{t('admin.payouts.history.title')}</CardTitle>
             </CardHeader>
             <CardContent>
               {completedPayouts.length === 0 ? (
                 <div className="text-center py-10">
                   <Calendar className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-                  <p className="text-muted-foreground">История выплат пуста</p>
+                  <p className="text-muted-foreground">{t('admin.payouts.history.empty')}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -320,17 +328,17 @@ export function PayoutManager() {
                           <CheckCircle2 className="w-5 h-5 text-success" />
                         </div>
                         <div>
-                          <p className="font-medium">{payout.provider?.name || 'Неизвестный провайдер'}</p>
+                          <p className="font-medium">{payout.provider?.name || t('admin.payouts.pending.unknownProvider')}</p>
                           <p className="text-sm text-muted-foreground">
                             {payout.processed_at 
-                              ? format(new Date(payout.processed_at), 'd MMM yyyy, HH:mm', { locale: ru })
-                              : format(new Date(payout.created_at), 'd MMM yyyy, HH:mm', { locale: ru })
+                              ? format(new Date(payout.processed_at), 'd MMM yyyy, HH:mm', { locale: dateLocale })
+                              : format(new Date(payout.created_at), 'd MMM yyyy, HH:mm', { locale: dateLocale })
                             }
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-success">{formatCurrency(payout.amount)}</p>
+                        <p className="text-lg font-bold text-success">{formatCurrency(payout.amount, intlLocale)}</p>
                         {payout.payment_reference && (
                           <p className="text-xs text-muted-foreground">Ref: {payout.payment_reference}</p>
                         )}
@@ -348,21 +356,21 @@ export function PayoutManager() {
       <Dialog open={processDialogOpen} onOpenChange={setProcessDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Обработка выплаты</DialogTitle>
+            <DialogTitle>{t('admin.payouts.dialog.title')}</DialogTitle>
             <DialogDescription>
               {selectedPayout && (
                 <>
-                  Выплата для {selectedPayout.provider?.name}: {formatCurrency(selectedPayout.amount)}
+                  {t('admin.payouts.dialog.descFor')} {selectedPayout.provider?.name}: {formatCurrency(selectedPayout.amount, intlLocale)}
                 </>
               )}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="payment-ref">Референс платежа (опционально)</Label>
+              <Label htmlFor="payment-ref">{t('admin.payouts.dialog.refLabel')}</Label>
               <Input
                 id="payment-ref"
-                placeholder="Номер транзакции или ID платежа"
+                placeholder={t('admin.payouts.dialog.refPlaceholder')}
                 value={paymentReference}
                 onChange={(e) => setPaymentReference(e.target.value)}
               />
@@ -375,14 +383,14 @@ export function PayoutManager() {
               disabled={processPayout.isPending}
             >
               <XCircle className="w-4 h-4 mr-2" />
-              Отклонить
+              {t('admin.payouts.dialog.reject')}
             </Button>
             <Button
               onClick={() => handleProcessPayout('completed')}
               disabled={processPayout.isPending}
             >
               <CheckCircle2 className="w-4 h-4 mr-2" />
-              Подтвердить выплату
+              {t('admin.payouts.dialog.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>
