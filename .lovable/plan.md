@@ -1,132 +1,84 @@
-# План: Phase 1 — фундамент мульти-локационности
 
-**Цель:** убрать архитектурные блокеры, после которых добавление новой локации (Бали, Дубай, Дананг, Гонконг — уже есть в `cities` как coming-soon) станет вопросом контента и сидинга, а не рефакторинга.
+## Проблема
 
-**Что НЕ входит в Phase 1:** локализация контента лендингов, partner network в новом городе, compliance/visa справочники, домены/субдомены. Это Phase 2/3 — отдельный план для каждой новой локации.
+Сейчас язык в myUNO может «прыгать» по нескольким причинам, и часть UI остаётся на русском даже при выбранном EN/TH. Ниже — что именно нашёл и как чиню.
 
-**Текущее состояние (по аудиту):** `cities`, `LocationContext`, `CurrencyContext`, `currency_rates`, `AdminCities`, `geography.ts` уже есть. Блокеры: 1 225 хардкодов `'THB'`, 265 файлов c "Phuket", `city` хранится как свободный текст на ~30 таблицах вместо FK, URL без префикса локации.
+## Причины произвольного переключения языка
 
----
+1. **`LanguageProfileHydrate` перезаписывает свежий выбор**
+   `src/components/providers/LanguageProfileHydrate.tsx` после логина читает `profiles.preferred_language` и безусловно вызывает `setLanguage(pl)`. Сценарий: гость выбрал EN → залогинился → язык скачет на RU (тот, что был сохранён в профиле раньше). Так же ведёт себя `useProfile.updateProfile.onSuccess` (`src/hooks/useProfile.ts:88`).
 
-## Шаги (порядок важен — каждый разблокирует следующий)
+2. **`detectInitialLanguage` не персистит результат**
+   `src/contexts/LanguageContext.tsx:51` каждый раз вычисляет язык из `navigator.languages`, но не записывает его в `localStorage`. Если браузер меняет порядок locale (или пользователь поставил расширение), при следующем заходе язык может измениться сам собой.
 
-### 1. БД: добавить `city_id` на доменные таблицы + бэкфилл
+3. **Синхронный `getTranslations` возвращает RU-кэш, пока EN/TH ещё грузится**
+   `src/i18n/index.ts:46` для несохранённого языка отдаёт `translationCache.ru`. Поэтому при первом открытии EN/TH-сессии экран мелькает по-русски, а часть ключей остаётся русскими, если фолбэк сработал в момент первого рендера и значение закэшировалось в memo.
 
-Одна миграция, добавляет `city_id uuid REFERENCES cities(id)` + индекс на каждую таблицу из списка. Бэкфилл — все существующие записи получают `city_id = (select id from cities where slug='phuket')`. NOT NULL после бэкфилла там, где можно.
+4. **`th` не доступен из UI, но детектится**
+   `LanguageSwitcher` и `DrawerFooter` предлагают только RU/EN, а `detectInitialLanguage` может выставить `th`. Юзер не может вернуть язык назад из шапки.
 
-Таблицы первой волны (бизнес-критичные):
-- `properties`, `property_projects`, `property_complexes`, `project_units`, `development_units`, `resale_properties`
-- `providers`, `marketplace_vendors`, `listings`, `business_listings`, `user_listings`
-- `restaurants`, `salons`, `gyms`, `flower_shops`, `pharmacies`, `veterinary_clinics`, `doctors`, `education_providers`, `insurance_providers`
-- `events`, `venues`, `experience_categories`, `water_activities`, `transfers`, `airport_services`, `legal_services`, `medical_services`, `visa_services`, `cleaning_services`
-- `developers`, `management_companies`, `crm_companies`, `crm_contacts`
-- `official_news`, `platform_news`, `lead_magnets`, `magnet_landings`
-- `phuket_osm_pois` → переименовать в `osm_pois` + `city_id`
+## Пробелы переводов
 
-Существующий `city` text-столбец **не удаляем** — оставляем как human-readable label, добавляем `city_id` поверх. Удалим в Phase 4 после полной миграции консьюмеров.
-
-RLS не меняем (всё остаётся как есть). Только GRANT не нужен — это ALTER, не CREATE.
-
-### 2. БД: вспомогательные таблицы для мульти-локационности
-
-- `city_areas` (id, city_id, slug, name_en/ru/th, lat, lng, polygon) — заменит хардкод `src/lib/config/phuketAreas.ts`. Бэкфилл из существующего файла для Пхукета.
-- `city_content` (city_id, key, value_en, value_ru, value_th) — локализованные тексты (адрес офиса, контакты, hero копирайт), заменит хардкод в `src/lib/config/contacts.ts`.
-- `cities.metadata` jsonb — расширение под per-city конфиг (compliance flags, sources, default zoom, og_image_url) без миграций на каждый чих.
-
-### 3. Контекст локации: убрать хардкод `'phuket'`
-
-`src/contexts/LocationContext.tsx`:
-- Дефолт через детекцию: localStorage → IP geo (есть edge function `ip-geolocate`? если нет — `navigator.geolocation` с timeout 1.5s) → ближайший активный город из `cities` по координатам → фолбэк на первый `is_active=true` город по `sort_order`.
-- Если детекция дала coming-soon город — открыть `CitySwitcherSheet` с CTA «Уведомить о запуске» + выбор активного города.
-- Все компоненты, которые сейчас читают `currentCitySlug === 'phuket'`, переходят на `currentCity.slug` (без сравнений с литералом).
-
-### 4. Унификация валют: codemod `'THB'` → city default
-
-Хелпер `src/lib/format/price.ts`:
-```ts
-formatPrice(amount, { from?: Currency, to?: Currency }) // to = currentCity.default_currency
-```
-Использует существующий `currency_rates` через `useCurrencyConversion`.
-
-Codemod-скрипт (jscodeshift или ручной find-replace по паттернам):
-- `'THB'` literal → `currentCity.default_currency` где есть контекст
-- `฿{amount}` → `<Price amount={amount} />` компонент
-- `Intl.NumberFormat('th-TH', { currency: 'THB' })` → `formatPrice(...)`
-
-Ожидаемый охват: ~80% из 1225 случаев автоматом, остальные руками. Отдельным PR-ом, маленькими порциями (по 50 файлов), чтобы review был возможен.
-
-### 5. City-aware queries: фильтрация хуков по `currentCity.id`
-
-Шаблон-хук `useCityScopedQuery`:
-```ts
-useCityScopedQuery(['properties'], (cityId) => 
-  supabase.from('properties').select('*').eq('city_id', cityId)
-)
-```
-Рефакторим в первую очередь хуки маркетплейса/discovery: `useProperties`, `useProviders`, `useListings`, `useRestaurants`, `useExperiences`, `useEvents`, `useTransfers`. CRM/owner/admin хуки — после, они tenant-scoped и менее срочны.
-
-### 6. URL-структура: опциональный префикс `/:city`
-
-`src/lib/config/routes.ts` + `AnimatedRoutes.tsx`:
-- Все публичные маркетинговые/discovery маршруты получают опциональный префикс: `/:city?/property`, `/:city?/restaurants`, `/:city?/for/:slug`.
-- Без префикса = currentCity по контексту (как сейчас).
-- С префиксом = override + автоматический `setCity(slug)`.
-- Legacy редиректы: `/property/...` → 301 → `/phuket/property/...` через middleware (или клиентский redirect в роутере), чтобы существующие беклинки и SEO не сломались.
-- `hreflang`/canonical в `LandingSeoHead` обновить под `/:city/` префикс.
-
-### 7. Расхардкод оставшихся `'phuket'` literals
-
-15 string-литералов `'phuket'` в коде (после п.3 их станет меньше). Заменить на `currentCity.slug` или удалить условные ветки. Контент-файлы (`src/content/landings/personas/*`) — оставляем как есть в Phase 1, они и так Phuket-only (Phase 2 вынесет в БД per-city).
-
-### 8. Launch checklist в админке
-
-`src/pages/admin/AdminCities.tsx`:
-- Кнопка «Запустить город»: чек-лист с проверками (есть ≥1 partner в каждом ключевом кластере, есть city_content для contacts/hero, есть translations покрытие ≥80%, geography заполнен, default_currency есть в `currency_rates`).
-- При всех зелёных — флипает `is_active=true, is_coming_soon=false`.
-- Read-only до Phase 2 контента, но фреймворк готов.
-
-### 9. CI guard
-
-Eslint-правило или скрипт в `predev`: запрет на новые литералы `'THB'`, `'phuket'`, `'Thailand'`, `'฿'` в `src/` (кроме whitelist: `geography.ts`, `i18n/`, `cities` seed). Не даст откатить прогресс.
+- Фолбэк `t()` идёт `DB → static(lang) → static(en) → key`. Для пользователя на EN/TH, если ключа нет — он видит либо EN, либо сам ключ (`home.hero.title`).
+- Нет инструмента, который покажет, какие ключи используются в коде, но отсутствуют в `ru.ts/en.ts/th.ts`, и где остался хардкод RU-строк вместо `t()`.
 
 ---
 
-## Технические детали
+## План правок
 
-**Стэк:** существующий — Supabase, React Query, LocationContext, CurrencyContext. Никаких новых зависимостей.
+### A. Фикс утечек языка (frontend only, без логики бэка)
 
-**Что НЕ трогаем в Phase 1:**
-- Auth/wallet/CRM — cross-city by design, остаются глобальными
-- Контент персональных лендингов — Phase 2 per-city
-- Compliance/visa/tax справочники — Phase 2 per-country (нужны отдельные таблицы `visa_types_by_country`, `tax_rates_by_country`)
-- Партнёрская сеть — Phase 3, контентная работа
-- Edge functions scraping (TAT/Bangkok Post) — Phase 2, per-city source configs
-- Lifecycle messaging шаблоны — Phase 2, per-city контент
+1. **`LanguageContext.tsx`**
+   - В `detectInitialLanguage` сразу писать результат в `localStorage`, чтобы выбор больше не пересчитывался.
+   - Ввести флаг `userExplicitlySetLanguage` (отдельный ключ `myuno-language-explicit=1`), который выставляется при ручном `setLanguage` из UI.
+   - Если язык был выставлен явно — `LanguageProfileHydrate` НЕ перезаписывает его профилем (а наоборот, апдейтит профиль под выбор пользователя).
 
-**Риски:**
-- Бэкфилл `city_id` на `properties` (281 колонка) — самая большая таблица, миграция может занять минуту. Делаем с `CONCURRENTLY` на индексе и батч-апдейтом.
-- Codemod на 1225 случаях `'THB'` — высокий риск регрессий в форматировании цен. Тесты на `formatPrice` обязательны, PR-ы по 50 файлов с visual review каждого экрана с ценами.
-- Legacy 301-редиректы могут просесть SEO — за неделю до накатки добавить `<link rel="canonical">` с новой URL-схемой на старых маршрутах, чтобы Google переиндексировал плавно.
+2. **`LanguageProfileHydrate.tsx`**
+   - На логине: гидрировать из профиля **только если** `userExplicitlySetLanguage` отсутствует. Иначе сразу `UPDATE profiles.preferred_language = language`.
+   - При смене языка залогиненным юзером — продолжаем писать в профиль (как сейчас), но без обратного триггера, который перезаписывал бы локальный стейт.
 
-**Оценка трудоёмкости (один разработчик):**
-- Шаги 1–2 (миграции): 2 дня
-- Шаг 3 (LocationContext): 1 день
-- Шаг 4 (codemod валют): 5–7 дней (растянуто по PR-ам)
-- Шаг 5 (city-aware hooks): 3 дня
-- Шаг 6 (URL prefix): 3 дня
-- Шаги 7–9: 2 дня
-- **Итого:** ~3 недели чистой работы + неделя на стабилизацию.
+3. **`useProfile.ts`**
+   - Убрать `setLanguage(data.preferred_language)` из `onSuccess`. Профиль не должен дёргать UI-язык — это делает `LanguageProfileHydrate` единой точкой.
 
-**Критерий готовности Phase 1:**
-1. `UPDATE cities SET is_active=true WHERE slug='bali'` + seed 10 fake properties с `city_id=<bali>` → на `/bali/property` видны только эти 10, цены в IDR, карта центрирована на Бали. Phuket не задет.
-2. CI guard блокирует PR с новыми `'THB'` литералами.
-3. Все существующие пользователи и URL продолжают работать без изменений (Phuket = дефолт).
+4. **`i18n/index.ts`**
+   - В `getTranslations(lang)` не отдавать RU как silent-фолбэк. Если нужного словаря ещё нет — вернуть пустой объект, и `t()` пойдёт по своему фолбэку (EN → key). Это уберёт мерцание RU-строк на EN/TH сессиях.
+   - В `LanguageProvider` дождаться `await loadI18n(language)` перед `setIsLoadingTranslations(false)` для **не-RU** языков — чтобы первый рендер уже был на нужном языке.
+
+5. **Language switcher: добавить `th`**
+   - В `LanguageSwitcher.tsx` и `DrawerFooter.tsx` показать все 3 языка (RU/EN/TH), чтобы юзер всегда мог вернуться.
+
+### B. Заполнение пробелов в переводах
+
+6. **Сканер пропусков** (одноразовый скрипт, не входит в бандл)
+   - Скрипт `scripts/i18n-audit.ts`: ходит по `src/**/*.{ts,tsx}`, собирает все аргументы `t('...')`, сверяет с `ru.ts/en.ts/th.ts`, печатает:
+     - ключи, которых нет в `en.ts` или `th.ts` (или которые равны RU-значению как «непереведённое»);
+     - хардкод-кириллицу в JSX (эвристика: текстовые ноды и атрибуты `placeholder/title/aria-label` с `[А-Яа-я]`).
+   - Запускаю руками, фиксирую дыры пакетно.
+
+7. **Догон переводов**
+   - По итогам аудита добавляю недостающие ключи в `en.ts` и `th.ts`. Если в коде встречается RU-литерал без `t()` — оборачиваю в `t('...')` и завожу ключ во всех трёх словарях.
+   - Объём заранее не оценить (зависит от вывода аудита). Готов сделать первую пачку (топ-50 самых заметных мест: главные экраны, навигация, формы, тосты) и потом расширять.
+
+### C. Проверка
+
+- Кейс «гость выбрал EN → логин → язык остаётся EN, профиль обновлён».
+- Кейс «логин, в профиле TH → язык переключается на TH сразу, без RU-флэша».
+- Кейс «вторая вкладка меняет язык → первая подхватывает».
+- Скрипт-аудит до/после: количество missing keys должно упасть до 0 в `en.ts`; в `th.ts` — задокументировать остаток.
 
 ---
 
-## Что дальше (вне Phase 1, для контекста)
+## Технические детали для ревью
 
-- **Phase 2 (per-locale контент, 2–3 недели на каждую новую локацию):** вынос лендингов в БД, локальные FAQ/visa/tax, источники новостей, OG-images, hreflang per-city.
-- **Phase 3 (launch playbook, 1 неделя на город):** seed партнёров, активация, домен/субдомен, маркетинг.
+**Файлы под правку:**
+- `src/contexts/LanguageContext.tsx` — explicit flag, persist при detect, await loadI18n.
+- `src/components/providers/LanguageProfileHydrate.tsx` — респект explicit flag.
+- `src/hooks/useProfile.ts` — убрать побочный `setLanguage`.
+- `src/i18n/index.ts` — `getTranslations` без RU-фолбэка.
+- `src/components/uno/LanguageSwitcher.tsx`, `src/components/market/drawer/DrawerFooter.tsx`, `src/components/nav/AppDrawer.tsx` (`toggleLang` → 3-way cycle или меню) — поддержка TH.
+- `scripts/i18n-audit.ts` (новый, dev-only).
+- `src/i18n/en.ts`, `src/i18n/th.ts` — добавляемые ключи (объём по результату аудита).
 
-Когда Phase 1 готов — спросишь меня про Phase 2 для конкретной локации (Бали? Дубай?), я составлю отдельный план с учётом местной специфики.
+**Что НЕ трогаю:** DB-таблицу `translations`, RLS, edge functions, бэкенд-логику профиля. Все изменения — frontend + один dev-скрипт.
+
+**Риски:** при аудите можем найти много хардкод-строк — заведу отдельным проходом, чтобы не раздувать один PR.
