@@ -44,11 +44,11 @@
 | # | Документ | О чём |
 |---|----------|-------|
 | 01 | [Segmentation Framework](./docs/canonical/01-segmentation-framework.md) | 3-осевая сегментация · 25 персон · 10 кластеров · CRM-поля |
-| 02 | [Service Catalogue v2](./docs/canonical/02-service-catalogue-v2.md) | 16 категорий × 230 услуг с тегами lifecycle/role/cluster |
+| 02 | [Service Catalogue v2](./docs/canonical/02-service-catalogue-v2.md) | Каталог услуг (тэги lifecycle/role/cluster). Target: 16 кат × 230 услуг; runtime SSOT `src/lib/catalog/taxonomy.ts` = 14 кат / ~69 услуг + DB |
 | 03 | [Tone of Voice](./docs/canonical/03-tone-of-voice.md) | Голос бренда: спокойная уверенность, продаём доверие |
 | 04 | [Implementation Protocol](./docs/canonical/04-implementation-protocol.md) | Operational playbook M1→M7 |
 | 05 | [Visual Design System](./docs/canonical/05-visual-design-system.md) | Цвет, типографика, сетка, компоненты, кластеры |
-| 06 | [ClearView™ Methodology](./docs/canonical/06-clearview-methodology.md) | Off-plan rating system · 8 категорий · AAA–BB · моат #8 |
+| 06 | [ClearView™ Methodology](./docs/canonical/06-clearview-methodology.md) | Off-plan rating system · 8 категорий оценки · AAA–CCC (7 grades + unrated) · моат #8 |
 | 07 | [Information Architecture](./docs/canonical/07-information-architecture.md) | URL-структура · субдомены · навигация · cross-domain SSO |
 | 08 | [AI Prompts Library](./docs/canonical/08-ai-prompts-library.md) | Канонические system prompts для всех AI-агентов |
 | 09 | [Data Schema](./docs/canonical/09-data-schema.md) | Таблицы · enums · RLS · FK · naming conventions Supabase |

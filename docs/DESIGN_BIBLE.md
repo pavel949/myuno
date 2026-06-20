@@ -225,7 +225,7 @@
 1. **Cluster IA + spatial memory** — 6 цветных кластеров, юзер учит карту один раз.
 2. **Role stack** — не «один человек = одна роль», а weighted stack. Конкурент не реплицирует за месяц.
 3. **AI как silent router** — не chatbot, а producer of intents с one-tap accept.
-4. **ClearView** — методология AAA–BB для off-plan, 8 категорий. Pavel-owned IP.
+4. **ClearView** — методология AAA–CCC для off-plan, 8 категорий. Pavel-owned IP.
 5. **Ignatev Capital** — внутренний CRM для HNW-сделок, эксклюзивные mandates.
 6. **PM-уровень доступ** — реальные собственники, реальные ставки, реальная аналитика.
 7. **Trust-as-UI** — audit markers на каждом money screen, не футер.
@@ -315,6 +315,10 @@ L0  Strategy          PROJECT.md · моаты · KPI
 
 Один человек = много ролей, multi-select, weighted. У каждого `primary_role` + `secondary` + `tertiary`.
 
+> **Два слоя ролей (не путать):**
+> 1. **Consumer role-stack (7)** — то, что юзер выбирает в онбординге: Tourist · Resident · Owner · Agent · Developer · Provider · Investor. Это persona-facing модель ниже.
+> 2. **`app_role` enum (18)** — канонический источник истины по авторизации: `src/types/auth.ts` (синхронизирован с DB `public.app_role`). Включает платформенные/админские роли сверх consumer-стека: `guest · user · tourist · resident · partner · owner · property_owner · property_manager · broker · vendor · staff · uno_team · admin · ombudsman · finance · support · sales · investor`. RLS/RoleGate работают по этому enum, не по 7-ролевому стеку.
+
 > DS 2.1: roles inherit their cluster's muted tone via `--cluster-*` — no per-role rainbow hex.
 
 | Роль | Cluster tone | Default landing |
@@ -385,7 +389,7 @@ weight = primary·3 + secondary·2 + tertiary·1
 | `myuno.app` | Главная, AI-консьерж, публичные вертикали | Все | P0 ✅ |
 | `app.myuno.app` | Личный кабинет | Authenticated residents | P0 |
 | `invest.myuno.app` | Инвест-платформа, DD, ClearView | P8, P9, P11 investors | P0 |
-| `clearview.myuno.app` | Public dashboard рейтингов AAA–BB | Investors + market | P0 |
+| `clearview.myuno.app` | Public dashboard рейтингов AAA–CCC | Investors + market | P0 |
 | `owner.myuno.app` | Owner portal | P8 owners, P10 operators | P1 |
 | `pm.myuno.app` | Property Management Dashboard | P10 operators | P1 |
 | `developers.myuno.app` | Developer Portal | P22 developers | P1 |
@@ -2332,7 +2336,7 @@ event: listing_clearview_expanded { listing_id, grade }
 
 ### 16.1 · Назначение
 
-Дать инвестору **одну страницу** с числовым ответом на вопрос «насколько это безопасно?». Off-plan = высокий риск (developer может не достроить). ClearView оценивает 8 категорий и выдаёт grade AAA → BB.
+Дать инвестору **одну страницу** с числовым ответом на вопрос «насколько это безопасно?». Off-plan = высокий риск (developer может не достроить). ClearView оценивает 8 категорий и выдаёт grade AAA → CCC (+ unrated).
 
 ### 16.2 · Grades
 
@@ -2421,7 +2425,7 @@ UI: `<DataTable>` sticky первая колонка (categories), columns scrol
 Marketing-grade страница со списком всех rated projects.
 
 **Filter UI:**
-- Grade slider (AAA → BB)
+- Grade slider (AAA → CCC)
 - Cluster filter (off-plan zones: Bang Tao, Patong, Rawai, Kamala, Surin, Mai Khao)
 - Price range
 - Payment plan type
@@ -3698,8 +3702,8 @@ event: doc_uploaded { type, size }
 | **Surface** | = Cluster (content). Two names, one concept. | Use «Surface» when referring to canonical 05-visual-design-system. |
 | **JTBD Cluster** | Functional Jobs-To-Be-Done classifier (A–J, 10 штук). | Different from Surface. Used for tagging, AI routing, SEO. |
 | **Persona** | One of 25 user personas (P01–P25). | См. `01-segmentation-framework.md`. |
-| **Vertical** | Micro-app inside a cluster. ~45 verticals across 6 clusters. | E.g. cleaning, visa, off-plan, schools. |
-| **Role** | One of 7 roles: Tourist, Resident, Owner, Agent, Developer, Provider, Investor. | Stored in `profiles.roles_stack`. |
+| **Vertical / Mini-app** | Micro-app inside a cluster. **59** entries across 6 clusters. | Canonical inventory: `src/lib/appRegistry.ts` (57 active + 2 pro). |
+| **Role** | Consumer role-stack = 7 (Tourist, Resident, Owner, Agent, Developer, Provider, Investor). Authorization SoT = `app_role` enum, **18 values** (`src/types/auth.ts`). | Stored in `profiles.roles_stack` + `profiles.primary_role`. |
 | **Role stack** | jsonb of user's roles with weights (primary·3 + secondary·2 + tertiary·1). | Multi-select. |
 | **Lifecycle phase** | One of 5: discover, arrive, live, manage, leave. | Stored in `profiles.lifecycle_phase`. |
 | **Intent** | AI agent output, user-confirmed via one-tap accept/later. | Never auto-execute money moves. |
@@ -3711,7 +3715,7 @@ event: doc_uploaded { type, size }
 | **Audit marker** | UI element showing tx_id + ledger_entry_id + timestamp. | Required on money screens. |
 | **KYC** | Know Your Customer. Levels 0–4 (4 = KYB). | См. §21. |
 | **KYB** | Know Your Business. KYC level 4 for companies. | |
-| **ClearView** | myUNO methodology for off-plan property rating. Grades AAA → BB. | См. §16. |
+| **ClearView** | myUNO methodology for off-plan property rating. Grades AAA → CCC (+ unrated), 7 levels. | См. §16. `CLEARVIEW_GRADES` in `src/lib/taxonomies/master.ts`. |
 | **Mandate** | Capital advisory engagement for HNW investors. Internal CRM. | Ignatev Capital. |
 | **Concierge** | Home canvas widget showing AI agent intents. | UI surface, not chatbot. |
 | **Signal stack** | Ranked list of intents/events shown on Home. | См. §12.5. |
@@ -5718,11 +5722,11 @@ App version изменяется при release. Design Bible — независ
 **Consequences:** Cleaner code, easier per-user prefs. Edge fn `notify` handles all.
 **Alternatives:** Per-feature (отвергли — fragmented).
 
-### ADR-014 · ClearView grades stay AAA → BB
-**Date:** 2026-03
-**Status:** Active
+### ADR-014 · ClearView grade scale
+**Date:** 2026-03 (extended 2026-04)
+**Status:** ⚠️ Superseded — Master Taxonomy v1.0 (2026-04) extended the scale from 5 to 7 grades.
 **Context:** Need rating scale for off-plan.
-**Decision:** AAA, AA, A, BBB, BB (5 grades). Inspired by S&P/Moody's.
+**Decision (superseded):** Originally AAA, AA, A, BBB, BB (5 grades). **Current canon:** AAA · AA · A · BBB · BB · B · CCC (7 grades) + `unrated` — see `CLEARVIEW_GRADES` in `src/lib/taxonomies/master.ts`, DB enum `public.clearview_grade`, and `docs/canonical/00-master-taxonomy.md` §4. Y1 brokered-project restriction also lifted.
 **Consequences:** Familiar to investors. Disciplined methodology (8 categories).
 **Alternatives:** 1–5 stars (отвергли — feels consumer, not financial). Custom scale (отвергли — confusion).
 

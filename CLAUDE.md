@@ -23,11 +23,11 @@
 **Шаг 2 — Операционные канонические документы.** Затем читай `/docs/canonical/` для конкретных решений (по номерам):
 
 1. `01-segmentation-framework.md` — персоны, жизненные фазы, роли, ситуации, CRM-поля
-2. `02-service-catalogue-v2.md` — каталог услуг (16 категорий × 230 услуг) с тегами lifecycle/role/cluster
+2. `02-service-catalogue-v2.md` — каталог услуг с тегами lifecycle/role/cluster. **Canonical target:** 16 категорий × 230 услуг. **Runtime (код):** static SSOT `src/lib/catalog/taxonomy.ts` = 14 категорий (`cat-*`) / ~69 услуг, поверх — DB-driven `category_groups`/`categories`. Drift документирован в самом doc 02.
 3. `03-tone-of-voice.md` — голос бренда (спокойная уверенность, продаём доверие не транзакцию)
 4. `04-implementation-protocol.md` — operational playbook M1→M7
 5. `05-visual-design-system.md` — визуальная дизайн-система (цвет, типографика, сетка, компоненты)
-6. `06-clearview-methodology.md` — ClearView™ методология рейтингов off-plan (моат #8, AAA–BB, 8 категорий)
+6. `06-clearview-methodology.md` — ClearView™ методология рейтингов off-plan (моат #8, AAA–CCC = 7 grades + unrated, 8 категорий оценки)
 7. `07-information-architecture.md` — URL-структура, субдомены, навигация, cross-domain SSO
 8. `08-ai-prompts-library.md` — канонические system prompts для всех AI-агентов (консьерж, ClearView draft, Tax Advisor, support и др.)
 9. `09-data-schema.md` — Canonical Data Schema: таблицы, enums, RLS, FK, naming conventions Supabase (источник истины по схеме данных)
@@ -62,7 +62,7 @@
 - **Canvas (App Shell)** — one of 6 long-lived app-shell canvases used by global navigation: *Home · Discover · Operate · Wallet · Me · Admin*. Previously also called «Surface» — renamed to remove the term collision.
 - **Cluster** — colloquial alias for Surface (content cluster). Same 6 IDs.
 - **JTBD Cluster** — one of 10 functional Jobs-To-Be-Done classifiers (A–J). Used for tagging, AI routing, SEO. **Never confuse with Surface.**
-- **Role stack** — `profiles.roles_stack` jsonb + `primary_role`, weighted `primary·3 + secondary·2 + tertiary·1`
+- **Role stack** — `profiles.roles_stack` jsonb + `primary_role`, weighted `primary·3 + secondary·2 + tertiary·1`. Два слоя: **consumer role-stack (7)** для онбординга (Tourist/Resident/Owner/Agent/Developer/Provider/Investor) и **`app_role` enum (18 values)** — канонический SoT по авторизации в `src/types/auth.ts` (синхронизирован с DB `public.app_role`; включает platform/admin роли: guest, user, partner, property_owner, property_manager, broker, vendor, staff, uno_team, admin, ombudsman, finance, support, sales и др.). RLS/RoleGate — по `app_role`.
 - **Intent** — AI agent output, user-confirmed via one-tap accept/later
 - **Navigator (v3)** — `/discover` рендерит [NavigatorPageV3](src/components/navigation/v3/NavigatorPageV3.tsx) (situation-first grid: `NavigatorPageV3` + `SituationCard` + `SituationDetailPage` + `useSituationServiceCounts`). GA с 2026-06-16 (миграция `20260616013024_enable_navigator_v3_flag.sql`); v2-вариант (`NavigatorPage` cluster grid) и `NavigatorEntry`-обёртка с feature-flag выпилены 2026-06-17 после прохождения QA на role-aware ranking, persona chip-row + RoleSheet, `/map` link, related-situations block. Флаг `feature_flag:navigator_v3` в `system_settings` больше не читается из кода — можно удалить миграцией если хочется.
 - **Canvas type** — `src/types/canvas.ts` экспортирует `CanvasId` + `CANVAS_META` (Home/Discover/Operate/Wallet/Me/Admin) с aud-ience tier'ом. Используйте этот type в новых routing/permission слоях, не строковые литералы.
