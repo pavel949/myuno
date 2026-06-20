@@ -28,7 +28,7 @@ export default function LiveSurfaceLandingPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
   const navigate = useNavigate();
-  const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Планирую переезд и жизнь на Пхукете' : 'Hello! I plan to live on Phuket long-term');
+  const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Планирую переезд и жизнь на Пхукете' : 'Hello! I plan to live in Phuket long-term');
 
   const seo = buildSurfaceSeo('live', t ? 'ru' : 'en');
 
@@ -37,7 +37,7 @@ export default function LiveSurfaceLandingPage() {
       <SEOHead title={seo.title} description={seo.description} url={seo.url} jsonLd={seo.jsonLd} />
       <LandingLayout
         icon={Sunset}
-        title={t ? 'Жизнь на Пхукете' : 'Live on Phuket'}
+        title={t ? 'Жизнь на Пхукете' : 'Live in Phuket'}
         subtitle={t ? 'Дом, школа, банк, страховка, права — всё, что нужно для долгой жизни на острове' : 'Home, school, bank, insurance, licence — everything you need for the long haul'}
         gradient="from-primary via-cluster-arrive to-accent"
         heroCta={{ label: t ? 'Спланировать переезд' : 'Plan my move', onClick: () => navigate(APP_ROUTES.RELOCATE) }}

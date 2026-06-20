@@ -43,7 +43,7 @@ export const P18_LGBTQ: PersonaLanding = {
   secondaryCta: { label: { ru: 'Открыть сообщество', en: 'Browse community' }, href: '/cluster/lifestyle' },
   seo: {
     metaTitle: { ru: 'LGBTQ+ Пхукет: friendly жильё, брак, клиники — myUNO', en: 'LGBTQ+ Phuket: friendly stays, marriage, clinics — myUNO' },
-    metaDescription: { ru: 'LGBTQ+ friendly виллы и кондо, легальный однополый брак, PrEP/HRT клиники и long-stay аренда на Пхукете без неловких вопросов.', en: 'LGBTQ+ friendly villas and condos, legal same-sex marriage, PrEP/HRT clinics and long-stay rental on Phuket — no awkward questions.' },
+    metaDescription: { ru: 'LGBTQ+ friendly виллы и кондо, легальный однополый брак, PrEP/HRT клиники и long-stay аренда на Пхукете без неловких вопросов.', en: 'LGBTQ+ friendly villas and condos, legal same-sex marriage, PrEP/HRT clinics and long-stay rental in Phuket — no awkward questions.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/lgbtq',
     hreflangAlternates: [

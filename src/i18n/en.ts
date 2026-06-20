@@ -360,7 +360,7 @@ export const en: Record<string, string> = {
   'tours.noToursFound': 'No tours found',
 
   // Property hub — landing & account
-  'propertyHub.landing.heading': 'Property on Phuket',
+  'propertyHub.landing.heading': 'Property in Phuket',
   'propertyHub.landing.subheading': 'Rent, buy, or invest — or work with real estate as an owner, management company, or developer. Everyone finds the right entry below.',
   'propertyHub.landing.sectionSeekers': 'Looking for a place or a deal',
   'propertyHub.landing.sectionPros': 'Owners, operators & developers',

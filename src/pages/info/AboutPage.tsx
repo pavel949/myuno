@@ -94,7 +94,7 @@ export default function AboutPage() {
           title={t('О myUNO', 'About myUNO')}
           subtitle={t(
             'Цифровая инфраструктура для жизни на Пхукете.',
-            'Digital infrastructure for life on Phuket.',
+            'Digital infrastructure for life in Phuket.',
           )}
         />
 
@@ -103,7 +103,7 @@ export default function AboutPage() {
             <p>
               {t(
                 'myUNO — единый аккаунт для всего, что нужно иностранцу на Пхукете: жильё и бронирования, медицина и образование, юристы и визы, управление недвижимостью и инвестиции.',
-                'myUNO is a single account for everything a foreigner needs on Phuket: stays and bookings, healthcare and education, lawyers and visas, property management and investments.',
+                'myUNO is a single account for everything a foreigner needs in Phuket: stays and bookings, healthcare and education, lawyers and visas, property management and investments.',
               )}
             </p>
             <p className="text-muted-foreground">
@@ -154,7 +154,7 @@ export default function AboutPage() {
             <p>
               {t(
                 'Главный офис и операционная команда — Пхукет, Таиланд. Постепенно расширяемся на соседние регионы Юго-Восточной Азии.',
-                'HQ and operations team on Phuket, Thailand. Gradually expanding to neighbouring Southeast Asian regions.',
+                'HQ and operations team in Phuket, Thailand. Gradually expanding to neighbouring Southeast Asian regions.',
               )}
             </p>
           </div>

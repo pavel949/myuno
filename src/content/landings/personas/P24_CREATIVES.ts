@@ -10,7 +10,7 @@ export const P24_CREATIVES: PersonaLanding = {
   personaCode: 'P24',
   slug: 'creatives',
   status: 'live',
-  h1: { ru: 'Creative class на Пхукете', en: 'Creative class on Phuket' },
+  h1: { ru: 'Creative class на Пхукете', en: 'Creative class in Phuket' },
   subtitle: { ru: 'Дизайнеры, продюсеры, фотографы, артисты — площадка для жизни, коллабораций и съёмок на острове.', en: 'Designers, producers, photographers, artists — a base for living, collaborating and shooting on the island.' },
   pains: [
     { ru: 'Нет базы локаций, людей и студий — каждый ресёрч с нуля.', en: 'No base of locations, people and studios — every research from scratch.' },
@@ -32,7 +32,7 @@ export const P24_CREATIVES: PersonaLanding = {
   secondaryCta: { label: { ru: 'Получить DTV', en: 'Get DTV' }, href: '/visa/quiz' },
   seo: {
     metaTitle: { ru: 'Creative Phuket: локации, команда, DTV — myUNO', en: 'Creative Phuket: locations, crew, DTV — myUNO' },
-    metaDescription: { ru: 'Площадка для дизайнеров, продюсеров и фотографов на Пхукете: локации, сборка команды, DTV и community.', en: 'A base for designers, producers and photographers on Phuket: locations, crew, DTV visa and community.' },
+    metaDescription: { ru: 'Площадка для дизайнеров, продюсеров и фотографов на Пхукете: локации, сборка команды, DTV и community.', en: 'A base for designers, producers and photographers in Phuket: locations, crew, DTV visa and community.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/creatives',
     hreflangAlternates: [

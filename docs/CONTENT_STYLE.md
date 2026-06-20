@@ -1,7 +1,7 @@
 # myUNO Content Style Guide (RU / EN)
 
 > Inspired by the GOV.UK content design principles. Adapted for a commercial
-> super-app serving foreigners on Phuket. Applies to every user-facing string:
+> super-app serving foreigners in Phuket. Applies to every user-facing string:
 > page titles, button labels, empty states, error messages, listing copy,
 > notifications, and AI Concierge responses.
 

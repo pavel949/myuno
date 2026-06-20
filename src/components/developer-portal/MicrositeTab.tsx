@@ -85,7 +85,7 @@ export function MicrositeTab({ projectId, slug, initial }: MicrositeTabProps) {
       meta_title: p.meta_title || `${initial.name_en} — Phuket new development`,
       meta_description: p.meta_description || (initial.tagline ?? '').slice(0, 160),
       og_image_url: p.og_image_url || initial.cover_image || '',
-      social_share_text: p.social_share_text || `${initial.name_en}: ${initial.tagline ?? 'New project on Phuket'}`,
+      social_share_text: p.social_share_text || `${initial.name_en}: ${initial.tagline ?? 'New project in Phuket'}`,
     }));
   };
 

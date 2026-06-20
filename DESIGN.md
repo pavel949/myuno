@@ -8,11 +8,11 @@
 
 ## Product Context
 
-- **What this is:** AI-first superapp for expats on Phuket — real estate, legal, property management, lifestyle, investments under one account.
+- **What this is:** AI-first superapp for expats in Phuket — real estate, legal, property management, lifestyle, investments under one account.
 - **Who it's for:** Russian-speaking expats primarily; international expats broadly. Mobile-first, real-money transactions.
 - **Space/industry:** Proptech + lifestyle superapp. Peers: property portals (Thailand Property, DDproperty), super-apps (Grab).
 - **Project type:** Mobile-first PWA + native (Capacitor). 40+ micro-app verticals inside one shell.
-- **Languages:** Russian + English UI. Thai script on Phuket-specific content.
+- **Languages:** Russian + English UI. Thai script in Phuket-specific content.
 
 ---
 

@@ -10,7 +10,7 @@ export const P25_STUDENTS: PersonaLanding = {
   personaCode: 'P25',
   slug: 'students',
   status: 'live',
-  h1: { ru: 'Студенты и молодые взрослые на Пхукете', en: 'Students and young adults on Phuket' },
+  h1: { ru: 'Студенты и молодые взрослые на Пхукете', en: 'Students and young adults in Phuket' },
   subtitle: { ru: 'Учёба, языковые школы, дайвинг, Muay Thai и доступная аренда — Пхукет как gap-year или semester abroad.', en: 'Study, language schools, diving, Muay Thai and affordable rentals — Phuket as a gap year or semester abroad.' },
   pains: [
     { ru: 'Нужна ED-виза, но школы и условия запутаны.', en: 'You need an ED visa, but schools and conditions are confusing.' },
@@ -31,8 +31,8 @@ export const P25_STUDENTS: PersonaLanding = {
   primaryCta: { label: { ru: 'Подобрать школу и визу', en: 'Pick school & visa' }, href: '/visa/quiz' },
   secondaryCta: { label: { ru: 'Найти жильё', en: 'Find housing' }, href: '/property/rent' },
   seo: {
-    metaTitle: { ru: 'Студенту на Пхукете: ED-виза, школы, жильё — myUNO', en: 'Students on Phuket: ED visa, schools, housing — myUNO' },
-    metaDescription: { ru: 'Gap-year или semester abroad на Пхукете: ED-виза, языковые школы, доступная аренда, дайвинг и community.', en: 'Gap year or semester abroad on Phuket: ED visa, language schools, affordable rentals, diving and community.' },
+    metaTitle: { ru: 'Студенту на Пхукете: ED-виза, школы, жильё — myUNO', en: 'Students in Phuket: ED visa, schools, housing — myUNO' },
+    metaDescription: { ru: 'Gap-year или semester abroad на Пхукете: ED-виза, языковые школы, доступная аренда, дайвинг и community.', en: 'Gap year or semester abroad in Phuket: ED visa, language schools, affordable rentals, diving and community.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/students',
     hreflangAlternates: [

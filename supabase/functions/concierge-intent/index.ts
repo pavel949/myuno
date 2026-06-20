@@ -69,7 +69,7 @@ const KNOWN_ROUTES: KnownRoute[] = [
   { route: '/property/for/developer-partner', cluster: 'build', en: 'Developer partner overview', ru: 'Обзор для застройщика' },
 ];
 
-const SYSTEM_PROMPT = `You are myUNO Concierge — a helpful assistant for foreigners on Phuket island.
+const SYSTEM_PROMPT = `You are myUNO Concierge — a helpful assistant for foreigners in Phuket island.
 
 Your job: take a free-text user message and respond conversationally, then suggest the BEST single platform route.
 

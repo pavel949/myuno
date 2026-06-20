@@ -279,7 +279,7 @@
 
 **P-28 · Indian Wedding Planner "Rohit, 38, IN"** — destination wedding organiser, on-site 3–10 дней × 8 событий/год, работает со Sri Panwa/Trisara. Jobs: Jain-catering audit, dhol-wala flight, permit-on-beach.
 
-**P-29 · LGBTQ+ Couple "Claire & Nadia, 34, FR"** — married after Jan 2025 on Phuket, DTV, $120K, Bang Tao rental. Pain: Embassy "no impediment", surrogacy barrier (foreigners excluded). Jobs: wedding-service marketplace, family-friendly resort verify, legal-advice cross-border.
+**P-29 · LGBTQ+ Couple "Claire & Nadia, 34, FR"** — married after Jan 2025 in Phuket, DTV, $120K, Bang Tao rental. Pain: Embassy "no impediment", surrogacy barrier (foreigners excluded). Jobs: wedding-service marketplace, family-friendly resort verify, legal-advice cross-border.
 
 **P-30 · Pet-owner Relocator "Natasha + 2 cats, 36, RU"** — 12+ мес, Non-O, Rawai. Pain: 80–90% condo ban pets, vet-specialist scarcity, import timeline. Jobs: pet-friendly listing, DLD R1/1 navigator, vet-verify.
 

@@ -12,7 +12,7 @@ export const P14_MEDICAL: PersonaLanding = {
   status: 'live',
   h1: {
     ru: 'Медицинский туризм на Пхукете: клиники и сопровождение',
-    en: 'Medical tourism on Phuket: clinics and concierge',
+    en: 'Medical tourism in Phuket: clinics and concierge',
   },
   subtitle: {
     ru: 'JCI-аккредитованные госпитали, многоязычный координатор (EN/RU/TH), страховой cashless и пакеты check-up — лечение и обследование без языкового барьера и переплат.',
@@ -50,7 +50,7 @@ export const P14_MEDICAL: PersonaLanding = {
     href: '/services/health/checkup',
   },
   seo: {
-    metaTitle: { ru: 'Медицинский туризм на Пхукете: JCI-клиники — myUNO', en: 'Medical tourism on Phuket: JCI hospitals — myUNO' },
+    metaTitle: { ru: 'Медицинский туризм на Пхукете: JCI-клиники — myUNO', en: 'Medical tourism in Phuket: JCI hospitals — myUNO' },
     metaDescription: { ru: 'Bangkok Hospital, BIH, многоязычный координатор (EN/RU/TH), cashless страховка и пакеты check-up. Без языкового барьера и переплат.', en: 'Bangkok Hospital, BIH, multilingual coordinator (EN/RU/TH), cashless insurance and check-up packages. No language barrier, no markup.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/medical',

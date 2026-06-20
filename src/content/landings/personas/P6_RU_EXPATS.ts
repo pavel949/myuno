@@ -52,7 +52,7 @@ export const P6_RU_EXPATS: PersonaLanding = {
     {
       slug: 'leasehold-guide',
       label: { ru: 'Leasehold vs Freehold', en: 'Leasehold vs Freehold' },
-      oneLiner: { ru: 'Гайд по правам собственности для иностранца на Пхукете.', en: 'Foreign-buyer guide to ownership rights on Phuket.' },
+      oneLiner: { ru: 'Гайд по правам собственности для иностранца на Пхукете.', en: 'Foreign-buyer guide to ownership rights in Phuket.' },
       href: '/knowledge/pillars/leasehold-vs-freehold',
     },
     {
@@ -103,11 +103,11 @@ export const P6_RU_EXPATS: PersonaLanding = {
   seo: {
     metaTitle: {
       ru: 'Купить жильё на Пхукете для жизни — myUNO',
-      en: 'Buy a home to live in on Phuket — myUNO',
+      en: 'Buy a home to live in in Phuket — myUNO',
     },
     metaDescription: {
       ru: 'От аренды к собственности на Пхукете. Калькулятор для resident, leasehold vs freehold, налоги, готовое жильё (resale).',
-      en: 'From renting to owning on Phuket. Resident calculator, leasehold vs freehold, taxes, move-in resale homes.',
+      en: 'From renting to owning in Phuket. Resident calculator, leasehold vs freehold, taxes, move-in resale homes.',
     },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/ru-expats',

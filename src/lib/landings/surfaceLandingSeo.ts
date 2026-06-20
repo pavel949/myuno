@@ -22,21 +22,21 @@ interface SurfaceSeoBundle {
 const META: Record<SurfaceSlug, { titleRu: string; titleEn: string; descRu: string; descEn: string }> = {
   arrive: {
     titleRu: 'Прибытие на Пхукет — трансфер, eSIM, заселение',
-    titleEn: 'Arrive on Phuket — transfer, eSIM, check-in',
+    titleEn: 'Arrive in Phuket — transfer, eSIM, check-in',
     descRu: 'Первые 72 часа на Пхукете: трансфер из аэропорта, eSIM, наличные THB, заселение и ориентация по районам.',
-    descEn: 'First 72 hours on Phuket: airport transfer, eSIM, THB cash, check-in and area orientation.',
+    descEn: 'First 72 hours in Phuket: airport transfer, eSIM, THB cash, check-in and area orientation.',
   },
   live: {
     titleRu: 'Жизнь на Пхукете — переезд, школа, банк',
-    titleEn: 'Life on Phuket — relocation, school, bank',
+    titleEn: 'Life in Phuket — relocation, school, bank',
     descRu: 'Долгосрочная жизнь на Пхукете: жильё, банк, школа, страховка, транспорт. Чек-листы и сервисы в одном месте.',
-    descEn: 'Long-term life on Phuket: housing, banking, schools, insurance, transport. Checklists and services in one place.',
+    descEn: 'Long-term life in Phuket: housing, banking, schools, insurance, transport. Checklists and services in one place.',
   },
   manage: {
     titleRu: 'Управление недвижимостью на Пхукете — PMS, гости, отчёты',
-    titleEn: 'Property management on Phuket — PMS, guests, reports',
+    titleEn: 'Property management in Phuket — PMS, guests, reports',
     descRu: 'Календарь, гости, уборка, отчёты собственнику, динамические цены — управление недвижимостью на Пхукете под ключ.',
-    descEn: 'Calendar, guests, cleaning, owner reports, dynamic pricing — turnkey property management on Phuket.',
+    descEn: 'Calendar, guests, cleaning, owner reports, dynamic pricing — turnkey property management in Phuket.',
   },
   invest: {
     titleRu: 'Инвестиции в Пхукет — недвижимость, бизнес, capital',
@@ -46,13 +46,13 @@ const META: Record<SurfaceSlug, { titleRu: string; titleEn: string; descRu: stri
   },
   legal: {
     titleRu: 'Юридические услуги на Пхукете — виза, компания, споры',
-    titleEn: 'Legal services on Phuket — visa, company, disputes',
+    titleEn: 'Legal services in Phuket — visa, company, disputes',
     descRu: 'Виза и иммиграция, открытие тайской компании, семейное право, налоги, страховые споры. Юристы RU+EN, фиксированные цены.',
     descEn: 'Visa and immigration, Thai company setup, family law, tax, insurance disputes. EN+RU lawyers, fixed pricing.',
   },
   build: {
     titleRu: 'Строительство виллы на Пхукете — земля, подрядчик, сдача',
-    titleEn: 'Build a villa on Phuket — land, contractor, handover',
+    titleEn: 'Build a villa in Phuket — land, contractor, handover',
     descRu: 'Подбор земли, титул, архитектор, подрядчик, надзор, сдача и управление. Прозрачный цикл с эскроу по этапам.',
     descEn: 'Land plot, title, architect, contractor, supervision, handover and management. Transparent cycle with milestone escrow.',
   },

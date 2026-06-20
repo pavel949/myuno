@@ -28,7 +28,7 @@ export default function KnowledgePillarsIndex() {
   const seoTitle = isRu ? 'Knowledge Hub — гайды myUNO' : 'Knowledge Hub — myUNO guides';
   const seoDescription = isRu
     ? 'Канонические гайды myUNO: покупка, аренда, визы, налоги, управление недвижимостью на Пхукете.'
-    : 'Canonical myUNO guides: buying, renting, visas, taxes, property management on Phuket.';
+    : 'Canonical myUNO guides: buying, renting, visas, taxes, property management in Phuket.';
 
   // Group by cluster for visual structure
   const grouped = useMemo(() => {

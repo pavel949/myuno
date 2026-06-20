@@ -27,7 +27,7 @@ export default function ArriveSurfaceLandingPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
   const navigate = useNavigate();
-  const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Прилетаю на Пхукет, нужна помощь с прибытием' : 'Hello! I am arriving on Phuket, need help with arrival');
+  const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Прилетаю на Пхукет, нужна помощь с прибытием' : 'Hello! I am arriving in Phuket, need help with arrival');
 
   const seo = buildSurfaceSeo('arrive', t ? 'ru' : 'en');
 
@@ -36,7 +36,7 @@ export default function ArriveSurfaceLandingPage() {
       <SEOHead title={seo.title} description={seo.description} url={seo.url} jsonLd={seo.jsonLd} />
       <LandingLayout
         icon={Plane}
-        title={t ? 'Прибытие на Пхукет' : 'Arrive on Phuket'}
+        title={t ? 'Прибытие на Пхукет' : 'Arrive in Phuket'}
         subtitle={t ? 'Первые 72 часа без стресса: трансфер, связь, деньги, заселение, ориентация' : 'First 72 hours without stress: transfer, connectivity, money, check-in, orientation'}
         gradient="from-cluster-arrive via-primary to-accent"
         heroCta={{ label: t ? 'Открыть чек-лист' : 'Open checklist', onClick: () => navigate('/guide/areas') }}

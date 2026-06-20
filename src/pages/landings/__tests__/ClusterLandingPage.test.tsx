@@ -58,7 +58,7 @@ const liveCluster: ClusterLanding = {
   clusterCode: 'A',
   slug: 'arrival',
   status: 'live',
-  h1: { ru: 'Прибытие на Пхукет', en: 'Arrival on Phuket' },
+  h1: { ru: 'Прибытие на Пхукет', en: 'Arrival in Phuket' },
   subtitle: { ru: 'Подзаголовок', en: 'Subtitle' },
   jobs: [{ ru: 'Заказать трансфер', en: 'Book transfer' }],
   services: [

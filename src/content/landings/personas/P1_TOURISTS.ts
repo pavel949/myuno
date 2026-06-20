@@ -101,7 +101,7 @@ export const P1_TOURISTS: PersonaLanding = {
     },
     metaDescription: {
       ru: 'Трансфер из аэропорта, eSIM, аренда виллы и экскурсии. Многоязычная поддержка (EN/RU/TH), оплата в THB. Без посредников у стойки.',
-      en: 'Airport transfer, eSIM, villa rental and tours on Phuket. Multilingual support (EN/RU/TH), THB payments, no street vendors.',
+      en: 'Airport transfer, eSIM, villa rental and tours in Phuket. Multilingual support (EN/RU/TH), THB payments, no street vendors.',
     },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/tourists',

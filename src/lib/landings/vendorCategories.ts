@@ -41,7 +41,7 @@ const DEFAULT_VPS: ValueProp[] = [
     iconName: 'Users',
     text: {
       ru: { title: 'Поток клиентов', desc: 'Иностранцы со всего мира на Пхукете уже ищут вас в myUNO — без затрат на рекламу.' },
-      en: { title: 'Customer flow', desc: 'International residents and visitors on Phuket already search for you inside myUNO — no ad spend needed.' },
+      en: { title: 'Customer flow', desc: 'International residents and visitors in Phuket already search for you inside myUNO — no ad spend needed.' },
       th: { title: 'กระแสลูกค้า', desc: 'ชาวต่างชาติบนภูเก็ตกำลังค้นหาคุณใน myUNO อยู่แล้ว — ไม่ต้องเสียค่าโฆษณา' },
     },
   },
