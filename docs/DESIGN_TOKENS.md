@@ -124,7 +124,7 @@ Admin / MC dashboards only, where dense data benefits from a dark canvas:
 
 ## Adding a new token
 
-1. Add the variable to `:root` in `src/styles/tokens.css`.
-2. Add the equivalent in `html.light`.
+1. Add the variable to `:root` in `src/styles/tokens.css` (light is the default theme).
+2. If a dark-mode variant is needed, add the dark equivalent in `.dark`.
 3. Document it here.
 4. Expose via `tailwind.config.ts` only if the value should be addressable as a Tailwind utility.
