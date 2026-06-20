@@ -38,7 +38,7 @@ export const P3_EU_GUESTS: PersonaLanding = {
   secondaryCta: { label: { ru: 'Связаться с консьержем', en: 'Talk to concierge' }, href: '/contact' },
   seo: {
     metaTitle: { ru: 'Пхукет для европейцев: long-stay виллы, EUR-оплата — myUNO', en: 'Phuket for Europeans: long-stay villas, EUR payment — myUNO' },
-    metaDescription: { ru: 'Long-stay виллы с прямой арендой, оплата EUR/SEPA, private transfer и wellness без турагентов. Английский сервис на Пхукете.', en: 'Long-stay villas with direct rental, EUR/SEPA payment, private transfer and wellness without tour operators. English service on Phuket.' },
+    metaDescription: { ru: 'Long-stay виллы с прямой арендой, оплата EUR/SEPA, private transfer и wellness без турагентов. Английский сервис на Пхукете.', en: 'Long-stay villas with direct rental, EUR/SEPA payment, private transfer and wellness without tour operators. English service in Phuket.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/eu-guests',
     hreflangAlternates: [

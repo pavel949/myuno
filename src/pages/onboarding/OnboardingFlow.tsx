@@ -384,7 +384,7 @@ const QuestionsScreen: React.FC<QuestionsProps> = ({ isRu, status, onPickStatus,
           <div className="bar"><span className="on" /><span className="on" /><span /></div>
         </div>
         <h2 className="onb-q-h">
-          {isRu ? <>Что у вас <em>сейчас</em> на Пхукете?</> : <>What's <em>your situation</em> on Phuket?</>}
+          {isRu ? <>Что у вас <em>сейчас</em> на Пхукете?</> : <>What's <em>your situation</em> in Phuket?</>}
         </h2>
         <p className="onb-q-hint">
           {isRu ? 'Один вариант · можно сменить в Профиле' : 'Single choice · changeable in Profile'}

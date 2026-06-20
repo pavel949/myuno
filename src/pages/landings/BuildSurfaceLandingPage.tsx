@@ -27,7 +27,7 @@ export default function BuildSurfaceLandingPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
   const navigate = useNavigate();
-  const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Хочу построить виллу на Пхукете' : 'Hello! I want to build a villa on Phuket');
+  const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Хочу построить виллу на Пхукете' : 'Hello! I want to build a villa in Phuket');
 
   const seo = buildSurfaceSeo('build', t ? 'ru' : 'en');
 
@@ -36,7 +36,7 @@ export default function BuildSurfaceLandingPage() {
       <SEOHead title={seo.title} description={seo.description} url={seo.url} jsonLd={seo.jsonLd} />
       <LandingLayout
         icon={HardHat}
-        title={t ? 'Построить виллу на Пхукете' : 'Build a villa on Phuket'}
+        title={t ? 'Построить виллу на Пхукете' : 'Build a villa in Phuket'}
         subtitle={t ? 'Земля → титул → стройка → сдача → сдача в аренду. Один контракт, один координатор, понятная цена.' : 'Land → title → build → handover → rentals. One contract, one coordinator, transparent pricing.'}
         gradient="from-primary via-accent to-cluster-manage"
         heroCta={{ label: t ? 'Обсудить проект' : 'Discuss my project', onClick: () => window.open(whatsappUrl, '_blank') }}

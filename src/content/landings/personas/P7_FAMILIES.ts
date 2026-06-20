@@ -51,7 +51,7 @@ export const P7_FAMILIES: PersonaLanding = {
   },
   seo: {
     metaTitle: { ru: 'Пхукет с детьми: школы, виллы, медицина — myUNO', en: 'Phuket with kids: schools, villas, healthcare — myUNO' },
-    metaDescription: { ru: 'Международные школы, family-friendly виллы, многоязычные педиатры (EN/RU/TH), экскурсии и виза для семьи на Пхукете.', en: 'International schools, family villas, multilingual paediatricians (EN/RU/TH), kid-friendly tours and family visas on Phuket.' },
+    metaDescription: { ru: 'Международные школы, family-friendly виллы, многоязычные педиатры (EN/RU/TH), экскурсии и виза для семьи на Пхукете.', en: 'International schools, family villas, multilingual paediatricians (EN/RU/TH), kid-friendly tours and family visas in Phuket.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/families',
     hreflangAlternates: [

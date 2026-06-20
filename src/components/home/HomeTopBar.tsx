@@ -101,7 +101,7 @@ export function HomeTopBar({
               subtitleCls,
             )}
           >
-            {isRu ? 'Инфраструктура для жизни на Пхукете' : 'Infrastructure for life on Phuket'}
+            {isRu ? 'Инфраструктура для жизни на Пхукете' : 'Infrastructure for life in Phuket'}
           </span>
         </div>
       </div>

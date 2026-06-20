@@ -48,7 +48,7 @@ export const P4_DIGITAL_NOMADS: PersonaLanding = {
   },
   seo: {
     metaTitle: { ru: 'Пхукет для digital nomad: DTV, condo, коворкинг — myUNO', en: 'Phuket for digital nomads: DTV, condo, co-working — myUNO' },
-    metaDescription: { ru: 'DTV-виза на 5 лет, long-stay condo с fiber-интернетом, карта коворкингов и комьюнити удалёнщиков на Пхукете.', en: 'DTV 5-year visa, long-stay condos with fibre internet, co-working map and remote-worker community on Phuket.' },
+    metaDescription: { ru: 'DTV-виза на 5 лет, long-stay condo с fiber-интернетом, карта коворкингов и комьюнити удалёнщиков на Пхукете.', en: 'DTV 5-year visa, long-stay condos with fibre internet, co-working map and remote-worker community in Phuket.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/digital-nomads',
     hreflangAlternates: [

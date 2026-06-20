@@ -10,7 +10,7 @@ export const P23_SMB: PersonaLanding = {
   personaCode: 'P23',
   slug: 'smb',
   status: 'live',
-  h1: { ru: 'Локальный малый бизнес на Пхукете', en: 'Local small business on Phuket' },
+  h1: { ru: 'Локальный малый бизнес на Пхукете', en: 'Local small business in Phuket' },
   subtitle: { ru: 'Кафе, спа, школы, прокат — получите витрину, бронирование, CRM и поток клиентов в одном инструменте.', en: 'Cafés, spas, schools, rentals — get a storefront, bookings, CRM and client flow in one tool.' },
   pains: [
     { ru: 'Нет нормального online-присутствия, кроме Google Maps.', en: 'No proper online presence beyond Google Maps.' },

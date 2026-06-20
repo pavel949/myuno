@@ -11,7 +11,7 @@ export const P16_ATHLETES: PersonaLanding = {
   status: 'live',
   h1: {
     ru: 'Тренировочные сборы на Пхукете: MMA, Muay Thai, fitness',
-    en: 'Training camps on Phuket: MMA, Muay Thai, fitness',
+    en: 'Training camps in Phuket: MMA, Muay Thai, fitness',
   },
   subtitle: {
     ru: 'Tiger Muay Thai, Phuket Top Team, AKA Thailand, Sinbi — сборы, проживание в 5 минутах от зала, ED-виза, восстановление и питание под спортсмена.',

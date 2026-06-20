@@ -1,6 +1,6 @@
 # myUNO Information Architecture — Life-task map
 
-> A task-based map of what foreigners actually need to do on Phuket, organised
+> A task-based map of what foreigners actually need to do in Phuket, organised
 > by persona and by life cluster. Inspired by the GOV.UK "Browse" taxonomy.
 >
 > This document is the source of truth for navigation, search keywords,
@@ -27,7 +27,7 @@ multiple steps, to **one** step-by-step flow (`StepByStepNav`).
 | Code | Persona | Trigger | Primary need |
 |---|---|---|---|
 | `tourist` | Tourist (1–30 days) | Arrived for holiday | Get oriented, stay safe, enjoy |
-| `resident` | Resident (>30 days) | Lives or works on Phuket | Daily life infrastructure |
+| `resident` | Resident (>30 days) | Lives or works in Phuket | Daily life infrastructure |
 | `owner` | Property owner | Owns or rents out property | Manage, comply, earn |
 | `investor` | Investor / second-home | Buying or scaling | Capital deployment, advisory |
 

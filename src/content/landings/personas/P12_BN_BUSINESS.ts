@@ -32,7 +32,7 @@ export const P12_BN_BUSINESS: PersonaLanding = {
   secondaryCta: { label: { ru: 'Получить investment brief', en: 'Get investment brief' }, href: '/property/mandate?source=bn' },
   seo: {
     metaTitle: { ru: 'Пхукет для гостей из Бангладеш: виллы, halal, визы — myUNO', en: 'Phuket for Bangladeshi guests: villas, halal, visas — myUNO' },
-    metaDescription: { ru: 'Семейные виллы, halal-кейтеринг, корпоративные ретриты и визовая поддержка для гостей из Бангладеш.', en: 'Family villas, halal catering, corporate retreats and visa support for Bangladeshi guests on Phuket.' },
+    metaDescription: { ru: 'Семейные виллы, halal-кейтеринг, корпоративные ретриты и визовая поддержка для гостей из Бангладеш.', en: 'Family villas, halal catering, corporate retreats and visa support for Bangladeshi guests in Phuket.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/bn-business',
     hreflangAlternates: [

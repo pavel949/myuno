@@ -358,7 +358,7 @@ export default function WelcomeLanding() {
           >
             {tx(language, { ru: 'Инфраструктура для жизни', en: 'Infrastructure for living', th: 'โครงสร้างพื้นฐานสำหรับการใช้ชีวิต' })}
             <br />
-            {tx(language, { ru: 'на Пхукете', en: 'on Phuket', th: 'บนเกาะภูเก็ต' })}
+            {tx(language, { ru: 'на Пхукете', en: 'in Phuket', th: 'บนเกาะภูเก็ต' })}
           </motion.h1>
 
           <motion.p
@@ -816,7 +816,7 @@ export default function WelcomeLanding() {
           <h2 className="font-display text-h1 font-normal leading-[1.05] tracking-tight sm:text-display">
             {tx(language, { ru: 'Один аккаунт —', en: 'One account —', th: 'บัญชีเดียว —' })}
             <br />
-            {tx(language, { ru: 'вся жизнь на Пхукете', en: 'a full life on Phuket', th: 'ชีวิตทั้งหมดบนภูเก็ต' })}
+            {tx(language, { ru: 'вся жизнь на Пхукете', en: 'a full life in Phuket', th: 'ชีวิตทั้งหมดบนภูเก็ต' })}
           </h2>
           <p className="mt-4 font-sans text-body-sm text-muted-foreground sm:text-body">
             {tx(language, {

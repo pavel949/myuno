@@ -27,7 +27,7 @@ export default function LegalSurfaceLandingPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
   const navigate = useNavigate();
-  const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Нужна юридическая помощь на Пхукете' : 'Hello! I need legal help on Phuket');
+  const whatsappUrl = getWhatsAppUrl(t ? 'Здравствуйте! Нужна юридическая помощь на Пхукете' : 'Hello! I need legal help in Phuket');
 
   const seo = buildSurfaceSeo('legal', t ? 'ru' : 'en');
 

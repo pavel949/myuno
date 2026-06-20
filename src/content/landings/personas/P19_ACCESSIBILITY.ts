@@ -43,7 +43,7 @@ export const P19_ACCESSIBILITY: PersonaLanding = {
   secondaryCta: { label: { ru: 'Заказать трансфер', en: 'Book a transfer' }, href: '/landing/airport-transfer' },
   seo: {
     metaTitle: { ru: 'Доступный Пхукет: жильё, трансфер, врачи — myUNO', en: 'Accessible Phuket: stays, transfer, doctors — myUNO' },
-    metaDescription: { ru: 'Step-free виллы, трансфер с пандусом, прокат электроколяски, accessible diving и медицинская поддержка 24/7 для путешественников с ограниченными возможностями.', en: 'Step-free villas, ramp transfer, power wheelchair rental, accessible diving and 24/7 medical support for accessibility-first travellers on Phuket.' },
+    metaDescription: { ru: 'Step-free виллы, трансфер с пандусом, прокат электроколяски, accessible diving и медицинская поддержка 24/7 для путешественников с ограниченными возможностями.', en: 'Step-free villas, ramp transfer, power wheelchair rental, accessible diving and 24/7 medical support for accessibility-first travellers in Phuket.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/accessibility',
     hreflangAlternates: [

@@ -25,7 +25,7 @@ export function PopularTasks() {
         id="popular-tasks-heading"
         className="text-[10.5px] tracking-[0.1em] uppercase text-muted-foreground/60 font-semibold mb-2"
       >
-        {isRu ? 'Чаще всего ищут на Пхукете' : 'Most popular on Phuket'}
+        {isRu ? 'Чаще всего ищут на Пхукете' : 'Most popular in Phuket'}
       </div>
       <ul className="grid grid-cols-2 gap-2">
         {tasks.map((task, i) => (

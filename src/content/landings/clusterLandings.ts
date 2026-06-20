@@ -50,7 +50,7 @@ const A_ARRIVAL: ClusterLanding = {
   status: 'live',
   h1: {
     ru: 'Прибытие на Пхукет: первые 72 часа',
-    en: 'Arriving on Phuket: the first 72 hours',
+    en: 'Arriving in Phuket: the first 72 hours',
   },
   subtitle: {
     ru: 'Трансфер, eSIM, наличные THB, заселение, ориентация по районам — пошаговый план без лишних движений.',
@@ -159,11 +159,11 @@ const A_ARRIVAL: ClusterLanding = {
   seo: {
     metaTitle: {
       ru: 'Прибытие на Пхукет: чек-лист первых 72 часов — myUNO',
-      en: 'Arriving on Phuket: a 72-hour checklist — myUNO',
+      en: 'Arriving in Phuket: a 72-hour checklist — myUNO',
     },
     metaDescription: {
       ru: 'Трансфер, eSIM, наличные THB, заселение и районы — пошаговый план для первых трёх дней на Пхукете.',
-      en: 'Transfer, eSIM, THB cash, check-in and areas — a step-by-step plan for your first 72 hours on Phuket.',
+      en: 'Transfer, eSIM, THB cash, check-in and areas — a step-by-step plan for your first 72 hours in Phuket.',
     },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/arrival',
@@ -184,7 +184,7 @@ const D_INVESTMENT: ClusterLanding = {
   status: 'live',
   h1: {
     ru: 'Покупка недвижимости на Пхукете: с чего начать',
-    en: 'Buying property on Phuket: where to start',
+    en: 'Buying property in Phuket: where to start',
   },
   subtitle: {
     ru: 'Сравнение районов, ClearView™ рейтинг застройщиков, юридическая структура и сценарии доходности — без давления продавца.',
@@ -293,7 +293,7 @@ const D_INVESTMENT: ClusterLanding = {
   seo: {
     metaTitle: {
       ru: 'Покупка недвижимости на Пхукете: ClearView™ — myUNO',
-      en: 'Buying property on Phuket: ClearView™ rating — myUNO',
+      en: 'Buying property in Phuket: ClearView™ rating — myUNO',
     },
     metaDescription: {
       ru: 'Сравнение районов, рейтинг застройщика, юридическая структура и калькулятор доходности. Без давления продавца.',
@@ -452,7 +452,7 @@ const G_COMPLIANCE: ClusterLanding = {
   status: 'live',
   h1: {
     ru: 'Налоги, право и compliance на Пхукете',
-    en: 'Tax, legal and compliance on Phuket',
+    en: 'Tax, legal and compliance in Phuket',
   },
   subtitle: {
     ru: 'Tax residency, налоги от аренды, контракты, due diligence и работа с тайскими нотариусами — без сюрпризов в апреле.',
@@ -493,7 +493,7 @@ const G_COMPLIANCE: ClusterLanding = {
   },
   relatedPersonas: ['P6', 'P7', 'P8', 'P9', 'P10', 'P20', 'P23'],
   seo: {
-    metaTitle: { ru: 'Налоги и право для иностранцев на Пхукете — myUNO', en: 'Tax & legal for foreigners on Phuket — myUNO' },
+    metaTitle: { ru: 'Налоги и право для иностранцев на Пхукете — myUNO', en: 'Tax & legal for foreigners in Phuket — myUNO' },
     metaDescription: { ru: 'Tax residency, налог с аренды, контракты, due diligence, тайская компания. Цены в THB, многоязычный юрист (EN/RU/TH).', en: 'Tax residency, rental tax, contracts, due diligence, Thai company. THB pricing, multilingual lawyer (EN/RU/TH).' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/compliance',
@@ -514,7 +514,7 @@ const H_EMERGENCY: ClusterLanding = {
   status: 'live',
   h1: {
     ru: 'Экстренная помощь на Пхукете',
-    en: 'Emergency support on Phuket',
+    en: 'Emergency support in Phuket',
   },
   subtitle: {
     ru: 'Один номер, один чат, чек-листы по ситуациям: ДТП, госпитализация, потеря документов, юридический инцидент. Многоязычная поддержка (EN/RU/TH) 24/7.',
@@ -555,7 +555,7 @@ const H_EMERGENCY: ClusterLanding = {
   },
   relatedPersonas: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P13', 'P14', 'P19', 'P20', 'P25'],
   seo: {
-    metaTitle: { ru: 'Экстренная помощь на Пхукете 24/7 — myUNO', en: 'Emergency support on Phuket 24/7 — myUNO' },
+    metaTitle: { ru: 'Экстренная помощь на Пхукете 24/7 — myUNO', en: 'Emergency support in Phuket 24/7 — myUNO' },
     metaDescription: { ru: 'Скорая, полиция, потеря документов, ДТП, страховая. Многоязычные чек-листы (EN/RU/TH) и SOS-чат с ответом за 10 минут.', en: 'Ambulance, police, lost documents, accidents, insurance. Multilingual checklists (EN/RU/TH) and SOS chat with 10-minute response.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/emergency',
@@ -617,7 +617,7 @@ const B_EXTENSION: ClusterLanding = {
   },
   relatedPersonas: ['P3', 'P4', 'P5', 'P6', 'P7', 'P25'],
   seo: {
-    metaTitle: { ru: 'Продление визы и long-stay на Пхукете — myUNO', en: 'Visa extension & long-stay on Phuket — myUNO' },
+    metaTitle: { ru: 'Продление визы и long-stay на Пхукете — myUNO', en: 'Visa extension & long-stay in Phuket — myUNO' },
     metaDescription: { ru: 'Продление туристической визы, visa run, переход на DTV и long-stay аренда. Без штрафов overstay и без посредников.', en: 'Tourist visa extension, visa run, DTV transition and long-stay rentals. No overstay fines, no shady middlemen.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/extension',
@@ -638,7 +638,7 @@ const C_SETTLEMENT: ClusterLanding = {
   status: 'live',
   h1: {
     ru: 'Обустройство жизни на Пхукете',
-    en: 'Settling in on Phuket',
+    en: 'Settling in in Phuket',
   },
   subtitle: {
     ru: 'Банк, права, школа, мебель, машина, интернет, страховка — собрали логистику переезда в один поток с понятными сроками и ценами в THB.',
@@ -700,7 +700,7 @@ const E_TRANSACTION: ClusterLanding = {
   status: 'live',
   h1: {
     ru: 'Сделка с недвижимостью на Пхукете',
-    en: 'Property transactions on Phuket',
+    en: 'Property transactions in Phuket',
   },
   subtitle: {
     ru: 'От задатка до Land Office: due diligence, эскроу, перевод средств, налоги и регистрация. Сопровождение многоязычным юристом (EN/RU/TH) на каждом шаге.',
@@ -762,7 +762,7 @@ const I_LIFESTYLE: ClusterLanding = {
   status: 'live',
   h1: {
     ru: 'Стиль жизни и впечатления на Пхукете',
-    en: 'Lifestyle and experiences on Phuket',
+    en: 'Lifestyle and experiences in Phuket',
   },
   subtitle: {
     ru: 'Wellness, рестораны, яхты, fight camps, события и комьюнити — собрали лучшее на острове, чтобы вы тратили время на впечатления, а не на поиск.',
@@ -860,7 +860,7 @@ const J_EXIT: ClusterLanding = {
   relatedPersonas: ['P8', 'P9', 'P10', 'P20'],
   seo: {
     metaTitle: { ru: 'Выход из актива на Пхукете: продажа и репатриация', en: 'Exiting your Phuket asset: sale, taxes, repatriation — myUNO' },
-    metaDescription: { ru: 'Продажа кондо или виллы на Пхукете под ключ: оценка, листинг, налоги, закрытие компании и репатриация THB → EUR/USD.', en: 'Turnkey condo or villa sale on Phuket: valuation, listing, taxes, company closure and THB → EUR/USD repatriation.' },
+    metaDescription: { ru: 'Продажа кондо или виллы на Пхукете под ключ: оценка, листинг, налоги, закрытие компании и репатриация THB → EUR/USD.', en: 'Turnkey condo or villa sale in Phuket: valuation, listing, taxes, company closure and THB → EUR/USD repatriation.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/cluster/exit',
     hreflangAlternates: [

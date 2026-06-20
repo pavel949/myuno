@@ -36,7 +36,7 @@ export default function InvestSurfaceLandingPage() {
       <SEOHead title={seo.title} description={seo.description} url={seo.url} jsonLd={seo.jsonLd} />
       <LandingLayout
         icon={TrendingUp}
-        title={t ? 'Инвестиции на Пхукете' : 'Invest on Phuket'}
+        title={t ? 'Инвестиции на Пхукете' : 'Invest in Phuket'}
         subtitle={t ? 'Недвижимость, бизнес, capital-сделки — с независимым ClearView-рейтингом и юридической чистотой' : 'Real estate, business and capital deals — with independent ClearView ratings and clean legal structure'}
         gradient="from-cluster-invest via-primary to-accent"
         heroCta={{ label: t ? 'Подобрать объект' : 'Match a deal', onClick: () => navigate(APP_ROUTES.INVEST_QUIZ) }}

@@ -43,7 +43,7 @@ export const P17_HALAL: PersonaLanding = {
   secondaryCta: { label: { ru: 'Открыть карту мечетей', en: 'Open mosque map' }, href: '/map' },
   seo: {
     metaTitle: { ru: 'Halal Пхукет: виллы, рестораны, мечети — myUNO', en: 'Halal Phuket: villas, restaurants, mosques — myUNO' },
-    metaDescription: { ru: 'Halal-friendly отдых на Пхукете: 40+ сертифицированных ресторанов, виллы с prayer space, женские spa и семейные трансферы.', en: 'Halal-friendly holidays on Phuket: 40+ certified restaurants, villas with prayer space, women-only spa and family transfers.' },
+    metaDescription: { ru: 'Halal-friendly отдых на Пхукете: 40+ сертифицированных ресторанов, виллы с prayer space, женские spa и семейные трансферы.', en: 'Halal-friendly holidays in Phuket: 40+ certified restaurants, villas with prayer space, women-only spa and family transfers.' },
     ogImage: OG_DEFAULT,
     canonicalPath: '/for/halal',
     hreflangAlternates: [
