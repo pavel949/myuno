@@ -1,7 +1,7 @@
-# CLAUDE.md — myUNO SuperApp (актуальна на 2026-05-01)
+# CLAUDE.md — myUNO SuperApp (актуальна на 2026-06-20)
 
 > Единственный источник информации для AI ассистентов в этом репозитории.
-> Версия v3.55.3 | Ветка: pavel/wip-current-version-20260318 | Last sync: 2026-05-01
+> Версия v3.55.5 | Ветка: main | Last sync: 2026-06-20
 
 ---
 
@@ -10,7 +10,7 @@
 **myUNO** — AI-first суперапп для иностранцев на Пхукете. 40+ микро-приложений (недвижимость, услуги, юриспруденция, образ жизни) под одним аккаунтом, одной БД, много точек входа.
 
 - **Домен:** myuno.app
-- **Стек:** React 18 + TypeScript + Vite 5 + Tailwind 3.4 + shadcn/ui + Supabase + Stripe + Vercel + Capacitor
+- **Стек:** React 18 + TypeScript 5.9 + Vite 6 + Tailwind 3.4 + shadcn/ui + Supabase + Stripe + Vercel + Capacitor
 - **Языки:** Русский (UI), Английский (UI). Код/комментарии/коммиты на English only.
 - **Архитектура:** Monolithic React SPA + 40 микро-компонентов по вертикалям
 
@@ -73,22 +73,27 @@
 
 ## 2. ТЕКУЩИЙ СТАТУС
 
-**Версия:** 3.55.3
-**Ветка:** pavel/wip-current-version-20260318
-**Статус:** Активная разработка (session work, CRM improvements, Edge Functions migration)
+**Версия:** 3.55.5
+**Ветка:** main (origin/main == HEAD на 2026-06-20)
+**Статус:** Активная разработка (i18n cleanup, lead routing, WhatsApp заявки, bug fixes)
 
 ### Последние изменения (последние 10 коммитов):
-- `b0a53ca3` — Merge conflicts resolved (Claude Code)
-- `f8df8213` — feat: session work
-- `dccff068` — Enable deno auto modules
-- `3e485f7e` — Add deno.json node modules auto
-- `93c1dcdd` — Preceding changes
+- `b66347d` — Отправил заявки в WhatsApp
+- `e4001b0` — Changes
+- `e3fcb30` — Доработал три фикса
+- `6b68feb` — Changes
+- `208e78c` — Changes
+- `3848c30` — Changes
+- `c00eaf5` — Changes
+- `11c0037` — Changes
+- `47a4b6d` — Changes
+- `4fb9a2c` — Заменял — на i18n ключи
 
 ### Текущие работы:
-- **Миграция Edge Functions на Deno 2.0** — добавление `deno.json` для автоматического управления модулями
-- **Session management** — улучшения в управлении сессиями пользователя
-- **CRM оптимизация** — исправления в контактах, сделках, фильтрах
-- **Design tokens унификация** — синхронизация шрифтов (Golos, Playfair, DM Sans, JetBrains)
+- **Lead routing → WhatsApp** — отправка заявок (viewing requests, leads) в WhatsApp Павлу
+- **i18n cleanup** — замена хардкод-строк и тире на i18n-ключи (RU/EN bilingual coverage)
+- **Bug fixes** — серия точечных фиксов в CRM / checkout / booking flow
+- **Edge Functions на Deno 2.0** — `supabase/functions/deno.json` для авто-управления модулями
 
 ---
 
@@ -141,7 +146,7 @@
 
 **Supabase client:** Always use `src/integrations/supabase/client.ts`. Never create new instances. PEYLAA was migrated into PRIMARY DB — `src/lib/peylaa/supabaseClient.ts` removed.
 
-**Auto-generated types:** `src/integrations/supabase/types.ts` (~900KB, не редактируем вручную).
+**Auto-generated types:** `src/integrations/supabase/types.ts` (~1.1MB, не редактируем вручную).
 
 **Schema:** all tables in `public` schema. No v2 schema exists. Не использовать `supabase.schema('v2')`.
 
@@ -159,7 +164,7 @@
 
 **Supabase client:** Always use `src/integrations/supabase/client.ts`. Never create new instances.
 
-**Auto-generated types:** `src/integrations/supabase/types.ts` (900KB, не редактируем вручную).
+**Auto-generated types:** `src/integrations/supabase/types.ts` (~1.1MB, не редактируем вручную).
 
 ---
 
@@ -268,9 +273,9 @@ npm run lint     # ESLint check
 
 ```
 src/
-├── pages/          — 510 pages organized by vertical (owner, property, invest, admin, etc.)
-├── components/     — ~992 components across 60+ domain folders
-├── hooks/          — 410 custom hooks (domain-specific)
+├── pages/          — 557 pages organized by vertical (owner, property, invest, admin, etc.)
+├── components/     — ~998 components across 90 domain folders
+├── hooks/          — 429 custom hooks (domain-specific)
 ├── contexts/       — 15 global providers (Auth, Cart, Language, Theme, Location, etc.)
 ├── integrations/   — Supabase client + auto-generated types
 ├── lib/            — Utilities, adapters, taxonomies, appVersion.ts
@@ -280,8 +285,8 @@ src/
 └── types/          — TypeScript definitions
 
 supabase/
-├── functions/      — 126 Edge Functions (Deno 2.0)
-└── migrations/     — 673 SQL migrations
+├── functions/      — 165 Edge Functions (Deno 2.0)
+└── migrations/     — 757 SQL migrations
 ```
 
 ---
@@ -297,8 +302,8 @@ supabase/
 
 ## 11. VERSION INFO
 
-- **App Version:** 3.55.3 (in `src/lib/appVersion.ts`)
-- **HTML meta tag:** `<meta name="version" content="3.55.3" />`
+- **App Version:** 3.55.5 (in `src/lib/appVersion.ts`)
+- **HTML meta tag:** `<meta name="version" content="3.55.5" />`
 - **Version endpoint:** `public/version.json`
 - **Cache busting:** Automatic on version mismatch (reload guard prevents loops)
 
@@ -319,7 +324,7 @@ supabase/
 
 ### Detected Stack
 
-- **Frontend:** React 18, TypeScript 5.8, Vite 5 (SWC), React Router 6, TanStack Query 5
+- **Frontend:** React 18, TypeScript 5.9, Vite 6 (SWC), React Router 6, TanStack Query 5
 - **UI:** Tailwind CSS 3.4, shadcn/ui, Radix UI, Framer Motion, Embla Carousel
 - **Forms:** React Hook Form 7, Zod validation
 - **Backend/DB:** Supabase (PostgreSQL, Auth, Storage, Edge Functions on Deno 2.0)
@@ -341,7 +346,7 @@ supabase/
 | Code review before merging to main, security audit, pre-PR checks | `code-reviewer` | Always run before merging. Covers TypeScript strictness, Supabase RLS, Stripe security, missing error handling |
 | Bundle size, query performance, PWA caching strategy, lazy loading, chunk splitting | `performance-optimizer` | Use for Vite chunk tuning, TanStack Query optimisation, image compression, Sentry performance traces |
 | Docs, CLAUDE.md updates, onboarding guides, API documentation | `documentation-specialist` | Use after major features land or when onboarding contributors |
-| Exploring unknown parts of the codebase (~992 components, 510 pages) | `code-archaeologist` | Use before large refactors or audits across verticals |
+| Exploring unknown parts of the codebase (~998 components, 557 pages) | `code-archaeologist` | Use before large refactors or audits across verticals |
 | Multi-step features spanning several verticals (STAYS, DEALS, CRM, Payments) | `tech-lead-orchestrator` | Use for complex cross-domain work — splits tasks and coordinates other agents |
 
 ### Quick-start Examples

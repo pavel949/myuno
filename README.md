@@ -4,8 +4,8 @@
 > Один аккаунт, одна база, одно окно — от трансфера из аэропорта до сделки с недвижимостью на $5M.
 
 [![Status](https://img.shields.io/badge/status-active%20development-00D68F)](./PROJECT.md)
-[![Version](https://img.shields.io/badge/app-v3.43.0-4E7BFF)](./src/lib/appVersion.ts)
-[![Stack](https://img.shields.io/badge/stack-React%2018%20%C2%B7%20Vite%205%20%C2%B7%20Supabase-0F1C2E)](#tech-stack)
+[![Version](https://img.shields.io/badge/app-v3.55.5-4E7BFF)](./src/lib/appVersion.ts)
+[![Stack](https://img.shields.io/badge/stack-React%2018%20%C2%B7%20Vite%206%20%C2%B7%20Supabase-0F1C2E)](#tech-stack)
 [![Domain](https://img.shields.io/badge/domain-myuno.app-08101E)](https://myuno.app)
 
 ---
@@ -79,7 +79,7 @@
 
 | Слой | Технологии |
 |------|------------|
-| **Frontend** | React 18 · TypeScript 5.8 · Vite 5 (SWC) · React Router 6 · TanStack Query 5 |
+| **Frontend** | React 18 · TypeScript 5.9 · Vite 6 (SWC) · React Router 6 · TanStack Query 5 |
 | **UI** | Tailwind CSS 3.4 · shadcn/ui · Radix UI · Framer Motion |
 | **Forms** | React Hook Form 7 · Zod |
 | **Backend** | Supabase (Postgres · Auth · Storage · Edge Functions on Deno 2.0) |
@@ -131,9 +131,9 @@ npm run lint      # ESLint
 │   └── …                       ← topic-specific docs
 │
 ├── src/
-│   ├── pages/                  ← 366+ pages by vertical
-│   ├── components/             ← 1000+ components / 60+ domains
-│   ├── hooks/                  ← 345 custom hooks
+│   ├── pages/                  ← 557 pages by vertical
+│   ├── components/             ← ~998 components / 90 domains
+│   ├── hooks/                  ← 429 custom hooks
 │   ├── contexts/               ← 11 global providers
 │   ├── integrations/supabase/  ← auto-generated client + types (DO NOT EDIT)
 │   ├── lib/                    ← utilities · taxonomies · adapters
