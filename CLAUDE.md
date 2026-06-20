@@ -7,12 +7,12 @@
 
 ## 1. ПРОЕКТ
 
-**myUNO** — AI-first суперапп для иностранцев на Пхукете. 40+ микро-приложений (недвижимость, услуги, юриспруденция, образ жизни) под одним аккаунтом, одной БД, много точек входа.
+**myUNO** — AI-first суперапп для иностранцев на Пхукете. 59 микро-приложений (canonical inventory — `src/lib/appRegistry.ts`; недвижимость, услуги, юриспруденция, образ жизни) под одним аккаунтом, одной БД, много точек входа.
 
 - **Домен:** myuno.app
 - **Стек:** React 18 + TypeScript 5.9 + Vite 6 + Tailwind 3.4 + shadcn/ui + Supabase + Stripe + Vercel + Capacitor
 - **Языки:** Русский (UI), Английский (UI). Код/комментарии/коммиты на English only.
-- **Архитектура:** Monolithic React SPA + 40 микро-компонентов по вертикалям
+- **Архитектура:** Monolithic React SPA + 59 micro-apps по вертикалям (6 surfaces: Arrive · Live · Manage · Invest · Legal · Build; 10 JTBD clusters A–J; 25 personas P01–P25 — `src/lib/taxonomies/master.ts`)
 
 ---
 
