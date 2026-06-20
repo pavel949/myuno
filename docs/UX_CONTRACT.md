@@ -1,7 +1,7 @@
 # myUNO SuperApp — UX Design Contract
 
-> **Version**: 2.0.0  
-> **Last Updated**: 2026-04-20  
+> **Version**: 2.1.0  
+> **Last Updated**: 2026-06-20  
 > **Status**: Active  
 > **Maintainers**: Platform Architecture Team  
 > **Design System**: DS 2.1 (see `DESIGN.md` — canonical source for all visual decisions)
@@ -359,53 +359,50 @@ Icons are resolved through `iconMap.ts` (200+ mappings).
 <div style={{ background: '#08101E' }}>
 ```
 
-### 8.2 Dark Theme (Default) — Key Tokens
+### 8.2 Light Theme (Default) — Key Tokens
 
-Dark is the **default** theme. No class needed on `<html>`. Tokens below apply at `:root`.
+DS 2.1 is **light-first** (civic infrastructure). The light theme is the default at `:root`; no class needed on `<html>`. Tokens below are approximate hex for the HSL values in `tokens.css`.
 
 | Token | Hex approx | Usage |
 |-------|-----------|-------|
-| `--background` | `#08101E` | Page background |
-| `--card` | `#162236` | Cards, modals |
-| `--primary` | `#00D68F` | CTAs, links, active states (mint) |
-| `--accent` | `#4E7BFF` | Secondary actions, info (blue) |
-| `--foreground` | `#EDF2FF` | Primary text |
-| `--muted-foreground` | `#8FA3B8` | Secondary text, placeholders |
-| `--border` | rgba white 7% | Default dividers |
-| `--border-strong` | rgba white 14% | Emphasized borders |
-| `--success` | `#2D9966` | Distinct from primary |
-| `--warning` | `#F59E0B` | Caution states |
-| `--destructive` | `#D93535` | Destructive actions |
+| `--background` | `#F7F5F1` | Page background (cream) |
+| `--card` | `#FFFFFF` | Cards, modals |
+| `--primary` | `#0A2240` | CTAs, links, active states (navy) |
+| `--accent` | `#D96B1A` | Singular accent — ≤3 % of screen (orange) |
+| `--foreground` | `#1C1916` | Primary text (ink) |
+| `--muted-foreground` | warm gray | Secondary text, placeholders |
+| `--border` | warm gray | Default dividers |
+| `--success` | green | Distinct from primary |
+| `--warning` | amber | Caution states |
+| `--destructive` | red | Destructive actions |
 
-### 8.3 Light Theme (`html.light`)
+### 8.3 Dark Theme (`.dark` — opt-in)
 
-Light mode is activated by adding `class="light"` to `<html>`. Use for document views, legal contracts, print contexts. Do NOT use as the default.
+Dark mode is opt-in for **admin / MC workspaces only**, activated via the standard `.dark` class on `<html>` (`darkMode: ["class"]`; toggled by `ThemeContext`: light / dark / system). Do NOT use as the default for public/consumer surfaces.
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `--background` | `#fafaf9` | Warm white |
-| `--card` | `#ffffff` | White cards |
-| `--primary` | `#0d6e4f` | Emerald CTA |
-| `--foreground` | `#1a1a19` | Near-black text |
-| `--muted-foreground` | `#57534e` | Warm gray secondary |
-| `--border` | `#e5e5e4` | Warm gray dividers |
+| Token | Hex approx | Usage |
+|-------|-----------|-------|
+| `--background` | `#051428` | Navy-900 background |
+| `--foreground` | `#F7F5F1` | Cream text |
+| `--primary` | `#D96B1A` | Orange CTA (better contrast on navy than navy-on-navy) |
+| `--accent` | lighter navy | Secondary accent |
 
 ### 8.4 Cluster Accent System (🔴 MUST — never reassign)
 
-Each cluster has an immutable accent color used for 2px left-border spines on cluster cards, section headers, and role glyph pills.
+> **DS 2.1:** the old 6-colour cluster rainbow (mint/blue/amber/violet/teal/red) is **retired**. Clusters now resolve to muted navy / orange / stone tones via `--cluster-*` tokens — never hardcode hues.
 
-| Cluster | Token | Hex |
-|---------|-------|-----|
-| `arrive` | `--cluster-arrive` | `#00D68F` |
-| `live` | `--cluster-live` | `#4E7BFF` |
-| `legal` | `--cluster-legal` | `#F59E0B` |
-| `invest` | `--cluster-invest` | `#A78BFA` |
-| `manage` | `--cluster-manage` | `#16BDCA` |
-| `build` | `--cluster-build` | `#EF4444` |
+| Cluster | Token | DS 2.1 tone |
+|---------|-------|-------------|
+| `arrive` | `--cluster-arrive` | navy-700 |
+| `live` | `--cluster-live` | navy-700 |
+| `legal` | `--cluster-legal` | neutral-dark |
+| `invest` | `--cluster-invest` | brand-orange |
+| `manage` | `--cluster-manage` | neutral-dark |
+| `build` | `--cluster-build` | stone |
 
 ```tsx
-// Cluster spine pattern (🔴 MUST for cluster-grouped cards)
-<div className="rounded-md border border-border pl-4"
+// Cluster spine pattern (🔴 MUST for cluster-grouped cards) — sharp corners (DS 2.1)
+<div className="border border-border pl-4"
      style={{ borderLeft: '2px solid var(--cluster-manage)' }}>
 ```
 
@@ -418,34 +415,37 @@ Each cluster has an immutable accent color used for 2px left-border spines on cl
 | Error | `text-destructive bg-destructive/10` | Rejected, Failed, Expired |
 | Info | `text-accent bg-accent/10` | New, Featured, Highlighted |
 
-### 8.6 Dark Mode Authoring Rules (🔴 MUST)
+### 8.6 Theme Authoring Rules (🔴 MUST)
 
-- Dark is the default — write styles for dark first; override with `html.light` context if needed
-- Use `[html.light_&]:` Tailwind variant (not `dark:`) because dark is the base
-- Never use Tailwind's `dark:` prefix — it only works with `class="dark"` strategy; myUNO uses the inverse (`light` class activates light mode)
+- Light is the default — write styles for light first using semantic tokens (`bg-background`, `bg-card`, `text-foreground`).
+- Dark is opt-in (`.dark` class, admin/MC only). Use the **standard** Tailwind `dark:` prefix to add dark overrides — myUNO uses `darkMode: ["class"]`.
+- Prefer semantic tokens that already theme-switch automatically (`bg-card`, `text-primary`) over manual `dark:` overrides; only reach for `dark:` when a token can't express the difference.
+- Never hardcode raw brand colours (`bg-navy`, `text-orange-400`, `bg-white`) — they break theme-switch.
 
 ```tsx
-// ✅ Correct — dark by default, light override
-<div className="bg-card [html.light_&]:bg-white">
+// ✅ Correct — semantic token theme-switches automatically
+<div className="bg-card text-foreground">
 
-// ❌ Incorrect — dark: prefix won't work with myUNO's theme strategy  
-<div className="bg-blue-100 dark:bg-card">
+// ✅ Correct — explicit dark override when needed
+<div className="bg-background dark:bg-[hsl(var(--card))]">
+
+// ❌ Incorrect — raw colours break theme-switch
+<div className="bg-white text-navy">
 ```
 
 ---
 
 ## 9. Typography
 
-> DS 2.1 font assignments. Tailwind utilities: `font-display` = Golos Text, `font-sans` = DM Sans, `font-mono` = JetBrains Mono, `font-serif` = Playfair Display (luxury RE only).
+> DS 2.1 font assignments (matches `tokens.css`). Tailwind utilities: `font-display`/`font-serif` = Source Serif 4, `font-sans` = Geist, `font-mono` = IBM Plex Mono. ⛔ Golos Text · DM Sans · JetBrains Mono · Playfair Display are **retired** (Golos/Unbounded remain only as RU locale fallbacks inside the font stack).
 
 ### 9.0 Font Assignments (🔴 MUST)
 
 | Role | Font | Tailwind class | Use for |
 |------|------|---------------|---------|
-| Display/Headings | **Golos Text** | `font-display` | Page titles, section headers, card titles |
-| Body | **DM Sans** | `font-sans` | Body copy, labels, descriptions |
-| Prices/Data | **JetBrains Mono** | `font-mono` | All prices, numeric data, AQI, dates, coordinates |
-| Luxury RE only | **Playfair Display** | `font-serif` | Developer/offplan names and luxury property headlines — never UI chrome |
+| Display/Headings | **Source Serif 4** | `font-display` / `font-serif` | Page titles, section headers, card titles (editorial voice, both languages) |
+| Body/UI | **Geist** | `font-sans` | Body copy, labels, descriptions |
+| Prices/Data | **IBM Plex Mono** | `font-mono` | All prices, numeric data, AQI, dates, coordinates |
 
 ```tsx
 // ✅ Correct
@@ -458,33 +458,33 @@ Each cluster has an immutable accent color used for 2px left-border spines on cl
 <span className="font-sans">฿ 45,000</span>
 ```
 
-**JetBrains Mono rule:** ALL prices, counts, percentages, and financial figures **MUST** use `font-mono` with `tabular-nums` (`font-feature-settings: "tnum"`). This applies globally — not just dashboards.
+**Mono / numerics rule:** ALL prices, counts, percentages, and financial figures **MUST** use `font-mono` (IBM Plex Mono) with `tabular-nums` (`font-feature-settings: "tnum"`). This applies globally — not just dashboards.
 
 ### 9.1 Heading Hierarchy (🔴 MUST)
 
 ```tsx
-// Page titles — Golos Text
+// Page titles — Source Serif 4
 <h1 className="font-display text-2xl font-bold">Page Title</h1>
 
-// Section headers — Golos Text
+// Section headers — Source Serif 4
 <h2 className="font-display text-xl font-semibold">Section Title</h2>
 
-// Subsection headers — Golos Text
+// Subsection headers — Source Serif 4
 <h3 className="font-display text-lg font-medium">Subsection Title</h3>
 
-// Card titles — Golos Text
+// Card titles — Source Serif 4
 <h4 className="font-display text-base font-semibold">Card Title</h4>
 
-// Labels — DM Sans
+// Labels — Geist
 <span className="font-sans text-sm font-medium">Label</span>
 
-// Body text — DM Sans
+// Body text — Geist
 <p className="font-sans text-sm text-muted-foreground">Description</p>
 
-// Small text / captions — DM Sans
+// Small text / captions — Geist
 <span className="font-sans text-xs text-muted-foreground">Caption</span>
 
-// Overline labels (section category tags) — DM Sans uppercase
+// Overline labels (section category tags) — Geist uppercase
 <span className="font-sans text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">Category</span>
 ```
 
@@ -720,9 +720,9 @@ Before submitting a PR for any vertical, verify:
 - [ ] Uses `UnifiedFiltersKlook` for filtering (if applicable)
 - [ ] Uses `IconBadge` for all icons
 - [ ] Uses semantic color tokens (no raw hex/RGB values)
-- [ ] Dark is default — no `dark:` prefixes, `html.light` pattern for overrides
-- [ ] Headings use `font-display` (Golos Text)
-- [ ] Prices/numbers use `font-mono tabular-nums` (JetBrains Mono)
+- [ ] Light is default — semantic tokens theme-switch automatically; use standard `dark:` prefix only for admin/MC dark overrides
+- [ ] Headings use `font-display` (Source Serif 4)
+- [ ] Prices/numbers use `font-mono tabular-nums` (IBM Plex Mono)
 - [ ] Cluster-grouped cards use 2px `borderLeft` spine in cluster accent color
 - [ ] Cards use `border border-border` only — no `box-shadow` on standard cards
 - [ ] Includes bilingual text (en/ru)
@@ -738,7 +738,8 @@ Before submitting a PR for any vertical, verify:
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 2.0.0 | 2026-04-20 | DS 2.1 alignment: dark-first theme, Golos Text + DM Sans + JetBrains Mono fonts, cluster accent system, border-only cards, `html.light` pattern, deprecated `dark:` prefix guidance |
+| 2.1.0 | 2026-06-20 | Re-synced §8 themes + §9 typography to DS 2.1 runtime (`tokens.css`): light-first default, navy/cream/orange palette, Source Serif 4 + Geist + IBM Plex Mono triad, muted cluster tones (rainbow retired), sharp corners, standard `dark:` (class) strategy. Corrects stale DS 2.0 guidance. |
+| 2.0.0 | 2026-04-20 | (Superseded) Documented DS 2.0: dark-first theme, Golos Text + DM Sans + JetBrains Mono fonts, `html.light` pattern, 6-colour cluster rainbow |
 | 1.0.0 | 2026-02-02 | Initial UX Contract established |
 
 ---

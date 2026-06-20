@@ -31,18 +31,20 @@ All tokens are HSL values exposed as CSS custom properties so Tailwind can consu
 
 ## Cluster accents (locked, do not invent new)
 
-| Token | Cluster |
-|-------|---------|
-| `--cluster-arrive` | Arrive (mint) |
-| `--cluster-live`   | Live (blue) |
-| `--cluster-legal`  | Stay legal (amber) |
-| `--cluster-invest` | Invest (violet) |
-| `--cluster-manage` | Manage (cyan-teal) |
-| `--cluster-build`  | Build (red) |
+> **DS 2.1:** the old 6-colour cluster rainbow (mint/blue/amber/violet/teal/red) is **retired**. Clusters now resolve to muted navy / orange / stone tones — no decorative per-cluster hues.
+
+| Token | Cluster | DS 2.1 tone |
+|-------|---------|-------------|
+| `--cluster-arrive` | Arrive | navy-700 |
+| `--cluster-live`   | Live   | navy-700 |
+| `--cluster-legal`  | Stay legal | neutral-dark |
+| `--cluster-invest` | Invest | brand-orange |
+| `--cluster-manage` | Manage | neutral-dark |
+| `--cluster-build`  | Build  | stone |
 
 ## Vertical accents (extended palette)
 
-For storefront verticals that need a distinctive hue but do not map to a cluster, use these semantic tokens instead of raw Tailwind palette classes (`bg-rose-500`, `text-emerald-600`, …). All values are dark-tuned in `:root` and light-tuned in `html.light`.
+For storefront verticals that need a distinctive hue but do not map to a cluster, use these semantic tokens instead of raw Tailwind palette classes (`bg-rose-500`, `text-emerald-600`, …). DS 2.1 is **light-first**: values are light-tuned in `:root` (default) and dark-tuned in `.dark` (admin/MC opt-in).
 
 | Token | Tailwind utility | Typical use |
 |-------|------------------|-------------|
@@ -70,7 +72,7 @@ For storefront verticals that need a distinctive hue but do not map to a cluster
 | `--page-padding-x` | `1rem`    | `1.5rem` | `2rem` | Horizontal padding inside `PageShell` |
 | `--section-gap`    | `1.25rem` | `1.5rem` | `2rem` | Vertical gap between `PageSection`s |
 | `--touch-target`   | `2.75rem` (44 px) | — | — | Minimum interactive size |
-| `--card-radius`    | 16 px | — | — | Card / panel corner radius |
+| `--card-radius`    | 0 px | — | — | Card / panel corner radius (DS 2.1 sharp corners; `--radius`=0, `--radius-sm`=2px, `--radius-full`=9999px) |
 | `--card-padding`   | 1 rem | — | — | Card content padding |
 
 Consume them with arbitrary values:
@@ -89,32 +91,34 @@ Consume them with arbitrary values:
 | `--shadow-elevation-4` | Modal / drawer |
 | `--shadow-elevation-5` | Float / tooltip |
 
-## Themes
+## Themes (DS 2.1 — civic infrastructure)
 
-The platform ships **two parallel visual languages**. Choose by route, not by user preference.
+DS 2.1 is **light-first**. The light theme is the default (`:root`); dark is an opt-in surface for admin/MC workspaces only.
 
-### 1. Super-app — `deep-sea dark` (default)
+### 1. Light — default (`:root`)
 
-Every authenticated workspace, dashboard, marketplace screen, owner/MC/admin/vendor portal, and consumer feed.
+Every public, consumer, owner/vendor and marketing surface. Reference points: GOV.UK, e-Estonia, The Economist.
 
-- Background `#08101E` → tokens above (default `:root`)
-- Light variant available via `html.light`
-- Used by: 95 % of routes
+- `--background` `#F7F5F1` (cream) · `--foreground` `#1C1916` (ink)
+- `--primary` `#0A2240` (navy) — CTAs, brand
+- `--accent` `#D96B1A` (orange) — singular accent, ≤3 % of screen
+- Used by: ~95 % of routes
 
-### 2. Editorial — `dark luxury` (special landings)
+### 2. Dark — opt-in (`.dark`)
 
-Reserved for marketing landings where storytelling matters more than UI density:
+Admin / MC dashboards only, where dense data benefits from a dark canvas:
 
-- `/newbuilds/*` (off-plan property storytelling)
-- `/relocate`, `/wedding`, lifestyle micro-funnels
+- `--background` navy-900 `#051428` · `--foreground` cream
+- `--primary` `#D96B1A` (orange — better contrast on navy than navy-on-navy)
+- `--accent` lighter navy
 
-These pages opt in via per-page wrappers (`EditorialShell`, not part of this DS page-template module). They **must not** be used inside the super-app for regular dashboards.
+**Retired in DS 2.1 (do not reintroduce):** mint `#00D68F` as primary, the 6-colour cluster rainbow, dark-default theme, glassmorphism/glow/decorative gradients, 8–16 px mid-range radius. See [`DESIGN.md`](../DESIGN.md).
 
 ## Anti-patterns
 
 - ❌ `bg-[#0F1C2E]` → ✅ `bg-secondary`
 - ❌ `text-[#EDF2FF]` → ✅ `text-foreground`
-- ❌ Inline `style={{ color: '#00D68F' }}` → ✅ `text-primary`
+- ❌ Inline `style={{ color: '#0A2240' }}` → ✅ `text-primary`
 - ❌ Hardcoded `padding: 24px` → ✅ `p-[var(--page-padding-x)]` or Tailwind scale (`p-6`)
 - ❌ Custom shadow values → ✅ `shadow-[var(--shadow-elevation-2)]`
 

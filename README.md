@@ -3,8 +3,8 @@
 > **Доверенная цифровая инфраструктура для жизни и инвестиций иностранца на Пхукете.**
 > Один аккаунт, одна база, одно окно — от трансфера из аэропорта до сделки с недвижимостью на $5M.
 
-[![Status](https://img.shields.io/badge/status-active%20development-00D68F)](./PROJECT.md)
-[![Version](https://img.shields.io/badge/app-v3.55.5-4E7BFF)](./src/lib/appVersion.ts)
+[![Status](https://img.shields.io/badge/status-active%20development-0A2240)](./PROJECT.md)
+[![Version](https://img.shields.io/badge/app-v3.55.5-D96B1A)](./src/lib/appVersion.ts)
 [![Stack](https://img.shields.io/badge/stack-React%2018%20%C2%B7%20Vite%206%20%C2%B7%20Supabase-0F1C2E)](#tech-stack)
 [![Domain](https://img.shields.io/badge/domain-myuno.app-08101E)](https://myuno.app)
 
@@ -89,8 +89,8 @@
 | **Mobile** | PWA (`vite-plugin-pwa`) · Capacitor (iOS/Android) |
 | **Quality** | Vitest · Testing Library · Playwright · Sentry |
 
-**Шрифты:** Golos Text (display) · DM Sans (body) · JetBrains Mono (data) · Playfair Display (luxury RE).
-**Палитра (dark default):** bg `#08101E` · primary `#00D68F` (mint) · accent `#4E7BFF` (blue).
+**Шрифты (DS 2.1):** Source Serif 4 (display) · Geist (body/UI) · IBM Plex Mono (data/numerics, `tnum`).
+**Палитра (light default — civic infrastructure):** bg `#F7F5F1` (cream) · foreground `#1C1916` (ink) · primary `#0A2240` (navy) · accent `#D96B1A` (orange, ≤3% экрана). Dark theme — opt-in для admin/MC. Подробнее — [`DESIGN.md`](./DESIGN.md).
 
 ---
 
@@ -134,7 +134,7 @@ npm run lint      # ESLint
 │   ├── pages/                  ← 557 pages by vertical
 │   ├── components/             ← ~998 components / 90 domains
 │   ├── hooks/                  ← 429 custom hooks
-│   ├── contexts/               ← 11 global providers
+│   ├── contexts/               ← 15 global providers
 │   ├── integrations/supabase/  ← auto-generated client + types (DO NOT EDIT)
 │   ├── lib/                    ← utilities · taxonomies · adapters
 │   ├── design-system/          ← tokens · component docs
