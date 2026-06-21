@@ -1,12 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Camera, Upload, Loader2, Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import browserImageCompression from 'browser-image-compression';
@@ -218,16 +213,14 @@ const isRu = language === 'ru';
         {size !== 'icon' && (isRu ? 'Сканировать визитку' : 'Scan Business Card')}
       </Button>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-accent-amber" />
-              {isRu ? 'Сканировать визитку' : 'Scan Business Card'}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4">
+      <ResponsiveModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        size="lg"
+        icon={<Sparkles className="h-5 w-5 text-accent-amber" />}
+        title={isRu ? 'Сканировать визитку' : 'Scan Business Card'}
+      >
+        <div className="space-y-4">
             {/* Camera/Upload Buttons */}
             {!imagePreview && !isCameraActive && (
               <div className="flex gap-3">
@@ -314,8 +307,7 @@ const isRu = language === 'ru';
               </p>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
+      </ResponsiveModal>
     </>
   );
 }

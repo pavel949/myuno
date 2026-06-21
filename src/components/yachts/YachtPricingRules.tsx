@@ -261,19 +261,21 @@ export function YachtPricingRules({
                         onCheckedChange={() => handleToggleActive(rule)}
                       />
                       <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 min-h-[44px] min-w-[44px]"
                         onClick={() => handleOpenEdit(rule)}
+                        aria-label={isRu ? 'Редактировать' : 'Edit'}
                       >
                         <Edit2 className="h-3 w-3" />
                       </Button>
                       <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 min-h-[44px] min-w-[44px] text-destructive hover:text-destructive"
                         onClick={() => handleDelete(rule.id)}
                         disabled={isDeleting}
+                        aria-label={isRu ? 'Удалить' : 'Delete'}
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>

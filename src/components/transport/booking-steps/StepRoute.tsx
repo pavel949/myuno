@@ -247,6 +247,7 @@ export function StepRoute({
               className="h-11 w-11 shrink-0"
               onClick={onUseCurrentLocation}
               disabled={geoLoading || isReverseGeocoding}
+              aria-label={language === 'ru' ? 'Моё местоположение' : 'Use my location'}
             >
               {(geoLoading || isReverseGeocoding)
                 ? <Loader2 className="h-4 w-4 animate-spin" />

@@ -125,8 +125,9 @@ export function ImageUpload({
             type="button"
             variant="destructive"
             size="icon"
-            className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-2 right-2 min-h-[44px] min-w-[44px] opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={handleRemove}
+            aria-label="Удалить фото"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -143,10 +144,10 @@ export function ImageUpload({
               className="flex-1"
               autoFocus
             />
-            <Button type="button" size="icon" onClick={handleUrlSubmit}>
+            <Button type="button" size="icon" onClick={handleUrlSubmit} aria-label="Добавить">
               <Check className="h-4 w-4" />
             </Button>
-            <Button type="button" size="icon" variant="ghost" onClick={() => setShowUrlInput(false)}>
+            <Button type="button" size="icon" variant="ghost" onClick={() => setShowUrlInput(false)} aria-label="Отмена">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -484,10 +485,10 @@ export function MultiImageUpload({
               className="flex-1"
               autoFocus
             />
-            <Button type="button" size="icon" onClick={handleUrlSubmit} disabled={!urlValue.trim()}>
+            <Button type="button" size="icon" onClick={handleUrlSubmit} disabled={!urlValue.trim()} aria-label="Добавить">
               <Check className="h-4 w-4" />
             </Button>
-            <Button type="button" size="icon" variant="ghost" onClick={() => setShowUrlInput(false)}>
+            <Button type="button" size="icon" variant="ghost" onClick={() => setShowUrlInput(false)} aria-label="Отмена">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -608,9 +609,10 @@ export function MultiImageUpload({
                     type="button"
                     variant="secondary"
                     size="icon"
-                    className="h-7 w-7"
+                    className="min-h-[44px] min-w-[44px]"
                     onClick={() => handleSetCover(index)}
                     title="Сделать обложкой"
+                    aria-label="Сделать обложкой"
                   >
                     <ImageIcon className="h-3.5 w-3.5" />
                   </Button>
@@ -619,8 +621,9 @@ export function MultiImageUpload({
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="h-7 w-7"
+                  className="min-h-[44px] min-w-[44px]"
                   onClick={() => handleRemove(index)}
+                  aria-label="Удалить фото"
                 >
                   <X className="h-3.5 w-3.5" />
                 </Button>

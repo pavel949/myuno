@@ -146,6 +146,7 @@ export function AITranslateButton({
             size={size}
             className={cn('text-muted-foreground hover:text-primary', className)}
             disabled={disabled || isLoading || !sourceText?.trim()}
+            aria-label="AI translate"
           >
             {buttonContent}
           </Button>
@@ -177,6 +178,7 @@ export function AITranslateButton({
             className={cn('text-muted-foreground hover:text-primary', className)}
             disabled={disabled || isLoading || !sourceText?.trim()}
             onClick={() => handleTranslate()}
+            aria-label="AI translate"
           >
             {buttonContent}
           </Button>
@@ -257,7 +259,7 @@ export function BilingualFieldWithAI({
               targetLang={primaryLang}
               onTranslate={onChangePrimary}
               size="icon"
-              className="h-5 w-5"
+              className="min-h-[44px] min-w-[44px]"
             />
           )}
         </div>
@@ -287,7 +289,7 @@ export function BilingualFieldWithAI({
               targetLang={secondaryLang}
               onTranslate={onChangeSecondary}
               size="icon"
-              className="h-5 w-5"
+              className="min-h-[44px] min-w-[44px]"
             />
           )}
         </div>

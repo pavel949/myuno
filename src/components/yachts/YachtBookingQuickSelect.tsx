@@ -154,7 +154,7 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
           </div>
           
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="shrink-0">
+            <Button variant="outline" size="icon" className="shrink-0" aria-label={language === 'ru' ? 'Корзина' : 'Cart'}>
               <ShoppingCart className="w-4 h-4" />
             </Button>
             <Button className="gap-2" onClick={() => setIsOpen(true)}>
@@ -301,7 +301,8 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
               <button
                 onClick={() => setGuests(Math.max(1, guests - 1))}
                 disabled={guests <= 1}
-                className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-lg font-medium disabled:opacity-50"
+                aria-label={language === 'ru' ? 'Меньше гостей' : 'Decrease guests'}
+                className="w-11 h-11 rounded-full bg-background border flex items-center justify-center text-lg font-medium disabled:opacity-50"
               >−</button>
               <div className="flex-1 text-center">
                 <span className="text-2xl font-bold">{guests}</span>
@@ -312,7 +313,8 @@ export function YachtBookingQuickSelect({ yacht }: YachtBookingQuickSelectProps)
               <button
                 onClick={() => setGuests(Math.min(yacht.capacity || 12, guests + 1))}
                 disabled={guests >= (yacht.capacity || 12)}
-                className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-lg font-medium disabled:opacity-50"
+                aria-label={language === 'ru' ? 'Больше гостей' : 'Increase guests'}
+                className="w-11 h-11 rounded-full bg-background border flex items-center justify-center text-lg font-medium disabled:opacity-50"
               >+</button>
             </div>
           </div>

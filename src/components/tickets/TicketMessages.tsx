@@ -196,11 +196,12 @@ export function TicketMessages({
                 }
               }}
             />
-            <Button 
-              onClick={handleSend} 
+            <Button
+              onClick={handleSend}
               disabled={!newMessage.trim() || isSending}
               size="icon"
               className="shrink-0"
+              aria-label="Отправить"
             >
               <Send className="w-4 h-4" />
             </Button>

@@ -228,7 +228,8 @@ export function DocumentMode({
               }
             }}
               disabled={disabled}
-              className="h-8 w-8"
+              className="min-h-[44px] min-w-[44px]"
+              aria-label="Заменить"
             >
               <RotateCcw className="h-4 w-4" />
             </Button>
@@ -238,7 +239,8 @@ export function DocumentMode({
               size="icon"
               onClick={handleRemove}
               disabled={disabled}
-              className="h-8 w-8"
+              className="min-h-[44px] min-w-[44px]"
+              aria-label="Удалить"
             >
               <X className="h-4 w-4" />
             </Button>

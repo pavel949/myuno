@@ -71,6 +71,20 @@ Strong primitives, uneven enforcement:
   standardize admin width, document one canonical responsive grid.
 - **Phase D — Mobile modals:** convert mobile-facing `Dialog` → `ResponsiveModal`.
 
+### Canonical page wrapper & responsive grid (Phase C)
+- **Page wrapper:** every authenticated/role page should use `PageShell`
+  (`src/components/page/PageShell.tsx`) as its outermost element instead of a
+  hand-rolled `<div className="px-… max-w-… mx-auto">`. Width modes:
+  `narrow` (max-w-3xl) · `default` (max-w-5xl) · `wide` (max-w-7xl) · `full`.
+  PageShell owns horizontal padding (`--page-padding-x` token) and bottom-nav
+  safe-area clearance — do not re-add `px-*`/`pb-24` inside.
+  - Data-dense admin/workspace pages that genuinely need 1536px use
+    `<PageShell width="full" className="max-w-[1536px]">` so width is preserved
+    while padding/clearance get standardized.
+- **Responsive grid (canonical):** for card/catalog grids use the progression
+  `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4`
+  (drop the last step for wider cards). Avoid ad-hoc `md:`-only jumps.
+
 ### Recommended guardrails
 - ESLint/CI grep to flag `rounded-(md|lg|xl|2xl)`, `backdrop-blur`, and hex
   literals in `src/**/*.tsx`.

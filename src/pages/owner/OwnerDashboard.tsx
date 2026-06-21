@@ -14,6 +14,7 @@ import { Home, Rocket, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { DashboardFilterProvider } from '@/contexts/DashboardFilterContext';
+import { PageShell } from '@/components/page/PageShell';
 
 // Eager — render in the initial sections (Greeting, header chrome).
 import { BusinessRoleSwitcher } from '@/components/owner/dashboard/BusinessRoleSwitcher';
@@ -423,7 +424,7 @@ export default function OwnerDashboard() {
     const total = 7;
     const completed = Math.round((percent / 100) * total);
     return (
-      <div className="px-4 md:px-6 lg:px-8 pt-10 pb-24 max-w-2xl mx-auto">
+      <PageShell width="narrow" className="max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -477,13 +478,13 @@ export default function OwnerDashboard() {
             </Button>
           </div>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
     <DashboardFilterProvider>
-      <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 space-y-5 overflow-x-hidden max-w-lg md:max-w-[1536px] mx-auto">
+      <PageShell width="full" className="max-w-[1536px] space-y-5 overflow-x-hidden">
         {/* Header: Greeting + Role Switcher */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -572,7 +573,7 @@ export default function OwnerDashboard() {
             </div>
           </section>
         ))}
-      </div>
+      </PageShell>
     </DashboardFilterProvider>
   );
 }
