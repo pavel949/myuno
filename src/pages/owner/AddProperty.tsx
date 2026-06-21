@@ -51,6 +51,7 @@ export default function AddProperty() {
     ownerPrefillApplied.current = ownerContactId;
     wizard.updateOwnershipData({
       ownership_type: 'verbal',
+      owner_contact_id: ownerContactId,
       actual_owner_name: `${ownerContact.first_name} ${ownerContact.last_name}`.trim(),
       actual_owner_phone: ownerContact.phone || ownerContact.mobile || ownerContact.whatsapp || '',
       actual_owner_email: ownerContact.email || '',
@@ -195,8 +196,8 @@ export default function AddProperty() {
             <span>
               {ownerContact
                 ? (isRu
-                  ? `Владелец предзаполнен из CRM: ${ownerContact.first_name} ${ownerContact.last_name}. После сохранения объекта свяжите его с контактом на карточке.`
-                  : `Owner prefilled from CRM: ${ownerContact.first_name} ${ownerContact.last_name}. After saving, link the property from the contact card.`)
+                  ? `Владелец из CRM: ${ownerContact.first_name} ${ownerContact.last_name}. Объект будет автоматически связан с этим контактом после сохранения.`
+                  : `Owner from CRM: ${ownerContact.first_name} ${ownerContact.last_name}. The property will be linked to this contact automatically on save.`)
                 : (isRu ? 'Загрузка данных контакта…' : 'Loading contact…')}
             </span>
             <Button variant="outline" size="sm" asChild className="shrink-0 w-full sm:w-auto">

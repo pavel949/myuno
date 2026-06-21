@@ -67,7 +67,7 @@ export function OwnerPropertiesList() {
         property={mapToOwnerProperty(property) as any}
         variant="compact"
         mode="owner"
-        navigateTo={`/mc/properties/${property.property_id}/manage`}
+        navigateTo={`/mc/properties/${property.property_id}/editor`}
       />
     </div>
   );

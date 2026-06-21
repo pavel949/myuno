@@ -134,7 +134,7 @@ export function PropertyPriorityWidget() {
               'cursor-pointer',
               p.overdueTasks > 0 && 'border-l-4 border-l-destructive'
             )}
-            onClick={() => navigate(`${APP_ROUTES.MC_PROPERTIES}/${p.propertyId}/manage`)}
+            onClick={() => navigate(`${APP_ROUTES.MC_PROPERTIES}/${p.propertyId}/editor`)}
           >
             <CardContent className="p-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">

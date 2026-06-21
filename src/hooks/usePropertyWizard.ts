@@ -165,33 +165,56 @@ export function usePropertyWizard() {
         }
       }
 
-      // Auto-create CRM owner contact when managing on behalf
+      // Link property to a CRM owner contact when managing on behalf.
+      // Priority: (1) reuse the contact the wizard was launched from, (2) reuse an
+      // existing contact with the same email, (3) create a new one. This prevents
+      // duplicate owner contacts when adding a property from an owner's card.
       if (isOnBehalf && property?.id && ownershipData.actual_owner_name.trim()) {
         try {
           const userId = (await supabase.auth.getUser()).data.user?.id;
-          const nameParts = ownershipData.actual_owner_name.trim().split(/\s+/);
-          const firstName = nameParts[0] || '';
-          const lastName = nameParts.slice(1).join(' ') || '';
+          let ownerContactId: string | null = ownershipData.owner_contact_id || null;
 
-          const { data: newContact } = await typedFrom('crm_contacts').insert({
-            company_id: activeOrgId,
-            contact_type: 'owner',
-            first_name: firstName,
-            last_name: lastName,
-            email: ownershipData.actual_owner_email || null,
-            phone: ownershipData.actual_owner_phone || null,
-            source: 'property_wizard',
-            lifecycle_stage: 'customer',
-            created_by: userId,
-          }).select('id').single();
+          if (!ownerContactId && activeOrgId && ownershipData.actual_owner_email.trim()) {
+            const { data: existing } = await typedFrom('crm_contacts')
+              .select('id')
+              .eq('company_id', activeOrgId)
+              .eq('email', ownershipData.actual_owner_email.trim())
+              .limit(1)
+              .maybeSingle();
+            if (existing?.id) ownerContactId = existing.id;
+          }
 
-          if (newContact?.id) {
+          if (!ownerContactId) {
+            const nameParts = ownershipData.actual_owner_name.trim().split(/\s+/);
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
+            const { data: newContact } = await typedFrom('crm_contacts').insert({
+              company_id: activeOrgId,
+              contact_type: 'owner',
+              first_name: firstName,
+              last_name: lastName,
+              email: ownershipData.actual_owner_email || null,
+              phone: ownershipData.actual_owner_phone || null,
+              source: 'property_wizard',
+              lifecycle_stage: 'customer',
+              created_by: userId,
+            }).select('id').single();
+            ownerContactId = newContact?.id ?? null;
+          }
+
+          if (ownerContactId) {
             await typedFrom('properties').update({
-              owner_contact_id: newContact.id,
+              owner_contact_id: ownerContactId,
             }).eq('id', property.id);
           }
         } catch (error: unknown) {
-          errorLog.silent(error, 'auto_create_owner_contact');
+          // Surface this — an unlinked property silently drops out of owner
+          // accounts, CRM and statement reporting (see MC UX audit).
+          errorLog.error(error, 'link_owner_contact');
+          toast.error(isRu
+            ? 'Объект создан, но не удалось связать его с собственником в CRM. Свяжите вручную на карточке объекта.'
+            : 'Property created, but linking it to the owner in CRM failed. Link it manually on the property card.');
         }
       }
 

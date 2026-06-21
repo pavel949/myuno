@@ -424,7 +424,8 @@ export const APP_ROUTES = {
   MC_PROPERTIES: '/mc/properties',
   MC_PROPERTY_DETAIL: (id: string) => `/mc/properties/${id}`,
   MC_PROPERTY_EDIT: (id: string) => `/mc/properties/${id}/editor`,
-  MC_PROPERTY_MANAGE: (id: string) => `/mc/properties/${id}/manage`,
+  /** @deprecated PropertyManage was consolidated into PropertyEditor — alias kept for back-compat. */
+  MC_PROPERTY_MANAGE: (id: string) => `/mc/properties/${id}/editor`,
   MC_PROPERTY_SETUP: (id: string) => `/mc/properties/${id}/setup`,
   MC_PROPERTY_GUIDEBOOK: (id: string) => `/mc/properties/${id}/guidebook`,
   MC_PROPERTY_PORTAL: (id: string) => `/mc/properties/${id}/portal-settings`,

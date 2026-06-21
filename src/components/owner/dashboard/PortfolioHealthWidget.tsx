@@ -124,7 +124,7 @@ function usePortfolioHealth() {
       const fields = fieldsMap.get(prop.property_id);
       const keys = keysMap.get(prop.property_id) || [];
       const utils = utilMap.get(prop.property_id) || [];
-      const basePath = `/mc/properties/${prop.property_id}/manage`;
+      const basePath = `/mc/properties/${prop.property_id}/editor`;
 
       const checks: HealthCheck[] = [];
 

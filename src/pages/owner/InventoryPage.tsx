@@ -285,7 +285,7 @@ export default function InventoryPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate(`${APP_ROUTES.MC_PROPERTIES}/${filterPropertyId}/manage`)}
+                onClick={() => navigate(`${APP_ROUTES.MC_PROPERTIES}/${filterPropertyId}/editor`)}
               >
                 {isRu ? 'Открыть карточку объекта' : 'Open property operations'}
               </Button>
