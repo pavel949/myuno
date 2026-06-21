@@ -129,9 +129,9 @@ export default function TeamDashboard() {
               </div>
             </div>
           </Card>
-          <Card className="p-4 bg-red-50 dark:bg-red-950/30 border-red-200">
+          <Card className="p-4 bg-destructive dark:bg-destructive/30 border-destructive">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <AlertTriangle className="h-8 w-8 text-destructive" />
               <div>
                 <p className="text-2xl font-bold">{leadStats.overdue}</p>
                 <p className="text-xs text-muted-foreground">{isRu ? 'Просрочено' : 'Overdue'}</p>

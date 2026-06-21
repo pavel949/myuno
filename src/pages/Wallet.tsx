@@ -359,7 +359,7 @@ const Wallet = () => {
                       </p>
                     </div>
                     <div className={`font-semibold whitespace-nowrap ${
-                      tx.type === 'payment' ? 'text-red-500' : 'text-success'
+                      tx.type === 'payment' ? 'text-destructive' : 'text-success'
                     }`}>
                       {formatCurrency(
                         tx.type === 'payment' ? -tx.amount : tx.amount,

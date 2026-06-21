@@ -211,7 +211,7 @@ function DocRow({ doc, onDelete }: { doc: { id: string; title: string; document_
       <span className="text-xs px-2 py-0.5 rounded-none bg-[hsl(var(--nb-glass-bg))] text-[hsl(var(--nb-muted))]">{doc.document_type}</span>
       {doc.is_sensitive ? <Lock className="w-3.5 h-3.5 text-accent" /> : <Unlock className="w-3.5 h-3.5 text-[hsl(var(--nb-muted))]" />}
       {doc.file_url && <a href={doc.file_url} target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--nb-gold))] hover:underline text-xs">Открыть</a>}
-      <button onClick={onDelete} className="text-[hsl(var(--nb-muted))] hover:text-red-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+      <button onClick={onDelete} className="text-[hsl(var(--nb-muted))] hover:text-destructive transition-colors"><Trash2 className="w-4 h-4" /></button>
     </div>
   );
 }
@@ -551,7 +551,7 @@ export default function DeveloperProjectEditor() {
                           <td className="p-3">
                             <div className="flex items-center gap-2">
                               <button onClick={() => setUnitModal({ open: true, initial: u })} className="text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-gold))]"><Pencil className="w-4 h-4" /></button>
-                              <button onClick={() => deleteUnit.mutate(u.id)} className="text-[hsl(var(--nb-muted))] hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                              <button onClick={() => deleteUnit.mutate(u.id)} className="text-[hsl(var(--nb-muted))] hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                             </div>
                           </td>
                         </tr>
@@ -703,7 +703,7 @@ export default function DeveloperProjectEditor() {
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <button onClick={() => setUpdateModal({ open: true, initial: upd })} className="text-[hsl(var(--nb-muted))] hover:text-[hsl(var(--nb-gold))]"><Pencil className="w-4 h-4" /></button>
-                          <button onClick={() => id && deleteUpdate.mutate({ id: upd.id, project_id: id })} className="text-[hsl(var(--nb-muted))] hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                          <button onClick={() => id && deleteUpdate.mutate({ id: upd.id, project_id: id })} className="text-[hsl(var(--nb-muted))] hover:text-destructive"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </div>
                     </div>

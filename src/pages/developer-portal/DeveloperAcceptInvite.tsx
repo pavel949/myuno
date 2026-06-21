@@ -133,7 +133,7 @@ export default function DeveloperAcceptInvite() {
 
             {(state === 'invalid' || state === 'expired') && (
               <>
-                <AlertCircle className="w-14 h-14 text-red-400 mx-auto" />
+                <AlertCircle className="w-14 h-14 text-destructive mx-auto" />
                 <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))]">
                   {state === 'expired' ? 'Ссылка устарела' : 'Ссылка недействительна'}
                 </h1>

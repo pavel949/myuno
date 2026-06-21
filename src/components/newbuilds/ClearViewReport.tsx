@@ -183,8 +183,8 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
 
       {/* Conflict of interest disclosure */}
       {brokered && (
-        <div className="flex items-start gap-2 border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-foreground">
-          <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+        <div className="flex items-start gap-2 border border-warning/30 bg-warning/5 p-3 text-xs text-foreground">
+          <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-warning dark:text-warning" />
           <div>
             <strong>
               {isRu
@@ -245,10 +245,10 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
                 if (!rec) return null;
                 const cls =
                   rec === 'BUY'
-                    ? 'border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10'
+                    ? 'border-success/40 text-success dark:text-success bg-success/10'
                     : rec === 'WATCH'
-                      ? 'border-amber-500/40 text-amber-700 dark:text-amber-400 bg-amber-500/10'
-                      : 'border-red-500/40 text-red-700 dark:text-red-400 bg-red-500/10';
+                      ? 'border-warning/40 text-warning dark:text-warning bg-warning/10'
+                      : 'border-destructive/40 text-destructive dark:text-destructive bg-destructive/10';
                 return (
                   <span
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 border text-xs font-medium rounded-none self-center ${cls}`}
@@ -272,7 +272,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
           <div className="grid sm:grid-cols-2 gap-3 pt-2 border-t border-border">
             {report.green_flags?.length > 0 && (
               <div className="space-y-1.5">
-                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5 text-success dark:text-success">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   {isRu ? 'Сильные стороны' : 'Strengths'}
                 </h4>
@@ -285,7 +285,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
             )}
             {report.red_flags?.length > 0 && (
               <div className="space-y-1.5">
-                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5 text-red-700 dark:text-red-400">
+                <h4 className="text-xs uppercase tracking-wider flex items-center gap-1.5 text-destructive dark:text-destructive">
                   <AlertTriangle className="w-3.5 h-3.5" />
                   {isRu ? 'Риски' : 'Risks'}
                 </h4>
@@ -331,7 +331,7 @@ export function ClearViewReport({ projectId, isBrokered }: Props) {
                       </ul>
                     )}
                     {finding && Array.isArray(finding.evidence_gaps) && finding.evidence_gaps.length > 0 && (
-                      <p className="text-[11px] text-amber-700 dark:text-amber-400">
+                      <p className="text-[11px] text-warning dark:text-warning">
                         ⚠ {isRu ? 'Недостаточно данных:' : 'Evidence gaps:'}{' '}
                         {finding.evidence_gaps.join('; ')}
                       </p>

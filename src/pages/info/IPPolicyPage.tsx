@@ -521,7 +521,7 @@ export default function IPPolicyPage() {
           <CardContent className="pt-6">
             <div className="space-y-2">
               {permittedUse.map((item, idx) => (
-                <div key={idx} className={`flex items-start gap-2 p-2 rounded-none ${item.allowed ? 'bg-success/5' : 'bg-red-500/5'}`}>
+                <div key={idx} className={`flex items-start gap-2 p-2 rounded-none ${item.allowed ? 'bg-success/5' : 'bg-destructive/5'}`}>
                   {item.allowed ? (
                     <CheckCircle2 className="h-4 w-4 text-success mt-0.5 shrink-0" />
                   ) : (

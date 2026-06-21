@@ -30,7 +30,7 @@ const SPECIAL_CATEGORIES = {
     description_en: 'Active discounts on popular products',
     description_ru: 'Действующие скидки на популярные товары',
     icon: '🔥',
-    gradient: 'from-accent/90 to-red-500/80',
+    gradient: 'from-accent/90 to-destructive/80',
     image_url: PLACEHOLDER_IMAGES.marketCategories['hot'],
   },
   popular: {

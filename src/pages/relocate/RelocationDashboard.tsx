@@ -50,7 +50,7 @@ export default function RelocationDashboard() {
         <p className="text-sm text-muted-foreground mt-1">{description}</p>
 
         {!user && (
-          <p className="text-xs text-amber-600 dark:text-amber-400 mt-3 rounded-none border border-amber-500/30 bg-amber-500/10 p-3">
+          <p className="text-xs text-warning dark:text-warning mt-3 rounded-none border border-warning/30 bg-warning/10 p-3">
             {isRu
               ? 'Вы не вошли в аккаунт — план сохраняется только на этом устройстве. Войдите, чтобы синхронизировать между устройствами.'
               : 'You are not signed in — the plan is stored on this device only. Sign in to sync across devices.'}

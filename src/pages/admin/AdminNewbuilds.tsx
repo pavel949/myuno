@@ -352,7 +352,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
               {p.is_featured ? <Star className="w-3.5 h-3.5 text-accent fill-accent" /> : <StarOff className="w-3.5 h-3.5 text-muted-foreground" />}
             </Button>
             <Button size="sm" variant="ghost" aria-label={p.is_approved ? 'Unapprove' : 'Approve'} className="h-7 w-7 p-0 min-h-[44px] min-w-[44px]" onClick={() => onUpdate({ is_approved: !p.is_approved })}>
-              {p.is_approved ? <Check className="w-3.5 h-3.5 text-success" /> : <X className="w-3.5 h-3.5 text-red-400" />}
+              {p.is_approved ? <Check className="w-3.5 h-3.5 text-success" /> : <X className="w-3.5 h-3.5 text-destructive" />}
             </Button>
           </div>
         </td>

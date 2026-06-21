@@ -598,7 +598,7 @@ export default function MapView() {
                 type="button"
                 aria-label="Close"
                 onClick={() => setSearchPin(null)}
-                className="p-1 rounded hover:bg-muted shrink-0"
+                className="p-1 rounded-none hover:bg-muted shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -616,7 +616,7 @@ export default function MapView() {
                 type="button"
                 aria-label="Close"
                 onClick={() => { setSelected(null); setPlaceDetails(null); selectMarker(null); searchBoxRef.current?.clear(); }}
-                className="absolute top-2 right-2 p-1 rounded hover:bg-muted"
+                className="absolute top-2 right-2 p-1 rounded-none hover:bg-muted"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -632,7 +632,7 @@ export default function MapView() {
                     className="text-left w-full pr-6"
                   >
                     {m.image && (
-                      <img src={m.image} alt="" className="w-full h-32 object-cover rounded mb-2" loading="lazy" />
+                      <img src={m.image} alt="" className="w-full h-32 object-cover rounded-none mb-2" loading="lazy" />
                     )}
                     <div className="font-semibold text-sm">{language === 'ru' ? m.nameRu : m.name}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">

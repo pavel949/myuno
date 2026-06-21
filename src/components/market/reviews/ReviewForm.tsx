@@ -164,7 +164,7 @@ export function ReviewForm({ productId, productName, isOpen, onClose, onSuccess 
 
           {/* Cons */}
           <div>
-            <Label htmlFor="cons" className="text-red-600">
+            <Label htmlFor="cons" className="text-destructive">
               − {language === 'ru' ? 'Недостатки' : 'Cons'}
             </Label>
             <Input

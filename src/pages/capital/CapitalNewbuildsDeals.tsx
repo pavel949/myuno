@@ -209,7 +209,7 @@ function useSendManualRln() {
 function TimeLeft({ expiresAt }: { expiresAt: string | null }) {
   if (!expiresAt) return <span className="text-gray-400">—</span>;
   const ms = new Date(expiresAt).getTime() - Date.now();
-  if (ms <= 0) return <span className="text-red-500 text-xs">Истёк</span>;
+  if (ms <= 0) return <span className="text-destructive text-xs">Истёк</span>;
   const m = Math.floor(ms / 60000);
   const s = Math.floor((ms % 60000) / 1000);
   return (
