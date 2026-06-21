@@ -36,7 +36,11 @@ export const mcRoutes = (
     <Route path="properties/:id/setup" element={<LazyPage><Pages.PropertyQuickSetup /></LazyPage>} />
     <Route path="properties/:id/guidebook" element={<LazyPage><Pages.OwnerGuidebookEdit /></LazyPage>} />
     <Route path="properties/:id/editor" element={<LazyPage><Pages.PropertyEditor /></LazyPage>} />
-    <Route path="properties/:id/manage" element={<LazyPage><Pages.PropertyManage /></LazyPage>} />
+    {/* PropertyManage (sectioned hub) consolidated into PropertyEditor — the
+        canonical editor (shared CanonicalPropertyForm, MCLayout shell). The hub
+        spawned its own shell and its dashboard deep-links used a ?tab= scheme it
+        never read. Redirect keeps every existing /manage link working. */}
+    <Route path="properties/:id/manage" element={<Navigate to="../editor" replace />} />
     <Route path="properties/:id/inventory" element={<LazyPage><Pages.InventoryPage /></LazyPage>} />
     <Route path="properties/:id/juristic-requests" element={<LazyPage><Pages.JuristicRequestsPage /></LazyPage>} />
     <Route path="properties/:id/portal-settings" element={<LazyPage><Pages.OwnerPortalSettingsPage /></LazyPage>} />
