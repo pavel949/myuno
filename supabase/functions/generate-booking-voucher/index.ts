@@ -65,8 +65,8 @@ Deno.serve(async (req) => {
         const propertyId = order.metadata?.property_id;
         if (propertyId) {
           const { data } = await supabase
-            .from('owner_properties')
-            .select('title_en, title_ru, address')
+            .from('properties')
+            .select('title, title_en, title_ru, address')
             .eq('id', propertyId)
             .single();
           property = data;
@@ -75,8 +75,8 @@ Deno.serve(async (req) => {
         voucherData = {
           voucher_number: order.order_number,
           booking_type: order.order_type,
-          title: property 
-            ? (isRu ? property.title_ru : property.title_en) || 'Property'
+          title: property
+            ? ((isRu ? property.title_ru : property.title_en) || property.title || 'Property')
             : items?.[0]?.item_name || order.order_type,
           subtitle: items?.map((i: any) => i.item_name).join(', '),
           date: order.start_at?.split('T')[0] || order.metadata?.check_in,
@@ -100,21 +100,21 @@ Deno.serve(async (req) => {
         .from('property_bookings')
         .select(`
           *,
-          owner_properties(title_en, title_ru, address)
+          properties(title, title_en, title_ru, address)
         `)
         .eq('id', bookingId)
         .single();
 
       if (!bookingError && booking) {
         entityType = 'property_booking';
-        const property = booking.owner_properties;
-        
+        const property = (booking as any).properties;
+
         voucherData = {
           voucher_number: booking.booking_code || `BK-${bookingId.slice(0, 8).toUpperCase()}`,
           booking_type: 'property',
-          title: isRu 
-            ? (property?.title_ru || property?.title_en || 'Property') 
-            : (property?.title_en || 'Property'),
+          title: isRu
+            ? (property?.title_ru || property?.title_en || property?.title || 'Property')
+            : (property?.title_en || property?.title || 'Property'),
           date: booking.check_in,
           time: '14:00',
           end_date: booking.check_out,
@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
           guests_count: booking.guests || 1,
           amount: booking.total_amount,
           currency: booking.currency || 'THB',
-          status: booking.status === 'completed' ? 'used' : 
+          status: booking.status === 'completed' ? 'used' :
                   booking.status === 'cancelled' ? 'cancelled' : 'active',
           booking_id: bookingId,
           created_at: booking.created_at,
