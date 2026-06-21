@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Anchor, Users, Clock, Loader2, AlertCircle, Info, Shield } from 'lucide-react';
@@ -63,6 +63,9 @@ export default function YachtBooking() {
   const { platformFeePercent } = useSystemSettings();
 
   const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  // Guards against double-submit: a second tap before React re-renders the
+  // disabled button must not create a duplicate order.
+  const isSubmittingRef = useRef(false);
 
   // Get pre-filled data from location state (Book Now flow)
   const bookNowData = (location.state as { bookNowData?: BookNowData })?.bookNowData;
@@ -171,7 +174,10 @@ export default function YachtBooking() {
 
   const handleSubmit = async () => {
     if (!date || !time || !contactData.name || !contactData.phone || !yacht) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
+    try {
     // Check availability before booking
     const scheduledAt = new Date(date);
     const [hours, minutes] = time.split(':').map(Number);
@@ -274,6 +280,8 @@ export default function YachtBooking() {
       payment: {
         amount: isInstant ? depositAmount : total,
         method: isInstant ? (paymentMethod === 'online' ? 'stripe' : paymentMethod === 'wallet' ? 'wallet' : 'cash') : 'cash',
+        // Wallet deposits are captured immediately; cash/request stays pending.
+        status: isInstant && paymentMethod === 'wallet' ? 'paid' : 'pending',
       },
       metadata: {
         yacht_id: yacht.id,
@@ -315,6 +323,9 @@ export default function YachtBooking() {
       }
 
       setBookingResult({ bookingId: result.order_id });
+    }
+    } finally {
+      isSubmittingRef.current = false;
     }
   };
 

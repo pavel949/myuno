@@ -112,6 +112,9 @@ export function useTeamMessages(channelSlug: string) {
   useEffect(() => {
     if (!channelSlug) return;
 
+    // Reset live buffer so the previous channel's messages don't bleed in.
+    setRealtimeMessages([]);
+
     const subscription = supabase
       .channel(`team-chat-${channelSlug}`)
       .on(

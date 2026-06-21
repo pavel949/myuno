@@ -69,8 +69,23 @@ Deno.serve(async (req) => {
     });
 
     await sb().from("orders").update({
+      status: "refunded",
       metadata: { ...meta, refunded_at: new Date().toISOString(), refund_method: "stripe", refund_id: refund.id, refund_reason: reason || null },
     }).eq("id", order_id);
+
+    // Audit trail: record the status transition to 'refunded'.
+    await sb().from("order_status_history").insert({
+      order_id,
+      from_status: order.status || null,
+      to_status: "refunded",
+      reason: `Stripe refund ${refund.id}: ${String(reason || "operator_reject")}`,
+    });
+
+    // TODO(ledger): no reversing-ledger RPC exists yet (only record_ledger_entries
+    // for forward postings). Until a `reverse_ledger_entries`/refund RPC is added,
+    // the double-entry trail is NOT reversed here. The Stripe `charge.refunded`
+    // webhook flips order/payment_intent status but also does not post a reversal,
+    // so reconciliation must account for refunded orders separately.
 
     return new Response(JSON.stringify({ success: true, refund_id: refund.id, status: refund.status }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

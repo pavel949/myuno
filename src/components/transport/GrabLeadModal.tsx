@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Phone, User, ArrowRight, Shield, Clock, Sparkles, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,20 @@ const isRu = language === 'ru';
 
   const [step, setStep] = useState<'form' | 'transition'>('form');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const redirectTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  // Cancel a pending auto-redirect when the modal closes or unmounts, so closing
+  // within 3s doesn't fire openGrabApp() and hijack navigation.
+  useEffect(() => {
+    if (!isOpen && redirectTimer.current) {
+      clearTimeout(redirectTimer.current);
+      redirectTimer.current = undefined;
+    }
+  }, [isOpen]);
+
+  useEffect(() => () => {
+    if (redirectTimer.current) clearTimeout(redirectTimer.current);
+  }, []);
   const [formData, setFormData] = useState({
     name: user?.user_metadata?.full_name || '',
     phone: user?.user_metadata?.phone || '',
@@ -67,8 +81,8 @@ const isRu = language === 'ru';
       // Show transition screen
       setStep('transition');
 
-      // Auto-redirect after 3 seconds
-      setTimeout(() => {
+      // Auto-redirect after 3 seconds (cancelled if the modal closes first)
+      redirectTimer.current = setTimeout(() => {
         openGrabApp();
       }, 3000);
 
@@ -83,6 +97,11 @@ const isRu = language === 'ru';
   };
 
   const openGrabApp = () => {
+    // A redirect is happening now — drop any pending auto-redirect timer.
+    if (redirectTimer.current) {
+      clearTimeout(redirectTimer.current);
+      redirectTimer.current = undefined;
+    }
     // Deep link to Grab app (works on mobile)
     // Fallback to website for desktop
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);

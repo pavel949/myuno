@@ -196,6 +196,7 @@ const { createOrder, cancelOrder, isCreating } = useOrders();
         payment: params.payment ? {
           method: mapPaymentMethod(params.payment.payment_method),
           amount: params.payment.amount,
+          status: params.payment.status,
         } : undefined,
         serviceName: params.serviceName,
         providerName: params.providerName,

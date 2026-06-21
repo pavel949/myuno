@@ -74,8 +74,12 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
         Object.entries(ratesData).forEach(([code, info]) => {
           if (code in currencyMeta) {
-            newRates[code as Currency] = info.rate;
-            if (!latestUpdate || info.updated_at > latestUpdate) {
+            // Only accept a valid positive numeric rate; a null/0/NaN rate would
+            // poison every converted price. Keep the previous/fallback otherwise.
+            if (typeof info?.rate === 'number' && Number.isFinite(info.rate) && info.rate > 0) {
+              newRates[code as Currency] = info.rate;
+            }
+            if (info?.updated_at && (!latestUpdate || info.updated_at > latestUpdate)) {
               latestUpdate = info.updated_at;
             }
           }

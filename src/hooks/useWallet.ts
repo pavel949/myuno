@@ -106,6 +106,49 @@ export const useWallet = () => {
     }
   }, [user]);
 
+  // Compensating credit back to the wallet, used to reverse a `payFromWallet`
+  // debit when the subsequent order creation fails (so money is never lost).
+  const refundToWallet = useCallback(async (
+    amount: number,
+    referenceType?: string,
+    referenceId?: string
+  ): Promise<{ success: boolean; error?: string; newBalance?: number }> => {
+    if (!user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+    try {
+      const { data, error } = await supabase.rpc('topup_wallet_atomic', {
+        p_user_id: user.id,
+        p_amount: amount,
+        p_reference_type: referenceType || 'refund',
+        p_reference_id: referenceId || null,
+      });
+
+      if (error) throw error;
+
+      const result = data as {
+        success: boolean;
+        error?: string;
+        message?: string;
+        new_balance?: number;
+      };
+
+      if (!result.success) {
+        return { success: false, error: result.message || result.error || 'Refund failed' };
+      }
+
+      setWallet(prev => prev ? {
+        ...prev,
+        balance: result.new_balance ?? prev.balance + amount,
+      } : null);
+
+      return { success: true, newBalance: result.new_balance };
+    } catch (error) {
+      errorLog.silent(error, 'refund_to_wallet');
+      return { success: false, error: 'Refund failed' };
+    }
+  }, [user]);
+
   const refetch = useCallback(() => {
     loadWallet(() => true);
   }, [loadWallet]);
@@ -116,6 +159,7 @@ export const useWallet = () => {
     currency: wallet?.currency ?? 'THB',
     isLoading,
     payFromWallet,
+    refundToWallet,
     refetch,
     hasEnoughBalance: (amount: number) => (wallet?.balance ?? 0) >= amount,
   };

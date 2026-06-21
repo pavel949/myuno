@@ -10,7 +10,7 @@
  *   const { developerId, enter, exit } = useImpersonation();
  *   useEffectiveDeveloperProfile() — drop-in for useDeveloperProfile()
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -36,13 +36,27 @@ const ImpersonationContext = createContext<ImpersonationContextValue>({
 export function ImpersonationProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [state, setState] = useState<ImpersonationState>({ developerId: null, developerName: null });
+  const boundUserRef = useRef<string | null | undefined>(undefined);
 
+  // Hydrate from sessionStorage on first mount, but clear the impersonation
+  // scope whenever the authenticated user changes (account switch or logout) so
+  // it never leaks across accounts on a shared device.
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      if (raw) setState(JSON.parse(raw));
-    } catch { /* ignore */ }
-  }, []);
+    const currentUserId = user?.id ?? null;
+    if (boundUserRef.current === undefined) {
+      boundUserRef.current = currentUserId;
+      try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (raw) setState(JSON.parse(raw));
+      } catch { /* ignore */ }
+      return;
+    }
+    if (boundUserRef.current !== currentUserId) {
+      boundUserRef.current = currentUserId;
+      setState({ developerId: null, developerName: null });
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    }
+  }, [user?.id]);
 
   const enter = useCallback(async (developerId: string, developerName: string) => {
     const next = { developerId, developerName };

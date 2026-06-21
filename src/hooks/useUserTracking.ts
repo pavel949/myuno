@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -20,24 +20,28 @@ export function useUserTracking() {
   const sessionIdRef = useRef<string>(getSessionId());
   const lastPageRef = useRef<string | null>(null);
   const pageEntryTimeRef = useRef<Date>(new Date());
-  const userIdRef = useRef<string | null>(null);
+  // Reactive user id so tracking effects (re)run once auth resolves after mount.
+  const [userId, setUserId] = useState<string | null>(null);
 
   // Get current user
   useEffect(() => {
+    let active = true;
     supabase.auth.getUser().then(({ data }) => {
-      userIdRef.current = data.user?.id || null;
-    });
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      userIdRef.current = session?.user?.id || null;
+      if (active) setUserId(data.user?.id || null);
     });
 
-    return () => subscription.unsubscribe();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Track session start/update
+  // Track session start/update — runs once the user becomes available.
   useEffect(() => {
-    const userId = userIdRef.current;
     if (!userId) return;
 
     const sessionId = sessionIdRef.current;
@@ -130,11 +134,10 @@ export function useUserTracking() {
       clearInterval(interval);
       window.removeEventListener('beforeunload', handleUnload);
     };
-  }, []);
+  }, [userId]);
 
   // Track page views
   useEffect(() => {
-    const userId = userIdRef.current;
     if (!userId) return;
 
     const currentPage = location.pathname;
@@ -162,7 +165,7 @@ export function useUserTracking() {
 
     lastPageRef.current = currentPage;
     pageEntryTimeRef.current = now;
-  }, [location.pathname]);
+  }, [location.pathname, userId]);
 
   // Track custom events
   const trackEvent = useCallback(async (
@@ -171,7 +174,6 @@ export function useUserTracking() {
     eventData?: Record<string, unknown>,
     eventCategory?: string
   ) => {
-    const userId = userIdRef.current;
     if (!userId) return;
 
     try {
@@ -189,7 +191,7 @@ export function useUserTracking() {
     } catch {
       // Silent fail for tracking
     }
-  }, [location.pathname]);
+  }, [location.pathname, userId]);
 
   return { trackEvent, sessionId: sessionIdRef.current };
 }

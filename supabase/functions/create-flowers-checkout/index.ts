@@ -4,8 +4,11 @@ import type { StripeLineItem } from "../_shared/checkout-handler.ts";
 Deno.serve(
   createCheckoutHandler({
     endpoint: "create-flowers-checkout",
+    // Flowers are charged in full up-front, so the order total must equal the
+    // sum of the (price-validated) line items.
+    enforceLineItemTotal: true,
 
-    build(raw, user, origin) {
+    async build(raw, user, origin, supabaseAdmin) {
       const b = raw as Record<string, any>;
       const {
         items = [],
@@ -25,6 +28,61 @@ Deno.serve(
       } = b;
 
       if (!items.length) throw new Error("Cart is empty");
+
+      // Anti-tampering: never trust client-supplied prices. Validate every cart
+      // line against the authoritative bouquet record in the DB. A client could
+      // otherwise POST item.price=1 and pay 1 THB for any order.
+      //
+      // Cart item ids embed the bouquet UUID in one of two formats:
+      //   "bouquet-<uuid>-<size>"   (size-variant pricing, see BouquetDetail)
+      //   "flowers-<providerId>-<uuid>"  (base price, see FlowerShopDetail)
+      // so we extract the UUID with a regex (robust to either format) and accept
+      // any *legitimate* size price: the base price, an explicit size_variant
+      // price, or the S/M/L multiplier fallback (×0.7 / ×1.0 / ×1.5) the client
+      // uses when no size_variants exist. Anything else is rejected.
+      const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+      const idToBouquet = new Map<string, string>();
+      for (const it of items) {
+        const m = typeof it.id === "string" ? it.id.match(UUID_RE) : null;
+        if (!m) throw new Error(`Unrecognised product id: ${it.id}`);
+        idToBouquet.set(it.id, m[0]);
+      }
+
+      const bouquetIds = [...new Set(idToBouquet.values())];
+      const { data: bouquets, error: bqErr } = await supabaseAdmin
+        .from("bouquets")
+        .select("id, price, size_variants, is_active")
+        .in("id", bouquetIds);
+      if (bqErr) throw new Error("Failed to validate prices");
+
+      const bouquetById = new Map<string, any>();
+      for (const row of bouquets ?? []) bouquetById.set((row as any).id, row);
+
+      const allowedPrices = (row: any): number[] => {
+        const base = Number(row.price);
+        const variants = Array.isArray(row.size_variants) ? row.size_variants : [];
+        const fromVariants = variants
+          .map((v: any) => Number(v?.price))
+          .filter((n: number) => Number.isFinite(n) && n > 0);
+        if (fromVariants.length) return [base, ...fromVariants];
+        // Multiplier fallback mirrors the client (S/M/L).
+        return [base, base * 0.7, base * 1.5];
+      };
+
+      for (const it of items) {
+        const row = bouquetById.get(idToBouquet.get(it.id)!);
+        if (!row || row.is_active === false) {
+          throw new Error(`Invalid or unavailable product: ${it.id}`);
+        }
+        const submitted = Number(it.price);
+        const ok = allowedPrices(row).some((p) => Math.abs(p - submitted) <= 0.5);
+        if (!ok) {
+          console.warn(
+            `[create-flowers-checkout] price tamper rejected: bouquet=${row.id} submitted=${submitted}`,
+          );
+          throw new Error("Price mismatch — please refresh your cart");
+        }
+      }
 
       const cur = String(currency).toLowerCase();
 

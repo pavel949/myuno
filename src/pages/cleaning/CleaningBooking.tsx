@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -46,6 +46,8 @@ export default function CleaningBooking() {
   const [contactData, setContactData] = useState<ContactFormData>({ name: "", phone: "" });
   const [paymentMethod, setPaymentMethod] = useState<UIPaymentMethod>("cash");
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
+  // Guards against double-submit before the disabled button re-renders.
+  const isSubmittingRef = useRef(false);
 
   // Calculate current step based on filled fields
   const getCurrentStep = () => {
@@ -102,7 +104,10 @@ export default function CleaningBooking() {
   const handleSubmit = async () => {
     if (!date || !time) return;
     if (!contactData.name || !contactData.phone || !address) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
+    try {
     const scheduledAt = new Date(date);
     const [hours, minutes] = time.split(':').map(Number);
     scheduledAt.setHours(hours, minutes, 0, 0);
@@ -127,10 +132,12 @@ export default function CleaningBooking() {
       return;
     }
 
-    // Map UI payment method to useOrders payment method
+    // Map UI payment method to useOrders payment method.
+    // concierge_advance settles in cash to the provider (no wallet charge happens
+    // here), so it must NOT record a phantom wallet payment — map it to 'cash'.
     const orderPaymentMethod = paymentMethod === 'card' || (paymentMethod as string) === 'online' ? 'stripe' :
                                paymentMethod === 'promptpay' ? 'stripe' :
-                               paymentMethod === 'concierge_advance' ? 'wallet' : 
+                               paymentMethod === 'concierge_advance' ? 'cash' :
                                paymentMethod as 'cash' | 'wallet';
 
     // P0 FIX: Use createOrder (orders table) instead of deprecated createBooking
@@ -171,12 +178,17 @@ export default function CleaningBooking() {
       payment: {
         method: orderPaymentMethod,
         amount: totalAmount,
+        // Wallet is debited immediately; cash settles later (pending).
+        status: orderPaymentMethod === 'wallet' ? 'paid' : 'pending',
       },
       serviceName: language === 'ru' ? service.nameRu : service.nameEn,
     });
 
     if (result.success) {
       setBookingResult({ success: true, bookingId: result.order_id });
+    }
+    } finally {
+      isSubmittingRef.current = false;
     }
   };
 

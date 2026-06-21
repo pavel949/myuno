@@ -58,11 +58,11 @@ export function BookingContactForm({
   // Validate fields
   useEffect(() => {
     const newErrors: FormErrors = {};
-    if (touched.name && !data.name.trim()) {
+    if (touched.name && !data.name?.trim()) {
       newErrors.name = language === 'ru' ? 'Введите имя' : 'Name is required';
     }
     if (touched.phone) {
-      if (!data.phone.trim()) {
+      if (!data.phone?.trim()) {
         newErrors.phone = language === 'ru' ? 'Введите телефон' : 'Phone is required';
       } else if (!PHONE_REGEX.test(data.phone.replace(/\s/g, ''))) {
         newErrors.phone = language === 'ru' ? 'Неверный формат телефона' : 'Invalid phone format';
@@ -73,10 +73,10 @@ export function BookingContactForm({
       newErrors.email = language === 'ru' ? 'Неверный формат email' : 'Invalid email format';
     }
     setErrors(newErrors);
-    const isValid = data.name.trim().length > 0 &&
-                    data.phone.trim().length > 0 &&
- 
-                    PHONE_REGEX.test(data.phone.replace(/\s/g, '')) &&
+    const isValid = (data.name?.trim().length ?? 0) > 0 &&
+                    (data.phone?.trim().length ?? 0) > 0 &&
+
+                    PHONE_REGEX.test((data.phone ?? '').replace(/\s/g, '')) &&
                     (!data.email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email));
     onValidationChange?.(isValid);
   }, [data, touched, language, onValidationChange]);

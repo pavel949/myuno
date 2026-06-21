@@ -60,6 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       Object.keys(window.sessionStorage)
         .filter((key) => key.startsWith('qa_multi_role_bundle_checked:'))
         .forEach((key) => window.sessionStorage.removeItem(key));
+
+      // Clear admin impersonation / "view-as" scopes so they never leak across
+      // an account switch on a shared device (keys mirror the STORAGE_KEY
+      // constants in ImpersonationContext / PlatformViewAsContext).
+      window.sessionStorage.removeItem('myuno:impersonate_dev');
+      window.sessionStorage.removeItem('myuno:platform-view-as');
     }
 
     clearAdminCache();
@@ -212,7 +218,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshFailureCountRef.current = 0;
 
     try {
-      await supabase.auth.signOut({ scope: 'local' });
+      // Global scope (default) revokes the refresh token server-side so the
+      // session is invalidated on the backend, not just in this tab. Critical
+      // for a payments app — a local-only signOut leaves the refresh token
+      // live and replayable.
+      await supabase.auth.signOut();
     } finally {
       clearStoredAuthSession();
       // Bible-v2 audit B1: drop every cached query so user A's data
