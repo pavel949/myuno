@@ -87,7 +87,7 @@ function ReviewCard({ review }: { review: MarketplaceReview }) {
               <img
                 key={idx}
                 src={photo}
-                alt=""
+                alt={language === 'ru' ? `Фото из отзыва ${idx + 1}` : `Review photo ${idx + 1}`}
                 className="w-16 h-16 rounded-none object-cover"
               />
             ))}

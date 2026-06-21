@@ -230,6 +230,7 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
             onClick={handleSend}
             disabled={!newMessage.trim() || isSending}
             size="icon"
+            aria-label={isRu ? 'Отправить' : 'Send'}
           >
             <Send className="h-4 w-4" />
           </Button>

@@ -201,7 +201,7 @@ function TermsMobileCard({
               )}
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="shrink-0" onClick={onEdit}>
+          <Button variant="ghost" size="icon" className="shrink-0" onClick={onEdit} aria-label={isRu ? 'Редактировать' : 'Edit'}>
             <Pencil className="h-4 w-4" />
           </Button>
         </div>
@@ -635,7 +635,7 @@ export default function ManagementPortfolio() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" onClick={() => openSheet(terms.property_id, terms)}>
+                      <Button variant="ghost" size="icon" onClick={() => openSheet(terms.property_id, terms)} aria-label={isRu ? 'Редактировать' : 'Edit'}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                     </TableCell>

@@ -187,7 +187,7 @@ export default function FETPage() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-muted-foreground">
               <p>{isRu ? result.reason.ru : result.reason.en}</p>
-              <div className="rounded-lg border bg-muted/40 p-4 text-foreground">
+              <div className="rounded-none border bg-muted/40 p-4 text-foreground">
                 <p className="text-sm font-medium">
                   {isRu
                     ? "Полный отчёт ฿1,500 — bank-by-bank, расчёт комиссий, шаблоны заявлений (готовится)"

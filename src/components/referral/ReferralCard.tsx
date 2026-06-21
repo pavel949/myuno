@@ -93,6 +93,7 @@ export function ReferralCard() {
             size="icon"
             className="h-12 w-12 rounded-none shrink-0"
             onClick={handleCopyCode}
+            aria-label={isRu ? 'Копировать код' : 'Copy code'}
           >
             {copied === 'code' ? (
               <Check className="w-5 h-5 text-success" />

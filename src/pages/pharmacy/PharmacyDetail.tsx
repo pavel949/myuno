@@ -200,9 +200,10 @@ export default function PharmacyDetail() {
                       <span className="font-bold text-primary">
                         ฿{product.price}
                       </span>
-                      <Button 
-                        size="icon" 
-                        className="h-8 w-8"
+                      <Button
+                        size="icon"
+                        className="min-h-[44px] min-w-[44px]"
+                        aria-label={language === 'ru' ? 'Добавить в корзину' : 'Add to cart'}
                         onClick={() => handleAddToCart(product)}
                         disabled={product.requires_prescription}
                       >

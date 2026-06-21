@@ -298,16 +298,18 @@ export default function AdminCities() {
                       checked={city.is_active && !city.is_coming_soon}
                       onCheckedChange={() => handleToggleActive(city)}
                     />
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="icon"
+                      aria-label={isRu ? 'Редактировать' : 'Edit'}
                       onClick={() => handleOpenEdit(city)}
                     >
                       <Edit2 className="w-4 h-4" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="icon"
+                      aria-label={isRu ? 'Удалить' : 'Delete'}
                       onClick={() => handleDeleteClick(city)}
                       className="text-destructive hover:text-destructive"
                     >

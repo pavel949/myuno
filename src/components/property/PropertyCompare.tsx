@@ -175,7 +175,8 @@ function CompareSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
                       <div className="relative">
                         <button
                           onClick={() => remove(p.id)}
-                          className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 z-10"
+                          aria-label={isRu ? 'Удалить из сравнения' : 'Remove from compare'}
+                          className="absolute -top-1 -right-1 w-6 h-6 min-h-[44px] min-w-[44px] rounded-full bg-destructive/10 text-destructive flex items-center justify-center hover:bg-destructive/20 z-10"
                         >
                           <X className="w-3 h-3" />
                         </button>

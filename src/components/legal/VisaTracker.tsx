@@ -133,8 +133,9 @@ export function VisaTracker() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 mt-1"
+                        className="h-7 w-7 min-h-[44px] min-w-[44px] mt-1"
                         onClick={() => remove.mutate(rec.id)}
+                        aria-label={t ? 'Удалить' : 'Delete'}
                       >
                         <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
                       </Button>

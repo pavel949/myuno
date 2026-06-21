@@ -124,7 +124,7 @@ export default function CapitalInvestmentDeals() {
                       <CardContent className="p-3 space-y-1.5">
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-sm font-medium line-clamp-2">{d.title_private || 'Без названия'}</p>
-                          <Button size="icon" variant="ghost" className="h-6 w-6 -mr-1 -mt-1" onClick={(e) => { e.stopPropagation(); togglePublish(d.id, d.is_published); }}>
+                          <Button size="icon" variant="ghost" aria-label={d.is_published ? 'Unpublish' : 'Publish'} className="h-6 w-6 min-h-[44px] min-w-[44px] -mr-1 -mt-1" onClick={(e) => { e.stopPropagation(); togglePublish(d.id, d.is_published); }}>
                             {d.is_published ? <Eye className="w-3.5 h-3.5 text-success" /> : <EyeOff className="w-3.5 h-3.5 text-muted-foreground" />}
                           </Button>
                         </div>

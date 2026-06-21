@@ -147,11 +147,11 @@ export function VendorOnboardingChecklist({
                 </CardTitle>
                 <div className="flex items-center gap-1">
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button variant="ghost" size="icon" aria-label={isExpanded ? (isRu ? 'Свернуть' : 'Collapse') : (isRu ? 'Развернуть' : 'Expand')}>
                       {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </Button>
                   </CollapsibleTrigger>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setIsDismissed(true); onDismiss?.(); }}>
+                  <Button variant="ghost" size="icon" aria-label={isRu ? 'Закрыть' : 'Close'} onClick={() => { setIsDismissed(true); onDismiss?.(); }}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>

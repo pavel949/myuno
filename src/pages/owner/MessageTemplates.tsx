@@ -199,7 +199,7 @@ export default function MessageTemplates() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        aria-label={isRu ? 'Редактировать' : 'Edit'}
                         onClick={() => handleOpenEdit(template)}
                       >
                         <Edit2 className="h-4 w-4" />
@@ -207,7 +207,8 @@ export default function MessageTemplates() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive"
+                        aria-label={isRu ? 'Удалить' : 'Delete'}
                         onClick={() => handleDelete(template.id)}
                       >
                         <Trash2 className="h-4 w-4" />

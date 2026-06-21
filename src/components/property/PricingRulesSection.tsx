@@ -258,8 +258,9 @@ function PricingRulesSectionInner({ formData, updateFormData }: PricingRulesSect
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="mt-5 h-9 w-9 text-destructive"
+                className="mt-5 text-destructive"
                 onClick={() => removeCustomDiscount(idx)}
+                aria-label={isRu ? 'Удалить' : 'Delete'}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

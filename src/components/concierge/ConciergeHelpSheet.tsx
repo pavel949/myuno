@@ -191,7 +191,7 @@ export function ConciergeHelpSheet({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 py-4">
-            <div className="flex items-center gap-3 rounded-md border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-3 rounded-none border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
               <ShieldCheck className="w-4 h-4 shrink-0 text-primary" />
               <span>
                 {isRu

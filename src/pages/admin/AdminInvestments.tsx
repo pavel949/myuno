@@ -455,16 +455,18 @@ export default function AdminInvestments() {
                         </td>
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2">
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="icon"
+                              aria-label={isRu ? 'Редактировать' : 'Edit'}
                               onClick={() => handleOpenEdit(project)}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="icon"
+                              aria-label={isRu ? 'Удалить' : 'Delete'}
                               className="text-destructive hover:text-destructive"
                               onClick={() => setDeleteConfirmId(project.id)}
                             >

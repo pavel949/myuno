@@ -212,7 +212,7 @@ export default function OwnerFinancials() {
         {selectedProperty !== 'all' && (
           <ExpenseTemplates propertyId={selectedProperty} onApplied={() => {}} />
         )}
-        <Button variant="outline" size="icon" onClick={handleExportCSV} disabled={!filteredFinancials.length} title={isRu ? 'Экспорт CSV' : 'Export CSV'}>
+        <Button variant="outline" size="icon" onClick={handleExportCSV} disabled={!filteredFinancials.length} title={isRu ? 'Экспорт CSV' : 'Export CSV'} aria-label={isRu ? 'Экспорт CSV' : 'Export CSV'}>
           <Download className="h-4 w-4" />
         </Button>
         <Button
@@ -221,6 +221,7 @@ export default function OwnerFinancials() {
           onClick={async () => { const { exportTransactionsExcel } = await import('@/utils/exportFinancialsExcel'); exportTransactionsExcel(filteredFinancials, language as 'ru' | 'en'); }}
           disabled={!filteredFinancials.length}
           title={isRu ? 'Экспорт Excel' : 'Export Excel'}
+          aria-label={isRu ? 'Экспорт Excel' : 'Export Excel'}
         >
           <FileSpreadsheet className="h-4 w-4" />
         </Button>

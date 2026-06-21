@@ -37,7 +37,7 @@ export function ExportLinkCard({ propertyId, propertyName, isRu }: ExportLinkCar
               {exportUrl ? exportUrl.slice(0, 50) + '...' : 'Loading...'}
             </p>
           </div>
-          <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!exportUrl}>
+          <Button variant="ghost" size="icon" aria-label={isRu ? 'Копировать' : 'Copy'} onClick={handleCopy} disabled={!exportUrl}>
             <Copy className="h-4 w-4" />
           </Button>
         </div>

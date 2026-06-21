@@ -259,17 +259,18 @@ export default function SalesPipeline() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/mc/sales/settings')} title={isRu ? 'Настройки воронки' : 'Pipeline settings'}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" onClick={() => navigate('/mc/sales/settings')} title={isRu ? 'Настройки воронки' : 'Pipeline settings'} aria-label={isRu ? 'Настройки воронки' : 'Pipeline settings'}>
             <Settings className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/mc/sales/analytics')}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" onClick={() => navigate('/mc/sales/analytics')} aria-label={isRu ? 'Аналитика' : 'Analytics'}>
             <BarChart3 className="h-4 w-4" />
           </Button>
           {view === 'list' && (
             <Button
               variant={selectMode ? 'default' : 'ghost'}
               size="icon"
-              className="h-8 w-8"
+              className="h-8 w-8 min-h-[44px] min-w-[44px]"
+              aria-label={isRu ? 'Выбрать' : 'Select'}
               onClick={() => { setSelectMode(!selectMode); setSelectedIds([]); }}
             >
               <CheckSquare className="h-4 w-4" />
@@ -278,22 +279,25 @@ export default function SalesPipeline() {
           <div className="flex border rounded-none overflow-hidden">
             <button
               onClick={() => { setView('list'); setSelectMode(false); setSelectedIds([]); }}
-              className={cn('p-2', view === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground')}
+              className={cn('p-2 min-h-[44px] min-w-[44px] flex items-center justify-center', view === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground')}
               title={isRu ? 'Список' : 'List'}
+              aria-label={isRu ? 'Список' : 'List'}
             >
               <LayoutList className="h-4 w-4" />
             </button>
             <button
               onClick={() => { setView('kanban'); setSelectMode(false); setSelectedIds([]); }}
-              className={cn('p-2', view === 'kanban' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground')}
+              className={cn('p-2 min-h-[44px] min-w-[44px] flex items-center justify-center', view === 'kanban' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground')}
               title="Kanban"
+              aria-label="Kanban"
             >
               <Columns3 className="h-4 w-4" />
             </button>
             <button
               onClick={() => { setView('pivot'); setSelectMode(false); setSelectedIds([]); }}
-              className={cn('p-2', view === 'pivot' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground')}
+              className={cn('p-2 min-h-[44px] min-w-[44px] flex items-center justify-center', view === 'pivot' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground')}
               title="Pivot"
+              aria-label="Pivot"
             >
               <Table2 className="h-4 w-4" />
             </button>

@@ -236,6 +236,7 @@ export default function BookingDetail() {
               size="icon"
               onClick={() => navigate('/bookings')}
               className="shrink-0"
+              aria-label={language === 'ru' ? 'Назад' : 'Back'}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>

@@ -107,7 +107,7 @@ export function PortalChatTab({ propertyId, senderRole = 'owner' }: Props) {
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
           disabled={isSending}
         />
-        <Button size="icon" onClick={handleSend} disabled={!input.trim() || isSending}>
+        <Button size="icon" aria-label={isRu ? 'Отправить' : 'Send'} onClick={handleSend} disabled={!input.trim() || isSending}>
           <Send className="w-4 h-4" />
         </Button>
       </div>

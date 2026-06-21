@@ -248,7 +248,8 @@ export function IntakeFileUpload({
                 <Button
                   variant="destructive"
                   size="icon"
-                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 h-6 w-6 min-h-[44px] min-w-[44px] opacity-0 group-hover:opacity-100 transition-opacity"
+                  aria-label={isRu ? 'Удалить' : 'Remove'}
                   onClick={(e) => {
                     e.stopPropagation();
                     removeFile(file.id);

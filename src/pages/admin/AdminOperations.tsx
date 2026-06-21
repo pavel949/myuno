@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { PageShell } from '@/components/page/PageShell';
 import { Badge } from '@/components/ui/badge';
 import { 
   ClipboardList, ShieldCheck, MessageSquare, Users, 
@@ -132,7 +133,7 @@ export default function AdminOperations() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-5 max-w-[1536px] mx-auto">
+    <PageShell width="full" className="max-w-[1536px] space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -143,9 +144,10 @@ export default function AdminOperations() {
             {isRu ? 'Заказы, модерация, лиды и тикеты' : 'Orders, moderation, leads & tickets'}
           </p>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={isRu ? 'Обновить' : 'Refresh'}
           onClick={() => refetchOverview()}
           className="text-muted-foreground"
         >
@@ -224,6 +226,6 @@ export default function AdminOperations() {
           <OperationsManualPaymentsTab />
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

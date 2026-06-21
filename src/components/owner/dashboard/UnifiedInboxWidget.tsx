@@ -90,7 +90,7 @@ export function UnifiedInboxWidget() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              aria-label={isRu ? 'Все сообщения' : 'All messages'}
               onClick={() => navigate('/mc/messages')}
             >
               <ChevronRight className="h-4 w-4" />

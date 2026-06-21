@@ -406,7 +406,7 @@ export default function ContactDetail() {
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" aria-label={isRu ? 'Удалить' : 'Delete'}>
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </AlertDialogTrigger>
@@ -907,6 +907,7 @@ export default function ContactDetail() {
                             <button
                               onClick={() => deleteNote.mutate({ id: note.id, contactId: contact.id })}
                               className="opacity-0 hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
+                              aria-label={isRu ? 'Удалить' : 'Delete'}
                             >
                               <Trash2 className="h-3 w-3" />
                             </button>
@@ -1216,7 +1217,7 @@ export default function ContactDetail() {
                   onKeyDown={e => e.key === 'Enter' && handleAddNote()}
                   className="h-9"
                 />
-                <Button size="sm" className="h-9 shrink-0" onClick={handleAddNote} disabled={addNote.isPending || !noteText.trim()}>
+                <Button size="sm" className="h-9 shrink-0" onClick={handleAddNote} disabled={addNote.isPending || !noteText.trim()} aria-label={isRu ? 'Отправить' : 'Send'}>
                   <SendHorizonal className="h-4 w-4" />
                 </Button>
               </div>
@@ -1329,6 +1330,7 @@ export default function ContactDetail() {
                         <button
                           onClick={() => deleteNote.mutate({ id: note.id, contactId: contact.id })}
                           className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0 self-center"
+                          aria-label={isRu ? 'Удалить' : 'Delete'}
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>

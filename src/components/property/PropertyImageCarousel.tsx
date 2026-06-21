@@ -123,7 +123,7 @@ export function PropertyImageCarousel({
       <button
         onClick={scrollPrev}
         className={cn(
-          "absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/90 shadow-md",
+          "absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 min-h-[44px] min-w-[44px] rounded-full bg-background/90 shadow-md",
           "flex items-center justify-center",
           "opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200",
           "hover:bg-background hover:shadow-lg ",
@@ -136,7 +136,7 @@ export function PropertyImageCarousel({
       <button
         onClick={scrollNext}
         className={cn(
-          "absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-background/90 shadow-md",
+          "absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 min-h-[44px] min-w-[44px] rounded-full bg-background/90 shadow-md",
           "flex items-center justify-center",
           "opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200",
           "hover:bg-background hover:shadow-lg ",

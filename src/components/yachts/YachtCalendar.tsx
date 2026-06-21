@@ -242,13 +242,13 @@ export function YachtCalendar({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+          <Button variant="outline" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} aria-label={isRu ? 'Предыдущий месяц' : 'Previous month'}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm font-medium w-32 text-center">
             {format(currentMonth, 'LLLL yyyy', { locale })}
           </span>
-          <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+          <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} aria-label={isRu ? 'Следующий месяц' : 'Next month'}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -363,7 +363,7 @@ export function YachtCalendar({
                   <h4 className="font-medium">
                     {getSelectedDates().length} {isRu ? 'дней выбрано' : 'days selected'}
                   </h4>
-                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={clearSelection}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 min-h-[44px] min-w-[44px]" onClick={clearSelection} aria-label={isRu ? 'Очистить' : 'Clear'}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>

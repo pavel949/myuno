@@ -115,7 +115,7 @@ export function WorkspaceHomeBanner() {
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 shrink-0 text-muted-foreground"
+          className="h-8 w-8 min-h-[44px] min-w-[44px] shrink-0 text-muted-foreground"
           onClick={() => setDismissed(true)}
           title={isRu ? 'Скрыть до конца сессии' : 'Dismiss for this session'}
           aria-label={isRu ? 'Скрыть' : 'Dismiss'}

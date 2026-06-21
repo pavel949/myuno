@@ -159,7 +159,7 @@ export const FieldRenderer = ({ field, row, onChange }: Props) => {
 
     case 'boolean':
       return (
-        <div className="flex items-center justify-between gap-3 rounded-md border border-border p-3">
+        <div className="flex items-center justify-between gap-3 rounded-none border border-border p-3">
           <div>
             {label}
             {hint}

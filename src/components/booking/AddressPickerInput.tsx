@@ -226,16 +226,17 @@ export function AddressPickerInput({
                       setSearchQuery('');
                       setSearchResults([]);
                     }}
+                    aria-label={language === 'ru' ? 'Очистить' : 'Clear'}
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-1"
                   >
                     <X className="w-4 h-4 text-muted-foreground" />
                   </button>
                 )}
               </div>
-              <Button onClick={searchLocation} disabled={isSearching} size="icon">
+              <Button onClick={searchLocation} disabled={isSearching} size="icon" aria-label={language === 'ru' ? 'Поиск' : 'Search'}>
                 {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               </Button>
-              <Button onClick={getPosition} disabled={geoLoading} size="icon" variant="outline">
+              <Button onClick={getPosition} disabled={geoLoading} size="icon" variant="outline" aria-label={language === 'ru' ? 'Моё местоположение' : 'My location'}>
                 {geoLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation className="w-4 h-4" />}
               </Button>
             </div>

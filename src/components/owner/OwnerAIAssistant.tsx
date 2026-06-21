@@ -100,11 +100,12 @@ export const OwnerAIAssistant: React.FC<OwnerAIAssistantProps> = ({
           </p>
         </div>
         {messages.length > 0 && (
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={clearMessages}
             className="text-muted-foreground"
+            aria-label={isRu ? 'Очистить чат' : 'Clear chat'}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -192,6 +193,7 @@ export const OwnerAIAssistant: React.FC<OwnerAIAssistantProps> = ({
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
             size="icon"
+            aria-label={isRu ? 'Отправить' : 'Send'}
           >
             <Send className="h-4 w-4" />
           </Button>

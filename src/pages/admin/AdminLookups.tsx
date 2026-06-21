@@ -287,6 +287,7 @@ export default function AdminLookups() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        aria-label={isRussian ? 'Редактировать' : 'Edit'}
                         onClick={() => openEditDialog(item)}
                       >
                         <Edit2 className="h-4 w-4" />
@@ -294,6 +295,7 @@ export default function AdminLookups() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        aria-label={isRussian ? 'Удалить' : 'Delete'}
                         onClick={() => handleDelete(item)}
                         className="text-destructive hover:text-destructive"
                       >

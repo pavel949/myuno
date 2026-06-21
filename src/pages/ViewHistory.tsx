@@ -185,7 +185,8 @@ export default function ViewHistory() {
 
                       <button
                         onClick={() => removeFromHistory(item.id)}
-                        className="p-2 hover:bg-secondary rounded-none transition-colors"
+                        aria-label={language === 'ru' ? 'Удалить' : 'Remove'}
+                        className="p-2 hover:bg-secondary rounded-none transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <X className="w-4 h-4 text-muted-foreground" />
                       </button>

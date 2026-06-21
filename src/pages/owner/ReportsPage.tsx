@@ -445,7 +445,7 @@ export default function ReportsPage() {
               <Send className="h-3.5 w-3.5 mr-1" />
               <span className="hidden md:inline">{isRu ? 'Отправить' : 'Send'}</span>
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 text-destructive" onClick={() => setDeleteReportId(report.id)}>
+            <Button variant="ghost" size="sm" className="h-8 min-h-[44px] text-destructive" aria-label={isRu ? 'Удалить' : 'Delete'} onClick={() => setDeleteReportId(report.id)}>
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -482,7 +482,7 @@ export default function ReportsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setShowOwnerInvite(true)}>
+            <Button variant="outline" size="icon" className="h-9 w-9 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Пригласить' : 'Invite'} onClick={() => setShowOwnerInvite(true)}>
               <UserPlus className="h-4 w-4" />
             </Button>
             <Button size="sm" onClick={() => setShowWizard(true)}>

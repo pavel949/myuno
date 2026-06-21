@@ -387,7 +387,7 @@ export default function AdminServices() {
               className="pl-9"
             />
           </div>
-          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} aria-label={isRussian ? 'Добавить' : 'Add'}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -464,7 +464,7 @@ export default function AdminServices() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" aria-label={isRussian ? 'Действия' : 'Actions'}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>

@@ -196,7 +196,7 @@ export default function AdminAIKnowledge() {
                     id="kb-lang"
                     value={lang}
                     onChange={(e) => setLang(e.target.value as 'ru' | 'en')}
-                    className="w-full h-10 px-3 border rounded-md bg-background"
+                    className="w-full h-10 px-3 border rounded-none bg-background"
                   >
                     <option value="ru">Русский</option>
                     <option value="en">English</option>

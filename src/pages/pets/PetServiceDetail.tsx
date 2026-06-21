@@ -69,10 +69,12 @@ export default function PetServiceDetail() {
         
         <div className="absolute top-4 right-4 flex gap-2">
           <Button size="icon" variant="secondary" className="rounded-full bg-white/20"
+            aria-label={language === 'ru' ? 'В избранное' : 'Save'}
             onClick={() => toggleFavorite('pet_service', service.id, service as any)}>
             <Heart className={cn("w-5 h-5", isFav && "fill-destructive text-destructive")} />
           </Button>
-          <Button size="icon" variant="secondary" className="rounded-full bg-white/20">
+          <Button size="icon" variant="secondary" className="rounded-full bg-white/20"
+            aria-label={language === 'ru' ? 'Поделиться' : 'Share'}>
             <Share2 className="w-5 h-5" />
           </Button>
         </div>

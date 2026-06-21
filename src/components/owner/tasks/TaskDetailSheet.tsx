@@ -151,7 +151,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, members, properties,
       <Button onClick={handleSave} className="flex-1">
         {t('Save', 'Сохранить')}
       </Button>
-      <Button variant="destructive" size="icon" onClick={() => setConfirmDelete(true)}>
+      <Button variant="destructive" size="icon" aria-label={t('Delete', 'Удалить')} onClick={() => setConfirmDelete(true)}>
         <Trash2 className="h-4 w-4" />
       </Button>
     </div>

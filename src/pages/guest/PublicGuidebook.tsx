@@ -80,7 +80,7 @@ export default function PublicGuidebook() {
   const welcomeMsg = isRu ? (guidebook.welcome_message_ru || guidebook.welcome_message) : guidebook.welcome_message;
 
   const CopyBtn = ({ text, field }: { text: string; field: string }) => (
-    <Button variant="ghost" size="icon" onClick={() => copyToClipboard(text, field)}>
+    <Button variant="ghost" size="icon" aria-label={isRu ? 'Копировать' : 'Copy'} onClick={() => copyToClipboard(text, field)}>
       {copiedField === field ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
     </Button>
   );
@@ -248,7 +248,7 @@ export default function PublicGuidebook() {
                         </div>
                         {guide.video_url && (
                           <Button variant="ghost" size="icon" asChild>
-                            <a href={guide.video_url} target="_blank" rel="noopener noreferrer"><Play className="w-4 h-4" /></a>
+                            <a href={guide.video_url} target="_blank" rel="noopener noreferrer" aria-label={isRu ? 'Смотреть видео' : 'Watch video'}><Play className="w-4 h-4" /></a>
                           </Button>
                         )}
                       </div>
@@ -432,7 +432,7 @@ export default function PublicGuidebook() {
                             </div>
                             {tip.google_maps_url && (
                               <Button variant="ghost" size="icon" asChild>
-                                <a href={tip.google_maps_url} target="_blank" rel="noopener noreferrer">
+                                <a href={tip.google_maps_url} target="_blank" rel="noopener noreferrer" aria-label={isRu ? 'Открыть на карте' : 'Open in Maps'}>
                                   <ExternalLink className="w-4 h-4" />
                                 </a>
                               </Button>

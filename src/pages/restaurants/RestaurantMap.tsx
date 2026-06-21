@@ -63,6 +63,7 @@ export default function RestaurantMap() {
             variant="secondary"
             size="icon"
             className="bg-background/90 shadow-lg"
+            aria-label={language === 'ru' ? 'Назад' : 'Back'}
             onClick={() => navigate('/restaurants')}
           >
             <ArrowLeft className="w-5 h-5" />

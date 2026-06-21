@@ -111,7 +111,7 @@ const PersonaAreaLandingPage = () => {
       >
         <LandingContainer className="relative max-w-3xl py-12 sm:py-16">
           <div
-            className="mb-5 inline-flex items-center gap-2 border border-border bg-background/60 px-3 py-1.5 backdrop-blur"
+            className="mb-5 inline-flex items-center gap-2 border border-border bg-background px-3 py-1.5"
             style={{ borderColor: tokenColor(theme.color, 0.4) }}
           >
             <Icon className="h-4 w-4" style={{ color: tokenColor(theme.color) }} />
@@ -126,7 +126,7 @@ const PersonaAreaLandingPage = () => {
             {override ? t(override.intro) : isRu ? a.description_ru : a.description_en}
           </p>
 
-          <dl className="mt-6 grid grid-cols-3 gap-3 border border-border bg-card/60 p-4 backdrop-blur">
+          <dl className="mt-6 grid grid-cols-3 gap-3 border border-border bg-card p-4">
             <div>
               <dt className="text-xs uppercase text-muted-foreground">{isRu ? 'Цена' : 'Price'}</dt>
               <dd className="mt-1 text-lg font-semibold text-foreground">
@@ -315,7 +315,7 @@ const PersonaAreaLandingPage = () => {
         </LandingContainer>
       </article>
 
-      <div className="sticky bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur sm:hidden">
+      <div className="sticky bottom-0 z-30 border-t border-border bg-background p-3 sm:hidden">
         {waUrl && override ? (
           <Button asChild size="lg" className="w-full">
             <a href={waUrl} target="_blank" rel="noopener noreferrer">

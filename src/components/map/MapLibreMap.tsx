@@ -265,7 +265,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
         : 'box-shadow: 0 2px 6px rgba(0,0,0,0.4);';
       el.style.cssText = `
         width: ${size}px; height: ${size}px; border-radius: 9999px; cursor: pointer;
-        background: ${m.color || '#00D68F'}; color: #08101E; font-size: ${isActive ? 16 : 14}px;
+        background: ${m.color || 'hsl(var(--primary))'}; color: hsl(var(--primary-foreground)); font-size: ${isActive ? 16 : 14}px;
         display: flex; align-items: center; justify-content: center;
         border: 2px solid rgba(255,255,255,0.95);
         ${ring}
@@ -306,7 +306,7 @@ export const MapLibreMap = forwardRef<MapLibreMapHandle, MapLibreMapProps>(funct
       {showLocateButton && !minimal && (
         <div className="absolute right-3 bottom-20 z-10 flex flex-col items-end gap-2 pointer-events-none">
           {locateError && (
-            <div className="pointer-events-auto bg-card text-foreground text-xs px-3 py-1.5 rounded-md border border-border shadow-md">
+            <div className="pointer-events-auto bg-card text-foreground text-xs px-3 py-1.5 rounded-none border border-border shadow-md">
               {locateError}
             </div>
           )}

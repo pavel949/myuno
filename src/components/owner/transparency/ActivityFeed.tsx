@@ -154,7 +154,7 @@ export function ActivityFeed({ propertyId, limit = 50 }: ActivityFeedProps) {
           </Button>
         ))}
         <div className="flex-1" />
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => refetch()}>
+        <Button variant="ghost" size="icon" aria-label={isRu ? 'Обновить' : 'Refresh'} className="min-h-[44px] min-w-[44px]" onClick={() => refetch()}>
           <RefreshCw className="w-3.5 h-3.5" />
         </Button>
       </div>

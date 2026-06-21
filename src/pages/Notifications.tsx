@@ -72,10 +72,11 @@ export default function Notifications() {
           showBack
           badge={unreadCount}
           actions={
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               onClick={() => navigate('/profile/notifications')}
+              aria-label={isRu ? 'Настройки уведомлений' : 'Notification settings'}
             >
               <Settings className="w-5 h-5" />
             </Button>

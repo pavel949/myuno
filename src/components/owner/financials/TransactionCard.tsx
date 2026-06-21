@@ -46,6 +46,7 @@ export function TransactionCard({ item, isRu, getCategoryLabel, onEdit, onDelete
                     <button
                       onClick={onViewReceipt}
                       className="text-primary hover:text-primary/80 transition-colors"
+                      aria-label={isRu ? 'Посмотреть чек' : 'View receipt'}
                       title={isRu ? 'Посмотреть чек' : 'View receipt'}
                     >
                       <Paperclip className="h-3.5 w-3.5" />
@@ -103,7 +104,7 @@ export function TransactionCard({ item, isRu, getCategoryLabel, onEdit, onDelete
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" aria-label={isRu ? 'Ещё' : 'More'}>
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

@@ -132,10 +132,10 @@ function MessageBubble({ message, isOwn, onReply }: MessageBubbleProps) {
 
       {/* Actions */}
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onReply}>
+        <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" onClick={onReply} aria-label={language === 'ru' ? 'Ответить' : 'Reply'}>
           <Reply className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7">
+        <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={language === 'ru' ? 'Реакция' : 'React'}>
           <Smile className="h-3.5 w-3.5" />
         </Button>
       </div>

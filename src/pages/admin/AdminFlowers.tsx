@@ -325,11 +325,11 @@ export default function AdminFlowers() {
                             </TableCell>
                             <TableCell className="text-right">
                               {isEditing ? (
-                                <Button variant="ghost" size="icon" onClick={() => savePriceEdit(b)}>
+                                <Button variant="ghost" size="icon" aria-label={isRu ? 'Сохранить' : 'Save'} onClick={() => savePriceEdit(b)}>
                                   <Save className="h-4 w-4 text-primary" />
                                 </Button>
                               ) : (
-                                <Button variant="ghost" size="icon" onClick={() => startPriceEdit(b)}>
+                                <Button variant="ghost" size="icon" aria-label={isRu ? 'Изменить цену' : 'Edit price'} onClick={() => startPriceEdit(b)}>
                                   <DollarSign className="h-4 w-4" />
                                 </Button>
                               )}
@@ -427,8 +427,8 @@ export default function AdminFlowers() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}><Pencil className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                          <Button variant="ghost" size="icon" aria-label={isRu ? 'Редактировать' : 'Edit'} onClick={() => handleEdit(item)}><Pencil className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" aria-label={isRu ? 'Удалить' : 'Delete'} onClick={() => handleDelete(item.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                         </TableCell>
                       </TableRow>
                     ))}

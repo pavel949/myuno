@@ -155,6 +155,7 @@ export function OtaConnectionsList({ onSelectConnection }: OtaConnectionsListPro
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={isRu ? 'Синхронизировать' : 'Sync'}
                       disabled={isSyncing}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -171,6 +172,7 @@ export function OtaConnectionsList({ onSelectConnection }: OtaConnectionsListPro
                       variant="ghost"
                       size="icon"
                       asChild
+                      aria-label={isRu ? 'Открыть' : 'Open'}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <a href={connection.listing_url} target="_blank" rel="noopener noreferrer">
@@ -181,6 +183,7 @@ export function OtaConnectionsList({ onSelectConnection }: OtaConnectionsListPro
                       variant="ghost"
                       size="icon"
                       className="text-destructive hover:text-destructive"
+                      aria-label={isRu ? 'Удалить' : 'Delete'}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (confirm(isRu ? 'Удалить подключение?' : 'Delete connection?')) {

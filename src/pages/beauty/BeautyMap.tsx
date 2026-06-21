@@ -58,7 +58,7 @@ export default function BeautyMap() {
         <div className="flex items-center justify-between p-4 bg-background/80 border-b border-border/50">
           <BackButton fallbackPath={APP_ROUTES.BEAUTY} variant="ghost" size="sm" />
           <h1 className="font-display font-semibold">{language === 'ru' ? 'Карта салонов' : 'Salon Map'}</h1>
-          <Button variant="ghost" size="icon" onClick={() => setIsFilterOpen(true)}>
+          <Button variant="ghost" size="icon" onClick={() => setIsFilterOpen(true)} aria-label={language === 'ru' ? 'Фильтры' : 'Filters'}>
             <Sliders className="w-5 h-5" />
           </Button>
         </div>

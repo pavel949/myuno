@@ -79,7 +79,7 @@ export function FileImporter({ onFileSelect, parsedData, isLoading, onClear }: F
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClear}>
+            <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'Очистить' : 'Clear'} onClick={onClear}>
               <X className="h-4 w-4" />
             </Button>
           </div>

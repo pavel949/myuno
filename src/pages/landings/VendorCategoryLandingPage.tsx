@@ -192,7 +192,7 @@ export default function VendorCategoryLandingPage() {
         </section>
 
         {/* Sticky CTA */}
-        <div className="sticky bottom-0 inset-x-0 bg-background/95 backdrop-blur border-t border-border p-3 z-30 md:hidden">
+        <div className="sticky bottom-0 inset-x-0 bg-background border-t border-border p-3 z-30 md:hidden">
           <Button className="w-full gap-2" onClick={() => navigate(joinUrl)}>
             {pick(lang, UI.becomePartner)}
             <ArrowRight className="w-4 h-4" />

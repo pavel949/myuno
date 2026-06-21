@@ -362,10 +362,11 @@ export default function AdminProviders() {
             onClick={handleExportCsv}
             disabled={filteredProviders.length === 0}
             title={isRussian ? 'Экспорт текущей выборки в CSV' : 'Export current selection as CSV'}
+            aria-label={isRussian ? 'Экспорт в CSV' : 'Export to CSV'}
           >
             <Download className="h-4 w-4" />
           </Button>
-          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }} aria-label={isRussian ? 'Добавить' : 'Add'}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -485,17 +486,18 @@ export default function AdminProviders() {
 
                       {/* Actions */}
                       <div className="flex items-center gap-1 shrink-0">
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 min-h-[44px] min-w-[44px]"
                           onClick={() => openEditDialog(provider)}
+                          aria-label={isRussian ? 'Редактировать' : 'Edit'}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Действия' : 'Actions'}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>

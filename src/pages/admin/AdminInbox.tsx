@@ -19,6 +19,7 @@ import { Inbox, Search, Filter, ExternalLink, AlertCircle, MessageSquare, Buildi
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { PageShell } from '@/components/page/PageShell';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -169,7 +170,7 @@ export default function AdminInbox() {
 
   return (
     <AppLayout>
-      <div className="px-4 pt-6 pb-24 md:px-6 md:pt-8 max-w-7xl mx-auto">
+      <PageShell width="wide">
         {/* Header */}
         <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
           <div>
@@ -332,7 +333,7 @@ export default function AdminInbox() {
             })}
           </div>
         )}
-      </div>
+      </PageShell>
     </AppLayout>
   );
 }

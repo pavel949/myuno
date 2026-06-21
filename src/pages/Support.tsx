@@ -171,7 +171,7 @@ export default function Support() {
         {/* What to do if… FAQ entry */}
         <Link
           to="/support/what-if"
-          className="mb-4 flex items-center justify-between rounded-md border border-border bg-card p-4 transition-colors hover:bg-accent/5"
+          className="mb-4 flex items-center justify-between rounded-none border border-border bg-card p-4 transition-colors hover:bg-accent/5"
         >
           <div className="flex items-center gap-3">
             <HelpCircle className="h-5 w-5 text-primary" aria-hidden />

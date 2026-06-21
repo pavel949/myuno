@@ -179,10 +179,10 @@ export default function OffplanDetail() {
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
           <BackButton fallbackPath={APP_ROUTES.OFFPLAN} variant="overlay" size="md" />
           <div className="flex gap-2">
-            <Button variant="secondary" size="icon" className="rounded-full bg-white/90 hover:bg-white">
+            <Button variant="secondary" size="icon" className="rounded-full bg-white/90 hover:bg-white" aria-label={isRu ? 'Поделиться' : 'Share'}>
               <Share2 className="w-5 h-5" />
             </Button>
-            <Button variant="secondary" size="icon" className="rounded-full bg-white/90 hover:bg-white">
+            <Button variant="secondary" size="icon" className="rounded-full bg-white/90 hover:bg-white" aria-label={isRu ? 'В избранное' : 'Save'}>
               <Heart className="w-5 h-5" />
             </Button>
           </div>

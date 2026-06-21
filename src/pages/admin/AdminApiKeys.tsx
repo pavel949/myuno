@@ -248,14 +248,14 @@ export default function AdminApiKeys() {
                     <p className="text-sm text-muted-foreground mt-0.5">{secret.label} — {secret.description}</p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleReveal(revealedSecrets, setRevealedSecrets, secret.key)} title={isRu ? 'Показать статус' : 'Show status'}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={revealedSecrets.has(secret.key) ? (isRu ? 'Скрыть статус' : 'Hide status') : (isRu ? 'Показать статус' : 'Show status')} onClick={() => toggleReveal(revealedSecrets, setRevealedSecrets, secret.key)} title={isRu ? 'Показать статус' : 'Show status'}>
                       {revealedSecrets.has(secret.key) ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard(secret.key)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Копировать' : 'Copy'} onClick={() => copyToClipboard(secret.key)}>
                       <Copy className="h-3.5 w-3.5" />
                     </Button>
                     {secret.url && (
-                      <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Открыть ссылку' : 'Open link'} asChild>
                         <a href={secret.url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="h-3.5 w-3.5" />
                         </a>
@@ -319,11 +319,11 @@ export default function AdminApiKeys() {
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     {isSet && (
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleReveal(revealedFrontend, setRevealedFrontend, v.key)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRevealed ? (isRu ? 'Скрыть значение' : 'Hide value') : (isRu ? 'Показать значение' : 'Show value')} onClick={() => toggleReveal(revealedFrontend, setRevealedFrontend, v.key)}>
                         {isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                       </Button>
                     )}
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyToClipboard(isSet && isRevealed ? value! : v.key)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Копировать' : 'Copy'} onClick={() => copyToClipboard(isSet && isRevealed ? value! : v.key)}>
                       <Copy className="h-3.5 w-3.5" />
                     </Button>
                   </div>
@@ -376,7 +376,8 @@ export default function AdminApiKeys() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 min-h-[44px] min-w-[44px]"
+                          aria-label={isRevealed ? (isRu ? 'Скрыть значение' : 'Hide value') : (isRu ? 'Показать значение' : 'Show value')}
                           onClick={() => toggleReveal(revealedConfigs, setRevealedConfigs, configKey)}
                         >
                           {isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -408,7 +409,7 @@ export default function AdminApiKeys() {
                           <label className="font-mono text-sm font-medium">{config.key}</label>
                           <Badge variant="secondary" className="text-xs">{isRu ? 'Пользовательский' : 'Custom'}</Badge>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteConfig(config.key)}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px] text-destructive" aria-label={isRu ? 'Удалить' : 'Delete'} onClick={() => deleteConfig(config.key)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -424,7 +425,8 @@ export default function AdminApiKeys() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 min-h-[44px] min-w-[44px]"
+                            aria-label={isRevealed ? (isRu ? 'Скрыть значение' : 'Hide value') : (isRu ? 'Показать значение' : 'Show value')}
                             onClick={() => toggleReveal(revealedConfigs, setRevealedConfigs, config.key)}
                           >
                             {isRevealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}

@@ -146,7 +146,7 @@ export function InlineAuthGate({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-2xl max-h-[92vh] overflow-y-auto">
+      <SheetContent side="bottom" className="rounded-none max-h-[92vh] overflow-y-auto">
         <SheetHeader className="text-left">
           <SheetTitle className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-primary" />

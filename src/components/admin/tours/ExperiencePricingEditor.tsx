@@ -146,7 +146,7 @@ export function ExperiencePricingEditor({ experienceId }: Props) {
             />
           </div>
           <div className="col-span-1">
-            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => removeRow(idx)}>
+            <Button size="icon" variant="ghost" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label="Delete pricing option" onClick={() => removeRow(idx)}>
               <Trash2 className="w-3 h-3 text-destructive" />
             </Button>
           </div>

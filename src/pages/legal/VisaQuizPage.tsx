@@ -281,7 +281,7 @@ export default function VisaQuizPage() {
           {/* Header */}
       <div className="sticky top-0 z-40 bg-background border-b border-border/50">
         <div className="flex items-center gap-3 px-4 py-3">
-          <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9" onClick={step === 0 && !showResult ? () => navigate(-1) : handleBack}>
+          <Button variant="ghost" size="icon" aria-label={isRu ? 'Назад' : 'Back'} className="shrink-0 min-h-[44px] min-w-[44px]" onClick={step === 0 && !showResult ? () => navigate(-1) : handleBack}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex-1 min-w-0">

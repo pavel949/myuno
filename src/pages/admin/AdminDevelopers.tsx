@@ -355,9 +355,10 @@ export default function AdminDevelopers() {
                       </p>
                     )}
                   </div>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="icon"
+                    aria-label={isRu ? 'Удалить' : 'Delete'}
                     className="text-destructive hover:text-destructive"
                     onClick={(e) => {
                       e.stopPropagation();

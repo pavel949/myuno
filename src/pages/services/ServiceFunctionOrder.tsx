@@ -235,7 +235,8 @@ import { toast } from 'sonner';
                type="button"
                variant="ghost"
                size="icon"
-               className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+               aria-label={isRu ? 'Использовать текущее местоположение' : 'Use current location'}
+               className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px]"
                onClick={handleUseCurrentLocation}
                disabled={isGeoLoading || isReverseGeocoding}
              >

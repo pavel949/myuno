@@ -119,7 +119,7 @@ export function PropertyNotesTab({ propertyId }: PropertyNotesTabProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
+                      aria-label={note.is_pinned ? (isRu ? 'Открепить' : 'Unpin') : (isRu ? 'Закрепить' : 'Pin')}
                       onClick={() => togglePin.mutate({ id: note.id, is_pinned: !note.is_pinned })}
                     >
                       {note.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
@@ -127,7 +127,8 @@ export function PropertyNotesTab({ propertyId }: PropertyNotesTabProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-destructive"
+                      aria-label={isRu ? 'Удалить' : 'Delete'}
+                      className="text-destructive"
                       onClick={() => handleDelete(note.id)}
                     >
                       <Trash2 className="h-4 w-4" />

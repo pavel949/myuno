@@ -107,7 +107,7 @@ export default function RateManagementPage() {
     <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/owner')}>
+        <Button variant="ghost" size="icon" aria-label={t('Back', 'Назад')} onClick={() => navigate('/owner')}>
           <ChevronLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
@@ -556,14 +556,14 @@ function PropertyPriceRow({
                 onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false); }}
               />
               <span className="text-xs text-muted-foreground">{currency}</span>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={save}><Check className="h-3.5 w-3.5" /></Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditing(false)}><X className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Сохранить' : 'Save'} onClick={save}><Check className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Отмена' : 'Cancel'} onClick={() => setEditing(false)}><X className="h-3.5 w-3.5" /></Button>
             </>
           ) : (
             <>
               <span className="font-semibold text-sm">{propSym}{pricePerNight.toLocaleString()}</span>
               <span className="text-xs text-muted-foreground">/{isRu ? 'ночь' : 'night'}</span>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setValue(String(pricePerNight)); setEditing(true); }}>
+              <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Редактировать' : 'Edit'} onClick={() => { setValue(String(pricePerNight)); setEditing(true); }}>
                 <Pencil className="h-3 w-3" />
               </Button>
             </>

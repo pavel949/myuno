@@ -586,9 +586,10 @@ function GuestCounter({
           type="button"
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
           onClick={() => onChange(Math.max(min, value - 1))}
           disabled={value <= min}
+          aria-label="Decrease"
         >
           <Minus className="h-4 w-4" />
         </Button>
@@ -597,9 +598,10 @@ function GuestCounter({
           type="button"
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
           onClick={() => onChange(Math.min(max, value + 1))}
           disabled={value >= max}
+          aria-label="Increase"
         >
           <Plus className="h-4 w-4" />
         </Button>

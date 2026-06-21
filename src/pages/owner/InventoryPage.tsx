@@ -327,9 +327,9 @@ export default function InventoryPage() {
                             </div>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQty.mutate({ id: item.id, qty: Math.max(0, (item.quantity ?? 0) - 1) })}>-</Button>
+                            <Button variant="outline" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Уменьшить количество' : 'Decrease quantity'} onClick={() => updateQty.mutate({ id: item.id, qty: Math.max(0, (item.quantity ?? 0) - 1) })}>-</Button>
                             <span className="w-8 text-center text-sm font-bold">{item.quantity ?? 0}</span>
-                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQty.mutate({ id: item.id, qty: (item.quantity ?? 0) + 1 })}>+</Button>
+                            <Button variant="outline" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Увеличить количество' : 'Increase quantity'} onClick={() => updateQty.mutate({ id: item.id, qty: (item.quantity ?? 0) + 1 })}>+</Button>
                           </div>
                         </Card>
                       );

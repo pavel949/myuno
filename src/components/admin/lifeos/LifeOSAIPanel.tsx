@@ -497,7 +497,7 @@ const SuggestionCard = forwardRef<HTMLDivElement, SuggestionCardProps>(function 
             </Badge>
           )}
         </div>
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onCopy}>
+        <Button variant="ghost" size="icon" className="h-6 w-6 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Копировать' : 'Copy'} onClick={onCopy}>
           <Copy className="w-3 h-3" />
         </Button>
       </div>
@@ -519,7 +519,8 @@ const SuggestionCard = forwardRef<HTMLDivElement, SuggestionCardProps>(function 
             <Button
               variant="ghost"
               size="icon"
-              className="h-5 w-5"
+              className="h-5 w-5 min-h-[44px] min-w-[44px]"
+              aria-label={isRu ? 'Копировать ID' : 'Copy ID'}
               onClick={() => {
                 // Could link to entity editor in future
                 navigator.clipboard.writeText(suggestion.entity_id!);

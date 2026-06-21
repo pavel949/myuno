@@ -373,7 +373,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                     variant="ghost"
                     size="icon"
                     onClick={() => setActiveView('menu')}
-                    className="h-8 w-8"
+                    className="h-8 w-8 min-h-[44px] min-w-[44px]"
                     aria-label={isRu ? 'Назад' : 'Back'}
                   >
                     <X className="w-4 h-4" />
@@ -395,7 +395,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                     variant="ghost"
                     size="icon"
                     onClick={handleClearHistory}
-                    className="h-8 w-8"
+                    className="h-8 w-8 min-h-[44px] min-w-[44px]"
                     aria-label={isRu ? 'Очистить историю' : 'Clear history'}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -479,7 +479,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                     disabled={isLoading}
                     className="flex-1"
                   />
-                  <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon">
+                  <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" aria-label={isRu ? 'Отправить' : 'Send'}>
                     <Send className="w-4 h-4" />
                   </Button>
                 </div>

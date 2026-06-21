@@ -186,7 +186,7 @@ const AdminOfficialNews: React.FC = () => {
           <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">
             Источники
           </h2>
-          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="rounded-none border border-border bg-card overflow-hidden">
             <div className="hidden md:grid grid-cols-[1.4fr_0.7fr_1fr_1fr_0.8fr] gap-3 px-4 py-2 text-[11px] uppercase tracking-wide text-muted-foreground border-b border-border bg-muted/30">
               <span>Источник</span>
               <span>Всего</span>
@@ -233,7 +233,7 @@ const AdminOfficialNews: React.FC = () => {
             <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-2">
               <Clock className="w-3.5 h-3.5" /> Результат последнего ручного запуска
             </h2>
-            <div className="rounded-2xl border border-border bg-card p-3">
+            <div className="rounded-none border border-border bg-card p-3">
               {Array.isArray(lastRunResult?.fetched) && (
                 <ul className="text-[13px] divide-y divide-border">
                   {lastRunResult.fetched.map((f: any) => (
@@ -275,7 +275,7 @@ const AdminOfficialNews: React.FC = () => {
 };
 
 const SummaryCard: React.FC<{ label: string; value: string; sub?: string; tone?: 'ok' | 'warn' }> = ({ label, value, sub, tone }) => (
-  <div className="rounded-2xl border border-border bg-card px-3 py-3">
+  <div className="rounded-none border border-border bg-card px-3 py-3">
     <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
     <div className={`text-lg font-semibold mt-1 ${tone === 'warn' ? 'text-amber-600' : 'text-foreground'}`}>{value}</div>
     {sub && <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>}

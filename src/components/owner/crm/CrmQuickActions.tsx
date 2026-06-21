@@ -79,7 +79,7 @@ export function CrmQuickActions() {
           <Button size="sm" className="h-8" onClick={handleQuickTask} disabled={createTask.isPending}>
             {isRu ? 'Добавить' : 'Add'}
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setQuickTaskOpen(false)}>
+          <Button variant="ghost" size="icon" aria-label={isRu ? 'Закрыть' : 'Close'} onClick={() => setQuickTaskOpen(false)}>
             <X className="h-3.5 w-3.5" />
           </Button>
         </div>

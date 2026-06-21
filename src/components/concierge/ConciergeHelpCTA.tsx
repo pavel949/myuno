@@ -130,7 +130,7 @@ export function ConciergeHelpCTA(props: ConciergeHelpCTAProps) {
       <>
         <div
           className={cn(
-            'flex items-center justify-between gap-3 rounded-md border bg-card px-4 py-3 text-sm',
+            'flex items-center justify-between gap-3 rounded-none border bg-card px-4 py-3 text-sm',
             className,
           )}
         >
@@ -152,7 +152,7 @@ export function ConciergeHelpCTA(props: ConciergeHelpCTAProps) {
     <>
       <Card className={cn('p-5 sm:p-6 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20', className)}>
         <div className="flex items-start gap-4">
-          <div className="hidden sm:flex w-12 h-12 shrink-0 items-center justify-center rounded-md bg-primary/10">
+          <div className="hidden sm:flex w-12 h-12 shrink-0 items-center justify-center rounded-none bg-primary/10">
             <Sparkles className="w-6 h-6 text-primary" />
           </div>
           <div className="flex-1 min-w-0">

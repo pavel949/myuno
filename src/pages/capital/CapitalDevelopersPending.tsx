@@ -549,7 +549,7 @@ export default function CapitalDevelopersPending() {
                 </label>
                 <div className="flex gap-2">
                   <Input value={claimResult.link} readOnly className="font-mono text-xs" />
-                  <Button variant="outline" size="icon" onClick={copyLink}>
+                  <Button variant="outline" size="icon" aria-label="Copy link" onClick={copyLink}>
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>

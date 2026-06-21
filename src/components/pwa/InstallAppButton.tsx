@@ -87,7 +87,7 @@ export function InstallAppButton() {
       </div>
 
       <Sheet open={iosOpen} onOpenChange={setIosOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl">
+        <SheetContent side="bottom" className="rounded-none">
           <SheetHeader className="text-left">
             <SheetTitle>{isRu ? 'Установить myUNO на iPhone' : 'Install myUNO on iPhone'}</SheetTitle>
             <SheetDescription>

@@ -381,7 +381,7 @@ export default function AdminExperiences() {
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="absolute bottom-2 right-2 bg-background/80 hover:bg-background" onClick={e => e.stopPropagation()}>
+                          <Button variant="ghost" size="icon" aria-label={isRu ? 'Действия' : 'Actions'} className="absolute bottom-2 right-2 bg-background/80 hover:bg-background" onClick={e => e.stopPropagation()}>
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>

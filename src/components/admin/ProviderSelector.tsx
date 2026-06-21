@@ -333,6 +333,7 @@ export function ProviderSelector({
           onClick={() => setIsQuickCreateOpen(true)}
           disabled={disabled || isCreating}
           title={t('admin.providerSelector.createTitle')}
+          aria-label={t('admin.providerSelector.createTitle')}
         >
           {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
         </Button>

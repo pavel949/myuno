@@ -122,7 +122,7 @@ export default function WhatIfFAQ() {
         {/* Emergency strip */}
         <section
           aria-label={meta.emergency}
-          className="mb-6 rounded-md border border-border bg-card p-4"
+          className="mb-6 rounded-none border border-border bg-card p-4"
         >
           <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {meta.emergency}
@@ -148,7 +148,7 @@ export default function WhatIfFAQ() {
         {/* Category nav */}
         <nav
           aria-label="Categories"
-          className="sticky top-0 z-10 -mx-4 mb-6 overflow-x-auto border-b border-border bg-background/95 px-4 py-2 backdrop-blur"
+          className="sticky top-0 z-10 -mx-4 mb-6 overflow-x-auto border-b border-border bg-background px-4 py-2"
         >
           <div className="flex gap-1">
             {WHAT_IF_FAQ.map((cat) => {

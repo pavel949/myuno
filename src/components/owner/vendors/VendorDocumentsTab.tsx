@@ -114,11 +114,11 @@ export function VendorDocumentsTab({ vendorId, docSource = 'vendor' }: VendorDoc
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   {doc.file_url && (
-                    <Button size="icon" variant="ghost" className="h-8 w-8" asChild>
+                    <Button size="icon" variant="ghost" aria-label={isRu ? 'Просмотреть' : 'View'} asChild>
                       <a href={doc.file_url} target="_blank" rel="noopener noreferrer"><Eye className="h-4 w-4" /></a>
                     </Button>
                   )}
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => handleDelete(doc.id)}>
+                  <Button size="icon" variant="ghost" aria-label={isRu ? 'Удалить' : 'Delete'} className="text-destructive" onClick={() => handleDelete(doc.id)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>

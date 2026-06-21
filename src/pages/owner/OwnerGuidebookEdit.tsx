@@ -220,10 +220,10 @@ export default function OwnerGuidebookEdit() {
             {guidebook?.share_token && formData.is_public && (
               <div className="flex items-center gap-2">
                 <Input value={shareUrl || ''} readOnly className="text-sm font-mono" />
-                <Button type="button" variant="outline" size="icon" onClick={copyShareLink}>
+                <Button type="button" variant="outline" size="icon" onClick={copyShareLink} aria-label={isRu ? 'Копировать' : 'Copy'}>
                   {copiedLink ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                 </Button>
-                <Button type="button" variant="outline" size="icon" asChild>
+                <Button type="button" variant="outline" size="icon" asChild aria-label={isRu ? 'Открыть' : 'Open'}>
                   <a href={shareUrl || '#'} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="w-4 h-4" />
                   </a>
@@ -344,7 +344,7 @@ export default function OwnerGuidebookEdit() {
                       {isRu ? `Шаг ${index + 1}` : `Step ${index + 1}`}
                     </span>
                   </div>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => removeDirection(step.id)}>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeDirection(step.id)} aria-label={isRu ? 'Удалить' : 'Delete'}>
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </div>
@@ -402,7 +402,7 @@ export default function OwnerGuidebookEdit() {
               <div key={guide.id} className="p-4 border rounded-none space-y-3">
                 <div className="flex items-center justify-between">
                   <Input value={guide.name} onChange={(e) => updateApplianceGuide(guide.id, 'name', e.target.value)} placeholder={isRu ? 'Кондиционер' : 'Air Conditioner'} className="flex-1 mr-2" />
-                  <Button type="button" variant="ghost" size="icon" onClick={() => removeApplianceGuide(guide.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeApplianceGuide(guide.id)} aria-label={isRu ? 'Удалить' : 'Delete'}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                 </div>
                 <Textarea value={guide.instructions} onChange={(e) => updateApplianceGuide(guide.id, 'instructions', e.target.value)} placeholder={isRu ? 'Инструкции...' : 'Instructions...'} rows={2} />
               </div>
@@ -446,7 +446,7 @@ export default function OwnerGuidebookEdit() {
               <div key={contact.id} className="p-4 border rounded-none space-y-3">
                 <div className="flex items-center gap-2">
                   <Input value={contact.name} onChange={(e) => updateEmergencyContact(contact.id, 'name', e.target.value)} placeholder={isRu ? 'Имя' : 'Name'} className="flex-1" />
-                  <Button type="button" variant="ghost" size="icon" onClick={() => removeEmergencyContact(contact.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeEmergencyContact(contact.id)} aria-label={isRu ? 'Удалить' : 'Delete'}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Input value={contact.role} onChange={(e) => updateEmergencyContact(contact.id, 'role', e.target.value)} placeholder={isRu ? 'Менеджер' : 'Manager'} />
@@ -480,7 +480,7 @@ export default function OwnerGuidebookEdit() {
                     </SelectContent>
                   </Select>
                   <Input value={tip.name} onChange={(e) => updateLocalTip(tip.id, 'name', e.target.value)} placeholder={isRu ? 'Название' : 'Name'} className="flex-1" />
-                  <Button type="button" variant="ghost" size="icon" onClick={() => removeLocalTip(tip.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeLocalTip(tip.id)} aria-label={isRu ? 'Удалить' : 'Delete'}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                 </div>
                 <Input value={tip.address || ''} onChange={(e) => updateLocalTip(tip.id, 'address', e.target.value)} placeholder={isRu ? 'Адрес' : 'Address'} />
                 <Input value={tip.google_maps_url || ''} onChange={(e) => updateLocalTip(tip.id, 'google_maps_url', e.target.value)} placeholder="Google Maps URL" />

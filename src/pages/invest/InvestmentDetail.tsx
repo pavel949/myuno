@@ -93,11 +93,12 @@ export default function InvestmentDetail() {
             <Button
               variant="ghost"
               size="icon"
+              aria-label={isRu ? 'Назад' : 'Back'}
               onClick={() => navigate(APP_ROUTES.INVEST)}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label={isRu ? 'Поделиться' : 'Share'}>
               <Share2 className="h-5 w-5" />
             </Button>
           </div>

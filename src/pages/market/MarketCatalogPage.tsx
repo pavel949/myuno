@@ -86,6 +86,7 @@ const MarketCatalogPage = () => {
               size="icon"
               className="shrink-0 -ml-2"
               onClick={() => navigate('/market')}
+              aria-label={language === 'ru' ? 'Назад' : 'Back'}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -104,7 +105,7 @@ const MarketCatalogPage = () => {
             {/* Drawer Trigger */}
             <CategoryDrawer 
               trigger={
-                <Button variant="outline" size="icon" className="shrink-0">
+                <Button variant="outline" size="icon" className="shrink-0" aria-label={language === 'ru' ? 'Каталог' : 'Catalog'}>
                   <Menu className="w-5 h-5" />
                 </Button>
               }

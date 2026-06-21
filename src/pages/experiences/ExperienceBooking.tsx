@@ -334,6 +334,7 @@ export default function ExperienceBooking() {
                       size="icon"
                       onClick={() => setParticipants(Math.max(1, participants - 1))}
                       disabled={participants <= (experience.min_participants || 1)}
+                      aria-label={isRu ? 'Меньше участников' : 'Decrease participants'}
                     >
                       -
                     </Button>
@@ -343,6 +344,7 @@ export default function ExperienceBooking() {
                       size="icon"
                       onClick={() => setParticipants(participants + 1)}
                       disabled={participants >= (experience.max_participants || 20)}
+                      aria-label={isRu ? 'Больше участников' : 'Increase participants'}
                     >
                       +
                     </Button>

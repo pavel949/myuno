@@ -91,7 +91,7 @@ const Index: React.FC = () => {
           <button
             type="button"
             onClick={() => setAppDrawerOpen(true)}
-            className="w-full flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-4 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
+            className="w-full flex items-center justify-between rounded-none border border-border bg-card px-4 py-4 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
           >
             <span>
               <span className="block text-[15px] font-semibold tracking-tight text-foreground">

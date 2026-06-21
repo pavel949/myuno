@@ -121,7 +121,7 @@ const EventDetail = () => {
         
         {/* Top Actions */}
         <div className="absolute top-4 left-4 right-4 flex justify-between">
-          <Button variant="secondary" size="icon" onClick={() => navigate('/events')}>
+          <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Назад' : 'Back'} onClick={() => navigate('/events')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex gap-2">
@@ -137,7 +137,7 @@ const EventDetail = () => {
               }}
               variant="secondary"
             />
-            <Button variant="secondary" size="icon">
+            <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Поделиться' : 'Share'}>
               <Share2 className="w-5 h-5" />
             </Button>
           </div>
@@ -160,7 +160,8 @@ const EventDetail = () => {
               <button
                 key={idx}
                 onClick={() => setSelectedImage(idx)}
-                className={`w-10 h-10 rounded-none overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}
+                aria-label={language === 'ru' ? `Фото ${idx + 1}` : `Photo ${idx + 1}`}
+                className={`w-11 h-11 rounded-none overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white/50'}`}
               >
                 <img src={img} alt="" className="w-full h-full object-cover" />
               </button>

@@ -63,7 +63,7 @@ export function PageSection({
           {action && (
             <button
               onClick={action.onClick}
-              className="flex items-center gap-0.5 text-xs font-medium text-primary hover:text-primary-hover transition-colors flex-shrink-0"
+              className="flex items-center gap-0.5 text-xs font-medium text-primary hover:text-primary-hover transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               {action.label}
               <ChevronRight className="w-3.5 h-3.5" />

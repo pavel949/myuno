@@ -214,6 +214,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                     size="icon"
                     onClick={() => removeRoom(room.id)}
                     className="text-destructive hover:text-destructive"
+                    aria-label={isRu ? 'Удалить' : 'Delete'}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -275,7 +276,8 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                               variant="ghost"
                               size="icon"
                               onClick={() => removeBed(room.id, bedIndex)}
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              className="h-8 w-8 min-h-[44px] min-w-[44px] text-muted-foreground hover:text-destructive"
+                              aria-label={isRu ? 'Удалить' : 'Delete'}
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>

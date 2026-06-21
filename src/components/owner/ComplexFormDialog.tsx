@@ -269,7 +269,7 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
             <button
               type="button"
               onClick={() => setAiOpen(o => !o)}
-              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors text-sm"
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-none border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors text-sm"
             >
               <span className="flex items-center gap-2 font-medium text-primary">
                 <Sparkles className="h-4 w-4" />
@@ -281,7 +281,7 @@ export function ComplexFormDialog({ open, onOpenChange, complex }: ComplexFormDi
             </button>
 
             {aiOpen && (
-              <div className="mt-2 space-y-2 p-3 rounded-lg border border-border bg-muted/30">
+              <div className="mt-2 space-y-2 p-3 rounded-none border border-border bg-muted/30">
                 <Textarea
                   rows={6}
                   value={aiText}

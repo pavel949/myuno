@@ -445,7 +445,8 @@ export default function MCSubscriptionPage() {
           <CardContent>
             <div className="flex items-center gap-4">
               <Button
-                variant="outline" size="icon" className="h-8 w-8"
+                variant="outline" size="icon"
+                aria-label={isRu ? 'Уменьшить' : 'Decrease'}
                 onClick={() => setCustomSlots(Math.max(1, customSlots - 1))}
                 disabled={customSlots <= 1}
               >
@@ -458,7 +459,8 @@ export default function MCSubscriptionPage() {
                 </div>
               </div>
               <Button
-                variant="outline" size="icon" className="h-8 w-8"
+                variant="outline" size="icon"
+                aria-label={isRu ? 'Увеличить' : 'Increase'}
                 onClick={() => setCustomSlots(customSlots + 1)}
               >
                 <Plus className="h-4 w-4" />

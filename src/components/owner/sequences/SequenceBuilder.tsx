@@ -173,7 +173,7 @@ const upsertSteps = useUpsertSequenceSteps();
                     />
                     <span className="text-xs text-muted-foreground">{isRu ? 'дн.' : 'days'}</span>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 ml-auto" onClick={() => removeStep(idx)}>
+                  <Button variant="ghost" size="icon" aria-label={isRu ? 'Удалить шаг' : 'Remove step'} className="min-h-[44px] min-w-[44px] ml-auto" onClick={() => removeStep(idx)}>
                     <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
                 </div>

@@ -38,7 +38,7 @@ export const OfficialNews: React.FC = () => {
         </Link>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
+      <div className="rounded-none border border-border bg-card divide-y divide-border overflow-hidden">
         {isLoading
           ? Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="px-4 py-3 animate-pulse">

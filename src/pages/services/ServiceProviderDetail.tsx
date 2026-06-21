@@ -307,8 +307,9 @@ const ServiceProviderDetail = () => {
                             <Button
                               size="sm"
                               variant="outline"
+                              aria-label={isRu ? 'Удалить из корзины' : 'Remove from cart'}
                               onClick={() => handleRemoveFromCart(service.id)}
-                              className="h-10 px-3 border-destructive text-destructive hover:bg-destructive/10"
+                              className="min-h-[44px] px-3 border-destructive text-destructive hover:bg-destructive/10"
                             >
                               <Minus className="w-4 h-4" />
                             </Button>

@@ -346,7 +346,7 @@ export default function AdminLocationKnowledge() {
           />
         </div>
 
-        <Button variant="ghost" size="icon" onClick={() => refetch()} disabled={isLoading}>
+        <Button variant="ghost" size="icon" aria-label={isRu ? 'Обновить' : 'Refresh'} onClick={() => refetch()} disabled={isLoading}>
           <RefreshCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
         </Button>
       </div>
@@ -457,16 +457,18 @@ export default function AdminLocationKnowledge() {
                                 checked={item.is_published}
                                 onCheckedChange={() => handleTogglePublished(item)}
                               />
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="icon"
+                                aria-label={isRu ? 'Редактировать' : 'Edit'}
                                 onClick={() => handleOpenEdit(item)}
                               >
                                 <Edit2 className="w-4 h-4" />
                               </Button>
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="icon"
+                                aria-label={isRu ? 'Удалить' : 'Delete'}
                                 onClick={() => handleDeleteClick(item)}
                                 className="text-destructive hover:text-destructive"
                               >

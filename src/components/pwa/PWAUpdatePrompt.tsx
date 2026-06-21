@@ -88,7 +88,7 @@ export function PWAUpdatePrompt() {
           role="status"
           aria-live="polite"
         >
-          <div className="bg-background/95 backdrop-blur border-2 border-primary/50 rounded-none p-4 shadow-2xl shadow-primary/20">
+          <div className="bg-background border-2 border-primary/50 rounded-none p-4 shadow-lg">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 w-12 h-12 rounded-none bg-primary flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-primary-foreground" />

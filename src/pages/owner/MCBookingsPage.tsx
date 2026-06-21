@@ -265,7 +265,7 @@ export default function MCBookingsPage() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" aria-label={isRu ? 'Сортировка' : 'Sort'}>
               <ArrowUpDown className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>

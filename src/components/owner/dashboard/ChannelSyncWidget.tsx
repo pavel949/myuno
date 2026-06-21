@@ -96,7 +96,7 @@ export function ChannelSyncWidget() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              aria-label={isRu ? 'Синхронизировать каналы' : 'Sync channels'}
               disabled={syncing}
               onClick={handleSyncAll}
             >
@@ -105,7 +105,7 @@ export function ChannelSyncWidget() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              aria-label={isRu ? 'Все каналы' : 'All channels'}
               onClick={() => navigate(APP_ROUTES.MC_CHANNELS)}
             >
               <ChevronRight className="h-4 w-4" />

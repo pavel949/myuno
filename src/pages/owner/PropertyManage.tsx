@@ -285,6 +285,7 @@ export default function PropertyManage() {
             <Button
               variant="ghost"
               size="icon"
+              aria-label={isRu ? 'Назад' : 'Back'}
               onClick={() => navigate(`/mc/properties/${id}`)}
             >
               <ChevronLeft className="h-5 w-5" />

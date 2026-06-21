@@ -586,7 +586,7 @@ export default function MapView() {
           )}
 
           {searchPin && (
-            <div className="absolute top-3 left-3 right-3 md:right-auto md:max-w-sm bg-card border border-border rounded-md shadow-lg px-3 py-2 z-20 flex items-start gap-2">
+            <div className="absolute top-3 left-3 right-3 md:right-auto md:max-w-sm bg-card border border-border rounded-none shadow-lg px-3 py-2 z-20 flex items-start gap-2">
               <span className="text-primary">📍</span>
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-foreground truncate">{searchPin.label}</p>
@@ -608,7 +608,7 @@ export default function MapView() {
           {/* Marker detail panel */}
 
           {selected && (
-            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-sm bg-card border-2 border-primary rounded-lg shadow-xl p-3 z-20 ring-2 ring-primary/20">
+            <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-sm bg-card border-2 border-primary rounded-none shadow-xl p-3 z-20 ring-2 ring-primary/20">
               <span className="absolute -top-2 left-3 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-sm bg-primary text-primary-foreground">
                 {language === 'ru' ? 'Активный' : 'Active'}
               </span>

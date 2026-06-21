@@ -105,7 +105,7 @@ export function HeroGreeting({ personas, onRoleSheetOpen, onAppDrawerOpen }: Her
 
           {personaLabel && (
             <div className="mt-3 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 backdrop-blur-sm px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-primary-foreground/90">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-primary-foreground/90">
                 <span
                   className="w-1.5 h-1.5 rounded-full"
                   style={{ backgroundColor: 'hsl(var(--brand-orange-400))' }}
@@ -121,11 +121,11 @@ export function HeroGreeting({ personas, onRoleSheetOpen, onAppDrawerOpen }: Her
         <button
           type="button"
           onClick={() => navigate(APP_ROUTES.SEARCH)}
-          className="group w-full flex items-center gap-3 rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 backdrop-blur-md px-4 py-3.5 mb-5 text-left transition-all hover:bg-primary-foreground/15 hover:border-primary-foreground/30 active:scale-[0.99]"
+          className="group w-full flex items-center gap-3 rounded-none border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-3.5 mb-5 text-left transition-all hover:bg-primary-foreground/15 hover:border-primary-foreground/30 active:scale-[0.99]"
           aria-label={isRu ? 'Открыть поиск' : 'Open search'}
         >
           <span
-            className="grid w-9 h-9 place-items-center rounded-xl flex-shrink-0"
+            className="grid w-9 h-9 place-items-center rounded-none flex-shrink-0"
             style={{
               backgroundColor: 'hsl(var(--brand-orange) / 0.95)',
               color: 'hsl(var(--primary-foreground))',

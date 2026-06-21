@@ -159,8 +159,9 @@ export function DragDropReceiptUpload({
             type="button"
             variant="destructive"
             size="icon"
-            className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-2 right-2 min-h-[44px] min-w-[44px] opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={handleRemove}
+            aria-label={isRu ? 'Удалить' : 'Remove'}
           >
             <X className="h-4 w-4" />
           </Button>

@@ -105,7 +105,7 @@ export default function DocumentsInsurancePage() {
   return (
     <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/owner')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/owner')} aria-label={isRu ? 'Назад' : 'Back'}>
           <ChevronLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">

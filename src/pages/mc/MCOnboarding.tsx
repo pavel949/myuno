@@ -379,7 +379,7 @@ const MCOnboarding: React.FC = () => {
                         {inv.sent ? (
                           <Check className="h-5 w-5 text-primary mt-2" />
                         ) : invites.length > 1 ? (
-                          <Button variant="ghost" size="icon" onClick={() => removeInvite(i)} className="mt-1">
+                          <Button variant="ghost" size="icon" onClick={() => removeInvite(i)} className="mt-1" aria-label={isRu ? 'Удалить' : 'Remove'}>
                             <X className="h-4 w-4" />
                           </Button>
                         ) : null}

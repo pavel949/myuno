@@ -90,7 +90,7 @@ export default function ServicesMap() {
           <h1 className="font-display font-semibold">{language === 'ru' ? 'Карта мастеров' : 'Professionals Map'}</h1>
           <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon"><Sliders className="w-5 h-5" /></Button>
+              <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'Фильтры' : 'Filters'}><Sliders className="w-5 h-5" /></Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader><SheetTitle>{language === 'ru' ? 'Фильтры' : 'Filters'}</SheetTitle></SheetHeader>
