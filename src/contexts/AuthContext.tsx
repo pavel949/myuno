@@ -218,7 +218,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshFailureCountRef.current = 0;
 
     try {
-      await supabase.auth.signOut({ scope: 'local' });
+      // Global scope (default) revokes the refresh token server-side so the
+      // session is invalidated on the backend, not just in this tab. Critical
+      // for a payments app — a local-only signOut leaves the refresh token
+      // live and replayable.
+      await supabase.auth.signOut();
     } finally {
       clearStoredAuthSession();
       // Bible-v2 audit B1: drop every cached query so user A's data

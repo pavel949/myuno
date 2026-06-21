@@ -96,6 +96,11 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  // Clear any pending debounced search on unmount so setState can't fire after unmount
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+  }, []);
+
   // Places API (New) — hotels & lodging (better than Geocoder for establishment names)
   const searchPlacesHotels = useCallback(async (q: string): Promise<GeocodeSuggestion[]> => {
     try {

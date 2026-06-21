@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, Truck, ShoppingBag, Package, Sparkles, Plane, AlertTriangle, User } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -201,6 +201,8 @@ const MarketCheckout = () => {
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [bookingResult, setBookingResult] = useState<{ success: boolean; bookingId?: string } | null>(null);
+  // Guards against double-submit before the disabled button re-renders.
+  const isSubmittingRef = useRef(false);
 
   // Auto-fill from profile on mount
   useEffect(() => {
@@ -300,7 +302,10 @@ const MarketCheckout = () => {
 
   const handleSubmit = async () => {
     if (!isFormValid) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
+    try {
     const formData = deliveryType === 'local' ? localFormData : intlFormData;
     const fullAddress = deliveryType === 'local' 
       ? localFormData.address 
@@ -354,9 +359,8 @@ const MarketCheckout = () => {
       });
     }
 
-    // Determine status based on payment method
-    const bookingStatus = paymentMethod === 'concierge_advance' ? 'pending' : 'pending';
-
+    // Concierge-advance orders are escalated to 'pending_advance' by
+    // createAdvanceRequest below; all others stay at the default 'pending'.
     const result = await createBooking({
       booking_type: 'product',
       scheduled_at: new Date(),
@@ -381,6 +385,8 @@ const MarketCheckout = () => {
       payment: {
         amount: total,
         payment_method: paymentMethod === 'concierge_advance' ? 'cash' : paymentMethod,
+        // Wallet is debited immediately; cash/concierge settle later (pending).
+        status: paymentMethod === 'wallet' ? 'paid' : 'pending',
       },
     });
 
@@ -435,6 +441,9 @@ const MarketCheckout = () => {
         clearByType('product');
       }
       setBookingResult({ success: true, bookingId: result.booking_id });
+    }
+    } finally {
+      isSubmittingRef.current = false;
     }
   };
 

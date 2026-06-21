@@ -143,7 +143,7 @@ export function useGuestServiceOrders() {
     if (!user) return;
 
     const channel = supabase
-      .channel('guest-orders')
+      .channel(`guest-orders-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {
@@ -249,7 +249,7 @@ export function useStaffServiceOrders() {
     if (!user) return;
 
     const channel = supabase
-      .channel('staff-orders')
+      .channel(`staff-orders-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {
@@ -341,7 +341,7 @@ export function useAdminServiceOrders(filters?: { status?: string; priority?: st
   // Real-time subscription
   useEffect(() => {
     const channel = supabase
-      .channel('admin-orders')
+      .channel(`admin-orders-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         {

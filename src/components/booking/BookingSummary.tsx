@@ -43,6 +43,12 @@ export function BookingSummary({
 
   const total = items ? items.reduce((sum, i) => sum + i.price * i.quantity, 0) + serviceFee : price * participants;
   const hasDiscount = originalPrice && originalPrice > price;
+  // Strike-through original must share the same base as `total` so the discount
+  // is meaningful. In items mode `total` already includes the service fee and is
+  // not multiplied by participants; in price mode `total` is price × participants.
+  const originalTotal = originalPrice
+    ? (items ? originalPrice + serviceFee : originalPrice * participants)
+    : 0;
 
   return (
     <div className="bg-card rounded-none border overflow-hidden">
@@ -155,7 +161,7 @@ export function BookingSummary({
           <div className="text-right">
             {hasDiscount && (
               <span className="text-sm text-muted-foreground line-through mr-2">
-                {formatPrice(originalPrice! * participants)}
+                {formatPrice(originalTotal)}
               </span>
             )}
             <span className="text-xl font-bold text-primary">

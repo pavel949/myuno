@@ -10,15 +10,24 @@
 import { createStripeClient, Stripe } from "./stripe.ts";
 import { createClient, createServiceClient } from "./supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "./rate-limit.ts";
+import { getCorsHeaders, getAllowedOrigin } from "./cors.ts";
 
 // Re-export for thin wrappers
 export { createServiceClient };
 
-export const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+// Extra headers the Supabase JS client may send on these endpoints, merged into
+// the request-scoped allow-list headers from cors.ts so preflight succeeds while
+// the origin stays restricted to the cors.ts allow-list (no wildcard on money moves).
+const EXTRA_ALLOW_HEADERS =
+  "x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version";
+
+function corsHeadersFor(req: Request): Record<string, string> {
+  const base = getCorsHeaders(req);
+  return {
+    ...base,
+    "Access-Control-Allow-Headers": `${base["Access-Control-Allow-Headers"]}, ${EXTRA_ALLOW_HEADERS}`,
+  };
+}
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -115,6 +124,8 @@ export interface CheckoutConfig {
 
 export function createCheckoutHandler(config: CheckoutConfig) {
   return async (req: Request): Promise<Response> => {
+    const CORS_HEADERS = corsHeadersFor(req);
+
     if (req.method === "OPTIONS") {
       return new Response(null, { headers: CORS_HEADERS });
     }
@@ -152,7 +163,11 @@ export function createCheckoutHandler(config: CheckoutConfig) {
 
       // 3. Parse body & build vertical-specific data
       const body = await req.json();
-      const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
+      // The raw `origin` header is attacker-controlled and is used by verticals to
+      // build Stripe success_url/cancel_url. Validate against the allow-list so a
+      // forged origin can't turn the post-payment redirect into an open redirect;
+      // unknown origins fall back to the canonical site URL.
+      const origin = getAllowedOrigin(req.headers.get("origin"));
       const supabaseAdmin = createServiceClient();
       const result = await config.build(body, { id: user.id, email: user.email ?? undefined }, origin, supabaseAdmin);
 

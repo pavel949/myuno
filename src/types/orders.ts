@@ -190,6 +190,12 @@ export interface CreateOrderInput {
   payment?: {
     method: PaymentMethod;
     amount: number;
+    /**
+     * Caller-supplied settlement status of the payment at order-creation time.
+     * 'paid' => funds already captured (e.g. wallet debit) — the payment intent
+     * is recorded as succeeded. Defaults to 'pending' (awaiting capture, e.g. cash).
+     */
+    status?: 'pending' | 'paid' | 'failed' | 'refunded';
   };
   // For WhatsApp notification
   serviceName?: string;

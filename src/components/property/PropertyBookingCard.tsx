@@ -89,6 +89,11 @@ export function PropertyBookingCard({
     [unavailableDates],
   );
 
+  // Clear the calendar auto-close timer on unmount so setState can't fire afterwards
+  useEffect(() => () => {
+    if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+  }, []);
+
   const nights = useMemo(() => {
     if (!dateRange?.from || !dateRange?.to) return 0;
     return differenceInDays(dateRange.to, dateRange.from);

@@ -157,15 +157,30 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Update order status to confirmed + set paid_at
-        const { error: orderUpdateError } = await supabaseAdmin
+        // Atomically claim the confirmation: conditional UPDATE that only matches
+        // rows not yet confirmed. Two concurrent duplicate deliveries race here,
+        // but only ONE gets a row back (`.select()` returns the affected rows) —
+        // the loser sees zero rows and bails before running side-effects. This
+        // closes the TOCTOU gap between the status SELECT above and this UPDATE.
+        const { data: confirmedRows, error: orderUpdateError } = await supabaseAdmin
           .from('orders')
           .update({ status: 'confirmed', paid_at: new Date().toISOString() })
-          .eq('id', orderId);
+          .eq('id', orderId)
+          .neq('status', 'confirmed')
+          .select('id');
 
         if (orderUpdateError) {
           logStep("ERROR", `Failed to update order: ${orderUpdateError.message}`);
           throw orderUpdateError;
+        }
+
+        if (!confirmedRows || confirmedRows.length === 0) {
+          // A concurrent delivery already confirmed this order — skip side-effects.
+          logStep("IDEMPOTENCY: Order confirmed by concurrent delivery, skipping side-effects", { orderId });
+          return new Response(JSON.stringify({ received: true, skipped: 'already_confirmed' }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
         }
 
         // Update payment_intent status

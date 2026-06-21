@@ -159,7 +159,11 @@ export function ServiceCard({ service, onClick, compact = false }: ServiceCardPr
             "font-bold text-primary",
             compact ? "text-sm" : "text-base"
           )}>
-            {service.price ? formatPrice(service.price) : (isRu ? 'По запросу' : 'On request')}
+            {service.price == null
+              ? (isRu ? 'По запросу' : 'On request')
+              : service.price > 0
+                ? formatPrice(service.price)
+                : (isRu ? 'Бесплатно' : 'Free')}
           </span>
           
           {service.duration_minutes && !compact && (

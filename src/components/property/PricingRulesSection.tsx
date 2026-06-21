@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,9 @@ import { Clock, Zap, Plus, Trash2, TrendingDown } from 'lucide-react';
 interface CustomLengthDiscount {
   min_nights: number;
   discount_percent: number;
+  // Stable client-side id used only as a React key so that removing a middle
+  // row does not reshuffle the controlled inputs of the remaining rows.
+  _id?: string;
 }
 
 interface PricingRulesData {
@@ -36,11 +39,22 @@ function PricingRulesSectionInner({ formData, updateFormData }: PricingRulesSect
 
   const earlyEnabled = !!(formData.early_booking_discount && formData.early_booking_discount > 0);
   const lastMinuteEnabled = !!(formData.last_minute_discount && formData.last_minute_discount > 0);
-  const customDiscounts = formData.custom_length_discounts || [];
+  const customDiscounts: CustomLengthDiscount[] = formData.custom_length_discounts || [];
+
+  // Backfill stable ids for rows loaded from the DB (which have none) exactly once,
+  // so React keys stay stable when a middle row is later removed.
+  useEffect(() => {
+    if (customDiscounts.length > 0 && customDiscounts.some((d) => !d._id)) {
+      updateFormData({
+        custom_length_discounts: customDiscounts.map((d) => (d._id ? d : { ...d, _id: crypto.randomUUID() })),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customDiscounts]);
 
   const addCustomDiscount = () => {
     const existing = [...customDiscounts];
-    existing.push({ min_nights: 14, discount_percent: 10 });
+    existing.push({ min_nights: 14, discount_percent: 10, _id: crypto.randomUUID() });
     updateFormData({ custom_length_discounts: existing });
   };
 
@@ -215,7 +229,7 @@ function PricingRulesSectionInner({ formData, updateFormData }: PricingRulesSect
           </div>
 
           {customDiscounts.map((d, idx) => (
-            <div key={idx} className="flex items-center gap-2">
+            <div key={d._id ?? `legacy-${idx}`} className="flex items-center gap-2">
               <div className="flex-1 space-y-1">
                 <Label className="text-xs">{isRu ? 'Мин. ночей' : 'Min nights'}</Label>
                 <Input

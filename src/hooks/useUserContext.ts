@@ -69,20 +69,32 @@ export function useUserContext() {
         .maybeSingle();
 
       if (error) throw error;
-      
-      // If no context exists, create default
-      if (!data) {
-        const { data: newContext, error: createError } = await supabase
-          .from('user_active_context')
-          .insert({ user_id: user.id, active_role: 'user' })
-          .select()
-          .single();
-        
-        if (createError) throw createError;
-        return newContext as UserActiveContext;
-      }
 
-      return data as UserActiveContext;
+      if (data) return data as UserActiveContext;
+
+      // No row yet. This is a READ path — never write from here: an insert
+      // races first-login role assignment and can fire from multiple mounted
+      // consumers (duplicate-insert errors / pinning the user to 'user').
+      // Return a safe in-memory default instead. The row is created lazily by
+      // switchContext()/switchMode() (idempotent upsert onConflict: 'user_id')
+      // when the user first changes context.
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('primary_role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const defaultRole = profile?.primary_role ?? 'user';
+
+      return {
+        id: `default-${user.id}`,
+        user_id: user.id,
+        active_role: defaultRole,
+        active_org_id: null,
+        mode: 'user',
+        entity_id: null,
+        updated_at: new Date().toISOString(),
+      } as UserActiveContext;
     },
     enabled: !!user?.id,
     ...CACHE_PROFILES.DYNAMIC,
