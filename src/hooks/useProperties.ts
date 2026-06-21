@@ -1,5 +1,6 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import type { SalonMarker } from '@/components/map/SalonMap';
+import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
@@ -205,6 +206,8 @@ export interface PropertyFilters {
   isQuickSale?: boolean;
 }
 
+type PropertiesRow = Database['public']['Tables']['properties']['Row'];
+
 const PAGE_SIZE = 20;
 
 /**
@@ -221,6 +224,68 @@ const PROPERTY_LIST_COLUMNS = `
   view_type, furnishing_level, highlights, monthly_discount,
   weekly_discount, management_company_id, sale_price,
   ownership_form, pool_type, parking_type, is_for_sale
+`;
+
+/**
+ * Public-safe column set for single-listing detail reads.
+ *
+ * Anonymous visitors no longer have a table-wide SELECT grant on `properties`
+ * (migration 20260617014005 revoked it and replaced it with a column-level
+ * GRANT to `anon`). A `select('*')` therefore expands to columns `anon` cannot
+ * read (PII / operational fields) and the whole query fails with
+ * "permission denied for column …" — which surfaced as "Объект не найден" on
+ * the public property detail page for logged-out users.
+ *
+ * This list mirrors the anon GRANT exactly, so the public detail/booking flow
+ * works for everyone. Private fields stay server-side (undefined client-side).
+ */
+export const PROPERTY_PUBLIC_DETAIL_COLUMNS = `
+  id, provider_id, location_id,
+  title, title_en, title_ru, description_en, description_ru,
+  property_type, listing_type, asset_class,
+  price, price_period, currency, price_per_night, price_per_month, price_per_year,
+  sale_price, sale_currency, is_for_sale, sale_intent,
+  bedrooms, bathrooms, rooms, beds, area_sqm, floor_area_sqm, land_size_sqm, land_size_rai,
+  max_guests, amenities, images, cover_image, video_url, video_file_url, virtual_tour_url,
+  lat, lng, address, district,
+  is_active, is_featured, is_verified, approval_status, status,
+  available_from, min_stay_nights, min_lease_months,
+  rating, review_count,
+  created_at, updated_at, approved_at,
+  instant_booking, instant_booking_enabled_at,
+  project_id, floor, unit_number, view_type, furnishing_level, equipment,
+  highlights, listing_modes, tenancy_modes,
+  weekly_discount, monthly_discount, seasonal_pricing,
+  early_booking_discount, early_booking_days, last_minute_discount, last_minute_days,
+  custom_length_discounts,
+  check_in_time, check_out_time, house_rules, house_rules_ru,
+  cancellation_policy, payment_policy, payment_model,
+  electricity_included, water_included, wifi_included, wifi_speed,
+  included_services, extra_services, cleaning_included, cleaning_frequency,
+  pool_size, pool_type, garden_type,
+  parking_spaces, parking_type, parking_included, parking_notes,
+  pet_policy, pets_allowed, pet_notes, pet_notes_ru,
+  smoking_policy, children_friendly, has_crib, has_high_chair,
+  parties_allowed, max_party_guests, quiet_hours_start, quiet_hours_end,
+  building_name, building_year, total_floors, has_elevator, building_condition,
+  internet_speed,
+  transfer_available, transfer_airport_price, transfer_notes, transfer_notes_ru,
+  extra_guest_price, extra_guest_threshold,
+  host_languages, nearby_places, safety_features, accessibility_features,
+  management_company_id, complex_id, pm_company_id,
+  road_access, zoning, frontage_m, title_deed_type,
+  electricity_load_kw, water_supply, permitted_uses,
+  hotel_keys, hotel_star_rating, hotel_brand, hotel_license_type, hotel_year_renovated,
+  deposit_amount, deposit_currency, deposit_type,
+  deposit_months_long, advance_months_long, utilities_included_long,
+  tm30_registration_supported,
+  is_assignment, is_quick_sale, quick_sale_reason, quick_sale_discount_pct,
+  urgency_deadline, accepts_installments, installment_plan,
+  escrow_offered, escrow_provider, foreign_quota_available,
+  encumbrances_disclosed,
+  yield_pct, cap_rate_pct,
+  clearview_badge, clearview_score, clearview_recommendation, clearview_synced_at,
+  marketplace_property_id, ownership_form, ownership_type
 `;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -415,7 +480,7 @@ export function useProperty(id?: string) {
 
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_PUBLIC_DETAIL_COLUMNS)
         .eq('id', id)
         .maybeSingle();
 
@@ -434,17 +499,27 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
     queryFn: async () => {
       if (!marketplacePropertyId) return null;
 
-      // Get property from unified table - all data is now in one place
-      const { data: property, error: propError } = await supabase
+      // Get property from unified table - all data is now in one place.
+      // Use the public-safe column list (not select('*')) so anonymous
+      // visitors — who only have a column-level GRANT on `properties` — can
+      // read the listing. select('*') fails for anon on restricted columns.
+      const { data: rawProperty, error: propError } = await supabase
         .from('properties')
-        .select('*')
+        .select(PROPERTY_PUBLIC_DETAIL_COLUMNS)
         .eq('id', marketplacePropertyId)
-        .single();
+        .maybeSingle();
 
       if (propError) {
         if (propError.code === 'PGRST116') return null;
         throw propError;
       }
+      if (!rawProperty) return null;
+
+      // Cast to the full generated Row type: the select() above returns a
+      // subset of columns, but the rental-terms mapping below reads optional
+      // private fields that are simply `undefined` for anon. The cast keeps
+      // the mapping type-safe without re-exposing those columns at runtime.
+      const property = rawProperty as unknown as PropertiesRow;
 
       // Get project info if property has project_id
       let projectData: PropertyProject | null = null;
