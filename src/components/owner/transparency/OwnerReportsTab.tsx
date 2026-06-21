@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { ReportDetailSheet } from '@/components/owner/reports/ReportDetailSheet';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
-import type { PropertyReport } from '@/hooks/usePropertyReports';
+import { useGeneratePdf, type PropertyReport } from '@/hooks/usePropertyReports';
 
 interface Props {
   propertyId: string;
@@ -22,6 +22,7 @@ export function OwnerReportsTab({ propertyId }: Props) {
   const isRu = language === 'ru';
   const { format: formatMoney } = useCityCurrency();
   const [viewReport, setViewReport] = useState<PropertyReport | null>(null);
+  const generatePdf = useGeneratePdf();
 
   const { data: reports, isLoading } = useQuery({
     queryKey: ['owner-transparency-reports', propertyId],
@@ -125,6 +126,16 @@ export function OwnerReportsTab({ propertyId }: Props) {
                 <Button variant="outline" size="sm" className="flex-1 h-8" onClick={() => setViewReport(report)}>
                   <Eye className="h-3.5 w-3.5 mr-1" />
                   {isRu ? 'Подробнее' : 'Details'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8"
+                  disabled={generatePdf.isPending}
+                  onClick={() => generatePdf.mutate({ report, language: isRu ? 'ru' : 'en' })}
+                >
+                  <Download className="h-3.5 w-3.5 mr-1" />
+                  PDF
                 </Button>
               </div>
             </CardContent>
