@@ -51,7 +51,7 @@ export function LandingShell({
     <div className="min-h-screen bg-background">
       <SEOHead title={t(seoTitle)} description={t(seoDescription)} />
 
-      <header className="sticky top-0 z-30 border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <header className="sticky top-0 z-30 border-b border-border/50 bg-background">
         <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="shrink-0">
             <ArrowLeft className="h-4 w-4 mr-1.5" />

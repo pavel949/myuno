@@ -305,7 +305,7 @@ export function MagnetCTA({
           onClick={() => setOpen(true)}
           className={
             className ??
-            'w-full text-left rounded-lg border border-border bg-card p-4 hover:border-primary transition-colors'
+            'w-full text-left rounded-none border border-border bg-card p-4 hover:border-primary transition-colors'
           }
         >
           <div className="flex items-start gap-3">

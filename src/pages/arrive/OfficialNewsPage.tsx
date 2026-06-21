@@ -76,7 +76,7 @@ const OfficialNewsPage: React.FC = () => {
           </p>
         </header>
 
-        <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden mb-6">
+        <div className="rounded-none border border-border bg-card divide-y divide-border overflow-hidden mb-6">
           {isLoading && (
             <div className="px-4 py-6 text-center text-[13px] text-muted-foreground">
               {isRu ? 'Загрузка…' : 'Loading…'}

@@ -137,7 +137,7 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
       </div>
 
       {/* Auto-translate */}
-      <div className="rounded-md border border-border bg-muted/40 p-3 space-y-3">
+      <div className="rounded-none border border-border bg-muted/40 p-3 space-y-3">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2 text-sm">
             <Sparkles className="h-4 w-4 text-primary" />

@@ -59,14 +59,14 @@ export function PendingPaymentsChip() {
     <div className="px-4 mt-4">
       <Link
         to="/me/payments"
-        className="flex items-center gap-3 rounded-2xl border px-4 py-3 transition-colors active:scale-[0.99]"
+        className="flex items-center gap-3 rounded-none border px-4 py-3 transition-colors active:scale-[0.99]"
         style={{
           backgroundColor: 'hsl(var(--warning-bg))',
           borderColor: 'hsl(var(--warning) / 0.25)',
         }}
       >
         <span
-          className="grid w-9 h-9 place-items-center rounded-xl flex-shrink-0"
+          className="grid w-9 h-9 place-items-center rounded-none flex-shrink-0"
           style={{
             backgroundColor: 'hsl(var(--warning) / 0.12)',
             color: 'hsl(var(--warning))',

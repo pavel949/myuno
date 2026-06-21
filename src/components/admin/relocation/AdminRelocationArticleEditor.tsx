@@ -221,7 +221,7 @@ export function AdminRelocationArticleEditor({
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-md border p-3">
+          <div className="flex items-center justify-between rounded-none border p-3">
             <Label htmlFor="published" className="cursor-pointer">Опубликовано</Label>
             <Switch
               id="published"

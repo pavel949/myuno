@@ -111,7 +111,7 @@ export default function InvestmentCalculatorPage() {
         })}
       />
 
-      <header className="sticky top-0 z-30 border-b border-border/50 bg-background/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-border/50 bg-background">
         <div className="mx-auto max-w-6xl px-4 h-14 flex items-center">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4 mr-1.5" />

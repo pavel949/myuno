@@ -70,7 +70,7 @@ export default function CommunityDetail() {
         <Card>
           <CardContent className="p-6 space-y-4">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-md bg-muted flex items-center justify-center text-3xl shrink-0">
+              <div className="w-14 h-14 rounded-none bg-muted flex items-center justify-center text-3xl shrink-0">
                 {item.country_code ? countryFlag(item.country_code) : '🏛️'}
               </div>
               <div className="flex-1 min-w-0">

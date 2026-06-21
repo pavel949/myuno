@@ -62,7 +62,7 @@ export default function VerticalCatalogPage() {
             <Link
               key={s.id}
               to={`/mc/catalog/${s.id}`}
-              className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
+              className="rounded-none border border-border px-3 py-1.5 text-sm hover:bg-muted"
             >
               {s.label[lang]}
             </Link>

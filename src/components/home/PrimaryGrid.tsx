@@ -148,7 +148,7 @@ export function PrimaryGrid() {
           to={hero.to}
           className={cn(
             'group relative sm:row-span-2 flex flex-col justify-between',
-            'rounded-2xl p-5 min-h-[200px] sm:min-h-[260px] overflow-hidden',
+            'rounded-none p-5 min-h-[200px] sm:min-h-[260px] overflow-hidden',
             'bg-primary text-primary-foreground',
             'transition-all hover:shadow-lg active:scale-[0.99]',
           )}
@@ -175,7 +175,7 @@ export function PrimaryGrid() {
 
           <div className="relative">
             <span
-              className="grid w-12 h-12 place-items-center rounded-xl"
+              className="grid w-12 h-12 place-items-center rounded-none"
               style={{
                 backgroundColor: 'hsl(var(--brand-orange))',
                 color: 'hsl(var(--primary-foreground))',
@@ -209,13 +209,13 @@ export function PrimaryGrid() {
               to={tile.to}
               className={cn(
                 'group relative flex flex-col justify-between',
-                'rounded-2xl p-3.5 min-h-[122px]',
+                'rounded-none p-3.5 min-h-[122px]',
                 'bg-card border border-border',
                 'transition-all hover:border-primary/30 hover:shadow-md active:scale-[0.98]',
               )}
             >
               <span
-                className="grid w-10 h-10 place-items-center rounded-lg"
+                className="grid w-10 h-10 place-items-center rounded-none"
                 style={{
                   backgroundColor: 'hsl(var(--brand-orange) / 0.12)',
                   color: 'hsl(var(--brand-orange))',

@@ -24,7 +24,7 @@ export function LandingChrome({
   themeVariant = 'buttons',
 }: LandingChromeProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-border/40 bg-background/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-30 border-b border-border/40 bg-background">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 sm:px-5">
         <div className="min-w-0 shrink-0">
           <BrandWordmark />

@@ -106,7 +106,7 @@ export function PoiClaimSheet({ open, onOpenChange, poi }: Props) {
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-          <div className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+          <div className="rounded-none bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
             <div className="font-medium text-foreground">{poi.name}</div>
             {poi.category && <div className="capitalize">{poi.category}</div>}
           </div>
@@ -143,7 +143,7 @@ export function PoiClaimSheet({ open, onOpenChange, poi }: Props) {
               id="target_vertical"
               value={form.target_vertical}
               onChange={(e) => setForm({ ...form, target_vertical: e.target.value })}
-              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              className="w-full h-10 rounded-none border border-input bg-background px-3 text-sm"
             >
               {VERTICALS.map((opt) => (
                 <option key={opt.v} value={opt.v}>{language === 'ru' ? opt.ru : opt.en}</option>

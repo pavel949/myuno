@@ -269,7 +269,7 @@ export default function ServicesIndex() {
     >
       {/* Unknown-slug fallback banner */}
       {unknownSlug && (
-        <div className="rounded-2xl border border-border bg-muted/40 p-4 flex items-start gap-3">
+        <div className="rounded-none border border-border bg-muted/40 p-4 flex items-start gap-3">
           <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
           <p className="text-[13px] text-muted-foreground leading-snug">
             {isRu
@@ -319,7 +319,7 @@ export default function ServicesIndex() {
           /discover deep links. Gives users a path even when the per-service
           grid is empty: describe the task via WhatsApp coordinator. */}
       {intro && (
-        <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-3">
+        <div className="rounded-none border border-border bg-card p-4 sm:p-5 space-y-3">
           <div className="space-y-1">
             <h4 className="font-display text-[17px] font-semibold tracking-tight text-foreground">
               {isRu ? intro.titleRu : intro.titleEn}

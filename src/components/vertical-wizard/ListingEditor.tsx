@@ -47,7 +47,7 @@ export const ListingEditor = ({ spec, initial, onSave, saving }: Props) => {
           {spec.editorTabs.map((tab) => (
             <TabsContent key={tab.id} value={tab.id} className="space-y-4 mt-4">
               {tab.groups.map((g) => (
-                <section key={g.id} className="rounded-lg border border-border bg-card p-5 space-y-4">
+                <section key={g.id} className="rounded-none border border-border bg-card p-5 space-y-4">
                   <header className="space-y-1">
                     <h3 className="text-base font-medium">{t(g.title, lang)}</h3>
                     {g.description && <p className="text-sm text-muted-foreground">{t(g.description, lang)}</p>}

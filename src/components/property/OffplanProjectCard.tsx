@@ -162,7 +162,7 @@ export function OffplanProjectCard({
 
           {/* Brokered / not ClearView-rated */}
           {!project.isClearviewRated && (
-            <Badge variant="outline" className="text-[10px] bg-background/80 border-warning/40 text-warning">
+            <Badge variant="outline" className="text-[10px] bg-background border-warning/40 text-warning">
               {isRu ? 'Не оценён ClearView' : 'Not ClearView rated'}
             </Badge>
           )}
@@ -189,7 +189,7 @@ export function OffplanProjectCard({
           onClick={handleFav}
           className={cn(
             'absolute right-3 flex items-center justify-center w-8 h-8 rounded-full',
-            'bg-background/80 backdrop-blur border border-border/50 shadow-sm',
+            'bg-background border border-border/50 shadow-sm',
             'hover:bg-background transition-colors',
             project.isClearviewRated && project.muunoScore ? 'top-14' : 'top-3'
           )}

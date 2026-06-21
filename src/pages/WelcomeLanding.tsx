@@ -343,7 +343,7 @@ export default function WelcomeLanding() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-2 rounded-none border border-border bg-card/60 px-3 py-1 font-sans text-caption font-medium uppercase tracking-[0.12em] text-muted-foreground"
+            className="inline-flex items-center gap-2 rounded-none border border-border bg-card px-3 py-1 font-sans text-caption font-medium uppercase tracking-[0.12em] text-muted-foreground"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
             <span className="font-semibold text-foreground">myUNO</span>
@@ -877,7 +877,7 @@ export default function WelcomeLanding() {
       </LandingSection>
 
       {/* ============================ 11. STICKY MOBILE ============================ */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background px-4 py-3 sm:hidden">
         {stickyMode === 'partner' ? (
           <Link
             to={APP_ROUTES.VENDOR_JOIN}

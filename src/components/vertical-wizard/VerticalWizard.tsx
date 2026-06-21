@@ -91,7 +91,7 @@ export const VerticalWizard = ({ spec, initial, onSubmit, onSaveDraft, submittin
         </div>
 
         {current.groups.map((g) => (
-          <section key={g.id} className="space-y-4 rounded-lg border border-border bg-card p-5">
+          <section key={g.id} className="space-y-4 rounded-none border border-border bg-card p-5">
             <header className="space-y-1">
               <h3 className="text-base font-medium">{t(g.title, lang)}</h3>
               {g.description && <p className="text-sm text-muted-foreground">{t(g.description, lang)}</p>}
@@ -105,7 +105,7 @@ export const VerticalWizard = ({ spec, initial, onSubmit, onSaveDraft, submittin
         ))}
 
         {stepErrors.length > 0 && (
-          <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
+          <div className="rounded-none border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
             {lang === 'ru' ? 'Заполните обязательные поля: ' : 'Please complete: '}
             {stepErrors.join(', ')}
           </div>
@@ -132,7 +132,7 @@ export const VerticalWizard = ({ spec, initial, onSubmit, onSaveDraft, submittin
 
       <aside className="space-y-4">
         <QualityPanel spec={spec} row={row} />
-        <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
+        <div className="rounded-none border border-border bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
           <p className="font-medium text-foreground">
             {lang === 'ru' ? 'Эталоны индустрии' : 'Industry references'}
           </p>

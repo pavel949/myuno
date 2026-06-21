@@ -175,7 +175,7 @@ function CommunityCard({ item, lang }: { item: Community; lang: string }) {
     <Card className="border-border hover:border-primary/40 transition-colors flex flex-col">
       <CardContent className="p-4 flex flex-col gap-3 flex-1">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center text-lg shrink-0">
+          <div className="w-10 h-10 rounded-none bg-muted flex items-center justify-center text-lg shrink-0">
             {item.country_code ? countryFlag(item.country_code) : <Icon className="w-5 h-5 text-primary" />}
           </div>
           <div className="flex-1 min-w-0">

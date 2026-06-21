@@ -24,7 +24,7 @@ export const QualityPanel = ({ spec, row }: Props) => {
   const rulesById = new Map(spec.quality.map((r) => [r.id, r]));
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+    <div className="rounded-none border border-border bg-card p-4 space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">
           {lang === 'ru' ? 'Качество карточки' : 'Listing quality'}

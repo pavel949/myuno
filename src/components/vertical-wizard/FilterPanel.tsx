@@ -172,7 +172,7 @@ function FilterRow({
 
     case 'bool':
       return (
-        <div className="flex items-center justify-between gap-2 rounded-md border border-border p-2.5">
+        <div className="flex items-center justify-between gap-2 rounded-none border border-border p-2.5">
           <Label className="text-sm">{label}</Label>
           <Switch checked={!!value} onCheckedChange={(v) => onSet(v || undefined)} />
         </div>
