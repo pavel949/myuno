@@ -1,7 +1,7 @@
 # PROJECT.md — myUNO · Ignatev Group
 ## Единственный источник стратегической истины платформы
 
-> **Версия:** 2.3 · **Дата:** Апрель 2026 · **Автор:** Pavel Ignatev
+> **Версия:** 2.3 · **Дата:** Апрель 2026 · **Last code-sync:** 2026-06-21 · **Автор:** Pavel Ignatev
 > **Назначение:** Системный контекст для Claude, Cursor, Lovable и любого AI-ассистента, работающего на проекте.
 > **Статус:** Этот документ отменяет все предыдущие версии, драфты и роадмапы.
 >
@@ -200,7 +200,7 @@ myUNO должна восприниматься как надёжная госу
 
 ### Визуальный язык
 
-**Цвета:** глубокий тёмно-синий (#0A2240) как основной авторитетный цвет, тёплый оранжевый (#D96B1A) как акцент человечности, светло-серый (#F5F4F0) как нейтральный фон.
+**Цвета:** глубокий тёмно-синий (#0A2240) как основной авторитетный цвет, тёплый оранжевый (#D96B1A) как акцент человечности, светло-кремовый (#F7F5F1) как нейтральный фон.
 
 **Типографика:** единая для обоих языков (см. Design Bible v2 §05.2 и `src/styles/tokens.css`). Display/headings — **Source Serif 4** (400–700). Body/UI — **Geist** (400–700). Числовые данные — **IBM Plex Mono** (tabular-nums). Luxury-вертикаль `/newbuilds` — **Source Serif 4** (italic; Cormorant Garamond больше не грузится). Локальные fallback для RU: Unbounded → Golos Text → Noto. Для EN: Noto Serif/Sans → Georgia / system-ui. (Старые ссылки на Unbounded+Golos / DM Sans / JetBrains Mono — stale.)
 
@@ -339,9 +339,10 @@ myUNO должна восприниматься как надёжная госу
 | IDE / Dev | Cursor + GitHub monorepo | Primary |
 | Frontend deploy | Vercel, host-based routing | Один repo, все субдомены |
 | Backend | Supabase: PostgreSQL + Auth + Storage + Edge Functions (Deno 2.0) + pgvector | Только public schema. v2 schema не существует |
-| AI reasoning | Claude Sonnet 4 | DueDiligence, ClearView scoring draft, архитектура, сложные задачи |
-| AI high-freq | Claude Haiku | Lead scoring, тесты, дешёвые операции |
-| AI vision | Gemini Flash | OCR, анализ фото объектов |
+| AI reasoning | Gemini 2.5 Pro + Gemini 3 Flash (preview) | DueDiligence, ClearView scoring draft, сложные задачи (фактически в коде) |
+| AI high-freq | Gemini 2.5 Flash / Flash-Lite + Claude Haiku 4.5 | Lead scoring, routing, дешёвые операции |
+| AI vision / OCR | Gemini 2.5 Flash (+ Flash Image) | OCR, анализ фото объектов |
+| AI embeddings | gemini-embedding-001 | pgvector RAG |
 | Web scraping | Firecrawl | Все источники данных |
 | DNS / CDN | Cloudflare (`myuno.app`) | DNS + защита |
 | Payments | Stripe + Stripe Connect | Все платежи, DepositSafe escrow |
@@ -351,13 +352,13 @@ myUNO должна восприниматься как надёжная госу
 | Fonts (display) | Source Serif 4 | Оба языка, primary (см. `tokens.css`) |
 | Fonts (body) | Geist | Оба языка, primary |
 | Data (числа) | IBM Plex Mono | tabular-nums |
-| Fonts (luxury) | Cormorant Garamond | Только `/newbuilds` Dark Luxury |
+| Fonts (luxury) | Source Serif 4 (italic) | `/newbuilds`; Cormorant Garamond больше не грузится в `index.html` |
 | Fonts (RU fallback) | Unbounded → Golos Text → Noto | Только когда primary не загрузился |
 | Fonts (EN fallback) | Noto Serif / Noto Sans | Только когда primary не загрузился |
 
 **Правила, которые нельзя нарушать:** один Supabase public schema; единый SSO (один user_id через все субдомены); TypeScript strict, no `any`; mobile-first 375px; bilingual UI (RU/EN); error handling и loading states везде; conventional commits, English; каждый merge в main — фиксит баг, приносит деньги или снижает техдолг.
 
-**Критические баги — починить до любого нового функционала:** Stripe checkout не создаёт order в БД (приоритет 0); Bloom cart checkout не создаёт order; owner financials inconsistencies; first login role assignment edge cases; booking confirmation state edge cases.
+**Критические баги — пропатчены 2026-06-21 (PR #23, commits `3cc727f` + `d43adb9`):** Stripe checkout / order creation в БД, Bloom cart checkout, owner financials inconsistencies, first-login role assignment edge cases, booking confirmation state edge cases — все исправлены; осталась верификация edge-кейсов на проде.
 
 ---
 
@@ -424,6 +425,6 @@ myUNO должна восприниматься как надёжная госу
 
 ---
 
-*PROJECT.md · v2.3 · Апрель 2026 · Pavel Ignatev · Ignatev Group · Phuket*
+*PROJECT.md · v2.3 · Апрель 2026 (last code-sync 2026-06-21) · Pavel Ignatev · Ignatev Group · Phuket*
 
 *Платформа, которой доверяют — не потому что она так говорит, а потому что она именно так работает.*
