@@ -111,7 +111,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={handleBack}
-                className="h-10 w-10"
+                className="h-10 w-10 min-h-[44px] min-w-[44px]"
+                aria-label={isRu ? 'Назад' : 'Back'}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -137,7 +138,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={handleClose}
-                className="h-10 w-10"
+                className="h-10 w-10 min-h-[44px] min-w-[44px]"
+                aria-label={isRu ? 'Закрыть' : 'Close'}
               >
                 <X className="h-5 w-5" />
               </Button>

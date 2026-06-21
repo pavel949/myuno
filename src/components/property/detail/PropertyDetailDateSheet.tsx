@@ -108,9 +108,10 @@ export function PropertyDetailDateSheet({
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
                 onClick={() => onGuestCountChange(Math.max(1, guestCount - 1))}
                 disabled={guestCount <= 1}
+                aria-label={isRu ? 'Меньше гостей' : 'Decrease guests'}
               >
                 <Minus className="w-4 h-4" />
               </Button>
@@ -118,9 +119,10 @@ export function PropertyDetailDateSheet({
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8 rounded-full"
+                className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
                 onClick={() => onGuestCountChange(Math.min(maxGuests, guestCount + 1))}
                 disabled={guestCount >= maxGuests}
+                aria-label={isRu ? 'Больше гостей' : 'Increase guests'}
               >
                 <Plus className="w-4 h-4" />
               </Button>

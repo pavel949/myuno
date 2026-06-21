@@ -90,7 +90,7 @@ const GymDetail = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
         <div className="absolute top-4 left-4 right-4 flex justify-between">
-          <Button variant="secondary" size="icon" onClick={() => navigate('/fitness')}>
+          <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Назад' : 'Back'} onClick={() => navigate('/fitness')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex gap-2">
@@ -100,7 +100,7 @@ const GymDetail = () => {
               itemData={{ title_en: gym.name_en, title_ru: gym.name_ru, image: images[0], price: gym.price_day_pass, location: gym.district }}
               variant="secondary"
             />
-            <Button variant="secondary" size="icon"><Share2 className="w-5 h-5" /></Button>
+            <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Поделиться' : 'Share'}><Share2 className="w-5 h-5" /></Button>
           </div>
         </div>
 

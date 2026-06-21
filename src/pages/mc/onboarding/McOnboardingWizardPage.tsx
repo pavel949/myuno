@@ -62,7 +62,7 @@ export default function McOnboardingWizardPage() {
             </p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => dismiss.mutate()} title={isRu ? 'Закрыть' : 'Dismiss'}>
+        <Button variant="ghost" size="icon" onClick={() => dismiss.mutate()} title={isRu ? 'Закрыть' : 'Dismiss'} aria-label={isRu ? 'Закрыть' : 'Dismiss'}>
           <X className="w-4 h-4" />
         </Button>
       </div>

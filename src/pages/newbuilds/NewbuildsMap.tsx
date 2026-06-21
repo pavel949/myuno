@@ -195,7 +195,7 @@ export default function NewbuildsMap() {
       {/* Header */}
       <div className="relative z-20 px-4 py-3 flex items-center justify-between" style={{ background: 'hsl(var(--nb-bg))', borderBottom: '1px solid hsl(var(--nb-gold) / 0.15)' }}>
         <div className="flex items-center gap-3">
-          <Link to={APP_ROUTES.OFFPLAN} className="p-1.5 rounded-none transition-colors" style={{ color: 'hsl(var(--nb-gold))' }}>
+          <Link to={APP_ROUTES.OFFPLAN} aria-label="Назад" className="p-1.5 rounded-none transition-colors" style={{ color: 'hsl(var(--nb-gold))' }}>
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <h1 className="nb-display text-lg" style={{ color: 'hsl(var(--nb-text))' }}>Карта проектов</h1>
@@ -468,7 +468,7 @@ export default function NewbuildsMap() {
                       )}
                     </div>
                   </div>
-                  <button onClick={() => setSelectedProject(null)} className="p-1 flex-shrink-0" style={{ color: 'hsl(var(--nb-muted))' }}>
+                  <button onClick={() => setSelectedProject(null)} aria-label="Закрыть" className="p-1 flex-shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center" style={{ color: 'hsl(var(--nb-muted))' }}>
                     ✕
                   </button>
                 </div>

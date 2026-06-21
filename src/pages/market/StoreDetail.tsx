@@ -134,11 +134,11 @@ const StoreDetail = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
           <div className="absolute top-4 left-4 right-4 flex justify-between">
-            <Button variant="secondary" size="icon" className="rounded-full bg-white/90" onClick={() => navigate('/market')}>
+            <Button variant="secondary" size="icon" className="rounded-full bg-white/90" onClick={() => navigate('/market')} aria-label={language === 'ru' ? 'Назад' : 'Back'}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex gap-2">
-              <Button variant="secondary" size="icon" className="rounded-full bg-white/90" onClick={() => setIsFavorite(!isFavorite)}>
+              <Button variant="secondary" size="icon" className="rounded-full bg-white/90" onClick={() => setIsFavorite(!isFavorite)} aria-label={language === 'ru' ? 'В избранное' : 'Favorite'}>
                 <Heart className={cn("h-5 w-5", isFavorite && "fill-destructive text-destructive")} />
               </Button>
             </div>
@@ -245,12 +245,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, language, quantity, 
         <div className="flex items-center justify-between mt-2">
           <span className="font-semibold">฿{product.price}</span>
           {quantity === 0 ? (
-            <Button size="icon" className="h-8 w-8 rounded-full" onClick={onAdd}><Plus className="h-4 w-4" /></Button>
+            <Button size="icon" className="min-h-[44px] min-w-[44px] h-8 w-8 rounded-full" onClick={onAdd} aria-label={language === 'ru' ? 'Добавить' : 'Add'}><Plus className="h-4 w-4" /></Button>
           ) : (
             <div className="flex items-center gap-2">
-              <Button size="icon" variant="outline" className="h-7 w-7 rounded-full" onClick={onRemove}><Minus className="h-3 w-3" /></Button>
+              <Button size="icon" variant="outline" className="min-h-[44px] min-w-[44px] h-7 w-7 rounded-full" onClick={onRemove} aria-label={language === 'ru' ? 'Убрать один' : 'Decrease quantity'}><Minus className="h-3 w-3" /></Button>
               <span className="text-sm font-medium w-4 text-center">{quantity}</span>
-              <Button size="icon" className="h-7 w-7 rounded-full" onClick={onAdd}><Plus className="h-3 w-3" /></Button>
+              <Button size="icon" className="min-h-[44px] min-w-[44px] h-7 w-7 rounded-full" onClick={onAdd} aria-label={language === 'ru' ? 'Добавить один' : 'Increase quantity'}><Plus className="h-3 w-3" /></Button>
             </div>
           )}
         </div>

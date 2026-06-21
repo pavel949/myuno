@@ -203,7 +203,8 @@ export function ChannelHealthDashboard() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="min-h-[44px] min-w-[44px]"
+                    aria-label={isRu ? 'Синхронизировать' : 'Sync'}
                     disabled={syncing === channel.id}
                     onClick={() => handleSyncChannel(channel.id)}
                   >

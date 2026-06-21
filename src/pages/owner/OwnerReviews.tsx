@@ -608,7 +608,8 @@ export default function OwnerReviews() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                            className="h-6 w-6 p-0 min-h-[44px] min-w-[44px] text-muted-foreground hover:text-destructive"
+                            aria-label={isRu ? 'Удалить' : 'Delete'}
                             onClick={() => handleDeleteResponse(review.id)}
                           >
                             <Trash2 className="h-3 w-3" />

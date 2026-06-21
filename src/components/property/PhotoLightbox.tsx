@@ -53,7 +53,7 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
     <div className="fixed inset-0 z-[100] bg-black flex flex-col" role="dialog" aria-modal="true">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 text-white/90">
-        <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+        <button onClick={onClose} aria-label={isRu ? 'Закрыть' : 'Close'} className="p-2 rounded-full hover:bg-white/10 transition-colors">
           <X className="w-6 h-6" />
         </button>
         <span className="text-sm font-medium">
@@ -68,6 +68,7 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
         {currentIndex > 0 && (
           <button
             onClick={goPrev}
+            aria-label={isRu ? 'Назад' : 'Previous'}
             className="absolute left-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -86,6 +87,7 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
         {currentIndex < images.length - 1 && (
           <button
             onClick={goNext}
+            aria-label={isRu ? 'Вперёд' : 'Next'}
             className="absolute right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white"
           >
             <ChevronRight className="w-6 h-6" />

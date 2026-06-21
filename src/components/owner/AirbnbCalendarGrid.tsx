@@ -193,13 +193,13 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
       <div className="space-y-2 w-full min-w-0">
         {/* Month navigation */}
         <div className="flex items-center justify-between px-1">
-          <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(m => subMonths(m, 1))}>
+          <Button variant="ghost" size="icon" aria-label={isRu ? 'Предыдущий месяц' : 'Previous month'} onClick={() => setCurrentMonth(m => subMonths(m, 1))}>
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <h2 className="text-lg font-semibold capitalize">
             {format(currentMonth, 'LLLL yyyy', { locale })}
           </h2>
-          <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(m => addMonths(m, 1))}>
+          <Button variant="ghost" size="icon" aria-label={isRu ? 'Следующий месяц' : 'Next month'} onClick={() => setCurrentMonth(m => addMonths(m, 1))}>
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>

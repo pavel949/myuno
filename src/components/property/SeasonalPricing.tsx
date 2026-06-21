@@ -239,7 +239,8 @@ export function SeasonalPricing({
                   variant="ghost"
                   size="icon"
                   onClick={() => removeSeason(season.id)}
-                  className="text-destructive hover:text-destructive h-8 w-8 mt-4"
+                  className="text-destructive hover:text-destructive h-8 w-8 min-h-[44px] min-w-[44px] mt-4"
+                  aria-label={isRu ? 'Удалить' : 'Delete'}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

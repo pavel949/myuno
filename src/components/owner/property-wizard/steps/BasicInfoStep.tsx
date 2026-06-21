@@ -89,7 +89,8 @@ function RoomStepper({ label, value, onChange, min = 0, max = 20 }: RoomStepperP
           type="button"
           variant="outline"
           size="icon"
-          className="h-9 w-9 shrink-0"
+          aria-label="Decrease"
+          className="min-h-[44px] min-w-[44px] shrink-0"
           onClick={() => onChange(Math.max(min, value - 1))}
           disabled={value <= min}
         >
@@ -100,7 +101,8 @@ function RoomStepper({ label, value, onChange, min = 0, max = 20 }: RoomStepperP
           type="button"
           variant="outline"
           size="icon"
-          className="h-9 w-9 shrink-0"
+          aria-label="Increase"
+          className="min-h-[44px] min-w-[44px] shrink-0"
           onClick={() => onChange(Math.min(max, value + 1))}
           disabled={value >= max}
         >
@@ -721,7 +723,7 @@ function BasicInfoStepInner({
                         {isRu ? 'Больше не показывать' : "Don't show again"}
                       </button>
                     </div>
-                    <button type="button" onClick={() => setShowHint(false)} className="text-muted-foreground hover:text-foreground">
+                    <button type="button" aria-label={isRu ? 'Закрыть' : 'Close'} onClick={() => setShowHint(false)} className="text-muted-foreground hover:text-foreground">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>

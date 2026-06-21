@@ -63,6 +63,7 @@ export default function Search() {
               {query && (
                 <button
                   onClick={() => setQuery('')}
+                  aria-label={isRu ? 'Очистить' : 'Clear'}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
                   <X className="w-4 h-4 text-muted-foreground" />

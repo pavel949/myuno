@@ -199,7 +199,7 @@ export function CompanyProfileSettings() {
                 {isRu ? 'Обложка' : 'Cover'}
               </Label>
               {form.cover_image && (
-                <img src={form.cover_image} alt="Cover" className="w-full h-24 object-cover rounded-none border border-border" />
+                <img src={form.cover_image} alt={isRu ? 'Обложка компании' : 'Company cover'} className="w-full h-24 object-cover rounded-none border border-border" />
               )}
               <UnifiedMediaUploader
                 mode="single"

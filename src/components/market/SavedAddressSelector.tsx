@@ -138,7 +138,7 @@ export const SavedAddressSelector: React.FC<SavedAddressSelectorProps> = ({
               {/* Actions dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={language === 'ru' ? 'Действия с адресом' : 'Address actions'}>
                     <MoreHorizontal className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>

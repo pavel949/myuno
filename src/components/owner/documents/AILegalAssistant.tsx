@@ -295,6 +295,7 @@ export function AILegalAssistant({ propertyContext, bookingContext }: AILegalAss
           <Button
             size="icon"
             className="h-11 w-11 flex-shrink-0"
+            aria-label={isRu ? 'Отправить' : 'Send'}
             onClick={() => handleSend()}
             disabled={isLoading || !input.trim()}
           >

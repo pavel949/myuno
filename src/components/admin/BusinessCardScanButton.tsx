@@ -212,6 +212,7 @@ const isRu = language === 'ru';
         className={className}
         onClick={() => setIsOpen(true)}
         title={isRu ? 'Сканировать визитку' : 'Scan Business Card'}
+        aria-label={size === 'icon' ? (isRu ? 'Сканировать визитку' : 'Scan Business Card') : undefined}
       >
         <Sparkles className={size === 'icon' ? 'h-4 w-4' : 'h-4 w-4 mr-2'} />
         {size !== 'icon' && (isRu ? 'Сканировать визитку' : 'Scan Business Card')}

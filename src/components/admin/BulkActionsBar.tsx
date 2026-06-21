@@ -141,10 +141,11 @@ export function BulkActionsBar({
       </div>
 
       {/* Close Button */}
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="h-8 w-8 ml-2"
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 min-h-[44px] min-w-[44px] ml-2"
+        aria-label={isRussian ? 'Закрыть' : 'Close'}
         onClick={onDeselectAll}
       >
         <X className="h-4 w-4" />

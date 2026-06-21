@@ -163,6 +163,7 @@ function PropertyWizardInner({
             size="icon"
             onClick={onSaveDraft}
             disabled={isSubmitting}
+            aria-label={isRu ? 'Сохранить черновик' : 'Save draft'}
             title={isRu ? 'Сохранить черновик' : 'Save draft'}
           >
             <Save className="h-4 w-4" />

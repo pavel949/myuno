@@ -226,11 +226,11 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
         <p className="text-sm text-muted-foreground">{sublabel}</p>
       </div>
       <div className="flex items-center gap-3">
-        <Button variant="outline" size="icon" className="rounded-full h-9 w-9 border-muted-foreground/30" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min}>
+        <Button variant="outline" size="icon" className="rounded-full min-h-[44px] min-w-[44px] border-muted-foreground/30" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label={isRu ? 'Уменьшить' : 'Decrease'}>
           <Minus className="w-4 h-4" />
         </Button>
         <span className="w-8 text-center font-semibold text-lg">{value}</span>
-        <Button variant="outline" size="icon" className="rounded-full h-9 w-9 border-muted-foreground/30" onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max}>
+        <Button variant="outline" size="icon" className="rounded-full min-h-[44px] min-w-[44px] border-muted-foreground/30" onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label={isRu ? 'Увеличить' : 'Increase'}>
           <Plus className="w-4 h-4" />
         </Button>
       </div>

@@ -333,7 +333,7 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
         <td className="p-3 text-xs text-muted-foreground">{index}</td>
         <td className="p-3">
           <div className="flex items-center gap-2">
-            {p.cover_image && <img src={p.cover_image} className="w-8 h-8 rounded-none object-cover" />}
+            {p.cover_image && <img src={p.cover_image} alt="" className="w-8 h-8 rounded-none object-cover" />}
             <span className="font-medium truncate max-w-[200px]">{p.name_en}</span>
           </div>
         </td>
@@ -345,13 +345,13 @@ function ProjectRow({ project: p, index, isEditing, onEdit, onUpdate }: {
         <td className="p-3 text-xs font-mono">{p.muuno_score || '—'}</td>
         <td className="p-3">
           <div className="flex gap-1">
-            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={onEdit}>
+            <Button size="sm" variant="ghost" aria-label="Edit" className="h-7 w-7 p-0 min-h-[44px] min-w-[44px]" onClick={onEdit}>
               <Edit2 className="w-3.5 h-3.5" />
             </Button>
-            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => onUpdate({ is_featured: !p.is_featured })}>
+            <Button size="sm" variant="ghost" aria-label={p.is_featured ? 'Unfeature' : 'Feature'} className="h-7 w-7 p-0 min-h-[44px] min-w-[44px]" onClick={() => onUpdate({ is_featured: !p.is_featured })}>
               {p.is_featured ? <Star className="w-3.5 h-3.5 text-accent fill-accent" /> : <StarOff className="w-3.5 h-3.5 text-muted-foreground" />}
             </Button>
-            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => onUpdate({ is_approved: !p.is_approved })}>
+            <Button size="sm" variant="ghost" aria-label={p.is_approved ? 'Unapprove' : 'Approve'} className="h-7 w-7 p-0 min-h-[44px] min-w-[44px]" onClick={() => onUpdate({ is_approved: !p.is_approved })}>
               {p.is_approved ? <Check className="w-3.5 h-3.5 text-success" /> : <X className="w-3.5 h-3.5 text-red-400" />}
             </Button>
           </div>
@@ -450,7 +450,7 @@ function FeaturedRow({ project: p, onUpdate, onRemove }: { project: Project; onU
           placeholder="#"
         />
       </div>
-      {p.cover_image && <img src={p.cover_image} className="w-14 h-10 rounded-none object-cover" />}
+      {p.cover_image && <img src={p.cover_image} alt="" className="w-14 h-10 rounded-none object-cover" />}
       <div className="flex-1 min-w-0">
         <h3 className="font-semibold text-sm truncate">{p.name_en}</h3>
         <p className="text-xs text-muted-foreground">{p.developer_name} · Score: {p.muuno_score || '—'}</p>
@@ -461,7 +461,7 @@ function FeaturedRow({ project: p, onUpdate, onRemove }: { project: Project; onU
         onChange={e => onUpdate({ featured_label: e.target.value })}
         placeholder="Label (e.g. Best ROI)"
       />
-      <Button size="sm" variant="ghost" onClick={onRemove}>
+      <Button size="sm" variant="ghost" aria-label="Remove from featured" onClick={onRemove}>
         <X className="w-4 h-4 text-muted-foreground" />
       </Button>
     </div>
@@ -475,7 +475,7 @@ function DeveloperRow({ developer: d, projectCount, onUpdate }: { developer: Dev
   return (
     <div className="border rounded-none">
       <div className="p-4 flex items-center gap-4">
-        {d.logo_url && <img src={d.logo_url} className="w-12 h-12 rounded-full object-cover" />}
+        {d.logo_url && <img src={d.logo_url} alt="" className="w-12 h-12 rounded-full object-cover" />}
         <div className="flex-1">
           <h3 className="font-semibold">{d.name_en}</h3>
           <p className="text-sm text-muted-foreground">{projectCount} проектов · {d.email || d.website || '—'}</p>
@@ -484,7 +484,7 @@ function DeveloperRow({ developer: d, projectCount, onUpdate }: { developer: Dev
           {d.is_verified ? <Shield className="w-4 h-4 text-success mr-1" /> : <ShieldOff className="w-4 h-4 text-muted-foreground mr-1" />}
           {d.is_verified ? 'Верифицирован' : 'Верифицировать'}
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => setExpanded(!expanded)}>
+        <Button size="sm" variant="ghost" aria-label={expanded ? 'Collapse' : 'Expand'} onClick={() => setExpanded(!expanded)}>
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </Button>
       </div>

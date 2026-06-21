@@ -426,7 +426,7 @@ export default function PartnerApplicationsAdmin() {
                         </span>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="shrink-0">
+                    <Button variant="ghost" size="icon" className="shrink-0" aria-label={language === 'ru' ? 'Просмотр' : 'View'}>
                       <Eye className="w-4 h-4" />
                     </Button>
                   </div>

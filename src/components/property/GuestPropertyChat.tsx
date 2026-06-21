@@ -158,7 +158,7 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
           </div>
         </div>
         {onClose && (
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose} aria-label={isRu ? 'Закрыть' : 'Close'}>
             ✕
           </Button>
         )}
@@ -233,11 +233,12 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
             className="flex-1 min-h-[40px] max-h-[100px] resize-none"
             rows={1}
           />
-          <Button 
-            onClick={handleSend} 
+          <Button
+            onClick={handleSend}
             disabled={!newMessage.trim() || isSending || (preSendWarning?.severity === 'critical')}
             size="icon"
             className="flex-shrink-0 self-end"
+            aria-label={isRu ? 'Отправить' : 'Send'}
           >
             {isSending ? (
               <Loader2 className="w-4 h-4 animate-spin" />

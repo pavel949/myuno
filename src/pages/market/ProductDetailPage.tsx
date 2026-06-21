@@ -196,13 +196,15 @@ const ProductDetailPage = () => {
             <>
               <button
                 onClick={prevImage}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 flex items-center justify-center shadow-lg"
+                aria-label={language === 'ru' ? 'Назад' : 'Previous'}
+                className="absolute left-4 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-background/80 flex items-center justify-center shadow-lg"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={nextImage}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 flex items-center justify-center shadow-lg"
+                aria-label={language === 'ru' ? 'Далее' : 'Next'}
+                className="absolute right-4 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-background/80 flex items-center justify-center shadow-lg"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -213,6 +215,7 @@ const ProductDetailPage = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
+                    aria-label={language === 'ru' ? `Фото ${index + 1}` : `Image ${index + 1}`}
                     className={cn(
                       "w-2 h-2 rounded-full transition-colors",
                       index === currentImageIndex ? "bg-primary" : "bg-background/60"
@@ -467,19 +470,21 @@ const ProductDetailPage = () => {
             ) : (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 bg-primary/10 rounded-full px-3 py-1.5">
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="h-8 w-8 rounded-full hover:bg-primary/20"
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="min-h-[44px] min-w-[44px] h-8 w-8 rounded-full hover:bg-primary/20"
                     onClick={handleRemove}
+                    aria-label={language === 'ru' ? 'Убрать один' : 'Decrease quantity'}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
                   <span className="text-base font-bold w-6 text-center">{quantity}</span>
-                  <Button 
-                    size="icon" 
-                    className="h-8 w-8 rounded-full"
+                  <Button
+                    size="icon"
+                    className="min-h-[44px] min-w-[44px] h-8 w-8 rounded-full"
                     onClick={handleAdd}
+                    aria-label={language === 'ru' ? 'Добавить один' : 'Increase quantity'}
                   >
                     <Plus className="h-4 w-4" />
                   </Button>

@@ -69,6 +69,7 @@ export function VendorCombobox({
             type="button"
             variant="ghost"
             size="icon"
+            aria-label={isRu ? 'Показать поставщиков' : 'Show vendors'}
             className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
             onClick={() => setOpen(!open)}
           >

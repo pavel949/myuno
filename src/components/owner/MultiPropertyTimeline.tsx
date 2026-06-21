@@ -235,13 +235,13 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
         {/* Navigation bar */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={goBack} className="h-8 w-8">
+            <Button variant="ghost" size="icon" aria-label={isRu ? 'Назад' : 'Previous'} onClick={goBack} className="min-h-[44px] min-w-[44px]">
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={goToday} className="h-8 text-xs">
               {isRu ? 'Сегодня' : 'Today'}
             </Button>
-            <Button variant="ghost" size="icon" onClick={goForward} className="h-8 w-8">
+            <Button variant="ghost" size="icon" aria-label={isRu ? 'Вперёд' : 'Next'} onClick={goForward} className="min-h-[44px] min-w-[44px]">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -369,6 +369,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                                 <button
                                   onClick={(e) => cleaningTask && handleTaskIconClick(cleaningTask, e)}
                                   className="transition-transform"
+                                  aria-label={isRu ? 'Уборка' : 'Cleaning'}
                                 >
                                   <Sparkles className="h-3 w-3 text-info" />
                                 </button>
@@ -377,6 +378,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                                 <button
                                   onClick={(e) => maintenanceTask && handleTaskIconClick(maintenanceTask, e)}
                                   className="transition-transform"
+                                  aria-label={isRu ? 'Ремонт' : 'Maintenance'}
                                 >
                                   <Wrench className="h-3 w-3 text-accent-foreground" />
                                 </button>

@@ -302,7 +302,7 @@ const ChatCard: React.FC<ChatCardProps> = ({ chat, isRu, onClick }) => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                aria-label={isRu ? 'Позвонить' : 'Call'}
                 onClick={(e) => {
                   e.stopPropagation();
                   window.open(`tel:${chat.guestPhone}`);

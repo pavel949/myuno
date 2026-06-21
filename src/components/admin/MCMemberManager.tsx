@@ -201,7 +201,8 @@ export function MCMemberManager({ companyId, companyName }: MCMemberManagerProps
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-destructive"
+                    className="h-7 w-7 min-h-[44px] min-w-[44px] text-destructive"
+                    aria-label={isRu ? 'Удалить' : 'Delete'}
                     onClick={() => handleRemoveMember(member.id)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -229,7 +230,7 @@ export function MCMemberManager({ companyId, companyName }: MCMemberManagerProps
               className="pl-9"
             />
           </div>
-          <Button variant="outline" size="icon" onClick={handleSearchUser} disabled={isSearching}>
+          <Button variant="outline" size="icon" aria-label={isRu ? 'Поиск' : 'Search'} onClick={handleSearchUser} disabled={isSearching}>
             {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
           </Button>
         </div>
@@ -255,7 +256,7 @@ export function MCMemberManager({ companyId, companyName }: MCMemberManagerProps
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button size="sm" onClick={handleAddMember} disabled={isAdding}>
+                  <Button size="sm" aria-label={isRu ? 'Добавить' : 'Add'} onClick={handleAddMember} disabled={isAdding}>
                     {isAdding ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
                   </Button>
                 </div>

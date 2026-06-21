@@ -163,21 +163,23 @@ const DEVELOPER_STAGES = [
 ];
 
 // Guest Counter Component
-function GuestCounter({ 
-  label, 
+function GuestCounter({
+  label,
   sublabel,
-  value, 
-  onChange, 
-  min = 0, 
-  max = 10 
-}: { 
-  label: string; 
+  value,
+  onChange,
+  min = 0,
+  max = 10
+}: {
+  label: string;
   sublabel?: string;
-  value: number; 
+  value: number;
   onChange: (v: number) => void;
   min?: number;
   max?: number;
 }) {
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
   return (
     <div className="flex items-center justify-between py-3">
       <div>
@@ -189,7 +191,8 @@ function GuestCounter({
           type="button"
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
+          aria-label={isRu ? `Уменьшить: ${label}` : `Decrease ${label}`}
           onClick={() => onChange(Math.max(min, value - 1))}
           disabled={value <= min}
         >
@@ -200,7 +203,8 @@ function GuestCounter({
           type="button"
           variant="outline"
           size="icon"
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
+          aria-label={isRu ? `Увеличить: ${label}` : `Increase ${label}`}
           onClick={() => onChange(Math.min(max, value + 1))}
           disabled={value >= max}
         >

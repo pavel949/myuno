@@ -149,8 +149,8 @@ export default function CrmMeetingsPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7"
                   onClick={() => setConfirmId(m.id)}
+                  aria-label={isRu ? 'Удалить' : 'Delete'}
                 >
                   <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>

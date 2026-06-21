@@ -88,28 +88,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             
             {/* Cart Controls */}
             {quantity === 0 ? (
-              <Button 
-                size="sm" 
-                className="h-8 px-3 rounded-full"
+              <Button
+                size="sm"
+                className="h-8 px-3 rounded-full min-h-[44px] min-w-[44px]"
                 onClick={(e) => { e.stopPropagation(); onAdd(); }}
+                aria-label={language === 'ru' ? 'В корзину' : 'Add to cart'}
               >
                 <Plus className="h-4 w-4" />
               </Button>
             ) : (
               <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  className="h-7 w-7 rounded-full"
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-7 w-7 rounded-full min-h-[44px] min-w-[44px]"
                   onClick={onRemove}
+                  aria-label={language === 'ru' ? 'Уменьшить' : 'Decrease'}
                 >
                   <Minus className="h-3 w-3" />
                 </Button>
                 <span className="text-sm font-medium w-4 text-center">{quantity}</span>
-                <Button 
-                  size="icon" 
-                  className="h-7 w-7 rounded-full"
+                <Button
+                  size="icon"
+                  className="h-7 w-7 rounded-full min-h-[44px] min-w-[44px]"
                   onClick={onAdd}
+                  aria-label={language === 'ru' ? 'Увеличить' : 'Increase'}
                 >
                   <Plus className="h-3 w-3" />
                 </Button>
@@ -190,28 +193,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           
           {/* Cart Controls */}
           {quantity === 0 ? (
-            <Button 
-              size="icon" 
-              className="h-8 w-8 rounded-full shrink-0"
+            <Button
+              size="icon"
+              className="h-8 w-8 rounded-full shrink-0 min-h-[44px] min-w-[44px]"
               onClick={(e) => { e.stopPropagation(); onAdd(); }}
+              aria-label={language === 'ru' ? 'В корзину' : 'Add to cart'}
             >
               <Plus className="h-4 w-4" />
             </Button>
           ) : (
             <div className="flex items-center gap-1.5">
-              <Button 
-                size="icon" 
-                variant="outline" 
-                className="h-7 w-7 rounded-full"
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-7 w-7 rounded-full min-h-[44px] min-w-[44px]"
                 onClick={(e) => { e.stopPropagation(); onRemove(); }}
+                aria-label={language === 'ru' ? 'Уменьшить' : 'Decrease'}
               >
                 <Minus className="h-3 w-3" />
               </Button>
               <span className="text-sm font-medium w-4 text-center">{quantity}</span>
-              <Button 
-                size="icon" 
-                className="h-7 w-7 rounded-full"
+              <Button
+                size="icon"
+                className="h-7 w-7 rounded-full min-h-[44px] min-w-[44px]"
                 onClick={(e) => { e.stopPropagation(); onAdd(); }}
+                aria-label={language === 'ru' ? 'Увеличить' : 'Increase'}
               >
                 <Plus className="h-3 w-3" />
               </Button>

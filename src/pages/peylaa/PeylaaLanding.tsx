@@ -361,14 +361,16 @@ export default function PeylaaLanding() {
               onClick={() => setLightboxIdx(null)}
             >
               <button
-                className="absolute top-4 right-4 text-white/60 hover:text-white text-3xl z-10"
+                className="absolute top-4 right-4 text-white/60 hover:text-white text-3xl z-10 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Закрыть"
                 onClick={() => setLightboxIdx(null)}
               >
                 &times;
               </button>
               {lightboxIdx > 0 && (
                 <button
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-4xl z-10"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-4xl z-10 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label="Предыдущее фото"
                   onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx - 1); }}
                 >
                   ‹
@@ -376,7 +378,8 @@ export default function PeylaaLanding() {
               )}
               {lightboxIdx < gallery.length - 1 && (
                 <button
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-4xl z-10"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 hover:text-white text-4xl z-10 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label="Следующее фото"
                   onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx + 1); }}
                 >
                   ›

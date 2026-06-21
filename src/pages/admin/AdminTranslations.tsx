@@ -95,7 +95,7 @@ export default function AdminTranslations() {
               Редактируйте тексты напрямую в таблице
             </CardDescription>
           </div>
-          <Button variant="ghost" size="icon" onClick={refetch} disabled={isLoading}>
+          <Button variant="ghost" size="icon" onClick={refetch} disabled={isLoading} aria-label="Refresh">
             <RefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
         </CardHeader>

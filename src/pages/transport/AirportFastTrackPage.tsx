@@ -588,11 +588,11 @@ export default function AirportFastTrackPage() {
             <div className="space-y-2">
               <Label>{isRu ? 'Количество пассажиров' : 'Number of passengers'}</Label>
               <div className="flex items-center gap-3">
-                <Button variant="outline" size="icon" onClick={removePassenger.bind(null, passengers.length - 1)} disabled={passengers.length <= 1}>
+                <Button variant="outline" size="icon" aria-label={isRu ? 'Убрать пассажира' : 'Remove passenger'} onClick={removePassenger.bind(null, passengers.length - 1)} disabled={passengers.length <= 1}>
                   <Minus className="w-4 h-4" />
                 </Button>
                 <span className="text-lg font-semibold w-8 text-center">{passengers.length}</span>
-                <Button variant="outline" size="icon" onClick={addPassenger} disabled={passengers.length >= (selectedService?.max_passengers || 10)}>
+                <Button variant="outline" size="icon" aria-label={isRu ? 'Добавить пассажира' : 'Add passenger'} onClick={addPassenger} disabled={passengers.length >= (selectedService?.max_passengers || 10)}>
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>

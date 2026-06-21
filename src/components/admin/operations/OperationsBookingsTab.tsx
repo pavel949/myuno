@@ -235,7 +235,8 @@ export function OperationsBookingsTab() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 min-h-[44px] min-w-[44px]"
+                            aria-label="View"
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedOrderId(order.id);

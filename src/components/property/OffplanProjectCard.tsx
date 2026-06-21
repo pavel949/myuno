@@ -188,7 +188,7 @@ export function OffplanProjectCard({
           aria-label={isRu ? 'Добавить в избранное' : 'Add to favourites'}
           onClick={handleFav}
           className={cn(
-            'absolute right-3 flex items-center justify-center w-8 h-8 rounded-full',
+            'absolute right-3 flex items-center justify-center w-8 h-8 min-h-[44px] min-w-[44px] rounded-full',
             'bg-background border border-border/50 shadow-sm',
             'hover:bg-background transition-colors',
             project.isClearviewRated && project.muunoScore ? 'top-14' : 'top-3'

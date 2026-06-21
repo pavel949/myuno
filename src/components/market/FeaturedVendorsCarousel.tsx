@@ -37,7 +37,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor, onClick }) => {
         {vendor.logo_url ? (
           <img
             src={vendor.logo_url}
-            alt={name}
+            alt=""
             className="w-12 h-12 rounded-none object-cover shadow-sm"
           />
         ) : (

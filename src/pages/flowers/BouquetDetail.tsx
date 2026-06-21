@@ -175,14 +175,14 @@ const BouquetDetail = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/flowers')} className="bg-black/20 text-white hover:bg-black/40">
+            <Button variant="ghost" size="icon" aria-label={isRu ? 'Назад' : 'Back'} onClick={() => navigate('/flowers')} className="bg-black/20 text-white hover:bg-black/40">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex gap-2">
-              <Button variant="ghost" size="icon" onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 text-white hover:bg-black/40">
+              <Button variant="ghost" size="icon" aria-label={isRu ? 'В избранное' : 'Favorite'} aria-pressed={isFavorite} onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 text-white hover:bg-black/40">
                 <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
               </Button>
-              <Button variant="ghost" size="icon" className="bg-black/20 text-white hover:bg-black/40">
+              <Button variant="ghost" size="icon" aria-label={isRu ? 'Поделиться' : 'Share'} className="bg-black/20 text-white hover:bg-black/40">
                 <Share2 className="w-5 h-5" />
               </Button>
             </div>
@@ -434,6 +434,7 @@ const BouquetDetail = () => {
                 </Button>
                 <Button
                   variant="outline"
+                  aria-label={isRu ? 'Добавить в корзину' : 'Add to cart'}
                   onClick={(e) => {
                     addToCart();
                   }}
@@ -445,11 +446,11 @@ const BouquetDetail = () => {
             ) : (
               <>
                 <div className="flex items-center gap-2 bg-secondary rounded-none p-1">
-                  <Button size="icon" variant="ghost" onClick={(e) => { removeFromCart(); }} className="h-10 w-10">
+                  <Button size="icon" variant="ghost" aria-label={isRu ? 'Уменьшить количество' : 'Decrease quantity'} onClick={(e) => { removeFromCart(); }} className="min-h-[44px] min-w-[44px]">
                     <Minus className="w-4 h-4" />
                   </Button>
                   <span className="w-8 text-center font-bold text-lg">{quantity}</span>
-                  <Button size="icon" variant="ghost" onClick={(e) => { addToCart(); }} className="h-10 w-10">
+                  <Button size="icon" variant="ghost" aria-label={isRu ? 'Увеличить количество' : 'Increase quantity'} onClick={(e) => { addToCart(); }} className="min-h-[44px] min-w-[44px]">
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>

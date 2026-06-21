@@ -244,7 +244,8 @@ export default function InspectionChecklist() {
                                 key={s}
                                 size="icon"
                                 variant={item.status === s ? 'default' : 'outline'}
-                                className={`h-7 w-7 ${item.status === s ? '' : sc.color}`}
+                                aria-label={isRu ? sc.label.ru : sc.label.en}
+                                className={`min-h-[44px] min-w-[44px] ${item.status === s ? '' : sc.color}`}
                                 onClick={() => updateItemStatus(idx, s)}
                               >
                                 <SIcon className="h-3.5 w-3.5" />

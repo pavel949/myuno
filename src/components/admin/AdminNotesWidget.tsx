@@ -302,7 +302,8 @@ export function AdminNotesWidget({
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-6 w-6"
+                                className="h-6 w-6 min-h-[44px] min-w-[44px]"
+                                aria-label={isRu ? 'Редактировать' : 'Edit'}
                                 onClick={() => startEdit(note)}
                               >
                                 <Pencil className="h-3 w-3" />
@@ -310,7 +311,8 @@ export function AdminNotesWidget({
                               <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-6 w-6 text-destructive hover:text-destructive"
+                                className="h-6 w-6 min-h-[44px] min-w-[44px] text-destructive hover:text-destructive"
+                                aria-label={isRu ? 'Удалить' : 'Delete'}
                                 onClick={() => deleteNote.mutate(note.id)}
                                 disabled={deleteNote.isPending}
                               >

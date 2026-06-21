@@ -644,7 +644,8 @@ const isRu = language === 'ru';
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6"
+                          className="min-h-[44px] min-w-[44px]"
+                          aria-label={isRu ? 'Удалить' : 'Remove'}
                           onClick={() => removeDocument(doc.url)}
                         >
                           <X className="h-3.5 w-3.5" />

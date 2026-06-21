@@ -56,7 +56,7 @@ export default function SavedSearches() {
           title={isRu ? 'Сохранённые поиски' : 'Saved searches'}
           showBack
           actions={
-            <Button variant="ghost" size="icon" onClick={() => navigate('/account/newbuild-alerts')}>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/account/newbuild-alerts')} aria-label={isRu ? 'Настройки оповещений' : 'Alert settings'}>
               <Settings className="w-5 h-5" />
             </Button>
           }
@@ -89,7 +89,7 @@ export default function SavedSearches() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button size="icon" variant="ghost" onClick={() => apply(s.id)} title={isRu ? 'Применить' : 'Apply'}>
+                    <Button size="icon" variant="ghost" onClick={() => apply(s.id)} title={isRu ? 'Применить' : 'Apply'} aria-label={isRu ? 'Применить' : 'Apply'}>
                       <Play className="w-4 h-4" />
                     </Button>
                     <Button
@@ -100,6 +100,7 @@ export default function SavedSearches() {
                         toast.success(isRu ? 'Удалено' : 'Deleted');
                       }}
                       title={isRu ? 'Удалить' : 'Delete'}
+                      aria-label={isRu ? 'Удалить' : 'Delete'}
                     >
                       <Trash2 className="w-4 h-4 text-destructive" />
                     </Button>

@@ -266,7 +266,8 @@ function MiniappMode({
           variant="ghost"
           size="icon"
           onClick={onMapClick || (mapPath ? () => navigate(mapPath) : undefined)}
-          className="shrink-0 h-9 w-9 rounded-none"
+          className="shrink-0 h-9 w-9 min-h-[44px] min-w-[44px] rounded-none"
+          aria-label={language === 'ru' ? 'Карта' : 'Map'}
         >
           <MapIcon className="w-5 h-5" />
         </Button>
@@ -280,7 +281,8 @@ function MiniappMode({
           variant="ghost"
           size="icon"
           onClick={() => navigate(APP_ROUTES.CART)}
-          className="relative shrink-0 h-9 w-9 rounded-none"
+          className="relative shrink-0 h-9 w-9 min-h-[44px] min-w-[44px] rounded-none"
+          aria-label={language === 'ru' ? 'Корзина' : 'Cart'}
         >
           <ShoppingCart className="w-5 h-5" />
           {cartItemCount > 0 && (
@@ -300,7 +302,7 @@ function MiniappMode({
           values={filterValues || {}}
           onChange={onFilterChange}
         >
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-none relative shrink-0">
+          <Button variant="ghost" size="icon" className="h-9 w-9 min-h-[44px] min-w-[44px] rounded-none relative shrink-0" aria-label={language === 'ru' ? 'Фильтры' : 'Filters'}>
             <SlidersHorizontal className="w-5 h-5" />
             {filterActiveCount > 0 && (
               <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">

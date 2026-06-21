@@ -87,7 +87,7 @@ export function PageHeader({
               {bc.href ? (
                 <button
                   onClick={() => navigate(bc.href!)}
-                  className="hover:text-foreground transition-colors truncate max-w-[120px]"
+                  className="hover:text-foreground transition-colors truncate max-w-[120px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   {bc.label}
                 </button>
@@ -141,6 +141,7 @@ export function PageHeader({
                     <button
                       key={i}
                       onClick={a.onClick}
+                      aria-label={a.label}
                       className={cn(
                         'inline-flex items-center gap-1.5 rounded-none text-sm font-medium transition-all ',
                         'h-[var(--touch-target)] px-3',

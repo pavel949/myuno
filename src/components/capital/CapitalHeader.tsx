@@ -13,7 +13,7 @@ export function CapitalHeader() {
       <span className="text-xs text-muted-foreground hidden sm:inline">
         {user?.email}
       </span>
-      <Button variant="ghost" size="icon" onClick={() => signOut()} title="Выйти">
+      <Button variant="ghost" size="icon" onClick={() => signOut()} title="Выйти" aria-label="Выйти">
         <LogOut className="w-4 h-4" />
       </Button>
     </header>

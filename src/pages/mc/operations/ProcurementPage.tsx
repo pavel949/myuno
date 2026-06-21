@@ -258,7 +258,8 @@ function CreatePOForm({ onClose }: { onClose: () => void }) {
               onChange={(e) => { const next = [...items]; next[idx].quantity = Number(e.target.value); setItems(next); }} />
             <Input className="col-span-3" type="number" min={0} step={0.01} value={it.unit_price}
               onChange={(e) => { const next = [...items]; next[idx].unit_price = Number(e.target.value); setItems(next); }} />
-            <Button type="button" size="icon" variant="ghost" className="col-span-1 h-8 w-8"
+            <Button type="button" size="icon" variant="ghost" className="col-span-1 min-h-[44px] min-w-[44px]"
+              aria-label={isRu ? 'Удалить позицию' : 'Remove item'}
               onClick={() => setItems(items.filter((_, i) => i !== idx))}>
               <X className="w-3 h-3" />
             </Button>

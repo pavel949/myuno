@@ -143,9 +143,10 @@ export default function AdminOperations() {
             {isRu ? 'Заказы, модерация, лиды и тикеты' : 'Orders, moderation, leads & tickets'}
           </p>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={isRu ? 'Обновить' : 'Refresh'}
           onClick={() => refetchOverview()}
           className="text-muted-foreground"
         >

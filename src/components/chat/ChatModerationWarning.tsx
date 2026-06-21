@@ -114,11 +114,12 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
         </div>
         
         {onDismiss && !isCritical && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-6 w-6 flex-shrink-0"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 min-h-[44px] min-w-[44px] flex-shrink-0"
             onClick={onDismiss}
+            aria-label={isRu ? 'Закрыть' : 'Close'}
           >
             <X className="w-3 h-3" />
           </Button>

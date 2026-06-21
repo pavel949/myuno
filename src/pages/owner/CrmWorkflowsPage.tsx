@@ -151,11 +151,12 @@ export default function CrmWorkflowsPage() {
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleActive(wf)}>
+                    <Button variant="ghost" size="icon" onClick={() => toggleActive(wf)} aria-label={wf.is_active ? (isRu ? 'Приостановить' : 'Pause') : (isRu ? 'Запустить' : 'Activate')}>
                       {wf.is_active ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
                     </Button>
                     <Button
-                      variant="ghost" size="icon" className="h-8 w-8"
+                      variant="ghost" size="icon"
+                      aria-label={isRu ? 'Удалить' : 'Delete'}
                       onClick={() => setConfirmId(wf.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />

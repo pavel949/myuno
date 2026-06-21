@@ -117,7 +117,7 @@ export default function VehicleDetail() {
               }}
               variant="ghost"
             />
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label={isRu ? 'Поделиться' : 'Share'}>
               <Share2 className="w-5 h-5" />
             </Button>
           </div>
@@ -348,10 +348,10 @@ export default function VehicleDetail() {
                 <span className="text-xs font-normal text-muted-foreground ml-0.5">/{isRu ? 'день' : 'day'}</span>
               </p>
             </div>
-            <Button variant="outline" size="icon" className="shrink-0">
+            <Button variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Позвонить' : 'Call'}>
               <Phone className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon" className="shrink-0">
+            <Button variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Написать' : 'Message'}>
               <MessageCircle className="w-4 h-4" />
             </Button>
             <Button

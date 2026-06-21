@@ -64,17 +64,18 @@ const RecipeBadge = forwardRef<HTMLDivElement, { recipe: ProductRecipe; language
             className="absolute z-50 top-full left-0 mt-2 w-64 bg-card border border-border rounded-none shadow-xl p-3 animate-in fade-in slide-in-from-top-2 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <button 
+            <button
               onClick={() => setShowTooltip(false)}
-              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label={language === 'ru' ? 'Закрыть' : 'Close'}
             >
               <X className="w-4 h-4" />
             </button>
             
             <div className="flex gap-3">
-              <img 
-                src={recipe.image} 
-                alt={recipe.dish}
+              <img
+                src={recipe.image}
+                alt=""
                 className="w-16 h-16 rounded-none object-cover shrink-0"
               />
               <div className="min-w-0">
@@ -205,19 +206,21 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
             </Button>
           ) : (
             <div className="flex items-center gap-2 bg-primary/10 rounded-full px-2" onClick={(e) => e.stopPropagation()}>
-              <Button 
-                size="icon" 
-                variant="ghost" 
-                className="h-9 w-9 rounded-full hover:bg-primary/20"
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-9 w-9 rounded-full hover:bg-primary/20 min-h-[44px] min-w-[44px]"
                 onClick={onRemove}
+                aria-label={language === 'ru' ? 'Уменьшить' : 'Decrease'}
               >
                 <Minus className="h-4 w-4" />
               </Button>
               <span className="text-base font-semibold w-6 text-center">{quantity}</span>
-              <Button 
-                size="icon" 
-                className="h-9 w-9 rounded-full"
+              <Button
+                size="icon"
+                className="h-9 w-9 rounded-full min-h-[44px] min-w-[44px]"
                 onClick={onAdd}
+                aria-label={language === 'ru' ? 'Увеличить' : 'Increase'}
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -292,28 +295,31 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
             
             {/* Cart Controls */}
             {quantity === 0 ? (
-              <Button 
-                size="sm" 
-                className="h-8 px-4 rounded-full shadow-sm"
+              <Button
+                size="sm"
+                className="h-8 px-4 rounded-full shadow-sm min-h-[44px] min-w-[44px]"
                 onClick={(e) => { e.stopPropagation(); onAdd(); }}
+                aria-label={language === 'ru' ? 'В корзину' : 'Add to cart'}
               >
                 <Plus className="h-4 w-4" />
               </Button>
             ) : (
               <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  className="h-7 w-7 rounded-full"
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-7 w-7 rounded-full min-h-[44px] min-w-[44px]"
                   onClick={onRemove}
+                  aria-label={language === 'ru' ? 'Уменьшить' : 'Decrease'}
                 >
                   <Minus className="h-3 w-3" />
                 </Button>
                 <span className="text-sm font-semibold w-5 text-center">{quantity}</span>
-                <Button 
-                  size="icon" 
-                  className="h-7 w-7 rounded-full"
+                <Button
+                  size="icon"
+                  className="h-7 w-7 rounded-full min-h-[44px] min-w-[44px]"
                   onClick={onAdd}
+                  aria-label={language === 'ru' ? 'Увеличить' : 'Increase'}
                 >
                   <Plus className="h-3 w-3" />
                 </Button>
@@ -454,26 +460,28 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
           
           {/* Cart Controls */}
           {quantity === 0 ? (
-            <Button 
-              size="icon" 
+            <Button
+              size="icon"
               className={cn(
-                "rounded-full shadow-md shrink-0",
+                "rounded-full shadow-md shrink-0 min-h-[44px] min-w-[44px]",
                 compact ? "h-7 w-7" : "h-9 w-9"
               )}
               onClick={(e) => { e.stopPropagation(); onAdd(); }}
+              aria-label={language === 'ru' ? 'В корзину' : 'Add to cart'}
             >
               <Plus className={compact ? "h-3 w-3" : "h-4 w-4"} />
             </Button>
           ) : (
             <div className="flex items-center gap-1 bg-primary/10 rounded-full px-1">
-              <Button 
-                size="icon" 
-                variant="ghost" 
+              <Button
+                size="icon"
+                variant="ghost"
                 className={cn(
-                  "rounded-full hover:bg-primary/20",
+                  "rounded-full hover:bg-primary/20 min-h-[44px] min-w-[44px]",
                   compact ? "h-6 w-6" : "h-7 w-7"
                 )}
                 onClick={(e) => { e.stopPropagation(); onRemove(); }}
+                aria-label={language === 'ru' ? 'Уменьшить' : 'Decrease'}
               >
                 <Minus className={compact ? "h-2.5 w-2.5" : "h-3 w-3"} />
               </Button>
@@ -481,13 +489,14 @@ export const ProfessionalProductCard = forwardRef<HTMLDivElement, ProfessionalPr
                 "font-bold text-center text-primary",
                 compact ? "text-xs w-4" : "text-sm w-5"
               )}>{quantity}</span>
-              <Button 
-                size="icon" 
+              <Button
+                size="icon"
                 className={cn(
-                  "rounded-full",
+                  "rounded-full min-h-[44px] min-w-[44px]",
                   compact ? "h-6 w-6" : "h-7 w-7"
                 )}
                 onClick={(e) => { e.stopPropagation(); onAdd(); }}
+                aria-label={language === 'ru' ? 'Увеличить' : 'Increase'}
               >
                 <Plus className={compact ? "h-2.5 w-2.5" : "h-3 w-3"} />
               </Button>

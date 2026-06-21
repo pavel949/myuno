@@ -38,7 +38,7 @@ export function BookingParticipants({
           size="icon"
           onClick={() => onChange(Math.max(min, count - 1))}
           disabled={count <= min}
-          className="h-10 w-10"
+          aria-label={language === 'ru' ? 'Уменьшить' : 'Decrease'}
         >
           <Minus className="w-4 h-4" />
         </Button>
@@ -61,7 +61,7 @@ export function BookingParticipants({
           size="icon"
           onClick={() => onChange(Math.min(max, count + 1))}
           disabled={count >= max}
-          className="h-10 w-10"
+          aria-label={language === 'ru' ? 'Увеличить' : 'Increase'}
         >
           <Plus className="w-4 h-4" />
         </Button>

@@ -156,7 +156,7 @@ export default function CrmCompaniesPage() {
                   </div>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive">
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" aria-label={isRu ? 'Удалить' : 'Delete'}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </AlertDialogTrigger>

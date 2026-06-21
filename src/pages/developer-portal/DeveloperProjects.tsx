@@ -73,12 +73,12 @@ export default function DeveloperProjects() {
               {/* Actions */}
               <div className="flex gap-2 flex-shrink-0">
                 <Link to={`/developer-portal/projects/${project.id}`}>
-                  <Button size="sm" variant="outline" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]">
+                  <Button size="sm" variant="outline" aria-label="Edit" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]">
                     <Edit className="w-4 h-4" />
                   </Button>
                 </Link>
                 <Link to={APP_ROUTES.OFFPLAN_DETAIL(project.id)} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="outline" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]">
+                  <Button size="sm" variant="outline" aria-label="Open" className="border-[hsl(var(--nb-glass-border))] text-[hsl(var(--nb-text-secondary))]">
                     <ExternalLink className="w-4 h-4" />
                   </Button>
                 </Link>

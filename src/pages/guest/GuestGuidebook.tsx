@@ -169,6 +169,7 @@ export default function GuestGuidebook() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={isRu ? 'Копировать' : 'Copy'}
                       onClick={() => copyToClipboard(guidebook.wifi_name!, 'wifi_name')}
                     >
                       {copiedField === 'wifi_name' ? (
@@ -188,6 +189,7 @@ export default function GuestGuidebook() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={isRu ? 'Копировать' : 'Copy'}
                       onClick={() => copyToClipboard(guidebook.wifi_password!, 'wifi_password')}
                     >
                       {copiedField === 'wifi_password' ? (
@@ -221,6 +223,7 @@ export default function GuestGuidebook() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={isRu ? 'Копировать' : 'Copy'}
                       onClick={() => copyToClipboard(guidebook.door_code!, 'door_code')}
                     >
                       {copiedField === 'door_code' ? (
@@ -240,6 +243,7 @@ export default function GuestGuidebook() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label={isRu ? 'Копировать' : 'Copy'}
                       onClick={() => copyToClipboard(guidebook.gate_code!, 'gate_code')}
                     >
                       {copiedField === 'gate_code' ? (
@@ -260,6 +264,7 @@ export default function GuestGuidebook() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        aria-label={isRu ? 'Копировать' : 'Copy'}
                         onClick={() => copyToClipboard(guidebook.lockbox_code!, 'lockbox_code')}
                       >
                         {copiedField === 'lockbox_code' ? (
@@ -303,7 +308,7 @@ export default function GuestGuidebook() {
                       </div>
                       {guide.video_url && (
                         <Button variant="ghost" size="icon" asChild>
-                          <a href={guide.video_url} target="_blank" rel="noopener noreferrer">
+                          <a href={guide.video_url} target="_blank" rel="noopener noreferrer" aria-label={isRu ? 'Смотреть видео' : 'Watch video'}>
                             <Play className="w-4 h-4" />
                           </a>
                         </Button>
@@ -441,7 +446,7 @@ export default function GuestGuidebook() {
                           </div>
                           {tip.google_maps_url && (
                             <Button variant="ghost" size="icon" asChild>
-                              <a href={tip.google_maps_url} target="_blank" rel="noopener noreferrer">
+                              <a href={tip.google_maps_url} target="_blank" rel="noopener noreferrer" aria-label={isRu ? 'Открыть на карте' : 'Open in Maps'}>
                                 <ExternalLink className="w-4 h-4" />
                               </a>
                             </Button>

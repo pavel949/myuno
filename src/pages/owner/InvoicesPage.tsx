@@ -258,7 +258,7 @@ export default function InvoicesPage() {
                         {item.amount.toLocaleString()}
                       </div>
                       {items.length > 1 && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem(idx)}>
+                        <Button variant="ghost" size="icon" onClick={() => removeItem(idx)} aria-label={isRu ? 'Удалить позицию' : 'Remove item'}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       )}
@@ -350,10 +350,10 @@ export default function InvoicesPage() {
                     <Send className="h-3 w-3 mr-1" />
                     {isRu ? 'Отправить' : 'Send'}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)}>
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)} aria-label={isRu ? 'Скачать' : 'Download'}>
                     <Download className="h-3 w-3" />
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleDelete(inv.id)}>
+                  <Button size="sm" variant="ghost" onClick={() => handleDelete(inv.id)} aria-label={isRu ? 'Удалить' : 'Delete'}>
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
@@ -365,10 +365,10 @@ export default function InvoicesPage() {
                     <Check className="h-3 w-3 mr-1" />
                     {isRu ? 'Оплачен' : 'Paid'}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)}>
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)} aria-label={isRu ? 'Скачать' : 'Download'}>
                     <Download className="h-3 w-3" />
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleCancel(inv.id)}>
+                  <Button size="sm" variant="ghost" onClick={() => handleCancel(inv.id)} aria-label={isRu ? 'Отменить' : 'Cancel'}>
                     <X className="h-3 w-3" />
                   </Button>
                 </div>
@@ -380,7 +380,7 @@ export default function InvoicesPage() {
                     <Check className="h-3 w-3 mr-1" />
                     {isRu ? 'Отметить оплату' : 'Mark Paid'}
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)}>
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadPdf(inv)} aria-label={isRu ? 'Скачать' : 'Download'}>
                     <Download className="h-3 w-3" />
                   </Button>
                 </div>

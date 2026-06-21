@@ -210,6 +210,7 @@ function RelationshipRow({
           'p-1.5 rounded-none transition-colors shrink-0',
           showUnlink ? 'text-destructive hover:bg-destructive/10' : 'text-muted-foreground/50 opacity-0 group-hover:opacity-100'
         )}
+        aria-label={isRu ? 'Удалить связь' : 'Remove'}
         title={isRu ? 'Удалить связь' : 'Remove'}
       >
         <Trash2 className="h-3.5 w-3.5" />

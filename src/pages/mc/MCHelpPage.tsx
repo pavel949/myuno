@@ -403,7 +403,7 @@ function HelpAIAssistant({ isRu }: { isRu: boolean }) {
             disabled={isLoading}
             className="flex-1 h-9"
           />
-          <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="h-9 w-9">
+          <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" className="min-h-[44px] min-w-[44px] h-9 w-9" aria-label={isRu ? 'Отправить' : 'Send'}>
             <Send className="w-4 h-4" />
           </Button>
         </div>

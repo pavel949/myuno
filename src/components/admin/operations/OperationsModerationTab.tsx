@@ -226,7 +226,8 @@ export function OperationsModerationTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-success hover:text-success hover:bg-success/10"
+                      className="h-8 w-8 min-h-[44px] min-w-[44px] text-success hover:text-success hover:bg-success/10"
+                      aria-label={isRussian ? 'Одобрить' : 'Approve'}
                       onClick={() => approveMutation.mutate({ id: item.id, type: item.type })}
                       disabled={approveMutation.isPending}
                     >
@@ -235,13 +236,14 @@ export function OperationsModerationTab() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      className="h-8 w-8 min-h-[44px] min-w-[44px] text-destructive hover:text-destructive hover:bg-destructive/10"
+                      aria-label={isRussian ? 'Отклонить' : 'Reject'}
                       onClick={() => rejectMutation.mutate({ id: item.id, type: item.type })}
                       disabled={rejectMutation.isPending}
                     >
                       <ThumbsDown className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Просмотр' : 'View'}>
                       <Eye className="h-4 w-4" />
                     </Button>
                   </div>

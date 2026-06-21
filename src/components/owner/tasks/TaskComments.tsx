@@ -83,7 +83,7 @@ export function TaskComments({ taskId, taskSource }: Props) {
           className="min-h-[36px] text-sm"
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
         />
-        <Button size="icon" variant="ghost" onClick={handleSubmit} disabled={!text.trim() || addComment.isPending}>
+        <Button size="icon" variant="ghost" aria-label={t('Send', 'Отправить')} onClick={handleSubmit} disabled={!text.trim() || addComment.isPending}>
           <Send className="h-4 w-4" />
         </Button>
       </div>

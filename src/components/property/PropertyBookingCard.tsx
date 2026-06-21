@@ -369,9 +369,9 @@ export function PropertyBookingCard({
             <div className="flex items-center justify-between">
               <span className="font-medium text-foreground">{isRu ? 'Гости' : 'Guests'}</span>
               <div className="flex items-center gap-3">
-                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={() => setGuests(Math.max(1, guests - 1))} disabled={guests <= 1}>-</Button>
+                <Button variant="outline" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full" onClick={() => setGuests(Math.max(1, guests - 1))} disabled={guests <= 1} aria-label={isRu ? 'Меньше гостей' : 'Fewer guests'}>-</Button>
                 <span className="w-6 text-center font-semibold text-foreground">{guests}</span>
-                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" onClick={() => setGuests(Math.min(rentalTerms?.max_guests || 20, guests + 1))} disabled={guests >= (rentalTerms?.max_guests || 20)}>+</Button>
+                <Button variant="outline" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full" onClick={() => setGuests(Math.min(rentalTerms?.max_guests || 20, guests + 1))} disabled={guests >= (rentalTerms?.max_guests || 20)} aria-label={isRu ? 'Больше гостей' : 'More guests'}>+</Button>
               </div>
             </div>
             {rentalTerms?.max_guests && (

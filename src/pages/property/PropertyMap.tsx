@@ -117,7 +117,7 @@ export default function PropertyMap() {
           
           <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'Фильтры' : 'Filters'}>
                 <Sliders className="w-5 h-5" />
               </Button>
             </SheetTrigger>

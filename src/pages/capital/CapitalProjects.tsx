@@ -168,7 +168,7 @@ export default function CapitalProjects() {
                   <div key={idx} className="flex gap-2 mt-1">
                     <Input value={sp} onChange={(e) => updateSellingPoint(idx, e.target.value)} placeholder="Преимущество..." />
                     {form.selling_points.length > 1 && (
-                      <Button variant="ghost" size="icon" onClick={() => removeSellingPoint(idx)}><X className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" aria-label="Remove" onClick={() => removeSellingPoint(idx)}><X className="w-4 h-4" /></Button>
                     )}
                   </div>
                 ))}
