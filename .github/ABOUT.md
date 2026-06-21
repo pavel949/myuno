@@ -4,7 +4,7 @@
 
 ## GitHub repository description (short, ≤350 chars)
 
-> myUNO · Phuket Super-App for Foreigners — stays, services, property & investments in one app. React 18 · Vite 6 · Supabase · Stripe · ClearView™. Trusted digital infrastructure for life and capital on Phuket.
+> myUNO · AI-first super-app for foreigners on Phuket. 59 micro-apps across 6 life surfaces (Arrive · Live · Manage · Invest · Legal · Build) — stays, services, property & off-plan investment under one account, one DB. React 18 · TypeScript · Vite 6 · Supabase · Stripe · Capacitor. ClearView™ off-plan ratings. RU/EN.
 
 ## GitHub topics (tags)
 
