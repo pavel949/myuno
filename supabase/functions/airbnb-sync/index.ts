@@ -1,4 +1,5 @@
 import { createClient } from '../_shared/supabase.ts';
+import { requireAuth } from '../_shared/auth-guard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -339,10 +340,15 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Require authenticated user
+    const authResult = await requireAuth(req, corsHeaders);
+    if (authResult instanceof Response) return authResult;
+    const userId = authResult.user.id;
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY');
-    
+
     if (!firecrawlKey) {
       return new Response(
         JSON.stringify({ success: false, error: 'Firecrawl connector not configured' }),
@@ -365,7 +371,7 @@ Deno.serve(async (req) => {
     let url = listing_url;
     let ownerId: string | null = null;
 
-    // If connection_id provided, fetch the connection
+    // If connection_id provided, fetch the connection and verify ownership
     if (connection_id) {
       const { data: connection, error: connError } = await supabase
         .from('ota_listing_connections')
@@ -377,6 +383,14 @@ Deno.serve(async (req) => {
         return new Response(
           JSON.stringify({ success: false, error: 'Connection not found' }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Ownership check — only the owner of the connection can trigger sync
+      if (connection.owner_id !== userId) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Forbidden: not the owner of this connection' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 

@@ -28,24 +28,26 @@ Deno.serve(async (req) => {
     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000)
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
     
-    // Get all bookings scheduled in the next 24 hours
+    // Get all confirmed orders scheduled to start in the next 24 hours.
+    // `orders` is the canonical model (property + service + transport + …).
     const { data: upcomingBookings, error: bookingsError } = await supabase
-      .from('bookings')
-      .select('id, user_id, scheduled_at, notes, total_amount, currency, booking_type')
-      .gte('scheduled_at', now.toISOString())
-      .lte('scheduled_at', tomorrow.toISOString())
-      .in('status', ['confirmed', 'submitted'])
-    
+      .from('orders')
+      .select('id, customer_user_id, start_at, total_amount, currency, order_type')
+      .not('start_at', 'is', null)
+      .gte('start_at', now.toISOString())
+      .lte('start_at', tomorrow.toISOString())
+      .in('status', ['confirmed', 'paid', 'submitted'])
+
     if (bookingsError) {
-      console.error('Error fetching bookings:', bookingsError)
+      console.error('Error fetching orders:', bookingsError)
       throw bookingsError
     }
 
-    console.info(`Found ${upcomingBookings?.length || 0} upcoming bookings`)
+    console.info(`Found ${upcomingBookings?.length || 0} upcoming orders`)
 
     if (!upcomingBookings || upcomingBookings.length === 0) {
       return new Response(
-        JSON.stringify({ message: 'No upcoming bookings found', processed: 0, sent: 0 }),
+        JSON.stringify({ message: 'No upcoming orders found', processed: 0, sent: 0 }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -53,10 +55,11 @@ Deno.serve(async (req) => {
     let notificationsSent = 0
 
     for (const booking of upcomingBookings) {
-      const scheduledDate = new Date(booking.scheduled_at)
+      if (!booking.customer_user_id || !booking.start_at) continue;
+      const scheduledDate = new Date(booking.start_at)
       const timeUntilBooking = scheduledDate.getTime() - now.getTime()
       const hoursUntil = timeUntilBooking / (60 * 60 * 1000)
-      
+
       // Determine reminder type: 1-hour or 24-hour
       let reminderType: '1hour' | '24hour' | null = null
       if (hoursUntil <= 1) {
@@ -64,18 +67,18 @@ Deno.serve(async (req) => {
       } else if (hoursUntil <= 24) {
         reminderType = '24hour'
       }
-      
+
       if (!reminderType) continue
 
       // Check if user wants booking reminders
       const { data: preferences } = await supabase
         .from('notification_preferences')
         .select('booking_reminders')
-        .eq('user_id', booking.user_id)
+        .eq('user_id', booking.customer_user_id)
         .single()
 
       if (preferences && preferences.booking_reminders === false) {
-        console.info(`User ${booking.user_id} has disabled booking reminders`)
+        console.info(`User ${booking.customer_user_id} has disabled booking reminders`)
         continue
       }
 
@@ -83,20 +86,20 @@ Deno.serve(async (req) => {
       const { data: existingNotification } = await supabase
         .from('notifications')
         .select('id')
-        .eq('user_id', booking.user_id)
+        .eq('user_id', booking.customer_user_id)
         .eq('type', `booking_reminder_${reminderType}`)
         .like('body', `%${booking.id}%`)
         .single()
 
       if (existingNotification) {
-        console.info(`${reminderType} reminder already sent for booking ${booking.id}`)
+        console.info(`${reminderType} reminder already sent for order ${booking.id}`)
         continue
       }
 
       // Format the scheduled time (reuse scheduledDate from above)
-      const timeStr = scheduledDate.toLocaleTimeString('ru-RU', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      const timeStr = scheduledDate.toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit'
       })
       const dateStr = scheduledDate.toLocaleDateString('ru-RU', {
         day: 'numeric',
@@ -110,31 +113,32 @@ Deno.serve(async (req) => {
         property: 'Недвижимость',
         event: 'Мероприятие',
         transport: 'Транспорт',
+        vehicle: 'Транспорт',
         food: 'Еда'
       }
-      const typeLabel = typeLabels[booking.booking_type] || 'Бронирование'
+      const typeLabel = typeLabels[booking.order_type] || 'Бронирование'
 
       // Create notification with appropriate urgency
       const isUrgent = reminderType === '1hour'
-      const title = isUrgent 
-        ? `⏰ Скоро: ${typeLabel}` 
+      const title = isUrgent
+        ? `⏰ Скоро: ${typeLabel}`
         : `Напоминание: ${typeLabel}`
-      const timeInfo = isUrgent 
-        ? `через 1 час (${timeStr})` 
+      const timeInfo = isUrgent
+        ? `через 1 час (${timeStr})`
         : `${dateStr} в ${timeStr}`
 
       // Create notification
       const { error: notifError } = await supabase
         .from('notifications')
         .insert({
-          user_id: booking.user_id,
+          user_id: booking.customer_user_id,
           title: title,
           body: `Ваше бронирование запланировано ${timeInfo}. ID: ${booking.id}`,
           type: `booking_reminder_${reminderType}`,
           data: {
-            booking_id: booking.id,
-            scheduled_at: booking.scheduled_at,
-            booking_type: booking.booking_type,
+            order_id: booking.id,
+            scheduled_at: booking.start_at,
+            order_type: booking.order_type,
             amount: booking.total_amount,
             currency: booking.currency,
             reminder_type: reminderType
@@ -142,10 +146,10 @@ Deno.serve(async (req) => {
         })
 
       if (notifError) {
-        console.error(`Error creating ${reminderType} notification for booking ${booking.id}:`, notifError)
+        console.error(`Error creating ${reminderType} notification for order ${booking.id}:`, notifError)
       } else {
         notificationsSent++
-        console.info(`${reminderType} reminder sent for booking ${booking.id}`)
+        console.info(`${reminderType} reminder sent for order ${booking.id}`)
       }
     }
 
