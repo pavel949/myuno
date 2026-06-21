@@ -60,6 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       Object.keys(window.sessionStorage)
         .filter((key) => key.startsWith('qa_multi_role_bundle_checked:'))
         .forEach((key) => window.sessionStorage.removeItem(key));
+
+      // Clear admin impersonation / "view-as" scopes so they never leak across
+      // an account switch on a shared device (keys mirror the STORAGE_KEY
+      // constants in ImpersonationContext / PlatformViewAsContext).
+      window.sessionStorage.removeItem('myuno:impersonate_dev');
+      window.sessionStorage.removeItem('myuno:platform-view-as');
     }
 
     clearAdminCache();

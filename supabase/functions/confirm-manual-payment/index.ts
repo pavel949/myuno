@@ -130,6 +130,17 @@ Deno.serve(async (req) => {
       })
       .eq('id', orderId);
 
+    // 2b. Record double-entry ledger so this manual (RUB) payment produces the
+    // same audit trail / platform-fee + vendor-payout entries as Stripe orders.
+    // Without this the order shows up as a discrepancy in reconciliation_alerts
+    // and no vendor payout is ever owed. RPC is idempotent (skips if exists).
+    try {
+      const { error: ledgerErr } = await sb.rpc('record_ledger_entries', { p_order_id: orderId });
+      if (ledgerErr) console.error('[confirm-manual-payment] record_ledger_entries failed (non-fatal):', ledgerErr);
+    } catch (e) {
+      console.error('[confirm-manual-payment] record_ledger_entries threw (non-fatal):', e);
+    }
+
     // 3. Notify guest in-app
     await sb.from('notifications').insert({
       user_id: (mpr as any).user_id,

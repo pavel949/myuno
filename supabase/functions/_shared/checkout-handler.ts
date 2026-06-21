@@ -94,6 +94,14 @@ export interface CheckoutResult {
 export interface CheckoutConfig {
   /** Endpoint name for rate limiting + logging. */
   endpoint: string;
+  /**
+   * When true, the persisted order total is forced to equal the sum of the
+   * Stripe line items (anti-tampering). Only enable for verticals where Stripe
+   * charges the FULL order amount up-front — NOT for deposit/partial-payment
+   * verticals (yacht, property-deposit) where the charge is intentionally less
+   * than the order total.
+   */
+  enforceLineItemTotal?: boolean;
   /** Build the checkout result from the parsed request body + authenticated user. */
   build(
     body: unknown,
@@ -147,6 +155,28 @@ export function createCheckoutHandler(config: CheckoutConfig) {
       const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
       const supabaseAdmin = createServiceClient();
       const result = await config.build(body, { id: user.id, email: user.email ?? undefined }, origin, supabaseAdmin);
+
+      // Anti-tampering guard (opt-in via enforceLineItemTotal): for verticals
+      // that charge the FULL amount up-front, Stripe charges the sum of
+      // `lineItems`, so the persisted order total MUST equal that sum — never a
+      // client-supplied `total_amount`. If they diverge we override the order
+      // total with the authoritative line-item sum (and log it) so the order
+      // record and ledger can never disagree with the money actually collected.
+      if (config.enforceLineItemTotal && result.order) {
+        const lineItemsTotal = result.lineItems.reduce(
+          (sum, li) => sum + (li.price_data.unit_amount * li.quantity) / 100,
+          0,
+        );
+        if (Number.isFinite(lineItemsTotal)) {
+          const claimed = Number(result.order.total_amount);
+          if (!Number.isFinite(claimed) || Math.abs(claimed - lineItemsTotal) > 0.01) {
+            console.warn(
+              `[${config.endpoint}] total_amount mismatch: client=${claimed} lineItems=${lineItemsTotal} — using line-item sum`,
+            );
+            result.order.total_amount = lineItemsTotal;
+          }
+        }
+      }
 
       let orderId: string | null = null;
       let orderNumber: string | null = null;

@@ -70,9 +70,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Clean phone number (remove @c.us suffix from UltraMSG)
-    const phone = from.replace("@c.us", "").replace("@s.whatsapp.net", "");
+    // Clean phone number (remove @c.us suffix from UltraMSG) and sanitize to
+    // digits only. `from` is attacker-controlled and later interpolated into a
+    // PostgREST `.or()` filter string, so stripping every non-digit character
+    // closes that injection vector while keeping the phone usable for lookups.
+    const phone = (from.split("@")[0] || "").replace(/\D/g, "");
     const name = pushName || `WhatsApp ${phone}`;
+
+    if (!phone) {
+      return new Response(
+        JSON.stringify({ ok: true, skipped: true, reason: "no_phone" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const supabase = createServiceClient();
 

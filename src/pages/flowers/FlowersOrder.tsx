@@ -41,7 +41,7 @@ const FlowersOrder = () => {
   const location = useLocation();
   const { language } = useLanguage();
   const { user } = useAuth();
-  const { balance, payFromWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
+  const { balance, payFromWallet, refundToWallet, hasEnoughBalance, isLoading: isWalletLoading } = useWallet();
   const { getItemsByType, clearByType } = useCart();
   const { createBooking, isSubmitting } = useBooking();
   const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
@@ -153,6 +153,9 @@ const FlowersOrder = () => {
     // Get first provider from cart items
     const firstProvider = cartItems.find(item => item.providerId);
 
+    // Tracks whether the wallet was debited, so we can refund on later failure.
+    let walletCharged = false;
+
     try {
       // For card payments, redirect to Stripe Checkout
       if (formData.paymentMethod === 'card') {
@@ -186,7 +189,8 @@ const FlowersOrder = () => {
         return;
       }
 
-      // For wallet payments, deduct balance first
+      // For wallet payments, deduct balance first. Track that we charged the
+      // wallet so we can refund if the subsequent order creation fails.
       if (formData.paymentMethod === 'wallet') {
         const result = await payFromWallet(
           finalTotal,
@@ -194,11 +198,12 @@ const FlowersOrder = () => {
           `Заказ цветов`,
           'flower_order'
         );
-        
+
         if (!result.success) {
           toast.error(language === 'ru' ? 'Недостаточно средств на кошельке' : 'Insufficient wallet balance');
           return;
         }
+        walletCharged = true;
       }
 
       // For concierge advance payments
@@ -429,9 +434,17 @@ const FlowersOrder = () => {
 
         navigate('/bookings');
       } else {
+        // Order creation failed after we already debited the wallet — refund it
+        // so the customer never loses money for an order that doesn't exist.
+        if (walletCharged) {
+          await refundToWallet(finalTotal, 'flower_order_failed');
+        }
         toast.error(language === 'ru' ? 'Не удалось создать заказ' : 'Failed to create order');
       }
     } catch {
+      if (walletCharged) {
+        await refundToWallet(finalTotal, 'flower_order_failed');
+      }
       toast.error(language === 'ru' ? 'Ошибка при оформлении заказа' : 'Failed to place order');
     }
   };

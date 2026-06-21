@@ -64,13 +64,26 @@ export function getClientIdentifier(req: Request, userId?: string): string {
 export async function checkRateLimit(
   identifier: string,
   endpoint: string,
-  config: { maxRequests: number; windowSeconds: number }
+  config: { maxRequests: number; windowSeconds: number },
+  // Security control: when the limiter itself errors, sensitive endpoints
+  // (auth/payment) must fail CLOSED so a brute-force attacker can't bypass the
+  // limit by inducing DB errors. Lenient/public endpoints can fail open to
+  // avoid hard outages on transient DB hiccups.
+  failClosed = false
 ): Promise<RateLimitResult> {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  
+
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  
+
+  const onError = (): RateLimitResult => ({
+    allowed: !failClosed,
+    currentCount: failClosed ? config.maxRequests : 0,
+    maxRequests: config.maxRequests,
+    windowSeconds: config.windowSeconds,
+    retryAfter: failClosed ? config.windowSeconds : 0,
+  });
+
   try {
     const { data, error } = await supabase.rpc("check_rate_limit", {
       p_identifier: identifier,
@@ -78,19 +91,12 @@ export async function checkRateLimit(
       p_max_requests: config.maxRequests,
       p_window_seconds: config.windowSeconds,
     });
-    
+
     if (error) {
       console.error("[RATE-LIMIT] Error checking rate limit:", error);
-      // Fail open - allow request if rate limit check fails
-      return {
-        allowed: true,
-        currentCount: 0,
-        maxRequests: config.maxRequests,
-        windowSeconds: config.windowSeconds,
-        retryAfter: 0,
-      };
+      return onError();
     }
-    
+
     return {
       allowed: data.allowed,
       currentCount: data.current_count,
@@ -100,14 +106,7 @@ export async function checkRateLimit(
     };
   } catch (err) {
     console.error("[RATE-LIMIT] Exception:", err);
-    // Fail open
-    return {
-      allowed: true,
-      currentCount: 0,
-      maxRequests: config.maxRequests,
-      windowSeconds: config.windowSeconds,
-      retryAfter: 0,
-    };
+    return onError();
   }
 }
 
@@ -147,10 +146,15 @@ export async function withRateLimit(
   endpoint: string,
   config: { maxRequests: number; windowSeconds: number },
   corsHeaders: Record<string, string>,
-  userId?: string
+  userId?: string,
+  // Fail closed for the auth bucket so the brute-force limiter can't be bypassed
+  // by forcing the limiter to error. Other buckets (payment endpoints already
+  // require a valid JWT, public reads) fail open to avoid blocking legitimate
+  // traffic during a transient DB hiccup. Callers can override explicitly.
+  failClosed: boolean = config === RATE_LIMITS.auth
 ): Promise<Response | null> {
   const identifier = getClientIdentifier(req, userId);
-  const result = await checkRateLimit(identifier, endpoint, config);
+  const result = await checkRateLimit(identifier, endpoint, config, failClosed);
   
   if (!result.allowed) {
     console.info(`[RATE-LIMIT] Blocked: ${identifier} on ${endpoint}`);
