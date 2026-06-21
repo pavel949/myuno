@@ -4,7 +4,7 @@ import { useMyGamification, getLevelFromPoints, getLevelProgress, LEVEL_CONFIG }
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Sparkles, Zap, Star, Crown, Medal, Award } from 'lucide-react';
+import { Trophy, Sparkles, Zap, Star, Crown, Medal, Award, Flame } from 'lucide-react';
 
 const LEVEL_ICONS = [Star, Zap, Medal, Award, Crown];
 
@@ -77,8 +77,9 @@ export function PointsDisplay({ compact = false, className }: PointsDisplayProps
               {stats?.streak_days} {isRu ? 'дней подряд' : 'day streak'}
             </span>
           </div>
-          <Badge variant="outline" className="text-warning border-warning/30">
-            🔥 {isRu ? 'В ударе!' : 'On fire!'}
+          <Badge variant="outline" className="gap-1 text-warning border-warning/30">
+            <Flame className="h-3 w-3" />
+            {isRu ? 'В ударе!' : 'On fire!'}
           </Badge>
         </div>
       )}

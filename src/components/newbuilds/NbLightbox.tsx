@@ -57,6 +57,7 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
       {/* Close button */}
       <button
         onClick={onClose}
+        aria-label="Close"
         className="absolute top-4 right-4 z-10 p-2 rounded-full transition-colors"
         style={{ background: 'hsl(var(--nb-gold) / 0.2)', color: 'hsl(var(--nb-gold))' }}
       >
@@ -109,6 +110,7 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
         <>
           <button
             onClick={e => { e.stopPropagation(); goPrev(); }}
+            aria-label="Previous"
             className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all "
             style={{ background: 'hsl(var(--nb-gold) / 0.2)', color: 'hsl(var(--nb-gold))' }}
           >
@@ -116,6 +118,7 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
           </button>
           <button
             onClick={e => { e.stopPropagation(); goNext(); }}
+            aria-label="Next"
             className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all "
             style={{ background: 'hsl(var(--nb-gold) / 0.2)', color: 'hsl(var(--nb-gold))' }}
           >
@@ -131,6 +134,7 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
             <button
               key={i}
               onClick={e => { e.stopPropagation(); setIndex(i); }}
+              aria-label={`Image ${i + 1}`}
               className="flex-shrink-0 w-12 h-9 rounded-none overflow-hidden transition-all"
               style={{
                 border: i === index ? '2px solid hsl(var(--nb-gold))' : '2px solid transparent',

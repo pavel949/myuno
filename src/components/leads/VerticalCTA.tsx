@@ -196,7 +196,7 @@ export function VerticalCTA({
               </div>
               {/* Online indicator */}
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-success rounded-full border-2 border-background flex items-center justify-center">
-                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                <div className="w-2 h-2 bg-card rounded-full animate-pulse" />
               </div>
             </div>
 

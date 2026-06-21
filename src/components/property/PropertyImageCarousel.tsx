@@ -89,7 +89,7 @@ export function PropertyImageCarousel({
         {hasMultiple && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
             {allImages.slice(0, 5).map((_, i) => (
-              <span key={i} className={cn("rounded-full", i === 0 ? "bg-white w-[6px] h-[6px]" : "bg-white/50 w-[5px] h-[5px]")} />
+              <span key={i} className={cn("rounded-full", i === 0 ? "bg-card w-[6px] h-[6px]" : "bg-white/50 w-[5px] h-[5px]")} />
             ))}
           </div>
         )}
@@ -152,9 +152,10 @@ export function PropertyImageCarousel({
         {allImages.slice(0, 5).map((_, i) => (
           <button
             key={i}
+            aria-label={`Go to image ${i + 1}`}
             className={cn(
               "rounded-full transition-all",
-              selectedIndex === i ? "bg-white w-[6px] h-[6px]" : "bg-white/50 w-[5px] h-[5px]"
+              selectedIndex === i ? "bg-card w-[6px] h-[6px]" : "bg-white/50 w-[5px] h-[5px]"
             )}
             onClick={(e) => {
               e.preventDefault();

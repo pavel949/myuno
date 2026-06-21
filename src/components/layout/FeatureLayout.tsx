@@ -543,7 +543,7 @@ function LandingMode({
             {heroCta && (
               <Button
                 onClick={heroCta.onClick}
-                className="bg-white text-foreground hover:bg-white/90 font-semibold gap-2"
+                className="bg-card text-foreground hover:bg-white/90 font-semibold gap-2"
               >
                 <MessageCircle className="w-4 h-4" />
                 {heroCta.label}

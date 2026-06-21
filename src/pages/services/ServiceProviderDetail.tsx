@@ -163,7 +163,7 @@ const ServiceProviderDetail = () => {
               />
               {provider.is_active && (
                 <div className="absolute bottom-1 right-1 w-6 h-6 bg-success rounded-full border-2 border-background flex items-center justify-center">
-                  <div className="w-2.5 h-2.5 bg-white rounded-full" />
+                  <div className="w-2.5 h-2.5 bg-card rounded-full" />
                 </div>
               )}
             </div>

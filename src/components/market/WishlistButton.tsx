@@ -35,6 +35,7 @@ export const WishlistButton = forwardRef<HTMLButtonElement, WishlistButtonProps>
           className
         )}
         aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+        aria-pressed={isWishlisted}
       >
         <Heart
           className={cn(

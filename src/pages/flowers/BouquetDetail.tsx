@@ -287,7 +287,7 @@ const BouquetDetail = () => {
                     )}
                     {selectedSize === variant.size && (
                       <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full" />
+                        <div className="w-2 h-2 bg-card rounded-full" />
                       </div>
                     )}
                   </button>

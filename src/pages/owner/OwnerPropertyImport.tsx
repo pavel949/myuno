@@ -761,10 +761,11 @@ export default function OwnerPropertyImport() {
                         )}
                       </CardDescription>
                     </div>
-                    <a 
-                      href={url} 
-                      target="_blank" 
+                    <a
+                      href={url}
+                      target="_blank"
                       rel="noopener noreferrer"
+                      aria-label={isRu ? 'Открыть' : 'Open'}
                       className="text-muted-foreground hover:text-primary"
                     >
                       <ExternalLink className="h-5 w-5" />

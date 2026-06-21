@@ -102,6 +102,7 @@ export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: Photo
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
+              aria-label={isRu ? `Фото ${i + 1}` : `Photo ${i + 1}`}
               className={cn(
                 "w-16 h-12 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all",
                 currentIndex === i

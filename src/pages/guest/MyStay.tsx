@@ -245,7 +245,7 @@ export default function MyStay() {
           <div className="space-y-4 py-4">
             <div className="flex justify-center gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
-                <button key={star} onClick={() => setRating(star)} className="p-1">
+                <button key={star} onClick={() => setRating(star)} aria-label={isRu ? `Оценка ${star} из 5` : `Rate ${star} of 5`} className="p-1">
                   <Star className={`w-8 h-8 ${star <= rating ? 'text-warning fill-warning' : 'text-muted'}`} />
                 </button>
               ))}
