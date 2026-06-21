@@ -1,7 +1,7 @@
 # myUNO SuperApp — UX Design Contract
 
 > **Version**: 2.1.0  
-> **Last Updated**: 2026-06-20  
+> **Last Updated**: 2026-06-21  
 > **Status**: Active  
 > **Maintainers**: Platform Architecture Team  
 > **Design System**: DS 2.1 (see `DESIGN.md` — canonical source for all visual decisions)
@@ -738,7 +738,7 @@ Before submitting a PR for any vertical, verify:
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 2.1.0 | 2026-06-20 | Re-synced §8 themes + §9 typography to DS 2.1 runtime (`tokens.css`): light-first default, navy/cream/orange palette, Source Serif 4 + Geist + IBM Plex Mono triad, muted cluster tones (rainbow retired), sharp corners, standard `dark:` (class) strategy. Corrects stale DS 2.0 guidance. |
+| 2.1.0 | 2026-06-21 | Re-synced §8 themes + §9 typography to DS 2.1 runtime (`tokens.css`): light-first default, navy/cream/orange palette, Source Serif 4 + Geist + IBM Plex Mono triad, muted cluster tones (rainbow retired), sharp corners, standard `dark:` (class) strategy. Corrects stale DS 2.0 guidance. |
 | 2.0.0 | 2026-04-20 | (Superseded) Documented DS 2.0: dark-first theme, Golos Text + DM Sans + JetBrains Mono fonts, `html.light` pattern, 6-colour cluster rainbow |
 | 1.0.0 | 2026-02-02 | Initial UX Contract established |
 
