@@ -75,25 +75,25 @@
 
 **Версия:** 3.55.5
 **Ветка:** main (origin/main == HEAD на 2026-06-21)
-**Статус:** Активная разработка (i18n cleanup, lead routing, WhatsApp заявки, bug fixes)
+**Статус:** Активная разработка (codebase audit-fix pass + полная синхронизация документации только что влиты; далее — i18n cleanup, lead routing)
 
 ### Последние изменения (последние 10 коммитов):
-- `b66347d` — Отправил заявки в WhatsApp
-- `e4001b0` — Changes
-- `e3fcb30` — Доработал три фикса
-- `6b68feb` — Changes
-- `208e78c` — Changes
-- `3848c30` — Changes
-- `c00eaf5` — Changes
-- `11c0037` — Changes
-- `47a4b6d` — Changes
-- `4fb9a2c` — Заменял — на i18n ключи
+- `fbdfd75` — docs: refresh repo description + bump last-updated stamps (#24)
+- `5ad39b3` — Merge PR #23: codebase bug audit fixes (payments, auth, edge, react)
+- `26f3f4f` — fix: remove duplicate [functions.*] tables in supabase config.toml
+- `4557b11` — ci: bump any-usage baseline 745→758 to match main
+- `599f31e` — docs: sync all documentation with current codebase truth (#22)
+- `d43adb9` — fix: resolve all remaining audit bugs (booking, edge, auth, react)
+- `3cc727f` — fix: patch critical payment, auth & security bugs from codebase audit
+- `4eae6c7` — Исправил CRM и RLS
+- `2ad822a` — Changes
+- `8f28d41` — Changes
 
 ### Текущие работы:
+- **Codebase audit fixes (влито)** — PR #23: patched payments/checkout, flowers, booking, owner financials, auth/roles, edge functions, React correctness + atomic rate-limit migration
+- **Documentation sync (влито)** — PR #22 + #24: вся документация и описание репозитория приведены к коду (v3.55.5, DS 2.1, 59 micro-apps, app_role×18, ClearView AAA–CCC)
 - **Lead routing → WhatsApp** — отправка заявок (viewing requests, leads) в WhatsApp Павлу
 - **i18n cleanup** — замена хардкод-строк и тире на i18n-ключи (RU/EN bilingual coverage)
-- **Bug fixes** — серия точечных фиксов в CRM / checkout / booking flow
-- **Edge Functions на Deno 2.0** — `supabase/functions/deno.json` для авто-управления модулями
 
 ---
 
@@ -112,12 +112,14 @@
 - `src/pages/invest/` — investor dashboard
 - **Flow:** Юзер смотрит листинг → Viewing Request → Lead created → Whatsapp Pavel → Capital advisory
 
-### ⚖️ RE Audit Findings (5 блоков с багами):
-1. **Checkout/Payments** — Stripe flow, orders not created in DB after payment
-2. **Flowers/Bloom** — Cart checkout doesn't create order
-3. **Booking flow** — Confirmation state edge cases
-4. **Owner financials** — Income/expense inconsistencies
-5. **Auth/Role selection** — First login role assignment edge cases
+### ⚖️ RE Audit Findings — fix pass влит 2026-06-21 (PR #23, commits `3cc727f` + `d43adb9`):
+> Все 5 блоков ниже получили фиксы (checkout-handler, create-flowers-checkout, booking forms, owner financial panels, AuthContext/Impersonation/useIsAdmin) + atomic rate-limit migration. Осталось — верификация edge-кейсов на проде.
+
+1. **Checkout/Payments** — Stripe flow, orders not created in DB after payment → patched
+2. **Flowers/Bloom** — Cart checkout doesn't create order → patched
+3. **Booking flow** — Confirmation state edge cases → patched
+4. **Owner financials** — Income/expense inconsistencies → patched
+5. **Auth/Role selection** — First login role assignment edge cases → patched
 
 ---
 
@@ -294,7 +296,7 @@ supabase/
 ## 10. GIT WORKFLOW
 
 - **Main branch:** production-ready
-- **Current branch:** `pavel/wip-current-version-20260318` (WIP, merge in progress)
+- **Current branch:** `main` (origin/main == HEAD; feature-работа ведётся на per-task ветках, напр. `claude/*`)
 - **Commit style:** Conventional commits with semantic prefixes
 - **Pre-commit:** ESLint checks enforced
 
