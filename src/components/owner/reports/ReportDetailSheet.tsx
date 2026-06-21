@@ -13,6 +13,7 @@ import { ru as ruLocale, enUS } from 'date-fns/locale';
 import { PropertyReport } from '@/hooks/usePropertyReports';
 import { ManagementReportDetail } from './ManagementReportDetail';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '@/hooks/usePropertyFinancials';
+import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 interface ReportDetailSheetProps {
   report: PropertyReport | null;
@@ -24,12 +25,11 @@ interface ReportDetailSheetProps {
 export function ReportDetailSheet({ report, open, onOpenChange, actionSlot }: ReportDetailSheetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { format: formatMoney } = useCityCurrency();
 
   if (!report) return null;
 
-  const formatCurrency = (amount: number) => {
-    return `฿${Number(amount || 0).toLocaleString()}`;
-  };
+  const formatCurrency = (amount: number) => formatMoney(Number(amount || 0));
 
   const localizeCat = (key: string) => {
     const all = [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES];

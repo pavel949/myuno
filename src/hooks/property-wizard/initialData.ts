@@ -75,6 +75,7 @@ export const initialFormData: PropertyFormData = {
 
 export const initialOwnershipData: OwnershipData = {
   ownership_type: 'own',
+  owner_contact_id: null,
   actual_owner_email: '',
   actual_owner_name: '',
   actual_owner_phone: '',

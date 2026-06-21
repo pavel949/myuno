@@ -4,6 +4,12 @@ export type OwnershipType = 'own' | 'verbal' | 'management_agreement';
 
 export interface OwnershipData {
   ownership_type: OwnershipType;
+  /**
+   * Existing CRM contact this property is being created for, when launched from
+   * an owner's card (`?owner_contact_id=`). When set, the wizard links this
+   * contact directly instead of creating a duplicate `crm_contacts` row.
+   */
+  owner_contact_id?: string | null;
   actual_owner_email: string;
   actual_owner_name: string;
   actual_owner_phone: string;
