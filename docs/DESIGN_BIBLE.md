@@ -1,6 +1,6 @@
 # myUNO · Design Bible
 
-> **v2.0 · MAY 2026** · полный справочник дизайна, философии, маршрутов, экранов и операций суперappа myUNO.
+> **v2.1 · JUN 2026** · полный справочник дизайна, философии, маршрутов, экранов и операций суперappа myUNO.
 >
 > **Статус:** канонический. Единый источник истины для дизайнеров, инженеров, AI-ассистентов и партнёров. При расхождении с другими документами — правится **код и сопутствующие доки**, не Bible.
 >
@@ -193,7 +193,7 @@
 
 ### 01.1 · Что такое myUNO одной фразой
 
-> **myUNO** — это операционная система для жизни иностранца на Пхукете: одна учётка, один интерфейс, 40+ микро-приложений (недвижимость, услуги, юридка, лайфстайл, инвестиции), AI-консьерж как тихий маршрутизатор интентов.
+> **myUNO** — это операционная система для жизни иностранца на Пхукете: одна учётка, один интерфейс, 55+ микро-приложений (59 в `src/lib/appRegistry.ts`; недвижимость, услуги, юридка, лайфстайл, инвестиции), AI-консьерж как тихий маршрутизатор интентов.
 
 ### 01.2 · Миссия
 
@@ -225,7 +225,7 @@
 1. **Cluster IA + spatial memory** — 6 цветных кластеров, юзер учит карту один раз.
 2. **Role stack** — не «один человек = одна роль», а weighted stack. Конкурент не реплицирует за месяц.
 3. **AI как silent router** — не chatbot, а producer of intents с one-tap accept.
-4. **ClearView** — методология AAA–BB для off-plan, 8 категорий. Pavel-owned IP.
+4. **ClearView** — методология AAA–CCC для off-plan, 8 категорий. Pavel-owned IP.
 5. **Ignatev Capital** — внутренний CRM для HNW-сделок, эксклюзивные mandates.
 6. **PM-уровень доступ** — реальные собственники, реальные ставки, реальная аналитика.
 7. **Trust-as-UI** — audit markers на каждом money screen, не футер.
@@ -298,14 +298,16 @@ L0  Strategy          PROJECT.md · моаты · KPI
 
 Кластеры — это «районы города». Цвет каждого immutable, юзер учит карту один раз.
 
-| Кластер | Token | Hex (dark) | Vertical examples | Кол-во |
+> DS 2.1: cluster colours are muted navy / orange / stone (the old rainbow is retired). Use the `--cluster-*` token, never a raw hex.
+
+| Кластер | Token | DS 2.1 tone | Vertical examples | Кол-во |
 |---|---|---|---|---|
-| **Arrive** | `--cluster-arrive` | `#00D68F` mint | airport transfer, short stay, SIM, relocation | ~5 |
-| **Live** | `--cluster-live` | `#4E7BFF` blue | cleaning, delivery, beauty, fitness, medical, pets | ~14 |
-| **Manage** | `--cluster-manage` | `#16BDCA` teal | PM, maintenance, staff, utilities, owner statements | ~9 |
-| **Invest** | `--cluster-invest` | `#A78BFA` purple | property search, off-plan, yield calc, viewings | ~7 |
-| **Legal** | `--cluster-legal` | `#F59E0B` amber | visa, company, contracts, tax, insurance | ~6 |
-| **Build** | `--cluster-build` | `#EF4444` coral | inventory, reservations, campaigns, construction | ~4 |
+| **Arrive** | `--cluster-arrive` | navy-700 | airport transfer, short stay, SIM, relocation | ~5 |
+| **Live** | `--cluster-live` | navy-700 | cleaning, delivery, beauty, fitness, medical, pets | ~14 |
+| **Manage** | `--cluster-manage` | neutral-dark | PM, maintenance, staff, utilities, owner statements | ~9 |
+| **Invest** | `--cluster-invest` | brand-orange | property search, off-plan, yield calc, viewings | ~7 |
+| **Legal** | `--cluster-legal` | neutral-dark | visa, company, contracts, tax, insurance | ~6 |
+| **Build** | `--cluster-build` | stone | inventory, reservations, campaigns, construction | ~4 |
 
 **Hard rule.** Новая вертикаль присоединяется к существующему кластеру или провоцирует **архитектурное решение** о 7-м кластере. Никаких ad-hoc табов.
 
@@ -313,15 +315,21 @@ L0  Strategy          PROJECT.md · моаты · KPI
 
 Один человек = много ролей, multi-select, weighted. У каждого `primary_role` + `secondary` + `tertiary`.
 
-| Роль | Цвет | Default landing |
+> **Два слоя ролей (не путать):**
+> 1. **Consumer role-stack (7)** — то, что юзер выбирает в онбординге: Tourist · Resident · Owner · Agent · Developer · Provider · Investor. Это persona-facing модель ниже.
+> 2. **`app_role` enum (18)** — канонический источник истины по авторизации: `src/types/auth.ts` (синхронизирован с DB `public.app_role`). Включает платформенные/админские роли сверх consumer-стека: `guest · user · tourist · resident · partner · owner · property_owner · property_manager · broker · vendor · staff · uno_team · admin · ombudsman · finance · support · sales · investor`. RLS/RoleGate работают по этому enum, не по 7-ролевому стеку.
+
+> DS 2.1: roles inherit their cluster's muted tone via `--cluster-*` — no per-role rainbow hex.
+
+| Роль | Cluster tone | Default landing |
 |---|---|---|
-| Tourist | `#4E7BFF` | `/` |
-| Resident | `#00D68F` | `/` |
-| Owner | `#16BDCA` | `/operate/owner` |
-| Agent | `#A78BFA` | `/operate/agent` |
-| Developer | `#EF4444` | `/operate/dev` |
-| Provider | `#F59E0B` | `/operate/provider` |
-| Investor | `#EAB308` | `/operate/invest` |
+| Tourist | navy-700 (live) | `/` |
+| Resident | navy-700 (arrive) | `/` |
+| Owner | neutral-dark (manage) | `/operate/owner` |
+| Agent | brand-orange (invest) | `/operate/agent` |
+| Developer | stone (build) | `/operate/dev` |
+| Provider | neutral-dark (legal) | `/operate/provider` |
+| Investor | brand-orange (invest) | `/operate/invest` |
 
 **Ranking equation** (для home feed, quick actions, notifications):
 ```
@@ -381,7 +389,7 @@ weight = primary·3 + secondary·2 + tertiary·1
 | `myuno.app` | Главная, AI-консьерж, публичные вертикали | Все | P0 ✅ |
 | `app.myuno.app` | Личный кабинет | Authenticated residents | P0 |
 | `invest.myuno.app` | Инвест-платформа, DD, ClearView | P8, P9, P11 investors | P0 |
-| `clearview.myuno.app` | Public dashboard рейтингов AAA–BB | Investors + market | P0 |
+| `clearview.myuno.app` | Public dashboard рейтингов AAA–CCC | Investors + market | P0 |
 | `owner.myuno.app` | Owner portal | P8 owners, P10 operators | P1 |
 | `pm.myuno.app` | Property Management Dashboard | P10 operators | P1 |
 | `developers.myuno.app` | Developer Portal | P22 developers | P1 |
@@ -649,58 +657,55 @@ AI-агенты говорят в **третьем лице о себе** или
 
 ### 05.1 · Цветовая система
 
-#### Dark theme (default — `:root`)
+> **DS 2.1 — light-first (civic infrastructure).** Light is the default theme (`:root`); dark is opt-in for admin/MC only (`.dark`, `darkMode: ["class"]`). The old DS 2.0 dark-default + mint primary + 6-colour cluster rainbow is **retired** — do not reintroduce.
+
+#### Light theme (default — `:root`)
 
 | Token | HSL | Hex | Назначение |
 |---|---|---|---|
-| `--background` | `216 60% 7%` | `#08101E` | Page background |
-| `--secondary` | `214 47% 12%` | `#0F1C2E` | Panel / nav background |
-| `--card` | `213 38% 15%` | `#162236` | Cards, modals |
-| `--card-elevated` | `213 38% 19%` | `#1E2D45` | Elevated cards |
-| `--primary` | `157 100% 42%` | `#00D68F` | CTAs, links, active states (mint) |
-| `--accent` | `224 100% 65%` | `#4E7BFF` | Secondary actions, info (blue) |
-| `--gold` | `38 92% 50%` | `#F59E0B` | Legal cluster, premium badges |
-| `--foreground` | `222 73% 96%` | `#EDF2FF` | Primary text |
-| `--muted-foreground` | `211 17% 64%` | `#8FA3B8` | Secondary text |
-| `--border` | `0 0% 100% / 0.07` | rgba 7% | Default dividers |
-| `--border-strong` | `0 0% 100% / 0.14` | rgba 14% | Emphasized borders |
-| `--success` | `152 58% 42%` | `#2D9966` | Distinct from primary |
-| `--warning` | `38 92% 50%` | `#F59E0B` | Caution states |
-| `--destructive` | `0 72% 51%` | `#D93535` | Destructive actions |
+| `--background` | `36 27% 96%` | `#F7F5F1` | Page background (cream) |
+| `--secondary` | `30 10% 98%` | `#FBFAF9` | Raised surface |
+| `--card` | `0 0% 100%` | `#FFFFFF` | White card on cream page |
+| `--primary` | `213 73% 15%` | `#0A2240` | CTAs, links, active states (navy) |
+| `--accent` | `22 79% 47%` | `#D96B1A` | Singular accent — ≤3 % of screen (orange) |
+| `--foreground` | `24 10% 10%` | `#1C1916` | Primary text (ink) |
+| `--muted-foreground` | `24 8% 38%` | warm gray | Secondary text (WCAG AA on cream) |
+| `--border` | `30 6% 90%` | warm gray | Dividers (`--border-subtle` lighter) |
+| `--destructive` | `0 72% 35%` | red | Destructive actions |
 
-#### Light theme (`html.light`)
+#### Dark theme (`.dark` — opt-in, admin/MC)
 
-| Token | Hex | Назначение |
-|---|---|---|
-| `--background` | `#fafaf9` | Warm white page bg |
-| `--card` | `#ffffff` | White cards |
-| `--primary` | `#0d6e4f` | Emerald CTA |
-| `--accent` | navy `#1e3a8a` | Trust accent |
-| `--foreground` | `#1a1a19` | Near-black text |
-| `--muted-foreground` | `#57534e` | Warm gray secondary |
-| `--border` | `#e5e5e4` | Warm gray dividers |
-| `--success` | `#16a34a` | Distinct green |
-| `--warning` | `#d97706` | Amber |
-| `--destructive` | `#dc2626` | Red |
-
-#### Cluster accent system (IMMUTABLE)
-
-| Cluster | Token | Hex (dark) | Vertical |
+| Token | HSL | Hex | Назначение |
 |---|---|---|---|
-| arrive | `--cluster-arrive` | `#00D68F` (=primary) | Relocation, arrival |
-| live | `--cluster-live` | `#4E7BFF` (=accent) | Lifestyle, services |
-| legal | `--cluster-legal` | `#F59E0B` | Legal, visas, contracts |
-| invest | `--cluster-invest` | `#A78BFA` | Property investment |
-| manage | `--cluster-manage` | `#16BDCA` | Property management (STAYS) |
-| build | `--cluster-build` | `#EF4444` | Developer/offplan (DEALS) |
+| `--background` | `214 78% 9%` | `#051428` | Navy-900 page bg |
+| `--card` | `213 73% 13%` | navy | Slightly lighter than bg |
+| `--primary` | `22 79% 47%` | `#D96B1A` | Orange CTA (better contrast on navy) |
+| `--accent` | `213 60% 45%` | lighter navy | Secondary accent |
+| `--foreground` | `36 27% 96%` | `#F7F5F1` | Cream text |
+| `--muted-foreground` | `30 12% 75%` | cream-muted | Secondary text |
+| `--border` | `213 50% 25%` | navy | Dividers |
+
+#### Cluster accent system (IMMUTABLE tokens, DS 2.1 muted tones)
+
+> Rainbow retired — clusters resolve to muted navy / orange / stone via `--cluster-*`. Never hardcode hues.
+
+| Cluster | Token | DS 2.1 tone | Vertical |
+|---|---|---|---|
+| arrive | `--cluster-arrive` | navy-700 | Relocation, arrival |
+| live | `--cluster-live` | navy-700 | Lifestyle, services |
+| legal | `--cluster-legal` | neutral-dark | Legal, visas, contracts |
+| invest | `--cluster-invest` | brand-orange | Property investment |
+| manage | `--cluster-manage` | neutral-dark | Property management (STAYS) |
+| build | `--cluster-build` | stone | Developer/offplan (DEALS) |
 
 **Правило использования цвета.**
 - `background` + `card` — 80% площади экрана
 - `foreground` + `muted-foreground` — текст
 - `primary` — 1 главный CTA на экран
-- `cluster-*` — категориальная плашка / акцент / activity tag
+- `accent` (orange) — ≤3 % экрана, единственный акцент
+- `cluster-*` — категориальная плашка / акцент / activity tag (muted tones)
 - `success` · `warning` · `destructive` — только для статусов
-- Никогда не миксовать 2 cluster colors на одном экране кроме `/discover` (где они и есть карта)
+- Sharp corners by default (`--radius: 0`); 8–16px mid-radius forbidden
 
 ### 05.2 · Типографика
 
@@ -713,9 +718,9 @@ AI-агенты говорят в **третьем лице о себе** или
 | Numerics / data / mono | **IBM Plex Mono** | 400–500 | tabular-nums | Prices, IDs, coordinates, timestamps |
 | Locale fallback RU | Unbounded → Golos Text → Noto Serif / Noto Sans | — | — | Когда Source Serif 4 не загрузился |
 | Locale fallback EN | Noto Serif → Noto Sans → Georgia / system-ui | — | — | Когда Source Serif 4 не загрузился |
-| Luxury (`/newbuilds`) | **Cormorant Garamond** | 400–700 italic | — | **Только** Dark Luxury theme |
+| Luxury (`/newbuilds`) | **Source Serif 4** (italic) | 400–700 italic | — | Dark Luxury landings — editorial display |
 
-**⛔ НЕ используется в коде:** Syne · DM Sans · Playfair Display · JetBrains Mono · Sarabun. Старые доки могут ссылаться — они stale.
+**⛔ НЕ используется в коде** (не загружаются в `index.html`): Syne · DM Sans · Playfair Display · JetBrains Mono (legacy fallback only) · Cormorant Garamond · Sarabun. Старые доки могут ссылаться — они stale. Runtime-загружаются: Geist · Source Serif 4 · IBM Plex Mono · Unbounded/Golos (RU fallback) · Noto Serif/Sans (EN fallback).
 
 **Type scale.**
 
@@ -1261,7 +1266,7 @@ AI agent создаёт intent → Home concierge card → user has 3 options:
 
 **НЕ применяется в:**
 - Body text
-- Buttons (primary/secondary всегда brand mint/blue)
+- Buttons (primary/secondary всегда brand navy/orange)
 - Background больших areas (только в `/discover/cluster/:id` hero может быть subtle tint)
 
 ### 07.10 · Loading pattern
@@ -1491,7 +1496,7 @@ Description: «Подождите 5 минут и повторите. Если �
 {
   "welcome": {
     "title": "Добро пожаловать в myUNO",
-    "subtitle": "Один аккаунт. 40+ микро-приложений. Жизнь на Пхукете."
+    "subtitle": "Один аккаунт. 55+ микро-приложений. Жизнь на Пхукете."
   },
   "roleSelect": {
     "title": "Кто вы?",
@@ -2331,7 +2336,7 @@ event: listing_clearview_expanded { listing_id, grade }
 
 ### 16.1 · Назначение
 
-Дать инвестору **одну страницу** с числовым ответом на вопрос «насколько это безопасно?». Off-plan = высокий риск (developer может не достроить). ClearView оценивает 8 категорий и выдаёт grade AAA → BB.
+Дать инвестору **одну страницу** с числовым ответом на вопрос «насколько это безопасно?». Off-plan = высокий риск (developer может не достроить). ClearView оценивает 8 категорий и выдаёт grade AAA → CCC (+ unrated).
 
 ### 16.2 · Grades
 
@@ -2420,7 +2425,7 @@ UI: `<DataTable>` sticky первая колонка (categories), columns scrol
 Marketing-grade страница со списком всех rated projects.
 
 **Filter UI:**
-- Grade slider (AAA → BB)
+- Grade slider (AAA → CCC)
 - Cluster filter (off-plan zones: Bang Tao, Patong, Rawai, Kamala, Surin, Mai Khao)
 - Price range
 - Payment plan type
@@ -3697,8 +3702,8 @@ event: doc_uploaded { type, size }
 | **Surface** | = Cluster (content). Two names, one concept. | Use «Surface» when referring to canonical 05-visual-design-system. |
 | **JTBD Cluster** | Functional Jobs-To-Be-Done classifier (A–J, 10 штук). | Different from Surface. Used for tagging, AI routing, SEO. |
 | **Persona** | One of 25 user personas (P01–P25). | См. `01-segmentation-framework.md`. |
-| **Vertical** | Micro-app inside a cluster. ~45 verticals across 6 clusters. | E.g. cleaning, visa, off-plan, schools. |
-| **Role** | One of 7 roles: Tourist, Resident, Owner, Agent, Developer, Provider, Investor. | Stored in `profiles.roles_stack`. |
+| **Vertical / Mini-app** | Micro-app inside a cluster. **59** entries across 6 clusters. | Canonical inventory: `src/lib/appRegistry.ts` (57 active + 2 pro). |
+| **Role** | Consumer role-stack = 7 (Tourist, Resident, Owner, Agent, Developer, Provider, Investor). Authorization SoT = `app_role` enum, **18 values** (`src/types/auth.ts`). | Stored in `profiles.roles_stack` + `profiles.primary_role`. |
 | **Role stack** | jsonb of user's roles with weights (primary·3 + secondary·2 + tertiary·1). | Multi-select. |
 | **Lifecycle phase** | One of 5: discover, arrive, live, manage, leave. | Stored in `profiles.lifecycle_phase`. |
 | **Intent** | AI agent output, user-confirmed via one-tap accept/later. | Never auto-execute money moves. |
@@ -3710,7 +3715,7 @@ event: doc_uploaded { type, size }
 | **Audit marker** | UI element showing tx_id + ledger_entry_id + timestamp. | Required on money screens. |
 | **KYC** | Know Your Customer. Levels 0–4 (4 = KYB). | См. §21. |
 | **KYB** | Know Your Business. KYC level 4 for companies. | |
-| **ClearView** | myUNO methodology for off-plan property rating. Grades AAA → BB. | См. §16. |
+| **ClearView** | myUNO methodology for off-plan property rating. Grades AAA → CCC (+ unrated), 7 levels. | См. §16. `CLEARVIEW_GRADES` in `src/lib/taxonomies/master.ts`. |
 | **Mandate** | Capital advisory engagement for HNW investors. Internal CRM. | Ignatev Capital. |
 | **Concierge** | Home canvas widget showing AI agent intents. | UI surface, not chatbot. |
 | **Signal stack** | Ranked list of intents/events shown on Home. | См. §12.5. |
@@ -5531,7 +5536,8 @@ PATCH — clarifications, examples added, typos
 
 | Version | Date | Author | Summary |
 |---|---|---|---|
-| **v2.0** | 2026-05-14 | Claude (под Pavel) | Полная reorganization в 40 разделов. Связка с PROJECT.md + ARCHITECTURE_V2 + DESIGN.md. Single source of truth для UI/UX. |
+| **v2.1** | 2026-06-20 | Claude (под Pavel) | Re-sync §05 colour system + clusters + roles to DS 2.1 runtime (`tokens.css`): light-first default (cream/navy/orange), muted cluster tones (rainbow retired), sharp corners, Cormorant dropped. ADR-021 added; ADR-001/003 superseded. App version → 3.55.5. |
+| v2.0 | 2026-05-14 | Claude (под Pavel) | Полная reorganization в 40 разделов. Связка с PROJECT.md + ARCHITECTURE_V2 + DESIGN.md. Single source of truth для UI/UX. |
 | v1.5 | 2026-04-22 | Pavel + CTO | Architecture Overview added (canonical/architecture/OVERVIEW.md). |
 | v1.4 | 2026-04-18 | Pavel + Claude | DESIGN.md formalized DS 2.1. Golos → Source Serif 4 transition. |
 | v1.3 | 2026-04-17 | Team configurator | AI Team Configuration added в CLAUDE.md. |
@@ -5541,7 +5547,7 @@ PATCH — clarifications, examples added, typos
 
 ### 38.3 · App version
 
-Текущая app version: **3.55.3** (`src/lib/appVersion.ts`).
+Текущая app version: **3.55.5** (`src/lib/appVersion.ts`).
 
 App version tracked в:
 - `src/lib/appVersion.ts`
@@ -5614,11 +5620,11 @@ App version изменяется при release. Design Bible — независ
 
 ### ADR-001 · Dark mode is default
 **Date:** 2026-04-18
-**Status:** Active
+**Status:** ⛔ Superseded by ADR-021 (2026-06) — DS 2.1 is light-first.
 **Context:** В фин-приложениях с большими сессиями (Owner timeline, Wallet, Investor DD) длительная работа на белом фоне утомляет. Категория (fintech, dashboards) ожидает dark.
-**Decision:** Dark mode default. Light mode опционален (`html.light`). Background `#08101E`, primary mint `#00D68F`.
+**Decision (superseded):** Dark mode default. Light mode опционален (`html.light`). Background `#08101E`, primary mint `#00D68F`.
 **Consequences:** Все компоненты проектируются dark-first. Light mode требует тестирования на каждом PR. Email шаблоны remain light (стандарт email).
-**Alternatives:** Light default (отвергли — категория и аудитория).
+**Alternatives:** Light default (отвергли — категория и аудитория). **→ позже принято в ADR-021.**
 
 ### ADR-002 · Source Serif 4 replaces Golos as display
 **Date:** 2026-05-01 (Bible v2.0)
@@ -5630,9 +5636,9 @@ App version изменяется при release. Design Bible — независ
 
 ### ADR-003 · 6 cluster colors immutable
 **Date:** 2026-04-18
-**Status:** Active
+**Status:** ⚠️ Partially superseded by ADR-021 (2026-06) — 6 clusters remain, but the colour rainbow is retired in favour of muted navy/orange/stone tones.
 **Context:** 40+ микро-приложений — без визуальной системы «карты города» юзер не запомнит структуру.
-**Decision:** 6 colour-locked clusters. Каждый цвет immutable. Никаких 7-х кластеров без архитектурного review.
+**Decision (colour part superseded):** 6 colour-locked clusters. Никаких 7-х кластеров без архитектурного review. **DS 2.1:** the *6-cluster taxonomy* stays immutable; the *per-cluster rainbow hex* is dropped — clusters now resolve to muted tones via `--cluster-*`.
 **Consequences:** Spatial memory works. Дисциплина в коде (нельзя contaminating). Limit для новых вертикалей — должны вписаться в один из 6.
 **Alternatives:** Один brand color (отвергли — нет spatial differentiation). Free cluster colors (отвергли — chaos).
 
@@ -5716,11 +5722,11 @@ App version изменяется при release. Design Bible — независ
 **Consequences:** Cleaner code, easier per-user prefs. Edge fn `notify` handles all.
 **Alternatives:** Per-feature (отвергли — fragmented).
 
-### ADR-014 · ClearView grades stay AAA → BB
-**Date:** 2026-03
-**Status:** Active
+### ADR-014 · ClearView grade scale
+**Date:** 2026-03 (extended 2026-04)
+**Status:** ⚠️ Superseded — Master Taxonomy v1.0 (2026-04) extended the scale from 5 to 7 grades.
 **Context:** Need rating scale for off-plan.
-**Decision:** AAA, AA, A, BBB, BB (5 grades). Inspired by S&P/Moody's.
+**Decision (superseded):** Originally AAA, AA, A, BBB, BB (5 grades). **Current canon:** AAA · AA · A · BBB · BB · B · CCC (7 grades) + `unrated` — see `CLEARVIEW_GRADES` in `src/lib/taxonomies/master.ts`, DB enum `public.clearview_grade`, and `docs/canonical/00-master-taxonomy.md` §4. Y1 brokered-project restriction also lifted.
 **Consequences:** Familiar to investors. Disciplined methodology (8 categories).
 **Alternatives:** 1–5 stars (отвергли — feels consumer, not financial). Custom scale (отвергли — confusion).
 
@@ -5771,6 +5777,14 @@ App version изменяется при release. Design Bible — независ
 **Decision:** Design Bible v2.0 в `docs/DESIGN_BIBLE.md` — единая точка входа. Связывает все sources.
 **Consequences:** New section structure (40 sections). Other docs become detail references. AI agents read Bible first.
 **Alternatives:** Multiple docs (statu quo, отвергли — fragmented).
+
+### ADR-021 · DS 2.1 is light-first; cluster rainbow retired
+**Date:** 2026-06
+**Status:** Active — supersedes ADR-001, partially supersedes ADR-003.
+**Context:** «Civic infrastructure» позиционирование (GOV.UK · e-Estonia · The Economist) требует светлого, спокойного, авторитетного интерфейса. Dark-default + mint + 6-цветная радуга читались как fintech-стартап, а не как доверенный инфраструктурный сервис. Runtime `tokens.css` уже переведён на light-first.
+**Decision:** Light theme — default (`:root`): cream `#F7F5F1` bg, ink `#1C1916`, navy `#0A2240` primary, orange `#D96B1A` accent (≤3 % экрана). Dark (`.dark`, `darkMode: ["class"]`) — opt-in только для admin/MC. Cluster colours → muted navy/orange/stone через `--cluster-*` (rainbow retired). Sharp corners (`--radius: 0`). Cormorant Garamond dropped — luxury display uses Source Serif 4 italic (Cormorant больше не грузится в `index.html`).
+**Consequences:** Components designed light-first; semantic tokens theme-switch automatically; use standard `dark:` prefix for admin/MC overrides. `tokens.css` + `tailwind.config.ts` + `DESIGN.md` — runtime SoT.
+**Alternatives:** Keep dark-default (отвергли — конфликт с civic-infrastructure brand).
 
 ---
 

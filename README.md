@@ -3,16 +3,16 @@
 > **Доверенная цифровая инфраструктура для жизни и инвестиций иностранца на Пхукете.**
 > Один аккаунт, одна база, одно окно — от трансфера из аэропорта до сделки с недвижимостью на $5M.
 
-[![Status](https://img.shields.io/badge/status-active%20development-00D68F)](./PROJECT.md)
-[![Version](https://img.shields.io/badge/app-v3.43.0-4E7BFF)](./src/lib/appVersion.ts)
-[![Stack](https://img.shields.io/badge/stack-React%2018%20%C2%B7%20Vite%205%20%C2%B7%20Supabase-0F1C2E)](#tech-stack)
+[![Status](https://img.shields.io/badge/status-active%20development-0A2240)](./PROJECT.md)
+[![Version](https://img.shields.io/badge/app-v3.55.5-D96B1A)](./src/lib/appVersion.ts)
+[![Stack](https://img.shields.io/badge/stack-React%2018%20%C2%B7%20Vite%206%20%C2%B7%20Supabase-0F1C2E)](#tech-stack)
 [![Domain](https://img.shields.io/badge/domain-myuno.app-08101E)](https://myuno.app)
 
 ---
 
 ## What it is
 
-**myUNO** — суперапп уровня государственного сервисного портала для русскоязычных и англоязычных иностранцев на Пхукете. Платформа охватывает 40+ микро-приложений в шести кластерах жизни (Arrive · Live · Manage · Invest · Legal · Build), объединённых единым AI-консьержем, общим CRM и канонической базой данных.
+**myUNO** — суперапп уровня государственного сервисного портала для русскоязычных и англоязычных иностранцев на Пхукете. Платформа охватывает 55+ микро-приложений (59 в реестре `src/lib/appRegistry.ts`) в шести surface-кластерах жизни (Arrive · Live · Manage · Invest · Legal · Build), объединённых единым AI-консьержем, общим CRM и канонической базой данных.
 
 **Маховик одного клиента:**
 
@@ -44,11 +44,11 @@
 | # | Документ | О чём |
 |---|----------|-------|
 | 01 | [Segmentation Framework](./docs/canonical/01-segmentation-framework.md) | 3-осевая сегментация · 25 персон · 10 кластеров · CRM-поля |
-| 02 | [Service Catalogue v2](./docs/canonical/02-service-catalogue-v2.md) | 16 категорий × 230 услуг с тегами lifecycle/role/cluster |
+| 02 | [Service Catalogue v2](./docs/canonical/02-service-catalogue-v2.md) | Каталог услуг (тэги lifecycle/role/cluster). Target: 16 кат × 230 услуг; runtime SSOT `src/lib/catalog/taxonomy.ts` = 14 кат / ~69 услуг + DB |
 | 03 | [Tone of Voice](./docs/canonical/03-tone-of-voice.md) | Голос бренда: спокойная уверенность, продаём доверие |
 | 04 | [Implementation Protocol](./docs/canonical/04-implementation-protocol.md) | Operational playbook M1→M7 |
 | 05 | [Visual Design System](./docs/canonical/05-visual-design-system.md) | Цвет, типографика, сетка, компоненты, кластеры |
-| 06 | [ClearView™ Methodology](./docs/canonical/06-clearview-methodology.md) | Off-plan rating system · 8 категорий · AAA–BB · моат #8 |
+| 06 | [ClearView™ Methodology](./docs/canonical/06-clearview-methodology.md) | Off-plan rating system · 8 категорий оценки · AAA–CCC (7 grades + unrated) · моат #8 |
 | 07 | [Information Architecture](./docs/canonical/07-information-architecture.md) | URL-структура · субдомены · навигация · cross-domain SSO |
 | 08 | [AI Prompts Library](./docs/canonical/08-ai-prompts-library.md) | Канонические system prompts для всех AI-агентов |
 | 09 | [Data Schema](./docs/canonical/09-data-schema.md) | Таблицы · enums · RLS · FK · naming conventions Supabase |
@@ -79,7 +79,7 @@
 
 | Слой | Технологии |
 |------|------------|
-| **Frontend** | React 18 · TypeScript 5.8 · Vite 5 (SWC) · React Router 6 · TanStack Query 5 |
+| **Frontend** | React 18 · TypeScript 5.9 · Vite 6 (SWC) · React Router 6 · TanStack Query 5 |
 | **UI** | Tailwind CSS 3.4 · shadcn/ui · Radix UI · Framer Motion |
 | **Forms** | React Hook Form 7 · Zod |
 | **Backend** | Supabase (Postgres · Auth · Storage · Edge Functions on Deno 2.0) |
@@ -89,8 +89,8 @@
 | **Mobile** | PWA (`vite-plugin-pwa`) · Capacitor (iOS/Android) |
 | **Quality** | Vitest · Testing Library · Playwright · Sentry |
 
-**Шрифты:** Golos Text (display) · DM Sans (body) · JetBrains Mono (data) · Playfair Display (luxury RE).
-**Палитра (dark default):** bg `#08101E` · primary `#00D68F` (mint) · accent `#4E7BFF` (blue).
+**Шрифты (DS 2.1):** Source Serif 4 (display) · Geist (body/UI) · IBM Plex Mono (data/numerics, `tnum`).
+**Палитра (light default — civic infrastructure):** bg `#F7F5F1` (cream) · foreground `#1C1916` (ink) · primary `#0A2240` (navy) · accent `#D96B1A` (orange, ≤3% экрана). Dark theme — opt-in для admin/MC. Подробнее — [`DESIGN.md`](./DESIGN.md).
 
 ---
 
@@ -131,10 +131,10 @@ npm run lint      # ESLint
 │   └── …                       ← topic-specific docs
 │
 ├── src/
-│   ├── pages/                  ← 366+ pages by vertical
-│   ├── components/             ← 1000+ components / 60+ domains
-│   ├── hooks/                  ← 345 custom hooks
-│   ├── contexts/               ← 11 global providers
+│   ├── pages/                  ← 557 pages by vertical
+│   ├── components/             ← ~998 components / 90 domains
+│   ├── hooks/                  ← 429 custom hooks
+│   ├── contexts/               ← 15 global providers
 │   ├── integrations/supabase/  ← auto-generated client + types (DO NOT EDIT)
 │   ├── lib/                    ← utilities · taxonomies · adapters
 │   ├── design-system/          ← tokens · component docs
