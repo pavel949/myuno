@@ -331,7 +331,7 @@ supabase/
 - **Payments:** Stripe (Checkout, Connect, Subscriptions)
 - **Maps:** Google Maps (@react-google-maps/api)
 - **Notifications:** UltraMSG (WhatsApp), Telegram Bot, Resend (email)
-- **Build/Deploy:** Vite 5, Vercel, Capacitor (iOS/Android), PWA (vite-plugin-pwa)
+- **Build/Deploy:** Vite 6, Vercel, Capacitor (iOS/Android), PWA (vite-plugin-pwa)
 - **Testing:** Vitest, Testing Library
 - **Monitoring:** Sentry
 
