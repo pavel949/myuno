@@ -41,14 +41,19 @@ interface BookingItem {
 const getBookingIcon = (type: string) => {
   switch (type) {
     case 'beauty': return Scissors;
-    case 'service': return Package;
+    case 'service':
+    case 'cleaning':
+    case 'pet_service': return Package;
     case 'food': return Package;
-    case 'flower': return Flower2;
-    case 'transport': return Car;
+    case 'flower':
+    case 'flowers': return Flower2;
+    case 'transport':
+    case 'vehicle': return Car;
     case 'tour': return Ticket;
     case 'event': return Ticket;
     case 'property': return Home;
-    case 'water': return Ship;
+    case 'water':
+    case 'yacht': return Ship;
     case 'medical': return Stethoscope;
     case 'fitness': return Dumbbell;
     default: return Calendar;
@@ -86,15 +91,22 @@ const getBookingTypeLabel = (type: string, language: string) => {
   const labels: Record<string, { en: string; ru: string }> = {
     beauty: { en: 'Beauty', ru: 'Красота' },
     service: { en: 'Service', ru: 'Услуга' },
+    cleaning: { en: 'Cleaning', ru: 'Уборка' },
+    pet_service: { en: 'Pet Service', ru: 'Питомцы' },
     food: { en: 'Restaurants', ru: 'Рестораны' },
     flower: { en: 'Flowers', ru: 'Цветы' },
+    flowers: { en: 'Flowers', ru: 'Цветы' },
     transport: { en: 'Transport', ru: 'Транспорт' },
+    vehicle: { en: 'Vehicle', ru: 'Транспорт' },
     tour: { en: 'Tour', ru: 'Тур' },
     event: { en: 'Event', ru: 'Событие' },
     property: { en: 'Property', ru: 'Недвижимость' },
     water: { en: 'Water', ru: 'Водный спорт' },
+    yacht: { en: 'Yacht', ru: 'Яхты' },
     medical: { en: 'Medical', ru: 'Медицина' },
     fitness: { en: 'Fitness', ru: 'Фитнес' },
+    education: { en: 'Education', ru: 'Образование' },
+    legal: { en: 'Legal', ru: 'Юридические' },
   };
   return labels[type]?.[language === 'ru' ? 'ru' : 'en'] || type;
 };
@@ -195,25 +207,28 @@ export default function Bookings() {
 
     try {
       // Phase 1: Load bookings — render cards as soon as this resolves.
-      // Note: `bookings` is a flat table; there is no `booking_items` relation.
+      // The customer booking flow writes to `orders` (via create_order_atomic),
+      // NOT the legacy `bookings` table, so we read from `orders` here. Status
+      // history lives in `order_status_history`.
       const { data: allBookingsData, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('user_id', user.id)
+        .from('orders')
+        .select('id, order_type, status, total_amount, currency, start_at, created_at')
+        .eq('customer_user_id', user.id)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       const formattedBookings: BookingItem[] = (allBookingsData || []).map((b) => {
-        const label = getBookingTypeLabel(b.booking_type, language);
+        const label = getBookingTypeLabel(b.order_type, language);
         return {
           id: b.id,
-          type: b.booking_type,
+          type: b.order_type,
           title: label,
           subtitle: label,
-          date: b.scheduled_at || b.created_at,
-          createdAt: b.created_at,
-          status: b.status,
+          date: b.start_at || b.created_at || '',
+          createdAt: b.created_at || '',
+          status: b.status || 'pending',
           total: b.total_amount || 0,
           currency: b.currency || 'THB',
         };
@@ -237,21 +252,21 @@ export default function Bookings() {
       }
 
       const { data: historyRows, error: historyError } = await supabase
-        .from('booking_status_history')
-        .select('id, booking_id, from_status, to_status, notes, created_at')
-        .in('booking_id', bookingIds)
+        .from('order_status_history')
+        .select('id, order_id, from_status, to_status, reason, created_at')
+        .in('order_id', bookingIds)
         .order('created_at', { ascending: true });
 
       if (!historyError && historyRows) {
         const grouped: Record<string, BookingStatusEvent[]> = {};
         for (const row of historyRows) {
-          if (!grouped[row.booking_id]) grouped[row.booking_id] = [];
-          grouped[row.booking_id].push({
+          if (!grouped[row.order_id]) grouped[row.order_id] = [];
+          grouped[row.order_id].push({
             id: row.id,
             from_status: row.from_status,
             to_status: row.to_status,
-            notes: row.notes,
-            created_at: row.created_at,
+            notes: row.reason,
+            created_at: row.created_at || '',
           });
           // Seed dedup set so realtime echoes of these rows are ignored.
           seenEventIdsRef.current.add(row.id);
@@ -301,16 +316,25 @@ export default function Bookings() {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'booking_status_history',
+          table: 'order_status_history',
         },
         (payload) => {
-          const row = payload.new as {
+          const raw = payload.new as {
             id: string;
-            booking_id: string;
+            order_id: string;
             from_status: string | null;
             to_status: string;
-            notes: string | null;
+            reason: string | null;
             created_at: string;
+          };
+          // Normalise to the booking_id / notes shape the rest of this handler uses.
+          const row = {
+            id: raw.id,
+            booking_id: raw.order_id,
+            from_status: raw.from_status,
+            to_status: raw.to_status,
+            notes: raw.reason,
+            created_at: raw.created_at,
           };
           // Only react to events for bookings currently rendered (RLS already
           // limits us to the user's own rows, but this avoids cross-user noise).
@@ -407,8 +431,8 @@ export default function Bookings() {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'bookings',
-          filter: `user_id=eq.${user.id}`,
+          table: 'orders',
+          filter: `customer_user_id=eq.${user.id}`,
         },
         (payload) => {
           const row = payload.new as { id: string; status: string };

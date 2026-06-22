@@ -15,13 +15,24 @@ import type { BookingStatusEvent } from '@/components/bookings/BookingStatusTime
 
 export type BookingHistoryTable =
   | 'booking_status_history'
-  | 'property_booking_status_history';
+  | 'property_booking_status_history'
+  | 'order_status_history';
 
 interface Options {
   table: BookingHistoryTable;
   bookingId: string | undefined | null;
   /** Disable network/realtime (e.g. before auth resolves). Defaults to true. */
   enabled?: boolean;
+  /**
+   * FK column linking a history row to its parent. Defaults to 'booking_id'.
+   * `order_status_history` uses 'order_id'.
+   */
+  idColumn?: string;
+  /**
+   * Free-text note column. Defaults to 'notes'.
+   * `order_status_history` uses 'reason'.
+   */
+  notesColumn?: string;
 }
 
 interface Result {
@@ -36,6 +47,8 @@ export function useBookingStatusHistory({
   table,
   bookingId,
   enabled = true,
+  idColumn = 'booking_id',
+  notesColumn = 'notes',
 }: Options): Result {
   const [events, setEvents] = useState<BookingStatusEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,8 +88,10 @@ export function useBookingStatusHistory({
         };
       })
         .from(table)
-        .select('id, booking_id, from_status, to_status, notes, created_at')
-        .eq('booking_id', bookingId)
+        // Alias the FK + note columns to the canonical (booking_id / notes) shape
+        // so order_status_history (order_id / reason) maps transparently.
+        .select(`id, booking_id:${idColumn}, from_status, to_status, notes:${notesColumn}, created_at`)
+        .eq(idColumn, bookingId)
         .order('created_at', { ascending: true });
 
       if (cancelled) return;
@@ -115,15 +130,16 @@ export function useBookingStatusHistory({
           event: 'INSERT',
           schema: 'public',
           table,
-          filter: `booking_id=eq.${bookingId}`,
+          filter: `${idColumn}=eq.${bookingId}`,
         },
         (payload) => {
-          const row = payload.new as {
-            id: string;
-            from_status: string | null;
-            to_status: string;
-            notes: string | null;
-            created_at: string;
+          const raw = payload.new as Record<string, unknown>;
+          const row = {
+            id: raw.id as string,
+            from_status: (raw.from_status as string | null) ?? null,
+            to_status: raw.to_status as string,
+            notes: (raw[notesColumn] as string | null) ?? null,
+            created_at: raw.created_at as string,
           };
           if (seenRef.current.has(row.id)) return;
           seenRef.current.add(row.id);

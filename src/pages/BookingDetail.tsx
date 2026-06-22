@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { BookingStatusTimeline, BookingStatusTimelineSkeleton } from '@/components/bookings/BookingStatusTimeline';
 import { useBookingStatusHistory } from '@/hooks/useBookingStatusHistory';
+import { useOrders } from '@/hooks/useOrders';
 
 interface BookingData {
   id: string;
@@ -58,8 +59,14 @@ interface BookingData {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'confirmed': return 'bg-success/10 text-success border-success/20';
-    case 'submitted': return 'bg-warning/10 text-warning border-warning/20';
+    case 'pending':
+    case 'submitted':
+    case 'awaiting_client_payment':
+    case 'pending_deposit': return 'bg-warning/10 text-warning border-warning/20';
     case 'completed': return 'bg-info/10 text-info border-info/20';
+    case 'cancelled':
+    case 'refunded':
+    case 'expired':
     case 'cancelled_by_user':
     case 'cancelled_by_provider': return 'bg-destructive/10 text-destructive border-destructive/20';
     case 'in_progress': return 'bg-accent-purple/10 text-accent-purple border-accent-purple/20';
@@ -70,10 +77,15 @@ const getStatusColor = (status: string) => {
 const getStatusLabel = (status: string, language: string) => {
   const labels: Record<string, { en: string; ru: string }> = {
     draft: { en: 'Draft', ru: 'Черновик' },
+    pending: { en: 'Pending', ru: 'Ожидает' },
     submitted: { en: 'Submitted', ru: 'Отправлено' },
+    awaiting_client_payment: { en: 'Awaiting Payment', ru: 'Ожидает оплаты' },
+    pending_deposit: { en: 'Awaiting Deposit', ru: 'Ожидает депозит' },
     confirmed: { en: 'Confirmed', ru: 'Подтверждено' },
     in_progress: { en: 'In Progress', ru: 'В процессе' },
     completed: { en: 'Completed', ru: 'Завершено' },
+    cancelled: { en: 'Cancelled', ru: 'Отменено' },
+    refunded: { en: 'Refunded', ru: 'Возвращено' },
     cancelled_by_user: { en: 'Cancelled', ru: 'Отменено' },
     cancelled_by_provider: { en: 'Cancelled by Provider', ru: 'Отменено провайдером' },
     expired: { en: 'Expired', ru: 'Истекло' },
@@ -101,12 +113,15 @@ export default function BookingDetail() {
   const [booking, setBooking] = useState<BookingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCancelling, setIsCancelling] = useState(false);
+  const { cancelOrder } = useOrders();
   const {
     events: historyEvents,
     isLoading: historyLoading,
     highlightIds: historyHighlightIds,
   } = useBookingStatusHistory({
-    table: 'booking_status_history',
+    table: 'order_status_history',
+    idColumn: 'order_id',
+    notesColumn: 'reason',
     bookingId: id,
     enabled: !!user && !!id,
   });
@@ -117,27 +132,50 @@ export default function BookingDetail() {
 
     setIsLoading(true);
     try {
+      // The customer booking flow writes to `orders` (not the legacy `bookings`
+      // table), so load the order plus its items / participants / addresses.
       const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
+        .from('orders')
+        .select(`
+          id, order_type, status, start_at, total_amount, currency, notes, created_at,
+          order_items(id, item_name, qty, unit_price, amount),
+          order_participants(id, name, phone, email, role),
+          order_addresses(id, address_type, address_text)
+        `)
         .eq('id', id)
-        .eq('user_id', user.id)
+        .eq('customer_user_id', user.id)
+        .is('deleted_at', null)
         .single();
 
       if (error) throw error;
 
       setBooking({
         id: data.id,
-        booking_type: data.booking_type,
-        status: data.status,
-        scheduled_at: data.scheduled_at,
+        booking_type: data.order_type,
+        status: data.status || 'pending',
+        scheduled_at: data.start_at,
         total_amount: data.total_amount,
         currency: data.currency,
         notes: data.notes,
-        created_at: data.created_at,
-        items: [],
-        participants: [],
-        addresses: [],
+        created_at: data.created_at || '',
+        items: (data.order_items ?? []).map((it) => ({
+          id: it.id,
+          item_name: it.item_name,
+          quantity: it.qty,
+          unit_price: it.unit_price,
+          subtotal: it.amount,
+        })),
+        participants: (data.order_participants ?? []).map((p) => ({
+          id: p.id,
+          name: p.name,
+          phone: p.phone,
+          email: p.email,
+        })),
+        addresses: (data.order_addresses ?? []).map((a) => ({
+          id: a.id,
+          address_type: a.address_type,
+          address: a.address_text,
+        })),
       });
     } catch (error) {
       console.error('Error loading booking:', error);
@@ -164,16 +202,13 @@ export default function BookingDetail() {
 
     setIsCancelling(true);
     try {
-      // Trigger `trg_bookings_status_history` will record the transition.
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: 'cancelled_by_user' })
-        .eq('id', booking.id);
+      // Cancel through the orders flow so the cancellation is recorded in
+      // order_status_history (audit trail) rather than writing the legacy table.
+      const ok = await cancelOrder(booking.id);
+      if (!ok) throw new Error('cancel_failed');
 
-      if (error) throw error;
-
-      toast.success(language === 'ru' ? 'Бронирование отменено' : 'Booking cancelled');
-      setBooking({ ...booking, status: 'cancelled_by_user' });
+      // cancelOrder already surfaces a success toast.
+      setBooking({ ...booking, status: 'cancelled' });
     } catch (error) {
       console.error('Error cancelling booking:', error);
       toast.error(language === 'ru' ? 'Ошибка отмены' : 'Failed to cancel');
@@ -215,7 +250,7 @@ export default function BookingDetail() {
     );
   }
 
-  const canCancel = ['submitted', 'confirmed', 'draft'].includes(booking.status);
+  const canCancel = ['pending', 'submitted', 'confirmed', 'draft'].includes(booking.status);
   const primaryParticipant = booking.participants.find(p => p);
   const deliveryAddress = booking.addresses.find(a => a.address_type === 'delivery' || a.address_type === 'service');
   
