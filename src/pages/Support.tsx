@@ -198,7 +198,7 @@ export default function Support() {
             </div>
             <div className="flex-1">
               <h2 className="font-semibold text-lg">
-                {isRu ? 'Чат с UNO' : 'Chat with UNO'}
+                {isRu ? 'Чат с myUNO' : 'Chat with myUNO'}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {isRu ? 'Быстрые ответы 24/7' : 'Quick answers 24/7'}
@@ -237,8 +237,8 @@ export default function Support() {
 
           <p className="text-sm text-muted-foreground mb-4">
             {isRu 
-              ? 'Не хотите искать сами? Менеджер UNO подберёт подходящие варианты, договорится о цене и забронирует за вас:' 
-              : 'Don\'t want to search yourself? UNO manager will find suitable options, negotiate the price and book for you:'}
+              ? 'Не хотите искать сами? Менеджер myUNO подберёт подходящие варианты, договорится о цене и забронирует за вас:' 
+              : 'Don\'t want to search yourself? myUNO manager will find suitable options, negotiate the price and book for you:'}
           </p>
 
           <div className="grid grid-cols-2 gap-2 mb-4">
@@ -326,9 +326,9 @@ export default function Support() {
           </div>
         </SectionCard>
 
-        {/* Why UNO Section */}
+        {/* Why myUNO Section */}
         <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">
-          {isRu ? 'Почему UNO?' : 'Why UNO?'}
+          {isRu ? 'Почему myUNO?' : 'Why myUNO?'}
         </div>
         <SectionCard className="bg-gradient-to-br from-muted/50 to-muted/30">
           <div className="grid grid-cols-1 gap-4">
