@@ -13,6 +13,7 @@ import {
   FileEdit,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { Language } from '@/i18n';
 import { cn } from '@/lib/utils';
 
 export interface BookingStatusEvent {
@@ -35,31 +36,33 @@ interface BookingStatusTimelineProps {
 
 const STATUS_CONFIG: Record<
   string,
-  { icon: typeof Clock; en: string; ru: string; tone: string }
+  { icon: typeof Clock; en: string; ru: string; th: string; tone: string }
 > = {
-  draft: { icon: FileEdit, en: 'Draft', ru: 'Черновик', tone: 'text-muted-foreground' },
-  pending: { icon: Clock, en: 'Pending', ru: 'Ожидает', tone: 'text-warning' },
-  submitted: { icon: Send, en: 'Submitted', ru: 'Отправлено', tone: 'text-info' },
-  confirmed: { icon: CheckCircle2, en: 'Confirmed', ru: 'Подтверждено', tone: 'text-info' },
-  in_progress: { icon: PlayCircle, en: 'In Progress', ru: 'В процессе', tone: 'text-accent-purple' },
-  checked_in: { icon: PlayCircle, en: 'Checked in', ru: 'Заселён', tone: 'text-info' },
-  checked_out: { icon: CheckCircle2, en: 'Checked out', ru: 'Выехал', tone: 'text-success' },
-  completed: { icon: PartyPopper, en: 'Completed', ru: 'Завершено', tone: 'text-success' },
-  cancelled: { icon: XCircle, en: 'Cancelled', ru: 'Отменено', tone: 'text-destructive' },
-  cancelled_by_user: { icon: XCircle, en: 'Cancelled by you', ru: 'Отменено вами', tone: 'text-destructive' },
-  cancelled_by_provider: { icon: XCircle, en: 'Declined', ru: 'Отклонено', tone: 'text-destructive' },
-  no_show: { icon: AlertTriangle, en: 'No-show', ru: 'Не пришёл', tone: 'text-destructive' },
-  expired: { icon: AlertTriangle, en: 'Expired', ru: 'Истекло', tone: 'text-muted-foreground' },
+  draft: { icon: FileEdit, en: 'Draft', ru: 'Черновик', th: 'ฉบับร่าง', tone: 'text-muted-foreground' },
+  pending: { icon: Clock, en: 'Pending', ru: 'Ожидает', th: 'รอดำเนินการ', tone: 'text-warning' },
+  submitted: { icon: Send, en: 'Submitted', ru: 'Отправлено', th: 'ส่งแล้ว', tone: 'text-info' },
+  confirmed: { icon: CheckCircle2, en: 'Confirmed', ru: 'Подтверждено', th: 'ยืนยันแล้ว', tone: 'text-info' },
+  in_progress: { icon: PlayCircle, en: 'In Progress', ru: 'В процессе', th: 'กำลังดำเนินการ', tone: 'text-accent-purple' },
+  checked_in: { icon: PlayCircle, en: 'Checked in', ru: 'Заселён', th: 'เช็คอินแล้ว', tone: 'text-info' },
+  checked_out: { icon: CheckCircle2, en: 'Checked out', ru: 'Выехал', th: 'เช็คเอาท์แล้ว', tone: 'text-success' },
+  completed: { icon: PartyPopper, en: 'Completed', ru: 'Завершено', th: 'เสร็จสมบูรณ์', tone: 'text-success' },
+  cancelled: { icon: XCircle, en: 'Cancelled', ru: 'Отменено', th: 'ยกเลิกแล้ว', tone: 'text-destructive' },
+  cancelled_by_user: { icon: XCircle, en: 'Cancelled by you', ru: 'Отменено вами', th: 'คุณยกเลิกแล้ว', tone: 'text-destructive' },
+  cancelled_by_provider: { icon: XCircle, en: 'Declined', ru: 'Отклонено', th: 'ถูกปฏิเสธ', tone: 'text-destructive' },
+  no_show: { icon: AlertTriangle, en: 'No-show', ru: 'Не пришёл', th: 'ไม่มาตามนัด', tone: 'text-destructive' },
+  expired: { icon: AlertTriangle, en: 'Expired', ru: 'Истекло', th: 'หมดอายุ', tone: 'text-muted-foreground' },
 };
 
-function getStatusMeta(status: string, isRu: boolean) {
+function getStatusMeta(status: string, language: Language) {
   const cfg = STATUS_CONFIG[status] ?? {
     icon: Clock,
     en: status,
     ru: status,
+    th: status,
     tone: 'text-muted-foreground',
   };
-  return { Icon: cfg.icon, label: isRu ? cfg.ru : cfg.en, tone: cfg.tone };
+  const label = language === 'ru' ? cfg.ru : language === 'th' ? cfg.th : cfg.en;
+  return { Icon: cfg.icon, label, tone: cfg.tone };
 }
 
 export function BookingStatusTimeline({
@@ -72,6 +75,7 @@ export function BookingStatusTimeline({
 }: BookingStatusTimelineProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  // date-fns ships ru/enUS here; Thai dates fall back to enUS formatting.
   const locale = isRu ? ru : enUS;
   const highlightSet =
     highlightIds instanceof Set
@@ -99,19 +103,19 @@ export function BookingStatusTimeline({
   if (timeline.length === 0) {
     return (
       <p className={cn('text-xs text-muted-foreground', className)}>
-        {isRu ? 'История статусов недоступна' : 'No status history yet'}
+        {language === 'ru' ? 'История статусов недоступна' : language === 'th' ? 'ยังไม่มีประวัติสถานะ' : 'No status history yet'}
       </p>
     );
   }
 
   return (
-    <ol className={cn('relative', className)} aria-label={isRu ? 'История статусов' : 'Status history'}>
+    <ol className={cn('relative', className)} aria-label={language === 'ru' ? 'История статусов' : language === 'th' ? 'ประวัติสถานะ' : 'Status history'}>
       <div
         aria-hidden="true"
         className="absolute left-[11px] top-2 bottom-2 w-px bg-border"
       />
       {timeline.map((event, idx) => {
-        const { Icon, label, tone } = getStatusMeta(event.to_status, isRu);
+        const { Icon, label, tone } = getStatusMeta(event.to_status, language);
         const isLast = idx === timeline.length - 1;
         const date = new Date(event.created_at);
         const isHighlighted = !!event.id && highlightSet.has(event.id);

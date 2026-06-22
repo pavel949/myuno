@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { GooglePlacesAutocomplete } from '@/components/shared/GooglePlacesAutocomplete';
 import { WeeklyHoursEditor } from './WeeklyHoursEditor';
+import type { Language } from '@/i18n';
 
 interface Props {
   field: FieldSpec;
@@ -17,7 +18,8 @@ interface Props {
   onChange: (next: Record<string, unknown>) => void;
 }
 
-const t = (l: LocalizedText, lang: 'en' | 'ru') => l[lang] ?? l.en;
+const t = (l: LocalizedText, lang: Language): string =>
+  (l as Record<Language, string | undefined>)[lang] ?? l.en;
 
 /**
  * Universal renderer for VerticalSpec FieldSpec.
@@ -27,7 +29,7 @@ const t = (l: LocalizedText, lang: 'en' | 'ru') => l[lang] ?? l.en;
  */
 export const FieldRenderer = ({ field, row, onChange }: Props) => {
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const value = getPath(row, field.path);
 
   const set = (v: unknown) => onChange(setPath(row, field.path, v));
@@ -186,7 +188,7 @@ export const FieldRenderer = ({ field, row, onChange }: Props) => {
             value={addr.line ?? ''}
             onChange={(line) => set({ ...addr, line })}
             onPlaceSelect={(p) => set({ line: p.address, lat: p.lat, lng: p.lng, district: p.district })}
-            placeholder={field.placeholder ? t(field.placeholder, lang) : (lang === 'ru' ? 'Начните вводить адрес…' : 'Start typing address…')}
+            placeholder={field.placeholder ? t(field.placeholder, lang) : (lang === 'ru' ? 'Начните вводить адрес…' : lang === 'th' ? 'เริ่มพิมพ์ที่อยู่…' : 'Start typing address…')}
           />
           {typeof addr.lat === 'number' && typeof addr.lng === 'number' && (
             <p className="text-[11px] text-muted-foreground font-mono">

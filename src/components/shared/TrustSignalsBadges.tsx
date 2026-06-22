@@ -21,36 +21,42 @@
      icon: Shield,
      labelEn: 'Verified',
      labelRu: 'Проверен',
+     labelTh: 'ยืนยันแล้ว',
       colorClass: 'bg-primary/10 text-primary border-primary/20',
     },
     insured: {
       icon: CheckCircle,
       labelEn: 'Insured',
       labelRu: 'Застрахован',
+      labelTh: 'มีประกัน',
       colorClass: 'bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] border-[hsl(var(--success))]/20',
     },
     'fast-response': {
       icon: Clock,
       labelEn: 'Fast Response',
       labelRu: 'Быстрый ответ',
+      labelTh: 'ตอบกลับเร็ว',
       colorClass: 'bg-[hsl(var(--info))]/10 text-[hsl(var(--info))] border-[hsl(var(--info))]/20',
     },
     guaranteed: {
       icon: Award,
       labelEn: 'Guaranteed',
       labelRu: 'Гарантия',
+      labelTh: 'รับประกัน',
       colorClass: 'bg-[hsl(var(--warning))]/10 text-[hsl(var(--warning))] border-[hsl(var(--warning))]/20',
     },
     popular: {
       icon: Users,
       labelEn: 'Popular',
       labelRu: 'Популярно',
+      labelTh: 'ยอดนิยม',
       colorClass: 'bg-[hsl(var(--accent-purple))]/10 text-[hsl(var(--accent-purple))] border-[hsl(var(--accent-purple))]/20',
     },
     'top-rated': {
       icon: Award,
       labelEn: 'Top Rated',
       labelRu: 'Топ рейтинг',
+      labelTh: 'คะแนนสูงสุด',
       colorClass: 'bg-[hsl(var(--warning))]/10 text-[hsl(var(--warning))] border-[hsl(var(--warning))]/20',
     },
  };
@@ -59,8 +65,8 @@
    const { language } = useLanguage();
    const config = BADGE_CONFIG[type];
    const Icon = config.icon;
-   const isRu = language === 'ru';
-   
+   const label = language === 'ru' ? config.labelRu : language === 'th' ? config.labelTh : config.labelEn;
+
    const sizeClasses = {
      sm: 'text-[10px] px-1.5 py-0.5 gap-1',
      md: 'text-xs px-2 py-1 gap-1.5',
@@ -77,7 +83,7 @@
        )}
      >
        <Icon className={cn(size === 'sm' ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5')} />
-       {value || (isRu ? config.labelRu : config.labelEn)}
+       {value || label}
      </Badge>
    );
  }
@@ -98,8 +104,8 @@
    className,
  }: TrustSignalsRowProps) {
    const { language } = useLanguage();
-   const isRu = language === 'ru';
-   
+   const minutesSuffix = language === 'ru' ? ' мин' : language === 'th' ? ' นาที' : 'm';
+
    const hasAnySignal = isVerified || isInsured || hasGuarantee || (responseTimeMinutes && responseTimeMinutes <= 30);
    
    if (!hasAnySignal) return null;
@@ -108,7 +114,7 @@
      <div className={cn('flex items-center gap-1.5 flex-wrap', className)}>
        {isVerified && <TrustBadge type="verified" />}
        {responseTimeMinutes && responseTimeMinutes <= 30 && (
-         <TrustBadge type="fast-response" value={`${responseTimeMinutes}${isRu ? ' мин' : 'm'}`} />
+         <TrustBadge type="fast-response" value={`${responseTimeMinutes}${minutesSuffix}`} />
        )}
        {isInsured && <TrustBadge type="insured" />}
        {hasGuarantee && <TrustBadge type="guaranteed" />}
@@ -125,26 +131,27 @@
  
  export function SocialProofBadge({ count, type, period = 'today', className }: SocialProofBadgeProps) {
    const { language } = useLanguage();
-   const isRu = language === 'ru';
-   
+   const tr = (ru: string, en: string, th: string) =>
+     language === 'ru' ? ru : language === 'th' ? th : en;
+
    const labels = {
      bookings: {
-       today: isRu ? 'забронировали сегодня' : 'booked today',
-       week: isRu ? 'бронирований за неделю' : 'bookings this week',
-       month: isRu ? 'бронирований за месяц' : 'bookings this month',
-       total: isRu ? 'бронирований' : 'bookings',
+       today: tr('забронировали сегодня', 'booked today', 'จองวันนี้'),
+       week: tr('бронирований за неделю', 'bookings this week', 'การจองสัปดาห์นี้'),
+       month: tr('бронирований за месяц', 'bookings this month', 'การจองเดือนนี้'),
+       total: tr('бронирований', 'bookings', 'การจอง'),
      },
      clients: {
-       today: isRu ? 'клиентов сегодня' : 'clients today',
-       week: isRu ? 'клиентов за неделю' : 'clients this week',
-       month: isRu ? 'клиентов за месяц' : 'clients this month',
-       total: isRu ? 'клиентов' : 'clients',
+       today: tr('клиентов сегодня', 'clients today', 'ลูกค้าวันนี้'),
+       week: tr('клиентов за неделю', 'clients this week', 'ลูกค้าสัปดาห์นี้'),
+       month: tr('клиентов за месяц', 'clients this month', 'ลูกค้าเดือนนี้'),
+       total: tr('клиентов', 'clients', 'ลูกค้า'),
      },
      reviews: {
-       today: isRu ? 'отзывов' : 'reviews',
-       week: isRu ? 'отзывов' : 'reviews',
-       month: isRu ? 'отзывов' : 'reviews',
-       total: isRu ? 'отзывов' : 'reviews',
+       today: tr('отзывов', 'reviews', 'รีวิว'),
+       week: tr('отзывов', 'reviews', 'รีวิว'),
+       month: tr('отзывов', 'reviews', 'รีวิว'),
+       total: tr('отзывов', 'reviews', 'รีวิว'),
      },
    };
  

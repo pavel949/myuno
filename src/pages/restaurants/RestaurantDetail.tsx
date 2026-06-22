@@ -32,13 +32,13 @@ function getReservationCTA(provider?: string | null, language: string = 'en') {
     case 'chope':
     case 'tablecheck':
     case 'sevenrooms':
-      return language === 'ru' ? 'Забронировать столик' : 'Reserve a Table';
+      return language === 'ru' ? 'Забронировать столик' : language === 'th' ? 'จองโต๊ะ' : 'Reserve a Table';
     case 'website':
-      return language === 'ru' ? 'Забронировать на сайте' : 'Book on Website';
+      return language === 'ru' ? 'Забронировать на сайте' : language === 'th' ? 'จองผ่านเว็บไซต์' : 'Book on Website';
     case 'phone':
-      return language === 'ru' ? 'Позвонить для брони' : 'Call to Reserve';
+      return language === 'ru' ? 'Позвонить для брони' : language === 'th' ? 'โทรเพื่อจอง' : 'Call to Reserve';
     default:
-      return language === 'ru' ? 'Забронировать' : 'Reserve';
+      return language === 'ru' ? 'Забронировать' : language === 'th' ? 'จอง' : 'Reserve';
   }
 }
 
@@ -82,7 +82,7 @@ export default function RestaurantDetail() {
       <AppLayout>
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-muted-foreground">
-            {language === 'ru' ? 'Ресторан не найден' : 'Restaurant not found'}
+            {language === 'ru' ? 'Ресторан не найден' : language === 'th' ? 'ไม่พบร้านอาหาร' : 'Restaurant not found'}
           </p>
         </div>
       </AppLayout>
@@ -230,7 +230,7 @@ export default function RestaurantDetail() {
         {galleryImages.length > 0 && (
           <div className="mt-4 px-4">
             <h3 className="text-sm font-semibold mb-2">
-              {language === 'ru' ? 'Фото' : 'Photos'}
+              {language === 'ru' ? 'Фото' : language === 'th' ? 'รูปภาพ' : 'Photos'}
             </h3>
             <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
               {galleryImages.map((img, i) => (
@@ -251,15 +251,15 @@ export default function RestaurantDetail() {
             <TabsList className="w-full grid grid-cols-3">
               <TabsTrigger value="info" className="gap-1.5 text-xs">
                 <MapPin className="w-3.5 h-3.5" />
-                {language === 'ru' ? 'Инфо' : 'Info'}
+                {language === 'ru' ? 'Инфо' : language === 'th' ? 'ข้อมูล' : 'Info'}
               </TabsTrigger>
               <TabsTrigger value="menu" className="gap-1.5 text-xs">
                 <UtensilsCrossed className="w-3.5 h-3.5" />
-                {language === 'ru' ? 'Меню' : 'Menu'}
+                {language === 'ru' ? 'Меню' : language === 'th' ? 'เมนู' : 'Menu'}
               </TabsTrigger>
               <TabsTrigger value="reviews" className="gap-1.5 text-xs">
                 <Star className="w-3.5 h-3.5" />
-                {language === 'ru' ? 'Отзывы' : 'Reviews'}
+                {language === 'ru' ? 'Отзывы' : language === 'th' ? 'รีวิว' : 'Reviews'}
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -272,7 +272,7 @@ export default function RestaurantDetail() {
             <Card variant="surface">
               <CardContent className="p-4 space-y-3">
                 <h3 className="font-semibold text-sm">
-                  {language === 'ru' ? 'Контакты' : 'Contact'}
+                  {language === 'ru' ? 'Контакты' : language === 'th' ? 'ติดต่อ' : 'Contact'}
                 </h3>
                 
                 {restaurant.address && (
@@ -304,7 +304,7 @@ export default function RestaurantDetail() {
                     className="flex items-center gap-3 text-sm text-primary"
                   >
                     <Globe className="w-4 h-4 shrink-0" />
-                    <span>{language === 'ru' ? 'Сайт ресторана' : 'Restaurant website'}</span>
+                    <span>{language === 'ru' ? 'Сайт ресторана' : language === 'th' ? 'เว็บไซต์ร้านอาหาร' : 'Restaurant website'}</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 )}
@@ -316,14 +316,14 @@ export default function RestaurantDetail() {
               <Card variant="surface">
                 <CardContent className="p-4 space-y-2">
                   <h3 className="font-semibold text-sm">
-                    {language === 'ru' ? 'Бронирование' : 'Reservation'}
+                    {language === 'ru' ? 'Бронирование' : language === 'th' ? 'การจอง' : 'Reservation'}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {reservationProvider === 'chope' && (language === 'ru' ? 'Бронирование через Chope' : 'Book via Chope – free online reservation')}
-                    {reservationProvider === 'tablecheck' && (language === 'ru' ? 'Бронирование через TableCheck' : 'Book via TableCheck – instant confirmation')}
-                    {reservationProvider === 'sevenrooms' && (language === 'ru' ? 'Бронирование через SevenRooms' : 'Book via SevenRooms')}
-                    {reservationProvider === 'website' && (language === 'ru' ? 'Бронирование на сайте ресторана' : 'Book directly on the restaurant website')}
-                    {reservationProvider === 'phone' && (language === 'ru' ? 'Позвоните для бронирования' : 'Call the restaurant to make a reservation')}
+                    {reservationProvider === 'chope' && (language === 'ru' ? 'Бронирование через Chope' : language === 'th' ? 'จองผ่าน Chope – จองออนไลน์ฟรี' : 'Book via Chope – free online reservation')}
+                    {reservationProvider === 'tablecheck' && (language === 'ru' ? 'Бронирование через TableCheck' : language === 'th' ? 'จองผ่าน TableCheck – ยืนยันทันที' : 'Book via TableCheck – instant confirmation')}
+                    {reservationProvider === 'sevenrooms' && (language === 'ru' ? 'Бронирование через SevenRooms' : language === 'th' ? 'จองผ่าน SevenRooms' : 'Book via SevenRooms')}
+                    {reservationProvider === 'website' && (language === 'ru' ? 'Бронирование на сайте ресторана' : language === 'th' ? 'จองโดยตรงผ่านเว็บไซต์ร้านอาหาร' : 'Book directly on the restaurant website')}
+                    {reservationProvider === 'phone' && (language === 'ru' ? 'Позвоните для бронирования' : language === 'th' ? 'โทรหาร้านอาหารเพื่อทำการจอง' : 'Call the restaurant to make a reservation')}
                   </p>
                   <Button
                     variant="outline"
@@ -332,7 +332,7 @@ export default function RestaurantDetail() {
                     onClick={() => window.open(reservationUrl, '_blank', 'noopener')}
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
-                    {language === 'ru' ? 'Открыть бронирование' : 'Open reservation page'}
+                    {language === 'ru' ? 'Открыть бронирование' : language === 'th' ? 'เปิดหน้าการจอง' : 'Open reservation page'}
                   </Button>
                 </CardContent>
               </Card>
@@ -341,7 +341,7 @@ export default function RestaurantDetail() {
             {/* Data Quality badge */}
             {r.needs_manual_verification === false && r.last_verified_at && (
               <div className="text-xs text-muted-foreground text-center pt-2">
-                ✅ {language === 'ru' ? 'Проверено' : 'Verified'} {new Date(r.last_verified_at).toLocaleDateString()}
+                ✅ {language === 'ru' ? 'Проверено' : language === 'th' ? 'ตรวจสอบแล้ว' : 'Verified'} {new Date(r.last_verified_at).toLocaleDateString(language === 'th' ? 'th-TH' : undefined)}
               </div>
             )}
           </div>
@@ -354,7 +354,7 @@ export default function RestaurantDetail() {
               <div className="text-center py-12">
                 <UtensilsCrossed className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground mb-2">
-                  {language === 'ru' ? 'Меню скоро появится' : 'Menu coming soon'}
+                  {language === 'ru' ? 'Меню скоро появится' : language === 'th' ? 'เมนูจะมาเร็ว ๆ นี้' : 'Menu coming soon'}
                 </p>
                 {r.menu_url && (
                   <Button
@@ -364,14 +364,16 @@ export default function RestaurantDetail() {
                     className="gap-1.5"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
-                    {language === 'ru' ? 'Посмотреть меню на сайте' : 'View menu on website'}
+                    {language === 'ru' ? 'Посмотреть меню на сайте' : language === 'th' ? 'ดูเมนูบนเว็บไซต์' : 'View menu on website'}
                   </Button>
                 )}
                 {reservationUrl && (
                   <p className="text-xs text-muted-foreground mt-3">
-                    {language === 'ru' 
-                      ? 'Меню доступно на странице бронирования' 
-                      : 'Menu may be available on the reservation page'}
+                    {language === 'ru'
+                      ? 'Меню доступно на странице бронирования'
+                      : language === 'th'
+                        ? 'อาจดูเมนูได้บนหน้าการจอง'
+                        : 'Menu may be available on the reservation page'}
                   </p>
                 )}
               </div>

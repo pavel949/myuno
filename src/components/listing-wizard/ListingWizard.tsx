@@ -18,19 +18,20 @@ import { ReviewStep } from './steps/ReviewStep';
 import { SuccessStep } from './steps/SuccessStep';
 
 const STEPS = [
-  { id: 'type', titleEn: 'What are you listing?', titleRu: 'Что вы предлагаете?' },
-  { id: 'basic', titleEn: 'Basic info', titleRu: 'Основная информация' },
-  { id: 'details', titleEn: 'Details', titleRu: 'Детали' },
-  { id: 'photos', titleEn: 'Photos', titleRu: 'Фотографии' },
-  { id: 'pricing', titleEn: 'Pricing', titleRu: 'Цена' },
-  { id: 'contact', titleEn: 'Contact info', titleRu: 'Контакты' },
-  { id: 'review', titleEn: 'Review & Submit', titleRu: 'Проверка и отправка' },
+  { id: 'type', titleEn: 'What are you listing?', titleRu: 'Что вы предлагаете?', titleTh: 'คุณต้องการลงประกาศอะไร?' },
+  { id: 'basic', titleEn: 'Basic info', titleRu: 'Основная информация', titleTh: 'ข้อมูลพื้นฐาน' },
+  { id: 'details', titleEn: 'Details', titleRu: 'Детали', titleTh: 'รายละเอียด' },
+  { id: 'photos', titleEn: 'Photos', titleRu: 'Фотографии', titleTh: 'รูปภาพ' },
+  { id: 'pricing', titleEn: 'Pricing', titleRu: 'Цена', titleTh: 'ราคา' },
+  { id: 'contact', titleEn: 'Contact info', titleRu: 'Контакты', titleTh: 'ข้อมูลติดต่อ' },
+  { id: 'review', titleEn: 'Review & Submit', titleRu: 'Проверка и отправка', titleTh: 'ตรวจสอบและส่ง' },
 ];
 
 export function ListingWizard() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   
   const {
     draft,
@@ -145,7 +146,7 @@ export function ListingWizard() {
       <header className="sticky top-0 z-50 bg-background/95 border-b">
         <div className="flex items-center justify-between px-4 h-14">
           {currentStep > 0 ? (
-            <Button variant="ghost" size="icon" onClick={prevStep} aria-label={isRu ? 'Назад' : 'Back'}>
+            <Button variant="ghost" size="icon" onClick={prevStep} aria-label={isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
           ) : (
@@ -156,7 +157,7 @@ export function ListingWizard() {
             {currentStep + 1} / {STEPS.length}
           </span>
           
-          <Button variant="ghost" size="icon" onClick={handleClose} aria-label={isRu ? 'Закрыть' : 'Close'}>
+          <Button variant="ghost" size="icon" onClick={handleClose} aria-label={isRu ? 'Закрыть' : isTh ? 'ปิด' : 'Close'}>
             <X className="h-5 w-5" />
           </Button>
         </div>
@@ -175,7 +176,7 @@ export function ListingWizard() {
               transition={{ duration: 0.2 }}
             >
               <h1 className="text-2xl font-bold mb-6">
-                {isRu ? currentStepData.titleRu : currentStepData.titleEn}
+                {isRu ? currentStepData.titleRu : isTh ? currentStepData.titleTh : currentStepData.titleEn}
               </h1>
               
               {renderStep()}
@@ -187,7 +188,7 @@ export function ListingWizard() {
       {/* Saving indicator */}
       {isSaving && (
         <div className="fixed bottom-4 left-4 bg-muted px-3 py-2 rounded-none text-sm text-muted-foreground">
-          {isRu ? 'Сохранение...' : 'Saving...'}
+          {isRu ? 'Сохранение...' : isTh ? 'กำลังบันทึก...' : 'Saving...'}
         </div>
       )}
     </div>

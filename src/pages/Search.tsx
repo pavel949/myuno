@@ -21,6 +21,9 @@ export default function Search() {
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const isRu = language === 'ru';
+  // Local trilingual helper for UI chrome strings (RU / EN / TH).
+  const tt = (ru: string, en: string, th: string) =>
+    language === 'ru' ? ru : language === 'th' ? th : en;
 
   const hasQuery = query.trim().length >= 2;
 
@@ -54,7 +57,7 @@ export default function Search() {
             <div className="flex-1 relative">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
-                placeholder={isRu ? 'Поиск услуг, мест...' : 'Search services, places...'}
+                placeholder={tt('Поиск услуг, мест...', 'Search services, places...', 'ค้นหาบริการ สถานที่...')}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="pl-10 pr-10"
@@ -63,7 +66,7 @@ export default function Search() {
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  aria-label={isRu ? 'Очистить' : 'Clear'}
+                  aria-label={tt('Очистить', 'Clear', 'ล้าง')}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
                   <X className="w-4 h-4 text-muted-foreground" />
@@ -80,7 +83,7 @@ export default function Search() {
               onClick={() => setSelectedType(null)}
               className="flex-shrink-0"
             >
-              {isRu ? 'Все' : 'All'}
+              {tt('Все', 'All', 'ทั้งหมด')}
             </Button>
             {popularCategories.slice(0, 12).map(type => {
               const config = searchTypeConfig[type];
@@ -109,7 +112,7 @@ export default function Search() {
               {/* Trending */}
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                  {isRu ? 'Популярное' : 'Trending'}
+                  {tt('Популярное', 'Trending', 'กำลังนิยม')}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {(trendingSearches[language] || trendingSearches.en).map(search => (
@@ -127,7 +130,7 @@ export default function Search() {
               {/* Popular Categories */}
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                  {isRu ? 'Популярные категории' : 'Popular Categories'}
+                  {tt('Популярные категории', 'Popular Categories', 'หมวดยอดนิยม')}
                 </h3>
                 <AnimatedGrid className="grid grid-cols-2 gap-3" staggerDelay={0.06}>
                   {popularCategories.slice(0, 6).map(type => {
@@ -161,7 +164,7 @@ export default function Search() {
             <div className="text-center py-12">
               <Loader2 className="w-8 h-8 text-primary mx-auto mb-3 animate-spin" />
               <p className="text-muted-foreground">
-                {isRu ? 'Поиск...' : 'Searching...'}
+                {tt('Поиск...', 'Searching...', 'กำลังค้นหา...')}
               </p>
             </div>
           )}
@@ -179,28 +182,30 @@ export default function Search() {
                 <div className="text-center py-12">
                   <SearchIcon className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                   <h3 className="font-semibold mb-1">
-                    {isRu ? 'Ничего не найдено' : 'No results found'}
+                    {tt('Ничего не найдено', 'No results found', 'ไม่พบผลลัพธ์')}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-6">
-                    {isRu
-                      ? 'Попробуйте изменить запрос или выберите раздел ниже'
-                      : 'Try different keywords or pick a section below'}
+                    {tt(
+                      'Попробуйте изменить запрос или выберите раздел ниже',
+                      'Try different keywords or pick a section below',
+                      'ลองใช้คำค้นอื่น หรือเลือกหมวดด้านล่าง',
+                    )}
                   </p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {[
-                      { ru: 'Виза', en: 'Visa', path: '/visa/quiz' },
-                      { ru: 'Жильё', en: 'Stay', path: '/property' },
-                      { ru: 'Услуги', en: 'Services', path: '/services' },
-                      { ru: 'Транспорт', en: 'Transport', path: '/transport' },
-                      { ru: 'Медицина', en: 'Medical', path: '/medical' },
-                      { ru: 'Юристы', en: 'Legal', path: '/legal' },
+                      { ru: 'Виза', en: 'Visa', th: 'วีซ่า', path: '/visa/quiz' },
+                      { ru: 'Жильё', en: 'Stay', th: 'ที่พัก', path: '/property' },
+                      { ru: 'Услуги', en: 'Services', th: 'บริการ', path: '/services' },
+                      { ru: 'Транспорт', en: 'Transport', th: 'การเดินทาง', path: '/transport' },
+                      { ru: 'Медицина', en: 'Medical', th: 'การแพทย์', path: '/medical' },
+                      { ru: 'Юристы', en: 'Legal', th: 'กฎหมาย', path: '/legal' },
                     ].map((c) => (
                       <button
                         key={c.path}
                         onClick={() => navigate(c.path)}
                         className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm hover:bg-primary/20 transition-colors"
                       >
-                        {isRu ? c.ru : c.en}
+                        {tt(c.ru, c.en, c.th)}
                       </button>
                     ))}
                   </div>
@@ -234,7 +239,7 @@ export default function Search() {
                             <div className="flex items-center gap-2 mb-1">
                               <Badge variant="secondary" className="text-xs gap-1">
                                 <Icon className="w-3 h-3" />
-                                {language === 'ru' ? config?.label?.ru : config?.label?.en}
+                                {config?.label?.[language] ?? config?.label?.en}
                               </Badge>
                               {item.rating && (
                                 <span className="text-xs text-muted-foreground flex items-center gap-0.5">

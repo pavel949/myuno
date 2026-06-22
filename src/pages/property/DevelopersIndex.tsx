@@ -18,6 +18,7 @@ export default function DevelopersIndex() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: developers, isLoading } = useDevelopers();
 

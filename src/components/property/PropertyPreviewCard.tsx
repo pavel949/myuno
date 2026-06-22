@@ -35,6 +35,7 @@ interface PropertyPreviewCardProps {
 export function PropertyPreviewCard({ data, className, variant = 'search' }: PropertyPreviewCardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const title = isRu ? (data.titleRu || data.title) : data.title;
   const typeLabel = data.propertyType 

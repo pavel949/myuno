@@ -30,6 +30,16 @@ const texts = {
     google: 'Google',
     apple: 'Apple',
   },
+  th: {
+    sectionTitle: 'บัญชีที่เชื่อมต่อ',
+    sectionDesc: 'เข้าสู่ระบบอย่างรวดเร็วผ่านโซเชียล',
+    connect: 'เชื่อมต่อ',
+    disconnect: 'ยกเลิกการเชื่อมต่อ',
+    connected: 'เชื่อมต่อแล้ว',
+    connectError: 'การเชื่อมต่อผิดพลาด',
+    google: 'Google',
+    apple: 'Apple',
+  },
 };
 
 const providers = [
@@ -75,7 +85,7 @@ const providers = [
 export function ConnectedAccountsSection() {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const t = texts[language === 'th' ? 'en' : language] || texts.en;
+  const t = texts[language] || texts.en;
   
   const [connectingProvider, setConnectingProvider] = useState<string | null>(null);
 

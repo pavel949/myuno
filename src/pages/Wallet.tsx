@@ -30,7 +30,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
-import { ru, enUS } from "date-fns/locale";
+import { ru, enUS, th } from "date-fns/locale";
 import { toast } from "sonner";
 import { CashbackRatesCard } from "@/components/uno/CashbackBadge";
 import { ReferralCard } from "@/components/uno/ReferralCard";
@@ -132,7 +132,7 @@ const Wallet = () => {
 
   const handleTopUp = async () => {
     if (!user || topUpAmount < 100) {
-      toast.error(language === 'ru' ? 'Минимальная сумма 100 ₽' : 'Minimum amount is 100 ₽');
+      toast.error(language === 'ru' ? 'Минимальная сумма 100 ₽' : language === 'th' ? 'จำนวนเงินขั้นต่ำ 100 ₽' : 'Minimum amount is 100 ₽');
       return;
     }
 
@@ -159,7 +159,7 @@ const Wallet = () => {
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
-      toast.error(language === 'ru' ? 'Ошибка при создании платежа' : 'Error creating payment');
+      toast.error(language === 'ru' ? 'Ошибка при создании платежа' : language === 'th' ? 'เกิดข้อผิดพลาดในการสร้างการชำระเงิน' : 'Error creating payment');
     } finally {
       setIsProcessing(false);
     }
@@ -184,21 +184,21 @@ const Wallet = () => {
 
   const getTransactionLabel = (type: Transaction['type']) => {
     const labels = {
-      topup: { en: 'Top Up', ru: 'Пополнение' },
-      payment: { en: 'Payment', ru: 'Оплата' },
-      refund: { en: 'Refund', ru: 'Возврат' },
-      bonus: { en: 'Bonus', ru: 'Бонус' },
-      cashback: { en: 'Cashback', ru: 'Кэшбэк' },
+      topup: { en: 'Top Up', ru: 'Пополнение', th: 'เติมเงิน' },
+      payment: { en: 'Payment', ru: 'Оплата', th: 'การชำระเงิน' },
+      refund: { en: 'Refund', ru: 'Возврат', th: 'การคืนเงิน' },
+      bonus: { en: 'Bonus', ru: 'Бонус', th: 'โบนัส' },
+      cashback: { en: 'Cashback', ru: 'Кэшбэк', th: 'เงินคืน' },
     };
     return labels[type]?.[language] || type;
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: { en: string; ru: string } }> = {
-      completed: { variant: 'default', label: { en: 'Completed', ru: 'Выполнено' } },
-      pending: { variant: 'secondary', label: { en: 'Pending', ru: 'Ожидание' } },
-      failed: { variant: 'destructive', label: { en: 'Failed', ru: 'Ошибка' } },
-      cancelled: { variant: 'outline', label: { en: 'Cancelled', ru: 'Отменено' } },
+    const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: { en: string; ru: string; th: string } }> = {
+      completed: { variant: 'default', label: { en: 'Completed', ru: 'Выполнено', th: 'สำเร็จ' } },
+      pending: { variant: 'secondary', label: { en: 'Pending', ru: 'Ожидание', th: 'รอดำเนินการ' } },
+      failed: { variant: 'destructive', label: { en: 'Failed', ru: 'Ошибка', th: 'ล้มเหลว' } },
+      cancelled: { variant: 'outline', label: { en: 'Cancelled', ru: 'Отменено', th: 'ยกเลิกแล้ว' } },
     };
     const config = variants[status] || variants.completed;
     return <Badge variant={config.variant}>{config.label[language]}</Badge>;
@@ -210,21 +210,21 @@ const Wallet = () => {
   };
 
   const quickActions = [
-    { 
-      icon: Plus, 
-      label: language === 'ru' ? 'Пополнить' : 'Top Up',
+    {
+      icon: Plus,
+      label: language === 'ru' ? 'Пополнить' : language === 'th' ? 'เติมเงิน' : 'Top Up',
       color: 'bg-success',
       onClick: () => setIsTopUpOpen(true)
     },
-    { 
-      icon: CreditCard, 
-      label: language === 'ru' ? 'Карты' : 'Cards',
+    {
+      icon: CreditCard,
+      label: language === 'ru' ? 'Карты' : language === 'th' ? 'บัตร' : 'Cards',
       color: 'bg-info',
       onClick: () => navigate('/wallet/cards')
     },
-    { 
-      icon: Clock, 
-      label: language === 'ru' ? 'История' : 'History',
+    {
+      icon: Clock,
+      label: language === 'ru' ? 'История' : language === 'th' ? 'ประวัติ' : 'History',
       color: 'bg-accent-purple',
       onClick: () => navigate('/wallet/history')
     },
@@ -250,15 +250,17 @@ const Wallet = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <WalletIcon className="w-5 h-5" />
                   <span className="text-sm opacity-90">
-                    {language === 'ru' ? 'Баланс' : 'Balance'}
+                    {language === 'ru' ? 'Баланс' : language === 'th' ? 'ยอดคงเหลือ' : 'Balance'}
                   </span>
                 </div>
                 <div className="text-4xl font-bold mb-4" data-testid="wallet-balance">
                   {wallet?.balance.toLocaleString() || 0} ₽
                 </div>
                 <div className="text-sm opacity-75">
-                  {language === 'ru' 
-                    ? 'Используйте баланс для оплаты услуг' 
+                  {language === 'ru'
+                    ? 'Используйте баланс для оплаты услуг'
+                    : language === 'th'
+                    ? 'ใช้ยอดคงเหลือเพื่อชำระค่าบริการ'
                     : 'Use balance to pay for services'}
                 </div>
               </>
@@ -293,7 +295,7 @@ const Wallet = () => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">
-              {language === 'ru' ? 'История операций' : 'Transaction History'}
+              {language === 'ru' ? 'История операций' : language === 'th' ? 'ประวัติการทำรายการ' : 'Transaction History'}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -314,8 +316,10 @@ const Wallet = () => {
               <div className="p-8 text-center text-muted-foreground">
                 <WalletIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>
-                  {language === 'ru' 
-                    ? 'История операций пуста' 
+                  {language === 'ru'
+                    ? 'История операций пуста'
+                    : language === 'th'
+                    ? 'ยังไม่มีรายการ'
                     : 'No transactions yet'}
                 </p>
                 <Button 
@@ -323,7 +327,7 @@ const Wallet = () => {
                   className="mt-2"
                   onClick={() => setIsTopUpOpen(true)}
                 >
-                  {language === 'ru' ? 'Пополнить кошелёк' : 'Top up wallet'}
+                  {language === 'ru' ? 'Пополнить кошелёк' : language === 'th' ? 'เติมเงินกระเป๋าเงิน' : 'Top up wallet'}
                 </Button>
               </div>
             ) : (
@@ -345,7 +349,7 @@ const Wallet = () => {
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {format(new Date(tx.created_at), 'dd MMM yyyy, HH:mm', {
-                          locale: language === 'ru' ? ru : enUS
+                          locale: language === 'ru' ? ru : language === 'th' ? th : enUS
                         })}
                       </p>
                       {/* Bible-v2 §00 H06: audit marker on money-moving rows.
@@ -396,11 +400,13 @@ const Wallet = () => {
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-warning">
-                {language === 'ru' ? 'Получайте кэшбэк' : 'Earn Cashback'}
+                {language === 'ru' ? 'Получайте кэшбэк' : language === 'th' ? 'รับเงินคืน' : 'Earn Cashback'}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' 
-                  ? 'Кэшбэк начисляется автоматически после завершения бронирования' 
+                {language === 'ru'
+                  ? 'Кэшбэк начисляется автоматически после завершения бронирования'
+                  : language === 'th'
+                  ? 'เงินคืนจะเข้าบัญชีโดยอัตโนมัติหลังจากการจองเสร็จสมบูรณ์'
                   : 'Cashback is credited automatically after booking completion'}
               </p>
             </div>
@@ -413,11 +419,13 @@ const Wallet = () => {
         <DialogContent className="sm:max-w-md" data-testid="topup-modal">
           <DialogHeader>
             <DialogTitle>
-              {language === 'ru' ? 'Пополнить кошелёк' : 'Top Up Wallet'}
+              {language === 'ru' ? 'Пополнить кошелёк' : language === 'th' ? 'เติมเงินกระเป๋าเงิน' : 'Top Up Wallet'}
             </DialogTitle>
             <DialogDescription>
-              {language === 'ru' 
-                ? 'Выберите сумму для пополнения' 
+              {language === 'ru'
+                ? 'Выберите сумму для пополнения'
+                : language === 'th'
+                ? 'เลือกจำนวนเงินที่ต้องการเติม'
                 : 'Choose amount to top up'}
             </DialogDescription>
           </DialogHeader>
@@ -440,7 +448,7 @@ const Wallet = () => {
             {/* Custom amount input */}
             <div className="space-y-2">
               <label className="text-sm font-medium">
-                {language === 'ru' ? 'Или введите сумму' : 'Or enter amount'}
+                {language === 'ru' ? 'Или введите сумму' : language === 'th' ? 'หรือกรอกจำนวนเงิน' : 'Or enter amount'}
               </label>
               <div className="relative">
                 <Input
@@ -456,7 +464,7 @@ const Wallet = () => {
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                {language === 'ru' ? 'Минимум 100 ₽' : 'Minimum 100 ₽'}
+                {language === 'ru' ? 'Минимум 100 ₽' : language === 'th' ? 'ขั้นต่ำ 100 ₽' : 'Minimum 100 ₽'}
               </p>
             </div>
 
@@ -470,19 +478,21 @@ const Wallet = () => {
               {isProcessing ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  {language === 'ru' ? 'Обработка...' : 'Processing...'}
+                  {language === 'ru' ? 'Обработка...' : language === 'th' ? 'กำลังดำเนินการ...' : 'Processing...'}
                 </>
               ) : (
                 <>
                   <CreditCard className="w-5 h-5" />
-                  {language === 'ru' ? `Оплатить ${topUpAmount} ₽` : `Pay ${topUpAmount} ₽`}
+                  {language === 'ru' ? `Оплатить ${topUpAmount} ₽` : language === 'th' ? `ชำระ ${topUpAmount} ₽` : `Pay ${topUpAmount} ₽`}
                 </>
               )}
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              {language === 'ru' 
-                ? 'Безопасная оплата через Stripe' 
+              {language === 'ru'
+                ? 'Безопасная оплата через Stripe'
+                : language === 'th'
+                ? 'ชำระเงินอย่างปลอดภัยผ่าน Stripe'
                 : 'Secure payment via Stripe'}
             </p>
           </div>

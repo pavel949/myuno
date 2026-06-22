@@ -19,7 +19,7 @@ import {
   type PaymentMethod 
 } from "@/components/booking";
 import { addDays, format } from "date-fns";
-import { ru } from "date-fns/locale";
+import { ru, th } from "date-fns/locale";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -82,20 +82,20 @@ export default function MedicalAppointment() {
     const bookingTitle = selectedService
       ? (language === 'ru' ? selectedService.name_ru : selectedService.name_en)
       : selectedDoctor
-        ? `${language === 'ru' ? 'Консультация:' : 'Consultation:'} ${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
-        : (language === 'ru' ? 'Запись к врачу' : 'Medical Appointment');
+        ? `${language === 'ru' ? 'Консультация:' : language === 'th' ? 'ปรึกษา:' : 'Consultation:'} ${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
+        : (language === 'ru' ? 'Запись к врачу' : language === 'th' ? 'นัดหมายพบแพทย์' : 'Medical Appointment');
 
     return (
       <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
           title={bookingTitle}
-          date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
+          date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : language === 'th' ? th : undefined }) : undefined}
           time={time}
           total={price}
           currency="THB"
           continuePath="/medical"
-          continueLabel={language === 'ru' ? 'К клиникам' : 'Browse Clinics'}
+          continueLabel={language === 'ru' ? 'К клиникам' : language === 'th' ? 'ดูคลินิก' : 'Browse Clinics'}
         />
       </AppLayout>
     );
@@ -112,8 +112,8 @@ export default function MedicalAppointment() {
     const itemName = selectedService
       ? (language === 'ru' ? selectedService.name_ru : selectedService.name_en)
       : selectedDoctor
-        ? `${language === 'ru' ? 'Консультация:' : 'Consultation:'} ${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
-        : (language === 'ru' ? 'Консультация врача' : 'Medical Consultation');
+        ? `${language === 'ru' ? 'Консультация:' : language === 'th' ? 'ปรึกษา:' : 'Consultation:'} ${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
+        : (language === 'ru' ? 'Консультация врача' : language === 'th' ? 'ปรึกษาแพทย์' : 'Medical Consultation');
 
     // Online card payment → Stripe checkout
     if (paymentMethod === 'card') {
@@ -176,18 +176,18 @@ export default function MedicalAppointment() {
     <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
-          title={language === 'ru' ? 'Запись на приём' : 'Book Appointment'} 
+          title={language === 'ru' ? 'Запись на приём' : language === 'th' ? 'นัดหมายเข้าพบแพทย์' : 'Book Appointment'}
           showBack 
         />
 
         {/* Summary Card */}
         <div className="mt-4 mb-6">
           <BookingSummary
-            title={selectedService 
+            title={selectedService
               ? (language === 'ru' ? selectedService.name_ru : selectedService.name_en)
               : selectedDoctor
                 ? `${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
-                : (language === 'ru' ? 'Консультация врача' : 'Medical Consultation')}
+                : (language === 'ru' ? 'Консультация врача' : language === 'th' ? 'ปรึกษาแพทย์' : 'Medical Consultation')}
             subtitle={clinic ? (language === 'ru' ? clinic.name_ru : clinic.name_en) : undefined}
             date={date}
             time={time}
@@ -199,7 +199,7 @@ export default function MedicalAppointment() {
         {/* Date & Time */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Дата и время' : 'Date & Time'}
+            {language === 'ru' ? 'Дата и время' : language === 'th' ? 'วันและเวลา' : 'Date & Time'}
           </h3>
           <BookingDateTimeSelect
             date={date}
@@ -214,7 +214,7 @@ export default function MedicalAppointment() {
         {/* Contact Info */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
+            {language === 'ru' ? 'Контактные данные' : language === 'th' ? 'ข้อมูลติดต่อ' : 'Contact Information'}
           </h3>
           <BookingContactForm
             data={contactData}
@@ -226,12 +226,12 @@ export default function MedicalAppointment() {
         {/* Symptoms */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <Label className="font-semibold mb-4 block">
-            {language === 'ru' ? 'Опишите симптомы' : 'Describe Symptoms'}
+            {language === 'ru' ? 'Опишите симптомы' : language === 'th' ? 'อธิบายอาการ' : 'Describe Symptoms'}
           </Label>
           <Textarea
             value={symptoms}
             onChange={(e) => setSymptoms(e.target.value)}
-            placeholder={language === 'ru' ? 'Что вас беспокоит?' : 'What concerns do you have?'}
+            placeholder={language === 'ru' ? 'Что вас беспокоит?' : language === 'th' ? 'คุณมีอาการหรือกังวลเรื่องใด?' : 'What concerns do you have?'}
             rows={4}
             className="mt-2"
           />
@@ -240,7 +240,7 @@ export default function MedicalAppointment() {
         {/* Payment Method */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+            {language === 'ru' ? 'Способ оплаты' : language === 'th' ? 'วิธีการชำระเงิน' : 'Payment Method'}
           </h3>
           <BookingPaymentSelect
             selected={paymentMethod}
@@ -259,8 +259,8 @@ export default function MedicalAppointment() {
           isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!date || !time || !contactData.name || !contactData.phone}
           submitLabel={paymentMethod === 'card'
-            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
-            : (language === 'ru' ? 'Записаться' : 'Book Appointment')}
+            ? (language === 'ru' ? 'Оплатить онлайн' : language === 'th' ? 'ชำระเงินออนไลน์' : 'Pay Online')
+            : (language === 'ru' ? 'Записаться' : language === 'th' ? 'ยืนยันการนัดหมาย' : 'Book Appointment')}
         />
       </PageContainer>
     </AppLayout>

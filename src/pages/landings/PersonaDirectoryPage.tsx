@@ -26,6 +26,7 @@ interface Group {
   id: string;
   titleRu: string;
   titleEn: string;
+  titleTh: string;
   slugs: string[];
 }
 
@@ -38,30 +39,35 @@ const GROUPS: Group[] = [
     id: 'travel',
     titleRu: 'Гости и путешественники',
     titleEn: 'Guests & travellers',
+    titleTh: 'แขกและนักเดินทาง',
     slugs: ['tourists', 'eu-guests', 'cn-investors', 'mn-investors', 'snowbirds', 'medical', 'weddings', 'athletes', 'students'],
   },
   {
     id: 'settle',
     titleRu: 'Жить и обустроиться',
     titleEn: 'Live & settle in',
+    titleTh: 'อยู่อาศัยและตั้งถิ่นฐาน',
     slugs: ['ru-expats', 'digital-nomads', 'families', 'retirees', 'pet-owners', 'creatives'],
   },
   {
     id: 'invest',
     titleRu: 'Инвестировать',
     titleEn: 'Invest',
+    titleTh: 'ลงทุน',
     slugs: ['passive-investors', 'hnw', 'operators', 'bn-business'],
   },
   {
     id: 'lifestyle',
     titleRu: 'Стиль и предпочтения',
     titleEn: 'Lifestyle & values',
+    titleTh: 'ไลฟ์สไตล์และคุณค่า',
     slugs: ['halal', 'conscious-eaters', 'lgbtq', 'accessibility'],
   },
   {
     id: 'business',
     titleRu: 'Бизнес и партнёры',
     titleEn: 'Business & partners',
+    titleTh: 'ธุรกิจและพาร์ทเนอร์',
     slugs: ['providers', 'developer-partner', 'smb', 'freelancers'],
   },
 ];
@@ -69,7 +75,8 @@ const GROUPS: Group[] = [
 export default function PersonaDirectoryPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const t = <T,>(ru: T, en: T): T => (isRu ? ru : en);
+  const isTh = language === 'th';
+  const t = <T,>(ru: T, en: T, th?: T): T => (isRu ? ru : isTh ? (th ?? en) : en);
 
   const liveBySlug = useMemo(() => {
     const map = new Map<string, (typeof PERSONA_LANDINGS)[number]>();
@@ -84,12 +91,16 @@ export default function PersonaDirectoryPage() {
     ? [...GROUPS, { id: 'other', titleRu: 'Другое', titleEn: 'Other', slugs: orphans }]
     : GROUPS;
 
-  const metaTitle = isRu
-    ? 'Подбор по аудитории — myUNO'
-    : 'Find your page — myUNO';
-  const metaDescription = isRu
-    ? '26 страниц для разных жителей и гостей Пхукета: туристы, инвесторы, семьи, номады, halal, vegan, питомцы и другие.'
-    : '26 tailored pages for Phuket residents and guests: tourists, investors, families, nomads, halal, vegan, pets and more.';
+  const metaTitle = t(
+    'Подбор по аудитории — myUNO',
+    'Find your page — myUNO',
+    'เลือกตามกลุ่มของคุณ — myUNO',
+  );
+  const metaDescription = t(
+    '26 страниц для разных жителей и гостей Пхукета: туристы, инвесторы, семьи, номады, halal, vegan, питомцы и другие.',
+    '26 tailored pages for Phuket residents and guests: tourists, investors, families, nomads, halal, vegan, pets and more.',
+    '26 หน้าเฉพาะสำหรับผู้อยู่อาศัยและแขกในภูเก็ต: นักท่องเที่ยว นักลงทุน ครอบครัว ดิจิทัลโนแมด halal vegan สัตว์เลี้ยง และอื่น ๆ',
+  );
 
   return (
     <AppLayout>
@@ -110,15 +121,16 @@ export default function PersonaDirectoryPage() {
       <header className="border-b border-border bg-card">
         <LandingContainer className="max-w-5xl py-10 sm:py-14">
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            {t('myUNO · Подбор по аудитории', 'myUNO · By audience')}
+            {t('myUNO · Подбор по аудитории', 'myUNO · By audience', 'myUNO · เลือกตามกลุ่ม')}
           </p>
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            {t('Какая страница ваша?', 'Which page is yours?')}
+            {t('Какая страница ваша?', 'Which page is yours?', 'หน้าไหนคือของคุณ?')}
           </h1>
           <p className="mt-3 max-w-2xl text-base text-muted-foreground">
             {t(
               '26 страниц с пользой и услугами под конкретную аудиторию — выберите свою или ту, что описывает вашу ситуацию ближе всего.',
               '26 tailored pages with services for specific audiences — pick yours or the one that fits you best.',
+              '26 หน้าพร้อมข้อมูลและบริการสำหรับแต่ละกลุ่มโดยเฉพาะ — เลือกหน้าของคุณหรือหน้าที่ตรงกับสถานการณ์ของคุณมากที่สุด',
             )}
           </p>
         </LandingContainer>
@@ -128,10 +140,10 @@ export default function PersonaDirectoryPage() {
       <section aria-labelledby="surfaces-heading" className="border-b border-border bg-background">
         <LandingContainer className="max-w-5xl py-8 sm:py-10">
           <h2 id="surfaces-heading" className="mb-1 text-lg font-semibold text-foreground">
-            {t('По жизненному циклу', 'By lifecycle')}
+            {t('По жизненному циклу', 'By lifecycle', 'ตามช่วงชีวิต')}
           </h2>
           <p className="mb-4 text-sm text-muted-foreground">
-            {t('Шесть кластеров — от прибытия до строительства.', 'Six clusters — from arrival to building.')}
+            {t('Шесть кластеров — от прибытия до строительства.', 'Six clusters — from arrival to building.', 'หกคลัสเตอร์ — ตั้งแต่เดินทางถึงจนถึงการก่อสร้าง')}
           </p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {SURFACE_LANDINGS.map((s) => {
@@ -175,7 +187,7 @@ export default function PersonaDirectoryPage() {
           return (
             <section key={group.id} className="mb-10 last:mb-0">
               <h2 className="mb-4 text-lg font-semibold text-foreground">
-                {t(group.titleRu, group.titleEn)}
+                {t(group.titleRu, group.titleEn, group.titleTh)}
               </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((landing) => {
@@ -222,7 +234,7 @@ export default function PersonaDirectoryPage() {
                         </p>
                       </div>
                       <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">
-                        {t('Открыть', 'Open')}
+                        {t('Открыть', 'Open', 'เปิด')}
                         <ArrowRight className="h-3 w-3" />
                       </div>
                     </Link>

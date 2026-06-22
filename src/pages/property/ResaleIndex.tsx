@@ -19,16 +19,17 @@ import { PHUKET_DISTRICTS } from '@/lib/taxonomies';
 type TabFilter = 'all' | 'assignment' | 'ready';
 
 const PROPERTY_TYPES = [
-  { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо' },
-  { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла' },
-  { value: 'townhouse', labelEn: 'Townhouse', labelRu: 'Таунхаус' },
-  { value: 'land', labelEn: 'Land', labelRu: 'Земля' },
+  { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо', labelTh: 'คอนโด' },
+  { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла', labelTh: 'วิลล่า' },
+  { value: 'townhouse', labelEn: 'Townhouse', labelRu: 'Таунхаус', labelTh: 'ทาวน์เฮาส์' },
+  { value: 'land', labelEn: 'Land', labelRu: 'Земля', labelTh: 'ที่ดิน' },
 ];
 
 export default function ResaleIndex() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const [tab, setTab] = useState<TabFilter>('all');
   const [zone, setZone] = useState('');
@@ -50,10 +51,10 @@ export default function ResaleIndex() {
     setPropertyType('');
   };
 
-  const tabs: { value: TabFilter; labelEn: string; labelRu: string }[] = [
-    { value: 'all', labelEn: 'All', labelRu: 'Все' },
-    { value: 'assignment', labelEn: 'Assignments', labelRu: 'Переуступки' },
-    { value: 'ready', labelEn: 'Ready', labelRu: 'Готовые' },
+  const tabs: { value: TabFilter; labelEn: string; labelRu: string; labelTh: string }[] = [
+    { value: 'all', labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+    { value: 'assignment', labelEn: 'Assignments', labelRu: 'Переуступки', labelTh: 'การโอนสิทธิ์' },
+    { value: 'ready', labelEn: 'Ready', labelRu: 'Готовые', labelTh: 'พร้อมเข้าอยู่' },
   ];
 
   return (
@@ -63,10 +64,10 @@ export default function ResaleIndex() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-lg font-bold text-foreground">
-              {isRu ? 'Вторичный рынок' : 'Resale Market'}
+              {isRu ? 'Вторичный рынок' : isTh ? 'ตลาดบ้านมือสอง' : 'Resale Market'}
             </h1>
             <p className="text-xs text-muted-foreground">
-              {isRu ? 'Переуступки и готовая недвижимость' : 'Assignments & ready properties'}
+              {isRu ? 'Переуступки и готовая недвижимость' : isTh ? 'การโอนสิทธิ์และอสังหาฯ พร้อมเข้าอยู่' : 'Assignments & ready properties'}
             </p>
           </div>
 
@@ -74,7 +75,7 @@ export default function ResaleIndex() {
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="relative">
                 <SlidersHorizontal className="w-4 h-4 mr-1" />
-                {isRu ? 'Фильтры' : 'Filters'}
+                {isRu ? 'Фильтры' : isTh ? 'ตัวกรอง' : 'Filters'}
                 {activeFilterCount > 0 && (
                   <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
                     {activeFilterCount}
@@ -84,19 +85,19 @@ export default function ResaleIndex() {
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[60vh] rounded-none">
               <SheetHeader>
-                <SheetTitle>{isRu ? 'Фильтры' : 'Filters'}</SheetTitle>
+                <SheetTitle>{isRu ? 'Фильтры' : isTh ? 'ตัวกรอง' : 'Filters'}</SheetTitle>
               </SheetHeader>
               <div className="space-y-4 mt-4">
                 <div>
                   <label className="text-sm font-medium mb-1 block">
-                    {isRu ? 'Тип недвижимости' : 'Property Type'}
+                    {isRu ? 'Тип недвижимости' : isTh ? 'ประเภทอสังหาฯ' : 'Property Type'}
                   </label>
                   <Select value={propertyType} onValueChange={setPropertyType}>
-                    <SelectTrigger><SelectValue placeholder={isRu ? 'Все типы' : 'All types'} /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={isRu ? 'Все типы' : isTh ? 'ทุกประเภท' : 'All types'} /></SelectTrigger>
                     <SelectContent>
                       {PROPERTY_TYPES.map(t => (
                         <SelectItem key={t.value} value={t.value}>
-                          {isRu ? t.labelRu : t.labelEn}
+                          {isRu ? t.labelRu : isTh ? t.labelTh : t.labelEn}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -104,10 +105,10 @@ export default function ResaleIndex() {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block">
-                    {isRu ? 'Район' : 'Zone'}
+                    {isRu ? 'Район' : isTh ? 'พื้นที่' : 'Zone'}
                   </label>
                   <Select value={zone} onValueChange={setZone}>
-                    <SelectTrigger><SelectValue placeholder={isRu ? 'Все районы' : 'All zones'} /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={isRu ? 'Все районы' : isTh ? 'ทุกพื้นที่' : 'All zones'} /></SelectTrigger>
                     <SelectContent>
                       {PHUKET_DISTRICTS.map((d) => (
                         <SelectItem key={d.id} value={d.labelEn}>
@@ -120,10 +121,10 @@ export default function ResaleIndex() {
 
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1" onClick={clearFilters}>
-                    {isRu ? 'Сбросить' : 'Clear'}
+                    {isRu ? 'Сбросить' : isTh ? 'ล้างค่า' : 'Clear'}
                   </Button>
                   <Button className="flex-1" onClick={() => setFiltersOpen(false)}>
-                    {isRu ? 'Показать' : 'Apply'}
+                    {isRu ? 'Показать' : isTh ? 'แสดงผล' : 'Apply'}
                   </Button>
                 </div>
               </div>
@@ -145,7 +146,7 @@ export default function ResaleIndex() {
               )}
             >
               {t.value === 'assignment' && <ArrowRightLeft className="w-3 h-3 inline mr-1" />}
-              {isRu ? t.labelRu : t.labelEn}
+              {isRu ? t.labelRu : isTh ? t.labelTh : t.labelEn}
             </button>
           ))}
         </div>
@@ -155,7 +156,7 @@ export default function ResaleIndex() {
       <div className="px-4 py-3">
         {!isLoading && properties && (
           <p className="text-sm text-muted-foreground mb-3">
-            {isRu ? `Найдено: ${properties.length}` : `Found: ${properties.length}`}
+            {isRu ? `Найдено: ${properties.length}` : isTh ? `พบ: ${properties.length}` : `Found: ${properties.length}`}
           </p>
         )}
 
@@ -175,7 +176,7 @@ export default function ResaleIndex() {
           <div className="text-center py-16">
             <Building2 className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
             <p className="text-muted-foreground">
-              {isRu ? 'Нет объектов по выбранным фильтрам' : 'No properties match your filters'}
+              {isRu ? 'Нет объектов по выбранным фильтрам' : isTh ? 'ไม่พบอสังหาฯ ตามตัวกรองที่เลือก' : 'No properties match your filters'}
             </p>
           </div>
         )}

@@ -33,6 +33,7 @@ export default function InsuranceIndex() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { providers, isLoading: providersLoading } = useInsuranceProviders({
     insuranceType: selectedCategory,
@@ -45,15 +46,15 @@ export default function InsuranceIndex() {
 
   return (
     <MiniAppLayout
-      title={isRu ? 'Страхование' : 'Insurance'}
-      subtitle={`${providers.length} ${isRu ? 'компаний' : 'providers'}`}
+      title={isRu ? 'Страхование' : isTh ? 'ประกันภัย' : 'Insurance'}
+      subtitle={`${providers.length} ${isRu ? 'компаний' : isTh ? 'บริษัท' : 'providers'}`}
       fallbackPath="/discover"
       categories={categories}
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={isRu ? 'Поиск страховок...' : 'Search insurance...'}
+      searchPlaceholder={isRu ? 'Поиск страховок...' : isTh ? 'ค้นหาประกันภัย...' : 'Search insurance...'}
       showHero={false}
       showFilter={false}
     >
@@ -68,10 +69,10 @@ export default function InsuranceIndex() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm">
-              {isRu ? 'Не летите без страховки!' : "Don't Fly Without Insurance!"}
+              {isRu ? 'Не летите без страховки!' : isTh ? 'อย่าเดินทางโดยไม่มีประกัน!' : "Don't Fly Without Insurance!"}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {isRu ? 'Быстрая туристическая страховка от 100 ₽/день' : 'Quick travel insurance from $1/day'}
+              {isRu ? 'Быстрая туристическая страховка от 100 ₽/день' : isTh ? 'ประกันการเดินทางด่วน เริ่มต้น $1/วัน' : 'Quick travel insurance from $1/day'}
             </p>
           </div>
           <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -94,7 +95,7 @@ export default function InsuranceIndex() {
           {popularPlans.length > 0 && (
             <div>
               <h2 className="text-lg font-semibold font-display mb-3">
-                {isRu ? 'Популярные планы' : 'Popular Plans'}
+                {isRu ? 'Популярные планы' : isTh ? 'แผนยอดนิยม' : 'Popular Plans'}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {popularPlans.map((plan) => (
@@ -119,19 +120,19 @@ export default function InsuranceIndex() {
                         {plan.price_yearly && (
                           <p className="font-bold text-primary">
                             ฿{plan.price_yearly.toLocaleString()}
-                            <span className="text-xs text-muted-foreground">/{isRu ? 'год' : 'yr'}</span>
+                            <span className="text-xs text-muted-foreground">/{isRu ? 'год' : isTh ? 'ปี' : 'yr'}</span>
                           </p>
                         )}
                         {plan.price_monthly && (
                           <p className="text-sm text-muted-foreground">
-                            ฿{plan.price_monthly.toLocaleString()}/{isRu ? 'мес' : 'mo'}
+                            ฿{plan.price_monthly.toLocaleString()}/{isRu ? 'мес' : isTh ? 'เดือน' : 'mo'}
                           </p>
                         )}
                       </div>
                     </div>
                     {plan.coverage_amount && (
                       <p className="text-sm text-muted-foreground">
-                        {isRu ? 'Покрытие до' : 'Coverage up to'} ฿{plan.coverage_amount.toLocaleString()}
+                        {isRu ? 'Покрытие до' : isTh ? 'คุ้มครองสูงสุด' : 'Coverage up to'} ฿{plan.coverage_amount.toLocaleString()}
                       </p>
                     )}
                   </div>
@@ -144,12 +145,12 @@ export default function InsuranceIndex() {
           {providers.length === 0 ? (
             <EmptyState
               icon={Shield}
-              title={isRu ? 'Страховые компании не найдены' : 'No insurance providers found'}
+              title={isRu ? 'Страховые компании не найдены' : isTh ? 'ไม่พบบริษัทประกัน' : 'No insurance providers found'}
             />
           ) : (
             <>
               <h2 className="text-lg font-semibold font-display mb-3">
-                {isRu ? 'Страховые компании' : 'Insurance Companies'}
+                {isRu ? 'Страховые компании' : isTh ? 'บริษัทประกันภัย' : 'Insurance Companies'}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
                 {providers.map((provider) => (

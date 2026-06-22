@@ -13,12 +13,12 @@ import { getDefaultCenter, DEFAULT_CITY } from '@/lib/config';
 import { useSalons } from '@/hooks/useSalons';
 
 const distanceOptions = [
-  { value: 0, labelEn: 'All', labelRu: 'Все' },
-  { value: 2, labelEn: '2 km', labelRu: '2 км' },
-  { value: 5, labelEn: '5 km', labelRu: '5 км' },
-  { value: 10, labelEn: '10 km', labelRu: '10 км' },
-  { value: 25, labelEn: '25 km', labelRu: '25 км' },
-  { value: 50, labelEn: '50 km', labelRu: '50 км' },
+  { value: 0, labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { value: 2, labelEn: '2 km', labelRu: '2 км', labelTh: '2 กม.' },
+  { value: 5, labelEn: '5 km', labelRu: '5 км', labelTh: '5 กม.' },
+  { value: 10, labelEn: '10 km', labelRu: '10 км', labelTh: '10 กม.' },
+  { value: 25, labelEn: '25 km', labelRu: '25 км', labelTh: '25 กม.' },
+  { value: 50, labelEn: '50 km', labelRu: '50 км', labelTh: '50 กม.' },
 ];
 
 export default function BeautyMap() {
@@ -57,8 +57,8 @@ export default function BeautyMap() {
       <div className="h-[calc(100vh-60px)] flex flex-col">
         <div className="flex items-center justify-between p-4 bg-background/80 border-b border-border/50">
           <BackButton fallbackPath={APP_ROUTES.BEAUTY} variant="ghost" size="sm" />
-          <h1 className="font-display font-semibold">{language === 'ru' ? 'Карта салонов' : 'Salon Map'}</h1>
-          <Button variant="ghost" size="icon" onClick={() => setIsFilterOpen(true)} aria-label={language === 'ru' ? 'Фильтры' : 'Filters'}>
+          <h1 className="font-display font-semibold">{language === 'ru' ? 'Карта салонов' : language === 'th' ? 'แผนที่ร้าน' : 'Salon Map'}</h1>
+          <Button variant="ghost" size="icon" onClick={() => setIsFilterOpen(true)} aria-label={language === 'ru' ? 'Фильтры' : language === 'th' ? 'ตัวกรอง' : 'Filters'}>
             <Sliders className="w-5 h-5" />
           </Button>
         </div>
@@ -66,31 +66,31 @@ export default function BeautyMap() {
         <ResponsiveModal
           open={isFilterOpen}
           onOpenChange={setIsFilterOpen}
-          title={language === 'ru' ? 'Фильтры' : 'Filters'}
+          title={language === 'ru' ? 'Фильтры' : language === 'th' ? 'ตัวกรอง' : 'Filters'}
           icon={<Sliders className="h-5 w-5 text-primary" />}
           size="sm"
           footer={
             <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
-              {language === 'ru' ? 'Применить' : 'Apply'}
+              {language === 'ru' ? 'Применить' : language === 'th' ? 'ใช้' : 'Apply'}
             </Button>
           }
         >
           <div className="space-y-6">
             <div>
-              <label className="text-sm font-medium mb-3 block">{language === 'ru' ? 'Расстояние' : 'Distance'}</label>
+              <label className="text-sm font-medium mb-3 block">{language === 'ru' ? 'Расстояние' : language === 'th' ? 'ระยะทาง' : 'Distance'}</label>
               <div className="flex flex-wrap gap-2">
                 {distanceOptions.map((opt) => (
-                  <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} isActive={distanceFilter === opt.value} onToggle={() => setDistanceFilter(opt.value)} />
+                  <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : language === 'th' ? opt.labelTh : opt.labelEn} isActive={distanceFilter === opt.value} onToggle={() => setDistanceFilter(opt.value)} />
                 ))}
               </div>
             </div>
             <div className="p-4 rounded-none bg-secondary/50">
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">{language === 'ru' ? 'Ваша локация' : 'Your Location'}</span>
+                <span className="text-sm font-medium">{language === 'ru' ? 'Ваша локация' : language === 'th' ? 'ตำแหน่งของคุณ' : 'Your Location'}</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : language === 'ru' ? 'Определение...' : 'Detecting...'}
+                {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : language === 'ru' ? 'Определение...' : language === 'th' ? 'กำลังค้นหา...' : 'Detecting...'}
               </p>
             </div>
           </div>
@@ -98,7 +98,7 @@ export default function BeautyMap() {
 
         <div className="flex gap-2 p-3 overflow-x-auto bg-background/50 border-b border-border/30">
           {distanceOptions.map((opt) => (
-            <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} isActive={distanceFilter === opt.value} onToggle={() => setDistanceFilter(opt.value)} />
+            <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : language === 'th' ? opt.labelTh : opt.labelEn} isActive={distanceFilter === opt.value} onToggle={() => setDistanceFilter(opt.value)} />
           ))}
         </div>
 

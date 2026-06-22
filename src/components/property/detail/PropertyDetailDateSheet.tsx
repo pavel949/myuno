@@ -3,7 +3,7 @@
  */
 import { Minus, Plus } from 'lucide-react';
 import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ru, th } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -44,6 +44,7 @@ export function PropertyDetailDateSheet({
 }: PropertyDetailDateSheetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const nights =
     dateRange?.from && dateRange?.to
@@ -54,7 +55,7 @@ export function PropertyDetailDateSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="rounded-none max-h-[85vh] overflow-y-auto">
         <SheetHeader className="pb-2">
-          <SheetTitle>{isRu ? 'Выберите даты' : 'Select dates'}</SheetTitle>
+          <SheetTitle>{isRu ? 'Выберите даты' : isTh ? 'เลือกวันที่' : 'Select dates'}</SheetTitle>
         </SheetHeader>
 
         <div className="space-y-4">
@@ -89,21 +90,21 @@ export function PropertyDetailDateSheet({
             <div className="flex items-center justify-between px-2 py-3 rounded-none bg-muted/50">
               <div className="text-sm">
                 <span className="font-medium">
-                  {format(dateRange.from, 'd MMM', { locale: isRu ? ru : undefined })}
+                  {format(dateRange.from, 'd MMM', { locale: isRu ? ru : isTh ? th : undefined })}
                 </span>
                 <span className="mx-2 text-muted-foreground">→</span>
                 <span className="font-medium">
-                  {format(dateRange.to, 'd MMM', { locale: isRu ? ru : undefined })}
+                  {format(dateRange.to, 'd MMM', { locale: isRu ? ru : isTh ? th : undefined })}
                 </span>
               </div>
               <span className="text-sm font-semibold text-primary">
-                {nights} {isRu ? 'ночей' : 'nights'}
+                {nights} {isRu ? 'ночей' : isTh ? 'คืน' : 'nights'}
               </span>
             </div>
           )}
 
           <div className="flex items-center justify-between px-2">
-            <span className="text-sm font-medium">{isRu ? 'Гости' : 'Guests'}</span>
+            <span className="text-sm font-medium">{isRu ? 'Гости' : isTh ? 'ผู้เข้าพัก' : 'Guests'}</span>
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
@@ -111,7 +112,7 @@ export function PropertyDetailDateSheet({
                 className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
                 onClick={() => onGuestCountChange(Math.max(1, guestCount - 1))}
                 disabled={guestCount <= 1}
-                aria-label={isRu ? 'Меньше гостей' : 'Decrease guests'}
+                aria-label={isRu ? 'Меньше гостей' : isTh ? 'ลดจำนวนผู้เข้าพัก' : 'Decrease guests'}
               >
                 <Minus className="w-4 h-4" />
               </Button>
@@ -122,7 +123,7 @@ export function PropertyDetailDateSheet({
                 className="h-8 w-8 min-h-[44px] min-w-[44px] rounded-full"
                 onClick={() => onGuestCountChange(Math.min(maxGuests, guestCount + 1))}
                 disabled={guestCount >= maxGuests}
-                aria-label={isRu ? 'Больше гостей' : 'Increase guests'}
+                aria-label={isRu ? 'Больше гостей' : isTh ? 'เพิ่มจำนวนผู้เข้าพัก' : 'Increase guests'}
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -133,7 +134,9 @@ export function PropertyDetailDateSheet({
             <p className="text-xs text-destructive px-2">
               {isRu
                 ? `Минимум ${minStayNights} ночей`
-                : `Minimum stay: ${minStayNights} nights`}
+                : isTh
+                  ? `เข้าพักขั้นต่ำ ${minStayNights} คืน`
+                  : `Minimum stay: ${minStayNights} nights`}
             </p>
           )}
 
@@ -144,8 +147,8 @@ export function PropertyDetailDateSheet({
             onClick={onConfirm}
           >
             {dateRange?.from && dateRange?.to
-              ? (isRu ? 'Перейти к бронированию' : 'Continue to booking')
-              : (isRu ? 'Выберите даты' : 'Select dates')}
+              ? (isRu ? 'Перейти к бронированию' : isTh ? 'ดำเนินการจองต่อ' : 'Continue to booking')
+              : (isRu ? 'Выберите даты' : isTh ? 'เลือกวันที่' : 'Select dates')}
           </Button>
         </div>
       </SheetContent>

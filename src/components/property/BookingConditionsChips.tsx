@@ -50,6 +50,7 @@ export function BookingConditionsChips({
 }: BookingConditionsChipsProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const chips: Array<{
     id: string;
@@ -63,7 +64,7 @@ export function BookingConditionsChips({
   if (instantBooking) {
     chips.push({
       id: 'instant',
-      label: isRu ? 'Мгновенное бронирование' : 'Instant Book',
+      label: isRu ? 'Мгновенное бронирование' : isTh ? 'จองได้ทันที' : 'Instant Book',
       icon: <Zap className="h-3 w-3" />,
       color: 'success',
       priority: 1,
@@ -100,7 +101,7 @@ export function BookingConditionsChips({
   if (depositAmount && depositAmount > 0) {
     chips.push({
       id: 'deposit',
-      label: `${isRu ? 'Залог' : 'Deposit'} ฿${depositAmount.toLocaleString()}`,
+      label: `${isRu ? 'Залог' : isTh ? 'เงินมัดจำ' : 'Deposit'} ฿${depositAmount.toLocaleString()}`,
       icon: <Shield className="h-3 w-3" />,
       priority: 4,
     });
@@ -110,7 +111,7 @@ export function BookingConditionsChips({
   if (minStayNights && minStayNights > 1) {
     chips.push({
       id: 'minstay',
-      label: `${minStayNights}+ ${isRu ? 'ночей' : 'nights'}`,
+      label: `${minStayNights}+ ${isRu ? 'ночей' : isTh ? 'คืน' : 'nights'}`,
       icon: <Calendar className="h-3 w-3" />,
       priority: 5,
     });
@@ -120,7 +121,7 @@ export function BookingConditionsChips({
   if (maxGuests) {
     chips.push({
       id: 'guests',
-      label: `${maxGuests} ${isRu ? 'гостей' : 'guests'}`,
+      label: `${maxGuests} ${isRu ? 'гостей' : isTh ? 'ผู้เข้าพัก' : 'guests'}`,
       icon: <Users className="h-3 w-3" />,
       priority: 6,
     });

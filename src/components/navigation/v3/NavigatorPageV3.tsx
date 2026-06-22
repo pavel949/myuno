@@ -73,6 +73,7 @@ function buildSituationClusterMap(): Record<string, ClusterId> {
 export default function NavigatorPageV3() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: situations, isLoading, isError } = useLifeSituations();
   const { data: counts } = useSituationServiceCounts();
   const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
@@ -155,21 +156,23 @@ export default function NavigatorPageV3() {
         {/* Header */}
         <header className="mb-8 md:mb-10">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
-            {isRu ? 'Навигатор' : 'Navigator'}
+            {isRu ? 'Навигатор' : isTh ? 'ตัวนำทาง' : 'Navigator'}
           </p>
           <h1 className="text-[28px] sm:text-[34px] font-serif font-semibold leading-[1.1] tracking-[-0.02em] text-foreground">
-            {isRu ? 'Что вам сейчас нужно?' : 'What do you need now?'}
+            {isRu ? 'Что вам сейчас нужно?' : isTh ? 'ตอนนี้คุณต้องการอะไร?' : 'What do you need now?'}
           </h1>
           <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground leading-[1.5] max-w-2xl">
             {isRu
               ? 'Выберите ситуацию — покажем сервисы, контакты и понятные шаги. Сгруппировано по сферам жизни и адаптировано под вашу роль.'
-              : 'Pick a situation — we surface services, contacts and clear next steps, grouped by life area and tuned to your role.'}
+              : isTh
+                ? 'เลือกสถานการณ์ แล้วเราจะแสดงบริการ ผู้ติดต่อ และขั้นตอนที่ชัดเจน จัดกลุ่มตามด้านของการใช้ชีวิตและปรับให้เข้ากับบทบาทของคุณ'
+                : 'Pick a situation — we surface services, contacts and clear next steps, grouped by life area and tuned to your role.'}
           </p>
 
           {/* Persona chip-row */}
           <div className="mt-6 flex items-center gap-2 flex-wrap">
             <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              {isRu ? 'Роль' : 'Role'}
+              {isRu ? 'Роль' : isTh ? 'บทบาท' : 'Role'}
             </span>
             {hasRealPersonas ? (
               effectivePersonas.slice(0, 3).map((persona) => {
@@ -186,7 +189,7 @@ export default function NavigatorPageV3() {
               })
             ) : (
               <span className="text-[12px] text-muted-foreground italic">
-                {isRu ? 'не выбрана' : 'not set'}
+                {isRu ? 'не выбрана' : isTh ? 'ยังไม่ได้เลือก' : 'not set'}
               </span>
             )}
             <button
@@ -195,7 +198,7 @@ export default function NavigatorPageV3() {
               className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors min-h-[28px]"
             >
               <SlidersHorizontal className="w-3 h-3" strokeWidth={2} />
-              {isRu ? 'Изменить' : 'Edit'}
+              {isRu ? 'Изменить' : isTh ? 'แก้ไข' : 'Edit'}
             </button>
           </div>
 
@@ -209,20 +212,20 @@ export default function NavigatorPageV3() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={isRu ? 'Поиск по ситуациям…' : 'Search situations…'}
+              placeholder={isRu ? 'Поиск по ситуациям…' : isTh ? 'ค้นหาสถานการณ์…' : 'Search situations…'}
               className={cn(
                 'w-full pl-[46px] pr-12 py-3.5 text-[14px] outline-none',
                 'border border-border bg-card text-foreground placeholder:text-muted-foreground',
                 'focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/30',
               )}
-              aria-label={isRu ? 'Поиск по ситуациям' : 'Search situations'}
+              aria-label={isRu ? 'Поиск по ситуациям' : isTh ? 'ค้นหาสถานการณ์' : 'Search situations'}
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery('')}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={isRu ? 'Очистить' : 'Clear'}
+                aria-label={isRu ? 'Очистить' : isTh ? 'ล้าง' : 'Clear'}
               >
                 <X className="w-4 h-4" strokeWidth={1.75} />
               </button>
@@ -236,14 +239,14 @@ export default function NavigatorPageV3() {
               className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
             >
               <MapPin className="w-3.5 h-3.5" strokeWidth={1.75} />
-              {isRu ? 'Показать на карте' : 'See on map'}
+              {isRu ? 'Показать на карте' : isTh ? 'ดูบนแผนที่' : 'See on map'}
             </Link>
           </div>
         </header>
 
         {isError && (
           <div className="border border-destructive/40 bg-destructive/5 text-destructive p-4 text-sm mb-6">
-            {isRu ? 'Не удалось загрузить ситуации.' : 'Failed to load situations.'}
+            {isRu ? 'Не удалось загрузить ситуации.' : isTh ? 'โหลดสถานการณ์ไม่สำเร็จ' : 'Failed to load situations.'}
           </div>
         )}
 
@@ -270,7 +273,7 @@ export default function NavigatorPageV3() {
                 id="for-you-title"
                 className="font-mono text-[11px] uppercase tracking-[0.18em] text-primary"
               >
-                {isRu ? 'Ситуации для вас' : 'Situations for you'}
+                {isRu ? 'Ситуации для вас' : isTh ? 'สถานการณ์สำหรับคุณ' : 'Situations for you'}
               </h2>
               <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
                 {forYou.length}
@@ -336,7 +339,7 @@ export default function NavigatorPageV3() {
         {!isLoading && visibleClusters.rest.length > 0 && (
           <div className="mt-12 pt-8 border-t border-border">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
-              {isRu ? 'Другие сферы' : 'Other areas'}
+              {isRu ? 'Другие сферы' : isTh ? 'ด้านอื่น ๆ' : 'Other areas'}
             </p>
             <div className="space-y-10">
               {visibleClusters.rest.map((cid) => (
@@ -356,14 +359,14 @@ export default function NavigatorPageV3() {
         {!isLoading && situations && situations.length > 0 && filteredSituations.length === 0 && (
           <div className="text-center py-16 border border-border">
             <p className="text-muted-foreground text-sm mb-4">
-              {isRu ? `Ничего не найдено по запросу «${query}».` : `No matches for "${query}".`}
+              {isRu ? `Ничего не найдено по запросу «${query}».` : isTh ? `ไม่พบผลลัพธ์สำหรับ "${query}"` : `No matches for "${query}".`}
             </p>
             <button
               type="button"
               onClick={() => setQuery('')}
               className="text-[13px] underline text-primary hover:no-underline"
             >
-              {isRu ? 'Сбросить поиск' : 'Clear search'}
+              {isRu ? 'Сбросить поиск' : isTh ? 'ล้างการค้นหา' : 'Clear search'}
             </button>
           </div>
         )}
@@ -372,7 +375,7 @@ export default function NavigatorPageV3() {
         {!isLoading && situations && situations.length === 0 && (
           <div className="border border-border bg-card p-8 text-center">
             <h2 className="text-[18px] font-serif font-semibold text-foreground mb-2">
-              {isRu ? 'Ситуации скоро появятся' : 'Situations are coming soon'}
+              {isRu ? 'Ситуации скоро появятся' : isTh ? 'สถานการณ์กำลังจะมาเร็ว ๆ นี้' : 'Situations are coming soon'}
             </h2>
             <a
               href="https://wa.me/66922407355"
@@ -380,7 +383,7 @@ export default function NavigatorPageV3() {
               rel="noopener noreferrer"
               className="inline-block mt-4 text-[13px] underline text-primary hover:no-underline"
             >
-              {isRu ? 'Связаться с консьержем' : 'Talk to concierge'}
+              {isRu ? 'Связаться с консьержем' : isTh ? 'ติดต่อคอนเซียร์จ' : 'Talk to concierge'}
             </a>
           </div>
         )}

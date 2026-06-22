@@ -144,6 +144,7 @@ export default function SituationDetailPage() {
   const { code } = useParams<{ code: string }>();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: situations, isLoading: situationsLoading } = useLifeSituations();
   const { data: items, isLoading: itemsLoading, isError } = useResolveLifeOSContext(code ?? null);
@@ -165,7 +166,7 @@ export default function SituationDetailPage() {
           className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
-          {isRu ? 'Все ситуации' : 'All situations'}
+          {isRu ? 'Все ситуации' : isTh ? 'ทุกสถานการณ์' : 'All situations'}
         </Link>
 
         {situationsLoading && (
@@ -179,10 +180,10 @@ export default function SituationDetailPage() {
         {!situationsLoading && !situation && (
           <div className="py-16 text-center">
             <p className="text-foreground text-lg mb-2">
-              {isRu ? 'Ситуация не найдена' : 'Situation not found'}
+              {isRu ? 'Ситуация не найдена' : isTh ? 'ไม่พบสถานการณ์' : 'Situation not found'}
             </p>
             <p className="text-muted-foreground text-sm">
-              {isRu ? `Код: ${code}` : `Code: ${code}`}
+              {isRu ? `Код: ${code}` : isTh ? `รหัส: ${code}` : `Code: ${code}`}
             </p>
           </div>
         )}
@@ -221,7 +222,7 @@ export default function SituationDetailPage() {
             <section>
               <div className="flex items-baseline justify-between mb-4 pb-2 border-b border-border">
                 <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                  {isRu ? 'Сервисы' : 'Services'}
+                  {isRu ? 'Сервисы' : isTh ? 'บริการ' : 'Services'}
                 </h2>
                 {items && items.length > 0 && (
                   <span className="font-mono text-[10px] text-muted-foreground">
@@ -232,7 +233,7 @@ export default function SituationDetailPage() {
 
               {isError && (
                 <div className="border border-destructive/40 bg-destructive/5 text-destructive p-4 text-sm">
-                  {isRu ? 'Не удалось загрузить сервисы.' : 'Failed to load services.'}
+                  {isRu ? 'Не удалось загрузить сервисы.' : isTh ? 'โหลดบริการไม่สำเร็จ' : 'Failed to load services.'}
                 </div>
               )}
 
@@ -260,7 +261,9 @@ export default function SituationDetailPage() {
                 <div className="border border-dashed border-border p-10 text-center text-muted-foreground text-sm">
                   {isRu
                     ? 'Сервисы для этой ситуации пока не настроены.'
-                    : 'No services mapped to this situation yet.'}
+                    : isTh
+                      ? 'ยังไม่มีบริการสำหรับสถานการณ์นี้'
+                      : 'No services mapped to this situation yet.'}
                 </div>
               )}
             </section>
@@ -269,7 +272,7 @@ export default function SituationDetailPage() {
               <section className="mt-10 md:mt-14">
                 <div className="flex items-baseline justify-between mb-4 pb-2 border-b border-border">
                   <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                    {isRu ? 'Похожие ситуации' : 'Related situations'}
+                    {isRu ? 'Похожие ситуации' : isTh ? 'สถานการณ์ที่เกี่ยวข้อง' : 'Related situations'}
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -318,7 +321,7 @@ export default function SituationDetailPage() {
                           </div>
                           {typeof count === 'number' && count > 0 && (
                             <span className="mt-1 inline-block font-mono text-[10px] text-muted-foreground">
-                              {count} {isRu ? (count === 1 ? 'сервис' : 'сервисов') : (count === 1 ? 'service' : 'services')}
+                              {count} {isRu ? (count === 1 ? 'сервис' : 'сервисов') : isTh ? 'บริการ' : (count === 1 ? 'service' : 'services')}
                             </span>
                           )}
                         </div>

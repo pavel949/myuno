@@ -2,14 +2,14 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 
-const DAYS: { key: string; en: string; ru: string }[] = [
-  { key: 'mon', en: 'Mon', ru: 'Пн' },
-  { key: 'tue', en: 'Tue', ru: 'Вт' },
-  { key: 'wed', en: 'Wed', ru: 'Ср' },
-  { key: 'thu', en: 'Thu', ru: 'Чт' },
-  { key: 'fri', en: 'Fri', ru: 'Пт' },
-  { key: 'sat', en: 'Sat', ru: 'Сб' },
-  { key: 'sun', en: 'Sun', ru: 'Вс' },
+const DAYS: { key: string; en: string; ru: string; th: string }[] = [
+  { key: 'mon', en: 'Mon', ru: 'Пн', th: 'จ.' },
+  { key: 'tue', en: 'Tue', ru: 'Вт', th: 'อ.' },
+  { key: 'wed', en: 'Wed', ru: 'Ср', th: 'พ.' },
+  { key: 'thu', en: 'Thu', ru: 'Чт', th: 'พฤ.' },
+  { key: 'fri', en: 'Fri', ru: 'Пт', th: 'ศ.' },
+  { key: 'sat', en: 'Sat', ru: 'Сб', th: 'ส.' },
+  { key: 'sun', en: 'Sun', ru: 'Вс', th: 'อา.' },
 ];
 
 export interface WeeklyHours {
@@ -23,7 +23,7 @@ interface Props {
 
 export function WeeklyHoursEditor({ value, onChange }: Props) {
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const v: WeeklyHours = value && typeof value === 'object' ? value : {};
 
   const set = (day: string, patch: Partial<{ open: string; close: string; closed: boolean }>) => {
@@ -37,7 +37,7 @@ export function WeeklyHoursEditor({ value, onChange }: Props) {
         const closed = !!row.closed;
         return (
           <div key={d.key} className="grid grid-cols-[60px,1fr,1fr,auto] items-center gap-2">
-            <span className="text-sm font-medium">{lang === 'ru' ? d.ru : d.en}</span>
+            <span className="text-sm font-medium">{lang === 'ru' ? d.ru : lang === 'th' ? d.th : d.en}</span>
             <Input
               type="time"
               value={row.open ?? ''}
@@ -52,7 +52,7 @@ export function WeeklyHoursEditor({ value, onChange }: Props) {
             />
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Switch checked={closed} onCheckedChange={(c) => set(d.key, { closed: c })} />
-              {lang === 'ru' ? 'Закрыто' : 'Closed'}
+              {lang === 'ru' ? 'Закрыто' : lang === 'th' ? 'ปิด' : 'Closed'}
             </label>
           </div>
         );

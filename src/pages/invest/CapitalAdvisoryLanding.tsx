@@ -22,7 +22,9 @@ export default function CapitalAdvisoryLanding() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+  const isTh = language === 'th';
+  const t = <T,>(p: { ru: T; en: T; th?: T }): T =>
+    isRu ? p.ru : isTh && p.th !== undefined ? p.th : p.en;
 
   return (
     <LandingShell
@@ -113,25 +115,25 @@ export default function CapitalAdvisoryLanding() {
     >
       <div className="rounded-none border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
-          {t({ ru: 'Что входит в работу', en: 'What is included' })}
+          {t({ ru: 'Что входит в работу', en: 'What is included', th: 'ขอบเขตงานที่รวมอยู่' })}
         </h2>
         <LandingChecklist
           items={[
-            { ru: 'Бриф 60 минут с инвестиционным директором', en: '60-min brief with investment director' },
-            { ru: 'NDA и pre-screening 5–8 объектов', en: 'NDA and pre-screening of 5–8 opportunities' },
-            { ru: 'Юридическая проверка по выбранному объекту', en: 'Legal review on the chosen asset' },
-            { ru: 'Структурирование сделки и налогов', en: 'Deal and tax structuring' },
-            { ru: 'Сопровождение до закрытия', en: 'Support through closing' },
-            { ru: 'Подключение к Deal Room myUNO', en: 'Access to myUNO Deal Room' },
+            { ru: 'Бриф 60 минут с инвестиционным директором', en: '60-min brief with investment director', th: 'การบรีฟ 60 นาทีกับผู้อำนวยการฝ่ายการลงทุน' },
+            { ru: 'NDA и pre-screening 5–8 объектов', en: 'NDA and pre-screening of 5–8 opportunities', th: 'NDA และการคัดกรองเบื้องต้น 5–8 ดีล' },
+            { ru: 'Юридическая проверка по выбранному объекту', en: 'Legal review on the chosen asset', th: 'การตรวจสอบทางกฎหมายของสินทรัพย์ที่เลือก' },
+            { ru: 'Структурирование сделки и налогов', en: 'Deal and tax structuring', th: 'การจัดโครงสร้างดีลและภาษี' },
+            { ru: 'Сопровождение до закрытия', en: 'Support through closing', th: 'การดูแลจนปิดดีล' },
+            { ru: 'Подключение к Deal Room myUNO', en: 'Access to myUNO Deal Room', th: 'การเข้าถึง Deal Room ของ myUNO' },
           ]}
         />
         <div className="mt-6 flex flex-wrap gap-3">
           <Button variant="outline" onClick={() => navigate('/property/mandate')}>
-            {t({ ru: 'Узнать про Deal Room', en: 'Learn about Deal Room' })}
+            {t({ ru: 'Узнать про Deal Room', en: 'Learn about Deal Room', th: 'ดูข้อมูล Deal Room' })}
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
           <Button variant="outline" onClick={() => navigate(APP_ROUTES.CAPITAL_DEAL_INTAKE)}>
-            {t({ ru: 'Подать сделку $200K+', en: 'Submit deal $200K+' })}
+            {t({ ru: 'Подать сделку $200K+', en: 'Submit deal $200K+', th: 'ส่งดีล $200K+' })}
           </Button>
         </div>
       </div>

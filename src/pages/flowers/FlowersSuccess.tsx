@@ -30,6 +30,7 @@ const FlowersSuccess = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const sessionId = searchParams.get('session_id');
 
@@ -100,8 +101,8 @@ const FlowersSuccess = () => {
 
   const meta = order?.metadata || {};
   const statusLabel = order?.status === 'confirmed'
-    ? (isRu ? 'Подтверждён' : 'Confirmed')
-    : (isRu ? 'Ожидает' : 'Pending');
+    ? (isRu ? 'Подтверждён' : isTh ? 'ยืนยันแล้ว' : 'Confirmed')
+    : (isRu ? 'Ожидает' : isTh ? 'รอดำเนินการ' : 'Pending');
 
   const details = order ? (
     <div className="space-y-4 text-left">
@@ -112,10 +113,10 @@ const FlowersSuccess = () => {
           </div>
           <div>
             <p className="font-medium text-sm">
-              {order.order_number || (isRu ? 'Заказ оформлен' : 'Order placed')}
+              {order.order_number || (isRu ? 'Заказ оформлен' : isTh ? 'สั่งซื้อสำเร็จ' : 'Order placed')}
             </p>
             <p className="text-xs text-muted-foreground">
-              {new Date(order.created_at).toLocaleDateString()}
+              {new Date(order.created_at).toLocaleDateString(isTh ? 'th-TH' : undefined)}
             </p>
           </div>
         </div>
@@ -131,7 +132,7 @@ const FlowersSuccess = () => {
             </div>
           ))}
           <div className="flex justify-between font-semibold text-sm pt-2 border-t border-border">
-            <span>{isRu ? 'Итого' : 'Total'}</span>
+            <span>{isRu ? 'Итого' : isTh ? 'รวมทั้งหมด' : 'Total'}</span>
             <span>฿{order.total_amount?.toLocaleString()}</span>
           </div>
         </div>
@@ -160,7 +161,7 @@ const FlowersSuccess = () => {
           {meta.gift_wrap && (
             <div className="flex items-center gap-2 text-sm">
               <Gift className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span>{isRu ? 'Праздничная упаковка' : 'Gift wrap included'}</span>
+              <span>{isRu ? 'Праздничная упаковка' : isTh ? 'รวมห่อของขวัญ' : 'Gift wrap included'}</span>
             </div>
           )}
         </div>
@@ -175,6 +176,7 @@ const FlowersSuccess = () => {
       note={{
         ru: 'Заказ принят. Мы свяжемся для подтверждения доставки.',
         en: 'Order received. We will contact you to confirm delivery.',
+        th: 'รับคำสั่งซื้อแล้ว เราจะติดต่อคุณเพื่อยืนยันการจัดส่ง',
       }}
       details={details}
       extras={<CrossSellRecommendations orderType="flowers" />}

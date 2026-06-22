@@ -14,66 +14,66 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 // Category-based recommendation mapping
-const RELATED_SERVICES: Record<string, Array<{ slug: string; labelEn: string; labelRu: string; icon: string; path: string }>> = {
+const RELATED_SERVICES: Record<string, Array<{ slug: string; labelEn: string; labelRu: string; labelTh: string; icon: string; path: string }>> = {
   flowers: [
-    { slug: 'restaurant', labelEn: 'Book a Restaurant', labelRu: 'Забронировать ресторан', icon: '🍽️', path: '/restaurants' },
-    { slug: 'transport', labelEn: 'Airport Transfer', labelRu: 'Трансфер из аэропорта', icon: '🚗', path: '/transport' },
+    { slug: 'restaurant', labelEn: 'Book a Restaurant', labelRu: 'Забронировать ресторан', labelTh: 'จองร้านอาหาร', icon: '🍽️', path: '/restaurants' },
+    { slug: 'transport', labelEn: 'Airport Transfer', labelRu: 'Трансфер из аэропорта', labelTh: 'รับส่งสนามบิน', icon: '🚗', path: '/transport' },
   ],
   restaurant: [
-    { slug: 'flowers', labelEn: 'Send Flowers', labelRu: 'Отправить цветы', icon: '💐', path: '/flowers' },
-    { slug: 'transport', labelEn: 'Book a Ride', labelRu: 'Заказать такси', icon: '🚗', path: '/transport' },
+    { slug: 'flowers', labelEn: 'Send Flowers', labelRu: 'Отправить цветы', labelTh: 'ส่งดอกไม้', icon: '💐', path: '/flowers' },
+    { slug: 'transport', labelEn: 'Book a Ride', labelRu: 'Заказать такси', labelTh: 'เรียกรถ', icon: '🚗', path: '/transport' },
   ],
   cleaning: [
-    { slug: 'beauty', labelEn: 'Beauty & Spa', labelRu: 'Красота и Спа', icon: '💅', path: '/beauty' },
-    { slug: 'flowers', labelEn: 'Send Flowers', labelRu: 'Отправить цветы', icon: '💐', path: '/flowers' },
+    { slug: 'beauty', labelEn: 'Beauty & Spa', labelRu: 'Красота и Спа', labelTh: 'ความงามและสปา', icon: '💅', path: '/beauty' },
+    { slug: 'flowers', labelEn: 'Send Flowers', labelRu: 'Отправить цветы', labelTh: 'ส่งดอกไม้', icon: '💐', path: '/flowers' },
   ],
   transport: [
-    { slug: 'flowers', labelEn: 'Send Flowers', labelRu: 'Отправить цветы', icon: '💐', path: '/flowers' },
-    { slug: 'experiences', labelEn: 'Tours & Activities', labelRu: 'Экскурсии', icon: '🗺️', path: '/experiences' },
+    { slug: 'flowers', labelEn: 'Send Flowers', labelRu: 'Отправить цветы', labelTh: 'ส่งดอกไม้', icon: '💐', path: '/flowers' },
+    { slug: 'experiences', labelEn: 'Tours & Activities', labelRu: 'Экскурсии', labelTh: 'ทัวร์และกิจกรรม', icon: '🗺️', path: '/experiences' },
   ],
   yacht: [
-    { slug: 'restaurant', labelEn: 'Book Dinner', labelRu: 'Забронировать ужин', icon: '🍽️', path: '/restaurants' },
-    { slug: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', icon: '💐', path: '/flowers' },
-    { slug: 'transport', labelEn: 'Airport Transfer', labelRu: 'Трансфер', icon: '🚗', path: '/transport' },
+    { slug: 'restaurant', labelEn: 'Book Dinner', labelRu: 'Забронировать ужин', labelTh: 'จองมื้อค่ำ', icon: '🍽️', path: '/restaurants' },
+    { slug: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', labelTh: 'ดอกไม้และของขวัญ', icon: '💐', path: '/flowers' },
+    { slug: 'transport', labelEn: 'Airport Transfer', labelRu: 'Трансфер', labelTh: 'รับส่งสนามบิน', icon: '🚗', path: '/transport' },
   ],
   yacht_charter: [
-    { slug: 'restaurant', labelEn: 'Book Dinner', labelRu: 'Забронировать ужин', icon: '🍽️', path: '/restaurants' },
-    { slug: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', icon: '💐', path: '/flowers' },
-    { slug: 'transport', labelEn: 'Airport Transfer', labelRu: 'Трансфер', icon: '🚗', path: '/transport' },
+    { slug: 'restaurant', labelEn: 'Book Dinner', labelRu: 'Забронировать ужин', labelTh: 'จองมื้อค่ำ', icon: '🍽️', path: '/restaurants' },
+    { slug: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', labelTh: 'ดอกไม้และของขวัญ', icon: '💐', path: '/flowers' },
+    { slug: 'transport', labelEn: 'Airport Transfer', labelRu: 'Трансфер', labelTh: 'รับส่งสนามบิน', icon: '🚗', path: '/transport' },
   ],
   legal: [
-    { slug: 'visa', labelEn: 'Visa Services', labelRu: 'Визовые услуги', icon: '📋', path: '/legal/visa' },
-    { slug: 'property', labelEn: 'Property Search', labelRu: 'Поиск недвижимости', icon: '🏠', path: '/property' },
+    { slug: 'visa', labelEn: 'Visa Services', labelRu: 'Визовые услуги', labelTh: 'บริการวีซ่า', icon: '📋', path: '/legal/visa' },
+    { slug: 'property', labelEn: 'Property Search', labelRu: 'Поиск недвижимости', labelTh: 'ค้นหาอสังหาริมทรัพย์', icon: '🏠', path: '/property' },
   ],
   legal_consultation: [
-    { slug: 'visa', labelEn: 'Visa Services', labelRu: 'Визовые услуги', icon: '📋', path: '/legal/visa' },
-    { slug: 'property', labelEn: 'Property Search', labelRu: 'Поиск недвижимости', icon: '🏠', path: '/property' },
+    { slug: 'visa', labelEn: 'Visa Services', labelRu: 'Визовые услуги', labelTh: 'บริการวีซ่า', icon: '📋', path: '/legal/visa' },
+    { slug: 'property', labelEn: 'Property Search', labelRu: 'Поиск недвижимости', labelTh: 'ค้นหาอสังหาริมทรัพย์', icon: '🏠', path: '/property' },
   ],
   pet_service: [
-    { slug: 'cleaning', labelEn: 'Home Cleaning', labelRu: 'Уборка квартиры', icon: '🧹', path: '/cleaning' },
-    { slug: 'medical', labelEn: 'Find a Doctor', labelRu: 'Найти врача', icon: '🏥', path: '/medical' },
+    { slug: 'cleaning', labelEn: 'Home Cleaning', labelRu: 'Уборка квартиры', labelTh: 'ทำความสะอาดบ้าน', icon: '🧹', path: '/cleaning' },
+    { slug: 'medical', labelEn: 'Find a Doctor', labelRu: 'Найти врача', labelTh: 'ค้นหาแพทย์', icon: '🏥', path: '/medical' },
   ],
   beauty: [
-    { slug: 'restaurant', labelEn: 'Book a Restaurant', labelRu: 'Забронировать ресторан', icon: '🍽️', path: '/restaurants' },
-    { slug: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', icon: '💐', path: '/flowers' },
+    { slug: 'restaurant', labelEn: 'Book a Restaurant', labelRu: 'Забронировать ресторан', labelTh: 'จองร้านอาหาร', icon: '🍽️', path: '/restaurants' },
+    { slug: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', labelTh: 'ดอกไม้และของขวัญ', icon: '💐', path: '/flowers' },
   ],
   wellness: [
-    { slug: 'restaurant', labelEn: 'Book a Restaurant', labelRu: 'Забронировать ресторан', icon: '🍽️', path: '/restaurants' },
-    { slug: 'experiences', labelEn: 'Tours & Activities', labelRu: 'Экскурсии', icon: '🗺️', path: '/experiences' },
+    { slug: 'restaurant', labelEn: 'Book a Restaurant', labelRu: 'Забронировать ресторан', labelTh: 'จองร้านอาหาร', icon: '🍽️', path: '/restaurants' },
+    { slug: 'experiences', labelEn: 'Tours & Activities', labelRu: 'Экскурсии', labelTh: 'ทัวร์และกิจกรรม', icon: '🗺️', path: '/experiences' },
   ],
   service: [
-    { slug: 'cleaning', labelEn: 'Home Cleaning', labelRu: 'Уборка квартиры', icon: '🧹', path: '/cleaning' },
-    { slug: 'beauty', labelEn: 'Beauty & Spa', labelRu: 'Красота и Спа', icon: '💅', path: '/beauty' },
+    { slug: 'cleaning', labelEn: 'Home Cleaning', labelRu: 'Уборка квартиры', labelTh: 'ทำความสะอาดบ้าน', icon: '🧹', path: '/cleaning' },
+    { slug: 'beauty', labelEn: 'Beauty & Spa', labelRu: 'Красота и Спа', labelTh: 'ความงามและสปา', icon: '💅', path: '/beauty' },
   ],
   event: [
-    { slug: 'restaurant', labelEn: 'Book Dinner', labelRu: 'Забронировать ужин', icon: '🍽️', path: '/restaurants' },
-    { slug: 'transport', labelEn: 'Book a Ride', labelRu: 'Заказать такси', icon: '🚗', path: '/transport' },
-    { slug: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', icon: '💐', path: '/flowers' },
+    { slug: 'restaurant', labelEn: 'Book Dinner', labelRu: 'Забронировать ужин', labelTh: 'จองมื้อค่ำ', icon: '🍽️', path: '/restaurants' },
+    { slug: 'transport', labelEn: 'Book a Ride', labelRu: 'Заказать такси', labelTh: 'เรียกรถ', icon: '🚗', path: '/transport' },
+    { slug: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', labelTh: 'ดอกไม้และของขวัญ', icon: '💐', path: '/flowers' },
   ],
   default: [
-    { slug: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', icon: '💐', path: '/flowers' },
-    { slug: 'restaurant', labelEn: 'Restaurants', labelRu: 'Рестораны', icon: '🍽️', path: '/restaurants' },
-    { slug: 'experiences', labelEn: 'Experiences', labelRu: 'Экскурсии', icon: '🗺️', path: '/experiences' },
+    { slug: 'flowers', labelEn: 'Flowers & Gifts', labelRu: 'Цветы и подарки', labelTh: 'ดอกไม้และของขวัญ', icon: '💐', path: '/flowers' },
+    { slug: 'restaurant', labelEn: 'Restaurants', labelRu: 'Рестораны', labelTh: 'ร้านอาหาร', icon: '🍽️', path: '/restaurants' },
+    { slug: 'experiences', labelEn: 'Experiences', labelRu: 'Экскурсии', labelTh: 'ประสบการณ์', icon: '🗺️', path: '/experiences' },
   ],
 };
 
@@ -85,7 +85,6 @@ interface CrossSellRecommendationsProps {
 
 export function CrossSellRecommendations({ orderType, orderId, className }: CrossSellRecommendationsProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const navigate = useNavigate();
 
   const suggestions = RELATED_SERVICES[orderType || ''] || RELATED_SERVICES.default;
@@ -95,7 +94,7 @@ export function CrossSellRecommendations({ orderType, orderId, className }: Cros
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-accent" />
-          {isRu ? 'Вам также может понравиться' : 'You might also like'}
+          {language === 'ru' ? 'Вам также может понравиться' : language === 'th' ? 'คุณอาจสนใจสิ่งนี้' : 'You might also like'}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -107,7 +106,7 @@ export function CrossSellRecommendations({ orderType, orderId, className }: Cros
           >
             <span className="text-2xl">{s.icon}</span>
             <span className="flex-1 font-medium text-sm">
-              {isRu ? s.labelRu : s.labelEn}
+              {language === 'ru' ? s.labelRu : language === 'th' ? s.labelTh : s.labelEn}
             </span>
             <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
           </button>

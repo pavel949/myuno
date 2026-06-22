@@ -22,9 +22,9 @@ const STATUS_FILTERS: Array<{ id: string; label: Record<Lang, string> }> = [
 ];
 
 const I18N = {
-  ru: { title: 'Операторская · Трансферы', orders: 'заказов', live: 'live-обновления', refresh: 'Обновить', empty: 'Нет заказов', confirm: 'Подтвердить', reject: 'Отклонить', complete: 'Завершить', waGuest: 'WhatsApp гостю', night: '🌙 ночной', statusUpdated: 'Статус обновлён', updateError: 'Ошибка обновления' },
-  en: { title: 'Operator · Transfers', orders: 'orders', live: 'live updates', refresh: 'Refresh', empty: 'No orders', confirm: 'Confirm', reject: 'Reject', complete: 'Complete', waGuest: 'WhatsApp guest', night: '🌙 night', statusUpdated: 'Status updated', updateError: 'Update failed' },
-  th: { title: 'เจ้าหน้าที่ · การรับส่ง', orders: 'รายการ', live: 'อัปเดตสด', refresh: 'รีเฟรช', empty: 'ไม่มีคำสั่ง', confirm: 'ยืนยัน', reject: 'ปฏิเสธ', complete: 'เสร็จสิ้น', waGuest: 'WhatsApp ลูกค้า', night: '🌙 กลางคืน', statusUpdated: 'อัปเดตสถานะแล้ว', updateError: 'อัปเดตล้มเหลว' },
+  ru: { title: 'Операторская · Трансферы', orders: 'заказов', live: 'live-обновления', refresh: 'Обновить', empty: 'Нет заказов', confirm: 'Подтвердить', reject: 'Отклонить', complete: 'Завершить', waGuest: 'WhatsApp гостю', night: '🌙 ночной', statusUpdated: 'Статус обновлён', updateError: 'Ошибка обновления', intl: 'Межд.', domestic: 'Внутр.' },
+  en: { title: 'Operator · Transfers', orders: 'orders', live: 'live updates', refresh: 'Refresh', empty: 'No orders', confirm: 'Confirm', reject: 'Reject', complete: 'Complete', waGuest: 'WhatsApp guest', night: '🌙 night', statusUpdated: 'Status updated', updateError: 'Update failed', intl: 'Int\'l', domestic: 'Domestic' },
+  th: { title: 'เจ้าหน้าที่ · การรับส่ง', orders: 'รายการ', live: 'อัปเดตสด', refresh: 'รีเฟรช', empty: 'ไม่มีคำสั่ง', confirm: 'ยืนยัน', reject: 'ปฏิเสธ', complete: 'เสร็จสิ้น', waGuest: 'WhatsApp ลูกค้า', night: '🌙 กลางคืน', statusUpdated: 'อัปเดตสถานะแล้ว', updateError: 'อัปเดตล้มเหลว', intl: 'ระหว่างประเทศ', domestic: 'ในประเทศ' },
 } as const;
 
 
@@ -174,7 +174,7 @@ export default function OperatorTransfers() {
                     {meta.flight_number && (
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Plane className="w-4 h-4 shrink-0" />
-                        <span>{meta.flight_number as string} · {(meta.terminal as string) === 'international' ? 'Int\'l' : 'Domestic'}</span>
+                        <span>{meta.flight_number as string} · {(meta.terminal as string) === 'international' ? t.intl : t.domestic}</span>
                       </div>
                     )}
                     {meta.vehicle_name && (

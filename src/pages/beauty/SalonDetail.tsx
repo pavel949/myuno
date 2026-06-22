@@ -54,9 +54,9 @@ export default function SalonDetail() {
       <AppLayout showHeader={false} showBottomNav>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <Scissors className="w-16 h-16 text-muted-foreground" />
-          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Салон не найден' : 'Salon not found'}</h2>
+          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Салон не найден' : language === 'th' ? 'ไม่พบร้าน' : 'Salon not found'}</h2>
           <Button onClick={() => navigate('/beauty')}>
-            {language === 'ru' ? 'К списку салонов' : 'Back to salons'}
+            {language === 'ru' ? 'К списку салонов' : language === 'th' ? 'กลับไปรายการร้าน' : 'Back to salons'}
           </Button>
         </div>
       </AppLayout>
@@ -94,7 +94,7 @@ export default function SalonDetail() {
               variant="secondary"
             />
             <button
-              aria-label={language === 'ru' ? 'Поделиться' : 'Share'}
+              aria-label={language === 'ru' ? 'Поделиться' : language === 'th' ? 'แชร์' : 'Share'}
               className="w-11 h-11 rounded-full glass flex items-center justify-center"
             >
               <Share2 className="w-5 h-5" />
@@ -144,7 +144,7 @@ export default function SalonDetail() {
         {/* Services */}
         <div>
           <h2 className="text-lg font-semibold mb-4">
-            {language === 'ru' ? 'Выберите услуги' : 'Select Services'}
+            {language === 'ru' ? 'Выберите услуги' : language === 'th' ? 'เลือกบริการ' : 'Select Services'}
           </h2>
           {servicesLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
@@ -165,7 +165,7 @@ export default function SalonDetail() {
                       <h3 className="font-medium">{language === 'ru' ? service.name_ru : service.name_en}</h3>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mt-0.5">
                         <Clock className="w-3.5 h-3.5" />
-                        <span>{service.duration_minutes} {language === 'ru' ? 'мин' : 'min'}</span>
+                        <span>{service.duration_minutes} {language === 'ru' ? 'мин' : language === 'th' ? 'นาที' : 'min'}</span>
                       </div>
                     </div>
                     <span className="font-semibold text-primary">฿{service.price.toLocaleString()}</span>
@@ -175,7 +175,7 @@ export default function SalonDetail() {
             </div>
           ) : (
             <p className="text-muted-foreground text-center py-8">
-              {language === 'ru' ? 'Услуги скоро будут добавлены' : 'Services coming soon'}
+              {language === 'ru' ? 'Услуги скоро будут добавлены' : language === 'th' ? 'บริการเร็ว ๆ นี้' : 'Services coming soon'}
             </p>
           )}
         </div>
@@ -192,7 +192,7 @@ export default function SalonDetail() {
           <div className="max-w-lg mx-auto flex items-center justify-between gap-4">
             <div>
               <p className="text-sm text-muted-foreground">
-                {selectedServices.length} {language === 'ru' ? 'услуг' : 'services'} • {totalDuration} {language === 'ru' ? 'мин' : 'min'}
+                {selectedServices.length} {language === 'ru' ? 'услуг' : language === 'th' ? 'บริการ' : 'services'} • {totalDuration} {language === 'ru' ? 'мин' : language === 'th' ? 'นาที' : 'min'}
               </p>
               <p className="text-xl font-bold text-primary">฿{totalPrice.toLocaleString()}</p>
             </div>

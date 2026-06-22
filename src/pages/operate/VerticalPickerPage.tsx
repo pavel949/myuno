@@ -13,7 +13,7 @@ import { ArrowRight } from 'lucide-react';
  */
 export default function VerticalPickerPage() {
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const specs = listVerticalSpecs();
 
   return (
@@ -21,11 +21,13 @@ export default function VerticalPickerPage() {
       <BackButton />
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold">
-          {lang === 'ru' ? 'Новая карточка' : 'New listing'}
+          {lang === 'ru' ? 'Новая карточка' : lang === 'th' ? 'รายการใหม่' : 'New listing'}
         </h1>
         <p className="text-sm text-muted-foreground">
           {lang === 'ru'
             ? 'Выберите вертикаль — мастер задаст только релевантные поля и проверит качество перед модерацией.'
+            : lang === 'th'
+            ? 'เลือกหมวดธุรกิจ — ตัวช่วยจะถามเฉพาะข้อมูลที่เกี่ยวข้องและตรวจสอบคุณภาพก่อนส่งตรวจ'
             : 'Pick a vertical — the wizard will ask only relevant fields and quality-check before review.'}
         </p>
       </header>
@@ -38,9 +40,9 @@ export default function VerticalPickerPage() {
               className="group flex items-start justify-between gap-3 border border-border bg-card p-4 hover:border-primary transition-colors"
             >
               <div className="space-y-1">
-                <div className="text-sm font-medium">{s.label[lang]}</div>
+                <div className="text-sm font-medium">{s.label[lang] ?? s.label.en}</div>
                 <div className="text-xs text-muted-foreground">
-                  {s.onboarding.length} {lang === 'ru' ? 'шагов' : 'steps'}
+                  {s.onboarding.length} {lang === 'ru' ? 'шагов' : lang === 'th' ? 'ขั้นตอน' : 'steps'}
                   {' · '}
                   {s.references?.slice(0, 2).join(' · ')}
                 </div>

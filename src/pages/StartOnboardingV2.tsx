@@ -27,30 +27,32 @@ import { RoleStep } from '@/components/onboarding/v2/RoleStep';
 import { ModifiersStep } from '@/components/onboarding/v2/ModifiersStep';
 import { ResultStep } from '@/components/onboarding/v2/ResultStep';
 
-type L = 'en' | 'ru';
-const T = (c: { en: string; ru: string }, l: L) => c[l] ?? c.en;
+type L = 'en' | 'ru' | 'th';
+const T = (c: { en: string; ru: string; th?: string }, l: L) => c[l] ?? c.en;
 
 const COPY = {
-  title: { en: 'Welcome to myUNO', ru: 'Добро пожаловать в myUNO' },
+  title: { en: 'Welcome to myUNO', ru: 'Добро пожаловать в myUNO', th: 'ยินดีต้อนรับสู่ myUNO' },
   subtitle: {
     en: '3 questions to understand your stage in Phuket.',
     ru: '3 вопроса, чтобы понять вашу ситуацию на Пхукете.',
+    th: '3 คำถามเพื่อทำความเข้าใจช่วงชีวิตของคุณในภูเก็ต',
   },
-  q1: { en: 'Where are you in the journey?', ru: 'На каком этапе пути вы сейчас?' },
-  q2: { en: 'How do you act here?', ru: 'Какая у вас роль?' },
-  q3: { en: 'Anything specific to consider?', ru: 'Есть что-то особенное?' },
-  next: { en: 'Continue', ru: 'Дальше' },
-  back: { en: 'Back', ru: 'Назад' },
-  finish: { en: 'See my recommendations', ru: 'Показать рекомендации' },
-  saving: { en: 'Preparing your map…', ru: 'Готовим карту…' },
-  skip: { en: 'Skip for now', ru: 'Пропустить' },
-  errorPrefix: { en: 'Could not save — please retry:', ru: 'Не удалось сохранить — попробуйте ещё раз:' },
-  flagOffTitle: { en: 'Onboarding coming soon', ru: 'Онбординг скоро' },
+  q1: { en: 'Where are you in the journey?', ru: 'На каком этапе пути вы сейчас?', th: 'ตอนนี้คุณอยู่ช่วงไหนของการเดินทาง?' },
+  q2: { en: 'How do you act here?', ru: 'Какая у вас роль?', th: 'บทบาทของคุณที่นี่คืออะไร?' },
+  q3: { en: 'Anything specific to consider?', ru: 'Есть что-то особенное?', th: 'มีอะไรเฉพาะเจาะจงที่ต้องพิจารณาไหม?' },
+  next: { en: 'Continue', ru: 'Дальше', th: 'ต่อไป' },
+  back: { en: 'Back', ru: 'Назад', th: 'ย้อนกลับ' },
+  finish: { en: 'See my recommendations', ru: 'Показать рекомендации', th: 'ดูคำแนะนำของฉัน' },
+  saving: { en: 'Preparing your map…', ru: 'Готовим карту…', th: 'กำลังเตรียมแผนที่ของคุณ…' },
+  skip: { en: 'Skip for now', ru: 'Пропустить', th: 'ข้ามไปก่อน' },
+  errorPrefix: { en: 'Could not save — please retry:', ru: 'Не удалось сохранить — попробуйте ещё раз:', th: 'บันทึกไม่สำเร็จ — โปรดลองอีกครั้ง:' },
+  flagOffTitle: { en: 'Onboarding coming soon', ru: 'Онбординг скоро', th: 'การเริ่มต้นใช้งานเร็วๆ นี้' },
   flagOffBody: {
     en: 'A canonical version of this guided flow is being prepared.',
     ru: 'Каноническая версия этого мастера готовится.',
+    th: 'กำลังเตรียมเวอร์ชันมาตรฐานของขั้นตอนแนะนำนี้',
   },
-  goHome: { en: 'Go to home', ru: 'На главную' },
+  goHome: { en: 'Go to home', ru: 'На главную', th: 'ไปหน้าแรก' },
 };
 
 function StepDots({ step }: { step: number }) {
@@ -81,7 +83,7 @@ function sanitizeReturnPath(raw: string | null): string {
 
 export default function StartOnboardingV2() {
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as L;
+  const lang = language as L;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const flagOn = useFeatureFlag('concierge_routing_v2_canonical', true);

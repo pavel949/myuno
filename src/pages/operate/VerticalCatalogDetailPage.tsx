@@ -22,7 +22,7 @@ const INQUIRY_VERTICALS = new Set(['beauty', 'fitness', 'tour', 'transport']);
 export default function VerticalCatalogDetailPage() {
   const { vertical = '', id = '' } = useParams<{ vertical: string; id: string }>();
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const spec = getVerticalSpec(vertical);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [savedStatus, setSavedStatus] = useState(() => (id ? getInquiryStatus(id) : null));
@@ -51,7 +51,11 @@ export default function VerticalCatalogDetailPage() {
       <div className="container py-10">
         <BackButton />
         <p className="text-sm text-muted-foreground">
-          {lang === 'ru' ? `Spec для «${vertical}» не подключён.` : `Spec for «${vertical}» not wired.`}
+          {lang === 'ru'
+            ? `Spec для «${vertical}» не подключён.`
+            : lang === 'th'
+            ? `ยังไม่ได้เชื่อมต่อ Spec สำหรับ «${vertical}»`
+            : `Spec for «${vertical}» not wired.`}
         </p>
       </div>
     );
@@ -61,9 +65,10 @@ export default function VerticalCatalogDetailPage() {
 
   const form = adapterDbToForm(vertical, data as Record<string, unknown>);
   const attrs = (form.attributes as Record<string, unknown>) ?? {};
-  const title = (attrs.title as { en?: string; ru?: string }) ?? {};
+  const title = (attrs.title as { en?: string; ru?: string; th?: string }) ?? {};
   const displayName =
     title[lang] ||
+    title.en ||
     (data as { name_en?: string; name_ru?: string }).name_en ||
     (data as { name_ru?: string }).name_ru ||
     '';
@@ -85,6 +90,8 @@ export default function VerticalCatalogDetailPage() {
     const phone = (attrs.phone as string) || '';
     const msg = lang === 'ru'
       ? `Здравствуйте! Интересует «${displayName}» (${spec.label.ru}). Хочу узнать подробности и забронировать.`
+      : lang === 'th'
+      ? `สวัสดีครับ/ค่ะ สนใจ «${displayName}» (${spec.label.en}) อยากทราบรายละเอียดและขอจองครับ/ค่ะ`
       : `Hi! I'd like to book «${displayName}» (${spec.label.en}). Could you share details?`;
 
     const digits = (wa || phone).replace(/[^\d]/g, '');
@@ -98,6 +105,8 @@ export default function VerticalCatalogDetailPage() {
     toast.info(
       lang === 'ru'
         ? 'Партнёр не указал контакт. Откройте «Связаться» позже.'
+        : lang === 'th'
+        ? 'พาร์ตเนอร์ยังไม่ได้ระบุช่องทางติดต่อ กรุณาลองใหม่อีกครั้งภายหลัง'
         : 'No contact channel configured. Try again later.',
     );
   };
@@ -108,9 +117,9 @@ export default function VerticalCatalogDetailPage() {
 
       {savedStatus && useInquiryForm && (
         <div className="flex items-center justify-between border border-border bg-card px-3 py-2">
-          <InquiryStatusBadge status={savedStatus} lang={lang} />
+          <InquiryStatusBadge status={savedStatus} lang={lang === 'ru' ? 'ru' : 'en'} />
           <Button size="sm" variant="ghost" onClick={() => setInquiryOpen(true)}>
-            {lang === 'ru' ? 'Отправить ещё раз' : 'Send again'}
+            {lang === 'ru' ? 'Отправить ещё раз' : lang === 'th' ? 'ส่งอีกครั้ง' : 'Send again'}
           </Button>
         </div>
       )}

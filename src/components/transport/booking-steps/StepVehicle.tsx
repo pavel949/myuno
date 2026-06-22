@@ -40,7 +40,7 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
       className="space-y-3"
     >
       <p className="text-sm text-muted-foreground">
-        {language === 'ru' ? 'Выберите автомобиль' : 'Choose your vehicle'}
+        {language === 'ru' ? 'Выберите автомобиль' : language === 'th' ? 'เลือกรถของคุณ' : 'Choose your vehicle'}
       </p>
 
       <div className="space-y-2">
@@ -88,8 +88,8 @@ export function StepVehicle({ formData, setFormData, language, vehicleTypes, rou
                   {language === 'ru' ? vehicle.name_ru : vehicle.name_en}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? `до ${vehicle.max_passengers} пасс.` : `up to ${vehicle.max_passengers} pax`}
-                  {vehicle.eta_minutes ? ` · ~${vehicle.eta_minutes} ${language === 'ru' ? 'мин' : 'min'}` : ''}
+                  {language === 'ru' ? `до ${vehicle.max_passengers} пасс.` : language === 'th' ? `สูงสุด ${vehicle.max_passengers} ที่นั่ง` : `up to ${vehicle.max_passengers} pax`}
+                  {vehicle.eta_minutes ? ` · ~${vehicle.eta_minutes} ${language === 'ru' ? 'мин' : language === 'th' ? 'นาที' : 'min'}` : ''}
                 </p>
               </div>
               <div className="text-right shrink-0">

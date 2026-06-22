@@ -51,14 +51,24 @@ const CLUSTER_LABEL_EN: Record<ClusterId, string> = {
   build: 'Build',
 };
 
-function formatCount(n: number, isRu: boolean): string {
-  if (isRu) {
+const CLUSTER_LABEL_TH: Record<ClusterId, string> = {
+  arrive: 'การมาถึง',
+  live: 'การใช้ชีวิต',
+  manage: 'การจัดการ',
+  invest: 'การลงทุน',
+  legal: 'เอกสารและกฎหมาย',
+  build: 'การพัฒนา',
+};
+
+function formatCount(n: number, language: 'ru' | 'en' | 'th'): string {
+  if (language === 'ru') {
     const mod10 = n % 10;
     const mod100 = n % 100;
     if (mod10 === 1 && mod100 !== 11) return `${n} услуга`;
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${n} услуги`;
     return `${n} услуг`;
   }
+  if (language === 'th') return `${n} บริการ`;
   return `${n} ${n === 1 ? 'service' : 'services'}`;
 }
 
@@ -71,6 +81,7 @@ export function NavigatorClusterSection({
 }: NavigatorClusterSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { effectivePersonas } = useUserPersonas();
   const role = useLifeOSRole();
   const cluster = CLUSTERS.find((c) => c.id === clusterId);
@@ -83,7 +94,7 @@ export function NavigatorClusterSection({
 
   if (!cluster || situations.length === 0) return null;
 
-  const label = isRu ? CLUSTER_LABEL_RU[clusterId] : CLUSTER_LABEL_EN[clusterId];
+  const label = isRu ? CLUSTER_LABEL_RU[clusterId] : isTh ? CLUSTER_LABEL_TH[clusterId] : CLUSTER_LABEL_EN[clusterId];
 
   return (
     <section
@@ -106,7 +117,7 @@ export function NavigatorClusterSection({
       {topServices.length > 0 && (
         <div className="mt-4 mb-5">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 mb-2">
-            {isRu ? 'Мини-приложения для вас' : 'Mini-apps for you'}
+            {isRu ? 'Мини-приложения для вас' : isTh ? 'มินิแอปสำหรับคุณ' : 'Mini-apps for you'}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {topServices.map((svc) => (
@@ -152,7 +163,7 @@ export function NavigatorClusterSection({
                   )}
                 </div>
                 <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
-                  {typeof count === 'number' && count > 0 ? formatCount(count, isRu) : (isRu ? 'открыть' : 'open')}
+                  {typeof count === 'number' && count > 0 ? formatCount(count, language) : (isRu ? 'открыть' : isTh ? 'เปิด' : 'open')}
                 </span>
                 <ArrowRight
                   className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors"

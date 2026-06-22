@@ -79,13 +79,13 @@ export default function BeautyBooking() {
       <AppLayout showBottomNav={false}>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
-          title={salon?.name || (language === 'ru' ? 'Салон красоты' : 'Beauty Salon')}
+          title={salon?.name || (language === 'ru' ? 'Салон красоты' : language === 'th' ? 'ร้านเสริมความงาม' : 'Beauty Salon')}
           date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
           time={time}
           total={totalPrice}
           currency="THB"
           continuePath="/beauty"
-          continueLabel={language === 'ru' ? 'К салонам' : 'Browse Salons'}
+          continueLabel={language === 'ru' ? 'К салонам' : language === 'th' ? 'ดูร้านอื่น' : 'Browse Salons'}
         />
       </AppLayout>
     );
@@ -124,7 +124,7 @@ export default function BeautyBooking() {
           notes: `Duration: ${totalDuration} min${staffName ? `. Staff: ${staffName}` : ''}`,
         });
         if (!success) {
-          toast.error(language === 'ru' ? 'Ошибка оплаты. Попробуйте ещё раз.' : 'Payment error. Please try again.');
+          toast.error(language === 'ru' ? 'Ошибка оплаты. Попробуйте ещё раз.' : language === 'th' ? 'การชำระเงินผิดพลาด กรุณาลองใหม่อีกครั้ง' : 'Payment error. Please try again.');
         }
         return;
       }
@@ -160,10 +160,10 @@ export default function BeautyBooking() {
       if (result.success) {
         setBookingResult({ success: true, bookingId: result.booking_id });
       } else {
-        toast.error(language === 'ru' ? 'Не удалось создать бронирование' : 'Failed to create booking');
+        toast.error(language === 'ru' ? 'Не удалось создать бронирование' : language === 'th' ? 'ไม่สามารถสร้างการจองได้' : 'Failed to create booking');
       }
     } catch {
-      toast.error(language === 'ru' ? 'Ошибка при бронировании. Попробуйте ещё раз.' : 'Booking error. Please try again.');
+      toast.error(language === 'ru' ? 'Ошибка при бронировании. Попробуйте ещё раз.' : language === 'th' ? 'เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง' : 'Booking error. Please try again.');
     }
   };
 
@@ -176,7 +176,7 @@ export default function BeautyBooking() {
     <AppLayout showBottomNav={false}>
       <PageContainer className="pb-40">
         <PageHeader 
-          title={language === 'ru' ? 'Бронирование' : 'Book Appointment'} 
+          title={language === 'ru' ? 'Бронирование' : language === 'th' ? 'จองนัดหมาย' : 'Book Appointment'}
           showBack 
           fallbackPath="/beauty"
         />
@@ -187,8 +187,8 @@ export default function BeautyBooking() {
         {/* Summary Card */}
         <div className="mb-6">
           <BookingSummary
-            title={salon?.name || (language === 'ru' ? 'Салон красоты' : 'Beauty Salon')}
-            subtitle={selectedServiceDetails.map((s: any) => 
+            title={salon?.name || (language === 'ru' ? 'Салон красоты' : language === 'th' ? 'ร้านเสริมความงาม' : 'Beauty Salon')}
+            subtitle={selectedServiceDetails.map((s: any) =>
               language === 'ru' ? s.nameRu : s.name
             ).join(', ')}
             duration={totalDuration ? `${totalDuration} min` : undefined}
@@ -203,7 +203,7 @@ export default function BeautyBooking() {
         {staff.length > 0 && (
           <div className="bg-card rounded-none border p-5 mb-4">
             <h3 className="font-semibold mb-3">
-              {language === 'ru' ? 'Выберите мастера' : 'Choose Specialist'}
+              {language === 'ru' ? 'Выберите мастера' : language === 'th' ? 'เลือกช่างผู้เชี่ยวชาญ' : 'Choose Specialist'}
             </h3>
             <StaffPickerInline
               staff={staff}
@@ -217,7 +217,7 @@ export default function BeautyBooking() {
         {/* Date & Time */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Дата и время' : 'Date & Time'}
+            {language === 'ru' ? 'Дата и время' : language === 'th' ? 'วันและเวลา' : 'Date & Time'}
           </h3>
           <BookingDateTimeSelect
             date={date}
@@ -232,7 +232,7 @@ export default function BeautyBooking() {
         {/* Contact Info */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
+            {language === 'ru' ? 'Контактные данные' : language === 'th' ? 'ข้อมูลติดต่อ' : 'Contact Information'}
           </h3>
           <BookingContactForm
             data={contactData}
@@ -245,7 +245,7 @@ export default function BeautyBooking() {
         {/* Payment Method */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+            {language === 'ru' ? 'Способ оплаты' : language === 'th' ? 'วิธีการชำระเงิน' : 'Payment Method'}
           </h3>
           <BookingPaymentSelect
             selected={paymentMethod}
@@ -263,10 +263,10 @@ export default function BeautyBooking() {
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!date || !time || !contactData.name || !contactData.phone}
-          submitLabel={paymentMethod === 'card' 
-            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
-            : (language === 'ru' ? 'Подтвердить бронирование' : 'Confirm Booking')}
-          hint={language === 'ru' ? '🔒 Безопасное бронирование' : '🔒 Secure booking'}
+          submitLabel={paymentMethod === 'card'
+            ? (language === 'ru' ? 'Оплатить онлайн' : language === 'th' ? 'ชำระเงินออนไลน์' : 'Pay Online')
+            : (language === 'ru' ? 'Подтвердить бронирование' : language === 'th' ? 'ยืนยันการจอง' : 'Confirm Booking')}
+          hint={language === 'ru' ? '🔒 Безопасное бронирование' : language === 'th' ? '🔒 การจองที่ปลอดภัย' : '🔒 Secure booking'}
         />
       </PageContainer>
     </AppLayout>

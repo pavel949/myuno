@@ -23,7 +23,11 @@ export default function VerticalOnboardingPage() {
     return (
       <div className="container py-10">
         <p className="text-sm text-muted-foreground">
-          {language === 'ru' ? `Вертикаль «${vertical}» пока без spec.` : `No spec yet for «${vertical}».`}
+          {language === 'ru'
+            ? `Вертикаль «${vertical}» пока без spec.`
+            : language === 'th'
+            ? `ยังไม่มี spec สำหรับหมวด «${vertical}»`
+            : `No spec yet for «${vertical}».`}
         </p>
       </div>
     );
@@ -40,7 +44,11 @@ export default function VerticalOnboardingPage() {
         .single();
       if (error) throw error;
       toast.success(
-        language === 'ru' ? 'Карточка отправлена на модерацию' : 'Submitted for review',
+        language === 'ru'
+          ? 'Карточка отправлена на модерацию'
+          : language === 'th'
+          ? 'ส่งรายการเพื่อตรวจสอบแล้ว'
+          : 'Submitted for review',
       );
       navigate(`/mc/listings/${(data as { id: string }).id}/edit`);
     } catch (e) {

@@ -9,7 +9,7 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { CANCELLATION_POLICY_DETAILS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { format, addHours } from 'date-fns';
-import { ru as ruLocale, enUS } from 'date-fns/locale';
+import { ru as ruLocale, enUS, th as thLocale } from 'date-fns/locale';
 
 interface BookingTermsCardProps {
   cancellationPolicy?: string;
@@ -48,6 +48,7 @@ export function BookingTermsCard({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [isOpen, setIsOpen] = React.useState(false);
 
   const policy = CANCELLATION_POLICY_DETAILS[cancellationPolicy as keyof typeof CANCELLATION_POLICY_DETAILS] 

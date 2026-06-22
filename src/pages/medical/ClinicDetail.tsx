@@ -53,9 +53,9 @@ const ClinicDetail = () => {
       <AppLayout showHeader={false} showBottomNav>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <Stethoscope className="w-16 h-16 text-muted-foreground" />
-          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Клиника не найдена' : 'Clinic not found'}</h2>
+          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Клиника не найдена' : language === 'th' ? 'ไม่พบคลินิก' : 'Clinic not found'}</h2>
           <Button onClick={() => navigate('/medical')}>
-            {language === 'ru' ? 'К списку клиник' : 'Back to clinics'}
+            {language === 'ru' ? 'К списку клиник' : language === 'th' ? 'กลับไปยังรายการคลินิก' : 'Back to clinics'}
           </Button>
         </div>
       </AppLayout>
@@ -76,7 +76,7 @@ const ClinicDetail = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
         <div className="absolute top-4 left-4 right-4 flex justify-between">
-          <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Назад' : 'Back'} onClick={() => navigate('/medical')}>
+          <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Назад' : language === 'th' ? 'ย้อนกลับ' : 'Back'} onClick={() => navigate('/medical')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex gap-2">
@@ -86,7 +86,7 @@ const ClinicDetail = () => {
               itemData={{ title_en: clinic.name_en, title_ru: clinic.name_ru, image: images[0], location: clinic.district, rating: clinic.rating }}
               variant="secondary"
             />
-            <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Поделиться' : 'Share'}><Share2 className="w-5 h-5" /></Button>
+            <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Поделиться' : language === 'th' ? 'แชร์' : 'Share'}><Share2 className="w-5 h-5" /></Button>
           </div>
         </div>
 
@@ -111,7 +111,7 @@ const ClinicDetail = () => {
                 {clinic.is_verified && (
                   <Badge variant="secondary" className="text-xs">
                     <CheckCircle className="w-3 h-3 mr-1" />
-                    {language === 'ru' ? 'Аккредитован' : 'Accredited'}
+                    {language === 'ru' ? 'Аккредитован' : language === 'th' ? 'ได้รับการรับรอง' : 'Accredited'}
                   </Badge>
                 )}
                 {clinic.is_24h && <Badge className="bg-success text-xs">24/7</Badge>}
@@ -122,7 +122,7 @@ const ClinicDetail = () => {
                 <Star className="w-5 h-5 fill-accent text-accent" />
                 <span className="font-bold">{clinic.rating}</span>
               </div>
-              <p className="text-sm text-muted-foreground">{clinic.review_count} reviews</p>
+              <p className="text-sm text-muted-foreground">{clinic.review_count} {language === 'ru' ? 'отзывов' : language === 'th' ? 'รีวิว' : 'reviews'}</p>
             </div>
           </div>
         </div>
@@ -150,16 +150,16 @@ const ClinicDetail = () => {
 
         <Tabs defaultValue="about" className="mb-24">
           <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="about">{language === 'ru' ? 'О клинике' : 'About'}</TabsTrigger>
-            <TabsTrigger value="doctors">{language === 'ru' ? 'Врачи' : 'Doctors'}</TabsTrigger>
-            <TabsTrigger value="services">{language === 'ru' ? 'Услуги' : 'Services'}</TabsTrigger>
+            <TabsTrigger value="about">{language === 'ru' ? 'О клинике' : language === 'th' ? 'เกี่ยวกับ' : 'About'}</TabsTrigger>
+            <TabsTrigger value="doctors">{language === 'ru' ? 'Врачи' : language === 'th' ? 'แพทย์' : 'Doctors'}</TabsTrigger>
+            <TabsTrigger value="services">{language === 'ru' ? 'Услуги' : language === 'th' ? 'บริการ' : 'Services'}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="about" className="mt-4 space-y-4">
             {description && <p className="text-muted-foreground">{description}</p>}
             {specialties.length > 0 && (
               <div>
-                <h4 className="font-semibold mb-2">{language === 'ru' ? 'Специализации' : 'Specialties'}</h4>
+                <h4 className="font-semibold mb-2">{language === 'ru' ? 'Специализации' : language === 'th' ? 'สาขาความเชี่ยวชาญ' : 'Specialties'}</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {specialties.map((spec, i) => (
                     <div key={i} className="flex items-center gap-2 text-sm">
@@ -189,7 +189,7 @@ const ClinicDetail = () => {
                 )}
               </div>
             )) : (
-              <p className="text-muted-foreground text-center py-4">{language === 'ru' ? 'Информация скоро появится' : 'Coming soon'}</p>
+              <p className="text-muted-foreground text-center py-4">{language === 'ru' ? 'Информация скоро появится' : language === 'th' ? 'เร็วๆ นี้' : 'Coming soon'}</p>
             )}
           </TabsContent>
 
@@ -200,7 +200,7 @@ const ClinicDetail = () => {
                 {service.price && <span className="font-semibold text-primary">฿{service.price.toLocaleString()}</span>}
               </div>
             )) : (
-              <p className="text-muted-foreground text-center py-4">{language === 'ru' ? 'Информация скоро появится' : 'Coming soon'}</p>
+              <p className="text-muted-foreground text-center py-4">{language === 'ru' ? 'Информация скоро появится' : language === 'th' ? 'เร็วๆ นี้' : 'Coming soon'}</p>
             )}
           </TabsContent>
         </Tabs>
@@ -212,13 +212,13 @@ const ClinicDetail = () => {
             <Button variant="outline" size="lg" className="flex-1" asChild>
               <a href={`tel:${clinic.phone}`}>
                 <Phone className="w-4 h-4 mr-2" />
-                {language === 'ru' ? 'Позвонить' : 'Call'}
+                {language === 'ru' ? 'Позвонить' : language === 'th' ? 'โทร' : 'Call'}
               </a>
             </Button>
           )}
           <Button size="lg" className="flex-1" onClick={() => navigate(`/medical/appointment/${id}`)}>
             <Calendar className="w-4 h-4 mr-2" />
-            {language === 'ru' ? 'Записаться' : 'Book'}
+            {language === 'ru' ? 'Записаться' : language === 'th' ? 'นัดหมาย' : 'Book'}
           </Button>
         </div>
       </div>

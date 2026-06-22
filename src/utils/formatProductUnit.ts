@@ -13,17 +13,19 @@ export interface ProductUnitData {
   unit_ru?: string;
 }
 
-const measureLabels: Record<string, { en: string; ru: string }> = {
-  g: { en: 'g', ru: 'г' },
-  kg: { en: 'kg', ru: 'кг' },
-  ml: { en: 'ml', ru: 'мл' },
-  L: { en: 'L', ru: 'л' },
-  pc: { en: 'pc', ru: 'шт' },
-  pcs: { en: 'pcs', ru: 'шт' },
-  pack: { en: 'pack', ru: 'уп' },
-  bunch: { en: 'bunch', ru: 'пучок' },
-  bottle: { en: 'bottle', ru: 'бут' },
-  box: { en: 'box', ru: 'кор' },
+type UnitLang = 'en' | 'ru' | 'th';
+
+const measureLabels: Record<string, { en: string; ru: string; th: string }> = {
+  g: { en: 'g', ru: 'г', th: 'ก.' },
+  kg: { en: 'kg', ru: 'кг', th: 'กก.' },
+  ml: { en: 'ml', ru: 'мл', th: 'มล.' },
+  L: { en: 'L', ru: 'л', th: 'ล.' },
+  pc: { en: 'pc', ru: 'шт', th: 'ชิ้น' },
+  pcs: { en: 'pcs', ru: 'шт', th: 'ชิ้น' },
+  pack: { en: 'pack', ru: 'уп', th: 'แพ็ค' },
+  bunch: { en: 'bunch', ru: 'пучок', th: 'ช่อ' },
+  bottle: { en: 'bottle', ru: 'бут', th: 'ขวด' },
+  box: { en: 'box', ru: 'кор', th: 'กล่อง' },
 };
 
 /**
@@ -36,7 +38,7 @@ const measureLabels: Record<string, { en: string; ru: string }> = {
  */
 export function formatProductUnit(
   product: ProductUnitData | null | undefined,
-  language: 'en' | 'ru' = 'en'
+  language: UnitLang = 'en'
 ): string {
   // Guard against null/undefined product
   if (!product) return '';
@@ -62,11 +64,11 @@ export function formatProductUnit(
   
   // Pack quantity without unit value: "6 pcs"
   if (pack_quantity && pack_quantity > 0) {
-    const pcLabel = language === 'ru' ? 'шт' : 'pcs';
+    const pcLabel = language === 'ru' ? 'шт' : language === 'th' ? 'ชิ้น' : 'pcs';
     return `${pack_quantity} ${pcLabel}`;
   }
-  
-  // Fallback to legacy unit field
+
+  // Fallback to legacy unit field (DB-sourced; Thai falls back to the English field)
   return language === 'ru' ? (unit_ru || unit || '') : (unit || '');
 }
 
@@ -76,7 +78,7 @@ export function formatProductUnit(
  */
 export function formatPricePerUnit(
   product: (ProductUnitData & { price: number }) | null | undefined,
-  language: 'en' | 'ru' = 'en'
+  language: UnitLang = 'en'
 ): string | null {
   // Guard against null/undefined product
   if (!product) return null;
@@ -95,11 +97,11 @@ export function formatPricePerUnit(
   
   switch (unit_measure) {
     case 'g':
-      standardUnit = language === 'ru' ? 'кг' : 'kg';
+      standardUnit = language === 'ru' ? 'кг' : language === 'th' ? 'กก.' : 'kg';
       multiplier = 1000 / numericValue;
       break;
     case 'ml':
-      standardUnit = language === 'ru' ? 'л' : 'L';
+      standardUnit = language === 'ru' ? 'л' : language === 'th' ? 'ล.' : 'L';
       multiplier = 1000 / numericValue;
       break;
     case 'kg':
@@ -117,16 +119,18 @@ export function formatPricePerUnit(
 /**
  * Get unit measure options for forms
  */
-export function getUnitMeasureOptions(language: 'en' | 'ru' = 'en') {
+export function getUnitMeasureOptions(language: UnitLang = 'en') {
+  const tt = (ru: string, en: string, th: string) =>
+    language === 'ru' ? ru : language === 'th' ? th : en;
   return [
-    { value: 'g', label: language === 'ru' ? 'граммы (г)' : 'grams (g)' },
-    { value: 'kg', label: language === 'ru' ? 'килограммы (кг)' : 'kilograms (kg)' },
-    { value: 'ml', label: language === 'ru' ? 'миллилитры (мл)' : 'milliliters (ml)' },
-    { value: 'L', label: language === 'ru' ? 'литры (л)' : 'liters (L)' },
-    { value: 'pc', label: language === 'ru' ? 'штуки (шт)' : 'pieces (pc)' },
-    { value: 'pack', label: language === 'ru' ? 'упаковка' : 'pack' },
-    { value: 'bunch', label: language === 'ru' ? 'пучок' : 'bunch' },
-    { value: 'bottle', label: language === 'ru' ? 'бутылка' : 'bottle' },
-    { value: 'box', label: language === 'ru' ? 'коробка' : 'box' },
+    { value: 'g', label: tt('граммы (г)', 'grams (g)', 'กรัม (ก.)') },
+    { value: 'kg', label: tt('килограммы (кг)', 'kilograms (kg)', 'กิโลกรัม (กก.)') },
+    { value: 'ml', label: tt('миллилитры (мл)', 'milliliters (ml)', 'มิลลิลิตร (มล.)') },
+    { value: 'L', label: tt('литры (л)', 'liters (L)', 'ลิตร (ล.)') },
+    { value: 'pc', label: tt('штуки (шт)', 'pieces (pc)', 'ชิ้น') },
+    { value: 'pack', label: tt('упаковка', 'pack', 'แพ็ค') },
+    { value: 'bunch', label: tt('пучок', 'bunch', 'ช่อ') },
+    { value: 'bottle', label: tt('бутылка', 'bottle', 'ขวด') },
+    { value: 'box', label: tt('коробка', 'box', 'กล่อง') },
   ];
 }

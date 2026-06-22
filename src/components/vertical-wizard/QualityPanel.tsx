@@ -3,8 +3,10 @@ import type { VerticalSpec, LocalizedText } from '@/lib/vertical-specs/types';
 import { computeQualityScore } from '@/lib/vertical-specs/qualityScore';
 import { Progress } from '@/components/ui/progress';
 import { Check, AlertCircle } from 'lucide-react';
+import type { Language } from '@/i18n';
 
-const t = (l: LocalizedText, lang: 'en' | 'ru') => l[lang] ?? l.en;
+const t = (l: LocalizedText, lang: Language): string =>
+  (l as Record<Language, string | undefined>)[lang] ?? l.en;
 
 interface Props {
   spec: VerticalSpec;
@@ -17,7 +19,7 @@ interface Props {
  */
 export const QualityPanel = ({ spec, row }: Props) => {
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const report = computeQualityScore(spec, row);
   const blocked = report.score < 60;
 
@@ -27,7 +29,7 @@ export const QualityPanel = ({ spec, row }: Props) => {
     <div className="rounded-none border border-border bg-card p-4 space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">
-          {lang === 'ru' ? 'Качество карточки' : 'Listing quality'}
+          {lang === 'ru' ? 'Качество карточки' : lang === 'th' ? 'คุณภาพประกาศ' : 'Listing quality'}
         </span>
         <span className="font-mono text-lg">{report.score}%</span>
       </div>
@@ -36,7 +38,9 @@ export const QualityPanel = ({ spec, row }: Props) => {
         <p className="text-xs text-destructive">
           {lang === 'ru'
             ? 'Нужно ≥60% для публикации.'
-            : 'Reach ≥60% to publish.'}
+            : lang === 'th'
+              ? 'ต้องมี ≥60% จึงจะเผยแพร่ได้'
+              : 'Reach ≥60% to publish.'}
         </p>
       )}
 

@@ -23,22 +23,25 @@ const CURRENCIES = [
 export function PricingStep({ draft, onChange, onNext, onBack }: PricingStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  
+  const isTh = language === 'th';
+
   const getPriceLabel = () => {
     if (draft.listing_type === 'property') {
-      return isRu ? 'Цена за ночь' : 'Price per night';
+      return isRu ? 'Цена за ночь' : isTh ? 'ราคาต่อคืน' : 'Price per night';
     }
     if (draft.listing_type === 'service') {
-      return isRu ? 'Цена за услугу' : 'Price per service';
+      return isRu ? 'Цена за услугу' : isTh ? 'ราคาต่อบริการ' : 'Price per service';
     }
-    return isRu ? 'Цена за единицу' : 'Price per unit';
+    return isRu ? 'Цена за единицу' : isTh ? 'ราคาต่อหน่วย' : 'Price per unit';
   };
   
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        {isRu 
+        {isRu
           ? 'Укажите цену для вашего листинга'
+          : isTh
+          ? 'กำหนดราคาสำหรับประกาศของคุณ'
           : 'Set the price for your listing'}
       </p>
       
@@ -76,8 +79,10 @@ export function PricingStep({ draft, onChange, onNext, onBack }: PricingStepProp
       {draft.listing_type === 'property' && (
         <div className="bg-muted/50 rounded-none p-4">
           <p className="text-sm text-muted-foreground">
-            {isRu 
+            {isRu
               ? 'После одобрения вы сможете настроить сезонные цены, скидки за длительное проживание и специальные предложения.'
+              : isTh
+              ? 'หลังได้รับการอนุมัติ คุณสามารถตั้งราคาตามฤดูกาล ส่วนลดสำหรับการเข้าพักระยะยาว และข้อเสนอพิเศษได้'
               : 'After approval, you can set up seasonal pricing, long-stay discounts, and special offers.'}
           </p>
         </div>
@@ -85,10 +90,10 @@ export function PricingStep({ draft, onChange, onNext, onBack }: PricingStepProp
       
       <div className="flex gap-3">
         <Button variant="outline" onClick={onBack} className="flex-1">
-          {isRu ? 'Назад' : 'Back'}
+          {isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
         </Button>
         <Button onClick={onNext} className="flex-1">
-          {isRu ? 'Продолжить' : 'Continue'}
+          {isRu ? 'Продолжить' : isTh ? 'ดำเนินการต่อ' : 'Continue'}
         </Button>
       </div>
     </div>

@@ -20,6 +20,10 @@ const defaultMeta = {
     title: 'myUNO - Все услуги в одном приложении',
     description: 'Ваша жизнь за рубежом стала проще. Бронируйте транспорт, туры, рестораны, салоны красоты и многое другое.',
   },
+  th: {
+    title: 'myUNO - ทุกบริการในแอปเดียว',
+    description: 'ใช้ชีวิตในต่างแดนได้ง่ายขึ้น จองรถรับส่ง ทัวร์ ร้านอาหาร บริการความงาม และอื่น ๆ ได้ในแอปเดียว',
+  },
 };
 
 export function SEOHead({
@@ -32,12 +36,12 @@ export function SEOHead({
   jsonLd,
 }: SEOHeadProps) {
   const { language } = useLanguage();
-  const lang = language === 'ru' ? 'ru' : 'en';
-  
-  const finalTitle = title 
+  const lang = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
+
+  const finalTitle = title
     ? `${title} | myUNO`
     : defaultMeta[lang].title;
-  
+
   const finalDescription = description || defaultMeta[lang].description;
   
   // Always use production domain for canonical/OG URLs
@@ -71,10 +75,11 @@ export function SEOHead({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:site_name" content="myUNO" />
-      <meta property="og:locale" content={lang === 'ru' ? 'ru_RU' : 'en_US'} />
-      <meta property="og:locale:alternate" content={lang === 'ru' ? 'en_US' : 'ru_RU'} />
-      <meta property="og:locale:alternate" content="th_TH" />
-      
+      <meta property="og:locale" content={lang === 'ru' ? 'ru_RU' : lang === 'th' ? 'th_TH' : 'en_US'} />
+      {lang !== 'en' && <meta property="og:locale:alternate" content="en_US" />}
+      {lang !== 'ru' && <meta property="og:locale:alternate" content="ru_RU" />}
+      {lang !== 'th' && <meta property="og:locale:alternate" content="th_TH" />}
+
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@myUNOapp" />
@@ -86,9 +91,10 @@ export function SEOHead({
       {/* Canonical URL */}
       <link rel="canonical" href={canonicalUrl} />
       
-      {/* Hreflang alternate links — th omitted until Thai content ships (Trust Stack audit A3) */}
+      {/* Hreflang alternate links — full RU/EN/TH coverage */}
       <link rel="alternate" hrefLang="en" href={hreflangUrls.en} />
       <link rel="alternate" hrefLang="ru" href={hreflangUrls.ru} />
+      <link rel="alternate" hrefLang="th" href={hreflangUrls.th} />
       <link rel="alternate" hrefLang="x-default" href={hreflangUrls.en} />
       
       
@@ -115,7 +121,7 @@ export const createOrganizationSchema = () => ({
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer service',
-    availableLanguage: ['English', 'Russian'],
+    availableLanguage: ['English', 'Russian', 'Thai'],
   },
 });
 

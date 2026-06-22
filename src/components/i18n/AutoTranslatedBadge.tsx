@@ -5,25 +5,27 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 type Lang = "ru" | "en" | "th";
 
-const sourceLabel: Record<Lang, { ru: string; en: string }> = {
-  ru: { ru: "русского", en: "Russian" },
-  en: { ru: "английского", en: "English" },
-  th: { ru: "тайского", en: "Thai" },
+const sourceLabel: Record<Lang, { ru: string; en: string; th: string }> = {
+  ru: { ru: "русского", en: "Russian", th: "ภาษารัสเซีย" },
+  en: { ru: "английского", en: "English", th: "ภาษาอังกฤษ" },
+  th: { ru: "тайского", en: "Thai", th: "ภาษาไทย" },
 };
 
 interface Props {
   sourceLang?: Lang;
-  uiLang?: "ru" | "en";
+  uiLang?: "ru" | "en" | "th";
   className?: string;
 }
 
 export function AutoTranslatedBadge({ sourceLang, uiLang = "en", className }: Props) {
   if (!sourceLang) return null;
-  const from = sourceLabel[sourceLang]?.[uiLang] ?? sourceLang.toUpperCase();
-  const label = uiLang === "ru" ? "Автоперевод" : "Auto-translated";
+  const from = sourceLabel[sourceLang]?.[uiLang] ?? sourceLabel[sourceLang]?.en ?? sourceLang.toUpperCase();
+  const label = uiLang === "ru" ? "Автоперевод" : uiLang === "th" ? "แปลอัตโนมัติ" : "Auto-translated";
   const tip = uiLang === "ru"
     ? `Переведено с ${from} автоматически`
-    : `Auto-translated from ${from}`;
+    : uiLang === "th"
+      ? `แปลจาก${from}โดยอัตโนมัติ`
+      : `Auto-translated from ${from}`;
   return (
     <TooltipProvider>
       <Tooltip>

@@ -50,10 +50,10 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
         {/* Title */}
         <div className="mb-6 md:mb-8">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-white leading-tight">
-            {isRu ? 'Аренда транспорта' : 'Vehicle Rental'}
+            {isRu ? 'Аренда транспорта' : language === 'th' ? 'เช่ารถ' : 'Vehicle Rental'}
           </h1>
           <p className="text-white/85 text-base md:text-lg mt-2 leading-snug max-w-2xl">
-            {isRu ? 'Проверенные автомобили и мотоциклы на Пхукете' : 'Verified cars & bikes in Phuket'}
+            {isRu ? 'Проверенные автомобили и мотоциклы на Пхукете' : language === 'th' ? 'รถยนต์และมอเตอร์ไซค์ที่ผ่านการตรวจสอบในภูเก็ต' : 'Verified cars & bikes in Phuket'}
           </p>
         </div>
 
@@ -66,10 +66,10 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
               <MapPin className="w-6 h-6 text-primary shrink-0" aria-hidden />
               <div className="flex-1 min-w-0">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                  {isRu ? 'Местоположение' : 'Location'}
+                  {isRu ? 'Местоположение' : language === 'th' ? 'สถานที่' : 'Location'}
                 </p>
                 <p className="text-base font-semibold text-foreground truncate mt-0.5">
-                  {isRu ? 'Пхукет' : 'Phuket'}
+                  {isRu ? 'Пхукет' : language === 'th' ? 'ภูเก็ต' : 'Phuket'}
                 </p>
               </div>
             </div>
@@ -84,12 +84,12 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
                   <CalendarIcon className="w-6 h-6 text-primary shrink-0" aria-hidden />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                      {isRu ? 'Получение' : 'Pick-up'}
+                      {isRu ? 'Получение' : language === 'th' ? 'รับรถ' : 'Pick-up'}
                     </p>
                     <p className={cn('text-base font-semibold truncate mt-0.5', pickupDate ? 'text-foreground' : 'text-muted-foreground')}>
                       {pickupDate
                         ? format(pickupDate, 'dd MMM yyyy', { locale: isRu ? ruLocale : undefined })
-                        : (isRu ? 'Выберите дату' : 'Select date')}
+                        : (isRu ? 'Выберите дату' : language === 'th' ? 'เลือกวันที่' : 'Select date')}
                     </p>
                   </div>
                 </button>
@@ -121,12 +121,12 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
                   <CalendarIcon className="w-6 h-6 text-primary shrink-0" aria-hidden />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                      {isRu ? 'Возврат' : 'Return'}
+                      {isRu ? 'Возврат' : language === 'th' ? 'คืนรถ' : 'Return'}
                     </p>
                     <p className={cn('text-base font-semibold truncate mt-0.5', returnDate ? 'text-foreground' : 'text-muted-foreground')}>
                       {returnDate
                         ? format(returnDate, 'dd MMM yyyy', { locale: isRu ? ruLocale : undefined })
-                        : (isRu ? 'Выберите дату' : 'Select date')}
+                        : (isRu ? 'Выберите дату' : language === 'th' ? 'เลือกวันที่' : 'Select date')}
                     </p>
                   </div>
                 </button>
@@ -156,7 +156,7 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
               })}
             >
               <Search className="w-5 h-5 shrink-0" aria-hidden />
-              {isRu ? 'Найти' : 'Search'}
+              {isRu ? 'Найти' : language === 'th' ? 'ค้นหา' : 'Search'}
             </Button>
           </div>
 
@@ -168,7 +168,7 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors min-h-11 py-1"
             >
               <ChevronDown className={cn('w-4 h-4 shrink-0 transition-transform', showAdvanced && 'rotate-180')} aria-hidden />
-              {isRu ? 'Дополнительные опции' : 'More options'}
+              {isRu ? 'Дополнительные опции' : language === 'th' ? 'ตัวเลือกเพิ่มเติม' : 'More options'}
             </button>
 
             {showAdvanced && (
@@ -177,17 +177,17 @@ export function TransportHeroSearch({ onSearch }: TransportHeroSearchProps) {
                   active={delivery}
                   onClick={() => setDelivery(!delivery)}
                   icon={<Truck className="w-4 h-4 shrink-0" aria-hidden />}
-                  label={isRu ? 'Доставка' : 'Delivery'}
+                  label={isRu ? 'Доставка' : language === 'th' ? 'จัดส่ง' : 'Delivery'}
                 />
                 <ToggleChip
                   active={withDriver}
                   onClick={() => setWithDriver(!withDriver)}
-                  label={isRu ? 'С водителем' : 'With driver'}
+                  label={isRu ? 'С водителем' : language === 'th' ? 'พร้อมคนขับ' : 'With driver'}
                 />
                 <ToggleChip
                   active={monthly}
                   onClick={() => setMonthly(!monthly)}
-                  label={isRu ? 'Помесячно' : 'Monthly'}
+                  label={isRu ? 'Помесячно' : language === 'th' ? 'รายเดือน' : 'Monthly'}
                 />
               </div>
             )}

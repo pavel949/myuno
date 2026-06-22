@@ -20,12 +20,12 @@ import {
   type PaymentMethod 
 } from "@/components/booking";
 import { addDays, format } from "date-fns";
-import { ru } from "date-fns/locale";
+import { ru, th } from "date-fns/locale";
 
 const membershipTypes = {
-  day: { price: 800, labelEn: 'Day Pass', labelRu: 'Дневной абонемент' },
-  week: { price: 4500, labelEn: 'Weekly Pass', labelRu: 'Недельный абонемент' },
-  month: { price: 15000, labelEn: 'Monthly Pass', labelRu: 'Месячный абонемент' },
+  day: { price: 800, labelEn: 'Day Pass', labelRu: 'Дневной абонемент', labelTh: 'บัตรรายวัน' },
+  week: { price: 4500, labelEn: 'Weekly Pass', labelRu: 'Недельный абонемент', labelTh: 'บัตรรายสัปดาห์' },
+  month: { price: 15000, labelEn: 'Monthly Pass', labelRu: 'Месячный абонемент', labelTh: 'บัตรรายเดือน' },
 };
 
 export default function FitnessBooking() {
@@ -71,12 +71,12 @@ export default function FitnessBooking() {
       <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
-          title={language === 'ru' ? membership.labelRu : membership.labelEn}
-          date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
+          title={language === 'ru' ? membership.labelRu : language === 'th' ? membership.labelTh : membership.labelEn}
+          date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : language === 'th' ? th : undefined }) : undefined}
           total={membership.price}
           currency="THB"
           continuePath="/fitness"
-          continueLabel={language === 'ru' ? 'К залам' : 'Browse Gyms'}
+          continueLabel={language === 'ru' ? 'К залам' : language === 'th' ? 'ดูฟิตเนส' : 'Browse Gyms'}
         />
       </AppLayout>
     );
@@ -101,7 +101,7 @@ export default function FitnessBooking() {
         vertical: 'fitness',
         items: [{
           id: id || membershipType,
-          name: language === 'ru' ? membership.labelRu : membership.labelEn,
+          name: language === 'ru' ? membership.labelRu : language === 'th' ? membership.labelTh : membership.labelEn,
           price: membership.price,
         }],
         total_amount: membership.price,
@@ -124,7 +124,7 @@ export default function FitnessBooking() {
       items: [{
         item_type: 'fitness_membership',
         item_id: id || membershipType,
-        item_name: language === 'ru' ? membership.labelRu : membership.labelEn,
+        item_name: language === 'ru' ? membership.labelRu : language === 'th' ? membership.labelTh : membership.labelEn,
         quantity: 1,
         unit_price: membership.price,
         subtotal: membership.price,
@@ -149,16 +149,16 @@ export default function FitnessBooking() {
   return (
     <AppLayout>
       <PageContainer className="pb-32">
-        <PageHeader 
-          title={language === 'ru' ? 'Оформление записи' : 'Book Membership'} 
-          showBack 
+        <PageHeader
+          title={language === 'ru' ? 'Оформление записи' : language === 'th' ? 'จองสมาชิก' : 'Book Membership'}
+          showBack
           fallbackPath="/fitness"
         />
 
         {/* Summary Card */}
         <div className="mt-4 mb-6">
           <BookingSummary
-            title={language === 'ru' ? membership.labelRu : membership.labelEn}
+            title={language === 'ru' ? membership.labelRu : language === 'th' ? membership.labelTh : membership.labelEn}
             date={date}
             price={membership.price}
             sourceCurrency="THB"
@@ -168,7 +168,7 @@ export default function FitnessBooking() {
         {/* Start Date */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Дата начала' : 'Start Date'}
+            {language === 'ru' ? 'Дата начала' : language === 'th' ? 'วันที่เริ่มต้น' : 'Start Date'}
           </h3>
           <BookingDateTimeSelect
             time=""
@@ -182,7 +182,7 @@ export default function FitnessBooking() {
         {/* Contact Info */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
+            {language === 'ru' ? 'Контактные данные' : language === 'th' ? 'ข้อมูลติดต่อ' : 'Contact Information'}
           </h3>
           <BookingContactForm
             data={contactData}
@@ -194,7 +194,7 @@ export default function FitnessBooking() {
         {/* Payment Method */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+            {language === 'ru' ? 'Способ оплаты' : language === 'th' ? 'วิธีการชำระเงิน' : 'Payment Method'}
           </h3>
           <BookingPaymentSelect
             selected={paymentMethod}
@@ -213,8 +213,8 @@ export default function FitnessBooking() {
           isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!contactData.name || !contactData.phone}
           submitLabel={paymentMethod === 'card'
-            ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
-            : (language === 'ru' ? 'Подтвердить' : 'Confirm')}
+            ? (language === 'ru' ? 'Оплатить онлайн' : language === 'th' ? 'ชำระเงินออนไลน์' : 'Pay Online')
+            : (language === 'ru' ? 'Подтвердить' : language === 'th' ? 'ยืนยัน' : 'Confirm')}
         />
       </PageContainer>
 

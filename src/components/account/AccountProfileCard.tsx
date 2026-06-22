@@ -10,12 +10,12 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ChevronRight } from 'lucide-react';
 
-const ROLE_LABELS: Record<string, { en: string; ru: string; color: string }> = {
-  user: { en: 'Buyer', ru: 'Покупатель', color: 'bg-info/15 text-info' },
-  owner: { en: 'Property Owner', ru: 'Собственник', color: 'bg-accent-teal/15 text-accent-teal' },
-  vendor: { en: 'Provider', ru: 'Поставщик', color: 'bg-accent-purple/15 text-accent-purple' },
-  admin: { en: 'Admin', ru: 'Админ', color: 'bg-destructive/15 text-destructive' },
-  uno_team: { en: 'Team', ru: 'Команда', color: 'bg-success/15 text-success' },
+const ROLE_LABELS: Record<string, { en: string; ru: string; th: string; color: string }> = {
+  user: { en: 'Buyer', ru: 'Покупатель', th: 'ผู้ซื้อ', color: 'bg-info/15 text-info' },
+  owner: { en: 'Property Owner', ru: 'Собственник', th: 'เจ้าของอสังหาริมทรัพย์', color: 'bg-accent-teal/15 text-accent-teal' },
+  vendor: { en: 'Provider', ru: 'Поставщик', th: 'ผู้ให้บริการ', color: 'bg-accent-purple/15 text-accent-purple' },
+  admin: { en: 'Admin', ru: 'Админ', th: 'ผู้ดูแลระบบ', color: 'bg-destructive/15 text-destructive' },
+  uno_team: { en: 'Team', ru: 'Команда', th: 'ทีมงาน', color: 'bg-success/15 text-success' },
 };
 
 export function AccountProfileCard() {
@@ -24,6 +24,7 @@ export function AccountProfileCard() {
   const { user } = useAuth();
   const { activeRole, isLoading: roleLoading } = useUserContext();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', user?.id],
@@ -74,7 +75,7 @@ export function AccountProfileCard() {
         <h2 className="font-semibold text-xl truncate">{displayName}</h2>
         <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
         <Badge className={`mt-1 text-[10px] ${roleConfig.color}`}>
-          {isRu ? roleConfig.ru : roleConfig.en}
+          {isRu ? roleConfig.ru : isTh ? roleConfig.th : roleConfig.en}
         </Badge>
       </div>
 

@@ -5,7 +5,7 @@
  * Static translations are imported from src/i18n/ (modular files per language).
  * DB translations override static ones and are cached for 1 hour.
  */
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getTranslations, loadTranslations as loadI18n, type Language } from '@/i18n';
 import { STORAGE_KEYS } from '@/lib/constants';
@@ -54,6 +54,14 @@ const LANGUAGE_EXPLICIT_LS_KEY = STORAGE_KEYS.LANGUAGE_EXPLICIT;
 
 const isValidLanguage = (value: string | null | undefined): value is Language =>
   value === 'ru' || value === 'en' || value === 'th';
+
+/**
+ * Has the static dictionary for `lang` already been loaded into the cache?
+ * RU is bundled eagerly; EN/TH are lazy chunks. We use this to decide whether
+ * `t()` would resolve real strings or only fallbacks for a given language.
+ */
+const isDictionaryReady = (lang: Language): boolean =>
+  lang === 'ru' || Object.keys(getTranslations(lang)).length > 0;
 
 /**
  * Detect a sensible default language for first-time visitors:
@@ -115,9 +123,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => readLanguageFromLocalStorage());
   const [customTranslations, setCustomTranslations] = useState<CachedTranslations>({});
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
-  // For non-RU languages we must wait for the static dictionary to load
-  // before exposing translations, otherwise `t()` falls back to keys.
-  const [staticReady, setStaticReady] = useState<boolean>(() => readLanguageFromLocalStorage() === 'ru');
+  // True once the static dictionary for the *current* language is loaded.
+  // RU is bundled eagerly, so it starts ready; EN/TH are lazy chunks.
+  // `staticReady` also doubles as a re-render trigger so consumers update the
+  // moment a lazily-loaded dictionary becomes available.
+  const [staticReady, setStaticReady] = useState<boolean>(() =>
+    isDictionaryReady(readLanguageFromLocalStorage()),
+  );
+  // Whether we have ever reached a ready state. Used to gate the *initial*
+  // render only — once the app has painted once, a subsequent language switch
+  // must never unmount the whole tree (it would drop scroll/form state).
+  const hasRenderedReady = useRef<boolean>(staticReady);
+  if (staticReady) hasRenderedReady.current = true;
 
   const setLanguage = useCallback((lang: Language) => {
     // Persist and update state immediately to avoid language flicker on fast navigation.
@@ -129,14 +146,21 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     } catch {
       // Private mode / quota — UI language still updates for this session.
     }
-    if (lang !== 'ru') setStaticReady(false);
-    void loadI18n(lang).then(() => setStaticReady(true));
+    if (isDictionaryReady(lang)) {
+      setStaticReady(true);
+    } else {
+      // Dictionary not loaded yet — mark not-ready so `t()` is recomputed once
+      // the chunk resolves. The tree is NOT blanked because hasRenderedReady
+      // is already true (initial paint happened); strings fall back briefly.
+      setStaticReady(false);
+      void loadI18n(lang).then(() => setStaticReady(true));
+    }
   }, []);
 
   // Eagerly load static translations for current language
   useEffect(() => {
     let cancelled = false;
-    if (language === 'ru') {
+    if (isDictionaryReady(language)) {
       setStaticReady(true);
       return;
     }
@@ -263,6 +287,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const value = useMemo(() => ({
     language, setLanguage, t, isLoadingTranslations,
   }), [language, setLanguage, t, isLoadingTranslations]);
+
+  // Initial-load gate: if the first language we show is a non-RU language whose
+  // dictionary has not loaded yet, hold the very first paint for the lazy chunk
+  // (a microtask, since the import is already in flight) so the user never sees
+  // a flash of Russian/keys. This only applies before the first ready render —
+  // later switches keep the tree mounted (see hasRenderedReady).
+  if (!staticReady && !hasRenderedReady.current) {
+    return null;
+  }
 
   return (
     <LanguageContext.Provider value={value}>

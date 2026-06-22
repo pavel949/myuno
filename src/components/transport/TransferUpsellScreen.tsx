@@ -21,9 +21,9 @@ interface TransferUpsellScreenProps {
 }
 
 const UPSELL_VEHICLES = [
-  { type: 'sedan', icon: '🚗', labelEn: 'Sedan', labelRu: 'Седан', highlight: false },
-  { type: 'van', icon: '🚐', labelEn: 'Family Van', labelRu: 'Семейный вэн', highlight: false },
-  { type: 'suv', icon: '🚙', labelEn: 'Luxury SUV', labelRu: 'Премиум SUV', highlight: true },
+  { type: 'sedan', icon: '🚗', labelEn: 'Sedan', labelRu: 'Седан', labelTh: 'รถเก๋ง', highlight: false },
+  { type: 'van', icon: '🚐', labelEn: 'Family Van', labelRu: 'Семейный вэн', labelTh: 'รถตู้ครอบครัว', highlight: false },
+  { type: 'suv', icon: '🚙', labelEn: 'Luxury SUV', labelRu: 'Премиум SUV', labelTh: 'SUV หรู', highlight: true },
 ];
 
 export function TransferUpsellScreen({
@@ -35,7 +35,6 @@ export function TransferUpsellScreen({
 }: TransferUpsellScreenProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const isRu = language === 'ru';
   const { vehicleTypes } = useVehicleTypes('airport_transfer');
 
   return (
@@ -47,7 +46,7 @@ export function TransferUpsellScreen({
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <h2 className="font-semibold">
-          {isRu ? 'Добавить трансфер?' : 'Add a transfer?'}
+          {language === 'ru' ? 'Добавить трансфер?' : language === 'th' ? 'เพิ่มบริการรับส่ง?' : 'Add a transfer?'}
         </h2>
         <button onClick={onSkip} className="p-2 rounded-full hover:bg-muted transition-colors">
           <X className="w-5 h-5 text-muted-foreground" />
@@ -63,13 +62,17 @@ export function TransferUpsellScreen({
           </div>
           <div>
             <h3 className="text-lg font-bold">
-              {isRu
+              {language === 'ru'
                 ? 'Ваш ассистент проведёт вас до выхода.'
+                : language === 'th'
+                ? 'ผู้ช่วยของคุณจะพาคุณไปยังทางออก'
                 : 'Your assistant will escort you to the exit.'}
             </h3>
             <p className="text-muted-foreground mt-1">
-              {isRu
+              {language === 'ru'
                 ? 'Хотите, чтобы машина уже ждала?'
+                : language === 'th'
+                ? 'ต้องการให้รถรออยู่แล้วไหม?'
                 : 'Want your car waiting already?'}
             </p>
           </div>
@@ -79,11 +82,11 @@ export function TransferUpsellScreen({
         <div className="flex gap-3 justify-center">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Shield className="w-3.5 h-3.5 text-primary" />
-            {isRu ? 'Встреча у выхода' : 'Meet at exit'}
+            {language === 'ru' ? 'Встреча у выхода' : language === 'th' ? 'พบกันที่ทางออก' : 'Meet at exit'}
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="w-3.5 h-3.5 text-primary" />
-            {isRu ? 'Без ожидания' : 'No waiting'}
+            {language === 'ru' ? 'Без ожидания' : language === 'th' ? 'ไม่ต้องรอ' : 'No waiting'}
           </div>
         </div>
 
@@ -114,11 +117,11 @@ export function TransferUpsellScreen({
                 <span className="text-3xl">{v.icon}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold">
-                    {isRu ? v.labelRu : v.labelEn}
+                    {language === 'ru' ? v.labelRu : language === 'th' ? v.labelTh : v.labelEn}
                   </p>
                   {v.highlight && (
                     <span className="text-[10px] font-semibold text-primary uppercase tracking-wide">
-                      {isRu ? 'Рекомендуем' : 'Recommended'}
+                      {language === 'ru' ? 'Рекомендуем' : language === 'th' ? 'แนะนำ' : 'Recommended'}
                     </span>
                   )}
                 </div>
@@ -141,7 +144,7 @@ export function TransferUpsellScreen({
           className="w-full text-muted-foreground"
           onClick={onSkip}
         >
-          {isRu ? 'Пропустить' : 'Skip'}
+          {language === 'ru' ? 'Пропустить' : language === 'th' ? 'ข้าม' : 'Skip'}
         </Button>
       </div>
     </motion.div>

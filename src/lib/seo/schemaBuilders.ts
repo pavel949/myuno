@@ -11,7 +11,16 @@
 
 import type { BilingualString } from '@/lib/landings/types';
 
-export type Lang = 'ru' | 'en';
+export type Lang = 'ru' | 'en' | 'th';
+
+/**
+ * Resolve a bilingual schema field. Schema source content carries only RU/EN,
+ * so Thai degrades to English — JSON-LD is never emitted with empty strings.
+ */
+function pickSchema(field: BilingualString, lang: Lang): string {
+  if (lang === 'ru') return field.ru ?? field.en;
+  return field.en ?? field.ru;
+}
 
 const ORIGIN = 'https://www.myuno.app';
 
@@ -37,7 +46,9 @@ export function buildOrganizationSchema(language: Lang): Record<string, unknown>
     logo: `${ORIGIN}/icons/icon-512x512.png`,
     description: language === 'ru'
       ? 'myUNO — цифровая инфраструктура для иностранцев в Юго-Восточной Азии, построенная вокруг операций с недвижимостью.'
-      : 'myUNO — digital infrastructure for foreigners in Southeast Asia, built around real-estate operations.',
+      : language === 'th'
+        ? 'myUNO — โครงสร้างพื้นฐานดิจิทัลสำหรับชาวต่างชาติในเอเชียตะวันออกเฉียงใต้ ออกแบบรอบการดำเนินงานด้านอสังหาริมทรัพย์'
+        : 'myUNO — digital infrastructure for foreigners in Southeast Asia, built around real-estate operations.',
     foundingDate: '2025',
     areaServed: { '@type': 'Place', name: 'Phuket, Thailand' },
     sameAs: ORG_PROVIDER.sameAs,
@@ -54,7 +65,7 @@ export function buildWebSiteSchema(language: Lang): Record<string, unknown> {
     '@type': 'WebSite',
     name: 'myUNO',
     url: ORIGIN,
-    inLanguage: language === 'ru' ? 'ru' : 'en',
+    inLanguage: language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
@@ -108,9 +119,9 @@ export function buildArticleSchema(input: ArticleSchemaInput): Record<string, un
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: input.headline[lang],
-    description: input.description[lang],
-    inLanguage: lang === 'ru' ? 'ru' : 'en',
+    headline: pickSchema(input.headline, lang),
+    description: pickSchema(input.description, lang),
+    inLanguage: lang === 'ru' ? 'ru' : lang === 'th' ? 'th' : 'en',
     image: input.image ?? `${ORIGIN}/og/default-og.jpg`,
     datePublished: input.datePublished,
     dateModified: input.dateModified ?? input.datePublished,
@@ -181,9 +192,9 @@ export function buildServiceSchema(input: ServiceSchemaInput): Record<string, un
   return {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: input.name[lang],
-    description: input.description[lang],
-    serviceType: input.serviceType ?? input.name[lang],
+    name: pickSchema(input.name, lang),
+    description: pickSchema(input.description, lang),
+    serviceType: input.serviceType ?? pickSchema(input.name, lang),
     areaServed: { '@type': 'Place', name: 'Phuket, Thailand' },
     provider: ORG_PROVIDER,
     url: input.url.startsWith('http') ? input.url : `${ORIGIN}${input.url}`,
@@ -280,7 +291,7 @@ export function buildClearViewReviewSchema(input: ClearViewReviewInput): Record<
     },
     author: ORG_PROVIDER,
     reviewBody: input.reviewBody,
-    inLanguage: input.language === 'ru' ? 'ru' : 'en',
+    inLanguage: input.language === 'ru' ? 'ru' : input.language === 'th' ? 'th' : 'en',
   };
 }
 

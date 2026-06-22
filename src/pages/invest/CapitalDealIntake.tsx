@@ -19,34 +19,40 @@ import { MoscowOmbudsmanNotice } from '@/components/invest/MoscowOmbudsmanNotice
 import { AuditMarker } from '@/components/monetization/AuditMarker';
 import { Landmark, ShieldCheck, FileSearch, Banknote } from 'lucide-react';
 
-const STEPS: { icon: React.ComponentType<{ className?: string }>; ru: string; en: string }[] = [
+const STEPS: { icon: React.ComponentType<{ className?: string }>; ru: string; en: string; th: string }[] = [
   {
     icon: FileSearch,
     ru: 'Подбор объекта и независимая оценка цены (Fair-Price, ฿9 900) либо ROI-отчёт (฿14 900).',
     en: 'Asset shortlist and independent fair-price assessment (THB 9 900) or ROI report (THB 14 900).',
+    th: 'คัดเลือกสินทรัพย์และประเมินราคาที่เป็นธรรมอย่างอิสระ (Fair-Price, ฿9 900) หรือรายงาน ROI (฿14 900)',
   },
   {
     icon: ShieldCheck,
     ru: 'WorldCheck KYC / AML по сторонам сделки (฿4 900). Юридический Due Diligence — ฿35 000 при необходимости.',
     en: 'WorldCheck KYC / AML on counterparties (THB 4 900). Legal due diligence (THB 35 000) on request.',
+    th: 'WorldCheck KYC / AML สำหรับคู่สัญญา (฿4 900) การตรวจสอบทางกฎหมาย (฿35 000) เมื่อจำเป็น',
   },
   {
     icon: Banknote,
     ru: 'Эскроу-сопровождение и подписание договора. Платёж проходит через защищённый счёт.',
     en: 'Escrow handling and contract signing. Payment routes through a protected account.',
+    th: 'การดูแลบัญชีเอสโครว์และการลงนามสัญญา ชำระเงินผ่านบัญชีที่ได้รับการคุ้มครอง',
   },
 ];
 
 export default function CapitalDealIntake() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   return (
     <MiniAppLayout
-      title={isRu ? 'Инвестиционная сделка от 200 000 USD' : 'Investment deal from USD 200 000'}
+      title={isRu ? 'Инвестиционная сделка от 200 000 USD' : isTh ? 'ดีลการลงทุนตั้งแต่ 200,000 USD' : 'Investment deal from USD 200 000'}
       subtitle={
         isRu
           ? 'Сопровождение сделки: проверка, эскроу, подписание.'
+          : isTh
+          ? 'การดูแลดีล: การตรวจสอบ เอสโครว์ การลงนาม'
           : 'Deal support: verification, escrow, signing.'
       }
       showSearch={false}
@@ -62,11 +68,15 @@ export default function CapitalDealIntake() {
               <h2 className="text-[15px] font-semibold text-foreground leading-snug">
                 {isRu
                   ? 'Услуга применяется к сделкам в недвижимости и бизнесе с суммой от 200 000 USD'
+                  : isTh
+                  ? 'บริการนี้ใช้กับดีลอสังหาริมทรัพย์และธุรกิจมูลค่าตั้งแต่ 200,000 USD ขึ้นไป'
                   : 'Service applies to real-estate and business deals from USD 200 000'}
               </h2>
               <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug">
                 {isRu
                   ? 'Оператор сделки — myUNO Pte. Ltd. Все ставки и сроки публичны и зафиксированы в реестре настроек платформы.'
+                  : isTh
+                  ? 'ผู้ดำเนินการดีล — myUNO Pte. Ltd. อัตราและกรอบเวลาทั้งหมดเปิดเผยต่อสาธารณะและบันทึกไว้ในทะเบียนการตั้งค่าแพลตฟอร์ม'
                   : 'Service operator — myUNO Pte. Ltd. All rates and timeframes are public and stored in the platform settings registry.'}
               </p>
             </div>
@@ -76,7 +86,7 @@ export default function CapitalDealIntake() {
         {/* Steps */}
         <section>
           <h3 className="text-[13px] font-semibold text-foreground uppercase tracking-wide mb-2">
-            {isRu ? 'Состав услуги' : 'Service scope'}
+            {isRu ? 'Состав услуги' : isTh ? 'ขอบเขตบริการ' : 'Service scope'}
           </h3>
           <ol className="space-y-2">
             {STEPS.map((step, idx) => {
@@ -93,7 +103,7 @@ export default function CapitalDealIntake() {
                     <div className="flex items-center gap-2">
                       <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                       <span className="text-[12.5px] text-foreground leading-snug">
-                        {isRu ? step.ru : step.en}
+                        {isRu ? step.ru : isTh ? step.th : step.en}
                       </span>
                     </div>
                   </div>
@@ -112,11 +122,13 @@ export default function CapitalDealIntake() {
         {/* Audit marker preview */}
         <section>
           <h3 className="text-[13px] font-semibold text-foreground uppercase tracking-wide mb-2">
-            {isRu ? 'Аудит сделки' : 'Deal audit'}
+            {isRu ? 'Аудит сделки' : isTh ? 'การตรวจสอบดีล' : 'Deal audit'}
           </h3>
           <p className="text-[12px] text-muted-foreground mb-2 leading-snug">
             {isRu
               ? 'После оплаты на странице платежа отображается аудит-маркер: идентификатор операции, запись в реестре и время. Пример формата:'
+              : isTh
+              ? 'หลังชำระเงิน หน้าการชำระเงินจะแสดงเครื่องหมายตรวจสอบ: รหัสธุรกรรม รายการในบัญชีแยกประเภท และเวลา ตัวอย่างรูปแบบ:'
               : 'After payment, the payment screen shows an audit marker: transaction id, ledger entry, timestamp. Example format:'}
           </p>
           <AuditMarker
@@ -130,7 +142,7 @@ export default function CapitalDealIntake() {
         {/* Intake form */}
         <section>
           <h3 className="text-[13px] font-semibold text-foreground uppercase tracking-wide mb-2">
-            {isRu ? 'Заявка на сопровождение' : 'Request deal support'}
+            {isRu ? 'Заявка на сопровождение' : isTh ? 'ขอรับการดูแลดีล' : 'Request deal support'}
           </h3>
           <div className="rounded-none border border-border bg-card px-3.5 py-4">
             <CapitalIntroForm

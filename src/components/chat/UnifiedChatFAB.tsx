@@ -63,6 +63,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
   const location = useLocation();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { canInstall, isInstalled, isIOS, install } = usePWAInstall();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -194,7 +195,9 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
           role: 'assistant',
           content: isRu
             ? 'Извините, произошла ошибка. Попробуйте позже или напишите нам в WhatsApp.'
-            : 'Sorry, an error occurred. Please try again or message us on WhatsApp.',
+            : isTh
+              ? 'ขออภัย เกิดข้อผิดพลาด กรุณาลองอีกครั้งหรือติดต่อเราทาง WhatsApp'
+              : 'Sorry, an error occurred. Please try again or message us on WhatsApp.',
         },
       ]);
     } finally {
@@ -238,7 +241,9 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
 
   const quickQuestions = isRu
     ? ['Как забронировать тур?', 'Где найти рестораны?', 'Аренда транспорта']
-    : ['How to book a tour?', 'Where to find restaurants?', 'Transport rental'];
+    : isTh
+      ? ['จองทัวร์อย่างไร?', 'หาร้านอาหารได้ที่ไหน?', 'เช่ารถ']
+      : ['How to book a tour?', 'Where to find restaurants?', 'Transport rental'];
 
   const showInstall = !isInstalled;
   const showLine = COMPANY_CONTACTS.line.enabled;
@@ -258,7 +263,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
           {activeView === 'menu' ? (
             <>
               <DrawerHeader className="text-center pb-2">
-                <DrawerTitle>{isRu ? 'Чем помочь?' : 'How can we help?'}</DrawerTitle>
+                <DrawerTitle>{isRu ? 'Чем помочь?' : isTh ? 'เราช่วยอะไรได้บ้าง?' : 'How can we help?'}</DrawerTitle>
               </DrawerHeader>
               <div className="p-4 pt-0 space-y-3 overflow-y-auto">
                 {/* PRIMARY — AI assistant */}
@@ -270,20 +275,20 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold">{isRu ? 'UNO AI Ассистент' : 'UNO AI Assistant'}</h3>
+                    <h3 className="font-semibold">{isRu ? 'UNO AI Ассистент' : isTh ? 'UNO AI Assistant' : 'UNO AI Assistant'}</h3>
                     <p className="text-sm opacity-80">
-                      {isRu ? 'Мгновенные ответы 24/7' : 'Instant answers 24/7'}
+                      {isRu ? 'Мгновенные ответы 24/7' : isTh ? 'ตอบกลับทันที 24/7' : 'Instant answers 24/7'}
                     </p>
                   </div>
                 </button>
 
                 {/* Human channels */}
                 <p className="text-xs text-muted-foreground pt-2 px-1">
-                  {isRu ? 'Поговорить с человеком' : 'Talk to a human'}
+                  {isRu ? 'Поговорить с человеком' : isTh ? 'พูดคุยกับเจ้าหน้าที่' : 'Talk to a human'}
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   <button
-                    onClick={() => openExternal(getWhatsAppUrl(isRu ? 'Здравствуйте, myUNO!' : 'Hello myUNO!'))}
+                    onClick={() => openExternal(getWhatsAppUrl(isRu ? 'Здравствуйте, myUNO!' : isTh ? 'สวัสดี myUNO!' : 'Hello myUNO!'))}
                     className="flex flex-col items-center justify-center gap-2 p-3 rounded-none border border-border bg-card hover:border-foreground/40 transition-colors"
                   >
                     <div className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center">
@@ -321,7 +326,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                   >
                     <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
                     <div className="min-w-0">
-                      <div className="text-xs text-muted-foreground">{isRu ? 'Звонок' : 'Call'}</div>
+                      <div className="text-xs text-muted-foreground">{isRu ? 'Звонок' : isTh ? 'โทร' : 'Call'}</div>
                       <div className="text-sm font-medium truncate">{COMPANY_CONTACTS.phone.display}</div>
                     </div>
                   </a>
@@ -346,12 +351,12 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                     {isIOS ? <Smartphone className="w-4 h-4 text-muted-foreground" /> : <Download className="w-4 h-4 text-muted-foreground" />}
                     <div className="text-left flex-1 min-w-0">
                       <div className="text-sm font-medium">
-                        {isRu ? 'Установить приложение' : 'Install the app'}
+                        {isRu ? 'Установить приложение' : isTh ? 'ติดตั้งแอป' : 'Install the app'}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {isIOS
-                          ? (isRu ? 'Поделиться → На экран «Домой»' : 'Share → Add to Home Screen')
-                          : (isRu ? 'Работает офлайн, без магазина' : 'Works offline, no app store')}
+                          ? (isRu ? 'Поделиться → На экран «Домой»' : isTh ? 'แชร์ → เพิ่มไปยังหน้าจอโฮม' : 'Share → Add to Home Screen')
+                          : (isRu ? 'Работает офлайн, без магазина' : isTh ? 'ใช้งานออฟไลน์ได้ ไม่ต้องผ่านสโตร์' : 'Works offline, no app store')}
                       </div>
                     </div>
                   </button>
@@ -360,7 +365,9 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                 <p className="text-[11px] text-center text-muted-foreground pt-2">
                   {isRu
                     ? `Поддержка ${COMPANY_CONTACTS.workingHours.support} · Офис ${COMPANY_CONTACTS.workingHours.office} ICT`
-                    : `Support ${COMPANY_CONTACTS.workingHours.support} · Office ${COMPANY_CONTACTS.workingHours.office} ICT`}
+                    : isTh
+                      ? `ฝ่ายสนับสนุน ${COMPANY_CONTACTS.workingHours.support} · สำนักงาน ${COMPANY_CONTACTS.workingHours.office} ICT`
+                      : `Support ${COMPANY_CONTACTS.workingHours.support} · Office ${COMPANY_CONTACTS.workingHours.office} ICT`}
                 </p>
               </div>
             </>
@@ -374,7 +381,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                     size="icon"
                     onClick={() => setActiveView('menu')}
                     className="h-8 w-8 min-h-[44px] min-w-[44px]"
-                    aria-label={isRu ? 'Назад' : 'Back'}
+                    aria-label={isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -385,7 +392,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                     <div>
                       <DrawerTitle className="text-base">UNO Assistant</DrawerTitle>
                       <p className="text-xs text-muted-foreground">
-                        {isRu ? 'AI-помощник · 24/7' : 'AI Support · 24/7'}
+                        {isRu ? 'AI-помощник · 24/7' : isTh ? 'ผู้ช่วย AI · 24/7' : 'AI Support · 24/7'}
                       </p>
                     </div>
                   </div>
@@ -396,7 +403,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                     size="icon"
                     onClick={handleClearHistory}
                     className="h-8 w-8 min-h-[44px] min-w-[44px]"
-                    aria-label={isRu ? 'Очистить историю' : 'Clear history'}
+                    aria-label={isRu ? 'Очистить историю' : isTh ? 'ล้างประวัติ' : 'Clear history'}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -412,12 +419,12 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                         <Bot className="w-7 h-7 text-primary" />
                       </div>
                       <p className="text-muted-foreground text-sm">
-                        {isRu ? 'Привет! Чем могу помочь?' : 'Hi! How can I help you?'}
+                        {isRu ? 'Привет! Чем могу помочь?' : isTh ? 'สวัสดี! ให้ช่วยอะไรดีคะ/ครับ?' : 'Hi! How can I help you?'}
                       </p>
                     </div>
                     <div className="space-y-2">
                       <p className="text-xs text-muted-foreground text-center">
-                        {isRu ? 'Популярные вопросы:' : 'Quick questions:'}
+                        {isRu ? 'Популярные вопросы:' : isTh ? 'คำถามยอดนิยม:' : 'Quick questions:'}
                       </p>
                       {quickQuestions.map((q, i) => (
                         <button
@@ -475,18 +482,20 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={isRu ? 'Введите сообщение...' : 'Type a message...'}
+                    placeholder={isRu ? 'Введите сообщение...' : isTh ? 'พิมพ์ข้อความ...' : 'Type a message...'}
                     disabled={isLoading}
                     className="flex-1"
                   />
-                  <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" aria-label={isRu ? 'Отправить' : 'Send'}>
+                  <Button onClick={handleSend} disabled={!input.trim() || isLoading} size="icon" aria-label={isRu ? 'Отправить' : isTh ? 'ส่ง' : 'Send'}>
                     <Send className="w-4 h-4" />
                   </Button>
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-2 text-center">
                   {isRu
                     ? 'AI может ошибаться. Для важных вопросов — WhatsApp.'
-                    : 'AI may make mistakes. For critical issues — WhatsApp.'}
+                    : isTh
+                      ? 'AI อาจมีข้อผิดพลาด สำหรับเรื่องสำคัญ โปรดใช้ WhatsApp'
+                      : 'AI may make mistakes. For critical issues — WhatsApp.'}
                 </p>
               </div>
             </>
@@ -509,7 +518,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
           'md:bottom-6 md:w-14 md:h-14',
           className,
         )}
-        aria-label={isRu ? 'Открыть помощник UNO' : 'Open UNO assistant'}
+        aria-label={isRu ? 'Открыть помощник UNO' : isTh ? 'เปิดผู้ช่วย UNO' : 'Open UNO assistant'}
       >
         <Sparkles className="w-5 h-5 md:w-6 md:h-6" />
         <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-success rounded-full border-2 border-background" />

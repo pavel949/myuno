@@ -16,6 +16,7 @@ interface PropertyDetailGalleryProps {
 export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyDetailGalleryProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [activeImage, setActiveImage] = useState(0);
 
   if (images.length === 0) return null;
@@ -75,7 +76,7 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
-                  aria-label={isRu ? `Фото ${i + 1}` : `Photo ${i + 1}`}
+                  aria-label={isRu ? `Фото ${i + 1}` : isTh ? `รูปภาพ ${i + 1}` : `Photo ${i + 1}`}
                   className={cn(
                     'w-16 h-12 rounded-none overflow-hidden flex-shrink-0 border-2 transition-all',
                     activeImage === i
@@ -96,7 +97,7 @@ export function PropertyDetailGallery({ images, alt, onOpenLightbox }: PropertyD
         className="absolute bottom-4 right-4 px-3 py-1.5 bg-background/90 rounded-none text-sm font-medium flex items-center gap-2 hover:bg-background transition-colors"
       >
         <Eye className="w-4 h-4" />
-        {images.length} {isRu ? 'фото' : 'photos'}
+        {images.length} {isRu ? 'фото' : isTh ? 'รูปภาพ' : 'photos'}
       </button>
     </div>
   );

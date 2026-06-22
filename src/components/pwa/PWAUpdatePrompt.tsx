@@ -71,6 +71,13 @@ export function PWAUpdatePrompt() {
       later: 'Later',
       reloading: 'Updating…',
     },
+    th: {
+      title: 'มีอัปเดตใหม่',
+      description: 'แอปเวอร์ชันใหม่พร้อมแล้ว โหลดใหม่เพื่อรับการแก้ไขล่าสุด',
+      update: 'อัปเดตตอนนี้',
+      later: 'ภายหลัง',
+      reloading: 'กำลังอัปเดต…',
+    },
   } as const;
 
   const t = texts[language] ?? texts.en;

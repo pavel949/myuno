@@ -26,9 +26,9 @@ import { LoginRequiredModal } from '@/components/guest/LoginRequiredModal';
 import { GuestModeBadge } from '@/components/guest/GuestModeBadge';
 
 const deliverySlots = [
-  { id: 'morning', timeEn: '9:00 - 12:00', timeRu: '9:00 - 12:00', labelEn: 'Morning', labelRu: 'Утро' },
-  { id: 'afternoon', timeEn: '12:00 - 17:00', timeRu: '12:00 - 17:00', labelEn: 'Afternoon', labelRu: 'День' },
-  { id: 'evening', timeEn: '17:00 - 21:00', timeRu: '17:00 - 21:00', labelEn: 'Evening', labelRu: 'Вечер' },
+  { id: 'morning', timeEn: '9:00 - 12:00', timeRu: '9:00 - 12:00', timeTh: '9:00 - 12:00', labelEn: 'Morning', labelRu: 'Утро', labelTh: 'ช่วงเช้า' },
+  { id: 'afternoon', timeEn: '12:00 - 17:00', timeRu: '12:00 - 17:00', timeTh: '12:00 - 17:00', labelEn: 'Afternoon', labelRu: 'День', labelTh: 'ช่วงบ่าย' },
+  { id: 'evening', timeEn: '17:00 - 21:00', timeRu: '17:00 - 21:00', timeTh: '17:00 - 21:00', labelEn: 'Evening', labelRu: 'Вечер', labelTh: 'ช่วงเย็น' },
 ];
 
 interface BuyNowState {
@@ -140,7 +140,7 @@ const FlowersOrder = () => {
     e.preventDefault();
     
     if (!formData.recipientName || !formData.recipientPhone || !formData.address || !formData.deliveryDate) {
-      toast.error(language === 'ru' ? 'Заполните все обязательные поля' : 'Please fill all required fields');
+      toast.error(language === 'ru' ? 'Заполните все обязательные поля' : language === 'th' ? 'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน' : 'Please fill all required fields');
       return;
     }
 
@@ -184,7 +184,7 @@ const FlowersOrder = () => {
         // If redirect is successful, Stripe will handle the rest
         // The page will redirect, so we don't need to do anything else here
         if (!success) {
-          toast.error(language === 'ru' ? 'Ошибка при создании платежа' : 'Failed to create payment');
+          toast.error(language === 'ru' ? 'Ошибка при создании платежа' : language === 'th' ? 'ไม่สามารถสร้างรายการชำระเงินได้' : 'Failed to create payment');
         }
         return;
       }
@@ -200,7 +200,7 @@ const FlowersOrder = () => {
         );
 
         if (!result.success) {
-          toast.error(language === 'ru' ? 'Недостаточно средств на кошельке' : 'Insufficient wallet balance');
+          toast.error(language === 'ru' ? 'Недостаточно средств на кошельке' : language === 'th' ? 'ยอดเงินในกระเป๋าเงินไม่เพียงพอ' : 'Insufficient wallet balance');
           return;
         }
         walletCharged = true;
@@ -230,7 +230,7 @@ const FlowersOrder = () => {
         items.push({
           item_type: 'delivery',
           item_id: undefined,
-          item_name: language === 'ru' ? 'Доставка' : 'Delivery',
+          item_name: language === 'ru' ? 'Доставка' : language === 'th' ? 'ค่าจัดส่ง' : 'Delivery',
           quantity: 1,
           unit_price: deliveryFee,
           subtotal: deliveryFee,
@@ -240,7 +240,7 @@ const FlowersOrder = () => {
           items.push({
             item_type: 'gift_wrap',
             item_id: undefined,
-            item_name: language === 'ru' ? 'Праздничная упаковка' : 'Gift Wrap',
+            item_name: language === 'ru' ? 'Праздничная упаковка' : language === 'th' ? 'ห่อของขวัญ' : 'Gift Wrap',
             quantity: 1,
             unit_price: giftWrapFee,
             subtotal: giftWrapFee,
@@ -278,7 +278,7 @@ const FlowersOrder = () => {
             recipient_phone: formData.recipientPhone,
             concierge_advance_requested: true,
           },
-          serviceName: language === 'ru' ? 'Доставка цветов' : 'Flower Delivery',
+          serviceName: language === 'ru' ? 'Доставка цветов' : language === 'th' ? 'บริการจัดส่งดอกไม้' : 'Flower Delivery',
           providerName: firstProvider?.providerName,
           openWhatsAppOnCash: false, // Don't open WhatsApp for concierge advance
         });
@@ -345,7 +345,7 @@ const FlowersOrder = () => {
       items.push({
         item_type: 'delivery',
         item_id: undefined,
-        item_name: language === 'ru' ? 'Доставка' : 'Delivery',
+        item_name: language === 'ru' ? 'Доставка' : language === 'th' ? 'ค่าจัดส่ง' : 'Delivery',
         quantity: 1,
         unit_price: deliveryFee,
         subtotal: deliveryFee,
@@ -356,7 +356,7 @@ const FlowersOrder = () => {
         items.push({
           item_type: 'gift_wrap',
           item_id: undefined,
-          item_name: language === 'ru' ? 'Праздничная упаковка' : 'Gift Wrap',
+          item_name: language === 'ru' ? 'Праздничная упаковка' : language === 'th' ? 'ห่อของขวัญ' : 'Gift Wrap',
           quantity: 1,
           unit_price: giftWrapFee,
           subtotal: giftWrapFee,
@@ -393,7 +393,7 @@ const FlowersOrder = () => {
           recipient_name: formData.recipientName,
           recipient_phone: formData.recipientPhone,
         },
-        serviceName: language === 'ru' ? 'Доставка цветов' : 'Flower Delivery',
+        serviceName: language === 'ru' ? 'Доставка цветов' : language === 'th' ? 'บริการจัดส่งดอกไม้' : 'Flower Delivery',
         providerName: firstProvider?.providerName,
         openWhatsAppOnCash: true,
       });
@@ -428,8 +428,8 @@ const FlowersOrder = () => {
 
         toast.success(
           formData.paymentMethod === 'wallet'
-            ? (language === 'ru' ? 'Заказ оплачен из кошелька!' : 'Order paid from wallet!')
-            : (language === 'ru' ? 'Заказ успешно оформлен!' : 'Order placed successfully!')
+            ? (language === 'ru' ? 'Заказ оплачен из кошелька!' : language === 'th' ? 'ชำระเงินจากกระเป๋าเงินเรียบร้อยแล้ว!' : 'Order paid from wallet!')
+            : (language === 'ru' ? 'Заказ успешно оформлен!' : language === 'th' ? 'สั่งซื้อสำเร็จแล้ว!' : 'Order placed successfully!')
         );
 
         navigate('/bookings');
@@ -439,13 +439,13 @@ const FlowersOrder = () => {
         if (walletCharged) {
           await refundToWallet(finalTotal, 'flower_order_failed');
         }
-        toast.error(language === 'ru' ? 'Не удалось создать заказ' : 'Failed to create order');
+        toast.error(language === 'ru' ? 'Не удалось создать заказ' : language === 'th' ? 'ไม่สามารถสร้างคำสั่งซื้อได้' : 'Failed to create order');
       }
     } catch {
       if (walletCharged) {
         await refundToWallet(finalTotal, 'flower_order_failed');
       }
-      toast.error(language === 'ru' ? 'Ошибка при оформлении заказа' : 'Failed to place order');
+      toast.error(language === 'ru' ? 'Ошибка при оформлении заказа' : language === 'th' ? 'เกิดข้อผิดพลาดในการสั่งซื้อ' : 'Failed to place order');
     }
   };
 
@@ -460,7 +460,7 @@ const FlowersOrder = () => {
               <BackButton fallbackPath="/flowers" />
               <div className="flex-1">
                 <h1 className="text-xl font-display font-bold">
-                  {language === 'ru' ? 'Оформление заказа' : 'Checkout'}
+                  {language === 'ru' ? 'Оформление заказа' : language === 'th' ? 'ดำเนินการสั่งซื้อ' : 'Checkout'}
                 </h1>
               </div>
             </div>
@@ -468,13 +468,13 @@ const FlowersOrder = () => {
           <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
             <Gift className="w-16 h-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">
-              {language === 'ru' ? 'Корзина пуста' : 'Cart is empty'}
+              {language === 'ru' ? 'Корзина пуста' : language === 'th' ? 'ตะกร้าสินค้าว่างเปล่า' : 'Cart is empty'}
             </h2>
             <p className="text-muted-foreground text-center mb-6">
-              {language === 'ru' ? 'Добавьте цветы для оформления заказа' : 'Add flowers to place an order'}
+              {language === 'ru' ? 'Добавьте цветы для оформления заказа' : language === 'th' ? 'เพิ่มดอกไม้เพื่อดำเนินการสั่งซื้อ' : 'Add flowers to place an order'}
             </p>
             <Button onClick={() => navigate('/flowers')}>
-              {language === 'ru' ? 'Выбрать цветы' : 'Browse Flowers'}
+              {language === 'ru' ? 'Выбрать цветы' : language === 'th' ? 'เลือกดอกไม้' : 'Browse Flowers'}
             </Button>
           </div>
         </div>
@@ -491,10 +491,10 @@ const FlowersOrder = () => {
             <BackButton fallbackPath="/flowers" />
             <div className="flex-1">
               <h1 className="text-xl font-display font-bold">
-                {language === 'ru' ? 'Оформление заказа' : 'Checkout'}
+                {language === 'ru' ? 'Оформление заказа' : language === 'th' ? 'ดำเนินการสั่งซื้อ' : 'Checkout'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' ? 'Доставка цветов' : 'Flower Delivery'}
+                {language === 'ru' ? 'Доставка цветов' : language === 'th' ? 'บริการจัดส่งดอกไม้' : 'Flower Delivery'}
               </p>
             </div>
           </div>
@@ -508,25 +508,25 @@ const FlowersOrder = () => {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Truck className="w-5 h-5 text-primary" />
-              {language === 'ru' ? 'Информация о получателе' : 'Recipient Information'}
+              {language === 'ru' ? 'Информация о получателе' : language === 'th' ? 'ข้อมูลผู้รับ' : 'Recipient Information'}
             </h2>
             
             <div className="space-y-3">
               <div>
                 <Label htmlFor="recipientName">
-                  {language === 'ru' ? 'Имя получателя *' : 'Recipient Name *'}
+                  {language === 'ru' ? 'Имя получателя *' : language === 'th' ? 'ชื่อผู้รับ *' : 'Recipient Name *'}
                 </Label>
                 <Input
                   id="recipientName"
                   value={formData.recipientName}
                   onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
-                  placeholder={language === 'ru' ? 'Введите имя' : 'Enter name'}
+                  placeholder={language === 'ru' ? 'Введите имя' : language === 'th' ? 'กรอกชื่อ' : 'Enter name'}
                 />
               </div>
               
               <div>
                 <Label htmlFor="recipientPhone">
-                  {language === 'ru' ? 'Телефон получателя *' : 'Recipient Phone *'}
+                  {language === 'ru' ? 'Телефон получателя *' : language === 'th' ? 'เบอร์โทรผู้รับ *' : 'Recipient Phone *'}
                 </Label>
                 <Input
                   id="recipientPhone"
@@ -540,8 +540,8 @@ const FlowersOrder = () => {
               <AddressPickerInput
                 value={formData.address}
                 onChange={(addr) => setFormData({ ...formData, address: addr })}
-                label={language === 'ru' ? 'Адрес доставки *' : 'Delivery Address *'}
-                placeholder={language === 'ru' ? 'Полный адрес доставки' : 'Full delivery address'}
+                label={language === 'ru' ? 'Адрес доставки *' : language === 'th' ? 'ที่อยู่จัดส่ง *' : 'Delivery Address *'}
+                placeholder={language === 'ru' ? 'Полный адрес доставки' : language === 'th' ? 'ที่อยู่จัดส่งฉบับเต็ม' : 'Full delivery address'}
                 type="delivery"
                 required
               />
@@ -552,13 +552,13 @@ const FlowersOrder = () => {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Calendar className="w-5 h-5 text-primary" />
-              {language === 'ru' ? 'Время доставки' : 'Delivery Time'}
+              {language === 'ru' ? 'Время доставки' : language === 'th' ? 'เวลาจัดส่ง' : 'Delivery Time'}
             </h2>
             
             <div className="space-y-3">
               <div>
                 <Label htmlFor="deliveryDate">
-                  {language === 'ru' ? 'Дата доставки *' : 'Delivery Date *'}
+                  {language === 'ru' ? 'Дата доставки *' : language === 'th' ? 'วันที่จัดส่ง *' : 'Delivery Date *'}
                 </Label>
                 {(() => {
                   // Same-day cutoff: if current time in Bangkok (UTC+7) is past 14:00, min date is tomorrow
@@ -580,9 +580,11 @@ const FlowersOrder = () => {
                       />
                       {isTodayCutoff && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          {language === 'ru' 
-                            ? 'Доставка в тот же день доступна до 14:00. Выберите завтра.' 
-                            : 'Same-day delivery available until 14:00. Please select tomorrow.'}
+                          {language === 'ru'
+                            ? 'Доставка в тот же день доступна до 14:00. Выберите завтра.'
+                            : language === 'th'
+                              ? 'บริการจัดส่งภายในวันเดียวกันสั่งได้ถึงเวลา 14:00 น. กรุณาเลือกวันพรุ่งนี้'
+                              : 'Same-day delivery available until 14:00. Please select tomorrow.'}
                         </p>
                       )}
                     </>
@@ -591,7 +593,7 @@ const FlowersOrder = () => {
               </div>
               
               <div>
-                <Label>{language === 'ru' ? 'Время доставки' : 'Delivery Slot'}</Label>
+                <Label>{language === 'ru' ? 'Время доставки' : language === 'th' ? 'ช่วงเวลาจัดส่ง' : 'Delivery Slot'}</Label>
                 <div className="grid grid-cols-3 gap-2 mt-2">
                   {deliverySlots.map((slot) => (
                     <button
@@ -608,10 +610,10 @@ const FlowersOrder = () => {
                       )}
                     >
                       <div className="text-sm font-medium">
-                        {language === 'ru' ? slot.labelRu : slot.labelEn}
+                        {language === 'ru' ? slot.labelRu : language === 'th' ? slot.labelTh : slot.labelEn}
                       </div>
                       <div className="text-xs text-muted-foreground mt-0.5">
-                        {language === 'ru' ? slot.timeRu : slot.timeEn}
+                        {language === 'ru' ? slot.timeRu : language === 'th' ? slot.timeTh : slot.timeEn}
                       </div>
                     </button>
                   ))}
@@ -624,13 +626,13 @@ const FlowersOrder = () => {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Gift className="w-5 h-5 text-primary" />
-              {language === 'ru' ? 'Открытка' : 'Message Card'}
+              {language === 'ru' ? 'Открытка' : language === 'th' ? 'การ์ดอวยพร' : 'Message Card'}
             </h2>
             
             <Textarea
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              placeholder={language === 'ru' ? 'Напишите послание для получателя (опционально)' : 'Write a message for the recipient (optional)'}
+              placeholder={language === 'ru' ? 'Напишите послание для получателя (опционально)' : language === 'th' ? 'เขียนข้อความถึงผู้รับ (ไม่บังคับ)' : 'Write a message for the recipient (optional)'}
               rows={3}
             />
 
@@ -649,10 +651,10 @@ const FlowersOrder = () => {
               </div>
               <div className="flex-1">
                 <div className="font-medium">
-                  {language === 'ru' ? 'Праздничная упаковка' : 'Gift Wrap'}
+                  {language === 'ru' ? 'Праздничная упаковка' : language === 'th' ? 'ห่อของขวัญ' : 'Gift Wrap'}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {language === 'ru' ? 'Красивая подарочная упаковка' : 'Beautiful gift packaging'}
+                  {language === 'ru' ? 'Красивая подарочная упаковка' : language === 'th' ? 'ห่อของขวัญสวยงาม' : 'Beautiful gift packaging'}
                 </div>
               </div>
               <span className="font-semibold text-primary">+฿150</span>
@@ -663,7 +665,7 @@ const FlowersOrder = () => {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-primary" />
-              {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+              {language === 'ru' ? 'Способ оплаты' : language === 'th' ? 'วิธีการชำระเงิน' : 'Payment Method'}
             </h2>
             
             <RadioGroup
@@ -682,20 +684,20 @@ const FlowersOrder = () => {
                 <Wallet className="w-5 h-5 text-primary" />
                 <div className="flex-1">
                   <div className="font-medium">
-                    {language === 'ru' ? 'Из кошелька' : 'From Wallet'}
+                    {language === 'ru' ? 'Из кошелька' : language === 'th' ? 'จากกระเป๋าเงิน' : 'From Wallet'}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {isWalletLoading ? (
                       <span className="flex items-center gap-1">
                         <Loader2 className="w-3 h-3 animate-spin" />
-                        {language === 'ru' ? 'Загрузка...' : 'Loading...'}
+                        {language === 'ru' ? 'Загрузка...' : language === 'th' ? 'กำลังโหลด...' : 'Loading...'}
                       </span>
                     ) : (
                       <>
-                        {language === 'ru' ? 'Баланс:' : 'Balance:'} ฿{balance.toLocaleString()}
+                        {language === 'ru' ? 'Баланс:' : language === 'th' ? 'ยอดเงิน:' : 'Balance:'} ฿{balance.toLocaleString()}
                         {!canPayWithWallet && (
                           <span className="text-destructive ml-1">
-                            ({language === 'ru' ? 'недостаточно' : 'insufficient'})
+                            ({language === 'ru' ? 'недостаточно' : language === 'th' ? 'ไม่เพียงพอ' : 'insufficient'})
                           </span>
                         )}
                       </>
@@ -710,7 +712,7 @@ const FlowersOrder = () => {
                 <CreditCard className="w-5 h-5 text-primary" />
                 <div className="flex-1">
                   <div className="font-medium">
-                    {language === 'ru' ? 'Банковская карта' : 'Credit/Debit Card'}
+                    {language === 'ru' ? 'Банковская карта' : language === 'th' ? 'บัตรเครดิต/เดบิต' : 'Credit/Debit Card'}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     Visa, Mastercard, JCB
@@ -726,10 +728,10 @@ const FlowersOrder = () => {
                 </div>
                 <div className="flex-1">
                   <div className="font-medium">
-                    {language === 'ru' ? 'Наличными' : 'Cash on Delivery'}
+                    {language === 'ru' ? 'Наличными' : language === 'th' ? 'เงินสดเมื่อจัดส่ง' : 'Cash on Delivery'}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {language === 'ru' ? 'Оплата при получении' : 'Pay when delivered'}
+                    {language === 'ru' ? 'Оплата при получении' : language === 'th' ? 'ชำระเงินเมื่อได้รับสินค้า' : 'Pay when delivered'}
                   </div>
                 </div>
               </label>
@@ -749,8 +751,8 @@ const FlowersOrder = () => {
 
           {/* Order Summary */}
           <div className="bg-card rounded-none border p-4 space-y-3">
-            <h3 className="font-semibold">{language === 'ru' ? 'Ваш заказ' : 'Your Order'}</h3>
-            
+            <h3 className="font-semibold">{language === 'ru' ? 'Ваш заказ' : language === 'th' ? 'คำสั่งซื้อของคุณ' : 'Your Order'}</h3>
+
             {cartItems.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
                 <span>{language === 'ru' ? item.nameRu : item.name} × {item.quantity}</span>
@@ -759,19 +761,19 @@ const FlowersOrder = () => {
             ))}
             
             <div className="flex justify-between text-sm">
-              <span>{language === 'ru' ? 'Доставка' : 'Delivery'}</span>
+              <span>{language === 'ru' ? 'Доставка' : language === 'th' ? 'ค่าจัดส่ง' : 'Delivery'}</span>
               <span>฿{deliveryFee.toLocaleString()}</span>
             </div>
-            
+
             {formData.giftWrap && (
               <div className="flex justify-between text-sm">
-                <span>{language === 'ru' ? 'Праздничная упаковка' : 'Gift Wrap'}</span>
+                <span>{language === 'ru' ? 'Праздничная упаковка' : language === 'th' ? 'ห่อของขวัญ' : 'Gift Wrap'}</span>
                 <span>฿{giftWrapFee.toLocaleString()}</span>
               </div>
             )}
-            
+
             <div className="border-t pt-3 flex justify-between font-semibold">
-              <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
+              <span>{language === 'ru' ? 'Итого' : language === 'th' ? 'ยอดรวม' : 'Total'}</span>
               <span className="text-primary">฿{finalTotal.toLocaleString()}</span>
             </div>
           </div>
@@ -786,10 +788,10 @@ const FlowersOrder = () => {
               <Loader2 className="w-5 h-5 animate-spin mr-2" />
             ) : null}
             {formData.paymentMethod === 'card'
-              ? (language === 'ru' ? 'Перейти к оплате' : 'Proceed to Payment')
+              ? (language === 'ru' ? 'Перейти к оплате' : language === 'th' ? 'ดำเนินการชำระเงิน' : 'Proceed to Payment')
               : formData.paymentMethod === 'concierge_advance'
-                ? (language === 'ru' ? 'Отправить запрос' : 'Submit Request')
-                : (language === 'ru' ? 'Оформить заказ' : 'Place Order')}
+                ? (language === 'ru' ? 'Отправить запрос' : language === 'th' ? 'ส่งคำขอ' : 'Submit Request')
+                : (language === 'ru' ? 'Оформить заказ' : language === 'th' ? 'ยืนยันการสั่งซื้อ' : 'Place Order')}
           </Button>
         </form>
       </div>

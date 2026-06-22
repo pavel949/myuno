@@ -41,6 +41,7 @@ interface CartService {
 const ServiceProviderDetail = () => {
   const { language } = useLanguage();
   const isRu = language === "ru";
+  const isTh = language === "th";
   const { addItem, removeItem, items } = useCart();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -55,7 +56,7 @@ const ServiceProviderDetail = () => {
   });
 
   // Fallback name/category from query params if DB row missing
-  const fallbackName = searchParams.get("name") || (isRu ? "Специалист" : "Specialist");
+  const fallbackName = searchParams.get("name") || (isRu ? "Специалист" : isTh ? "ผู้เชี่ยวชาญ" : "Specialist");
   const fallbackCategory = searchParams.get("category") || "";
 
   const providerName = provider?.name || fallbackName;

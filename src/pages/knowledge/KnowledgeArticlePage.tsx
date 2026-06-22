@@ -20,7 +20,7 @@ export default function KnowledgeArticlePage() {
   const { data: article, isLoading } = useKnowledgeArticle(section || '', slug || '');
 
   const cityName = getCityName(language as 'en' | 'ru' | 'th');
-  const sectionMeta = getSectionMeta(section || '', language as 'en' | 'ru');
+  const sectionMeta = getSectionMeta(section || '', language === 'ru' ? 'ru' : 'en');
 
   const pageTitle = article 
     ? `${article.title} — ${cityName}` 
@@ -118,17 +118,19 @@ export default function KnowledgeArticlePage() {
             <Card>
               <CardContent className="py-8 text-center">
                 <p className="text-muted-foreground">
-                  {language === 'ru' 
+                  {language === 'ru'
                     ? 'Статья не найдена'
+                    : language === 'th'
+                    ? 'ไม่พบบทความ'
                     : 'Article not found'
                   }
                 </p>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="mt-4"
                   onClick={() => navigate('/knowledge')}
                 >
-                  {language === 'ru' ? 'Вернуться к справочнику' : 'Back to Knowledge Hub'}
+                  {language === 'ru' ? 'Вернуться к справочнику' : language === 'th' ? 'กลับไปยังศูนย์ความรู้' : 'Back to Knowledge Hub'}
                 </Button>
               </CardContent>
             </Card>

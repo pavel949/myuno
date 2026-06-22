@@ -29,6 +29,7 @@ export const IconGrid: React.FC<IconGridProps> = ({
 }) => {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (services.length === 0) return null;
 
@@ -54,7 +55,7 @@ export const IconGrid: React.FC<IconGridProps> = ({
               to={seeAllHref}
               className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors shrink-0"
             >
-              {isRu ? 'Все' : 'All'}
+              {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'All'}
               <ArrowRight className="w-3 h-3" strokeWidth={2} />
             </Link>
           )}

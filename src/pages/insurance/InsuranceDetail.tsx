@@ -25,12 +25,12 @@ import {
   Car,
 } from 'lucide-react';
 
-const insuranceTypeLabels: Record<string, { en: string; ru: string }> = {
-  health: { en: 'Health', ru: 'Здоровье' },
-  travel: { en: 'Travel', ru: 'Путешествия' },
-  property: { en: 'Property', ru: 'Имущество' },
-  vehicle: { en: 'Vehicle', ru: 'Авто' },
-  life: { en: 'Life', ru: 'Жизнь' },
+const insuranceTypeLabels: Record<string, { en: string; ru: string; th: string }> = {
+  health: { en: 'Health', ru: 'Здоровье', th: 'สุขภาพ' },
+  travel: { en: 'Travel', ru: 'Путешествия', th: 'การเดินทาง' },
+  property: { en: 'Property', ru: 'Имущество', th: 'ทรัพย์สิน' },
+  vehicle: { en: 'Vehicle', ru: 'Авто', th: 'ยานพาหนะ' },
+  life: { en: 'Life', ru: 'Жизнь', th: 'ชีวิต' },
 };
 
 const tierColors: Record<string, string> = {
@@ -62,7 +62,7 @@ export default function InsuranceDetail() {
     return (
       <AppLayout showBottomNav={false}>
         <div className="p-4 text-center">
-          <p>{language === 'ru' ? 'Компания не найдена' : 'Provider not found'}</p>
+          <p>{language === 'ru' ? 'Компания не найдена' : language === 'th' ? 'ไม่พบบริษัทประกัน' : 'Provider not found'}</p>
         </div>
       </AppLayout>
     );
@@ -124,15 +124,15 @@ export default function InsuranceDetail() {
         {/* Tabs */}
         <Tabs defaultValue="plans" className="px-4 pt-4">
           <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="plans">{language === 'ru' ? 'Планы' : 'Plans'}</TabsTrigger>
-            <TabsTrigger value="about">{language === 'ru' ? 'О нас' : 'About'}</TabsTrigger>
-            <TabsTrigger value="contact">{language === 'ru' ? 'Контакты' : 'Contact'}</TabsTrigger>
+            <TabsTrigger value="plans">{language === 'ru' ? 'Планы' : language === 'th' ? 'แผนประกัน' : 'Plans'}</TabsTrigger>
+            <TabsTrigger value="about">{language === 'ru' ? 'О нас' : language === 'th' ? 'เกี่ยวกับเรา' : 'About'}</TabsTrigger>
+            <TabsTrigger value="contact">{language === 'ru' ? 'Контакты' : language === 'th' ? 'ติดต่อ' : 'Contact'}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="plans" className="space-y-4 mt-4">
             {plans.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                {language === 'ru' ? 'Нет доступных планов' : 'No plans available'}
+                {language === 'ru' ? 'Нет доступных планов' : language === 'th' ? 'ไม่มีแผนประกันที่พร้อมให้บริการ' : 'No plans available'}
               </p>
             ) : (
               plans.map((plan) => (
@@ -149,7 +149,7 @@ export default function InsuranceDetail() {
                         </Badge>
                         {plan.is_popular && (
                           <Badge variant="outline" className="text-xs border-primary text-primary">
-                            ⭐ {language === 'ru' ? 'Популярный' : 'Popular'}
+                            ⭐ {language === 'ru' ? 'Популярный' : language === 'th' ? 'ยอดนิยม' : 'Popular'}
                           </Badge>
                         )}
                       </div>
@@ -159,12 +159,12 @@ export default function InsuranceDetail() {
                       {plan.price_yearly && (
                         <p className="font-bold text-primary">
                           ฿{plan.price_yearly.toLocaleString()}
-                          <span className="text-xs text-muted-foreground">/{language === 'ru' ? 'год' : 'yr'}</span>
+                          <span className="text-xs text-muted-foreground">/{language === 'ru' ? 'год' : language === 'th' ? 'ปี' : 'yr'}</span>
                         </p>
                       )}
                       {plan.price_monthly && (
                         <p className="text-sm text-muted-foreground">
-                          ฿{plan.price_monthly.toLocaleString()}/{language === 'ru' ? 'мес' : 'mo'}
+                          ฿{plan.price_monthly.toLocaleString()}/{language === 'ru' ? 'мес' : language === 'th' ? 'เดือน' : 'mo'}
                         </p>
                       )}
                     </div>
@@ -173,7 +173,7 @@ export default function InsuranceDetail() {
                   {plan.coverage_amount && (
                     <p className="text-sm text-muted-foreground mb-2">
                       <Shield className="w-4 h-4 inline mr-1" />
-                      {language === 'ru' ? 'Покрытие:' : 'Coverage:'} ฿{plan.coverage_amount.toLocaleString()}
+                      {language === 'ru' ? 'Покрытие:' : language === 'th' ? 'ความคุ้มครอง:' : 'Coverage:'} ฿{plan.coverage_amount.toLocaleString()}
                     </p>
                   )}
 
@@ -187,14 +187,14 @@ export default function InsuranceDetail() {
                       ))}
                       {((language === 'ru' ? plan.features.ru : plan.features.en)?.length || 0) > 3 && (
                         <p className="text-xs text-primary">
-                          +{((language === 'ru' ? plan.features.ru : plan.features.en)?.length || 0) - 3} {language === 'ru' ? 'ещё' : 'more'}
+                          +{((language === 'ru' ? plan.features.ru : plan.features.en)?.length || 0) - 3} {language === 'ru' ? 'ещё' : language === 'th' ? 'รายการ' : 'more'}
                         </p>
                       )}
                     </div>
                   ) : null}
 
                   <Button className="w-full mt-4" variant="outline">
-                    {language === 'ru' ? 'Подробнее' : 'View Details'}
+                    {language === 'ru' ? 'Подробнее' : language === 'th' ? 'ดูรายละเอียด' : 'View Details'}
                   </Button>
                 </div>
               ))
@@ -212,7 +212,7 @@ export default function InsuranceDetail() {
               <div className="bg-card border border-border rounded-none p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Award className="w-4 h-4 text-primary" />
-                  <h3 className="font-semibold">{language === 'ru' ? 'Лицензия' : 'License'}</h3>
+                  <h3 className="font-semibold">{language === 'ru' ? 'Лицензия' : language === 'th' ? 'ใบอนุญาต' : 'License'}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">{provider.license_number}</p>
               </div>
@@ -221,7 +221,7 @@ export default function InsuranceDetail() {
             <div className="bg-card border border-border rounded-none p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Languages className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold">{language === 'ru' ? 'Языки поддержки' : 'Support Languages'}</h3>
+                <h3 className="font-semibold">{language === 'ru' ? 'Языки поддержки' : language === 'th' ? 'ภาษาที่ให้บริการ' : 'Support Languages'}</h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 {provider.languages.map((lang) => (
@@ -233,18 +233,18 @@ export default function InsuranceDetail() {
             </div>
 
             <div className="bg-card border border-border rounded-none p-4">
-              <h3 className="font-semibold mb-3">{language === 'ru' ? 'Преимущества' : 'Features'}</h3>
+              <h3 className="font-semibold mb-3">{language === 'ru' ? 'Преимущества' : language === 'th' ? 'จุดเด่น' : 'Features'}</h3>
               <div className="space-y-2">
                 {provider.has_online_claims && (
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-success" />
-                    <span>{language === 'ru' ? 'Онлайн подача заявок' : 'Online claims submission'}</span>
+                    <span>{language === 'ru' ? 'Онлайн подача заявок' : language === 'th' ? 'ยื่นเคลมออนไลน์' : 'Online claims submission'}</span>
                   </div>
                 )}
                 {provider.has_24h_support && (
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4 text-success" />
-                    <span>{language === 'ru' ? 'Поддержка 24/7' : '24/7 support'}</span>
+                    <span>{language === 'ru' ? 'Поддержка 24/7' : language === 'th' ? 'บริการช่วยเหลือ 24/7' : '24/7 support'}</span>
                   </div>
                 )}
               </div>
@@ -285,11 +285,11 @@ export default function InsuranceDetail() {
           <div className="flex gap-3 max-w-lg mx-auto">
             <Button variant="outline" className="flex-1" onClick={() => provider.phone && window.open(`tel:${provider.phone}`)}>
               <Phone className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Позвонить' : 'Call'}
+              {language === 'ru' ? 'Позвонить' : language === 'th' ? 'โทร' : 'Call'}
             </Button>
             <Button className="flex-1" onClick={() => navigate(`/insurance/${id}/quote`)}>
               <Shield className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Получить расчёт' : 'Get Quote'}
+              {language === 'ru' ? 'Получить расчёт' : language === 'th' ? 'ขอใบเสนอราคา' : 'Get Quote'}
             </Button>
           </div>
         </div>

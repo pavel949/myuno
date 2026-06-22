@@ -115,8 +115,8 @@ const FlowerShopDetail = () => {
     return (
       <AppLayout showBottomNav={false}>
         <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-          <p className="text-muted-foreground">{language === 'ru' ? 'Магазин не найден' : 'Shop not found'}</p>
-          <Button onClick={() => navigate('/flowers')}>{language === 'ru' ? 'К магазинам' : 'Back to shops'}</Button>
+          <p className="text-muted-foreground">{language === 'ru' ? 'Магазин не найден' : language === 'th' ? 'ไม่พบร้านค้า' : 'Shop not found'}</p>
+          <Button onClick={() => navigate('/flowers')}>{language === 'ru' ? 'К магазинам' : language === 'th' ? 'กลับไปที่ร้านค้า' : 'Back to shops'}</Button>
         </div>
       </AppLayout>
     );
@@ -131,12 +131,12 @@ const FlowerShopDetail = () => {
           <img src={shop.cover_image || PLACEHOLDER_IMAGES.flower} alt={shopName} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
-            <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'Назад' : 'Back'} onClick={() => navigate('/flowers')} className="bg-black/20 text-white hover:bg-black/40"><ArrowLeft className="w-5 h-5" /></Button>
+            <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'Назад' : language === 'th' ? 'ย้อนกลับ' : 'Back'} onClick={() => navigate('/flowers')} className="bg-black/20 text-white hover:bg-black/40"><ArrowLeft className="w-5 h-5" /></Button>
             <div className="flex gap-2">
-              <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'В избранное' : 'Favorite'} aria-pressed={isFavorite} onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 text-white hover:bg-black/40">
+              <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'В избранное' : language === 'th' ? 'รายการโปรด' : 'Favorite'} aria-pressed={isFavorite} onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 text-white hover:bg-black/40">
                 <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
               </Button>
-              <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'Поделиться' : 'Share'} className="bg-black/20 text-white hover:bg-black/40"><Share2 className="w-5 h-5" /></Button>
+              <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'Поделиться' : language === 'th' ? 'แชร์' : 'Share'} className="bg-black/20 text-white hover:bg-black/40"><Share2 className="w-5 h-5" /></Button>
             </div>
           </div>
         </div>
@@ -147,7 +147,7 @@ const FlowerShopDetail = () => {
             <div className="flex items-center gap-2 mt-2">
               <Star className="w-5 h-5 fill-primary text-primary" />
               <span className="font-medium">{shop.rating ?? 0}</span>
-              <span className="text-muted-foreground">({shop.review_count ?? 0} {language === 'ru' ? 'отзывов' : 'reviews'})</span>
+              <span className="text-muted-foreground">({shop.review_count ?? 0} {language === 'ru' ? 'отзывов' : language === 'th' ? 'รีวิว' : 'reviews'})</span>
             </div>
           </div>
           <p className="text-muted-foreground">{language === 'ru' ? shop.description_ru : shop.description_en}</p>
@@ -158,7 +158,7 @@ const FlowerShopDetail = () => {
         </div>
 
         <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4">{language === 'ru' ? 'Букеты' : 'Bouquets'}</h2>
+          <h2 className="text-lg font-semibold mb-4">{language === 'ru' ? 'Букеты' : language === 'th' ? 'ช่อดอกไม้' : 'Bouquets'}</h2>
           {bouquetsLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
           ) : (
@@ -176,14 +176,14 @@ const FlowerShopDetail = () => {
                       <div className="flex items-center justify-between mt-2">
                         <span className="font-semibold text-primary">{formatPrice(product.price)}</span>
                         {quantity === 0 ? (
-                          <Button size="sm" variant="outline" aria-label={language === 'ru' ? 'Добавить в корзину' : 'Add to cart'} onClick={(e) => { addToCart(product); }} className="relative overflow-hidden min-h-[44px] min-w-[44px] px-3 ">
+                          <Button size="sm" variant="outline" aria-label={language === 'ru' ? 'Добавить в корзину' : language === 'th' ? 'เพิ่มลงตะกร้า' : 'Add to cart'} onClick={(e) => { addToCart(product); }} className="relative overflow-hidden min-h-[44px] min-w-[44px] px-3 ">
                             <Plus className="w-4 h-4" />
                           </Button>
                         ) : (
                           <div className="flex items-center gap-1">
-                            <Button size="icon" variant="outline" aria-label={language === 'ru' ? 'Уменьшить количество' : 'Decrease quantity'} onClick={(e) => { removeFromCart(product.id); }} className="relative overflow-hidden min-h-[44px] min-w-[44px] "><Minus className="w-3 h-3" /></Button>
+                            <Button size="icon" variant="outline" aria-label={language === 'ru' ? 'Уменьшить количество' : language === 'th' ? 'ลดจำนวน' : 'Decrease quantity'} onClick={(e) => { removeFromCart(product.id); }} className="relative overflow-hidden min-h-[44px] min-w-[44px] "><Minus className="w-3 h-3" /></Button>
                             <span className="w-6 text-center font-medium text-sm">{quantity}</span>
-                            <Button size="icon" variant="outline" aria-label={language === 'ru' ? 'Увеличить количество' : 'Increase quantity'} onClick={(e) => { addToCart(product); }} className="relative overflow-hidden min-h-[44px] min-w-[44px] "><Plus className="w-3 h-3" /></Button>
+                            <Button size="icon" variant="outline" aria-label={language === 'ru' ? 'Увеличить количество' : language === 'th' ? 'เพิ่มจำนวน' : 'Increase quantity'} onClick={(e) => { addToCart(product); }} className="relative overflow-hidden min-h-[44px] min-w-[44px] "><Plus className="w-3 h-3" /></Button>
                           </div>
                         )}
                       </div>
@@ -195,7 +195,7 @@ const FlowerShopDetail = () => {
           )}
         </div>
 
-        <StickyCartBar providerId={providerId} buttonLabel={language === 'ru' ? 'Оформить заказ' : 'Checkout'} className="bottom-0" />
+        <StickyCartBar providerId={providerId} buttonLabel={language === 'ru' ? 'Оформить заказ' : language === 'th' ? 'ชำระเงิน' : 'Checkout'} className="bottom-0" />
       </div>
     </AppLayout>
   );

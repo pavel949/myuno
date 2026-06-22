@@ -22,6 +22,7 @@ export interface VehicleClass {
   id: string;
   labelEn: string;
   labelRu: string;
+  labelTh: string;
 }
 
 const VEHICLE_CLASS_ICONS: Record<string, LucideIcon> = {
@@ -36,14 +37,14 @@ const VEHICLE_CLASS_ICONS: Record<string, LucideIcon> = {
 };
 
 export const VEHICLE_CLASSES: VehicleClass[] = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'scooter', labelEn: 'Scooter', labelRu: 'Скутер' },
-  { id: 'motorcycle', labelEn: 'Moto', labelRu: 'Мото' },
-  { id: 'compact', labelEn: 'Compact', labelRu: 'Компакт' },
-  { id: 'sedan', labelEn: 'Sedan', labelRu: 'Седан' },
-  { id: 'suv', labelEn: 'SUV', labelRu: 'Внедорожник' },
-  { id: 'van', labelEn: 'Van', labelRu: 'Минивэн' },
-  { id: 'luxury', labelEn: 'Premium', labelRu: 'Премиум' },
+  { id: 'all', labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { id: 'scooter', labelEn: 'Scooter', labelRu: 'Скутер', labelTh: 'สกู๊ตเตอร์' },
+  { id: 'motorcycle', labelEn: 'Moto', labelRu: 'Мото', labelTh: 'มอเตอร์ไซค์' },
+  { id: 'compact', labelEn: 'Compact', labelRu: 'Компакт', labelTh: 'รถเล็ก' },
+  { id: 'sedan', labelEn: 'Sedan', labelRu: 'Седан', labelTh: 'รถเก๋ง' },
+  { id: 'suv', labelEn: 'SUV', labelRu: 'Внедорожник', labelTh: 'รถ SUV' },
+  { id: 'van', labelEn: 'Van', labelRu: 'Минивэн', labelTh: 'รถตู้' },
+  { id: 'luxury', labelEn: 'Premium', labelRu: 'Премиум', labelTh: 'พรีเมียม' },
 ];
 
 interface VehicleClassNavProps {
@@ -54,7 +55,6 @@ interface VehicleClassNavProps {
 
 export function VehicleClassNav({ selected, onChange, counts }: VehicleClassNavProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -89,7 +89,7 @@ export function VehicleClassNav({ selected, onChange, counts }: VehicleClassNavP
                   strokeWidth={2}
                   aria-hidden
                 />
-                <span>{isRu ? cls.labelRu : cls.labelEn}</span>
+                <span>{language === 'ru' ? cls.labelRu : language === 'th' ? cls.labelTh : cls.labelEn}</span>
                 {count !== undefined && count > 0 && (
                   <span
                     className={cn(

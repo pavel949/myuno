@@ -12,6 +12,7 @@ export function InvestorRecommendations() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: projects, isLoading } = useInvestmentProjects({ isFeatured: true });
 
@@ -34,11 +35,11 @@ export function InvestorRecommendations() {
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-medium flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          {isRu ? 'Рекомендации' : 'Recommendations'}
+          {isRu ? 'Рекомендации' : isTh ? 'คำแนะนำ' : 'Recommendations'}
         </h3>
         {recommended.length > 0 && (
           <Button variant="ghost" size="sm" className="text-xs gap-1 h-7" onClick={() => navigate('/invest')}>
-            {isRu ? 'Все проекты' : 'All Projects'}
+            {isRu ? 'Все проекты' : isTh ? 'โปรเจกต์ทั้งหมด' : 'All Projects'}
             <ChevronRight className="h-3 w-3" />
           </Button>
         )}
@@ -46,7 +47,7 @@ export function InvestorRecommendations() {
 
       {recommended.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          {isRu ? 'Проекты, которые могут вас заинтересовать' : 'Projects you might be interested in'}
+          {isRu ? 'Проекты, которые могут вас заинтересовать' : isTh ? 'โปรเจกต์ที่คุณอาจสนใจ' : 'Projects you might be interested in'}
         </p>
       ) : (
         <ScrollArea className="w-full">

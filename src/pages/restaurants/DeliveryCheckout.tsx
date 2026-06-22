@@ -63,7 +63,7 @@ export default function DeliveryCheckout() {
       <AppLayout showBottomNav={false}>
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-muted-foreground">
-            {language === 'ru' ? 'Ресторан не найден' : 'Restaurant not found'}
+            {language === 'ru' ? 'Ресторан не найден' : language === 'th' ? 'ไม่พบร้านอาหาร' : 'Restaurant not found'}
           </p>
         </div>
       </AppLayout>
@@ -132,7 +132,7 @@ export default function DeliveryCheckout() {
       }));
       
       checkoutItems.push({
-        name: language === 'ru' ? 'Доставка' : 'Delivery',
+        name: language === 'ru' ? 'Доставка' : language === 'th' ? 'ค่าจัดส่ง' : 'Delivery',
         quantity: 1,
         price: deliveryFee,
       });
@@ -176,7 +176,7 @@ export default function DeliveryCheckout() {
     return (
       <BookingConfirmation
         bookingId={bookingId}
-        title={language === 'ru' ? `Заказ из ${restaurant.name_ru}` : `Order from ${restaurant.name_en}`}
+        title={language === 'ru' ? `Заказ из ${restaurant.name_ru}` : language === 'th' ? `สั่งอาหารจาก ${restaurant.name_en}` : `Order from ${restaurant.name_en}`}
         location={address}
         total={total}
         currency="THB"
@@ -195,7 +195,7 @@ export default function DeliveryCheckout() {
             <BackButton fallbackPath="/restaurants" variant="ghost" />
             <div>
               <h1 className="font-semibold">
-                {language === 'ru' ? 'Оформление заказа' : 'Checkout'}
+                {language === 'ru' ? 'Оформление заказа' : language === 'th' ? 'ชำระเงิน' : 'Checkout'}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {language === 'ru' ? restaurant.name_ru : restaurant.name_en}
@@ -208,7 +208,7 @@ export default function DeliveryCheckout() {
           {/* Order Summary */}
           <div className="p-4 rounded-none bg-card border border-border/50">
             <h2 className="font-semibold mb-3">
-              {language === 'ru' ? 'Ваш заказ' : 'Your Order'}
+              {language === 'ru' ? 'Ваш заказ' : language === 'th' ? 'รายการสั่งซื้อของคุณ' : 'Your Order'}
             </h2>
             <div className="space-y-2">
               {cartItems.map(item => (
@@ -219,11 +219,11 @@ export default function DeliveryCheckout() {
               ))}
               <div className="border-t border-border/50 pt-2 mt-2">
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{language === 'ru' ? 'Доставка' : 'Delivery'}</span>
+                  <span>{language === 'ru' ? 'Доставка' : language === 'th' ? 'ค่าจัดส่ง' : 'Delivery'}</span>
                   <span>฿{deliveryFee}</span>
                 </div>
                 <div className="flex justify-between font-bold mt-1">
-                  <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
+                  <span>{language === 'ru' ? 'Итого' : language === 'th' ? 'ยอดรวม' : 'Total'}</span>
                   <span className="text-primary">฿{total}</span>
                 </div>
               </div>
@@ -232,7 +232,7 @@ export default function DeliveryCheckout() {
             {restaurant.delivery_time && (
               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground">
                 <Clock className="w-4 h-4" />
-                <span>{language === 'ru' ? 'Доставка' : 'Delivery'}: {restaurant.delivery_time} min</span>
+                <span>{language === 'ru' ? 'Доставка' : language === 'th' ? 'จัดส่ง' : 'Delivery'}: {restaurant.delivery_time} min</span>
               </div>
             )}
           </div>
@@ -242,14 +242,16 @@ export default function DeliveryCheckout() {
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-primary" />
               <Label className="font-semibold">
-                {language === 'ru' ? 'Адрес доставки' : 'Delivery Address'}
+                {language === 'ru' ? 'Адрес доставки' : language === 'th' ? 'ที่อยู่จัดส่ง' : 'Delivery Address'}
               </Label>
             </div>
             <Textarea
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder={language === 'ru' 
-                ? 'Улица, дом, квартира...' 
+              placeholder={language === 'ru'
+                ? 'Улица, дом, квартира...'
+                : language === 'th'
+                ? 'ถนน อาคาร ห้อง...'
                 : 'Street, building, apartment...'}
               required
             />
@@ -280,10 +282,10 @@ export default function DeliveryCheckout() {
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!isFormValid}
-          submitLabel={language === 'ru' ? `Заказать за ฿${total}` : `Order for ฿${total}`}
+          submitLabel={language === 'ru' ? `Заказать за ฿${total}` : language === 'th' ? `สั่งซื้อ ฿${total}` : `Order for ฿${total}`}
           showBreakdown={[
-            { label: language === 'ru' ? 'Блюда' : 'Items', amount: subtotal },
-            { label: language === 'ru' ? 'Доставка' : 'Delivery', amount: deliveryFee },
+            { label: language === 'ru' ? 'Блюда' : language === 'th' ? 'รายการอาหาร' : 'Items', amount: subtotal },
+            { label: language === 'ru' ? 'Доставка' : language === 'th' ? 'ค่าจัดส่ง' : 'Delivery', amount: deliveryFee },
           ]}
         />
       </div>

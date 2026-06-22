@@ -39,13 +39,30 @@ import {
 
 type LandingType = 'persona' | 'cluster';
 
+/**
+ * Landing SEO language. Landing CONTENT objects (`BilingualString`) carry only
+ * RU/EN, so for Thai we fall back to EN at render time via {@link pickSeo} —
+ * Thai pages still emit valid (English) meta instead of blank tags.
+ */
+type SeoLang = 'ru' | 'en' | 'th';
+
 interface LandingSeoHeadProps {
   landing: PersonaLanding | ClusterLanding;
   type: LandingType;
-  /** Текущий язык страницы (RU / EN). */
-  language: 'ru' | 'en';
+  /** Текущий язык страницы (RU / EN / TH). */
+  language: SeoLang;
   /** Базовый origin (для абсолютных URL). По умолчанию из window.location. */
   origin?: string;
+}
+
+/**
+ * Resolve a bilingual landing field for the active SEO language.
+ * Landing data has no Thai — TH degrades to EN so meta is never empty.
+ */
+function pickSeo(field: { ru: string; en: string }, language: SeoLang): string {
+  if (language === 'ru') return field.ru ?? field.en;
+  // 'en' and 'th' both resolve to English (no Thai in landing data).
+  return field.en ?? field.ru;
 }
 
 const DEFAULT_ORIGIN = SEO_CONSTANTS.ORIGIN;
@@ -62,33 +79,33 @@ function resolveOrigin(explicit?: string): string {
 function pickJobs(
   landing: PersonaLanding | ClusterLanding,
   type: LandingType,
-  language: 'ru' | 'en',
+  language: SeoLang,
 ): string[] {
   if (type === 'cluster') {
-    return (landing as ClusterLanding).jobs.map((j) => j[language]);
+    return (landing as ClusterLanding).jobs.map((j) => pickSeo(j, language));
   }
-  return (landing as PersonaLanding).pains.map((p) => p[language]);
+  return (landing as PersonaLanding).pains.map((p) => pickSeo(p, language));
 }
 
 function buildServiceSchema(
   landing: PersonaLanding | ClusterLanding,
   type: LandingType,
-  language: 'ru' | 'en',
+  language: SeoLang,
   canonicalUrl: string,
 ): Record<string, unknown> {
   const jobs = pickJobs(landing, type, language);
   const serviceList = landing.services.map((s) => ({
     '@type': 'Offer',
-    name: s.label[language],
+    name: pickSeo(s.label, language),
     url: s.href.startsWith('http') ? s.href : `${canonicalUrl.split('/').slice(0, 3).join('/')}${s.href}`,
-    description: s.oneLiner ? s.oneLiner[language] : undefined,
+    description: s.oneLiner ? pickSeo(s.oneLiner, language) : undefined,
   }));
 
   return {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: landing.h1[language],
-    description: landing.subtitle[language],
+    name: pickSeo(landing.h1, language),
+    description: pickSeo(landing.subtitle, language),
     serviceType: type === 'persona' ? `Persona services for ${landing.slug}` : `Lifecycle services: ${landing.slug}`,
     areaServed: {
       '@type': 'Place',
@@ -99,7 +116,7 @@ function buildServiceSchema(
     knowsAbout: jobs,
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
-      name: landing.h1[language],
+      name: pickSeo(landing.h1, language),
       itemListElement: serviceList,
     },
   };
@@ -107,13 +124,13 @@ function buildServiceSchema(
 
 function buildLandingFaqSchema(
   landing: PersonaLanding | ClusterLanding,
-  language: 'ru' | 'en',
+  language: SeoLang,
 ): Record<string, unknown> | null {
   if (!landing.faq || landing.faq.length === 0) return null;
   return buildFaqSchemaShared(
     landing.faq.map((entry) => ({
-      question: entry.q[language],
-      answer: entry.a[language],
+      question: pickSeo(entry.q, language),
+      answer: pickSeo(entry.a, language),
     })),
   );
 }
@@ -121,19 +138,19 @@ function buildLandingFaqSchema(
 function buildLandingBreadcrumb(
   landing: PersonaLanding | ClusterLanding,
   type: LandingType,
-  language: 'ru' | 'en',
+  language: SeoLang,
   baseOrigin: string,
 ): Record<string, unknown> {
-  const homeLabel = language === 'ru' ? 'Главная' : 'Home';
+  const homeLabel = language === 'ru' ? 'Главная' : language === 'th' ? 'หน้าแรก' : 'Home';
   const sectionLabel =
     type === 'persona'
-      ? language === 'ru' ? 'Для вас' : 'For you'
-      : language === 'ru' ? 'Жизненные кластеры' : 'Life clusters';
+      ? language === 'ru' ? 'Для вас' : language === 'th' ? 'สำหรับคุณ' : 'For you'
+      : language === 'ru' ? 'Жизненные кластеры' : language === 'th' ? 'หมวดการใช้ชีวิต' : 'Life clusters';
   const sectionHref = type === 'persona' ? '/for' : '/cluster';
   const items = [
     { name: homeLabel, url: `${baseOrigin}/` },
     { name: sectionLabel, url: `${baseOrigin}${sectionHref}` },
-    { name: landing.h1[language], url: `${baseOrigin}${landing.seo!.canonicalPath}` },
+    { name: pickSeo(landing.h1, language), url: `${baseOrigin}${landing.seo!.canonicalPath}` },
   ];
   return buildBreadcrumbSchema(items);
 }
@@ -145,16 +162,20 @@ const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps
   const baseOrigin = resolveOrigin(origin);
   const canonicalUrl = `${baseOrigin}${seo.canonicalPath}`;
 
-  const title = seo.metaTitle[language];
-  const description = seo.metaDescription[language];
+  const title = pickSeo(seo.metaTitle, language);
+  const description = pickSeo(seo.metaDescription, language);
+
+  // OG image lang: the edge function only renders RU/EN cards — TH degrades
+  // to EN so the share card still has readable copy.
+  const ogLang: 'ru' | 'en' = language === 'ru' ? 'ru' : 'en';
 
   // Dynamic OG image (Wave 4) — overrides the static seo.ogImage so that
   // each persona/cluster gets a branded, language-aware share card.
   const ogImage =
     type === 'persona'
-      ? buildPersonaOgUrl({ persona: landing.slug, lang: language })
-      : buildClusterOgUrl({ cluster: landing.slug, lang: language });
-  const ogAlt = `${landing.h1[language]} — myUNO`;
+      ? buildPersonaOgUrl({ persona: landing.slug, lang: ogLang })
+      : buildClusterOgUrl({ cluster: landing.slug, lang: ogLang });
+  const ogAlt = `${pickSeo(landing.h1, language)} — myUNO`;
 
   // hreflang: используем явные alternates если заданы, иначе генерируем дефолт.
   const alternates =
@@ -163,6 +184,7 @@ const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps
       : ([
           { lang: 'ru', href: `${baseOrigin}${seo.canonicalPath}?lang=ru` },
           { lang: 'en', href: `${baseOrigin}${seo.canonicalPath}?lang=en` },
+          { lang: 'th', href: `${baseOrigin}${seo.canonicalPath}?lang=th` },
         ] as const);
 
   const serviceSchema = buildServiceSchema(landing, type, language, canonicalUrl);
@@ -196,11 +218,10 @@ const LandingSeoHead = ({ landing, type, language, origin }: LandingSeoHeadProps
       <meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
       <meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
       <meta property="og:image:alt" content={ogAlt} />
-      <meta property="og:locale" content={language === 'ru' ? 'ru_RU' : 'en_US'} />
-      <meta
-        property="og:locale:alternate"
-        content={language === 'ru' ? 'en_US' : 'ru_RU'}
-      />
+      <meta property="og:locale" content={language === 'ru' ? 'ru_RU' : language === 'th' ? 'th_TH' : 'en_US'} />
+      {language !== 'en' && <meta property="og:locale:alternate" content="en_US" />}
+      {language !== 'ru' && <meta property="og:locale:alternate" content="ru_RU" />}
+      {language !== 'th' && <meta property="og:locale:alternate" content="th_TH" />}
       <meta property="og:site_name" content="myUNO" />
 
       {/* Twitter */}

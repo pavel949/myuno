@@ -23,7 +23,7 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
           <Check className="w-12 h-12 text-success" />
         </div>
         <h2 className="text-2xl font-display font-bold mb-2 text-center">
-          {language === 'ru' ? 'Трансфер забронирован!' : 'Transfer Booked!'}
+          {language === 'ru' ? 'Трансфер забронирован!' : language === 'th' ? 'จองรถรับส่งสำเร็จ!' : 'Transfer Booked!'}
         </h2>
         {createdOrderNumber && (
           <p className="text-lg font-semibold text-primary mb-2">#{createdOrderNumber}</p>
@@ -31,12 +31,14 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
         <p className="text-muted-foreground text-center max-w-sm mb-2">
           {language === 'ru'
             ? `Рейс ${formData.flightNumber} • ${formData.arrivalDate}`
+            : language === 'th'
+            ? `เที่ยวบิน ${formData.flightNumber} • ${formData.arrivalDate}`
             : `Flight ${formData.flightNumber} • ${formData.arrivalDate}`}
         </p>
         <div className="flex items-center gap-2 mb-2">
           <Badge variant="secondary" className="bg-success/10 text-success">
             <Shield className="w-3 h-3 mr-1" />
-            {language === 'ru' ? 'Подтверждено' : 'Confirmed'}
+            {language === 'ru' ? 'Подтверждено' : language === 'th' ? 'ยืนยันแล้ว' : 'Confirmed'}
           </Badge>
           {formData.paymentMethod === 'concierge_advance' && (
             <Badge variant="secondary" className="bg-warning/10 text-warning">
@@ -50,6 +52,8 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
           <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
             {language === 'ru'
               ? 'Мы оплатим за вас. После трансфера вы вернёте сумму удобным способом.'
+              : language === 'th'
+              ? 'เราจะชำระเงินให้ก่อน คุณค่อยคืนเงินหลังการเดินทางตามวิธีที่สะดวก'
               : "We'll pay for you. Return the amount after the transfer."}
           </p>
         )}
@@ -62,7 +66,7 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Имя на табличке' : 'Name on sign'}
+                  {language === 'ru' ? 'Имя на табличке' : language === 'th' ? 'ชื่อบนป้ายต้อนรับ' : 'Name on sign'}
                 </p>
                 <p className="font-semibold text-lg">{formData.meetingSignName || formData.name}</p>
               </div>
@@ -73,7 +77,7 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">
-                  {language === 'ru' ? 'Адрес назначения' : 'Destination'}
+                  {language === 'ru' ? 'Адрес назначения' : language === 'th' ? 'ปลายทาง' : 'Destination'}
                 </p>
                 <p className="font-medium">{formData.destinationAddress}</p>
               </div>
@@ -84,14 +88,16 @@ export function TransferSuccess({ language, formData, createdOrderNumber }: Tran
         <p className="text-muted-foreground text-center max-w-sm mb-8">
           {language === 'ru'
             ? 'Водитель встретит вас с табличкой у выхода из терминала.'
+            : language === 'th'
+            ? 'คนขับจะรอรับคุณพร้อมป้ายชื่อที่บริเวณทางออกอาคารผู้โดยสาร'
             : 'Driver will meet you with a sign at the terminal exit.'}
         </p>
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => navigate(APP_ROUTES.TRANSPORT)}>
-            {language === 'ru' ? 'К транспорту' : 'Browse More'}
+            {language === 'ru' ? 'К транспорту' : language === 'th' ? 'ดูบริการเพิ่มเติม' : 'Browse More'}
           </Button>
           <Button onClick={() => navigate(APP_ROUTES.BOOKINGS)}>
-            {language === 'ru' ? 'Мои брони' : 'My Bookings'}
+            {language === 'ru' ? 'Мои брони' : language === 'th' ? 'การจองของฉัน' : 'My Bookings'}
           </Button>
         </div>
       </div>

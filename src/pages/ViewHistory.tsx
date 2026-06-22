@@ -14,7 +14,7 @@ import { EmptyState } from '@/components/uno/EmptyState';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { AnimatedList, AnimatedItem } from '@/components/layout/AnimatedList';
 import { formatDistanceToNow } from 'date-fns';
-import { ru, enUS } from 'date-fns/locale';
+import { ru, enUS, th } from 'date-fns/locale';
 
 const typeIcons: Record<string, React.ElementType> = {
   salon: Scissors,
@@ -27,15 +27,15 @@ const typeIcons: Record<string, React.ElementType> = {
   course: GraduationCap,
 };
 
-const typeLabels: Record<string, { en: string; ru: string }> = {
-  salon: { en: 'Beauty Salon', ru: 'Салон красоты' },
-  property: { en: 'Property', ru: 'Недвижимость' },
-  restaurant: { en: 'Restaurant', ru: 'Ресторан' },
-  vehicle: { en: 'Vehicle', ru: 'Транспорт' },
-  gym: { en: 'Gym', ru: 'Фитнес' },
-  clinic: { en: 'Clinic', ru: 'Клиника' },
-  event: { en: 'Event', ru: 'Мероприятие' },
-  course: { en: 'Course', ru: 'Курс' },
+const typeLabels: Record<string, { en: string; ru: string; th: string }> = {
+  salon: { en: 'Beauty Salon', ru: 'Салон красоты', th: 'ร้านเสริมสวย' },
+  property: { en: 'Property', ru: 'Недвижимость', th: 'อสังหาริมทรัพย์' },
+  restaurant: { en: 'Restaurant', ru: 'Ресторан', th: 'ร้านอาหาร' },
+  vehicle: { en: 'Vehicle', ru: 'Транспорт', th: 'ยานพาหนะ' },
+  gym: { en: 'Gym', ru: 'Фитнес', th: 'ฟิตเนส' },
+  clinic: { en: 'Clinic', ru: 'Клиника', th: 'คลินิก' },
+  event: { en: 'Event', ru: 'Мероприятие', th: 'อีเวนต์' },
+  course: { en: 'Course', ru: 'Курс', th: 'คอร์สเรียน' },
 };
 
 const typeRoutes: Record<string, string> = {
@@ -72,13 +72,15 @@ export default function ViewHistory() {
       <AppLayout>
         <EmptyState
           icon={Clock}
-          title={language === 'ru' ? 'Войдите в аккаунт' : 'Sign in to continue'}
-          description={language === 'ru' 
+          title={language === 'ru' ? 'Войдите в аккаунт' : language === 'th' ? 'เข้าสู่ระบบเพื่อดำเนินการต่อ' : 'Sign in to continue'}
+          description={language === 'ru'
             ? 'Чтобы просматривать историю, войдите в аккаунт'
+            : language === 'th'
+            ? 'เข้าสู่ระบบเพื่อดูประวัติการเข้าชมของคุณ'
             : 'Sign in to view your browsing history'}
           action={
             <PremiumButton onClick={() => navigate('/auth')}>
-              {language === 'ru' ? 'Войти' : 'Sign In'}
+              {language === 'ru' ? 'Войти' : language === 'th' ? 'เข้าสู่ระบบ' : 'Sign In'}
             </PremiumButton>
           }
         />
@@ -96,7 +98,7 @@ export default function ViewHistory() {
       <PullToRefresh onRefresh={handleRefresh} className="flex-1">
         <PageContainer>
           <PageHeader
-            title={language === 'ru' ? 'История просмотров' : 'View History'}
+            title={language === 'ru' ? 'История просмотров' : language === 'th' ? 'ประวัติการเข้าชม' : 'View History'}
             actions={
               history.length > 0 && (
                 <PremiumButton
@@ -106,7 +108,7 @@ export default function ViewHistory() {
                   className="text-destructive hover:text-destructive"
                 >
                   <Trash2 className="w-4 h-4 mr-1" />
-                  {language === 'ru' ? 'Очистить' : 'Clear'}
+                  {language === 'ru' ? 'Очистить' : language === 'th' ? 'ล้างทั้งหมด' : 'Clear'}
                 </PremiumButton>
               )
             }
@@ -127,9 +129,11 @@ export default function ViewHistory() {
           ) : history.length === 0 ? (
             <EmptyState
               icon={Clock}
-              title={language === 'ru' ? 'История пуста' : 'No history yet'}
-              description={language === 'ru' 
+              title={language === 'ru' ? 'История пуста' : language === 'th' ? 'ยังไม่มีประวัติ' : 'No history yet'}
+              description={language === 'ru'
                 ? 'Просмотренные салоны и услуги появятся здесь'
+                : language === 'th'
+                ? 'ร้านและบริการที่คุณเข้าชมจะแสดงที่นี่'
                 : 'Viewed salons and services will appear here'}
             />
           ) : (
@@ -178,14 +182,14 @@ export default function ViewHistory() {
                         <p className="text-xs text-muted-foreground mt-1">
                           {formatDistanceToNow(new Date(item.viewed_at), {
                             addSuffix: true,
-                            locale: language === 'ru' ? ru : enUS
+                            locale: language === 'ru' ? ru : language === 'th' ? th : enUS
                           })}
                         </p>
                       </button>
 
                       <button
                         onClick={() => removeFromHistory(item.id)}
-                        aria-label={language === 'ru' ? 'Удалить' : 'Remove'}
+                        aria-label={language === 'ru' ? 'Удалить' : language === 'th' ? 'ลบ' : 'Remove'}
                         className="p-2 hover:bg-secondary rounded-none transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                       >
                         <X className="w-4 h-4 text-muted-foreground" />

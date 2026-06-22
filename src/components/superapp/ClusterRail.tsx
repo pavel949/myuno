@@ -24,6 +24,7 @@ export const ClusterRail: React.FC<ClusterRailProps> = ({ clusterId, limit = 8 }
   const role = useLifeOSRole();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const cluster = getClusterById(clusterId);
 
@@ -36,7 +37,7 @@ export const ClusterRail: React.FC<ClusterRailProps> = ({ clusterId, limit = 8 }
 
   return (
     <IconGrid
-      title={isRu ? cluster.labelRu : cluster.labelEn}
+      title={isRu ? cluster.labelRu : isTh ? (cluster.labelTh ?? cluster.labelEn) : cluster.labelEn}
       count={AVAILABLE_SERVICES.filter((s) => s.clusterId === clusterId).length}
       seeAllHref={cluster.homeRoute}
       services={services}

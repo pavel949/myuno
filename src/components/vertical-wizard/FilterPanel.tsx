@@ -10,8 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import type { ActiveFilters } from '@/hooks/useVerticalListings';
+import type { Language } from '@/i18n';
 
-const t = (l: LocalizedText, lang: 'en' | 'ru') => l[lang] ?? l.en;
+const t = (l: LocalizedText, lang: Language): string =>
+  (l as Record<Language, string | undefined>)[lang] ?? l.en;
 
 interface Props {
   spec: VerticalSpec;
@@ -24,7 +26,7 @@ interface Props {
  */
 export function FilterPanel({ spec, onChange }: Props) {
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const [params, setParams] = useSearchParams();
 
   const { filters, sort } = useMemo(() => parseParams(spec, params), [spec, params]);
@@ -76,7 +78,7 @@ export function FilterPanel({ spec, onChange }: Props) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium">
-          {lang === 'ru' ? 'Фильтры' : 'Filters'}
+          {lang === 'ru' ? 'Фильтры' : lang === 'th' ? 'ตัวกรอง' : 'Filters'}
           {activeCount > 0 && (
             <Badge variant="secondary" className="ml-2">{activeCount}</Badge>
           )}
@@ -84,7 +86,7 @@ export function FilterPanel({ spec, onChange }: Props) {
         {activeCount > 0 && (
           <Button variant="ghost" size="sm" onClick={reset}>
             <X className="h-3 w-3 mr-1" />
-            {lang === 'ru' ? 'Сброс' : 'Reset'}
+            {lang === 'ru' ? 'Сброс' : lang === 'th' ? 'ล้าง' : 'Reset'}
           </Button>
         )}
       </div>
@@ -121,7 +123,7 @@ function FilterRow({
 }: {
   spec: FilterSpec;
   value: unknown;
-  lang: 'en' | 'ru';
+  lang: Language;
   onSet: (v: unknown) => void;
 }) {
   const label = t(spec.label, lang);
@@ -134,7 +136,7 @@ function FilterRow({
           <div className="space-y-1.5">
             <Label className="text-xs uppercase tracking-wide text-muted-foreground">{label}</Label>
             <Select value={(value as string) ?? ''} onValueChange={(v) => onSet(v || undefined)}>
-              <SelectTrigger><SelectValue placeholder={lang === 'ru' ? 'Любое' : 'Any'} /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={lang === 'ru' ? 'Любое' : lang === 'th' ? 'ทั้งหมด' : 'Any'} /></SelectTrigger>
               <SelectContent>
                 {spec.options?.map((o) => (
                   <SelectItem key={o.value} value={o.value}>{t(o.label, lang)}</SelectItem>
@@ -188,7 +190,7 @@ function FilterRow({
           <div className="grid grid-cols-2 gap-2">
             <Input
               type="number"
-              placeholder={lang === 'ru' ? 'от' : 'min'}
+              placeholder={lang === 'ru' ? 'от' : lang === 'th' ? 'ต่ำสุด' : 'min'}
               value={v.min ?? ''}
               min={spec.min}
               max={spec.max}
@@ -197,7 +199,7 @@ function FilterRow({
             />
             <Input
               type="number"
-              placeholder={lang === 'ru' ? 'до' : 'max'}
+              placeholder={lang === 'ru' ? 'до' : lang === 'th' ? 'สูงสุด' : 'max'}
               value={v.max ?? ''}
               min={spec.min}
               max={spec.max}
@@ -247,7 +249,7 @@ function FilterRow({
           <Input
             value={(value as string) ?? ''}
             onChange={(e) => onSet(e.target.value || undefined)}
-            placeholder={lang === 'ru' ? 'Поиск…' : 'Search…'}
+            placeholder={lang === 'ru' ? 'Поиск…' : lang === 'th' ? 'ค้นหา…' : 'Search…'}
           />
         </div>
       );

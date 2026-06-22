@@ -21,8 +21,10 @@ interface VehicleCardProps {
 export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, className }: VehicleCardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  // DB fields (name_ru/name_en): keep ru/en; Thai falls back to English
   const name = isRu ? vehicle.name_ru : vehicle.name_en;
   const currencySymbol = getCurrencySymbol(vehicle.currency || 'THB');
+  // Taxonomy helpers only support 'ru'|'en' — Thai falls back to English labels
   const transmissionLabel = getTransmissionLabel(vehicle.transmission, isRu ? 'ru' : 'en');
   const fuelLabel = getFuelLabel(vehicle.fuel_type, isRu ? 'ru' : 'en');
   const categoryConfig = getCategoryConfig(vehicle.vehicle_type);
@@ -59,7 +61,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
             {vehicle.is_featured && (
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-none bg-warning/90 text-white text-[10px] font-semibold">
                 <Sparkles className="w-3 h-3" />
-                {isRu ? 'Рекомендуем' : 'Featured'}
+                {language === 'ru' ? 'Рекомендуем' : language === 'th' ? 'แนะนำ' : 'Featured'}
               </span>
             )}
           </div>
@@ -77,7 +79,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
           <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/50">
             <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
             <span className="text-[10px] text-white font-medium">
-              {isRu ? 'Доступен' : 'Available'}
+              {language === 'ru' ? 'Доступен' : language === 'th' ? 'ว่าง' : 'Available'}
             </span>
           </div>
         )}
@@ -91,6 +93,7 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
             {name}
           </h3>
           <p className="text-xs text-muted-foreground mt-0.5">
+            {/* categoryConfig from taxonomy supports ru/en only — Thai falls back to English */}
             {isRu ? categoryConfig.labelRu : categoryConfig.labelEn}
           </p>
         </div>
@@ -122,19 +125,19 @@ export const VehicleCard = memo(function VehicleCard({ vehicle, onClick, classNa
           <div className="flex items-end justify-between">
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                {isRu ? 'От' : 'From'}
+                {language === 'ru' ? 'От' : language === 'th' ? 'เริ่มต้น' : 'From'}
               </p>
               <p className="text-lg font-bold text-foreground">
                 {currencySymbol}{vehicle.price_per_day?.toLocaleString() || '—'}
                 <span className="text-xs font-normal text-muted-foreground ml-0.5">
-                  /{isRu ? 'день' : 'day'}
+                  /{language === 'ru' ? 'день' : language === 'th' ? 'วัน' : 'day'}
                 </span>
               </p>
             </div>
 
             {vehicle.price_per_month && (
               <p className="text-[11px] text-muted-foreground text-right">
-                {isRu ? 'Месяц от' : 'Monthly from'}{' '}
+                {language === 'ru' ? 'Месяц от' : language === 'th' ? 'รายเดือนเริ่มต้น' : 'Monthly from'}{' '}
                 <span className="font-semibold text-foreground">
                   {currencySymbol}{vehicle.price_per_month.toLocaleString()}
                 </span>

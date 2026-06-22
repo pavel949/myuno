@@ -63,7 +63,7 @@ export default function RestaurantMap() {
             variant="secondary"
             size="icon"
             className="bg-background/90 shadow-lg"
-            aria-label={language === 'ru' ? 'Назад' : 'Back'}
+            aria-label={language === 'ru' ? 'Назад' : language === 'th' ? 'กลับ' : 'Back'}
             onClick={() => navigate('/restaurants')}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -75,7 +75,7 @@ export default function RestaurantMap() {
             onClick={() => navigate(`/restaurants?mode=${mode}`)}
           >
             <List className="w-4 h-4 mr-2" />
-            {language === 'ru' ? 'Список' : 'List'}
+            {language === 'ru' ? 'Список' : language === 'th' ? 'รายการ' : 'List'}
           </Button>
         </div>
 
@@ -85,8 +85,8 @@ export default function RestaurantMap() {
               <MapPin className="w-8 h-8 text-muted-foreground" />
               <p className="text-muted-foreground">
                 {loadError?.message?.includes('auth')
-                  ? (language === 'ru' ? 'Ошибка авторизации Google Maps' : 'Google Maps auth error')
-                  : (language === 'ru' ? 'Карта недоступна' : 'Map unavailable')}
+                  ? (language === 'ru' ? 'Ошибка авторизации Google Maps' : language === 'th' ? 'เกิดข้อผิดพลาดในการยืนยันตัวตน Google Maps' : 'Google Maps auth error')
+                  : (language === 'ru' ? 'Карта недоступна' : language === 'th' ? 'แผนที่ไม่พร้อมใช้งาน' : 'Map unavailable')}
               </p>
               <a
                 href="https://www.google.com/maps"
@@ -94,7 +94,7 @@ export default function RestaurantMap() {
                 rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline"
               >
-                {language === 'ru' ? 'Открыть Google Maps' : 'Open Google Maps'}
+                {language === 'ru' ? 'Открыть Google Maps' : language === 'th' ? 'เปิด Google Maps' : 'Open Google Maps'}
               </a>
             </div>
           )}
@@ -103,7 +103,7 @@ export default function RestaurantMap() {
               <div className="text-center">
                 <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  {language === 'ru' ? 'Загрузка карты...' : 'Loading map...'}
+                  {language === 'ru' ? 'Загрузка карты...' : language === 'th' ? 'กำลังโหลดแผนที่...' : 'Loading map...'}
                 </p>
               </div>
             </div>
@@ -164,23 +164,27 @@ export default function RestaurantMap() {
                       {selected.is_active
                         ? language === 'ru'
                           ? 'Открыто'
-                          : 'Open'
+                          : language === 'th'
+                            ? 'เปิด'
+                            : 'Open'
                         : language === 'ru'
                           ? 'Закрыто'
-                          : 'Closed'}
+                          : language === 'th'
+                            ? 'ปิด'
+                            : 'Closed'}
                     </Badge>
                   </div>
                 </div>
               </div>
               <div className="flex gap-2 mt-3">
                 <Button variant="outline" className="flex-1" onClick={() => setSelectedRestaurant(null)}>
-                  {language === 'ru' ? 'Закрыть' : 'Close'}
+                  {language === 'ru' ? 'Закрыть' : language === 'th' ? 'ปิด' : 'Close'}
                 </Button>
                 <Button
                   className="flex-1"
                   onClick={() => navigate(`/restaurants/${selected.id}?mode=${mode}`)}
                 >
-                  {language === 'ru' ? 'Подробнее' : 'Details'}
+                  {language === 'ru' ? 'Подробнее' : language === 'th' ? 'รายละเอียด' : 'Details'}
                 </Button>
               </div>
             </div>
@@ -193,7 +197,7 @@ export default function RestaurantMap() {
               <div className="flex items-center gap-2">
                 <span>🍽️</span>
                 <span className="text-muted-foreground">
-                  {filteredRestaurants.length} {language === 'ru' ? 'ресторанов' : 'restaurants'}
+                  {filteredRestaurants.length} {language === 'ru' ? 'ресторанов' : language === 'th' ? 'ร้านอาหาร' : 'restaurants'}
                 </span>
               </div>
             </div>

@@ -14,9 +14,17 @@ import type { FlatService, RoleTag } from '@/lib/catalog/taxonomy';
 import { PERSONA_INFO, type UserPersona } from '@/hooks/useUserPersonas';
 import type { LifeOSRole } from '@/hooks/useLifeOS';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { Language } from '@/i18n';
 import { cn } from '@/lib/utils';
 
-interface SituationLabel { ru: string; en: string }
+interface SituationLabel { ru: string; en: string; th?: string }
+
+/** Resolve a situation label for the active language (th→en→ru fallback). */
+function pickSituationLabel(lbl: SituationLabel, language: Language): string {
+  if (language === 'ru') return lbl.ru;
+  if (language === 'th') return lbl.th ?? lbl.en;
+  return lbl.en;
+}
 
 interface MiniAppCardProps {
   svc: FlatService;
@@ -26,14 +34,14 @@ interface MiniAppCardProps {
   situationLabels?: Record<string, SituationLabel>;
 }
 
-const ROLE_LABELS: Record<LifeOSRole, { ru: string; en: string }> = {
-  guest:     { ru: 'Гость',          en: 'Guest' },
-  resident:  { ru: 'Резидент',       en: 'Resident' },
-  owner:     { ru: 'Собственник',    en: 'Owner' },
-  mc:        { ru: 'УК',             en: 'MC' },
-  investor:  { ru: 'Инвестор',       en: 'Investor' },
-  developer: { ru: 'Застройщик',     en: 'Developer' },
-  vendor:    { ru: 'Поставщик',      en: 'Vendor' },
+const ROLE_LABELS: Record<LifeOSRole, { ru: string; en: string; th: string }> = {
+  guest:     { ru: 'Гость',          en: 'Guest',      th: 'ผู้มาเยือน' },
+  resident:  { ru: 'Резидент',       en: 'Resident',   th: 'ผู้พำนัก' },
+  owner:     { ru: 'Собственник',    en: 'Owner',      th: 'เจ้าของ' },
+  mc:        { ru: 'УК',             en: 'MC',         th: 'MC' },
+  investor:  { ru: 'Инвестор',       en: 'Investor',   th: 'นักลงทุน' },
+  developer: { ru: 'Застройщик',     en: 'Developer',  th: 'ผู้พัฒนา' },
+  vendor:    { ru: 'Поставщик',      en: 'Vendor',     th: 'ผู้ให้บริการ' },
 };
 
 const ROLE_TO_TAGS: Record<LifeOSRole, RoleTag[]> = {
@@ -52,22 +60,29 @@ function pickHint(
   role: LifeOSRole,
   activeSituationCode: string | undefined,
   situationLabels: Record<string, SituationLabel> | undefined,
-  isRu: boolean,
+  language: Language,
 ): string | null {
+  const isRu = language === 'ru';
+  const isTh = language === 'th';
+  const situationWord = isRu ? 'Ситуация' : isTh ? 'สถานการณ์' : 'Situation';
+  const forWord = isRu ? 'Для' : isTh ? 'สำหรับ' : 'For';
+  const roleWord = isRu ? 'Роль' : isTh ? 'บทบาท' : 'Role';
+
   if (
     activeSituationCode &&
     svc.situationCodes?.includes(activeSituationCode) &&
     situationLabels?.[activeSituationCode]
   ) {
     const lbl = situationLabels[activeSituationCode];
-    return `${isRu ? 'Ситуация' : 'Situation'}: ${isRu ? lbl.ru : lbl.en}`;
+    return `${situationWord}: ${pickSituationLabel(lbl, language)}`;
   }
 
   if (svc.personaTags?.length && personas.length) {
     for (const p of personas) {
       if (svc.personaTags.includes(p)) {
         const info = PERSONA_INFO[p];
-        if (info) return `${isRu ? 'Для' : 'For'}: ${isRu ? info.labelRu : info.labelEn}`;
+        // PERSONA_INFO has only RU/EN — Thai falls back to EN.
+        if (info) return `${forWord}: ${isRu ? info.labelRu : info.labelEn}`;
       }
     }
   }
@@ -76,7 +91,7 @@ function pickHint(
     const roleTags = ROLE_TO_TAGS[role] ?? [];
     if (svc.roleTags.some((t) => t === 'all' || roleTags.includes(t))) {
       const lbl = ROLE_LABELS[role];
-      return `${isRu ? 'Роль' : 'Role'}: ${isRu ? lbl.ru : lbl.en}`;
+      return `${roleWord}: ${isRu ? lbl.ru : isTh ? lbl.th : lbl.en}`;
     }
   }
 
@@ -85,7 +100,7 @@ function pickHint(
     for (const code of svc.situationCodes) {
       if (situationLabels[code]) {
         const lbl = situationLabels[code];
-        return `${isRu ? 'Ситуация' : 'Situation'}: ${isRu ? lbl.ru : lbl.en}`;
+        return `${situationWord}: ${pickSituationLabel(lbl, language)}`;
       }
     }
   }
@@ -102,12 +117,14 @@ export const MiniAppCard: React.FC<MiniAppCardProps> = ({
 }) => {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const Icon = svc.icon;
   const isSoon = svc.status === 'soon';
 
+  // FlatService labels carry only RU/EN — Thai falls back to EN.
   const label = isRu ? svc.labelRu : svc.labelEn;
   const category = isRu ? svc.categoryLabelRu : svc.categoryLabelEn;
-  const hint = pickHint(svc, personas, role, activeSituationCode, situationLabels, isRu);
+  const hint = pickHint(svc, personas, role, activeSituationCode, situationLabels, language);
 
   return (
     <Link
@@ -126,7 +143,7 @@ export const MiniAppCard: React.FC<MiniAppCardProps> = ({
         </div>
         {isSoon ? (
           <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
-            {isRu ? 'скоро' : 'soon'}
+            {isRu ? 'скоро' : isTh ? 'เร็ว ๆ นี้' : 'soon'}
           </span>
         ) : (
           <ArrowUpRight

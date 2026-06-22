@@ -8,8 +8,8 @@ import { AddressAutocomplete } from '@/components/transport/AddressAutocomplete'
 import type { BaseStepProps, TransferDirection } from './types';
 
 const terminals = [
-  { id: 'domestic', nameEn: 'Domestic Terminal', nameRu: 'Внутренний терминал' },
-  { id: 'international', nameEn: 'International Terminal', nameRu: 'Международный терминал' },
+  { id: 'domestic', nameEn: 'Domestic Terminal', nameRu: 'Внутренний терминал', nameTh: 'อาคารผู้โดยสารภายในประเทศ' },
+  { id: 'international', nameEn: 'International Terminal', nameRu: 'Международный терминал', nameTh: 'อาคารผู้โดยสารระหว่างประเทศ' },
 ];
 
 const stepVariants = {
@@ -65,7 +65,7 @@ export function StepRoute({
       {/* Direction */}
       <div className="space-y-2">
         <Label className="text-sm font-medium text-muted-foreground">
-          {language === 'ru' ? 'Направление' : 'Direction'}
+          {language === 'ru' ? 'Направление' : language === 'th' ? 'เส้นทาง' : 'Direction'}
         </Label>
         <div className="grid grid-cols-2 gap-2">
           <button
@@ -87,7 +87,7 @@ export function StepRoute({
               <MapPin className="w-4 h-4 text-muted-foreground" />
             </div>
             <p className="font-medium text-sm">
-              {language === 'ru' ? 'Из аэропорта' : 'From Airport'}
+              {language === 'ru' ? 'Из аэропорта' : language === 'th' ? 'จากสนามบิน' : 'From Airport'}
             </p>
           </button>
           <button
@@ -109,7 +109,7 @@ export function StepRoute({
               <Plane className="w-4 h-4 text-primary" />
             </div>
             <p className="font-medium text-sm">
-              {language === 'ru' ? 'В аэропорт' : 'To Airport'}
+              {language === 'ru' ? 'В аэропорт' : language === 'th' ? 'ไปสนามบิน' : 'To Airport'}
             </p>
           </button>
         </div>
@@ -118,7 +118,7 @@ export function StepRoute({
       {/* Terminal */}
       <div className="space-y-2">
         <Label className="text-sm font-medium text-muted-foreground">
-          {language === 'ru' ? 'Терминал' : 'Terminal'}
+          {language === 'ru' ? 'Терминал' : language === 'th' ? 'อาคารผู้โดยสาร' : 'Terminal'}
         </Label>
         <div className="grid grid-cols-2 gap-2">
           {terminals.map((terminal) => (
@@ -138,7 +138,7 @@ export function StepRoute({
               )}
               <Plane className="w-5 h-5 mb-1 text-primary mx-auto" />
               <p className="font-medium text-xs">
-                {language === 'ru' ? terminal.nameRu : terminal.nameEn}
+                {language === 'ru' ? terminal.nameRu : language === 'th' ? terminal.nameTh : terminal.nameEn}
               </p>
             </button>
           ))}
@@ -151,11 +151,13 @@ export function StepRoute({
         {formData.terminal === 'international' && formData.direction === 'from-airport' && (
           <div className="rounded-none border border-primary/30 bg-primary/[0.04] p-3 mt-2">
             <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground font-semibold mb-1">
-              {language === 'ru' ? 'Место встречи' : 'Meeting point'}
+              {language === 'ru' ? 'Место встречи' : language === 'th' ? 'จุดนัดพบ' : 'Meeting point'}
             </p>
             <p className="text-[13px] text-foreground leading-snug">
               {language === 'ru'
                 ? 'Стойка туристической полиции (Tourist Police 1155) в зоне прилёта международного терминала.'
+                : language === 'th'
+                ? 'เคาน์เตอร์ตำรวจท่องเที่ยว (Tourist Police 1155) บริเวณผู้โดยสารขาเข้าของอาคารผู้โดยสารระหว่างประเทศ'
                 : 'Tourist Police desk (1155) in the international arrivals hall.'}
             </p>
           </div>
@@ -167,14 +169,14 @@ export function StepRoute({
         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <MapPin className="w-4 h-4" />
           {formData.direction === 'from-airport'
-            ? (language === 'ru' ? 'Куда доставить' : 'Drop-off Address')
-            : (language === 'ru' ? 'Откуда забрать' : 'Pick-up Address')}
+            ? (language === 'ru' ? 'Куда доставить' : language === 'th' ? 'ที่อยู่ปลายทาง' : 'Drop-off Address')
+            : (language === 'ru' ? 'Откуда забрать' : language === 'th' ? 'ที่อยู่จุดรับ' : 'Pick-up Address')}
         </Label>
 
         {destinations.length > 0 ? (
           <div className="space-y-1.5">
             <p className="text-xs text-muted-foreground">
-              {language === 'ru' ? 'Популярные направления' : 'Popular destinations'}
+              {language === 'ru' ? 'Популярные направления' : language === 'th' ? 'จุดหมายยอดนิยม' : 'Popular destinations'}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {destinations
@@ -205,7 +207,7 @@ export function StepRoute({
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono font-semibold text-primary">฿{dest.base_price.toLocaleString()}</span>
                       {dest.duration_minutes && (
-                        <span className="text-[10px] text-muted-foreground">~{dest.duration_minutes} {language === 'ru' ? 'мин' : 'min'}</span>
+                        <span className="text-[10px] text-muted-foreground">~{dest.duration_minutes} {language === 'ru' ? 'мин' : language === 'th' ? 'นาที' : 'min'}</span>
                       )}
                     </div>
                   </button>
@@ -217,6 +219,8 @@ export function StepRoute({
             <p className="text-xs text-muted-foreground leading-relaxed">
               {language === 'ru'
                 ? 'Популярные направления ещё не загружены. Введите адрес назначения в поле ниже.'
+                : language === 'th'
+                ? 'ยังไม่ได้โหลดจุดหมายยอดนิยม กรุณากรอกที่อยู่ปลายทางในช่องด้านล่าง'
                 : 'Popular destinations are not loaded yet. Enter the destination address in the field below.'}
             </p>
           </div>
@@ -236,7 +240,7 @@ export function StepRoute({
                 onDestinationCoords(null);
               }
             }}
-            placeholder={language === 'ru' ? 'Или введите свой адрес' : 'Or enter your address'}
+            placeholder={language === 'ru' ? 'Или введите свой адрес' : language === 'th' ? 'หรือกรอกที่อยู่ของคุณ' : 'Or enter your address'}
             className="flex-1"
           />
           {geoSupported && (
@@ -247,7 +251,7 @@ export function StepRoute({
               className="h-11 w-11 shrink-0"
               onClick={onUseCurrentLocation}
               disabled={geoLoading || isReverseGeocoding}
-              aria-label={language === 'ru' ? 'Моё местоположение' : 'Use my location'}
+              aria-label={language === 'ru' ? 'Моё местоположение' : language === 'th' ? 'ใช้ตำแหน่งของฉัน' : 'Use my location'}
             >
               {(geoLoading || isReverseGeocoding)
                 ? <Loader2 className="h-4 w-4 animate-spin" />

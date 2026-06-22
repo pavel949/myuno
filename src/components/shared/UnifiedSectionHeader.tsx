@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { resolveIcon } from '@/lib/iconMap';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface UnifiedSectionHeaderProps {
   icon?: LucideIcon;
@@ -28,12 +29,16 @@ export const UnifiedSectionHeader = memo(forwardRef<HTMLDivElement, UnifiedSecti
   title,
   count,
   viewAllPath,
-  viewAllLabel = 'All',
+  viewAllLabel,
   onViewAll,
   className,
   children,
 }, ref) {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+
+  const resolvedViewAllLabel =
+    viewAllLabel ?? (language === 'ru' ? 'Все' : language === 'th' ? 'ทั้งหมด' : 'All');
 
   const handleViewAll = () => {
     if (onViewAll) {
@@ -89,7 +94,7 @@ export const UnifiedSectionHeader = memo(forwardRef<HTMLDivElement, UnifiedSecti
           className="text-primary gap-1 shrink-0"
           onClick={handleViewAll}
         >
-          {viewAllLabel}
+          {resolvedViewAllLabel}
           <ChevronRight className="w-4 h-4" />
         </Button>
       )}

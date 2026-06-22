@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { Language } from '@/i18n';
+import { pickLang } from '@/lib/i18n/pickLang';
 import {
   LIFECYCLE_OPTIONS,
 } from '@/lib/segmentation/detectPersona';
@@ -17,21 +19,21 @@ const ICONS: Record<LifecycleStage, string> = {
   returnee: '🔁',
 };
 
-const DESCRIPTIONS: Record<LifecycleStage, { en: string; ru: string }> = {
-  scout:    { en: 'Researching, not here yet', ru: 'Изучаю, ещё не приехал' },
-  tourist:  { en: 'Short visit, holiday',     ru: 'Короткий визит, отпуск' },
-  snowbird: { en: '1–6 months a year',        ru: '1–6 месяцев в году' },
-  nomad:    { en: 'Working remotely',         ru: 'Работаю удалённо' },
-  settler:  { en: 'Just relocated',           ru: 'Только переехал' },
-  resident: { en: 'Living here permanently',  ru: 'Живу постоянно' },
-  absentee: { en: 'Own here, live elsewhere', ru: 'Владею, живу в другом месте' },
-  returnee: { en: 'Coming back again',        ru: 'Возвращаюсь снова' },
+const DESCRIPTIONS: Record<LifecycleStage, { en: string; ru: string; th: string }> = {
+  scout:    { en: 'Researching, not here yet', ru: 'Изучаю, ещё не приехал', th: 'กำลังหาข้อมูล ยังไม่ได้มา' },
+  tourist:  { en: 'Short visit, holiday',     ru: 'Короткий визит, отпуск', th: 'มาเที่ยวระยะสั้น' },
+  snowbird: { en: '1–6 months a year',        ru: '1–6 месяцев в году', th: '1–6 เดือนต่อปี' },
+  nomad:    { en: 'Working remotely',         ru: 'Работаю удалённо', th: 'ทำงานทางไกล' },
+  settler:  { en: 'Just relocated',           ru: 'Только переехал', th: 'เพิ่งย้ายมา' },
+  resident: { en: 'Living here permanently',  ru: 'Живу постоянно', th: 'อาศัยอยู่ที่นี่ถาวร' },
+  absentee: { en: 'Own here, live elsewhere', ru: 'Владею, живу в другом месте', th: 'เป็นเจ้าของที่นี่ แต่อาศัยที่อื่น' },
+  returnee: { en: 'Coming back again',        ru: 'Возвращаюсь снова', th: 'กลับมาอีกครั้ง' },
 };
 
 interface Props {
   value: LifecycleStage | null;
   onChange: (v: LifecycleStage) => void;
-  lang: 'en' | 'ru';
+  lang: Language;
 }
 
 export function LifecycleStep({ value, onChange, lang }: Props) {
@@ -58,10 +60,10 @@ export function LifecycleStep({ value, onChange, lang }: Props) {
             </span>
             <span className="flex-1">
               <span className="block text-sm font-semibold text-foreground">
-                {LIFECYCLE_STAGE_LABELS[stage][lang]}
+                {pickLang(LIFECYCLE_STAGE_LABELS[stage], lang)}
               </span>
               <span className="mt-0.5 block text-xs text-muted-foreground">
-                {DESCRIPTIONS[stage][lang]}
+                {pickLang(DESCRIPTIONS[stage], lang)}
               </span>
             </span>
             {isActive && (

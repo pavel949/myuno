@@ -8,6 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface ViewLabel {
   en: string;
   ru: string;
+  th?: string;
 }
 
 interface PropertyDetailHighlightsProps {
@@ -32,13 +33,14 @@ export function PropertyDetailHighlights({
 }: PropertyDetailHighlightsProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const propertyTypeLabel =
     propertyType === 'villa'
-      ? (isRu ? 'Вилла целиком' : 'Entire villa')
+      ? (isRu ? 'Вилла целиком' : isTh ? 'วิลลาทั้งหลัง' : 'Entire villa')
       : propertyType === 'condo'
-        ? (isRu ? 'Апартаменты целиком' : 'Entire apartment')
-        : (isRu ? 'Жильё целиком' : 'Entire place');
+        ? (isRu ? 'Апартаменты целиком' : isTh ? 'อพาร์ตเมนต์ทั้งห้อง' : 'Entire apartment')
+        : (isRu ? 'Жильё целиком' : isTh ? 'ที่พักทั้งหลัง' : 'Entire place');
 
   return (
     <div className="space-y-4">

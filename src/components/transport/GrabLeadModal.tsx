@@ -19,7 +19,6 @@ interface GrabLeadModalProps {
 export function GrabLeadModal({ isOpen, onClose, pickupAddress, destinationAddress }: GrabLeadModalProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
-const isRu = language === 'ru';
 
   const [step, setStep] = useState<'form' | 'transition'>('form');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +47,7 @@ const isRu = language === 'ru';
     e.preventDefault();
     
     if (!formData.phone || !formData.pickup) {
-      toast.error(isRu ? 'Заполните обязательные поля' : 'Fill required fields');
+      toast.error(language === 'ru' ? 'Заполните обязательные поля' : language === 'th' ? 'กรุณากรอกข้อมูลที่จำเป็น' : 'Fill required fields');
       return;
     }
 
@@ -88,8 +87,8 @@ const isRu = language === 'ru';
 
     } catch (error) {
       console.error('Error saving lead:', error);
-      toast.error(isRu ? 'Ошибка' : 'Error', {
-        description: isRu ? 'Попробуйте ещё раз' : 'Please try again',
+      toast.error(language === 'ru' ? 'Ошибка' : language === 'th' ? 'เกิดข้อผิดพลาด' : 'Error', {
+        description: language === 'ru' ? 'Попробуйте ещё раз' : language === 'th' ? 'กรุณาลองอีกครั้ง' : 'Please try again',
       });
     } finally {
       setIsSubmitting(false);
@@ -157,10 +156,10 @@ const isRu = language === 'ru';
                     </div>
                     <div>
                       <h2 className="text-lg font-bold">
-                        {isRu ? 'Заказ через Grab' : 'Book via Grab'}
+                        {language === 'ru' ? 'Заказ через Grab' : language === 'th' ? 'จองผ่าน Grab' : 'Book via Grab'}
                       </h2>
                       <p className="text-xs text-muted-foreground">
-                        {isRu ? 'Партнёр myUNO' : 'myUNO Partner'}
+                        {language === 'ru' ? 'Партнёр myUNO' : language === 'th' ? 'พาร์ทเนอร์ myUNO' : 'myUNO Partner'}
                       </p>
                     </div>
                   </div>
@@ -178,17 +177,17 @@ const isRu = language === 'ru';
                 <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Shield className="w-3.5 h-3.5 text-primary" />
-                    <span>{isRu ? 'Безопасно' : 'Secure'}</span>
+                    <span>{language === 'ru' ? 'Безопасно' : language === 'th' ? 'ปลอดภัย' : 'Secure'}</span>
                   </div>
                   <div className="w-1 h-1 rounded-full bg-border" />
                   <div className="flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-primary" />
-                    <span>{isRu ? '3-5 мин' : '3-5 min'}</span>
+                    <span>{language === 'ru' ? '3-5 мин' : language === 'th' ? '3-5 นาที' : '3-5 min'}</span>
                   </div>
                   <div className="w-1 h-1 rounded-full bg-border" />
                   <div className="flex items-center gap-1">
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
-                    <span>{isRu ? 'Проверено' : 'Verified'}</span>
+                    <span>{language === 'ru' ? 'Проверено' : language === 'th' ? 'ตรวจสอบแล้ว' : 'Verified'}</span>
                   </div>
                 </div>
               </div>
@@ -198,19 +197,19 @@ const isRu = language === 'ru';
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <User className="w-4 h-4 text-muted-foreground" />
-                    {isRu ? 'Ваше имя' : 'Your name'}
+                    {language === 'ru' ? 'Ваше имя' : language === 'th' ? 'ชื่อของคุณ' : 'Your name'}
                   </Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder={isRu ? 'Как к вам обращаться?' : 'How should we call you?'}
+                    placeholder={language === 'ru' ? 'Как к вам обращаться?' : language === 'th' ? 'เราควรเรียกคุณว่าอะไร?' : 'How should we call you?'}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Phone className="w-4 h-4 text-muted-foreground" />
-                    {isRu ? 'Телефон' : 'Phone'} *
+                    {language === 'ru' ? 'Телефон' : language === 'th' ? 'เบอร์โทรศัพท์' : 'Phone'} *
                   </Label>
                   <Input
                     type="tel"
@@ -224,12 +223,12 @@ const isRu = language === 'ru';
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-success" />
-                    {isRu ? 'Откуда' : 'From'} *
+                    {language === 'ru' ? 'Откуда' : language === 'th' ? 'จาก' : 'From'} *
                   </Label>
                   <Input
                     value={formData.pickup}
                     onChange={(e) => setFormData({ ...formData, pickup: e.target.value })}
-                    placeholder={isRu ? 'Адрес подачи' : 'Pickup address'}
+                    placeholder={language === 'ru' ? 'Адрес подачи' : language === 'th' ? 'ที่อยู่จุดรับ' : 'Pickup address'}
                     required
                   />
                 </div>
@@ -237,20 +236,22 @@ const isRu = language === 'ru';
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-primary" />
-                    {isRu ? 'Куда' : 'To'}
+                    {language === 'ru' ? 'Куда' : language === 'th' ? 'ไปที่' : 'To'}
                   </Label>
                   <Input
                     value={formData.destination}
                     onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                    placeholder={isRu ? 'Адрес назначения' : 'Destination address'}
+                    placeholder={language === 'ru' ? 'Адрес назначения' : language === 'th' ? 'ที่อยู่ปลายทาง' : 'Destination address'}
                   />
                 </div>
 
                 {/* Info note */}
                 <div className="p-3 rounded-none bg-primary/10 border border-primary/20">
                   <p className="text-xs text-muted-foreground">
-                    {isRu 
+                    {language === 'ru'
                       ? '📱 После отправки вы будете перенаправлены в приложение Grab для завершения заказа. myUNO сохранит вашу заявку для поддержки.'
+                      : language === 'th'
+                      ? '📱 หลังจากส่งแล้ว คุณจะถูกนำไปยังแอป Grab เพื่อทำการจองให้เสร็จสมบูรณ์ myUNO จะบันทึกคำขอของคุณไว้สำหรับการช่วยเหลือ'
                       : '📱 After submitting, you will be redirected to the Grab app to complete your booking. myUNO will save your request for support.'}
                   </p>
                 </div>
@@ -267,11 +268,11 @@ const isRu = language === 'ru';
                         transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                         className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
                       />
-                      {isRu ? 'Обработка...' : 'Processing...'}
+                      {language === 'ru' ? 'Обработка...' : language === 'th' ? 'กำลังดำเนินการ...' : 'Processing...'}
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      {isRu ? 'Продолжить в Grab' : 'Continue to Grab'}
+                      {language === 'ru' ? 'Продолжить в Grab' : language === 'th' ? 'ไปต่อที่ Grab' : 'Continue to Grab'}
                       <ArrowRight className="w-5 h-5" />
                     </span>
                   )}
@@ -298,11 +299,13 @@ const isRu = language === 'ru';
                 transition={{ delay: 0.2 }}
               >
                 <h2 className="text-xl font-bold mb-2">
-                  {isRu ? 'Переходим в Grab' : 'Opening Grab'}
+                  {language === 'ru' ? 'Переходим в Grab' : language === 'th' ? 'กำลังเปิด Grab' : 'Opening Grab'}
                 </h2>
                 <p className="text-muted-foreground mb-6">
-                  {isRu 
+                  {language === 'ru'
                     ? 'myUNO сохранил вашу заявку. Наша служба поддержки доступна 24/7 если понадобится помощь.'
+                    : language === 'th'
+                    ? 'myUNO บันทึกคำขอของคุณแล้ว ทีมสนับสนุนของเราพร้อมให้บริการตลอด 24 ชั่วโมงหากคุณต้องการความช่วยเหลือ'
                     : 'myUNO saved your request. Our support team is available 24/7 if you need help.'}
                 </p>
               </motion.div>
@@ -330,7 +333,7 @@ const isRu = language === 'ru';
                 className="gap-2"
               >
                 <ExternalLink className="w-4 h-4" />
-                {isRu ? 'Открыть сейчас' : 'Open now'}
+                {language === 'ru' ? 'Открыть сейчас' : language === 'th' ? 'เปิดเลย' : 'Open now'}
               </Button>
             </div>
           )}

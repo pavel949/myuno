@@ -27,6 +27,7 @@ export default function FlowersIndex() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
   const { categoryRibbon, filterConfig, isLoading: filtersLoading } = useFlowerFilterOptions();
@@ -142,13 +143,13 @@ export default function FlowersIndex() {
 
   return (
     <MiniAppLayout
-      title={isRu ? 'Доставка цветов' : 'Flower Delivery'}
-      subtitle={isRu ? `Найдено: ${filteredBouquets.length}` : `${filteredBouquets.length} results`}
+      title={isRu ? 'Доставка цветов' : isTh ? 'บริการส่งดอกไม้' : 'Flower Delivery'}
+      subtitle={isRu ? `Найдено: ${filteredBouquets.length}` : isTh ? `พบ ${filteredBouquets.length} รายการ` : `${filteredBouquets.length} results`}
       fallbackPath={APP_ROUTES.DISCOVER}
       showSearch
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={isRu ? 'Поиск букетов, цветов, поводов…' : 'Search bouquets, flowers, occasions…'}
+      searchPlaceholder={isRu ? 'Поиск букетов, цветов, поводов…' : isTh ? 'ค้นหาช่อดอกไม้ ดอกไม้ โอกาสพิเศษ…' : 'Search bouquets, flowers, occasions…'}
       showHero={false}
       categories={categories}
       selectedCategory={selectedCategory}
@@ -162,9 +163,11 @@ export default function FlowersIndex() {
       showBottomNav={false}
     >
       <Helmet>
-        <title>{isRu ? 'Доставка цветов на Пхукете | myUNO' : 'Flower Delivery in Phuket | myUNO'}</title>
+        <title>{isRu ? 'Доставка цветов на Пхукете | myUNO' : isTh ? 'บริการส่งดอกไม้ในภูเก็ต | myUNO' : 'Flower Delivery in Phuket | myUNO'}</title>
         <meta name="description" content={isRu
           ? 'Доставка свежих букетов на Пхукете за 1-3 часа. Розы, пионы, орхидеи.'
+          : isTh
+          ? 'บริการส่งช่อดอกไม้สดในภูเก็ตภายใน 1-3 ชั่วโมง กุหลาบ พีโอนี กล้วยไม้'
           : 'Fresh flower delivery in Phuket within 1-3 hours. Roses, peonies, orchids.'
         } />
       </Helmet>
@@ -173,12 +176,12 @@ export default function FlowersIndex() {
       <div className="flex items-center justify-center gap-3 sm:gap-4 text-xs text-muted-foreground flex-wrap -mt-2 mb-4">
         <span className="flex items-center gap-1 shrink-0">
           <Shield className="w-3 h-3 text-primary shrink-0" />
-          {isRu ? 'Гарантия свежести 5 дней' : '5-day freshness guarantee'}
+          {isRu ? 'Гарантия свежести 5 дней' : isTh ? 'รับประกันความสด 5 วัน' : '5-day freshness guarantee'}
         </span>
         {isBefore2PM && (
           <span className="flex items-center gap-1 shrink-0">
             <Clock className="w-3 h-3 text-primary shrink-0" />
-            {isRu ? 'Доставка сегодня — заказ до 14:00' : 'Same-day delivery — order before 2 PM'}
+            {isRu ? 'Доставка сегодня — заказ до 14:00' : isTh ? 'จัดส่งวันนี้ — สั่งก่อน 14:00 น.' : 'Same-day delivery — order before 2 PM'}
           </span>
         )}
       </div>
@@ -206,14 +209,16 @@ export default function FlowersIndex() {
       ) : filteredBouquets.length === 0 ? (
         <EmptyState
           icon={Flower2}
-          title={isRu ? 'Букеты не найдены' : 'No bouquets found'}
+          title={isRu ? 'Букеты не найдены' : isTh ? 'ไม่พบช่อดอกไม้' : 'No bouquets found'}
           description={isRu
             ? activeFilterCount > 0 ? 'Попробуйте изменить фильтры' : 'В этой категории пока нет букетов'
+            : isTh
+            ? activeFilterCount > 0 ? 'ลองปรับตัวกรองของคุณ' : 'ยังไม่มีช่อดอกไม้ในหมวดหมู่นี้'
             : activeFilterCount > 0 ? 'Try adjusting your filters' : 'No bouquets in this category yet'
           }
           action={activeFilterCount > 0 ? (
             <Button variant="outline" onClick={handleClearAll}>
-              {isRu ? 'Сбросить фильтры' : 'Reset filters'}
+              {isRu ? 'Сбросить фильтры' : isTh ? 'ล้างตัวกรอง' : 'Reset filters'}
             </Button>
           ) : undefined}
         />

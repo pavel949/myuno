@@ -34,20 +34,20 @@ interface ClusterTheme {
   icon: LucideIcon;
   color: string;
   colorAccent: string;
-  tagline: { ru: string; en: string };
+  tagline: { ru: string; en: string; th: string };
 }
 
 const CLUSTER_THEME: Record<string, ClusterTheme> = {
-  arrival:     { icon: Plane,         color: 'cluster-arrive',  colorAccent: 'accent-cyan',   tagline: { ru: 'Жизненный цикл · Прибытие',     en: 'Lifecycle · Arrival' } },
-  extension:   { icon: Repeat,        color: 'accent-amber',    colorAccent: 'cluster-arrive',tagline: { ru: 'Жизненный цикл · Продление',    en: 'Lifecycle · Extension' } },
-  settlement:  { icon: Building2,     color: 'cluster-live',    colorAccent: 'accent-purple', tagline: { ru: 'Жизненный цикл · Заселение',    en: 'Lifecycle · Settlement' } },
-  investment:  { icon: TrendingUp,    color: 'cluster-invest',  colorAccent: 'accent-cyan',   tagline: { ru: 'Жизненный цикл · Инвестиции',   en: 'Lifecycle · Investment' } },
-  transaction: { icon: Building2,     color: 'cluster-build',   colorAccent: 'accent-amber',  tagline: { ru: 'Жизненный цикл · Сделка',       en: 'Lifecycle · Transaction' } },
-  operations:  { icon: Wrench,        color: 'cluster-manage',  colorAccent: 'cluster-invest',tagline: { ru: 'Жизненный цикл · Управление',   en: 'Lifecycle · Operations' } },
-  compliance:  { icon: Scale,         color: 'cluster-legal',   colorAccent: 'accent-amber',  tagline: { ru: 'Жизненный цикл · Право',        en: 'Lifecycle · Compliance' } },
-  emergency:   { icon: AlertTriangle, color: 'destructive',     colorAccent: 'accent-coral',  tagline: { ru: 'Жизненный цикл · Экстренно',    en: 'Lifecycle · Emergency' } },
-  lifestyle:   { icon: Sun,           color: 'accent-coral',    colorAccent: 'accent-purple', tagline: { ru: 'Жизненный цикл · Образ жизни',  en: 'Lifecycle · Lifestyle' } },
-  exit:        { icon: LogOut,        color: 'muted-foreground',colorAccent: 'cluster-invest',tagline: { ru: 'Жизненный цикл · Выход',        en: 'Lifecycle · Exit' } },
+  arrival:     { icon: Plane,         color: 'cluster-arrive',  colorAccent: 'accent-cyan',   tagline: { ru: 'Жизненный цикл · Прибытие',     en: 'Lifecycle · Arrival',     th: 'ช่วงชีวิต · การเดินทางถึง' } },
+  extension:   { icon: Repeat,        color: 'accent-amber',    colorAccent: 'cluster-arrive',tagline: { ru: 'Жизненный цикл · Продление',    en: 'Lifecycle · Extension',   th: 'ช่วงชีวิต · การต่ออายุ' } },
+  settlement:  { icon: Building2,     color: 'cluster-live',    colorAccent: 'accent-purple', tagline: { ru: 'Жизненный цикл · Заселение',    en: 'Lifecycle · Settlement',  th: 'ช่วงชีวิต · การตั้งถิ่นฐาน' } },
+  investment:  { icon: TrendingUp,    color: 'cluster-invest',  colorAccent: 'accent-cyan',   tagline: { ru: 'Жизненный цикл · Инвестиции',   en: 'Lifecycle · Investment',  th: 'ช่วงชีวิต · การลงทุน' } },
+  transaction: { icon: Building2,     color: 'cluster-build',   colorAccent: 'accent-amber',  tagline: { ru: 'Жизненный цикл · Сделка',       en: 'Lifecycle · Transaction', th: 'ช่วงชีวิต · การทำธุรกรรม' } },
+  operations:  { icon: Wrench,        color: 'cluster-manage',  colorAccent: 'cluster-invest',tagline: { ru: 'Жизненный цикл · Управление',   en: 'Lifecycle · Operations',  th: 'ช่วงชีวิต · การบริหารจัดการ' } },
+  compliance:  { icon: Scale,         color: 'cluster-legal',   colorAccent: 'accent-amber',  tagline: { ru: 'Жизненный цикл · Право',        en: 'Lifecycle · Compliance',  th: 'ช่วงชีวิต · การปฏิบัติตามกฎหมาย' } },
+  emergency:   { icon: AlertTriangle, color: 'destructive',     colorAccent: 'accent-coral',  tagline: { ru: 'Жизненный цикл · Экстренно',    en: 'Lifecycle · Emergency',   th: 'ช่วงชีวิต · เหตุฉุกเฉิน' } },
+  lifestyle:   { icon: Sun,           color: 'accent-coral',    colorAccent: 'accent-purple', tagline: { ru: 'Жизненный цикл · Образ жизни',  en: 'Lifecycle · Lifestyle',   th: 'ช่วงชีวิต · ไลฟ์สไตล์' } },
+  exit:        { icon: LogOut,        color: 'muted-foreground',colorAccent: 'cluster-invest',tagline: { ru: 'Жизненный цикл · Выход',        en: 'Lifecycle · Exit',        th: 'ช่วงชีวิต · การออก' } },
 };
 
 function getClusterTheme(slug: string): ClusterTheme {
@@ -55,7 +55,7 @@ function getClusterTheme(slug: string): ClusterTheme {
     icon: Sparkles,
     color: 'primary',
     colorAccent: 'accent-cyan',
-    tagline: { ru: 'Кластер', en: 'Cluster' },
+    tagline: { ru: 'Кластер', en: 'Cluster', th: 'คลัสเตอร์' },
   };
 }
 
@@ -67,7 +67,8 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
   const { language } = useLanguage();
   const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
-  const t = <T,>(pair: { ru: T; en: T }): T => (isRu ? pair.ru : pair.en);
+  const isTh = language === 'th';
+  const t = <T,>(pair: { ru: T; en: T; th?: T }): T => (isRu ? pair.ru : isTh ? (pair.th ?? pair.en) : pair.en);
   const theme = getClusterTheme(landing.slug);
   const Icon = theme.icon;
 
@@ -88,7 +89,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
 
   return (
     <AppLayout>
-      <LandingSeoHead landing={landing} type="cluster" language={language as 'ru' | 'en'} />
+      <LandingSeoHead landing={landing} type="cluster" language={language} />
 
       {/* ─── HERO ───────────────────────────────────────────────── */}
       <header
@@ -146,7 +147,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         const SurfaceIcon = surface.icon;
         return (
           <aside
-            aria-label={isRu ? 'Связанный surface' : 'Related surface'}
+            aria-label={isRu ? 'Связанный surface' : isTh ? 'Surface ที่เกี่ยวข้อง' : 'Related surface'}
             className="border-b border-border bg-muted/20"
           >
             <LandingContainer className="max-w-3xl px-4 py-4 sm:px-6">
@@ -185,7 +186,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         {landing.jobs.length > 0 ? (
           <section className="mb-12">
             <h2 className="mb-5 text-2xl font-semibold text-foreground">
-              {isRu ? 'Что делают на этом этапе' : 'What people do at this stage'}
+              {isRu ? 'Что делают на этом этапе' : isTh ? 'สิ่งที่ผู้คนทำในขั้นตอนนี้' : 'What people do at this stage'}
             </h2>
             <ul className="space-y-2">
               {landing.jobs.map((job, i) => (
@@ -202,7 +203,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         {landing.services.length > 0 ? (
           <section className="mb-12">
             <h2 className="mb-5 text-2xl font-semibold text-foreground">
-              {isRu ? 'Услуги кластера' : 'Cluster services'}
+              {isRu ? 'Услуги кластера' : isTh ? 'บริการในคลัสเตอร์' : 'Cluster services'}
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {landing.services.map((service) => (
@@ -251,7 +252,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         {livePersonaLinks.length > 0 ? (
           <section className="mb-12">
             <h2 className="mb-5 text-2xl font-semibold text-foreground">
-              {isRu ? 'Кому актуально' : 'Who this is for'}
+              {isRu ? 'Кому актуально' : isTh ? 'เหมาะกับใคร' : 'Who this is for'}
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {livePersonaLinks.map((p) => (
@@ -275,7 +276,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         {landing.faq.length > 0 ? (
           <section className="mb-12">
             <h2 className="mb-5 text-2xl font-semibold text-foreground">
-              {isRu ? 'Вопросы и ответы' : 'Questions & answers'}
+              {isRu ? 'Вопросы и ответы' : isTh ? 'คำถามที่พบบ่อย' : 'Questions & answers'}
             </h2>
             <dl className="space-y-5">
               {landing.faq.map((entry, i) => (
@@ -294,11 +295,13 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
           style={{ borderColor: tokenColor(theme.color, 0.4), background: tokenColor(theme.color, 0.06) }}
         >
           <h3 className="text-xl font-semibold text-foreground">
-            {isRu ? 'Готовы начать?' : 'Ready to start?'}
+            {isRu ? 'Готовы начать?' : isTh ? 'พร้อมเริ่มหรือยัง?' : 'Ready to start?'}
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
             {isRu
               ? 'Ответ дежурного — за 12 минут, без обязательств.'
+              : isTh
+              ? 'ทีมงานตอบกลับภายใน 12 นาที ไม่มีข้อผูกมัด'
               : 'Reply within 12 minutes, no commitment.'}
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">

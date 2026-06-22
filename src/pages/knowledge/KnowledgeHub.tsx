@@ -18,8 +18,10 @@ export default function KnowledgeHub() {
   const { data: sections, isLoading } = useKnowledgeSections();
 
   const cityName = getCityName(language as 'en' | 'ru' | 'th');
-  const pageTitle = language === 'ru' 
-    ? `Справочник знаний — ${cityName}` 
+  const pageTitle = language === 'ru'
+    ? `Справочник знаний — ${cityName}`
+    : language === 'th'
+    ? `ศูนย์ความรู้ — ${cityName}`
     : `Knowledge Hub — ${cityName}`;
 
   // Group sections for display
@@ -37,8 +39,10 @@ export default function KnowledgeHub() {
     <>
       <SEOHead 
         title={pageTitle}
-        description={language === 'ru' 
+        description={language === 'ru'
           ? `Все что нужно знать о ${cityName}: культура, законы, госорганы, экстренные контакты`
+          : language === 'th'
+          ? `ทุกสิ่งที่คุณควรรู้เกี่ยวกับ ${cityName}: วัฒนธรรม กฎหมาย หน่วยงานราชการ และเบอร์ติดต่อฉุกเฉิน`
           : `Everything you need to know about ${cityName}: culture, laws, government, emergency contacts`
         }
       />
@@ -50,7 +54,7 @@ export default function KnowledgeHub() {
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <BookOpen className="h-6 w-6 text-primary" />
-              {language === 'ru' ? 'Справочник знаний' : 'Knowledge Hub'}
+              {language === 'ru' ? 'Справочник знаний' : language === 'th' ? 'ศูนย์ความรู้' : 'Knowledge Hub'}
             </h1>
             <div className="flex items-center gap-1 text-muted-foreground text-sm">
               <MapPin className="h-4 w-4" />
@@ -63,7 +67,7 @@ export default function KnowledgeHub() {
         {/* Quick Facts */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold mb-3 text-foreground">
-            {language === 'ru' ? 'Основные факты' : 'Quick Facts'}
+            {language === 'ru' ? 'Основные факты' : language === 'th' ? 'ข้อมูลสำคัญโดยย่อ' : 'Quick Facts'}
           </h2>
           <QuickFactsGrid />
         </section>
@@ -80,11 +84,13 @@ export default function KnowledgeHub() {
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-base font-semibold text-foreground">
-                {language === 'ru' ? 'Канонические гайды' : 'Pillar guides'}
+                {language === 'ru' ? 'Канонические гайды' : language === 'th' ? 'คู่มือหลัก' : 'Pillar guides'}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {language === 'ru'
                   ? '10 опорных материалов: покупка недвижимости, визы, налоги, управление объектами'
+                  : language === 'th'
+                  ? 'คู่มือหลัก 10 ฉบับ: การซื้ออสังหาริมทรัพย์ วีซ่า ภาษี และการบริหารจัดการทรัพย์สิน'
                   : '10 pillar guides: buying property, visas, taxes, property management'}
               </p>
             </div>
@@ -103,11 +109,13 @@ export default function KnowledgeHub() {
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-base font-semibold text-foreground">
-                {language === 'ru' ? 'Переезд на Пхукет' : 'Moving to Phuket'}
+                {language === 'ru' ? 'Переезд на Пхукет' : language === 'th' ? 'ย้ายมาอยู่ภูเก็ต' : 'Moving to Phuket'}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {language === 'ru'
                   ? 'Визы, TM30, жильё, школы, банки — отдельные гайды с чеклистом в приложении.'
+                  : language === 'th'
+                  ? 'วีซ่า TM30 ที่พัก โรงเรียน และธนาคาร — คู่มือเฉพาะเรื่องพร้อมเช็กลิสต์ในแอป'
                   : 'Visas, TM30, housing, schools, banking — dedicated guides plus in-app checklist.'}
               </p>
             </div>
@@ -118,7 +126,7 @@ export default function KnowledgeHub() {
         {/* Knowledge Sections Grid */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold mb-3 text-foreground">
-            {language === 'ru' ? 'Разделы справочника' : 'Knowledge Sections'}
+            {language === 'ru' ? 'Разделы справочника' : language === 'th' ? 'หมวดหมู่ความรู้' : 'Knowledge Sections'}
           </h2>
           
           {isLoading ? (
@@ -146,7 +154,7 @@ export default function KnowledgeHub() {
         {/* Do's & Don'ts Preview */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold mb-3 text-foreground">
-            {language === 'ru' ? 'Культурный этикет' : 'Cultural Etiquette'}
+            {language === 'ru' ? 'Культурный этикет' : language === 'th' ? 'มารยาททางวัฒนธรรม' : 'Cultural Etiquette'}
           </h2>
           <DosDontsCard />
         </section>

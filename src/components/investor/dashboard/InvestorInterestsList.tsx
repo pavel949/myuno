@@ -7,19 +7,20 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useInvestmentInterest } from '@/hooks/useInvestmentInterest';
 import { FileText, ChevronRight, TrendingUp } from 'lucide-react';
 
-const STATUS_BADGES: Record<string, { en: string; ru: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  pending: { en: 'Pending', ru: 'На рассмотрении', variant: 'secondary' },
-  contacted: { en: 'Contacted', ru: 'Связались', variant: 'default' },
-  qualified: { en: 'Qualified', ru: 'Квалифицирован', variant: 'default' },
-  negotiation: { en: 'Negotiation', ru: 'Переговоры', variant: 'default' },
-  closed: { en: 'Closed', ru: 'Закрыто', variant: 'outline' },
-  rejected: { en: 'Rejected', ru: 'Отклонено', variant: 'destructive' },
+const STATUS_BADGES: Record<string, { en: string; ru: string; th: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+  pending: { en: 'Pending', ru: 'На рассмотрении', th: 'รอดำเนินการ', variant: 'secondary' },
+  contacted: { en: 'Contacted', ru: 'Связались', th: 'ติดต่อแล้ว', variant: 'default' },
+  qualified: { en: 'Qualified', ru: 'Квалифицирован', th: 'ผ่านการคัดกรอง', variant: 'default' },
+  negotiation: { en: 'Negotiation', ru: 'Переговоры', th: 'กำลังเจรจา', variant: 'default' },
+  closed: { en: 'Closed', ru: 'Закрыто', th: 'ปิดแล้ว', variant: 'outline' },
+  rejected: { en: 'Rejected', ru: 'Отклонено', th: 'ถูกปฏิเสธ', variant: 'destructive' },
 };
 
 export function InvestorInterestsList() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { userInterestsWithProjects, loadingInterestsWithProjects } = useInvestmentInterest();
 
@@ -39,7 +40,7 @@ export function InvestorInterestsList() {
     <Card className="p-6">
       <h3 className="font-medium mb-3 flex items-center gap-2">
         <FileText className="h-4 w-4 text-primary" />
-        {isRu ? 'Мои заявки' : 'My Applications'}
+        {isRu ? 'Мои заявки' : isTh ? 'ใบสมัครของฉัน' : 'My Applications'}
         {interests.length > 0 && (
           <Badge variant="secondary" className="text-xs">{interests.length}</Badge>
         )}
@@ -48,10 +49,10 @@ export function InvestorInterestsList() {
       {interests.length === 0 ? (
         <div className="text-center py-4">
           <p className="text-sm text-muted-foreground mb-3">
-            {isRu ? 'У вас пока нет активных заявок' : 'No active applications yet'}
+            {isRu ? 'У вас пока нет активных заявок' : isTh ? 'คุณยังไม่มีใบสมัครที่ใช้งานอยู่' : 'No active applications yet'}
           </p>
           <Button variant="outline" size="sm" onClick={() => navigate('/invest')}>
-            {isRu ? 'Смотреть проекты' : 'Browse Projects'}
+            {isRu ? 'Смотреть проекты' : isTh ? 'ดูโปรเจกต์' : 'Browse Projects'}
           </Button>
         </div>
       ) : (
@@ -60,7 +61,7 @@ export function InvestorInterestsList() {
             const project = interest.project;
             const title = project
               ? (isRu ? project.title_ru : project.title_en) || project.title_en
-              : isRu ? 'Проект' : 'Project';
+              : isRu ? 'Проект' : isTh ? 'โปรเจกต์' : 'Project';
             const statusConfig = STATUS_BADGES[interest.status] || STATUS_BADGES.pending;
 
             return (
@@ -90,7 +91,7 @@ export function InvestorInterestsList() {
                   </div>
                 </div>
                 <Badge variant={statusConfig.variant} className="text-[10px] shrink-0">
-                  {isRu ? statusConfig.ru : statusConfig.en}
+                  {isRu ? statusConfig.ru : isTh ? statusConfig.th : statusConfig.en}
                 </Badge>
                 <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
               </CardContent>

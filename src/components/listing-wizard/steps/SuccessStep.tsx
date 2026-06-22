@@ -14,17 +14,18 @@ export function SuccessStep({ listingType }: SuccessStepProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  
+  const isTh = language === 'th';
+
   const getNextSteps = () => {
     if (listingType === 'property') {
       return {
         dashboardPath: '/owner',
-        dashboardLabel: isRu ? 'Кабинет владельца' : 'Owner Dashboard',
+        dashboardLabel: isRu ? 'Кабинет владельца' : isTh ? 'แดชบอร์ดเจ้าของ' : 'Owner Dashboard',
       };
     }
     return {
       dashboardPath: '/vendor',
-      dashboardLabel: isRu ? 'Кабинет продавца' : 'Vendor Dashboard',
+      dashboardLabel: isRu ? 'Кабинет продавца' : isTh ? 'แดชบอร์ดผู้ขาย' : 'Vendor Dashboard',
     };
   };
   
@@ -49,21 +50,23 @@ export function SuccessStep({ listingType }: SuccessStepProps) {
         className="space-y-4"
       >
         <h1 className="text-2xl font-bold">
-          {isRu ? 'Заявка отправлена!' : 'Application Submitted!'}
+          {isRu ? 'Заявка отправлена!' : isTh ? 'ส่งคำขอเรียบร้อยแล้ว!' : 'Application Submitted!'}
         </h1>
         
         <p className="text-muted-foreground max-w-sm">
-          {isRu 
+          {isRu
             ? 'Мы рассмотрим вашу заявку и свяжемся с вами в течение 24-48 часов.'
+            : isTh
+            ? 'เราจะตรวจสอบคำขอของคุณและติดต่อกลับภายใน 24-48 ชั่วโมง'
             : 'We\'ll review your application and get back to you within 24-48 hours.'}
         </p>
         
         <div className="bg-muted/50 rounded-none p-4 text-sm text-left space-y-2 mt-6">
-          <p className="font-medium">{isRu ? 'Что дальше:' : 'What\'s next:'}</p>
+          <p className="font-medium">{isRu ? 'Что дальше:' : isTh ? 'ขั้นตอนต่อไป:' : 'What\'s next:'}</p>
           <ul className="space-y-1 text-muted-foreground">
-            <li>• {isRu ? 'Проверьте email для подтверждения' : 'Check your email for confirmation'}</li>
-            <li>• {isRu ? 'Мы можем запросить дополнительную информацию' : 'We may request additional information'}</li>
-            <li>• {isRu ? 'После одобрения вы получите доступ к панели управления' : 'Once approved, you\'ll get access to your dashboard'}</li>
+            <li>• {isRu ? 'Проверьте email для подтверждения' : isTh ? 'ตรวจสอบอีเมลของคุณเพื่อยืนยัน' : 'Check your email for confirmation'}</li>
+            <li>• {isRu ? 'Мы можем запросить дополнительную информацию' : isTh ? 'เราอาจขอข้อมูลเพิ่มเติม' : 'We may request additional information'}</li>
+            <li>• {isRu ? 'После одобрения вы получите доступ к панели управления' : isTh ? 'เมื่อได้รับการอนุมัติ คุณจะเข้าถึงแดชบอร์ดได้' : 'Once approved, you\'ll get access to your dashboard'}</li>
           </ul>
         </div>
       </motion.div>
@@ -75,7 +78,7 @@ export function SuccessStep({ listingType }: SuccessStepProps) {
         className="mt-8 space-y-3 w-full max-w-xs"
       >
         <Button onClick={() => navigate('/account')} className="w-full" size="lg">
-          {isRu ? 'Мой кабинет' : 'My Account'}
+          {isRu ? 'Мой кабинет' : isTh ? 'บัญชีของฉัน' : 'My Account'}
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
         
@@ -84,7 +87,7 @@ export function SuccessStep({ listingType }: SuccessStepProps) {
           onClick={() => navigate('/')} 
           className="w-full"
         >
-          {isRu ? 'На главную' : 'Go to Home'}
+          {isRu ? 'На главную' : isTh ? 'กลับสู่หน้าหลัก' : 'Go to Home'}
         </Button>
       </motion.div>
     </div>

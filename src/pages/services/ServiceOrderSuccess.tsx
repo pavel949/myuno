@@ -122,13 +122,14 @@ export default function ServiceOrderSuccess() {
       note={{
         ru: 'Менеджер свяжется в течение 30 минут для подтверждения деталей.',
         en: 'A manager will contact you within 30 minutes to confirm details.',
+        th: 'เจ้าหน้าที่จะติดต่อกลับภายใน 30 นาทีเพื่อยืนยันรายละเอียด',
       }}
       details={details}
       extras={<CrossSellRecommendations orderType="service" />}
       primaryHref="/services"
-      primaryLabel={{ ru: 'Заказать ещё', en: 'Order more' }}
+      primaryLabel={{ ru: 'Заказать ещё', en: 'Order more', th: 'สั่งเพิ่ม' }}
       secondaryHref="/bookings"
-      secondaryLabel={{ ru: 'Мои заказы', en: 'My orders' }}
+      secondaryLabel={{ ru: 'Мои заказы', en: 'My orders', th: 'คำสั่งซื้อของฉัน' }}
       totalAmount={order?.total_amount}
       currency={order?.currency || undefined}
       whatsappSummary={summaryRu || summaryEn ? { ru: summaryRu, en: summaryEn } : undefined}

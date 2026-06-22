@@ -68,6 +68,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
   const { language } = useLanguage();
   const { hasKey, isLoaded, loadError } = useGoogleMaps();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   // External selection wins; fall back to local state for standalone usage.
   const [localOpenId, setLocalOpenId] = useState<string | null>(null);
   const openId = onSelect ? selectedId : localOpenId;
@@ -127,8 +128,10 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
           {loadError?.message?.includes('auth')
             ? (isRu
               ? 'Ошибка авторизации Google Maps. Проверьте ограничения API-ключа в Google Cloud Console.'
+              : isTh
+              ? 'เกิดข้อผิดพลาดในการยืนยันตัวตน Google Maps โปรดตรวจสอบการจำกัด API key ใน Google Cloud Console'
               : 'Google Maps auth error. Check API key restrictions in Google Cloud Console.')
-            : (isRu ? 'Карта недоступна' : 'Map unavailable')}
+            : (isRu ? 'Карта недоступна' : isTh ? 'แผนที่ไม่พร้อมใช้งาน' : 'Map unavailable')}
         </p>
       </div>
     );
@@ -240,7 +243,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
                       <>
                         {formatPrice(openProperty.price_per_night ?? openProperty.price ?? 0)}
                         <span className="font-normal text-muted-foreground">
-                          {' '}/ {isRu ? 'ночь' : 'night'}
+                          {' '}/ {isRu ? 'ночь' : isTh ? 'คืน' : 'night'}
                         </span>
                       </>
                     )}
@@ -263,7 +266,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
                 onClick={() => navigate(APP_ROUTES.PROPERTY_DETAIL(openProperty.id))}
                 className="mt-2 w-full text-[11px] font-semibold uppercase tracking-wide bg-foreground text-background py-1.5 hover:opacity-90"
               >
-                {isRu ? 'Открыть' : 'View details'}
+                {isRu ? 'Открыть' : isTh ? 'ดูรายละเอียด' : 'View details'}
               </button>
             </div>
           </InfoWindow>

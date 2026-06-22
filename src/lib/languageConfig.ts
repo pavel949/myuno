@@ -223,11 +223,12 @@ export function normalizeLanguages(languages: string[]): string[] {
  * Use this in non-component code (error handlers, hooks with toast messages, etc.)
  * instead of duplicating localStorage reads.
  */
-export function getStoredLang(): 'en' | 'ru' {
+export function getStoredLang(): 'en' | 'ru' | 'th' {
   if (typeof window !== 'undefined') {
     try {
       const stored = localStorage.getItem('myuno-language');
       if (stored === 'ru') return 'ru';
+      if (stored === 'th') return 'th';
     } catch { /* ignored */ }
   }
   return 'en';

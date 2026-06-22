@@ -34,20 +34,20 @@ export default function MyTickets() {
   return (
     <AppLayout>
       <PageContainer>
-        <PageHeader 
-          title={language === 'ru' ? 'Мои обращения' : 'My Tickets'}
+        <PageHeader
+          title={language === 'ru' ? 'Мои обращения' : language === 'th' ? 'คำร้องของฉัน' : 'My Tickets'}
           showBack
         />
         <Button onClick={() => navigate('/support/new-ticket')} className="mb-4">
           <Plus className="w-4 h-4 mr-2" />
-          {language === 'ru' ? 'Создать обращение' : 'New Ticket'}
+          {language === 'ru' ? 'Создать обращение' : language === 'th' ? 'สร้างคำร้อง' : 'New Ticket'}
         </Button>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full mb-4">
             <TabsTrigger value="active" className="flex-1">
               <Ticket className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Активные' : 'Active'}
+              {language === 'ru' ? 'Активные' : language === 'th' ? 'กำลังดำเนินการ' : 'Active'}
               {activeTickets.length > 0 && (
                 <span className="ml-2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
                   {activeTickets.length}
@@ -56,7 +56,7 @@ export default function MyTickets() {
             </TabsTrigger>
             <TabsTrigger value="closed" className="flex-1">
               <CheckCircle className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Закрытые' : 'Closed'}
+              {language === 'ru' ? 'Закрытые' : language === 'th' ? 'ปิดแล้ว' : 'Closed'}
             </TabsTrigger>
           </TabsList>
 
@@ -64,14 +64,16 @@ export default function MyTickets() {
             {activeTickets.length === 0 ? (
               <EmptyState
                 icon={Ticket}
-                title={language === 'ru' ? 'Нет активных обращений' : 'No active tickets'}
-                description={language === 'ru' 
-                  ? 'Создайте обращение, если у вас есть вопрос или проблема' 
+                title={language === 'ru' ? 'Нет активных обращений' : language === 'th' ? 'ยังไม่มีคำร้องที่กำลังดำเนินการ' : 'No active tickets'}
+                description={language === 'ru'
+                  ? 'Создайте обращение, если у вас есть вопрос или проблема'
+                  : language === 'th'
+                  ? 'สร้างคำร้องได้เลยหากคุณมีคำถามหรือพบปัญหา'
                   : 'Create a ticket if you have a question or issue'}
                 action={
                   <Button onClick={() => navigate('/support/new-ticket')}>
                     <Plus className="w-4 h-4 mr-2" />
-                    {language === 'ru' ? 'Создать обращение' : 'Create Ticket'}
+                    {language === 'ru' ? 'Создать обращение' : language === 'th' ? 'สร้างคำร้อง' : 'Create Ticket'}
                   </Button>
                 }
               />
@@ -90,9 +92,11 @@ export default function MyTickets() {
             {closedTickets.length === 0 ? (
               <EmptyState
                 icon={CheckCircle}
-                title={language === 'ru' ? 'Нет закрытых обращений' : 'No closed tickets'}
-                description={language === 'ru' 
-                  ? 'Решённые обращения будут отображаться здесь' 
+                title={language === 'ru' ? 'Нет закрытых обращений' : language === 'th' ? 'ยังไม่มีคำร้องที่ปิดแล้ว' : 'No closed tickets'}
+                description={language === 'ru'
+                  ? 'Решённые обращения будут отображаться здесь'
+                  : language === 'th'
+                  ? 'คำร้องที่แก้ไขเรียบร้อยแล้วจะแสดงที่นี่'
                   : 'Resolved tickets will appear here'}
               />
             ) : (

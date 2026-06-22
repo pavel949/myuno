@@ -1,36 +1,37 @@
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { Language } from '@/i18n';
 import {
   MODIFIER_OPTIONS,
   type CanonicalModifier,
 } from '@/lib/segmentation/detectPersona';
 
-const LABELS: Record<CanonicalModifier, { en: string; ru: string; icon: string }> = {
-  'pet-owner':     { en: 'I have a pet',         ru: 'У меня питомец',         icon: '🐾' },
-  medical:         { en: 'Medical needs',         ru: 'Медицинские потребности', icon: '🩺' },
-  halal:           { en: 'Halal',                 ru: 'Халяль',                 icon: '🕌' },
-  kosher:          { en: 'Kosher',                ru: 'Кошер',                  icon: '✡️' },
-  vegan:           { en: 'Vegan / vegetarian',    ru: 'Веган / вегетарианец',   icon: '🌱' },
-  accessibility:   { en: 'Accessibility',         ru: 'Доступная среда',        icon: '♿' },
-  lgbtq:           { en: 'LGBTQ+ friendly',       ru: 'LGBTQ+ friendly',        icon: '🏳️‍🌈' },
-  athlete:         { en: 'Active sport',          ru: 'Активный спорт',         icon: '🏋️' },
-  wedding:         { en: 'Wedding planning',      ru: 'Планирую свадьбу',       icon: '💍' },
-  'family-young':  { en: 'Young kids (0–6)',      ru: 'Маленькие дети (0–6)',   icon: '🧸' },
-  'family-school': { en: 'School-age kids (7–17)',ru: 'Дети-школьники (7–17)',  icon: '🎒' },
+const LABELS: Record<CanonicalModifier, { en: string; ru: string; th: string; icon: string }> = {
+  'pet-owner':     { en: 'I have a pet',         ru: 'У меня питомец',         th: 'ฉันมีสัตว์เลี้ยง',        icon: '🐾' },
+  medical:         { en: 'Medical needs',         ru: 'Медицинские потребности', th: 'ความต้องการทางการแพทย์', icon: '🩺' },
+  halal:           { en: 'Halal',                 ru: 'Халяль',                 th: 'ฮาลาล',                  icon: '🕌' },
+  kosher:          { en: 'Kosher',                ru: 'Кошер',                  th: 'โคเชอร์',                icon: '✡️' },
+  vegan:           { en: 'Vegan / vegetarian',    ru: 'Веган / вегетарианец',   th: 'วีแกน / มังสวิรัติ',      icon: '🌱' },
+  accessibility:   { en: 'Accessibility',         ru: 'Доступная среда',        th: 'สิ่งอำนวยความสะดวกสำหรับผู้พิการ', icon: '♿' },
+  lgbtq:           { en: 'LGBTQ+ friendly',       ru: 'LGBTQ+ friendly',        th: 'เป็นมิตรกับ LGBTQ+',      icon: '🏳️‍🌈' },
+  athlete:         { en: 'Active sport',          ru: 'Активный спорт',         th: 'กีฬาและออกกำลังกาย',     icon: '🏋️' },
+  wedding:         { en: 'Wedding planning',      ru: 'Планирую свадьбу',       th: 'วางแผนงานแต่งงาน',        icon: '💍' },
+  'family-young':  { en: 'Young kids (0–6)',      ru: 'Маленькие дети (0–6)',   th: 'เด็กเล็ก (0–6 ปี)',      icon: '🧸' },
+  'family-school': { en: 'School-age kids (7–17)',ru: 'Дети-школьники (7–17)',  th: 'เด็กวัยเรียน (7–17 ปี)', icon: '🎒' },
 };
 
 interface Props {
   selected: CanonicalModifier[];
   onToggle: (m: CanonicalModifier) => void;
-  lang: 'en' | 'ru';
+  lang: Language;
 }
 
 export function ModifiersStep({ selected, onToggle, lang }: Props) {
   return (
     <>
       <p className="text-xs text-muted-foreground -mt-2">
-        {lang === 'ru' ? 'Можно выбрать несколько или пропустить.' : 'Pick any that apply, or skip.'}
+        {lang === 'ru' ? 'Можно выбрать несколько или пропустить.' : lang === 'th' ? 'เลือกได้หลายข้อ หรือข้ามก็ได้' : 'Pick any that apply, or skip.'}
       </p>
       <div className="grid gap-2.5 sm:grid-cols-2">
         {MODIFIER_OPTIONS.map((m) => {
@@ -53,7 +54,7 @@ export function ModifiersStep({ selected, onToggle, lang }: Props) {
                 {meta.icon}
               </span>
               <span className="flex-1 text-sm font-medium text-foreground">
-                {meta[lang]}
+                {meta[lang] ?? meta.en}
               </span>
               {isActive && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">

@@ -32,7 +32,8 @@ const PersonaAreaLandingPage = () => {
   const { persona: personaParam, area: areaParam } = useParams<{ persona: string; area: string }>();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+  const isTh = language === 'th';
+  const t = <T,>(p: { ru: T; en: T; th?: T }): T => (isRu ? p.ru : isTh ? (p.th ?? p.en) : p.en);
 
   const data = useMemo(() => {
     if (!personaParam || !areaParam) return undefined;
@@ -59,12 +60,16 @@ const PersonaAreaLandingPage = () => {
   const canonical = `https://www.myuno.app/for/${persona.slug}/in/${a.slug}`;
   const titleRu = `${t(persona.h1)} в ${a.name_ru} · myUNO`;
   const titleEn = `${t(persona.h1)} in ${a.name_en} · myUNO`;
-  const title = (isRu ? titleRu : titleEn).slice(0, 60);
+  const titleTh = `${t(persona.h1)} ใน ${a.name_en} · myUNO`;
+  const title = (isRu ? titleRu : isTh ? titleTh : titleEn).slice(0, 60);
   const descRu = `${a.name_ru}: ฿${(a.avg_price_sqm / 1000).toFixed(0)}K/м², доходность ${a.avg_yield}%. Подборка под задачу: ${t(persona.h1)}.`;
   const descEn = `${a.name_en}: ฿${(a.avg_price_sqm / 1000).toFixed(0)}K/sqm, yield ${a.avg_yield}%. Curated for: ${t(persona.h1)}.`;
-  const description = (isRu ? descRu : descEn).slice(0, 160);
+  const descTh = `${a.name_en}: ฿${(a.avg_price_sqm / 1000).toFixed(0)}K/ตร.ม. ผลตอบแทน ${a.avg_yield}% คัดสรรสำหรับ: ${t(persona.h1)}`;
+  const description = (isRu ? descRu : isTh ? descTh : descEn).slice(0, 160);
   const ogAlt = isRu
     ? `${t(persona.h1)} в ${a.name_ru} — myUNO`
+    : isTh
+    ? `${t(persona.h1)} ใน ${a.name_en} — myUNO`
     : `${t(persona.h1)} in ${a.name_en} — myUNO`;
 
   const pros = isRu ? a.pros_ru : a.pros_en;
@@ -92,7 +97,7 @@ const PersonaAreaLandingPage = () => {
         <meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
         <meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
         <meta property="og:image:alt" content={ogAlt} />
-        <meta property="og:locale" content={isRu ? 'ru_RU' : 'en_US'} />
+        <meta property="og:locale" content={isRu ? 'ru_RU' : isTh ? 'th_TH' : 'en_US'} />
         <meta property="og:locale:alternate" content={isRu ? 'en_US' : 'ru_RU'} />
         <meta property="og:site_name" content="myUNO" />
         <meta name="twitter:card" content="summary_large_image" />
@@ -120,7 +125,7 @@ const PersonaAreaLandingPage = () => {
             </span>
           </div>
           <h1 className="text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
-            {t(persona.h1)} {isRu ? 'в' : 'in'} {isRu ? a.name_ru : a.name_en}
+            {t(persona.h1)} {isRu ? 'в' : isTh ? 'ใน' : 'in'} {isRu ? a.name_ru : a.name_en}
           </h1>
           <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
             {override ? t(override.intro) : isRu ? a.description_ru : a.description_en}
@@ -128,21 +133,21 @@ const PersonaAreaLandingPage = () => {
 
           <dl className="mt-6 grid grid-cols-3 gap-3 border border-border bg-card p-4">
             <div>
-              <dt className="text-xs uppercase text-muted-foreground">{isRu ? 'Цена' : 'Price'}</dt>
+              <dt className="text-xs uppercase text-muted-foreground">{isRu ? 'Цена' : isTh ? 'ราคา' : 'Price'}</dt>
               <dd className="mt-1 text-lg font-semibold text-foreground">
-                ฿{(a.avg_price_sqm / 1000).toFixed(0)}K<span className="text-xs text-muted-foreground">/{isRu ? 'м²' : 'sqm'}</span>
+                ฿{(a.avg_price_sqm / 1000).toFixed(0)}K<span className="text-xs text-muted-foreground">/{isRu ? 'м²' : isTh ? 'ตร.ม.' : 'sqm'}</span>
               </dd>
             </div>
             <div>
-              <dt className="text-xs uppercase text-muted-foreground">{isRu ? 'Доходность' : 'Yield'}</dt>
+              <dt className="text-xs uppercase text-muted-foreground">{isRu ? 'Доходность' : isTh ? 'ผลตอบแทน' : 'Yield'}</dt>
               <dd className="mt-1 text-lg font-semibold text-foreground">{a.avg_yield}%</dd>
             </div>
             <div>
-              <dt className="text-xs uppercase text-muted-foreground">{isRu ? 'Пляж' : 'Beach'}</dt>
+              <dt className="text-xs uppercase text-muted-foreground">{isRu ? 'Пляж' : isTh ? 'ชายหาด' : 'Beach'}</dt>
               <dd className="mt-1 text-lg font-semibold text-foreground">
                 {a.distance_beach_km < 1
-                  ? `${(a.distance_beach_km * 1000).toFixed(0)} ${isRu ? 'м' : 'm'}`
-                  : `${a.distance_beach_km} ${isRu ? 'км' : 'km'}`}
+                  ? `${(a.distance_beach_km * 1000).toFixed(0)} ${isRu ? 'м' : isTh ? 'ม.' : 'm'}`
+                  : `${a.distance_beach_km} ${isRu ? 'км' : isTh ? 'กม.' : 'km'}`}
               </dd>
             </div>
           </dl>
@@ -178,6 +183,8 @@ const PersonaAreaLandingPage = () => {
               <Star className="h-5 w-5" style={{ color: tokenColor(theme.color) }} />
               {isRu
                 ? `3 причины выбрать ${a.name_ru} именно вам`
+                : isTh
+                ? `3 เหตุผลที่ ${a.name_en} เหมาะกับคุณ`
                 : `3 reasons ${a.name_en} is the right fit for you`}
             </h2>
             <ol className="space-y-3">
@@ -214,7 +221,7 @@ const PersonaAreaLandingPage = () => {
           <div className="border border-border bg-card p-5">
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
               <CheckCircle2 className="h-5 w-5" style={{ color: tokenColor(theme.color) }} />
-              {isRu ? 'Почему здесь подходит' : 'Why this area works'}
+              {isRu ? 'Почему здесь подходит' : isTh ? 'ทำไมทำเลนี้จึงเหมาะ' : 'Why this area works'}
             </h2>
             <ul className="space-y-2">
               {pros.map((p, i) => (
@@ -228,7 +235,7 @@ const PersonaAreaLandingPage = () => {
           <div className="border border-border bg-card p-5">
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
               <AlertCircle className="h-5 w-5 text-muted-foreground" />
-              {isRu ? 'О чём подумать' : 'What to consider'}
+              {isRu ? 'О чём подумать' : isTh ? 'สิ่งที่ควรพิจารณา' : 'What to consider'}
             </h2>
             <ul className="space-y-2">
               {cons.map((c, i) => (
@@ -245,7 +252,7 @@ const PersonaAreaLandingPage = () => {
         {persona.services.length > 0 ? (
           <section className="mb-12">
             <h2 className="mb-5 text-2xl font-semibold text-foreground">
-              {isRu ? `Услуги в ${a.name_ru}` : `Services in ${a.name_en}`}
+              {isRu ? `Услуги в ${a.name_ru}` : isTh ? `บริการใน ${a.name_en}` : `Services in ${a.name_en}`}
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {persona.services.slice(0, 6).map((s) => (
@@ -274,11 +281,15 @@ const PersonaAreaLandingPage = () => {
             <h3 className="text-xl font-semibold text-foreground">
               {isRu
                 ? `Подборка под ${a.name_ru} — за 24 часа`
+                : isTh
+                ? `ตัวเลือกที่คัดสรรสำหรับ ${a.name_en} — ภายใน 24 ชั่วโมง`
                 : `Curated picks for ${a.name_en} — within 24 hours`}
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {isRu
                 ? 'Соберём варианты с учётом района и вашей задачи. Пришлём в WhatsApp.'
+                : isTh
+                ? 'เราจะคัดสรรตัวเลือกที่ตรงกับทำเลและโจทย์ของคุณ และส่งให้ทาง WhatsApp'
                 : 'We will curate options matching the area and your goal. Sent via WhatsApp.'}
             </p>
           </div>
@@ -299,15 +310,15 @@ const PersonaAreaLandingPage = () => {
         <section className="border-t border-border pt-8">
           <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
             <MapPin className="h-5 w-5" style={{ color: tokenColor(theme.color) }} />
-            {isRu ? 'Связанные страницы' : 'Related pages'}
+            {isRu ? 'Связанные страницы' : isTh ? 'หน้าที่เกี่ยวข้อง' : 'Related pages'}
           </h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <a href={`/for/${persona.slug}`} className="border border-border bg-card p-3 hover:border-primary/60">
-              <div className="text-foreground">{isRu ? 'Все районы для' : 'All areas for'}</div>
+              <div className="text-foreground">{isRu ? 'Все районы для' : isTh ? 'ทุกทำเลสำหรับ' : 'All areas for'}</div>
               <div className="mt-0.5 font-medium text-foreground">{t(persona.h1)}</div>
             </a>
             <a href={`/area/${a.slug}`} className="border border-border bg-card p-3 hover:border-primary/60">
-              <div className="text-foreground">{isRu ? 'Гид по району' : 'Area guide'}</div>
+              <div className="text-foreground">{isRu ? 'Гид по району' : isTh ? 'คู่มือทำเล' : 'Area guide'}</div>
               <div className="mt-0.5 font-medium text-foreground">{isRu ? a.name_ru : a.name_en}</div>
             </a>
           </div>

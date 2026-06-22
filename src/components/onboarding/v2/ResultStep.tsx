@@ -2,35 +2,38 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import type { Language } from '@/i18n';
+import { pickLang } from '@/lib/i18n/pickLang';
 import type { CanonicalOnboardingResult } from '@/hooks/useCanonicalOnboarding';
 import { CLUSTER_META, LIFECYCLE_STAGE_LABELS } from '@/types/canonical';
 import { APP_ROUTES } from '@/lib/config/routes';
 
 interface Props {
   result: CanonicalOnboardingResult;
-  lang: 'en' | 'ru';
+  lang: Language;
   onReset: () => void;
 }
 
 const COPY = {
-  resultTitle: { en: 'Your starting map', ru: 'Ваша стартовая карта' },
+  resultTitle: { en: 'Your starting map', ru: 'Ваша стартовая карта', th: 'แผนผังเริ่มต้นของคุณ' },
   proposalLine: {
     en: 'Stage and active clusters:',
     ru: 'Этап и активные кластеры:',
+    th: 'ระยะและกลุ่มบริการที่ใช้งาน:',
   },
-  openPrefix: { en: 'Open', ru: 'Открыть' },
-  exploreLater: { en: 'Browse all services', ru: 'Смотреть все сервисы' },
-  redo: { en: 'Redo questions', ru: 'Пройти заново' },
+  openPrefix: { en: 'Open', ru: 'Открыть', th: 'เปิด' },
+  exploreLater: { en: 'Browse all services', ru: 'Смотреть все сервисы', th: 'ดูบริการทั้งหมด' },
+  redo: { en: 'Redo questions', ru: 'Пройти заново', th: 'ตอบคำถามใหม่' },
   bySource: {
-    ai_v1: { en: 'AI-assisted', ru: 'С помощью ИИ' },
-    rules_v1: { en: 'Rule-based', ru: 'По правилам' },
+    ai_v1: { en: 'AI-assisted', ru: 'С помощью ИИ', th: 'ช่วยเหลือด้วย AI' },
+    rules_v1: { en: 'Rule-based', ru: 'По правилам', th: 'อิงตามกฎ' },
   },
 };
 
 export function ResultStep({ result, lang, onReset }: Props) {
   const navigate = useNavigate();
   const { proposal, recommendations, source } = result;
-  const stageLabel = LIFECYCLE_STAGE_LABELS[proposal.lifecycle_stage][lang];
+  const stageLabel = pickLang(LIFECYCLE_STAGE_LABELS[proposal.lifecycle_stage], lang);
   const primary = recommendations[0];
 
   return (
@@ -73,8 +76,8 @@ export function ResultStep({ result, lang, onReset }: Props) {
             >
               <span className="text-2xl shrink-0" aria-hidden>{item.icon}</span>
               <span className="flex-1">
-                <span className="block text-sm font-semibold text-foreground">{item.title[lang]}</span>
-                <span className="mt-0.5 block text-xs text-muted-foreground">{item.description[lang]}</span>
+                <span className="block text-sm font-semibold text-foreground">{pickLang(item.title, lang)}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">{pickLang(item.description, lang)}</span>
               </span>
               <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </button>
@@ -85,7 +88,7 @@ export function ResultStep({ result, lang, onReset }: Props) {
       <div className="flex flex-col gap-2 pt-2 sm:flex-row">
         {primary && (
           <Button className="flex-1" onClick={() => navigate(primary.route)}>
-            {COPY.openPrefix[lang]} · {primary.title[lang]}
+            {COPY.openPrefix[lang]} · {pickLang(primary.title, lang)}
           </Button>
         )}
         <Button variant="outline" className="flex-1" onClick={() => navigate(APP_ROUTES.DISCOVER)}>

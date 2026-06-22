@@ -23,7 +23,9 @@ export default function ClearViewForDevelopersLanding() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+  const isTh = language === 'th';
+  const t = <T,>(p: { ru: T; en: T; th?: T }): T =>
+    isRu ? p.ru : isTh && p.th !== undefined ? p.th : p.en;
 
   return (
     <LandingShell
@@ -109,7 +111,7 @@ export default function ClearViewForDevelopersLanding() {
     >
       <div className="rounded-none border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
-          {t({ ru: 'Что входит в рейтинг', en: 'What the rating covers' })}
+          {t({ ru: 'Что входит в рейтинг', th: 'การจัดอันดับครอบคลุมอะไรบ้าง', en: 'What the rating covers' })}
         </h2>
         <LandingChecklist
           items={[
@@ -125,11 +127,11 @@ export default function ClearViewForDevelopersLanding() {
         />
         <div className="mt-6 flex flex-wrap gap-3">
           <Button onClick={() => navigate(APP_ROUTES.CLEARVIEW)}>
-            {t({ ru: 'Подробнее о методологии', en: 'See methodology' })}
+            {t({ ru: 'Подробнее о методологии', th: 'ดูรายละเอียดวิธีการประเมิน', en: 'See methodology' })}
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
           <Button variant="outline" onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_APPLY)}>
-            {t({ ru: 'Стать партнёром-застройщиком', en: 'Become developer partner' })}
+            {t({ ru: 'Стать партнёром-застройщиком', th: 'เป็นพันธมิตรผู้พัฒนาโครงการ', en: 'Become developer partner' })}
           </Button>
         </div>
       </div>

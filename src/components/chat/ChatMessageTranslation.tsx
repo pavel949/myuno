@@ -21,9 +21,10 @@ export const ChatMessageTranslation: React.FC<ChatMessageTranslationProps> = ({
   const { language } = useLanguage();
   const { translate, isTranslating } = useAutoTranslate();
   const isRu = language === 'ru';
-  
+  const isTh = language === 'th';
+
   // Get target language based on user's interface language
-  const targetLang = language === 'ru' ? 'ru' : 'en';
+  const targetLang: 'ru' | 'en' | 'th' = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
   
   const [translation, setTranslation] = useState<string | null>(() => {
     // Check cache on mount
@@ -63,6 +64,7 @@ export const ChatMessageTranslation: React.FC<ChatMessageTranslationProps> = ({
   // Skip if message is already in user's language
   if (targetLang === 'ru' && hasRussian && !hasThai) return null;
   if (targetLang === 'en' && isLikelyEnglish && !hasRussian && !hasThai) return null;
+  if (targetLang === 'th' && hasThai && !hasRussian) return null;
 
   return (
     <div className={cn("mt-1.5", className)}>
@@ -77,17 +79,17 @@ export const ChatMessageTranslation: React.FC<ChatMessageTranslationProps> = ({
           {isTranslating ? (
             <>
               <Loader2 className="w-3 h-3 animate-spin" />
-              {isRu ? 'Перевожу...' : 'Translating...'}
+              {isRu ? 'Перевожу...' : isTh ? 'กำลังแปล...' : 'Translating...'}
             </>
           ) : error ? (
             <>
               <Globe className="w-3 h-3" />
-              {isRu ? 'Ошибка. Попробовать ещё?' : 'Error. Try again?'}
+              {isRu ? 'Ошибка. Попробовать ещё?' : isTh ? 'เกิดข้อผิดพลาด ลองอีกครั้งไหม?' : 'Error. Try again?'}
             </>
           ) : (
             <>
               <Globe className="w-3 h-3" />
-              {isRu ? 'Перевести' : 'Translate'}
+              {isRu ? 'Перевести' : isTh ? 'แปล' : 'Translate'}
             </>
           )}
         </Button>
@@ -106,7 +108,7 @@ export const ChatMessageTranslation: React.FC<ChatMessageTranslationProps> = ({
             className="h-5 px-2 py-0 text-[10px] text-muted-foreground hover:text-primary gap-0.5"
           >
             <ChevronUp className="w-3 h-3" />
-            {isRu ? 'Скрыть перевод' : 'Hide translation'}
+            {isRu ? 'Скрыть перевод' : isTh ? 'ซ่อนคำแปล' : 'Hide translation'}
           </Button>
         </div>
       )}

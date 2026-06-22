@@ -82,6 +82,7 @@ export default function KnowledgePillarPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   // The route param can be URL-encoded (e.g. "guides%2Fbuying-property-thailand")
   const decoded = slug ? decodeURIComponent(slug) : '';
@@ -118,7 +119,7 @@ export default function KnowledgePillarPage() {
       list.push({
         id: 'browse-offplan',
         to: matches.href,
-        label: isRu ? 'Считаем подходящие проекты…' : 'Counting matching projects…',
+        label: isRu ? 'Считаем подходящие проекты…' : isTh ? 'กำลังนับโครงการที่ตรงกับคุณ…' : 'Counting matching projects…',
         icon: Building2,
         transactional: false,
         loading: true,
@@ -129,6 +130,8 @@ export default function KnowledgePillarPage() {
         to: matches.href,
         label: isRu
           ? `${matches.count} проектов в каталоге новостроек`
+          : isTh
+          ? `${matches.count} โครงการในแคตตาล็อกออฟแพลน`
           : `${matches.count} projects in the off-plan catalog`,
         icon: Building2,
         transactional: true,
@@ -137,20 +140,20 @@ export default function KnowledgePillarPage() {
     list.push({
       id: 'roi-calculator',
       to: APP_ROUTES.NEWBUILDS_CALCULATOR,
-      label: isRu ? 'ROI-калькулятор для инвестора' : 'ROI calculator for investors',
-      hint: isRu ? 'Рассчитать доходность' : 'Estimate returns',
+      label: isRu ? 'ROI-калькулятор для инвестора' : isTh ? 'เครื่องคำนวณ ROI สำหรับนักลงทุน' : 'ROI calculator for investors',
+      hint: isRu ? 'Рассчитать доходность' : isTh ? 'ประเมินผลตอบแทน' : 'Estimate returns',
       icon: Calculator,
       trackEvent: 'roi_calculator_run',
     });
     list.push({
       id: 'clearview',
       to: APP_ROUTES.CLEARVIEW,
-      label: isRu ? 'ClearView™ — независимый рейтинг проектов' : 'ClearView™ — independent project rating',
+      label: isRu ? 'ClearView™ — независимый рейтинг проектов' : isTh ? 'ClearView™ — เรตติ้งโครงการอย่างเป็นอิสระ' : 'ClearView™ — independent project rating',
       icon: ShieldCheck,
       transactional: true,
     });
     return list;
-  }, [isPropertyPillar, matches.count, matches.href, matches.isLoading, isRu]);
+  }, [isPropertyPillar, matches.count, matches.href, matches.isLoading, isRu, isTh]);
 
   const seoTitle = pillar ? (isRu ? pillar.meta_title_ru : pillar.meta_title_en) : 'Knowledge Hub';
   const seoDescription = pillar ? (isRu ? pillar.meta_description_ru : pillar.meta_description_en) : '';
@@ -166,7 +169,7 @@ export default function KnowledgePillarPage() {
           <div className="flex-1 min-w-0">
             <p className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
               <BookOpen className="h-3.5 w-3.5" />
-              {isRu ? 'Гайд myUNO' : 'myUNO guide'}
+              {isRu ? 'Гайд myUNO' : isTh ? 'คู่มือ myUNO' : 'myUNO guide'}
               {pillar && <Badge variant="outline" className="text-[10px] ml-1">§{pillar.cluster}</Badge>}
             </p>
             <h1 className="text-xl font-bold text-foreground line-clamp-2">
@@ -186,10 +189,10 @@ export default function KnowledgePillarPage() {
           <Card>
             <CardContent className="py-10 text-center">
               <p className="text-muted-foreground mb-4">
-                {isRu ? 'Гайд не найден.' : 'Guide not found.'}
+                {isRu ? 'Гайд не найден.' : isTh ? 'ไม่พบคู่มือ' : 'Guide not found.'}
               </p>
               <Button variant="outline" onClick={() => navigate('/knowledge/pillars')}>
-                {isRu ? 'Все гайды' : 'All guides'}
+                {isRu ? 'Все гайды' : isTh ? 'คู่มือทั้งหมด' : 'All guides'}
               </Button>
             </CardContent>
           </Card>
@@ -211,7 +214,7 @@ export default function KnowledgePillarPage() {
               <div className="mt-6">
                 <ContextualCTA
                   sourceModule="knowledge_pillar"
-                  title={isRu ? 'От теории к делу' : 'From theory to action'}
+                  title={isRu ? 'От теории к делу' : isTh ? 'จากทฤษฎีสู่การลงมือทำ' : 'From theory to action'}
                   actions={propertyCtaActions}
                   trackContext={{ pillar_slug: pillar.slug, cluster: pillar.cluster }}
                 />
@@ -221,7 +224,7 @@ export default function KnowledgePillarPage() {
             {related.length > 0 && (
               <section className="mt-8">
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                  {isRu ? 'Связанные гайды' : 'Related guides'}
+                  {isRu ? 'Связанные гайды' : isTh ? 'คู่มือที่เกี่ยวข้อง' : 'Related guides'}
                 </h2>
                 <div className="space-y-2">
                   {related.map((r) => {

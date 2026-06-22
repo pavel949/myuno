@@ -26,6 +26,7 @@ export function UserRolesPermissions() {
   const { user } = useAuth();
   const { activeRoles } = useUserRoles();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   // Fetch MC memberships
   const { data: memberships = [] } = useQuery({
@@ -73,14 +74,14 @@ export function UserRolesPermissions() {
   };
 
   const mcRoleLabel = (role: string) => {
-    const map: Record<string, { en: string; ru: string }> = {
-      director: { en: 'Director', ru: 'Директор' },
-      admin: { en: 'Admin', ru: 'Администратор' },
-      manager: { en: 'Manager', ru: 'Менеджер' },
-      staff: { en: 'Staff', ru: 'Сотрудник' },
-      accountant: { en: 'Accountant', ru: 'Бухгалтер' },
+    const map: Record<string, { en: string; ru: string; th: string }> = {
+      director: { en: 'Director', ru: 'Директор', th: 'ผู้อำนวยการ' },
+      admin: { en: 'Admin', ru: 'Администратор', th: 'ผู้ดูแลระบบ' },
+      manager: { en: 'Manager', ru: 'Менеджер', th: 'ผู้จัดการ' },
+      staff: { en: 'Staff', ru: 'Сотрудник', th: 'พนักงาน' },
+      accountant: { en: 'Accountant', ru: 'Бухгалтер', th: 'นักบัญชี' },
     };
-    return map[role] ? (isRu ? map[role].ru : map[role].en) : role;
+    return map[role] ? (isRu ? map[role].ru : isTh ? map[role].th : map[role].en) : role;
   };
 
   return (
@@ -91,7 +92,7 @@ export function UserRolesPermissions() {
           <div className="flex items-center gap-2 mb-3">
             <Shield className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-semibold">
-              {isRu ? 'Роли на платформе' : 'Platform Roles'}
+              {isRu ? 'Роли на платформе' : isTh ? 'บทบาทบนแพลตฟอร์ม' : 'Platform Roles'}
             </h3>
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -102,7 +103,7 @@ export function UserRolesPermissions() {
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            {isRu ? 'Роли назначаются администратором' : 'Roles are assigned by administrators'}
+            {isRu ? 'Роли назначаются администратором' : isTh ? 'บทบาทกำหนดโดยผู้ดูแลระบบ' : 'Roles are assigned by administrators'}
           </p>
         </SectionCard>
       )}
@@ -113,7 +114,7 @@ export function UserRolesPermissions() {
           <div className="flex items-center gap-2 mb-3">
             <Building2 className="w-4 h-4 text-success" />
             <h3 className="text-sm font-semibold">
-              {isRu ? 'Управляющие компании' : 'Management Companies'}
+              {isRu ? 'Управляющие компании' : isTh ? 'บริษัทบริหารจัดการ' : 'Management Companies'}
             </h3>
           </div>
           <div className="space-y-2">
@@ -135,7 +136,7 @@ export function UserRolesPermissions() {
           <div className="flex items-center gap-2 mb-3">
             <Key className="w-4 h-4 text-warning" />
             <h3 className="text-sm font-semibold">
-              {isRu ? 'Доступы к модулям' : 'Module Access'}
+              {isRu ? 'Доступы к модулям' : isTh ? 'สิทธิ์เข้าถึงโมดูล' : 'Module Access'}
             </h3>
           </div>
           <div className="space-y-1">
@@ -143,15 +144,15 @@ export function UserRolesPermissions() {
               <div key={i} className="flex items-center gap-2 text-xs py-1">
                 <span className="font-medium capitalize">{p.module}</span>
                 <div className="flex gap-1 ml-auto">
-                  {p.can_view && <Badge variant="secondary" className="text-[10px] px-1.5">{isRu ? 'Просмотр' : 'View'}</Badge>}
-                  {p.can_edit && <Badge variant="secondary" className="text-[10px] px-1.5">{isRu ? 'Редакт.' : 'Edit'}</Badge>}
-                  {p.can_export && <Badge variant="secondary" className="text-[10px] px-1.5">{isRu ? 'Экспорт' : 'Export'}</Badge>}
+                  {p.can_view && <Badge variant="secondary" className="text-[10px] px-1.5">{isRu ? 'Просмотр' : isTh ? 'ดู' : 'View'}</Badge>}
+                  {p.can_edit && <Badge variant="secondary" className="text-[10px] px-1.5">{isRu ? 'Редакт.' : isTh ? 'แก้ไข' : 'Edit'}</Badge>}
+                  {p.can_export && <Badge variant="secondary" className="text-[10px] px-1.5">{isRu ? 'Экспорт' : isTh ? 'ส่งออก' : 'Export'}</Badge>}
                 </div>
               </div>
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            {isRu ? 'Управляется директором компании' : 'Managed by company director'}
+            {isRu ? 'Управляется директором компании' : isTh ? 'จัดการโดยผู้อำนวยการบริษัท' : 'Managed by company director'}
           </p>
         </SectionCard>
       )}

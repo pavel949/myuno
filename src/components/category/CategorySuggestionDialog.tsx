@@ -30,7 +30,8 @@ export function CategorySuggestionDialog({
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
-  
+  const isTh = language === 'th';
+
   const [formData, setFormData] = useState({
     category_name: initialName,
     category_name_ru: '',
@@ -44,7 +45,7 @@ export function CategorySuggestionDialog({
     e.preventDefault();
     
     if (!formData.category_name.trim()) {
-      toast.error(isRu ? 'Укажите название категории' : 'Please enter category name');
+      toast.error(isRu ? 'Укажите название категории' : isTh ? 'กรุณากรอกชื่อหมวดหมู่' : 'Please enter category name');
       return;
     }
     
@@ -67,11 +68,11 @@ export function CategorySuggestionDialog({
       if (insertError) throw insertError;
 
       setIsSuccess(true);
-      toast.success(isRu ? 'Заявка отправлена!' : 'Suggestion submitted!');
+      toast.success(isRu ? 'Заявка отправлена!' : isTh ? 'ส่งคำแนะนำแล้ว!' : 'Suggestion submitted!');
       
     } catch (error) {
       console.error('Error submitting suggestion:', error);
-      toast.error(isRu ? 'Ошибка отправки' : 'Submission failed');
+      toast.error(isRu ? 'Ошибка отправки' : isTh ? 'ส่งไม่สำเร็จ' : 'Submission failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -96,18 +97,20 @@ export function CategorySuggestionDialog({
         onOpenChange={onOpenChange}
         size="md"
         icon={<CheckCircle2 className="h-5 w-5 text-success" />}
-        title={isRu ? 'Спасибо за предложение!' : 'Thank you for your suggestion!'}
+        title={isRu ? 'Спасибо за предложение!' : isTh ? 'ขอบคุณสำหรับคำแนะนำ!' : 'Thank you for your suggestion!'}
       >
         <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="p-4 rounded-full bg-success/10 mb-4">
               <CheckCircle2 className="h-8 w-8 text-success" />
             </div>
             <h3 className="text-lg font-semibold mb-2">
-              {isRu ? 'Спасибо за предложение!' : 'Thank you for your suggestion!'}
+              {isRu ? 'Спасибо за предложение!' : isTh ? 'ขอบคุณสำหรับคำแนะนำ!' : 'Thank you for your suggestion!'}
             </h3>
             <p className="text-sm text-muted-foreground">
               {isRu
                 ? 'Мы рассмотрим вашу заявку в течение 48 часов'
+                : isTh
+                ? 'เราจะตรวจสอบคำขอของคุณภายใน 48 ชั่วโมง'
                 : 'We will review your request within 48 hours'}
             </p>
           </div>
@@ -121,21 +124,23 @@ export function CategorySuggestionDialog({
       onOpenChange={onOpenChange}
       size="md"
       icon={<Lightbulb className="h-5 w-5 text-warning" />}
-      title={isRu ? 'Предложить категорию' : 'Suggest a Category'}
+      title={isRu ? 'Предложить категорию' : isTh ? 'แนะนำหมวดหมู่' : 'Suggest a Category'}
       description={
         isRu
           ? 'Не нашли подходящую категорию? Предложите свою, и мы добавим её!'
+          : isTh
+          ? 'ไม่พบหมวดหมู่ที่ต้องการใช่ไหม? แนะนำมาได้เลย แล้วเราจะเพิ่มให้!'
           : "Can't find the right category? Suggest one and we'll add it!"
       }
     >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="category_name">
-              {isRu ? 'Название категории (EN) *' : 'Category name (EN) *'}
+              {isRu ? 'Название категории (EN) *' : isTh ? 'ชื่อหมวดหมู่ (EN) *' : 'Category name (EN) *'}
             </Label>
             <Input
               id="category_name"
-              placeholder={isRu ? 'Например: Vintage Electronics' : 'e.g., Vintage Electronics'}
+              placeholder={isRu ? 'Например: Vintage Electronics' : isTh ? 'เช่น Vintage Electronics' : 'e.g., Vintage Electronics'}
               value={formData.category_name}
               onChange={(e) => setFormData(prev => ({ ...prev, category_name: e.target.value }))}
               required
@@ -144,11 +149,11 @@ export function CategorySuggestionDialog({
 
           <div className="space-y-2">
             <Label htmlFor="category_name_ru">
-              {isRu ? 'Название на русском' : 'Russian name'}
+              {isRu ? 'Название на русском' : isTh ? 'ชื่อภาษารัสเซีย' : 'Russian name'}
             </Label>
             <Input
               id="category_name_ru"
-              placeholder={isRu ? 'Например: Винтажная электроника' : 'e.g., Винтажная электроника'}
+              placeholder={isRu ? 'Например: Винтажная электроника' : isTh ? 'เช่น Винтажная электроника' : 'e.g., Винтажная электроника'}
               value={formData.category_name_ru}
               onChange={(e) => setFormData(prev => ({ ...prev, category_name_ru: e.target.value }))}
             />
@@ -156,12 +161,14 @@ export function CategorySuggestionDialog({
 
           <div className="space-y-2">
             <Label htmlFor="description">
-              {isRu ? 'Описание категории' : 'Category description'}
+              {isRu ? 'Описание категории' : isTh ? 'คำอธิบายหมวดหมู่' : 'Category description'}
             </Label>
             <Textarea
               id="description"
-              placeholder={isRu 
+              placeholder={isRu
                 ? 'Опишите, какие товары/услуги входят в эту категорию...'
+                : isTh
+                ? 'อธิบายว่าสินค้า/บริการใดบ้างที่อยู่ในหมวดหมู่นี้...'
                 : 'Describe what products/services belong to this category...'}
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -171,12 +178,14 @@ export function CategorySuggestionDialog({
 
           <div className="space-y-2">
             <Label htmlFor="example_items">
-              {isRu ? 'Примеры товаров/услуг' : 'Example items/services'}
+              {isRu ? 'Примеры товаров/услуг' : isTh ? 'ตัวอย่างสินค้า/บริการ' : 'Example items/services'}
             </Label>
             <Input
               id="example_items"
-              placeholder={isRu 
+              placeholder={isRu
                 ? 'Sony Walkman, ретро-телевизоры, радиоприёмники...'
+                : isTh
+                ? 'Sony Walkman, ทีวีย้อนยุค, วิทยุวินเทจ...'
                 : 'Sony Walkman, retro TVs, vintage radios...'}
               value={formData.example_items}
               onChange={(e) => setFormData(prev => ({ ...prev, example_items: e.target.value }))}
@@ -191,7 +200,7 @@ export function CategorySuggestionDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              {isRu ? 'Отмена' : 'Cancel'}
+              {isRu ? 'Отмена' : isTh ? 'ยกเลิก' : 'Cancel'}
             </Button>
             <Button
               type="submit"
@@ -203,7 +212,7 @@ export function CategorySuggestionDialog({
               ) : (
                 <Send className="h-4 w-4 mr-2" />
               )}
-              {isRu ? 'Отправить' : 'Submit'}
+              {isRu ? 'Отправить' : isTh ? 'ส่ง' : 'Submit'}
             </Button>
           </div>
         </form>
@@ -211,6 +220,8 @@ export function CategorySuggestionDialog({
         <p className="text-xs text-center text-muted-foreground mt-2">
           {isRu
             ? 'Мы уведомим вас, когда категория будет добавлена'
+            : isTh
+            ? 'เราจะแจ้งให้คุณทราบเมื่อเพิ่มหมวดหมู่แล้ว'
             : "We'll notify you when the category is added"}
         </p>
     </ResponsiveModal>

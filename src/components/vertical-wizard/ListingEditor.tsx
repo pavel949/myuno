@@ -6,8 +6,10 @@ import { QualityPanel } from './QualityPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
+import type { Language } from '@/i18n';
 
-const t = (l: LocalizedText, lang: 'en' | 'ru') => l[lang] ?? l.en;
+const t = (l: LocalizedText, lang: Language): string =>
+  (l as Record<Language, string | undefined>)[lang] ?? l.en;
 
 interface Props {
   spec: VerticalSpec;
@@ -22,7 +24,7 @@ interface Props {
  */
 export const ListingEditor = ({ spec, initial, onSave, saving }: Props) => {
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const [row, setRow] = useState<Record<string, unknown>>(initial);
   const [active, setActive] = useState(spec.editorTabs[0]?.id ?? 'basics');
 
@@ -33,7 +35,7 @@ export const ListingEditor = ({ spec, initial, onSave, saving }: Props) => {
           <h1 className="text-xl font-semibold">{t(spec.label, lang)}</h1>
           <Button onClick={() => onSave(row)} disabled={saving}>
             <Save className="h-4 w-4 mr-2" />
-            {lang === 'ru' ? 'Сохранить' : 'Save'}
+            {lang === 'ru' ? 'Сохранить' : lang === 'th' ? 'บันทึก' : 'Save'}
           </Button>
         </div>
 

@@ -35,6 +35,19 @@ const texts = {
     },
     allComplete: 'Great! Your profile is complete',
   },
+  th: {
+    title: 'ความสมบูรณ์ของโปรไฟล์',
+    subtitle: 'โปรไฟล์ที่สมบูรณ์ช่วยให้จองได้เร็วขึ้นและสร้างความน่าเชื่อถือ',
+    complete: 'เสร็จสมบูรณ์',
+    items: {
+      name: 'ชื่อและรูปภาพ',
+      phone: 'หมายเลขโทรศัพท์',
+      documents: 'เอกสาร',
+      emergency: 'ผู้ติดต่อฉุกเฉิน',
+      address: 'ที่อยู่อาศัย',
+    },
+    allComplete: 'เยี่ยมมาก! โปรไฟล์ของคุณสมบูรณ์แล้ว',
+  },
 };
 
 interface CompletionItem {
@@ -49,7 +62,7 @@ export function ProfileCompletionCard() {
   const { profile } = useProfile();
   const { details } = useProfileDetails();
   const navigate = useNavigate();
-  const t = texts[language === 'th' ? 'en' : language] || texts.en;
+  const t = texts[language] || texts.en;
 
   const completionItems: CompletionItem[] = useMemo(() => [
     {

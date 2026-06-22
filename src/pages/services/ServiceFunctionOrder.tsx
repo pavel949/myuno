@@ -23,6 +23,7 @@ import { toast } from 'sonner';
    const navigate = useNavigate();
    const { language, t } = useLanguage();
    const isRu = language === 'ru';
+   const isTh = language === 'th';
    
   const { getFunction, getRawFunction } = useServiceFunctions();
   const { createOrder, isCreating } = useOrders();
@@ -58,10 +59,10 @@ import { toast } from 'sonner';
          })
          .catch(() => {
            setIsReverseGeocoding(false);
-           toast.error(isRu ? 'Не удалось определить адрес' : 'Could not determine address');
+           toast.error(isRu ? 'Не удалось определить адрес' : isTh ? 'ไม่สามารถระบุที่อยู่ได้' : 'Could not determine address');
          });
      }
-   }, [hasLocation, latitude, longitude, isReverseGeocoding, isRu]);
+   }, [hasLocation, latitude, longitude, isReverseGeocoding, isRu, isTh]);
  
    const handleUseCurrentLocation = () => {
      setIsReverseGeocoding(true);
@@ -74,13 +75,13 @@ import { toast } from 'sonner';
     if (!fn || !rawFn) return;
 
     if (!user) {
-      toast.error(isRu ? 'Войдите, чтобы оформить заказ' : 'Please sign in to place an order');
+      toast.error(isRu ? 'Войдите, чтобы оформить заказ' : isTh ? 'กรุณาเข้าสู่ระบบเพื่อสั่งซื้อ' : 'Please sign in to place an order');
       navigate('/auth?redirect=' + encodeURIComponent(`/services/order/${functionId}`));
       return;
     }
 
     if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim()) {
-      toast.error(isRu ? 'Заполните обязательные поля' : 'Please fill required fields');
+      toast.error(isRu ? 'Заполните обязательные поля' : isTh ? 'กรุณากรอกข้อมูลในช่องที่จำเป็น' : 'Please fill required fields');
       return;
     }
 
@@ -149,7 +150,7 @@ import { toast } from 'sonner';
    if (!fn || !rawFn) {
      return (
        <div className="min-h-screen flex items-center justify-center">
-         <p className="text-muted-foreground">{isRu ? 'Услуга не найдена' : 'Service not found'}</p>
+         <p className="text-muted-foreground">{isRu ? 'Услуга не найдена' : isTh ? 'ไม่พบบริการ' : 'Service not found'}</p>
        </div>
      );
    }
@@ -160,10 +161,10 @@ import { toast } from 'sonner';
    };
  
    const timeSlots = [
-     { value: 'morning', labelEn: 'Morning (9:00-12:00)', labelRu: 'Утро (9:00-12:00)' },
-     { value: 'afternoon', labelEn: 'Afternoon (12:00-17:00)', labelRu: 'День (12:00-17:00)' },
-     { value: 'evening', labelEn: 'Evening (17:00-20:00)', labelRu: 'Вечер (17:00-20:00)' },
-     { value: 'urgent', labelEn: 'ASAP (Urgent)', labelRu: 'Срочно (ASAP)' },
+     { value: 'morning', labelEn: 'Morning (9:00-12:00)', labelRu: 'Утро (9:00-12:00)', labelTh: 'ช่วงเช้า (9:00-12:00)' },
+     { value: 'afternoon', labelEn: 'Afternoon (12:00-17:00)', labelRu: 'День (12:00-17:00)', labelTh: 'ช่วงบ่าย (12:00-17:00)' },
+     { value: 'evening', labelEn: 'Evening (17:00-20:00)', labelRu: 'Вечер (17:00-20:00)', labelTh: 'ช่วงเย็น (17:00-20:00)' },
+     { value: 'urgent', labelEn: 'ASAP (Urgent)', labelRu: 'Срочно (ASAP)', labelTh: 'ด่วน (ASAP)' },
    ];
  
    return (
@@ -173,7 +174,7 @@ import { toast } from 'sonner';
          <div className="flex items-center gap-3 px-4 py-3">
            <BackButton fallbackPath={APP_ROUTES.SERVICES} variant="ghost" />
            <div className="flex-1">
-             <h1 className="font-semibold">{isRu ? 'Заказать услугу' : 'Order Service'}</h1>
+             <h1 className="font-semibold">{isRu ? 'Заказать услугу' : isTh ? 'สั่งบริการ' : 'Order Service'}</h1>
            </div>
          </div>
        </div>
@@ -194,7 +195,7 @@ import { toast } from 'sonner';
                      {fn.estimatedTime}
                    </span>
                    <span className="font-medium text-primary">
-                     {isRu ? 'от' : 'from'} {formatPrice(fn.basePrice, fn.currency)}
+                     {isRu ? 'от' : isTh ? 'เริ่มต้น' : 'from'} {formatPrice(fn.basePrice, fn.currency)}
                    </span>
                  </div>
                </div>
@@ -203,7 +204,7 @@ import { toast } from 'sonner';
              {/* What's included */}
              <div className="mt-4 pt-3 border-t border-primary/10">
                <p className="text-xs font-medium text-muted-foreground mb-2">
-                 {isRu ? 'Что входит:' : 'Includes:'}
+                 {isRu ? 'Что входит:' : isTh ? 'รวมบริการ:' : 'Includes:'}
                </p>
                <div className="flex flex-wrap gap-1.5">
                  {fn.includes.map((item, idx) => (
@@ -221,13 +222,13 @@ import { toast } from 'sonner';
          <div className="space-y-2">
            <Label className="flex items-center gap-2">
              <MapPin className="h-4 w-4" />
-             {isRu ? 'Адрес' : 'Address'} *
+             {isRu ? 'Адрес' : isTh ? 'ที่อยู่' : 'Address'} *
            </Label>
            <div className="relative">
              <Input
                value={formData.address}
                onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-               placeholder={isRu ? 'Введите адрес или выберите на карте' : 'Enter address or use location'}
+               placeholder={isRu ? 'Введите адрес или выберите на карте' : isTh ? 'กรอกที่อยู่หรือเลือกบนแผนที่' : 'Enter address or use location'}
                className="pr-10"
                required
              />
@@ -235,7 +236,7 @@ import { toast } from 'sonner';
                type="button"
                variant="ghost"
                size="icon"
-               aria-label={isRu ? 'Использовать текущее местоположение' : 'Use current location'}
+               aria-label={isRu ? 'Использовать текущее местоположение' : isTh ? 'ใช้ตำแหน่งปัจจุบัน' : 'Use current location'}
                className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px]"
                onClick={handleUseCurrentLocation}
                disabled={isGeoLoading || isReverseGeocoding}
@@ -254,7 +255,7 @@ import { toast } from 'sonner';
              className="text-xs text-primary hover:underline flex items-center gap-1"
            >
              <LocateFixed className="h-3 w-3" />
-             {isRu ? 'Использовать текущее местоположение' : 'Use current location'}
+             {isRu ? 'Использовать текущее местоположение' : isTh ? 'ใช้ตำแหน่งปัจจุบัน' : 'Use current location'}
            </button>
          </div>
  
@@ -262,7 +263,7 @@ import { toast } from 'sonner';
          <div className="space-y-2">
            <Label className="flex items-center gap-2">
              <Calendar className="h-4 w-4" />
-             {isRu ? 'Предпочтительная дата' : 'Preferred Date'}
+             {isRu ? 'Предпочтительная дата' : isTh ? 'วันที่ต้องการ' : 'Preferred Date'}
            </Label>
            <Input
              type="date"
@@ -274,7 +275,7 @@ import { toast } from 'sonner';
  
          {/* Preferred Time */}
          <div className="space-y-2">
-           <Label>{isRu ? 'Удобное время' : 'Preferred Time'}</Label>
+           <Label>{isRu ? 'Удобное время' : isTh ? 'เวลาที่สะดวก' : 'Preferred Time'}</Label>
            <RadioGroup
              value={formData.preferredTime}
              onValueChange={(value) => setFormData(prev => ({ ...prev, preferredTime: value }))}
@@ -291,7 +292,7 @@ import { toast } from 'sonner';
                  }`}
                >
                  <RadioGroupItem value={slot.value} id={`time-${slot.value}`} />
-                 <span className="text-sm">{isRu ? slot.labelRu : slot.labelEn}</span>
+                 <span className="text-sm">{isRu ? slot.labelRu : isTh ? slot.labelTh : slot.labelEn}</span>
                </Label>
              ))}
            </RadioGroup>
@@ -301,13 +302,15 @@ import { toast } from 'sonner';
          <div className="space-y-2">
            <Label className="flex items-center gap-2">
              <MessageSquare className="h-4 w-4" />
-             {isRu ? 'Опишите проблему' : 'Describe the problem'}
+             {isRu ? 'Опишите проблему' : isTh ? 'อธิบายปัญหา' : 'Describe the problem'}
            </Label>
            <Textarea
              value={formData.problemDescription}
              onChange={(e) => setFormData(prev => ({ ...prev, problemDescription: e.target.value }))}
-             placeholder={isRu 
-               ? 'Расскажите подробнее о проблеме...' 
+             placeholder={isRu
+               ? 'Расскажите подробнее о проблеме...'
+               : isTh
+               ? 'เล่ารายละเอียดเกี่ยวกับปัญหาเพิ่มเติม...'
                : 'Tell us more about the problem...'}
              rows={3}
            />
@@ -316,20 +319,20 @@ import { toast } from 'sonner';
          {/* Contact Info */}
          <Card>
            <CardContent className="p-4 space-y-4">
-             <h3 className="font-medium">{isRu ? 'Контактные данные' : 'Contact Information'}</h3>
-             
+             <h3 className="font-medium">{isRu ? 'Контактные данные' : isTh ? 'ข้อมูลติดต่อ' : 'Contact Information'}</h3>
+
              <div className="space-y-2">
-               <Label>{isRu ? 'Ваше имя' : 'Your name'} *</Label>
+               <Label>{isRu ? 'Ваше имя' : isTh ? 'ชื่อของคุณ' : 'Your name'} *</Label>
                <Input
                  value={formData.name}
                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                 placeholder={isRu ? 'Иван Петров' : 'John Smith'}
+                 placeholder={isRu ? 'Иван Петров' : isTh ? 'สมชาย ใจดี' : 'John Smith'}
                  required
                />
              </div>
              
              <div className="space-y-2">
-               <Label>{isRu ? 'Телефон' : 'Phone'} *</Label>
+               <Label>{isRu ? 'Телефон' : isTh ? 'เบอร์โทรศัพท์' : 'Phone'} *</Label>
                <Input
                  type="tel"
                  value={formData.phone}
@@ -340,7 +343,7 @@ import { toast } from 'sonner';
              </div>
              
              <div className="space-y-2">
-               <Label>{isRu ? 'Как с вами связаться?' : 'How to contact you?'}</Label>
+               <Label>{isRu ? 'Как с вами связаться?' : isTh ? 'ติดต่อคุณได้อย่างไร?' : 'How to contact you?'}</Label>
                <RadioGroup
                  value={formData.contactMethod}
                  onValueChange={(value) => setFormData(prev => ({ ...prev, contactMethod: value }))}
@@ -352,7 +355,7 @@ import { toast } from 'sonner';
                  </Label>
                  <Label htmlFor="contact-phone" className="flex items-center gap-2 cursor-pointer">
                    <RadioGroupItem value="phone" id="contact-phone" />
-                   <span className="text-sm">{isRu ? 'Звонок' : 'Phone call'}</span>
+                   <span className="text-sm">{isRu ? 'Звонок' : isTh ? 'โทรศัพท์' : 'Phone call'}</span>
                  </Label>
                  <Label htmlFor="contact-line" className="flex items-center gap-2 cursor-pointer">
                    <RadioGroupItem value="line" id="contact-line" />
@@ -373,11 +376,13 @@ import { toast } from 'sonner';
              {isCreating ? (
                <Loader2 className="h-5 w-5 animate-spin mr-2" />
              ) : null}
-             {isRu ? 'Отправить заявку' : 'Submit Request'}
+             {isRu ? 'Отправить заявку' : isTh ? 'ส่งคำขอ' : 'Submit Request'}
            </Button>
            <p className="text-xs text-center text-muted-foreground mt-2">
-             {isRu 
-               ? 'Мы свяжемся с вами в течение 30 минут' 
+             {isRu
+               ? 'Мы свяжемся с вами в течение 30 минут'
+               : isTh
+               ? 'เราจะติดต่อกลับภายใน 30 นาที'
                : 'We will contact you within 30 minutes'}
            </p>
          </div>

@@ -35,15 +35,19 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
       if (error) throw error;
 
       toast.success(
-        language === 'ru' 
-          ? 'Письмо отправлено! Проверьте почту.' 
+        language === 'ru'
+          ? 'Письмо отправлено! Проверьте почту.'
+          : language === 'th'
+          ? 'ส่งอีเมลแล้ว! โปรดตรวจสอบกล่องจดหมายของคุณ'
           : 'Email sent! Check your inbox.'
       );
     } catch (error: any) {
       console.error('Resend verification error:', error);
       toast.error(
-        language === 'ru' 
-          ? 'Ошибка отправки письма' 
+        language === 'ru'
+          ? 'Ошибка отправки письма'
+          : language === 'th'
+          ? 'ส่งอีเมลไม่สำเร็จ'
           : 'Failed to send email'
       );
     } finally {
@@ -58,14 +62,14 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
           <>
             <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-success shrink-0" />
             <span className="text-xs sm:text-sm text-success">
-              {language === 'ru' ? 'Email подтверждён' : 'Email verified'}
+              {language === 'ru' ? 'Email подтверждён' : language === 'th' ? 'ยืนยันอีเมลแล้ว' : 'Email verified'}
             </span>
           </>
         ) : (
           <>
             <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warning shrink-0" />
             <span className="text-xs sm:text-sm text-warning">
-              {language === 'ru' ? 'Email не подтверждён' : 'Email not verified'}
+              {language === 'ru' ? 'Email не подтверждён' : language === 'th' ? 'ยังไม่ได้ยืนยันอีเมล' : 'Email not verified'}
             </span>
             <PremiumButton
               variant="ghost"
@@ -77,7 +81,7 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
               {isResending ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
-                language === 'ru' ? 'Отправить' : 'Resend'
+                language === 'ru' ? 'Отправить' : language === 'th' ? 'ส่งอีกครั้ง' : 'Resend'
               )}
             </PremiumButton>
           </>
@@ -95,7 +99,7 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
         </div>
         <div className="flex-1">
           <p className="font-medium text-success">
-            {language === 'ru' ? 'Email подтверждён' : 'Email Verified'}
+            {language === 'ru' ? 'Email подтверждён' : language === 'th' ? 'ยืนยันอีเมลแล้ว' : 'Email Verified'}
           </p>
           <p className="text-sm text-success/80">
             {user.email}
@@ -113,11 +117,13 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-medium text-warning">
-            {language === 'ru' ? 'Подтвердите email' : 'Verify Your Email'}
+            {language === 'ru' ? 'Подтвердите email' : language === 'th' ? 'ยืนยันอีเมลของคุณ' : 'Verify Your Email'}
           </p>
           <p className="text-sm text-warning/80 mt-1">
-            {language === 'ru' 
-              ? 'Мы отправили письмо на вашу почту. Перейдите по ссылке для подтверждения.' 
+            {language === 'ru'
+              ? 'Мы отправили письмо на вашу почту. Перейдите по ссылке для подтверждения.'
+              : language === 'th'
+              ? 'เราได้ส่งลิงก์ยืนยันไปยังอีเมลของคุณแล้ว คลิกลิงก์เพื่อยืนยัน'
               : 'We sent a verification link to your email. Click the link to verify.'}
           </p>
           <PremiumButton
@@ -130,12 +136,12 @@ export function EmailVerificationBadge({ variant = 'inline' }: EmailVerification
             {isResending ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {language === 'ru' ? 'Отправка...' : 'Sending...'}
+                {language === 'ru' ? 'Отправка...' : language === 'th' ? 'กำลังส่ง...' : 'Sending...'}
               </>
             ) : (
               <>
                 <Mail className="w-4 h-4 mr-2" />
-                {language === 'ru' ? 'Отправить письмо повторно' : 'Resend Verification Email'}
+                {language === 'ru' ? 'Отправить письмо повторно' : language === 'th' ? 'ส่งอีเมลยืนยันอีกครั้ง' : 'Resend Verification Email'}
               </>
             )}
           </PremiumButton>

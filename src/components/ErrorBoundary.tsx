@@ -19,18 +19,18 @@ interface State {
   error: Error | null;
 }
 
-// Bilingual error messages
+// Trilingual error messages (RU / EN / TH)
 const ERROR_MESSAGES = {
   chunk: {
-    title: { en: 'Connection issue', ru: 'Проблема с подключением' },
-    desc: { en: 'Some components could not be loaded. Please check your connection and try again.', ru: 'Не удалось загрузить некоторые компоненты. Проверьте подключение и попробуйте снова.' },
+    title: { en: 'Connection issue', ru: 'Проблема с подключением', th: 'ปัญหาการเชื่อมต่อ' },
+    desc: { en: 'Some components could not be loaded. Please check your connection and try again.', ru: 'Не удалось загрузить некоторые компоненты. Проверьте подключение и попробуйте снова.', th: 'โหลดบางส่วนไม่สำเร็จ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง' },
   },
   generic: {
-    title: { en: 'This page failed to load', ru: 'Страница не загрузилась' },
-    desc: { en: 'Try again, or reload the page. We have logged the issue.', ru: 'Попробуйте снова или перезагрузите страницу. Мы записали ошибку.' },
+    title: { en: 'This page failed to load', ru: 'Страница не загрузилась', th: 'โหลดหน้านี้ไม่สำเร็จ' },
+    desc: { en: 'Try again, or reload the page. We have logged the issue.', ru: 'Попробуйте снова или перезагрузите страницу. Мы записали ошибку.', th: 'ลองอีกครั้ง หรือโหลดหน้าใหม่ เราได้บันทึกปัญหาไว้แล้ว' },
   },
-  tryAgain: { en: 'Try again', ru: 'Попробовать снова' },
-  reload: { en: 'Reload page', ru: 'Перезагрузить' },
+  tryAgain: { en: 'Try again', ru: 'Попробовать снова', th: 'ลองอีกครั้ง' },
+  reload: { en: 'Reload page', ru: 'Перезагрузить', th: 'โหลดหน้าใหม่' },
 };
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -191,10 +191,12 @@ export function useGlobalErrorHandler() {
           toast.error(
             lang === 'ru'
               ? 'Не удалось загрузить компонент. Обновите страницу.'
+              : lang === 'th'
+              ? 'โหลดคอมโพเนนต์ไม่สำเร็จ โปรดรีเฟรชหน้า'
               : 'Failed to load component. Please refresh the page.',
             {
               action: {
-                label: lang === 'ru' ? 'Обновить' : 'Refresh',
+                label: lang === 'ru' ? 'Обновить' : lang === 'th' ? 'รีเฟรช' : 'Refresh',
                 onClick: () => window.location.reload(),
               },
             }
@@ -204,6 +206,8 @@ export function useGlobalErrorHandler() {
         toast.error(
           lang === 'ru'
             ? 'Запрос не выполнен. Попробуйте ещё раз.'
+            : lang === 'th'
+            ? 'คำขอไม่สำเร็จ โปรดลองอีกครั้ง'
             : 'Request failed. Please try again.'
         );
       }
@@ -218,6 +222,8 @@ export function useGlobalErrorHandler() {
         toast.error(
           lang === 'ru'
             ? 'Проблема с подключением. Обновите страницу.'
+            : lang === 'th'
+            ? 'ปัญหาการเชื่อมต่อ โปรดรีเฟรชหน้า'
             : 'Connection issue. Please refresh the page.'
         );
       }

@@ -40,23 +40,23 @@ interface TransportFilterSidebarProps {
   onClose: () => void;
 }
 
-const TRANSMISSIONS = [
-  { id: 'automatic', en: 'Automatic', ru: 'Автомат' },
-  { id: 'manual', en: 'Manual', ru: 'Механика' },
+const TRANSMISSIONS: { id: string; en: string; ru: string; th: string }[] = [
+  { id: 'automatic', en: 'Automatic', ru: 'Автомат', th: 'อัตโนมัติ' },
+  { id: 'manual', en: 'Manual', ru: 'Механика', th: 'ธรรมดา' },
 ];
 
-const FUEL_TYPES = [
-  { id: 'petrol', en: 'Petrol', ru: 'Бензин' },
-  { id: 'diesel', en: 'Diesel', ru: 'Дизель' },
-  { id: 'electric', en: 'Electric', ru: 'Электро' },
-  { id: 'hybrid', en: 'Hybrid', ru: 'Гибрид' },
+const FUEL_TYPES: { id: string; en: string; ru: string; th: string }[] = [
+  { id: 'petrol', en: 'Petrol', ru: 'Бензин', th: 'เบนซิน' },
+  { id: 'diesel', en: 'Diesel', ru: 'Дизель', th: 'ดีเซล' },
+  { id: 'electric', en: 'Electric', ru: 'Электро', th: 'ไฟฟ้า' },
+  { id: 'hybrid', en: 'Hybrid', ru: 'Гибрид', th: 'ไฮบริด' },
 ];
 
-const SEAT_OPTIONS = [
-  { id: 2, en: '2+ seats', ru: '2+ мест' },
-  { id: 4, en: '4+ seats', ru: '4+ мест' },
-  { id: 7, en: '7+ seats', ru: '7+ мест' },
-  { id: 9, en: '9+ seats', ru: '9+ мест' },
+const SEAT_OPTIONS: { id: number; en: string; ru: string; th: string }[] = [
+  { id: 2, en: '2+ seats', ru: '2+ мест', th: '2+ ที่นั่ง' },
+  { id: 4, en: '4+ seats', ru: '4+ мест', th: '4+ ที่นั่ง' },
+  { id: 7, en: '7+ seats', ru: '7+ мест', th: '7+ ที่นั่ง' },
+  { id: 9, en: '9+ seats', ru: '9+ мест', th: '9+ ที่นั่ง' },
 ];
 
 export function TransportFilterSidebar({
@@ -67,7 +67,6 @@ export function TransportFilterSidebar({
   onClose,
 }: TransportFilterSidebarProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
 
   // Extract unique brands from vehicles
   const brands = useMemo(() => {
@@ -122,7 +121,7 @@ export function TransportFilterSidebar({
         <div className="sticky top-0 z-10 bg-background border-b border-border/50 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4 text-primary" />
-            <h2 className="font-semibold text-sm">{isRu ? 'Фильтры' : 'Filters'}</h2>
+            <h2 className="font-semibold text-sm">{language === 'ru' ? 'Фильтры' : language === 'th' ? 'ตัวกรอง' : 'Filters'}</h2>
             {activeCount > 0 && (
               <span className="px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
                 {activeCount}
@@ -132,7 +131,7 @@ export function TransportFilterSidebar({
           <div className="flex items-center gap-2">
             {activeCount > 0 && (
               <button onClick={reset} className="text-xs text-primary hover:underline">
-                {isRu ? 'Сбросить' : 'Reset'}
+                {language === 'ru' ? 'Сбросить' : language === 'th' ? 'ล้างค่า' : 'Reset'}
               </button>
             )}
             <button onClick={onClose} className="lg:hidden p-1 rounded-none hover:bg-muted">
@@ -143,7 +142,7 @@ export function TransportFilterSidebar({
 
         <div className="p-4 space-y-6">
           {/* Price Range */}
-          <FilterSection title={isRu ? 'Цена за день' : 'Daily price'}>
+          <FilterSection title={language === 'ru' ? 'Цена за день' : language === 'th' ? 'ราคาต่อวัน' : 'Daily price'}>
             <div className="px-1">
               <Slider
                 value={filters.priceRange}
@@ -161,7 +160,7 @@ export function TransportFilterSidebar({
           </FilterSection>
 
           {/* Transmission */}
-          <FilterSection title={isRu ? 'Трансмиссия' : 'Transmission'}>
+          <FilterSection title={language === 'ru' ? 'Трансмиссия' : language === 'th' ? 'ระบบเกียร์' : 'Transmission'}>
             <div className="space-y-2">
               {TRANSMISSIONS.map(t => (
                 <label key={t.id} className="flex items-center gap-2.5 cursor-pointer">
@@ -169,14 +168,14 @@ export function TransportFilterSidebar({
                     checked={filters.transmissions.includes(t.id)}
                     onCheckedChange={() => update({ transmissions: toggleInArray(filters.transmissions, t.id) })}
                   />
-                  <span className="text-sm">{isRu ? t.ru : t.en}</span>
+                  <span className="text-sm">{language === 'ru' ? t.ru : language === 'th' ? t.th : t.en}</span>
                 </label>
               ))}
             </div>
           </FilterSection>
 
           {/* Fuel Type */}
-          <FilterSection title={isRu ? 'Тип топлива' : 'Fuel type'}>
+          <FilterSection title={language === 'ru' ? 'Тип топлива' : language === 'th' ? 'ประเภทเชื้อเพลิง' : 'Fuel type'}>
             <div className="space-y-2">
               {FUEL_TYPES.map(f => (
                 <label key={f.id} className="flex items-center gap-2.5 cursor-pointer">
@@ -184,14 +183,14 @@ export function TransportFilterSidebar({
                     checked={filters.fuelTypes.includes(f.id)}
                     onCheckedChange={() => update({ fuelTypes: toggleInArray(filters.fuelTypes, f.id) })}
                   />
-                  <span className="text-sm">{isRu ? f.ru : f.en}</span>
+                  <span className="text-sm">{language === 'ru' ? f.ru : language === 'th' ? f.th : f.en}</span>
                 </label>
               ))}
             </div>
           </FilterSection>
 
           {/* Seats */}
-          <FilterSection title={isRu ? 'Мест' : 'Seats'}>
+          <FilterSection title={language === 'ru' ? 'Мест' : language === 'th' ? 'ที่นั่ง' : 'Seats'}>
             <div className="flex flex-wrap gap-2">
               {SEAT_OPTIONS.map(s => (
                 <button
@@ -204,7 +203,7 @@ export function TransportFilterSidebar({
                       : "bg-background text-muted-foreground border-border hover:border-foreground/30"
                   )}
                 >
-                  {isRu ? s.ru : s.en}
+                  {language === 'ru' ? s.ru : language === 'th' ? s.th : s.en}
                 </button>
               ))}
             </div>
@@ -212,7 +211,7 @@ export function TransportFilterSidebar({
 
           {/* Brand */}
           {brands.length > 0 && (
-            <FilterSection title={isRu ? 'Марка' : 'Brand'}>
+            <FilterSection title={language === 'ru' ? 'Марка' : language === 'th' ? 'ยี่ห้อ' : 'Brand'}>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {brands.map(brand => (
                   <label key={brand} className="flex items-center gap-2.5 cursor-pointer">
@@ -228,21 +227,21 @@ export function TransportFilterSidebar({
           )}
 
           {/* Toggles */}
-          <FilterSection title={isRu ? 'Опции' : 'Options'}>
+          <FilterSection title={language === 'ru' ? 'Опции' : language === 'th' ? 'ตัวเลือก' : 'Options'}>
             <div className="space-y-2">
               <label className="flex items-center gap-2.5 cursor-pointer">
                 <Checkbox
                   checked={filters.deliveryOnly}
                   onCheckedChange={(v) => update({ deliveryOnly: !!v })}
                 />
-                <span className="text-sm">{isRu ? 'С доставкой' : 'Delivery available'}</span>
+                <span className="text-sm">{language === 'ru' ? 'С доставкой' : language === 'th' ? 'มีบริการจัดส่ง' : 'Delivery available'}</span>
               </label>
               <label className="flex items-center gap-2.5 cursor-pointer">
                 <Checkbox
                   checked={filters.withDriverOnly}
                   onCheckedChange={(v) => update({ withDriverOnly: !!v })}
                 />
-                <span className="text-sm">{isRu ? 'С водителем' : 'With driver'}</span>
+                <span className="text-sm">{language === 'ru' ? 'С водителем' : language === 'th' ? 'พร้อมคนขับ' : 'With driver'}</span>
               </label>
             </div>
           </FilterSection>

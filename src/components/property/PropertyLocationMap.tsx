@@ -26,6 +26,7 @@ export function PropertyLocationMap({
 }: PropertyLocationMapProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { hasKey, isLoaded, loadError } = useGoogleMaps();
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -56,7 +57,7 @@ export function PropertyLocationMap({
     <div>
       {showHeading && (
         <h2 className="text-xl font-semibold mb-3">
-          {isRu ? 'Где вы будете' : "Where you'll be"}
+          {isRu ? 'Где вы будете' : isTh ? 'ทำเลที่ตั้ง' : "Where you'll be"}
         </h2>
       )}
 
@@ -68,8 +69,10 @@ export function PropertyLocationMap({
               {loadError?.message?.includes('auth')
                 ? (isRu
                   ? 'Ошибка авторизации Google Maps. Проверьте ограничения API-ключа.'
+                  : isTh
+                  ? 'เกิดข้อผิดพลาดในการยืนยันตัวตน Google Maps โปรดตรวจสอบข้อจำกัดของคีย์ API'
                   : 'Google Maps auth error. Check API key restrictions.')
-                : (isRu ? 'Карта недоступна' : 'Map unavailable')}
+                : (isRu ? 'Карта недоступна' : isTh ? 'ไม่สามารถแสดงแผนที่ได้' : 'Map unavailable')}
             </p>
             {googleMapsUrl && (
               <a
@@ -78,7 +81,7 @@ export function PropertyLocationMap({
                 rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline"
               >
-                {isRu ? 'Открыть в Google Картах' : 'Open in Google Maps'}
+                {isRu ? 'Открыть в Google Картах' : isTh ? 'เปิดใน Google Maps' : 'Open in Google Maps'}
               </a>
             )}
           </div>
@@ -114,7 +117,7 @@ export function PropertyLocationMap({
               rel="noopener noreferrer"
               className="text-xs bg-background/95 hover:bg-background border border-border rounded-none px-2 py-1.5 shadow-sm text-primary hover:underline"
             >
-              {isRu ? 'Открыть в Google Картах' : 'Open in Google Maps'}
+              {isRu ? 'Открыть в Google Картах' : isTh ? 'เปิดใน Google Maps' : 'Open in Google Maps'}
             </a>
           </div>
         )}
@@ -129,6 +132,8 @@ export function PropertyLocationMap({
             <p className="text-xs mt-1">
               {isRu
                 ? 'Точное местоположение будет предоставлено после бронирования'
+                : isTh
+                ? 'จะแจ้งตำแหน่งที่แน่นอนหลังจากการจอง'
                 : 'Exact location provided after booking'}
             </p>
           )}
@@ -139,7 +144,7 @@ export function PropertyLocationMap({
               rel="noopener noreferrer"
               className="text-xs text-primary hover:underline mt-1 inline-block"
             >
-              {isRu ? 'Показать на Google Картах' : 'Show on Google Maps'}
+              {isRu ? 'Показать на Google Картах' : isTh ? 'แสดงบน Google Maps' : 'Show on Google Maps'}
             </a>
           )}
         </div>

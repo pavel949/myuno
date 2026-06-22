@@ -18,7 +18,8 @@ export function ContactStep({ draft, onChange, onNext, onBack }: ContactStepProp
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
-  
+  const isTh = language === 'th';
+
   // Pre-fill from user if available
   React.useEffect(() => {
     if (user && !draft.applicant_email) {
@@ -35,15 +36,19 @@ export function ContactStep({ draft, onChange, onNext, onBack }: ContactStepProp
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        {isRu 
+        {isRu
           ? 'Как с вами связаться для уточнения деталей?'
+          : isTh
+          ? 'เราจะติดต่อคุณเพื่อสอบถามรายละเอียดได้อย่างไร?'
           : 'How can we contact you to clarify details?'}
       </p>
       
       {user && (
         <div className="bg-primary/10 rounded-none p-4 text-sm">
-          {isRu 
+          {isRu
             ? '✓ Вы вошли в систему. Контактные данные заполнены автоматически.'
+            : isTh
+            ? '✓ คุณเข้าสู่ระบบแล้ว ข้อมูลติดต่อถูกกรอกให้โดยอัตโนมัติ'
             : '✓ You are signed in. Contact info is pre-filled.'}
         </div>
       )}
@@ -51,13 +56,13 @@ export function ContactStep({ draft, onChange, onNext, onBack }: ContactStepProp
       <div className="space-y-2">
         <Label htmlFor="name" className="flex items-center gap-2">
           <User className="h-4 w-4" />
-          {isRu ? 'Ваше имя' : 'Your name'} *
+          {isRu ? 'Ваше имя' : isTh ? 'ชื่อของคุณ' : 'Your name'} *
         </Label>
         <Input
           id="name"
           value={draft.applicant_name || ''}
           onChange={(e) => onChange({ applicant_name: e.target.value })}
-          placeholder={isRu ? 'Иван Петров' : 'John Smith'}
+          placeholder={isRu ? 'Иван Петров' : isTh ? 'สมชาย ใจดี' : 'John Smith'}
         />
       </div>
       
@@ -78,7 +83,7 @@ export function ContactStep({ draft, onChange, onNext, onBack }: ContactStepProp
       <div className="space-y-2">
         <Label htmlFor="phone" className="flex items-center gap-2">
           <Phone className="h-4 w-4" />
-          {isRu ? 'Телефон' : 'Phone'}
+          {isRu ? 'Телефон' : isTh ? 'โทรศัพท์' : 'Phone'}
         </Label>
         <Input
           id="phone"
@@ -91,10 +96,10 @@ export function ContactStep({ draft, onChange, onNext, onBack }: ContactStepProp
       
       <div className="flex gap-3">
         <Button variant="outline" onClick={onBack} className="flex-1">
-          {isRu ? 'Назад' : 'Back'}
+          {isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
         </Button>
         <Button onClick={onNext} className="flex-1" disabled={!isValid}>
-          {isRu ? 'Продолжить' : 'Continue'}
+          {isRu ? 'Продолжить' : isTh ? 'ดำเนินการต่อ' : 'Continue'}
         </Button>
       </div>
     </div>

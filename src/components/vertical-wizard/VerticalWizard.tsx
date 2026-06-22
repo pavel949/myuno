@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { getPath } from '@/lib/vertical-specs/pathUtils';
+import type { Language } from '@/i18n';
 
-const t = (l: LocalizedText, lang: 'en' | 'ru') => l[lang] ?? l.en;
+const t = (l: LocalizedText, lang: Language): string =>
+  (l as Record<Language, string | undefined>)[lang] ?? l.en;
 
 interface Props {
   spec: VerticalSpec;
@@ -24,7 +26,7 @@ interface Props {
  */
 export const VerticalWizard = ({ spec, initial, onSubmit, onSaveDraft, submitting }: Props) => {
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const [step, setStep] = useState(0);
   const [row, setRow] = useState<Record<string, unknown>>(initial ?? {});
 
@@ -76,7 +78,7 @@ export const VerticalWizard = ({ spec, initial, onSubmit, onSaveDraft, submittin
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
-              {lang === 'ru' ? 'Шаг' : 'Step'} {step + 1} / {steps.length}
+              {lang === 'ru' ? 'Шаг' : lang === 'th' ? 'ขั้นตอน' : 'Step'} {step + 1} / {steps.length}
             </span>
             <span>{t(spec.label, lang)}</span>
           </div>
@@ -106,7 +108,7 @@ export const VerticalWizard = ({ spec, initial, onSubmit, onSaveDraft, submittin
 
         {stepErrors.length > 0 && (
           <div className="rounded-none border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
-            {lang === 'ru' ? 'Заполните обязательные поля: ' : 'Please complete: '}
+            {lang === 'ru' ? 'Заполните обязательные поля: ' : lang === 'th' ? 'กรุณากรอกข้อมูลที่จำเป็น: ' : 'Please complete: '}
             {stepErrors.join(', ')}
           </div>
         )}
@@ -114,17 +116,17 @@ export const VerticalWizard = ({ spec, initial, onSubmit, onSaveDraft, submittin
         <div className="flex items-center justify-between gap-2 pt-2">
           <Button variant="outline" onClick={back} disabled={step === 0}>
             <ChevronLeft className="h-4 w-4 mr-1" />
-            {lang === 'ru' ? 'Назад' : 'Back'}
+            {lang === 'ru' ? 'Назад' : lang === 'th' ? 'ย้อนกลับ' : 'Back'}
           </Button>
           {step < steps.length - 1 ? (
             <Button onClick={next} disabled={stepErrors.length > 0}>
-              {lang === 'ru' ? 'Дальше' : 'Next'}
+              {lang === 'ru' ? 'Дальше' : lang === 'th' ? 'ถัดไป' : 'Next'}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           ) : (
             <Button onClick={submit} disabled={stepErrors.length > 0 || submitting}>
               <Check className="h-4 w-4 mr-1" />
-              {lang === 'ru' ? 'Отправить на модерацию' : 'Submit for review'}
+              {lang === 'ru' ? 'Отправить на модерацию' : lang === 'th' ? 'ส่งเพื่อตรวจสอบ' : 'Submit for review'}
             </Button>
           )}
         </div>
@@ -134,7 +136,7 @@ export const VerticalWizard = ({ spec, initial, onSubmit, onSaveDraft, submittin
         <QualityPanel spec={spec} row={row} />
         <div className="rounded-none border border-border bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
           <p className="font-medium text-foreground">
-            {lang === 'ru' ? 'Эталоны индустрии' : 'Industry references'}
+            {lang === 'ru' ? 'Эталоны индустрии' : lang === 'th' ? 'มาตรฐานอุตสาหกรรม' : 'Industry references'}
           </p>
           <p>{spec.references?.join(' · ')}</p>
         </div>

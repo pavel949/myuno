@@ -25,6 +25,7 @@ type Intent = 'rent' | 'sale';
 export default function CommercialIndex() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -95,10 +96,12 @@ export default function CommercialIndex() {
   return (
     <>
       <SEOHead
-        title={isRu ? 'Коммерческая недвижимость в Пхукете — myUNO' : 'Commercial Real Estate Phuket — myUNO'}
+        title={isRu ? 'Коммерческая недвижимость в Пхукете — myUNO' : isTh ? 'อสังหาริมทรัพย์เชิงพาณิชย์ในภูเก็ต — myUNO' : 'Commercial Real Estate Phuket — myUNO'}
         description={
           isRu
             ? 'Офисы, склады, рестораны, отели — аренда и продажа коммерческой недвижимости с метриками доходности (Cap Rate, NOI, Yield).'
+            : isTh
+            ? 'สำนักงาน โกดัง ร้านอาหาร โรงแรม — เช่าและขายอสังหาริมทรัพย์เชิงพาณิชย์พร้อมตัวชี้วัดผลตอบแทน (Cap Rate, NOI, Yield)'
             : 'Offices, warehouses, restaurants, hotels — rent and sale of commercial real estate with yield metrics (Cap Rate, NOI).'
         }
       />
@@ -112,12 +115,14 @@ export default function CommercialIndex() {
           <div className="flex items-center gap-2 mb-1.5">
             <Briefcase className="w-5 h-5 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">
-              {isRu ? 'Коммерческая недвижимость' : 'Commercial Real Estate'}
+              {isRu ? 'Коммерческая недвижимость' : isTh ? 'อสังหาริมทรัพย์เชิงพาณิชย์' : 'Commercial Real Estate'}
             </h1>
           </div>
           <p className="text-sm text-muted-foreground">
             {isRu
               ? 'Офисы, ритейл, склады, F&B, отели — с фокусом на доходность.'
+              : isTh
+              ? 'สำนักงาน ค้าปลีก โกดัง F&B โรงแรม — เน้นรายการที่ให้ผลตอบแทน'
               : 'Offices, retail, warehouses, F&B, hotels — yield-focused listings.'}
           </p>
         </div>
@@ -139,7 +144,17 @@ export default function CommercialIndex() {
                     : 'text-muted-foreground hover:text-foreground',
                 )}
               >
-                {i === 'sale' ? (isRu ? 'Продажа' : 'Sale') : isRu ? 'Аренда' : 'Rent'}
+                {i === 'sale'
+                  ? isRu
+                    ? 'Продажа'
+                    : isTh
+                    ? 'ขาย'
+                    : 'Sale'
+                  : isRu
+                  ? 'Аренда'
+                  : isTh
+                  ? 'เช่า'
+                  : 'Rent'}
               </button>
             ))}
           </div>
@@ -157,7 +172,7 @@ export default function CommercialIndex() {
                     : 'bg-background text-muted-foreground border-border hover:text-foreground',
                 )}
               >
-                {isRu ? 'Все' : 'All'}
+                {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'All'}
               </button>
               {/* Hotels — dedicated sub-vertical, navigates to /property/hotels for SEO */}
               <button
@@ -169,7 +184,7 @@ export default function CommercialIndex() {
                 )}
               >
                 <Hotel className="inline w-3 h-3 mr-1" />
-                {isRu ? 'Отели' : 'Hotels'}
+                {isRu ? 'Отели' : isTh ? 'โรงแรม' : 'Hotels'}
                 <span className="ml-1.5 text-[10px] opacity-70">PRO</span>
               </button>
               {COMMERCIAL_TYPES.filter((t) => !(HOTEL_PROPERTY_TYPES as string[]).includes(t.id)).map((t) => (
@@ -203,7 +218,7 @@ export default function CommercialIndex() {
 
           {!isLoading && error && (
             <div className="text-sm text-destructive p-4 rounded-none bg-destructive/5">
-              {isRu ? 'Не удалось загрузить листинги' : 'Failed to load listings'}
+              {isRu ? 'Не удалось загрузить листинги' : isTh ? 'ไม่สามารถโหลดรายการได้' : 'Failed to load listings'}
             </div>
           )}
 
@@ -211,16 +226,18 @@ export default function CommercialIndex() {
             <div className="text-center py-16 px-4 border border-dashed border-border rounded-none">
               <Building2 className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-sm font-medium text-foreground mb-1">
-                {isRu ? 'Скоро здесь будут объекты' : 'Listings coming soon'}
+                {isRu ? 'Скоро здесь будут объекты' : isTh ? 'รายการกำลังจะมาเร็ว ๆ นี้' : 'Listings coming soon'}
               </p>
               <p className="text-xs text-muted-foreground mb-4">
                 {isRu
                   ? 'Мы собираем эксклюзивный пул коммерческих объектов с проверенной доходностью.'
+                  : isTh
+                  ? 'เรากำลังคัดสรรกลุ่มอสังหาริมทรัพย์เชิงพาณิชย์ระดับเอ็กซ์คลูซีฟที่ผ่านการตรวจสอบผลตอบแทนแล้ว'
                   : 'We are curating an exclusive pool of commercial assets with verified yield.'}
               </p>
               <Button size="sm" variant="outline" asChild>
                 <a href="mailto:capital@myuno.app">
-                  {isRu ? 'Связаться с Capital Advisory' : 'Contact Capital Advisory'}
+                  {isRu ? 'Связаться с Capital Advisory' : isTh ? 'ติดต่อ Capital Advisory' : 'Contact Capital Advisory'}
                 </a>
               </Button>
             </div>

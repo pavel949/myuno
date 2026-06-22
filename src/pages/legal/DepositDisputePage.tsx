@@ -46,6 +46,7 @@ export default function DepositDisputePage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const t = language === "ru";
+  const isTh = language === "th";
   const { user } = useAuth();
   const { openAuthSheet } = useAuthSheet();
 
@@ -80,7 +81,7 @@ export default function DepositDisputePage() {
       .maybeSingle();
     setLoading(false);
     if (error || !data) {
-      toast.error(t ? "Пакет не найден" : "Pack not found");
+      toast.error(t ? "Пакет не найден" : isTh ? "ไม่พบชุดเอกสาร" : "Pack not found");
       return;
     }
     setPack(data as DisputePack);
@@ -98,7 +99,7 @@ export default function DepositDisputePage() {
       return;
     }
     if (!vaultId) {
-      toast.error(t ? "Не указано хранилище" : "Vault missing");
+      toast.error(t ? "Не указано хранилище" : isTh ? "ไม่ได้ระบุห้องนิรภัย" : "Vault missing");
       return;
     }
     setSubmitting(true);
@@ -115,7 +116,7 @@ export default function DepositDisputePage() {
     setSubmitting(false);
     if (error || !data?.url) {
       console.error(error);
-      toast.error(t ? "Не удалось открыть оплату" : "Checkout failed");
+      toast.error(t ? "Не удалось открыть оплату" : isTh ? "ไม่สามารถเปิดหน้าชำระเงินได้" : "Checkout failed");
       return;
     }
     window.location.href = data.url;
@@ -129,11 +130,11 @@ export default function DepositDisputePage() {
     setGenerating(false);
     if (error || !data?.letter) {
       console.error(error);
-      toast.error(t ? "AI-генерация не удалась" : "AI generation failed");
+      toast.error(t ? "AI-генерация не удалась" : isTh ? "AI สร้างเอกสารไม่สำเร็จ" : "AI generation failed");
       return;
     }
     setPack((prev) => prev ? { ...prev, letter_text: data.letter, status: "generated" } : prev);
-    toast.success(t ? "Письмо готово" : "Letter ready");
+    toast.success(t ? "Письмо готово" : isTh ? "จดหมายพร้อมแล้ว" : "Letter ready");
   }
 
   function downloadLetter() {
@@ -150,10 +151,12 @@ export default function DepositDisputePage() {
   return (
     <AppLayout>
       <SEOHead
-        title={t ? "Dispute Pack — возврат депозита" : "Dispute Pack — get your deposit back"}
+        title={t ? "Dispute Pack — возврат депозита" : isTh ? "Dispute Pack — ทวงเงินมัดจำคืน" : "Dispute Pack — get your deposit back"}
         description={
           t
             ? "Платный пакет ฿1,490: AI-черновик жалобы в OCPB + индекс доказательств."
+            : isTh
+            ? "ชุดเอกสารแบบชำระเงิน ฿1,490: ร่างคำร้องเรียน สคบ. ด้วย AI + ดัชนีหลักฐาน"
             : "฿1,490 paid pack: AI-drafted OCPB complaint + evidence index."
         }
         url="/legal/deposit-vault/dispute"
@@ -167,7 +170,7 @@ export default function DepositDisputePage() {
             </div>
             <h1 className="text-2xl font-bold mb-1">{t ? "Dispute Pack" : "Dispute Pack"}</h1>
             <p className="text-primary-foreground/80 text-sm">
-              {t ? `AI-черновик жалобы в OCPB · ฿${PRICE_THB.toLocaleString()}` : `AI-drafted OCPB complaint · ฿${PRICE_THB.toLocaleString()}`}
+              {t ? `AI-черновик жалобы в OCPB · ฿${PRICE_THB.toLocaleString()}` : isTh ? `ร่างคำร้องเรียน สคบ. ด้วย AI · ฿${PRICE_THB.toLocaleString()}` : `AI-drafted OCPB complaint · ฿${PRICE_THB.toLocaleString()}`}
             </p>
           </div>
         </div>
@@ -179,7 +182,7 @@ export default function DepositDisputePage() {
                 <form onSubmit={handleCheckout} className="space-y-3">
                   <div>
                     <Label htmlFor="landlord" className="text-xs">
-                      {t ? "Имя арендодателя" : "Landlord name"}
+                      {t ? "Имя арендодателя" : isTh ? "ชื่อผู้ให้เช่า" : "Landlord name"}
                     </Label>
                     <Input
                       id="landlord"
@@ -189,7 +192,7 @@ export default function DepositDisputePage() {
                   </div>
                   <div>
                     <Label htmlFor="contact" className="text-xs">
-                      {t ? "Контакт арендодателя" : "Landlord contact"}
+                      {t ? "Контакт арендодателя" : isTh ? "ข้อมูลติดต่อผู้ให้เช่า" : "Landlord contact"}
                     </Label>
                     <Input
                       id="contact"

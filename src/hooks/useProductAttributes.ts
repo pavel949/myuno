@@ -98,19 +98,19 @@ export function useAttributeFilter(categorySlug?: string, attributeKey?: string)
 }
 
 // Attribute key labels for display
-export const ATTRIBUTE_LABELS: Record<string, { en: string; ru: string }> = {
-  brand: { en: 'Brand', ru: 'Бренд' },
-  origin: { en: 'Country of Origin', ru: 'Страна происхождения' },
-  storage: { en: 'Storage', ru: 'Хранение' },
-  organic: { en: 'Organic', ru: 'Органик' },
-  weight: { en: 'Weight', ru: 'Вес' },
-  volume: { en: 'Volume', ru: 'Объём' },
-  material: { en: 'Material', ru: 'Материал' },
-  size: { en: 'Size', ru: 'Размер' },
-  color: { en: 'Color', ru: 'Цвет' },
-  expiry: { en: 'Shelf Life', ru: 'Срок годности' },
+export const ATTRIBUTE_LABELS: Record<string, { en: string; ru: string; th: string }> = {
+  brand: { en: 'Brand', ru: 'Бренд', th: 'แบรนด์' },
+  origin: { en: 'Country of Origin', ru: 'Страна происхождения', th: 'ประเทศต้นกำเนิด' },
+  storage: { en: 'Storage', ru: 'Хранение', th: 'การจัดเก็บ' },
+  organic: { en: 'Organic', ru: 'Органик', th: 'ออร์แกนิก' },
+  weight: { en: 'Weight', ru: 'Вес', th: 'น้ำหนัก' },
+  volume: { en: 'Volume', ru: 'Объём', th: 'ปริมาตร' },
+  material: { en: 'Material', ru: 'Материал', th: 'วัสดุ' },
+  size: { en: 'Size', ru: 'Размер', th: 'ขนาด' },
+  color: { en: 'Color', ru: 'Цвет', th: 'สี' },
+  expiry: { en: 'Shelf Life', ru: 'Срок годности', th: 'อายุการเก็บ' },
 };
 
-export function getAttributeLabel(key: string, language: 'en' | 'ru'): string {
-  return ATTRIBUTE_LABELS[key]?.[language] || key;
+export function getAttributeLabel(key: string, language: 'en' | 'ru' | 'th'): string {
+  return ATTRIBUTE_LABELS[key]?.[language] || ATTRIBUTE_LABELS[key]?.en || key;
 }

@@ -42,16 +42,17 @@ interface FullReport {
 
 const PRICE_THB = 4900;
 const CONTRACT_TYPES = [
-  { id: 'sale', ru: 'Купля-продажа', en: 'Sale & Purchase' },
-  { id: 'lease', ru: 'Аренда', en: 'Lease / Rental' },
-  { id: 'pms', ru: 'Управление (PMS)', en: 'Property management' },
-  { id: 'partnership', ru: 'Партнёрство / SPA', en: 'Partnership / SPA' },
-  { id: 'other', ru: 'Другое', en: 'Other' },
+  { id: 'sale', ru: 'Купля-продажа', th: 'สัญญาซื้อขาย', en: 'Sale & Purchase' },
+  { id: 'lease', ru: 'Аренда', th: 'สัญญาเช่า', en: 'Lease / Rental' },
+  { id: 'pms', ru: 'Управление (PMS)', th: 'สัญญาบริหารทรัพย์สิน (PMS)', en: 'Property management' },
+  { id: 'partnership', ru: 'Партнёрство / SPA', th: 'หุ้นส่วน / SPA', en: 'Partnership / SPA' },
+  { id: 'other', ru: 'Другое', th: 'อื่น ๆ', en: 'Other' },
 ];
 
 export default function ContractAnalysisPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
+  const isTh = language === 'th';
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [file, setFile] = useState<File | null>(null);
@@ -73,11 +74,11 @@ export default function ContractAnalysisPage() {
       if (data?.report) setFullReport(data.report as FullReport);
     } catch (err) {
       console.error('Full report error:', err);
-      toast.error(t ? 'Не удалось загрузить полный отчёт' : 'Failed to load full report');
+      toast.error(t ? 'Не удалось загрузить полный отчёт' : isTh ? 'ไม่สามารถโหลดรายงานฉบับเต็มได้' : 'Failed to load full report');
     } finally {
       setIsLoadingFull(false);
     }
-  }, [language, t]);
+  }, [language, t, isTh]);
 
   // Detect return from Stripe checkout
   useEffect(() => {
@@ -85,17 +86,17 @@ export default function ContractAnalysisPage() {
     const id = searchParams.get('analysisId');
     if (status === 'paid' && id) {
       setAnalysisId(id);
-      toast.success(t ? 'Оплата получена. Генерирую полный отчёт…' : 'Payment received. Generating full report…');
+      toast.success(t ? 'Оплата получена. Генерирую полный отчёт…' : isTh ? 'รับชำระเงินแล้ว กำลังจัดทำรายงานฉบับเต็ม…' : 'Payment received. Generating full report…');
       loadFullReport(id);
       searchParams.delete('status');
       searchParams.delete('session_id');
       setSearchParams(searchParams, { replace: true });
     } else if (status === 'cancelled') {
-      toast.info(t ? 'Оплата отменена' : 'Payment cancelled');
+      toast.info(t ? 'Оплата отменена' : isTh ? 'ยกเลิกการชำระเงินแล้ว' : 'Payment cancelled');
       searchParams.delete('status');
       setSearchParams(searchParams, { replace: true });
     }
-  }, [searchParams, setSearchParams, t, loadFullReport]);
+  }, [searchParams, setSearchParams, t, isTh, loadFullReport]);
 
   const handleAnalyze = async () => {
     if (!file) return;
@@ -121,7 +122,7 @@ export default function ContractAnalysisPage() {
       }
     } catch (err) {
       console.error('Preview error:', err);
-      const msg = err instanceof Error ? err.message : (t ? 'Ошибка анализа' : 'Analysis failed');
+      const msg = err instanceof Error ? err.message : (t ? 'Ошибка анализа' : isTh ? 'การวิเคราะห์ล้มเหลว' : 'Analysis failed');
       toast.error(msg);
     } finally {
       setIsAnalyzing(false);
@@ -143,7 +144,7 @@ export default function ContractAnalysisPage() {
       }
     } catch (err) {
       console.error('Checkout error:', err);
-      toast.error(t ? 'Не удалось открыть оплату. Войдите в аккаунт.' : 'Failed to open checkout. Please sign in.');
+      toast.error(t ? 'Не удалось открыть оплату. Войдите в аккаунт.' : isTh ? 'ไม่สามารถเปิดหน้าชำระเงินได้ กรุณาเข้าสู่ระบบ' : 'Failed to open checkout. Please sign in.');
       setIsPaying(false);
     }
   };
@@ -163,9 +164,11 @@ export default function ContractAnalysisPage() {
   return (
     <AppLayout>
       <SEOHead
-        title={t ? 'ContractAI — проверка договора за ฿4,900' : 'ContractAI — contract review for ฿4,900'}
+        title={t ? 'ContractAI — проверка договора за ฿4,900' : isTh ? 'ContractAI — ตรวจสอบสัญญาในราคา ฿4,900' : 'ContractAI — contract review for ฿4,900'}
         description={t
           ? 'AI-анализ sale/lease/PMS-договоров. Бесплатное превью риска, полный отчёт за ฿4,900 — 24 часа.'
+          : isTh
+          ? 'ตรวจสอบความเสี่ยงสัญญาซื้อขาย เช่า และ PMS ด้วย AI ดูตัวอย่างความเสี่ยงฟรี รายงานฉบับเต็ม ฿4,900 ภายใน 24 ชั่วโมง'
           : 'AI risk review for Thai sale, lease and PMS contracts. Free risk preview, full report for ฿4,900 within 24h.'}
       />
       <div className="pb-24">
@@ -177,7 +180,7 @@ export default function ContractAnalysisPage() {
             </div>
             <h1 className="text-2xl font-bold mb-1">ContractAI</h1>
             <p className="text-primary-foreground/80 text-sm">
-              {t ? 'AI-проверка договора · ฿4,900 за полный отчёт' : 'AI contract review · ฿4,900 full report'}
+              {t ? 'AI-проверка договора · ฿4,900 за полный отчёт' : isTh ? 'ตรวจสอบสัญญาด้วย AI · รายงานฉบับเต็ม ฿4,900' : 'AI contract review · ฿4,900 full report'}
             </p>
           </div>
         </div>
@@ -189,7 +192,7 @@ export default function ContractAnalysisPage() {
               <CardContent className="p-4 space-y-3">
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">
-                    {t ? 'Тип договора' : 'Contract type'}
+                    {t ? 'Тип договора' : isTh ? 'ประเภทสัญญา' : 'Contract type'}
                   </label>
                   <div className="grid grid-cols-2 gap-1.5">
                     {CONTRACT_TYPES.map(c => (
@@ -204,7 +207,7 @@ export default function ContractAnalysisPage() {
                             : 'border-border bg-card text-foreground',
                         )}
                       >
-                        {t ? c.ru : c.en}
+                        {t ? c.ru : isTh ? c.th : c.en}
                       </button>
                     ))}
                   </div>
@@ -227,10 +230,10 @@ export default function ContractAnalysisPage() {
                     <div className="text-center">
                       <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                       <p className="text-sm text-muted-foreground">
-                        {t ? 'Загрузите договор (TXT/HTML)' : 'Upload contract (TXT/HTML)'}
+                        {t ? 'Загрузите договор (TXT/HTML)' : isTh ? 'อัปโหลดสัญญา (TXT/HTML)' : 'Upload contract (TXT/HTML)'}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {t ? 'PDF/DOC — конвертируйте в текст' : 'PDF/DOC — convert to text first'}
+                        {t ? 'PDF/DOC — конвертируйте в текст' : isTh ? 'PDF/DOC — แปลงเป็นไฟล์ข้อความก่อน' : 'PDF/DOC — convert to text first'}
                       </p>
                     </div>
                   )}
@@ -238,14 +241,16 @@ export default function ContractAnalysisPage() {
 
                 <Button className="w-full gap-2" disabled={!file || isAnalyzing} onClick={handleAnalyze}>
                   {isAnalyzing ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" />{t ? 'Анализирую…' : 'Analyzing…'}</>
+                    <><Loader2 className="w-4 h-4 animate-spin" />{t ? 'Анализирую…' : isTh ? 'กำลังวิเคราะห์…' : 'Analyzing…'}</>
                   ) : (
-                    <><FileSearch className="w-4 h-4" />{t ? 'Бесплатное превью' : 'Free preview'}</>
+                    <><FileSearch className="w-4 h-4" />{t ? 'Бесплатное превью' : isTh ? 'ดูตัวอย่างฟรี' : 'Free preview'}</>
                   )}
                 </Button>
                 <p className="text-[11px] text-muted-foreground text-center">
                   {t
                     ? 'Превью бесплатно. Полный отчёт — ฿4,900 (оплата картой).'
+                    : isTh
+                    ? 'ดูตัวอย่างฟรี รายงานฉบับเต็ม ฿4,900 (ชำระด้วยบัตร)'
                     : 'Preview is free. Full report — ฿4,900 (card payment).'}
                 </p>
               </CardContent>
@@ -257,7 +262,7 @@ export default function ContractAnalysisPage() {
             <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4">
               <Card>
                 <CardContent className="p-4 text-center">
-                  <p className="text-xs text-muted-foreground mb-1">{t ? 'Оценка риска' : 'Risk score'}</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t ? 'Оценка риска' : isTh ? 'คะแนนความเสี่ยง' : 'Risk score'}</p>
                   <p className={cn('text-4xl font-bold tabular-nums', riskColor(preview.risk_score))}>
                     {preview.risk_score}<span className="text-lg text-muted-foreground">/10</span>
                   </p>
@@ -268,7 +273,7 @@ export default function ContractAnalysisPage() {
                 <CardContent className="p-4">
                   <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                     <Info className="w-4 h-4 text-primary" />
-                    {t ? 'Резюме' : 'Summary'}
+                    {t ? 'Резюме' : isTh ? 'สรุป' : 'Summary'}
                   </h3>
                   <p className="text-sm text-muted-foreground">{preview.summary}</p>
                 </CardContent>
@@ -279,7 +284,7 @@ export default function ContractAnalysisPage() {
                   <CardContent className="p-4">
                     <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-destructive">
                       <AlertTriangle className="w-4 h-4" />
-                      {t ? 'Главный риск' : 'Top red flag'}
+                      {t ? 'Главный риск' : isTh ? 'ความเสี่ยงสำคัญที่สุด' : 'Top red flag'}
                     </h3>
                     <p className="text-sm text-muted-foreground">{preview.top_red_flag}</p>
                   </CardContent>
@@ -293,24 +298,26 @@ export default function ContractAnalysisPage() {
                     <Lock className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                     <div>
                       <p className="text-sm font-semibold">
-                        {t ? 'Полный отчёт за ฿4,900' : `Full report for ฿${PRICE_THB.toLocaleString()}`}
+                        {t ? 'Полный отчёт за ฿4,900' : isTh ? `รายงานฉบับเต็ม ฿${PRICE_THB.toLocaleString()}` : `Full report for ฿${PRICE_THB.toLocaleString()}`}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {t
                           ? 'Все красные флаги, отсутствующие пункты, рекомендации и шаги (1-я редакция за 24 ч).'
+                          : isTh
+                          ? 'ความเสี่ยงทั้งหมด ข้อสัญญาที่ขาดหาย คำแนะนำ และขั้นตอนที่ควรทำ (ฉบับร่างแรกภายใน 24 ชั่วโมง)'
                           : 'All red flags, missing clauses, recommendations and action items (first draft in 24h).'}
                       </p>
                     </div>
                   </div>
                   <Button className="w-full gap-2" disabled={isPaying} onClick={handleUnlock}>
                     {isPaying ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" />{t ? 'Открываю оплату…' : 'Opening checkout…'}</>
+                      <><Loader2 className="w-4 h-4 animate-spin" />{t ? 'Открываю оплату…' : isTh ? 'กำลังเปิดหน้าชำระเงิน…' : 'Opening checkout…'}</>
                     ) : (
-                      <><Shield className="w-4 h-4" />{t ? `Открыть отчёт · ฿${PRICE_THB.toLocaleString()}` : `Unlock report · ฿${PRICE_THB.toLocaleString()}`}</>
+                      <><Shield className="w-4 h-4" />{t ? `Открыть отчёт · ฿${PRICE_THB.toLocaleString()}` : isTh ? `ปลดล็อกรายงาน · ฿${PRICE_THB.toLocaleString()}` : `Unlock report · ฿${PRICE_THB.toLocaleString()}`}</>
                     )}
                   </Button>
                   <p className="text-[11px] text-muted-foreground text-center">
-                    {t ? 'Платёж через Stripe. Возврат в течение 7 дней, если AI не справился.' : 'Stripe payment. Refund within 7 days if AI fails.'}
+                    {t ? 'Платёж через Stripe. Возврат в течение 7 дней, если AI не справился.' : isTh ? 'ชำระผ่าน Stripe คืนเงินภายใน 7 วันหาก AI ทำงานไม่สำเร็จ' : 'Stripe payment. Refund within 7 days if AI fails.'}
                   </p>
                 </CardContent>
               </Card>
@@ -323,7 +330,7 @@ export default function ContractAnalysisPage() {
               <CardContent className="p-8 text-center">
                 <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3 text-primary" />
                 <p className="text-sm text-muted-foreground">
-                  {t ? 'Готовлю полный отчёт (15–30 с)…' : 'Generating full report (15-30s)…'}
+                  {t ? 'Готовлю полный отчёт (15–30 с)…' : isTh ? 'กำลังจัดทำรายงานฉบับเต็ม (15–30 วินาที)…' : 'Generating full report (15-30s)…'}
                 </p>
               </CardContent>
             </Card>
@@ -334,7 +341,7 @@ export default function ContractAnalysisPage() {
             <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4">
               <Card>
                 <CardContent className="p-4 text-center">
-                  <p className="text-xs text-muted-foreground mb-1">{t ? 'Оценка риска' : 'Risk score'}</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t ? 'Оценка риска' : isTh ? 'คะแนนความเสี่ยง' : 'Risk score'}</p>
                   <p className={cn('text-4xl font-bold tabular-nums', riskColor(fullReport.risk_score))}>
                     {fullReport.risk_score}<span className="text-lg text-muted-foreground">/10</span>
                   </p>
@@ -348,7 +355,7 @@ export default function ContractAnalysisPage() {
                 <CardContent className="p-4">
                   <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                     <Info className="w-4 h-4 text-primary" />
-                    {t ? 'Резюме' : 'Summary'}
+                    {t ? 'Резюме' : isTh ? 'สรุป' : 'Summary'}
                   </h3>
                   <p className="text-sm text-muted-foreground">{fullReport.summary}</p>
                 </CardContent>
@@ -357,7 +364,7 @@ export default function ContractAnalysisPage() {
               {fullReport.parties && fullReport.parties.length > 0 && (
                 <Card>
                   <CardContent className="p-4">
-                    <h3 className="text-sm font-semibold mb-2">{t ? 'Стороны' : 'Parties'}</h3>
+                    <h3 className="text-sm font-semibold mb-2">{t ? 'Стороны' : isTh ? 'คู่สัญญา' : 'Parties'}</h3>
                     <ul className="space-y-1">
                       {fullReport.parties.map((p, i) => (
                         <li key={i} className="text-sm text-muted-foreground">
@@ -374,7 +381,7 @@ export default function ContractAnalysisPage() {
                   <CardContent className="p-4">
                     <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-destructive">
                       <AlertTriangle className="w-4 h-4" />
-                      {t ? 'Красные флаги' : 'Red flags'} ({fullReport.red_flags.length})
+                      {t ? 'Красные флаги' : isTh ? 'จุดเสี่ยง' : 'Red flags'} ({fullReport.red_flags.length})
                     </h3>
                     <ul className="space-y-3">
                       {fullReport.red_flags.map((f, i) => (
@@ -382,7 +389,7 @@ export default function ContractAnalysisPage() {
                           <p className="font-medium text-foreground">{f.clause}</p>
                           <p className="text-muted-foreground mt-1">{f.issue}</p>
                           <p className="text-xs text-foreground mt-1.5">
-                            <span className="font-semibold">{t ? 'Исправить:' : 'Fix:'}</span> {f.fix}
+                            <span className="font-semibold">{t ? 'Исправить:' : isTh ? 'แนวทางแก้ไข:' : 'Fix:'}</span> {f.fix}
                           </p>
                         </li>
                       ))}
@@ -395,7 +402,7 @@ export default function ContractAnalysisPage() {
                 <Card>
                   <CardContent className="p-4">
                     <h3 className="text-sm font-semibold mb-2">
-                      {t ? 'Отсутствующие пункты' : 'Missing clauses'}
+                      {t ? 'Отсутствующие пункты' : isTh ? 'ข้อสัญญาที่ขาดหาย' : 'Missing clauses'}
                     </h3>
                     <ul className="space-y-1.5">
                       {fullReport.missing_clauses.map((c, i) => (
@@ -413,7 +420,7 @@ export default function ContractAnalysisPage() {
                   <CardContent className="p-4">
                     <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-success" />
-                      {t ? 'Ключевые условия' : 'Key terms'}
+                      {t ? 'Ключевые условия' : isTh ? 'เงื่อนไขสำคัญ' : 'Key terms'}
                     </h3>
                     <dl className="space-y-2">
                       {fullReport.key_terms.map((k, i) => (
@@ -430,7 +437,7 @@ export default function ContractAnalysisPage() {
               {fullReport.recommendations && fullReport.recommendations.length > 0 && (
                 <Card>
                   <CardContent className="p-4">
-                    <h3 className="text-sm font-semibold mb-2">{t ? 'Рекомендации' : 'Recommendations'}</h3>
+                    <h3 className="text-sm font-semibold mb-2">{t ? 'Рекомендации' : isTh ? 'คำแนะนำ' : 'Recommendations'}</h3>
                     <ul className="space-y-1.5">
                       {fullReport.recommendations.map((r, i) => (
                         <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
@@ -445,7 +452,7 @@ export default function ContractAnalysisPage() {
               {fullReport.next_steps && fullReport.next_steps.length > 0 && (
                 <Card className="border-primary/30">
                   <CardContent className="p-4">
-                    <h3 className="text-sm font-semibold mb-2">{t ? 'Следующие шаги' : 'Next steps'}</h3>
+                    <h3 className="text-sm font-semibold mb-2">{t ? 'Следующие шаги' : isTh ? 'ขั้นตอนต่อไป' : 'Next steps'}</h3>
                     <ul className="space-y-1.5">
                       {fullReport.next_steps.map((s, i) => (
                         <li key={i} className="text-sm text-foreground flex items-start gap-2">

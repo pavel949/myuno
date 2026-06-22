@@ -18,6 +18,8 @@ import { Sparkles, RefreshCw, ArrowRight } from 'lucide-react';
 import { useCanonicalProfile } from '@/hooks/useCanonicalProfile';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { Language } from '@/i18n';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,37 +35,39 @@ const RETURN_PATH = '/account';
 const TARGET_HREF = `/start/v2?return=${encodeURIComponent(RETURN_PATH)}`;
 
 const COPY = {
-  heading: { en: 'Your profile signals', ru: 'Ваш профиль' },
+  heading: { en: 'Your profile signals', ru: 'Ваш профиль', th: 'ข้อมูลโปรไฟล์ของคุณ' },
   subEmpty: {
     en: 'Tell us about you in 30 seconds — we will tailor recommendations and routes.',
     ru: 'Расскажите о себе за 30 секунд — подстроим рекомендации и маршрут.',
+    th: 'บอกเราเกี่ยวกับคุณใน 30 วินาที แล้วเราจะปรับคำแนะนำและเส้นทางให้เหมาะกับคุณ',
   },
-  startCta: { en: 'Set up in 30 seconds', ru: 'Настроить за 30 секунд' },
-  refineCta: { en: 'Refine answers', ru: 'Уточнить ответы' },
-  lifecycle: { en: 'Stage', ru: 'Этап' },
-  persona: { en: 'Persona', ru: 'Персона' },
-  clusters: { en: 'Active clusters', ru: 'Активные направления' },
-  noClusters: { en: 'No clusters yet', ru: 'Пока без направлений' },
-  noPersona: { en: 'Not detected yet', ru: 'Пока не определена' },
+  startCta: { en: 'Set up in 30 seconds', ru: 'Настроить за 30 секунд', th: 'ตั้งค่าใน 30 วินาที' },
+  refineCta: { en: 'Refine answers', ru: 'Уточнить ответы', th: 'ปรับคำตอบ' },
+  lifecycle: { en: 'Stage', ru: 'Этап', th: 'ระยะ' },
+  persona: { en: 'Persona', ru: 'Персона', th: 'เพอร์โซน่า' },
+  clusters: { en: 'Active clusters', ru: 'Активные направления', th: 'กลุ่มบริการที่ใช้งาน' },
+  noClusters: { en: 'No clusters yet', ru: 'Пока без направлений', th: 'ยังไม่มีกลุ่มบริการ' },
+  noPersona: { en: 'Not detected yet', ru: 'Пока не определена', th: 'ยังไม่ได้ระบุ' },
 };
 
-function pick<T extends { en: string; ru: string }>(obj: T, lang: 'en' | 'ru'): string {
-  return obj[lang];
+function pick<T extends { en: string; ru: string; th?: string }>(obj: T, lang: Language): string {
+  return obj[lang] ?? obj.en;
 }
 
-function lifecycleLabel(stage: LifecycleStage | null, lang: 'en' | 'ru'): string {
+function lifecycleLabel(stage: LifecycleStage | null, lang: Language): string {
   if (!stage) return '—';
-  return LIFECYCLE_STAGE_LABELS[stage]?.[lang] ?? stage;
+  const meta = LIFECYCLE_STAGE_LABELS[stage];
+  return meta ? pickLang(meta, lang) : stage;
 }
 
-function clusterLabel(id: ClusterId, lang: 'en' | 'ru'): string {
+function clusterLabel(id: ClusterId, lang: Language): string {
   const meta = CLUSTER_META[id];
   return lang === 'ru' ? meta.labelRu : meta.labelEn;
 }
 
 export function PersonaDetectionPreview() {
   const { language } = useLanguage();
-  const lang: 'en' | 'ru' = language === 'ru' ? 'ru' : 'en';
+  const lang = language;
   const { profile, isLoading } = useCanonicalProfile();
   const v2On = useFeatureFlag('concierge_routing_v2_canonical', false);
 

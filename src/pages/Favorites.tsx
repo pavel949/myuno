@@ -51,17 +51,17 @@ export default function Favorites() {
     await refetch();
   }, [refetch]);
 
-  const filters: { value: FilterType; label: string; labelRu: string; icon: React.ElementType }[] = [
-    { value: 'all', label: 'All', labelRu: 'Все', icon: Heart },
-    { value: 'restaurant', label: 'Restaurants', labelRu: 'Рестораны', icon: Heart },
-    { value: 'tour', label: 'Tours', labelRu: 'Туры', icon: Heart },
-    { value: 'course', label: 'Courses', labelRu: 'Курсы', icon: GraduationCap },
-    { value: 'tutor', label: 'Tutors', labelRu: 'Репетиторы', icon: User },
-    { value: 'event', label: 'Events', labelRu: 'События', icon: Ticket },
-    { value: 'property', label: 'Property', labelRu: 'Недвижимость', icon: Home },
-    { value: 'vehicle', label: 'Transport', labelRu: 'Транспорт', icon: Car },
-    { value: 'clinic', label: 'Clinics', labelRu: 'Клиники', icon: Stethoscope },
-    { value: 'gym', label: 'Fitness', labelRu: 'Фитнес', icon: Dumbbell },
+  const filters: { value: FilterType; label: string; labelRu: string; labelTh: string; icon: React.ElementType }[] = [
+    { value: 'all', label: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด', icon: Heart },
+    { value: 'restaurant', label: 'Restaurants', labelRu: 'Рестораны', labelTh: 'ร้านอาหาร', icon: Heart },
+    { value: 'tour', label: 'Tours', labelRu: 'Туры', labelTh: 'ทัวร์', icon: Heart },
+    { value: 'course', label: 'Courses', labelRu: 'Курсы', labelTh: 'คอร์สเรียน', icon: GraduationCap },
+    { value: 'tutor', label: 'Tutors', labelRu: 'Репетиторы', labelTh: 'ติวเตอร์', icon: User },
+    { value: 'event', label: 'Events', labelRu: 'События', labelTh: 'อีเวนต์', icon: Ticket },
+    { value: 'property', label: 'Property', labelRu: 'Недвижимость', labelTh: 'อสังหาริมทรัพย์', icon: Home },
+    { value: 'vehicle', label: 'Transport', labelRu: 'Транспорт', labelTh: 'ยานพาหนะ', icon: Car },
+    { value: 'clinic', label: 'Clinics', labelRu: 'Клиники', labelTh: 'คลินิก', icon: Stethoscope },
+    { value: 'gym', label: 'Fitness', labelRu: 'Фитнес', labelTh: 'ฟิตเนส', icon: Dumbbell },
   ];
 
   const filteredFavorites = filter === 'all' 
@@ -100,17 +100,17 @@ export default function Favorites() {
   };
 
   const getTypeLabel = (type: string) => {
-    const labels: Record<string, { en: string; ru: string }> = {
-      course: { en: 'Course', ru: 'Курс' },
-      tutor: { en: 'Tutor', ru: 'Репетитор' },
-      event: { en: 'Event', ru: 'Событие' },
-      property: { en: 'Property', ru: 'Недвижимость' },
-      vehicle: { en: 'Vehicle', ru: 'Транспорт' },
-      clinic: { en: 'Clinic', ru: 'Клиника' },
-      gym: { en: 'Gym', ru: 'Фитнес' },
-      tour: { en: 'Tour', ru: 'Тур' },
-      water_activity: { en: 'Water Activity', ru: 'Водный спорт' },
-      restaurant: { en: 'Restaurant', ru: 'Ресторан' },
+    const labels: Record<string, { en: string; ru: string; th: string }> = {
+      course: { en: 'Course', ru: 'Курс', th: 'คอร์สเรียน' },
+      tutor: { en: 'Tutor', ru: 'Репетитор', th: 'ติวเตอร์' },
+      event: { en: 'Event', ru: 'Событие', th: 'อีเวนต์' },
+      property: { en: 'Property', ru: 'Недвижимость', th: 'อสังหาริมทรัพย์' },
+      vehicle: { en: 'Vehicle', ru: 'Транспорт', th: 'ยานพาหนะ' },
+      clinic: { en: 'Clinic', ru: 'Клиника', th: 'คลินิก' },
+      gym: { en: 'Gym', ru: 'Фитнес', th: 'ฟิตเนส' },
+      tour: { en: 'Tour', ru: 'Тур', th: 'ทัวร์' },
+      water_activity: { en: 'Water Activity', ru: 'Водный спорт', th: 'กิจกรรมทางน้ำ' },
+      restaurant: { en: 'Restaurant', ru: 'Ресторан', th: 'ร้านอาหาร' },
     };
     return labels[type]?.[language] || type;
   };
@@ -124,14 +124,14 @@ export default function Favorites() {
       <PullToRefresh onRefresh={handleRefresh} className="min-h-0 flex-1 h-[calc(100vh-8rem)]">
         <PageContainer>
           <PageHeader 
-            title={language === 'ru' ? 'Избранное' : 'Favorites'} 
+            title={language === 'ru' ? 'Избранное' : language === 'th' ? 'รายการโปรด' : 'Favorites'}
             actions={
               <div className="flex items-center gap-2">
                 <Button
                   variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                   size="icon"
                   onClick={() => setViewMode('list')}
-                  aria-label={language === 'ru' ? 'Список' : 'List view'}
+                  aria-label={language === 'ru' ? 'Список' : language === 'th' ? 'มุมมองรายการ' : 'List view'}
                 >
                   <List className="h-4 w-4" />
                 </Button>
@@ -139,7 +139,7 @@ export default function Favorites() {
                   variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                   size="icon"
                   onClick={() => setViewMode('grid')}
-                  aria-label={language === 'ru' ? 'Сетка' : 'Grid view'}
+                  aria-label={language === 'ru' ? 'Сетка' : language === 'th' ? 'มุมมองตาราง' : 'Grid view'}
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </Button>
@@ -152,14 +152,14 @@ export default function Favorites() {
             <TabsList className="w-full">
               <TabsTrigger value="items" className="flex-1 gap-2">
                 <Heart className="w-4 h-4" />
-                {language === 'ru' ? 'Элементы' : 'Items'}
+                {language === 'ru' ? 'Элементы' : language === 'th' ? 'รายการ' : 'Items'}
                 <Badge variant="secondary" className="ml-1 text-xs">
                   {favorites.length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="collections" className="flex-1 gap-2">
                 <FolderHeart className="w-4 h-4" />
-                {language === 'ru' ? 'Коллекции' : 'Collections'}
+                {language === 'ru' ? 'Коллекции' : language === 'th' ? 'คอลเลกชัน' : 'Collections'}
               </TabsTrigger>
             </TabsList>
 
@@ -186,7 +186,7 @@ export default function Favorites() {
                     className="flex-shrink-0 rounded-none"
                   >
                     <f.icon className="h-4 w-4 mr-1" />
-                    {language === 'ru' ? f.labelRu : f.label}
+                    {language === 'ru' ? f.labelRu : language === 'th' ? f.labelTh : f.label}
                   </Button>
                 ))}
               </div>
@@ -202,13 +202,15 @@ export default function Favorites() {
               {!loading && filteredFavorites.length === 0 && (
                 <EmptyState
                   icon={Heart}
-                  title={language === 'ru' ? 'Пока пусто' : 'No favorites yet'}
-                  description={language === 'ru' 
-                    ? 'Добавляйте понравившиеся курсы и услуги, нажимая на сердечко' 
+                  title={language === 'ru' ? 'Пока пусто' : language === 'th' ? 'ยังไม่มีรายการโปรด' : 'No favorites yet'}
+                  description={language === 'ru'
+                    ? 'Добавляйте понравившиеся курсы и услуги, нажимая на сердечко'
+                    : language === 'th'
+                    ? 'เพิ่มคอร์สและบริการที่คุณชอบได้โดยแตะที่ไอคอนหัวใจ'
                     : 'Add your favorite courses and services by tapping the heart icon'}
                   action={
                     <Button onClick={() => navigate('/discover')}>
-                      {language === 'ru' ? 'Начать поиск' : 'Browse Services'}
+                      {language === 'ru' ? 'Начать поиск' : language === 'th' ? 'เลือกดูบริการ' : 'Browse Services'}
                     </Button>
                   }
                 />
@@ -254,7 +256,7 @@ export default function Favorites() {
                               {data.price && (
                                 <p className="text-sm font-medium text-primary mt-1">
                                   {data.currency || '฿'}{data.price}
-                                  {item.item_type === 'tutor' && (language === 'ru' ? '/час' : '/hour')}
+                                  {item.item_type === 'tutor' && (language === 'ru' ? '/час' : language === 'th' ? '/ชั่วโมง' : '/hour')}
                                 </p>
                               )}
                             </div>
@@ -262,7 +264,7 @@ export default function Favorites() {
                           <div className="flex flex-col border-l border-border">
                             <button
                               onClick={() => handleRemove(item)}
-                              aria-label={language === 'ru' ? 'Удалить' : 'Remove'}
+                              aria-label={language === 'ru' ? 'Удалить' : language === 'th' ? 'ลบ' : 'Remove'}
                               className="flex-1 px-4 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                             >
                               <Trash2 className="h-5 w-5" />
@@ -301,7 +303,7 @@ export default function Favorites() {
                               e.stopPropagation();
                               handleRemove(item);
                             }}
-                            aria-label={language === 'ru' ? 'Удалить из избранного' : 'Remove from favorites'}
+                            aria-label={language === 'ru' ? 'Удалить из избранного' : language === 'th' ? 'ลบออกจากรายการโปรด' : 'Remove from favorites'}
                             className="absolute top-2 right-2 p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center bg-background/80 rounded-full hover:bg-destructive hover:text-destructive-foreground transition-colors"
                           >
                             <Heart className="w-4 h-4 fill-current" />

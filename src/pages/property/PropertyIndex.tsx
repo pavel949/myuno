@@ -55,6 +55,7 @@ interface RecentProperty {
 function RecentCard({ item, onClick }: { item: RecentProperty; onClick: () => void }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   return (
     <button onClick={onClick} className="w-[150px] shrink-0 text-left group">
       <div className="relative aspect-square rounded-none overflow-hidden mb-1.5">
@@ -62,7 +63,7 @@ function RecentCard({ item, onClick }: { item: RecentProperty; onClick: () => vo
       </div>
       <p className="text-xs font-semibold line-clamp-1">{item.district}</p>
       <p className="text-[11px] text-muted-foreground">
-        {item.bedrooms} {isRu ? 'кроват' : 'bed'}{item.bedrooms !== 1 ? (isRu ? 'и' : 's') : (isRu ? 'ь' : '')}
+        {item.bedrooms} {isRu ? 'кроват' : isTh ? 'ห้องนอน' : 'bed'}{isTh ? '' : item.bedrooms !== 1 ? (isRu ? 'и' : 's') : (isRu ? 'ь' : '')}
         {item.rating != null && item.rating > 0 && (<> · <Star className="w-2.5 h-2.5 inline fill-current" /> {item.rating.toFixed(1)}</>)}
       </p>
     </button>
@@ -74,6 +75,7 @@ export default function PropertyIndex() {
   const navigate = useNavigate();
   const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   // UniversalFilter state
   const { filterConfig } = usePropertyFilterOptions();
@@ -259,27 +261,39 @@ export default function PropertyIndex() {
           propertyMode === 'buy'
             ? isRu
               ? 'Покупка недвижимости на Пхукете'
-              : 'Property for sale in Phuket'
+              : isTh
+                ? 'อสังหาริมทรัพย์สำหรับขายในภูเก็ต'
+                : 'Property for sale in Phuket'
             : isRu
               ? rentTenancy === 'long'
                 ? 'Долгосрочная аренда на Пхукете'
                 : 'Посуточная аренда на Пхукете'
-              : rentTenancy === 'long'
-                ? 'Long-term rent in Phuket'
-                : 'Nightly rentals in Phuket'
+              : isTh
+                ? rentTenancy === 'long'
+                  ? 'เช่าระยะยาวในภูเก็ต'
+                  : 'เช่ารายวันในภูเก็ต'
+                : rentTenancy === 'long'
+                  ? 'Long-term rent in Phuket'
+                  : 'Nightly rentals in Phuket'
         }
         description={
           propertyMode === 'buy'
             ? isRu
               ? 'Вторичка и новостройки — виллы, кондо и апартаменты на Пхукете.'
-              : 'Resale and new builds — villas, condos, and apartments in Phuket.'
+              : isTh
+                ? 'บ้านมือสองและโครงการใหม่ — วิลล่า คอนโด และอพาร์ตเมนต์ในภูเก็ต'
+                : 'Resale and new builds — villas, condos, and apartments in Phuket.'
             : isRu
               ? rentTenancy === 'long'
                 ? 'Долгосрочная аренда на Пхукете — месячные ставки, виллы и кондо.'
                 : 'Посуточная аренда на Пхукете — виллы, кондо и апартаменты.'
-              : rentTenancy === 'long'
-                ? 'Long-term rentals in Phuket — monthly rates, villas and condos.'
-                : 'Nightly stays in Phuket — villas, condos, and apartments.'
+              : isTh
+                ? rentTenancy === 'long'
+                  ? 'เช่าระยะยาวในภูเก็ต — ราคารายเดือน วิลล่าและคอนโด'
+                  : 'เช่ารายวันในภูเก็ต — วิลล่า คอนโด และอพาร์ตเมนต์'
+                : rentTenancy === 'long'
+                  ? 'Long-term rentals in Phuket — monthly rates, villas and condos.'
+                  : 'Nightly stays in Phuket — villas, condos, and apartments.'
         }
       />
       <div className="pb-24">
@@ -317,7 +331,7 @@ export default function PropertyIndex() {
                   className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-none border text-xs font-medium text-foreground hover:shadow-sm transition-all"
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5" />
-                  {isRu ? 'Фильтры' : 'Filters'}
+                  {isRu ? 'Фильтры' : isTh ? 'ตัวกรอง' : 'Filters'}
                   {activeFilterCount > 0 && (
                     <Badge className="ml-0.5 h-4 min-w-[16px] px-1 flex items-center justify-center text-[10px]">
                       {activeFilterCount}
@@ -333,7 +347,7 @@ export default function PropertyIndex() {
         {(selectedCategories.length > 0 || activeFilterCount > 0) && (
           <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pt-2 flex items-center gap-2")}>
             <p className="text-xs text-muted-foreground">
-              {filteredProperties.length} {isRu ? 'объектов' : 'places'}
+              {filteredProperties.length} {isRu ? 'объектов' : isTh ? 'รายการ' : 'places'}
             </p>
             <button
               onClick={() => {
@@ -343,7 +357,7 @@ export default function PropertyIndex() {
               }}
               className="text-xs text-primary font-medium hover:underline"
             >
-              {isRu ? 'Сбросить' : 'Clear'}
+              {isRu ? 'Сбросить' : isTh ? 'ล้าง' : 'Clear'}
             </button>
           </div>
         )}
@@ -360,7 +374,7 @@ export default function PropertyIndex() {
           {recentItems.length > 0 && selectedCategories.length === 0 && (
             <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "mb-6 px-0")}>
               <h2 className="text-base font-bold mb-3">
-                {isRu ? 'Вы недавно смотрели' : 'Recently viewed'}
+                {isRu ? 'Вы недавно смотрели' : isTh ? 'ดูล่าสุด' : 'Recently viewed'}
               </h2>
               <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                 {recentItems.slice(0, 8).map((item) => (
@@ -391,12 +405,12 @@ export default function PropertyIndex() {
               <div className="flex items-center justify-between mb-3">
                 {selectedCategories.length === 0 && (
                   <h2 className="text-base font-bold">
-                    {isRu ? 'Все объекты' : 'All listings'}
+                    {isRu ? 'Все объекты' : isTh ? 'รายการทั้งหมด' : 'All listings'}
                   </h2>
                 )}
                 <Button variant="outline" size="sm" className="gap-1.5 ml-auto" onClick={() => navigate(APP_ROUTES.PROPERTY_MAP)}>
                   <Map className="w-4 h-4" />
-                  {isRu ? 'Карта' : 'Map'}
+                  {isRu ? 'Карта' : isTh ? 'แผนที่' : 'Map'}
                 </Button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
@@ -408,12 +422,12 @@ export default function PropertyIndex() {
               <div ref={sentinelRef} className="h-1" />
               {isFetchingNextPage && (
                 <div className="mt-6 text-center text-sm text-muted-foreground">
-                  {isRu ? 'Загрузка...' : 'Loading...'}
+                  {isRu ? 'Загрузка...' : isTh ? 'กำลังโหลด...' : 'Loading...'}
                 </div>
               )}
               {!hasNextPage && filteredProperties.length > 0 && (
                 <div className="mt-6 text-center text-xs text-muted-foreground">
-                  {isRu ? `Всего объектов: ${filteredProperties.length}` : `Total: ${filteredProperties.length}`}
+                  {isRu ? `Всего объектов: ${filteredProperties.length}` : isTh ? `ทั้งหมด: ${filteredProperties.length}` : `Total: ${filteredProperties.length}`}
                 </div>
               )}
             </section>
@@ -422,10 +436,10 @@ export default function PropertyIndex() {
           {!isLoading && filteredProperties.length === 0 && allProperties.length > 0 && (
             <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-16")}>
               <p className="text-muted-foreground mb-3">
-                {isRu ? 'Нет объектов с выбранными фильтрами' : 'No properties match selected filters'}
+                {isRu ? 'Нет объектов с выбранными фильтрами' : isTh ? 'ไม่มีอสังหาริมทรัพย์ที่ตรงกับตัวกรองที่เลือก' : 'No properties match selected filters'}
               </p>
               <Button variant="outline" size="sm" onClick={() => { setSelectedCategories([]); setFilterValues({}); clearStorage(); }}>
-                {isRu ? 'Сбросить фильтры' : 'Clear filters'}
+                {isRu ? 'Сбросить фильтры' : isTh ? 'ล้างตัวกรอง' : 'Clear filters'}
               </Button>
             </div>
           )}
@@ -434,15 +448,17 @@ export default function PropertyIndex() {
           {!isLoading && allProperties.length === 0 && (
             <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-20")}>
               <p className="text-base font-medium mb-2">
-                {isRu ? 'Пока нет объектов' : 'No properties yet'}
+                {isRu ? 'Пока нет объектов' : isTh ? 'ยังไม่มีอสังหาริมทรัพย์' : 'No properties yet'}
               </p>
               <p className="text-sm text-muted-foreground mb-4">
                 {isRu
                   ? 'По выбранным параметрам ничего не нашлось. Попробуйте сбросить фильтры.'
-                  : 'Nothing matches your search. Try clearing filters.'}
+                  : isTh
+                    ? 'ไม่พบรายการที่ตรงกับการค้นหาของคุณ ลองล้างตัวกรองดู'
+                    : 'Nothing matches your search. Try clearing filters.'}
               </p>
               <Button variant="outline" size="sm" onClick={() => { setSelectedCategories([]); setFilterValues({}); clearStorage(); }}>
-                {isRu ? 'Сбросить фильтры' : 'Clear filters'}
+                {isRu ? 'Сбросить фильтры' : isTh ? 'ล้างตัวกรอง' : 'Clear filters'}
               </Button>
             </div>
           )}

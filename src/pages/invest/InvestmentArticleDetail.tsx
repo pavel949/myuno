@@ -14,6 +14,7 @@ export default function InvestmentArticleDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: article, isLoading } = useInvestmentArticle(slug);
 
   if (isLoading) {
@@ -25,10 +26,10 @@ export default function InvestmentArticleDetail() {
   }
   if (!article) {
     return (
-      <MiniAppLayout title={isRu ? 'Не найдено' : 'Not found'} showSearch={false}>
-        <p className="text-muted-foreground">{isRu ? 'Статья не найдена' : 'Article not found'}</p>
+      <MiniAppLayout title={isRu ? 'Не найдено' : isTh ? 'ไม่พบ' : 'Not found'} showSearch={false}>
+        <p className="text-muted-foreground">{isRu ? 'Статья не найдена' : isTh ? 'ไม่พบบทความ' : 'Article not found'}</p>
         <Button variant="ghost" onClick={() => navigate('/invest/articles')} className="mt-3">
-          <ArrowLeft className="w-4 h-4 mr-1" /> {isRu ? 'Назад к базе знаний' : 'Back to knowledge base'}
+          <ArrowLeft className="w-4 h-4 mr-1" /> {isRu ? 'Назад к базе знаний' : isTh ? 'กลับสู่ฐานความรู้' : 'Back to knowledge base'}
         </Button>
       </MiniAppLayout>
     );
@@ -55,15 +56,15 @@ export default function InvestmentArticleDetail() {
         <title>{title} | myUNO</title>
         <meta name="description" content={(isRu ? article.excerpt_ru : article.excerpt_en) || title} />
       </Helmet>
-      <MiniAppLayout title={isRu ? 'Статья' : 'Article'} showSearch={false}>
+      <MiniAppLayout title={isRu ? 'Статья' : isTh ? 'บทความ' : 'Article'} showSearch={false}>
         <article className="space-y-4 pb-10 max-w-2xl">
           <Button variant="ghost" size="sm" onClick={() => navigate('/invest/articles')} className="-ml-2">
-            <ArrowLeft className="w-4 h-4 mr-1" /> {isRu ? 'База знаний' : 'Knowledge'}
+            <ArrowLeft className="w-4 h-4 mr-1" /> {isRu ? 'База знаний' : isTh ? 'ฐานความรู้' : 'Knowledge'}
           </Button>
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="outline">{article.category}</Badge>
-            {article.read_time_min && (<><Clock className="w-3 h-3" />{article.read_time_min} {isRu ? 'мин' : 'min'}</>)}
+            {article.read_time_min && (<><Clock className="w-3 h-3" />{article.read_time_min} {isRu ? 'мин' : isTh ? 'นาที' : 'min'}</>)}
           </div>
 
           <h1 className="text-2xl font-bold leading-tight">{title}</h1>
@@ -72,13 +73,13 @@ export default function InvestmentArticleDetail() {
             <div className="grid grid-cols-2 gap-2">
               {article.avg_ticket_thb && (
                 <div className="rounded-none border p-3">
-                  <div className="text-xs text-muted-foreground flex items-center gap-1"><Banknote className="w-3 h-3" />{isRu ? 'Средний тикет' : 'Avg ticket'}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-1"><Banknote className="w-3 h-3" />{isRu ? 'Средний тикет' : isTh ? 'ขนาดลงทุนเฉลี่ย' : 'Avg ticket'}</div>
                   <p className="font-semibold">{(article.avg_ticket_thb / 1_000_000).toFixed(0)}M ฿</p>
                 </div>
               )}
               {article.typical_roi_pct && (
                 <div className="rounded-none border p-3">
-                  <div className="text-xs text-muted-foreground flex items-center gap-1"><TrendingUp className="w-3 h-3" />{isRu ? 'Типичный ROI' : 'Typical ROI'}</div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-1"><TrendingUp className="w-3 h-3" />{isRu ? 'Типичный ROI' : isTh ? 'ROI ทั่วไป' : 'Typical ROI'}</div>
                   <p className="font-semibold">{article.typical_roi_pct}%</p>
                 </div>
               )}
@@ -90,23 +91,23 @@ export default function InvestmentArticleDetail() {
           {article.risks_summary && (
             <div className="rounded-none border border-accent/40 bg-accent/5 p-3 mt-4">
               <div className="flex items-center gap-1.5 text-xs font-medium text-accent mb-1">
-                <AlertTriangle className="w-3.5 h-3.5" /> {isRu ? 'Риски' : 'Risks'}
+                <AlertTriangle className="w-3.5 h-3.5" /> {isRu ? 'Риски' : isTh ? 'ความเสี่ยง' : 'Risks'}
               </div>
               <p className="text-sm">{article.risks_summary}</p>
             </div>
           )}
 
           <div className="rounded-none border border-primary/30 bg-primary/5 p-4 mt-4">
-            <h3 className="font-semibold mb-1">{isRu ? 'Готовы инвестировать?' : 'Ready to invest?'}</h3>
+            <h3 className="font-semibold mb-1">{isRu ? 'Готовы инвестировать?' : isTh ? 'พร้อมลงทุนหรือยัง?' : 'Ready to invest?'}</h3>
             <p className="text-sm text-muted-foreground mb-3">
-              {isRu ? 'Посмотрите анонимизированные сделки или подайте свой проект.' : 'Browse anonymized deals or submit your own project.'}
+              {isRu ? 'Посмотрите анонимизированные сделки или подайте свой проект.' : isTh ? 'ดูดีลแบบไม่เปิดเผยตัวตนหรือส่งโครงการของคุณ' : 'Browse anonymized deals or submit your own project.'}
             </p>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)} className="gap-1.5">
-                {isRu ? 'Сделки' : 'Browse deals'} <ArrowRight className="w-3.5 h-3.5" />
+                {isRu ? 'Сделки' : isTh ? 'ดูดีล' : 'Browse deals'} <ArrowRight className="w-3.5 h-3.5" />
               </Button>
               <Button size="sm" variant="outline" onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}>
-                {isRu ? 'Подать проект' : 'Submit opportunity'}
+                {isRu ? 'Подать проект' : isTh ? 'ส่งโอกาสการลงทุน' : 'Submit opportunity'}
               </Button>
             </div>
           </div>

@@ -9,10 +9,10 @@ interface RealtimeIndicatorProps {
   className?: string;
 }
 
-const labels: Record<RealtimeStatus, { ru: string; en: string }> = {
-  connecting: { ru: 'Подключение…', en: 'Connecting…' },
-  live: { ru: 'В реальном времени', en: 'Live' },
-  offline: { ru: 'Не в сети', en: 'Offline' },
+const labels: Record<RealtimeStatus, { ru: string; en: string; th: string }> = {
+  connecting: { ru: 'Подключение…', en: 'Connecting…', th: 'กำลังเชื่อมต่อ…' },
+  live: { ru: 'В реальном времени', en: 'Live', th: 'แบบเรียลไทม์' },
+  offline: { ru: 'Не в сети', en: 'Offline', th: 'ออฟไลน์' },
 };
 
 const styles: Record<RealtimeStatus, string> = {
@@ -23,7 +23,7 @@ const styles: Record<RealtimeStatus, string> = {
 };
 
 export function RealtimeIndicator({ status, language, className }: RealtimeIndicatorProps) {
-  const lang = language === 'ru' ? 'ru' : 'en';
+  const lang = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
   const label = labels[status][lang];
 
   return (

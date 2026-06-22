@@ -136,12 +136,12 @@ const { createOrder, cancelOrder, isCreating } = useOrders();
 
   const t = useCallback((key: string) => {
     const translations: Record<string, Record<string, string>> = {
-      'booking.success': { en: 'Booking confirmed!', ru: 'Бронирование подтверждено!' },
-      'booking.error': { en: 'Booking failed', ru: 'Ошибка бронирования' },
-      'booking.loginRequired': { en: 'Please login to continue', ru: 'Войдите для продолжения' },
-      'booking.cancelled': { en: 'Booking cancelled', ru: 'Бронирование отменено' },
+      'booking.success': { en: 'Booking confirmed!', ru: 'Бронирование подтверждено!', th: 'ยืนยันการจองแล้ว!' },
+      'booking.error': { en: 'Booking failed', ru: 'Ошибка бронирования', th: 'การจองล้มเหลว' },
+      'booking.loginRequired': { en: 'Please login to continue', ru: 'Войдите для продолжения', th: 'กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ' },
+      'booking.cancelled': { en: 'Booking cancelled', ru: 'Бронирование отменено', th: 'ยกเลิกการจองแล้ว' },
     };
-    return translations[key]?.[language] || key;
+    return translations[key]?.[language] || translations[key]?.en || key;
   }, [language]);
 
   const createBooking = useCallback(async (params: CreateBookingParams): Promise<BookingResult> => {

@@ -24,6 +24,7 @@ export const ChatDelegationBanner: React.FC<ChatDelegationBannerProps> = ({
 }) => {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (variant === 'compact') {
     return (
@@ -40,9 +41,11 @@ export const ChatDelegationBanner: React.FC<ChatDelegationBannerProps> = ({
             isDelegated ? 'text-primary' : 'text-muted-foreground'
           )} />
           <span className="text-sm">
-            {isRu 
+            {isRu
               ? (isDelegated ? 'Чат ведёт myUNO' : 'Делегировать чат myUNO')
-              : (isDelegated ? 'Chat managed by myUNO' : 'Delegate chat to myUNO')
+              : isTh
+                ? (isDelegated ? 'แชทดูแลโดย myUNO' : 'มอบหมายแชทให้ myUNO')
+                : (isDelegated ? 'Chat managed by myUNO' : 'Delegate chat to myUNO')
             }
           </span>
         </div>
@@ -76,29 +79,31 @@ export const ChatDelegationBanner: React.FC<ChatDelegationBannerProps> = ({
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-semibold">
-                {isRu ? 'Делегировать чат команде myUNO' : 'Delegate Chat to myUNO Team'}
+                {isRu ? 'Делегировать чат команде myUNO' : isTh ? 'มอบหมายแชทให้ทีม myUNO' : 'Delegate Chat to myUNO Team'}
               </h3>
               {isDelegated && (
                 <Badge variant="default" className="text-[10px]">
-                  {isRu ? 'АКТИВНО' : 'ACTIVE'}
+                  {isRu ? 'АКТИВНО' : isTh ? 'ใช้งานอยู่' : 'ACTIVE'}
                 </Badge>
               )}
             </div>
             
             <p className="text-sm text-muted-foreground mb-3">
-              {isRu 
+              {isRu
                 ? 'Наши специалисты будут отвечать гостям от вашего имени, обрабатывать запросы и решать вопросы 24/7.'
-                : 'Our specialists will respond to guests on your behalf, handle requests, and resolve issues 24/7.'}
+                : isTh
+                  ? 'ผู้เชี่ยวชาญของเราจะตอบกลับแขกในนามของคุณ จัดการคำขอ และแก้ไขปัญหาตลอด 24 ชั่วโมง'
+                  : 'Our specialists will respond to guests on your behalf, handle requests, and resolve issues 24/7.'}
             </p>
 
             <div className="flex flex-wrap gap-3 mb-4">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Users className="w-3.5 h-3.5" />
-                <span>{isRu ? 'Профессиональная поддержка' : 'Professional support'}</span>
+                <span>{isRu ? 'Профессиональная поддержка' : isTh ? 'การสนับสนุนระดับมืออาชีพ' : 'Professional support'}</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                <span>{isRu ? 'Соблюдение правил' : 'Policy compliance'}</span>
+                <span>{isRu ? 'Соблюдение правил' : isTh ? 'ปฏิบัติตามนโยบาย' : 'Policy compliance'}</span>
               </div>
             </div>
 
@@ -113,21 +118,23 @@ export const ChatDelegationBanner: React.FC<ChatDelegationBannerProps> = ({
                 {isDelegated ? (
                   <>
                     <ToggleRight className="w-4 h-4" />
-                    {isRu ? 'Отключить делегирование' : 'Disable Delegation'}
+                    {isRu ? 'Отключить делегирование' : isTh ? 'ปิดการมอบหมาย' : 'Disable Delegation'}
                   </>
                 ) : (
                   <>
                     <ToggleLeft className="w-4 h-4" />
-                    {isRu ? 'Делегировать myUNO' : 'Delegate to myUNO'}
+                    {isRu ? 'Делегировать myUNO' : isTh ? 'มอบหมายให้ myUNO' : 'Delegate to myUNO'}
                   </>
                 )}
               </Button>
               
               {isDelegated && (
                 <span className="text-xs text-primary">
-                  {isRu 
+                  {isRu
                     ? '✓ Команда myUNO отвечает за вас'
-                    : '✓ myUNO team responds for you'}
+                    : isTh
+                      ? '✓ ทีม myUNO ตอบกลับแทนคุณ'
+                      : '✓ myUNO team responds for you'}
                 </span>
               )}
             </div>

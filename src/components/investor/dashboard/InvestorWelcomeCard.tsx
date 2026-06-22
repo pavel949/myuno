@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function InvestorWelcomeCard() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { user } = useAuth();
 
   const { data: stats, isLoading } = useQuery({
@@ -45,10 +46,10 @@ export function InvestorWelcomeCard() {
         </div>
         <div>
           <h2 className="text-lg font-semibold">
-            {isRu ? 'Мои инвестиции' : 'My Investments'}
+            {isRu ? 'Мои инвестиции' : isTh ? 'การลงทุนของฉัน' : 'My Investments'}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {isRu ? 'Отслеживайте ваши инвестиционные интересы' : 'Track your investment interests'}
+            {isRu ? 'Отслеживайте ваши инвестиционные интересы' : isTh ? 'ติดตามความสนใจด้านการลงทุนของคุณ' : 'Track your investment interests'}
           </p>
         </div>
       </div>
@@ -61,9 +62,9 @@ export function InvestorWelcomeCard() {
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-3">
-          <Stat icon={<Heart className="h-4 w-4 text-primary" />} value={stats?.interests ?? 0} label={isRu ? 'Интересов' : 'Interests'} />
-          <Stat icon={<Sparkles className="h-4 w-4 text-warning" />} value={stats?.active ?? 0} label={isRu ? 'В работе' : 'Active'} />
-          <Stat icon={<Eye className="h-4 w-4 text-info" />} value={stats?.viewings ?? 0} label={isRu ? 'Просмотров' : 'Viewings'} />
+          <Stat icon={<Heart className="h-4 w-4 text-primary" />} value={stats?.interests ?? 0} label={isRu ? 'Интересов' : isTh ? 'ความสนใจ' : 'Interests'} />
+          <Stat icon={<Sparkles className="h-4 w-4 text-warning" />} value={stats?.active ?? 0} label={isRu ? 'В работе' : isTh ? 'กำลังดำเนินการ' : 'Active'} />
+          <Stat icon={<Eye className="h-4 w-4 text-info" />} value={stats?.viewings ?? 0} label={isRu ? 'Просмотров' : isTh ? 'การเข้าชม' : 'Viewings'} />
         </div>
       )}
     </Card>

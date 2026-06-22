@@ -60,6 +60,7 @@ export default function AirportFastTrackPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   // White-label: fetch ALL services (no supplier filter), supplier routing is internal
   const { fastTrackServices, addons, bundles, isLoading } = useAirportServices('HKT');
@@ -163,12 +164,12 @@ export default function AirportFastTrackPage() {
     const newErrors: Record<string, string> = {};
 
     if (targetStep === 'passenger' || targetStep === 'review') {
-      if (!selectedServiceId) newErrors.service = isRu ? 'Выберите услугу' : 'Select a service';
-      if (!flightNumber) newErrors.flightNumber = isRu ? 'Укажите номер рейса' : 'Flight number required';
-      if (flightNumber && !FLIGHT_REGEX.test(flightNumber)) newErrors.flightNumber = isRu ? 'Неверный формат рейса' : 'Invalid flight format (e.g. TG123)';
-      if (!flightDate) newErrors.flightDate = isRu ? 'Укажите дату' : 'Date required';
-      if (!flightTime) newErrors.flightTime = isRu ? 'Укажите время' : 'Time required';
-      if (cutoffViolated) newErrors.flightDate = isRu ? 'Бронирование за 24+ часа' : 'Must book 24+ hours ahead';
+      if (!selectedServiceId) newErrors.service = isRu ? 'Выберите услугу' : isTh ? 'กรุณาเลือกบริการ' : 'Select a service';
+      if (!flightNumber) newErrors.flightNumber = isRu ? 'Укажите номер рейса' : isTh ? 'กรุณาระบุหมายเลขเที่ยวบิน' : 'Flight number required';
+      if (flightNumber && !FLIGHT_REGEX.test(flightNumber)) newErrors.flightNumber = isRu ? 'Неверный формат рейса' : isTh ? 'รูปแบบเที่ยวบินไม่ถูกต้อง (เช่น TG123)' : 'Invalid flight format (e.g. TG123)';
+      if (!flightDate) newErrors.flightDate = isRu ? 'Укажите дату' : isTh ? 'กรุณาระบุวันที่' : 'Date required';
+      if (!flightTime) newErrors.flightTime = isRu ? 'Укажите время' : isTh ? 'กรุณาระบุเวลา' : 'Time required';
+      if (cutoffViolated) newErrors.flightDate = isRu ? 'Бронирование за 24+ часа' : isTh ? 'ต้องจองล่วงหน้าอย่างน้อย 24 ชั่วโมง' : 'Must book 24+ hours ahead';
     }
 
     if (targetStep === 'review') {
@@ -181,7 +182,7 @@ export default function AirportFastTrackPage() {
         }
       });
       if (!contactWhatsapp && !contactEmail) {
-        newErrors.contact = isRu ? 'Укажите WhatsApp или email' : 'WhatsApp or email required';
+        newErrors.contact = isRu ? 'Укажите WhatsApp или email' : isTh ? 'กรุณาระบุ WhatsApp หรืออีเมล' : 'WhatsApp or email required';
       }
     }
 
@@ -207,7 +208,7 @@ export default function AirportFastTrackPage() {
 
   const handleSubmit = async () => {
     if (!user) {
-      toast.error(isRu ? 'Войдите в аккаунт' : 'Please sign in');
+      toast.error(isRu ? 'Войдите в аккаунт' : isTh ? 'กรุณาเข้าสู่ระบบ' : 'Please sign in');
       navigate('/auth');
       return;
     }
@@ -215,7 +216,7 @@ export default function AirportFastTrackPage() {
 
     setIsSubmitting(true);
     try {
-      const serviceName = isRu ? selectedService.name_ru : selectedService.name_en;
+      const serviceName = isRu ? selectedService.name_ru : selectedService.name_en; // DB data: Thai falls back to English (name_en)
 
       const { data, error } = await supabase.functions.invoke('notify-fasttrack-booking', {
         body: {
@@ -251,8 +252,8 @@ export default function AirportFastTrackPage() {
 
       if (error) throw error;
 
-      toast(isRu ? 'Бронирование создано!' : 'Booking created!', {
-        description: isRu ? 'Мы свяжемся с вами для подтверждения' : "We'll contact you to confirm",
+      toast(isRu ? 'Бронирование создано!' : isTh ? 'สร้างการจองเรียบร้อยแล้ว!' : 'Booking created!', {
+        description: isRu ? 'Мы свяжемся с вами для подтверждения' : isTh ? 'เราจะติดต่อกลับเพื่อยืนยันการจอง' : "We'll contact you to confirm",
       });
 
       if (direction === 'arrival') {
@@ -262,8 +263,8 @@ export default function AirportFastTrackPage() {
       }
     } catch (err) {
       console.error('Fast Track booking error:', err);
-      toast.error(isRu ? 'Ошибка' : 'Error', {
-        description: isRu ? 'Не удалось создать бронирование. Попробуйте снова.' : 'Failed to create booking. Please try again.',
+      toast.error(isRu ? 'Ошибка' : isTh ? 'เกิดข้อผิดพลาด' : 'Error', {
+        description: isRu ? 'Не удалось создать бронирование. Попробуйте снова.' : isTh ? 'ไม่สามารถสร้างการจองได้ กรุณาลองใหม่อีกครั้ง' : 'Failed to create booking. Please try again.',
       });
     } finally {
       setIsSubmitting(false);
@@ -303,7 +304,7 @@ export default function AirportFastTrackPage() {
         <div className="px-4 pt-3">
           <Button variant="ghost" size="sm" className="gap-1 -ml-2" onClick={handleBack}>
             <ChevronLeft className="w-4 h-4" />
-            {isRu ? 'Назад' : 'Back'}
+            {isRu ? 'Назад' : isTh ? 'กลับ' : 'Back'}
           </Button>
         </div>
 
@@ -318,29 +319,31 @@ export default function AirportFastTrackPage() {
                 {isRu ? 'myUNO Airport VIP' : 'myUNO Airport VIP'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {isRu ? 'Пхукет (HKT) · Fast Track и лаунжи' : 'Phuket (HKT) · Fast Track & Lounges'}
+                {isRu ? 'Пхукет (HKT) · Fast Track и лаунжи' : isTh ? 'ภูเก็ต (HKT) · ช่องทางด่วนและเลานจ์' : 'Phuket (HKT) · Fast Track & Lounges'}
               </p>
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Badge variant="secondary" className="text-xs gap-1">
               <Clock className="w-3 h-3" />
-              {isRu ? 'До 60 мин экономии' : 'Save up to 60 min'}
+              {isRu ? 'До 60 мин экономии' : isTh ? 'ประหยัดเวลาได้ถึง 60 นาที' : 'Save up to 60 min'}
             </Badge>
             <Badge variant="secondary" className="text-xs gap-1">
               <Users className="w-3 h-3" />
-              {isRu ? 'Персональный эскорт' : 'Personal escort'}
+              {isRu ? 'Персональный эскорт' : isTh ? 'พนักงานดูแลส่วนตัว' : 'Personal escort'}
             </Badge>
             <Badge variant="secondary" className="text-xs gap-1">
               <Sparkles className="w-3 h-3" />
-              {isRu ? 'Лаунж и лёгкий проход' : 'Lounge & Fast Track'}
+              {isRu ? 'Лаунж и лёгкий проход' : isTh ? 'เลานจ์และช่องทางด่วน' : 'Lounge & Fast Track'}
             </Badge>
           </div>
           {/* Trust copy */}
           <p className="text-xs text-muted-foreground mt-3">
             {isRu
               ? 'Фиксированная цена. Без скрытых доплат. Профессиональный эскорт включён.'
-              : 'Fixed price. No hidden fees. Professional escort included.'}
+              : isTh
+                ? 'ราคาคงที่ ไม่มีค่าใช้จ่ายแอบแฝง รวมพนักงานดูแลมืออาชีพ'
+                : 'Fixed price. No hidden fees. Professional escort included.'}
           </p>
         </div>
 
@@ -355,9 +358,9 @@ export default function AirportFastTrackPage() {
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {step === 'service' && (isRu ? 'Шаг 1: Рейс и услуги' : 'Step 1: Flight & services')}
-            {step === 'passenger' && (isRu ? 'Шаг 2: Данные пассажиров' : 'Step 2: Passenger details')}
-            {step === 'review' && (isRu ? 'Шаг 3: Подтверждение' : 'Step 3: Confirmation')}
+            {step === 'service' && (isRu ? 'Шаг 1: Рейс и услуги' : isTh ? 'ขั้นตอนที่ 1: เที่ยวบินและบริการ' : 'Step 1: Flight & services')}
+            {step === 'passenger' && (isRu ? 'Шаг 2: Данные пассажиров' : isTh ? 'ขั้นตอนที่ 2: ข้อมูลผู้โดยสาร' : 'Step 2: Passenger details')}
+            {step === 'review' && (isRu ? 'Шаг 3: Подтверждение' : isTh ? 'ขั้นตอนที่ 3: ยืนยันการจอง' : 'Step 3: Confirmation')}
           </p>
         </div>
 

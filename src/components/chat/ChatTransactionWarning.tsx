@@ -15,6 +15,7 @@ export const ChatTransactionWarning: React.FC<ChatTransactionWarningProps> = ({
 }) => {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (variant === 'compact') {
     return (
@@ -24,9 +25,11 @@ export const ChatTransactionWarning: React.FC<ChatTransactionWarningProps> = ({
       )}>
         <Shield className="w-3.5 h-3.5 text-primary flex-shrink-0" />
         <span className="text-muted-foreground">
-          {isRu 
-            ? 'Транзакции защищены только при оплате через UNO' 
-            : 'Transactions protected only when paid through UNO'}
+          {isRu
+            ? 'Транзакции защищены только при оплате через UNO'
+            : isTh
+              ? 'ธุรกรรมได้รับการคุ้มครองเฉพาะเมื่อชำระผ่าน UNO เท่านั้น'
+              : 'Transactions protected only when paid through UNO'}
         </span>
       </div>
     );
@@ -43,18 +46,20 @@ export const ChatTransactionWarning: React.FC<ChatTransactionWarningProps> = ({
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-medium mb-1">
-            {isRu ? '🛡️ Защита транзакций' : '🛡️ Transaction Protection'}
+            {isRu ? '🛡️ Защита транзакций' : isTh ? '🛡️ การคุ้มครองธุรกรรม' : '🛡️ Transaction Protection'}
           </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            {isRu 
-              ? 'Оплата вне платформы лишает вас гарантий возврата, кэшбека и поддержки. Все сделки должны проходить через UNO.' 
-              : 'Payment outside the platform deprives you of refund guarantees, cashback, and support. All transactions must go through UNO.'}
+            {isRu
+              ? 'Оплата вне платформы лишает вас гарантий возврата, кэшбека и поддержки. Все сделки должны проходить через UNO.'
+              : isTh
+                ? 'การชำระเงินนอกแพลตฟอร์มจะทำให้คุณสูญเสียการรับประกันการคืนเงิน เงินคืน และการสนับสนุน ธุรกรรมทั้งหมดต้องดำเนินการผ่าน UNO'
+                : 'Payment outside the platform deprives you of refund guarantees, cashback, and support. All transactions must go through UNO.'}
           </p>
           <Link 
             to="/terms" 
             className="text-xs text-primary hover:underline mt-1 inline-block"
           >
-            {isRu ? 'Подробнее →' : 'Learn more →'}
+            {isRu ? 'Подробнее →' : isTh ? 'เรียนรู้เพิ่มเติม →' : 'Learn more →'}
           </Link>
         </div>
       </div>

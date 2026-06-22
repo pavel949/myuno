@@ -46,6 +46,7 @@ export function StaffPicker({
 }: StaffPickerProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (isLoading) {
     return (
@@ -70,7 +71,7 @@ export function StaffPicker({
   return (
     <div className={className}>
       <h3 className="font-semibold mb-3">
-        {isRu ? 'Выберите мастера' : 'Choose Your Specialist'}
+        {isRu ? 'Выберите мастера' : isTh ? 'เลือกช่างผู้เชี่ยวชาญของคุณ' : 'Choose Your Specialist'}
       </h3>
       
       <div className="flex gap-3 pb-2 overflow-x-auto scrollbar-hide touch-pan-y snap-x snap-mandatory -mx-4 px-4">
@@ -93,10 +94,10 @@ export function StaffPicker({
                 )}
               </div>
               <p className="font-medium text-sm">
-                {isRu ? 'Любой' : 'Any'}
+                {isRu ? 'Любой' : isTh ? 'ใครก็ได้' : 'Any'}
               </p>
               <p className="text-xs text-muted-foreground">
-                {isRu ? 'свободный' : 'available'}
+                {isRu ? 'свободный' : isTh ? 'ที่ว่าง' : 'available'}
               </p>
             </CardContent>
           </Card>
@@ -159,7 +160,7 @@ export function StaffPicker({
                   <div className="flex items-center justify-center gap-1 mt-1 text-xs text-muted-foreground">
                     <Clock className="w-3 h-3" />
                     <span>
-                      {member.experience_years} {isRu ? 'лет' : 'yrs'}
+                      {member.experience_years} {isRu ? 'лет' : isTh ? 'ปี' : 'yrs'}
                     </span>
                   </div>
                 )}
@@ -188,6 +189,7 @@ export function StaffPickerInline({
 }: StaffPickerInlineProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (isLoading) {
     return (
@@ -221,7 +223,7 @@ export function StaffPickerInline({
           <span className="text-lg">👤</span>
         </div>
         <span className="text-xs font-medium">
-          {isRu ? 'Любой' : 'Any'}
+          {isRu ? 'Любой' : isTh ? 'ใครก็ได้' : 'Any'}
         </span>
       </button>
 

@@ -14,50 +14,51 @@ interface DetailsStepProps {
 }
 
 const PROPERTY_TYPES = [
-  { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла' },
-  { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо' },
-  { value: 'apartment', labelEn: 'Apartment', labelRu: 'Квартира' },
-  { value: 'house', labelEn: 'House', labelRu: 'Дом' },
-  { value: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
+  { value: 'villa', labelEn: 'Villa', labelRu: 'Вилла', labelTh: 'วิลล่า' },
+  { value: 'condo', labelEn: 'Condo', labelRu: 'Кондо', labelTh: 'คอนโด' },
+  { value: 'apartment', labelEn: 'Apartment', labelRu: 'Квартира', labelTh: 'อพาร์ตเมนต์' },
+  { value: 'house', labelEn: 'House', labelRu: 'Дом', labelTh: 'บ้าน' },
+  { value: 'studio', labelEn: 'Studio', labelRu: 'Студия', labelTh: 'สตูดิโอ' },
 ];
 
 const SERVICE_CATEGORIES = [
-  { value: 'beauty', labelEn: 'Beauty & Wellness', labelRu: 'Красота и здоровье' },
-  { value: 'tours', labelEn: 'Tours & Experiences', labelRu: 'Туры и развлечения' },
-  { value: 'cleaning', labelEn: 'Cleaning', labelRu: 'Уборка' },
-  { value: 'repairs', labelEn: 'Repairs & Maintenance', labelRu: 'Ремонт и обслуживание' },
-  { value: 'transport', labelEn: 'Transport', labelRu: 'Транспорт' },
-  { value: 'other', labelEn: 'Other', labelRu: 'Другое' },
+  { value: 'beauty', labelEn: 'Beauty & Wellness', labelRu: 'Красота и здоровье', labelTh: 'ความงามและสุขภาพ' },
+  { value: 'tours', labelEn: 'Tours & Experiences', labelRu: 'Туры и развлечения', labelTh: 'ทัวร์และกิจกรรม' },
+  { value: 'cleaning', labelEn: 'Cleaning', labelRu: 'Уборка', labelTh: 'ทำความสะอาด' },
+  { value: 'repairs', labelEn: 'Repairs & Maintenance', labelRu: 'Ремонт и обслуживание', labelTh: 'ซ่อมแซมและบำรุงรักษา' },
+  { value: 'transport', labelEn: 'Transport', labelRu: 'Транспорт', labelTh: 'ขนส่ง' },
+  { value: 'other', labelEn: 'Other', labelRu: 'Другое', labelTh: 'อื่น ๆ' },
 ];
 
 const PRODUCT_CATEGORIES = [
-  { value: 'food', labelEn: 'Food & Grocery', labelRu: 'Еда и продукты' },
-  { value: 'health', labelEn: 'Health & Beauty', labelRu: 'Здоровье и красота' },
-  { value: 'home', labelEn: 'Home & Garden', labelRu: 'Дом и сад' },
-  { value: 'fashion', labelEn: 'Fashion', labelRu: 'Мода' },
-  { value: 'electronics', labelEn: 'Electronics', labelRu: 'Электроника' },
-  { value: 'other', labelEn: 'Other', labelRu: 'Другое' },
+  { value: 'food', labelEn: 'Food & Grocery', labelRu: 'Еда и продукты', labelTh: 'อาหารและของชำ' },
+  { value: 'health', labelEn: 'Health & Beauty', labelRu: 'Здоровье и красота', labelTh: 'สุขภาพและความงาม' },
+  { value: 'home', labelEn: 'Home & Garden', labelRu: 'Дом и сад', labelTh: 'บ้านและสวน' },
+  { value: 'fashion', labelEn: 'Fashion', labelRu: 'Мода', labelTh: 'แฟชั่น' },
+  { value: 'electronics', labelEn: 'Electronics', labelRu: 'Электроника', labelTh: 'อิเล็กทรอนิกส์' },
+  { value: 'other', labelEn: 'Other', labelRu: 'Другое', labelTh: 'อื่น ๆ' },
 ];
 
 export function DetailsStep({ draft, onChange, onNext, onBack }: DetailsStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   
   const renderPropertyDetails = () => (
     <>
       <div className="space-y-2">
-        <Label>{isRu ? 'Тип жилья' : 'Property type'}</Label>
+        <Label>{isRu ? 'Тип жилья' : isTh ? 'ประเภทที่พัก' : 'Property type'}</Label>
         <Select
           value={draft.property_type}
           onValueChange={(v) => onChange({ property_type: v })}
         >
           <SelectTrigger>
-            <SelectValue placeholder={isRu ? 'Выберите тип' : 'Select type'} />
+            <SelectValue placeholder={isRu ? 'Выберите тип' : isTh ? 'เลือกประเภท' : 'Select type'} />
           </SelectTrigger>
           <SelectContent>
             {PROPERTY_TYPES.map((t) => (
               <SelectItem key={t.value} value={t.value}>
-                {isRu ? t.labelRu : t.labelEn}
+                {isRu ? t.labelRu : isTh ? t.labelTh : t.labelEn}
               </SelectItem>
             ))}
           </SelectContent>
@@ -66,7 +67,7 @@ export function DetailsStep({ draft, onChange, onNext, onBack }: DetailsStepProp
       
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-2">
-          <Label>{isRu ? 'Спален' : 'Bedrooms'}</Label>
+          <Label>{isRu ? 'Спален' : isTh ? 'ห้องนอน' : 'Bedrooms'}</Label>
           <Input
             type="number"
             min={0}
@@ -75,7 +76,7 @@ export function DetailsStep({ draft, onChange, onNext, onBack }: DetailsStepProp
           />
         </div>
         <div className="space-y-2">
-          <Label>{isRu ? 'Ванных' : 'Bathrooms'}</Label>
+          <Label>{isRu ? 'Ванных' : isTh ? 'ห้องน้ำ' : 'Bathrooms'}</Label>
           <Input
             type="number"
             min={0}
@@ -84,7 +85,7 @@ export function DetailsStep({ draft, onChange, onNext, onBack }: DetailsStepProp
           />
         </div>
         <div className="space-y-2">
-          <Label>{isRu ? 'Гостей' : 'Guests'}</Label>
+          <Label>{isRu ? 'Гостей' : isTh ? 'จำนวนแขก' : 'Guests'}</Label>
           <Input
             type="number"
             min={1}
@@ -99,18 +100,18 @@ export function DetailsStep({ draft, onChange, onNext, onBack }: DetailsStepProp
   const renderServiceDetails = () => (
     <>
       <div className="space-y-2">
-        <Label>{isRu ? 'Категория услуги' : 'Service category'}</Label>
+        <Label>{isRu ? 'Категория услуги' : isTh ? 'หมวดหมู่บริการ' : 'Service category'}</Label>
         <Select
           value={draft.service_category}
           onValueChange={(v) => onChange({ service_category: v })}
         >
           <SelectTrigger>
-            <SelectValue placeholder={isRu ? 'Выберите категорию' : 'Select category'} />
+            <SelectValue placeholder={isRu ? 'Выберите категорию' : isTh ? 'เลือกหมวดหมู่' : 'Select category'} />
           </SelectTrigger>
           <SelectContent>
             {SERVICE_CATEGORIES.map((c) => (
               <SelectItem key={c.value} value={c.value}>
-                {isRu ? c.labelRu : c.labelEn}
+                {isRu ? c.labelRu : isTh ? c.labelTh : c.labelEn}
               </SelectItem>
             ))}
           </SelectContent>
@@ -118,7 +119,7 @@ export function DetailsStep({ draft, onChange, onNext, onBack }: DetailsStepProp
       </div>
       
       <div className="space-y-2">
-        <Label>{isRu ? 'Длительность (мин)' : 'Duration (minutes)'}</Label>
+        <Label>{isRu ? 'Длительность (мин)' : isTh ? 'ระยะเวลา (นาที)' : 'Duration (minutes)'}</Label>
         <Input
           type="number"
           min={15}
@@ -134,18 +135,18 @@ export function DetailsStep({ draft, onChange, onNext, onBack }: DetailsStepProp
   const renderProductDetails = () => (
     <>
       <div className="space-y-2">
-        <Label>{isRu ? 'Категория товара' : 'Product category'}</Label>
+        <Label>{isRu ? 'Категория товара' : isTh ? 'หมวดหมู่สินค้า' : 'Product category'}</Label>
         <Select
           value={draft.product_category}
           onValueChange={(v) => onChange({ product_category: v })}
         >
           <SelectTrigger>
-            <SelectValue placeholder={isRu ? 'Выберите категорию' : 'Select category'} />
+            <SelectValue placeholder={isRu ? 'Выберите категорию' : isTh ? 'เลือกหมวดหมู่' : 'Select category'} />
           </SelectTrigger>
           <SelectContent>
             {PRODUCT_CATEGORIES.map((c) => (
               <SelectItem key={c.value} value={c.value}>
-                {isRu ? c.labelRu : c.labelEn}
+                {isRu ? c.labelRu : isTh ? c.labelTh : c.labelEn}
               </SelectItem>
             ))}
           </SelectContent>
@@ -153,7 +154,7 @@ export function DetailsStep({ draft, onChange, onNext, onBack }: DetailsStepProp
       </div>
       
       <div className="space-y-2">
-        <Label>{isRu ? 'Количество в наличии' : 'Stock quantity'}</Label>
+        <Label>{isRu ? 'Количество в наличии' : isTh ? 'จำนวนสินค้าคงเหลือ' : 'Stock quantity'}</Label>
         <Input
           type="number"
           min={1}
@@ -173,13 +174,13 @@ export function DetailsStep({ draft, onChange, onNext, onBack }: DetailsStepProp
       
       {/* Location - common */}
       <div className="space-y-2">
-        <Label>{isRu ? 'Город' : 'City'}</Label>
+        <Label>{isRu ? 'Город' : isTh ? 'เมือง' : 'City'}</Label>
         <Select
           value={draft.city}
           onValueChange={(v) => onChange({ city: v })}
         >
           <SelectTrigger>
-            <SelectValue placeholder={isRu ? 'Выберите город' : 'Select city'} />
+            <SelectValue placeholder={isRu ? 'Выберите город' : isTh ? 'เลือกเมือง' : 'Select city'} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="phuket">Phuket</SelectItem>
@@ -191,29 +192,29 @@ export function DetailsStep({ draft, onChange, onNext, onBack }: DetailsStepProp
       </div>
       
       <div className="space-y-2">
-        <Label>{isRu ? 'Район' : 'District'}</Label>
+        <Label>{isRu ? 'Район' : isTh ? 'อำเภอ/ตำบล' : 'District'}</Label>
         <Input
           value={draft.district || ''}
           onChange={(e) => onChange({ district: e.target.value })}
-          placeholder={isRu ? 'Например: Rawai' : 'e.g. Rawai'}
+          placeholder={isRu ? 'Например: Rawai' : isTh ? 'เช่น ราไวย์' : 'e.g. Rawai'}
         />
       </div>
       
       <div className="space-y-2">
-        <Label>{isRu ? 'Адрес' : 'Address'}</Label>
+        <Label>{isRu ? 'Адрес' : isTh ? 'ที่อยู่' : 'Address'}</Label>
         <Input
           value={draft.address || ''}
           onChange={(e) => onChange({ address: e.target.value })}
-          placeholder={isRu ? 'Улица, дом' : 'Street, building'}
+          placeholder={isRu ? 'Улица, дом' : isTh ? 'ถนน อาคาร' : 'Street, building'}
         />
       </div>
       
       <div className="flex gap-3">
         <Button variant="outline" onClick={onBack} className="flex-1">
-          {isRu ? 'Назад' : 'Back'}
+          {isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
         </Button>
         <Button onClick={onNext} className="flex-1">
-          {isRu ? 'Продолжить' : 'Continue'}
+          {isRu ? 'Продолжить' : isTh ? 'ดำเนินการต่อ' : 'Continue'}
         </Button>
       </div>
     </div>

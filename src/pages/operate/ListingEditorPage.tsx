@@ -43,7 +43,7 @@ export default function ListingEditorPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success(language === 'ru' ? 'Сохранено' : 'Saved');
+      toast.success(language === 'ru' ? 'Сохранено' : language === 'th' ? 'บันทึกแล้ว' : 'Saved');
       qc.invalidateQueries({ queryKey: ['listings', 'edit', id] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -57,6 +57,8 @@ export default function ListingEditorPage() {
         <p className="text-sm text-muted-foreground">
           {language === 'ru'
             ? `Spec для «${(listing as { vertical: string }).vertical}» пока не подключён.`
+            : language === 'th'
+            ? `ยังไม่ได้เชื่อมต่อ Spec สำหรับ «${(listing as { vertical: string }).vertical}»`
             : `Spec for «${(listing as { vertical: string }).vertical}» not wired yet.`}
         </p>
       </div>

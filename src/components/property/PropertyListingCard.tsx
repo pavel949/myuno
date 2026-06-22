@@ -40,14 +40,14 @@ interface PropertyListingCardProps {
 const FALLBACK_IMAGE = PLACEHOLDER_IMAGES.property;
 
 const formatPriceLabel = (period: string, lang: string) => {
-  const labels: Record<string, { en: string; ru: string }> = {
-    night: { en: ' night', ru: ' ночь' },
-    week: { en: ' week', ru: ' нед.' },
-    month: { en: ' month', ru: ' мес.' },
-    year: { en: ' year', ru: ' год' },
-    total: { en: '', ru: '' },
+  const labels: Record<string, { en: string; ru: string; th: string }> = {
+    night: { en: ' night', ru: ' ночь', th: ' คืน' },
+    week: { en: ' week', ru: ' нед.', th: ' สัปดาห์' },
+    month: { en: ' month', ru: ' мес.', th: ' เดือน' },
+    year: { en: ' year', ru: ' год', th: ' ปี' },
+    total: { en: '', ru: '', th: '' },
   };
-  return labels[period]?.[lang as 'en' | 'ru'] || '';
+  return labels[period]?.[lang as 'en' | 'ru' | 'th'] || '';
 };
 
 export function PropertyListingCard({
@@ -66,6 +66,7 @@ export function PropertyListingCard({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const rootRef = React.useRef<HTMLDivElement | null>(null);
 
   const surface = useMemo(() => surfaceFromProperty(property, mode), [property, mode]);
@@ -164,7 +165,7 @@ export function PropertyListingCard({
             />
           ) : property.is_featured ? (
             <Badge className="bg-background text-foreground border-0 shadow-sm text-[11px] font-semibold px-2 py-0.5 rounded-full">
-              {isRu ? 'Популярное' : 'Popular'}
+              {isRu ? 'Популярное' : isTh ? 'ยอดนิยม' : 'Popular'}
             </Badge>
           ) : null}
           {primaryViewLabel && (
@@ -175,7 +176,7 @@ export function PropertyListingCard({
           {property.instant_booking && (
             <Badge className="bg-accent-amber text-white border-0 text-[11px] gap-1 rounded-full px-2 py-0.5">
               <Zap className="w-3 h-3" />
-              {isRu ? 'Мгновенное' : 'Instant'}
+              {isRu ? 'Мгновенное' : isTh ? 'จองทันที' : 'Instant'}
             </Badge>
           )}
         </div>
@@ -215,16 +216,16 @@ export function PropertyListingCard({
             ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en')
             : title}
           {property.bedrooms != null && property.bedrooms > 0 && (
-            <> · {property.bedrooms} {isRu ? (property.bedrooms === 1 ? 'сп.' : 'сп.') : (property.bedrooms === 1 ? 'bed' : 'beds')}</>
+            <> · {property.bedrooms} {isRu ? (property.bedrooms === 1 ? 'сп.' : 'сп.') : isTh ? 'ห้องนอน' : (property.bedrooms === 1 ? 'bed' : 'beds')}</>
           )}
           {property.bathrooms != null && property.bathrooms > 0 && (
-            <span className="hidden sm:inline"> · {property.bathrooms} {isRu ? (property.bathrooms === 1 ? 'ванная' : 'ванных') : (property.bathrooms === 1 ? 'bath' : 'baths')}</span>
+            <span className="hidden sm:inline"> · {property.bathrooms} {isRu ? (property.bathrooms === 1 ? 'ванная' : 'ванных') : isTh ? 'ห้องน้ำ' : (property.bathrooms === 1 ? 'bath' : 'baths')}</span>
           )}
           {property.area_sqm != null && property.area_sqm > 0 && (
             <span> · {Math.round(property.area_sqm)} m²</span>
           )}
           {property.max_guests != null && property.max_guests > 0 && (
-            <span className="hidden sm:inline"> · {isRu ? `до ${property.max_guests} гостей` : `up to ${property.max_guests} guests`}</span>
+            <span className="hidden sm:inline"> · {isRu ? `до ${property.max_guests} гостей` : isTh ? `รองรับ ${property.max_guests} ท่าน` : `up to ${property.max_guests} guests`}</span>
           )}
         </p>
 
@@ -259,7 +260,7 @@ export function PropertyListingCard({
           </p>
           {totalPrice && nights && mode !== 'buy' && (
             <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 underline decoration-muted-foreground/50">
-              {formatPrice(totalPrice)} {isRu ? 'итого' : 'total'}
+              {formatPrice(totalPrice)} {isRu ? 'итого' : isTh ? 'รวม' : 'total'}
             </p>
           )}
         </div>

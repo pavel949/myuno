@@ -20,19 +20,19 @@ import type { FilterValues } from '@/components/filters/UniversalFilter';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
 const CATEGORIES = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'gym', labelEn: 'Gym', labelRu: 'Зал' },
-  { id: 'yoga', labelEn: 'Yoga', labelRu: 'Йога' },
-  { id: 'muay-thai', labelEn: 'Muay Thai', labelRu: 'Муай Тай' },
-  { id: 'crossfit', labelEn: 'CrossFit', labelRu: 'Кроссфит' },
-  { id: 'swimming', labelEn: 'Swimming', labelRu: 'Бассейн' },
+  { id: 'all', labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { id: 'gym', labelEn: 'Gym', labelRu: 'Зал', labelTh: 'ฟิตเนส' },
+  { id: 'yoga', labelEn: 'Yoga', labelRu: 'Йога', labelTh: 'โยคะ' },
+  { id: 'muay-thai', labelEn: 'Muay Thai', labelRu: 'Муай Тай', labelTh: 'มวยไทย' },
+  { id: 'crossfit', labelEn: 'CrossFit', labelRu: 'Кроссфит', labelTh: 'ครอสฟิต' },
+  { id: 'swimming', labelEn: 'Swimming', labelRu: 'Бассейн', labelTh: 'ว่ายน้ำ' },
 ];
 
 const SORT_OPTIONS = [
-  { id: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые' },
-  { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу' },
-  { id: 'price_low', labelEn: 'Price: Low', labelRu: 'Цена ↑' },
-  { id: 'price_high', labelEn: 'Price: High', labelRu: 'Цена ↓' },
+  { id: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые', labelTh: 'แนะนำ' },
+  { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу', labelTh: 'คะแนนสูงสุด' },
+  { id: 'price_low', labelEn: 'Price: Low', labelRu: 'Цена ↑', labelTh: 'ราคา: ต่ำ' },
+  { id: 'price_high', labelEn: 'Price: High', labelRu: 'Цена ↓', labelTh: 'ราคา: สูง' },
 ];
 
 export default function FitnessIndex() {
@@ -44,6 +44,7 @@ export default function FitnessIndex() {
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [sortBy, setSortBy] = useState('recommended');
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
   const filterActiveCount = useMemo(() => {
@@ -103,13 +104,13 @@ export default function FitnessIndex() {
 
   return (
     <MiniAppLayout
-      title={isRu ? 'Фитнес и Спорт' : 'Fitness & Sports'}
-      subtitle={`${filteredAndSorted.length} ${isRu ? 'залов' : 'gyms'}`}
+      title={isRu ? 'Фитнес и Спорт' : isTh ? 'ฟิตเนสและกีฬา' : 'Fitness & Sports'}
+      subtitle={`${filteredAndSorted.length} ${isRu ? 'залов' : isTh ? 'แห่ง' : 'gyms'}`}
       fallbackPath="/discover"
       showSearch
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={isRu ? 'Поиск залов...' : 'Search gyms...'}
+      searchPlaceholder={isRu ? 'Поиск залов...' : isTh ? 'ค้นหาฟิตเนส...' : 'Search gyms...'}
       showHero={false}
       categories={CATEGORIES}
       selectedCategory={selectedCategory}
@@ -122,7 +123,7 @@ export default function FitnessIndex() {
       onMapMarkerSelect={(id) => navigate(`/fitness/${id}`)}
       mapIconChar="F"
       resultsCount={filteredAndSorted.length}
-      resultsLabel={isRu ? 'Залы' : 'Gyms'}
+      resultsLabel={isRu ? 'Залы' : isTh ? 'ฟิตเนส' : 'Gyms'}
       stickySubHeader={
         <div className="px-4 py-2 flex items-center justify-end">
           <select
@@ -132,7 +133,7 @@ export default function FitnessIndex() {
           >
             {SORT_OPTIONS.map(opt => (
               <option key={opt.id} value={opt.id}>
-                {isRu ? opt.labelRu : opt.labelEn}
+                {isRu ? opt.labelRu : isTh ? opt.labelTh : opt.labelEn}
               </option>
             ))}
           </select>
@@ -152,8 +153,8 @@ export default function FitnessIndex() {
       ) : filteredAndSorted.length === 0 ? (
         <EmptyState
           icon={Dumbbell}
-          title={isRu ? 'Залы не найдены' : 'No gyms found'}
-          description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+          title={isRu ? 'Залы не найдены' : isTh ? 'ไม่พบฟิตเนส' : 'No gyms found'}
+          description={isRu ? 'Попробуйте изменить фильтры' : isTh ? 'ลองปรับตัวกรองของคุณ' : 'Try adjusting your filters'}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">

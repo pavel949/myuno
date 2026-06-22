@@ -62,6 +62,7 @@ export default function TransferSuccess() {
   }, [orderId]);
 
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const metadata = order?.metadata || {};
   const pickupAddress = order?.order_addresses?.find(a => a.address_type === 'pickup')?.address_text;
   const dropoffAddress = order?.order_addresses?.find(a => a.address_type === 'dropoff')?.address_text;
@@ -70,7 +71,7 @@ export default function TransferSuccess() {
   // All transfers happen in Phuket — always display Asia/Bangkok local time,
   // regardless of the customer's device timezone.
   const TZ = 'Asia/Bangkok';
-  const localeTag = isRu ? 'ru-RU' : 'en-GB';
+  const localeTag = isRu ? 'ru-RU' : isTh ? 'th-TH' : 'en-GB';
   const scheduledDate = order?.start_at
     ? new Date(order.start_at).toLocaleDateString(localeTag, { timeZone: TZ, day: '2-digit', month: 'short', year: 'numeric' })
     : '';
@@ -82,13 +83,13 @@ export default function TransferSuccess() {
     <div className="space-y-3 text-left">
       {flightNumber && (
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{isRu ? 'Рейс' : 'Flight'}</span>
+          <span className="text-muted-foreground">{isRu ? 'Рейс' : isTh ? 'เที่ยวบิน' : 'Flight'}</span>
           <span className="font-medium">{flightNumber}</span>
         </div>
       )}
       {scheduledDate && (
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{isRu ? 'Дата' : 'Date'}</span>
+          <span className="text-muted-foreground">{isRu ? 'Дата' : isTh ? 'วันที่' : 'Date'}</span>
           <span className="font-medium">{scheduledDate}</span>
         </div>
       )}
@@ -98,7 +99,7 @@ export default function TransferSuccess() {
           <div className="flex items-center gap-3">
             <User className="w-4 h-4 text-muted-foreground shrink-0" />
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">{isRu ? 'Имя на табличке' : 'Name on sign'}</p>
+              <p className="text-xs text-muted-foreground">{isRu ? 'Имя на табличке' : isTh ? 'ชื่อบนป้าย' : 'Name on sign'}</p>
               <p className="text-sm font-medium">{meetingSignName}</p>
             </div>
           </div>
@@ -107,7 +108,7 @@ export default function TransferSuccess() {
           <div className="flex items-center gap-3">
             <Plane className="w-4 h-4 text-muted-foreground shrink-0" />
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">{isRu ? 'Откуда' : 'From'}</p>
+              <p className="text-xs text-muted-foreground">{isRu ? 'Откуда' : isTh ? 'จาก' : 'From'}</p>
               <p className="text-sm font-medium truncate">{pickupAddress}</p>
             </div>
           </div>
@@ -116,7 +117,7 @@ export default function TransferSuccess() {
           <div className="flex items-center gap-3">
             <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">{isRu ? 'Куда' : 'To'}</p>
+              <p className="text-xs text-muted-foreground">{isRu ? 'Куда' : isTh ? 'ถึง' : 'To'}</p>
               <p className="text-sm font-medium truncate">{dropoffAddress}</p>
             </div>
           </div>
@@ -125,7 +126,7 @@ export default function TransferSuccess() {
           <div className="flex items-center gap-3">
             <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
             <div>
-              <p className="text-xs text-muted-foreground">{isRu ? 'Время' : 'Time'}</p>
+              <p className="text-xs text-muted-foreground">{isRu ? 'Время' : isTh ? 'เวลา' : 'Time'}</p>
               <p className="text-sm font-medium">{scheduledTime}</p>
             </div>
           </div>
@@ -154,6 +155,7 @@ export default function TransferSuccess() {
       note={{
         ru: 'Водитель встретит вас с табличкой у выхода из терминала.',
         en: 'Driver will meet you with a sign at the terminal exit.',
+        th: 'คนขับจะรอรับคุณพร้อมป้ายชื่อบริเวณทางออกอาคารผู้โดยสาร',
       }}
       details={details}
       extras={<CrossSellRecommendations orderType="transport" />}

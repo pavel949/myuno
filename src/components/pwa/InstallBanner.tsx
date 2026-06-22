@@ -11,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 const texts = {
   en: { install: 'Install app for quick access', download: 'Install', close: 'Close', iosTitle: 'Add to Home Screen', androidTitle: 'Install app', toScreen: 'Home Screen', successToast: 'Done — icon added to your home screen' },
   ru: { install: 'Установите для быстрого доступа', download: 'Установить', close: 'Закрыть', iosTitle: 'Добавить на экран', androidTitle: 'Установить', toScreen: 'На экран', successToast: 'Готово — иконка на главном экране' },
+  th: { install: 'ติดตั้งแอปเพื่อเข้าถึงเร็ว', download: 'ติดตั้ง', close: 'ปิด', iosTitle: 'เพิ่มไปยังหน้าจอหลัก', androidTitle: 'ติดตั้งแอป', toScreen: 'หน้าจอหลัก', successToast: 'เสร็จแล้ว — เพิ่มไอคอนบนหน้าจอหลักของคุณ' },
 };
 
 const BANNER_DISMISSED_KEY = 'pwa_banner_dismissed';

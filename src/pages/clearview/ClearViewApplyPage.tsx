@@ -30,6 +30,7 @@ interface PreselectedProject {
 export default function ClearViewApplyPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [params] = useSearchParams();
   const projectId = params.get('project') || undefined;
   const { track } = useIPPLeadEvent();
@@ -65,11 +66,11 @@ export default function ClearViewApplyPage() {
     <div className="min-h-screen bg-background pb-16">
       <header className="sticky top-0 z-10 bg-background/95 border-b border-border">
         <div className="px-4 py-3 flex items-center gap-3">
-          <Link to={APP_ROUTES.CLEARVIEW} aria-label={isRu ? 'Назад' : 'Back'}>
+          <Link to={APP_ROUTES.CLEARVIEW} aria-label={isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}>
             <ArrowLeft className="w-5 h-5 text-foreground" />
           </Link>
           <h1 className="font-display text-[16px] font-semibold text-foreground truncate">
-            {isRu ? 'Заказать полный отчёт ClearView™' : 'Order ClearView™ Full Report'}
+            {isRu ? 'Заказать полный отчёт ClearView™' : isTh ? 'สั่งซื้อรายงานฉบับสมบูรณ์ ClearView™' : 'Order ClearView™ Full Report'}
           </h1>
         </div>
       </header>
@@ -85,6 +86,8 @@ export default function ClearViewApplyPage() {
               <p className="text-[13px] text-muted-foreground mt-1 leading-snug">
                 {isRu
                   ? 'Независимая 8-критериальная экспертиза проекта: юр. статус, репутация девелопера, ход стройки, ROI, ликвидность.'
+                  : isTh
+                  ? 'การประเมินโครงการอย่างเป็นอิสระตาม 8 เกณฑ์: สถานะทางกฎหมาย ชื่อเสียงของผู้พัฒนา ความคืบหน้าการก่อสร้าง ผลตอบแทน (ROI) และสภาพคล่อง'
                   : 'Independent 8-criteria project assessment: legal status, developer reputation, construction progress, ROI, liquidity.'}
               </p>
             </div>
@@ -92,7 +95,7 @@ export default function ClearViewApplyPage() {
 
           {projectLabel && (
             <div className="rounded-none bg-muted/40 border border-border px-3 py-2 text-[13px] text-foreground">
-              <span className="text-muted-foreground">{isRu ? 'Проект: ' : 'Project: '}</span>
+              <span className="text-muted-foreground">{isRu ? 'Проект: ' : isTh ? 'โครงการ: ' : 'Project: '}</span>
               <span className="font-semibold">{projectLabel}</span>
             </div>
           )}
@@ -104,7 +107,7 @@ export default function ClearViewApplyPage() {
             </div>
             <div className="flex items-center gap-1.5 text-foreground">
               <Clock className="w-4 h-4 text-muted-foreground" />
-              <span>{isRu ? '15 рабочих дней' : '15 business days'}</span>
+              <span>{isRu ? '15 рабочих дней' : isTh ? '15 วันทำการ' : '15 business days'}</span>
             </div>
           </div>
         </div>
@@ -112,19 +115,19 @@ export default function ClearViewApplyPage() {
 
       <section className="px-4 pb-5">
         <h3 className="font-display text-[14px] font-semibold text-foreground mb-2">
-          {isRu ? 'Что входит' : 'What is included'}
+          {isRu ? 'Что входит' : isTh ? 'สิ่งที่รวมอยู่ในรายงาน' : 'What is included'}
         </h3>
         <ul className="space-y-1.5 text-[13px] text-foreground/90">
           {[
-            { ru: 'Рейтинг AAA–CCC по 8 категориям', en: 'AAA–CCC rating across 8 categories' },
-            { ru: 'Юридическая верификация (title, escrow, FET)', en: 'Legal verification (title, escrow, FET)' },
-            { ru: 'История девелопера и завершённые проекты', en: 'Developer track record and delivered projects' },
-            { ru: 'ROI с учётом текущего STR-рынка района', en: 'ROI based on current district STR market data' },
-            { ru: 'Red/green flags + персональные рекомендации', en: 'Red/green flags + personal recommendations' },
+            { ru: 'Рейтинг AAA–CCC по 8 категориям', th: 'การจัดอันดับ AAA–CCC ครอบคลุม 8 หมวดหมู่', en: 'AAA–CCC rating across 8 categories' },
+            { ru: 'Юридическая верификация (title, escrow, FET)', th: 'การตรวจสอบทางกฎหมาย (โฉนด, บัญชีเอสโครว์, FET)', en: 'Legal verification (title, escrow, FET)' },
+            { ru: 'История девелопера и завершённые проекты', th: 'ประวัติผลงานของผู้พัฒนาและโครงการที่ส่งมอบแล้ว', en: 'Developer track record and delivered projects' },
+            { ru: 'ROI с учётом текущего STR-рынка района', th: 'ผลตอบแทน (ROI) อ้างอิงจากข้อมูลตลาดเช่าระยะสั้นในพื้นที่', en: 'ROI based on current district STR market data' },
+            { ru: 'Red/green flags + персональные рекомендации', th: 'สัญญาณเตือนและสัญญาณบวก พร้อมคำแนะนำเฉพาะบุคคล', en: 'Red/green flags + personal recommendations' },
           ].map((line, i) => (
             <li key={i} className="flex items-start gap-2">
               <FileText className="w-3.5 h-3.5 text-muted-foreground mt-1 shrink-0" />
-              <span>{isRu ? line.ru : line.en}</span>
+              <span>{isRu ? line.ru : isTh ? line.th : line.en}</span>
             </li>
           ))}
         </ul>
@@ -133,7 +136,7 @@ export default function ClearViewApplyPage() {
       <section className="px-4 pb-6">
         <div className="rounded-none border border-border bg-card p-4">
           <h3 className="font-display text-[14px] font-semibold text-foreground mb-3">
-            {isRu ? 'Контактные данные' : 'Contact details'}
+            {isRu ? 'Контактные данные' : isTh ? 'ข้อมูลติดต่อ' : 'Contact details'}
           </h3>
           <NbLeadForm
             projectId={projectId}
@@ -142,6 +145,8 @@ export default function ClearViewApplyPage() {
           <p className="text-[11.5px] text-muted-foreground mt-3 leading-snug">
             {isRu
               ? 'После заявки мы пришлём счёт на ฿4,900 и стартуем DD. Отчёт высылается в PDF и в личный кабинет.'
+              : isTh
+              ? 'หลังจากส่งคำขอ เราจะส่งใบแจ้งหนี้ ฿4,900 และเริ่มการตรวจสอบสถานะ (DD) รายงานจะจัดส่งเป็นไฟล์ PDF และในบัญชีของท่าน'
               : 'After your request we will send a ฿4,900 invoice and start DD. The report is delivered as PDF and in your account.'}
           </p>
         </div>

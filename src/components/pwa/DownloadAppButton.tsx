@@ -27,6 +27,14 @@ export function DownloadAppButton() {
       installing: "Установка...",
       installed: "Приложение установлено",
       installedHint: "Откройте с главного экрана"
+    },
+    th: {
+      title: "ดาวน์โหลดแอป",
+      subtitle: "เข้าถึงเร็วโดยไม่ต้องเปิดเบราว์เซอร์",
+      iosHint: "เพิ่มไปยังหน้าจอหลัก",
+      installing: "กำลังติดตั้ง...",
+      installed: "ติดตั้งแอปแล้ว",
+      installedHint: "เปิดจากหน้าจอหลักของคุณ"
     }
   };
 

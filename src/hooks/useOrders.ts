@@ -48,14 +48,14 @@ const queryClient = useQueryClient();
 
   const t = (key: string) => {
     const translations: Record<string, Record<string, string>> = {
-      'order.success': { en: 'Order confirmed!', ru: 'Заказ подтверждён!' },
-      'order.error': { en: 'Order failed', ru: 'Ошибка заказа' },
-      'order.loginRequired': { en: 'Please login to continue', ru: 'Войдите для продолжения' },
-      'order.cancelled': { en: 'Order cancelled', ru: 'Заказ отменён' },
-      'order.refunded': { en: 'Payment refunded to wallet', ru: 'Оплата возвращена на кошелёк' },
-      'order.insufficientBalance': { en: 'Insufficient wallet balance', ru: 'Недостаточно средств на кошельке' },
+      'order.success': { en: 'Order confirmed!', ru: 'Заказ подтверждён!', th: 'ยืนยันคำสั่งซื้อแล้ว!' },
+      'order.error': { en: 'Order failed', ru: 'Ошибка заказа', th: 'คำสั่งซื้อล้มเหลว' },
+      'order.loginRequired': { en: 'Please login to continue', ru: 'Войдите для продолжения', th: 'กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ' },
+      'order.cancelled': { en: 'Order cancelled', ru: 'Заказ отменён', th: 'ยกเลิกคำสั่งซื้อแล้ว' },
+      'order.refunded': { en: 'Payment refunded to wallet', ru: 'Оплата возвращена на кошелёк', th: 'คืนเงินเข้ากระเป๋าเงินแล้ว' },
+      'order.insufficientBalance': { en: 'Insufficient wallet balance', ru: 'Недостаточно средств на кошельке', th: 'ยอดเงินในกระเป๋าไม่เพียงพอ' },
     };
-    return translations[key]?.[language] || key;
+    return translations[key]?.[language] || translations[key]?.en || key;
   };
 
   // Fetch user's orders

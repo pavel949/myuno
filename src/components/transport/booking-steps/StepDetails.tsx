@@ -32,18 +32,20 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
       <div className="space-y-2">
         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <Plane className="w-4 h-4" />
-          {language === 'ru' ? 'Номер рейса' : 'Flight Number'}
+          {language === 'ru' ? 'Номер рейса' : language === 'th' ? 'หมายเลขเที่ยวบิน' : 'Flight Number'}
           <span className="text-accent">*</span>
         </Label>
         <Input
           value={formData.flightNumber}
           onChange={(e) => setFormData(prev => ({ ...prev, flightNumber: e.target.value.toUpperCase() }))}
-          placeholder={language === 'ru' ? 'например, TG 925' : 'e.g. TG 925'}
+          placeholder={language === 'ru' ? 'например, TG 925' : language === 'th' ? 'เช่น TG 925' : 'e.g. TG 925'}
           className="h-11"
         />
         <p className="text-[11px] text-muted-foreground">
           {language === 'ru'
             ? 'Обязательное поле — водитель отслеживает рейс по номеру'
+            : language === 'th'
+            ? 'จำเป็นต้องกรอก — คนขับจะติดตามเที่ยวบินของคุณจากหมายเลขนี้'
             : 'Required — the driver tracks your flight by number'}
         </p>
       </div>
@@ -54,7 +56,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Calendar className="w-4 h-4" />
-            {language === 'ru' ? 'Дата' : 'Date'}
+            {language === 'ru' ? 'Дата' : language === 'th' ? 'วันที่' : 'Date'}
           </Label>
           <Input
             type="date"
@@ -67,7 +69,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Clock className="w-4 h-4" />
-            {language === 'ru' ? 'Время' : 'Time'}
+            {language === 'ru' ? 'Время' : language === 'th' ? 'เวลา' : 'Time'}
           </Label>
           <Input
             type="time"
@@ -83,7 +85,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Users className="w-4 h-4" />
-            {language === 'ru' ? 'Пассажиры' : 'Passengers'}
+            {language === 'ru' ? 'Пассажиры' : language === 'th' ? 'ผู้โดยสาร' : 'Passengers'}
           </Label>
           <Input
             type="number"
@@ -97,7 +99,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
             <Briefcase className="w-4 h-4" />
-            {language === 'ru' ? 'Багаж' : 'Luggage'}
+            {language === 'ru' ? 'Багаж' : language === 'th' ? 'สัมภาระ' : 'Luggage'}
           </Label>
           <Input
             type="number"
@@ -114,12 +116,12 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
       <div className="space-y-2">
         <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <User className="w-4 h-4" />
-          {language === 'ru' ? 'Контакты' : 'Contact Info'}
+          {language === 'ru' ? 'Контакты' : language === 'th' ? 'ข้อมูลติดต่อ' : 'Contact Info'}
         </Label>
         <Input
           value={formData.name}
           onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-          placeholder={language === 'ru' ? 'Ваше имя' : 'Your name'}
+          placeholder={language === 'ru' ? 'Ваше имя' : language === 'th' ? 'ชื่อของคุณ' : 'Your name'}
           className="h-11"
         />
         <div className="grid grid-cols-2 gap-2">
@@ -127,7 +129,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-            placeholder={language === 'ru' ? 'Телефон' : 'Phone'}
+            placeholder={language === 'ru' ? 'Телефон' : language === 'th' ? 'โทรศัพท์' : 'Phone'}
             className="h-11"
           />
           <Input
@@ -144,7 +146,7 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
       {formData.direction === 'from-airport' && (
         <div className="space-y-2">
           <Label className="text-sm font-medium text-muted-foreground">
-            {language === 'ru' ? 'Имя на табличке' : 'Name on sign'}
+            {language === 'ru' ? 'Имя на табличке' : language === 'th' ? 'ชื่อบนป้ายต้อนรับ' : 'Name on sign'}
           </Label>
           <Input
             value={formData.meetingSignName}
@@ -152,12 +154,12 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
               meetingSignManuallyEditedRef.current = true;
               setFormData(prev => ({ ...prev, meetingSignName: e.target.value }));
             }}
-            placeholder={language === 'ru' ? 'Латиницей, как в паспорте' : 'In Latin letters'}
+            placeholder={language === 'ru' ? 'Латиницей, как в паспорте' : language === 'th' ? 'เป็นอักษรละติน ตามหนังสือเดินทาง' : 'In Latin letters'}
             className="h-11"
           />
           {!formData.meetingSignName && formData.name && (
             <p className="text-[11px] text-muted-foreground">
-              {language === 'ru' ? 'Подставится автоматически: ' : 'Will auto-fill as: '}
+              {language === 'ru' ? 'Подставится автоматически: ' : language === 'th' ? 'จะกรอกให้อัตโนมัติเป็น: ' : 'Will auto-fill as: '}
               <span className="font-mono">{transliterate(formData.name)}</span>
             </p>
           )}
@@ -167,12 +169,12 @@ export function StepDetails({ formData, setFormData, language, meetingSignManual
       {/* Notes */}
       <div className="space-y-2">
         <Label className="text-sm font-medium text-muted-foreground">
-          {language === 'ru' ? 'Примечания' : 'Notes'}
+          {language === 'ru' ? 'Примечания' : language === 'th' ? 'หมายเหตุ' : 'Notes'}
         </Label>
         <Textarea
           value={formData.notes}
           onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-          placeholder={language === 'ru' ? 'Детские кресла, особые пожелания...' : 'Child seats, special requests...'}
+          placeholder={language === 'ru' ? 'Детские кресла, особые пожелания...' : language === 'th' ? 'เบาะนั่งเด็ก ความต้องการพิเศษ...' : 'Child seats, special requests...'}
           className="resize-none"
           rows={2}
         />

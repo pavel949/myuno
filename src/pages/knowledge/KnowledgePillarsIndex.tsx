@@ -25,9 +25,12 @@ export default function KnowledgePillarsIndex() {
   const { data: pillars, isLoading } = useKnowledgePillars(search);
 
   const isRu = language === 'ru';
-  const seoTitle = isRu ? 'Knowledge Hub — гайды myUNO' : 'Knowledge Hub — myUNO guides';
+  const isTh = language === 'th';
+  const seoTitle = isRu ? 'Knowledge Hub — гайды myUNO' : isTh ? 'Knowledge Hub — คู่มือ myUNO' : 'Knowledge Hub — myUNO guides';
   const seoDescription = isRu
     ? 'Канонические гайды myUNO: покупка, аренда, визы, налоги, управление недвижимостью на Пхукете.'
+    : isTh
+    ? 'คู่มือหลักของ myUNO: การซื้อ การเช่า วีซ่า ภาษี และการบริหารจัดการอสังหาริมทรัพย์ในภูเก็ต'
     : 'Canonical myUNO guides: buying, renting, visas, taxes, property management in Phuket.';
 
   // Group by cluster for visual structure
@@ -48,23 +51,27 @@ export default function KnowledgePillarsIndex() {
 
   return (
     <MiniAppLayout
-      title={isRu ? 'Гайды myUNO' : 'myUNO guides'}
+      title={isRu ? 'Гайды myUNO' : isTh ? 'คู่มือ myUNO' : 'myUNO guides'}
       subtitle={
         isRu
           ? 'Канонические pillar pages по 10 кластерам Semantic Core.'
+          : isTh
+          ? 'หน้าคู่มือหลัก 10 ฉบับจากคลัสเตอร์ Semantic Core'
           : '10 canonical pillar pages from the Semantic Core clusters.'
       }
       fallbackPath={APP_ROUTES.KNOWLEDGE}
       heroIcon={BookOpen}
-      heroTitle={isRu ? 'База знаний' : 'Knowledge base'}
+      heroTitle={isRu ? 'База знаний' : isTh ? 'ฐานความรู้' : 'Knowledge base'}
       heroSubtitle={
         isRu
           ? 'Подробные гайды по жизни и бизнесу на Пхукете.'
+          : isTh
+          ? 'คู่มือเชิงลึกสำหรับการใช้ชีวิตและทำธุรกิจในภูเก็ต'
           : 'In-depth guides for living and doing business in Phuket.'
       }
       searchValue={search}
       onSearchChange={setSearch}
-      searchPlaceholder={isRu ? 'Поиск по гайдам…' : 'Search guides…'}
+      searchPlaceholder={isRu ? 'Поиск по гайдам…' : isTh ? 'ค้นหาคู่มือ…' : 'Search guides…'}
       seoTitle={seoTitle}
       seoDescription={seoDescription}
     >
@@ -79,7 +86,7 @@ export default function KnowledgePillarsIndex() {
           <CardContent className="py-12 text-center">
             <FileText className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground">
-              {isRu ? 'Ничего не нашли. Попробуйте смягчить запрос.' : 'Nothing found. Try a broader query.'}
+              {isRu ? 'Ничего не нашли. Попробуйте смягчить запрос.' : isTh ? 'ไม่พบผลลัพธ์ ลองใช้คำค้นที่กว้างขึ้น' : 'Nothing found. Try a broader query.'}
             </p>
           </CardContent>
         </Card>
@@ -88,7 +95,7 @@ export default function KnowledgePillarsIndex() {
           {grouped.map(([cluster, items]) => (
             <section key={cluster}>
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                {isRu ? 'Кластер' : 'Cluster'} §{cluster}
+                {isRu ? 'Кластер' : isTh ? 'คลัสเตอร์' : 'Cluster'} §{cluster}
               </h2>
               <div className="space-y-3">
                 {(items ?? []).map((p) => (
@@ -117,10 +124,10 @@ export default function KnowledgePillarsIndex() {
                       </p>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-[10px]">
-                          {p.status === 'live' ? (isRu ? 'опубликован' : 'live') : (isRu ? 'черновик' : 'draft')}
+                          {p.status === 'live' ? (isRu ? 'опубликован' : isTh ? 'เผยแพร่แล้ว' : 'live') : (isRu ? 'черновик' : isTh ? 'ฉบับร่าง' : 'draft')}
                         </Badge>
                         <span className="text-[11px] text-muted-foreground">
-                          {p.word_count} {isRu ? 'слов' : 'words'}
+                          {p.word_count} {isRu ? 'слов' : isTh ? 'คำ' : 'words'}
                         </span>
                       </div>
                     </CardContent>

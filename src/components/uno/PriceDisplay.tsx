@@ -26,13 +26,13 @@ const sizeClasses = {
   xl: { price: 'text-3xl', original: 'text-lg', unit: 'text-base' },
 };
 
-const unitLabels: Record<PriceUnit & string, { ru: string; en: string }> = {
-  hour: { ru: '/час', en: '/hr' },
-  day: { ru: '/день', en: '/day' },
-  night: { ru: '/ночь', en: '/night' },
-  person: { ru: '/чел', en: '/person' },
-  item: { ru: '/шт', en: '/item' },
-  session: { ru: '/сеанс', en: '/session' },
+const unitLabels: Record<PriceUnit & string, { ru: string; en: string; th: string }> = {
+  hour: { ru: '/час', en: '/hr', th: '/ชม.' },
+  day: { ru: '/день', en: '/day', th: '/วัน' },
+  night: { ru: '/ночь', en: '/night', th: '/คืน' },
+  person: { ru: '/чел', en: '/person', th: '/คน' },
+  item: { ru: '/шт', en: '/item', th: '/ชิ้น' },
+  session: { ru: '/сеанс', en: '/session', th: '/ครั้ง' },
 };
 
 export function PriceDisplay({
@@ -62,7 +62,8 @@ export function PriceDisplay({
     : 0;
 
   const formatPriceValue = (value: number) => {
-    return value.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US');
+    const locale = language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-US';
+    return value.toLocaleString(locale);
   };
 
   return (
@@ -89,7 +90,7 @@ export function PriceDisplay({
       {/* Unit label */}
       {unit && unitLabels[unit] && (
         <span className={cn("text-muted-foreground", sizes.unit)}>
-          {unitLabels[unit][language]}
+          {unitLabels[unit][language] ?? unitLabels[unit].en}
         </span>
       )}
 

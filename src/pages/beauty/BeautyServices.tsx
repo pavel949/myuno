@@ -12,13 +12,13 @@ import type { SalonService } from '@/hooks/useSalons';
 import { Loader2 } from 'lucide-react';
 
 const categories = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'popular', labelEn: 'Popular', labelRu: 'Популярное' },
-  { id: 'massage', labelEn: 'Massage', labelRu: 'Массаж' },
-  { id: 'hair', labelEn: 'Hair', labelRu: 'Волосы' },
-  { id: 'nails', labelEn: 'Nails', labelRu: 'Ногти' },
-  { id: 'face', labelEn: 'Facial', labelRu: 'Уход за лицом' },
-  { id: 'makeup', labelEn: 'Makeup', labelRu: 'Макияж' },
+  { id: 'all', labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { id: 'popular', labelEn: 'Popular', labelRu: 'Популярное', labelTh: 'ยอดนิยม' },
+  { id: 'massage', labelEn: 'Massage', labelRu: 'Массаж', labelTh: 'นวด' },
+  { id: 'hair', labelEn: 'Hair', labelRu: 'Волосы', labelTh: 'ทำผม' },
+  { id: 'nails', labelEn: 'Nails', labelRu: 'Ногти', labelTh: 'ทำเล็บ' },
+  { id: 'face', labelEn: 'Facial', labelRu: 'Уход за лицом', labelTh: 'ดูแลผิวหน้า' },
+  { id: 'makeup', labelEn: 'Makeup', labelRu: 'Макияж', labelTh: 'แต่งหน้า' },
 ];
 
 export default function BeautyServices() {
@@ -56,7 +56,7 @@ export default function BeautyServices() {
 
   const getCategoryLabel = (catId: string) => {
     const cat = categories.find(c => c.id === catId);
-    return cat ? (language === 'ru' ? cat.labelRu : cat.labelEn) : catId;
+    return cat ? (language === 'ru' ? cat.labelRu : language === 'th' ? cat.labelTh : cat.labelEn) : catId;
   };
 
   return (
@@ -64,21 +64,21 @@ export default function BeautyServices() {
       <div className="px-4 py-6 space-y-6">
         <div>
           <h1 className="text-2xl font-display font-bold">
-            {language === 'ru' ? 'Каталог услуг' : 'Services Catalog'}
+            {language === 'ru' ? 'Каталог услуг' : language === 'th' ? 'แคตตาล็อกบริการ' : 'Services Catalog'}
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {isLoading ? '...' : language === 'ru' ? `${allServices?.length || 0} услуг доступно` : `${allServices?.length || 0} services available`}
+            {isLoading ? '...' : language === 'ru' ? `${allServices?.length || 0} услуг доступно` : language === 'th' ? `มีบริการ ${allServices?.length || 0} รายการ` : `${allServices?.length || 0} services available`}
           </p>
         </div>
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          <Input placeholder={language === 'ru' ? 'Поиск услуг...' : 'Search services...'} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 h-12 bg-card border-border/50" />
+          <Input placeholder={language === 'ru' ? 'Поиск услуг...' : language === 'th' ? 'ค้นหาบริการ...' : 'Search services...'} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 h-12 bg-card border-border/50" />
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide touch-pan-y">
           {categories.map((cat) => (
-            <FilterChip key={cat.id} label={language === 'ru' ? cat.labelRu : cat.labelEn} isActive={selectedCategory === cat.id} onToggle={() => setSelectedCategory(cat.id)} />
+            <FilterChip key={cat.id} label={language === 'ru' ? cat.labelRu : language === 'th' ? cat.labelTh : cat.labelEn} isActive={selectedCategory === cat.id} onToggle={() => setSelectedCategory(cat.id)} />
           ))}
         </div>
 
@@ -108,7 +108,7 @@ export default function BeautyServices() {
             )}
             {filteredServices.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">{language === 'ru' ? 'Ничего не найдено' : 'No results found'}</p>
+                <p className="text-muted-foreground">{language === 'ru' ? 'Ничего не найдено' : language === 'th' ? 'ไม่พบผลลัพธ์' : 'No results found'}</p>
               </div>
             )}
           </>
@@ -135,7 +135,7 @@ function ServiceCard({ service, language, formatPrice, onClick }: {
         <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5">
           <span className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />
-            {service.duration_minutes} {language === 'ru' ? 'мин' : 'min'}
+            {service.duration_minutes} {language === 'ru' ? 'мин' : language === 'th' ? 'นาที' : 'min'}
           </span>
         </div>
       </div>

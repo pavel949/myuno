@@ -38,6 +38,7 @@ const DESC_KEY: Record<SourceLang, keyof ListingApplicationDraft> = {
 export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { translateMultiple, isTranslating } = useAutoTranslate();
 
   const sourceLang: SourceLang = (draft.source_lang as SourceLang) ?? (language === 'ru' ? 'ru' : 'en');
@@ -50,12 +51,12 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
 
   const placeholder = () => {
     if (draft.listing_type === 'property') {
-      return isRu ? 'Например: Уютная вилла с бассейном' : 'e.g. Cozy villa with pool';
+      return isRu ? 'Например: Уютная вилла с бассейном' : isTh ? 'เช่น วิลล่าพร้อมสระว่ายน้ำสุดอบอุ่น' : 'e.g. Cozy villa with pool';
     }
     if (draft.listing_type === 'service') {
-      return isRu ? 'Например: Профессиональный массаж' : 'e.g. Professional massage';
+      return isRu ? 'Например: Профессиональный массаж' : isTh ? 'เช่น นวดเพื่อสุขภาพระดับมืออาชีพ' : 'e.g. Professional massage';
     }
-    return isRu ? 'Например: Органическое кокосовое масло' : 'e.g. Organic coconut oil';
+    return isRu ? 'Например: Органическое кокосовое масло' : isTh ? 'เช่น น้ำมันมะพร้าวออร์แกนิก' : 'e.g. Organic coconut oil';
   };
 
   const setSourceLang = (lang: SourceLang) => {
@@ -88,7 +89,7 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
     <div className="space-y-6">
       {/* Source language selector */}
       <div className="space-y-2">
-        <Label>{isRu ? 'Язык заполнения' : 'Input language'}</Label>
+        <Label>{isRu ? 'Язык заполнения' : isTh ? 'ภาษาที่กรอก' : 'Input language'}</Label>
         <div className="flex gap-2">
           {(['en', 'ru', 'th'] as SourceLang[]).map((lang) => (
             <Button
@@ -106,13 +107,15 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
         <p className="text-xs text-muted-foreground">
           {isRu
             ? 'Заполните на удобном языке — система переведёт автоматически на остальные.'
+            : isTh
+            ? 'กรอกด้วยภาษาที่คุณถนัด ระบบจะแปลเป็นภาษาอื่นให้โดยอัตโนมัติ'
             : 'Fill in any language — the system will translate to the others automatically.'}
         </p>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="source_title">
-          {isRu ? 'Название' : 'Title'} ({LANG_META[sourceLang].label}) *
+          {isRu ? 'Название' : isTh ? 'ชื่อ' : 'Title'} ({LANG_META[sourceLang].label}) *
         </Label>
         <Input
           id="source_title"
@@ -125,13 +128,13 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
 
       <div className="space-y-2">
         <Label htmlFor="source_desc">
-          {isRu ? 'Описание' : 'Description'} ({LANG_META[sourceLang].label})
+          {isRu ? 'Описание' : isTh ? 'รายละเอียด' : 'Description'} ({LANG_META[sourceLang].label})
         </Label>
         <Textarea
           id="source_desc"
           value={sourceDesc}
           onChange={(e) => onChange({ [descKey]: e.target.value } as Partial<ListingApplicationDraft>)}
-          placeholder={isRu ? 'Расскажите подробнее...' : 'Tell us more...'}
+          placeholder={isRu ? 'Расскажите подробнее...' : isTh ? 'บอกรายละเอียดเพิ่มเติม...' : 'Tell us more...'}
           rows={4}
         />
       </div>
@@ -144,6 +147,8 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
             <span>
               {isRu
                 ? 'AI-перевод на остальные языки'
+                : isTh
+                ? 'AI แปลเป็นภาษาอื่น'
                 : 'AI translation to other languages'}
             </span>
           </div>
@@ -157,12 +162,12 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
             {isTranslating ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {isRu ? 'Перевожу...' : 'Translating...'}
+                {isRu ? 'Перевожу...' : isTh ? 'กำลังแปล...' : 'Translating...'}
               </>
             ) : (
               <>
                 <Languages className="mr-2 h-4 w-4" />
-                {isRu ? 'Перевести автоматически' : 'Auto-translate'}
+                {isRu ? 'Перевести автоматически' : isTh ? 'แปลอัตโนมัติ' : 'Auto-translate'}
               </>
             )}
           </Button>
@@ -181,7 +186,7 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
                   {t && (
                     <Badge variant="outline" className="text-xs">
                       <Languages className="mr-1 h-3 w-3" />
-                      {isRu ? 'Автоперевод' : 'Auto'}
+                      {isRu ? 'Автоперевод' : isTh ? 'แปลอัตโนมัติ' : 'Auto'}
                     </Badge>
                   )}
                 </div>
@@ -190,7 +195,7 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
                   onChange={(e) =>
                     onChange({ [TITLE_KEY[lang]]: e.target.value } as Partial<ListingApplicationDraft>)
                   }
-                  placeholder={isRu ? 'Будет заполнено автоматически' : 'Will be filled automatically'}
+                  placeholder={isRu ? 'Будет заполнено автоматически' : isTh ? 'ระบบจะกรอกให้โดยอัตโนมัติ' : 'Will be filled automatically'}
                   className="bg-background"
                 />
                 <Textarea
@@ -198,7 +203,7 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
                   onChange={(e) =>
                     onChange({ [DESC_KEY[lang]]: e.target.value } as Partial<ListingApplicationDraft>)
                   }
-                  placeholder={isRu ? 'Описание будет переведено' : 'Description will be translated'}
+                  placeholder={isRu ? 'Описание будет переведено' : isTh ? 'รายละเอียดจะถูกแปลให้' : 'Description will be translated'}
                   rows={2}
                   className="bg-background"
                 />
@@ -210,6 +215,8 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
           <p className="text-xs text-muted-foreground">
             {isRu
               ? 'Проверьте переводы и при необходимости отредактируйте вручную.'
+              : isTh
+              ? 'ตรวจสอบคำแปลและแก้ไขด้วยตนเองหากจำเป็น'
               : 'Review the translations and edit if needed.'}
           </p>
         )}
@@ -217,10 +224,10 @@ export function BasicInfoStep({ draft, onChange, onNext, onBack }: BasicInfoStep
 
       <div className="flex gap-3">
         <Button variant="outline" onClick={onBack} className="flex-1">
-          {isRu ? 'Назад' : 'Back'}
+          {isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
         </Button>
         <Button onClick={onNext} className="flex-1" disabled={!isValid}>
-          {isRu ? 'Продолжить' : 'Continue'}
+          {isRu ? 'Продолжить' : isTh ? 'ดำเนินการต่อ' : 'Continue'}
         </Button>
       </div>
     </div>

@@ -34,7 +34,7 @@ export default function KnowledgeSectionPage() {
   const { data: articles, isLoading } = useKnowledgeBySection(section || '');
 
   const cityName = getCityName(language as 'en' | 'ru' | 'th');
-  const sectionMeta = getSectionMeta(section || '', language as 'en' | 'ru');
+  const sectionMeta = getSectionMeta(section || '', language === 'ru' ? 'ru' : 'en');
   
   // Get icon component dynamically
   const IconComponent = sectionMeta?.icon 
@@ -49,8 +49,10 @@ export default function KnowledgeSectionPage() {
     <>
       <SEOHead 
         title={pageTitle}
-        description={language === 'ru' 
+        description={language === 'ru'
           ? `${sectionMeta?.label || 'Информация'} о ${cityName}`
+          : language === 'th'
+          ? `${sectionMeta?.label || 'ข้อมูล'} เกี่ยวกับ ${cityName}`
           : `${sectionMeta?.label || 'Information'} about ${cityName}`
         }
       />

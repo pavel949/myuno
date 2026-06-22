@@ -27,6 +27,7 @@ export function SituationCard({
 }: SituationCardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const title = isRu ? situation.title_ru : situation.title_en;
   const description = isRu ? situation.description_ru : situation.description_en;
@@ -86,8 +87,8 @@ export function SituationCard({
       <div className="pt-3 border-t border-border/60 flex items-center justify-between gap-3">
         <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
           {typeof serviceCount === 'number' && serviceCount > 0
-            ? `${serviceCount} ${isRu ? (serviceCount === 1 ? 'услуга' : serviceCount < 5 ? 'услуги' : 'услуг') : serviceCount === 1 ? 'service' : 'services'}`
-            : isRu ? 'Открыть' : 'Open'}
+            ? `${serviceCount} ${isRu ? (serviceCount === 1 ? 'услуга' : serviceCount < 5 ? 'услуги' : 'услуг') : isTh ? 'บริการ' : serviceCount === 1 ? 'service' : 'services'}`
+            : isRu ? 'Открыть' : isTh ? 'เปิด' : 'Open'}
         </span>
         {clusterId && (
           <span

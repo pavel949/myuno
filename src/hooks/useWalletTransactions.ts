@@ -99,29 +99,32 @@ export function useWalletTransactions(filters: TransactionFilters = {}) {
 // Export helper for CSV generation
 export function generateTransactionsCsv(
   transactions: WalletTransaction[],
-  language: 'ru' | 'en' = 'ru'
+  language: 'ru' | 'en' | 'th' = 'ru'
 ): string {
   const headers = language === 'ru'
     ? ['Дата', 'Тип', 'Сумма', 'Валюта', 'Описание', 'Статус']
+    : language === 'th'
+    ? ['วันที่', 'ประเภท', 'จำนวน', 'สกุลเงิน', 'รายละเอียด', 'สถานะ']
     : ['Date', 'Type', 'Amount', 'Currency', 'Description', 'Status'];
 
-  const typeLabels: Record<TransactionType, { ru: string; en: string }> = {
-    topup: { ru: 'Пополнение', en: 'Top-up' },
-    payment: { ru: 'Оплата', en: 'Payment' },
-    refund: { ru: 'Возврат', en: 'Refund' },
-    bonus: { ru: 'Бонус', en: 'Bonus' },
-    cashback: { ru: 'Кэшбэк', en: 'Cashback' },
+  const typeLabels: Record<TransactionType, { ru: string; en: string; th: string }> = {
+    topup: { ru: 'Пополнение', en: 'Top-up', th: 'เติมเงิน' },
+    payment: { ru: 'Оплата', en: 'Payment', th: 'ชำระเงิน' },
+    refund: { ru: 'Возврат', en: 'Refund', th: 'คืนเงิน' },
+    bonus: { ru: 'Бонус', en: 'Bonus', th: 'โบนัส' },
+    cashback: { ru: 'Кэшбэк', en: 'Cashback', th: 'เงินคืน' },
   };
 
-  const statusLabels: Record<TransactionStatus, { ru: string; en: string }> = {
-    pending: { ru: 'В обработке', en: 'Pending' },
-    completed: { ru: 'Завершено', en: 'Completed' },
-    failed: { ru: 'Ошибка', en: 'Failed' },
-    cancelled: { ru: 'Отменено', en: 'Cancelled' },
+  const statusLabels: Record<TransactionStatus, { ru: string; en: string; th: string }> = {
+    pending: { ru: 'В обработке', en: 'Pending', th: 'กำลังดำเนินการ' },
+    completed: { ru: 'Завершено', en: 'Completed', th: 'เสร็จสมบูรณ์' },
+    failed: { ru: 'Ошибка', en: 'Failed', th: 'ล้มเหลว' },
+    cancelled: { ru: 'Отменено', en: 'Cancelled', th: 'ยกเลิกแล้ว' },
   };
 
+  const locale = language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-US';
   const rows = transactions.map(t => [
-    new Date(t.created_at).toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US'),
+    new Date(t.created_at).toLocaleDateString(locale),
     typeLabels[t.type][language],
     t.amount.toString(),
     t.currency,

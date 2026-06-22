@@ -15,7 +15,7 @@ import { Star, MapPin } from 'lucide-react';
 export default function VerticalCatalogPage() {
   const { vertical = 'restaurant' } = useParams<{ vertical: string }>();
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const [params] = useSearchParams();
   const spec = getVerticalSpec(vertical);
 
@@ -55,7 +55,11 @@ export default function VerticalCatalogPage() {
       <div className="container py-10 space-y-4">
         <BackButton />
         <p className="text-sm text-muted-foreground">
-          {lang === 'ru' ? `Spec для «${vertical}» не подключён.` : `Spec for «${vertical}» not wired.`}
+          {lang === 'ru'
+            ? `Spec для «${vertical}» не подключён.`
+            : lang === 'th'
+            ? `ยังไม่ได้เชื่อมต่อ Spec สำหรับ «${vertical}»`
+            : `Spec for «${vertical}» not wired.`}
         </p>
         <div className="flex flex-wrap gap-2">
           {listVerticalSpecs().map((s) => (
@@ -64,7 +68,7 @@ export default function VerticalCatalogPage() {
               to={`/mc/catalog/${s.id}`}
               className="rounded-none border border-border px-3 py-1.5 text-sm hover:bg-muted"
             >
-              {s.label[lang]}
+              {s.label[lang] ?? s.label.en}
             </Link>
           ))}
         </div>
@@ -82,9 +86,9 @@ export default function VerticalCatalogPage() {
 
         <div className="space-y-4">
           <div className="flex items-baseline justify-between">
-            <h1 className="text-xl font-semibold">{spec.label[lang]}</h1>
+            <h1 className="text-xl font-semibold">{spec.label[lang] ?? spec.label.en}</h1>
             <span className="text-sm text-muted-foreground">
-              {isLoading ? '…' : `${rows.length} ${lang === 'ru' ? 'результатов' : 'results'}`}
+              {isLoading ? '…' : `${rows.length} ${lang === 'ru' ? 'результатов' : lang === 'th' ? 'รายการ' : 'results'}`}
             </span>
           </div>
 
@@ -92,14 +96,18 @@ export default function VerticalCatalogPage() {
             <LoadingState />
           ) : rows.length === 0 ? (
             <p className="text-sm text-muted-foreground py-12 text-center">
-              {lang === 'ru' ? 'Ничего не найдено. Сбросьте фильтры.' : 'No results. Try clearing filters.'}
+              {lang === 'ru'
+                ? 'Ничего не найдено. Сбросьте фильтры.'
+                : lang === 'th'
+                ? 'ไม่พบรายการ ลองล้างตัวกรอง'
+                : 'No results. Try clearing filters.'}
             </p>
           ) : (
             <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {rows.map((row) => {
                 const attrs = (row.attributes ?? {}) as Record<string, unknown>;
-                const title = (attrs.title as { en?: string; ru?: string }) ?? {};
-                const name = title[lang] || row.name_en || row.name_ru || '—';
+                const title = (attrs.title as { en?: string; ru?: string; th?: string }) ?? {};
+                const name = title[lang] || title.en || row.name_en || row.name_ru || '—';
                 return (
                   <li key={row.id} className="border border-border bg-card overflow-hidden">
                     <Link to={`/mc/catalog/${spec.id}/${row.id}`}>

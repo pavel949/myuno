@@ -22,12 +22,14 @@ import {
   CalendarCheck,
 } from 'lucide-react';
 import { type AppRole } from '@/types/auth';
+import { type Language } from '@/i18n';
 
 /* ─── Section config ─── */
 interface SectionConfig {
   icon: React.ElementType;
   titleRu: string;
   titleEn: string;
+  titleTh: string;
   color: string;
   bg: string;
   border: string;
@@ -35,39 +37,39 @@ interface SectionConfig {
 
 const SECTIONS: Record<string, SectionConfig> = {
   overdue: {
-    icon: AlertTriangle, titleRu: 'Требует внимания', titleEn: 'Needs Attention',
+    icon: AlertTriangle, titleRu: 'Требует внимания', titleEn: 'Needs Attention', titleTh: 'ต้องดำเนินการ',
     color: 'text-destructive', bg: 'bg-destructive/5', border: 'border-l-destructive',
   },
   birthday: {
-    icon: Cake, titleRu: 'Дни рождения', titleEn: 'Birthdays',
+    icon: Cake, titleRu: 'Дни рождения', titleEn: 'Birthdays', titleTh: 'วันเกิด',
     color: 'text-accent-foreground', bg: 'bg-accent', border: 'border-l-accent',
   },
   schedule: {
-    icon: Calendar, titleRu: 'Расписание дня', titleEn: "Today's Schedule",
+    icon: Calendar, titleRu: 'Расписание дня', titleEn: "Today's Schedule", titleTh: 'ตารางวันนี้',
     color: 'text-primary', bg: 'bg-primary/5', border: 'border-l-primary',
   },
   tasks: {
-    icon: ClipboardCheck, titleRu: 'Задачи на сегодня', titleEn: "Today's Tasks",
+    icon: ClipboardCheck, titleRu: 'Задачи на сегодня', titleEn: "Today's Tasks", titleTh: 'งานวันนี้',
     color: 'text-info', bg: 'bg-info/5', border: 'border-l-info',
   },
   reminders: {
-    icon: Bell, titleRu: 'Напоминания', titleEn: 'Reminders',
+    icon: Bell, titleRu: 'Напоминания', titleEn: 'Reminders', titleTh: 'การแจ้งเตือน',
     color: 'text-warning', bg: 'bg-warning/5', border: 'border-l-warning',
   },
   tomorrow: {
-    icon: CalendarClock, titleRu: 'Завтра', titleEn: 'Tomorrow',
+    icon: CalendarClock, titleRu: 'Завтра', titleEn: 'Tomorrow', titleTh: 'พรุ่งนี้',
     color: 'text-muted-foreground', bg: 'bg-muted/30', border: 'border-l-muted-foreground/40',
   },
   recommendations: {
-    icon: Lightbulb, titleRu: 'Рекомендации myUNO', titleEn: 'myUNO Recommendations',
+    icon: Lightbulb, titleRu: 'Рекомендации myUNO', titleEn: 'myUNO Recommendations', titleTh: 'คำแนะนำจาก myUNO',
     color: 'text-primary', bg: 'bg-primary/5', border: 'border-l-primary',
   },
   news: {
-    icon: Newspaper, titleRu: 'Новости Пхукета', titleEn: 'Phuket News',
+    icon: Newspaper, titleRu: 'Новости Пхукета', titleEn: 'Phuket News', titleTh: 'ข่าวภูเก็ต',
     color: 'text-info', bg: 'bg-info/5', border: 'border-l-info',
   },
   events: {
-    icon: PartyPopper, titleRu: 'События и мероприятия', titleEn: 'Events',
+    icon: PartyPopper, titleRu: 'События и мероприятия', titleEn: 'Events', titleTh: 'กิจกรรมและอีเวนต์',
     color: 'text-accent-foreground', bg: 'bg-accent', border: 'border-l-accent',
   },
 };
@@ -175,6 +177,7 @@ export function YourDayFeed({ role, compact }: YourDayFeedProps = {}) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: items, isLoading } = useDayBriefing(role ? { role } : undefined);
 
   const sections = useMemo(() => {
@@ -212,11 +215,11 @@ export function YourDayFeed({ role, compact }: YourDayFeedProps = {}) {
       <section className="space-y-2">
         <h3 className="font-semibold text-[15px] flex items-center gap-2 px-1">
           <Sparkles className="h-4 w-4 text-primary" />
-          {isRu ? 'Ваш день' : 'Your Day'}
+          {isRu ? 'Ваш день' : isTh ? 'วันของคุณ' : 'Your Day'}
         </h3>
         <Card className="border-dashed">
           <CardContent className="py-8 text-center text-muted-foreground text-sm">
-            {isRu ? '✨ Отличный день — ничего срочного!' : '✨ Great day — nothing urgent!'}
+            {isRu ? '✨ Отличный день — ничего срочного!' : isTh ? '✨ วันที่ดี — ไม่มีอะไรเร่งด่วน!' : '✨ Great day — nothing urgent!'}
           </CardContent>
         </Card>
       </section>
@@ -238,7 +241,7 @@ export function YourDayFeed({ role, compact }: YourDayFeedProps = {}) {
       <div className="flex items-center justify-between px-1">
         <h3 className={cn('font-semibold flex items-center gap-2', compact ? 'text-sm' : 'text-[15px]')}>
           <Sparkles className="h-4 w-4 text-primary" />
-          {isRu ? 'Ваш день' : 'Your Day'}
+          {isRu ? 'Ваш день' : isTh ? 'วันของคุณ' : 'Your Day'}
           <Badge variant="secondary" className="text-xs">{totalCount}</Badge>
           {birthdayCount > 0 && (
             <span className="text-sm">🎂 {birthdayCount}</span>
@@ -254,20 +257,20 @@ export function YourDayFeed({ role, compact }: YourDayFeedProps = {}) {
             <div className="flex items-center gap-2 px-1">
               <SectionIcon className={cn('h-3.5 w-3.5', config.color)} />
               <h4 className="text-sm font-medium text-muted-foreground">
-                {isRu ? config.titleRu : config.titleEn}
+                {isRu ? config.titleRu : isTh ? config.titleTh : config.titleEn}
               </h4>
               <Badge variant="outline" className="text-[10px]">{sectionItems.length}</Badge>
             </div>
 
             {key === 'birthday' ? (
-              <BirthdayCards items={sectionItems} isRu={isRu} onNavigate={(href) => href && navigate(href)} />
+              <BirthdayCards items={sectionItems} language={language} onNavigate={(href) => href && navigate(href)} />
             ) : (
               <div className="space-y-1.5">
                 {sectionItems.map(item => (
                   <DayItemCard
                     key={item.id}
                     item={item}
-                    isRu={isRu}
+                    language={language}
                     onClick={() => item.href && navigate(item.href)}
                   />
                 ))}
@@ -281,7 +284,9 @@ export function YourDayFeed({ role, compact }: YourDayFeedProps = {}) {
 }
 
 /* ─── Birthday Cards (horizontal scroll) ─── */
-function BirthdayCards({ items, isRu, onNavigate }: { items: DayItem[]; isRu: boolean; onNavigate: (href?: string) => void }) {
+function BirthdayCards({ items, language, onNavigate }: { items: DayItem[]; language: Language; onNavigate: (href?: string) => void }) {
+  const isRu = language === 'ru';
+  const isTh = language === 'th';
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
       {items.map(item => {
@@ -306,13 +311,13 @@ function BirthdayCards({ items, isRu, onNavigate }: { items: DayItem[]; isRu: bo
               <div className="min-w-0 w-full">
                 <p className="text-sm font-medium truncate">{item.title}</p>
                 {isToday ? (
-                  <p className="text-xs text-accent-foreground font-medium">🎂 {isRu ? 'Сегодня!' : 'Today!'}</p>
+                  <p className="text-xs text-accent-foreground font-medium">🎂 {isRu ? 'Сегодня!' : isTh ? 'วันนี้!' : 'Today!'}</p>
                 ) : (
                   <p className="text-xs text-muted-foreground">{item.subtitle}</p>
                 )}
                 {item.meta?.contactType && (
                   <Badge variant="outline" className="text-[9px] mt-1">
-                    {item.meta.contactType === 'staff' ? (isRu ? 'Сотрудник' : 'Staff') : item.meta.contactType}
+                    {item.meta.contactType === 'staff' ? (isRu ? 'Сотрудник' : isTh ? 'พนักงาน' : 'Staff') : item.meta.contactType}
                   </Badge>
                 )}
               </div>
@@ -325,15 +330,17 @@ function BirthdayCards({ items, isRu, onNavigate }: { items: DayItem[]; isRu: bo
 }
 
 /* ─── Generic Day Item Card ─── */
-function DayItemCard({ item, isRu, onClick }: { item: DayItem; isRu: boolean; onClick: () => void }) {
+function DayItemCard({ item, language, onClick }: { item: DayItem; language: Language; onClick: () => void }) {
+  const isRu = language === 'ru';
+  const isTh = language === 'th';
   const Icon = getItemIcon(item.type, item.meta);
   const styles = getItemStyle(item);
-  
-  const typeLabel = getTypeLabel(item, isRu);
+
+  const typeLabel = getTypeLabel(item, language);
   const daysLabel = item.meta?.daysUntil != null
     ? item.meta.daysUntil <= 0
-      ? (isRu ? 'просрочено' : 'overdue')
-      : (isRu ? `${item.meta.daysUntil} дн.` : `${item.meta.daysUntil}d`)
+      ? (isRu ? 'просрочено' : isTh ? 'เลยกำหนด' : 'overdue')
+      : (isRu ? `${item.meta.daysUntil} дн.` : isTh ? `${item.meta.daysUntil} วัน` : `${item.meta.daysUntil}d`)
     : null;
 
   return (
@@ -380,29 +387,29 @@ function DayItemCard({ item, isRu, onClick }: { item: DayItem; isRu: boolean; on
   );
 }
 
-function getTypeLabel(item: DayItem, isRu: boolean): string {
-  const labels: Partial<Record<DayItemType, [string, string]>> = {
-    overdue_task: ['Просрочено', 'Overdue'],
-    birthday: ['ДР', 'Birthday'],
-    check_in: ['Заезд', 'Check-in'],
-    check_out: ['Выезд', 'Check-out'],
-    check_in_tomorrow: ['Заезд', 'Check-in'],
-    check_out_tomorrow: ['Выезд', 'Check-out'],
-    crm_activity: ['CRM', 'CRM'],
-    crm_task: ['Задача', 'Task'],
-    personal_reminder: ['Личное', 'Personal'],
-    document_expiry: ['Документ', 'Document'],
-    deadline: ['Дедлайн', 'Deadline'],
-    recommendation: ['myUNO', 'myUNO'],
-    news: ['Новости', 'News'],
-    event: ['Событие', 'Event'],
-    vendor_order: ['Заказ', 'Order'],
-    vendor_review: ['Отзыв', 'Review'],
-    staff_task: ['Задание', 'Task'],
-    investment_update: ['Инвестиции', 'Investment'],
-    my_booking: ['Бронь', 'Booking'],
-    myuno_service: ['Сервис', 'Service'],
+function getTypeLabel(item: DayItem, language: Language): string {
+  const labels: Partial<Record<DayItemType, [string, string, string]>> = {
+    overdue_task: ['Просрочено', 'Overdue', 'เลยกำหนด'],
+    birthday: ['ДР', 'Birthday', 'วันเกิด'],
+    check_in: ['Заезд', 'Check-in', 'เช็คอิน'],
+    check_out: ['Выезд', 'Check-out', 'เช็คเอาท์'],
+    check_in_tomorrow: ['Заезд', 'Check-in', 'เช็คอิน'],
+    check_out_tomorrow: ['Выезд', 'Check-out', 'เช็คเอาท์'],
+    crm_activity: ['CRM', 'CRM', 'CRM'],
+    crm_task: ['Задача', 'Task', 'งาน'],
+    personal_reminder: ['Личное', 'Personal', 'ส่วนตัว'],
+    document_expiry: ['Документ', 'Document', 'เอกสาร'],
+    deadline: ['Дедлайн', 'Deadline', 'กำหนดส่ง'],
+    recommendation: ['myUNO', 'myUNO', 'myUNO'],
+    news: ['Новости', 'News', 'ข่าว'],
+    event: ['Событие', 'Event', 'อีเวนต์'],
+    vendor_order: ['Заказ', 'Order', 'คำสั่งซื้อ'],
+    vendor_review: ['Отзыв', 'Review', 'รีวิว'],
+    staff_task: ['Задание', 'Task', 'งาน'],
+    investment_update: ['Инвестиции', 'Investment', 'การลงทุน'],
+    my_booking: ['Бронь', 'Booking', 'การจอง'],
+    myuno_service: ['Сервис', 'Service', 'บริการ'],
   };
-  const [ru, en] = labels[item.type] || ['', ''];
-  return isRu ? ru : en;
+  const [ru, en, th] = labels[item.type] || ['', '', ''];
+  return language === 'ru' ? ru : language === 'th' ? th : en;
 }

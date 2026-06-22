@@ -36,6 +36,7 @@ export function PropertyPdfButton({ property, variant = 'ghost', size = 'sm', cl
 }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [generating, setGenerating] = useState(false);
 
   const handleGenerate = async (e: React.MouseEvent) => {
@@ -154,10 +155,10 @@ export function PropertyPdfButton({ property, variant = 'ghost', size = 'sm', cl
       // Download
       const filename = `${(title || 'property').replace(/[^a-zA-Zа-яА-Я0-9]/g, '_').slice(0, 40)}.pdf`;
       doc.save(filename);
-      toast.success(isRu ? 'PDF скачан!' : 'PDF downloaded!');
+      toast.success(isRu ? 'PDF скачан!' : isTh ? 'ดาวน์โหลด PDF แล้ว!' : 'PDF downloaded!');
     } catch (err) {
       console.error('PDF generation error:', err);
-      toast.error(isRu ? 'Ошибка генерации PDF' : 'Failed to generate PDF');
+      toast.error(isRu ? 'Ошибка генерации PDF' : isTh ? 'ไม่สามารถสร้าง PDF ได้' : 'Failed to generate PDF');
     } finally {
       setGenerating(false);
     }
@@ -173,7 +174,7 @@ export function PropertyPdfButton({ property, variant = 'ghost', size = 'sm', cl
     >
       {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
       <span className="hidden sm:inline ml-1.5">
-        {generating ? (isRu ? 'Создание...' : 'Generating...') : 'PDF'}
+        {generating ? (isRu ? 'Создание...' : isTh ? 'กำลังสร้าง...' : 'Generating...') : 'PDF'}
       </span>
     </Button>
   );

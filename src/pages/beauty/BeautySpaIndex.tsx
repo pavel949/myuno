@@ -21,20 +21,20 @@ import type { FilterValues } from '@/components/filters/UniversalFilter';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 
 const CATEGORIES = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'spa', labelEn: 'Spa', labelRu: 'Спа' },
-  { id: 'massage', labelEn: 'Massage', labelRu: 'Массаж' },
-  { id: 'beauty_salon', labelEn: 'Beauty', labelRu: 'Красота' },
-  { id: 'hair_salon', labelEn: 'Hair', labelRu: 'Волосы' },
-  { id: 'nail_salon', labelEn: 'Nails', labelRu: 'Ногти' },
-  { id: 'barber', labelEn: 'Barber', labelRu: 'Барбер' },
+  { id: 'all', labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { id: 'spa', labelEn: 'Spa', labelRu: 'Спа', labelTh: 'สปา' },
+  { id: 'massage', labelEn: 'Massage', labelRu: 'Массаж', labelTh: 'นวด' },
+  { id: 'beauty_salon', labelEn: 'Beauty', labelRu: 'Красота', labelTh: 'ความงาม' },
+  { id: 'hair_salon', labelEn: 'Hair', labelRu: 'Волосы', labelTh: 'ทำผม' },
+  { id: 'nail_salon', labelEn: 'Nails', labelRu: 'Ногти', labelTh: 'ทำเล็บ' },
+  { id: 'barber', labelEn: 'Barber', labelRu: 'Барбер', labelTh: 'บาร์เบอร์' },
 ];
 
 const SORT_OPTIONS = [
-  { id: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые' },
-  { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу' },
-  { id: 'price_low', labelEn: 'Price: Low', labelRu: 'Цена ↑' },
-  { id: 'price_high', labelEn: 'Price: High', labelRu: 'Цена ↓' },
+  { id: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые', labelTh: 'แนะนำ' },
+  { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу', labelTh: 'คะแนนสูงสุด' },
+  { id: 'price_low', labelEn: 'Price: Low', labelRu: 'Цена ↑', labelTh: 'ราคา: ต่ำ' },
+  { id: 'price_high', labelEn: 'Price: High', labelRu: 'Цена ↓', labelTh: 'ราคา: สูง' },
 ];
 
 export default function BeautySpaIndex() {
@@ -45,6 +45,7 @@ export default function BeautySpaIndex() {
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [sortBy, setSortBy] = useState('recommended');
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
   const { salons, isLoading } = useSalons(selectedCategory === 'all' ? undefined : selectedCategory);
@@ -96,13 +97,13 @@ export default function BeautySpaIndex() {
 
   return (
     <MiniAppLayout
-      title={isRu ? 'Красота и СПА' : 'Beauty & Spa'}
-      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : `${filteredAndSorted.length} results`}
+      title={isRu ? 'Красота и СПА' : isTh ? 'ความงามและสปา' : 'Beauty & Spa'}
+      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : isTh ? `พบ ${filteredAndSorted.length} รายการ` : `${filteredAndSorted.length} results`}
       fallbackPath="/discover"
       showSearch
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={isRu ? 'Поиск салонов...' : 'Search salons...'}
+      searchPlaceholder={isRu ? 'Поиск салонов...' : isTh ? 'ค้นหาร้าน...' : 'Search salons...'}
       showHero={false}
       categories={CATEGORIES}
       selectedCategory={selectedCategory}
@@ -115,7 +116,7 @@ export default function BeautySpaIndex() {
       onMapMarkerSelect={(id) => navigate(`/beauty/salon/${id}`)}
       mapIconChar="B"
       resultsCount={filteredAndSorted.length}
-      resultsLabel={isRu ? 'Салоны' : 'Salons'}
+      resultsLabel={isRu ? 'Салоны' : isTh ? 'ร้าน' : 'Salons'}
       stickySubHeader={
         <div className="px-4 py-2 flex items-center justify-end">
           <select
@@ -125,7 +126,7 @@ export default function BeautySpaIndex() {
           >
             {SORT_OPTIONS.map(opt => (
               <option key={opt.id} value={opt.id}>
-                {isRu ? opt.labelRu : opt.labelEn}
+                {isRu ? opt.labelRu : isTh ? opt.labelTh : opt.labelEn}
               </option>
             ))}
           </select>
@@ -145,8 +146,8 @@ export default function BeautySpaIndex() {
       ) : filteredAndSorted.length === 0 ? (
         <EmptyState
           icon={Scissors}
-          title={isRu ? 'Салоны не найдены' : 'No salons found'}
-          description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+          title={isRu ? 'Салоны не найдены' : isTh ? 'ไม่พบร้าน' : 'No salons found'}
+          description={isRu ? 'Попробуйте изменить фильтры' : isTh ? 'ลองปรับตัวกรองดู' : 'Try adjusting your filters'}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">

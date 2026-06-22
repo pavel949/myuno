@@ -71,7 +71,7 @@ export default function ServiceBooking() {
     }
     return {
       id: id,
-      name: language === "ru" ? "Специалист" : "Specialist",
+      name: language === "ru" ? "Специалист" : language === "th" ? "ผู้เชี่ยวชาญ" : "Specialist",
       image: PLACEHOLDER_IMAGES.provider,
     };
   }, [dbProvider, language, id]);
@@ -113,7 +113,7 @@ export default function ServiceBooking() {
     return (
       <AppLayout>
         <PageContainer className="pb-32">
-          <PageHeader title={language === 'ru' ? 'Загрузка...' : 'Loading...'} showBack />
+          <PageHeader title={language === 'ru' ? 'Загрузка...' : language === 'th' ? 'กำลังโหลด...' : 'Loading...'} showBack />
           <div className="space-y-4 mt-4">
             <Skeleton className="h-20 w-full rounded-none" />
             <Skeleton className="h-40 w-full rounded-none" />
@@ -150,7 +150,7 @@ export default function ServiceBooking() {
           total={totalAmount}
           currency="THB"
           continuePath="/services"
-          continueLabel={language === 'ru' ? 'К услугам' : 'Browse Services'}
+          continueLabel={language === 'ru' ? 'К услугам' : language === 'th' ? 'ดูบริการ' : 'Browse Services'}
         />
       </AppLayout>
     );
@@ -178,7 +178,7 @@ export default function ServiceBooking() {
     items.push({
       item_type: 'fee',
       item_id: 'service_fee',
-      item_name: language === 'ru' ? 'Сервисный сбор' : 'Service fee',
+      item_name: language === 'ru' ? 'Сервисный сбор' : language === 'th' ? 'ค่าบริการ' : 'Service fee',
       quantity: 1,
       unit_price: serviceFee,
       subtotal: serviceFee,
@@ -216,7 +216,7 @@ export default function ServiceBooking() {
     <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
-          title={language === 'ru' ? 'Бронирование' : 'Booking'} 
+          title={language === 'ru' ? 'Бронирование' : language === 'th' ? 'การจอง' : 'Booking'}
           showBack 
         />
 
@@ -230,7 +230,7 @@ export default function ServiceBooking() {
           <div>
             <h3 className="font-semibold">{providerInfo.name}</h3>
             <p className="text-sm text-muted-foreground">
-              {language === "ru" ? "Сантехник" : "Plumber"}
+              {language === "ru" ? "Сантехник" : language === "th" ? "ช่างประปา" : "Plumber"}
             </p>
           </div>
         </div>
@@ -239,11 +239,11 @@ export default function ServiceBooking() {
         <div className="bg-card rounded-none border p-5 mb-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">
-              {language === 'ru' ? 'Выберите услуги' : 'Select Services'}
+              {language === 'ru' ? 'Выберите услуги' : language === 'th' ? 'เลือกบริการ' : 'Select Services'}
             </h3>
             {selectedServices.length > 0 && (
               <Badge variant="secondary">
-                {selectedServices.length} {language === 'ru' ? 'выбрано' : 'selected'}
+                {selectedServices.length} {language === 'ru' ? 'выбрано' : language === 'th' ? 'รายการที่เลือก' : 'selected'}
               </Badge>
             )}
           </div>
@@ -288,7 +288,7 @@ export default function ServiceBooking() {
         {/* Date & Time */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Дата и время' : 'Date & Time'}
+            {language === 'ru' ? 'Дата и время' : language === 'th' ? 'วันและเวลา' : 'Date & Time'}
           </h3>
           <BookingDateTimeSelect
             date={date}
@@ -304,12 +304,12 @@ export default function ServiceBooking() {
         <div className="bg-card rounded-none border p-5 mb-4">
           <Label className="font-semibold mb-4 flex items-center gap-2">
             <Home className="w-5 h-5 text-primary" />
-            {language === 'ru' ? 'Адрес' : 'Address'}
+            {language === 'ru' ? 'Адрес' : language === 'th' ? 'ที่อยู่' : 'Address'}
           </Label>
           <Input
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder={language === 'ru' ? 'Адрес оказания услуги' : 'Service address'}
+            placeholder={language === 'ru' ? 'Адрес оказания услуги' : language === 'th' ? 'ที่อยู่สำหรับให้บริการ' : 'Service address'}
             className="mt-2"
             required
           />
@@ -318,7 +318,7 @@ export default function ServiceBooking() {
         {/* Contact Info */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
+            {language === 'ru' ? 'Контактные данные' : language === 'th' ? 'ข้อมูลติดต่อ' : 'Contact Information'}
           </h3>
           <BookingContactForm
             data={contactData}
@@ -330,7 +330,7 @@ export default function ServiceBooking() {
         {/* Payment Method */}
         <div className="bg-card rounded-none border p-5 mb-4">
           <h3 className="font-semibold mb-4">
-            {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+            {language === 'ru' ? 'Способ оплаты' : language === 'th' ? 'วิธีการชำระเงิน' : 'Payment Method'}
           </h3>
           <BookingPaymentSelect
             selected={paymentMethod}
@@ -356,12 +356,12 @@ export default function ServiceBooking() {
               ))}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">
-                  {language === 'ru' ? 'Сервисный сбор' : 'Service fee'}
+                  {language === 'ru' ? 'Сервисный сбор' : language === 'th' ? 'ค่าบริการ' : 'Service fee'}
                 </span>
                 <span>฿{serviceFee}</span>
               </div>
               <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
-                <span>{language === 'ru' ? 'Итого' : 'Total'}</span>
+                <span>{language === 'ru' ? 'Итого' : language === 'th' ? 'ยอดรวม' : 'Total'}</span>
                 <span className="text-primary">฿{totalAmount.toLocaleString()}</span>
               </div>
             </div>
@@ -374,7 +374,7 @@ export default function ServiceBooking() {
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!date || !time || !contactData.name || !contactData.phone || !address || selectedServices.length === 0}
-          submitLabel={language === 'ru' ? 'Подтвердить заказ' : 'Confirm Order'}
+          submitLabel={language === 'ru' ? 'Подтвердить заказ' : language === 'th' ? 'ยืนยันคำสั่งซื้อ' : 'Confirm Order'}
         />
       </PageContainer>
     </AppLayout>

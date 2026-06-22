@@ -24,6 +24,7 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
   const { language } = useLanguage();
   const lang = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (!moderationResult.isViolation || !moderationResult.warningMessage) {
     return null;
@@ -71,7 +72,7 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
             </span>
             {isCritical && (
               <span className="text-[10px] text-destructive font-medium">
-                {isRu ? 'КРИТИЧНО' : 'CRITICAL'}
+                {isRu ? 'КРИТИЧНО' : isTh ? 'วิกฤต' : 'CRITICAL'}
               </span>
             )}
           </div>
@@ -82,9 +83,11 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
           
           {isPreSend && (
             <p className="text-xs text-muted-foreground mt-2">
-              {isRu 
-                ? 'Ваше сообщение не будет отправлено. Пожалуйста, отредактируйте его.' 
-                : 'Your message will not be sent. Please edit it.'}
+              {isRu
+                ? 'Ваше сообщение не будет отправлено. Пожалуйста, отредактируйте его.'
+                : isTh
+                  ? 'ข้อความของคุณจะไม่ถูกส่ง กรุณาแก้ไขข้อความ'
+                  : 'Your message will not be sent. Please edit it.'}
             </p>
           )}
 
@@ -96,7 +99,7 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
                 isCritical ? 'text-destructive' : 'text-warning'
               )}
             >
-              {isRu ? 'Правила чата' : 'Chat Policy'}
+              {isRu ? 'Правила чата' : isTh ? 'นโยบายการแชท' : 'Chat Policy'}
               <ExternalLink className="w-3 h-3" />
             </Link>
             
@@ -107,7 +110,7 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
                 onClick={onAcknowledge}
                 className="h-7 text-xs"
               >
-                {isRu ? 'Понятно' : 'Got it'}
+                {isRu ? 'Понятно' : isTh ? 'เข้าใจแล้ว' : 'Got it'}
               </Button>
             )}
           </div>
@@ -119,7 +122,7 @@ export const ChatModerationWarning: React.FC<ChatModerationWarningProps> = ({
             size="icon"
             className="h-6 w-6 min-h-[44px] min-w-[44px] flex-shrink-0"
             onClick={onDismiss}
-            aria-label={isRu ? 'Закрыть' : 'Close'}
+            aria-label={isRu ? 'Закрыть' : isTh ? 'ปิด' : 'Close'}
           >
             <X className="w-3 h-3" />
           </Button>

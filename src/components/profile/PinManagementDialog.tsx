@@ -81,6 +81,32 @@ const texts = {
     step1: 'Enter new PIN',
     step2: 'Confirm PIN',
   },
+  th: {
+    setupTitle: 'ตั้งค่า PIN',
+    setupDesc: 'สร้าง PIN 4 หลักเพื่อเข้าสู่ระบบอย่างรวดเร็ว',
+    changeTitle: 'เปลี่ยน PIN',
+    changeDesc: 'กรอก PIN ปัจจุบันและ PIN ใหม่',
+    resetTitle: 'รีเซ็ต PIN',
+    resetDesc: 'กรอกรหัสผ่านเพื่อรีเซ็ต PIN',
+    disableTitle: 'ปิดการใช้งาน PIN?',
+    disableDesc: 'คุณจะต้องเข้าสู่ระบบด้วยอีเมลและรหัสผ่าน',
+    currentPin: 'PIN ปัจจุบัน',
+    newPin: 'PIN ใหม่',
+    confirmPin: 'ยืนยัน PIN',
+    password: 'รหัสผ่าน',
+    save: 'บันทึก',
+    cancel: 'ยกเลิก',
+    disable: 'ปิดการใช้งาน',
+    success: 'อัปเดต PIN สำเร็จ',
+    setupSuccess: 'ตั้งค่า PIN สำเร็จ',
+    disableSuccess: 'ปิดการใช้งาน PIN แล้ว',
+    pinMismatch: 'PIN ไม่ตรงกัน',
+    incorrectPin: 'PIN ไม่ถูกต้อง',
+    incorrectPassword: 'รหัสผ่านไม่ถูกต้อง',
+    enterPin: 'กรอก PIN 4 หลัก',
+    step1: 'กรอก PIN ใหม่',
+    step2: 'ยืนยัน PIN',
+  },
 };
 
 type DialogMode = 'setup' | 'change' | 'reset' | 'disable' | null;
@@ -95,7 +121,7 @@ export function PinManagementDialog({ mode, onClose, onSuccess }: PinManagementD
   const { language } = useLanguage();
   const { user } = useAuth();
   const { setupPin, changePin, resetPinWithPassword, disablePin, isLoading } = usePinManagement();
-  const t = texts[language === 'th' ? 'en' : language] || texts.en;
+  const t = texts[language] || texts.en;
   
   // Initialize step based on mode
   const getInitialStep = (dialogMode: DialogMode): 'current' | 'new' | 'confirm' | 'password' => {

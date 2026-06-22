@@ -51,9 +51,9 @@ export default function InsurancePlanDetail() {
     return (
       <AppLayout showBottomNav={false}>
         <div className="p-4 text-center">
-          <p>{language === 'ru' ? 'План не найден' : 'Plan not found'}</p>
+          <p>{language === 'ru' ? 'План не найден' : language === 'th' ? 'ไม่พบแผนประกัน' : 'Plan not found'}</p>
           <Button onClick={() => navigate('/insurance')} className="mt-4">
-            {language === 'ru' ? 'Назад' : 'Go back'}
+            {language === 'ru' ? 'Назад' : language === 'th' ? 'ย้อนกลับ' : 'Go back'}
           </Button>
         </div>
       </AppLayout>
@@ -80,7 +80,7 @@ export default function InsurancePlanDetail() {
               </div>
               {plan.is_popular && (
                 <Badge className="bg-warning text-warning-foreground text-xs">
-                  ⭐ {language === 'ru' ? 'Популярно' : 'Popular'}
+                  ⭐ {language === 'ru' ? 'Популярно' : language === 'th' ? 'ยอดนิยม' : 'Popular'}
                 </Badge>
               )}
             </div>
@@ -99,20 +99,20 @@ export default function InsurancePlanDetail() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">
-                {language === 'ru' ? 'Стоимость' : 'Price'}
+                {language === 'ru' ? 'Стоимость' : language === 'th' ? 'ราคา' : 'Price'}
               </p>
               <div className="flex items-baseline gap-2">
                 {plan.price_yearly && (
                   <span className="text-2xl font-bold text-primary">
                     ฿{plan.price_yearly.toLocaleString()}
                     <span className="text-sm text-muted-foreground font-normal">
-                      /{language === 'ru' ? 'год' : 'year'}
+                      /{language === 'ru' ? 'год' : language === 'th' ? 'ปี' : 'year'}
                     </span>
                   </span>
                 )}
                 {plan.price_monthly && (
                   <span className="text-sm text-muted-foreground">
-                    (฿{plan.price_monthly.toLocaleString()}/{language === 'ru' ? 'мес' : 'mo'})
+                    (฿{plan.price_monthly.toLocaleString()}/{language === 'ru' ? 'мес' : language === 'th' ? 'เดือน' : 'mo'})
                   </span>
                 )}
               </div>
@@ -120,7 +120,7 @@ export default function InsurancePlanDetail() {
             {plan.coverage_amount && (
               <div className="text-right">
                 <p className="text-sm text-muted-foreground">
-                  {language === 'ru' ? 'Покрытие до' : 'Coverage up to'}
+                  {language === 'ru' ? 'Покрытие до' : language === 'th' ? 'คุ้มครองสูงสุด' : 'Coverage up to'}
                 </p>
                 <p className="text-lg font-bold">฿{plan.coverage_amount.toLocaleString()}</p>
               </div>
@@ -131,8 +131,8 @@ export default function InsurancePlanDetail() {
         {/* Tabs */}
         <Tabs defaultValue="features" className="px-4 pt-4">
           <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="features">{language === 'ru' ? 'Включено' : 'Features'}</TabsTrigger>
-            <TabsTrigger value="exclusions">{language === 'ru' ? 'Исключения' : 'Exclusions'}</TabsTrigger>
+            <TabsTrigger value="features">{language === 'ru' ? 'Включено' : language === 'th' ? 'ความคุ้มครอง' : 'Features'}</TabsTrigger>
+            <TabsTrigger value="exclusions">{language === 'ru' ? 'Исключения' : language === 'th' ? 'ข้อยกเว้น' : 'Exclusions'}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="features" className="space-y-4 mt-4">
@@ -151,14 +151,14 @@ export default function InsurancePlanDetail() {
             {(plan.min_age || plan.max_age) && (
               <div className="bg-card border border-border rounded-none p-4">
                 <h3 className="font-semibold mb-2">
-                  {language === 'ru' ? 'Возрастные ограничения' : 'Age Requirements'}
+                  {language === 'ru' ? 'Возрастные ограничения' : language === 'th' ? 'เงื่อนไขอายุ' : 'Age Requirements'}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {plan.min_age && plan.max_age
-                    ? `${plan.min_age} - ${plan.max_age} ${language === 'ru' ? 'лет' : 'years'}`
+                    ? `${plan.min_age} - ${plan.max_age} ${language === 'ru' ? 'лет' : language === 'th' ? 'ปี' : 'years'}`
                     : plan.min_age
-                    ? `${language === 'ru' ? 'От' : 'From'} ${plan.min_age} ${language === 'ru' ? 'лет' : 'years'}`
-                    : `${language === 'ru' ? 'До' : 'Up to'} ${plan.max_age} ${language === 'ru' ? 'лет' : 'years'}`}
+                    ? `${language === 'ru' ? 'От' : language === 'th' ? 'ตั้งแต่' : 'From'} ${plan.min_age} ${language === 'ru' ? 'лет' : language === 'th' ? 'ปี' : 'years'}`
+                    : `${language === 'ru' ? 'До' : language === 'th' ? 'สูงสุด' : 'Up to'} ${plan.max_age} ${language === 'ru' ? 'лет' : language === 'th' ? 'ปี' : 'years'}`}
                 </p>
               </div>
             )}
@@ -167,7 +167,7 @@ export default function InsurancePlanDetail() {
             {plan.deductible && (
               <div className="bg-card border border-border rounded-none p-4">
                 <h3 className="font-semibold mb-2">
-                  {language === 'ru' ? 'Франшиза' : 'Deductible'}
+                  {language === 'ru' ? 'Франшиза' : language === 'th' ? 'ค่าเสียหายส่วนแรก' : 'Deductible'}
                 </h3>
                 <p className="text-lg font-bold text-primary">฿{plan.deductible.toLocaleString()}</p>
               </div>

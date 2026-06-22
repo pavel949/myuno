@@ -22,18 +22,18 @@ import { VerticalContextBanner } from '@/components/vertical/VerticalContextBann
 import { VerticalInsightPanel } from '@/components/vertical/VerticalInsightPanel';
 
 const SPECIALTIES = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'general', labelEn: 'General', labelRu: 'Терапевт' },
-  { id: 'dental', labelEn: 'Dental', labelRu: 'Стоматолог' },
-  { id: 'cardio', labelEn: 'Cardio', labelRu: 'Кардиолог' },
-  { id: 'pediatric', labelEn: 'Pediatric', labelRu: 'Педиатр' },
-  { id: 'eye', labelEn: 'Eye', labelRu: 'Офтальмолог' },
+  { id: 'all', labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { id: 'general', labelEn: 'General', labelRu: 'Терапевт', labelTh: 'อายุรแพทย์' },
+  { id: 'dental', labelEn: 'Dental', labelRu: 'Стоматолог', labelTh: 'ทันตแพทย์' },
+  { id: 'cardio', labelEn: 'Cardio', labelRu: 'Кардиолог', labelTh: 'แพทย์หัวใจ' },
+  { id: 'pediatric', labelEn: 'Pediatric', labelRu: 'Педиатр', labelTh: 'กุมารแพทย์' },
+  { id: 'eye', labelEn: 'Eye', labelRu: 'Офтальмолог', labelTh: 'จักษุแพทย์' },
 ];
 
 const SORT_OPTIONS = [
-  { id: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые' },
-  { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу' },
-  { id: 'open_first', labelEn: 'Open Now', labelRu: 'Открыто сейчас' },
+  { id: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые', labelTh: 'แนะนำ' },
+  { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу', labelTh: 'คะแนนสูงสุด' },
+  { id: 'open_first', labelEn: 'Open Now', labelRu: 'Открыто сейчас', labelTh: 'เปิดอยู่ตอนนี้' },
 ];
 
 function isClinicOpen(workingHours: Record<string, string>, is24h: boolean): boolean {
@@ -59,6 +59,7 @@ export default function MedicalIndex() {
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [sortBy, setSortBy] = useState('recommended');
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { clinics, isLoading } = useClinics({
     specialty: selectedSpecialty === 'all' ? undefined : selectedSpecialty,
@@ -106,10 +107,10 @@ export default function MedicalIndex() {
     <div className="p-3 rounded-none bg-destructive/10 border border-destructive/30">
       <div className="flex items-center gap-2 mb-1">
         <ShieldAlert className="w-4 h-4 text-destructive shrink-0" />
-        <span className="text-sm font-semibold text-destructive">{isRu ? 'Скорая помощь' : 'Emergency'}</span>
+        <span className="text-sm font-semibold text-destructive">{isRu ? 'Скорая помощь' : isTh ? 'เหตุฉุกเฉิน' : 'Emergency'}</span>
       </div>
       <p className="text-xs text-muted-foreground mb-2">
-        {isRu ? 'Для экстренной медицинской помощи звоните 1669' : 'For medical emergencies call 1669'}
+        {isRu ? 'Для экстренной медицинской помощи звоните 1669' : isTh ? 'กรณีฉุกเฉินทางการแพทย์ โทร 1669' : 'For medical emergencies call 1669'}
       </p>
       <Button
         variant="destructive"
@@ -125,13 +126,13 @@ export default function MedicalIndex() {
 
   return (
     <MiniAppLayout
-      title={isRu ? 'Медицина' : 'Healthcare'}
-      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : `${filteredAndSorted.length} results`}
+      title={isRu ? 'Медицина' : isTh ? 'สุขภาพ' : 'Healthcare'}
+      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : isTh ? `พบ ${filteredAndSorted.length} รายการ` : `${filteredAndSorted.length} results`}
       fallbackPath="/discover"
       showSearch
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={isRu ? 'Поиск клиник...' : 'Search clinics...'}
+      searchPlaceholder={isRu ? 'Поиск клиник...' : isTh ? 'ค้นหาคลินิก...' : 'Search clinics...'}
       showHero={false}
       categories={SPECIALTIES}
       selectedCategory={selectedSpecialty}
@@ -144,7 +145,7 @@ export default function MedicalIndex() {
       onMapMarkerSelect={(id) => navigate(`/clinics/${id}`)}
       mapIconChar="✚"
       resultsCount={filteredAndSorted.length}
-      resultsLabel={isRu ? 'Клиники' : 'Clinics'}
+      resultsLabel={isRu ? 'Клиники' : isTh ? 'คลินิก' : 'Clinics'}
       quickActions={emergencyBanner}
       stickySubHeader={
         <div className="px-4 py-2 flex items-center justify-end">
@@ -155,7 +156,7 @@ export default function MedicalIndex() {
           >
             {SORT_OPTIONS.map(opt => (
               <option key={opt.id} value={opt.id}>
-                {isRu ? opt.labelRu : opt.labelEn}
+                {isRu ? opt.labelRu : isTh ? opt.labelTh : opt.labelEn}
               </option>
             ))}
           </select>
@@ -177,8 +178,8 @@ export default function MedicalIndex() {
       ) : filteredAndSorted.length === 0 ? (
         <EmptyState
           icon={Stethoscope}
-          title={isRu ? 'Клиники не найдены' : 'No clinics found'}
-          description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+          title={isRu ? 'Клиники не найдены' : isTh ? 'ไม่พบคลินิก' : 'No clinics found'}
+          description={isRu ? 'Попробуйте изменить фильтры' : isTh ? 'ลองปรับตัวกรองของคุณ' : 'Try adjusting your filters'}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">

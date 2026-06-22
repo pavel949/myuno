@@ -21,6 +21,7 @@ export default function CapitalDashboard() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: stats, isLoading } = useCapitalDashboardStats();
 
   if (isLoading || !stats) {
@@ -36,10 +37,10 @@ export default function CapitalDashboard() {
   }
 
   const kpis = [
-    { label: isRu ? 'Контактов' : 'Contacts', value: stats.contactsCount, icon: Users, path: '/capital/contacts' },
-    { label: isRu ? 'Кампаний' : 'Campaigns', value: stats.activeCampaigns, icon: Megaphone, path: '/capital/campaigns' },
-    { label: isRu ? 'Касаний за неделю' : 'Touches this week', value: stats.outreachThisWeek, icon: MessageCircle, path: '/capital/outreach' },
-    { label: isRu ? 'Ожидаемая комиссия' : 'Expected commission', value: `${stats.expectedCommission.toLocaleString()} THB`, icon: TrendingUp, path: '/capital/pipeline' },
+    { label: isRu ? 'Контактов' : isTh ? 'ผู้ติดต่อ' : 'Contacts', value: stats.contactsCount, icon: Users, path: '/capital/contacts' },
+    { label: isRu ? 'Кампаний' : isTh ? 'แคมเปญ' : 'Campaigns', value: stats.activeCampaigns, icon: Megaphone, path: '/capital/campaigns' },
+    { label: isRu ? 'Касаний за неделю' : isTh ? 'การติดต่อสัปดาห์นี้' : 'Touches this week', value: stats.outreachThisWeek, icon: MessageCircle, path: '/capital/outreach' },
+    { label: isRu ? 'Ожидаемая комиссия' : isTh ? 'ค่าคอมมิชชันที่คาดว่าจะได้รับ' : 'Expected commission', value: `${stats.expectedCommission.toLocaleString()} THB`, icon: TrendingUp, path: '/capital/pipeline' },
   ];
 
   const chartData = PIPELINE_STAGES_ORDER

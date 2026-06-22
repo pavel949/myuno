@@ -1,8 +1,18 @@
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { Language } from '@/i18n';
 import { ROLE_OPTIONS, type CanonicalRoleAnswer } from '@/lib/segmentation/detectPersona';
 import { CANONICAL_ROLE_META } from '@/types/canonical';
+
+const ROLE_LABELS_TH: Record<CanonicalRoleAnswer, { label: string; description: string }> = {
+  consumer:           { label: 'ผู้ใช้บริการ',     description: 'ฉันมาเที่ยวหรือมาใช้บริการ' },
+  'resident-user':    { label: 'ผู้พักอาศัย',       description: 'ฉันอาศัยอยู่ที่นี่และใช้บริการในชีวิตประจำวัน' },
+  'investor-passive': { label: 'นักลงทุนเชิงรับ',   description: 'ฉันลงทุนและให้คนอื่นดูแลให้' },
+  'investor-active':  { label: 'นักลงทุนเชิงรุก',   description: 'ฉันบริหารการลงทุนของตัวเอง' },
+  operator:           { label: 'ผู้ดูแลทรัพย์สิน',   description: 'ฉันดูแลหรือบริหารอสังหาริมทรัพย์' },
+  provider:           { label: 'ผู้ให้บริการ',       description: 'ฉันให้บริการแก่ผู้อื่น' },
+};
 
 const ICONS: Record<CanonicalRoleAnswer, string> = {
   consumer: '🛍️',
@@ -16,7 +26,7 @@ const ICONS: Record<CanonicalRoleAnswer, string> = {
 interface Props {
   value: CanonicalRoleAnswer | null;
   onChange: (v: CanonicalRoleAnswer) => void;
-  lang: 'en' | 'ru';
+  lang: Language;
 }
 
 export function RoleStep({ value, onChange, lang }: Props) {
@@ -44,10 +54,10 @@ export function RoleStep({ value, onChange, lang }: Props) {
             </span>
             <span className="flex-1">
               <span className="block text-sm font-semibold text-foreground">
-                {lang === 'ru' ? meta.labelRu : meta.labelEn}
+                {lang === 'ru' ? meta.labelRu : lang === 'th' ? ROLE_LABELS_TH[role].label : meta.labelEn}
               </span>
               <span className="mt-0.5 block text-xs text-muted-foreground">
-                {lang === 'ru' ? meta.descriptionRu : meta.descriptionEn}
+                {lang === 'ru' ? meta.descriptionRu : lang === 'th' ? ROLE_LABELS_TH[role].description : meta.descriptionEn}
               </span>
             </span>
             {isActive && (

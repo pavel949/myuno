@@ -9,14 +9,14 @@ import { cn } from '@/lib/utils';
 
 // Popular Phuket areas (static fallback)
 const POPULAR_PLACES = [
-  { id: 'patong-beach', nameEn: 'Patong Beach Area', nameRu: 'Район Патонг Бич', address: 'Patong, Kathu, Phuket' },
-  { id: 'kata-beach', nameEn: 'Kata Beach Area', nameRu: 'Район Ката Бич', address: 'Kata, Karon, Phuket' },
-  { id: 'karon-beach', nameEn: 'Karon Beach Area', nameRu: 'Район Карон Бич', address: 'Karon, Phuket' },
-  { id: 'bang-tao', nameEn: 'Bang Tao / Laguna Area', nameRu: 'Банг Тао / Лагуна', address: 'Bang Tao, Choeng Thale, Phuket' },
-  { id: 'old-town', nameEn: 'Phuket Old Town', nameRu: 'Старый город Пхукет', address: 'Talat Yai, Phuket Town' },
-  { id: 'rawai', nameEn: 'Rawai Area', nameRu: 'Район Равай', address: 'Rawai, Phuket' },
-  { id: 'kamala', nameEn: 'Kamala Beach Area', nameRu: 'Район Камала', address: 'Kamala, Kathu, Phuket' },
-  { id: 'surin', nameEn: 'Surin Beach Area', nameRu: 'Район Сурин', address: 'Surin, Choeng Thale, Phuket' },
+  { id: 'patong-beach', nameEn: 'Patong Beach Area', nameRu: 'Район Патонг Бич', nameTh: 'ย่านหาดป่าตอง', address: 'Patong, Kathu, Phuket' },
+  { id: 'kata-beach', nameEn: 'Kata Beach Area', nameRu: 'Район Ката Бич', nameTh: 'ย่านหาดกะตะ', address: 'Kata, Karon, Phuket' },
+  { id: 'karon-beach', nameEn: 'Karon Beach Area', nameRu: 'Район Карон Бич', nameTh: 'ย่านหาดกะรน', address: 'Karon, Phuket' },
+  { id: 'bang-tao', nameEn: 'Bang Tao / Laguna Area', nameRu: 'Банг Тао / Лагуна', nameTh: 'ย่านบางเทา / ลากูน่า', address: 'Bang Tao, Choeng Thale, Phuket' },
+  { id: 'old-town', nameEn: 'Phuket Old Town', nameRu: 'Старый город Пхукет', nameTh: 'เมืองเก่าภูเก็ต', address: 'Talat Yai, Phuket Town' },
+  { id: 'rawai', nameEn: 'Rawai Area', nameRu: 'Район Равай', nameTh: 'ย่านราไวย์', address: 'Rawai, Phuket' },
+  { id: 'kamala', nameEn: 'Kamala Beach Area', nameRu: 'Район Камала', nameTh: 'ย่านหาดกมลา', address: 'Kamala, Kathu, Phuket' },
+  { id: 'surin', nameEn: 'Surin Beach Area', nameRu: 'Район Сурин', nameTh: 'ย่านหาดสุรินทร์', address: 'Surin, Choeng Thale, Phuket' },
 ];
 
 interface GeocodeSuggestion {
@@ -208,14 +208,14 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
   const areaSuggestions = useMemo((): Suggestion[] => {
     const items = POPULAR_PLACES.map(p => ({
       id: p.id,
-      name: isRu ? p.nameRu : p.nameEn,
+      name: language === 'ru' ? p.nameRu : language === 'th' ? p.nameTh : p.nameEn,
       address: p.address,
       source: 'area' as const,
     }));
     if (!query || query.length < 2) return items;
     const q = query.toLowerCase();
     return items.filter(s => s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q));
-  }, [query, isRu]);
+  }, [query, language]);
 
   // Hotel suggestions (Places API New)
   const hotelSuggestions = useMemo((): Suggestion[] =>
@@ -369,7 +369,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             value={value}
             onChange={handleInputChange}
             onFocus={handleFocus}
-            placeholder={placeholder || (isRu ? 'Отель, вилла или адрес' : 'Hotel, villa or address')}
+            placeholder={placeholder || (language === 'ru' ? 'Отель, вилла или адрес' : language === 'th' ? 'โรงแรม วิลล่า หรือที่อยู่' : 'Hotel, villa or address')}
             className={cn("h-11 pl-9", isSelectionActive ? "pr-16" : "pr-9")}
             autoComplete="off"
           />
@@ -380,14 +380,14 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             <>
               <span
                 className="absolute right-8 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-success/15 flex items-center justify-center"
-                title={isRu ? 'Адрес подтверждён через Google' : 'Address verified via Google'}
+                title={language === 'ru' ? 'Адрес подтверждён через Google' : language === 'th' ? 'ยืนยันที่อยู่ผ่าน Google แล้ว' : 'Address verified via Google'}
               >
                 <Check className="w-3 h-3 text-success" />
               </span>
               <button
                 type="button"
                 onClick={clearSelection}
-                title={isRu ? 'Очистить' : 'Clear'}
+                title={language === 'ru' ? 'Очистить' : language === 'th' ? 'ล้าง' : 'Clear'}
                 className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
@@ -398,7 +398,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
         {value && value.length >= 3 && (
           <button
             type="button"
-            title={isRu ? 'Открыть на карте' : 'Open on map'}
+            title={language === 'ru' ? 'Открыть на карте' : language === 'th' ? 'เปิดบนแผนที่' : 'Open on map'}
             className="h-11 w-11 shrink-0 rounded-none border border-border bg-background flex items-center justify-center hover:bg-accent transition-colors"
             onClick={() => {
               const mapQuery = selectedSuggestion?.lat != null && selectedSuggestion?.lng != null
@@ -426,7 +426,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-semibold text-success uppercase tracking-wider mb-0.5">
-                  {isRu ? 'Выбрано' : 'Selected'}
+                  {language === 'ru' ? 'Выбрано' : language === 'th' ? 'เลือกแล้ว' : 'Selected'}
                 </p>
                 <p className="font-medium text-sm truncate">{selectedSuggestion.name}</p>
                 <p className="text-xs text-muted-foreground truncate">{selectedSuggestion.address}</p>
@@ -441,7 +441,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
                 onClick={clearSelection}
                 className="text-xs text-muted-foreground hover:text-foreground underline shrink-0 mt-1"
               >
-                {isRu ? 'Изменить' : 'Change'}
+                {language === 'ru' ? 'Изменить' : language === 'th' ? 'เปลี่ยน' : 'Change'}
               </button>
             </div>
           )}
@@ -456,14 +456,14 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
             <div className="w-8 h-8 rounded-none bg-info/10 flex items-center justify-center shrink-0">
               {geolocating ? <Loader2 className="w-4 h-4 animate-spin text-info" /> : <Navigation className="w-4 h-4 text-info" />}
             </div>
-            <span className="text-sm font-medium">{isRu ? 'Мое местоположение' : 'Use my location'}</span>
+            <span className="text-sm font-medium">{language === 'ru' ? 'Мое местоположение' : language === 'th' ? 'ใช้ตำแหน่งของฉัน' : 'Use my location'}</span>
           </button>
 
           {/* Hotels — Places API (New), shown first as primary intent */}
           {hasHotels && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50">
-                {isRu ? 'Отели и виллы' : 'Hotels & lodging'}
+                {language === 'ru' ? 'Отели и виллы' : language === 'th' ? 'โรงแรมและที่พัก' : 'Hotels & lodging'}
               </div>
               {hotelSuggestions.map((s) => (
                 <SuggestionRow key={s.id} suggestion={s} query={query} onSelect={handleSelect} icon={<Hotel className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
@@ -478,7 +478,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
                 "px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50",
                 hasHotels && "border-t border-border/50"
               )}>
-                {isRu ? 'Адреса' : 'Addresses'}
+                {language === 'ru' ? 'Адреса' : language === 'th' ? 'ที่อยู่' : 'Addresses'}
               </div>
               {geocodeSuggestions.map((s) => (
                 <SuggestionRow key={s.id} suggestion={s} query={query} onSelect={handleSelect} icon={<MapPin className="w-4 h-4 text-primary" />} iconBg="bg-primary/10" />
@@ -490,7 +490,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           {hasProjects && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 border-t border-border/50">
-                {isRu ? 'Жилые комплексы' : 'Residences'}
+                {language === 'ru' ? 'Жилые комплексы' : language === 'th' ? 'โครงการที่พักอาศัย' : 'Residences'}
               </div>
               {projectSuggestions.map(s => (
                 <SuggestionRow key={s.id} suggestion={s} query={query} onSelect={handleSelect} icon={<Building2 className="w-4 h-4 text-accent-amber" />} iconBg="bg-accent-amber/10" />
@@ -502,7 +502,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           {!hasHotels && !hasGeocode && hasAreas && (
             <>
               <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 border-t border-border/50">
-                {isRu ? 'Популярные районы' : 'Popular areas'}
+                {language === 'ru' ? 'Популярные районы' : language === 'th' ? 'ย่านยอดนิยม' : 'Popular areas'}
               </div>
               {areaSuggestions.map(s => (
                 <SuggestionRow key={s.id} suggestion={s} query={query} onSelect={handleSelect} icon={<MapPin className="w-4 h-4 text-muted-foreground" />} iconBg="bg-muted" />
@@ -514,7 +514,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           {isSearching && !hasHotels && !hasGeocode && (
             <div className="px-3 py-4 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin" />
-              {isRu ? 'Поиск...' : 'Searching...'}
+              {language === 'ru' ? 'Поиск...' : language === 'th' ? 'กำลังค้นหา...' : 'Searching...'}
             </div>
           )}
 
@@ -522,7 +522,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
           {query.length >= 2 && !isSearching && !hasHotels && !hasGeocode && (
             <div className="px-3 py-3 text-center text-xs text-muted-foreground border-t border-border/50 flex items-center justify-center gap-1.5">
               <Keyboard className="w-3.5 h-3.5" />
-              {isRu ? 'Или введите адрес вручную' : 'Or type your address manually'}
+              {language === 'ru' ? 'Или введите адрес вручную' : language === 'th' ? 'หรือพิมพ์ที่อยู่ของคุณเอง' : 'Or type your address manually'}
             </div>
           )}
         </div>

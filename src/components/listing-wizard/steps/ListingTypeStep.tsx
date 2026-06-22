@@ -18,36 +18,45 @@ const LISTING_TYPES = [
     icon: Building2,
     titleEn: 'Property for Rent',
     titleRu: 'Сдать жильё',
+    titleTh: 'ปล่อยเช่าอสังหาริมทรัพย์',
     descEn: 'Villa, condo, apartment, or house',
     descRu: 'Вилла, кондо, квартира или дом',
+    descTh: 'วิลล่า คอนโด อพาร์ตเมนต์ หรือบ้าน',
   },
   {
     type: 'service' as ListingType,
     icon: Wrench,
     titleEn: 'Offer a Service',
     titleRu: 'Предложить услугу',
+    titleTh: 'เสนอบริการ',
     descEn: 'Tours, beauty, cleaning, repairs, etc.',
     descRu: 'Туры, красота, уборка, ремонт и др.',
+    descTh: 'ทัวร์ ความงาม ทำความสะอาด ซ่อมแซม และอื่น ๆ',
   },
   {
     type: 'product' as ListingType,
     icon: Package,
     titleEn: 'Sell Products',
     titleRu: 'Продавать товары',
+    titleTh: 'ขายสินค้า',
     descEn: 'Physical goods in the marketplace',
     descRu: 'Товары на маркетплейсе',
+    descTh: 'สินค้าจริงในมาร์เก็ตเพลส',
   },
 ];
 
 export function ListingTypeStep({ value, onChange, onNext }: ListingTypeStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        {isRu 
+        {isRu
           ? 'Выберите тип листинга, который хотите создать'
+          : isTh
+          ? 'เลือกประเภทประกาศที่คุณต้องการสร้าง'
           : 'Choose the type of listing you want to create'}
       </p>
       
@@ -74,10 +83,10 @@ export function ListingTypeStep({ value, onChange, onNext }: ListingTypeStepProp
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold">
-                    {isRu ? item.titleRu : item.titleEn}
+                    {isRu ? item.titleRu : isTh ? item.titleTh : item.titleEn}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {isRu ? item.descRu : item.descEn}
+                    {isRu ? item.descRu : isTh ? item.descTh : item.descEn}
                   </p>
                 </div>
               </CardContent>
@@ -87,7 +96,7 @@ export function ListingTypeStep({ value, onChange, onNext }: ListingTypeStepProp
       </div>
       
       <Button onClick={onNext} className="w-full" size="lg">
-        {isRu ? 'Продолжить' : 'Continue'}
+        {isRu ? 'Продолжить' : isTh ? 'ดำเนินการต่อ' : 'Continue'}
       </Button>
     </div>
   );

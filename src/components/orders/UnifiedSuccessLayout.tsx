@@ -12,6 +12,7 @@ import { Check, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { WhatsAppOrderContact } from '@/components/contact/WhatsAppOrderContact';
 
 interface UnifiedSuccessLayoutProps {
@@ -23,12 +24,12 @@ interface UnifiedSuccessLayoutProps {
   extras?: ReactNode;
   /** Primary action — typically "My orders". */
   primaryHref: string;
-  primaryLabel?: { ru: string; en: string };
+  primaryLabel?: { ru: string; en: string; th?: string };
   /** Secondary action — typically "Back to catalog". */
   secondaryHref: string;
-  secondaryLabel?: { ru: string; en: string };
+  secondaryLabel?: { ru: string; en: string; th?: string };
   /** Optional one-line note shown under the title. */
-  note?: { ru: string; en: string };
+  note?: { ru: string; en: string; th?: string };
   /** Краткое описание заказа для подстановки в WhatsApp-сообщение (опционально). */
   whatsappSummary?: { ru?: string; en?: string };
   /** Сумма для отображения в WhatsApp-сообщении. */
@@ -38,8 +39,8 @@ interface UnifiedSuccessLayoutProps {
   hideWhatsApp?: boolean;
 }
 
-const DEFAULT_PRIMARY = { ru: 'Мои заказы', en: 'My orders' };
-const DEFAULT_SECONDARY = { ru: 'Вернуться в каталог', en: 'Back to catalog' };
+const DEFAULT_PRIMARY = { ru: 'Мои заказы', en: 'My orders', th: 'คำสั่งซื้อของฉัน' };
+const DEFAULT_SECONDARY = { ru: 'Вернуться в каталог', en: 'Back to catalog', th: 'กลับไปที่แคตตาล็อก' };
 
 export function UnifiedSuccessLayout({
   isLoading = false,
@@ -58,7 +59,6 @@ export function UnifiedSuccessLayout({
 }: UnifiedSuccessLayoutProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const isRu = language === 'ru';
 
   if (isLoading) {
     return (
@@ -82,16 +82,16 @@ export function UnifiedSuccessLayout({
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-base font-semibold text-foreground leading-tight">
-                  {isRu ? 'Оплата подтверждена.' : 'Payment confirmed.'}
+                  {language === 'ru' ? 'Оплата подтверждена.' : language === 'th' ? 'ยืนยันการชำระเงินแล้ว' : 'Payment confirmed.'}
                 </h1>
                 {orderNumber && (
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {isRu ? 'Номер заказа' : 'Order number'}: {orderNumber}
+                    {language === 'ru' ? 'Номер заказа' : language === 'th' ? 'หมายเลขคำสั่งซื้อ' : 'Order number'}: {orderNumber}
                   </p>
                 )}
                 {note && (
                   <p className="text-xs text-muted-foreground mt-1 leading-snug">
-                    {isRu ? note.ru : note.en}
+                    {pickLang(note, language)}
                   </p>
                 )}
               </div>
@@ -109,14 +109,14 @@ export function UnifiedSuccessLayout({
           {/* Actions */}
           <div className="space-y-2 pt-1">
             <Button onClick={() => navigate(primaryHref)} className="w-full">
-              {isRu ? primaryLabel.ru : primaryLabel.en}
+              {pickLang(primaryLabel, language)}
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate(secondaryHref)}
               className="w-full"
             >
-              {isRu ? secondaryLabel.ru : secondaryLabel.en}
+              {pickLang(secondaryLabel, language)}
             </Button>
             {!hideWhatsApp && (
               <WhatsAppOrderContact

@@ -23,9 +23,9 @@ const GymDetail = () => {
   const { gym, isLoading } = useGym(id || '');
 
   const prices = [
-    { type: 'day', price: gym?.price_day_pass || 0, labelEn: 'Day Pass', labelRu: 'Дневной' },
-    { type: 'week', price: gym?.price_week_pass || 0, labelEn: 'Weekly', labelRu: 'Недельный' },
-    { type: 'month', price: gym?.price_month_pass || 0, labelEn: 'Monthly', labelRu: 'Месячный' },
+    { type: 'day', price: gym?.price_day_pass || 0, labelEn: 'Day Pass', labelRu: 'Дневной', labelTh: 'รายวัน' },
+    { type: 'week', price: gym?.price_week_pass || 0, labelEn: 'Weekly', labelRu: 'Недельный', labelTh: 'รายสัปดาห์' },
+    { type: 'month', price: gym?.price_month_pass || 0, labelEn: 'Monthly', labelRu: 'Месячный', labelTh: 'รายเดือน' },
   ].filter(p => p.price > 0);
 
   const [selectedPrice, setSelectedPrice] = useState(prices[0]);
@@ -65,9 +65,9 @@ const GymDetail = () => {
       <AppLayout showHeader={false} showBottomNav>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <Dumbbell className="w-16 h-16 text-muted-foreground" />
-          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Зал не найден' : 'Gym not found'}</h2>
+          <h2 className="text-xl font-semibold">{language === 'ru' ? 'Зал не найден' : language === 'th' ? 'ไม่พบฟิตเนส' : 'Gym not found'}</h2>
           <Button onClick={() => navigate('/fitness')}>
-            {language === 'ru' ? 'К списку залов' : 'Back to gyms'}
+            {language === 'ru' ? 'К списку залов' : language === 'th' ? 'กลับไปยังรายการฟิตเนส' : 'Back to gyms'}
           </Button>
         </div>
       </AppLayout>
@@ -90,7 +90,7 @@ const GymDetail = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
         <div className="absolute top-4 left-4 right-4 flex justify-between">
-          <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Назад' : 'Back'} onClick={() => navigate('/fitness')}>
+          <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Назад' : language === 'th' ? 'ย้อนกลับ' : 'Back'} onClick={() => navigate('/fitness')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex gap-2">
@@ -100,7 +100,7 @@ const GymDetail = () => {
               itemData={{ title_en: gym.name_en, title_ru: gym.name_ru, image: images[0], price: gym.price_day_pass, location: gym.district }}
               variant="secondary"
             />
-            <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Поделиться' : 'Share'}><Share2 className="w-5 h-5" /></Button>
+            <Button variant="secondary" size="icon" aria-label={language === 'ru' ? 'Поделиться' : language === 'th' ? 'แชร์' : 'Share'}><Share2 className="w-5 h-5" /></Button>
           </div>
         </div>
 
@@ -129,7 +129,7 @@ const GymDetail = () => {
                 {gym.is_verified && (
                   <Badge variant="secondary" className="text-xs">
                     <CheckCircle className="w-3 h-3 mr-1" />
-                    {language === 'ru' ? 'Проверен' : 'Verified'}
+                    {language === 'ru' ? 'Проверен' : language === 'th' ? 'ยืนยันแล้ว' : 'Verified'}
                   </Badge>
                 )}
               </div>
@@ -139,7 +139,7 @@ const GymDetail = () => {
                 <Star className="w-5 h-5 fill-warning text-warning" />
                 <span className="font-bold">{gym.rating}</span>
               </div>
-              <p className="text-sm text-muted-foreground">{gym.review_count} reviews</p>
+              <p className="text-sm text-muted-foreground">{gym.review_count} {language === 'th' ? 'รีวิว' : 'reviews'}</p>
             </div>
           </div>
         </div>
@@ -160,7 +160,7 @@ const GymDetail = () => {
         {/* Pricing */}
         {prices.length > 0 && (
           <div className="mb-6">
-            <h3 className="font-semibold mb-3">{language === 'ru' ? 'Выберите абонемент' : 'Select Membership'}</h3>
+            <h3 className="font-semibold mb-3">{language === 'ru' ? 'Выберите абонемент' : language === 'th' ? 'เลือกสมาชิก' : 'Select Membership'}</h3>
             <div className="grid grid-cols-3 gap-3">
               {prices.map(price => (
                 <button
@@ -171,7 +171,7 @@ const GymDetail = () => {
                   }`}
                 >
                   <p className="text-lg font-bold text-primary">฿{price.price.toLocaleString()}</p>
-                  <p className="text-xs text-muted-foreground">{language === 'ru' ? price.labelRu : price.labelEn}</p>
+                  <p className="text-xs text-muted-foreground">{language === 'ru' ? price.labelRu : language === 'th' ? price.labelTh : price.labelEn}</p>
                 </button>
               ))}
             </div>
@@ -181,8 +181,8 @@ const GymDetail = () => {
         {/* Tabs */}
         <Tabs defaultValue="about" className="mb-24">
           <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="about">{language === 'ru' ? 'О зале' : 'About'}</TabsTrigger>
-            <TabsTrigger value="amenities">{language === 'ru' ? 'Удобства' : 'Amenities'}</TabsTrigger>
+            <TabsTrigger value="about">{language === 'ru' ? 'О зале' : language === 'th' ? 'เกี่ยวกับ' : 'About'}</TabsTrigger>
+            <TabsTrigger value="amenities">{language === 'ru' ? 'Удобства' : language === 'th' ? 'สิ่งอำนวยความสะดวก' : 'Amenities'}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="about" className="mt-4 space-y-4">
@@ -205,7 +205,7 @@ const GymDetail = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">{language === 'ru' ? 'Информация будет добавлена' : 'Information coming soon'}</p>
+              <p className="text-muted-foreground text-sm">{language === 'ru' ? 'Информация будет добавлена' : language === 'th' ? 'ข้อมูลจะเพิ่มเร็วๆ นี้' : 'Information coming soon'}</p>
             )}
           </TabsContent>
         </Tabs>
@@ -216,12 +216,12 @@ const GymDetail = () => {
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t border-border">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-muted-foreground">{language === 'ru' ? currentPrice.labelRu : currentPrice.labelEn}</p>
+              <p className="text-sm text-muted-foreground">{language === 'ru' ? currentPrice.labelRu : language === 'th' ? currentPrice.labelTh : currentPrice.labelEn}</p>
               <p className="text-xl font-bold text-primary">฿{currentPrice.price.toLocaleString()}</p>
             </div>
             <Button size="lg" className="flex-1" onClick={() => navigate(`/fitness/booking/${id}?type=${currentPrice.type}`)}>
               <Calendar className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Записаться' : 'Book Now'}
+              {language === 'ru' ? 'Записаться' : language === 'th' ? 'จองเลย' : 'Book Now'}
             </Button>
           </div>
         </div>

@@ -4,8 +4,10 @@ import { getPath } from '@/lib/vertical-specs/pathUtils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Phone, MapPin, Star } from 'lucide-react';
+import type { Language } from '@/i18n';
 
-const t = (l: LocalizedText, lang: 'en' | 'ru') => l[lang] ?? l.en;
+const t = (l: LocalizedText, lang: Language): string =>
+  (l as Record<Language, string | undefined>)[lang] ?? l.en;
 
 interface Props {
   spec: VerticalSpec;
@@ -19,7 +21,7 @@ interface Props {
  */
 export function DetailRenderer({ spec, row, onContact }: Props) {
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const attrs = (row.attributes as Record<string, unknown>) ?? {};
 
   const sections = spec.detail.filter((s) => {
@@ -43,11 +45,11 @@ function Section({
   row: Record<string, unknown>;
   attrs: Record<string, unknown>;
   spec: VerticalSpec;
-  lang: 'en' | 'ru';
+  lang: Language;
   onContact?: () => void;
 }) {
-  const title = (attrs.title as { en?: string; ru?: string }) ?? {};
-  const description = (attrs.description as { en?: string; ru?: string }) ?? {};
+  const title = (attrs.title as { en?: string; ru?: string; th?: string }) ?? {};
+  const description = (attrs.description as { en?: string; ru?: string; th?: string }) ?? {};
   const address = (attrs.address as { line?: string; lat?: number; lng?: number }) ?? {};
   const gallery = (row.gallery as string[]) ?? (row.images as string[]) ?? [];
   const cover = (row.cover_image as string) || gallery[0];
@@ -62,7 +64,7 @@ function Section({
             </div>
           )}
           <h1 className="text-2xl font-semibold">
-            {title[lang] || (row.name_en as string) || (row.name_ru as string)}
+            {title[lang] || title.en || (row.name_en as string) || (row.name_ru as string)}
           </h1>
           <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
             {typeof row.rating === 'number' && (row.rating as number) > 0 && (
@@ -82,14 +84,16 @@ function Section({
         </header>
       );
 
-    case 'description':
-      if (!description[lang]) return null;
+    case 'description': {
+      const descText = description[lang] || description.en;
+      if (!descText) return null;
       return (
         <section className="space-y-2">
-          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Описание' : 'About'} lang={lang} />
-          <p className="text-sm leading-relaxed whitespace-pre-line">{description[lang]}</p>
+          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Описание' : lang === 'th' ? 'รายละเอียด' : 'About'} lang={lang} />
+          <p className="text-sm leading-relaxed whitespace-pre-line">{descText}</p>
         </section>
       );
+    }
 
     case 'amenities': {
       const amenities = (attrs.amenities as string[]) ?? (attrs.ambiance as string[]) ?? [];
@@ -101,7 +105,7 @@ function Section({
         .flatMap((f) => f.options ?? []);
       return (
         <section className="space-y-2">
-          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Удобства' : 'Amenities'} lang={lang} />
+          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Удобства' : lang === 'th' ? 'สิ่งอำนวยความสะดวก' : 'Amenities'} lang={lang} />
           <div className="flex flex-wrap gap-1.5">
             {amenities.map((a) => {
               const o = allOptions.find((x) => x.value === a);
@@ -116,7 +120,7 @@ function Section({
       if (gallery.length === 0) return null;
       return (
         <section className="space-y-2">
-          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Галерея' : 'Gallery'} lang={lang} />
+          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Галерея' : lang === 'th' ? 'แกลเลอรี' : 'Gallery'} lang={lang} />
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {gallery.slice(0, 9).map((src, i) => (
               <div key={i} className="aspect-square bg-muted overflow-hidden">
@@ -131,7 +135,7 @@ function Section({
       if (typeof address.lat !== 'number' || typeof address.lng !== 'number') return null;
       return (
         <section className="space-y-2">
-          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'На карте' : 'Map'} lang={lang} />
+          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'На карте' : lang === 'th' ? 'แผนที่' : 'Map'} lang={lang} />
           <a
             href={`https://www.google.com/maps?q=${address.lat},${address.lng}`}
             target="_blank"
@@ -150,22 +154,22 @@ function Section({
     case 'hours': {
       const hours = attrs.hours as Record<string, { open?: string; close?: string; closed?: boolean }> | undefined;
       if (!hours || typeof hours !== 'object') return null;
-      const days: { key: string; en: string; ru: string }[] = [
-        { key: 'mon', en: 'Mon', ru: 'Пн' }, { key: 'tue', en: 'Tue', ru: 'Вт' },
-        { key: 'wed', en: 'Wed', ru: 'Ср' }, { key: 'thu', en: 'Thu', ru: 'Чт' },
-        { key: 'fri', en: 'Fri', ru: 'Пт' }, { key: 'sat', en: 'Sat', ru: 'Сб' },
-        { key: 'sun', en: 'Sun', ru: 'Вс' },
+      const days: { key: string; en: string; ru: string; th: string }[] = [
+        { key: 'mon', en: 'Mon', ru: 'Пн', th: 'จ.' }, { key: 'tue', en: 'Tue', ru: 'Вт', th: 'อ.' },
+        { key: 'wed', en: 'Wed', ru: 'Ср', th: 'พ.' }, { key: 'thu', en: 'Thu', ru: 'Чт', th: 'พฤ.' },
+        { key: 'fri', en: 'Fri', ru: 'Пт', th: 'ศ.' }, { key: 'sat', en: 'Sat', ru: 'Сб', th: 'ส.' },
+        { key: 'sun', en: 'Sun', ru: 'Вс', th: 'อา.' },
       ];
       return (
         <section className="space-y-2">
-          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Часы работы' : 'Hours'} lang={lang} />
+          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Часы работы' : lang === 'th' ? 'เวลาทำการ' : 'Hours'} lang={lang} />
           <ul className="text-sm grid grid-cols-2 gap-y-1">
             {days.map((d) => {
               const h = hours[d.key];
               return (
                 <li key={d.key} className="flex justify-between gap-2">
-                  <span className="text-muted-foreground">{lang === 'ru' ? d.ru : d.en}</span>
-                  <span className="font-mono">{h?.closed ? (lang === 'ru' ? 'закрыто' : 'closed') : `${h?.open ?? '—'}–${h?.close ?? '—'}`}</span>
+                  <span className="text-muted-foreground">{lang === 'ru' ? d.ru : lang === 'th' ? d.th : d.en}</span>
+                  <span className="font-mono">{h?.closed ? (lang === 'ru' ? 'закрыто' : lang === 'th' ? 'ปิด' : 'closed') : `${h?.open ?? '—'}–${h?.close ?? '—'}`}</span>
                 </li>
               );
             })}
@@ -180,10 +184,10 @@ function Section({
       if (!menuUrl && menuMedia.length === 0) return null;
       return (
         <section className="space-y-2">
-          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Меню' : 'Menu'} lang={lang} />
+          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Меню' : lang === 'th' ? 'เมนู' : 'Menu'} lang={lang} />
           {menuUrl && (
             <a href={menuUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">
-              {lang === 'ru' ? 'Открыть меню' : 'View menu'}
+              {lang === 'ru' ? 'Открыть меню' : lang === 'th' ? 'ดูเมนู' : 'View menu'}
             </a>
           )}
           {menuMedia.length > 0 && (
@@ -199,21 +203,21 @@ function Section({
 
     case 'pricing': {
       const items = [
-        { k: 'price_daily', en: 'Per night', ru: 'За ночь' },
-        { k: 'price_monthly', en: 'Per month', ru: 'За месяц' },
-        { k: 'price_sale', en: 'Sale price', ru: 'Цена продажи' },
-        { k: 'price_half_day', en: 'Half-day', ru: 'Полдня' },
-        { k: 'price_full_day', en: 'Full day', ru: 'Полный день' },
-        { k: 'price_overnight', en: 'Per night', ru: 'За ночь' },
+        { k: 'price_daily', en: 'Per night', ru: 'За ночь', th: 'ต่อคืน' },
+        { k: 'price_monthly', en: 'Per month', ru: 'За месяц', th: 'ต่อเดือน' },
+        { k: 'price_sale', en: 'Sale price', ru: 'Цена продажи', th: 'ราคาขาย' },
+        { k: 'price_half_day', en: 'Half-day', ru: 'Полдня', th: 'ครึ่งวัน' },
+        { k: 'price_full_day', en: 'Full day', ru: 'Полный день', th: 'เต็มวัน' },
+        { k: 'price_overnight', en: 'Per night', ru: 'За ночь', th: 'ต่อคืน' },
       ].filter((p) => typeof (attrs as Record<string, unknown>)[p.k] === 'number');
       if (items.length === 0 && typeof row.price !== 'number') return null;
       return (
         <section className="space-y-2">
-          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Цены' : 'Pricing'} lang={lang} />
+          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Цены' : lang === 'th' ? 'ราคา' : 'Pricing'} lang={lang} />
           <dl className="grid grid-cols-2 gap-y-1 text-sm">
             {items.map((p) => (
               <div key={p.k} className="contents">
-                <dt className="text-muted-foreground">{lang === 'ru' ? p.ru : p.en}</dt>
+                <dt className="text-muted-foreground">{lang === 'ru' ? p.ru : lang === 'th' ? p.th : p.en}</dt>
                 <dd className="font-mono text-right">฿ {((attrs as Record<string, unknown>)[p.k] as number).toLocaleString()}</dd>
               </div>
             ))}
@@ -227,20 +231,20 @@ function Section({
       return null;
 
     case 'policies': {
-      const rules: { k: string; en: string; ru: string }[] = [
-        { k: 'check_in', en: 'Check-in', ru: 'Заезд' },
-        { k: 'check_out', en: 'Check-out', ru: 'Выезд' },
-        { k: 'min_stay', en: 'Min stay (nights)', ru: 'Мин. срок (ночей)' },
-        { k: 'cancellation_hours', en: 'Free cancellation (h)', ru: 'Бесп. отмена (ч)' },
+      const rules: { k: string; en: string; ru: string; th: string }[] = [
+        { k: 'check_in', en: 'Check-in', ru: 'Заезд', th: 'เช็คอิน' },
+        { k: 'check_out', en: 'Check-out', ru: 'Выезд', th: 'เช็คเอาท์' },
+        { k: 'min_stay', en: 'Min stay (nights)', ru: 'Мин. срок (ночей)', th: 'พักขั้นต่ำ (คืน)' },
+        { k: 'cancellation_hours', en: 'Free cancellation (h)', ru: 'Бесп. отмена (ч)', th: 'ยกเลิกฟรี (ชม.)' },
       ].filter((r) => (attrs as Record<string, unknown>)[r.k] !== undefined && (attrs as Record<string, unknown>)[r.k] !== '');
       if (rules.length === 0) return null;
       return (
         <section className="space-y-2">
-          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Правила' : 'Policies'} lang={lang} />
+          <SectionTitle title={section.title} fallback={lang === 'ru' ? 'Правила' : lang === 'th' ? 'นโยบาย' : 'Policies'} lang={lang} />
           <dl className="grid grid-cols-2 gap-y-1 text-sm">
             {rules.map((r) => (
               <div key={r.k} className="contents">
-                <dt className="text-muted-foreground">{lang === 'ru' ? r.ru : r.en}</dt>
+                <dt className="text-muted-foreground">{lang === 'ru' ? r.ru : lang === 'th' ? r.th : r.en}</dt>
                 <dd className="font-mono text-right">{String((attrs as Record<string, unknown>)[r.k])}</dd>
               </div>
             ))}
@@ -253,7 +257,7 @@ function Section({
       return (
         <section className="sticky bottom-4 z-10 flex gap-2">
           <Button className="flex-1" onClick={onContact}>
-            {lang === 'ru' ? 'Связаться' : 'Contact'}
+            {lang === 'ru' ? 'Связаться' : lang === 'th' ? 'ติดต่อ' : 'Contact'}
           </Button>
           {attrs.phone && (
             <Button variant="outline" asChild>
@@ -272,6 +276,6 @@ function Section({
   }
 }
 
-function SectionTitle({ title, fallback, lang }: { title?: LocalizedText; fallback: string; lang: 'en' | 'ru' }) {
+function SectionTitle({ title, fallback, lang }: { title?: LocalizedText; fallback: string; lang: Language }) {
   return <h2 className="text-base font-medium">{title ? t(title, lang) : fallback}</h2>;
 }

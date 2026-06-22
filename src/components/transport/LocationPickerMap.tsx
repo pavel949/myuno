@@ -200,14 +200,14 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
     <div ref={ref} className="fixed inset-0 z-50 bg-background">
       <div className="absolute top-0 left-0 right-0 z-10 bg-background/95 border-b border-border">
         <div className="px-4 py-3 flex items-center gap-3">
-          <button onClick={onClose} aria-label={language === 'ru' ? 'Закрыть' : 'Close'} className="p-1 min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground">
+          <button onClick={onClose} aria-label={language === 'ru' ? 'Закрыть' : language === 'th' ? 'ปิด' : 'Close'} className="p-1 min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground hover:text-foreground">
             <X className="w-6 h-6" />
           </button>
           <div className="flex-1">
             <h2 className="font-semibold text-lg">
               {type === 'pickup'
-                ? (language === 'ru' ? 'Откуда забрать?' : 'Pickup location')
-                : (language === 'ru' ? 'Куда едем?' : 'Where to?')}
+                ? (language === 'ru' ? 'Откуда забрать?' : language === 'th' ? 'จุดรับ' : 'Pickup location')
+                : (language === 'ru' ? 'Куда едем?' : language === 'th' ? 'ไปที่ไหน?' : 'Where to?')}
             </h2>
           </div>
         </div>
@@ -218,11 +218,11 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && searchLocation()}
-              placeholder={language === 'ru' ? 'Поиск адреса...' : 'Search address...'}
+              placeholder={language === 'ru' ? 'Поиск адреса...' : language === 'th' ? 'ค้นหาที่อยู่...' : 'Search address...'}
               className="pl-10"
             />
           </div>
-          <Button onClick={searchLocation} size="icon" variant="outline" aria-label={language === 'ru' ? 'Поиск' : 'Search'}>
+          <Button onClick={searchLocation} size="icon" variant="outline" aria-label={language === 'ru' ? 'Поиск' : language === 'th' ? 'ค้นหา' : 'Search'}>
             <Search className="w-4 h-4" />
           </Button>
         </div>
@@ -234,8 +234,8 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
             <MapPin className="w-8 h-8 text-muted-foreground" />
             <p className="text-muted-foreground">
               {loadError?.message?.includes('auth')
-                ? (language === 'ru' ? 'Ошибка авторизации Google Maps' : 'Google Maps auth error')
-                : (language === 'ru' ? 'Карта недоступна' : 'Map unavailable')}
+                ? (language === 'ru' ? 'Ошибка авторизации Google Maps' : language === 'th' ? 'ข้อผิดพลาดการยืนยันตัวตน Google Maps' : 'Google Maps auth error')
+                : (language === 'ru' ? 'Карта недоступна' : language === 'th' ? 'ไม่สามารถใช้แผนที่ได้' : 'Map unavailable')}
             </p>
             <a
               href="https://www.google.com/maps/search/?api=1&query=7.8804,98.3923"
@@ -243,7 +243,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
               rel="noopener noreferrer"
               className="text-sm text-primary hover:underline"
             >
-              {language === 'ru' ? 'Открыть карту в Google Maps' : 'Open in Google Maps'}
+              {language === 'ru' ? 'Открыть карту в Google Maps' : language === 'th' ? 'เปิดใน Google Maps' : 'Open in Google Maps'}
             </a>
           </div>
         ) : isLoading ? (
@@ -280,7 +280,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
       <button
         onClick={getCurrentLocation}
         disabled={isGettingLocation || !!noKey || isLoading}
-        aria-label={language === 'ru' ? 'Моё местоположение' : 'Use my location'}
+        aria-label={language === 'ru' ? 'Моё местоположение' : language === 'th' ? 'ใช้ตำแหน่งของฉัน' : 'Use my location'}
         className="absolute right-4 bottom-52 z-10 w-12 h-12 rounded-full bg-card shadow-lg border border-border flex items-center justify-center hover:bg-muted transition-colors"
       >
         {isGettingLocation ? (
@@ -293,7 +293,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
       <div className="absolute bottom-0 left-0 right-0 z-10 bg-background/95 border-t border-border rounded-none">
         <div className="px-4 py-3">
           <p className="text-xs text-muted-foreground mb-2">
-            {language === 'ru' ? 'Популярные места' : 'Popular locations'}
+            {language === 'ru' ? 'Популярные места' : language === 'th' ? 'สถานที่ยอดนิยม' : 'Popular locations'}
           </p>
           <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory touch-pan-y">
             {popularLocations.slice(0, 5).map((location) => (
@@ -321,11 +321,11 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">
                 {type === 'pickup'
-                  ? (language === 'ru' ? 'Место подачи' : 'Pickup point')
-                  : (language === 'ru' ? 'Место назначения' : 'Destination')}
+                  ? (language === 'ru' ? 'Место подачи' : language === 'th' ? 'จุดรับ' : 'Pickup point')
+                  : (language === 'ru' ? 'Место назначения' : language === 'th' ? 'ปลายทาง' : 'Destination')}
               </p>
               <p className="text-sm truncate">
-                {selectedLocation?.address || (language === 'ru' ? 'Выберите на карте' : 'Select on map')}
+                {selectedLocation?.address || (language === 'ru' ? 'Выберите на карте' : language === 'th' ? 'เลือกบนแผนที่' : 'Select on map')}
               </p>
             </div>
           </div>
@@ -335,7 +335,7 @@ const LocationPickerMap = forwardRef<HTMLDivElement, LocationPickerMapProps>(({
             className="w-full"
             size="lg"
           >
-            {language === 'ru' ? 'Подтвердить' : 'Confirm location'}
+            {language === 'ru' ? 'Подтвердить' : language === 'th' ? 'ยืนยันตำแหน่ง' : 'Confirm location'}
           </Button>
         </div>
       </div>

@@ -22,7 +22,9 @@ export default function ResaleAssignmentLanding() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+  const isTh = language === 'th';
+  const t = <T,>(p: { ru: T; en: T; th?: T }): T =>
+    isRu ? p.ru : isTh ? (p.th ?? p.en) : p.en;
 
   return (
     <LandingShell
@@ -107,7 +109,7 @@ export default function ResaleAssignmentLanding() {
     >
       <div className="rounded-none border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
-          {t({ ru: 'Как это работает', en: 'How it works' })}
+          {t({ ru: 'Как это работает', en: 'How it works', th: 'ขั้นตอนการทำงาน' })}
         </h2>
         <LandingChecklist
           items={[
@@ -120,11 +122,11 @@ export default function ResaleAssignmentLanding() {
         />
         <div className="mt-6 flex flex-wrap gap-3">
           <Button onClick={() => navigate(APP_ROUTES.RESALE)}>
-            {t({ ru: 'Смотреть каталог', en: 'Browse catalog' })}
+            {t({ ru: 'Смотреть каталог', en: 'Browse catalog', th: 'ดูแคตตาล็อก' })}
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
           <Button variant="outline" onClick={() => navigate(APP_ROUTES.PROPERTY_CONSULTATION)}>
-            {t({ ru: 'Консультация эксперта', en: 'Expert consultation' })}
+            {t({ ru: 'Консультация эксперта', en: 'Expert consultation', th: 'ปรึกษาผู้เชี่ยวชาญ' })}
           </Button>
         </div>
       </div>

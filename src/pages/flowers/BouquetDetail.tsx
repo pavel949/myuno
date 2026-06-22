@@ -16,20 +16,21 @@ import { SIZE_NOTE_EN, SIZE_NOTE_RU } from '@/types/bouquet';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 type SizeKey = 'S' | 'M' | 'L';
 
 // Emotional microcopy based on trigger tag
-const EMOTIONAL_COPY: Record<string, { en: string; ru: string }> = {
-  romantic: { en: 'Make this moment unforgettable.', ru: 'Сделайте этот момент незабываемым.' },
-  birthday: { en: 'Brighten their day instantly.', ru: 'Мгновенно осветите их день.' },
-  joy: { en: 'Pure happiness, delivered.', ru: 'Чистое счастье с доставкой.' },
-  luxury: { en: 'Because ordinary isn\'t enough.', ru: 'Потому что обычного — недостаточно.' },
-  gratitude: { en: 'The perfect way to say thank you.', ru: 'Идеальный способ сказать спасибо.' },
-  comfort: { en: 'Warmth and care in every petal.', ru: 'Тепло и забота в каждом лепестке.' },
-  sophistication: { en: 'Elegance speaks for itself.', ru: 'Элегантность говорит сама за себя.' },
-  adventure: { en: 'A burst of tropical energy.', ru: 'Заряд тропической энергии.' },
-  lifestyle: { en: 'Beauty that lasts.', ru: 'Красота, которая сохраняется.' },
+const EMOTIONAL_COPY: Record<string, { en: string; ru: string; th: string }> = {
+  romantic: { en: 'Make this moment unforgettable.', ru: 'Сделайте этот момент незабываемым.', th: 'ทำให้ช่วงเวลานี้ไม่มีวันลืม' },
+  birthday: { en: 'Brighten their day instantly.', ru: 'Мгновенно осветите их день.', th: 'เติมความสดใสให้วันของเขาในทันที' },
+  joy: { en: 'Pure happiness, delivered.', ru: 'Чистое счастье с доставкой.', th: 'ส่งมอบความสุขล้วนๆ ถึงมือคุณ' },
+  luxury: { en: 'Because ordinary isn\'t enough.', ru: 'Потому что обычного — недостаточно.', th: 'เพราะความธรรมดายังไม่เพียงพอ' },
+  gratitude: { en: 'The perfect way to say thank you.', ru: 'Идеальный способ сказать спасибо.', th: 'วิธีที่สมบูรณ์แบบในการกล่าวขอบคุณ' },
+  comfort: { en: 'Warmth and care in every petal.', ru: 'Тепло и забота в каждом лепестке.', th: 'ความอบอุ่นและใส่ใจในทุกกลีบดอก' },
+  sophistication: { en: 'Elegance speaks for itself.', ru: 'Элегантность говорит сама за себя.', th: 'ความสง่างามที่บอกได้ด้วยตัวเอง' },
+  adventure: { en: 'A burst of tropical energy.', ru: 'Заряд тропической энергии.', th: 'พลังแห่งเขตร้อนที่เปี่ยมล้น' },
+  lifestyle: { en: 'Beauty that lasts.', ru: 'Красота, которая сохраняется.', th: 'ความงามที่คงอยู่ยาวนาน' },
 };
 
 // Fetch flower addons
@@ -60,6 +61,7 @@ const BouquetDetail = () => {
 
   const { bouquet, isLoading } = useBouquet(id || '');
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const sizeVariants = useMemo<SizeVariant[]>(() => {
     if (bouquet?.size_variants?.length) {
@@ -102,13 +104,13 @@ const BouquetDetail = () => {
         <div className="flex flex-col items-center justify-center py-20 text-center px-6">
           <Flower2 className="w-16 h-16 text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">
-            {isRu ? 'Букет не найден' : 'Bouquet not found'}
+            {isRu ? 'Букет не найден' : isTh ? 'ไม่พบช่อดอกไม้' : 'Bouquet not found'}
           </h2>
           <p className="text-muted-foreground mb-6">
-            {isRu ? 'Возможно, он был удалён или недоступен' : 'It may have been removed or is unavailable'}
+            {isRu ? 'Возможно, он был удалён или недоступен' : isTh ? 'อาจถูกลบไปแล้วหรือไม่พร้อมให้บริการ' : 'It may have been removed or is unavailable'}
           </p>
           <Button onClick={() => navigate('/flowers')}>
-            {isRu ? 'К каталогу цветов' : 'Back to flowers'}
+            {isRu ? 'К каталогу цветов' : isTh ? 'กลับไปที่แคตตาล็อกดอกไม้' : 'Back to flowers'}
           </Button>
         </div>
       </AppLayout>
@@ -140,7 +142,7 @@ const BouquetDetail = () => {
     showAddedToast({ item });
     // Compliment toast
     toast.success(
-      isRu ? 'Отличный выбор! Этот букет точно произведёт впечатление ✨' : 'Great choice! This bouquet will make an impression ✨',
+      isRu ? 'Отличный выбор! Этот букет точно произведёт впечатление ✨' : isTh ? 'เลือกได้ยอดเยี่ยม! ช่อดอกไม้นี้สร้างความประทับใจได้แน่นอน ✨' : 'Great choice! This bouquet will make an impression ✨',
       { duration: 3000 }
     );
   };
@@ -161,7 +163,7 @@ const BouquetDetail = () => {
   return (
     <AppLayout showBottomNav={false}>
       <Helmet>
-        <title>{`${isRu ? bouquet.name_ru : bouquet.name_en} — ${isRu ? 'Доставка цветов' : 'Flower Delivery'} | myUNO`}</title>
+        <title>{`${isRu ? bouquet.name_ru : bouquet.name_en} — ${isRu ? 'Доставка цветов' : isTh ? 'บริการส่งดอกไม้' : 'Flower Delivery'} | myUNO`}</title>
         <meta name="description" content={(isRu ? bouquet.description_ru : bouquet.description_en) || (isRu ? bouquet.name_ru : bouquet.name_en)} />
       </Helmet>
       <div className="min-h-screen bg-background pb-28">
@@ -175,14 +177,14 @@ const BouquetDetail = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
-            <Button variant="ghost" size="icon" aria-label={isRu ? 'Назад' : 'Back'} onClick={() => navigate('/flowers')} className="bg-black/20 text-white hover:bg-black/40">
+            <Button variant="ghost" size="icon" aria-label={isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'} onClick={() => navigate('/flowers')} className="bg-black/20 text-white hover:bg-black/40">
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div className="flex gap-2">
-              <Button variant="ghost" size="icon" aria-label={isRu ? 'В избранное' : 'Favorite'} aria-pressed={isFavorite} onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 text-white hover:bg-black/40">
+              <Button variant="ghost" size="icon" aria-label={isRu ? 'В избранное' : isTh ? 'รายการโปรด' : 'Favorite'} aria-pressed={isFavorite} onClick={() => setIsFavorite(!isFavorite)} className="bg-black/20 text-white hover:bg-black/40">
                 <Heart className={cn("w-5 h-5", isFavorite && "fill-red-500 text-red-500")} />
               </Button>
-              <Button variant="ghost" size="icon" aria-label={isRu ? 'Поделиться' : 'Share'} className="bg-black/20 text-white hover:bg-black/40">
+              <Button variant="ghost" size="icon" aria-label={isRu ? 'Поделиться' : isTh ? 'แชร์' : 'Share'} className="bg-black/20 text-white hover:bg-black/40">
                 <Share2 className="w-5 h-5" />
               </Button>
             </div>
@@ -192,22 +194,26 @@ const BouquetDetail = () => {
           <div className="absolute bottom-4 left-4 flex flex-col gap-1.5">
             {bouquet.is_popular && (
               <Badge variant="default" className="bg-primary text-sm">
-                {isRu ? '🔥 Бестселлер' : '🔥 Bestseller'}
+                {isRu ? '🔥 Бестселлер' : isTh ? '🔥 ขายดีที่สุด' : '🔥 Bestseller'}
               </Badge>
             )}
             {socialProof && (
               <Badge className="bg-background/90 text-foreground text-xs border-0">
                 <Star className="w-3 h-3 mr-1 text-accent" />
-                {isRu 
+                {isRu
                   ? socialProof === 'Most ordered this week' ? 'Самый заказываемый на этой неделе'
                     : socialProof === 'Customer favorite' ? 'Любимец покупателей'
+                    : socialProof
+                  : isTh
+                  ? socialProof === 'Most ordered this week' ? 'สั่งซื้อมากที่สุดในสัปดาห์นี้'
+                    : socialProof === 'Customer favorite' ? 'ขวัญใจลูกค้า'
                     : socialProof
                   : socialProof}
               </Badge>
             )}
             {scarcityLevel === 'high' && (
               <Badge variant="destructive" className="text-xs">
-                {isRu ? 'Ограниченное количество сегодня' : 'Limited availability today'}
+                {isRu ? 'Ограниченное количество сегодня' : isTh ? 'มีจำนวนจำกัดสำหรับวันนี้' : 'Limited availability today'}
               </Badge>
             )}
           </div>
@@ -231,7 +237,7 @@ const BouquetDetail = () => {
               </span>
               {currentVariant?.flower_count && (
                 <span className="text-sm text-muted-foreground">
-                  ~{currentVariant.flower_count} {isRu ? 'цветов' : 'flowers'}
+                  ~{currentVariant.flower_count} {isRu ? 'цветов' : isTh ? 'ดอก' : 'flowers'}
                 </span>
               )}
             </div>
@@ -239,7 +245,7 @@ const BouquetDetail = () => {
             {/* Emotional microcopy */}
             {emotionalCopy && (
               <p className="text-sm text-muted-foreground mt-2 italic">
-                ✨ {isRu ? emotionalCopy.ru : emotionalCopy.en}
+                ✨ {pickLang(emotionalCopy, language)}
               </p>
             )}
           </div>

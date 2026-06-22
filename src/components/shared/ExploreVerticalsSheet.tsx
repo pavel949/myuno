@@ -48,7 +48,7 @@ export const ExploreVerticalsSheet = memo(function ExploreVerticalsSheet({
         <LayoutGrid className="w-5 h-5 text-gray-900 dark:text-gray-100" />
       </div>
       <span className="text-[10px] font-medium text-gray-900 dark:text-gray-100">
-        {language === 'ru' ? 'Ещё' : 'More'}
+        {language === 'ru' ? 'Ещё' : language === 'th' ? 'เพิ่มเติม' : 'More'}
       </span>
     </button>
   );
@@ -65,7 +65,7 @@ export const ExploreVerticalsSheet = memo(function ExploreVerticalsSheet({
       <ResponsiveModal
         open={open}
         onOpenChange={setOpen}
-        title={language === 'ru' ? 'Все услуги' : 'All Services'}
+        title={language === 'ru' ? 'Все услуги' : language === 'th' ? 'บริการทั้งหมด' : 'All Services'}
         icon={<LayoutGrid className="h-5 w-5 text-primary" />}
         size="lg"
       >

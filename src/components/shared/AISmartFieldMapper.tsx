@@ -67,6 +67,8 @@ export function AISmartFieldMapper({
       toast.success(
         language === 'ru'
           ? `Найдено ${confidentMappings.length} совпадений`
+          : language === 'th'
+          ? `พบการจับคู่ ${confidentMappings.length} รายการ`
           : `Found ${confidentMappings.length} mappings`
       );
     } catch (err) {
@@ -74,6 +76,8 @@ export function AISmartFieldMapper({
       toast.error(
         language === 'ru'
           ? 'Ошибка AI анализа'
+          : language === 'th'
+          ? 'การวิเคราะห์ด้วย AI ล้มเหลว'
           : 'AI analysis failed'
       );
     } finally {
@@ -95,7 +99,7 @@ export function AISmartFieldMapper({
         ) : (
           <Sparkles className="h-4 w-4" />
         )}
-        {language === 'ru' ? 'AI Маппинг' : 'AI Smart Map'}
+        {language === 'ru' ? 'AI Маппинг' : language === 'th' ? 'AI จับคู่อัจฉริยะ' : 'AI Smart Map'}
       </Button>
 
       {lastResult && (
@@ -121,7 +125,7 @@ export function AISmartFieldMapper({
           </div>
           {lastResult.unmappedColumns.length > 0 && (
             <p className="text-muted-foreground">
-              {language === 'ru' ? 'Не распознаны: ' : 'Unmapped: '}
+              {language === 'ru' ? 'Не распознаны: ' : language === 'th' ? 'ไม่สามารถจับคู่: ' : 'Unmapped: '}
               {lastResult.unmappedColumns.join(', ')}
             </p>
           )}

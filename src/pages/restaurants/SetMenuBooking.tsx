@@ -89,7 +89,7 @@ export default function SetMenuBooking() {
       <AppLayout showBottomNav={false}>
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-muted-foreground">
-            {language === 'ru' ? 'Сет-меню не найдено' : 'Set menu not found'}
+            {language === 'ru' ? 'Сет-меню не найдено' : language === 'th' ? 'ไม่พบเซตเมนู' : 'Set menu not found'}
           </p>
         </div>
       </AppLayout>
@@ -200,7 +200,7 @@ export default function SetMenuBooking() {
             <BackButton fallbackPath="/restaurants" variant="ghost" />
             <div>
               <h1 className="font-semibold">
-                {language === 'ru' ? 'Бронирование сета' : 'Book Set Menu'}
+                {language === 'ru' ? 'Бронирование сета' : language === 'th' ? 'จองเซตเมนู' : 'Book Set Menu'}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {language === 'ru' ? restaurant.name_ru : restaurant.name_en}
@@ -226,7 +226,7 @@ export default function SetMenuBooking() {
           {/* What's Included */}
           <div className="p-4 rounded-none bg-card border border-border/50">
             <h3 className="font-semibold mb-3">
-              {language === 'ru' ? 'Что включено' : "What's Included"}
+              {language === 'ru' ? 'Что включено' : language === 'th' ? 'รายการที่รวมอยู่' : "What's Included"}
             </h3>
             <div className="space-y-2">
               {(language === 'ru' ? setMenu.includesRu : setMenu.includes).map((item, i) => (
@@ -256,17 +256,19 @@ export default function SetMenuBooking() {
             min={1}
             max={setMenu.maxGuests}
             pricePerPerson={setMenu.price}
-            label={language === 'ru' ? 'Количество гостей' : 'Number of Guests'}
+            label={language === 'ru' ? 'Количество гостей' : language === 'th' ? 'จำนวนแขก' : 'Number of Guests'}
           />
 
           {/* Special Requests */}
           <div className="space-y-3">
             <Label className="font-semibold">
-              {language === 'ru' ? 'Особые пожелания' : 'Special Requests'}
+              {language === 'ru' ? 'Особые пожелания' : language === 'th' ? 'คำขอพิเศษ' : 'Special Requests'}
             </Label>
             <Textarea
-              placeholder={language === 'ru' 
-                ? 'Аллергии, диетические ограничения...' 
+              placeholder={language === 'ru'
+                ? 'Аллергии, диетические ограничения...'
+                : language === 'th'
+                ? 'อาการแพ้ ข้อจำกัดด้านอาหาร...'
                 : 'Allergies, dietary restrictions...'}
               value={specialRequests}
               onChange={(e) => setSpecialRequests(e.target.value)}
@@ -298,7 +300,7 @@ export default function SetMenuBooking() {
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!isFormValid}
-          submitLabel={language === 'ru' ? `Забронировать за ฿${totalPrice}` : `Book for ฿${totalPrice}`}
+          submitLabel={language === 'ru' ? `Забронировать за ฿${totalPrice}` : language === 'th' ? `จอง ฿${totalPrice}` : `Book for ฿${totalPrice}`}
           showBreakdown={[
             { label: `${language === 'ru' ? setMenu.nameRu : setMenu.nameEn} × ${guests}`, amount: totalPrice },
           ]}

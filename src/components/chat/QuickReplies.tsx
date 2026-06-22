@@ -20,6 +20,7 @@ interface QuickRepliesProps {
 export const QuickReplies: React.FC<QuickRepliesProps> = ({ onSelect, disabled }) => {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { templates, isLoading } = useMessageTemplates();
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<TemplateCategory | 'quick'>('quick');
@@ -71,7 +72,7 @@ export const QuickReplies: React.FC<QuickRepliesProps> = ({ onSelect, disabled }
             size="icon"
             className="flex-shrink-0 h-8 w-8 min-h-[44px] min-w-[44px]"
             disabled={disabled}
-            aria-label={isRu ? 'Шаблоны сообщений' : 'Message templates'}
+            aria-label={isRu ? 'Шаблоны сообщений' : isTh ? 'เทมเพลตข้อความ' : 'Message templates'}
           >
             <FileText className="h-4 w-4" />
           </Button>
@@ -79,10 +80,10 @@ export const QuickReplies: React.FC<QuickRepliesProps> = ({ onSelect, disabled }
         <PopoverContent className="w-80 p-0" align="end">
           <div className="p-3 border-b">
             <h4 className="font-medium text-sm">
-              {isRu ? 'Шаблоны сообщений' : 'Message Templates'}
+              {isRu ? 'Шаблоны сообщений' : isTh ? 'เทมเพลตข้อความ' : 'Message Templates'}
             </h4>
             <p className="text-xs text-muted-foreground">
-              {isRu ? 'Выберите шаблон для быстрого ответа' : 'Select a template for quick reply'}
+              {isRu ? 'Выберите шаблон для быстрого ответа' : isTh ? 'เลือกเทมเพลตเพื่อตอบกลับอย่างรวดเร็ว' : 'Select a template for quick reply'}
             </p>
           </div>
 
@@ -95,7 +96,7 @@ export const QuickReplies: React.FC<QuickRepliesProps> = ({ onSelect, disabled }
                     className="text-xs data-[state=active]:bg-secondary rounded-none border-b-2 border-transparent data-[state=active]:border-primary"
                   >
                     <Zap className="h-3 w-3 mr-1" />
-                    {isRu ? 'Быстрые' : 'Quick'}
+                    {isRu ? 'Быстрые' : isTh ? 'ด่วน' : 'Quick'}
                   </TabsTrigger>
                   {categoriesWithTemplates.map((cat) => (
                     <TabsTrigger
@@ -151,9 +152,11 @@ export const QuickReplies: React.FC<QuickRepliesProps> = ({ onSelect, disabled }
 
               {templates.length === 0 && activeCategory !== 'quick' && (
                 <div className="p-4 text-center text-sm text-muted-foreground">
-                  {isRu 
+                  {isRu
                     ? 'Нет шаблонов. Создайте их в настройках.'
-                    : 'No templates. Create them in settings.'}
+                    : isTh
+                      ? 'ยังไม่มีเทมเพลต สร้างได้ในการตั้งค่า'
+                      : 'No templates. Create them in settings.'}
                 </div>
               )}
             </ScrollArea>

@@ -13,7 +13,6 @@ interface GrabTransitionCardProps {
 
 export function GrabTransitionCard({ pickupAddress, destinationAddress, className }: GrabTransitionCardProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -47,13 +46,15 @@ export function GrabTransitionCard({ pickupAddress, destinationAddress, classNam
                 Grab
               </h3>
               <div className="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-semibold text-white uppercase">
-                {isRu ? 'Партнёр' : 'Partner'}
+                {language === 'ru' ? 'Партнёр' : language === 'th' ? 'พาร์ทเนอร์' : 'Partner'}
               </div>
             </div>
             
             <p className="text-white/80 text-sm mb-3">
-              {isRu 
+              {language === 'ru'
                 ? 'Крупнейший сервис такси в Юго-Восточной Азии'
+                : language === 'th'
+                ? 'บริการเรียกรถที่ใหญ่ที่สุดในเอเชียตะวันออกเฉียงใต้'
                 : 'Southeast Asia\'s largest ride-hailing service'}
             </p>
 
@@ -65,11 +66,11 @@ export function GrabTransitionCard({ pickupAddress, destinationAddress, classNam
               </div>
               <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/15 text-xs text-white">
                 <Clock className="w-3 h-3" />
-                <span>{isRu ? '3-5 мин' : '3-5 min'}</span>
+                <span>{language === 'ru' ? '3-5 мин' : language === 'th' ? '3-5 นาที' : '3-5 min'}</span>
               </div>
               <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-white/15 text-xs text-white">
                 <Shield className="w-3 h-3" />
-                <span>{isRu ? 'Страховка' : 'Insured'}</span>
+                <span>{language === 'ru' ? 'Страховка' : language === 'th' ? 'มีประกัน' : 'Insured'}</span>
               </div>
             </div>
           </div>
@@ -84,10 +85,10 @@ export function GrabTransitionCard({ pickupAddress, destinationAddress, classNam
         <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2 text-white/70 text-xs">
             <Zap className="w-3.5 h-3.5" />
-            <span>{isRu ? 'Быстрое подключение через myUNO' : 'Quick connect via myUNO'}</span>
+            <span>{language === 'ru' ? 'Быстрое подключение через myUNO' : language === 'th' ? 'เชื่อมต่อด่วนผ่าน myUNO' : 'Quick connect via myUNO'}</span>
           </div>
           <span className="text-white font-medium text-sm">
-            {isRu ? 'Заказать →' : 'Book now →'}
+            {language === 'ru' ? 'Заказать →' : language === 'th' ? 'จองเลย →' : 'Book now →'}
           </span>
         </div>
       </motion.button>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { BackButton } from '@/components/uno/BackButton';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import {
   ECOSYSTEM_HEADER_SUBTITLE,
@@ -33,7 +34,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
   badge,
   showBack = true,
   fallbackPath = '/',
-  searchPlaceholder = 'Search...',
+  searchPlaceholder,
   searchValue,
   onSearchChange,
   onSearchClick,
@@ -43,6 +44,11 @@ export const UnifiedHeader = memo(function UnifiedHeader({
   className,
 }: UnifiedHeaderProps) {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+
+  const resolvedSearchPlaceholder =
+    searchPlaceholder ??
+    (language === 'ru' ? 'Поиск...' : language === 'th' ? 'ค้นหา...' : 'Search...');
 
   const isSearchInteractive = !!onSearchChange;
   const isSearchClickable = !!onSearchClick && !isSearchInteractive;
@@ -74,7 +80,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground pointer-events-none" />
           <Input
-            placeholder={searchPlaceholder}
+            placeholder={resolvedSearchPlaceholder}
             value={shouldBindSearchValue ? (searchValue ?? '') : undefined}
             onChange={isSearchInteractive ? (e) => onSearchChange(e.target.value) : undefined}
             onClick={isSearchClickable ? onSearchClick : undefined}

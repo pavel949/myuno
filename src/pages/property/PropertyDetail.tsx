@@ -56,21 +56,21 @@ import { TrustStrip } from '@/components/property/TrustStrip';
 import { InstallmentTimeline } from '@/components/property/InstallmentTimeline';
 import { getInstallmentPreset, type InstallmentMilestone } from '@/lib/real-estate/installmentPresets';
 
-const viewTypeLabels: Record<string, { en: string; ru: string }> = {
-  sea: { en: 'Sea View', ru: 'Вид на море' },
-  ocean: { en: 'Ocean View', ru: 'Вид на океан' },
-  pool: { en: 'Pool View', ru: 'Вид на бассейн' },
-  garden: { en: 'Garden View', ru: 'Вид на сад' },
-  city: { en: 'City View', ru: 'Вид на город' },
-  mountain: { en: 'Mountain View', ru: 'Вид на горы' },
-  lagoon: { en: 'Lagoon View', ru: 'Вид на лагуну' },
+const viewTypeLabels: Record<string, { en: string; ru: string; th: string }> = {
+  sea: { en: 'Sea View', ru: 'Вид на море', th: 'วิวทะเล' },
+  ocean: { en: 'Ocean View', ru: 'Вид на океан', th: 'วิวมหาสมุทร' },
+  pool: { en: 'Pool View', ru: 'Вид на бассейн', th: 'วิวสระว่ายน้ำ' },
+  garden: { en: 'Garden View', ru: 'Вид на сад', th: 'วิวสวน' },
+  city: { en: 'City View', ru: 'Вид на город', th: 'วิวเมือง' },
+  mountain: { en: 'Mountain View', ru: 'Вид на горы', th: 'วิวภูเขา' },
+  lagoon: { en: 'Lagoon View', ru: 'Вид на лагуну', th: 'วิวลากูน' },
 };
 
-const OWNERSHIP_LABELS: Record<string, { en: string; ru: string }> = {
-  freehold: { en: 'Freehold', ru: 'Фрихолд' },
-  leasehold: { en: 'Leasehold', ru: 'Лизхолд' },
-  company: { en: 'Thai company', ru: 'Тайская компания' },
-  foreign_company: { en: 'Foreign LLC', ru: 'Иностранная компания' },
+const OWNERSHIP_LABELS: Record<string, { en: string; ru: string; th: string }> = {
+  freehold: { en: 'Freehold', ru: 'Фрихолд', th: 'กรรมสิทธิ์สมบูรณ์ (Freehold)' },
+  leasehold: { en: 'Leasehold', ru: 'Лизхолд', th: 'สิทธิการเช่าระยะยาว (Leasehold)' },
+  company: { en: 'Thai company', ru: 'Тайская компания', th: 'บริษัทไทย' },
+  foreign_company: { en: 'Foreign LLC', ru: 'Иностранная компания', th: 'บริษัทต่างชาติ' },
 };
 
 export default function PropertyDetail() {
@@ -80,6 +80,7 @@ export default function PropertyDetail() {
   const { formatPrice } = useCurrency();
   const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
 
   const [showAllPhotos, setShowAllPhotos] = useState(false);
@@ -129,9 +130,9 @@ export default function PropertyDetail() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <Home className="w-16 h-16 text-muted-foreground/50" />
-        <h2 className="text-xl font-semibold">{isRu ? 'Объект не найден' : 'Property not found'}</h2>
+        <h2 className="text-xl font-semibold">{isRu ? 'Объект не найден' : isTh ? 'ไม่พบอสังหาริมทรัพย์' : 'Property not found'}</h2>
         <Button variant="outline" onClick={() => navigate('/property')}>
-          {isRu ? 'К списку' : 'Back to listings'}
+          {isRu ? 'К списку' : isTh ? 'กลับไปยังรายการ' : 'Back to listings'}
         </Button>
       </div>
     );
@@ -187,7 +188,8 @@ export default function PropertyDetail() {
     ? (OWNERSHIP_LABELS[property.ownership_form] ?? {
         en: property.ownership_form,
         ru: property.ownership_form,
-      })[isRu ? 'ru' : 'en']
+        th: property.ownership_form,
+      })[isRu ? 'ru' : isTh ? 'th' : 'en']
     : undefined;
 
   const openLightbox = (startIndex: number) => {
@@ -239,7 +241,7 @@ export default function PropertyDetail() {
             >
               <Button variant="ghost" size="sm" className="gap-2 text-sm">
                 <Share2 className="w-4 h-4" />
-                <span className="hidden sm:inline">{isRu ? 'Поделиться' : 'Share'}</span>
+                <span className="hidden sm:inline">{isRu ? 'Поделиться' : isTh ? 'แชร์' : 'Share'}</span>
               </Button>
             </PropertyShareSheet>
             <CompareButton
@@ -308,7 +310,7 @@ export default function PropertyDetail() {
                         <span className="font-semibold">{property.rating}</span>
                       </div>
                       <span className="text-muted-foreground">
-                        · {property.review_count || 0} {isRu ? 'отзывов' : 'reviews'}
+                        · {property.review_count || 0} {isRu ? 'отзывов' : isTh ? 'รีวิว' : 'reviews'}
                       </span>
                     </>
                   )}
@@ -320,7 +322,7 @@ export default function PropertyDetail() {
                   {property.is_verified && (
                     <span className="flex items-center gap-1 text-primary">
                       · <Shield className="w-3.5 h-3.5" />
-                      <span className="underline font-medium">{isRu ? 'Проверено' : 'Verified'}</span>
+                      <span className="underline font-medium">{isRu ? 'Проверено' : isTh ? 'ตรวจสอบแล้ว' : 'Verified'}</span>
                     </span>
                   )}
                   <span className="text-muted-foreground">
@@ -333,7 +335,7 @@ export default function PropertyDetail() {
                 <>
                   <Separator />
                   <div className="rounded-none border border-border/60 bg-muted/30 p-4 space-y-2">
-                    <h2 className="text-lg font-semibold">{isRu ? 'Продажа' : 'For sale'}</h2>
+                    <h2 className="text-lg font-semibold">{isRu ? 'Продажа' : isTh ? 'สำหรับขาย' : 'For sale'}</h2>
                     <p className="text-2xl font-bold tracking-tight">{formatPrice(salePrice)}</p>
                     {ownershipLabel && (
                       <p className="text-sm text-muted-foreground">{ownershipLabel}</p>
@@ -341,7 +343,9 @@ export default function PropertyDetail() {
                     <p className="text-xs text-muted-foreground leading-relaxed">
                       {isRu
                         ? 'Запросите детали сделки, Due Diligence и варианты оплаты у менеджера.'
-                        : 'Ask the manager for transaction details, due diligence, and payment options.'}
+                        : isTh
+                          ? 'สอบถามรายละเอียดการทำธุรกรรม การตรวจสอบทรัพย์สิน (Due Diligence) และทางเลือกการชำระเงินกับผู้จัดการ'
+                          : 'Ask the manager for transaction details, due diligence, and payment options.'}
                     </p>
                   </div>
                 </>
@@ -387,10 +391,10 @@ export default function PropertyDetail() {
               {/* Specs Grid */}
               <div className="grid grid-cols-2 xs:grid-cols-4 gap-2 lg:gap-4">
                 {[
-                  { icon: BedDouble, value: property.bedrooms || 0, label: isRu ? 'Спальни' : 'Beds' },
-                  { icon: Bath, value: property.bathrooms || 0, label: isRu ? 'Ванные' : 'Baths' },
+                  { icon: BedDouble, value: property.bedrooms || 0, label: isRu ? 'Спальни' : isTh ? 'ห้องนอน' : 'Beds' },
+                  { icon: Bath, value: property.bathrooms || 0, label: isRu ? 'Ванные' : isTh ? 'ห้องน้ำ' : 'Baths' },
                   { icon: Maximize, value: property.area_sqm || 0, label: 'м²' },
-                  { icon: Users, value: property.max_guests || rentalTerms?.max_guests || 0, label: isRu ? 'Гости' : 'Guests' },
+                  { icon: Users, value: property.max_guests || rentalTerms?.max_guests || 0, label: isRu ? 'Гости' : isTh ? 'ผู้เข้าพัก' : 'Guests' },
                 ].filter((spec) => spec.value > 0).map((spec, i) => (
                   <div key={i} className="flex flex-col items-center p-3 lg:p-5 rounded-none bg-muted/50">
                     <spec.icon className="w-5 h-5 lg:w-6 lg:h-6 text-muted-foreground mb-1" />
@@ -404,7 +408,7 @@ export default function PropertyDetail() {
               <Separator />
               <div>
                 <h2 className="text-xl lg:text-2xl font-semibold mb-4">
-                  {isRu ? 'Что есть в жилье' : 'What this place offers'}
+                  {isRu ? 'Что есть в жилье' : isTh ? 'สิ่งอำนวยความสะดวกในที่พัก' : 'What this place offers'}
                 </h2>
                 <UnitSpecs
                   floor={property.floor}
@@ -438,7 +442,7 @@ export default function PropertyDetail() {
 
               <div>
                 <h2 className="text-xl lg:text-2xl font-semibold mb-3 lg:mb-4">
-                  {isRu ? 'Об этом жилье' : 'About this place'}
+                  {isRu ? 'Об этом жилье' : isTh ? 'เกี่ยวกับที่พักนี้' : 'About this place'}
                 </h2>
                 <p className="text-muted-foreground leading-relaxed lg:text-base lg:leading-7">
                   {isRu ? property.description_ru : property.description_en}
@@ -611,21 +615,21 @@ export default function PropertyDetail() {
                   <CardContent className="p-4 space-y-3">
                     {isSaleListing ? (
                       <>
-                        <p className="text-sm text-muted-foreground">{isRu ? 'Цена' : 'Asking price'}</p>
+                        <p className="text-sm text-muted-foreground">{isRu ? 'Цена' : isTh ? 'ราคาเสนอขาย' : 'Asking price'}</p>
                         <p className="text-2xl font-bold">{formatPrice(salePrice)}</p>
                       </>
                     ) : (
                       <>
                         <p className="text-sm text-muted-foreground">
                           {tenancyModes.includes('long')
-                            ? (isRu ? 'Долгосрочная аренда' : 'Long-term rental')
-                            : (isRu ? 'Среднесрочная аренда' : 'Medium-term rental')}
+                            ? (isRu ? 'Долгосрочная аренда' : isTh ? 'เช่าระยะยาว' : 'Long-term rental')
+                            : (isRu ? 'Среднесрочная аренда' : isTh ? 'เช่าระยะกลาง' : 'Medium-term rental')}
                         </p>
                         {propertyExt.price_per_month && (
                           <p className="text-2xl font-bold">
                             {formatPrice(propertyExt.price_per_month)}
                             <span className="text-sm font-normal text-muted-foreground ml-1">
-                              /{isRu ? 'мес' : 'mo'}
+                              /{isRu ? 'мес' : isTh ? 'เดือน' : 'mo'}
                             </span>
                           </p>
                         )}
@@ -633,7 +637,9 @@ export default function PropertyDetail() {
                           <p className="text-xs text-muted-foreground">
                             {isRu
                               ? `Минимальный срок: ${propertyExt.min_lease_months} мес.`
-                              : `Minimum lease: ${propertyExt.min_lease_months} months`}
+                              : isTh
+                                ? `สัญญาเช่าขั้นต่ำ: ${propertyExt.min_lease_months} เดือน`
+                                : `Minimum lease: ${propertyExt.min_lease_months} months`}
                           </p>
                         )}
                       </>
@@ -653,13 +659,15 @@ export default function PropertyDetail() {
                       <p>
                         {isRu
                           ? 'Консьерж myUNO поможет с трансфером, визой и вопросами по бронированию.'
-                          : 'myUNO concierge can help with transfers, visas, and booking questions.'}
+                          : isTh
+                            ? 'คอนเซียร์จ myUNO ช่วยเรื่องการรับส่ง วีซ่า และคำถามเกี่ยวกับการจองได้'
+                            : 'myUNO concierge can help with transfers, visas, and booking questions.'}
                       </p>
                       <Link
                         to={APP_ROUTES.SUPPORT}
                         className="mt-1.5 inline-flex font-medium text-primary hover:underline"
                       >
-                        {isRu ? 'Связаться с поддержкой' : 'Contact myUNO support'}
+                        {isRu ? 'Связаться с поддержкой' : isTh ? 'ติดต่อฝ่ายสนับสนุน myUNO' : 'Contact myUNO support'}
                       </Link>
                     </div>
                   </CardContent>
@@ -698,13 +706,15 @@ export default function PropertyDetail() {
                     <p>
                       {isRu
                         ? 'Консьерж myUNO поможет с трансфером, визой и вопросами по бронированию.'
-                        : 'myUNO concierge can help with transfers, visas, and booking questions.'}
+                        : isTh
+                          ? 'คอนเซียร์จ myUNO ช่วยเรื่องการรับส่ง วีซ่า และคำถามเกี่ยวกับการจองได้'
+                          : 'myUNO concierge can help with transfers, visas, and booking questions.'}
                     </p>
                     <Link
                       to={APP_ROUTES.SUPPORT}
                       className="mt-1.5 inline-flex font-medium text-primary hover:underline"
                     >
-                      {isRu ? 'Связаться с поддержкой' : 'Contact myUNO support'}
+                      {isRu ? 'Связаться с поддержкой' : isTh ? 'ติดต่อฝ่ายสนับสนุน myUNO' : 'Contact myUNO support'}
                     </Link>
                   </div>
                   <GuestAssuranceCard />

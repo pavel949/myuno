@@ -14,6 +14,7 @@ import { useAuthSheet } from '@/contexts/AuthSheetContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUniversalLead } from '@/hooks/useUniversalLead';
 import type { LeadSource } from '@/lib/leadVerticalConfig';
+import type { Language } from '@/i18n';
 
 /** Map vertical-spec id → existing leadVerticalConfig id used by consultation_requests. */
 const VERTICAL_TO_LEAD_ID: Record<string, string> = {
@@ -62,24 +63,24 @@ export function getInquiryStatus(listingId: string): SavedInquiry | null {
   return readSavedInquiries().find((e) => e.listingId === listingId) ?? null;
 }
 
-const makeSchema = (lang: 'en' | 'ru') =>
+const makeSchema = (lang: Language) =>
   z.object({
     name: z
       .string()
       .trim()
-      .min(2, lang === 'ru' ? 'Имя минимум 2 символа' : 'Name must be at least 2 chars')
+      .min(2, lang === 'ru' ? 'Имя минимум 2 символа' : lang === 'th' ? 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร' : 'Name must be at least 2 chars')
       .max(100),
     phone: z
       .string()
       .trim()
-      .min(7, lang === 'ru' ? 'Введите номер телефона' : 'Enter a phone number')
+      .min(7, lang === 'ru' ? 'Введите номер телефона' : lang === 'th' ? 'กรุณากรอกหมายเลขโทรศัพท์' : 'Enter a phone number')
       .max(32)
-      .regex(/^[\d+()\-\s]+$/, lang === 'ru' ? 'Только цифры и +()-' : 'Digits and +()- only'),
+      .regex(/^[\d+()\-\s]+$/, lang === 'ru' ? 'Только цифры и +()-' : lang === 'th' ? 'ใส่ได้เฉพาะตัวเลขและ +()-' : 'Digits and +()- only'),
     email: z
       .string()
       .trim()
       .max(255)
-      .email(lang === 'ru' ? 'Неверный email' : 'Invalid email')
+      .email(lang === 'ru' ? 'Неверный email' : lang === 'th' ? 'อีเมลไม่ถูกต้อง' : 'Invalid email')
       .optional()
       .or(z.literal('')),
     preferred_date: z.string().optional().or(z.literal('')),
@@ -110,7 +111,7 @@ export function InquiryForm({
   source = 'cta', entryPoint,
 }: Props) {
   const { language } = useLanguage();
-  const lang = (language === 'ru' ? 'ru' : 'en') as 'en' | 'ru';
+  const lang = language;
   const { user } = useAuth();
   const { openAuthSheet } = useAuthSheet();
   const { submitLead, isSubmitting } = useUniversalLead();
@@ -188,7 +189,7 @@ export function InquiryForm({
       <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
-            {lang === 'ru' ? 'Оставить заявку' : 'Send inquiry'}
+            {lang === 'ru' ? 'Оставить заявку' : lang === 'th' ? 'ส่งคำขอติดต่อ' : 'Send inquiry'}
           </SheetTitle>
           <SheetDescription>{listingTitle}</SheetDescription>
         </SheetHeader>
@@ -200,7 +201,7 @@ export function InquiryForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{lang === 'ru' ? 'Имя *' : 'Name *'}</FormLabel>
+                  <FormLabel>{lang === 'ru' ? 'Имя *' : lang === 'th' ? 'ชื่อ *' : 'Name *'}</FormLabel>
                   <FormControl><Input {...field} maxLength={100} /></FormControl>
                   <FormMessage />
                 </FormItem>
@@ -211,7 +212,7 @@ export function InquiryForm({
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{lang === 'ru' ? 'Телефон / WhatsApp *' : 'Phone / WhatsApp *'}</FormLabel>
+                  <FormLabel>{lang === 'ru' ? 'Телефон / WhatsApp *' : lang === 'th' ? 'โทรศัพท์ / WhatsApp *' : 'Phone / WhatsApp *'}</FormLabel>
                   <FormControl><Input {...field} inputMode="tel" placeholder="+66 ..." maxLength={32} /></FormControl>
                   <FormMessage />
                 </FormItem>
@@ -234,7 +235,7 @@ export function InquiryForm({
                 name="preferred_date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{lang === 'ru' ? 'Дата' : 'Date'}</FormLabel>
+                    <FormLabel>{lang === 'ru' ? 'Дата' : lang === 'th' ? 'วันที่' : 'Date'}</FormLabel>
                     <FormControl><Input {...field} type="date" /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -245,7 +246,7 @@ export function InquiryForm({
                 name="guests"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{lang === 'ru' ? 'Гостей' : 'Guests'}</FormLabel>
+                    <FormLabel>{lang === 'ru' ? 'Гостей' : lang === 'th' ? 'จำนวนผู้เข้าพัก' : 'Guests'}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -266,7 +267,7 @@ export function InquiryForm({
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{lang === 'ru' ? 'Комментарий' : 'Notes'}</FormLabel>
+                  <FormLabel>{lang === 'ru' ? 'Комментарий' : lang === 'th' ? 'หมายเหตุ' : 'Notes'}</FormLabel>
                   <FormControl><Textarea {...field} rows={3} maxLength={1000} /></FormControl>
                   <FormMessage />
                 </FormItem>
@@ -275,12 +276,12 @@ export function InquiryForm({
 
             <SheetFooter className="gap-2 sm:gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                {lang === 'ru' ? 'Отмена' : 'Cancel'}
+                {lang === 'ru' ? 'Отмена' : lang === 'th' ? 'ยกเลิก' : 'Cancel'}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting
-                  ? (lang === 'ru' ? 'Отправка…' : 'Sending…')
-                  : (lang === 'ru' ? 'Отправить' : 'Send')}
+                  ? (lang === 'ru' ? 'Отправка…' : lang === 'th' ? 'กำลังส่ง…' : 'Sending…')
+                  : (lang === 'ru' ? 'Отправить' : lang === 'th' ? 'ส่ง' : 'Send')}
               </Button>
             </SheetFooter>
           </form>
@@ -290,21 +291,21 @@ export function InquiryForm({
   );
 }
 
-export function InquiryStatusBadge({ status, lang }: { status: SavedInquiry; lang: 'en' | 'ru' }) {
+export function InquiryStatusBadge({ status, lang }: { status: SavedInquiry; lang: Language }) {
   const map = {
     pending: {
       icon: Clock,
-      label: lang === 'ru' ? 'Заявка отправлена' : 'Inquiry sent',
+      label: lang === 'ru' ? 'Заявка отправлена' : lang === 'th' ? 'ส่งคำขอแล้ว' : 'Inquiry sent',
       variant: 'secondary' as const,
     },
     contacted: {
       icon: CheckCircle2,
-      label: lang === 'ru' ? 'С вами связались' : 'Contacted',
+      label: lang === 'ru' ? 'С вами связались' : lang === 'th' ? 'ติดต่อกลับแล้ว' : 'Contacted',
       variant: 'default' as const,
     },
     confirmed: {
       icon: CheckCircle2,
-      label: lang === 'ru' ? 'Подтверждено' : 'Confirmed',
+      label: lang === 'ru' ? 'Подтверждено' : lang === 'th' ? 'ยืนยันแล้ว' : 'Confirmed',
       variant: 'default' as const,
     },
   };

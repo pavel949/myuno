@@ -77,7 +77,7 @@ export default function TableReservation() {
       <AppLayout showBottomNav={false}>
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-muted-foreground">
-            {language === 'ru' ? 'Ресторан не найден' : 'Restaurant not found'}
+            {language === 'ru' ? 'Ресторан не найден' : language === 'th' ? 'ไม่พบร้านอาหาร' : 'Restaurant not found'}
           </p>
         </div>
       </AppLayout>
@@ -188,7 +188,7 @@ export default function TableReservation() {
             <BackButton fallbackPath="/restaurants" variant="ghost" />
             <div>
               <h1 className="font-semibold">
-                {language === 'ru' ? 'Бронирование столика' : 'Table Reservation'}
+                {language === 'ru' ? 'Бронирование столика' : language === 'th' ? 'จองโต๊ะ' : 'Table Reservation'}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {language === 'ru' ? restaurant.name_ru : restaurant.name_en}
@@ -237,13 +237,13 @@ export default function TableReservation() {
             onChange={setGuests}
             min={1}
             max={maxPartySize}
-            label={language === 'ru' ? 'Количество гостей' : 'Number of Guests'}
+            label={language === 'ru' ? 'Количество гостей' : language === 'th' ? 'จำนวนแขก' : 'Number of Guests'}
           />
 
           {/* Special Options */}
           <div className="space-y-3">
             <Label className="font-semibold">
-              {language === 'ru' ? 'Дополнительно' : 'Special Requests'}
+              {language === 'ru' ? 'Дополнительно' : language === 'th' ? 'คำขอพิเศษ' : 'Special Requests'}
             </Label>
             
             <div className="space-y-3">
@@ -256,7 +256,7 @@ export default function TableReservation() {
                 <label htmlFor="highchair" className="flex items-center gap-2 cursor-pointer flex-1">
                   <BabyIcon className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm">
-                    {language === 'ru' ? 'Детское кресло' : 'High chair needed'}
+                    {language === 'ru' ? 'Детское кресло' : language === 'th' ? 'ต้องการเก้าอี้เด็ก' : 'High chair needed'}
                   </span>
                 </label>
               </div>
@@ -270,15 +270,17 @@ export default function TableReservation() {
                 <label htmlFor="outdoor" className="flex items-center gap-2 cursor-pointer flex-1">
                   <Utensils className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm">
-                    {language === 'ru' ? 'Место на террасе' : 'Outdoor seating'}
+                    {language === 'ru' ? 'Место на террасе' : language === 'th' ? 'ที่นั่งกลางแจ้ง' : 'Outdoor seating'}
                   </span>
                 </label>
               </div>
             </div>
 
             <Textarea
-              placeholder={language === 'ru' 
-                ? 'Аллергии, особые пожелания...' 
+              placeholder={language === 'ru'
+                ? 'Аллергии, особые пожелания...'
+                : language === 'th'
+                ? 'อาการแพ้ คำขอพิเศษ...'
                 : 'Allergies, special requests...'}
               value={specialRequests}
               onChange={(e) => setSpecialRequests(e.target.value)}
@@ -299,11 +301,13 @@ export default function TableReservation() {
               <CreditCard className="w-5 h-5 text-warning flex-shrink-0" />
               <div>
                 <p className="font-medium text-warning">
-                  {language === 'ru' ? `Депозит: ${depositAmount}฿` : `Deposit: ${depositAmount}฿`}
+                  {language === 'ru' ? `Депозит: ${depositAmount}฿` : language === 'th' ? `เงินมัดจำ: ${depositAmount}฿` : `Deposit: ${depositAmount}฿`}
                 </p>
                 <p className="text-sm text-warning/80 mt-1">
-                  {language === 'ru' 
+                  {language === 'ru'
                     ? 'Оплата депозита онлайн через Stripe. Будет зачтён в счёт заказа.'
+                    : language === 'th'
+                    ? 'ชำระเงินมัดจำออนไลน์ผ่าน Stripe และจะถูกหักออกจากยอดบิลของคุณ'
                     : 'Pay deposit online via Stripe. Will be applied to your bill.'}
                 </p>
               </div>
@@ -313,11 +317,13 @@ export default function TableReservation() {
               <div className="w-5 h-5 rounded-full bg-success text-success-foreground flex items-center justify-center text-xs flex-shrink-0">✓</div>
               <div>
                 <p className="font-medium text-success">
-                  {language === 'ru' ? 'Бесплатное бронирование' : 'Free Reservation'}
+                  {language === 'ru' ? 'Бесплатное бронирование' : language === 'th' ? 'จองฟรี' : 'Free Reservation'}
                 </p>
                 <p className="text-sm text-success/80 mt-1">
-                  {language === 'ru' 
+                  {language === 'ru'
                     ? 'Оплата не требуется. Просто приходите в назначенное время.'
+                    : language === 'th'
+                    ? 'ไม่ต้องชำระเงิน เพียงมาตามเวลาที่จองไว้'
                     : 'No payment required. Just show up at your reserved time.'}
                 </p>
               </div>
@@ -331,9 +337,9 @@ export default function TableReservation() {
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
           disabled={!isFormValid}
-          submitLabel={depositRequired 
-            ? (language === 'ru' ? `Забронировать (${depositAmount}฿)` : `Reserve (${depositAmount}฿)`)
-            : (language === 'ru' ? 'Забронировать столик' : 'Reserve Table')
+          submitLabel={depositRequired
+            ? (language === 'ru' ? `Забронировать (${depositAmount}฿)` : language === 'th' ? `จองโต๊ะ (${depositAmount}฿)` : `Reserve (${depositAmount}฿)`)
+            : (language === 'ru' ? 'Забронировать столик' : language === 'th' ? 'จองโต๊ะ' : 'Reserve Table')
           }
         />
       </div>

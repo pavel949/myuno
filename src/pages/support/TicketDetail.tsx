@@ -10,7 +10,7 @@ import { TicketCategoryBadge } from '@/components/tickets/TicketCategoryBadge';
 import { TicketMessages } from '@/components/tickets/TicketMessages';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ru, th, enUS } from 'date-fns/locale';
 import { useTickets, type SupportTicket, type TicketMessage } from '@/hooks/useTickets';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -67,7 +67,7 @@ export default function TicketDetail() {
       <AppLayout>
         <PageContainer>
           <PageHeader 
-            title={language === 'ru' ? 'Обращение не найдено' : 'Ticket Not Found'}
+            title={language === 'ru' ? 'Обращение не найдено' : language === 'th' ? 'ไม่พบคำร้อง' : 'Ticket Not Found'}
             showBack
           />
         </PageContainer>
@@ -99,19 +99,19 @@ export default function TicketDetail() {
             <p className="text-sm text-muted-foreground mb-4">{ticket.description}</p>
             
             <div className="text-xs text-muted-foreground">
-              {language === 'ru' ? 'Создано: ' : 'Created: '}
-              {format(new Date(ticket.created_at), 'dd MMMM yyyy, HH:mm', { locale: ru })}
+              {language === 'ru' ? 'Создано: ' : language === 'th' ? 'สร้างเมื่อ: ' : 'Created: '}
+              {format(new Date(ticket.created_at), 'dd MMMM yyyy, HH:mm', { locale: language === 'ru' ? ru : language === 'th' ? th : enUS })}
             </div>
 
             {ticket.resolution && (
               <div className="mt-4 p-3 bg-success/10 border border-success/40 rounded-none">
                 <h4 className="text-sm font-medium text-success mb-1">
-                  {language === 'ru' ? 'Решение:' : 'Resolution:'}
+                  {language === 'ru' ? 'Решение:' : language === 'th' ? 'การแก้ไข:' : 'Resolution:'}
                 </h4>
                 <p className="text-sm text-success">{ticket.resolution}</p>
                 {ticket.refund_amount && (
                   <p className="text-sm text-success mt-1">
-                    {language === 'ru' ? 'Сумма возврата: ' : 'Refund amount: '}
+                    {language === 'ru' ? 'Сумма возврата: ' : language === 'th' ? 'ยอดเงินคืน: ' : 'Refund amount: '}
                     ฿{ticket.refund_amount.toLocaleString()}
                   </p>
                 )}
@@ -124,7 +124,7 @@ export default function TicketDetail() {
         <Card className="flex-1 flex flex-col min-h-[400px]">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">
-              {language === 'ru' ? 'Переписка' : 'Conversation'}
+              {language === 'ru' ? 'Переписка' : language === 'th' ? 'การสนทนา' : 'Conversation'}
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-1 p-0">

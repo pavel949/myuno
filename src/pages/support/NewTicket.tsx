@@ -18,7 +18,7 @@ export default function NewTicket() {
     <AppLayout>
       <PageContainer>
         <PageHeader 
-          title={language === 'ru' ? 'Новое обращение' : 'New Ticket'}
+          title={language === 'ru' ? 'Новое обращение' : language === 'th' ? 'คำร้องใหม่' : 'New Ticket'}
           showBack
         />
         

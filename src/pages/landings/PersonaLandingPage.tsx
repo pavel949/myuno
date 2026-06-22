@@ -59,7 +59,8 @@ interface PersonaLandingViewProps {
 const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const t = <T,>(pair: { ru: T; en: T }): T => (isRu ? pair.ru : pair.en);
+  const isTh = language === 'th';
+  const t = <T,>(pair: { ru: T; en: T; th?: T }): T => (isRu ? pair.ru : isTh ? (pair.th ?? pair.en) : pair.en);
   const theme = getPersonaTheme(landing.slug);
   const Icon = theme.icon;
 
@@ -81,7 +82,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
 
   return (
     <AppLayout>
-      <LandingSeoHead landing={landing} type="persona" language={language as 'ru' | 'en'} />
+      <LandingSeoHead landing={landing} type="persona" language={language} />
 
       {/* ─── HERO ───────────────────────────────────────────────── */}
       <header
@@ -150,7 +151,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
         {landing.pains.length > 0 ? (
           <section className="mb-12">
             <h2 className="mb-5 text-2xl font-semibold text-foreground">
-              {isRu ? 'Что вы решаете' : 'What you solve'}
+              {isRu ? 'Что вы решаете' : isTh ? 'สิ่งที่เราช่วยแก้ให้คุณ' : 'What you solve'}
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {landing.pains.map((pain, i) => (
@@ -179,7 +180,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
         {landing.services.length > 0 ? (
           <section className="mb-12">
             <h2 className="mb-5 text-2xl font-semibold text-foreground">
-              {isRu ? 'Услуги под вашу задачу' : 'Services for your goal'}
+              {isRu ? 'Услуги под вашу задачу' : isTh ? 'บริการที่ตอบโจทย์ของคุณ' : 'Services for your goal'}
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {landing.services.map((service) => (
@@ -213,11 +214,13 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           <section className="mb-12">
             <h2 className="mb-2 flex items-center gap-2 text-2xl font-semibold text-foreground">
               <Grid3x3 className="h-5 w-5" style={{ color: tokenColor(theme.color) }} />
-              {isRu ? 'Все приложения для вас' : 'All apps for you'}
+              {isRu ? 'Все приложения для вас' : isTh ? 'แอปทั้งหมดสำหรับคุณ' : 'All apps for you'}
             </h2>
             <p className="mb-5 text-sm text-muted-foreground">
               {isRu
                 ? 'Любое приложение знает, что вы пришли с этой страницы — каталог откроется уже отфильтрованным.'
+                : isTh
+                ? 'ทุกแอปจะรู้ว่าคุณมาจากหน้านี้ — แคตตาล็อกจะเปิดขึ้นพร้อมตัวกรองไว้ให้แล้ว'
                 : 'Every app knows you came from this page — the catalogue opens pre-filtered.'}
             </p>
             <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
@@ -239,6 +242,8 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
               <p className="mt-3 text-xs text-muted-foreground">
                 {isRu
                   ? `И ещё ${personaApps.length - 16} приложений в разделе «Все сервисы».`
+                  : isTh
+                  ? `และอีก ${personaApps.length - 16} แอปในหมวด “บริการทั้งหมด”`
                   : `And ${personaApps.length - 16} more in “All services”.`}
               </p>
             ) : null}
@@ -270,7 +275,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           <section className="mb-12">
             <h2 className="mb-5 flex items-center gap-2 text-2xl font-semibold text-foreground">
               <MapPin className="h-5 w-5" style={{ color: tokenColor(theme.color) }} />
-              {isRu ? 'Подходящие районы' : 'Best-fit areas'}
+              {isRu ? 'Подходящие районы' : isTh ? 'ทำเลที่เหมาะที่สุด' : 'Best-fit areas'}
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {relatedAreas.map((a) => (
@@ -303,7 +308,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           return (
             <section className="mb-12">
               <h2 className="mb-5 text-2xl font-semibold text-foreground">
-                {isRu ? 'Похожие профили' : 'Related profiles'}
+                {isRu ? 'Похожие профили' : isTh ? 'โปรไฟล์ที่ใกล้เคียง' : 'Related profiles'}
               </h2>
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {related.map((p) => {
@@ -330,7 +335,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
         {landing.faq.length > 0 ? (
           <section className="mb-12">
             <h2 className="mb-5 text-2xl font-semibold text-foreground">
-              {isRu ? 'Вопросы и ответы' : 'Questions & answers'}
+              {isRu ? 'Вопросы и ответы' : isTh ? 'คำถามที่พบบ่อย' : 'Questions & answers'}
             </h2>
             <dl className="space-y-5">
               {landing.faq.map((entry, i) => (
@@ -351,11 +356,13 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             <section className="mt-8">
               <div className="mb-4">
                 <h3 className="text-xl font-semibold text-foreground">
-                  {isRu ? 'Оставьте заявку — ответим за 24 часа' : 'Leave a request — reply within 24 hours'}
+                  {isRu ? 'Оставьте заявку — ответим за 24 часа' : isTh ? 'ฝากคำขอไว้ — เราตอบกลับภายใน 24 ชั่วโมง' : 'Leave a request — reply within 24 hours'}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {isRu
                     ? 'Мы соберём подборку под вашу задачу и пришлём в WhatsApp.'
+                    : isTh
+                    ? 'เราจะคัดสรรตัวเลือกที่ตรงกับโจทย์ของคุณ และส่งให้ทาง WhatsApp'
                     : 'We will curate options for your goal and send them via WhatsApp.'}
                 </p>
               </div>
@@ -380,11 +387,13 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           style={{ borderColor: tokenColor(theme.color, 0.4), background: tokenColor(theme.color, 0.06) }}
         >
           <h3 className="text-xl font-semibold text-foreground">
-            {isRu ? 'Готовы начать?' : 'Ready to start?'}
+            {isRu ? 'Готовы начать?' : isTh ? 'พร้อมเริ่มหรือยัง?' : 'Ready to start?'}
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
             {isRu
               ? 'Ответ дежурного — за 12 минут, без обязательств.'
+              : isTh
+              ? 'ทีมงานตอบกลับภายใน 12 นาที ไม่มีข้อผูกมัด'
               : 'Reply within 12 minutes, no commitment.'}
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">

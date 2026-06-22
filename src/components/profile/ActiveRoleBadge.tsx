@@ -16,6 +16,7 @@ const MC_ROLE_BADGE_CONFIG: Record<string, {
   icon: React.ElementType;
   labelEn: string;
   labelRu: string;
+  labelTh: string;
   color: string;
   bgColor: string;
 }> = {
@@ -23,6 +24,7 @@ const MC_ROLE_BADGE_CONFIG: Record<string, {
     icon: Shield,
     labelEn: 'Director',
     labelRu: 'Директор',
+    labelTh: 'ผู้อำนวยการ',
     color: 'text-primary',
     bgColor: 'bg-primary/10',
   },
@@ -30,6 +32,7 @@ const MC_ROLE_BADGE_CONFIG: Record<string, {
     icon: Shield,
     labelEn: 'Admin',
     labelRu: 'Администратор',
+    labelTh: 'ผู้ดูแลระบบ',
     color: 'text-primary',
     bgColor: 'bg-primary/10',
   },
@@ -37,6 +40,7 @@ const MC_ROLE_BADGE_CONFIG: Record<string, {
     icon: Briefcase,
     labelEn: 'Manager',
     labelRu: 'Менеджер',
+    labelTh: 'ผู้จัดการ',
     color: 'text-teal',
     bgColor: 'bg-teal/10',
   },
@@ -44,6 +48,7 @@ const MC_ROLE_BADGE_CONFIG: Record<string, {
     icon: Wallet,
     labelEn: 'Accountant',
     labelRu: 'Бухгалтер',
+    labelTh: 'นักบัญชี',
     color: 'text-success',
     bgColor: 'bg-success/10',
   },
@@ -51,6 +56,7 @@ const MC_ROLE_BADGE_CONFIG: Record<string, {
     icon: Users,
     labelEn: 'Staff',
     labelRu: 'Сотрудник',
+    labelTh: 'พนักงาน',
     color: 'text-warning',
     bgColor: 'bg-warning/10',
   },
@@ -61,6 +67,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
   icon: React.ElementType;
   labelEn: string;
   labelRu: string;
+  labelTh: string;
   color: string;
   bgColor: string;
 }>> = {
@@ -68,6 +75,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: User,
     labelEn: 'Guest',
     labelRu: 'Гость',
+    labelTh: 'ผู้เยี่ยมชม',
     color: 'text-muted-foreground',
     bgColor: 'bg-muted',
   },
@@ -75,6 +83,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Home,
     labelEn: 'Client',
     labelRu: 'Клиент',
+    labelTh: 'ลูกค้า',
     color: 'text-info',
     bgColor: 'bg-info/10',
   },
@@ -82,6 +91,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Plane,
     labelEn: 'Tourist',
     labelRu: 'Турист',
+    labelTh: 'นักท่องเที่ยว',
     color: 'text-accent-cyan',
     bgColor: 'bg-accent-cyan/10',
   },
@@ -89,6 +99,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Home,
     labelEn: 'Resident',
     labelRu: 'Резидент',
+    labelTh: 'ผู้พักอาศัย',
     color: 'text-success',
     bgColor: 'bg-success/10',
   },
@@ -96,6 +107,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Handshake,
     labelEn: 'Partner',
     labelRu: 'Партнёр',
+    labelTh: 'พาร์ทเนอร์',
     color: 'text-primary',
     bgColor: 'bg-primary/10',
   },
@@ -103,6 +115,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Building2,
     labelEn: 'Property Owner',
     labelRu: 'Собственник',
+    labelTh: 'เจ้าของอสังหาริมทรัพย์',
     color: 'text-teal',
     bgColor: 'bg-teal/10',
   },
@@ -110,6 +123,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Store,
     labelEn: 'Provider',
     labelRu: 'Продавец',
+    labelTh: 'ผู้ให้บริการ',
     color: 'text-accent-purple',
     bgColor: 'bg-accent-purple/10',
   },
@@ -117,6 +131,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Briefcase,
     labelEn: 'Staff',
     labelRu: 'Сотрудник',
+    labelTh: 'พนักงาน',
     color: 'text-warning',
     bgColor: 'bg-warning/10',
   },
@@ -124,6 +139,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Headphones,
     labelEn: 'Team',
     labelRu: 'Команда',
+    labelTh: 'ทีมงาน',
     color: 'text-success',
     bgColor: 'bg-success/10',
   },
@@ -131,6 +147,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Shield,
     labelEn: 'Admin',
     labelRu: 'Админ',
+    labelTh: 'ผู้ดูแลระบบ',
     color: 'text-destructive',
     bgColor: 'bg-destructive/10',
   },
@@ -138,6 +155,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Scale,
     labelEn: 'Ombudsman',
     labelRu: 'Омбудсмен',
+    labelTh: 'ผู้ตรวจการ',
     color: 'text-muted-foreground',
     bgColor: 'bg-muted',
   },
@@ -145,6 +163,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Wallet,
     labelEn: 'Finance',
     labelRu: 'Финансы',
+    labelTh: 'การเงิน',
     color: 'text-success',
     bgColor: 'bg-success/10',
   },
@@ -152,6 +171,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: Headphones,
     labelEn: 'Support',
     labelRu: 'Поддержка',
+    labelTh: 'ฝ่ายสนับสนุน',
     color: 'text-info',
     bgColor: 'bg-info/10',
   },
@@ -159,6 +179,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: TrendingUp,
     labelEn: 'Sales',
     labelRu: 'Продажи',
+    labelTh: 'ฝ่ายขาย',
     color: 'text-success',
     bgColor: 'bg-success/10',
   },
@@ -166,6 +187,7 @@ const ROLE_BADGE_CONFIG: Partial<Record<AppRole, {
     icon: LineChart,
     labelEn: 'Investor',
     labelRu: 'Инвестор',
+    labelTh: 'นักลงทุน',
     color: 'text-accent-amber',
     bgColor: 'bg-accent-amber/10',
   },
@@ -176,6 +198,7 @@ const DEFAULT_BADGE_CONFIG = {
   icon: User,
   labelEn: 'User',
   labelRu: 'Пользователь',
+  labelTh: 'ผู้ใช้',
   color: 'text-info',
   bgColor: 'bg-info/10',
 };
@@ -197,7 +220,7 @@ export function ActiveRoleBadge({ className, showLabel = true }: ActiveRoleBadge
   
   const config = mcConfig || ROLE_BADGE_CONFIG[activeRole] || DEFAULT_BADGE_CONFIG;
   const Icon = config.icon;
-  const label = language === 'ru' ? config.labelRu : config.labelEn;
+  const label = language === 'ru' ? config.labelRu : language === 'th' ? config.labelTh : config.labelEn;
 
   return (
     <div

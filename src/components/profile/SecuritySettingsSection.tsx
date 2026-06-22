@@ -101,6 +101,37 @@ const texts = {
     resetPin: 'Reset PIN',
     disablePin: 'Disable PIN',
   },
+  th: {
+    sectionTitle: 'ความปลอดภัย',
+    changePassword: 'เปลี่ยนรหัสผ่าน',
+    changePasswordDesc: 'เราแนะนำให้เปลี่ยนรหัสผ่านทุก 3 เดือน',
+    pinSettings: 'เข้าสู่ระบบด้วย PIN',
+    pinSettingsDesc: 'เข้าสู่ระบบอย่างรวดเร็วด้วยรหัส 4 หลัก',
+    activeSessions: 'เซสชันที่ใช้งานอยู่',
+    activeSessionsDesc: 'จัดการอุปกรณ์ของคุณ',
+    deleteAccount: 'ลบบัญชี',
+    deleteAccountDesc: 'ลบข้อมูลทั้งหมดของคุณอย่างถาวร',
+    currentPassword: 'รหัสผ่านปัจจุบัน',
+    newPassword: 'รหัสผ่านใหม่',
+    confirmPassword: 'ยืนยันรหัสผ่าน',
+    save: 'บันทึก',
+    cancel: 'ยกเลิก',
+    passwordChanged: 'เปลี่ยนรหัสผ่านสำเร็จ',
+    passwordError: 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน',
+    passwordMismatch: 'รหัสผ่านไม่ตรงกัน',
+    deleteConfirmTitle: 'ลบบัญชี?',
+    deleteConfirmDesc: 'การดำเนินการนี้ไม่สามารถย้อนกลับได้ ข้อมูล การจอง และยอดเงินในกระเป๋าของคุณทั้งหมดจะถูกลบ',
+    deleteConfirm: 'ใช่ ลบเลย',
+    thisDevice: 'อุปกรณ์นี้',
+    logoutAll: 'ออกจากระบบทุกอุปกรณ์',
+    logoutAllSuccess: 'ออกจากระบบทุกอุปกรณ์แล้ว',
+    configured: 'ตั้งค่าแล้ว',
+    notConfigured: 'ยังไม่ได้ตั้งค่า',
+    setupPin: 'ตั้งค่า PIN',
+    changePin: 'เปลี่ยน PIN',
+    resetPin: 'รีเซ็ต PIN',
+    disablePin: 'ปิดการใช้งาน PIN',
+  },
 };
 
 type PinDialogMode = 'setup' | 'change' | 'reset' | 'disable' | null;
@@ -109,7 +140,7 @@ export function SecuritySettingsSection() {
   const { language } = useLanguage();
   const { signOut } = useAuth();
   const { hasPin, isLoading: pinLoading, checkHasPin } = usePinManagement();
-  const t = texts[language === 'th' ? 'en' : language] || texts.en;
+  const t = texts[language] || texts.en;
   
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);

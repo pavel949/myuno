@@ -45,7 +45,7 @@ export function CashbackBadge({
         {showAmount && cashbackAmount > 0 ? (
           <span>+{cashbackAmount.toLocaleString()} ₽</span>
         ) : (
-          <span>{percentage}% {language === 'ru' ? 'кэшбэк' : 'cashback'}</span>
+          <span>{percentage}% {language === 'ru' ? 'кэшбэк' : language === 'th' ? 'เงินคืน' : 'cashback'}</span>
         )}
       </span>
     );
@@ -62,11 +62,11 @@ export function CashbackBadge({
         </div>
         <div className="flex-1">
           <div className="text-sm font-medium text-success">
-            {language === 'ru' ? `Кэшбэк ${percentage}%` : `${percentage}% Cashback`}
+            {language === 'ru' ? `Кэшбэк ${percentage}%` : language === 'th' ? `เงินคืน ${percentage}%` : `${percentage}% Cashback`}
           </div>
           {showAmount && cashbackAmount > 0 && (
             <div className="text-xs text-muted-foreground">
-              {language === 'ru' ? 'Вернём на кошелёк' : 'Back to wallet'}: +{cashbackAmount.toLocaleString()} ₽
+              {language === 'ru' ? 'Вернём на кошелёк' : language === 'th' ? 'คืนเข้ากระเป๋าเงิน' : 'Back to wallet'}: +{cashbackAmount.toLocaleString()} ₽
             </div>
           )}
         </div>
@@ -87,11 +87,13 @@ export function CashbackBadge({
           </div>
           <div className="flex-1">
             <h4 className="font-semibold text-success">
-              {language === 'ru' ? `Кэшбэк ${percentage}%` : `${percentage}% Cashback`}
+              {language === 'ru' ? `Кэшбэк ${percentage}%` : language === 'th' ? `เงินคืน ${percentage}%` : `${percentage}% Cashback`}
             </h4>
             <p className="text-sm text-muted-foreground">
-              {language === 'ru' 
+              {language === 'ru'
                 ? `Получите ${showAmount && cashbackAmount > 0 ? cashbackAmount.toLocaleString() + ' ₽' : `до ${percentage}%`} обратно на кошелёк`
+                : language === 'th'
+                ? `รับ ${showAmount && cashbackAmount > 0 ? cashbackAmount.toLocaleString() + ' ₽' : `สูงสุด ${percentage}%`} คืนเข้ากระเป๋าเงิน`
                 : `Get ${showAmount && cashbackAmount > 0 ? cashbackAmount.toLocaleString() + ' ₽' : `up to ${percentage}%`} back to wallet`}
             </p>
           </div>
@@ -117,17 +119,17 @@ export function CashbackRatesCard({ className }: { className?: string }) {
 
   if (isLoading || settings.length === 0) return null;
 
-  const categoryLabels: Record<string, { en: string; ru: string }> = {
-    default: { en: 'All services', ru: 'Все услуги' },
-    beauty: { en: 'Beauty & Spa', ru: 'Красота и СПА' },
-    food: { en: 'Food & Delivery', ru: 'Еда и доставка' },
-    property: { en: 'Real Estate', ru: 'Недвижимость' },
-    service: { en: 'Services', ru: 'Услуги' },
-    transport: { en: 'Transport', ru: 'Транспорт' },
-    fitness: { en: 'Fitness', ru: 'Фитнес' },
-    medical: { en: 'Medical', ru: 'Медицина' },
-    events: { en: 'Events', ru: 'Мероприятия' },
-    education: { en: 'Education', ru: 'Образование' },
+  const categoryLabels: Record<string, { en: string; ru: string; th: string }> = {
+    default: { en: 'All services', ru: 'Все услуги', th: 'บริการทั้งหมด' },
+    beauty: { en: 'Beauty & Spa', ru: 'Красота и СПА', th: 'ความงามและสปา' },
+    food: { en: 'Food & Delivery', ru: 'Еда и доставка', th: 'อาหารและเดลิเวอรี' },
+    property: { en: 'Real Estate', ru: 'Недвижимость', th: 'อสังหาริมทรัพย์' },
+    service: { en: 'Services', ru: 'Услуги', th: 'บริการ' },
+    transport: { en: 'Transport', ru: 'Транспорт', th: 'การเดินทาง' },
+    fitness: { en: 'Fitness', ru: 'Фитнес', th: 'ฟิตเนส' },
+    medical: { en: 'Medical', ru: 'Медицина', th: 'การแพทย์' },
+    events: { en: 'Events', ru: 'Мероприятия', th: 'อีเวนต์' },
+    education: { en: 'Education', ru: 'Образование', th: 'การศึกษา' },
   };
 
   return (
@@ -138,7 +140,7 @@ export function CashbackRatesCard({ className }: { className?: string }) {
       <div className="flex items-center gap-2 mb-3">
         <TrendingUp className="w-5 h-5 text-success" />
         <h3 className="font-semibold">
-          {language === 'ru' ? 'Ставки кэшбэка' : 'Cashback Rates'}
+          {language === 'ru' ? 'Ставки кэшбэка' : language === 'th' ? 'อัตราเงินคืน' : 'Cashback Rates'}
         </h3>
       </div>
       <div className="space-y-2">
@@ -151,7 +153,7 @@ export function CashbackRatesCard({ className }: { className?: string }) {
               {setting.percentage}%
               {setting.min_order_amount > 0 && (
                 <span className="text-xs text-muted-foreground ml-1">
-                  ({language === 'ru' ? 'от' : 'from'} {setting.min_order_amount}₽)
+                  ({language === 'ru' ? 'от' : language === 'th' ? 'ตั้งแต่' : 'from'} {setting.min_order_amount}₽)
                 </span>
               )}
             </span>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { MapPin, Loader2, Search } from 'lucide-react';
 import { useGoogleMaps } from '@/contexts/GoogleMapsContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 
@@ -67,11 +68,19 @@ export function GooglePlacesAutocomplete({
   value,
   onChange,
   onPlaceSelect,
-  placeholder = 'Search address...',
+  placeholder,
   className,
   disabled,
 }: GooglePlacesAutocompleteProps) {
   const { isLoaded, hasKey } = useGoogleMaps();
+  const { language } = useLanguage();
+  const resolvedPlaceholder =
+    placeholder ??
+    (language === 'ru'
+      ? 'Поиск адреса...'
+      : language === 'th'
+      ? 'ค้นหาที่อยู่...'
+      : 'Search address...');
   const [predictions, setPredictions] = useState<PredictionItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -195,12 +204,18 @@ export function GooglePlacesAutocomplete({
       setIsOpen(nextPredictions.length > 0);
 
       if (nextPredictions.length === 0) {
-        setErrorHint('Google suggestions are unavailable for this domain right now.');
+        setErrorHint(
+          language === 'ru'
+            ? 'Подсказки Google сейчас недоступны для этого домена.'
+            : language === 'th'
+            ? 'ขณะนี้คำแนะนำจาก Google ไม่พร้อมใช้งานสำหรับโดเมนนี้'
+            : 'Google suggestions are unavailable for this domain right now.'
+        );
       }
     } finally {
       setLoading(false);
     }
-  }, [fetchGeocoderPredictions]);
+  }, [fetchGeocoderPredictions, language]);
 
   const handleInputChange = (val: string) => {
     onChange(val);
@@ -251,7 +266,13 @@ export function GooglePlacesAutocomplete({
       });
     } catch (error) {
       logger.warn('[GooglePlacesAutocomplete] Failed to resolve selected place.', error);
-      setErrorHint('Could not load place details from Google.');
+      setErrorHint(
+        language === 'ru'
+          ? 'Не удалось загрузить данные места из Google.'
+          : language === 'th'
+          ? 'ไม่สามารถโหลดรายละเอียดสถานที่จาก Google ได้'
+          : 'Could not load place details from Google.'
+      );
     }
   };
 
@@ -260,7 +281,7 @@ export function GooglePlacesAutocomplete({
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         className={className}
         disabled={disabled}
       />
@@ -275,7 +296,7 @@ export function GooglePlacesAutocomplete({
           value={value}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => predictions.length > 0 && setIsOpen(true)}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           className={cn('pl-9 pr-8', className)}
           disabled={disabled}
           autoComplete="off"

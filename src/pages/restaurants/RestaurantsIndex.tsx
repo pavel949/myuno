@@ -22,14 +22,14 @@ import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { cn } from '@/lib/utils';
 
 const CUISINES = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'thai', labelEn: 'Thai', labelRu: 'Тайская' },
-  { id: 'seafood', labelEn: 'Seafood', labelRu: 'Морепродукты' },
-  { id: 'japanese', labelEn: 'Japanese', labelRu: 'Японская' },
-  { id: 'italian', labelEn: 'Italian', labelRu: 'Итальянская' },
-  { id: 'indian', labelEn: 'Indian', labelRu: 'Индийская' },
-  { id: 'steak', labelEn: 'Steak', labelRu: 'Стейк' },
-  { id: 'international', labelEn: 'International', labelRu: 'Международная' },
+  { id: 'all', labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { id: 'thai', labelEn: 'Thai', labelRu: 'Тайская', labelTh: 'อาหารไทย' },
+  { id: 'seafood', labelEn: 'Seafood', labelRu: 'Морепродукты', labelTh: 'อาหารทะเล' },
+  { id: 'japanese', labelEn: 'Japanese', labelRu: 'Японская', labelTh: 'อาหารญี่ปุ่น' },
+  { id: 'italian', labelEn: 'Italian', labelRu: 'Итальянская', labelTh: 'อาหารอิตาเลียน' },
+  { id: 'indian', labelEn: 'Indian', labelRu: 'Индийская', labelTh: 'อาหารอินเดีย' },
+  { id: 'steak', labelEn: 'Steak', labelRu: 'Стейк', labelTh: 'สเต๊ก' },
+  { id: 'international', labelEn: 'International', labelRu: 'Международная', labelTh: 'อาหารนานาชาติ' },
 ];
 
 const AREAS = [
@@ -41,16 +41,17 @@ const AREAS = [
 ];
 
 const SORT_OPTIONS = [
-  { id: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые' },
-  { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу' },
-  { id: 'price_low', labelEn: 'Price: Low', labelRu: 'Цена ↑' },
-  { id: 'price_high', labelEn: 'Price: High', labelRu: 'Цена ↓' },
+  { id: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые', labelTh: 'แนะนำ' },
+  { id: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу', labelTh: 'คะแนนสูงสุด' },
+  { id: 'price_low', labelEn: 'Price: Low', labelRu: 'Цена ↑', labelTh: 'ราคา ↑' },
+  { id: 'price_high', labelEn: 'Price: High', labelRu: 'Цена ↓', labelTh: 'ราคา ↓' },
 ];
 
 export default function RestaurantsIndex() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const [selectedCuisine, setSelectedCuisine] = useState('all');
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
@@ -137,13 +138,13 @@ export default function RestaurantsIndex() {
 
   return (
     <MiniAppLayout
-      title={isRu ? 'Рестораны' : 'Restaurants'}
-      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : `${filteredAndSorted.length} results`}
+      title={isRu ? 'Рестораны' : isTh ? 'ร้านอาหาร' : 'Restaurants'}
+      subtitle={isRu ? `Найдено: ${filteredAndSorted.length}` : isTh ? `พบ ${filteredAndSorted.length} รายการ` : `${filteredAndSorted.length} results`}
       fallbackPath="/"
       showSearch
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={isRu ? 'Поиск ресторанов...' : 'Search restaurants...'}
+      searchPlaceholder={isRu ? 'Поиск ресторанов...' : isTh ? 'ค้นหาร้านอาหาร...' : 'Search restaurants...'}
       showHero={false}
       categories={CUISINES}
       selectedCategory={selectedCuisine}
@@ -156,7 +157,7 @@ export default function RestaurantsIndex() {
       onMapMarkerSelect={(id) => navigate(`/restaurants/${id}`)}
       mapIconChar="🍴"
       resultsCount={filteredAndSorted.length}
-      resultsLabel={isRu ? 'Рестораны' : 'Restaurants'}
+      resultsLabel={isRu ? 'Рестораны' : isTh ? 'ร้านอาหาร' : 'Restaurants'}
       stickySubHeader={
         <div className="px-4 py-2 flex items-center gap-2 overflow-x-auto scrollbar-hide">
           {AREAS.map(a => (
@@ -182,7 +183,7 @@ export default function RestaurantsIndex() {
           >
             {SORT_OPTIONS.map(opt => (
               <option key={opt.id} value={opt.id}>
-                {isRu ? opt.labelRu : opt.labelEn}
+                {isRu ? opt.labelRu : isTh ? opt.labelTh : opt.labelEn}
               </option>
             ))}
           </select>
@@ -203,8 +204,8 @@ export default function RestaurantsIndex() {
       ) : filteredAndSorted.length === 0 ? (
         <EmptyState
           icon={UtensilsCrossed}
-          title={isRu ? 'Ничего не найдено' : 'No restaurants found'}
-          description={isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}
+          title={isRu ? 'Ничего не найдено' : isTh ? 'ไม่พบร้านอาหาร' : 'No restaurants found'}
+          description={isRu ? 'Попробуйте изменить фильтры' : isTh ? 'ลองปรับตัวกรองดู' : 'Try adjusting your filters'}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">

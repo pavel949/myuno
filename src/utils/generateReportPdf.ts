@@ -211,8 +211,10 @@ export async function generateReportPdf(options: GeneratePdfOptions): Promise<js
   const isOwnerStatement = reportType === 'owner_statement';
   const isPnl = reportType === 'pnl';
   const isPerBooking = reportType === 'per_booking';
-  const t = translations[language];
-  const catLabels = categoryLabels[language];
+  // Owner financial report copy exists in RU/EN only; Thai (or any other
+  // language) falls back to English so PDF generation never crashes.
+  const t = translations[language as keyof typeof translations] ?? translations.en;
+  const catLabels = categoryLabels[language] ?? categoryLabels.en;
 
   const doc = new jsPDF();
   await loadCyrillicFont(doc);
