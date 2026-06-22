@@ -122,12 +122,12 @@ export default function OwnerPayoutsPage() {
                 <div className="flex items-center gap-2">
                   {p.status === 'pending' && (
                     <Button size="sm" variant="outline" onClick={() => updateStatus.mutate({ id: p.id, status: 'approved' })}>
-                      <CheckCircle2 className="w-4 h-4 mr-1" />{isRu ? 'Одобрить' : 'Approve'}
+                      <CheckCircle2 className="w-4 h-4 mr-1" />{isRu ? 'Одобрить' : isTh ? 'อนุมัติ' : 'Approve'}
                     </Button>
                   )}
                   {p.status === 'approved' && (
                     <Button size="sm" onClick={() => updateStatus.mutate({ id: p.id, status: 'paid' })}>
-                      <ArrowUpRight className="w-4 h-4 mr-1" />{isRu ? 'Отметить выплаченной' : 'Mark paid'}
+                      <ArrowUpRight className="w-4 h-4 mr-1" />{isRu ? 'Отметить выплаченной' : isTh ? 'ทำเครื่องหมายว่าจ่ายแล้ว' : 'Mark paid'}
                     </Button>
                   )}
                   {p.status === 'draft' && (

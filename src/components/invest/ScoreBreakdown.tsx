@@ -21,18 +21,18 @@ interface ScoreBreakdownProps {
 
 // Score categories for real estate
 const REAL_ESTATE_CATEGORIES = [
-  { key: 'location', icon: MapPin, en: 'Location', ru: 'Локация', weight: 25 },
-  { key: 'developer', icon: Building2, en: 'Developer', ru: 'Девелопер', weight: 25 },
-  { key: 'financial', icon: TrendingUp, en: 'Financial Model', ru: 'Финансовая модель', weight: 30 },
-  { key: 'market', icon: Users, en: 'Market Demand', ru: 'Рыночный спрос', weight: 20 },
+  { key: 'location', icon: MapPin, en: 'Location', ru: 'Локация', th: 'ทำเล', weight: 25 },
+  { key: 'developer', icon: Building2, en: 'Developer', ru: 'Девелопер', th: 'ผู้พัฒนา', weight: 25 },
+  { key: 'financial', icon: TrendingUp, en: 'Financial Model', ru: 'Финансовая модель', th: 'โมเดลทางการเงิน', weight: 30 },
+  { key: 'market', icon: Users, en: 'Market Demand', ru: 'Рыночный спрос', th: 'อุปสงค์ในตลาด', weight: 20 },
 ];
 
 // Score categories for business
 const BUSINESS_CATEGORIES = [
-  { key: 'team', icon: Briefcase, en: 'Team', ru: 'Команда', weight: 30 },
-  { key: 'market', icon: BarChart3, en: 'Market', ru: 'Рынок', weight: 25 },
-  { key: 'financial', icon: TrendingUp, en: 'Financials', ru: 'Финансы', weight: 25 },
-  { key: 'product', icon: Package, en: 'Product', ru: 'Продукт', weight: 20 },
+  { key: 'team', icon: Briefcase, en: 'Team', ru: 'Команда', th: 'ทีมงาน', weight: 30 },
+  { key: 'market', icon: BarChart3, en: 'Market', ru: 'Рынок', th: 'ตลาด', weight: 25 },
+  { key: 'financial', icon: TrendingUp, en: 'Financials', ru: 'Финансы', th: 'การเงิน', weight: 25 },
+  { key: 'product', icon: Package, en: 'Product', ru: 'Продукт', th: 'ผลิตภัณฑ์', weight: 20 },
 ];
 
 export function ScoreBreakdown({
@@ -42,6 +42,7 @@ export function ScoreBreakdown({
 }: ScoreBreakdownProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (!scoreBreakdown || Object.keys(scoreBreakdown).length === 0) {
     return null;
@@ -68,7 +69,7 @@ export function ScoreBreakdown({
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center gap-2 text-sm font-medium">
         <Target className="h-4 w-4 text-primary" />
-        <span>{isRu ? 'Детализация оценки muUNO' : 'muUNO Score Breakdown'}</span>
+        <span>{isRu ? 'Детализация оценки muUNO' : isTh ? 'รายละเอียดคะแนน muUNO' : 'muUNO Score Breakdown'}</span>
       </div>
 
       <div className="space-y-3">
@@ -81,7 +82,7 @@ export function ScoreBreakdown({
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <Icon className="h-4 w-4 text-muted-foreground" />
-                  <span>{isRu ? category.ru : category.en}</span>
+                  <span>{isRu ? category.ru : isTh ? category.th : category.en}</span>
                   <span className="text-[10px] text-muted-foreground">
                     ({category.weight}%)
                   </span>

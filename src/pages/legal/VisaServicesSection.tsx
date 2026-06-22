@@ -34,13 +34,13 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <span className="text-primary">🛂</span>
-            {language === 'ru' ? 'Визовые услуги' : 'Visa Services'}
+            {language === 'ru' ? 'Визовые услуги' : language === 'th' ? 'บริการด้านวีซ่า' : 'Visa Services'}
           </h2>
           <button
             onClick={() => navigate('/legal?category=visa')}
             className="text-sm text-primary flex items-center gap-1"
           >
-            {language === 'ru' ? 'Все' : 'All'}
+            {language === 'ru' ? 'Все' : language === 'th' ? 'ทั้งหมด' : 'All'}
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -70,7 +70,7 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
                   </Badge>
                   {visa.is_popular && (
                     <Badge variant="secondary" className="text-xs">
-                      ⭐ {language === 'ru' ? 'Популярно' : 'Popular'}
+                      ⭐ {language === 'ru' ? 'Популярно' : language === 'th' ? 'ยอดนิยม' : 'Popular'}
                     </Badge>
                   )}
                 </div>
@@ -103,7 +103,7 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
                 </p>
                 {visa.government_fee && (
                   <p className="text-xs text-muted-foreground">
-                    +฿{visa.government_fee.toLocaleString()} {language === 'ru' ? 'гос.сбор' : 'gov fee'}
+                    +฿{visa.government_fee.toLocaleString()} {language === 'ru' ? 'гос.сбор' : language === 'th' ? 'ค่าธรรมเนียมราชการ' : 'gov fee'}
                   </p>
                 )}
               </div>

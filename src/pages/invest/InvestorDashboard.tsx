@@ -18,6 +18,7 @@ export default function InvestorDashboard() {
   const { user, isLoading } = useAuth();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   // Show loading while checking auth
   if (isLoading) {
@@ -32,18 +33,20 @@ export default function InvestorDashboard() {
   return (
     <>
       <Helmet>
-        <title>{isRu ? 'Мои инвестиции | myUNO' : 'My Investments | myUNO'}</title>
-        <meta 
-          name="description" 
-          content={isRu 
+        <title>{isRu ? 'Мои инвестиции | myUNO' : isTh ? 'การลงทุนของฉัน | myUNO' : 'My Investments | myUNO'}</title>
+        <meta
+          name="description"
+          content={isRu
             ? 'Управляйте своими инвестиционными заявками и отслеживайте статусы'
+            : isTh
+            ? 'จัดการคำขอการลงทุนและติดตามสถานะของคุณ'
             : 'Manage your investment applications and track statuses'
-          } 
+          }
         />
       </Helmet>
 
       <MiniAppLayout
-        title={isRu ? 'Мои инвестиции' : 'My Investments'}
+        title={isRu ? 'Мои инвестиции' : isTh ? 'การลงทุนของฉัน' : 'My Investments'}
         showSearch={false}
         fallbackPath={APP_ROUTES.INVEST}
       >

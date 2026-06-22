@@ -28,6 +28,7 @@ export function AnonymizedListingCard({ listing }: Props) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const assetMeta = BUSINESS_ASSET_CLASSES.find((a) => a.key === listing.asset_class);
   const assetLabel = assetMeta ? (isRu ? assetMeta.ru : assetMeta.en) : listing.asset_class;
@@ -44,7 +45,7 @@ export function AnonymizedListingCard({ listing }: Props) {
         <span className="text-5xl opacity-80">{assetMeta?.icon ?? '💼'}</span>
         {listing.is_anonymized && (
           <Badge variant="secondary" className="absolute top-2 right-2 gap-1">
-            <Lock className="h-3 w-3" /> {isRu ? 'Анонимно' : 'Anonymous'}
+            <Lock className="h-3 w-3" /> {isRu ? 'Анонимно' : isTh ? 'ไม่เปิดเผยตัวตน' : 'Anonymous'}
           </Badge>
         )}
         <Badge
@@ -83,9 +84,13 @@ export function AnonymizedListingCard({ listing }: Props) {
               listing.listing_type === 'operating_partner_wanted'
                 ? isRu
                   ? 'Привлекают'
+                  : isTh
+                  ? 'กำลังระดมทุน'
                   : 'Raising'
                 : isRu
                 ? 'Цена'
+                : isTh
+                ? 'ราคาเสนอ'
                 : 'Ask'}
             </div>
             <div className="font-mono font-bold text-sm">
@@ -95,7 +100,7 @@ export function AnonymizedListingCard({ listing }: Props) {
           {listing.equity_offered_pct != null && (
             <div className="text-right">
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                {isRu ? 'Доля' : 'Equity'}
+                {isRu ? 'Доля' : isTh ? 'สัดส่วนหุ้น' : 'Equity'}
               </div>
               <div className="font-mono font-bold text-sm flex items-center gap-1">
                 <TrendingUp className="h-3 w-3 text-primary" />
@@ -112,7 +117,7 @@ export function AnonymizedListingCard({ listing }: Props) {
           onClick={() => navigate(`/invest/business/${listing.slug}`)}
         >
           <Eye className="h-3.5 w-3.5" />
-          {isRu ? 'Запросить детали' : 'Request details'}
+          {isRu ? 'Запросить детали' : isTh ? 'ขอรายละเอียด' : 'Request details'}
           <ArrowRight className="h-3.5 w-3.5 ml-auto" />
         </Button>
       </CardContent>

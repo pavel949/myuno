@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 export default function ApiKeysPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: keys = [], isLoading } = useApiKeys();
   const createMutation = useCreateApiKey();
   const revokeMutation = useRevokeApiKey();
@@ -34,7 +35,7 @@ export default function ApiKeysPage() {
 
   const copyKey = (k: string) => {
     navigator.clipboard.writeText(k);
-    toast.success(isRu ? 'Скопировано' : 'Copied');
+    toast.success(isRu ? 'Скопировано' : isTh ? 'คัดลอกแล้ว' : 'Copied');
   };
 
   if (isLoading) return <div className="flex items-center justify-center min-h-[60vh]"><LoadingSpinner size="lg" /></div>;
@@ -45,14 +46,14 @@ export default function ApiKeysPage() {
         <div>
           <div className="flex items-center gap-2">
             <Key className="w-5 h-5 text-primary" />
-            <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'API ключи' : 'API Keys'}</h1>
+            <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'API ключи' : isTh ? 'คีย์ API' : 'API Keys'}</h1>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Программный доступ к данным компании. Ключи показываются один раз.' : 'Programmatic access to company data. Keys are shown only once.'}
+            {isRu ? 'Программный доступ к данным компании. Ключи показываются один раз.' : isTh ? 'การเข้าถึงข้อมูลบริษัทแบบโปรแกรม คีย์จะแสดงเพียงครั้งเดียว' : 'Programmatic access to company data. Keys are shown only once.'}
           </p>
         </div>
         <Button onClick={() => { setNewKey(null); setOpen(true); }}>
-          <Plus className="w-4 h-4 mr-1" /> {isRu ? 'Создать' : 'New key'}
+          <Plus className="w-4 h-4 mr-1" /> {isRu ? 'Создать' : isTh ? 'คีย์ใหม่' : 'New key'}
         </Button>
       </div>
 
@@ -61,6 +62,8 @@ export default function ApiKeysPage() {
           <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
           <p>{isRu
             ? 'Никогда не публикуйте ключи в frontend-коде или git. Используйте их только в серверных интеграциях.'
+            : isTh
+            ? 'อย่าเปิดเผยคีย์ในโค้ดฝั่งหน้าเว็บหรือใน git ใช้คีย์เฉพาะในการเชื่อมต่อฝั่งเซิร์ฟเวอร์เท่านั้น'
             : 'Never expose keys in frontend code or git. Use them in server-side integrations only.'}</p>
         </CardContent>
       </Card>
@@ -69,7 +72,7 @@ export default function ApiKeysPage() {
         {keys.length === 0 ? (
           <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">
             <Key className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">{isRu ? 'Нет ключей. Создайте первый, чтобы подключить интеграции.' : 'No keys yet. Create one to connect integrations.'}</p>
+            <p className="text-sm">{isRu ? 'Нет ключей. Создайте первый, чтобы подключить интеграции.' : isTh ? 'ยังไม่มีคีย์ สร้างคีย์แรกเพื่อเชื่อมต่อการผสานรวม' : 'No keys yet. Create one to connect integrations.'}</p>
           </CardContent></Card>
         ) : keys.map((k) => (
           <Card key={k.id} className={cn(k.revoked_at && 'opacity-60')}>
@@ -78,13 +81,13 @@ export default function ApiKeysPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="text-sm font-semibold truncate">{k.name}</p>
-                  {k.revoked_at && <Badge variant="outline" className="bg-destructive/10 text-destructive text-xs">{isRu ? 'Отозван' : 'Revoked'}</Badge>}
+                  {k.revoked_at && <Badge variant="outline" className="bg-destructive/10 text-destructive text-xs">{isRu ? 'Отозван' : isTh ? 'ถูกเพิกถอน' : 'Revoked'}</Badge>}
                   {k.scopes.map((s) => <Badge key={s} variant="outline" className="text-[10px]">{s}</Badge>)}
                 </div>
                 <p className="text-xs text-muted-foreground font-mono mt-0.5">{k.key_prefix}…</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  {isRu ? 'Создан' : 'Created'} {new Date(k.created_at).toLocaleDateString()}
-                  {k.last_used_at && ` · ${isRu ? 'Использован' : 'Last used'} ${new Date(k.last_used_at).toLocaleDateString()}`}
+                  {isRu ? 'Создан' : isTh ? 'สร้างเมื่อ' : 'Created'} {new Date(k.created_at).toLocaleDateString()}
+                  {k.last_used_at && ` · ${isRu ? 'Использован' : isTh ? 'ใช้ล่าสุด' : 'Last used'} ${new Date(k.last_used_at).toLocaleDateString()}`}
                 </p>
               </div>
               {!k.revoked_at && (
@@ -99,13 +102,13 @@ export default function ApiKeysPage() {
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto">
-          <SheetHeader><SheetTitle>{newKey ? (isRu ? 'Сохраните ключ' : 'Save your key') : (isRu ? 'Новый API ключ' : 'New API key')}</SheetTitle></SheetHeader>
+          <SheetHeader><SheetTitle>{newKey ? (isRu ? 'Сохраните ключ' : isTh ? 'บันทึกคีย์ของคุณ' : 'Save your key') : (isRu ? 'Новый API ключ' : isTh ? 'คีย์ API ใหม่' : 'New API key')}</SheetTitle></SheetHeader>
           <div className="space-y-4 py-4">
             {newKey ? (
               <>
                 <Card className="border-warning/30 bg-warning/5">
                   <CardContent className="p-3 text-xs">
-                    {isRu ? 'Скопируйте ключ сейчас — после закрытия он больше не будет показан.' : 'Copy now — once closed it cannot be retrieved.'}
+                    {isRu ? 'Скопируйте ключ сейчас — после закрытия он больше не будет показан.' : isTh ? 'คัดลอกตอนนี้ — เมื่อปิดแล้วจะไม่สามารถเรียกดูได้อีก' : 'Copy now — once closed it cannot be retrieved.'}
                   </CardContent>
                 </Card>
                 <div className="flex gap-2">
@@ -113,17 +116,17 @@ export default function ApiKeysPage() {
                   <Button onClick={() => copyKey(newKey)}><Copy className="w-4 h-4" /></Button>
                 </div>
                 <Button className="w-full" onClick={() => { setOpen(false); setNewKey(null); }}>
-                  {isRu ? 'Готово' : 'Done'}
+                  {isRu ? 'Готово' : isTh ? 'เสร็จสิ้น' : 'Done'}
                 </Button>
               </>
             ) : (
               <>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium">{isRu ? 'Название' : 'Name'}</label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={isRu ? 'Например: Production server' : 'e.g. Production server'} />
+                  <label className="text-xs font-medium">{isRu ? 'Название' : isTh ? 'ชื่อ' : 'Name'}</label>
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={isRu ? 'Например: Production server' : isTh ? 'เช่น Production server' : 'e.g. Production server'} />
                 </div>
                 <Button className="w-full" onClick={handleCreate} disabled={!name.trim() || createMutation.isPending}>
-                  {createMutation.isPending ? (isRu ? 'Создание…' : 'Creating…') : (isRu ? 'Создать ключ' : 'Create key')}
+                  {createMutation.isPending ? (isRu ? 'Создание…' : isTh ? 'กำลังสร้าง…' : 'Creating…') : (isRu ? 'Создать ключ' : isTh ? 'สร้างคีย์' : 'Create key')}
                 </Button>
               </>
             )}

@@ -42,9 +42,9 @@ export default function VisaServiceDetail() {
     return (
       <AppLayout>
         <div className="p-4 text-center">
-          <p>{language === 'ru' ? 'Услуга не найдена' : 'Service not found'}</p>
+          <p>{language === 'ru' ? 'Услуга не найдена' : language === 'th' ? 'ไม่พบบริการ' : 'Service not found'}</p>
           <Button onClick={() => navigate('/legal')} className="mt-4">
-            {language === 'ru' ? 'Назад' : 'Go back'}
+            {language === 'ru' ? 'Назад' : language === 'th' ? 'ย้อนกลับ' : 'Go back'}
           </Button>
         </div>
       </AppLayout>
@@ -77,7 +77,7 @@ export default function VisaServiceDetail() {
               </Badge>
               {visa.is_popular && (
                 <Badge className="bg-white/20 text-white text-xs">
-                  ⭐ {language === 'ru' ? 'Популярно' : 'Popular'}
+                  ⭐ {language === 'ru' ? 'Популярно' : language === 'th' ? 'ยอดนิยม' : 'Popular'}
                 </Badge>
               )}
             </div>
@@ -97,25 +97,25 @@ export default function VisaServiceDetail() {
             <div className="flex items-center justify-center mb-1">
               <Clock className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Срок' : 'Processing'}</p>
+            <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Срок' : language === 'th' ? 'ระยะเวลาดำเนินการ' : 'Processing'}</p>
             <p className="text-sm font-semibold">{visa.processing_time || '-'}</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
               <FileCheck className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Действие' : 'Validity'}</p>
+            <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Действие' : language === 'th' ? 'อายุการใช้งาน' : 'Validity'}</p>
             <p className="text-sm font-semibold">{visa.validity_period || '-'}</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
               <Calendar className="w-4 h-4 text-primary" />
             </div>
-            <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Продление' : 'Renewal'}</p>
+            <p className="text-xs text-muted-foreground">{language === 'ru' ? 'Продление' : language === 'th' ? 'การต่ออายุ' : 'Renewal'}</p>
             <p className="text-sm font-semibold">
-              {visa.is_renewable 
-                ? (language === 'ru' ? 'Да' : 'Yes') 
-                : (language === 'ru' ? 'Нет' : 'No')}
+              {visa.is_renewable
+                ? (language === 'ru' ? 'Да' : language === 'th' ? 'ได้' : 'Yes')
+                : (language === 'ru' ? 'Нет' : language === 'th' ? 'ไม่ได้' : 'No')}
             </p>
           </div>
         </div>
@@ -123,32 +123,32 @@ export default function VisaServiceDetail() {
         {/* Tabs */}
         <Tabs defaultValue="overview" className="px-4 pt-4">
           <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="overview">{language === 'ru' ? 'Обзор' : 'Overview'}</TabsTrigger>
-            <TabsTrigger value="documents">{language === 'ru' ? 'Документы' : 'Documents'}</TabsTrigger>
-            <TabsTrigger value="process">{language === 'ru' ? 'Процесс' : 'Process'}</TabsTrigger>
+            <TabsTrigger value="overview">{language === 'ru' ? 'Обзор' : language === 'th' ? 'ภาพรวม' : 'Overview'}</TabsTrigger>
+            <TabsTrigger value="documents">{language === 'ru' ? 'Документы' : language === 'th' ? 'เอกสาร' : 'Documents'}</TabsTrigger>
+            <TabsTrigger value="process">{language === 'ru' ? 'Процесс' : language === 'th' ? 'ขั้นตอน' : 'Process'}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 mt-4">
             {/* Pricing */}
             <div className="bg-card border border-border rounded-none p-4">
-              <h3 className="font-semibold mb-3">{language === 'ru' ? 'Стоимость' : 'Pricing'}</h3>
+              <h3 className="font-semibold mb-3">{language === 'ru' ? 'Стоимость' : language === 'th' ? 'ราคา' : 'Pricing'}</h3>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
-                    {language === 'ru' ? 'Услуги агентства' : 'Agency fee'}
+                    {language === 'ru' ? 'Услуги агентства' : language === 'th' ? 'ค่าบริการตัวแทน' : 'Agency fee'}
                   </span>
                   <span className="font-bold text-primary">฿{(visa.price || 0).toLocaleString()}</span>
                 </div>
                 {visa.government_fee && (
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">
-                      {language === 'ru' ? 'Гос. сбор' : 'Government fee'}
+                      {language === 'ru' ? 'Гос. сбор' : language === 'th' ? 'ค่าธรรมเนียมราชการ' : 'Government fee'}
                     </span>
                     <span className="font-semibold">฿{visa.government_fee.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="border-t border-border pt-2 mt-2 flex justify-between items-center">
-                  <span className="font-semibold">{language === 'ru' ? 'Итого' : 'Total'}</span>
+                  <span className="font-semibold">{language === 'ru' ? 'Итого' : language === 'th' ? 'รวมทั้งหมด' : 'Total'}</span>
                   <span className="font-bold text-lg text-primary">
                     ฿{((visa.price || 0) + (visa.government_fee || 0)).toLocaleString()}
                   </span>
@@ -161,7 +161,7 @@ export default function VisaServiceDetail() {
               <div className="bg-card border border-border rounded-none p-4">
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-warning" />
-                  {language === 'ru' ? 'Требования' : 'Requirements'}
+                  {language === 'ru' ? 'Требования' : language === 'th' ? 'ข้อกำหนด' : 'Requirements'}
                 </h3>
                 <ul className="space-y-2">
                   {(language === 'ru' ? requirements.ru : requirements.en)?.map((req, idx) => (
@@ -182,7 +182,7 @@ export default function VisaServiceDetail() {
               >
                 <h3 className="font-semibold mb-3 flex items-center gap-2">
                   <Building2 className="w-4 h-4 text-primary" />
-                  {language === 'ru' ? 'Провайдер' : 'Provider'}
+                  {language === 'ru' ? 'Провайдер' : language === 'th' ? 'ผู้ให้บริการ' : 'Provider'}
                 </h3>
                 <div className="flex items-center justify-between">
                   <div>
@@ -202,7 +202,7 @@ export default function VisaServiceDetail() {
                   {visa.provider.is_verified && (
                     <Badge variant="secondary" className="text-xs">
                       <CheckCircle2 className="w-3 h-3 mr-1" />
-                      {language === 'ru' ? 'Проверен' : 'Verified'}
+                      {language === 'ru' ? 'Проверен' : language === 'th' ? 'ยืนยันแล้ว' : 'Verified'}
                     </Badge>
                   )}
                 </div>
@@ -214,7 +214,7 @@ export default function VisaServiceDetail() {
             <div className="bg-card border border-border rounded-none p-4">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <FileText className="w-4 h-4 text-primary" />
-                {language === 'ru' ? 'Необходимые документы' : 'Required Documents'}
+                {language === 'ru' ? 'Необходимые документы' : language === 'th' ? 'เอกสารที่ต้องใช้' : 'Required Documents'}
               </h3>
               <ul className="space-y-3">
                 {(language === 'ru' ? documents.ru : documents.en)?.map((doc, idx) => (
@@ -231,7 +231,7 @@ export default function VisaServiceDetail() {
 
           <TabsContent value="process" className="space-y-4 mt-4">
             <div className="bg-card border border-border rounded-none p-4">
-              <h3 className="font-semibold mb-4">{language === 'ru' ? 'Этапы оформления' : 'Process Steps'}</h3>
+              <h3 className="font-semibold mb-4">{language === 'ru' ? 'Этапы оформления' : language === 'th' ? 'ขั้นตอนการดำเนินการ' : 'Process Steps'}</h3>
               <div className="space-y-4">
                 {(language === 'ru' ? process.ru : process.en)?.map((step, idx) => (
                   <div key={idx} className="flex gap-4">
@@ -258,11 +258,11 @@ export default function VisaServiceDetail() {
           <div className="flex gap-3 max-w-lg mx-auto">
             <Button variant="outline" className="flex-1">
               <MessageCircle className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Консультация' : 'Consult'}
+              {language === 'ru' ? 'Консультация' : language === 'th' ? 'ปรึกษา' : 'Consult'}
             </Button>
             <Button className="flex-1" onClick={() => navigate(`/legal/booking/${visa.provider_id}?visa=${visa.id}`)}>
               <Calendar className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Оформить' : 'Apply'}
+              {language === 'ru' ? 'Оформить' : language === 'th' ? 'ยื่นเรื่อง' : 'Apply'}
             </Button>
           </div>
         </div>

@@ -26,11 +26,12 @@ export default function InvestmentBusinessDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: listing, isLoading } = useBusinessListing(slug);
 
   if (isLoading) {
     return (
-      <MiniAppLayout title={isRu ? 'Загрузка...' : 'Loading...'} showSearch={false}>
+      <MiniAppLayout title={isRu ? 'Загрузка...' : isTh ? 'กำลังโหลด...' : 'Loading...'} showSearch={false}>
         <div className="space-y-4">
           <Skeleton className="h-48 rounded-none" />
           <Skeleton className="h-32 rounded-none" />
@@ -41,15 +42,15 @@ export default function InvestmentBusinessDetail() {
 
   if (!listing) {
     return (
-      <MiniAppLayout title={isRu ? 'Не найдено' : 'Not found'} showSearch={false}>
+      <MiniAppLayout title={isRu ? 'Не найдено' : isTh ? 'ไม่พบ' : 'Not found'} showSearch={false}>
         <Card>
           <CardContent className="p-8 text-center space-y-3">
             <p className="text-muted-foreground">
-              {isRu ? 'Объявление не найдено или снято с публикации.' : 'Listing not found or unpublished.'}
+              {isRu ? 'Объявление не найдено или снято с публикации.' : isTh ? 'ไม่พบประกาศหรือถูกยกเลิกการเผยแพร่แล้ว' : 'Listing not found or unpublished.'}
             </p>
             <Button onClick={() => navigate(APP_ROUTES.INVEST_BUSINESS)}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              {isRu ? 'К каталогу' : 'Back to catalog'}
+              {isRu ? 'К каталогу' : isTh ? 'กลับไปแคตตาล็อก' : 'Back to catalog'}
             </Button>
           </CardContent>
         </Card>
@@ -69,13 +70,13 @@ export default function InvestmentBusinessDetail() {
         <title>{title} | myUNO Invest</title>
         {teaser && <meta name="description" content={teaser} />}
       </Helmet>
-      <MiniAppLayout title={isRu ? 'Объявление' : 'Listing'} showSearch={false}>
+      <MiniAppLayout title={isRu ? 'Объявление' : isTh ? 'ประกาศ' : 'Listing'} showSearch={false}>
         <div className="space-y-4 pb-10">
           {/* Hero */}
           <div className="relative h-44 rounded-none bg-gradient-to-br from-primary/20 via-accent/10 to-muted/20 flex items-center justify-center overflow-hidden">
             <span className="text-7xl opacity-80">{assetMeta?.icon ?? '💼'}</span>
             <Badge variant="secondary" className="absolute top-3 right-3 gap-1">
-              <Lock className="h-3 w-3" /> {isRu ? 'Анонимно' : 'Anonymous'}
+              <Lock className="h-3 w-3" /> {isRu ? 'Анонимно' : isTh ? 'ไม่เปิดเผยตัวตน' : 'Anonymous'}
             </Badge>
             <Badge className="absolute top-3 left-3">
               {isRu ? typeLabel.ru : typeLabel.en}
@@ -104,7 +105,7 @@ export default function InvestmentBusinessDetail() {
           <div className="grid grid-cols-2 gap-3">
             <Card>
               <CardContent className="p-4">
-                <div className="text-xs text-muted-foreground">{isRu ? 'Объём' : 'Ticket'}</div>
+                <div className="text-xs text-muted-foreground">{isRu ? 'Объём' : isTh ? 'มูลค่าดีล' : 'Ticket'}</div>
                 <div className="font-mono font-bold text-lg">
                   {fmtBand(listing.ask_amount, listing.currency ?? 'THB')}
                 </div>
@@ -113,7 +114,7 @@ export default function InvestmentBusinessDetail() {
             {listing.equity_offered_pct != null && (
               <Card>
                 <CardContent className="p-4">
-                  <div className="text-xs text-muted-foreground">{isRu ? 'Доля' : 'Equity'}</div>
+                  <div className="text-xs text-muted-foreground">{isRu ? 'Доля' : isTh ? 'สัดส่วนหุ้น' : 'Equity'}</div>
                   <div className="font-mono font-bold text-lg flex items-center gap-1">
                     <TrendingUp className="h-4 w-4 text-primary" />
                     {listing.equity_offered_pct}%
@@ -125,7 +126,7 @@ export default function InvestmentBusinessDetail() {
               <Card>
                 <CardContent className="p-4">
                   <div className="text-xs text-muted-foreground">
-                    {isRu ? 'Выручка/мес' : 'Monthly revenue'}
+                    {isRu ? 'Выручка/мес' : isTh ? 'รายได้/เดือน' : 'Monthly revenue'}
                   </div>
                   <div className="font-mono font-bold text-lg">
                     {fmtBand(listing.monthly_revenue, listing.currency ?? 'THB')}
@@ -136,7 +137,7 @@ export default function InvestmentBusinessDetail() {
             {listing.staff_count != null && (
               <Card>
                 <CardContent className="p-4">
-                  <div className="text-xs text-muted-foreground">{isRu ? 'Команда' : 'Staff'}</div>
+                  <div className="text-xs text-muted-foreground">{isRu ? 'Команда' : isTh ? 'พนักงาน' : 'Staff'}</div>
                   <div className="font-mono font-bold text-lg flex items-center gap-1">
                     <Users className="h-4 w-4 text-primary" />
                     {listing.staff_count}
@@ -152,12 +153,14 @@ export default function InvestmentBusinessDetail() {
               <div className="flex items-center gap-2">
                 <Lock className="h-4 w-4 text-primary" />
                 <h3 className="font-semibold">
-                  {isRu ? 'Полная информация после интро' : 'Full details after intro'}
+                  {isRu ? 'Полная информация после интро' : isTh ? 'ข้อมูลทั้งหมดหลังการแนะนำ (intro)' : 'Full details after intro'}
                 </h3>
               </div>
               <p className="text-sm text-muted-foreground">
                 {isRu
                   ? 'Финансовая модель, точное местоположение, контакты владельца и причина продажи доступны после согласования NDA и одобрения интро нашей командой.'
+                  : isTh
+                  ? 'โมเดลทางการเงิน ตำแหน่งที่ตั้งที่แน่นอน ข้อมูลติดต่อเจ้าของ และเหตุผลในการขายจะเปิดเผยหลังลงนาม NDA และทีมงานอนุมัติการแนะนำ'
                   : 'Financials, exact location, owner contacts and reason for sale unlock after NDA + our team-approved intro.'}
               </p>
 
@@ -165,7 +168,7 @@ export default function InvestmentBusinessDetail() {
                 {listing.lease_remaining_months != null && (
                   <Badge variant="outline" className="gap-1">
                     <Calendar className="h-3 w-3" />
-                    {isRu ? 'Аренда' : 'Lease'}: {listing.lease_remaining_months} {isRu ? 'мес' : 'mo'}
+                    {isRu ? 'Аренда' : isTh ? 'สัญญาเช่า' : 'Lease'}: {listing.lease_remaining_months} {isRu ? 'мес' : isTh ? 'เดือน' : 'mo'}
                   </Badge>
                 )}
                 {listing.license_status && (
@@ -179,13 +182,13 @@ export default function InvestmentBusinessDetail() {
                 <SheetTrigger asChild>
                   <Button className="w-full gap-2">
                     <MessageSquare className="h-4 w-4" />
-                    {isRu ? 'Запросить интро' : 'Request intro'}
+                    {isRu ? 'Запросить интро' : isTh ? 'ขอการแนะนำ (intro)' : 'Request intro'}
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle>
-                      {isRu ? 'Запросить детали по объекту' : 'Request listing intro'}
+                      {isRu ? 'Запросить детали по объекту' : isTh ? 'ขอรายละเอียดของประกาศ' : 'Request listing intro'}
                     </SheetTitle>
                   </SheetHeader>
                   <div className="mt-4">
@@ -203,7 +206,7 @@ export default function InvestmentBusinessDetail() {
           </Card>
 
           <Button variant="ghost" onClick={() => navigate(-1)} className="gap-1">
-            <ArrowLeft className="h-4 w-4" /> {isRu ? 'Назад' : 'Back'}
+            <ArrowLeft className="h-4 w-4" /> {isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
           </Button>
         </div>
       </MiniAppLayout>

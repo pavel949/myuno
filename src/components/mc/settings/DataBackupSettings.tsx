@@ -16,11 +16,11 @@ import { toast } from 'sonner';
 type ExportType = 'properties' | 'crm' | 'finance' | 'reports' | 'all';
 type ExportFormat = 'json' | 'csv';
 
-const EXPORT_CATEGORIES: { type: ExportType; labelEn: string; labelRu: string; icon: React.ElementType; descEn: string; descRu: string }[] = [
-  { type: 'properties', labelEn: 'Properties', labelRu: 'Объекты', icon: Database, descEn: 'All property data and settings', descRu: 'Все данные и настройки объектов' },
-  { type: 'crm', labelEn: 'CRM Contacts', labelRu: 'CRM Контакты', icon: Users, descEn: 'Contacts, deals, activities', descRu: 'Контакты, сделки, активности' },
-  { type: 'finance', labelEn: 'Finance', labelRu: 'Финансы', icon: DollarSign, descEn: 'Transactions, invoices, reports', descRu: 'Транзакции, счета, отчёты' },
-  { type: 'reports', labelEn: 'Reports', labelRu: 'Отчёты', icon: FileBarChart, descEn: 'Analytics and generated reports', descRu: 'Аналитика и сгенерированные отчёты' },
+const EXPORT_CATEGORIES: { type: ExportType; labelEn: string; labelRu: string; labelTh: string; icon: React.ElementType; descEn: string; descRu: string; descTh: string }[] = [
+  { type: 'properties', labelEn: 'Properties', labelRu: 'Объекты', labelTh: 'ทรัพย์สิน', icon: Database, descEn: 'All property data and settings', descRu: 'Все данные и настройки объектов', descTh: 'ข้อมูลและการตั้งค่าทรัพย์สินทั้งหมด' },
+  { type: 'crm', labelEn: 'CRM Contacts', labelRu: 'CRM Контакты', labelTh: 'ผู้ติดต่อ CRM', icon: Users, descEn: 'Contacts, deals, activities', descRu: 'Контакты, сделки, активности', descTh: 'ผู้ติดต่อ ดีล และกิจกรรม' },
+  { type: 'finance', labelEn: 'Finance', labelRu: 'Финансы', labelTh: 'การเงิน', icon: DollarSign, descEn: 'Transactions, invoices, reports', descRu: 'Транзакции, счета, отчёты', descTh: 'ธุรกรรม ใบแจ้งหนี้ และรายงาน' },
+  { type: 'reports', labelEn: 'Reports', labelRu: 'Отчёты', labelTh: 'รายงาน', icon: FileBarChart, descEn: 'Analytics and generated reports', descRu: 'Аналитика и сгенерированные отчёты', descTh: 'การวิเคราะห์และรายงานที่สร้างขึ้น' },
 ];
 
 interface BackupSettings {
@@ -32,6 +32,7 @@ interface BackupSettings {
 export function DataBackupSettings() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
   const queryClient = useQueryClient();
@@ -80,11 +81,11 @@ export function DataBackupSettings() {
       a.download = `${exportType}-backup-${new Date().toISOString().slice(0, 10)}.${ext}`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(isRu ? 'Экспорт завершён' : 'Export complete');
+      toast.success(isRu ? 'Экспорт завершён' : isTh ? 'ส่งออกข้อมูลเสร็จสิ้น' : 'Export complete');
       setExportingType(null);
     },
     onError: () => {
-      toast.error(isRu ? 'Ошибка экспорта' : 'Export failed');
+      toast.error(isRu ? 'Ошибка экспорта' : isTh ? 'ส่งออกข้อมูลล้มเหลว' : 'Export failed');
       setExportingType(null);
     },
   });
@@ -101,7 +102,7 @@ export function DataBackupSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mc-backup-settings', companyId] });
-      toast.success(isRu ? 'Настройки сохранены' : 'Settings saved');
+      toast.success(isRu ? 'Настройки сохранены' : isTh ? 'บันทึกการตั้งค่าแล้ว' : 'Settings saved');
     },
   });
 
@@ -130,15 +131,15 @@ export function DataBackupSettings() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Download className="h-4 w-4" />
-            {isRu ? 'Экспорт данных' : 'Data Export'}
+            {isRu ? 'Экспорт данных' : isTh ? 'ส่งออกข้อมูล' : 'Data Export'}
           </CardTitle>
           <CardDescription className="text-xs">
-            {isRu ? 'Скачайте данные вашей компании' : 'Download your company data'}
+            {isRu ? 'Скачайте данные вашей компании' : isTh ? 'ดาวน์โหลดข้อมูลบริษัทของคุณ' : 'Download your company data'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-3">
-            <Label className="text-xs">{isRu ? 'Формат' : 'Format'}</Label>
+            <Label className="text-xs">{isRu ? 'Формат' : isTh ? 'รูปแบบ' : 'Format'}</Label>
             <Select value={format} onValueChange={(v) => setFormat(v as ExportFormat)}>
               <SelectTrigger className="w-28 h-8 text-xs">
                 <SelectValue />
@@ -160,8 +161,8 @@ export function DataBackupSettings() {
                     <Icon className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{isRu ? cat.labelRu : cat.labelEn}</p>
-                    <p className="text-[10px] text-muted-foreground">{isRu ? cat.descRu : cat.descEn}</p>
+                    <p className="text-sm font-medium">{isRu ? cat.labelRu : isTh ? cat.labelTh : cat.labelEn}</p>
+                    <p className="text-[10px] text-muted-foreground">{isRu ? cat.descRu : isTh ? cat.descTh : cat.descEn}</p>
                   </div>
                   <Button
                     variant="outline"
@@ -171,7 +172,7 @@ export function DataBackupSettings() {
                     onClick={() => exportMutation.mutate(cat.type)}
                   >
                     {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                    {isRu ? 'Скачать' : 'Export'}
+                    {isRu ? 'Скачать' : isTh ? 'ส่งออก' : 'Export'}
                   </Button>
                 </div>
               );
@@ -187,7 +188,7 @@ export function DataBackupSettings() {
             className="w-full gap-2"
           >
             {exportingType === 'all' ? <Loader2 className="h-4 w-4 animate-spin" /> : <HardDrive className="h-4 w-4" />}
-            {isRu ? 'Полный бэкап всех данных' : 'Full Backup — All Data'}
+            {isRu ? 'Полный бэкап всех данных' : isTh ? 'สำรองข้อมูลทั้งหมด' : 'Full Backup — All Data'}
           </Button>
         </CardContent>
       </Card>
@@ -197,18 +198,18 @@ export function DataBackupSettings() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            {isRu ? 'Автоматический бэкап' : 'Auto Backup'}
+            {isRu ? 'Автоматический бэкап' : isTh ? 'สำรองข้อมูลอัตโนมัติ' : 'Auto Backup'}
           </CardTitle>
           <CardDescription className="text-xs">
-            {isRu ? 'Настройте автоматическое резервное копирование' : 'Schedule automatic data backups'}
+            {isRu ? 'Настройте автоматическое резервное копирование' : isTh ? 'ตั้งเวลาสำรองข้อมูลอัตโนมัติ' : 'Schedule automatic data backups'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">{isRu ? 'Включить автобэкап' : 'Enable auto backup'}</p>
+              <p className="text-sm font-medium">{isRu ? 'Включить автобэкап' : isTh ? 'เปิดใช้งานการสำรองข้อมูลอัตโนมัติ' : 'Enable auto backup'}</p>
               <p className="text-xs text-muted-foreground">
-                {isRu ? 'Данные будут сохраняться автоматически' : 'Data will be backed up automatically'}
+                {isRu ? 'Данные будут сохраняться автоматически' : isTh ? 'ข้อมูลจะถูกสำรองโดยอัตโนมัติ' : 'Data will be backed up automatically'}
               </p>
             </div>
             <Switch checked={autoEnabled} onCheckedChange={toggleAutoBackup} />
@@ -216,18 +217,18 @@ export function DataBackupSettings() {
 
           {autoEnabled && (
             <div className="flex items-center gap-3">
-              <Label className="text-xs">{isRu ? 'Частота' : 'Frequency'}</Label>
+              <Label className="text-xs">{isRu ? 'Частота' : isTh ? 'ความถี่' : 'Frequency'}</Label>
               <Select value={autoFrequency} onValueChange={(v) => changeFrequency(v as 'weekly' | 'monthly')}>
                 <SelectTrigger className="w-36 h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="weekly">{isRu ? 'Еженедельно' : 'Weekly'}</SelectItem>
-                  <SelectItem value="monthly">{isRu ? 'Ежемесячно' : 'Monthly'}</SelectItem>
+                  <SelectItem value="weekly">{isRu ? 'Еженедельно' : isTh ? 'รายสัปดาห์' : 'Weekly'}</SelectItem>
+                  <SelectItem value="monthly">{isRu ? 'Ежемесячно' : isTh ? 'รายเดือน' : 'Monthly'}</SelectItem>
                 </SelectContent>
               </Select>
               <Badge variant="secondary" className="text-[10px]">
-                {isRu ? 'Сохраняется в облако' : 'Saved to cloud'}
+                {isRu ? 'Сохраняется в облако' : isTh ? 'บันทึกไปยังคลาวด์' : 'Saved to cloud'}
               </Badge>
             </div>
           )}

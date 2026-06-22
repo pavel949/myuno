@@ -26,37 +26,38 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-support-c
 // ═══════════════════════════════════════════
 
 interface FAQItem {
-  q: { en: string; ru: string };
-  a: { en: string; ru: string };
+  q: { en: string; ru: string; th: string };
+  a: { en: string; ru: string; th: string };
 }
 
 interface FeatureSection {
   id: string;
   icon: React.ElementType;
-  title: { en: string; ru: string };
-  description: { en: string; ru: string };
-  features: { en: string; ru: string }[];
+  title: { en: string; ru: string; th: string };
+  description: { en: string; ru: string; th: string };
+  features: { en: string; ru: string; th: string }[];
 }
 
 const FAQ_ITEMS: FAQItem[] = [
   {
-    q: { en: 'MC CRM vs Capital — where do I work deals?', ru: 'MC CRM и Capital — где что вести?' },
+    q: { en: 'MC CRM vs Capital — where do I work deals?', ru: 'MC CRM и Capital — где что вести?', th: 'MC CRM กับ Capital — ทำดีลที่ไหน?' },
     a: {
       en: 'Use MC (/mc/…) for day-to-day operations: rentals, property management, owners, and service-related pipeline. Use Capital (/capital/…) for off-plan, viewing requests, mandates, and the investor pipeline. The same person can exist in both; open the banner on a contact card to jump between pipelines.',
       ru: 'MC (/mc/…) — повседневные операции: аренда, управление объектами, собственники и сервисная воронка. Capital (/capital/…) — newbuild, запросы на показы, мандаты и инвестиционный пайплайн. Один человек может быть в обеих CRM — на карточке контакта откройте баннер, чтобы перейти в другую воронку.',
+      th: 'ใช้ MC (/mc/…) สำหรับงานประจำวัน เช่น การเช่า การบริหารทรัพย์สิน เจ้าของ และไปป์ไลน์งานบริการ ใช้ Capital (/capital/…) สำหรับโครงการ off-plan คำขอเข้าชม สัญญาฝากขาย และไปป์ไลน์นักลงทุน บุคคลเดียวกันสามารถอยู่ได้ทั้งสองระบบ เปิดแบนเนอร์บนการ์ดผู้ติดต่อเพื่อสลับระหว่างไปป์ไลน์',
     },
   },
   {
-    q: { en: 'How do I add a new property?', ru: 'Как добавить новый объект?' },
-    a: { en: 'Go to Properties → click "Add Property". Fill in the details, upload photos, and save. Once saved, activate the property slot in the Subscription section to enable PMS features (calendar, bookings, finances).', ru: 'Перейдите в Объекты → нажмите «Добавить объект». Заполните информацию, загрузите фото и сохраните. После сохранения активируйте слот объекта в разделе Подписка, чтобы включить PMS-функции (календарь, бронирования, финансы).' },
+    q: { en: 'How do I add a new property?', ru: 'Как добавить новый объект?', th: 'จะเพิ่มทรัพย์สินใหม่อย่างไร?' },
+    a: { en: 'Go to Properties → click "Add Property". Fill in the details, upload photos, and save. Once saved, activate the property slot in the Subscription section to enable PMS features (calendar, bookings, finances).', ru: 'Перейдите в Объекты → нажмите «Добавить объект». Заполните информацию, загрузите фото и сохраните. После сохранения активируйте слот объекта в разделе Подписка, чтобы включить PMS-функции (календарь, бронирования, финансы).', th: 'ไปที่ ทรัพย์สิน → คลิก "เพิ่มทรัพย์สิน" กรอกรายละเอียด อัปโหลดรูปภาพ และบันทึก เมื่อบันทึกแล้ว ให้เปิดใช้งานสล็อตทรัพย์สินในส่วนการสมัครสมาชิกเพื่อเปิดใช้ฟีเจอร์ PMS (ปฏิทิน การจอง การเงิน)' },
   },
   {
-    q: { en: 'How does the subscription work?', ru: 'Как работает подписка?' },
-    a: { en: 'You pay $25/month per active property slot. Choose a plan (Basic, Starter, Professional, Enterprise) or set a custom quantity. Pay online via Stripe or contact us on WhatsApp for offline payment. You can activate/deactivate properties at any time — billing adjusts automatically.', ru: 'Вы платите $25/мес за каждый активный слот объекта. Выберите план (Базовый, Стартовый, Профессиональный, Корпоративный) или укажите своё количество. Оплата онлайн через Stripe или оффлайн через WhatsApp. Вы можете включать/отключать объекты в любой момент — стоимость пересчитывается автоматически.' },
+    q: { en: 'How does the subscription work?', ru: 'Как работает подписка?', th: 'การสมัครสมาชิกทำงานอย่างไร?' },
+    a: { en: 'You pay $25/month per active property slot. Choose a plan (Basic, Starter, Professional, Enterprise) or set a custom quantity. Pay online via Stripe or contact us on WhatsApp for offline payment. You can activate/deactivate properties at any time — billing adjusts automatically.', ru: 'Вы платите $25/мес за каждый активный слот объекта. Выберите план (Базовый, Стартовый, Профессиональный, Корпоративный) или укажите своё количество. Оплата онлайн через Stripe или оффлайн через WhatsApp. Вы можете включать/отключать объекты в любой момент — стоимость пересчитывается автоматически.', th: 'คุณจ่าย $25/เดือน ต่อสล็อตทรัพย์สินที่ใช้งาน เลือกแพ็กเกจ (Basic, Starter, Professional, Enterprise) หรือกำหนดจำนวนเอง ชำระออนไลน์ผ่าน Stripe หรือติดต่อเราทาง WhatsApp สำหรับการชำระแบบออฟไลน์ คุณสามารถเปิด/ปิดการใช้งานทรัพย์สินได้ตลอดเวลา — ค่าใช้จ่ายจะปรับโดยอัตโนมัติ' },
   },
   {
-    q: { en: 'Can I invite team members?', ru: 'Могу ли я пригласить сотрудников?' },
-    a: { en: 'Yes! Go to Staff & Access → Invite. Enter their email and select a role (Admin, Manager, Staff, Cleaner, Maintenance). They will receive an email with login credentials. You can configure module-level permissions for each team member.', ru: 'Да! Перейдите в Сотрудники → Пригласить. Введите email и выберите роль (Администратор, Менеджер, Сотрудник, Уборщик, Техник). Им придёт письмо с данными для входа. Вы можете настроить доступ к модулям для каждого сотрудника.' },
+    q: { en: 'Can I invite team members?', ru: 'Могу ли я пригласить сотрудников?', th: 'ฉันสามารถเชิญสมาชิกในทีมได้หรือไม่?' },
+    a: { en: 'Yes! Go to Staff & Access → Invite. Enter their email and select a role (Admin, Manager, Staff, Cleaner, Maintenance). They will receive an email with login credentials. You can configure module-level permissions for each team member.', ru: 'Да! Перейдите в Сотрудники → Пригласить. Введите email и выберите роль (Администратор, Менеджер, Сотрудник, Уборщик, Техник). Им придёт письмо с данными для входа. Вы можете настроить доступ к модулям для каждого сотрудника.', th: 'ได้! ไปที่ พนักงานและสิทธิ์การเข้าถึง → เชิญ กรอกอีเมลและเลือกบทบาท (แอดมิน ผู้จัดการ พนักงาน แม่บ้าน ช่างซ่อมบำรุง) พวกเขาจะได้รับอีเมลพร้อมข้อมูลเข้าสู่ระบบ คุณสามารถกำหนดสิทธิ์ระดับโมดูลให้สมาชิกแต่ละคนได้' },
   },
   {
     q: { en: 'How do I manage bookings?', ru: 'Как управлять бронированиями?' },

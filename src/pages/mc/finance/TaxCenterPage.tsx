@@ -24,6 +24,7 @@ const STATUS_COLORS: Record<TaxFilingStatus, string> = {
 export default function TaxCenterPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { symbol: curSym } = useCityCurrency();
   const { data: filings, isLoading } = useTaxFilings('all');
   const create = useCreateTaxFiling();
@@ -46,19 +47,19 @@ export default function TaxCenterPage() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
             <Calculator className="w-7 h-7 text-primary" />
-            {isRu ? 'Налоги Таиланд' : 'Tax Center'}
+            {isRu ? 'Налоги Таиланд' : isTh ? 'ศูนย์ภาษี' : 'Tax Center'}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Расчёт WHT 3%, VAT 7%, PND 1/3/53 и квартальные декларации' : 'WHT 3%, VAT 7%, PND 1/3/53 quarterly filings'}
+            {isRu ? 'Расчёт WHT 3%, VAT 7%, PND 1/3/53 и квартальные декларации' : isTh ? 'การคำนวณ WHT 3%, VAT 7%, ภ.ง.ด. 1/3/53 และการยื่นรายไตรมาส' : 'WHT 3%, VAT 7%, PND 1/3/53 quarterly filings'}
           </p>
         </div>
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild><Button><Plus className="w-4 h-4 mr-2" />{isRu ? 'Новая декларация' : 'New filing'}</Button></SheetTrigger>
+          <SheetTrigger asChild><Button><Plus className="w-4 h-4 mr-2" />{isRu ? 'Новая декларация' : isTh ? 'ยื่นแบบใหม่' : 'New filing'}</Button></SheetTrigger>
           <SheetContent>
-            <SheetHeader><SheetTitle>{isRu ? 'Новая налоговая декларация' : 'New tax filing'}</SheetTitle></SheetHeader>
+            <SheetHeader><SheetTitle>{isRu ? 'Новая налоговая декларация' : isTh ? 'ยื่นแบบแสดงรายการภาษีใหม่' : 'New tax filing'}</SheetTitle></SheetHeader>
             <div className="space-y-3 mt-4">
               <div>
-                <Label>{isRu ? 'Тип' : 'Type'}</Label>
+                <Label>{isRu ? 'Тип' : isTh ? 'ประเภท' : 'Type'}</Label>
                 <Select value={form.filing_type} onValueChange={(v) => {
                   const t = v as TaxFilingType;
                   setForm({ ...form, filing_type: t, tax_rate: TAX_TYPE_INFO[t].defaultRate });
@@ -74,19 +75,19 @@ export default function TaxCenterPage() {
                 </Select>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div><Label>{isRu ? 'С даты' : 'From'}</Label><Input type="date" value={form.period_start} onChange={e => setForm({ ...form, period_start: e.target.value })} /></div>
-                <div><Label>{isRu ? 'По дату' : 'To'}</Label><Input type="date" value={form.period_end} onChange={e => setForm({ ...form, period_end: e.target.value })} /></div>
+                <div><Label>{isRu ? 'С даты' : isTh ? 'ตั้งแต่วันที่' : 'From'}</Label><Input type="date" value={form.period_start} onChange={e => setForm({ ...form, period_start: e.target.value })} /></div>
+                <div><Label>{isRu ? 'По дату' : isTh ? 'ถึงวันที่' : 'To'}</Label><Input type="date" value={form.period_end} onChange={e => setForm({ ...form, period_end: e.target.value })} /></div>
               </div>
-              <div><Label>{isRu ? `База, ${curSym}` : `Taxable base, ${curSym}`}</Label><Input type="number" value={form.taxable_base} onChange={e => setForm({ ...form, taxable_base: Number(e.target.value) })} /></div>
-              <div><Label>{isRu ? 'Ставка, %' : 'Rate, %'}</Label><Input type="number" step="0.1" value={form.tax_rate} onChange={e => setForm({ ...form, tax_rate: Number(e.target.value) })} /></div>
+              <div><Label>{isRu ? `База, ${curSym}` : isTh ? `ฐานภาษี, ${curSym}` : `Taxable base, ${curSym}`}</Label><Input type="number" value={form.taxable_base} onChange={e => setForm({ ...form, taxable_base: Number(e.target.value) })} /></div>
+              <div><Label>{isRu ? 'Ставка, %' : isTh ? 'อัตรา, %' : 'Rate, %'}</Label><Input type="number" step="0.1" value={form.tax_rate} onChange={e => setForm({ ...form, tax_rate: Number(e.target.value) })} /></div>
               <Card className="p-3 bg-primary/5">
-                <div className="text-xs text-muted-foreground">{isRu ? 'Налог к уплате' : 'Tax due'}</div>
+                <div className="text-xs text-muted-foreground">{isRu ? 'Налог к уплате' : isTh ? 'ภาษีที่ต้องชำระ' : 'Tax due'}</div>
                 <div className="text-2xl font-bold tabular-nums">{fmt((form.taxable_base * form.tax_rate) / 100)} {curSym}</div>
               </Card>
               <Button className="w-full" disabled={!form.taxable_base} onClick={async () => {
                 await create.mutateAsync(form);
                 setOpen(false);
-              }}>{isRu ? 'Рассчитать' : 'Calculate'}</Button>
+              }}>{isRu ? 'Рассчитать' : isTh ? 'คำนวณ' : 'Calculate'}</Button>
             </div>
           </SheetContent>
         </Sheet>
@@ -95,7 +96,7 @@ export default function TaxCenterPage() {
       {isLoading ? <Skeleton className="h-40" /> : !filings || filings.length === 0 ? (
         <Card className="p-10 text-center">
           <Calculator className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-          <p className="text-muted-foreground">{isRu ? 'Деклараций пока нет' : 'No filings yet'}</p>
+          <p className="text-muted-foreground">{isRu ? 'Деклараций пока нет' : isTh ? 'ยังไม่มีการยื่นแบบ' : 'No filings yet'}</p>
         </Card>
       ) : (
         <div className="space-y-2">
@@ -118,12 +119,12 @@ export default function TaxCenterPage() {
                 <div className="flex gap-2">
                   {f.status === 'calculated' && (
                     <Button size="sm" variant="outline" onClick={() => updateStatus.mutate({ id: f.id, status: 'filed' })}>
-                      <FileCheck2 className="w-4 h-4 mr-1" />{isRu ? 'Подано' : 'Filed'}
+                      <FileCheck2 className="w-4 h-4 mr-1" />{isRu ? 'Подано' : isTh ? 'ยื่นแล้ว' : 'Filed'}
                     </Button>
                   )}
                   {f.status === 'filed' && (
                     <Button size="sm" onClick={() => updateStatus.mutate({ id: f.id, status: 'paid' })}>
-                      {isRu ? 'Оплачено' : 'Paid'}
+                      {isRu ? 'Оплачено' : isTh ? 'ชำระแล้ว' : 'Paid'}
                     </Button>
                   )}
                 </div>

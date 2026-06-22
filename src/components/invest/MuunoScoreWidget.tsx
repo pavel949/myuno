@@ -24,6 +24,7 @@ export function MuunoScoreWidget({
 }: MuunoScoreWidgetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (score === null || score === undefined) {
     return null;
@@ -37,7 +38,7 @@ export function MuunoScoreWidget({
           bg: 'bg-success',
           bgLight: 'bg-success/10',
           border: 'border-success/30',
-          label: { en: 'Low Risk', ru: 'Низкий риск' },
+          label: { en: 'Low Risk', ru: 'Низкий риск', th: 'ความเสี่ยงต่ำ' },
           icon: CheckCircle2,
         };
       case 'medium':
@@ -46,7 +47,7 @@ export function MuunoScoreWidget({
           bg: 'bg-warning',
           bgLight: 'bg-warning/10',
           border: 'border-warning/30',
-          label: { en: 'Medium Risk', ru: 'Средний риск' },
+          label: { en: 'Medium Risk', ru: 'Средний риск', th: 'ความเสี่ยงปานกลาง' },
           icon: TrendingUp,
         };
       case 'elevated':
@@ -55,7 +56,7 @@ export function MuunoScoreWidget({
           bg: 'bg-accent-amber',
           bgLight: 'bg-accent-amber/10',
           border: 'border-accent-amber/30',
-          label: { en: 'Elevated Risk', ru: 'Повышенный риск' },
+          label: { en: 'Elevated Risk', ru: 'Повышенный риск', th: 'ความเสี่ยงค่อนข้างสูง' },
           icon: AlertTriangle,
         };
       case 'high':
@@ -64,7 +65,7 @@ export function MuunoScoreWidget({
           bg: 'bg-destructive',
           bgLight: 'bg-destructive/10',
           border: 'border-destructive/30',
-          label: { en: 'High Risk', ru: 'Высокий риск' },
+          label: { en: 'High Risk', ru: 'Высокий риск', th: 'ความเสี่ยงสูง' },
           icon: AlertTriangle,
         };
       default:
@@ -140,7 +141,7 @@ export function MuunoScoreWidget({
         )}>
           <RiskIcon className={cn('h-3 w-3', config.color)} />
           <span className={cn(styles.label, config.color, 'font-medium')}>
-            {isRu ? config.label.ru : config.label.en}
+            {isRu ? config.label.ru : isTh ? config.label.th : config.label.en}
           </span>
         </div>
       )}

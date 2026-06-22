@@ -672,7 +672,7 @@ export default function VisaImmigrationPage() {
                     <CardContent className="p-3 text-center">
                       <FileCheck className="w-4 h-4 mx-auto mb-1 text-primary" />
                       <p className="text-xs text-muted-foreground">
-                        {language === 'ru' ? 'Стоимость' : 'Cost'}
+                        {language === 'ru' ? 'Стоимость' : language === 'th' ? 'ค่าใช้จ่าย' : 'Cost'}
                       </p>
                       <p className="text-sm font-semibold">{selectedVisa.cost}</p>
                     </CardContent>
@@ -684,7 +684,7 @@ export default function VisaImmigrationPage() {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base flex items-center gap-2">
                       <FileCheck className="w-4 h-4 text-primary" />
-                      {language === 'ru' ? 'Требования' : 'Requirements'}
+                      {language === 'ru' ? 'Требования' : language === 'th' ? 'ข้อกำหนด' : 'Requirements'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
@@ -704,7 +704,7 @@ export default function VisaImmigrationPage() {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base flex items-center gap-2">
                       <Users className="w-4 h-4 text-primary" />
-                      {language === 'ru' ? 'Подходит для' : 'Best For'}
+                      {language === 'ru' ? 'Подходит для' : language === 'th' ? 'เหมาะสำหรับ' : 'Best For'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
@@ -721,7 +721,7 @@ export default function VisaImmigrationPage() {
                   className="w-full"
                   onClick={() => navigate('/legal?category=visa')}
                 >
-                  {language === 'ru' ? 'Получить помощь с визой' : 'Get Visa Assistance'}
+                  {language === 'ru' ? 'Получить помощь с визой' : language === 'th' ? 'ขอความช่วยเหลือเรื่องวีซ่า' : 'Get Visa Assistance'}
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
@@ -776,7 +776,7 @@ export default function VisaImmigrationPage() {
                 <div>
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-primary" />
-                    {language === 'ru' ? 'Шаги' : 'Steps'}
+                    {language === 'ru' ? 'Шаги' : language === 'th' ? 'ขั้นตอน' : 'Steps'}
                   </h4>
                   <ol className="space-y-2">
                     {extensionInfo.steps.map((step, idx) => (
@@ -794,7 +794,7 @@ export default function VisaImmigrationPage() {
                 <div>
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
                     <FileCheck className="w-4 h-4 text-primary" />
-                    {language === 'ru' ? 'Документы' : 'Documents'}
+                    {language === 'ru' ? 'Документы' : language === 'th' ? 'เอกสาร' : 'Documents'}
                   </h4>
                   <ul className="grid grid-cols-2 gap-2">
                     {extensionInfo.documents.map((doc, idx) => (
@@ -810,7 +810,7 @@ export default function VisaImmigrationPage() {
                 <div className="bg-muted/50 rounded-none p-3">
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
                     <Info className="w-4 h-4 text-primary" />
-                    {language === 'ru' ? 'Советы' : 'Tips'}
+                    {language === 'ru' ? 'Советы' : language === 'th' ? 'เคล็ดลับ' : 'Tips'}
                   </h4>
                   <ul className="space-y-1">
                     {extensionInfo.tips.map((tip, idx) => (
@@ -828,7 +828,7 @@ export default function VisaImmigrationPage() {
             <div>
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-primary" />
-                {language === 'ru' ? 'Иммиграционные офисы' : 'Immigration Offices'}
+                {language === 'ru' ? 'Иммиграционные офисы' : language === 'th' ? 'สำนักงานตรวจคนเข้าเมือง' : 'Immigration Offices'}
               </h3>
               <div className="space-y-3">
                 {IMMIGRATION_OFFICES.map((office, idx) => (
@@ -837,7 +837,7 @@ export default function VisaImmigrationPage() {
                       <div className="flex items-start justify-between">
                         <div>
                           <h4 className="font-semibold text-sm">
-                            {language === 'ru' ? office.name.ru : office.name.en}
+                            {language === 'ru' ? office.name.ru : language === 'th' ? office.name.th : office.name.en}
                           </h4>
                           <p className="text-xs text-muted-foreground mt-1">{office.address}</p>
                           <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
@@ -866,14 +866,14 @@ export default function VisaImmigrationPage() {
           <TabsContent value="services" className="space-y-4 mt-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold">
-                {language === 'ru' ? 'Визовые услуги' : 'Visa Services'}
+                {language === 'ru' ? 'Визовые услуги' : language === 'th' ? 'บริการด้านวีซ่า' : 'Visa Services'}
               </h3>
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => navigate('/legal?category=visa')}
               >
-                {language === 'ru' ? 'Все услуги' : 'All Services'}
+                {language === 'ru' ? 'Все услуги' : language === 'th' ? 'บริการทั้งหมด' : 'All Services'}
                 <ExternalLink className="w-3 h-3 ml-1" />
               </Button>
             </div>
@@ -889,7 +889,7 @@ export default function VisaImmigrationPage() {
                 <CardContent className="p-8 text-center">
                   <Plane className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
                   <p className="text-muted-foreground">
-                    {language === 'ru' ? 'Услуги скоро появятся' : 'Services coming soon'}
+                    {language === 'ru' ? 'Услуги скоро появятся' : language === 'th' ? 'บริการจะเปิดให้บริการเร็ว ๆ นี้' : 'Services coming soon'}
                   </p>
                 </CardContent>
               </Card>
@@ -919,7 +919,7 @@ export default function VisaImmigrationPage() {
                             </Badge>
                             {visa.is_popular && (
                               <Badge variant="secondary" className="text-xs">
-                                ⭐ {language === 'ru' ? 'Популярно' : 'Popular'}
+                                ⭐ {language === 'ru' ? 'Популярно' : language === 'th' ? 'ยอดนิยม' : 'Popular'}
                               </Badge>
                             )}
                           </div>
@@ -967,15 +967,17 @@ export default function VisaImmigrationPage() {
             <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
               <CardContent className="p-4 text-center">
                 <h4 className="font-semibold mb-1">
-                  {language === 'ru' ? 'Нужна помощь с визой?' : 'Need Visa Help?'}
+                  {language === 'ru' ? 'Нужна помощь с визой?' : language === 'th' ? 'ต้องการความช่วยเหลือเรื่องวีซ่า?' : 'Need Visa Help?'}
                 </h4>
                 <p className="text-sm text-muted-foreground mb-3">
-                  {language === 'ru' 
+                  {language === 'ru'
                     ? 'Наши партнёры помогут с оформлением любого типа визы'
+                    : language === 'th'
+                    ? 'พันธมิตรของเราพร้อมช่วยเหลือคุณเรื่องวีซ่าทุกประเภท'
                     : 'Our partners can help you with any visa type'}
                 </p>
                 <Button onClick={() => navigate('/legal?category=visa')}>
-                  {language === 'ru' ? 'Найти специалиста' : 'Find a Specialist'}
+                  {language === 'ru' ? 'Найти специалиста' : language === 'th' ? 'ค้นหาผู้เชี่ยวชาญ' : 'Find a Specialist'}
                 </Button>
               </CardContent>
             </Card>

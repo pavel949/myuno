@@ -26,10 +26,11 @@ export function InvestmentCard({
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const title = isRu ? project.title_ru : project.title_en;
   const category = INVESTMENT_CATEGORIES.find(c => c.key === project.project_type);
-  const categoryLabel = category 
+  const categoryLabel = category
     ? (isRu ? category.ru : category.en)
     : project.project_type;
   const categoryIcon = category?.icon || '💼';
@@ -126,7 +127,7 @@ export function InvestmentCard({
             {project.investment_term_months && (
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Clock className="h-3 w-3" />
-                <span>{project.investment_term_months} {isRu ? 'мес' : 'mo'}</span>
+                <span>{project.investment_term_months} {isRu ? 'мес' : isTh ? 'เดือน' : 'mo'}</span>
               </div>
             )}
           </div>
@@ -134,7 +135,7 @@ export function InvestmentCard({
           {/* Min investment */}
           {project.min_investment && (
             <div className="text-xs text-muted-foreground">
-              {isRu ? 'от' : 'from'}{' '}
+              {isRu ? 'от' : isTh ? 'เริ่มต้น' : 'from'}{' '}
               <span className="font-semibold text-foreground">
                 ${project.min_investment >= 1000 ? `${Math.round(project.min_investment / 1000)}K` : project.min_investment}
               </span>
@@ -234,7 +235,7 @@ export function InvestmentCard({
               {project.roi_projected ? `${project.roi_projected}%` : '—'}
             </div>
             <div className="text-[10px] text-muted-foreground uppercase">
-              {isRu ? 'Годовой ROI' : 'Annual ROI'}
+              {isRu ? 'Годовой ROI' : isTh ? 'ROI ต่อปี' : 'Annual ROI'}
             </div>
           </div>
           <div className="text-center border-x border-border/50">
@@ -242,7 +243,7 @@ export function InvestmentCard({
               {project.investment_term_months ? `${project.investment_term_months}` : '—'}
             </div>
             <div className="text-[10px] text-muted-foreground uppercase">
-              {isRu ? 'Месяцев' : 'Months'}
+              {isRu ? 'Месяцев' : isTh ? 'เดือน' : 'Months'}
             </div>
           </div>
           <div className="text-center">
@@ -255,7 +256,7 @@ export function InvestmentCard({
               }
             </div>
             <div className="text-[10px] text-muted-foreground uppercase">
-              {isRu ? 'Мин. вход' : 'Min Entry'}
+              {isRu ? 'Мин. вход' : isTh ? 'ขั้นต่ำ' : 'Min Entry'}
             </div>
           </div>
         </div>

@@ -161,9 +161,11 @@ export default function VisaComparePage() {
     [nationality, purpose, horizon, family],
   );
 
-  const title = isRu ? 'Какая виза на Пхукет?' : 'Which Phuket visa fits?';
+  const title = isRu ? 'Какая виза на Пхукет?' : isTh ? 'วีซ่าแบบไหนเหมาะกับภูเก็ต?' : 'Which Phuket visa fits?';
   const description = isRu
     ? 'Быстрый decision tree: не юридическая консультация, а ориентир для разговора с юристом.'
+    : isTh
+    ? 'แผนผังการตัดสินใจอย่างรวดเร็ว ไม่ใช่คำปรึกษาทางกฎหมาย ใช้เป็นแนวทางในการพูดคุยกับทนายความ'
     : 'Fast decision tree — not legal advice; use it to brief your lawyer.';
 
   const chip = (active: boolean, onClick: () => void, label: string) => (
@@ -191,25 +193,25 @@ export default function VisaComparePage() {
 
         <section className="mt-6 space-y-5 rounded-none border border-border bg-card p-4">
           <div>
-            <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Паспорт / регион' : 'Passport / region'}</p>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Паспорт / регион' : isTh ? 'หนังสือเดินทาง / ภูมิภาค' : 'Passport / region'}</p>
             <div className="flex flex-wrap gap-2 mt-2">
-              {chip(nationality === 'cis', () => setNationality('cis'), isRu ? 'СНГ' : 'CIS')}
+              {chip(nationality === 'cis', () => setNationality('cis'), isRu ? 'СНГ' : isTh ? 'CIS' : 'CIS')}
               {chip(nationality === 'western', () => setNationality('western'), isRu ? 'EU / US / UK' : 'EU / US / UK')}
-              {chip(nationality === 'other', () => setNationality('other'), isRu ? 'Другое' : 'Other')}
+              {chip(nationality === 'other', () => setNationality('other'), isRu ? 'Другое' : isTh ? 'อื่น ๆ' : 'Other')}
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Цель' : 'Primary goal'}</p>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Цель' : isTh ? 'วัตถุประสงค์หลัก' : 'Primary goal'}</p>
             <div className="flex flex-wrap gap-2 mt-2">
-              {chip(purpose === 'remote', () => setPurpose('remote'), isRu ? 'Удалёнка' : 'Remote work')}
-              {chip(purpose === 'local_job', () => setPurpose('local_job'), isRu ? 'Работа в TH' : 'Job in TH')}
-              {chip(purpose === 'retire', () => setPurpose('retire'), isRu ? 'Пенсия' : 'Retire')}
-              {chip(purpose === 'study', () => setPurpose('study'), isRu ? 'Учёба' : 'Study')}
-              {chip(purpose === 'tourism', () => setPurpose('tourism'), isRu ? 'Туризм' : 'Tourism')}
+              {chip(purpose === 'remote', () => setPurpose('remote'), isRu ? 'Удалёнка' : isTh ? 'ทำงานทางไกล' : 'Remote work')}
+              {chip(purpose === 'local_job', () => setPurpose('local_job'), isRu ? 'Работа в TH' : isTh ? 'ทำงานในไทย' : 'Job in TH')}
+              {chip(purpose === 'retire', () => setPurpose('retire'), isRu ? 'Пенсия' : isTh ? 'เกษียณ' : 'Retire')}
+              {chip(purpose === 'study', () => setPurpose('study'), isRu ? 'Учёба' : isTh ? 'เรียน' : 'Study')}
+              {chip(purpose === 'tourism', () => setPurpose('tourism'), isRu ? 'Туризм' : isTh ? 'ท่องเที่ยว' : 'Tourism')}
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Горизонт' : 'Stay horizon'}</p>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Горизонт' : isTh ? 'ระยะเวลาพำนัก' : 'Stay horizon'}</p>
             <div className="flex flex-wrap gap-2 mt-2">
               {chip(horizon === 'u3', () => setHorizon('u3'), '<3 mo')}
               {chip(horizon === '3_12', () => setHorizon('3_12'), '3–12 mo')}
@@ -217,35 +219,35 @@ export default function VisaComparePage() {
             </div>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Семья' : 'Family'}</p>
+            <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Семья' : isTh ? 'ครอบครัว' : 'Family'}</p>
             <div className="flex flex-wrap gap-2 mt-2">
-              {chip(family === 'no', () => setFamily('no'), isRu ? 'Без детей' : 'No kids')}
-              {chip(family === 'yes', () => setFamily('yes'), isRu ? 'С детьми' : 'With kids')}
+              {chip(family === 'no', () => setFamily('no'), isRu ? 'Без детей' : isTh ? 'ไม่มีบุตร' : 'No kids')}
+              {chip(family === 'yes', () => setFamily('yes'), isRu ? 'С детьми' : isTh ? 'มีบุตร' : 'With kids')}
             </div>
           </div>
         </section>
 
         <section className="mt-8 space-y-3">
-          <h2 className="text-lg font-semibold text-foreground">{isRu ? 'Рекомендованный порядок изучения' : 'Suggested order to explore'}</h2>
+          <h2 className="text-lg font-semibold text-foreground">{isRu ? 'Рекомендованный порядок изучения' : isTh ? 'ลำดับที่แนะนำให้พิจารณา' : 'Suggested order to explore'}</h2>
           {ranked.map((v, idx) => (
             <div key={v.id} className="rounded-none border border-border bg-card p-4">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[10px] font-bold text-muted-foreground">#{idx + 1}</p>
                 <span className="text-[10px] font-mono text-muted-foreground">score {v.score}</span>
               </div>
-              <h3 className="text-base font-semibold text-foreground mt-1">{isRu ? v.titleRu : v.titleEn}</h3>
-              <p className="text-xs text-foreground mt-2">{isRu ? v.fitRu : v.fitEn}</p>
-              <p className="text-xs text-destructive/90 mt-2">{isRu ? v.caveatsRu : v.caveatsEn}</p>
+              <h3 className="text-base font-semibold text-foreground mt-1">{isRu ? v.titleRu : isTh ? v.titleTh : v.titleEn}</h3>
+              <p className="text-xs text-foreground mt-2">{isRu ? v.fitRu : isTh ? v.fitTh : v.fitEn}</p>
+              <p className="text-xs text-destructive/90 mt-2">{isRu ? v.caveatsRu : isTh ? v.caveatsTh : v.caveatsEn}</p>
             </div>
           ))}
         </section>
 
         <div className="mt-8 flex flex-col gap-2">
           <Button asChild>
-            <Link to={APP_ROUTES.RELOCATION_GUIDE('visa-overview')}>{isRu ? 'Читать гайд по визам' : 'Read visa overview guide'}</Link>
+            <Link to={APP_ROUTES.RELOCATION_GUIDE('visa-overview')}>{isRu ? 'Читать гайд по визам' : isTh ? 'อ่านคู่มือภาพรวมวีซ่า' : 'Read visa overview guide'}</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link to={APP_ROUTES.VISA_IMMIGRATION}>{isRu ? 'Все визовые сервисы' : 'All visa services'}</Link>
+            <Link to={APP_ROUTES.VISA_IMMIGRATION}>{isRu ? 'Все визовые сервисы' : isTh ? 'บริการด้านวีซ่าทั้งหมด' : 'All visa services'}</Link>
           </Button>
         </div>
 

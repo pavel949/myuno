@@ -17,6 +17,7 @@ export default function InvestmentBusinessZone() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [params, setParams] = useSearchParams();
   const selectedType = params.get('type');
 
@@ -30,21 +31,23 @@ export default function InvestmentBusinessZone() {
   return (
     <>
       <Helmet>
-        <title>{isRu ? 'Бизнес и франшизы | myUNO' : 'Business & Franchises | myUNO'}</title>
+        <title>{isRu ? 'Бизнес и франшизы | myUNO' : isTh ? 'ธุรกิจและแฟรนไชส์ | myUNO' : 'Business & Franchises | myUNO'}</title>
       </Helmet>
-      <MiniAppLayout title={isRu ? 'Бизнес' : 'Business'} showSearch={false}>
+      <MiniAppLayout title={isRu ? 'Бизнес' : isTh ? 'ธุรกิจ' : 'Business'} showSearch={false}>
         <div className="space-y-5 pb-10">
           <Card className="bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
             <CardContent className="p-5 space-y-2">
               <div className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-primary" />
                 <h1 className="font-bold text-lg">
-                  {isRu ? 'Готовый бизнес и франшизы' : 'Operating business & franchises'}
+                  {isRu ? 'Готовый бизнес и франшизы' : isTh ? 'ธุรกิจที่เปิดดำเนินการและแฟรนไชส์' : 'Operating business & franchises'}
                 </h1>
               </div>
               <p className="text-sm text-muted-foreground">
                 {isRu
                   ? 'F&B, отели, ритейл, marine, импорт-экспорт, медицина — действующие проекты с операционкой.'
+                  : isTh
+                  ? 'F&B โรงแรม ค้าปลีก มารีน นำเข้า-ส่งออก การแพทย์ — โครงการที่เปิดดำเนินการพร้อมระบบปฏิบัติการ'
                   : 'F&B, hotels, retail, marine, import-export, medical — running projects with operations.'}
               </p>
             </CardContent>
@@ -61,11 +64,13 @@ export default function InvestmentBusinessZone() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm">
-                {isRu ? 'Ищете площадь / землю под бизнес?' : 'Looking for a venue / land for your business?'}
+                {isRu ? 'Ищете площадь / землю под бизнес?' : isTh ? 'กำลังมองหาสถานที่ / ที่ดินสำหรับธุรกิจ?' : 'Looking for a venue / land for your business?'}
               </p>
               <p className="text-xs text-muted-foreground line-clamp-1">
                 {isRu
                   ? 'Офисы, рестораны, склады, ритейл — аренда и продажа.'
+                  : isTh
+                  ? 'สำนักงาน ร้านอาหาร คลังสินค้า ค้าปลีก — เช่าและขาย'
                   : 'Offices, restaurants, warehouses, retail — rent and sale.'}
               </p>
             </div>
@@ -79,7 +84,7 @@ export default function InvestmentBusinessZone() {
                 className="cursor-pointer flex-shrink-0"
                 onClick={() => setParams({})}
               >
-                {isRu ? 'Все' : 'All'}
+                {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'All'}
               </Badge>
               {BUSINESS_CATEGORIES.map((cat) => (
                 <Badge
@@ -89,7 +94,7 @@ export default function InvestmentBusinessZone() {
                   onClick={() => setParams({ type: cat.key })}
                 >
                   <span className="mr-1">{cat.icon}</span>
-                  {isRu ? cat.ru : cat.en}
+                  {isRu ? cat.ru : cat.en}{/* th label not in source taxonomy → EN fallback */}
                 </Badge>
               ))}
             </div>
@@ -102,7 +107,7 @@ export default function InvestmentBusinessZone() {
               <div className="flex items-center gap-2">
                 <Lock className="h-4 w-4 text-primary" />
                 <h2 className="font-bold">
-                  {isRu ? 'Анонимные предложения' : 'Anonymous deal flow'}
+                  {isRu ? 'Анонимные предложения' : isTh ? 'ดีลแบบไม่เปิดเผยตัวตน' : 'Anonymous deal flow'}
                 </h2>
               </div>
               {loadingListings ? (
@@ -128,15 +133,17 @@ export default function InvestmentBusinessZone() {
               <CardContent className="p-8 text-center space-y-3">
                 <Construction className="h-10 w-10 text-muted-foreground mx-auto" />
                 <h3 className="font-semibold">
-                  {isRu ? 'Каталог пополняется' : 'Catalog growing'}
+                  {isRu ? 'Каталог пополняется' : isTh ? 'แคตตาล็อกกำลังเพิ่มขึ้น' : 'Catalog growing'}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {isRu
                     ? 'Готовый бизнес на продажу появится здесь в ближайших релизах. Оставьте заявку — мы подберём проект под ваш бэкграунд.'
+                    : isTh
+                    ? 'ธุรกิจพร้อมขายจะปรากฏที่นี่ในรุ่นถัดไป ส่งคำขอ — เราจะจับคู่โครงการให้เหมาะกับประสบการณ์ของคุณ'
                     : 'Businesses for sale are coming in upcoming releases. Submit a request — we will match a project to your background.'}
                 </p>
                 <Button onClick={() => navigate(APP_ROUTES.INVEST_SERVICES)}>
-                  {isRu ? 'Оставить запрос' : 'Submit request'}
+                  {isRu ? 'Оставить запрос' : isTh ? 'ส่งคำขอ' : 'Submit request'}
                 </Button>
               </CardContent>
             </Card>
@@ -155,17 +162,19 @@ export default function InvestmentBusinessZone() {
               </div>
               <div className="flex-1">
                 <h3 className="font-bold">
-                  {isRu ? 'Продаёте бизнес?' : 'Selling a business?'}
+                  {isRu ? 'Продаёте бизнес?' : isTh ? 'ขายธุรกิจอยู่หรือไม่?' : 'Selling a business?'}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isRu
                     ? 'Разместите действующий проект — F&B, отель, retail или marine.'
+                    : isTh
+                    ? 'ลงประกาศโครงการที่ดำเนินการอยู่ — F&B โรงแรม ค้าปลีก หรือมารีน'
                     : 'List your operating project — F&B, hotel, retail or marine.'}
                 </p>
               </div>
             </div>
             <Button onClick={() => navigate(APP_ROUTES.INVEST_RAISE)} className="w-full gap-2">
-              {isRu ? 'Разместить' : 'List a business'}
+              {isRu ? 'Разместить' : isTh ? 'ลงประกาศ' : 'List a business'}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </section>

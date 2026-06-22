@@ -20,6 +20,7 @@ interface QuizOption {
   id: string;
   labelEn: string;
   labelRu: string;
+  labelTh: string;
   emoji: string;
 }
 
@@ -27,6 +28,7 @@ interface QuizStep {
   id: string;
   questionEn: string;
   questionRu: string;
+  questionTh: string;
   options: QuizOption[];
 }
 
@@ -35,43 +37,47 @@ const QUIZ_STEPS: QuizStep[] = [
     id: 'purpose',
     questionEn: 'What brings you to Thailand?',
     questionRu: 'Зачем вы приезжаете в Таиланд?',
+    questionTh: 'อะไรที่พาคุณมาประเทศไทย?',
     options: [
-      { id: 'tourism', labelEn: 'Tourism / Vacation', labelRu: 'Туризм / Отпуск', emoji: '🏖️' },
-      { id: 'work', labelEn: 'Work / Business', labelRu: 'Работа / Бизнес', emoji: '💼' },
-      { id: 'retirement', labelEn: 'Retirement', labelRu: 'Пенсия / Retirement', emoji: '🌅' },
-      { id: 'study', labelEn: 'Study / Education', labelRu: 'Учёба / Образование', emoji: '📚' },
+      { id: 'tourism', labelEn: 'Tourism / Vacation', labelRu: 'Туризм / Отпуск', labelTh: 'ท่องเที่ยว / พักผ่อน', emoji: '🏖️' },
+      { id: 'work', labelEn: 'Work / Business', labelRu: 'Работа / Бизнес', labelTh: 'ทำงาน / ธุรกิจ', emoji: '💼' },
+      { id: 'retirement', labelEn: 'Retirement', labelRu: 'Пенсия / Retirement', labelTh: 'เกษียณอายุ', emoji: '🌅' },
+      { id: 'study', labelEn: 'Study / Education', labelRu: 'Учёба / Образование', labelTh: 'เรียน / การศึกษา', emoji: '📚' },
     ],
   },
   {
     id: 'duration',
     questionEn: 'How long do you plan to stay?',
     questionRu: 'Как долго планируете оставаться?',
+    questionTh: 'คุณวางแผนพำนักนานแค่ไหน?',
     options: [
-      { id: 'short', labelEn: 'Up to 30 days', labelRu: 'До 30 дней', emoji: '📅' },
-      { id: 'medium', labelEn: '1–3 months', labelRu: '1–3 месяца', emoji: '🗓️' },
-      { id: 'long', labelEn: '3–12 months', labelRu: '3–12 месяцев', emoji: '📆' },
-      { id: 'permanent', labelEn: 'Over 1 year', labelRu: 'Более 1 года', emoji: '🏠' },
+      { id: 'short', labelEn: 'Up to 30 days', labelRu: 'До 30 дней', labelTh: 'ไม่เกิน 30 วัน', emoji: '📅' },
+      { id: 'medium', labelEn: '1–3 months', labelRu: '1–3 месяца', labelTh: '1–3 เดือน', emoji: '🗓️' },
+      { id: 'long', labelEn: '3–12 months', labelRu: '3–12 месяцев', labelTh: '3–12 เดือน', emoji: '📆' },
+      { id: 'permanent', labelEn: 'Over 1 year', labelRu: 'Более 1 года', labelTh: 'มากกว่า 1 ปี', emoji: '🏠' },
     ],
   },
   {
     id: 'nationality',
     questionEn: 'Your passport type?',
     questionRu: 'Тип вашего паспорта?',
+    questionTh: 'หนังสือเดินทางของคุณประเภทใด?',
     options: [
-      { id: 'russia', labelEn: 'Russia / CIS', labelRu: 'Россия / СНГ', emoji: '🇷🇺' },
-      { id: 'eu', labelEn: 'EU / UK', labelRu: 'ЕС / Великобритания', emoji: '🇪🇺' },
-      { id: 'us', labelEn: 'USA / Canada / Australia', labelRu: 'США / Канада / Австралия', emoji: '🇺🇸' },
-      { id: 'other', labelEn: 'Other', labelRu: 'Другой', emoji: '🌍' },
+      { id: 'russia', labelEn: 'Russia / CIS', labelRu: 'Россия / СНГ', labelTh: 'รัสเซีย / CIS', emoji: '🇷🇺' },
+      { id: 'eu', labelEn: 'EU / UK', labelRu: 'ЕС / Великобритания', labelTh: 'สหภาพยุโรป / สหราชอาณาจักร', emoji: '🇪🇺' },
+      { id: 'us', labelEn: 'USA / Canada / Australia', labelRu: 'США / Канада / Австралия', labelTh: 'สหรัฐฯ / แคนาดา / ออสเตรเลีย', emoji: '🇺🇸' },
+      { id: 'other', labelEn: 'Other', labelRu: 'Другой', labelTh: 'อื่น ๆ', emoji: '🌍' },
     ],
   },
   {
     id: 'family',
     questionEn: 'Traveling with family?',
     questionRu: 'Едете с семьёй?',
+    questionTh: 'เดินทางพร้อมครอบครัวหรือไม่?',
     options: [
-      { id: 'solo', labelEn: 'Solo', labelRu: 'Один / Одна', emoji: '🧑' },
-      { id: 'couple', labelEn: 'With partner', labelRu: 'С партнёром', emoji: '👫' },
-      { id: 'family_kids', labelEn: 'With children', labelRu: 'С детьми', emoji: '👨‍👩‍👧‍👦' },
+      { id: 'solo', labelEn: 'Solo', labelRu: 'Один / Одна', labelTh: 'คนเดียว', emoji: '🧑' },
+      { id: 'couple', labelEn: 'With partner', labelRu: 'С партнёром', labelTh: 'กับคู่รัก', emoji: '👫' },
+      { id: 'family_kids', labelEn: 'With children', labelRu: 'С детьми', labelTh: 'กับบุตรหลาน', emoji: '👨‍👩‍👧‍👦' },
     ],
   },
 ];
@@ -79,12 +85,14 @@ const QUIZ_STEPS: QuizStep[] = [
 interface VisaResult {
   titleEn: string;
   titleRu: string;
+  titleTh: string;
   descEn: string;
   descRu: string;
+  descTh: string;
   duration: string;
   cost: string;
   complexity: 'easy' | 'medium' | 'hard';
-  tips: { en: string; ru: string }[];
+  tips: { en: string; ru: string; th: string }[];
 }
 
 function getVisaResult(answers: Record<string, string>): VisaResult {
@@ -94,19 +102,23 @@ function getVisaResult(answers: Record<string, string>): VisaResult {
     return {
       titleEn: 'Visa Exemption / Tourist Visa',
       titleRu: 'Безвизовый въезд / Туристическая виза',
+      titleTh: 'ยกเว้นวีซ่า / วีซ่าท่องเที่ยว',
       descEn: nationality === 'russia'
         ? 'Russian citizens get 90-day visa-free entry. No visa needed for stays up to 90 days.'
         : 'Most nationalities get 30-60 day visa-free entry. Can be extended once at immigration.',
       descRu: nationality === 'russia'
         ? 'Граждане России получают 90 дней безвизового пребывания. Виза не нужна для поездок до 90 дней.'
         : 'Большинство стран получают 30-60 дней безвизового въезда. Можно продлить один раз в иммиграции.',
+      descTh: nationality === 'russia'
+        ? 'พลเมืองรัสเซียได้รับสิทธิ์เข้าประเทศโดยไม่ต้องมีวีซ่า 90 วัน ไม่ต้องใช้วีซ่าหากพำนักไม่เกิน 90 วัน'
+        : 'สัญชาติส่วนใหญ่ได้รับสิทธิ์เข้าประเทศโดยไม่ต้องมีวีซ่า 30-60 วัน สามารถต่ออายุได้หนึ่งครั้งที่สำนักงานตรวจคนเข้าเมือง',
       duration: nationality === 'russia' ? '90 days' : '30-60 days',
       cost: 'Free',
       complexity: 'easy',
       tips: [
-        { en: 'Have a return ticket ready', ru: 'Подготовьте обратный билет' },
-        { en: 'Hotel booking confirmation helps', ru: 'Бронирование отеля поможет при въезде' },
-        { en: '20,000 THB cash per person recommended', ru: 'Рекомендуется 20 000 ฿ наличными на человека' },
+        { en: 'Have a return ticket ready', ru: 'Подготовьте обратный билет', th: 'เตรียมตั๋วเครื่องบินขากลับให้พร้อม' },
+        { en: 'Hotel booking confirmation helps', ru: 'Бронирование отеля поможет при въезде', th: 'การยืนยันการจองโรงแรมช่วยได้' },
+        { en: '20,000 THB cash per person recommended', ru: 'Рекомендуется 20 000 ฿ наличными на человека', th: 'แนะนำให้มีเงินสด 20,000 บาทต่อคน' },
       ],
     };
   }
@@ -115,15 +127,17 @@ function getVisaResult(answers: Record<string, string>): VisaResult {
     return {
       titleEn: 'Non-Immigrant B Visa + Work Permit',
       titleRu: 'Виза Non-Immigrant B + Разрешение на работу',
+      titleTh: 'วีซ่า Non-Immigrant B + ใบอนุญาตทำงาน',
       descEn: 'Required for legal employment. Your employer must sponsor the work permit application.',
       descRu: 'Требуется для легальной работы. Работодатель должен подать заявку на разрешение на работу.',
+      descTh: 'จำเป็นสำหรับการทำงานอย่างถูกกฎหมาย นายจ้างต้องเป็นผู้ยื่นขอใบอนุญาตทำงานให้',
       duration: '1 year (renewable)',
       cost: '2,000-5,000 THB',
       complexity: 'hard',
       tips: [
-        { en: 'Start process before arriving', ru: 'Начните процесс до приезда' },
-        { en: 'Need employer sponsorship', ru: 'Нужна спонсорская поддержка работодателя' },
-        { en: 'Digital nomad? Consider DTV visa', ru: 'Цифровой кочевник? Рассмотрите DTV визу' },
+        { en: 'Start process before arriving', ru: 'Начните процесс до приезда', th: 'เริ่มดำเนินการก่อนเดินทางมาถึง' },
+        { en: 'Need employer sponsorship', ru: 'Нужна спонсорская поддержка работодателя', th: 'ต้องมีนายจ้างเป็นผู้สนับสนุน' },
+        { en: 'Digital nomad? Consider DTV visa', ru: 'Цифровой кочевник? Рассмотрите DTV визу', th: 'ดิจิทัลโนแมด? ลองพิจารณาวีซ่า DTV' },
       ],
     };
   }
@@ -132,15 +146,17 @@ function getVisaResult(answers: Record<string, string>): VisaResult {
     return {
       titleEn: 'Non-Immigrant O-A (Retirement Visa)',
       titleRu: 'Виза Non-Immigrant O-A (Пенсионная)',
+      titleTh: 'วีซ่า Non-Immigrant O-A (เกษียณอายุ)',
       descEn: 'For retirees 50+. Requires 800,000 THB in Thai bank or 65,000 THB/month income proof.',
       descRu: 'Для пенсионеров 50+. Требуется 800 000 ฿ в тайском банке или доход 65 000 ฿/мес.',
+      descTh: 'สำหรับผู้เกษียณอายุ 50 ปีขึ้นไป ต้องมีเงิน 800,000 บาทในธนาคารไทย หรือหลักฐานรายได้ 65,000 บาท/เดือน',
       duration: '1 year (renewable)',
       cost: '2,000 THB',
       complexity: 'medium',
       tips: [
-        { en: 'Open Thai bank account first', ru: 'Сначала откройте счёт в тайском банке' },
-        { en: 'Health insurance required', ru: 'Требуется медицинская страховка' },
-        { en: '90-day reporting mandatory', ru: 'Обязательна отметка каждые 90 дней' },
+        { en: 'Open Thai bank account first', ru: 'Сначала откройте счёт в тайском банке', th: 'เปิดบัญชีธนาคารไทยก่อน' },
+        { en: 'Health insurance required', ru: 'Требуется медицинская страховка', th: 'ต้องมีประกันสุขภาพ' },
+        { en: '90-day reporting mandatory', ru: 'Обязательна отметка каждые 90 дней', th: 'ต้องรายงานตัวทุก 90 วัน' },
       ],
     };
   }
@@ -149,15 +165,17 @@ function getVisaResult(answers: Record<string, string>): VisaResult {
     return {
       titleEn: 'Non-Immigrant ED Visa (Education)',
       titleRu: 'Виза Non-Immigrant ED (Образовательная)',
+      titleTh: 'วีซ่า Non-Immigrant ED (เพื่อการศึกษา)',
       descEn: 'For Thai language courses, university, or Muay Thai training at accredited schools.',
       descRu: 'Для курсов тайского языка, университета или тренировок Муай Тай в аккредитованных школах.',
+      descTh: 'สำหรับหลักสูตรภาษาไทย มหาวิทยาลัย หรือการฝึกมวยไทยในสถาบันที่ได้รับการรับรอง',
       duration: '90 days – 1 year',
       cost: '2,000 THB + school fees',
       complexity: 'medium',
       tips: [
-        { en: 'Choose a MoE-accredited school', ru: 'Выберите аккредитованную школу' },
-        { en: 'Attendance required', ru: 'Требуется посещение занятий' },
-        { en: 'Can be combined with part-time work', ru: 'Можно совмещать с подработкой' },
+        { en: 'Choose a MoE-accredited school', ru: 'Выберите аккредитованную школу', th: 'เลือกสถาบันที่ได้รับการรับรองจากกระทรวงศึกษาธิการ' },
+        { en: 'Attendance required', ru: 'Требуется посещение занятий', th: 'ต้องเข้าเรียนตามกำหนด' },
+        { en: 'Can be combined with part-time work', ru: 'Можно совмещать с подработкой', th: 'สามารถทำควบคู่กับงานพาร์ทไทม์ได้' },
       ],
     };
   }
@@ -167,15 +185,17 @@ function getVisaResult(answers: Record<string, string>): VisaResult {
     return {
       titleEn: 'Tourist Visa (TR) or DTV Visa',
       titleRu: 'Туристическая виза (TR) или DTV Виза',
+      titleTh: 'วีซ่าท่องเที่ยว (TR) หรือวีซ่า DTV',
       descEn: 'For stays over 60 days. DTV (Destination Thailand Visa) allows 180-day stays with remote work.',
       descRu: 'Для пребывания свыше 60 дней. DTV виза позволяет 180 дней с удалённой работой.',
+      descTh: 'สำหรับการพำนักเกิน 60 วัน วีซ่า DTV (Destination Thailand Visa) อนุญาตให้พำนักได้ 180 วันพร้อมทำงานทางไกล',
       duration: '60-180 days',
       cost: '1,000-10,000 THB',
       complexity: 'medium',
       tips: [
-        { en: 'DTV requires proof of remote work', ru: 'DTV требует подтверждение удалённой работы' },
-        { en: 'Apply at Thai embassy before travel', ru: 'Подайте в посольство Таиланда до поездки' },
-        { en: 'Can extend TR visa 30 days at immigration', ru: 'Можно продлить TR визу на 30 дней в иммиграции' },
+        { en: 'DTV requires proof of remote work', ru: 'DTV требует подтверждение удалённой работы', th: 'DTV ต้องมีหลักฐานการทำงานทางไกล' },
+        { en: 'Apply at Thai embassy before travel', ru: 'Подайте в посольство Таиланда до поездки', th: 'ยื่นที่สถานทูตไทยก่อนเดินทาง' },
+        { en: 'Can extend TR visa 30 days at immigration', ru: 'Можно продлить TR визу на 30 дней в иммиграции', th: 'สามารถต่อวีซ่า TR ได้อีก 30 วันที่สำนักงานตรวจคนเข้าเมือง' },
       ],
     };
   }
@@ -184,13 +204,15 @@ function getVisaResult(answers: Record<string, string>): VisaResult {
   return {
     titleEn: 'Visa Exemption',
     titleRu: 'Безвизовый въезд',
+    titleTh: 'ยกเว้นวีซ่า',
     descEn: 'You likely qualify for visa-free entry. Contact our legal team for personalized advice.',
     descRu: 'Вероятно, вы можете въехать без визы. Свяжитесь с нашей командой для консультации.',
+    descTh: 'คุณน่าจะมีสิทธิ์เข้าประเทศโดยไม่ต้องมีวีซ่า ติดต่อทีมกฎหมายของเราเพื่อรับคำแนะนำเฉพาะบุคคล',
     duration: '30-90 days',
     cost: 'Free',
     complexity: 'easy',
     tips: [
-      { en: 'Check latest rules before travel', ru: 'Проверьте актуальные правила перед поездкой' },
+      { en: 'Check latest rules before travel', ru: 'Проверьте актуальные правила перед поездкой', th: 'ตรวจสอบกฎระเบียบล่าสุดก่อนเดินทาง' },
     ],
   };
 }
@@ -199,6 +221,7 @@ export default function VisaQuizPage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -239,16 +262,16 @@ export default function VisaQuizPage() {
     hard: 'bg-destructive/10 text-destructive border-destructive/30',
   };
   const complexityLabels = {
-    easy: isRu ? 'Просто' : 'Easy',
-    medium: isRu ? 'Средне' : 'Medium',
-    hard: isRu ? 'Сложно' : 'Complex',
+    easy: isRu ? 'Просто' : isTh ? 'ง่าย' : 'Easy',
+    medium: isRu ? 'Средне' : isTh ? 'ปานกลาง' : 'Medium',
+    hard: isRu ? 'Сложно' : isTh ? 'ซับซ้อน' : 'Complex',
   };
 
   return (
     <AppLayout showHeader={false} showBottomNav>
       <SEOHead
-        title={isRu ? 'Какая виза мне нужна? — Квиз' : 'Which Visa Do I Need? — Quiz'}
-        description={isRu ? 'Пройдите квиз и узнайте какая виза подходит для вашей поездки в Таиланд' : 'Take a quick quiz to find the right visa for your Thailand trip'}
+        title={isRu ? 'Какая виза мне нужна? — Квиз' : isTh ? 'ฉันต้องใช้วีซ่าแบบไหน? — แบบทดสอบ' : 'Which Visa Do I Need? — Quiz'}
+        description={isRu ? 'Пройдите квиз и узнайте какая виза подходит для вашей поездки в Таиланд' : isTh ? 'ทำแบบทดสอบสั้น ๆ เพื่อหาวีซ่าที่เหมาะกับการเดินทางมาประเทศไทยของคุณ' : 'Take a quick quiz to find the right visa for your Thailand trip'}
       />
 
       {!started ? (

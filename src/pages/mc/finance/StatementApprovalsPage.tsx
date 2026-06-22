@@ -17,6 +17,7 @@ import { useCityCurrency } from '@/hooks/useCityCurrency';
 export default function StatementApprovalsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { code: cityCurrencyCode } = useCityCurrency();
   const { data: items = [], isLoading } = useCompanyStatementApprovals();
 
@@ -40,21 +41,23 @@ export default function StatementApprovalsPage() {
         <div className="flex items-center gap-2">
           <FileCheck className="w-5 h-5 text-primary" />
           <h1 className="text-xl md:text-2xl font-bold">
-            {isRu ? 'Одобрения отчётов' : 'Statement Approvals'}
+            {isRu ? 'Одобрения отчётов' : isTh ? 'การอนุมัติรายงาน' : 'Statement Approvals'}
           </h1>
         </div>
         <p className="text-sm text-muted-foreground">
           {isRu
             ? 'Отслеживайте одобрение ежемесячных отчётов собственниками.'
+            : isTh
+            ? 'ติดตามการอนุมัติรายงานประจำเดือนโดยเจ้าของทรัพย์สิน'
             : 'Track owner approvals of monthly statements.'}
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <StatCard label={isRu ? 'Ожидают' : 'Pending'} value={stats.pending} cls="text-warning" Icon={Clock} />
-        <StatCard label={isRu ? 'Одобрено' : 'Approved'} value={stats.approved} cls="text-success" Icon={CheckCircle2} />
-        <StatCard label={isRu ? 'Отклонено' : 'Rejected'} value={stats.rejected} cls="text-destructive" Icon={XCircle} />
+        <StatCard label={isRu ? 'Ожидают' : isTh ? 'รอดำเนินการ' : 'Pending'} value={stats.pending} cls="text-warning" Icon={Clock} />
+        <StatCard label={isRu ? 'Одобрено' : isTh ? 'อนุมัติแล้ว' : 'Approved'} value={stats.approved} cls="text-success" Icon={CheckCircle2} />
+        <StatCard label={isRu ? 'Отклонено' : isTh ? 'ปฏิเสธแล้ว' : 'Rejected'} value={stats.rejected} cls="text-destructive" Icon={XCircle} />
       </div>
 
       {/* List */}
@@ -65,6 +68,8 @@ export default function StatementApprovalsPage() {
             <p className="text-sm">
               {isRu
                 ? 'Пока нет отправленных отчётов на одобрение.'
+                : isTh
+                ? 'ยังไม่มีรายงานที่ส่งเพื่อขออนุมัติ'
                 : 'No statements sent for approval yet.'}
             </p>
           </CardContent>
@@ -73,10 +78,10 @@ export default function StatementApprovalsPage() {
         <div className="space-y-2">
           {items.map(item => {
             const cfgMap: Record<string, { label: string; cls: string; Icon: typeof Clock }> = {
-              pending: { label: isRu ? 'Ожидает' : 'Pending', cls: 'bg-warning/15 text-warning', Icon: Clock },
-              approved: { label: isRu ? 'Одобрено' : 'Approved', cls: 'bg-success/15 text-success', Icon: CheckCircle2 },
-              rejected: { label: isRu ? 'Отклонено' : 'Rejected', cls: 'bg-destructive/15 text-destructive', Icon: XCircle },
-              expired: { label: isRu ? 'Истёк' : 'Expired', cls: 'bg-muted text-muted-foreground', Icon: Clock },
+              pending: { label: isRu ? 'Ожидает' : isTh ? 'รอดำเนินการ' : 'Pending', cls: 'bg-warning/15 text-warning', Icon: Clock },
+              approved: { label: isRu ? 'Одобрено' : isTh ? 'อนุมัติแล้ว' : 'Approved', cls: 'bg-success/15 text-success', Icon: CheckCircle2 },
+              rejected: { label: isRu ? 'Отклонено' : isTh ? 'ปฏิเสธแล้ว' : 'Rejected', cls: 'bg-destructive/15 text-destructive', Icon: XCircle },
+              expired: { label: isRu ? 'Истёк' : isTh ? 'หมดอายุ' : 'Expired', cls: 'bg-muted text-muted-foreground', Icon: Clock },
             };
             const cfg = cfgMap[item.status];
             const Icon = cfg.Icon;
@@ -93,9 +98,9 @@ export default function StatementApprovalsPage() {
                       {format(new Date(item.period_end), 'd MMM yyyy', { locale: isRu ? ru : undefined })}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {isRu ? 'Отправлено: ' : 'Sent: '}
+                      {isRu ? 'Отправлено: ' : isTh ? 'ส่งเมื่อ: ' : 'Sent: '}
                       {format(new Date(item.created_at), 'd MMM HH:mm', { locale: isRu ? ru : undefined })}
-                      {item.signed_at && ` · ${isRu ? 'подписано' : 'signed'} ${format(new Date(item.signed_at), 'd MMM HH:mm', { locale: isRu ? ru : undefined })}`}
+                      {item.signed_at && ` · ${isRu ? 'подписано' : isTh ? 'ลงนามเมื่อ' : 'signed'} ${format(new Date(item.signed_at), 'd MMM HH:mm', { locale: isRu ? ru : undefined })}`}
                     </p>
                     {item.rejection_reason && (
                       <p className="text-xs text-destructive mt-1">⚠️ {item.rejection_reason}</p>

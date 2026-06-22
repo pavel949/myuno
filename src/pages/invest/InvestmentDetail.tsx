@@ -39,6 +39,7 @@ export default function InvestmentDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: project, isLoading, error } = useInvestmentProject(id);
 
@@ -61,11 +62,11 @@ export default function InvestmentDetail() {
         <div className="min-h-[60vh] flex items-center justify-center p-4">
           <div className="text-center space-y-4">
             <p className="text-muted-foreground">
-              {isRu ? 'Проект не найден' : 'Project not found'}
+              {isRu ? 'Проект не найден' : isTh ? 'ไม่พบโครงการ' : 'Project not found'}
             </p>
             <Button variant="outline" onClick={() => navigate(APP_ROUTES.INVEST)}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              {isRu ? 'Назад к каталогу' : 'Back to catalog'}
+              {isRu ? 'Назад к каталогу' : isTh ? 'กลับไปแคตตาล็อก' : 'Back to catalog'}
             </Button>
           </div>
         </div>
@@ -82,7 +83,7 @@ export default function InvestmentDetail() {
   return (
     <AppLayout showHeader={false} showBottomNav usePageContainer={false}>
       <Helmet>
-        <title>{title} | {isRu ? 'Инвестиции' : 'Invest'} | myUNO</title>
+        <title>{title} | {isRu ? 'Инвестиции' : isTh ? 'การลงทุน' : 'Invest'} | myUNO</title>
         <meta name="description" content={description || title} />
       </Helmet>
 
@@ -93,12 +94,12 @@ export default function InvestmentDetail() {
             <Button
               variant="ghost"
               size="icon"
-              aria-label={isRu ? 'Назад' : 'Back'}
+              aria-label={isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
               onClick={() => navigate(APP_ROUTES.INVEST)}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" aria-label={isRu ? 'Поделиться' : 'Share'}>
+            <Button variant="ghost" size="icon" aria-label={isRu ? 'Поделиться' : isTh ? 'แชร์' : 'Share'}>
               <Share2 className="h-5 w-5" />
             </Button>
           </div>
@@ -175,20 +176,20 @@ export default function InvestmentDetail() {
             <div className="bg-card rounded-none p-4 border border-border/50">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <TrendingUp className="h-4 w-4 text-success" />
-                <span>{isRu ? 'Прогноз ROI' : 'Projected ROI'}</span>
+                <span>{isRu ? 'Прогноз ROI' : isTh ? 'ROI ที่คาดการณ์' : 'Projected ROI'}</span>
               </div>
               <div className="text-2xl font-bold text-success mt-1">
                 {project.roi_projected ? `${project.roi_projected}%` : '—'}
               </div>
               <div className="text-xs text-muted-foreground">
-                {isRu ? 'годовых' : 'annually'}
+                {isRu ? 'годовых' : isTh ? 'ต่อปี' : 'annually'}
               </div>
             </div>
 
             <div className="bg-card rounded-none p-4 border border-border/50">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <DollarSign className="h-4 w-4" />
-                <span>{isRu ? 'Мин. вход' : 'Min Entry'}</span>
+                <span>{isRu ? 'Мин. вход' : isTh ? 'ขั้นต่ำ' : 'Min Entry'}</span>
               </div>
               <div className="text-2xl font-bold mt-1">
                 {project.min_investment 
@@ -204,23 +205,23 @@ export default function InvestmentDetail() {
             <div className="bg-card rounded-none p-4 border border-border/50">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Clock className="h-4 w-4" />
-                <span>{isRu ? 'Срок' : 'Term'}</span>
+                <span>{isRu ? 'Срок' : isTh ? 'ระยะเวลา' : 'Term'}</span>
               </div>
               <div className="text-2xl font-bold mt-1">
                 {project.investment_term_months || '—'}
               </div>
               <div className="text-xs text-muted-foreground">
-                {isRu ? 'месяцев' : 'months'}
+                {isRu ? 'месяцев' : isTh ? 'เดือน' : 'months'}
               </div>
             </div>
 
             <div className="bg-card rounded-none p-4 border border-border/50">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Target className="h-4 w-4" />
-                <span>{isRu ? 'Выход' : 'Exit'}</span>
+                <span>{isRu ? 'Выход' : isTh ? 'การออกจากการลงทุน' : 'Exit'}</span>
               </div>
               <div className="text-sm font-medium mt-1 line-clamp-2">
-                {project.exit_strategy || (isRu ? 'Аренда + Перепродажа' : 'Rental + Resale')}
+                {project.exit_strategy || (isRu ? 'Аренда + Перепродажа' : isTh ? 'ปล่อยเช่า + ขายต่อ' : 'Rental + Resale')}
               </div>
             </div>
           </div>
@@ -230,7 +231,7 @@ export default function InvestmentDetail() {
             <div className="bg-card rounded-none p-4 border border-border/50">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
-                {isRu ? 'Прогресс сбора' : 'Funding Progress'}
+                {isRu ? 'Прогресс сбора' : isTh ? 'ความคืบหน้าการระดมทุน' : 'Funding Progress'}
               </h3>
               <FundingProgress
                 fundingGoal={project.funding_goal}
@@ -246,13 +247,13 @@ export default function InvestmentDetail() {
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="w-full">
               <TabsTrigger value="overview" className="flex-1">
-                {isRu ? 'Обзор' : 'Overview'}
+                {isRu ? 'Обзор' : isTh ? 'ภาพรวม' : 'Overview'}
               </TabsTrigger>
               <TabsTrigger value="scoring" className="flex-1">
-                {isRu ? 'Скоринг' : 'Scoring'}
+                {isRu ? 'Скоринг' : isTh ? 'การให้คะแนน' : 'Scoring'}
               </TabsTrigger>
               <TabsTrigger value="risks" className="flex-1">
-                {isRu ? 'Риски' : 'Risks'}
+                {isRu ? 'Риски' : isTh ? 'ความเสี่ยง' : 'Risks'}
               </TabsTrigger>
             </TabsList>
 
@@ -264,7 +265,7 @@ export default function InvestmentDetail() {
                   </p>
                 ) : (
                   <p className="text-muted-foreground italic">
-                    {isRu ? 'Описание скоро будет добавлено' : 'Description coming soon'}
+                    {isRu ? 'Описание скоро будет добавлено' : isTh ? 'คำอธิบายจะเพิ่มเร็ว ๆ นี้' : 'Description coming soon'}
                   </p>
                 )}
 
@@ -272,7 +273,7 @@ export default function InvestmentDetail() {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t border-border/50">
                     <Calendar className="h-4 w-4" />
                     <span>
-                      {isRu ? 'Опубликовано:' : 'Published:'}{' '}
+                      {isRu ? 'Опубликовано:' : isTh ? 'เผยแพร่:' : 'Published:'}{' '}
                       {new Date(project.published_at).toLocaleDateString()}
                     </span>
                   </div>
@@ -289,8 +290,10 @@ export default function InvestmentDetail() {
                 
                 {!project.score_breakdown && (
                   <p className="text-muted-foreground text-sm text-center py-4">
-                    {isRu 
+                    {isRu
                       ? 'Детализация скоринга будет доступна после верификации'
+                      : isTh
+                      ? 'รายละเอียดคะแนนจะพร้อมใช้งานหลังการตรวจสอบยืนยัน'
                       : 'Score breakdown will be available after verification'
                     }
                   </p>
@@ -302,7 +305,7 @@ export default function InvestmentDetail() {
               <div className="bg-card rounded-none p-4 border border-border/50 space-y-3">
                 <h3 className="font-semibold flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-warning" />
-                  {isRu ? 'Факторы риска' : 'Risk Factors'}
+                  {isRu ? 'Факторы риска' : isTh ? 'ปัจจัยความเสี่ยง' : 'Risk Factors'}
                 </h3>
                 
                 {project.risk_factors && project.risk_factors.length > 0 ? (
@@ -319,8 +322,10 @@ export default function InvestmentDetail() {
                     <div className="flex items-start gap-2">
                       <span className="text-warning">•</span>
                       <span>
-                        {isRu 
+                        {isRu
                           ? 'Возможные задержки строительства (типично 6-12 месяцев)'
+                          : isTh
+                          ? 'ความล่าช้าในการก่อสร้างที่อาจเกิดขึ้น (โดยทั่วไป 6-12 เดือน)'
                           : 'Potential construction delays (typically 6-12 months)'
                         }
                       </span>
@@ -328,8 +333,10 @@ export default function InvestmentDetail() {
                     <div className="flex items-start gap-2">
                       <span className="text-warning">•</span>
                       <span>
-                        {isRu 
+                        {isRu
                           ? 'Валютные риски (THB/USD)'
+                          : isTh
+                          ? 'ความเสี่ยงด้านอัตราแลกเปลี่ยน (THB/USD)'
                           : 'Currency risks (THB/USD)'
                         }
                       </span>
@@ -337,8 +344,10 @@ export default function InvestmentDetail() {
                     <div className="flex items-start gap-2">
                       <span className="text-warning">•</span>
                       <span>
-                        {isRu 
+                        {isRu
                           ? 'Рыночные колебания спроса на аренду'
+                          : isTh
+                          ? 'ความผันผวนของอุปสงค์ในตลาดเช่า'
                           : 'Market fluctuations in rental demand'
                         }
                       </span>

@@ -12,37 +12,38 @@ const PipelineSettingsContent = React.lazy(() => import('@/pages/owner/PipelineS
 export default function MCSettingsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const sections = [
     {
       id: 'profile',
       icon: Building2,
-      title: isRu ? 'Профиль компании' : 'Company Profile',
-      desc: isRu ? 'Бренд, контакты, юридические данные' : 'Branding, contacts, legal details',
+      title: isRu ? 'Профиль компании' : isTh ? 'โปรไฟล์บริษัท' : 'Company Profile',
+      desc: isRu ? 'Бренд, контакты, юридические данные' : isTh ? 'แบรนด์ ข้อมูลติดต่อ ข้อมูลทางกฎหมาย' : 'Branding, contacts, legal details',
     },
     {
       id: 'finance',
       icon: DollarSign,
-      title: isRu ? 'Финансы' : 'Finance',
-      desc: isRu ? 'Категории доходов и расходов' : 'Income & expense categories',
+      title: isRu ? 'Финансы' : isTh ? 'การเงิน' : 'Finance',
+      desc: isRu ? 'Категории доходов и расходов' : isTh ? 'หมวดหมู่รายรับและรายจ่าย' : 'Income & expense categories',
     },
     {
       id: 'crm',
       icon: Target,
       title: 'CRM',
-      desc: isRu ? 'Этапы сделок, типы контактов, источники' : 'Deal stages, contact types, sources',
+      desc: isRu ? 'Этапы сделок, типы контактов, источники' : isTh ? 'ขั้นตอนดีล ประเภทผู้ติดต่อ และแหล่งที่มา' : 'Deal stages, contact types, sources',
     },
     {
       id: 'operations',
       icon: Wrench,
-      title: isRu ? 'Операции' : 'Operations',
-      desc: isRu ? 'Шаблоны чек-листов, настройки задач' : 'Checklist templates, task settings',
+      title: isRu ? 'Операции' : isTh ? 'ปฏิบัติการ' : 'Operations',
+      desc: isRu ? 'Шаблоны чек-листов, настройки задач' : isTh ? 'เทมเพลตเช็กลิสต์และการตั้งค่างาน' : 'Checklist templates, task settings',
     },
     {
       id: 'data',
       icon: HardDrive,
-      title: isRu ? 'Данные и бэкап' : 'Data & Backup',
-      desc: isRu ? 'Экспорт данных, автоматический бэкап' : 'Data export, automatic backups',
+      title: isRu ? 'Данные и бэкап' : isTh ? 'ข้อมูลและการสำรองข้อมูล' : 'Data & Backup',
+      desc: isRu ? 'Экспорт данных, автоматический бэкап' : isTh ? 'ส่งออกข้อมูลและสำรองข้อมูลอัตโนมัติ' : 'Data export, automatic backups',
     },
   ];
 
@@ -54,10 +55,10 @@ export default function MCSettingsPage() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-foreground">
-            {isRu ? 'Настройки' : 'Settings'}
+            {isRu ? 'Настройки' : isTh ? 'การตั้งค่า' : 'Settings'}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {isRu ? 'Настройте систему под вашу компанию' : 'Customize the system for your company'}
+            {isRu ? 'Настройте систему под вашу компанию' : isTh ? 'ปรับแต่งระบบให้เหมาะกับบริษัทของคุณ' : 'Customize the system for your company'}
           </p>
         </div>
       </div>
@@ -92,7 +93,7 @@ export default function MCSettingsPage() {
                 <div className="flex items-center gap-3 p-4 rounded-none bg-muted/30">
                   <Wrench className="h-5 w-5 text-muted-foreground shrink-0" />
                   <p className="text-sm text-muted-foreground">
-                    {isRu ? 'Шаблоны чек-листов, настройки задач — скоро' : 'Checklist templates, task settings — coming soon'}
+                    {isRu ? 'Шаблоны чек-листов, настройки задач — скоро' : isTh ? 'เทมเพลตเช็กลิสต์และการตั้งค่างาน — เร็ว ๆ นี้' : 'Checklist templates, task settings — coming soon'}
                   </p>
                 </div>
               )}
