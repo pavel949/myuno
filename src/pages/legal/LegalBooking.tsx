@@ -20,7 +20,7 @@ import {
   type PaymentMethod 
 } from "@/components/booking";
 import { addDays, format } from "date-fns";
-import { ru } from "date-fns/locale";
+import { ru, th } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -34,6 +34,7 @@ export default function LegalBooking() {
   const preSelectedService = searchParams.get("service");
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const isTh = language === "th";
   const { user, isLoading: authLoading } = useAuth();
   const { createBooking, isSubmitting } = useBooking();
   const { createConsultation } = useConsultationRequests();
@@ -55,13 +56,13 @@ export default function LegalBooking() {
   const consultationPrice = 2000;
 
   const services = [
-    language === "ru" ? "Регистрация компании" : "Company Registration",
-    language === "ru" ? "Сопровождение сделок с недвижимостью" : "Real Estate Transaction",
-    language === "ru" ? "Визовая консультация" : "Visa Consultation",
-    language === "ru" ? "Трудовое право" : "Employment Law",
+    language === "ru" ? "Регистрация компании" : isTh ? "จดทะเบียนบริษัท" : "Company Registration",
+    language === "ru" ? "Сопровождение сделок с недвижимостью" : isTh ? "ดูแลธุรกรรมอสังหาริมทรัพย์" : "Real Estate Transaction",
+    language === "ru" ? "Визовая консультация" : isTh ? "ปรึกษาเรื่องวีซ่า" : "Visa Consultation",
+    language === "ru" ? "Трудовое право" : isTh ? "กฎหมายแรงงาน" : "Employment Law",
     language === "ru" ? "Due Diligence" : "Due Diligence",
-    language === "ru" ? "Налоговое планирование" : "Tax Planning",
-    language === "ru" ? "Другое" : "Other",
+    language === "ru" ? "Налоговое планирование" : isTh ? "วางแผนภาษี" : "Tax Planning",
+    language === "ru" ? "Другое" : isTh ? "อื่น ๆ" : "Other",
   ];
 
   const availableTimes = [
@@ -81,13 +82,13 @@ export default function LegalBooking() {
       <AppLayout>
         <BookingConfirmation
           bookingId={bookingResult.bookingId}
-          title={language === 'ru' ? 'Юридическая консультация' : 'Legal Consultation'}
-          date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : undefined }) : undefined}
+          title={language === 'ru' ? 'Юридическая консультация' : isTh ? 'ปรึกษากฎหมาย' : 'Legal Consultation'}
+          date={date ? format(date, 'PPP', { locale: language === 'ru' ? ru : isTh ? th : undefined }) : undefined}
           time={time}
           total={consultationPrice}
           currency="THB"
           continuePath="/legal"
-          continueLabel={language === 'ru' ? 'К юристам' : 'Browse Legal Services'}
+          continueLabel={language === 'ru' ? 'К юристам' : isTh ? 'ดูบริการกฎหมาย' : 'Browse Legal Services'}
         />
       </AppLayout>
     );
@@ -105,7 +106,7 @@ export default function LegalBooking() {
     if (paymentMethod === 'online') {
       await createCheckout('create-legal-checkout', {
         provider_id: id,
-        provider_name: language === 'ru' ? 'Юридическая консультация' : 'Legal Consultation',
+        provider_name: language === 'ru' ? 'Юридическая консультация' : isTh ? 'ปรึกษากฎหมาย' : 'Legal Consultation',
         service_type: selectedService,
         consultation_type: consultationType,
         consultation_price: consultationPrice,
@@ -155,7 +156,7 @@ export default function LegalBooking() {
         items: [{
           item_type: 'legal_consultation',
           item_id: id || 'consultation',
-          item_name: selectedService || (language === 'ru' ? 'Консультация' : 'Consultation'),
+          item_name: selectedService || (language === 'ru' ? 'Консультация' : isTh ? 'การปรึกษา' : 'Consultation'),
           quantity: 1,
           unit_price: consultationPrice,
           subtotal: consultationPrice,
@@ -180,7 +181,7 @@ export default function LegalBooking() {
     <AppLayout>
       <PageContainer className="pb-32">
         <PageHeader 
-          title={language === 'ru' ? 'Запись на консультацию' : 'Book Consultation'} 
+          title={language === 'ru' ? 'Запись на консультацию' : isTh ? 'จองการปรึกษา' : 'Book Consultation'}
           showBack 
         />
 
@@ -208,7 +209,7 @@ export default function LegalBooking() {
             {/* Consultation Type */}
             <div className="bg-card rounded-none border p-5">
               <Label className="font-semibold mb-4 block">
-                {language === 'ru' ? 'Формат консультации' : 'Consultation Format'}
+                {language === 'ru' ? 'Формат консультации' : isTh ? 'รูปแบบการปรึกษา' : 'Consultation Format'}
               </Label>
               <div className="grid grid-cols-2 gap-3 mt-3">
                 <button
@@ -220,7 +221,7 @@ export default function LegalBooking() {
                   }`}
                 >
                   <MapPin className={`w-6 h-6 mx-auto mb-2 ${consultationType === "office" ? "text-primary" : "text-muted-foreground"}`} />
-                  <p className="font-medium text-sm">{language === "ru" ? "В офисе" : "In Office"}</p>
+                  <p className="font-medium text-sm">{language === "ru" ? "В офисе" : isTh ? "ที่สำนักงาน" : "In Office"}</p>
                 </button>
                 <button
                   onClick={() => setConsultationType("online")}
@@ -231,7 +232,7 @@ export default function LegalBooking() {
                   }`}
                 >
                   <Video className={`w-6 h-6 mx-auto mb-2 ${consultationType === "online" ? "text-primary" : "text-muted-foreground"}`} />
-                  <p className="font-medium text-sm">{language === "ru" ? "Онлайн" : "Online"}</p>
+                  <p className="font-medium text-sm">{language === "ru" ? "Онлайн" : isTh ? "ออนไลน์" : "Online"}</p>
                 </button>
               </div>
             </div>
@@ -239,7 +240,7 @@ export default function LegalBooking() {
             {/* Date & Time */}
             <div className="bg-card rounded-none border p-5">
               <h3 className="font-semibold mb-4">
-                {language === 'ru' ? 'Дата и время' : 'Date & Time'}
+                {language === 'ru' ? 'Дата и время' : isTh ? 'วันและเวลา' : 'Date & Time'}
               </h3>
               <BookingDateTimeSelect
                 date={date}
@@ -255,7 +256,7 @@ export default function LegalBooking() {
               disabled={!date || !time}
               onClick={() => setStep(2)}
             >
-              {language === 'ru' ? 'Продолжить' : 'Continue'}
+              {language === 'ru' ? 'Продолжить' : isTh ? 'ดำเนินการต่อ' : 'Continue'}
             </Button>
           </div>
         )}
@@ -265,12 +266,12 @@ export default function LegalBooking() {
           <div className="space-y-6">
             {/* Summary */}
             <BookingSummary
-              title={language === 'ru' ? 'Консультация' : 'Consultation'}
+              title={language === 'ru' ? 'Консультация' : isTh ? 'การปรึกษา' : 'Consultation'}
               date={date}
               time={time}
-              subtitle={consultationType === 'office' 
-                ? (language === 'ru' ? 'В офисе' : 'In Office')
-                : (language === 'ru' ? 'Онлайн' : 'Online')
+              subtitle={consultationType === 'office'
+                ? (language === 'ru' ? 'В офисе' : isTh ? 'ที่สำนักงาน' : 'In Office')
+                : (language === 'ru' ? 'Онлайн' : isTh ? 'ออนไลน์' : 'Online')
               }
               price={consultationPrice}
               sourceCurrency="THB"
@@ -279,7 +280,7 @@ export default function LegalBooking() {
             {/* Service Selection */}
             <div className="bg-card rounded-none border p-5">
               <Label className="font-semibold mb-4 block">
-                {language === 'ru' ? 'Тип услуги' : 'Service Type'}
+                {language === 'ru' ? 'Тип услуги' : isTh ? 'ประเภทบริการ' : 'Service Type'}
               </Label>
               <div className="flex flex-wrap gap-2 mt-3">
                 {services.map((service) => (
@@ -298,13 +299,15 @@ export default function LegalBooking() {
             {/* Description */}
             <div className="bg-card rounded-none border p-5">
               <Label className="font-semibold mb-4 block">
-                {language === 'ru' ? 'Опишите ваш вопрос' : 'Describe Your Question'}
+                {language === 'ru' ? 'Опишите ваш вопрос' : isTh ? 'อธิบายคำถามของคุณ' : 'Describe Your Question'}
               </Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder={language === 'ru' 
+                placeholder={language === 'ru'
                   ? 'Кратко опишите, с чем вам нужна помощь...'
+                  : isTh
+                  ? 'อธิบายสั้น ๆ ว่าคุณต้องการความช่วยเหลือเรื่องใด...'
                   : 'Briefly describe what you need help with...'}
                 rows={4}
                 className="mt-2"
@@ -313,14 +316,14 @@ export default function LegalBooking() {
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                {language === 'ru' ? 'Назад' : 'Back'}
+                {language === 'ru' ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
               </Button>
               <Button
                 className="flex-1"
                 disabled={!selectedService}
                 onClick={() => setStep(3)}
               >
-                {language === 'ru' ? 'Продолжить' : 'Continue'}
+                {language === 'ru' ? 'Продолжить' : isTh ? 'ดำเนินการต่อ' : 'Continue'}
               </Button>
             </div>
           </div>
@@ -341,7 +344,7 @@ export default function LegalBooking() {
             {/* Contact Info */}
             <div className="bg-card rounded-none border p-5">
               <h3 className="font-semibold mb-4">
-                {language === 'ru' ? 'Контактные данные' : 'Contact Information'}
+                {language === 'ru' ? 'Контактные данные' : isTh ? 'ข้อมูลติดต่อ' : 'Contact Information'}
               </h3>
               <BookingContactForm
                 data={contactData}
@@ -349,11 +352,11 @@ export default function LegalBooking() {
                 showEmail
               />
               <div className="mt-4">
-                <Label>{language === 'ru' ? 'Компания (если есть)' : 'Company (if any)'}</Label>
+                <Label>{language === 'ru' ? 'Компания (если есть)' : isTh ? 'บริษัท (ถ้ามี)' : 'Company (if any)'}</Label>
                 <Input
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  placeholder={language === 'ru' ? 'Название компании' : 'Company name'}
+                  placeholder={language === 'ru' ? 'Название компании' : isTh ? 'ชื่อบริษัท' : 'Company name'}
                   className="mt-1"
                 />
               </div>
@@ -362,7 +365,7 @@ export default function LegalBooking() {
             {/* Payment Method */}
             <div className="bg-card rounded-none border p-5">
               <h3 className="font-semibold mb-4">
-                {language === 'ru' ? 'Способ оплаты' : 'Payment Method'}
+                {language === 'ru' ? 'Способ оплаты' : isTh ? 'วิธีการชำระเงิน' : 'Payment Method'}
               </h3>
               <BookingPaymentSelect
                 selected={paymentMethod}
@@ -377,7 +380,7 @@ export default function LegalBooking() {
 
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
-                {language === 'ru' ? 'Назад' : 'Back'}
+                {language === 'ru' ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
               </Button>
             </div>
 
@@ -388,8 +391,8 @@ export default function LegalBooking() {
               isSubmitting={isSubmitting || isStripeProcessing}
               disabled={!contactData.name || !contactData.phone}
               submitLabel={paymentMethod === 'card'
-                ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
-                : (language === 'ru' ? 'Отправить заявку' : 'Submit Request')}
+                ? (language === 'ru' ? 'Оплатить онлайн' : isTh ? 'ชำระเงินออนไลน์' : 'Pay Online')
+                : (language === 'ru' ? 'Отправить заявку' : isTh ? 'ส่งคำขอ' : 'Submit Request')}
             />
           </div>
         )}

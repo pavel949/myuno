@@ -25,25 +25,26 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [showLeadForm, setShowLeadForm] = useState(false);
 
   const features = [
     {
       icon: TrendingUp,
-      title: isRu ? 'Узнать реальную доходность' : 'Check Real ROI',
-      description: isRu ? 'Независимая аналитика muUNO' : 'Independent muUNO analytics',
+      title: isRu ? 'Узнать реальную доходность' : isTh ? 'ดูผลตอบแทนที่แท้จริง' : 'Check Real ROI',
+      description: isRu ? 'Независимая аналитика muUNO' : isTh ? 'การวิเคราะห์อิสระโดย muUNO' : 'Independent muUNO analytics',
       action: () => navigate('/property/invest'),
     },
     {
       icon: ShieldCheck,
-      title: isRu ? 'Проверить риски застройщика' : 'Verify Developer Risks',
-      description: isRu ? 'Скоринг надёжности проектов' : 'Project reliability scoring',
+      title: isRu ? 'Проверить риски застройщика' : isTh ? 'ตรวจสอบความเสี่ยงของผู้พัฒนา' : 'Verify Developer Risks',
+      description: isRu ? 'Скоринг надёжности проектов' : isTh ? 'การให้คะแนนความน่าเชื่อถือของโครงการ' : 'Project reliability scoring',
       action: () => navigate('/property/offplan'),
     },
     {
       icon: MessageCircle,
-      title: isRu ? 'Получить экспертную консультацию' : 'Get Expert Consultation',
-      description: isRu ? 'Бесплатно, без обязательств' : 'Free, no obligations',
+      title: isRu ? 'Получить экспертную консультацию' : isTh ? 'รับคำปรึกษาจากผู้เชี่ยวชาญ' : 'Get Expert Consultation',
+      description: isRu ? 'Бесплатно, без обязательств' : isTh ? 'ฟรี ไม่มีข้อผูกมัด' : 'Free, no obligations',
       action: () => setShowLeadForm(true),
     },
   ];
@@ -63,12 +64,14 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-base flex items-center gap-2">
-              {isRu ? 'Интересуют новостройки Пхукета?' : 'Interested in Phuket New Developments?'}
+              {isRu ? 'Интересуют новостройки Пхукета?' : isTh ? 'สนใจโครงการใหม่ในภูเก็ตหรือไม่?' : 'Interested in Phuket New Developments?'}
               <Sparkles className="w-4 h-4 text-accent-amber" />
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {isRu 
-                ? 'Проверьте надёжность проекта с экспертизой muUNO' 
+              {isRu
+                ? 'Проверьте надёжность проекта с экспертизой muUNO'
+                : isTh
+                ? 'ตรวจสอบความน่าเชื่อถือของโครงการด้วยความเชี่ยวชาญของ muUNO'
                 : 'Verify project reliability with muUNO expertise'}
             </p>
           </div>
@@ -101,7 +104,7 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
             className="flex-1 gap-2"
           >
             <Building2 className="w-4 h-4" />
-            {isRu ? 'Смотреть новостройки' : 'View New Developments'}
+            {isRu ? 'Смотреть новостройки' : isTh ? 'ดูโครงการใหม่' : 'View New Developments'}
           </Button>
           <Button
             variant="outline"
@@ -109,7 +112,7 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
             className="flex-1 gap-2"
           >
             <MessageCircle className="w-4 h-4" />
-            {isRu ? 'Помочь подобрать' : 'Help Me Choose'}
+            {isRu ? 'Помочь подобрать' : isTh ? 'ช่วยฉันเลือก' : 'Help Me Choose'}
           </Button>
         </div>
       </section>
@@ -119,7 +122,7 @@ export function OffplanCTASection({ className }: OffplanCTASectionProps) {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {isRu ? 'Консультация по новостройкам' : 'New Development Consultation'}
+              {isRu ? 'Консультация по новостройкам' : isTh ? 'ปรึกษาเรื่องโครงการใหม่' : 'New Development Consultation'}
             </DialogTitle>
           </DialogHeader>
           <UniversalLeadForm

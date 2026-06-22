@@ -21,6 +21,7 @@ export interface InstallmentTimelineProps {
   milestones: InstallmentMilestone[] | null | undefined;
   totalPrice?: number | null;
   isRu: boolean;
+  isTh?: boolean;
   /** Optional preset id to display as title. */
   presetLabel?: string;
   className?: string;
@@ -30,6 +31,7 @@ export function InstallmentTimeline({
   milestones,
   totalPrice,
   isRu,
+  isTh = false,
   presetLabel,
   className,
 }: InstallmentTimelineProps) {
@@ -43,12 +45,12 @@ export function InstallmentTimeline({
   return (
     <section
       className={cn('border border-border/60 bg-card p-4 rounded-none', className)}
-      aria-label={isRu ? 'Платёжный график' : 'Payment schedule'}
+      aria-label={isRu ? 'Платёжный график' : isTh ? 'กำหนดการชำระเงิน' : 'Payment schedule'}
     >
       <header className="flex items-start justify-between gap-3 mb-3">
         <div>
           <h3 className="text-base font-semibold text-foreground">
-            {isRu ? 'Платёжный график' : 'Payment schedule'}
+            {isRu ? 'Платёжный график' : isTh ? 'กำหนดการชำระเงิน' : 'Payment schedule'}
           </h3>
           {presetLabel && (
             <p className="text-xs text-muted-foreground mt-0.5">{presetLabel}</p>
@@ -123,7 +125,7 @@ export function InstallmentTimeline({
       {totalPrice ? (
         <div className="mt-4 pt-3 border-t border-border/60 flex items-baseline justify-between">
           <span className="text-sm text-muted-foreground">
-            {isRu ? 'Итого' : 'Total'}
+            {isRu ? 'Итого' : isTh ? 'รวมทั้งหมด' : 'Total'}
           </span>
           <span className="text-base font-mono font-bold text-foreground tabular-nums">
             {formatPrice(totalPrice)}

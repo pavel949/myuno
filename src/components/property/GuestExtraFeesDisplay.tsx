@@ -23,25 +23,26 @@ interface GuestExtraFeesDisplayProps {
 
 const CURRENCY_SYMBOLS: Record<string, string> = { THB: '฿', USD: '$', EUR: '€' };
 
-function formatRate(rate: number, currency: string, unit?: string, isRu = false): string {
+function formatRate(rate: number, currency: string, unit?: string, isRu = false, isTh = false): string {
   const symbol = CURRENCY_SYMBOLS[currency] ?? currency;
   const u = unit?.trim();
   const perUnit = u ? `/${u}` : '';
-  return `${symbol}${rate.toLocaleString(isRu ? 'ru-RU' : 'en-US')}${perUnit}`;
+  return `${symbol}${rate.toLocaleString(isRu ? 'ru-RU' : isTh ? 'th-TH' : 'en-US')}${perUnit}`;
 }
 
-function formatRange(min: number | null, max: number | null, currency: string, isRu = false): string | null {
+function formatRange(min: number | null, max: number | null, currency: string, isRu = false, isTh = false): string | null {
   if (min == null && max == null) return null;
   const symbol = CURRENCY_SYMBOLS[currency] ?? currency;
-  const fmt = (n: number) => n.toLocaleString(isRu ? 'ru-RU' : 'en-US');
+  const fmt = (n: number) => n.toLocaleString(isRu ? 'ru-RU' : isTh ? 'th-TH' : 'en-US');
   if (min != null && max != null) return `~${symbol}${fmt(min)}–${symbol}${fmt(max)}`;
-  if (min != null) return `${isRu ? 'от' : 'from'} ${symbol}${fmt(min)}`;
-  return `${isRu ? 'до' : 'up to'} ${symbol}${fmt(max!)}`;
+  if (min != null) return `${isRu ? 'от' : isTh ? 'ตั้งแต่' : 'from'} ${symbol}${fmt(min)}`;
+  return `${isRu ? 'до' : isTh ? 'สูงสุด' : 'up to'} ${symbol}${fmt(max!)}`;
 }
 
 export function GuestExtraFeesDisplay({ fees, className }: GuestExtraFeesDisplayProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const parsed = parseGuestExtraFees(fees);
   if (parsed.length === 0) return null;
@@ -51,13 +52,15 @@ export function GuestExtraFeesDisplay({ fees, className }: GuestExtraFeesDisplay
       <div className="flex items-center gap-2 mb-3">
         <Receipt className="h-5 w-5 text-primary" />
         <h2 id="guest-extra-fees-heading" className="text-lg font-semibold">
-          {isRu ? 'Оплачивается отдельно' : 'Paid separately'}
+          {isRu ? 'Оплачивается отдельно' : isTh ? 'ชำระแยกต่างหาก' : 'Paid separately'}
         </h2>
       </div>
 
       <p className="text-sm text-muted-foreground mb-4">
         {isRu
           ? 'Эти позиции не включены в стоимость бронирования и оплачиваются хосту по факту использования.'
+          : isTh
+          ? 'รายการเหล่านี้ไม่รวมอยู่ในยอดการจอง และชำระให้เจ้าของตามการใช้งานจริง'
           : 'These items are not included in the booking total and are paid to the host based on actual usage.'}
       </p>
 
@@ -66,8 +69,8 @@ export function GuestExtraFeesDisplay({ fees, className }: GuestExtraFeesDisplay
           const preset = GUEST_FEE_KIND_PRESETS[fee.kind];
           const label = getFeeLabel(fee, isRu);
           const currency = fee.currency || 'THB';
-          const rateStr = fee.rate != null && fee.rate > 0 ? formatRate(fee.rate, currency, fee.unit, isRu) : null;
-          const range = formatRange(fee.estimate_min ?? null, fee.estimate_max ?? null, currency, isRu);
+          const rateStr = fee.rate != null && fee.rate > 0 ? formatRate(fee.rate, currency, fee.unit, isRu, isTh) : null;
+          const range = formatRange(fee.estimate_min ?? null, fee.estimate_max ?? null, currency, isRu, isTh);
           const note = isRu ? fee.notes_ru : fee.notes_en;
           const moment = isRu
             ? PAYMENT_MOMENT_LABELS[fee.when_paid].labelRu
@@ -93,7 +96,7 @@ export function GuestExtraFeesDisplay({ fees, className }: GuestExtraFeesDisplay
                   {range && (
                     <span className="inline-flex items-center gap-1">
                       <span className="w-1 h-1 rounded-full bg-muted-foreground/60" />
-                      {isRu ? 'обычно' : 'typically'} {range}
+                      {isRu ? 'обычно' : isTh ? 'โดยทั่วไป' : 'typically'} {range}
                     </span>
                   )}
                 </div>

@@ -273,6 +273,7 @@ export function PropertyListingCard({
           floodRisk={(property as unknown as { flood_risk?: string | null }).flood_risk ?? null}
           ownerVerified={property.is_verified ?? null}
           isRu={isRu}
+          isTh={isTh}
           className="mt-1.5 [&>div]:text-[10px] [&>div]:px-1.5 [&>div]:py-0.5 [&_svg]:w-3 [&_svg]:h-3"
         />
       </div>

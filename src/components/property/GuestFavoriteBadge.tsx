@@ -43,10 +43,11 @@ export function GuestFavoriteBadge({
 }: GuestFavoriteBadgeProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (!isGuestFavorite(rating, reviewsCount)) return null;
 
-  const label = isRu ? 'Любимец гостей' : 'Guest favorite';
+  const label = isRu ? 'Любимец гостей' : isTh ? 'ที่พักยอดนิยม' : 'Guest favorite';
 
   if (variant === 'inline') {
     return (
@@ -70,7 +71,7 @@ export function GuestFavoriteBadge({
         'text-[11px] font-semibold text-foreground shadow-sm border border-border/40',
         className,
       )}
-      title={isRu ? `Рейтинг ${rating} из ${reviewsCount} отзывов` : `${rating} from ${reviewsCount} reviews`}
+      title={isRu ? `Рейтинг ${rating} из ${reviewsCount} отзывов` : isTh ? `คะแนน ${rating} จาก ${reviewsCount} รีวิว` : `${rating} from ${reviewsCount} reviews`}
     >
       <Award className="w-3.5 h-3.5 text-primary" />
       {label}

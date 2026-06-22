@@ -30,36 +30,37 @@ interface PropertyRoomsProps {
 }
 
 const roomTypes = [
-  { value: 'bedroom', labelEn: 'Bedroom', labelRu: 'Спальня', icon: Bed },
-  { value: 'living', labelEn: 'Living Room', labelRu: 'Гостиная', icon: Sofa },
-  { value: 'kitchen', labelEn: 'Kitchen', labelRu: 'Кухня', icon: UtensilsCrossed },
-  { value: 'bathroom', labelEn: 'Bathroom', labelRu: 'Ванная', icon: Bath },
-  { value: 'outdoor', labelEn: 'Outdoor Space', labelRu: 'Терраса/Балкон', icon: TreePine },
+  { value: 'bedroom', labelEn: 'Bedroom', labelRu: 'Спальня', labelTh: 'ห้องนอน', icon: Bed },
+  { value: 'living', labelEn: 'Living Room', labelRu: 'Гостиная', labelTh: 'ห้องนั่งเล่น', icon: Sofa },
+  { value: 'kitchen', labelEn: 'Kitchen', labelRu: 'Кухня', labelTh: 'ห้องครัว', icon: UtensilsCrossed },
+  { value: 'bathroom', labelEn: 'Bathroom', labelRu: 'Ванная', labelTh: 'ห้องน้ำ', icon: Bath },
+  { value: 'outdoor', labelEn: 'Outdoor Space', labelRu: 'Терраса/Балкон', labelTh: 'พื้นที่กลางแจ้ง', icon: TreePine },
 ];
 
 const bedTypes = [
-  { value: 'king', labelEn: 'King Bed', labelRu: 'Кровать King', sleeps: 2 },
-  { value: 'queen', labelEn: 'Queen Bed', labelRu: 'Кровать Queen', sleeps: 2 },
-  { value: 'double', labelEn: 'Double Bed', labelRu: 'Двуспальная', sleeps: 2 },
-  { value: 'single', labelEn: 'Single Bed', labelRu: 'Односпальная', sleeps: 1 },
-  { value: 'sofa_bed', labelEn: 'Sofa Bed', labelRu: 'Диван-кровать', sleeps: 2 },
-  { value: 'bunk', labelEn: 'Bunk Bed', labelRu: 'Двухъярусная', sleeps: 2 },
+  { value: 'king', labelEn: 'King Bed', labelRu: 'Кровать King', labelTh: 'เตียงคิงไซส์', sleeps: 2 },
+  { value: 'queen', labelEn: 'Queen Bed', labelRu: 'Кровать Queen', labelTh: 'เตียงควีนไซส์', sleeps: 2 },
+  { value: 'double', labelEn: 'Double Bed', labelRu: 'Двуспальная', labelTh: 'เตียงคู่', sleeps: 2 },
+  { value: 'single', labelEn: 'Single Bed', labelRu: 'Односпальная', labelTh: 'เตียงเดี่ยว', sleeps: 1 },
+  { value: 'sofa_bed', labelEn: 'Sofa Bed', labelRu: 'Диван-кровать', labelTh: 'โซฟาเบด', sleeps: 2 },
+  { value: 'bunk', labelEn: 'Bunk Bed', labelRu: 'Двухъярусная', labelTh: 'เตียงสองชั้น', sleeps: 2 },
 ];
 
 const roomAmenities = [
-  { value: 'tv', labelEn: 'TV', labelRu: 'Телевизор' },
-  { value: 'ac', labelEn: 'Air Conditioning', labelRu: 'Кондиционер' },
-  { value: 'ensuite', labelEn: 'En-suite Bathroom', labelRu: 'Своя ванная' },
-  { value: 'balcony', labelEn: 'Balcony', labelRu: 'Балкон' },
-  { value: 'wardrobe', labelEn: 'Wardrobe', labelRu: 'Шкаф' },
-  { value: 'desk', labelEn: 'Work Desk', labelRu: 'Рабочий стол' },
-  { value: 'safe', labelEn: 'Safe', labelRu: 'Сейф' },
-  { value: 'minibar', labelEn: 'Mini Bar', labelRu: 'Мини-бар' },
+  { value: 'tv', labelEn: 'TV', labelRu: 'Телевизор', labelTh: 'ทีวี' },
+  { value: 'ac', labelEn: 'Air Conditioning', labelRu: 'Кондиционер', labelTh: 'เครื่องปรับอากาศ' },
+  { value: 'ensuite', labelEn: 'En-suite Bathroom', labelRu: 'Своя ванная', labelTh: 'ห้องน้ำในตัว' },
+  { value: 'balcony', labelEn: 'Balcony', labelRu: 'Балкон', labelTh: 'ระเบียง' },
+  { value: 'wardrobe', labelEn: 'Wardrobe', labelRu: 'Шкаф', labelTh: 'ตู้เสื้อผ้า' },
+  { value: 'desk', labelEn: 'Work Desk', labelRu: 'Рабочий стол', labelTh: 'โต๊ะทำงาน' },
+  { value: 'safe', labelEn: 'Safe', labelRu: 'Сейф', labelTh: 'ตู้เซฟ' },
+  { value: 'minibar', labelEn: 'Mini Bar', labelRu: 'Мини-бар', labelTh: 'มินิบาร์' },
 ];
 
 export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const addRoom = () => {
     const newRoom: Room = {
@@ -135,24 +136,24 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
           <CardTitle className="text-lg">
-            {isRu ? 'Комнаты и спальные места' : 'Rooms & Sleeping Arrangements'}
+            {isRu ? 'Комнаты и спальные места' : isTh ? 'ห้องและการจัดที่นอน' : 'Rooms & Sleeping Arrangements'}
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? `Всего спальных мест: ${calculateTotalSleeps()}` : `Total sleeping capacity: ${calculateTotalSleeps()}`}
+            {isRu ? `Всего спальных мест: ${calculateTotalSleeps()}` : isTh ? `รองรับการนอนทั้งหมด: ${calculateTotalSleeps()}` : `Total sleeping capacity: ${calculateTotalSleeps()}`}
           </p>
         </div>
         <Button onClick={addRoom} size="sm" variant="outline">
           <Plus className="h-4 w-4 mr-1" />
-          {isRu ? 'Добавить' : 'Add Room'}
+          {isRu ? 'Добавить' : isTh ? 'เพิ่มห้อง' : 'Add Room'}
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {rooms.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-none">
             <Bed className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>{isRu ? 'Нет добавленных комнат' : 'No rooms added yet'}</p>
+            <p>{isRu ? 'Нет добавленных комнат' : isTh ? 'ยังไม่ได้เพิ่มห้อง' : 'No rooms added yet'}</p>
             <Button onClick={addRoom} variant="link" className="mt-2">
-              {isRu ? 'Добавить первую комнату' : 'Add your first room'}
+              {isRu ? 'Добавить первую комнату' : isTh ? 'เพิ่มห้องแรกของคุณ' : 'Add your first room'}
             </Button>
           </div>
         ) : (
@@ -168,7 +169,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                       <Label className="text-xs text-muted-foreground">
-                        {isRu ? 'Тип' : 'Type'}
+                        {isRu ? 'Тип' : isTh ? 'ประเภท' : 'Type'}
                       </Label>
                       <Select
                         value={room.type}
@@ -180,7 +181,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                         <SelectContent>
                           {roomTypes.map(rt => (
                             <SelectItem key={rt.value} value={rt.value}>
-                              {isRu ? rt.labelRu : rt.labelEn}
+                              {isRu ? rt.labelRu : isTh ? rt.labelTh : rt.labelEn}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -188,7 +189,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">
-                        {isRu ? 'Название (EN)' : 'Name (EN)'}
+                        {isRu ? 'Название (EN)' : isTh ? 'ชื่อ (EN)' : 'Name (EN)'}
                       </Label>
                       <Input
                         value={room.name}
@@ -199,7 +200,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">
-                        {isRu ? 'Название (RU)' : 'Name (RU)'}
+                        {isRu ? 'Название (RU)' : isTh ? 'ชื่อ (RU)' : 'Name (RU)'}
                       </Label>
                       <Input
                         value={room.nameRu || ''}
@@ -214,7 +215,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                     size="icon"
                     onClick={() => removeRoom(room.id)}
                     className="text-destructive hover:text-destructive"
-                    aria-label={isRu ? 'Удалить' : 'Delete'}
+                    aria-label={isRu ? 'Удалить' : isTh ? 'ลบ' : 'Delete'}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -225,7 +226,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                   <div className="pl-4 border-l-2 border-muted space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">
-                        {isRu ? 'Кровати' : 'Beds'}
+                        {isRu ? 'Кровати' : isTh ? 'เตียง' : 'Beds'}
                       </Label>
                       <Button
                         variant="ghost"
@@ -234,13 +235,13 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                         className="h-7 text-xs"
                       >
                         <Plus className="h-3 w-3 mr-1" />
-                        {isRu ? 'Добавить кровать' : 'Add Bed'}
+                        {isRu ? 'Добавить кровать' : isTh ? 'เพิ่มเตียง' : 'Add Bed'}
                       </Button>
                     </div>
                     
                     {(room.beds || []).length === 0 ? (
                       <p className="text-xs text-muted-foreground">
-                        {isRu ? 'Нет кроватей' : 'No beds added'}
+                        {isRu ? 'Нет кроватей' : isTh ? 'ยังไม่ได้เพิ่มเตียง' : 'No beds added'}
                       </p>
                     ) : (
                       <div className="grid gap-2">
@@ -256,7 +257,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                               <SelectContent>
                                 {bedTypes.map(bt => (
                                   <SelectItem key={bt.value} value={bt.value}>
-                                    {isRu ? bt.labelRu : bt.labelEn} ({bt.sleeps} {isRu ? 'чел.' : 'pax'})
+                                    {isRu ? bt.labelRu : isTh ? bt.labelTh : bt.labelEn} ({bt.sleeps} {isRu ? 'чел.' : isTh ? 'คน' : 'pax'})
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -277,7 +278,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                               size="icon"
                               onClick={() => removeBed(room.id, bedIndex)}
                               className="h-8 w-8 min-h-[44px] min-w-[44px] text-muted-foreground hover:text-destructive"
-                              aria-label={isRu ? 'Удалить' : 'Delete'}
+                              aria-label={isRu ? 'Удалить' : isTh ? 'ลบ' : 'Delete'}
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>
@@ -291,7 +292,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                 {/* Room Amenities */}
                 <div className="pl-4 border-l-2 border-muted">
                   <Label className="text-sm font-medium mb-2 block">
-                    {isRu ? 'Удобства в комнате' : 'Room Amenities'}
+                    {isRu ? 'Удобства в комнате' : isTh ? 'สิ่งอำนวยความสะดวกในห้อง' : 'Room Amenities'}
                   </Label>
                   <div className="flex flex-wrap gap-2">
                     {roomAmenities.map(amenity => (
@@ -301,7 +302,7 @@ export function PropertyRooms({ rooms, onChange, className }: PropertyRoomsProps
                         className="cursor-pointer"
                         onClick={() => toggleAmenity(room.id, amenity.value)}
                       >
-                        {isRu ? amenity.labelRu : amenity.labelEn}
+                        {isRu ? amenity.labelRu : isTh ? amenity.labelTh : amenity.labelEn}
                       </Badge>
                     ))}
                   </div>

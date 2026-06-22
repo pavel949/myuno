@@ -19,8 +19,9 @@ interface StepConfig {
   id: string;
   question: string;
   questionRu: string;
+  questionTh: string;
   type: 'radio' | 'checkbox';
-  options: { value: string; label: string; labelRu: string }[];
+  options: { value: string; label: string; labelRu: string; labelTh: string }[];
 }
 
 const STEPS: StepConfig[] = [
@@ -28,47 +29,51 @@ const STEPS: StepConfig[] = [
     id: 'residency',
     question: 'What is your tax residency status?',
     questionRu: 'Ваш налоговый статус?',
+    questionTh: 'สถานะการเป็นผู้เสียภาษีของคุณคืออะไร?',
     type: 'radio',
     options: [
-      { value: 'resident', label: 'Tax resident (180+ days/year)', labelRu: 'Налоговый резидент (180+ дней/год)' },
-      { value: 'non_resident', label: 'Non-resident (<180 days/year)', labelRu: 'Нерезидент (<180 дней/год)' },
-      { value: 'unsure', label: 'Not sure', labelRu: 'Не уверен(а)' },
+      { value: 'resident', label: 'Tax resident (180+ days/year)', labelRu: 'Налоговый резидент (180+ дней/год)', labelTh: 'ผู้มีถิ่นที่อยู่ทางภาษี (180+ วัน/ปี)' },
+      { value: 'non_resident', label: 'Non-resident (<180 days/year)', labelRu: 'Нерезидент (<180 дней/год)', labelTh: 'ผู้ไม่มีถิ่นที่อยู่ทางภาษี (<180 วัน/ปี)' },
+      { value: 'unsure', label: 'Not sure', labelRu: 'Не уверен(а)', labelTh: 'ไม่แน่ใจ' },
     ],
   },
   {
     id: 'income_sources',
     question: 'What are your income sources?',
     questionRu: 'Источники дохода?',
+    questionTh: 'แหล่งที่มาของรายได้ของคุณคืออะไร?',
     type: 'checkbox',
     options: [
-      { value: 'employment', label: 'Employment in Thailand', labelRu: 'Работа в Таиланде' },
-      { value: 'rental', label: 'Rental income (Thai property)', labelRu: 'Доход от аренды (тайская недвижимость)' },
-      { value: 'freelance', label: 'Freelance / Remote work', labelRu: 'Фриланс / Удалённая работа' },
-      { value: 'investment', label: 'Investment / Dividends', labelRu: 'Инвестиции / Дивиденды' },
-      { value: 'pension', label: 'Pension', labelRu: 'Пенсия' },
-      { value: 'business', label: 'Thai business owner', labelRu: 'Владелец бизнеса в Таиланде' },
+      { value: 'employment', label: 'Employment in Thailand', labelRu: 'Работа в Таиланде', labelTh: 'การจ้างงานในประเทศไทย' },
+      { value: 'rental', label: 'Rental income (Thai property)', labelRu: 'Доход от аренды (тайская недвижимость)', labelTh: 'รายได้จากค่าเช่า (อสังหาริมทรัพย์ในไทย)' },
+      { value: 'freelance', label: 'Freelance / Remote work', labelRu: 'Фриланс / Удалённая работа', labelTh: 'ฟรีแลนซ์ / ทำงานทางไกล' },
+      { value: 'investment', label: 'Investment / Dividends', labelRu: 'Инвестиции / Дивиденды', labelTh: 'การลงทุน / เงินปันผล' },
+      { value: 'pension', label: 'Pension', labelRu: 'Пенсия', labelTh: 'เงินบำนาญ' },
+      { value: 'business', label: 'Thai business owner', labelRu: 'Владелец бизнеса в Таиланде', labelTh: 'เจ้าของธุรกิจในประเทศไทย' },
     ],
   },
   {
     id: 'stay_duration',
     question: 'How long have you been in Thailand this year?',
     questionRu: 'Сколько вы в Таиланде в этом году?',
+    questionTh: 'ปีนี้คุณอยู่ในประเทศไทยมานานเท่าใด?',
     type: 'radio',
     options: [
-      { value: 'under_90', label: 'Under 90 days', labelRu: 'Менее 90 дней' },
-      { value: '90_180', label: '90-180 days', labelRu: '90-180 дней' },
-      { value: 'over_180', label: 'Over 180 days', labelRu: 'Более 180 дней' },
+      { value: 'under_90', label: 'Under 90 days', labelRu: 'Менее 90 дней', labelTh: 'น้อยกว่า 90 วัน' },
+      { value: '90_180', label: '90-180 days', labelRu: '90-180 дней', labelTh: '90-180 วัน' },
+      { value: 'over_180', label: 'Over 180 days', labelRu: 'Более 180 дней', labelTh: 'มากกว่า 180 วัน' },
     ],
   },
   {
     id: 'existing_filing',
     question: 'Do you currently file taxes in Thailand?',
     questionRu: 'Подаёте ли вы налоговую декларацию в Таиланде?',
+    questionTh: 'ปัจจุบันคุณยื่นภาษีในประเทศไทยหรือไม่?',
     type: 'radio',
     options: [
-      { value: 'yes', label: 'Yes, I file annually', labelRu: 'Да, ежегодно' },
-      { value: 'no', label: 'No', labelRu: 'Нет' },
-      { value: 'unsure', label: 'Not sure if I need to', labelRu: 'Не уверен(а), нужно ли' },
+      { value: 'yes', label: 'Yes, I file annually', labelRu: 'Да, ежегодно', labelTh: 'ใช่ ยื่นทุกปี' },
+      { value: 'no', label: 'No', labelRu: 'Нет', labelTh: 'ไม่' },
+      { value: 'unsure', label: 'Not sure if I need to', labelRu: 'Не уверен(а), нужно ли', labelTh: 'ไม่แน่ใจว่าต้องยื่นหรือไม่' },
     ],
   },
 ];
@@ -76,6 +81,7 @@ const STEPS: StepConfig[] = [
 export default function TaxNavPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
+  const isTh = language === 'th';
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -103,14 +109,15 @@ export default function TaxNavPage() {
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     try {
+      const labelKey = t ? 'labelRu' : isTh ? 'labelTh' : 'label';
       const prompt = STEPS.map(s => {
         const answer = answers[s.id];
-        const q = t ? s.questionRu : s.question;
+        const q = t ? s.questionRu : isTh ? s.questionTh : s.question;
         if (Array.isArray(answer)) {
-          const labels = answer.map(a => s.options.find(o => o.value === a)?.[t ? 'labelRu' : 'label'] || a);
+          const labels = answer.map(a => s.options.find(o => o.value === a)?.[labelKey] || a);
           return `${q}\n→ ${labels.join(', ')}`;
         }
-        return `${q}\n→ ${s.options.find(o => o.value === answer)?.[t ? 'labelRu' : 'label'] || answer}`;
+        return `${q}\n→ ${s.options.find(o => o.value === answer)?.[labelKey] || answer}`;
       }).join('\n\n');
 
       const { data, error } = await supabase.functions.invoke('ai-agent', {
@@ -118,7 +125,7 @@ export default function TaxNavPage() {
           messages: [
             {
               role: 'system',
-              content: `You are a Thai tax advisor for expats and foreigners. Based on the user's answers, provide a clear, actionable summary of their likely tax obligations in Thailand. Include: (1) Whether they need to file, (2) Key deadlines, (3) Applicable tax rates, (4) Recommended next steps. Be specific but note this is informational, not legal advice. Respond in ${t ? 'Russian' : 'English'}. Use markdown formatting.`
+              content: `You are a Thai tax advisor for expats and foreigners. Based on the user's answers, provide a clear, actionable summary of their likely tax obligations in Thailand. Include: (1) Whether they need to file, (2) Key deadlines, (3) Applicable tax rates, (4) Recommended next steps. Be specific but note this is informational, not legal advice. Respond in ${t ? 'Russian' : isTh ? 'Thai' : 'English'}. Use markdown formatting.`
             },
             { role: 'user', content: `Here are my answers to the tax questionnaire:\n\n${prompt}` }
           ],
@@ -129,7 +136,7 @@ export default function TaxNavPage() {
       setResult(data?.choices?.[0]?.message?.content || data?.result || 'No response');
     } catch (err) {
       console.error('Tax analysis error:', err);
-      toast.error(t ? 'Ошибка анализа' : 'Analysis failed');
+      toast.error(t ? 'Ошибка анализа' : isTh ? 'การวิเคราะห์ล้มเหลว' : 'Analysis failed');
     } finally {
       setIsAnalyzing(false);
     }
@@ -148,18 +155,18 @@ export default function TaxNavPage() {
   if (step >= STEPS.length) {
     return (
       <AppLayout>
-        <SEOHead title={t ? 'Налоговый навигатор' : 'Tax Navigator'} description={t ? 'AI-навигатор налоговых обязательств для иностранцев в Таиланде' : 'AI tax obligations navigator for foreigners in Thailand'} />
+        <SEOHead title={t ? 'Налоговый навигатор' : isTh ? 'ตัวช่วยนำทางภาษี' : 'Tax Navigator'} description={t ? 'AI-навигатор налоговых обязательств для иностранцев в Таиланде' : isTh ? 'ตัวช่วยนำทางภาระภาษีด้วย AI สำหรับชาวต่างชาติในประเทศไทย' : 'AI tax obligations navigator for foreigners in Thailand'} />
         <div className="pb-24">
           <div className="relative bg-gradient-to-br from-primary via-primary to-primary p-6 pt-16 pb-8">
             <BackButton fallbackPath={APP_ROUTES.LEGAL} variant="overlay" className="absolute top-4 left-4" />
             <div className="text-white text-center">
               <Calculator className="w-8 h-8 mx-auto mb-2" />
-              <h1 className="text-xl font-bold">{t ? 'Результат анализа' : 'Analysis Result'}</h1>
+              <h1 className="text-xl font-bold">{t ? 'Результат анализа' : isTh ? 'ผลการวิเคราะห์' : 'Analysis Result'}</h1>
             </div>
           </div>
           <div className="px-4 -mt-4 space-y-4">
             {isAnalyzing ? (
-              <Card><CardContent className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary mb-3" /><p className="text-sm text-muted-foreground">{t ? 'Анализирую...' : 'Analyzing your situation...'}</p></CardContent></Card>
+              <Card><CardContent className="p-8 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary mb-3" /><p className="text-sm text-muted-foreground">{t ? 'Анализирую...' : isTh ? 'กำลังวิเคราะห์สถานการณ์ของคุณ...' : 'Analyzing your situation...'}</p></CardContent></Card>
             ) : result ? (
               <>
                 <Card>
@@ -170,15 +177,15 @@ export default function TaxNavPage() {
                 <Card className="bg-primary/5 border-primary/20">
                   <CardContent className="p-4 text-center">
                     <MessageCircle className="w-6 h-6 mx-auto text-primary mb-2" />
-                    <p className="text-sm font-medium mb-1">{t ? 'Нужна консультация?' : 'Need expert advice?'}</p>
-                    <p className="text-xs text-muted-foreground mb-3">{t ? 'Свяжитесь с налоговым консультантом' : 'Connect with a tax advisor'}</p>
-                    <Button size="sm" onClick={() => window.open(getWhatsAppUrl(t ? 'Здравствуйте! Нужна налоговая консультация' : 'Tax consultation request'), '_blank')}>
-                      {t ? 'Связаться' : 'Get in Touch'}
+                    <p className="text-sm font-medium mb-1">{t ? 'Нужна консультация?' : isTh ? 'ต้องการคำปรึกษาจากผู้เชี่ยวชาญ?' : 'Need expert advice?'}</p>
+                    <p className="text-xs text-muted-foreground mb-3">{t ? 'Свяжитесь с налоговым консультантом' : isTh ? 'ติดต่อที่ปรึกษาด้านภาษี' : 'Connect with a tax advisor'}</p>
+                    <Button size="sm" onClick={() => window.open(getWhatsAppUrl(t ? 'Здравствуйте! Нужна налоговая консультация' : isTh ? 'สวัสดีครับ/ค่ะ ต้องการคำปรึกษาด้านภาษี' : 'Tax consultation request'), '_blank')}>
+                      {t ? 'Связаться' : isTh ? 'ติดต่อเรา' : 'Get in Touch'}
                     </Button>
                   </CardContent>
                 </Card>
                 <Button variant="outline" className="w-full" onClick={() => { setStep(0); setResult(null); setAnswers({}); }}>
-                  {t ? 'Начать заново' : 'Start Over'}
+                  {t ? 'Начать заново' : isTh ? 'เริ่มใหม่' : 'Start Over'}
                 </Button>
               </>
             ) : null}
@@ -198,7 +205,7 @@ export default function TaxNavPage() {
           <div className="text-white text-center">
             <Calculator className="w-8 h-8 mx-auto mb-2" />
             <h1 className="text-xl font-bold">{t ? 'TaxNav' : 'TaxNav'}</h1>
-            <p className="text-white/80 text-sm">{t ? 'Навигатор налоговых обязательств' : 'Tax obligations navigator'}</p>
+            <p className="text-white/80 text-sm">{t ? 'Навигатор налоговых обязательств' : isTh ? 'ตัวช่วยนำทางภาระภาษี' : 'Tax obligations navigator'}</p>
           </div>
         </div>
 
@@ -213,15 +220,15 @@ export default function TaxNavPage() {
           {/* Question */}
           <Card>
             <CardContent className="p-4 space-y-4">
-              <p className="text-sm text-muted-foreground">{t ? 'Шаг' : 'Step'} {step + 1}/{STEPS.length}</p>
-              <h2 className="text-base font-semibold">{t ? currentStep.questionRu : currentStep.question}</h2>
+              <p className="text-sm text-muted-foreground">{t ? 'Шаг' : isTh ? 'ขั้นตอน' : 'Step'} {step + 1}/{STEPS.length}</p>
+              <h2 className="text-base font-semibold">{t ? currentStep.questionRu : isTh ? currentStep.questionTh : currentStep.question}</h2>
 
               {currentStep.type === 'radio' ? (
                 <RadioGroup value={answers[currentStep.id] as string || ''} onValueChange={handleRadio} className="space-y-2">
                   {currentStep.options.map(opt => (
                     <div key={opt.value} className="flex items-center space-x-3 p-3 rounded-none border border-border hover:bg-muted/50 transition-colors">
                       <RadioGroupItem value={opt.value} id={opt.value} />
-                      <Label htmlFor={opt.value} className="text-sm cursor-pointer flex-1">{t ? opt.labelRu : opt.label}</Label>
+                      <Label htmlFor={opt.value} className="text-sm cursor-pointer flex-1">{t ? opt.labelRu : isTh ? opt.labelTh : opt.label}</Label>
                     </div>
                   ))}
                 </RadioGroup>
@@ -234,7 +241,7 @@ export default function TaxNavPage() {
                         checked={((answers[currentStep.id] as string[]) || []).includes(opt.value)}
                         onCheckedChange={(checked) => handleCheckbox(opt.value, !!checked)}
                       />
-                      <Label htmlFor={opt.value} className="text-sm cursor-pointer flex-1">{t ? opt.labelRu : opt.label}</Label>
+                      <Label htmlFor={opt.value} className="text-sm cursor-pointer flex-1">{t ? opt.labelRu : isTh ? opt.labelTh : opt.label}</Label>
                     </div>
                   ))}
                 </div>
@@ -246,11 +253,11 @@ export default function TaxNavPage() {
           <div className="flex gap-3">
             {step > 0 && (
               <Button variant="outline" className="gap-1" onClick={() => setStep(s => s - 1)}>
-                <ChevronLeft className="w-4 h-4" />{t ? 'Назад' : 'Back'}
+                <ChevronLeft className="w-4 h-4" />{t ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
               </Button>
             )}
             <Button className="flex-1 gap-1" disabled={!canProceed} onClick={handleNext}>
-              {isLastStep ? (t ? 'Анализировать' : 'Analyze') : (t ? 'Далее' : 'Next')}
+              {isLastStep ? (t ? 'Анализировать' : isTh ? 'วิเคราะห์' : 'Analyze') : (t ? 'Далее' : isTh ? 'ถัดไป' : 'Next')}
               {!isLastStep && <ChevronRight className="w-4 h-4" />}
             </Button>
           </div>

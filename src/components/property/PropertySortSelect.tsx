@@ -21,17 +21,18 @@ interface PropertySortSelectProps {
   onChange: (value: PropertySortKey) => void;
 }
 
-const sortOptions: Array<{ value: PropertySortKey; labelEn: string; labelRu: string }> = [
-  { value: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые' },
-  { value: 'price_asc', labelEn: 'Price: Low → High', labelRu: 'Цена: по возрастанию' },
-  { value: 'price_desc', labelEn: 'Price: High → Low', labelRu: 'Цена: по убыванию' },
-  { value: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу' },
-  { value: 'newest', labelEn: 'Newest', labelRu: 'Новые' },
+const sortOptions: Array<{ value: PropertySortKey; labelEn: string; labelRu: string; labelTh: string }> = [
+  { value: 'recommended', labelEn: 'Recommended', labelRu: 'Рекомендуемые', labelTh: 'แนะนำ' },
+  { value: 'price_asc', labelEn: 'Price: Low → High', labelRu: 'Цена: по возрастанию', labelTh: 'ราคา: ต่ำ → สูง' },
+  { value: 'price_desc', labelEn: 'Price: High → Low', labelRu: 'Цена: по убыванию', labelTh: 'ราคา: สูง → ต่ำ' },
+  { value: 'rating', labelEn: 'Top Rated', labelRu: 'По рейтингу', labelTh: 'คะแนนสูงสุด' },
+  { value: 'newest', labelEn: 'Newest', labelRu: 'Новые', labelTh: 'ใหม่ล่าสุด' },
 ];
 
 export function PropertySortSelect({ value, onChange }: PropertySortSelectProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   return (
     <Select value={value} onValueChange={(v) => onChange(v as PropertySortKey)}>
@@ -42,7 +43,7 @@ export function PropertySortSelect({ value, onChange }: PropertySortSelectProps)
       <SelectContent>
         {sortOptions.map((opt) => (
           <SelectItem key={opt.value} value={opt.value} className="text-xs">
-            {isRu ? opt.labelRu : opt.labelEn}
+            {isRu ? opt.labelRu : isTh ? opt.labelTh : opt.labelEn}
           </SelectItem>
         ))}
       </SelectContent>

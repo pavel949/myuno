@@ -24,6 +24,7 @@ interface Props {
 export function SaveOffplanSearchDialog({ filters, resultCount }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { user } = useAuth();
   const navigate = useNavigate();
   const { create } = useNbSavedSearches();
@@ -40,12 +41,12 @@ export function SaveOffplanSearchDialog({ filters, resultCount }: Props) {
     if (filters.fRec) parts.push(filters.fRec);
     if (filters.fYear) parts.push(filters.fYear);
     if (filters.q) parts.push(`"${filters.q}"`);
-    return parts.length ? parts.join(' · ') : (isRu ? 'Мой поиск новостроек' : 'My off-plan search');
+    return parts.length ? parts.join(' · ') : (isRu ? 'Мой поиск новостроек' : isTh ? 'การค้นหาโครงการ Off-plan ของฉัน' : 'My off-plan search');
   };
 
   const handleOpen = (next: boolean) => {
     if (next && !user) {
-      toast.error(isRu ? 'Войдите, чтобы сохранить поиск' : 'Sign in to save searches');
+      toast.error(isRu ? 'Войдите, чтобы сохранить поиск' : isTh ? 'เข้าสู่ระบบเพื่อบันทึกการค้นหา' : 'Sign in to save searches');
       navigate('/auth');
       return;
     }
@@ -62,7 +63,7 @@ export function SaveOffplanSearchDialog({ filters, resultCount }: Props) {
         notify_whatsapp: whatsapp,
         frequency: 'daily',
       });
-      toast.success(isRu ? 'Поиск сохранён — будем присылать новые проекты' : 'Search saved — we will notify you on new matches');
+      toast.success(isRu ? 'Поиск сохранён — будем присылать новые проекты' : isTh ? 'บันทึกการค้นหาแล้ว — เราจะแจ้งเตือนเมื่อมีโครงการใหม่ที่ตรงกัน' : 'Search saved — we will notify you on new matches');
       setOpen(false);
     } catch (err) {
       toast.error((err as Error).message);
@@ -74,45 +75,49 @@ export function SaveOffplanSearchDialog({ filters, resultCount }: Props) {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="shrink-0 rounded-full gap-1.5">
           <Bookmark className="w-4 h-4" />
-          {isRu ? 'Сохранить поиск' : 'Save search'}
+          {isRu ? 'Сохранить поиск' : isTh ? 'บันทึกการค้นหา' : 'Save search'}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{isRu ? 'Сохранить поиск' : 'Save this search'}</DialogTitle>
+          <DialogTitle>{isRu ? 'Сохранить поиск' : isTh ? 'บันทึกการค้นหานี้' : 'Save this search'}</DialogTitle>
           <DialogDescription>
             {isRu
               ? `Будем присылать уведомления, когда появятся новые проекты под ваши фильтры. Сейчас совпадает ${resultCount}.`
+              : isTh
+              ? `เราจะแจ้งเตือนเมื่อมีโครงการใหม่ที่ตรงกับตัวกรองของคุณ ขณะนี้ตรงกัน ${resultCount} รายการ`
               : `We will notify you when new projects match your filters. Currently matching ${resultCount}.`}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="search-name">{isRu ? 'Название поиска' : 'Search name'}</Label>
+            <Label htmlFor="search-name">{isRu ? 'Название поиска' : isTh ? 'ชื่อการค้นหา' : 'Search name'}</Label>
             <Input id="search-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={120} />
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="ch-email" className="font-normal">{isRu ? 'Уведомлять на email' : 'Notify by email'}</Label>
+            <Label htmlFor="ch-email" className="font-normal">{isRu ? 'Уведомлять на email' : isTh ? 'แจ้งเตือนทางอีเมล' : 'Notify by email'}</Label>
             <Switch id="ch-email" checked={email} onCheckedChange={setEmail} />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="ch-wa" className="font-normal">{isRu ? 'Уведомлять в WhatsApp' : 'Notify on WhatsApp'}</Label>
+            <Label htmlFor="ch-wa" className="font-normal">{isRu ? 'Уведомлять в WhatsApp' : isTh ? 'แจ้งเตือนทาง WhatsApp' : 'Notify on WhatsApp'}</Label>
             <Switch id="ch-wa" checked={whatsapp} onCheckedChange={setWhatsapp} />
           </div>
           <p className="text-xs text-muted-foreground">
             {isRu
               ? 'Канал и номер WhatsApp настраиваются в Настройках уведомлений новостроек.'
+              : isTh
+              ? 'ช่องทางและหมายเลข WhatsApp ตั้งค่าได้ในการตั้งค่าการแจ้งเตือนโครงการใหม่'
               : 'Channels and WhatsApp number can be configured in Newbuild alert settings.'}
           </p>
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={() => setOpen(false)}>{isRu ? 'Отмена' : 'Cancel'}</Button>
+          <Button variant="ghost" onClick={() => setOpen(false)}>{isRu ? 'Отмена' : isTh ? 'ยกเลิก' : 'Cancel'}</Button>
           <Button onClick={handleSave} disabled={create.isPending || (!email && !whatsapp)}>
             {create.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {isRu ? 'Сохранить' : 'Save'}
+            {isRu ? 'Сохранить' : isTh ? 'บันทึก' : 'Save'}
           </Button>
         </DialogFooter>
       </DialogContent>

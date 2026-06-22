@@ -258,6 +258,7 @@ export const PropertyMapView = forwardRef<HTMLDivElement, PropertyMapViewProps>(
                 floodRisk={openProperty.flood_risk ?? null}
                 ownerVerified={openProperty.is_verified ?? null}
                 isRu={isRu}
+                isTh={isTh}
                 className="mt-2 [&>div]:text-[10px] [&>div]:px-1.5 [&>div]:py-0.5 [&_svg]:w-3 [&_svg]:h-3"
               />
 

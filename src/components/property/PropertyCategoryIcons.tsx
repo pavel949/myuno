@@ -59,6 +59,7 @@ interface PropertyCategoryIconsProps {
 export function PropertyCategoryIcons({ selected, onSelect, className }: PropertyCategoryIconsProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const handleToggle = (id: string) => {
     onSelect(
@@ -77,7 +78,7 @@ export function PropertyCategoryIcons({ selected, onSelect, className }: Propert
             className="flex flex-col items-center gap-1.5 pb-2 border-b-2 border-transparent text-primary hover:text-primary/80 min-w-[56px] transition-all"
           >
             <span className="text-[10px] font-medium whitespace-nowrap">
-              {isRu ? 'Сброс' : 'Clear'}
+              {isRu ? 'Сброс' : isTh ? 'ล้าง' : 'Clear'}
             </span>
           </button>
         )}

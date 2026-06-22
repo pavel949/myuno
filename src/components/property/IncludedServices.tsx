@@ -16,6 +16,7 @@ interface IncludedServicesProps {
 export function IncludedServices({ services, className }: IncludedServicesProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (!services || services.length === 0) return null;
 
@@ -23,7 +24,7 @@ export function IncludedServices({ services, className }: IncludedServicesProps)
     <div className={className}>
       <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
         <Check className="w-5 h-5 text-primary" />
-        {isRu ? 'Что включено' : "What's Included"}
+        {isRu ? 'Что включено' : isTh ? 'สิ่งที่รวมอยู่ในราคา' : "What's Included"}
       </h3>
       <div className="grid grid-cols-2 gap-2">
         {services.map((serviceId) => {

@@ -29,6 +29,7 @@ export interface PropertyVideoUploaderProps {
   propertyId?: string | null;
   ownerId?: string | null;
   isRu: boolean;
+  isTh?: boolean;
   className?: string;
 }
 
@@ -47,6 +48,7 @@ export function PropertyVideoUploader({
   propertyId,
   ownerId,
   isRu,
+  isTh = false,
   className,
 }: PropertyVideoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,11 +62,11 @@ export function PropertyVideoUploader({
 
   const handleFile = async (file: File) => {
     if (!ACCEPTED_MIME.includes(file.type)) {
-      toast.error(isRu ? 'Поддерживаются: mp4, mov, webm, m4v' : 'Supported: mp4, mov, webm, m4v');
+      toast.error(isRu ? 'Поддерживаются: mp4, mov, webm, m4v' : isTh ? 'รองรับ: mp4, mov, webm, m4v' : 'Supported: mp4, mov, webm, m4v');
       return;
     }
     if (file.size > MAX_BYTES) {
-      toast.error(isRu ? 'Максимальный размер 500 МБ' : 'Max size 500 MB');
+      toast.error(isRu ? 'Максимальный размер 500 МБ' : isTh ? 'ขนาดสูงสุด 500 MB' : 'Max size 500 MB');
       return;
     }
     setUploading(true);
@@ -88,10 +90,10 @@ export function PropertyVideoUploader({
 
       setProgress(100);
       onChange(publicUrl);
-      toast.success(isRu ? 'Видео загружено' : 'Video uploaded');
+      toast.success(isRu ? 'Видео загружено' : isTh ? 'อัปโหลดวิดีโอแล้ว' : 'Video uploaded');
     } catch (err) {
       console.error('[PropertyVideoUploader] upload failed', err);
-      toast.error(isRu ? 'Ошибка загрузки видео' : 'Failed to upload video');
+      toast.error(isRu ? 'Ошибка загрузки видео' : isTh ? 'อัปโหลดวิดีโอไม่สำเร็จ' : 'Failed to upload video');
     } finally {
       setUploading(false);
       setTimeout(() => setProgress(0), 800);
@@ -110,11 +112,11 @@ export function PropertyVideoUploader({
       return;
     }
     if (!isHttpUrl(trimmed)) {
-      toast.error(isRu ? 'Некорректная ссылка' : 'Invalid URL');
+      toast.error(isRu ? 'Некорректная ссылка' : isTh ? 'ลิงก์ไม่ถูกต้อง' : 'Invalid URL');
       return;
     }
     onChange(trimmed);
-    toast.success(isRu ? 'Ссылка сохранена' : 'Link saved');
+    toast.success(isRu ? 'Ссылка сохранена' : isTh ? 'บันทึกลิงก์แล้ว' : 'Link saved');
   };
 
   return (
@@ -122,7 +124,7 @@ export function PropertyVideoUploader({
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Video className="h-4 w-4" />
-          {isRu ? 'Видео-тур объекта' : 'Property video tour'}
+          {isRu ? 'Видео-тур объекта' : isTh ? 'วิดีโอทัวร์อสังหาริมทรัพย์' : 'Property video tour'}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -137,7 +139,7 @@ export function PropertyVideoUploader({
               )}
               <span className="text-sm truncate font-mono">{value}</span>
             </div>
-            <Button type="button" variant="ghost" size="sm" onClick={handleRemove} aria-label={isRu ? 'Удалить' : 'Remove'}>
+            <Button type="button" variant="ghost" size="sm" onClick={handleRemove} aria-label={isRu ? 'Удалить' : isTh ? 'ลบ' : 'Remove'}>
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -146,7 +148,7 @@ export function PropertyVideoUploader({
         {/* Upload file */}
         <div>
           <Label className="text-sm text-muted-foreground mb-1.5 block">
-            {isRu ? 'Загрузить файл (до 500 МБ)' : 'Upload file (up to 500 MB)'}
+            {isRu ? 'Загрузить файл (до 500 МБ)' : isTh ? 'อัปโหลดไฟล์ (สูงสุด 500 MB)' : 'Upload file (up to 500 MB)'}
           </Label>
           <input
             ref={inputRef}
@@ -169,12 +171,12 @@ export function PropertyVideoUploader({
             {uploading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {isRu ? 'Загрузка…' : 'Uploading…'}
+                {isRu ? 'Загрузка…' : isTh ? 'กำลังอัปโหลด…' : 'Uploading…'}
               </>
             ) : (
               <>
                 <Upload className="h-4 w-4 mr-2" />
-                {isRu ? 'Выбрать видео-файл' : 'Choose video file'}
+                {isRu ? 'Выбрать видео-файл' : isTh ? 'เลือกไฟล์วิดีโอ' : 'Choose video file'}
               </>
             )}
           </Button>
@@ -184,7 +186,7 @@ export function PropertyVideoUploader({
         {/* OR YouTube/Vimeo URL */}
         <div>
           <Label className="text-sm text-muted-foreground mb-1.5 block">
-            {isRu ? 'Или ссылка на YouTube / Vimeo' : 'Or YouTube / Vimeo link'}
+            {isRu ? 'Или ссылка на YouTube / Vimeo' : isTh ? 'หรือลิงก์ YouTube / Vimeo' : 'Or YouTube / Vimeo link'}
           </Label>
           <div className="flex gap-2">
             <Input
@@ -194,7 +196,7 @@ export function PropertyVideoUploader({
               className="rounded-none"
             />
             <Button type="button" variant="outline" onClick={handleSetUrl} className="rounded-none shrink-0">
-              {isRu ? 'Сохранить' : 'Save'}
+              {isRu ? 'Сохранить' : isTh ? 'บันทึก' : 'Save'}
             </Button>
           </div>
         </div>
@@ -202,6 +204,8 @@ export function PropertyVideoUploader({
         <p className="text-xs text-muted-foreground leading-relaxed">
           {isRu
             ? 'Видео-тур значительно повышает доверие и конверсию. Снимайте 1–3 минуты в горизонтальной ориентации.'
+            : isTh
+            ? 'วิดีโอทัวร์ช่วยเพิ่มความน่าเชื่อถือและอัตราการเปลี่ยนเป็นลูกค้าได้อย่างมาก ถ่ายความยาว 1–3 นาทีในแนวนอน'
             : 'A video tour materially boosts trust and conversion. Record 1–3 minutes in landscape orientation.'}
         </p>
       </CardContent>

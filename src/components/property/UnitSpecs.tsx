@@ -46,153 +46,154 @@ const furnishingLabels: Record<string, { en: string; ru: string }> = Object.from
   FURNISHING_LEVELS.map(f => [f.id, { en: f.labelEn, ru: f.labelRu }])
 );
 
-const parkingTypeLabels: Record<string, { en: string; ru: string }> = {
-  garage: { en: 'Garage', ru: 'Гараж' },
-  carport: { en: 'Carport', ru: 'Навес' },
-  open: { en: 'Open Parking', ru: 'Открытая парковка' },
-  street: { en: 'Street Parking', ru: 'Уличная' },
-  none: { en: 'No Parking', ru: 'Нет' },
+const parkingTypeLabels: Record<string, { en: string; ru: string; th: string }> = {
+  garage: { en: 'Garage', ru: 'Гараж', th: 'โรงรถ' },
+  carport: { en: 'Carport', ru: 'Навес', th: 'ที่จอดรถมีหลังคา' },
+  open: { en: 'Open Parking', ru: 'Открытая парковка', th: 'ที่จอดรถกลางแจ้ง' },
+  street: { en: 'Street Parking', ru: 'Уличная', th: 'จอดริมถนน' },
+  none: { en: 'No Parking', ru: 'Нет', th: 'ไม่มีที่จอดรถ' },
 };
 
-const poolTypeLabels: Record<string, { en: string; ru: string }> = {
-  private: { en: 'Private Pool', ru: 'Частный бассейн' },
-  infinity: { en: 'Infinity Pool', ru: 'Инфинити' },
-  plunge: { en: 'Plunge Pool', ru: 'Плунж' },
-  shared: { en: 'Shared Pool', ru: 'Общий бассейн' },
-  none: { en: 'No Pool', ru: 'Нет' },
+const poolTypeLabels: Record<string, { en: string; ru: string; th: string }> = {
+  private: { en: 'Private Pool', ru: 'Частный бассейн', th: 'สระว่ายน้ำส่วนตัว' },
+  infinity: { en: 'Infinity Pool', ru: 'Инфинити', th: 'สระอินฟินิตี้' },
+  plunge: { en: 'Plunge Pool', ru: 'Плунж', th: 'สระจุ่มตัว' },
+  shared: { en: 'Shared Pool', ru: 'Общий бассейн', th: 'สระว่ายน้ำส่วนกลาง' },
+  none: { en: 'No Pool', ru: 'Нет', th: 'ไม่มีสระ' },
 };
 
-const gardenTypeLabels: Record<string, { en: string; ru: string }> = {
-  private: { en: 'Private Garden', ru: 'Частный сад' },
-  tropical: { en: 'Tropical Garden', ru: 'Тропический' },
-  shared: { en: 'Shared Garden', ru: 'Общий сад' },
-  rooftop: { en: 'Rooftop', ru: 'Крыша' },
-  courtyard: { en: 'Courtyard', ru: 'Двор' },
-  none: { en: 'No Garden', ru: 'Нет' },
+const gardenTypeLabels: Record<string, { en: string; ru: string; th: string }> = {
+  private: { en: 'Private Garden', ru: 'Частный сад', th: 'สวนส่วนตัว' },
+  tropical: { en: 'Tropical Garden', ru: 'Тропический', th: 'สวนเขตร้อน' },
+  shared: { en: 'Shared Garden', ru: 'Общий сад', th: 'สวนส่วนกลาง' },
+  rooftop: { en: 'Rooftop', ru: 'Крыша', th: 'ดาดฟ้า' },
+  courtyard: { en: 'Courtyard', ru: 'Двор', th: 'ลานบ้าน' },
+  none: { en: 'No Garden', ru: 'Нет', th: 'ไม่มีสวน' },
 };
 
 // ============= COMPREHENSIVE EQUIPMENT LABELS =============
 interface EquipmentMeta {
   en: string;
   ru: string;
+  th: string;
   icon: React.ReactNode;
   group: 'connectivity' | 'climate' | 'kitchen' | 'bathroom' | 'bedroom' | 'laundry' | 'living' | 'outdoor' | 'fitness' | 'kids' | 'parking' | 'safety' | 'other';
 }
 
-const GROUP_LABELS: Record<string, { en: string; ru: string }> = {
-  connectivity: { en: 'Connectivity', ru: 'Связь' },
-  climate: { en: 'Climate', ru: 'Климат' },
-  kitchen: { en: 'Kitchen', ru: 'Кухня' },
-  bathroom: { en: 'Bathroom', ru: 'Ванная' },
-  bedroom: { en: 'Bedroom', ru: 'Спальня' },
-  laundry: { en: 'Laundry', ru: 'Стирка' },
-  living: { en: 'Living', ru: 'Гостиная' },
-  outdoor: { en: 'Outdoor', ru: 'На улице' },
-  fitness: { en: 'Fitness', ru: 'Фитнес' },
-  kids: { en: 'For kids', ru: 'Для детей' },
-  parking: { en: 'Parking', ru: 'Парковка' },
-  safety: { en: 'Safety', ru: 'Безопасность' },
-  other: { en: 'Other', ru: 'Прочее' },
+const GROUP_LABELS: Record<string, { en: string; ru: string; th: string }> = {
+  connectivity: { en: 'Connectivity', ru: 'Связь', th: 'การเชื่อมต่อ' },
+  climate: { en: 'Climate', ru: 'Климат', th: 'ปรับอากาศ' },
+  kitchen: { en: 'Kitchen', ru: 'Кухня', th: 'ครัว' },
+  bathroom: { en: 'Bathroom', ru: 'Ванная', th: 'ห้องน้ำ' },
+  bedroom: { en: 'Bedroom', ru: 'Спальня', th: 'ห้องนอน' },
+  laundry: { en: 'Laundry', ru: 'Стирка', th: 'ซักรีด' },
+  living: { en: 'Living', ru: 'Гостиная', th: 'ห้องนั่งเล่น' },
+  outdoor: { en: 'Outdoor', ru: 'На улице', th: 'กลางแจ้ง' },
+  fitness: { en: 'Fitness', ru: 'Фитнес', th: 'ฟิตเนส' },
+  kids: { en: 'For kids', ru: 'Для детей', th: 'สำหรับเด็ก' },
+  parking: { en: 'Parking', ru: 'Парковка', th: 'ที่จอดรถ' },
+  safety: { en: 'Safety', ru: 'Безопасность', th: 'ความปลอดภัย' },
+  other: { en: 'Other', ru: 'Прочее', th: 'อื่นๆ' },
 };
 
 const ICON_SIZE = "h-4 w-4";
 
 const EQUIPMENT_META: Record<string, EquipmentMeta> = {
   // Connectivity
-  wifi: { en: 'WiFi', ru: 'WiFi', icon: <Wifi className={ICON_SIZE} />, group: 'connectivity' },
-  
+  wifi: { en: 'WiFi', ru: 'WiFi', th: 'WiFi', icon: <Wifi className={ICON_SIZE} />, group: 'connectivity' },
+
   // Climate
-  ac: { en: 'Air Conditioning', ru: 'Кондиционер', icon: <Wind className={ICON_SIZE} />, group: 'climate' },
-  fan: { en: 'Fan', ru: 'Вентилятор', icon: <Wind className={ICON_SIZE} />, group: 'climate' },
-  heater: { en: 'Heater', ru: 'Обогреватель', icon: <Flame className={ICON_SIZE} />, group: 'climate' },
-  
+  ac: { en: 'Air Conditioning', ru: 'Кондиционер', th: 'เครื่องปรับอากาศ', icon: <Wind className={ICON_SIZE} />, group: 'climate' },
+  fan: { en: 'Fan', ru: 'Вентилятор', th: 'พัดลม', icon: <Wind className={ICON_SIZE} />, group: 'climate' },
+  heater: { en: 'Heater', ru: 'Обогреватель', th: 'เครื่องทำความร้อน', icon: <Flame className={ICON_SIZE} />, group: 'climate' },
+
   // Kitchen
-  kitchen: { en: 'Full Kitchen', ru: 'Полная кухня', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
-  fridge: { en: 'Refrigerator', ru: 'Холодильник', icon: <Refrigerator className={ICON_SIZE} />, group: 'kitchen' },
-  microwave: { en: 'Microwave', ru: 'Микроволновка', icon: <Microwave className={ICON_SIZE} />, group: 'kitchen' },
-  oven: { en: 'Oven', ru: 'Духовка', icon: <Flame className={ICON_SIZE} />, group: 'kitchen' },
-  stove: { en: 'Stove', ru: 'Плита', icon: <Flame className={ICON_SIZE} />, group: 'kitchen' },
-  coffee_machine: { en: 'Coffee Machine', ru: 'Кофемашина', icon: <Coffee className={ICON_SIZE} />, group: 'kitchen' },
-  kettle: { en: 'Kettle', ru: 'Чайник', icon: <Coffee className={ICON_SIZE} />, group: 'kitchen' },
-  toaster: { en: 'Toaster', ru: 'Тостер', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
-  dishes: { en: 'Dishes & Cutlery', ru: 'Посуда и приборы', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
-  wine_glasses: { en: 'Wine Glasses', ru: 'Бокалы для вина', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
-  cookware: { en: 'Cookware', ru: 'Кухонная утварь', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
-  dining_table: { en: 'Dining Table', ru: 'Обеденный стол', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
-  dishwasher: { en: 'Dishwasher', ru: 'Посудомоечная машина', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
-  blender: { en: 'Blender', ru: 'Блендер', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
-  rice_cooker: { en: 'Rice Cooker', ru: 'Рисоварка', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
-  water_filter: { en: 'Water Filter', ru: 'Фильтр для воды', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
-  
+  kitchen: { en: 'Full Kitchen', ru: 'Полная кухня', th: 'ครัวครบครัน', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  fridge: { en: 'Refrigerator', ru: 'Холодильник', th: 'ตู้เย็น', icon: <Refrigerator className={ICON_SIZE} />, group: 'kitchen' },
+  microwave: { en: 'Microwave', ru: 'Микроволновка', th: 'ไมโครเวฟ', icon: <Microwave className={ICON_SIZE} />, group: 'kitchen' },
+  oven: { en: 'Oven', ru: 'Духовка', th: 'เตาอบ', icon: <Flame className={ICON_SIZE} />, group: 'kitchen' },
+  stove: { en: 'Stove', ru: 'Плита', th: 'เตา', icon: <Flame className={ICON_SIZE} />, group: 'kitchen' },
+  coffee_machine: { en: 'Coffee Machine', ru: 'Кофемашина', th: 'เครื่องชงกาแฟ', icon: <Coffee className={ICON_SIZE} />, group: 'kitchen' },
+  kettle: { en: 'Kettle', ru: 'Чайник', th: 'กาต้มน้ำ', icon: <Coffee className={ICON_SIZE} />, group: 'kitchen' },
+  toaster: { en: 'Toaster', ru: 'Тостер', th: 'เครื่องปิ้งขนมปัง', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  dishes: { en: 'Dishes & Cutlery', ru: 'Посуда и приборы', th: 'จานชามและช้อนส้อม', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  wine_glasses: { en: 'Wine Glasses', ru: 'Бокалы для вина', th: 'แก้วไวน์', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  cookware: { en: 'Cookware', ru: 'Кухонная утварь', th: 'เครื่องครัว', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  dining_table: { en: 'Dining Table', ru: 'Обеденный стол', th: 'โต๊ะอาหาร', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  dishwasher: { en: 'Dishwasher', ru: 'Посудомоечная машина', th: 'เครื่องล้างจาน', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  blender: { en: 'Blender', ru: 'Блендер', th: 'เครื่องปั่น', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  rice_cooker: { en: 'Rice Cooker', ru: 'Рисоварка', th: 'หม้อหุงข้าว', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+  water_filter: { en: 'Water Filter', ru: 'Фильтр для воды', th: 'เครื่องกรองน้ำ', icon: <UtensilsCrossed className={ICON_SIZE} />, group: 'kitchen' },
+
   // Bathroom
-  hot_water: { en: 'Hot Water', ru: 'Горячая вода', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
-  towels: { en: 'Towels', ru: 'Полотенца', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
-  hair_dryer: { en: 'Hair Dryer', ru: 'Фен', icon: <Wind className={ICON_SIZE} />, group: 'bathroom' },
-  bathtub: { en: 'Bathtub', ru: 'Ванна', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
-  bidet: { en: 'Bidet', ru: 'Биде', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
-  toiletries: { en: 'Toiletries', ru: 'Туалетные принадлежности', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
-  steam_room: { en: 'Steam Room', ru: 'Хамам', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
-  
+  hot_water: { en: 'Hot Water', ru: 'Горячая вода', th: 'น้ำอุ่น', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  towels: { en: 'Towels', ru: 'Полотенца', th: 'ผ้าเช็ดตัv', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  hair_dryer: { en: 'Hair Dryer', ru: 'Фен', th: 'ไดร์เป่าผม', icon: <Wind className={ICON_SIZE} />, group: 'bathroom' },
+  bathtub: { en: 'Bathtub', ru: 'Ванна', th: 'อ่างอาบน้ำ', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  bidet: { en: 'Bidet', ru: 'Биде', th: 'โถสุขภัณฑ์ชำระล้าง', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  toiletries: { en: 'Toiletries', ru: 'Туалетные принадлежности', th: 'ของใช้ในห้องน้ำ', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+  steam_room: { en: 'Steam Room', ru: 'Хамам', th: 'ห้องอบไอน้ำ', icon: <ShowerHead className={ICON_SIZE} />, group: 'bathroom' },
+
   // Bedroom
-  bed_linens: { en: 'Bed Linens', ru: 'Постельное бельё', icon: <BedDouble className={ICON_SIZE} />, group: 'bedroom' },
-  extra_pillows: { en: 'Extra Pillows', ru: 'Доп. подушки', icon: <BedDouble className={ICON_SIZE} />, group: 'bedroom' },
-  blackout_curtains: { en: 'Blackout Curtains', ru: 'Шторы блэкаут', icon: <Blinds className={ICON_SIZE} />, group: 'bedroom' },
-  hangers: { en: 'Hangers', ru: 'Вешалки', icon: <Shirt className={ICON_SIZE} />, group: 'bedroom' },
-  closet: { en: 'Closet', ru: 'Шкаф', icon: <DoorOpen className={ICON_SIZE} />, group: 'bedroom' },
-  
+  bed_linens: { en: 'Bed Linens', ru: 'Постельное бельё', th: 'ผ้าปูที่นอน', icon: <BedDouble className={ICON_SIZE} />, group: 'bedroom' },
+  extra_pillows: { en: 'Extra Pillows', ru: 'Доп. подушки', th: 'หมอนเสริม', icon: <BedDouble className={ICON_SIZE} />, group: 'bedroom' },
+  blackout_curtains: { en: 'Blackout Curtains', ru: 'Шторы блэкаут', th: 'ผ้าม่านทึบแสง', icon: <Blinds className={ICON_SIZE} />, group: 'bedroom' },
+  hangers: { en: 'Hangers', ru: 'Вешалки', th: 'ไม้แขวนเสื้อ', icon: <Shirt className={ICON_SIZE} />, group: 'bedroom' },
+  closet: { en: 'Closet', ru: 'Шкаф', th: 'ตู้เสื้อผ้า', icon: <DoorOpen className={ICON_SIZE} />, group: 'bedroom' },
+
   // Laundry
-  washer: { en: 'Washing Machine', ru: 'Стиральная машина', icon: <WashingMachine className={ICON_SIZE} />, group: 'laundry' },
-  dryer: { en: 'Dryer', ru: 'Сушильная машина', icon: <WashingMachine className={ICON_SIZE} />, group: 'laundry' },
-  iron: { en: 'Iron', ru: 'Утюг', icon: <Shirt className={ICON_SIZE} />, group: 'laundry' },
-  ironing_board: { en: 'Ironing Board', ru: 'Гладильная доска', icon: <Shirt className={ICON_SIZE} />, group: 'laundry' },
-  
+  washer: { en: 'Washing Machine', ru: 'Стиральная машина', th: 'เครื่องซักผ้า', icon: <WashingMachine className={ICON_SIZE} />, group: 'laundry' },
+  dryer: { en: 'Dryer', ru: 'Сушильная машина', th: 'เครื่องอบผ้า', icon: <WashingMachine className={ICON_SIZE} />, group: 'laundry' },
+  iron: { en: 'Iron', ru: 'Утюг', th: 'เตารีด', icon: <Shirt className={ICON_SIZE} />, group: 'laundry' },
+  ironing_board: { en: 'Ironing Board', ru: 'Гладильная доска', th: 'โต๊ะรีดผ้า', icon: <Shirt className={ICON_SIZE} />, group: 'laundry' },
+
   // Living
-  tv: { en: 'TV', ru: 'Телевизор', icon: <Tv className={ICON_SIZE} />, group: 'living' },
-  smart_tv: { en: 'Smart TV', ru: 'Smart TV', icon: <Tv className={ICON_SIZE} />, group: 'living' },
-  netflix: { en: 'Netflix', ru: 'Netflix', icon: <Tv className={ICON_SIZE} />, group: 'living' },
-  bluetooth_speaker: { en: 'Bluetooth Speaker', ru: 'Bluetooth-колонка', icon: <Tv className={ICON_SIZE} />, group: 'living' },
-  safe: { en: 'Safe', ru: 'Сейф', icon: <LockKeyhole className={ICON_SIZE} />, group: 'living' },
-  desk: { en: 'Work Desk', ru: 'Рабочий стол', icon: <Sofa className={ICON_SIZE} />, group: 'living' },
-  sofa: { en: 'Sofa', ru: 'Диван', icon: <Sofa className={ICON_SIZE} />, group: 'living' },
-  
+  tv: { en: 'TV', ru: 'Телевизор', th: 'ทีวี', icon: <Tv className={ICON_SIZE} />, group: 'living' },
+  smart_tv: { en: 'Smart TV', ru: 'Smart TV', th: 'สมาร์ททีวี', icon: <Tv className={ICON_SIZE} />, group: 'living' },
+  netflix: { en: 'Netflix', ru: 'Netflix', th: 'Netflix', icon: <Tv className={ICON_SIZE} />, group: 'living' },
+  bluetooth_speaker: { en: 'Bluetooth Speaker', ru: 'Bluetooth-колонка', th: 'ลำโพงบลูทูธ', icon: <Tv className={ICON_SIZE} />, group: 'living' },
+  safe: { en: 'Safe', ru: 'Сейф', th: 'ตู้เซฟ', icon: <LockKeyhole className={ICON_SIZE} />, group: 'living' },
+  desk: { en: 'Work Desk', ru: 'Рабочий стол', th: 'โต๊ะทำงาน', icon: <Sofa className={ICON_SIZE} />, group: 'living' },
+  sofa: { en: 'Sofa', ru: 'Диван', th: 'โซฟา', icon: <Sofa className={ICON_SIZE} />, group: 'living' },
+
   // Outdoor
-  balcony: { en: 'Balcony', ru: 'Балкон', icon: <Sun className={ICON_SIZE} />, group: 'outdoor' },
-  terrace: { en: 'Terrace', ru: 'Терраса', icon: <Sun className={ICON_SIZE} />, group: 'outdoor' },
-  private_pool: { en: 'Private Pool', ru: 'Частный бассейн', icon: <Waves className={ICON_SIZE} />, group: 'outdoor' },
-  garden: { en: 'Garden', ru: 'Сад', icon: <TreePine className={ICON_SIZE} />, group: 'outdoor' },
-  bbq: { en: 'BBQ', ru: 'Барбекю', icon: <Flame className={ICON_SIZE} />, group: 'outdoor' },
-  outdoor_furniture: { en: 'Outdoor Furniture', ru: 'Уличная мебель', icon: <Sofa className={ICON_SIZE} />, group: 'outdoor' },
-  outdoor_shower: { en: 'Outdoor Shower', ru: 'Уличный душ', icon: <ShowerHead className={ICON_SIZE} />, group: 'outdoor' },
-  sun_loungers: { en: 'Sun Loungers', ru: 'Шезлонги', icon: <Sun className={ICON_SIZE} />, group: 'outdoor' },
-  
+  balcony: { en: 'Balcony', ru: 'Балкон', th: 'ระเบียง', icon: <Sun className={ICON_SIZE} />, group: 'outdoor' },
+  terrace: { en: 'Terrace', ru: 'Терраса', th: 'เฉลียง', icon: <Sun className={ICON_SIZE} />, group: 'outdoor' },
+  private_pool: { en: 'Private Pool', ru: 'Частный бассейн', th: 'สระว่ายน้ำส่วนตัว', icon: <Waves className={ICON_SIZE} />, group: 'outdoor' },
+  garden: { en: 'Garden', ru: 'Сад', th: 'สวน', icon: <TreePine className={ICON_SIZE} />, group: 'outdoor' },
+  bbq: { en: 'BBQ', ru: 'Барбекю', th: 'บาร์บีคิว', icon: <Flame className={ICON_SIZE} />, group: 'outdoor' },
+  outdoor_furniture: { en: 'Outdoor Furniture', ru: 'Уличная мебель', th: 'เฟอร์นิเจอร์กลางแจ้ง', icon: <Sofa className={ICON_SIZE} />, group: 'outdoor' },
+  outdoor_shower: { en: 'Outdoor Shower', ru: 'Уличный душ', th: 'ฝักบัวกลางแจ้ง', icon: <ShowerHead className={ICON_SIZE} />, group: 'outdoor' },
+  sun_loungers: { en: 'Sun Loungers', ru: 'Шезлонги', th: 'เตียงอาบแดด', icon: <Sun className={ICON_SIZE} />, group: 'outdoor' },
+
   // Fitness
-  gym: { en: 'Gym', ru: 'Тренажёрный зал', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
-  weights: { en: 'Weights', ru: 'Гантели', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
-  treadmill: { en: 'Treadmill', ru: 'Беговая дорожка', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
-  exercise_bike: { en: 'Exercise Bike', ru: 'Велотренажёр', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
-  yoga_mat: { en: 'Yoga Mat', ru: 'Коврик для йоги', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
-  
+  gym: { en: 'Gym', ru: 'Тренажёрный зал', th: 'ฟิตเนส', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
+  weights: { en: 'Weights', ru: 'Гантели', th: 'ดัมบ์เบล', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
+  treadmill: { en: 'Treadmill', ru: 'Беговая дорожка', th: 'ลู่วิ่ง', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
+  exercise_bike: { en: 'Exercise Bike', ru: 'Велотренажёр', th: 'จักรยานออกกำลังกาย', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
+  yoga_mat: { en: 'Yoga Mat', ru: 'Коврик для йоги', th: 'เสื่อโยคะ', icon: <Dumbbell className={ICON_SIZE} />, group: 'fitness' },
+
   // Kids
-  crib: { en: 'Crib', ru: 'Детская кроватка', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
-  high_chair: { en: 'High Chair', ru: 'Детский стульчик', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
-  baby_bath: { en: 'Baby Bath', ru: 'Детская ванночка', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
-  toys: { en: 'Toys', ru: 'Игрушки', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
-  
+  crib: { en: 'Crib', ru: 'Детская кроватка', th: 'เตียงเด็ก', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
+  high_chair: { en: 'High Chair', ru: 'Детский стульчик', th: 'เก้าอี้สูงสำหรับเด็ก', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
+  baby_bath: { en: 'Baby Bath', ru: 'Детская ванночка', th: 'อ่างอาบน้ำเด็ก', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
+  toys: { en: 'Toys', ru: 'Игрушки', th: 'ของเล่น', icon: <Baby className={ICON_SIZE} />, group: 'kids' },
+
   // Parking
-  free_parking: { en: 'Free Parking', ru: 'Бесплатная парковка', icon: <Car className={ICON_SIZE} />, group: 'parking' },
-  covered_parking: { en: 'Covered Parking', ru: 'Крытая парковка', icon: <Car className={ICON_SIZE} />, group: 'parking' },
-  garage: { en: 'Garage', ru: 'Гараж', icon: <Car className={ICON_SIZE} />, group: 'parking' },
-  
+  free_parking: { en: 'Free Parking', ru: 'Бесплатная парковка', th: 'ที่จอดรถฟรี', icon: <Car className={ICON_SIZE} />, group: 'parking' },
+  covered_parking: { en: 'Covered Parking', ru: 'Крытая парковка', th: 'ที่จอดรถมีหลังคา', icon: <Car className={ICON_SIZE} />, group: 'parking' },
+  garage: { en: 'Garage', ru: 'Гараж', th: 'โรงรถ', icon: <Car className={ICON_SIZE} />, group: 'parking' },
+
   // Safety
-  smoke_detector: { en: 'Smoke Detector', ru: 'Датчик дыма', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
-  fire_extinguisher: { en: 'Fire Extinguisher', ru: 'Огнетушитель', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
-  first_aid: { en: 'First Aid Kit', ru: 'Аптечка', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
-  security_camera: { en: 'Security Camera', ru: 'Камера наблюдения', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
-  elevator_access: { en: 'Elevator', ru: 'Лифт', icon: <Layers className={ICON_SIZE} />, group: 'safety' },
-  
+  smoke_detector: { en: 'Smoke Detector', ru: 'Датчик дыма', th: 'เครื่องตรวจจับควัน', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
+  fire_extinguisher: { en: 'Fire Extinguisher', ru: 'Огнетушитель', th: 'ถังดับเพลิง', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
+  first_aid: { en: 'First Aid Kit', ru: 'Аптечка', th: 'ชุดปฐมพยาบาล', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
+  security_camera: { en: 'Security Camera', ru: 'Камера наблюдения', th: 'กล้องวงจรปิด', icon: <Shield className={ICON_SIZE} />, group: 'safety' },
+  elevator_access: { en: 'Elevator', ru: 'Лифт', th: 'ลิฟต์', icon: <Layers className={ICON_SIZE} />, group: 'safety' },
+
   // Other
-  long_term_stays: { en: 'Long-term stays', ru: 'Долгосрочная аренда', icon: <Moon className={ICON_SIZE} />, group: 'other' },
-  pet_friendly: { en: 'Pet Friendly', ru: 'Можно с питомцами', icon: <Sun className={ICON_SIZE} />, group: 'other' },
+  long_term_stays: { en: 'Long-term stays', ru: 'Долгосрочная аренда', th: 'เข้าพักระยะยาว', icon: <Moon className={ICON_SIZE} />, group: 'other' },
+  pet_friendly: { en: 'Pet Friendly', ru: 'Можно с питомцами', th: 'นำสัตว์เลี้ยงได้', icon: <Sun className={ICON_SIZE} />, group: 'other' },
 };
 
 // Group order for display

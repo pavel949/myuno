@@ -27,6 +27,7 @@ export function OffplanPromoSection({
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: projects, isLoading } = useOffplanProjects({
     status: ['offplan', 'under_construction'],
@@ -50,11 +51,13 @@ export function OffplanPromoSection({
           </div>
           <div>
             <h2 className="font-bold text-lg">
-              {isRu ? 'Новостройки Пхукета' : 'Phuket New Developments'}
+              {isRu ? 'Новостройки Пхукета' : isTh ? 'โครงการใหม่ในภูเก็ต' : 'Phuket New Developments'}
             </h2>
             <p className="text-xs text-muted-foreground">
-              {isRu 
-                ? 'Проверенные проекты с экспертизой myUNO' 
+              {isRu
+                ? 'Проверенные проекты с экспертизой myUNO'
+                : isTh
+                ? 'โครงการที่ผ่านการตรวจสอบด้วยความเชี่ยวชาญของ myUNO'
                 : 'Verified projects with myUNO expertise'}
             </p>
           </div>
@@ -66,7 +69,7 @@ export function OffplanPromoSection({
           onClick={() => navigate('/property/offplan')}
           className="gap-1 text-primary hover:text-primary"
         >
-          {isRu ? 'Все' : 'All'}
+          {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'All'}
           <ChevronRight className="w-4 h-4" />
         </Button>
       </div>
@@ -76,12 +79,12 @@ export function OffplanPromoSection({
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Building2 className="w-3.5 h-3.5" />
-            <span>{projects.length} {isRu ? 'проектов' : 'projects'}</span>
+            <span>{projects.length} {isRu ? 'проектов' : isTh ? 'โครงการ' : 'projects'}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5 text-success" />
             <span>
-              {isRu ? 'до' : 'up to'} {Math.max(...projects.map(p => p.roiProjected || 0))}% ROI
+              {isRu ? 'до' : isTh ? 'สูงสุด' : 'up to'} {Math.max(...projects.map(p => p.roiProjected || 0))}% ROI
             </span>
           </div>
         </div>
@@ -135,10 +138,10 @@ export function OffplanPromoSection({
                 <ChevronRight className="w-6 h-6 text-primary" />
               </div>
               <span className="font-medium text-sm text-primary">
-                {isRu ? 'Смотреть все' : 'View all'}
+                {isRu ? 'Смотреть все' : isTh ? 'ดูทั้งหมด' : 'View all'}
               </span>
               <span className="text-xs text-muted-foreground">
-                {projects.length - maxItems}+ {isRu ? 'ещё' : 'more'}
+                {projects.length - maxItems}+ {isRu ? 'ещё' : isTh ? 'เพิ่มเติม' : 'more'}
               </span>
             </div>
           )}

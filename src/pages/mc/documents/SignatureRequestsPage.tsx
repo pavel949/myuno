@@ -4,6 +4,7 @@
  */
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { Language } from '@/i18n';
 import {
   useCompanySignatureRequests,
   useCreateSignatureRequest,
@@ -24,19 +25,24 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
-const statusCfg = (isRu: boolean) => ({
-  draft: { label: isRu ? 'Черновик' : 'Draft', cls: 'bg-muted text-muted-foreground', Icon: Clock },
-  sent: { label: isRu ? 'Отправлено' : 'Sent', cls: 'bg-primary/15 text-primary', Icon: Send },
-  partially_signed: { label: isRu ? 'Частично подписано' : 'Partial', cls: 'bg-warning/15 text-warning', Icon: Clock },
-  completed: { label: isRu ? 'Подписано' : 'Completed', cls: 'bg-success/15 text-success', Icon: CheckCircle2 },
-  declined: { label: isRu ? 'Отклонено' : 'Declined', cls: 'bg-destructive/15 text-destructive', Icon: XCircle },
-  expired: { label: isRu ? 'Истёк' : 'Expired', cls: 'bg-muted text-muted-foreground', Icon: Clock },
-  cancelled: { label: isRu ? 'Отменено' : 'Cancelled', cls: 'bg-muted text-muted-foreground', Icon: Ban },
-});
+const statusCfg = (language: Language) => {
+  const isRu = language === 'ru';
+  const isTh = language === 'th';
+  return {
+    draft: { label: isRu ? 'Черновик' : isTh ? 'ฉบับร่าง' : 'Draft', cls: 'bg-muted text-muted-foreground', Icon: Clock },
+    sent: { label: isRu ? 'Отправлено' : isTh ? 'ส่งแล้ว' : 'Sent', cls: 'bg-primary/15 text-primary', Icon: Send },
+    partially_signed: { label: isRu ? 'Частично подписано' : isTh ? 'ลงนามบางส่วน' : 'Partial', cls: 'bg-warning/15 text-warning', Icon: Clock },
+    completed: { label: isRu ? 'Подписано' : isTh ? 'ลงนามครบแล้ว' : 'Completed', cls: 'bg-success/15 text-success', Icon: CheckCircle2 },
+    declined: { label: isRu ? 'Отклонено' : isTh ? 'ปฏิเสธแล้ว' : 'Declined', cls: 'bg-destructive/15 text-destructive', Icon: XCircle },
+    expired: { label: isRu ? 'Истёк' : isTh ? 'หมดอายุ' : 'Expired', cls: 'bg-muted text-muted-foreground', Icon: Clock },
+    cancelled: { label: isRu ? 'Отменено' : isTh ? 'ยกเลิกแล้ว' : 'Cancelled', cls: 'bg-muted text-muted-foreground', Icon: Ban },
+  };
+};
 
 export default function SignatureRequestsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: items = [], isLoading } = useCompanySignatureRequests();
   const create = useCreateSignatureRequest();
   const cancel = useCancelSignatureRequest();
@@ -85,7 +91,7 @@ export default function SignatureRequestsPage() {
     );
   }
 
-  const cfgMap = statusCfg(isRu);
+  const cfgMap = statusCfg(language);
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6 pb-24">
@@ -94,18 +100,20 @@ export default function SignatureRequestsPage() {
           <div className="flex items-center gap-2">
             <FileSignature className="w-5 h-5 text-primary" />
             <h1 className="text-xl md:text-2xl font-bold">
-              {isRu ? 'Электронные подписи' : 'E-Signatures'}
+              {isRu ? 'Электронные подписи' : isTh ? 'ลายเซ็นอิเล็กทรอนิกส์' : 'E-Signatures'}
             </h1>
           </div>
           <p className="text-sm text-muted-foreground">
             {isRu
               ? 'Отправляйте договоры собственникам и контрагентам на подпись.'
+              : isTh
+              ? 'ส่งสัญญาให้เจ้าของและคู่สัญญาเพื่อลงนามอิเล็กทรอนิกส์'
               : 'Send contracts to owners and counterparties for e-signature.'}
           </p>
         </div>
         <Button onClick={() => setOpen(true)} size="sm">
           <Plus className="w-4 h-4 mr-1.5" />
-          {isRu ? 'Отправить' : 'New Request'}
+          {isRu ? 'Отправить' : isTh ? 'คำขอใหม่' : 'New Request'}
         </Button>
       </div>
 
@@ -114,7 +122,7 @@ export default function SignatureRequestsPage() {
           <CardContent className="py-12 text-center text-muted-foreground">
             <FileSignature className="w-10 h-10 opacity-30 mx-auto mb-3" />
             <p className="text-sm">
-              {isRu ? 'Нет отправленных запросов на подпись.' : 'No signature requests yet.'}
+              {isRu ? 'Нет отправленных запросов на подпись.' : isTh ? 'ยังไม่มีคำขอลงนาม' : 'No signature requests yet.'}
             </p>
           </CardContent>
         </Card>
@@ -136,7 +144,7 @@ export default function SignatureRequestsPage() {
                           {cfg.label}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {signedCount}/{signers.length} {isRu ? 'подписей' : 'signed'}
+                          {signedCount}/{signers.length} {isRu ? 'подписей' : isTh ? 'ลงนามแล้ว' : 'signed'}
                         </span>
                       </div>
                       <p className="text-sm font-semibold">{item.title}</p>
@@ -145,12 +153,12 @@ export default function SignatureRequestsPage() {
                       )}
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-xs text-muted-foreground">
                         <span>
-                          {isRu ? 'Создано ' : 'Created '}
+                          {isRu ? 'Создано ' : isTh ? 'สร้างเมื่อ ' : 'Created '}
                           {format(new Date(item.created_at), 'd MMM HH:mm', { locale: isRu ? ru : undefined })}
                         </span>
                         {item.expires_at && (
                           <span>
-                            {isRu ? 'Истекает ' : 'Expires '}
+                            {isRu ? 'Истекает ' : isTh ? 'หมดอายุ ' : 'Expires '}
                             {format(new Date(item.expires_at), 'd MMM yyyy', { locale: isRu ? ru : undefined })}
                           </span>
                         )}
@@ -158,14 +166,14 @@ export default function SignatureRequestsPage() {
                     </div>
                     <div className="flex gap-1">
                       <a href={item.document_url} target="_blank" rel="noopener noreferrer">
-                        <Button size="icon" variant="ghost" aria-label={isRu ? 'Открыть документ' : 'Open document'}><ExternalLink className="w-4 h-4" /></Button>
+                        <Button size="icon" variant="ghost" aria-label={isRu ? 'Открыть документ' : isTh ? 'เปิดเอกสาร' : 'Open document'}><ExternalLink className="w-4 h-4" /></Button>
                       </a>
                       {['draft', 'sent', 'partially_signed'].includes(item.status) && (
                         <Button
                           size="icon"
                           variant="ghost"
                           onClick={() => cancel.mutate({ id: item.id })}
-                          aria-label={isRu ? 'Отменить' : 'Cancel'}
+                          aria-label={isRu ? 'Отменить' : isTh ? 'ยกเลิก' : 'Cancel'}
                         >
                           <Ban className="w-4 h-4 text-destructive" />
                         </Button>
@@ -205,24 +213,24 @@ export default function SignatureRequestsPage() {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>{isRu ? 'Новый запрос на подпись' : 'New Signature Request'}</SheetTitle>
+            <SheetTitle>{isRu ? 'Новый запрос на подпись' : isTh ? 'คำขอลงนามใหม่' : 'New Signature Request'}</SheetTitle>
           </SheetHeader>
           <div className="mt-4 space-y-3">
-            <Field label={isRu ? 'Заголовок *' : 'Title *'}>
+            <Field label={isRu ? 'Заголовок *' : isTh ? 'หัวข้อ *' : 'Title *'}>
               <Input
                 value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder={isRu ? 'Договор управления' : 'Management agreement'}
+                placeholder={isRu ? 'Договор управления' : isTh ? 'สัญญาบริหารจัดการ' : 'Management agreement'}
               />
             </Field>
-            <Field label={isRu ? 'Описание' : 'Description'}>
+            <Field label={isRu ? 'Описание' : isTh ? 'คำอธิบาย' : 'Description'}>
               <Textarea
                 value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 rows={2}
               />
             </Field>
-            <Field label={isRu ? 'URL документа (PDF) *' : 'Document URL (PDF) *'}>
+            <Field label={isRu ? 'URL документа (PDF) *' : isTh ? 'URL เอกสาร (PDF) *' : 'Document URL (PDF) *'}>
               <Input
                 value={form.document_url}
                 onChange={e => setForm(f => ({ ...f, document_url: e.target.value }))}
@@ -231,15 +239,15 @@ export default function SignatureRequestsPage() {
             </Field>
             <div className="border-t pt-3 space-y-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {isRu ? 'Подписант' : 'Signer'}
+                {isRu ? 'Подписант' : isTh ? 'ผู้ลงนาม' : 'Signer'}
               </p>
-              <Field label={isRu ? 'Имя *' : 'Name *'}>
+              <Field label={isRu ? 'Имя *' : isTh ? 'ชื่อ *' : 'Name *'}>
                 <Input
                   value={form.signer_name}
                   onChange={e => setForm(f => ({ ...f, signer_name: e.target.value }))}
                 />
               </Field>
-              <Field label={isRu ? 'User ID собственника (опционально)' : 'Owner user ID (optional)'}>
+              <Field label={isRu ? 'User ID собственника (опционально)' : isTh ? 'User ID ของเจ้าของ (ไม่บังคับ)' : 'Owner user ID (optional)'}>
                 <Input
                   value={form.signer_user_id}
                   onChange={e => setForm(f => ({ ...f, signer_user_id: e.target.value }))}
@@ -254,7 +262,7 @@ export default function SignatureRequestsPage() {
                 />
               </Field>
             </div>
-            <Field label={isRu ? 'Срок действия (дней)' : 'Expires in (days)'}>
+            <Field label={isRu ? 'Срок действия (дней)' : isTh ? 'อายุการใช้งาน (วัน)' : 'Expires in (days)'}>
               <Input
                 type="number"
                 value={form.expires_in_days}
@@ -268,8 +276,8 @@ export default function SignatureRequestsPage() {
             >
               <Send className="w-4 h-4 mr-2" />
               {create.isPending
-                ? (isRu ? 'Отправка...' : 'Sending...')
-                : (isRu ? 'Отправить на подпись' : 'Send for Signature')}
+                ? (isRu ? 'Отправка...' : isTh ? 'กำลังส่ง...' : 'Sending...')
+                : (isRu ? 'Отправить на подпись' : isTh ? 'ส่งเพื่อลงนาม' : 'Send for Signature')}
             </Button>
           </div>
         </SheetContent>

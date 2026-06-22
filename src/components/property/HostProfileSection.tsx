@@ -13,6 +13,7 @@ interface HostProfileSectionProps {
 export function HostProfileSection({ rentalTerms, isVerified }: HostProfileSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const hostName = rentalTerms?.manager_name;
   if (!hostName) return null;
@@ -37,12 +38,12 @@ export function HostProfileSection({ rentalTerms, isVerified }: HostProfileSecti
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="font-semibold text-lg">
-            {isRu ? `Хозяин: ${hostName}` : `Hosted by ${hostName}`}
+            {isRu ? `Хозяин: ${hostName}` : isTh ? `เจ้าของที่พัก: ${hostName}` : `Hosted by ${hostName}`}
           </h3>
           {isVerified && (
             <Badge variant="secondary" className="gap-1 text-xs">
               <Shield className="w-3 h-3" />
-              {isRu ? 'Суперхост' : 'Superhost'}
+              {isRu ? 'Суперхост' : isTh ? 'ซูเปอร์โฮสต์' : 'Superhost'}
             </Badge>
           )}
         </div>
@@ -59,6 +60,8 @@ export function HostProfileSection({ rentalTerms, isVerified }: HostProfileSecti
         <p className="text-sm text-muted-foreground mt-2">
           {isRu
             ? 'Ваш хозяин позаботится о комфортном проживании и ответит на все вопросы.'
+            : isTh
+            ? 'เจ้าของที่พักจะดูแลให้คุณพักอย่างสะดวกสบายและตอบทุกคำถามของคุณ'
             : 'Your host will ensure a comfortable stay and answer any questions.'}
         </p>
       </div>

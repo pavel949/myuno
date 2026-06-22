@@ -19,6 +19,7 @@ export default function OwnerPortalDashboard() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { user } = useAuth();
   const { data: portalProperties, isLoading } = useMyPortalSettings();
 
@@ -69,15 +70,17 @@ export default function OwnerPortalDashboard() {
           <Building2 className="w-8 h-8 text-primary" />
         </div>
         <h1 className="text-xl font-bold">
-          {isRu ? 'Портал владельца' : 'Owner Portal'}
+          {isRu ? 'Портал владельца' : isTh ? 'พอร์ทัลเจ้าของ' : 'Owner Portal'}
         </h1>
         <p className="text-sm text-muted-foreground max-w-md">
-          {isRu 
+          {isRu
             ? 'У вас пока нет объектов, подключённых к порталу. Попросите вашу управляющую компанию настроить доступ.'
+            : isTh
+            ? 'คุณยังไม่มีทรัพย์สินที่เชื่อมต่อกับพอร์ทัล โปรดขอให้บริษัทบริหารจัดการของคุณตั้งค่าการเข้าถึง'
             : 'You don\'t have any properties connected to the portal yet. Ask your management company to set up access.'}
         </p>
         <Button variant="outline" onClick={() => navigate('/')}>
-          {isRu ? 'На главную' : 'Go Home'}
+          {isRu ? 'На главную' : isTh ? 'กลับหน้าหลัก' : 'Go Home'}
         </Button>
       </div>
     );
@@ -89,16 +92,18 @@ export default function OwnerPortalDashboard() {
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold">
-            {isRu ? 'Мои объекты' : 'My Properties'}
+            {isRu ? 'Мои объекты' : isTh ? 'ทรัพย์สินของฉัน' : 'My Properties'}
           </h1>
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-accent/15 text-accent dark:text-accent border border-accent/40">
             <Lock className="w-3 h-3" />
-            {isRu ? 'Портал УК' : 'MC Portal'}
+            {isRu ? 'Портал УК' : isTh ? 'พอร์ทัล MC' : 'MC Portal'}
           </span>
         </div>
         <p className="text-sm text-muted-foreground">
           {isRu
             ? 'Доступ предоставлен вашей управляющей компанией — только просмотр'
+            : isTh
+            ? 'สิทธิ์การเข้าถึงมอบให้โดยบริษัทบริหารจัดการของคุณ — ดูได้อย่างเดียว'
             : 'Access granted by your management company — read only'}
         </p>
       </div>
@@ -112,7 +117,7 @@ export default function OwnerPortalDashboard() {
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold truncate">{isRu ? 'Отчёты' : 'Statements'}</p>
+                <p className="text-sm font-semibold truncate">{isRu ? 'Отчёты' : isTh ? 'รายงาน' : 'Statements'}</p>
                 {pendingStatements > 0 && (
                   <Badge variant="destructive" className="rounded-none px-1.5 py-0 h-5 text-[10px]">
                     {pendingStatements}
@@ -121,8 +126,8 @@ export default function OwnerPortalDashboard() {
               </div>
               <p className="text-[11px] text-muted-foreground truncate">
                 {pendingStatements > 0
-                  ? (isRu ? `${pendingStatements} на одобрение` : `${pendingStatements} for approval`)
-                  : (isRu ? 'На одобрение' : 'For approval')}
+                  ? (isRu ? `${pendingStatements} на одобрение` : isTh ? `${pendingStatements} รออนุมัติ` : `${pendingStatements} for approval`)
+                  : (isRu ? 'На одобрение' : isTh ? 'รออนุมัติ' : 'For approval')}
               </p>
             </div>
           </CardContent>
@@ -134,7 +139,7 @@ export default function OwnerPortalDashboard() {
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold truncate">{isRu ? 'Документы' : 'Documents'}</p>
+                <p className="text-sm font-semibold truncate">{isRu ? 'Документы' : isTh ? 'เอกสาร' : 'Documents'}</p>
                 {pendingSignatures > 0 && (
                   <Badge variant="destructive" className="rounded-none px-1.5 py-0 h-5 text-[10px]">
                     {pendingSignatures}
@@ -143,8 +148,8 @@ export default function OwnerPortalDashboard() {
               </div>
               <p className="text-[11px] text-muted-foreground truncate">
                 {pendingSignatures > 0
-                  ? (isRu ? `${pendingSignatures} на подпись` : `${pendingSignatures} to sign`)
-                  : (isRu ? 'На подпись' : 'To sign')}
+                  ? (isRu ? `${pendingSignatures} на подпись` : isTh ? `${pendingSignatures} รอลงนาม` : `${pendingSignatures} to sign`)
+                  : (isRu ? 'На подпись' : isTh ? 'รอลงนาม' : 'To sign')}
               </p>
             </div>
           </CardContent>
@@ -179,7 +184,7 @@ export default function OwnerPortalDashboard() {
                   
                   <div className="flex-1 py-3 pr-4 flex flex-col justify-between min-w-0">
                     <div>
-                      <h3 className="font-semibold text-sm truncate">{title || (isRu ? 'Объект' : 'Property')}</h3>
+                      <h3 className="font-semibold text-sm truncate">{title || (isRu ? 'Объект' : isTh ? 'ทรัพย์สิน' : 'Property')}</h3>
                       {prop.address && (
                         <p className="text-xs text-muted-foreground truncate mt-0.5">{prop.address}</p>
                       )}
@@ -189,7 +194,7 @@ export default function OwnerPortalDashboard() {
                     <div className="flex items-center gap-3 mt-2">
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Shield className="w-3.5 h-3.5" />
-                        <span>{isRu ? 'Под управлением' : 'Managed'}</span>
+                        <span>{isRu ? 'Под управлением' : isTh ? 'อยู่ภายใต้การบริหาร' : 'Managed'}</span>
                       </div>
                       <Button
                         variant="ghost"
@@ -201,7 +206,7 @@ export default function OwnerPortalDashboard() {
                         }}
                       >
                         <Eye className="w-3.5 h-3.5 mr-1" />
-                        {isRu ? 'Прозрачность' : 'Transparency'}
+                        {isRu ? 'Прозрачность' : isTh ? 'ความโปร่งใส' : 'Transparency'}
                       </Button>
                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
@@ -219,11 +224,11 @@ export default function OwnerPortalDashboard() {
         <CardContent className="py-4 flex items-center gap-3">
           <MessageSquare className="w-5 h-5 text-primary shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-medium">{isRu ? 'Связаться с УК' : 'Contact Management'}</p>
-            <p className="text-xs text-muted-foreground">{isRu ? 'Задайте вопрос или оставьте заявку' : 'Ask a question or submit a request'}</p>
+            <p className="text-sm font-medium">{isRu ? 'Связаться с УК' : isTh ? 'ติดต่อบริษัทบริหารจัดการ' : 'Contact Management'}</p>
+            <p className="text-xs text-muted-foreground">{isRu ? 'Задайте вопрос или оставьте заявку' : isTh ? 'สอบถามคำถามหรือส่งคำขอ' : 'Ask a question or submit a request'}</p>
           </div>
           <Button variant="outline" size="sm" onClick={() => navigate('/support')}>
-            {isRu ? 'Написать' : 'Message'}
+            {isRu ? 'Написать' : isTh ? 'ส่งข้อความ' : 'Message'}
           </Button>
         </CardContent>
       </Card>

@@ -34,6 +34,7 @@ interface GuestExtraFeesSectionProps {
 function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFeesSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const fees = parseGuestExtraFees(formData.guest_extra_fees);
 
@@ -55,19 +56,21 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Receipt className="h-4 w-4" />
-          {isRu ? 'Доп. оплаты гостя' : 'Guest extra fees'}
+          {isRu ? 'Доп. оплаты гостя' : isTh ? 'ค่าใช้จ่ายเพิ่มเติมของผู้เข้าพัก' : 'Guest extra fees'}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
           {isRu
             ? 'Расходы, которые гость оплачивает отдельно от стоимости проживания (электричество по счётчику, вода, интернет, уборка). На странице объекта показывается список с ориентировочными суммами.'
+            : isTh
+            ? 'ค่าใช้จ่ายที่ผู้เข้าพักชำระแยกจากค่าที่พักรายคืน (ค่าไฟตามมิเตอร์ ค่าน้ำ อินเทอร์เน็ต ทำความสะอาด) หน้าอสังหาริมทรัพย์จะแสดงรายการพร้อมช่วงราคาโดยประมาณ'
             : 'Charges the guest pays separately from the nightly rate (metered electricity, water, internet, cleaning). The property page shows the list with estimate ranges.'}
         </p>
 
         {fees.length === 0 && (
           <div className="rounded-none border-2 border-dashed border-border/60 p-4 text-center text-sm text-muted-foreground">
-            {isRu ? 'Доп. позиции не настроены' : 'No extra fees configured'}
+            {isRu ? 'Доп. позиции не настроены' : isTh ? 'ยังไม่ได้ตั้งค่าใช้จ่ายเพิ่มเติม' : 'No extra fees configured'}
           </div>
         )}
 
@@ -106,7 +109,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
                   size="icon"
                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
                   onClick={() => remove(fee.id)}
-                  aria-label={isRu ? 'Удалить' : 'Remove'}
+                  aria-label={isRu ? 'Удалить' : isTh ? 'ลบ' : 'Remove'}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -115,7 +118,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
               {/* Optional bilingual label override */}
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">{isRu ? 'Название EN' : 'Label EN'}</Label>
+                  <Label className="text-xs">{isRu ? 'Название EN' : isTh ? 'ชื่อ EN' : 'Label EN'}</Label>
                   <Input
                     value={fee.label_en ?? ''}
                     onChange={(e) => updateOne(fee.id, { label_en: e.target.value })}
@@ -124,7 +127,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">{isRu ? 'Название RU' : 'Label RU'}</Label>
+                  <Label className="text-xs">{isRu ? 'Название RU' : isTh ? 'ชื่อ RU' : 'Label RU'}</Label>
                   <Input
                     value={fee.label_ru ?? ''}
                     onChange={(e) => updateOne(fee.id, { label_ru: e.target.value })}
@@ -137,7 +140,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
               {/* Rate + unit + currency */}
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">{isRu ? 'Тариф' : 'Rate'}</Label>
+                  <Label className="text-xs">{isRu ? 'Тариф' : isTh ? 'อัตรา' : 'Rate'}</Label>
                   <Input
                     type="number"
                     min={0}
@@ -151,7 +154,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">{isRu ? 'Единица' : 'Unit'}</Label>
+                  <Label className="text-xs">{isRu ? 'Единица' : isTh ? 'หน่วย' : 'Unit'}</Label>
                   <Input
                     value={fee.unit ?? ''}
                     onChange={(e) => updateOne(fee.id, { unit: e.target.value })}
@@ -160,7 +163,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">{isRu ? 'Валюта' : 'Currency'}</Label>
+                  <Label className="text-xs">{isRu ? 'Валюта' : isTh ? 'สกุลเงิน' : 'Currency'}</Label>
                   <Select
                     value={fee.currency ?? 'THB'}
                     onValueChange={(v) => updateOne(fee.id, { currency: v })}
@@ -180,7 +183,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
               {/* Estimate range — what the guest typically pays per booking */}
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">{isRu ? 'Оценка от' : 'Estimate min'}</Label>
+                  <Label className="text-xs">{isRu ? 'Оценка от' : isTh ? 'ประมาณการต่ำสุด' : 'Estimate min'}</Label>
                   <Input
                     type="number"
                     min={0}
@@ -195,7 +198,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">{isRu ? 'Оценка до' : 'Estimate max'}</Label>
+                  <Label className="text-xs">{isRu ? 'Оценка до' : isTh ? 'ประมาณการสูงสุด' : 'Estimate max'}</Label>
                   <Input
                     type="number"
                     min={0}
@@ -213,7 +216,7 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
 
               {/* When paid */}
               <div className="space-y-1">
-                <Label className="text-xs">{isRu ? 'Когда оплачивается' : 'When paid'}</Label>
+                <Label className="text-xs">{isRu ? 'Когда оплачивается' : isTh ? 'ชำระเมื่อใด' : 'When paid'}</Label>
                 <Select
                   value={fee.when_paid}
                   onValueChange={(v) => updateOne(fee.id, { when_paid: v as GuestFeePaymentMoment })}
@@ -234,21 +237,21 @@ function GuestExtraFeesSectionInner({ formData, updateFormData }: GuestExtraFees
               {/* Optional bilingual notes */}
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">{isRu ? 'Заметка EN' : 'Notes EN'}</Label>
+                  <Label className="text-xs">{isRu ? 'Заметка EN' : isTh ? 'หมายเหตุ EN' : 'Notes EN'}</Label>
                   <Input
                     value={fee.notes_en ?? ''}
                     onChange={(e) => updateOne(fee.id, { notes_en: e.target.value })}
                     className="h-8 text-xs"
-                    placeholder={isRu ? 'необязательно' : 'optional'}
+                    placeholder={isRu ? 'необязательно' : isTh ? 'ไม่บังคับ' : 'optional'}
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">{isRu ? 'Заметка RU' : 'Notes RU'}</Label>
+                  <Label className="text-xs">{isRu ? 'Заметка RU' : isTh ? 'หมายเหตุ RU' : 'Notes RU'}</Label>
                   <Input
                     value={fee.notes_ru ?? ''}
                     onChange={(e) => updateOne(fee.id, { notes_ru: e.target.value })}
                     className="h-8 text-xs"
-                    placeholder={isRu ? 'необязательно' : 'optional'}
+                    placeholder={isRu ? 'необязательно' : isTh ? 'ไม่บังคับ' : 'optional'}
                   />
                 </div>
               </div>

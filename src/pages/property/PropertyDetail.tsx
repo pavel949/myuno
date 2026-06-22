@@ -357,6 +357,7 @@ export default function PropertyDetail() {
                 escrowOffered={propertyExt.escrow_offered}
                 ownerVerified={property.is_verified}
                 isRu={isRu}
+                isTh={isTh}
               />
 
               {/* Payment schedule (sale / assignment) */}
@@ -371,6 +372,7 @@ export default function PropertyDetail() {
                     totalPrice={salePrice ?? null}
                     presetLabel={presetLabel}
                     isRu={isRu}
+                    isTh={isTh}
                   />
                 );
               })()}

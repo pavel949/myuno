@@ -233,14 +233,17 @@ export default function PropertyLanding() {
   const { t, language } = useLanguage();
   const { personas, togglePersona, isToggling } = useUserPersonas();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const hasCapitalPersona = personas.includes('business') || personas.includes('investor');
 
   return (
     <>
       <SEOHead
-        title={isRu ? 'Недвижимость — myUNO' : 'Property — myUNO'}
+        title={isRu ? 'Недвижимость — myUNO' : isTh ? 'อสังหาริมทรัพย์ — myUNO' : 'Property — myUNO'}
         description={isRu
           ? 'Аренда, покупка, инвестиции; коммерция и земля; кабинеты собственника, УК и застройщика — единая точка входа на Пхукете.'
+          : isTh
+          ? 'เช่า ซื้อ ลงทุน อสังหาริมทรัพย์เชิงพาณิชย์และที่ดิน พร้อมเครื่องมือสำหรับเจ้าของ บริษัทบริหาร และผู้พัฒนา — ศูนย์รวมอสังหาริมทรัพย์ภูเก็ตในที่เดียว'
           : 'Rent, buy, invest, commercial & land, plus pro tools for owners, MCs, and developers — one Phuket property hub.'}
       />
       <div className={cn(PROPERTY_VERTICAL_PAGE_GUTTER, 'py-8 pb-24')}>

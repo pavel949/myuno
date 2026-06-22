@@ -15,8 +15,10 @@ interface TripService {
   path: string;
   labelEn: string;
   labelRu: string;
+  labelTh: string;
   descEn: string;
   descRu: string;
+  descTh: string;
   gradient: string;
   priority: number;
 }
@@ -28,8 +30,10 @@ const TRIP_SERVICES: TripService[] = [
     path: '/transport',
     labelEn: 'Airport Transfer',
     labelRu: 'Трансфер',
+    labelTh: 'รถรับส่งสนามบิน',
     descEn: 'Meet & greet service',
     descRu: 'Встреча в аэропорту',
+    descTh: 'บริการรับที่สนามบิน',
     gradient: 'from-primary to-primary',
     priority: 1,
   },
@@ -39,8 +43,10 @@ const TRIP_SERVICES: TripService[] = [
     path: '/transport?type=rental',
     labelEn: 'Rent a Car',
     labelRu: 'Аренда авто',
+    labelTh: 'เช่ารถ',
     descEn: 'Cars & bikes',
     descRu: 'Авто и байки',
+    descTh: 'รถยนต์และมอเตอร์ไซค์',
     gradient: 'from-slate-600 to-slate-800',
     priority: 2,
   },
@@ -50,8 +56,10 @@ const TRIP_SERVICES: TripService[] = [
     path: '/market?category=grocery',
     labelEn: 'Groceries',
     labelRu: 'Продукты',
+    labelTh: 'ของชำ',
     descEn: 'Stock up fridge',
     descRu: 'Заполнить холодильник',
+    descTh: 'เติมของในตู้เย็น',
     gradient: 'from-success to-success',
     priority: 3,
   },
@@ -61,8 +69,10 @@ const TRIP_SERVICES: TripService[] = [
     path: '/flowers',
     labelEn: 'Flowers',
     labelRu: 'Цветы',
+    labelTh: 'ดอกไม้',
     descEn: 'Welcome bouquet',
     descRu: 'Букет к приезду',
+    descTh: 'ช่อดอกไม้ต้อนรับ',
     gradient: 'from-accent to-accent',
     priority: 4,
   },
@@ -72,8 +82,10 @@ const TRIP_SERVICES: TripService[] = [
     path: '/services?type=cleaning',
     labelEn: 'Extra Cleaning',
     labelRu: 'Уборка',
+    labelTh: 'ทำความสะอาดเพิ่ม',
     descEn: 'During your stay',
     descRu: 'Во время проживания',
+    descTh: 'ระหว่างที่คุณเข้าพัก',
     gradient: 'from-success to-primary',
     priority: 5,
   },
@@ -83,8 +95,10 @@ const TRIP_SERVICES: TripService[] = [
     path: '/banking',
     labelEn: 'Open Account',
     labelRu: 'Открыть счёт',
+    labelTh: 'เปิดบัญชี',
     descEn: 'Thai bank account',
     descRu: 'Тайский банк',
+    descTh: 'บัญชีธนาคารไทย',
     gradient: 'from-accent to-accent',
     priority: 6,
   },
@@ -94,8 +108,10 @@ const TRIP_SERVICES: TripService[] = [
     path: '/restaurants',
     labelEn: 'Restaurants',
     labelRu: 'Рестораны',
+    labelTh: 'ร้านอาหาร',
     descEn: 'Book a table',
     descRu: 'Забронировать столик',
+    descTh: 'จองโต๊ะ',
     gradient: 'from-accent to-red-500',
     priority: 7,
   },
@@ -105,8 +121,10 @@ const TRIP_SERVICES: TripService[] = [
     path: '/babysitter',
     labelEn: 'Babysitter',
     labelRu: 'Няня',
+    labelTh: 'พี่เลี้ยงเด็ก',
     descEn: 'Childcare service',
     descRu: 'Присмотр за детьми',
+    descTh: 'บริการดูแลเด็ก',
     gradient: 'from-primary to-primary',
     priority: 8,
   },
@@ -116,8 +134,10 @@ const TRIP_SERVICES: TripService[] = [
     path: '/market?category=sim',
     labelEn: 'SIM Card',
     labelRu: 'SIM-карта',
+    labelTh: 'ซิมการ์ด',
     descEn: 'Stay connected',
     descRu: 'Оставайся на связи',
+    descTh: 'เชื่อมต่อตลอดเวลา',
     gradient: 'from-primary to-primary',
     priority: 9,
   },
@@ -141,6 +161,7 @@ export function TripServicesGrid({
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const displayServices = TRIP_SERVICES
     .sort((a, b) => a.priority - b.priority)
@@ -165,7 +186,7 @@ export function TripServicesGrid({
       <div className={cn("space-y-3", className)}>
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-sm">
-            {isRu ? '🚀 Подготовьтесь к поездке' : '🚀 Prepare for Your Trip'}
+            {isRu ? '🚀 Подготовьтесь к поездке' : isTh ? '🚀 เตรียมพร้อมสำหรับการเดินทาง' : '🚀 Prepare for Your Trip'}
           </h3>
           <Button
             variant="ghost"
@@ -173,7 +194,7 @@ export function TripServicesGrid({
             onClick={() => navigate('/')}
             className="h-7 text-xs gap-1"
           >
-            {isRu ? 'Все' : 'All'}
+            {isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'All'}
             <ArrowRight className="w-3 h-3" />
           </Button>
         </div>
@@ -197,7 +218,7 @@ export function TripServicesGrid({
                   <Icon className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xs font-medium text-center line-clamp-1">
-                  {isRu ? service.labelRu : service.labelEn}
+                  {isRu ? service.labelRu : isTh ? service.labelTh : service.labelEn}
                 </span>
               </motion.button>
             );
@@ -213,10 +234,10 @@ export function TripServicesGrid({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-semibold">
-            {isRu ? '🚀 Подготовьтесь к поездке' : '🚀 Prepare for Your Trip'}
+            {isRu ? '🚀 Подготовьтесь к поездке' : isTh ? '🚀 เตรียมพร้อมสำหรับการเดินทาง' : '🚀 Prepare for Your Trip'}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {isRu ? 'Закажите услуги заранее' : 'Book services in advance'}
+            {isRu ? 'Закажите услуги заранее' : isTh ? 'จองบริการล่วงหน้า' : 'Book services in advance'}
           </p>
         </div>
         <Button
@@ -225,7 +246,7 @@ export function TripServicesGrid({
           onClick={() => navigate('/')}
           className="gap-1"
         >
-          {isRu ? 'Все услуги' : 'All Services'}
+          {isRu ? 'Все услуги' : isTh ? 'บริการทั้งหมด' : 'All Services'}
           <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
@@ -249,10 +270,10 @@ export function TripServicesGrid({
                 <Icon className="w-6 h-6 text-white" />
               </div>
               <span className="font-medium text-sm text-center">
-                {isRu ? service.labelRu : service.labelEn}
+                {isRu ? service.labelRu : isTh ? service.labelTh : service.labelEn}
               </span>
               <span className="text-xs text-muted-foreground text-center mt-0.5 line-clamp-1">
-                {isRu ? service.descRu : service.descEn}
+                {isRu ? service.descRu : isTh ? service.descTh : service.descEn}
               </span>
             </motion.button>
           );

@@ -40,11 +40,11 @@ interface HouseRulesProps {
   className?: string;
 }
 
-const cancellationPolicies: Record<string, { en: string; ru: string }> = {
-  flexible: { en: 'Flexible - Free cancellation 24h before', ru: 'Гибкая - бесплатная отмена за 24ч' },
-  moderate: { en: 'Moderate - Free cancellation 5 days before', ru: 'Умеренная - бесплатная отмена за 5 дней' },
-  strict: { en: 'Strict - 50% refund up to 1 week before', ru: 'Строгая - 50% возврат за неделю' },
-  non_refundable: { en: 'Non-refundable', ru: 'Без возврата' },
+const cancellationPolicies: Record<string, { en: string; ru: string; th: string }> = {
+  flexible: { en: 'Flexible - Free cancellation 24h before', ru: 'Гибкая - бесплатная отмена за 24ч', th: 'ยืดหยุ่น - ยกเลิกฟรีก่อน 24 ชม.' },
+  moderate: { en: 'Moderate - Free cancellation 5 days before', ru: 'Умеренная - бесплатная отмена за 5 дней', th: 'ปานกลาง - ยกเลิกฟรีก่อน 5 วัน' },
+  strict: { en: 'Strict - 50% refund up to 1 week before', ru: 'Строгая - 50% возврат за неделю', th: 'เข้มงวด - คืนเงิน 50% หากยกเลิกก่อน 1 สัปดาห์' },
+  non_refundable: { en: 'Non-refundable', ru: 'Без возврата', th: 'ไม่คืนเงิน' },
 };
 
 export function HouseRules({ 
@@ -61,12 +61,13 @@ export function HouseRules({
 }: HouseRulesProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   return (
     <div className={className}>
       <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
         <FileText className="w-5 h-5 text-primary" />
-        {isRu ? 'Правила дома' : 'House Rules'}
+        {isRu ? 'Правила дома' : isTh ? 'กฎของที่พัก' : 'House Rules'}
       </h3>
       
       <div className="space-y-3">
@@ -78,9 +79,9 @@ export function HouseRules({
             className="gap-1"
           >
             <Cigarette className="w-3 h-3" />
-            {smoking?.allowed 
-              ? (isRu ? 'Курение разрешено' : 'Smoking allowed')
-              : (isRu ? 'Не курить' : 'No smoking')}
+            {smoking?.allowed
+              ? (isRu ? 'Курение разрешено' : isTh ? 'สูบบุหรี่ได้' : 'Smoking allowed')
+              : (isRu ? 'Не курить' : isTh ? 'ห้ามสูบบุหรี่' : 'No smoking')}
           </Badge>
 
           {/* Pets */}
@@ -90,9 +91,9 @@ export function HouseRules({
               className="gap-1"
             >
               <Dog className="w-3 h-3" />
-              {pets.allowed 
-                ? (isRu ? 'Питомцы OK' : 'Pets OK')
-                : (isRu ? 'Без питомцев' : 'No pets')}
+              {pets.allowed
+                ? (isRu ? 'Питомцы OK' : isTh ? 'นำสัตว์เลี้ยงได้' : 'Pets OK')
+                : (isRu ? 'Без питомцев' : isTh ? 'ไม่อนุญาตสัตว์เลี้ยง' : 'No pets')}
             </Badge>
           )}
 
@@ -103,9 +104,9 @@ export function HouseRules({
               className="gap-1"
             >
               <PartyPopper className="w-3 h-3" />
-              {parties.allowed 
-                ? (isRu ? `Вечеринки до ${parties.maxGuests || '?'} чел` : `Parties up to ${parties.maxGuests || '?'}`)
-                : (isRu ? 'Без вечеринок' : 'No parties')}
+              {parties.allowed
+                ? (isRu ? `Вечеринки до ${parties.maxGuests || '?'} чел` : isTh ? `จัดงานได้ไม่เกิน ${parties.maxGuests || '?'} คน` : `Parties up to ${parties.maxGuests || '?'}`)
+                : (isRu ? 'Без вечеринок' : isTh ? 'ห้ามจัดงานปาร์ตี้' : 'No parties')}
             </Badge>
           )}
 
@@ -116,9 +117,9 @@ export function HouseRules({
               className="gap-1"
             >
               <Baby className="w-3 h-3" />
-              {children.friendly 
-                ? (isRu ? 'Дети welcome' : 'Child-friendly')
-                : (isRu ? 'Не для детей' : 'Not child-friendly')}
+              {children.friendly
+                ? (isRu ? 'Дети welcome' : isTh ? 'เหมาะกับเด็ก' : 'Child-friendly')
+                : (isRu ? 'Не для детей' : isTh ? 'ไม่เหมาะกับเด็ก' : 'Not child-friendly')}
             </Badge>
           )}
         </div>
@@ -128,7 +129,7 @@ export function HouseRules({
           <div className="flex items-center gap-2 p-2 rounded-none bg-muted/30">
             <Volume2 className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm">
-              {isRu ? 'Тишина:' : 'Quiet hours:'} {quietHours.start || '22:00'} – {quietHours.end || '08:00'}
+              {isRu ? 'Тишина:' : isTh ? 'ช่วงเวลาเงียบสงบ:' : 'Quiet hours:'} {quietHours.start || '22:00'} – {quietHours.end || '08:00'}
             </span>
           </div>
         )}
@@ -137,7 +138,7 @@ export function HouseRules({
         {pets?.allowed && (pets.deposit || pets.notes) && (
           <div className="text-sm text-muted-foreground p-2 rounded-none bg-muted/30">
             {pets.deposit && (
-              <p>{isRu ? `Депозит за питомца: ฿${pets.deposit}` : `Pet deposit: ฿${pets.deposit}`}</p>
+              <p>{isRu ? `Депозит за питомца: ฿${pets.deposit}` : isTh ? `เงินมัดจำสัตว์เลี้ยง: ฿${pets.deposit}` : `Pet deposit: ฿${pets.deposit}`}</p>
             )}
             {(pets.notes || pets.notes_ru) && (
               <p className="mt-1">{isRu ? pets.notes_ru || pets.notes : pets.notes}</p>
@@ -150,10 +151,10 @@ export function HouseRules({
           <div className="text-sm text-muted-foreground p-2 rounded-none bg-muted/30">
             <p className="flex items-center gap-2">
               <Baby className="w-4 h-4" />
-              {isRu ? 'Доступно:' : 'Available:'}
-              {children.hasCrib && <span>{isRu ? 'Детская кроватка' : 'Crib'}</span>}
+              {isRu ? 'Доступно:' : isTh ? 'มีให้บริการ:' : 'Available:'}
+              {children.hasCrib && <span>{isRu ? 'Детская кроватка' : isTh ? 'เตียงเด็ก' : 'Crib'}</span>}
               {children.hasCrib && children.hasHighChair && ', '}
-              {children.hasHighChair && <span>{isRu ? 'Детский стульчик' : 'High chair'}</span>}
+              {children.hasHighChair && <span>{isRu ? 'Детский стульчик' : isTh ? 'เก้าอี้สูงสำหรับเด็ก' : 'High chair'}</span>}
             </p>
           </div>
         )}
@@ -162,7 +163,7 @@ export function HouseRules({
         {!smoking?.allowed && smoking?.penalty && (
           <div className="flex items-center gap-2 text-sm text-destructive p-2 rounded-none bg-destructive/10">
             <AlertTriangle className="w-4 h-4" />
-            {isRu ? `Штраф за курение: ฿${smoking.penalty}` : `Smoking penalty: ฿${smoking.penalty}`}
+            {isRu ? `Штраф за курение: ฿${smoking.penalty}` : isTh ? `ค่าปรับสูบบุหรี่: ฿${smoking.penalty}` : `Smoking penalty: ฿${smoking.penalty}`}
           </div>
         )}
 
@@ -179,10 +180,10 @@ export function HouseRules({
         {cancellationPolicy && (
           <div className="p-3 rounded-none bg-muted/30">
             <p className="text-xs text-muted-foreground mb-1">
-              {isRu ? 'Политика отмены' : 'Cancellation Policy'}
+              {isRu ? 'Политика отмены' : isTh ? 'นโยบายการยกเลิก' : 'Cancellation Policy'}
             </p>
             <p className="text-sm font-medium">
-              {cancellationPolicies[cancellationPolicy]?.[isRu ? 'ru' : 'en'] || cancellationPolicy}
+              {cancellationPolicies[cancellationPolicy]?.[isRu ? 'ru' : isTh ? 'th' : 'en'] || cancellationPolicy}
             </p>
           </div>
         )}
@@ -192,7 +193,7 @@ export function HouseRules({
           <div className="p-3 rounded-none bg-destructive/5 border border-destructive/20">
             <div className="flex items-center gap-2 mb-1">
               <Shield className="w-4 h-4 text-destructive" />
-              <span className="text-sm font-medium">{isRu ? 'Экстренный контакт' : 'Emergency Contact'}</span>
+              <span className="text-sm font-medium">{isRu ? 'Экстренный контакт' : isTh ? 'ผู้ติดต่อกรณีฉุกเฉิน' : 'Emergency Contact'}</span>
             </div>
             <p className="text-sm text-muted-foreground">
               {emergencyContact.name && <span>{emergencyContact.name}</span>}

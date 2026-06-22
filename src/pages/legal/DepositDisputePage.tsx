@@ -168,7 +168,7 @@ export default function DepositDisputePage() {
             <div className="w-14 h-14 bg-primary-foreground/15 rounded-none flex items-center justify-center mx-auto mb-3">
               <FileWarning className="w-7 h-7" />
             </div>
-            <h1 className="text-2xl font-bold mb-1">{t ? "Dispute Pack" : "Dispute Pack"}</h1>
+            <h1 className="text-2xl font-bold mb-1">Dispute Pack</h1>
             <p className="text-primary-foreground/80 text-sm">
               {t ? `AI-черновик жалобы в OCPB · ฿${PRICE_THB.toLocaleString()}` : isTh ? `ร่างคำร้องเรียน สคบ. ด้วย AI · ฿${PRICE_THB.toLocaleString()}` : `AI-drafted OCPB complaint · ฿${PRICE_THB.toLocaleString()}`}
             </p>
@@ -202,7 +202,7 @@ export default function DepositDisputePage() {
                   </div>
                   <div>
                     <Label htmlFor="amount" className="text-xs">
-                      {t ? "Сумма депозита, ฿" : "Deposit amount, ฿"}
+                      {t ? "Сумма депозита, ฿" : isTh ? "จำนวนเงินมัดจำ, ฿" : "Deposit amount, ฿"}
                     </Label>
                     <Input
                       id="amount"
@@ -213,7 +213,7 @@ export default function DepositDisputePage() {
                   </div>
                   <div>
                     <Label htmlFor="summary" className="text-xs">
-                      {t ? "Что произошло (кратко)" : "What happened (briefly)"}
+                      {t ? "Что произошло (кратко)" : isTh ? "เกิดอะไรขึ้น (โดยย่อ)" : "What happened (briefly)"}
                     </Label>
                     <Textarea
                       id="summary"
@@ -223,12 +223,14 @@ export default function DepositDisputePage() {
                       placeholder={
                         t
                           ? "Например: арендодатель удержал 30 000 ฿ за «царапины», которые были при въезде…"
+                          : isTh
+                          ? "เช่น ผู้ให้เช่าหักเงิน 30,000 ฿ อ้างว่าเป็น «รอยขีดข่วน» ซึ่งมีอยู่แล้วตั้งแต่วันเข้าอยู่…"
                           : "e.g. landlord withheld 30,000 ฿ for 'scratches' that were already there on check-in…"
                       }
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">{t ? "Язык письма" : "Letter language"}</Label>
+                    <Label className="text-xs">{t ? "Язык письма" : isTh ? "ภาษาของจดหมาย" : "Letter language"}</Label>
                     <div className="flex gap-2 mt-1">
                       {(["ru", "en"] as const).map((lang) => (
                         <button
@@ -252,13 +254,13 @@ export default function DepositDisputePage() {
                     ) : (
                       <>
                         <FileText className="w-4 h-4" />
-                        {t ? `Купить пакет · ฿${PRICE_THB.toLocaleString()}` : `Buy pack · ฿${PRICE_THB.toLocaleString()}`}
+                        {t ? `Купить пакет · ฿${PRICE_THB.toLocaleString()}` : isTh ? `ซื้อชุดเอกสาร · ฿${PRICE_THB.toLocaleString()}` : `Buy pack · ฿${PRICE_THB.toLocaleString()}`}
                       </>
                     )}
                   </Button>
                   {!vaultId && (
                     <p className="text-xs text-destructive">
-                      {t ? "Сначала создайте хранилище аренды." : "Create a rental vault first."}
+                      {t ? "Сначала создайте хранилище аренды." : isTh ? "กรุณาสร้างห้องนิรภัยสัญญาเช่าก่อน" : "Create a rental vault first."}
                     </p>
                   )}
                 </form>
@@ -277,12 +279,12 @@ export default function DepositDisputePage() {
               <Card>
                 <CardContent className="p-4 space-y-2">
                   <p className="text-xs text-muted-foreground">
-                    {t ? "Статус" : "Status"}:{" "}
+                    {t ? "Статус" : isTh ? "สถานะ" : "Status"}:{" "}
                     <span className="font-medium text-foreground uppercase">{pack.status}</span>
                   </p>
                   {pack.status === "pending" && (
                     <p className="text-xs text-muted-foreground">
-                      {t ? "Ожидаем подтверждение платежа…" : "Awaiting payment confirmation…"}
+                      {t ? "Ожидаем подтверждение платежа…" : isTh ? "กำลังรอการยืนยันการชำระเงิน…" : "Awaiting payment confirmation…"}
                     </p>
                   )}
                   {pack.status !== "pending" && !pack.letter_text && (
@@ -292,7 +294,7 @@ export default function DepositDisputePage() {
                       className="w-full gap-2"
                     >
                       {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                      {t ? "Сгенерировать письмо" : "Generate letter"}
+                      {t ? "Сгенерировать письмо" : isTh ? "สร้างจดหมาย" : "Generate letter"}
                     </Button>
                   )}
                 </CardContent>
@@ -304,7 +306,7 @@ export default function DepositDisputePage() {
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-semibold flex items-center gap-2">
                         <FileText className="w-4 h-4 text-primary" />
-                        {t ? "Черновик жалобы" : "Draft complaint"}
+                        {t ? "Черновик жалобы" : isTh ? "ร่างคำร้องเรียน" : "Draft complaint"}
                       </h3>
                       <Button size="sm" variant="ghost" onClick={downloadLetter} className="gap-1">
                         <Download className="w-3.5 h-3.5" />
@@ -317,6 +319,8 @@ export default function DepositDisputePage() {
                     <p className="text-[11px] text-muted-foreground">
                       {t
                         ? "Disclaimer: автоматически сгенерированный черновик. Перед подачей проверьте у юриста (партнёрская юрфирма myUNO)."
+                        : isTh
+                        ? "ข้อจำกัดความรับผิด: เอกสารร่างที่สร้างโดยอัตโนมัติ กรุณาให้ทนายความตรวจสอบ (สำนักงานกฎหมายพันธมิตรของ myUNO) ก่อนยื่น"
                         : "Disclaimer: auto-generated draft. Please have it reviewed by a lawyer (myUNO partner firm) before filing."}
                     </p>
                   </CardContent>
@@ -324,7 +328,7 @@ export default function DepositDisputePage() {
               )}
 
               <Button variant="outline" className="w-full" onClick={() => navigate("/legal/deposit-vault")}>
-                {t ? "← Вернуться к Vault" : "← Back to Vault"}
+                {t ? "← Вернуться к Vault" : isTh ? "← กลับไปที่ Vault" : "← Back to Vault"}
               </Button>
             </>
           )}

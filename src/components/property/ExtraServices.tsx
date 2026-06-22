@@ -23,6 +23,7 @@ interface ExtraServicesProps {
 export function ExtraServices({ services, currency = 'THB', className }: ExtraServicesProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (!services || services.length === 0) return null;
 
@@ -30,7 +31,7 @@ export function ExtraServices({ services, currency = 'THB', className }: ExtraSe
     <div className={className}>
       <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
         <Plus className="w-5 h-5 text-primary" />
-        {isRu ? 'Дополнительные услуги' : 'Extra Services'}
+        {isRu ? 'Дополнительные услуги' : isTh ? 'บริการเสริม' : 'Extra Services'}
       </h3>
       <div className="space-y-2">
         {services.map((service) => {

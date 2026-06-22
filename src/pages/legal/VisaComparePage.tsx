@@ -18,11 +18,14 @@ interface VisaOption {
   id: string;
   titleRu: string;
   titleEn: string;
+  titleTh: string;
   score: number;
   fitRu: string;
   fitEn: string;
+  fitTh: string;
   caveatsRu: string;
   caveatsEn: string;
+  caveatsTh: string;
 }
 
 function scoreOptions(input: { nationality: Nationality; purpose: Purpose; horizon: Horizon; family: Family }): VisaOption[] {
@@ -32,61 +35,79 @@ function scoreOptions(input: { nationality: Nationality; purpose: Purpose; horiz
       id: 'dtv',
       titleRu: 'DTV (удалёнка)',
       titleEn: 'DTV (remote)',
+      titleTh: 'DTV (ทำงานทางไกล)',
       score: 0,
       fitRu: 'Удалённая работа за рубежом, длительные визиты без тайского работодателя.',
       fitEn: 'Remote employment abroad, longer stays without a Thai employer.',
+      fitTh: 'ทำงานทางไกลให้นายจ้างต่างประเทศ พำนักระยะยาวโดยไม่ต้องมีนายจ้างในไทย',
       caveatsRu: 'Нужны подтверждения дохода/работодателя; не для работы в Таиланде.',
       caveatsEn: 'Proof of income/employer required; not for working inside Thailand.',
+      caveatsTh: 'ต้องมีหลักฐานรายได้/นายจ้าง ใช้ทำงานในประเทศไทยไม่ได้',
     },
     {
       id: 'ed',
       titleRu: 'ED (учёба)',
       titleEn: 'ED (education)',
+      titleTh: 'ED (เพื่อการศึกษา)',
       score: 0,
       fitRu: 'Очное или языковое обучение в аккредитованной школе.',
       fitEn: 'Full-time or language study at a legitimate school.',
+      fitTh: 'เรียนเต็มเวลาหรือเรียนภาษาในสถาบันที่ได้รับการรับรอง',
       caveatsRu: 'Нужна реальная учёба; проверки посещаемости.',
       caveatsEn: 'Must attend classes; attendance checks.',
+      caveatsTh: 'ต้องเข้าเรียนจริง และมีการตรวจสอบการเข้าเรียน',
     },
     {
       id: 'nonb',
       titleRu: 'Non-Immigrant B + WP',
       titleEn: 'Non-B + work permit',
+      titleTh: 'Non-B + ใบอนุญาตทำงาน',
       score: 0,
       fitRu: 'Официальная работа в Таиланде.',
       fitEn: 'Onshore employment in Thailand.',
+      fitTh: 'ทำงานอย่างถูกต้องตามกฎหมายในประเทศไทย',
       caveatsRu: 'Работодатель и work permit; сроки зависят от компании.',
       caveatsEn: 'Employer + work permit; timelines depend on the company.',
+      caveatsTh: 'ต้องมีนายจ้างและใบอนุญาตทำงาน ระยะเวลาขึ้นอยู่กับบริษัท',
     },
     {
       id: 'tourist',
       titleRu: 'Туризм / exemption',
       titleEn: 'Tourist / exemption',
+      titleTh: 'ท่องเที่ยว / ยกเว้นวีซ่า',
       score: 0,
       fitRu: 'Короткие поездки и разведка перед переездом.',
       fitEn: 'Short trips and scouting before committing.',
+      fitTh: 'การเดินทางระยะสั้นและสำรวจพื้นที่ก่อนตัดสินใจย้าย',
       caveatsRu: 'Не заменяет статус для жизни 6–12+ месяцев.',
       caveatsEn: 'Not a substitute for 6–12+ month living status.',
+      caveatsTh: 'ไม่สามารถใช้แทนสถานะสำหรับการพำนัก 6–12 เดือนขึ้นไป',
     },
     {
       id: 'elite',
       titleRu: 'Thailand Elite / премиум',
       titleEn: 'Thailand Elite / premium',
+      titleTh: 'Thailand Elite / พรีเมียม',
       score: 0,
       fitRu: 'Длинные визиты при готовности платить премию за простоту.',
       fitEn: 'Long visits when you prioritise convenience over cost.',
+      fitTh: 'การพำนักระยะยาวเมื่อให้ความสำคัญกับความสะดวกมากกว่าค่าใช้จ่าย',
       caveatsRu: 'Высокая стоимость; правила программы меняются.',
       caveatsEn: 'Higher cost; programme rules change over time.',
+      caveatsTh: 'ค่าใช้จ่ายสูง และกฎของโครงการมีการเปลี่ยนแปลงเป็นระยะ',
     },
     {
       id: 'ltr_retire',
       titleRu: 'LTR / пенсионная (если подходите)',
       titleEn: 'LTR / retirement (if eligible)',
+      titleTh: 'LTR / วีซ่าเกษียณ (หากมีคุณสมบัติ)',
       score: 0,
       fitRu: 'Долгосрок при выполнении финансовых/возрастных критериев.',
       fitEn: 'Long-term when financial/age thresholds are met.',
+      fitTh: 'พำนักระยะยาวเมื่อผ่านเกณฑ์ด้านการเงิน/อายุ',
       caveatsRu: 'Строгие критерии; нужна проверка с юристом.',
       caveatsEn: 'Strict criteria; confirm with counsel.',
+      caveatsTh: 'เกณฑ์เข้มงวด ควรตรวจสอบกับทนายความ',
     },
   ];
 
@@ -129,6 +150,7 @@ function scoreOptions(input: { nationality: Nationality; purpose: Purpose; horiz
 export default function VisaComparePage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [nationality, setNationality] = useState<Nationality>('cis');
   const [purpose, setPurpose] = useState<Purpose>('remote');
   const [horizon, setHorizon] = useState<Horizon>('3_12');

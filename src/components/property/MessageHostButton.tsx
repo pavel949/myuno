@@ -15,6 +15,7 @@ interface MessageHostButtonProps {
   /** Override button + modal title (defaults: booking request copy) */
   labelRu?: string;
   labelEn?: string;
+  labelTh?: string;
   variant?: 'default' | 'outline' | 'ghost' | 'secondary';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   fullWidth?: boolean;
@@ -30,6 +31,7 @@ export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButton
     ownerName,
     labelRu,
     labelEn,
+    labelTh,
     variant = 'outline',
     size = 'default',
     fullWidth = false,
@@ -41,10 +43,13 @@ export const MessageHostButton = forwardRef<HTMLButtonElement, MessageHostButton
   const { user } = useAuth();
   const { openAuthSheet } = useAuthSheet();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const title = isRu ? propertyTitleRu || propertyTitle : propertyTitle;
   const buttonLabel = isRu
     ? (labelRu ?? 'Запросить бронь')
+    : isTh
+    ? (labelTh ?? 'ขอจอง')
     : (labelEn ?? 'Request booking');
 
   const handleClick = () => {

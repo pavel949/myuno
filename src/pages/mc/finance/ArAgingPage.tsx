@@ -10,6 +10,7 @@ import { useCityCurrency } from '@/hooks/useCityCurrency';
 export default function ArAgingPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { symbol: curSym } = useCityCurrency();
   const { data: rows, isLoading } = useArAging();
 
@@ -31,10 +32,10 @@ export default function ArAgingPage() {
       <div>
         <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
           <Receipt className="w-7 h-7 text-primary" />
-          {isRu ? 'Дебиторская задолженность' : 'AR Aging'}
+          {isRu ? 'Дебиторская задолженность' : isTh ? 'อายุลูกหนี้ค้างชำระ' : 'AR Aging'}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {isRu ? 'Открытые инвойсы по контрагентам с разбивкой по срокам просрочки' : 'Open invoices by contact, bucketed by overdue days'}
+          {isRu ? 'Открытые инвойсы по контрагентам с разбивкой по срокам просрочки' : isTh ? 'ใบแจ้งหนี้ค้างชำระแยกตามคู่สัญญาและจำนวนวันที่เกินกำหนด' : 'Open invoices by contact, bucketed by overdue days'}
         </p>
       </div>
 
@@ -44,10 +45,10 @@ export default function ArAgingPage() {
           { label: '31–60', value: totals.b2, color: 'text-warning' },
           { label: '61–90', value: totals.b3, color: 'text-warning' },
           { label: '90+', value: totals.b4, color: 'text-destructive' },
-          { label: isRu ? 'Всего' : 'Total', value: totals.total, color: 'text-primary' },
+          { label: isRu ? 'Всего' : isTh ? 'รวม' : 'Total', value: totals.total, color: 'text-primary' },
         ].map((b, i) => (
           <Card key={i} className="p-3">
-            <div className="text-xs text-muted-foreground">{b.label} {isRu ? 'дн.' : 'days'}</div>
+            <div className="text-xs text-muted-foreground">{b.label} {isRu ? 'дн.' : isTh ? 'วัน' : 'days'}</div>
             <div className={cn("text-lg md:text-xl font-bold tabular-nums mt-1", b.color)}>{fmt(b.value)} {curSym}</div>
           </Card>
         ))}
@@ -58,20 +59,20 @@ export default function ArAgingPage() {
       ) : !rows || rows.length === 0 ? (
         <Card className="p-10 text-center">
           <Receipt className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-          <p className="text-muted-foreground">{isRu ? 'Открытой дебиторки нет' : 'No outstanding receivables'}</p>
+          <p className="text-muted-foreground">{isRu ? 'Открытой дебиторки нет' : isTh ? 'ไม่มีลูกหนี้ค้างชำระ' : 'No outstanding receivables'}</p>
         </Card>
       ) : (
         <Card className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="text-left p-3">{isRu ? 'Контрагент' : 'Contact'}</th>
-                <th className="text-right p-3">{isRu ? 'Инв.' : 'Inv.'}</th>
+                <th className="text-left p-3">{isRu ? 'Контрагент' : isTh ? 'คู่สัญญา' : 'Contact'}</th>
+                <th className="text-right p-3">{isRu ? 'Инв.' : isTh ? 'ใบแจ้งหนี้' : 'Inv.'}</th>
                 <th className="text-right p-3">0–30</th>
                 <th className="text-right p-3">31–60</th>
                 <th className="text-right p-3">61–90</th>
                 <th className="text-right p-3">90+</th>
-                <th className="text-right p-3">{isRu ? 'Итого' : 'Total'}</th>
+                <th className="text-right p-3">{isRu ? 'Итого' : isTh ? 'รวม' : 'Total'}</th>
               </tr>
             </thead>
             <tbody>

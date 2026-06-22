@@ -25,6 +25,7 @@ export interface TrustStripProps {
   ownerVerified?: boolean | null;
   foreignQuota?: { available: number; total: number } | null;
   isRu: boolean;
+  isTh?: boolean;
   className?: string;
 }
 
@@ -74,6 +75,7 @@ export function TrustStrip({
   ownerVerified,
   foreignQuota,
   isRu,
+  isTh = false,
   className,
 }: TrustStripProps) {
   const chips: React.ReactNode[] = [];
@@ -101,8 +103,8 @@ export function TrustStrip({
       <Chip
         key="escrow"
         icon={Lock}
-        label={isRu ? 'Эскроу доступен' : 'Escrow available'}
-        tooltip={isRu ? 'Сделка может быть проведена через эскроу-счёт' : 'Deal can be settled via escrow account'}
+        label={isRu ? 'Эскроу доступен' : isTh ? 'มีบริการเอสโครว์' : 'Escrow available'}
+        tooltip={isRu ? 'Сделка может быть проведена через эскроу-счёт' : isTh ? 'สามารถชำระธุรกรรมผ่านบัญชีเอสโครว์ได้' : 'Deal can be settled via escrow account'}
         className="border-blue-500/40 text-blue-700 dark:text-blue-400 bg-blue-500/10"
       />,
     );
@@ -141,7 +143,7 @@ export function TrustStrip({
         key="cv-rec"
         icon={Info}
         label={clearviewRecommendation}
-        tooltip={isRu ? 'Рекомендация ClearView V3' : 'ClearView V3 recommendation'}
+        tooltip={isRu ? 'Рекомендация ClearView V3' : isTh ? 'คำแนะนำจาก ClearView V3' : 'ClearView V3 recommendation'}
         className={REC_COLORS[clearviewRecommendation]}
       />,
     );
@@ -149,16 +151,16 @@ export function TrustStrip({
 
   // Flood risk
   if (floodRisk && RISK_COLORS[floodRisk]) {
-    const labels: Record<string, { en: string; ru: string }> = {
-      low: { en: 'Low flood risk', ru: 'Низкий риск затопления' },
-      medium: { en: 'Medium flood risk', ru: 'Средний риск затопления' },
-      high: { en: 'High flood risk', ru: 'Высокий риск затопления' },
+    const labels: Record<string, { en: string; ru: string; th: string }> = {
+      low: { en: 'Low flood risk', ru: 'Низкий риск затопления', th: 'ความเสี่ยงน้ำท่วมต่ำ' },
+      medium: { en: 'Medium flood risk', ru: 'Средний риск затопления', th: 'ความเสี่ยงน้ำท่วมปานกลาง' },
+      high: { en: 'High flood risk', ru: 'Высокий риск затопления', th: 'ความเสี่ยงน้ำท่วมสูง' },
     };
     chips.push(
       <Chip
         key="flood"
         icon={Droplets}
-        label={isRu ? labels[floodRisk].ru : labels[floodRisk].en}
+        label={isRu ? labels[floodRisk].ru : isTh ? labels[floodRisk].th : labels[floodRisk].en}
         className={RISK_COLORS[floodRisk]}
       />,
     );
@@ -180,9 +182,11 @@ export function TrustStrip({
         label={
           isRu
             ? `Иностр. квота: ${left}/${foreignQuota.total}`
+            : isTh
+            ? `โควตาต่างชาติ: ${left}/${foreignQuota.total}`
             : `Foreign quota: ${left}/${foreignQuota.total}`
         }
-        tooltip={isRu ? 'Доступно юнитов в иностранной 49% квоте' : 'Units available in 49% foreign quota'}
+        tooltip={isRu ? 'Доступно юнитов в иностранной 49% квоте' : isTh ? 'จำนวนยูนิตที่ว่างในโควตาต่างชาติ 49%' : 'Units available in 49% foreign quota'}
         className={cls}
       />,
     );
@@ -194,7 +198,7 @@ export function TrustStrip({
       <Chip
         key="verified"
         icon={ShieldCheck}
-        label={isRu ? 'Владелец верифицирован' : 'Owner verified'}
+        label={isRu ? 'Владелец верифицирован' : isTh ? 'ยืนยันตัวตนเจ้าของแล้ว' : 'Owner verified'}
         className="border-primary/40 text-primary bg-primary/10"
       />,
     );
@@ -203,7 +207,7 @@ export function TrustStrip({
   if (chips.length === 0) return null;
 
   return (
-    <div className={cn('flex flex-wrap gap-2', className)} role="list" aria-label={isRu ? 'Сигналы доверия' : 'Trust signals'}>
+    <div className={cn('flex flex-wrap gap-2', className)} role="list" aria-label={isRu ? 'Сигналы доверия' : isTh ? 'สัญญาณความน่าเชื่อถือ' : 'Trust signals'}>
       {chips}
     </div>
   );

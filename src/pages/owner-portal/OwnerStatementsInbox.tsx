@@ -4,6 +4,7 @@
  */
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { Language } from '@/i18n';
 import {
   useMyStatementApprovals,
   useSignStatement,
@@ -25,6 +26,7 @@ import { cn } from '@/lib/utils';
 export default function OwnerStatementsInbox() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: items = [], isLoading } = useMyStatementApprovals();
   const sign = useSignStatement();
   const reject = useRejectStatement();
@@ -71,12 +73,14 @@ export default function OwnerStatementsInbox() {
         <div className="flex items-center gap-2">
           <FileText className="w-5 h-5 text-primary" />
           <h1 className="text-xl font-bold">
-            {isRu ? 'Отчёты на одобрение' : 'Statements for Approval'}
+            {isRu ? 'Отчёты на одобрение' : isTh ? 'รายงานที่รออนุมัติ' : 'Statements for Approval'}
           </h1>
         </div>
         <p className="text-sm text-muted-foreground">
           {isRu
             ? 'Просмотрите ежемесячные отчёты от управляющей компании и подпишите их.'
+            : isTh
+            ? 'ตรวจสอบรายงานประจำเดือนจากบริษัทบริหารจัดการของคุณและลงนาม'
             : 'Review monthly statements from your management company and sign them.'}
         </p>
       </div>
@@ -84,12 +88,12 @@ export default function OwnerStatementsInbox() {
       {/* Pending */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {isRu ? 'Ожидают подписи' : 'Pending'} ({pending.length})
+          {isRu ? 'Ожидают подписи' : isTh ? 'รอการลงนาม' : 'Pending'} ({pending.length})
         </h2>
         {pending.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center text-sm text-muted-foreground">
-              {isRu ? 'Нет отчётов на одобрение' : 'No statements awaiting approval'}
+              {isRu ? 'Нет отчётов на одобрение' : isTh ? 'ไม่มีรายงานที่รออนุมัติ' : 'No statements awaiting approval'}
             </CardContent>
           </Card>
         ) : (
@@ -97,7 +101,7 @@ export default function OwnerStatementsInbox() {
             <StatementCard
               key={item.id}
               item={item}
-              isRu={isRu}
+              language={language}
               onSign={() => { setActive(item); setMode('sign'); }}
               onReject={() => { setActive(item); setMode('reject'); }}
             />
@@ -109,10 +113,10 @@ export default function OwnerStatementsInbox() {
       {past.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            {isRu ? 'История' : 'History'}
+            {isRu ? 'История' : isTh ? 'ประวัติ' : 'History'}
           </h2>
           {past.map(item => (
-            <StatementCard key={item.id} item={item} isRu={isRu} readOnly />
+            <StatementCard key={item.id} item={item} language={language} readOnly />
           ))}
         </section>
       )}
@@ -123,8 +127,8 @@ export default function OwnerStatementsInbox() {
           <SheetHeader>
             <SheetTitle>
               {mode === 'sign'
-                ? (isRu ? 'Подписать отчёт' : 'Sign Statement')
-                : (isRu ? 'Отклонить отчёт' : 'Reject Statement')}
+                ? (isRu ? 'Подписать отчёт' : isTh ? 'ลงนามรายงาน' : 'Sign Statement')
+                : (isRu ? 'Отклонить отчёт' : isTh ? 'ปฏิเสธรายงาน' : 'Reject Statement')}
             </SheetTitle>
           </SheetHeader>
 
@@ -133,14 +137,14 @@ export default function OwnerStatementsInbox() {
               {/* Period & amount */}
               <div className="bg-muted/30 rounded-none p-3 space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">{isRu ? 'Период' : 'Period'}</span>
+                  <span className="text-muted-foreground">{isRu ? 'Период' : isTh ? 'รอบระยะเวลา' : 'Period'}</span>
                   <span className="font-medium">
                     {format(new Date(active.period_start), 'd MMM', { locale: isRu ? ru : undefined })} – {format(new Date(active.period_end), 'd MMM yyyy', { locale: isRu ? ru : undefined })}
                   </span>
                 </div>
                 {active.net_amount != null && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">{isRu ? 'К выплате' : 'Net payout'}</span>
+                    <span className="text-muted-foreground">{isRu ? 'К выплате' : isTh ? 'ยอดสุทธิที่จ่าย' : 'Net payout'}</span>
                     <span className="font-bold text-success">
                       {active.net_amount.toLocaleString()} {active.currency || 'THB'}
                     </span>
@@ -152,7 +156,7 @@ export default function OwnerStatementsInbox() {
                 <Button variant="outline" className="w-full" asChild>
                   <a href={active.statement_url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="w-4 h-4 mr-2" />
-                    {isRu ? 'Открыть PDF отчёта' : 'Open Statement PDF'}
+                    {isRu ? 'Открыть PDF отчёта' : isTh ? 'เปิดไฟล์ PDF รายงาน' : 'Open Statement PDF'}
                   </a>
                 </Button>
               )}
@@ -161,18 +165,18 @@ export default function OwnerStatementsInbox() {
                 <>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
-                      {isRu ? 'Ваша подпись' : 'Your signature'}
+                      {isRu ? 'Ваша подпись' : isTh ? 'ลายเซ็นของคุณ' : 'Your signature'}
                     </label>
                     <SignaturePad onChange={setSignatureUrl} />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
-                      {isRu ? 'Комментарий (опционально)' : 'Comment (optional)'}
+                      {isRu ? 'Комментарий (опционально)' : isTh ? 'ความคิดเห็น (ไม่บังคับ)' : 'Comment (optional)'}
                     </label>
                     <Textarea
                       value={comment}
                       onChange={e => setComment(e.target.value)}
-                      placeholder={isRu ? 'Например: всё проверил, согласен' : 'E.g. all good, agreed'}
+                      placeholder={isRu ? 'Например: всё проверил, согласен' : isTh ? 'เช่น ตรวจสอบเรียบร้อยแล้ว เห็นชอบ' : 'E.g. all good, agreed'}
                       rows={2}
                     />
                   </div>
@@ -183,8 +187,8 @@ export default function OwnerStatementsInbox() {
                   >
                     <CheckCircle2 className="w-4 h-4 mr-2" />
                     {sign.isPending
-                      ? (isRu ? 'Сохранение...' : 'Saving...')
-                      : (isRu ? 'Подписать и одобрить' : 'Sign & Approve')}
+                      ? (isRu ? 'Сохранение...' : isTh ? 'กำลังบันทึก...' : 'Saving...')
+                      : (isRu ? 'Подписать и одобрить' : isTh ? 'ลงนามและอนุมัติ' : 'Sign & Approve')}
                   </Button>
                 </>
               )}
@@ -193,12 +197,12 @@ export default function OwnerStatementsInbox() {
                 <>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
-                      {isRu ? 'Причина отклонения' : 'Reason for rejection'}
+                      {isRu ? 'Причина отклонения' : isTh ? 'เหตุผลในการปฏิเสธ' : 'Reason for rejection'}
                     </label>
                     <Textarea
                       value={reason}
                       onChange={e => setReason(e.target.value)}
-                      placeholder={isRu ? 'Опишите, что нужно исправить' : 'Describe what needs to be corrected'}
+                      placeholder={isRu ? 'Опишите, что нужно исправить' : isTh ? 'อธิบายสิ่งที่ต้องแก้ไข' : 'Describe what needs to be corrected'}
                       rows={3}
                       required
                     />
@@ -210,7 +214,7 @@ export default function OwnerStatementsInbox() {
                     onClick={handleReject}
                   >
                     <XCircle className="w-4 h-4 mr-2" />
-                    {isRu ? 'Отклонить отчёт' : 'Reject Statement'}
+                    {isRu ? 'Отклонить отчёт' : isTh ? 'ปฏิเสธรายงาน' : 'Reject Statement'}
                   </Button>
                 </>
               )}
@@ -224,22 +228,24 @@ export default function OwnerStatementsInbox() {
 
 function StatementCard({
   item,
-  isRu,
+  language,
   onSign,
   onReject,
   readOnly,
 }: {
   item: StatementApproval;
-  isRu: boolean;
+  language: Language;
   onSign?: () => void;
   onReject?: () => void;
   readOnly?: boolean;
 }) {
+  const isRu = language === 'ru';
+  const isTh = language === 'th';
   const statusConfig: Record<string, { label: string; cls: string; Icon: typeof Clock }> = {
-    pending: { label: isRu ? 'Ожидает' : 'Pending', cls: 'bg-warning/15 text-warning', Icon: Clock },
-    approved: { label: isRu ? 'Одобрено' : 'Approved', cls: 'bg-success/15 text-success', Icon: CheckCircle2 },
-    rejected: { label: isRu ? 'Отклонено' : 'Rejected', cls: 'bg-destructive/15 text-destructive', Icon: XCircle },
-    expired: { label: isRu ? 'Истёк' : 'Expired', cls: 'bg-muted text-muted-foreground', Icon: Clock },
+    pending: { label: isRu ? 'Ожидает' : isTh ? 'รอดำเนินการ' : 'Pending', cls: 'bg-warning/15 text-warning', Icon: Clock },
+    approved: { label: isRu ? 'Одобрено' : isTh ? 'อนุมัติแล้ว' : 'Approved', cls: 'bg-success/15 text-success', Icon: CheckCircle2 },
+    rejected: { label: isRu ? 'Отклонено' : isTh ? 'ปฏิเสธแล้ว' : 'Rejected', cls: 'bg-destructive/15 text-destructive', Icon: XCircle },
+    expired: { label: isRu ? 'Истёк' : isTh ? 'หมดอายุ' : 'Expired', cls: 'bg-muted text-muted-foreground', Icon: Clock },
   };
   const cfg = statusConfig[item.status];
   const Icon = cfg.Icon;
@@ -260,7 +266,7 @@ function StatementCard({
             </p>
             {item.net_amount != null && (
               <p className="text-xs text-muted-foreground mt-0.5">
-                {isRu ? 'К выплате: ' : 'Net: '}
+                {isRu ? 'К выплате: ' : isTh ? 'ยอดสุทธิ: ' : 'Net: '}
                 <span className="font-semibold text-foreground">
                   {item.net_amount.toLocaleString()} {item.currency || 'THB'}
                 </span>
@@ -268,7 +274,7 @@ function StatementCard({
             )}
             {item.signed_at && (
               <p className="text-xs text-muted-foreground mt-0.5">
-                {isRu ? 'Подписано: ' : 'Signed: '}
+                {isRu ? 'Подписано: ' : isTh ? 'ลงนามเมื่อ: ' : 'Signed: '}
                 {format(new Date(item.signed_at), 'd MMM HH:mm', { locale: isRu ? ru : undefined })}
               </p>
             )}
@@ -282,11 +288,11 @@ function StatementCard({
           <div className="flex gap-2">
             <Button size="sm" className="flex-1" onClick={onSign}>
               <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-              {isRu ? 'Подписать' : 'Sign'}
+              {isRu ? 'Подписать' : isTh ? 'ลงนาม' : 'Sign'}
             </Button>
             <Button size="sm" variant="outline" onClick={onReject}>
               <XCircle className="w-3.5 h-3.5 mr-1.5" />
-              {isRu ? 'Отклонить' : 'Reject'}
+              {isRu ? 'Отклонить' : isTh ? 'ปฏิเสธ' : 'Reject'}
             </Button>
           </div>
         )}

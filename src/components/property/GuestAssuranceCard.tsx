@@ -11,34 +11,46 @@ const ITEMS = [
     icon: Headphones,
     titleRu: 'Срочная поддержка',
     titleEn: 'Urgent support',
+    titleTh: 'ความช่วยเหลือเร่งด่วน',
     shortRu: 'Линия myUNO для срочных вопросов по бронированию и заезду.',
     shortEn: 'myUNO line for urgent booking and check-in questions.',
+    shortTh: 'สายด่วน myUNO สำหรับคำถามเร่งด่วนเรื่องการจองและการเช็คอิน',
     detailRu:
       'Если что-то пошло не так с доступом, временем заезда или связью с менеджером — напишите в поддержку myUNO. Мы помогаем связаться с хозяином и согласовать следующий шаг.',
     detailEn:
       'If something goes wrong with access, check-in timing, or reaching the manager — contact myUNO support. We help you reach the host and agree on the next step.',
+    detailTh:
+      'หากเกิดปัญหาเรื่องการเข้าพัก เวลาเช็คอิน หรือการติดต่อผู้จัดการ — ติดต่อทีมซัพพอร์ต myUNO เราจะช่วยประสานงานกับเจ้าของและตกลงขั้นตอนถัดไป',
   },
   {
     icon: Handshake,
     titleRu: 'Координация с УК и хозяином',
     titleEn: 'Coordination with MC & host',
+    titleTh: 'การประสานงานกับบริษัทบริหารและเจ้าของ',
     shortRu: 'Помогаем выстроить диалог между гостём, хозяином и управляющей компанией.',
     shortEn: 'We help coordinate communication between guest, host, and building management.',
+    shortTh: 'เราช่วยประสานการสื่อสารระหว่างผู้เข้าพัก เจ้าของ และฝ่ายบริหารอาคาร',
     detailRu:
       'ЖК и управляющие компании задают правила комплекса — это нормально. Мы не вмешиваемся в договор с УК, но можем подсказать, как согласовать вопросы через хозяина и офис комплекса без конфликта.',
     detailEn:
       'Projects and management companies set estate rules — that is normal. We do not replace your contract with the MC, but we can suggest how to resolve questions through the host and the juristic office constructively.',
+    detailTh:
+      'โครงการและบริษัทบริหารเป็นผู้กำหนดกฎของโครงการ ซึ่งเป็นเรื่องปกติ เราไม่เข้าไปแทนที่สัญญาของคุณกับบริษัทบริหาร แต่สามารถแนะนำวิธีแก้ไขปัญหาผ่านเจ้าของและสำนักงานนิติบุคคลอย่างสร้างสรรค์',
   },
   {
     icon: Shield,
     titleRu: 'Споры и разногласия',
     titleEn: 'Disputes',
+    titleTh: 'ข้อพิพาทและความขัดแย้ง',
     shortRu: 'Подключаем поддержку, чтобы найти решение справедливо и спокойно.',
     shortEn: 'We involve support to find a fair, calm resolution.',
+    shortTh: 'เราจะช่วยหาทางออกอย่างเป็นธรรมและสงบ',
     detailRu:
       'При разногласиях по состоянию жилья, депозиту или условиям мы фиксируем обращение и помогаем сторонам договориться. Цель — решение в рамках правил объявления и добросовестной практики, а не «победа» одной стороны.',
     detailEn:
       'If you disagree about the unit condition, deposit, or terms, we log the case and help both sides work it out. The goal is a solution within the listing rules and good-faith practice — not taking sides against the host or the building.',
+    detailTh:
+      'หากมีความเห็นไม่ตรงกันเรื่องสภาพห้อง เงินมัดจำ หรือเงื่อนไข เราจะบันทึกเรื่องและช่วยให้ทั้งสองฝ่ายตกลงกัน เป้าหมายคือทางออกภายใต้กฎของประกาศและหลักปฏิบัติที่สุจริต ไม่ใช่การเข้าข้างฝ่ายใดฝ่ายหนึ่ง',
   },
 ] as const;
 
@@ -51,6 +63,7 @@ interface GuestAssuranceCardProps {
 export function GuestAssuranceCard({ compact, className }: GuestAssuranceCardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (compact) {
     return (
@@ -63,10 +76,12 @@ export function GuestAssuranceCard({ compact, className }: GuestAssuranceCardPro
         <p>
           {isRu
             ? 'myUNO на связи по срочным вопросам и помогает согласовать общение с хозяином и комплексом.'
+            : isTh
+            ? 'myUNO พร้อมช่วยเหลือในเรื่องเร่งด่วน และช่วยประสานงานกับเจ้าของและโครงการ'
             : 'myUNO is here for urgent issues and helps coordinate with the host and the estate.'}
         </p>
         <Link to={APP_ROUTES.SUPPORT} className="mt-1.5 inline-flex font-medium text-primary hover:underline">
-          {isRu ? 'Поддержка' : 'Support'}
+          {isRu ? 'Поддержка' : isTh ? 'ฝ่ายช่วยเหลือ' : 'Support'}
         </Link>
       </div>
     );
@@ -80,14 +95,14 @@ export function GuestAssuranceCard({ compact, className }: GuestAssuranceCardPro
       )}
     >
       <p className="text-xs font-semibold text-foreground uppercase tracking-wide">
-        {isRu ? 'Надёжность myUNO' : 'myUNO guest care'}
+        {isRu ? 'Надёжность myUNO' : isTh ? 'การดูแลผู้เข้าพักโดย myUNO' : 'myUNO guest care'}
       </p>
       <ul className="space-y-2">
         {ITEMS.map((item) => {
           const Icon = item.icon;
-          const title = isRu ? item.titleRu : item.titleEn;
-          const short = isRu ? item.shortRu : item.shortEn;
-          const detail = isRu ? item.detailRu : item.detailEn;
+          const title = isRu ? item.titleRu : isTh ? item.titleTh : item.titleEn;
+          const short = isRu ? item.shortRu : isTh ? item.shortTh : item.shortEn;
+          const detail = isRu ? item.detailRu : isTh ? item.detailTh : item.detailEn;
           return (
             <li key={item.titleEn} className="flex gap-2 items-start">
               <Icon className="w-4 h-4 text-primary shrink-0 mt-0.5" aria-hidden />
@@ -99,7 +114,7 @@ export function GuestAssuranceCard({ compact, className }: GuestAssuranceCardPro
                       <button
                         type="button"
                         className="rounded-full p-0.5 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
-                        aria-label={isRu ? 'Подробнее' : 'More info'}
+                        aria-label={isRu ? 'Подробнее' : isTh ? 'ดูเพิ่มเติม' : 'More info'}
                       >
                         <Info className="w-3.5 h-3.5" />
                       </button>
@@ -119,7 +134,7 @@ export function GuestAssuranceCard({ compact, className }: GuestAssuranceCardPro
         to={APP_ROUTES.SUPPORT}
         className="inline-flex text-xs font-medium text-primary hover:underline pt-0.5"
       >
-        {isRu ? 'Связаться с поддержкой' : 'Contact myUNO support'}
+        {isRu ? 'Связаться с поддержкой' : isTh ? 'ติดต่อทีมช่วยเหลือ myUNO' : 'Contact myUNO support'}
       </Link>
     </div>
   );

@@ -36,17 +36,18 @@ interface CheckInDetailsProps {
   showPricingDeposit?: boolean;
 }
 
-const keyHandoverLabels: Record<string, { en: string; ru: string; icon: string }> = {
-  in_person: { en: 'Meet & Greet', ru: 'Личная встреча', icon: '🤝' },
-  lockbox: { en: 'Lockbox', ru: 'Сейфовый ящик', icon: '🔐' },
-  doorman: { en: 'Doorman/Concierge', ru: 'Консьерж', icon: '🧑‍💼' },
-  keypad: { en: 'Digital Keypad', ru: 'Цифровой код', icon: '🔢' },
-  smart_lock: { en: 'Smart Lock', ru: 'Умный замок', icon: '📱' },
+const keyHandoverLabels: Record<string, { en: string; ru: string; th: string; icon: string }> = {
+  in_person: { en: 'Meet & Greet', ru: 'Личная встреча', th: 'รับกุญแจด้วยตนเอง', icon: '🤝' },
+  lockbox: { en: 'Lockbox', ru: 'Сейфовый ящик', th: 'กล่องเก็บกุญแจ', icon: '🔐' },
+  doorman: { en: 'Doorman/Concierge', ru: 'Консьерж', th: 'พนักงานต้อนรับ', icon: '🧑‍💼' },
+  keypad: { en: 'Digital Keypad', ru: 'Цифровой код', th: 'รหัสดิจิทัล', icon: '🔢' },
+  smart_lock: { en: 'Smart Lock', ru: 'Умный замок', th: 'สมาร์ทล็อก', icon: '📱' },
 };
 
 const INTRO_POPOVER = {
   ru: 'Время заезда и выезда задаёт хозяин или управление объектом. Ранний заезд и поздний выезд могут быть платными — условия и суммы указаны в разделе «Стоимость», если применимо.',
   en: 'Check-in and check-out times are set by the host or the property. Early check-in and late check-out may cost extra — see the Pricing section when applicable.',
+  th: 'เวลาเช็คอินและเช็คเอาต์กำหนดโดยเจ้าของหรือฝ่ายบริหารที่พัก การเช็คอินก่อนเวลาและเช็คเอาต์ช้าอาจมีค่าใช้จ่ายเพิ่ม — ดูรายละเอียดในส่วน «ราคา» หากมี',
 };
 
 export function CheckInDetails({
@@ -66,6 +67,7 @@ export function CheckInDetails({
 }: CheckInDetailsProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const instructionText = isRu ? instructions_ru || instructions : instructions;
   const longInstructions = Boolean(instructionText && instructionText.length > 160);
@@ -76,20 +78,20 @@ export function CheckInDetails({
       <CardHeader className="pb-2 flex flex-row items-start justify-between gap-2 space-y-0">
         <CardTitle className="text-lg flex items-center gap-2">
           <Clock className="w-5 h-5 text-primary shrink-0" />
-          {isRu ? 'Заезд и выезд' : 'Check-in & Check-out'}
+          {isRu ? 'Заезд и выезд' : isTh ? 'เช็คอินและเช็คเอาต์' : 'Check-in & Check-out'}
         </CardTitle>
         <Popover>
           <PopoverTrigger asChild>
             <button
               type="button"
               className="rounded-full p-1 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
-              aria-label={isRu ? 'Справка по заезду' : 'About check-in'}
+              aria-label={isRu ? 'Справка по заезду' : isTh ? 'เกี่ยวกับการเช็คอิน' : 'About check-in'}
             >
               <Info className="w-4 h-4" />
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-[min(100vw-2rem,320px)] text-sm" align="end">
-            <p className="text-muted-foreground leading-relaxed">{isRu ? INTRO_POPOVER.ru : INTRO_POPOVER.en}</p>
+            <p className="text-muted-foreground leading-relaxed">{isRu ? INTRO_POPOVER.ru : isTh ? INTRO_POPOVER.th : INTRO_POPOVER.en}</p>
           </PopoverContent>
         </Popover>
       </CardHeader>
@@ -99,19 +101,19 @@ export function CheckInDetails({
           <div className="grid grid-cols-2 gap-2 min-w-0">
             {checkIn && (
               <div className="p-3 rounded-none bg-primary/5 border border-primary/10 min-w-0">
-                <p className="text-xs text-muted-foreground mb-1">{isRu ? 'Заезд' : 'Check-in'}</p>
+                <p className="text-xs text-muted-foreground mb-1">{isRu ? 'Заезд' : isTh ? 'เช็คอิน' : 'Check-in'}</p>
                 <p className="text-base font-semibold tabular-nums">{checkIn}</p>
                 {earlyCheckinPrice != null && earlyCheckinPrice > 0 && (
                   <div className="mt-1 flex items-center gap-1.5 flex-wrap">
                     <span className="text-xs text-muted-foreground">
-                      {isRu ? 'Ранний заезд' : 'Early'} +฿{earlyCheckinPrice.toLocaleString()}
+                      {isRu ? 'Ранний заезд' : isTh ? 'เช็คอินก่อนเวลา' : 'Early'} +฿{earlyCheckinPrice.toLocaleString()}
                     </span>
                     <Popover>
                       <PopoverTrigger asChild>
                         <button
                           type="button"
                           className="rounded-full p-0.5 text-muted-foreground hover:text-foreground"
-                          aria-label={isRu ? 'О раннем заезде' : 'About early check-in'}
+                          aria-label={isRu ? 'О раннем заезде' : isTh ? 'เกี่ยวกับการเช็คอินก่อนเวลา' : 'About early check-in'}
                         >
                           <Info className="w-3.5 h-3.5" />
                         </button>
@@ -119,6 +121,8 @@ export function CheckInDetails({
                       <PopoverContent className="w-[min(100vw-2rem,280px)] text-xs" align="start">
                         {isRu
                           ? 'Стоимость согласуется с хозяином; подробности — в разделе «Стоимость» ниже.'
+                          : isTh
+                          ? 'ค่าใช้จ่ายเป็นไปตามนโยบายของเจ้าของ ดูรายละเอียดในส่วน «ราคา» ด้านล่าง'
                           : 'Charged per host policy; details are in the Pricing section below.'}
                       </PopoverContent>
                     </Popover>
@@ -128,30 +132,30 @@ export function CheckInDetails({
             )}
             {checkOut && (
               <div className="p-3 rounded-none bg-muted/30 border border-border/50 min-w-0">
-                <p className="text-xs text-muted-foreground mb-1">{isRu ? 'Выезд' : 'Check-out'}</p>
+                <p className="text-xs text-muted-foreground mb-1">{isRu ? 'Выезд' : isTh ? 'เช็คเอาต์' : 'Check-out'}</p>
                 <p className="text-base font-semibold tabular-nums">{checkOut}</p>
                 {lateCheckoutPrice != null && lateCheckoutPrice > 0 && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    {isRu ? 'Поздний:' : 'Late:'} +฿{lateCheckoutPrice.toLocaleString()}
+                    {isRu ? 'Поздний:' : isTh ? 'ช้า:' : 'Late:'} +฿{lateCheckoutPrice.toLocaleString()}
                   </p>
                 )}
                 {lateCheckoutPenalty != null && lateCheckoutPenalty > 0 && (
                   <p className="text-xs text-destructive mt-1">
-                    {isRu ? 'Штраф:' : 'Penalty:'} ฿{lateCheckoutPenalty.toLocaleString()}
+                    {isRu ? 'Штраф:' : isTh ? 'ค่าปรับ:' : 'Penalty:'} ฿{lateCheckoutPenalty.toLocaleString()}
                   </p>
                 )}
                 {(lateCheckoutPrice == null || lateCheckoutPrice <= 0) &&
                   (lateCheckoutPenalty == null || lateCheckoutPenalty <= 0) && (
                     <div className="mt-1 flex items-center gap-1.5">
                       <span className="text-xs text-muted-foreground">
-                        {isRu ? 'Поздний выезд — по правилам объекта' : 'Late check-out per property rules'}
+                        {isRu ? 'Поздний выезд — по правилам объекта' : isTh ? 'เช็คเอาต์ช้าตามกฎของที่พัก' : 'Late check-out per property rules'}
                       </span>
                       <Popover>
                         <PopoverTrigger asChild>
                           <button
                             type="button"
                             className="rounded-full p-0.5 text-muted-foreground hover:text-foreground shrink-0"
-                            aria-label={isRu ? 'О позднем выезде' : 'About late check-out'}
+                            aria-label={isRu ? 'О позднем выезде' : isTh ? 'เกี่ยวกับการเช็คเอาต์ช้า' : 'About late check-out'}
                           >
                             <Info className="w-3.5 h-3.5" />
                           </button>
@@ -159,6 +163,8 @@ export function CheckInDetails({
                         <PopoverContent className="w-[min(100vw-2rem,280px)] text-xs" align="start">
                           {isRu
                             ? 'Суммы и штрафы — в разделе «Стоимость» или в правилах дома.'
+                            : isTh
+                            ? 'ค่าธรรมเนียมและค่าปรับระบุไว้ในส่วน «ราคา» หรือกฎของที่พัก'
                             : 'Fees are listed under Pricing or house rules.'}
                         </PopoverContent>
                       </Popover>
@@ -173,10 +179,10 @@ export function CheckInDetails({
               <div className="flex gap-2 p-3 rounded-none bg-card border border-border/50 min-h-[4.5rem]">
                 <Key className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Доступ / ключи' : 'Access'}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">{isRu ? 'Доступ / ключи' : isTh ? 'การเข้าถึง / กุญแจ' : 'Access'}</p>
                   <p className="text-sm font-medium leading-snug break-words">
                     {keyHandoverLabels[keyHandover]
-                      ? `${keyHandoverLabels[keyHandover].icon} ${isRu ? keyHandoverLabels[keyHandover].ru : keyHandoverLabels[keyHandover].en}`
+                      ? `${keyHandoverLabels[keyHandover].icon} ${isRu ? keyHandoverLabels[keyHandover].ru : isTh ? keyHandoverLabels[keyHandover].th : keyHandoverLabels[keyHandover].en}`
                       : keyHandover}
                   </p>
                 </div>
@@ -185,6 +191,8 @@ export function CheckInDetails({
               <div className="p-3 rounded-none border border-dashed border-border/60 text-xs text-muted-foreground min-h-[4.5rem] flex items-center">
                 {isRu
                   ? 'Способ передачи ключей уточните у менеджера после бронирования.'
+                  : isTh
+                  ? 'รายละเอียดการรับกุญแจจะยืนยันกับผู้จัดการหลังการจอง'
                   : 'Key handover details are confirmed with the manager after booking.'}
               </div>
             )}
@@ -195,17 +203,19 @@ export function CheckInDetails({
           <div className="flex items-start gap-2 rounded-none bg-warning/5 border border-warning/15 px-3 py-2">
             <Info className="w-4 h-4 text-warning shrink-0 mt-0.5" />
             <div className="min-w-0 text-sm">
-              <p className="font-medium text-foreground">{isRu ? 'Залог / депозит' : 'Security deposit'}</p>
+              <p className="font-medium text-foreground">{isRu ? 'Залог / депозит' : isTh ? 'เงินประกัน' : 'Security deposit'}</p>
               <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
                 {isRu
                   ? 'Сумма и условия возврата указаны в разделе «Стоимость» — не дублируем цифры здесь.'
+                  : isTh
+                  ? 'จำนวนเงินและเงื่อนไขการคืนเงินระบุไว้ในส่วน «ราคา» — เราไม่ทำซ้ำตัวเลขที่นี่'
                   : 'Amount and refund terms are in the Pricing section — we do not repeat them here.'}
               </p>
               <a
                 href="#property-pricing"
                 className="inline-flex mt-1 text-xs font-medium text-primary hover:underline"
               >
-                {isRu ? 'Перейти к разделу «Стоимость»' : 'Go to Pricing'}
+                {isRu ? 'Перейти к разделу «Стоимость»' : isTh ? 'ไปที่ส่วนราคา' : 'Go to Pricing'}
               </a>
             </div>
           </div>
@@ -214,7 +224,7 @@ export function CheckInDetails({
         {instructionText && (
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              {isRu ? 'Инструкции' : 'Instructions'}
+              {isRu ? 'Инструкции' : isTh ? 'คำแนะนำ' : 'Instructions'}
             </p>
             <p
               className={cn(
@@ -234,10 +244,14 @@ export function CheckInDetails({
                 {instructionsExpanded
                   ? isRu
                     ? 'Свернуть'
-                    : 'Show less'
+                    : isTh
+                      ? 'แสดงน้อยลง'
+                      : 'Show less'
                   : isRu
                     ? 'Полные инструкции'
-                    : 'Full instructions'}
+                    : isTh
+                      ? 'คำแนะนำทั้งหมด'
+                      : 'Full instructions'}
               </button>
             )}
           </div>
@@ -248,7 +262,7 @@ export function CheckInDetails({
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <Car className="w-5 h-5 text-primary shrink-0" />
-                <span className="font-medium text-sm">{isRu ? 'Трансфер из аэропорта' : 'Airport transfer'}</span>
+                <span className="font-medium text-sm">{isRu ? 'Трансфер из аэропорта' : isTh ? 'รถรับส่งสนามบิน' : 'Airport transfer'}</span>
               </div>
               {transfer.airportPrice != null && transfer.airportPrice > 0 && (
                 <PriceDisplay price={transfer.airportPrice} sourceCurrency={currency} size="sm" />
@@ -264,7 +278,7 @@ export function CheckInDetails({
 
         {manager && (manager.name || manager.phone) && (
           <div className="p-3 rounded-none bg-card border border-border/50">
-            <p className="text-sm font-medium mb-2">{isRu ? 'Менеджер' : 'Property manager'}</p>
+            <p className="text-sm font-medium mb-2">{isRu ? 'Менеджер' : isTh ? 'ผู้จัดการที่พัก' : 'Property manager'}</p>
             {manager.name && <p className="text-sm">{manager.name}</p>}
             <div className="flex flex-wrap items-center gap-3 mt-2">
               {manager.phone && (

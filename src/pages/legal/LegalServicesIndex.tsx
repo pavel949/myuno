@@ -36,6 +36,7 @@ export default function LegalServicesIndex() {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [filterValues] = useState<FilterValues>({});
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const filteredProviders = useMemo(() => {
     return legalServices.filter((provider) => {
@@ -82,7 +83,7 @@ export default function LegalServicesIndex() {
       onCategoryChange={setSelectedCategory}
       searchValue={searchQuery}
       onSearchChange={setSearchQuery}
-      searchPlaceholder={isRu ? 'Поиск компаний…' : 'Search providers…'}
+      searchPlaceholder={isRu ? 'Поиск компаний…' : isTh ? 'ค้นหาผู้ให้บริการ…' : 'Search providers…'}
       showHero={false}
     >
 
@@ -121,7 +122,7 @@ export default function LegalServicesIndex() {
               ) : (
                 <>
                   <h2 className="text-lg font-semibold">
-                    {isRu ? 'Юридические компании' : 'Legal Companies'}
+                    {isRu ? 'Юридические компании' : isTh ? 'บริษัทกฎหมาย' : 'Legal Companies'}
                   </h2>
                   <div className="space-y-4">
                     {filteredProviders.map((provider) => (
@@ -133,7 +134,7 @@ export default function LegalServicesIndex() {
                         rating={provider.rating}
                         reviewCount={provider.review_count}
                         price={provider.price_consultation ?? undefined}
-                        priceUnit={isRu ? '/консультация' : '/consultation'}
+                        priceUnit={isRu ? '/консультация' : isTh ? '/การปรึกษา' : '/consultation'}
                         currency={currencyInfo.symbol}
                         isVerified={provider.is_verified}
                         tags={provider.specializations?.slice(0, 2) || []}

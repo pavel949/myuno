@@ -15,20 +15,21 @@ export interface CategoryItem {
   icon: React.ComponentType<{ className?: string }>;
   labelEn: string;
   labelRu: string;
+  labelTh: string;
 }
 
 export const PROPERTY_CATEGORIES: CategoryItem[] = [
-  { id: 'beachfront', icon: Waves, labelEn: 'Beach', labelRu: 'Пляж' },
-  { id: 'walk_to_beach', icon: Footprints, labelEn: 'Walk', labelRu: 'Пешком' },
-  { id: 'sea_view', icon: Eye, labelEn: 'Sea', labelRu: 'Море' },
-  { id: 'private_pool', icon: Lock, labelEn: 'Priv pool', labelRu: 'Свой пул' },
-  { id: 'pool', icon: Droplets, labelEn: 'Pool', labelRu: 'Пул' },
-  { id: 'washer', icon: WashingMachine, labelEn: 'Washer', labelRu: 'Стирка' },
-  { id: 'pet_friendly', icon: PawPrint, labelEn: 'Pets', labelRu: 'Питомцы' },
-  { id: 'kid_friendly', icon: Baby, labelEn: 'Kids', labelRu: 'Дети' },
-  { id: 'parking', icon: Car, labelEn: 'Parking', labelRu: 'Авто' },
-  { id: 'wifi', icon: Wifi, labelEn: 'WiFi', labelRu: 'WiFi' },
-  { id: 'luxury', icon: Sparkles, labelEn: 'Luxury', labelRu: 'Люкс' },
+  { id: 'beachfront', icon: Waves, labelEn: 'Beach', labelRu: 'Пляж', labelTh: 'หาด' },
+  { id: 'walk_to_beach', icon: Footprints, labelEn: 'Walk', labelRu: 'Пешком', labelTh: 'เดินถึง' },
+  { id: 'sea_view', icon: Eye, labelEn: 'Sea', labelRu: 'Море', labelTh: 'วิวทะเล' },
+  { id: 'private_pool', icon: Lock, labelEn: 'Priv pool', labelRu: 'Свой пул', labelTh: 'สระส่วนตัว' },
+  { id: 'pool', icon: Droplets, labelEn: 'Pool', labelRu: 'Пул', labelTh: 'สระว่ายน้ำ' },
+  { id: 'washer', icon: WashingMachine, labelEn: 'Washer', labelRu: 'Стирка', labelTh: 'เครื่องซักผ้า' },
+  { id: 'pet_friendly', icon: PawPrint, labelEn: 'Pets', labelRu: 'Питомцы', labelTh: 'สัตว์เลี้ยง' },
+  { id: 'kid_friendly', icon: Baby, labelEn: 'Kids', labelRu: 'Дети', labelTh: 'เด็ก' },
+  { id: 'parking', icon: Car, labelEn: 'Parking', labelRu: 'Авто', labelTh: 'ที่จอดรถ' },
+  { id: 'wifi', icon: Wifi, labelEn: 'WiFi', labelRu: 'WiFi', labelTh: 'WiFi' },
+  { id: 'luxury', icon: Sparkles, labelEn: 'Luxury', labelRu: 'Люкс', labelTh: 'หรูหรา' },
 ];
 
 interface AirbnbCategoryRibbonProps {
@@ -44,6 +45,7 @@ export const AirbnbCategoryRibbon = memo(function AirbnbCategoryRibbon({
 }: AirbnbCategoryRibbonProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const toggle = (id: string) => {
     onChange(
@@ -72,7 +74,7 @@ export const AirbnbCategoryRibbon = memo(function AirbnbCategoryRibbon({
           >
             <Icon className={cn("w-4 h-4", isActive && "text-foreground")} />
             <span className="text-[9px] font-medium whitespace-nowrap leading-none">
-              {isRu ? cat.labelRu : cat.labelEn}
+              {isRu ? cat.labelRu : isTh ? cat.labelTh : cat.labelEn}
             </span>
           </button>
         );

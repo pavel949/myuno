@@ -4,6 +4,7 @@
  */
 import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { Language } from '@/i18n';
 import {
   useMySignatureRequests,
   useSignRequest,
@@ -28,6 +29,7 @@ type Item = SignatureSigner & { signature_requests: SignatureRequest };
 export default function OwnerSignaturesInbox() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: items = [], isLoading } = useMySignatureRequests();
   const sign = useSignRequest();
   const decline = useDeclineSignRequest();
@@ -73,22 +75,22 @@ export default function OwnerSignaturesInbox() {
         <div className="flex items-center gap-2">
           <FileSignature className="w-5 h-5 text-primary" />
           <h1 className="text-xl font-bold">
-            {isRu ? 'Документы на подпись' : 'Documents to Sign'}
+            {isRu ? 'Документы на подпись' : isTh ? 'เอกสารที่ต้องลงนาม' : 'Documents to Sign'}
           </h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          {isRu ? 'Договоры и соглашения от управляющей компании.' : 'Contracts and agreements from your management company.'}
+          {isRu ? 'Договоры и соглашения от управляющей компании.' : isTh ? 'สัญญาและข้อตกลงจากบริษัทบริหารจัดการของคุณ' : 'Contracts and agreements from your management company.'}
         </p>
       </div>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {isRu ? 'Ожидают подписи' : 'Pending'} ({pending.length})
+          {isRu ? 'Ожидают подписи' : isTh ? 'รอการลงนาม' : 'Pending'} ({pending.length})
         </h2>
         {pending.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center text-sm text-muted-foreground">
-              {isRu ? 'Нет документов на подпись' : 'No documents awaiting signature'}
+              {isRu ? 'Нет документов на подпись' : isTh ? 'ไม่มีเอกสารที่รอการลงนาม' : 'No documents awaiting signature'}
             </CardContent>
           </Card>
         ) : (
@@ -96,7 +98,7 @@ export default function OwnerSignaturesInbox() {
             <SigCard
               key={item.id}
               item={item}
-              isRu={isRu}
+              language={language}
               onSign={() => { setActive(item); setMode('sign'); }}
               onDecline={() => { setActive(item); setMode('decline'); }}
             />
@@ -107,9 +109,9 @@ export default function OwnerSignaturesInbox() {
       {past.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            {isRu ? 'История' : 'History'}
+            {isRu ? 'История' : isTh ? 'ประวัติ' : 'History'}
           </h2>
-          {past.map(item => <SigCard key={item.id} item={item} isRu={isRu} readOnly />)}
+          {past.map(item => <SigCard key={item.id} item={item} language={language} readOnly />)}
         </section>
       )}
 
@@ -118,8 +120,8 @@ export default function OwnerSignaturesInbox() {
           <SheetHeader>
             <SheetTitle>
               {mode === 'sign'
-                ? (isRu ? 'Подписать документ' : 'Sign Document')
-                : (isRu ? 'Отказаться от подписи' : 'Decline Document')}
+                ? (isRu ? 'Подписать документ' : isTh ? 'ลงนามเอกสาร' : 'Sign Document')
+                : (isRu ? 'Отказаться от подписи' : isTh ? 'ปฏิเสธการลงนาม' : 'Decline Document')}
             </SheetTitle>
           </SheetHeader>
 
@@ -135,7 +137,7 @@ export default function OwnerSignaturesInbox() {
               <Button variant="outline" className="w-full" asChild>
                 <a href={active.signature_requests.document_url} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  {isRu ? 'Открыть документ' : 'Open Document'}
+                  {isRu ? 'Открыть документ' : isTh ? 'เปิดเอกสาร' : 'Open Document'}
                 </a>
               </Button>
 
@@ -143,20 +145,22 @@ export default function OwnerSignaturesInbox() {
                 <>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
-                      {isRu ? 'Подпись' : 'Signature'}
+                      {isRu ? 'Подпись' : isTh ? 'ลายเซ็น' : 'Signature'}
                     </label>
                     <SignaturePad onChange={setSignatureUrl} />
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {isRu
                       ? 'Подписывая документ, вы соглашаетесь с его содержанием. Подпись сохраняется с меткой времени и IP.'
+                      : isTh
+                      ? 'การลงนามถือว่าคุณยอมรับเงื่อนไขของเอกสาร ลายเซ็นจะถูกบันทึกพร้อมเวลาและที่อยู่ IP'
                       : 'By signing, you agree to the document terms. Signature is stored with timestamp and IP.'}
                   </p>
                   <Button className="w-full" disabled={!signatureUrl || sign.isPending} onClick={handleSign}>
                     <PenLine className="w-4 h-4 mr-2" />
                     {sign.isPending
-                      ? (isRu ? 'Сохранение...' : 'Saving...')
-                      : (isRu ? 'Подписать документ' : 'Sign Document')}
+                      ? (isRu ? 'Сохранение...' : isTh ? 'กำลังบันทึก...' : 'Saving...')
+                      : (isRu ? 'Подписать документ' : isTh ? 'ลงนามเอกสาร' : 'Sign Document')}
                   </Button>
                 </>
               )}
@@ -165,12 +169,12 @@ export default function OwnerSignaturesInbox() {
                 <>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
-                      {isRu ? 'Причина отказа' : 'Reason'}
+                      {isRu ? 'Причина отказа' : isTh ? 'เหตุผล' : 'Reason'}
                     </label>
                     <Textarea
                       value={reason}
                       onChange={e => setReason(e.target.value)}
-                      placeholder={isRu ? 'Объясните причину' : 'Explain'}
+                      placeholder={isRu ? 'Объясните причину' : isTh ? 'อธิบายเหตุผล' : 'Explain'}
                       rows={3}
                     />
                   </div>
@@ -181,7 +185,7 @@ export default function OwnerSignaturesInbox() {
                     onClick={handleDecline}
                   >
                     <XCircle className="w-4 h-4 mr-2" />
-                    {isRu ? 'Отказаться' : 'Decline'}
+                    {isRu ? 'Отказаться' : isTh ? 'ปฏิเสธ' : 'Decline'}
                   </Button>
                 </>
               )}
@@ -193,17 +197,19 @@ export default function OwnerSignaturesInbox() {
   );
 }
 
-function SigCard({ item, isRu, onSign, onDecline, readOnly }: {
+function SigCard({ item, language, onSign, onDecline, readOnly }: {
   item: Item;
-  isRu: boolean;
+  language: Language;
   onSign?: () => void;
   onDecline?: () => void;
   readOnly?: boolean;
 }) {
+  const isRu = language === 'ru';
+  const isTh = language === 'th';
   const cfg: Record<string, { label: string; cls: string; Icon: typeof Clock }> = {
-    pending: { label: isRu ? 'Ожидает' : 'Pending', cls: 'bg-warning/15 text-warning', Icon: Clock },
-    signed: { label: isRu ? 'Подписано' : 'Signed', cls: 'bg-success/15 text-success', Icon: CheckCircle2 },
-    declined: { label: isRu ? 'Отклонено' : 'Declined', cls: 'bg-destructive/15 text-destructive', Icon: XCircle },
+    pending: { label: isRu ? 'Ожидает' : isTh ? 'รอดำเนินการ' : 'Pending', cls: 'bg-warning/15 text-warning', Icon: Clock },
+    signed: { label: isRu ? 'Подписано' : isTh ? 'ลงนามแล้ว' : 'Signed', cls: 'bg-success/15 text-success', Icon: CheckCircle2 },
+    declined: { label: isRu ? 'Отклонено' : isTh ? 'ปฏิเสธแล้ว' : 'Declined', cls: 'bg-destructive/15 text-destructive', Icon: XCircle },
   };
   const c = cfg[item.status];
   const Icon = c.Icon;
@@ -224,7 +230,7 @@ function SigCard({ item, isRu, onSign, onDecline, readOnly }: {
             )}
             {item.signed_at && (
               <p className="text-xs text-muted-foreground mt-1">
-                {isRu ? 'Подписано ' : 'Signed '}
+                {isRu ? 'Подписано ' : isTh ? 'ลงนามเมื่อ ' : 'Signed '}
                 {format(new Date(item.signed_at), 'd MMM HH:mm', { locale: isRu ? ru : undefined })}
               </p>
             )}
@@ -237,10 +243,10 @@ function SigCard({ item, isRu, onSign, onDecline, readOnly }: {
           <div className="flex gap-2">
             <Button size="sm" className="flex-1" onClick={onSign}>
               <PenLine className="w-3.5 h-3.5 mr-1.5" />
-              {isRu ? 'Подписать' : 'Sign'}
+              {isRu ? 'Подписать' : isTh ? 'ลงนาม' : 'Sign'}
             </Button>
             <Button size="sm" variant="outline" onClick={onDecline}>
-              {isRu ? 'Отказаться' : 'Decline'}
+              {isRu ? 'Отказаться' : isTh ? 'ปฏิเสธ' : 'Decline'}
             </Button>
           </div>
         )}

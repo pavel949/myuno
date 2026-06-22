@@ -24,7 +24,8 @@ export default function TaxStructuringLanding() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+  const isTh = language === 'th';
+  const t = <T,>(p: { ru: T; en: T; th?: T }): T => (isRu ? p.ru : isTh && p.th !== undefined ? p.th : p.en);
 
   return (
     <LandingShell
@@ -116,7 +117,7 @@ export default function TaxStructuringLanding() {
     >
       <div className="rounded-none border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
-          {t({ ru: 'Когда это нужно', en: 'When you need this' })}
+          {t({ ru: 'Когда это нужно', en: 'When you need this', th: 'เมื่อไรที่คุณต้องการบริการนี้' })}
         </h2>
         <LandingChecklist
           items={[
@@ -130,11 +131,11 @@ export default function TaxStructuringLanding() {
         />
         <div className="mt-6 flex flex-wrap gap-3">
           <Button onClick={() => navigate(APP_ROUTES.LEGAL_BOOKING('tax-consultation'))}>
-            {t({ ru: 'Забронировать консультацию ฿2,000', en: 'Book consultation ฿2,000' })}
+            {t({ ru: 'Забронировать консультацию ฿2,000', en: 'Book consultation ฿2,000', th: 'จองการปรึกษา ฿2,000' })}
             <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
           <Button variant="outline" onClick={() => navigate(APP_ROUTES.TAX_NAV)}>
-            {t({ ru: 'Пройти tax quiz', en: 'Take the tax quiz' })}
+            {t({ ru: 'Пройти tax quiz', en: 'Take the tax quiz', th: 'ทำแบบทดสอบภาษี' })}
           </Button>
         </div>
 

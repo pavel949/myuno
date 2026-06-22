@@ -32,6 +32,7 @@ export function ContactAdminButton({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const handleContact = () => {
     const {
@@ -92,7 +93,7 @@ I would like to discuss payment options for the deposit.`;
       onClick={handleContact}
     >
       <MessageCircle className="w-4 h-4 mr-2" />
-      {isRu ? 'Обсудить с myUNO' : 'Discuss with myUNO'}
+      {isRu ? 'Обсудить с myUNO' : isTh ? 'ปรึกษากับ myUNO' : 'Discuss with myUNO'}
     </Button>
   );
 }
