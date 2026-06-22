@@ -29,6 +29,7 @@ export default function CommercialDetail() {
   const { formatPrice } = useCurrency();
   const { user } = useAuth();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: property, isLoading, error } = useCommercialProperty(id);
   const isHotel = isHotelType(property?.property_type);
@@ -52,7 +53,7 @@ export default function CommercialDetail() {
         <div className="px-4 pt-3"><BackButton /></div>
         <div className="px-4 py-12 text-center">
           <p className="text-sm text-muted-foreground">
-            {isRu ? 'Объект не найден' : 'Listing not found'}
+            {isRu ? 'Объект не найден' : isTh ? 'ไม่พบรายการ' : 'Listing not found'}
           </p>
         </div>
       </div>
@@ -68,7 +69,7 @@ export default function CommercialDetail() {
 
   const priceMain =
     isRent && property.monthly_rent_thb
-      ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : 'mo'}`
+      ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : isTh ? 'เดือน' : 'mo'}`
       : property.sale_price
       ? formatPrice(property.sale_price)
       : property.price
@@ -90,13 +91,13 @@ export default function CommercialDetail() {
           <div className="absolute top-3 left-3 flex gap-1.5">
             <Badge className="bg-background/95 text-foreground">{typeLabel}</Badge>
             <Badge className={isRent ? 'bg-primary/95 text-white' : 'bg-accent/95 text-white'}>
-              {isRent ? (isRu ? 'Аренда' : 'Rent') : isRu ? 'Продажа' : 'Sale'}
+              {isRent ? (isRu ? 'Аренда' : isTh ? 'เช่า' : 'Rent') : isRu ? 'Продажа' : isTh ? 'ขาย' : 'Sale'}
             </Badge>
           </div>
           {property.is_verified && (
             <Badge className="absolute top-3 right-3 bg-success/95 text-white gap-1">
               <BadgeCheck className="w-3 h-3" />
-              {isRu ? 'Проверено' : 'Verified'}
+              {isRu ? 'Проверено' : isTh ? 'ผ่านการตรวจสอบ' : 'Verified'}
             </Badge>
           )}
         </div>
@@ -113,7 +114,7 @@ export default function CommercialDetail() {
           {/* Key metrics strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {priceMain && (
-              <Metric label={isRent ? (isRu ? 'Аренда' : 'Rent') : isRu ? 'Цена' : 'Price'} value={priceMain} />
+              <Metric label={isRent ? (isRu ? 'Аренда' : isTh ? 'เช่า' : 'Rent') : isRu ? 'Цена' : isTh ? 'ราคา' : 'Price'} value={priceMain} />
             )}
             {property.cap_rate_pct != null && (
               <Metric label="Cap rate" value={`${property.cap_rate_pct.toFixed(1)}%`} />
@@ -122,7 +123,7 @@ export default function CommercialDetail() {
               <Metric label="NOI / yr" value={formatPrice(property.noi_annual_thb)} />
             )}
             {property.floor_area_sqm != null && (
-              <Metric label={isRu ? 'Площадь' : 'Area'} value={`${property.floor_area_sqm} m²`} />
+              <Metric label={isRu ? 'Площадь' : isTh ? 'พื้นที่' : 'Area'} value={`${property.floor_area_sqm} m²`} />
             )}
           </div>
 
@@ -131,7 +132,7 @@ export default function CommercialDetail() {
             <section className="rounded-none border border-accent/40 bg-gradient-to-br from-accent/5 to-transparent p-4 space-y-4">
               <div className="flex items-center gap-2">
                 <Hotel className="w-4 h-4 text-accent" />
-                <h2 className="text-base font-semibold">{isRu ? 'Параметры отеля' : 'Hotel performance'}</h2>
+                <h2 className="text-base font-semibold">{isRu ? 'Параметры отеля' : isTh ? 'ผลการดำเนินงานโรงแรม' : 'Hotel performance'}</h2>
                 {property.hotel_star_rating != null && (
                   <div className="flex items-center gap-0.5 ml-auto">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -150,16 +151,16 @@ export default function CommercialDetail() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {property.hotel_keys != null && (
-                  <Metric label={isRu ? 'Номеров' : 'Keys'} value={String(property.hotel_keys)} />
+                  <Metric label={isRu ? 'Номеров' : isTh ? 'จำนวนห้อง' : 'Keys'} value={String(property.hotel_keys)} />
                 )}
                 {property.hotel_brand && (
-                  <Metric label={isRu ? 'Бренд' : 'Brand'} value={property.hotel_brand} />
+                  <Metric label={isRu ? 'Бренд' : isTh ? 'แบรนด์' : 'Brand'} value={property.hotel_brand} />
                 )}
                 {property.hotel_occupancy_pct != null && (
-                  <Metric label={isRu ? 'Загрузка' : 'Occupancy'} value={`${property.hotel_occupancy_pct.toFixed(0)}%`} />
+                  <Metric label={isRu ? 'Загрузка' : isTh ? 'อัตราการเข้าพัก' : 'Occupancy'} value={`${property.hotel_occupancy_pct.toFixed(0)}%`} />
                 )}
                 {property.hotel_year_renovated != null && (
-                  <Metric label={isRu ? 'Реновация' : 'Renovated'} value={String(property.hotel_year_renovated)} />
+                  <Metric label={isRu ? 'Реновация' : isTh ? 'ปรับปรุงเมื่อ' : 'Renovated'} value={String(property.hotel_year_renovated)} />
                 )}
               </div>
 
@@ -167,7 +168,7 @@ export default function CommercialDetail() {
                 <div className="pt-3 border-t border-accent/40">
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
                     <TrendingUp className="w-3 h-3" />
-                    {isRu ? 'Финансовые метрики' : 'Financial metrics'}
+                    {isRu ? 'Финансовые метрики' : isTh ? 'ตัวชี้วัดทางการเงิน' : 'Financial metrics'}
                     {!user && <Lock className="w-3 h-3 ml-1" />}
                   </p>
                   {user ? (
@@ -184,7 +185,7 @@ export default function CommercialDetail() {
                     </div>
                   ) : (
                     <div className="rounded-none border border-dashed border-accent/40 bg-background/50 p-3 text-xs text-muted-foreground text-center">
-                      {isRu ? 'Войдите, чтобы увидеть ADR, RevPAR и GOP%' : 'Sign in to view ADR, RevPAR and GOP%'}
+                      {isRu ? 'Войдите, чтобы увидеть ADR, RevPAR и GOP%' : isTh ? 'เข้าสู่ระบบเพื่อดู ADR, RevPAR และ GOP%' : 'Sign in to view ADR, RevPAR and GOP%'}
                     </div>
                   )}
                 </div>
@@ -223,26 +224,26 @@ export default function CommercialDetail() {
           {/* Specs */}
           <section>
             <h2 className="text-base font-semibold mb-2">
-              {isRu ? 'Характеристики' : 'Specs'}
+              {isRu ? 'Характеристики' : isTh ? 'ข้อมูลจำเพาะ' : 'Specs'}
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
               {property.electricity_load_kw != null && (
-                <SpecRow icon={<Zap className="w-3.5 h-3.5" />} label={isRu ? 'Электричество' : 'Electricity'} value={`${property.electricity_load_kw} kW`} />
+                <SpecRow icon={<Zap className="w-3.5 h-3.5" />} label={isRu ? 'Электричество' : isTh ? 'ไฟฟ้า' : 'Electricity'} value={`${property.electricity_load_kw} kW`} />
               )}
               {property.parking_type && (
-                <SpecRow icon={<Car className="w-3.5 h-3.5" />} label={isRu ? 'Парковка' : 'Parking'} value={property.parking_type} />
+                <SpecRow icon={<Car className="w-3.5 h-3.5" />} label={isRu ? 'Парковка' : isTh ? 'ที่จอดรถ' : 'Parking'} value={property.parking_type} />
               )}
               {property.lease_remaining_months != null && (
-                <SpecRow icon={<Calendar className="w-3.5 h-3.5" />} label={isRu ? 'Аренда осталось' : 'Lease remaining'} value={`${Math.round(property.lease_remaining_months / 12)} ${isRu ? 'лет' : 'yrs'}`} />
+                <SpecRow icon={<Calendar className="w-3.5 h-3.5" />} label={isRu ? 'Аренда осталось' : isTh ? 'สัญญาเช่าคงเหลือ' : 'Lease remaining'} value={`${Math.round(property.lease_remaining_months / 12)} ${isRu ? 'лет' : isTh ? 'ปี' : 'yrs'}`} />
               )}
               {property.floor != null && (
-                <SpecRow icon={<Building2 className="w-3.5 h-3.5" />} label={isRu ? 'Этаж' : 'Floor'} value={String(property.floor)} />
+                <SpecRow icon={<Building2 className="w-3.5 h-3.5" />} label={isRu ? 'Этаж' : isTh ? 'ชั้น' : 'Floor'} value={String(property.floor)} />
               )}
               {titleDeed && (
-                <SpecRow icon={<ShieldCheck className="w-3.5 h-3.5" />} label={isRu ? 'Документ' : 'Title deed'} value={titleDeed} />
+                <SpecRow icon={<ShieldCheck className="w-3.5 h-3.5" />} label={isRu ? 'Документ' : isTh ? 'โฉนด' : 'Title deed'} value={titleDeed} />
               )}
               {property.zoning && (
-                <SpecRow icon={<ShieldCheck className="w-3.5 h-3.5" />} label={isRu ? 'Зонирование' : 'Zoning'} value={property.zoning} />
+                <SpecRow icon={<ShieldCheck className="w-3.5 h-3.5" />} label={isRu ? 'Зонирование' : isTh ? 'การจัดโซน' : 'Zoning'} value={property.zoning} />
               )}
             </div>
           </section>
@@ -251,7 +252,7 @@ export default function CommercialDetail() {
           {property.permitted_uses && property.permitted_uses.length > 0 && (
             <section>
               <h2 className="text-base font-semibold mb-2">
-                {isRu ? 'Разрешённое использование' : 'Permitted uses'}
+                {isRu ? 'Разрешённое использование' : isTh ? 'การใช้งานที่อนุญาต' : 'Permitted uses'}
               </h2>
               <div className="flex flex-wrap gap-2">
                 {property.permitted_uses.map((use) => (
@@ -266,12 +267,12 @@ export default function CommercialDetail() {
             <Button className="flex-1" asChild>
               <a href={`mailto:capital@myuno.app?subject=${encodeURIComponent(`Inquiry: ${title}`)}`}>
                 <Mail className="w-4 h-4 mr-1.5" />
-                {isRu ? 'Запросить просмотр' : 'Request viewing'}
+                {isRu ? 'Запросить просмотр' : isTh ? 'ขอเข้าชม' : 'Request viewing'}
               </a>
             </Button>
             <Button variant="outline" className="flex-1" asChild>
               <a href={`mailto:capital@myuno.app?subject=${encodeURIComponent(`Financials: ${title}`)}`}>
-                {isRu ? 'Финансовые данные' : 'Request financials'}
+                {isRu ? 'Финансовые данные' : isTh ? 'ขอข้อมูลการเงิน' : 'Request financials'}
               </a>
             </Button>
           </div>

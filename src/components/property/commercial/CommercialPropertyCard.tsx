@@ -25,6 +25,7 @@ export function CommercialPropertyCard({ property, className }: Props) {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const isRent = property.listing_type === 'rent';
   const title = (isRu ? property.title_ru : property.title_en) || property.title_en;
@@ -34,7 +35,7 @@ export function CommercialPropertyCard({ property, className }: Props) {
 
   const priceMain =
     isRent && property.monthly_rent_thb
-      ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : 'mo'}`
+      ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : isTh ? 'เดือน' : 'mo'}`
       : property.sale_price
       ? formatPrice(property.sale_price)
       : property.price
@@ -76,14 +77,14 @@ export function CommercialPropertyCard({ property, className }: Props) {
                 : 'bg-accent/95 text-white hover:bg-accent',
             )}
           >
-            {isRent ? (isRu ? 'Аренда' : 'Rent') : isRu ? 'Продажа' : 'Sale'}
+            {isRent ? (isRu ? 'Аренда' : isTh ? 'เช่า' : 'Rent') : isRu ? 'Продажа' : isTh ? 'ขาย' : 'Sale'}
           </Badge>
         </div>
         {/* Top-right: verified */}
         {property.is_verified && (
           <Badge className="absolute top-3 right-3 bg-success/95 text-white hover:bg-success gap-1">
             <BadgeCheck className="w-3 h-3" />
-            {isRu ? 'Проверено' : 'Verified'}
+            {isRu ? 'Проверено' : isTh ? 'ผ่านการตรวจสอบ' : 'Verified'}
           </Badge>
         )}
       </div>
@@ -103,7 +104,7 @@ export function CommercialPropertyCard({ property, className }: Props) {
             <p className="text-base font-bold text-foreground">{priceMain}</p>
             {property.cap_rate_pct != null && (
               <p className="text-xs font-medium text-success dark:text-success">
-                {isRu ? 'Cap rate' : 'Cap rate'} {property.cap_rate_pct.toFixed(1)}%
+                {'Cap rate'} {property.cap_rate_pct.toFixed(1)}%
               </p>
             )}
           </div>
@@ -111,7 +112,7 @@ export function CommercialPropertyCard({ property, className }: Props) {
 
         {property.noi_annual_thb != null && (
           <p className="text-xs text-muted-foreground">
-            NOI {formatPrice(property.noi_annual_thb)} / {isRu ? 'год' : 'yr'}
+            NOI {formatPrice(property.noi_annual_thb)} / {isRu ? 'год' : isTh ? 'ปี' : 'yr'}
           </p>
         )}
 
@@ -132,13 +133,13 @@ export function CommercialPropertyCard({ property, className }: Props) {
           {property.parking_type && property.parking_type !== 'none' && (
             <span className="inline-flex items-center gap-1">
               <Car className="w-3 h-3" />
-              {isRu ? 'Парковка' : 'Parking'}
+              {isRu ? 'Парковка' : isTh ? 'ที่จอดรถ' : 'Parking'}
             </span>
           )}
           {property.lease_remaining_months != null && (
             <span className="inline-flex items-center gap-1">
               <Calendar className="w-3 h-3" />
-              {Math.round(property.lease_remaining_months / 12)} {isRu ? 'лет ост.' : 'yrs left'}
+              {Math.round(property.lease_remaining_months / 12)} {isRu ? 'лет ост.' : isTh ? 'ปีคงเหลือ' : 'yrs left'}
             </span>
           )}
         </div>

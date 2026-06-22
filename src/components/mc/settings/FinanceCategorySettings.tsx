@@ -21,12 +21,12 @@ import type { CategorySetting } from '@/hooks/useCompanyCategorySettings';
 
 // ─── Category Row (memoized) ─────────────────────────────────────────────
 const CategoryRow = memo(function CategoryRow({
-  code, labelEn, labelRu, isEnabled, type, isRu, isPending,
+  code, labelEn, labelRu, isEnabled, type, isRu, isTh, isPending,
   onToggle, overrides, onOverride,
 }: {
   code: string; labelEn: string; labelRu: string;
   isEnabled: boolean; type: 'expense' | 'income';
-  isRu: boolean; isPending: boolean;
+  isRu: boolean; isTh: boolean; isPending: boolean;
   onToggle: () => void;
   overrides: CategorySetting | undefined;
   onOverride: (code: string, field: string, value: unknown) => void;
@@ -145,7 +145,7 @@ const CategoryRow = memo(function CategoryRow({
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Тип затрат' : 'Cost type'}</Label>
+                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Тип затрат' : isTh ? 'ประเภทต้นทุน' : 'Cost type'}</Label>
                 <Select value={effectiveClass} onValueChange={v => onOverride(code, 'category_class', v)}>
                   <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -157,7 +157,7 @@ const CategoryRow = memo(function CategoryRow({
               </div>
 
               <div>
-                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Группа' : 'Group'}</Label>
+                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Группа' : isTh ? 'กลุ่ม' : 'Group'}</Label>
                 <Select value={effectiveGroup} onValueChange={v => onOverride(code, 'category_group', v)}>
                   <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -169,7 +169,7 @@ const CategoryRow = memo(function CategoryRow({
               </div>
 
               <div>
-                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Распределение' : 'Allocation'}</Label>
+                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Распределение' : isTh ? 'การปันส่วน' : 'Allocation'}</Label>
                 <Select value={effectiveAlloc} onValueChange={v => onOverride(code, 'allocation_method', v)}>
                   <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -182,11 +182,11 @@ const CategoryRow = memo(function CategoryRow({
 
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[11px] text-muted-foreground">{isRu ? 'Влияет на P&L' : 'Affects P&L'}</Label>
+                  <Label className="text-[11px] text-muted-foreground">{isRu ? 'Влияет на P&L' : isTh ? 'มีผลต่อกำไรขาดทุน' : 'Affects P&L'}</Label>
                   <Switch checked={effectiveProfit} onCheckedChange={v => onOverride(code, 'affects_net_profit', v)} className="scale-75" />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label className="text-[11px] text-muted-foreground">{isRu ? 'Налоговый вычет' : 'Tax deductible'}</Label>
+                  <Label className="text-[11px] text-muted-foreground">{isRu ? 'Налоговый вычет' : isTh ? 'หักภาษีได้' : 'Tax deductible'}</Label>
                   <Switch checked={effectiveTax} onCheckedChange={v => onOverride(code, 'is_tax_deductible', v)} className="scale-75" />
                 </div>
               </div>
@@ -230,12 +230,13 @@ const CustomCategoryRow = memo(function CustomCategoryRow({
 
 // ─── Group header (memoized) ─────────────────────────────────────────────
 const GroupSection = memo(function GroupSection({
-  group, cats, type, isRu, enabledCodes, settingsMap, isPending, onToggle, onBulkToggle, onOverride,
+  group, cats, type, isRu, isTh, enabledCodes, settingsMap, isPending, onToggle, onBulkToggle, onOverride,
 }: {
   group: CategoryGroup;
   cats: { value: string; labelEn: string; labelRu: string }[];
   type: 'expense' | 'income';
   isRu: boolean;
+  isTh: boolean;
   enabledCodes: Set<string> | null;
   settingsMap: Map<string, CategorySetting>;
   isPending: boolean;
@@ -257,11 +258,11 @@ const GroupSection = memo(function GroupSection({
         <div className="flex gap-1">
           <Button variant="ghost" size="sm" className="h-6 text-[10px] px-1.5 text-muted-foreground"
             onClick={() => onBulkToggle(cats.map(c => c.value), true)} disabled={isPending}>
-            <Check className="h-2.5 w-2.5 mr-0.5" />{isRu ? 'Все' : 'All'}
+            <Check className="h-2.5 w-2.5 mr-0.5" />{isRu ? 'Все' : isTh ? 'ทั้งหมด' : 'All'}
           </Button>
           <Button variant="ghost" size="sm" className="h-6 text-[10px] px-1.5 text-muted-foreground"
             onClick={() => onBulkToggle(cats.map(c => c.value), false)} disabled={isPending}>
-            <X className="h-2.5 w-2.5 mr-0.5" />{isRu ? 'Нет' : 'None'}
+            <X className="h-2.5 w-2.5 mr-0.5" />{isRu ? 'Нет' : isTh ? 'ไม่มี' : 'None'}
           </Button>
         </div>
       </div>
@@ -276,6 +277,7 @@ const GroupSection = memo(function GroupSection({
             isEnabled={isEnabled}
             type={type}
             isRu={isRu}
+            isTh={isTh}
             isPending={isPending}
             onToggle={() => onToggle(cat.value, isEnabled)}
             overrides={settingsMap.get(cat.value)}
@@ -291,6 +293,7 @@ const GroupSection = memo(function GroupSection({
 function CategorySection({ type }: { type: 'expense' | 'income' }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const standardCategories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
   const { enabledCodes, hasSettings, isLoading, settings } = useCompanyCategorySettings(type);
   const toggleMutation = useToggleCategorySetting();
@@ -401,7 +404,7 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
   }, [standardCategories, enabledCodes, type]);
 
   if (isLoading) {
-    return <div className="flex items-center gap-2 py-4 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> {isRu ? 'Загрузка...' : 'Loading...'}</div>;
+    return <div className="flex items-center gap-2 py-4 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> {isRu ? 'Загрузка...' : isTh ? 'กำลังโหลด...' : 'Loading...'}</div>;
   }
 
   const isMutating = toggleMutation.isPending || bulkToggleMutation.isPending;
@@ -413,14 +416,14 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
             <Settings2 className="h-4 w-4 text-muted-foreground" />
             {type === 'expense'
-              ? (isRu ? 'Статьи расходов' : 'Expense Categories')
-              : (isRu ? 'Статьи доходов' : 'Income Categories')
+              ? (isRu ? 'Статьи расходов' : isTh ? 'หมวดหมู่รายจ่าย' : 'Expense Categories')
+              : (isRu ? 'Статьи доходов' : isTh ? 'หมวดหมู่รายรับ' : 'Income Categories')
             }
           </h3>
           {hasSettings && (
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className="text-xs text-muted-foreground">
-                {isRu ? `${enabledCount} из ${standardCategories.length} активных` : `${enabledCount} of ${standardCategories.length} active`}
+                {isRu ? `${enabledCount} из ${standardCategories.length} активных` : isTh ? `เปิดใช้งาน ${enabledCount} จาก ${standardCategories.length}` : `${enabledCount} of ${standardCategories.length} active`}
               </span>
               <span className="text-muted-foreground/30">•</span>
               {Object.entries(classCount).map(([cls, count]) => (
@@ -433,7 +436,7 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
         </div>
         {!hasSettings && (
           <Button variant="outline" size="sm" onClick={handleInit} disabled={initMutation.isPending}>
-            {initMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : (isRu ? 'Настроить' : 'Configure')}
+            {initMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : (isRu ? 'Настроить' : isTh ? 'ตั้งค่า' : 'Configure')}
           </Button>
         )}
       </div>
@@ -442,6 +445,8 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
         <p className="text-xs text-muted-foreground">
           {isRu
             ? 'Все категории активны по умолчанию. Нажмите "Настроить", чтобы выбрать нужные и настроить классификацию.'
+            : isTh
+            ? 'หมวดหมู่ทั้งหมดเปิดใช้งานตามค่าเริ่มต้น คลิก "ตั้งค่า" เพื่อปรับแต่งการเลือกและการจัดประเภท'
             : 'All categories are active by default. Click "Configure" to customize selection and classification.'}
         </p>
       )}
@@ -455,6 +460,7 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
               cats={groupedCategories.get(group)!}
               type={type}
               isRu={isRu}
+              isTh={isTh}
               enabledCodes={enabledCodes}
               settingsMap={settingsMap}
               isPending={isMutating}
@@ -469,7 +475,7 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
       {customCats.length > 0 && (
         <div className="pt-2 border-t border-border">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
-            {isRu ? 'Кастомные категории' : 'Custom Categories'}
+            {isRu ? 'Кастомные категории' : isTh ? 'หมวดหมู่ที่กำหนดเอง' : 'Custom Categories'}
           </h4>
           <div className="space-y-0.5">
             {customCats.map(cat => (
@@ -486,7 +492,7 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
 
       <Button variant="outline" size="sm" onClick={() => setShowAdd(true)} className="gap-1.5 h-8">
         <Plus className="h-3.5 w-3.5" />
-        {isRu ? 'Добавить свою' : 'Add custom'}
+        {isRu ? 'Добавить свою' : isTh ? 'เพิ่มหมวดหมู่เอง' : 'Add custom'}
       </Button>
 
       {/* Add custom category dialog */}
@@ -496,23 +502,25 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
             <DialogTitle>
               {isRu
                 ? type === 'expense' ? 'Новая статья расхода' : 'Новая статья дохода'
+                : isTh
+                ? type === 'expense' ? 'หมวดหมู่รายจ่ายใหม่' : 'หมวดหมู่รายรับใหม่'
                 : type === 'expense' ? 'New expense category' : 'New income category'}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">{isRu ? 'Название (EN)' : 'Name (EN)'}</Label>
+                <Label className="text-xs">{isRu ? 'Название (EN)' : isTh ? 'ชื่อ (EN)' : 'Name (EN)'}</Label>
                 <Input value={newNameEn} onChange={e => setNewNameEn(e.target.value)} placeholder="e.g. Pool Maintenance" className="h-9 mt-1" />
               </div>
               <div>
-                <Label className="text-xs">{isRu ? 'Название (RU)' : 'Name (RU)'}</Label>
+                <Label className="text-xs">{isRu ? 'Название (RU)' : isTh ? 'ชื่อ (RU)' : 'Name (RU)'}</Label>
                 <Input value={newNameRu} onChange={e => setNewNameRu(e.target.value)} placeholder="напр. Обслуживание бассейна" className="h-9 mt-1" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">{isRu ? 'Тип затрат' : 'Cost type'}</Label>
+                <Label className="text-xs">{isRu ? 'Тип затрат' : isTh ? 'ประเภทต้นทุน' : 'Cost type'}</Label>
                 <Select value={newClass} onValueChange={v => setNewClass(v as CategoryClass)}>
                   <SelectTrigger className="h-9 text-xs mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -523,7 +531,7 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
                 </Select>
               </div>
               <div>
-                <Label className="text-xs">{isRu ? 'Группа' : 'Group'}</Label>
+                <Label className="text-xs">{isRu ? 'Группа' : isTh ? 'กลุ่ม' : 'Group'}</Label>
                 <Select value={newGroup} onValueChange={v => setNewGroup(v as CategoryGroup)}>
                   <SelectTrigger className="h-9 text-xs mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -535,18 +543,18 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
               </div>
             </div>
             <div className="flex items-center justify-between py-1">
-              <Label className="text-xs">{isRu ? 'Влияет на P&L' : 'Affects P&L'}</Label>
+              <Label className="text-xs">{isRu ? 'Влияет на P&L' : isTh ? 'มีผลต่อกำไรขาดทุน' : 'Affects P&L'}</Label>
               <Switch checked={newAffectsProfit} onCheckedChange={setNewAffectsProfit} />
             </div>
             <div className="flex items-center justify-between py-1">
-              <Label className="text-xs">{isRu ? 'Налоговый вычет' : 'Tax deductible'}</Label>
+              <Label className="text-xs">{isRu ? 'Налоговый вычет' : isTh ? 'หักภาษีได้' : 'Tax deductible'}</Label>
               <Switch checked={newTaxDeductible} onCheckedChange={setNewTaxDeductible} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" size="sm" onClick={() => setShowAdd(false)}>{isRu ? 'Отмена' : 'Cancel'}</Button>
+            <Button variant="outline" size="sm" onClick={() => setShowAdd(false)}>{isRu ? 'Отмена' : isTh ? 'ยกเลิก' : 'Cancel'}</Button>
             <Button size="sm" disabled={!newNameEn.trim() || createCategory.isPending} onClick={handleAddCustom}>
-              {createCategory.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (isRu ? 'Добавить' : 'Add')}
+              {createCategory.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (isRu ? 'Добавить' : isTh ? 'เพิ่ม' : 'Add')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -556,7 +564,7 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
       <Dialog open={!!editCustom} onOpenChange={open => !open && setEditCustom(null)}>
         <DialogContent className="sm:max-w-[380px]">
           <DialogHeader>
-            <DialogTitle>{isRu ? 'Редактировать категорию' : 'Edit category'}</DialogTitle>
+            <DialogTitle>{isRu ? 'Редактировать категорию' : isTh ? 'แก้ไขหมวดหมู่' : 'Edit category'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div>

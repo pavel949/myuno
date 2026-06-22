@@ -43,7 +43,7 @@ export default function InsuranceQuote() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.email || !formData.phone) {
-      toast.error(language === 'ru' ? 'Заполните обязательные поля' : 'Please fill required fields');
+      toast.error(language === 'ru' ? 'Заполните обязательные поля' : language === 'th' ? 'กรุณากรอกข้อมูลในช่องที่จำเป็น' : 'Please fill required fields');
       return;
     }
     setIsSubmitting(true);
@@ -53,7 +53,7 @@ export default function InsuranceQuote() {
 
     setIsSubmitting(false);
     setIsSubmitted(true);
-    toast.success(language === 'ru' ? 'Заявка отправлена!' : 'Quote request submitted!');
+    toast.success(language === 'ru' ? 'Заявка отправлена!' : language === 'th' ? 'ส่งคำขอแล้ว!' : 'Quote request submitted!');
   };
 
   if (providerLoading) {
@@ -74,7 +74,7 @@ export default function InsuranceQuote() {
             <CheckCircle2 className="w-8 h-8 text-success" />
           </div>
           <h1 className="text-xl font-bold mb-2">
-            {language === 'ru' ? 'Заявка отправлена!' : 'Quote Request Submitted!'}
+            {language === 'ru' ? 'Заявка отправлена!' : language === 'th' ? 'ส่งคำขอใบเสนอราคาแล้ว!' : 'Quote Request Submitted!'}
           </h1>
           <p className="text-muted-foreground mb-6 max-w-sm">
             {language === 'ru'
@@ -83,10 +83,10 @@ export default function InsuranceQuote() {
           </p>
           <div className="space-y-2 w-full max-w-xs">
             <Button className="w-full" onClick={() => navigate('/insurance')}>
-              {language === 'ru' ? 'Вернуться к страхованию' : 'Back to Insurance'}
+              {language === 'ru' ? 'Вернуться к страхованию' : language === 'th' ? 'กลับไปที่ประกันภัย' : 'Back to Insurance'}
             </Button>
             <Button variant="outline" className="w-full" onClick={() => navigate('/bookings')}>
-              {language === 'ru' ? 'Мои бронирования' : 'My Bookings'}
+              {language === 'ru' ? 'Мои бронирования' : language === 'th' ? 'การจองของฉัน' : 'My Bookings'}
             </Button>
           </div>
         </div>
@@ -105,7 +105,7 @@ export default function InsuranceQuote() {
               <Shield className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">{language === 'ru' ? 'Запрос расчёта' : 'Get Quote'}</h1>
+              <h1 className="text-xl font-bold">{language === 'ru' ? 'Запрос расчёта' : language === 'th' ? 'ขอใบเสนอราคา' : 'Get Quote'}</h1>
               <p className="text-sm text-muted-foreground">
                 {provider && (language === 'ru' ? provider.name_ru : provider.name_en)}
               </p>
@@ -118,13 +118,13 @@ export default function InsuranceQuote() {
           {/* Plan Selection */}
           {plans.length > 0 && (
             <div className="space-y-2">
-              <Label>{language === 'ru' ? 'Выберите план' : 'Select Plan'}</Label>
+              <Label>{language === 'ru' ? 'Выберите план' : language === 'th' ? 'เลือกแผน' : 'Select Plan'}</Label>
               <Select
                 value={formData.selectedPlan}
                 onValueChange={(val) => setFormData({ ...formData, selectedPlan: val })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={language === 'ru' ? 'Выберите план...' : 'Select a plan...'} />
+                  <SelectValue placeholder={language === 'ru' ? 'Выберите план...' : language === 'th' ? 'เลือกแผน...' : 'Select a plan...'} />
                 </SelectTrigger>
                 <SelectContent>
                   {plans.map((plan) => (
@@ -140,7 +140,7 @@ export default function InsuranceQuote() {
 
           {/* Coverage Type */}
           <div className="space-y-2">
-            <Label>{language === 'ru' ? 'Тип покрытия' : 'Coverage Type'}</Label>
+            <Label>{language === 'ru' ? 'Тип покрытия' : language === 'th' ? 'ประเภทความคุ้มครอง' : 'Coverage Type'}</Label>
             <Select
               value={formData.coverageType}
               onValueChange={(val) => setFormData({ ...formData, coverageType: val })}
@@ -149,9 +149,9 @@ export default function InsuranceQuote() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="individual">{language === 'ru' ? 'Индивидуальный' : 'Individual'}</SelectItem>
-                <SelectItem value="couple">{language === 'ru' ? 'Пара' : 'Couple'}</SelectItem>
-                <SelectItem value="family">{language === 'ru' ? 'Семья' : 'Family'}</SelectItem>
+                <SelectItem value="individual">{language === 'ru' ? 'Индивидуальный' : language === 'th' ? 'รายบุคคล' : 'Individual'}</SelectItem>
+                <SelectItem value="couple">{language === 'ru' ? 'Пара' : language === 'th' ? 'คู่' : 'Couple'}</SelectItem>
+                <SelectItem value="family">{language === 'ru' ? 'Семья' : language === 'th' ? 'ครอบครัว' : 'Family'}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -160,12 +160,12 @@ export default function InsuranceQuote() {
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <User className="w-4 h-4" />
-              {language === 'ru' ? 'Полное имя' : 'Full Name'} *
+              {language === 'ru' ? 'Полное имя' : language === 'th' ? 'ชื่อ-นามสกุล' : 'Full Name'} *
             </Label>
             <Input
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              placeholder={language === 'ru' ? 'Ваше полное имя' : 'Your full name'}
+              placeholder={language === 'ru' ? 'Ваше полное имя' : language === 'th' ? 'ชื่อ-นามสกุลของคุณ' : 'Your full name'}
               required
             />
           </div>
@@ -174,7 +174,7 @@ export default function InsuranceQuote() {
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                {language === 'ru' ? 'Дата рождения' : 'Date of Birth'}
+                {language === 'ru' ? 'Дата рождения' : language === 'th' ? 'วันเกิด' : 'Date of Birth'}
               </Label>
               <Input
                 type="date"
@@ -183,7 +183,7 @@ export default function InsuranceQuote() {
               />
             </div>
             <div className="space-y-2">
-              <Label>{language === 'ru' ? 'Гражданство' : 'Nationality'}</Label>
+              <Label>{language === 'ru' ? 'Гражданство' : language === 'th' ? 'สัญชาติ' : 'Nationality'}</Label>
               <Input
                 value={formData.nationality}
                 onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
@@ -209,7 +209,7 @@ export default function InsuranceQuote() {
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <Phone className="w-4 h-4" />
-              {language === 'ru' ? 'Телефон' : 'Phone'} *
+              {language === 'ru' ? 'Телефон' : language === 'th' ? 'เบอร์โทรศัพท์' : 'Phone'} *
             </Label>
             <Input
               type="tel"
@@ -223,7 +223,7 @@ export default function InsuranceQuote() {
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
-              {language === 'ru' ? 'Дополнительные пожелания' : 'Additional Notes'}
+              {language === 'ru' ? 'Дополнительные пожелания' : language === 'th' ? 'หมายเหตุเพิ่มเติม' : 'Additional Notes'}
             </Label>
             <Textarea
               value={formData.notes}
@@ -231,6 +231,8 @@ export default function InsuranceQuote() {
               placeholder={
                 language === 'ru'
                   ? 'Опишите ваши потребности, предыдущие заболевания, особые требования...'
+                  : language === 'th'
+                  ? 'อธิบายความต้องการของคุณ โรคประจำตัว ข้อกำหนดพิเศษ...'
                   : 'Describe your needs, pre-existing conditions, special requirements...'
               }
               rows={3}
@@ -240,7 +242,7 @@ export default function InsuranceQuote() {
           {/* Selected Plan Summary */}
           {selectedPlan && (
             <div className="bg-card border border-border rounded-none p-4">
-              <h3 className="font-semibold mb-2">{language === 'ru' ? 'Выбранный план' : 'Selected Plan'}</h3>
+              <h3 className="font-semibold mb-2">{language === 'ru' ? 'Выбранный план' : language === 'th' ? 'แผนที่เลือก' : 'Selected Plan'}</h3>
               <div className="flex items-center justify-between">
                 <span>{language === 'ru' ? selectedPlan.name_ru : selectedPlan.name_en}</span>
                 <span className="font-bold text-primary">
@@ -258,6 +260,8 @@ export default function InsuranceQuote() {
               <LoadingSpinner size="sm" />
             ) : language === 'ru' ? (
               'Отправить запрос'
+            ) : language === 'th' ? (
+              'ส่งคำขอใบเสนอราคา'
             ) : (
               'Submit Quote Request'
             )}

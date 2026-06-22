@@ -23,19 +23,27 @@ const FACTS = {
     { icon: Clock, title: 'Купите до вылета', desc: 'Большинство полисов действительны только если оформлены до въезда в страну.', color: 'text-primary' },
     { icon: Shield, title: 'Спокойствие', desc: 'Страховка от 100–300 ₽/день покрывает лечение, кражу, задержки рейсов.', color: 'text-success' },
   ],
+  th: [
+    { icon: AlertTriangle, title: 'ค่ารักษาพยาบาล', desc: 'การเข้าห้องฉุกเฉินในไทยโดยเฉลี่ยอยู่ที่ $2,000–$15,000 ห้อง ICU อาจเกิน $50,000', color: 'text-destructive' },
+    { icon: Heart, title: 'การเคลื่อนย้ายผู้ป่วย', desc: 'การเคลื่อนย้ายทางอากาศกลับประเทศมีค่าใช้จ่าย $50,000–$300,000 หากไม่มีประกัน', color: 'text-accent' },
+    { icon: Clock, title: 'ซื้อก่อนเดินทาง', desc: 'กรมธรรม์ส่วนใหญ่ต้องซื้อก่อนเข้าประเทศไทยจึงจะมีผลคุ้มครอง', color: 'text-primary' },
+    { icon: Shield, title: 'ความอุ่นใจ', desc: 'ประกันการเดินทางเริ่มต้น $1–3/วัน ครอบคลุมค่ารักษา การโจรกรรม เที่ยวบินล่าช้า และอื่น ๆ', color: 'text-success' },
+  ],
 };
 
 const COVERAGE_ITEMS = {
   en: ['Emergency medical treatment', 'Hospital stays & surgery', 'Medical evacuation', 'Trip cancellation', 'Lost luggage & theft', 'Flight delays', 'COVID-19 coverage', '24/7 assistance hotline'],
   ru: ['Экстренная медпомощь', 'Госпитализация и операции', 'Медицинская эвакуация', 'Отмена поездки', 'Потеря багажа и кража', 'Задержка рейса', 'Покрытие COVID-19', 'Горячая линия 24/7'],
+  th: ['การรักษาพยาบาลฉุกเฉิน', 'การนอนโรงพยาบาลและการผ่าตัด', 'การเคลื่อนย้ายผู้ป่วย', 'การยกเลิกการเดินทาง', 'กระเป๋าสูญหายและการโจรกรรม', 'เที่ยวบินล่าช้า', 'ความคุ้มครองโควิด-19', 'สายด่วนช่วยเหลือ 24/7'],
 };
 
 export default function TravelInsurance() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  const facts = isRu ? FACTS.ru : FACTS.en;
-  const coverage = isRu ? COVERAGE_ITEMS.ru : COVERAGE_ITEMS.en;
+  const isTh = language === 'th';
+  const facts = isRu ? FACTS.ru : isTh ? FACTS.th : FACTS.en;
+  const coverage = isRu ? COVERAGE_ITEMS.ru : isTh ? COVERAGE_ITEMS.th : COVERAGE_ITEMS.en;
 
   // Check if user returned from partner site
   useEffect(() => {
@@ -46,12 +54,14 @@ export default function TravelInsurance() {
         toast.info(
           isRu
             ? 'Купили страховку? Загрузите полис ниже — мы поможем при страховом случае'
+            : isTh
+            ? 'ซื้อประกันแล้ว? อัปโหลดกรมธรรม์ด้านล่าง — เราจะช่วยเหลือเมื่อต้องเคลม'
             : "Bought insurance? Upload your policy below — we'll help during claims",
           { duration: 8000 }
         );
       }, 500);
     }
-  }, [isRu]);
+  }, [isRu, isTh]);
 
   const handleCherehapa = () => {
     sessionStorage.setItem('insurance_redirect', 'true');
@@ -71,7 +81,7 @@ export default function TravelInsurance() {
           <BackButton fallbackPath={APP_ROUTES.INSURANCE} variant="ghost" size="sm" />
           <div className="flex-1">
             <h1 className="font-semibold text-base">
-              {isRu ? 'Туристическая страховка' : 'Travel Insurance'}
+              {isRu ? 'Туристическая страховка' : isTh ? 'ประกันการเดินทาง' : 'Travel Insurance'}
             </h1>
             <p className="text-xs text-muted-foreground">myUNO Travel Protection</p>
           </div>
@@ -88,11 +98,13 @@ export default function TravelInsurance() {
             </div>
           </div>
           <h2 className="text-xl font-bold mb-2">
-            {isRu ? '🚫 Не летите без страховки!' : "🚫 Don't Fly Without Insurance!"}
+            {isRu ? '🚫 Не летите без страховки!' : isTh ? '🚫 อย่าเดินทางโดยไม่มีประกัน!' : "🚫 Don't Fly Without Insurance!"}
           </h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             {isRu
               ? 'Один визит в тайскую больницу может стоить больше, чем вся ваша поездка. Страховка — от 100 ₽/день.'
+              : isTh
+              ? 'การเข้าโรงพยาบาลในไทยเพียงครั้งเดียวอาจมีค่าใช้จ่ายมากกว่าทั้งทริปของคุณ ประกันเริ่มต้นเพียง $1/วัน'
               : 'A single hospital visit in Thailand can cost more than your entire trip. Insurance starts from $1/day.'}
           </p>
         </div>
@@ -100,7 +112,7 @@ export default function TravelInsurance() {
         {/* Key Facts */}
         <div className="space-y-3">
           <h3 className="font-semibold text-base">
-            {isRu ? 'Почему это важно' : 'Why It Matters'}
+            {isRu ? 'Почему это важно' : isTh ? 'ทำไมจึงสำคัญ' : 'Why It Matters'}
           </h3>
           <div className="grid grid-cols-1 gap-3">
             {facts.map((fact, i) => (
@@ -124,7 +136,7 @@ export default function TravelInsurance() {
           <CardContent className="p-4">
             <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Shield className="w-4 h-4 text-primary" />
-              {isRu ? 'Что покрывает страховка' : "What's Covered"}
+              {isRu ? 'Что покрывает страховка' : isTh ? 'ความคุ้มครองที่ได้รับ' : "What's Covered"}
             </h3>
             <div className="grid grid-cols-2 gap-2">
               {coverage.map((item, i) => (
@@ -140,7 +152,7 @@ export default function TravelInsurance() {
         {/* CTA Section */}
         <div className="space-y-4">
           <h3 className="font-semibold text-base text-center">
-            {isRu ? 'Оформить прямо сейчас' : 'Get Insured Now'}
+            {isRu ? 'Оформить прямо сейчас' : isTh ? 'ทำประกันเลยตอนนี้' : 'Get Insured Now'}
           </h3>
 
           {/* Russian-speaking option */}
@@ -150,21 +162,23 @@ export default function TravelInsurance() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant="secondary" className="text-xs">
-                      🇷🇺 {isRu ? 'Для граждан РФ/СНГ' : 'For RU/CIS Citizens'}
+                      🇷🇺 {isRu ? 'Для граждан РФ/СНГ' : isTh ? 'สำหรับพลเมือง RU/CIS' : 'For RU/CIS Citizens'}
                     </Badge>
                   </div>
                   <h4 className="font-semibold text-sm">
-                    {isRu ? 'Cherehapa — маркетплейс страховок' : 'Cherehapa — Insurance Marketplace'}
+                    {isRu ? 'Cherehapa — маркетплейс страховок' : isTh ? 'Cherehapa — มาร์เก็ตเพลสประกันภัย' : 'Cherehapa — Insurance Marketplace'}
                   </h4>
                   <p className="text-xs text-muted-foreground mt-1">
                     {isRu
                       ? '18+ страховых компаний. Сравните цены и купите полис за 2 минуты.'
+                      : isTh
+                      ? 'บริษัทประกัน 18+ แห่ง เปรียบเทียบราคาและซื้อกรมธรรม์ได้ใน 2 นาที'
                       : '18+ insurance companies. Compare prices and buy a policy in 2 minutes.'}
                   </p>
                   <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                    <span>{isRu ? 'от 300 ₽/день' : 'from ₽300/day'}</span>
+                    <span>{isRu ? 'от 300 ₽/день' : isTh ? 'เริ่มต้น ₽300/วัน' : 'from ₽300/day'}</span>
                     <span>•</span>
-                    <span>{isRu ? 'Мгновенный полис' : 'Instant policy'}</span>
+                    <span>{isRu ? 'Мгновенный полис' : isTh ? 'ออกกรมธรรม์ทันที' : 'Instant policy'}</span>
                   </div>
                 </div>
                 <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
@@ -179,21 +193,23 @@ export default function TravelInsurance() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant="secondary" className="text-xs">
-                      🌍 {isRu ? 'Международная' : 'International'}
+                      🌍 {isRu ? 'Международная' : isTh ? 'ระหว่างประเทศ' : 'International'}
                     </Badge>
                   </div>
                   <h4 className="font-semibold text-sm">
-                    {isRu ? 'SafetyWing — страховка для номадов' : 'SafetyWing — Nomad Insurance'}
+                    {isRu ? 'SafetyWing — страховка для номадов' : isTh ? 'SafetyWing — ประกันสำหรับโนแมด' : 'SafetyWing — Nomad Insurance'}
                   </h4>
                   <p className="text-xs text-muted-foreground mt-1">
                     {isRu
                       ? 'Подписочная страховка с покрытием до $250,000. Идеально для digital-номадов.'
+                      : isTh
+                      ? 'ประกันแบบสมัครสมาชิก คุ้มครองสูงสุด $250,000 เหมาะสำหรับดิจิทัลโนแมด'
                       : 'Subscription insurance with coverage up to $250,000. Perfect for digital nomads.'}
                   </p>
                   <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                    <span>~$45/4 {isRu ? 'недели' : 'weeks'}</span>
+                    <span>~$45/4 {isRu ? 'недели' : isTh ? 'สัปดาห์' : 'weeks'}</span>
                     <span>•</span>
-                    <span>{isRu ? 'Глобальное покрытие' : 'Global coverage'}</span>
+                    <span>{isRu ? 'Глобальное покрытие' : isTh ? 'ความคุ้มครองทั่วโลก' : 'Global coverage'}</span>
                   </div>
                 </div>
                 <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0 mt-1" />
@@ -209,7 +225,7 @@ export default function TravelInsurance() {
         <div className="text-center">
           <Button variant="ghost" onClick={() => navigate('/insurance')} className="text-xs">
             <Plane className="w-3 h-3 mr-1" />
-            {isRu ? 'Страхование для резидентов →' : 'Insurance for residents →'}
+            {isRu ? 'Страхование для резидентов →' : isTh ? 'ประกันสำหรับผู้พำนัก →' : 'Insurance for residents →'}
           </Button>
         </div>
       </div>

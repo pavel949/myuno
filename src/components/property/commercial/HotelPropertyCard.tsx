@@ -57,6 +57,7 @@ export function HotelPropertyCard({ property, className }: Props) {
   const { user } = useAuth();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const isAuthed = !!user;
 
   const isRent = property.listing_type === 'rent';
@@ -68,10 +69,10 @@ export function HotelPropertyCard({ property, className }: Props) {
   const mgmtStatus = getHotelManagementStatusLabel(property.hotel_management_status, isRu);
 
   const intentLabel = isSeekingOperator
-    ? isRu ? 'Ищет оператора' : 'Operator wanted'
+    ? isRu ? 'Ищет оператора' : isTh ? 'ต้องการผู้ดำเนินการ' : 'Operator wanted'
     : isRent
-    ? isRu ? 'Аренда здания' : 'Building lease'
-    : isRu ? 'Продажа' : 'For sale';
+    ? isRu ? 'Аренда здания' : isTh ? 'เช่าอาคาร' : 'Building lease'
+    : isRu ? 'Продажа' : isTh ? 'ขาย' : 'For sale';
 
   const intentColor = isSeekingOperator
     ? 'bg-primary/95 text-white hover:bg-primary'
@@ -82,7 +83,7 @@ export function HotelPropertyCard({ property, className }: Props) {
   const priceMain = isSeekingOperator
     ? null
     : isRent && property.monthly_rent_thb
-    ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : 'mo'}`
+    ? `${formatPrice(property.monthly_rent_thb)} / ${isRu ? 'мес' : isTh ? 'เดือน' : 'mo'}`
     : property.sale_price
     ? formatPrice(property.sale_price)
     : property.price
@@ -123,7 +124,7 @@ export function HotelPropertyCard({ property, className }: Props) {
           {property.is_verified && (
             <Badge className="bg-success/95 text-white hover:bg-success gap-1">
               <BadgeCheck className="w-3 h-3" />
-              {isRu ? 'Проверено' : 'Verified'}
+              {isRu ? 'Проверено' : isTh ? 'ผ่านการตรวจสอบ' : 'Verified'}
             </Badge>
           )}
           {property.hotel_star_rating != null && (
@@ -150,7 +151,7 @@ export function HotelPropertyCard({ property, className }: Props) {
               {property.hotel_keys ?? '—'}
             </div>
             <div className="text-[10px] text-muted-foreground uppercase tracking-wide">
-              {isRu ? 'Ключи' : 'Keys'}
+              {isRu ? 'Ключи' : isTh ? 'ห้อง' : 'Keys'}
             </div>
           </div>
           <div className="text-center">
@@ -178,7 +179,7 @@ export function HotelPropertyCard({ property, className }: Props) {
               {property.hotel_occupancy_pct != null ? `${Math.round(property.hotel_occupancy_pct)}%` : '—'}
             </div>
             <div className="text-[10px] text-muted-foreground uppercase tracking-wide">
-              {isRu ? 'Загр.' : 'Occ.'}
+              {isRu ? 'Загр.' : isTh ? 'เข้าพัก' : 'Occ.'}
             </div>
           </div>
         </div>
@@ -189,10 +190,10 @@ export function HotelPropertyCard({ property, className }: Props) {
             <p className="text-base font-bold text-foreground">{priceMain}</p>
           ) : isSeekingOperator ? (
             <p className="text-xs font-medium text-primary dark:text-primary">
-              {isRu ? 'Запрос предложения от оператора' : 'Operator proposal welcome'}
+              {isRu ? 'Запрос предложения от оператора' : isTh ? 'ยินดีรับข้อเสนอจากผู้ดำเนินการ' : 'Operator proposal welcome'}
             </p>
           ) : (
-            <span className="text-xs text-muted-foreground">{isRu ? 'По запросу' : 'On request'}</span>
+            <span className="text-xs text-muted-foreground">{isRu ? 'По запросу' : isTh ? 'ตามคำขอ' : 'On request'}</span>
           )}
           {property.cap_rate_pct != null && (
             <p className="text-xs font-medium text-success dark:text-success">

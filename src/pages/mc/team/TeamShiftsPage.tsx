@@ -158,18 +158,18 @@ export default function TeamShiftsPage() {
   );
 }
 
-function ShiftRow({ shift, isRu }: { shift: any; isRu: boolean }) {
-  const cfgMap: Record<string, { ru: string; en: string; cls: string }> = {
-    scheduled: { ru: 'Запланировано', en: 'Scheduled', cls: 'bg-muted text-muted-foreground' },
-    in_progress: { ru: 'В работе', en: 'In progress', cls: 'bg-primary/15 text-primary' },
-    completed: { ru: 'Завершено', en: 'Completed', cls: 'bg-success/15 text-success' },
-    cancelled: { ru: 'Отменено', en: 'Cancelled', cls: 'bg-destructive/15 text-destructive' },
-    missed: { ru: 'Пропущено', en: 'Missed', cls: 'bg-warning/15 text-warning' },
+function ShiftRow({ shift, isRu, isTh }: { shift: any; isRu: boolean; isTh: boolean }) {
+  const cfgMap: Record<string, { ru: string; en: string; th: string; cls: string }> = {
+    scheduled: { ru: 'Запланировано', en: 'Scheduled', th: 'จัดตารางแล้ว', cls: 'bg-muted text-muted-foreground' },
+    in_progress: { ru: 'В работе', en: 'In progress', th: 'กำลังดำเนินการ', cls: 'bg-primary/15 text-primary' },
+    completed: { ru: 'Завершено', en: 'Completed', th: 'เสร็จสิ้น', cls: 'bg-success/15 text-success' },
+    cancelled: { ru: 'Отменено', en: 'Cancelled', th: 'ยกเลิกแล้ว', cls: 'bg-destructive/15 text-destructive' },
+    missed: { ru: 'Пропущено', en: 'Missed', th: 'พลาดกะ', cls: 'bg-warning/15 text-warning' },
   };
   const cfg = cfgMap[shift.status];
   return (
     <div className="flex items-center gap-3 py-1.5">
-      <Badge variant="outline" className={cn('text-xs', cfg.cls)}>{isRu ? cfg.ru : cfg.en}</Badge>
+      <Badge variant="outline" className={cn('text-xs', cfg.cls)}>{isRu ? cfg.ru : isTh ? cfg.th : cfg.en}</Badge>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium">
           {format(new Date(shift.start_at), 'HH:mm')} – {format(new Date(shift.end_at), 'HH:mm')}
@@ -184,6 +184,7 @@ function ShiftRow({ shift, isRu }: { shift: any; isRu: boolean }) {
 function CreateShiftForm({ onClose }: { onClose: () => void }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const create = useCreateShift();
   const [assignee, setAssignee] = useState('');
   const [startAt, setStartAt] = useState('');
@@ -201,29 +202,29 @@ function CreateShiftForm({ onClose }: { onClose: () => void }) {
       onClose();
     }}>
       <div className="space-y-1.5">
-        <Label>{isRu ? 'ID сотрудника' : 'Assignee user ID'}</Label>
+        <Label>{isRu ? 'ID сотрудника' : isTh ? 'User ID ของผู้รับมอบหมาย' : 'Assignee user ID'}</Label>
         <Input value={assignee} onChange={(e) => setAssignee(e.target.value)} required placeholder="uuid…" />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label>{isRu ? 'Начало' : 'Start'}</Label>
+          <Label>{isRu ? 'Начало' : isTh ? 'เริ่ม' : 'Start'}</Label>
           <Input type="datetime-local" value={startAt} onChange={(e) => setStartAt(e.target.value)} required />
         </div>
         <div className="space-y-1.5">
-          <Label>{isRu ? 'Конец' : 'End'}</Label>
+          <Label>{isRu ? 'Конец' : isTh ? 'สิ้นสุด' : 'End'}</Label>
           <Input type="datetime-local" value={endAt} onChange={(e) => setEndAt(e.target.value)} required />
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label>{isRu ? 'Роль' : 'Role label'}</Label>
-        <Input value={roleLabel} onChange={(e) => setRoleLabel(e.target.value)} placeholder={isRu ? 'Уборка / Тех. поддержка' : 'Cleaner / Maintenance'} />
+        <Label>{isRu ? 'Роль' : isTh ? 'ป้ายบทบาท' : 'Role label'}</Label>
+        <Input value={roleLabel} onChange={(e) => setRoleLabel(e.target.value)} placeholder={isRu ? 'Уборка / Тех. поддержка' : isTh ? 'แม่บ้าน / งานบำรุงรักษา' : 'Cleaner / Maintenance'} />
       </div>
       <div className="space-y-1.5">
-        <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
+        <Label>{isRu ? 'Заметки' : isTh ? 'หมายเหตุ' : 'Notes'}</Label>
         <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
       <Button type="submit" className="w-full" disabled={create.isPending}>
-        {create.isPending ? (isRu ? 'Создание…' : 'Creating…') : (isRu ? 'Запланировать' : 'Schedule')}
+        {create.isPending ? (isRu ? 'Создание…' : isTh ? 'กำลังสร้าง…' : 'Creating…') : (isRu ? 'Запланировать' : isTh ? 'จัดตาราง' : 'Schedule')}
       </Button>
     </form>
   );

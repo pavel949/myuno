@@ -33,6 +33,7 @@ export default function DeveloperDetail() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: developer, isLoading } = useDeveloper(id || '');
   const { data: allProjects } = useOffplanProjects({ developerId: id });
@@ -52,10 +53,10 @@ export default function DeveloperDetail() {
       <div className="flex flex-col items-center justify-center py-20">
         <Building2 className="w-16 h-16 text-muted-foreground/30 mb-4" />
         <p className="text-muted-foreground">
-          {isRu ? 'Застройщик не найден' : 'Developer not found'}
+          {isRu ? 'Застройщик не найден' : isTh ? 'ไม่พบผู้พัฒนา' : 'Developer not found'}
         </p>
         <Button variant="link" onClick={() => navigate('/property/developers')}>
-          {isRu ? 'Вернуться к списку' : 'Back to list'}
+          {isRu ? 'Вернуться к списку' : isTh ? 'กลับไปยังรายการ' : 'Back to list'}
         </Button>
       </div>
     );
@@ -63,7 +64,7 @@ export default function DeveloperDetail() {
 
   const name = isRu ? developer.nameRu : developer.nameEn;
   const description = isRu ? developer.descriptionRu : developer.descriptionEn;
-  const seoTitle = `${name} · ${isRu ? 'Застройщик' : 'Developer'} · Phuket`;
+  const seoTitle = `${name} · ${isRu ? 'Застройщик' : isTh ? 'ผู้พัฒนา' : 'Developer'} · Phuket`;
   const seoDescription = description
     || (isRu
       ? `${name} — застройщик Пхукета. ${developer.projectsCompleted} проектов, ${developer.totalUnitsSold} юнитов продано.${developer.foundedYear ? ` Основано в ${developer.foundedYear}.` : ''}`
@@ -81,7 +82,7 @@ export default function DeveloperDetail() {
   };
   const breadcrumbSchema = createBreadcrumbSchema([
     { name: 'Property', url: 'https://www.myuno.app/property' },
-    { name: isRu ? 'Застройщики' : 'Developers', url: 'https://www.myuno.app/property/developers' },
+    { name: isRu ? 'Застройщики' : isTh ? 'ผู้พัฒนา' : 'Developers', url: 'https://www.myuno.app/property/developers' },
     { name, url: canonicalUrl },
   ]);
 
@@ -125,7 +126,7 @@ export default function DeveloperDetail() {
               {developer.foundedYear && (
                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  {isRu ? 'С' : 'Since'} {developer.foundedYear}
+                  {isRu ? 'С' : isTh ? 'ตั้งแต่' : 'Since'} {developer.foundedYear}
                 </p>
               )}
             </div>
@@ -142,11 +143,11 @@ export default function DeveloperDetail() {
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-none bg-muted/50 p-3 text-center">
             <div className="text-2xl font-bold text-primary">{developer.projectsCompleted}</div>
-            <div className="text-xs text-muted-foreground">{isRu ? 'Проектов' : 'Projects'}</div>
+            <div className="text-xs text-muted-foreground">{isRu ? 'Проектов' : isTh ? 'โครงการ' : 'Projects'}</div>
           </div>
           <div className="rounded-none bg-muted/50 p-3 text-center">
             <div className="text-2xl font-bold">{developer.totalUnitsSold}</div>
-            <div className="text-xs text-muted-foreground">{isRu ? 'Юнитов' : 'Units Sold'}</div>
+            <div className="text-xs text-muted-foreground">{isRu ? 'Юнитов' : isTh ? 'ยูนิตที่ขายแล้ว' : 'Units Sold'}</div>
           </div>
           <div className="rounded-none bg-muted/50 p-3 text-center">
             <div className="text-2xl font-bold inline-flex items-center justify-center gap-1">
@@ -157,27 +158,27 @@ export default function DeveloperDetail() {
                 </>
               ) : '—'}
             </div>
-            <div className="text-xs text-muted-foreground">{isRu ? 'Рейтинг' : 'Rating'}</div>
+            <div className="text-xs text-muted-foreground">{isRu ? 'Рейтинг' : isTh ? 'คะแนน' : 'Rating'}</div>
           </div>
         </div>
 
         {/* Description */}
         {description && (
           <div>
-            <h2 className="font-semibold mb-2">{isRu ? 'О компании' : 'About'}</h2>
+            <h2 className="font-semibold mb-2">{isRu ? 'О компании' : isTh ? 'เกี่ยวกับบริษัท' : 'About'}</h2>
             <p className="text-muted-foreground text-sm">{description}</p>
           </div>
         )}
 
         {/* Contact */}
         <div className="space-y-2">
-          <h2 className="font-semibold mb-2">{isRu ? 'Контакты' : 'Contact'}</h2>
+          <h2 className="font-semibold mb-2">{isRu ? 'Контакты' : isTh ? 'ติดต่อ' : 'Contact'}</h2>
           {developer.website && (
             <a
               href={developer.website}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={isRu ? `Сайт ${name}` : `${name} website`}
+              aria-label={isRu ? `Сайт ${name}` : isTh ? `เว็บไซต์ ${name}` : `${name} website`}
               className="flex items-center gap-2 text-sm text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none"
             >
               <Globe className="w-4 h-4" aria-hidden />
@@ -187,7 +188,7 @@ export default function DeveloperDetail() {
           {developer.phone && (
             <a
               href={`tel:${developer.phone}`}
-              aria-label={isRu ? `Позвонить ${name}` : `Call ${name}`}
+              aria-label={isRu ? `Позвонить ${name}` : isTh ? `โทรหา ${name}` : `Call ${name}`}
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none"
             >
               <Phone className="w-4 h-4" aria-hidden />
@@ -197,7 +198,7 @@ export default function DeveloperDetail() {
           {developer.email && (
             <a
               href={`mailto:${developer.email}`}
-              aria-label={isRu ? `Написать ${name}` : `Email ${name}`}
+              aria-label={isRu ? `Написать ${name}` : isTh ? `อีเมลถึง ${name}` : `Email ${name}`}
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none"
             >
               <Mail className="w-4 h-4" aria-hidden />
@@ -210,7 +211,7 @@ export default function DeveloperDetail() {
         {allProjects && allProjects.length > 0 && (
           <div>
             <h2 className="font-semibold mb-3">
-              {isRu ? 'Проекты' : 'Projects'} ({allProjects.length})
+              {isRu ? 'Проекты' : isTh ? 'โครงการ' : 'Projects'} ({allProjects.length})
             </h2>
             <div className="space-y-4">
               {allProjects.map(project => (

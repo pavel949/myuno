@@ -60,7 +60,7 @@ export default function LegalBooking() {
     language === "ru" ? "Сопровождение сделок с недвижимостью" : isTh ? "ดูแลธุรกรรมอสังหาริมทรัพย์" : "Real Estate Transaction",
     language === "ru" ? "Визовая консультация" : isTh ? "ปรึกษาเรื่องวีซ่า" : "Visa Consultation",
     language === "ru" ? "Трудовое право" : isTh ? "กฎหมายแรงงาน" : "Employment Law",
-    language === "ru" ? "Due Diligence" : "Due Diligence",
+    language === "ru" ? "Due Diligence" : isTh ? "การตรวจสอบสถานะ (Due Diligence)" : "Due Diligence",
     language === "ru" ? "Налоговое планирование" : isTh ? "วางแผนภาษี" : "Tax Planning",
     language === "ru" ? "Другое" : isTh ? "อื่น ๆ" : "Other",
   ];

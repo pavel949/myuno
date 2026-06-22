@@ -29,6 +29,7 @@ export default function ResaleDetail() {
   const { formatPrice } = useCurrency();
   const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
@@ -49,7 +50,7 @@ export default function ResaleDetail() {
   if (!property) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">{isRu ? 'Объект не найден' : 'Property not found'}</p>
+        <p className="text-muted-foreground">{isRu ? 'Объект не найден' : isTh ? 'ไม่พบทรัพย์' : 'Property not found'}</p>
       </div>
     );
   }
@@ -68,13 +69,15 @@ export default function ResaleDetail() {
 
   const TITLE_TYPE_LABELS: Record<string, string> = {
     freehold: 'Freehold',
-    leasehold: `Leasehold${property.lease_years_remaining ? ` (${property.lease_years_remaining} ${isRu ? 'лет' : 'yrs'})` : ''}`,
-    company_structure: isRu ? 'Через компанию' : 'Company structure',
+    leasehold: `Leasehold${property.lease_years_remaining ? ` (${property.lease_years_remaining} ${isRu ? 'лет' : isTh ? 'ปี' : 'yrs'})` : ''}`,
+    company_structure: isRu ? 'Через компанию' : isTh ? 'ผ่านบริษัท' : 'Company structure',
   };
 
-  const seoTitle = `${title}${property.zone ? ` · ${property.zone}` : ''}${property.is_assignment ? ` · ${isRu ? 'Переуступка' : 'Assignment'}` : ''}`;
+  const seoTitle = `${title}${property.zone ? ` · ${property.zone}` : ''}${property.is_assignment ? ` · ${isRu ? 'Переуступка' : isTh ? 'การโอนสิทธิ' : 'Assignment'}` : ''}`;
   const seoDescription = isRu
     ? `${title} в ${property.zone || 'Пхукет'}. Цена ${formatPrice(property.asking_price)}. ${property.estimated_roi ? `ROI ${property.estimated_roi}%.` : ''} ${property.is_assignment ? 'Переуступка прав.' : 'Вторичный рынок.'}`.trim()
+    : isTh
+    ? `${title} ใน ${property.zone || 'ภูเก็ต'} ราคา ${formatPrice(property.asking_price)} ${property.estimated_roi ? `ROI ${property.estimated_roi}%` : ''} ${property.is_assignment ? 'การโอนสิทธิ' : 'ตลาดมือสอง'}`.trim()
     : `${title} in ${property.zone || 'Phuket'}. Asking ${formatPrice(property.asking_price)}. ${property.estimated_roi ? `${property.estimated_roi}% ROI.` : ''} ${property.is_assignment ? 'Assignment.' : 'Secondary market.'}`.trim();
   const seoImage = (typeof images[0] === 'string' && images[0]) || 'https://www.myuno.app/og-image.png';
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.RESALE_DETAIL(property.id)}`;
@@ -119,7 +122,7 @@ export default function ResaleDetail() {
         {property.is_assignment && (
           <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground">
             <ArrowRightLeft className="w-3 h-3 mr-1" />
-            {isRu ? 'Переуступка' : 'Assignment'}
+            {isRu ? 'Переуступка' : isTh ? 'การโอนสิทธิ' : 'Assignment'}
           </Badge>
         )}
       </div>
@@ -137,13 +140,13 @@ export default function ResaleDetail() {
         {/* Key Metrics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <MetricCard
-            label={isRu ? 'Цена' : 'Price'}
+            label={isRu ? 'Цена' : isTh ? 'ราคา' : 'Price'}
             value={formatPrice(property.asking_price)}
             highlight
           />
           {property.area_sqm && (
             <MetricCard
-              label={isRu ? 'Площадь' : 'Area'}
+              label={isRu ? 'Площадь' : isTh ? 'พื้นที่' : 'Area'}
               value={`${property.area_sqm} м²`}
             />
           )}
@@ -155,7 +158,7 @@ export default function ResaleDetail() {
             />
           )}
           <MetricCard
-            label={isRu ? 'Владение' : 'Ownership'}
+            label={isRu ? 'Владение' : isTh ? 'การถือครอง' : 'Ownership'}
             value={TITLE_TYPE_LABELS[property.title_type] || property.title_type}
             icon={<Shield className="w-4 h-4 text-primary" />}
           />
@@ -166,20 +169,20 @@ export default function ResaleDetail() {
           <div className="bg-accent/10 border border-accent/30 rounded-none p-4 space-y-2">
             <h3 className="font-semibold text-sm flex items-center gap-1.5">
               <ArrowRightLeft className="w-4 h-4" />
-              {isRu ? 'Условия переуступки' : 'Assignment Details'}
+              {isRu ? 'Условия переуступки' : isTh ? 'รายละเอียดการโอนสิทธิ' : 'Assignment Details'}
             </h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
-                <span className="text-muted-foreground">{isRu ? 'Покупка' : 'Original'}:</span>
+                <span className="text-muted-foreground">{isRu ? 'Покупка' : isTh ? 'ราคาเดิม' : 'Original'}:</span>
                 <span className="ml-1 font-medium">{formatPrice(property.original_purchase_price)}</span>
               </div>
               <div>
-                <span className="text-muted-foreground">{isRu ? 'Сейчас' : 'Asking'}:</span>
+                <span className="text-muted-foreground">{isRu ? 'Сейчас' : isTh ? 'ราคาเสนอ' : 'Asking'}:</span>
                 <span className="ml-1 font-medium">{formatPrice(property.asking_price)}</span>
               </div>
               {premiumPercent !== null && (
                 <div>
-                  <span className="text-muted-foreground">{isRu ? 'Наценка' : 'Premium'}:</span>
+                  <span className="text-muted-foreground">{isRu ? 'Наценка' : isTh ? 'ส่วนเพิ่ม' : 'Premium'}:</span>
                   <span className={cn("ml-1 font-medium", premiumPercent > 0 ? 'text-destructive' : 'text-primary')}>
                     {premiumPercent > 0 ? '+' : ''}{premiumPercent}%
                   </span>
@@ -187,7 +190,7 @@ export default function ResaleDetail() {
               )}
               {property.transfer_fee_paid_by && (
                 <div>
-                  <span className="text-muted-foreground">{isRu ? 'Комиссия' : 'Transfer fee'}:</span>
+                  <span className="text-muted-foreground">{isRu ? 'Комиссия' : isTh ? 'ค่าโอน' : 'Transfer fee'}:</span>
                   <span className="ml-1 font-medium capitalize">{property.transfer_fee_paid_by}</span>
                 </div>
               )}
@@ -198,13 +201,13 @@ export default function ResaleDetail() {
         {/* Specs */}
         <div className="grid grid-cols-3 gap-3">
           {property.bedrooms != null && (
-            <SpecItem icon={<BedDouble className="w-4 h-4" />} label={isRu ? 'Спальни' : 'Bedrooms'} value={String(property.bedrooms)} />
+            <SpecItem icon={<BedDouble className="w-4 h-4" />} label={isRu ? 'Спальни' : isTh ? 'ห้องนอน' : 'Bedrooms'} value={String(property.bedrooms)} />
           )}
           {property.bathrooms != null && (
-            <SpecItem icon={<Bath className="w-4 h-4" />} label={isRu ? 'Ванные' : 'Bathrooms'} value={String(property.bathrooms)} />
+            <SpecItem icon={<Bath className="w-4 h-4" />} label={isRu ? 'Ванные' : isTh ? 'ห้องน้ำ' : 'Bathrooms'} value={String(property.bathrooms)} />
           )}
           {property.floor && (
-            <SpecItem icon={<Maximize2 className="w-4 h-4" />} label={isRu ? 'Этаж' : 'Floor'} value={String(property.floor)} />
+            <SpecItem icon={<Maximize2 className="w-4 h-4" />} label={isRu ? 'Этаж' : isTh ? 'ชั้น' : 'Floor'} value={String(property.floor)} />
           )}
         </div>
 
@@ -212,10 +215,10 @@ export default function ResaleDetail() {
         {property.current_rental_income && (
           <div className="bg-primary/5 border border-primary/20 rounded-none p-4">
             <h3 className="font-semibold text-sm mb-1">
-              {isRu ? 'Текущий доход от аренды' : 'Current Rental Income'}
+              {isRu ? 'Текущий доход от аренды' : isTh ? 'รายได้ค่าเช่าปัจจุบัน' : 'Current Rental Income'}
             </h3>
             <p className="text-lg font-bold text-primary">
-              {formatPrice(property.current_rental_income)}<span className="text-sm font-normal text-muted-foreground">/{isRu ? 'мес' : 'mo'}</span>
+              {formatPrice(property.current_rental_income)}<span className="text-sm font-normal text-muted-foreground">/{isRu ? 'мес' : isTh ? 'เดือน' : 'mo'}</span>
             </p>
           </div>
         )}
@@ -223,7 +226,7 @@ export default function ResaleDetail() {
         {/* Description */}
         {description && (
           <div>
-            <h3 className="font-semibold text-sm mb-2">{isRu ? 'Описание' : 'Description'}</h3>
+            <h3 className="font-semibold text-sm mb-2">{isRu ? 'Описание' : isTh ? 'รายละเอียด' : 'Description'}</h3>
             <p className="text-sm text-muted-foreground whitespace-pre-line">{description}</p>
           </div>
         )}
@@ -232,12 +235,12 @@ export default function ResaleDetail() {
       {/* Fixed CTA */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 border-t border-border p-4 flex gap-2 z-30">
         <div className="flex-1">
-          <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
+          <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : isTh ? 'ราคา' : 'Price'}</p>
           <p className="text-lg font-bold text-foreground">{formatPrice(property.asking_price)}</p>
         </div>
         <Button onClick={() => setShowLeadForm(true)} className="px-6">
           <Phone className="w-4 h-4 mr-1" />
-          {isRu ? 'Запросить показ' : 'Request Viewing'}
+          {isRu ? 'Запросить показ' : isTh ? 'ขอเข้าชม' : 'Request Viewing'}
         </Button>
       </div>
 
@@ -245,7 +248,7 @@ export default function ResaleDetail() {
       <ResponsiveModal
         open={showLeadForm}
         onOpenChange={setShowLeadForm}
-        title={isRu ? 'Запросить показ' : 'Request Viewing'}
+        title={isRu ? 'Запросить показ' : isTh ? 'ขอเข้าชม' : 'Request Viewing'}
         size="md"
       >
         <UniversalLeadForm

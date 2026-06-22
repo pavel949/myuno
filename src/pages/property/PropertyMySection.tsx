@@ -19,6 +19,7 @@ export default function PropertyMySection() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (!user) {
     return (
@@ -27,15 +28,17 @@ export default function PropertyMySection() {
           <LogIn className="w-8 h-8 text-primary" />
         </div>
         <h2 className="text-xl font-semibold text-foreground">
-          {isRu ? 'Войдите, чтобы управлять недвижимостью' : 'Sign in to manage your property'}
+          {isRu ? 'Войдите, чтобы управлять недвижимостью' : isTh ? 'เข้าสู่ระบบเพื่อจัดการอสังหาริมทรัพย์ของคุณ' : 'Sign in to manage your property'}
         </h2>
         <p className="text-muted-foreground text-sm max-w-sm">
           {isRu
             ? 'Добавляйте объекты, отслеживайте бронирования и управляйте портфелем'
+            : isTh
+            ? 'เพิ่มทรัพย์ ติดตามการจอง และจัดการพอร์ตของคุณ'
             : 'Add properties, track bookings, and manage your portfolio'}
         </p>
         <Button onClick={() => navigate('/auth')} size="lg">
-          {isRu ? 'Войти' : 'Sign In'}
+          {isRu ? 'Войти' : isTh ? 'เข้าสู่ระบบ' : 'Sign In'}
         </Button>
       </div>
     );
@@ -50,6 +53,7 @@ function AuthenticatedMySection() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { allProperties, isLoading, isOwner, isManager, hasProperties } = useMyProperties();
   const { data: delegations = [], isLoading: delegLoading } = useMyDelegations();
 
@@ -62,9 +66,11 @@ function AuthenticatedMySection() {
     {
       id: 'manage',
       icon: Building2,
-      title: isRu ? 'Управление объектами' : 'Property Management',
+      title: isRu ? 'Управление объектами' : isTh ? 'การจัดการอสังหาริมทรัพย์' : 'Property Management',
       description: isRu
         ? `${allProperties.length} объект${allProperties.length !== 1 ? 'ов' : ''} в управлении`
+        : isTh
+        ? `จัดการ ${allProperties.length} ทรัพย์`
         : `${allProperties.length} propert${allProperties.length !== 1 ? 'ies' : 'y'} managed`,
       path: '/owner',
       show: isOwner || isManager || hasProperties,
@@ -73,8 +79,8 @@ function AuthenticatedMySection() {
     {
       id: 'invest',
       icon: TrendingUp,
-      title: isRu ? 'Инвестиционный портфель' : 'Investment Portfolio',
-      description: isRu ? 'Проекты и аналитика' : 'Projects & analytics',
+      title: isRu ? 'Инвестиционный портфель' : isTh ? 'พอร์ตการลงทุน' : 'Investment Portfolio',
+      description: isRu ? 'Проекты и аналитика' : isTh ? 'โครงการและการวิเคราะห์' : 'Projects & analytics',
       // /property/invest legacy → /invest (handled by router redirect, but link directly to canonical)
       path: '/invest',
       show: true,
@@ -83,8 +89,8 @@ function AuthenticatedMySection() {
     {
       id: 'add',
       icon: Home,
-      title: isRu ? 'Добавить объект' : 'Add Property',
-      description: isRu ? 'Разместить на платформе' : 'List on the platform',
+      title: isRu ? 'Добавить объект' : isTh ? 'เพิ่มทรัพย์' : 'Add Property',
+      description: isRu ? 'Разместить на платформе' : isTh ? 'ลงประกาศบนแพลตฟอร์ม' : 'List on the platform',
       path: '/owner',
       show: true,
       gradient: 'from-accent to-accent/70',
@@ -94,7 +100,7 @@ function AuthenticatedMySection() {
   return (
     <div className="px-4 py-6 space-y-4 max-w-2xl mx-auto">
       <h1 className="text-lg font-semibold text-foreground">
-        {isRu ? 'Мои объекты' : 'My Property'}
+        {isRu ? 'Мои объекты' : isTh ? 'ทรัพย์ของฉัน' : 'My Property'}
       </h1>
 
       {isLoading ? (
@@ -137,11 +143,13 @@ function AuthenticatedMySection() {
         <div className="space-y-3 pt-2">
           <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
             <Eye className="w-4 h-4 text-muted-foreground" />
-            {isRu ? 'Управляемые объекты' : 'Managed Properties'}
+            {isRu ? 'Управляемые объекты' : isTh ? 'ทรัพย์ที่ดูแล' : 'Managed Properties'}
           </h2>
           <p className="text-xs text-muted-foreground -mt-1">
-            {isRu 
+            {isRu
               ? 'Объекты, переданные вам в управление. Нажмите для просмотра отчётности.'
+              : isTh
+              ? 'ทรัพย์ที่มอบหมายให้คุณดูแล แตะเพื่อดูรายงาน'
               : 'Properties delegated to you. Tap to view reports.'}
           </p>
           {activeDelegations.map((d: any) => {

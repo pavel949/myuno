@@ -54,13 +54,13 @@ interface CompanyProfile {
 }
 
 const COLOR_SCHEMES = [
-  { id: 'blue', labelEn: 'Blue', labelRu: 'Синий', hsl: '221 83% 53%' },
-  { id: 'teal', labelEn: 'Teal', labelRu: 'Бирюзовый', hsl: '173 80% 40%' },
-  { id: 'violet', labelEn: 'Violet', labelRu: 'Фиолетовый', hsl: '263 70% 50%' },
-  { id: 'rose', labelEn: 'Rose', labelRu: 'Розовый', hsl: '347 77% 50%' },
-  { id: 'amber', labelEn: 'Amber', labelRu: 'Янтарный', hsl: '38 92% 50%' },
-  { id: 'emerald', labelEn: 'Emerald', labelRu: 'Изумрудный', hsl: '160 84% 39%' },
-  { id: 'slate', labelEn: 'Slate', labelRu: 'Графитовый', hsl: '215 16% 47%' },
+  { id: 'blue', labelEn: 'Blue', labelRu: 'Синий', labelTh: 'น้ำเงิน', hsl: '221 83% 53%' },
+  { id: 'teal', labelEn: 'Teal', labelRu: 'Бирюзовый', labelTh: 'เขียวน้ำทะเล', hsl: '173 80% 40%' },
+  { id: 'violet', labelEn: 'Violet', labelRu: 'Фиолетовый', labelTh: 'ม่วง', hsl: '263 70% 50%' },
+  { id: 'rose', labelEn: 'Rose', labelRu: 'Розовый', labelTh: 'ชมพู', hsl: '347 77% 50%' },
+  { id: 'amber', labelEn: 'Amber', labelRu: 'Янтарный', labelTh: 'อำพัน', hsl: '38 92% 50%' },
+  { id: 'emerald', labelEn: 'Emerald', labelRu: 'Изумрудный', labelTh: 'มรกต', hsl: '160 84% 39%' },
+  { id: 'slate', labelEn: 'Slate', labelRu: 'Графитовый', labelTh: 'เทาหิน', hsl: '215 16% 47%' },
 ];
 
 const INITIAL_FORM: CompanyProfile = {
@@ -78,6 +78,7 @@ const SELECT_FIELDS = 'name_en, name_ru, logo, cover_image, brand_color, email, 
 export function CompanyProfileSettings() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
@@ -126,11 +127,11 @@ export function CompanyProfileSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mc-profile', companyId] });
-      toast.success(isRu ? 'Профиль сохранён' : 'Profile saved');
+      toast.success(isRu ? 'Профиль сохранён' : isTh ? 'บันทึกโปรไฟล์แล้ว' : 'Profile saved');
     },
     onError: (error: unknown) => {
       errorLog.silent(error, 'save_company_profile');
-      toast.error(isRu ? 'Ошибка сохранения' : 'Save failed');
+      toast.error(isRu ? 'Ошибка сохранения' : isTh ? 'บันทึกล้มเหลว' : 'Save failed');
     },
   });
 
@@ -165,14 +166,14 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-primary" />
-              {isRu ? 'Бренд компании' : 'Company Branding'}
+              {isRu ? 'Бренд компании' : isTh ? 'แบรนด์บริษัท' : 'Company Branding'}
             </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
             <div className="flex items-start gap-4">
               <div className="space-y-1.5 shrink-0">
                 <Label className="text-xs text-muted-foreground">
-                  {isRu ? 'Логотип' : 'Logo'}
+                  {isRu ? 'Логотип' : isTh ? 'โลโก้' : 'Logo'}
                 </Label>
                 <Avatar className="h-16 w-16 rounded-none border-2 border-dashed border-border">
                   <AvatarImage src={form.logo || undefined} className="object-cover" />
@@ -187,7 +188,7 @@ export function CompanyProfileSettings() {
                   value={form.logo || ''}
                   onChange={(url) => update({ logo: typeof url === 'string' ? url : '' })}
                   bucket="company-logos"
-                  placeholder={isRu ? 'Логотип (400×400)' : 'Logo (400×400)'}
+                  placeholder={isRu ? 'Логотип (400×400)' : isTh ? 'โลโก้ (400×400)' : 'Logo (400×400)'}
                 />
               </div>
             </div>
@@ -196,10 +197,10 @@ export function CompanyProfileSettings() {
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5 text-xs">
                 <Image className="h-3.5 w-3.5" />
-                {isRu ? 'Обложка' : 'Cover'}
+                {isRu ? 'Обложка' : isTh ? 'ภาพปก' : 'Cover'}
               </Label>
               {form.cover_image && (
-                <img src={form.cover_image} alt={isRu ? 'Обложка компании' : 'Company cover'} className="w-full h-24 object-cover rounded-none border border-border" />
+                <img src={form.cover_image} alt={isRu ? 'Обложка компании' : isTh ? 'ภาพปกบริษัท' : 'Company cover'} className="w-full h-24 object-cover rounded-none border border-border" />
               )}
               <UnifiedMediaUploader
                 mode="single"
@@ -207,7 +208,7 @@ export function CompanyProfileSettings() {
                 onChange={(url) => update({ cover_image: typeof url === 'string' ? url : '' })}
                 bucket="company-logos"
                 folder="covers"
-                placeholder={isRu ? 'Обложка (1200×400)' : 'Cover (1200×400)'}
+                placeholder={isRu ? 'Обложка (1200×400)' : isTh ? 'ภาพปก (1200×400)' : 'Cover (1200×400)'}
               />
             </div>
 
@@ -215,7 +216,7 @@ export function CompanyProfileSettings() {
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5 text-xs">
                 <Palette className="h-3.5 w-3.5" />
-                {isRu ? 'Цветовая схема' : 'Color Scheme'}
+                {isRu ? 'Цветовая схема' : isTh ? 'ชุดสี' : 'Color Scheme'}
               </Label>
               <div className="flex flex-wrap gap-2">
                 {COLOR_SCHEMES.map((scheme) => (
@@ -233,29 +234,29 @@ export function CompanyProfileSettings() {
                       className="w-4 h-4 rounded-full shrink-0 ring-1 ring-black/10"
                       style={{ backgroundColor: `hsl(${scheme.hsl})` }}
                     />
-                    {isRu ? scheme.labelRu : scheme.labelEn}
+                    {isRu ? scheme.labelRu : isTh ? scheme.labelTh : scheme.labelEn}
                   </button>
                 ))}
               </div>
               <p className="text-[11px] text-muted-foreground">
-                {isRu ? 'Используется в витрине и фирменных отчётах' : 'Used in storefront and branded reports'}
+                {isRu ? 'Используется в витрине и фирменных отчётах' : isTh ? 'ใช้ในหน้าร้านและรายงานที่มีตราสินค้า' : 'Used in storefront and branded reports'}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Название (EN)' : 'Name (EN)'}</Label>
+                <Label className="text-xs">{isRu ? 'Название (EN)' : isTh ? 'ชื่อ (EN)' : 'Name (EN)'}</Label>
                 <Input value={form.name_en} onChange={(e) => update({ name_en: e.target.value })} placeholder="My Property Company" className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Название (RU)' : 'Name (RU)'}</Label>
+                <Label className="text-xs">{isRu ? 'Название (RU)' : isTh ? 'ชื่อ (RU)' : 'Name (RU)'}</Label>
                 <Input value={form.name_ru} onChange={(e) => update({ name_ru: e.target.value })} placeholder="Моя УК" className="h-9" />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">{isRu ? 'Директор' : 'Director'}</Label>
-              <Input value={form.director_name || ''} onChange={(e) => update({ director_name: e.target.value })} placeholder={isRu ? 'Иван Петров' : 'John Smith'} className="h-9" />
+              <Label className="text-xs">{isRu ? 'Директор' : isTh ? 'กรรมการผู้จัดการ' : 'Director'}</Label>
+              <Input value={form.director_name || ''} onChange={(e) => update({ director_name: e.target.value })} placeholder={isRu ? 'Иван Петров' : isTh ? 'สมชาย ใจดี' : 'John Smith'} className="h-9" />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -265,7 +266,7 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-primary" />
-              {isRu ? 'Контакты' : 'Contacts'}
+              {isRu ? 'Контакты' : isTh ? 'ข้อมูลติดต่อ' : 'Contacts'}
             </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-3 pb-4">
@@ -275,7 +276,7 @@ export function CompanyProfileSettings() {
                 <Input type="email" value={form.email || ''} onChange={(e) => update({ email: e.target.value })} placeholder="info@company.com" className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1 text-xs"><Phone className="h-3 w-3" /> {isRu ? 'Телефон' : 'Phone'}</Label>
+                <Label className="flex items-center gap-1 text-xs"><Phone className="h-3 w-3" /> {isRu ? 'Телефон' : isTh ? 'โทรศัพท์' : 'Phone'}</Label>
                 <Input type="tel" value={form.phone || ''} onChange={(e) => update({ phone: e.target.value })} placeholder="+66 XX XXX XXXX" className="h-9" />
               </div>
               <div className="space-y-1.5">
@@ -283,17 +284,17 @@ export function CompanyProfileSettings() {
                 <Input type="tel" value={form.whatsapp || ''} onChange={(e) => update({ whatsapp: e.target.value })} placeholder="+66 XX XXX XXXX" className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1 text-xs"><Globe className="h-3 w-3" /> {isRu ? 'Сайт' : 'Website'}</Label>
+                <Label className="flex items-center gap-1 text-xs"><Globe className="h-3 w-3" /> {isRu ? 'Сайт' : isTh ? 'เว็บไซต์' : 'Website'}</Label>
                 <Input value={form.website || ''} onChange={(e) => update({ website: e.target.value })} placeholder="https://company.com" className="h-9" />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1 text-xs"><MapPin className="h-3 w-3" /> {isRu ? 'Адрес' : 'Address'}</Label>
+                <Label className="flex items-center gap-1 text-xs"><MapPin className="h-3 w-3" /> {isRu ? 'Адрес' : isTh ? 'ที่อยู่' : 'Address'}</Label>
                 <Input value={form.address || ''} onChange={(e) => update({ address: e.target.value })} placeholder="123 Main St" className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Район' : 'District'}</Label>
+                <Label className="text-xs">{isRu ? 'Район' : isTh ? 'เขต/อำเภอ' : 'District'}</Label>
                 <Input value={form.district || ''} onChange={(e) => update({ district: e.target.value })} placeholder="Rawai" className="h-9" />
               </div>
             </div>
@@ -305,16 +306,16 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
-              {isRu ? 'О компании' : 'About'}
+              {isRu ? 'О компании' : isTh ? 'เกี่ยวกับ' : 'About'}
             </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-3 pb-4">
             <div className="space-y-1.5">
-              <Label className="text-xs">{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label>
+              <Label className="text-xs">{isRu ? 'Описание (EN)' : isTh ? 'คำอธิบาย (EN)' : 'Description (EN)'}</Label>
               <Textarea value={form.description_en || ''} onChange={(e) => update({ description_en: e.target.value })} rows={2} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">{isRu ? 'Описание (RU)' : 'Description (RU)'}</Label>
+              <Label className="text-xs">{isRu ? 'Описание (RU)' : isTh ? 'คำอธิบาย (RU)' : 'Description (RU)'}</Label>
               <Textarea value={form.description_ru || ''} onChange={(e) => update({ description_ru: e.target.value })} rows={2} />
             </div>
           </AccordionContent>
@@ -324,35 +325,35 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
-              {isRu ? 'Юридические данные' : 'Legal Details'}
+              {isRu ? 'Юридические данные' : isTh ? 'ข้อมูลทางกฎหมาย' : 'Legal Details'}
             </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-3 pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Юридическое название' : 'Legal Name'}</Label>
-                <Input value={form.legal_name || ''} onChange={(e) => update({ legal_name: e.target.value })} placeholder={isRu ? 'ООО «Компания»' : 'Company LLC'} className="h-9" />
+                <Label className="text-xs">{isRu ? 'Юридическое название' : isTh ? 'ชื่อตามกฎหมาย' : 'Legal Name'}</Label>
+                <Input value={form.legal_name || ''} onChange={(e) => update({ legal_name: e.target.value })} placeholder={isRu ? 'ООО «Компания»' : isTh ? 'บริษัท จำกัด' : 'Company LLC'} className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Рег. номер' : 'Registration №'}</Label>
+                <Label className="text-xs">{isRu ? 'Рег. номер' : isTh ? 'เลขทะเบียน' : 'Registration №'}</Label>
                 <Input value={form.registration_number || ''} onChange={(e) => update({ registration_number: e.target.value })} className="h-9" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">{isRu ? 'Юридический адрес' : 'Legal Address'}</Label>
+              <Label className="text-xs">{isRu ? 'Юридический адрес' : isTh ? 'ที่อยู่ตามกฎหมาย' : 'Legal Address'}</Label>
               <Input value={form.legal_address || ''} onChange={(e) => update({ legal_address: e.target.value })} className="h-9" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'ИНН / Tax ID' : 'Tax ID'}</Label>
+                <Label className="text-xs">{isRu ? 'ИНН / Tax ID' : isTh ? 'เลขประจำตัวผู้เสียภาษี' : 'Tax ID'}</Label>
                 <Input value={form.tax_id || ''} onChange={(e) => update({ tax_id: e.target.value })} className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Лицензия' : 'License №'}</Label>
+                <Label className="text-xs">{isRu ? 'Лицензия' : isTh ? 'เลขใบอนุญาต' : 'License №'}</Label>
                 <Input value={form.license_number || ''} onChange={(e) => update({ license_number: e.target.value })} className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Год основания' : 'Founded'}</Label>
+                <Label className="text-xs">{isRu ? 'Год основания' : isTh ? 'ปีที่ก่อตั้ง' : 'Founded'}</Label>
                 <Input type="number" value={form.founded_year || ''} onChange={(e) => update({ founded_year: e.target.value ? Number(e.target.value) : null })} placeholder="2020" className="h-9" />
               </div>
             </div>
@@ -360,7 +361,7 @@ export function CompanyProfileSettings() {
             {/* DBD Card */}
             <div className="space-y-2">
               <Label className="text-xs font-medium">
-                {isRu ? 'DBD карточка (Dept. of Business Development)' : 'DBD Card (Dept. of Business Development)'}
+                {isRu ? 'DBD карточка (Dept. of Business Development)' : isTh ? 'บัตร DBD (กรมพัฒนาธุรกิจการค้า)' : 'DBD Card (Dept. of Business Development)'}
               </Label>
               {form.dbd_card_url && (
                 <img src={form.dbd_card_url} alt="DBD Card" className="w-full max-w-sm h-auto rounded-none border border-border" />
@@ -371,7 +372,7 @@ export function CompanyProfileSettings() {
                 onChange={(url) => update({ dbd_card_url: typeof url === 'string' ? url : '' })}
                 bucket="company-logos"
                 folder="dbd-cards"
-                placeholder={isRu ? 'Загрузите DBD карточку' : 'Upload DBD card'}
+                placeholder={isRu ? 'Загрузите DBD карточку' : isTh ? 'อัปโหลดบัตร DBD' : 'Upload DBD card'}
               />
             </div>
           </AccordionContent>
@@ -382,17 +383,17 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <Landmark className="h-4 w-4 text-primary" />
-              {isRu ? 'Банковские реквизиты' : 'Banking Details'}
+              {isRu ? 'Банковские реквизиты' : isTh ? 'ข้อมูลธนาคาร' : 'Banking Details'}
             </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-3 pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Название банка' : 'Bank Name'}</Label>
+                <Label className="text-xs">{isRu ? 'Название банка' : isTh ? 'ชื่อธนาคาร' : 'Bank Name'}</Label>
                 <Input value={form.bank_name || ''} onChange={(e) => update({ bank_name: e.target.value })} placeholder="Bangkok Bank" className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Номер счёта' : 'Account №'}</Label>
+                <Label className="text-xs">{isRu ? 'Номер счёта' : isTh ? 'เลขที่บัญชี' : 'Account №'}</Label>
                 <Input value={form.bank_account || ''} onChange={(e) => update({ bank_account: e.target.value })} className="h-9" />
               </div>
             </div>
@@ -408,7 +409,7 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
-              {isRu ? 'Документы компании' : 'Company Documents'}
+              {isRu ? 'Документы компании' : isTh ? 'เอกสารบริษัท' : 'Company Documents'}
               {form.documents.length > 0 && (
                 <span className="text-xs font-normal text-muted-foreground">({form.documents.length})</span>
               )}
@@ -416,7 +417,7 @@ export function CompanyProfileSettings() {
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
             <p className="text-xs text-muted-foreground">
-              {isRu ? 'Лицензии, сертификаты, регистрационные документы' : 'Licenses, certificates, registration documents'}
+              {isRu ? 'Лицензии, сертификаты, регистрационные документы' : isTh ? 'ใบอนุญาต ใบรับรอง และเอกสารการจดทะเบียน' : 'Licenses, certificates, registration documents'}
             </p>
 
             {form.documents.length > 0 && (
@@ -428,7 +429,7 @@ export function CompanyProfileSettings() {
                       {doc.name}
                     </a>
                     <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => removeDocument(i)}>
-                      {isRu ? 'Удалить' : 'Remove'}
+                      {isRu ? 'Удалить' : isTh ? 'ลบ' : 'Remove'}
                     </Button>
                   </div>
                 ))}
@@ -441,7 +442,7 @@ export function CompanyProfileSettings() {
               onChange={(url) => handleDocumentUpload(typeof url === 'string' ? url : '')}
               bucket="company-logos"
               folder="documents"
-              placeholder={isRu ? 'Загрузите документ' : 'Upload document'}
+              placeholder={isRu ? 'Загрузите документ' : isTh ? 'อัปโหลดเอกสาร' : 'Upload document'}
             />
           </AccordionContent>
         </AccordionItem>
@@ -455,7 +456,7 @@ export function CompanyProfileSettings() {
           ) : (
             <Save className="h-4 w-4 mr-2" />
           )}
-          {isRu ? 'Сохранить профиль' : 'Save Profile'}
+          {isRu ? 'Сохранить профиль' : isTh ? 'บันทึกโปรไฟล์' : 'Save Profile'}
         </Button>
       </div>
     </div>

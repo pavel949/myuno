@@ -177,15 +177,15 @@ export default function InsurancePlanDetail() {
             {plan.requires_medical_exam !== null && (
               <div className="bg-card border border-border rounded-none p-4 flex items-center justify-between">
                 <span className="text-sm">
-                  {language === 'ru' ? 'Мед. осмотр' : 'Medical exam required'}
+                  {language === 'ru' ? 'Мед. осмотр' : language === 'th' ? 'ต้องตรวจสุขภาพ' : 'Medical exam required'}
                 </span>
                 {plan.requires_medical_exam ? (
                   <Badge variant="secondary">
-                    {language === 'ru' ? 'Требуется' : 'Required'}
+                    {language === 'ru' ? 'Требуется' : language === 'th' ? 'จำเป็น' : 'Required'}
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-success">
-                    {language === 'ru' ? 'Не требуется' : 'Not required'}
+                    {language === 'ru' ? 'Не требуется' : language === 'th' ? 'ไม่จำเป็น' : 'Not required'}
                   </Badge>
                 )}
               </div>
@@ -211,11 +211,11 @@ export default function InsurancePlanDetail() {
           <div className="flex gap-3 max-w-lg mx-auto">
             <Button variant="outline" className="flex-1">
               <MessageCircle className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Консультация' : 'Consult'}
+              {language === 'ru' ? 'Консультация' : language === 'th' ? 'ปรึกษา' : 'Consult'}
             </Button>
             <Button className="flex-1" onClick={() => navigate(`/insurance/${plan.provider_id}/quote?plan=${plan.id}`)}>
               <Calendar className="w-4 h-4 mr-2" />
-              {language === 'ru' ? 'Оформить' : 'Get Quote'}
+              {language === 'ru' ? 'Оформить' : language === 'th' ? 'ขอใบเสนอราคา' : 'Get Quote'}
             </Button>
           </div>
         </div>

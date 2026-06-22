@@ -24,22 +24,22 @@ interface ServiceProvider {
 }
 
 const categories = [
-  { id: 'all', icon: null, labelEn: 'All', labelRu: 'Все' },
-  { id: 'plumbing', icon: Droplets, labelEn: 'Plumbing', labelRu: 'Сантехник' },
-  { id: 'electrical', icon: Zap, labelEn: 'Electrical', labelRu: 'Электрик' },
-  { id: 'cleaning', icon: Sparkles, labelEn: 'Cleaning', labelRu: 'Уборка' },
-  { id: 'repair', icon: Hammer, labelEn: 'Repair', labelRu: 'Ремонт' },
-  { id: 'painting', icon: PaintBucket, labelEn: 'Painting', labelRu: 'Покраска' },
-  { id: 'hvac', icon: Wind, labelEn: 'HVAC', labelRu: 'Кондиционеры' },
+  { id: 'all', icon: null, labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { id: 'plumbing', icon: Droplets, labelEn: 'Plumbing', labelRu: 'Сантехник', labelTh: 'ช่างประปา' },
+  { id: 'electrical', icon: Zap, labelEn: 'Electrical', labelRu: 'Электрик', labelTh: 'ช่างไฟฟ้า' },
+  { id: 'cleaning', icon: Sparkles, labelEn: 'Cleaning', labelRu: 'Уборка', labelTh: 'ทำความสะอาด' },
+  { id: 'repair', icon: Hammer, labelEn: 'Repair', labelRu: 'Ремонт', labelTh: 'ซ่อมแซม' },
+  { id: 'painting', icon: PaintBucket, labelEn: 'Painting', labelRu: 'Покраска', labelTh: 'ทาสี' },
+  { id: 'hvac', icon: Wind, labelEn: 'HVAC', labelRu: 'Кондиционеры', labelTh: 'เครื่องปรับอากาศ' },
 ];
 
 const distanceOptions = [
-  { value: 0, labelEn: 'All', labelRu: 'Все' },
-  { value: 2, labelEn: '2 km', labelRu: '2 км' },
-  { value: 5, labelEn: '5 km', labelRu: '5 км' },
-  { value: 10, labelEn: '10 km', labelRu: '10 км' },
-  { value: 25, labelEn: '25 km', labelRu: '25 км' },
-  { value: 50, labelEn: '50 km', labelRu: '50 км' },
+  { value: 0, labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { value: 2, labelEn: '2 km', labelRu: '2 км', labelTh: '2 กม.' },
+  { value: 5, labelEn: '5 km', labelRu: '5 км', labelTh: '5 กม.' },
+  { value: 10, labelEn: '10 km', labelRu: '10 км', labelTh: '10 กม.' },
+  { value: 25, labelEn: '25 km', labelRu: '25 км', labelTh: '25 กม.' },
+  { value: 50, labelEn: '50 km', labelRu: '50 км', labelTh: '50 กม.' },
 ];
 
 export default function ServicesMap() {
@@ -87,40 +87,40 @@ export default function ServicesMap() {
       <div className="h-[calc(100vh-60px)] flex flex-col">
         <div className="flex items-center justify-between p-4 bg-background/80 border-b border-border/50">
           <BackButton fallbackPath={APP_ROUTES.SERVICES} variant="ghost" size="sm" />
-          <h1 className="font-display font-semibold">{language === 'ru' ? 'Карта мастеров' : 'Professionals Map'}</h1>
+          <h1 className="font-display font-semibold">{language === 'ru' ? 'Карта мастеров' : language === 'th' ? 'แผนที่ผู้ให้บริการ' : 'Professionals Map'}</h1>
           <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'Фильтры' : 'Filters'}><Sliders className="w-5 h-5" /></Button>
+              <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'Фильтры' : language === 'th' ? 'ตัวกรอง' : 'Filters'}><Sliders className="w-5 h-5" /></Button>
             </SheetTrigger>
             <SheetContent>
-              <SheetHeader><SheetTitle>{language === 'ru' ? 'Фильтры' : 'Filters'}</SheetTitle></SheetHeader>
+              <SheetHeader><SheetTitle>{language === 'ru' ? 'Фильтры' : language === 'th' ? 'ตัวกรอง' : 'Filters'}</SheetTitle></SheetHeader>
               <div className="mt-6 space-y-6">
                 <div>
-                  <label className="text-sm font-medium mb-3 block">{language === 'ru' ? 'Категория' : 'Category'}</label>
+                  <label className="text-sm font-medium mb-3 block">{language === 'ru' ? 'Категория' : language === 'th' ? 'หมวดหมู่' : 'Category'}</label>
                   <div className="flex flex-wrap gap-2">
                     {categories.map((cat) => (
-                      <FilterChip key={cat.id} label={language === 'ru' ? cat.labelRu : cat.labelEn} isActive={categoryFilter === cat.id} onToggle={() => setCategoryFilter(cat.id)} />
+                      <FilterChip key={cat.id} label={language === 'ru' ? cat.labelRu : language === 'th' ? cat.labelTh : cat.labelEn} isActive={categoryFilter === cat.id} onToggle={() => setCategoryFilter(cat.id)} />
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-3 block">{language === 'ru' ? 'Расстояние' : 'Distance'}</label>
+                  <label className="text-sm font-medium mb-3 block">{language === 'ru' ? 'Расстояние' : language === 'th' ? 'ระยะทาง' : 'Distance'}</label>
                   <div className="flex flex-wrap gap-2">
                     {distanceOptions.map((opt) => (
-                      <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} isActive={distanceFilter === opt.value} onToggle={() => setDistanceFilter(opt.value)} />
+                      <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : language === 'th' ? opt.labelTh : opt.labelEn} isActive={distanceFilter === opt.value} onToggle={() => setDistanceFilter(opt.value)} />
                     ))}
                   </div>
                 </div>
                 <div className="p-4 rounded-none bg-secondary/50">
                   <div className="flex items-center gap-2 mb-2">
                     <MapPin className="w-4 h-4 text-primary" />
-                    <span className="text-sm font-medium">{language === 'ru' ? 'Ваша локация' : 'Your Location'}</span>
+                    <span className="text-sm font-medium">{language === 'ru' ? 'Ваша локация' : language === 'th' ? 'ตำแหน่งของคุณ' : 'Your Location'}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : language === 'ru' ? 'Определение...' : 'Detecting...'}
+                    {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : language === 'ru' ? 'Определение...' : language === 'th' ? 'กำลังค้นหา...' : 'Detecting...'}
                   </p>
                 </div>
-                <Button className="w-full" onClick={() => setIsFilterOpen(false)}>{language === 'ru' ? 'Применить' : 'Apply'}</Button>
+                <Button className="w-full" onClick={() => setIsFilterOpen(false)}>{language === 'ru' ? 'Применить' : language === 'th' ? 'นำไปใช้' : 'Apply'}</Button>
               </div>
             </SheetContent>
           </Sheet>
@@ -133,7 +133,7 @@ export default function ServicesMap() {
               <button key={cat.id} onClick={() => setCategoryFilter(cat.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${categoryFilter === cat.id ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
                 {Icon && <Icon className="w-4 h-4" />}
-                {language === 'ru' ? cat.labelRu : cat.labelEn}
+                {language === 'ru' ? cat.labelRu : language === 'th' ? cat.labelTh : cat.labelEn}
               </button>
             );
           })}

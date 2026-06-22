@@ -17,17 +17,17 @@ interface ResalePropertyCardProps {
   className?: string;
 }
 
-const CONDITION_LABELS: Record<string, { en: string; ru: string }> = {
-  new: { en: 'New', ru: 'Новое' },
-  excellent: { en: 'Excellent', ru: 'Отличное' },
-  good: { en: 'Good', ru: 'Хорошее' },
-  needs_renovation: { en: 'Needs Reno', ru: 'Под ремонт' },
+const CONDITION_LABELS: Record<string, { en: string; ru: string; th: string }> = {
+  new: { en: 'New', ru: 'Новое', th: 'ใหม่' },
+  excellent: { en: 'Excellent', ru: 'Отличное', th: 'ดีเยี่ยม' },
+  good: { en: 'Good', ru: 'Хорошее', th: 'ดี' },
+  needs_renovation: { en: 'Needs Reno', ru: 'Под ремонт', th: 'ต้องปรับปรุง' },
 };
 
-const TITLE_TYPE_LABELS: Record<string, { en: string; ru: string }> = {
-  freehold: { en: 'Freehold', ru: 'Freehold' },
-  leasehold: { en: 'Leasehold', ru: 'Leasehold' },
-  company_structure: { en: 'Company', ru: 'Компания' },
+const TITLE_TYPE_LABELS: Record<string, { en: string; ru: string; th: string }> = {
+  freehold: { en: 'Freehold', ru: 'Freehold', th: 'Freehold' },
+  leasehold: { en: 'Leasehold', ru: 'Leasehold', th: 'Leasehold' },
+  company_structure: { en: 'Company', ru: 'Компания', th: 'บริษัท' },
 };
 
 export function ResalePropertyCard({ property, onClick, className }: ResalePropertyCardProps) {
@@ -35,6 +35,8 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
+  const lng = isRu ? 'ru' : isTh ? 'th' : 'en';
 
   const surface = useMemo(() => surfaceFromResale(property), [property]);
   const title = isRu ? surface.titleRu : surface.titleEn;
@@ -74,12 +76,12 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
           {property.is_assignment && (
             <Badge className="bg-accent text-accent-foreground text-[10px] px-2 py-0.5">
               <ArrowRightLeft className="w-3 h-3 mr-1" />
-              {isRu ? 'Переуступка' : 'Assignment'}
+              {isRu ? 'Переуступка' : isTh ? 'การโอนสิทธิ' : 'Assignment'}
             </Badge>
           )}
           {property.featured && (
             <Badge className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5">
-              ⭐ {isRu ? 'Рекомендуем' : 'Featured'}
+              ⭐ {isRu ? 'Рекомендуем' : isTh ? 'แนะนำ' : 'Featured'}
             </Badge>
           )}
         </div>
@@ -87,7 +89,7 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
         {/* Title type badge */}
         <div className="absolute bottom-2 right-2">
           <Badge variant="secondary" className="text-[10px] bg-background/80">
-            {TITLE_TYPE_LABELS[property.title_type]?.[isRu ? 'ru' : 'en'] || property.title_type}
+            {TITLE_TYPE_LABELS[property.title_type]?.[lng] || property.title_type}
           </Badge>
         </div>
       </div>
@@ -110,7 +112,7 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
             <>
               <span className="mx-1">·</span>
               <BedDouble className="w-3 h-3" />
-              <span>{property.bedrooms} {isRu ? 'сп.' : 'bd'}</span>
+              <span>{property.bedrooms} {isRu ? 'сп.' : isTh ? 'ห้องนอน' : 'bd'}</span>
             </>
           )}
         </div>
@@ -137,7 +139,7 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {property.current_rental_income && (
               <span>
-                {isRu ? 'Доход:' : 'Income:'} {formatPrice(property.current_rental_income)}/{isRu ? 'мес' : 'mo'}
+                {isRu ? 'Доход:' : isTh ? 'รายได้:' : 'Income:'} {formatPrice(property.current_rental_income)}/{isRu ? 'мес' : isTh ? 'เดือน' : 'mo'}
               </span>
             )}
             {property.estimated_roi && (
@@ -153,14 +155,14 @@ export function ResalePropertyCard({ property, onClick, className }: ResalePrope
         <div className="flex gap-1 text-[10px]">
           {property.condition && (
             <Badge variant="outline" className="text-[10px]">
-              {CONDITION_LABELS[property.condition]?.[isRu ? 'ru' : 'en'] || property.condition}
+              {CONDITION_LABELS[property.condition]?.[lng] || property.condition}
             </Badge>
           )}
           {property.furnished && property.furnished !== 'unfurnished' && (
             <Badge variant="outline" className="text-[10px]">
               {property.furnished === 'fully'
-                ? (isRu ? 'С мебелью' : 'Furnished')
-                : (isRu ? 'Частично' : 'Partial')}
+                ? (isRu ? 'С мебелью' : isTh ? 'มีเฟอร์นิเจอร์' : 'Furnished')
+                : (isRu ? 'Частично' : isTh ? 'บางส่วน' : 'Partial')}
             </Badge>
           )}
         </div>

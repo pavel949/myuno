@@ -23,6 +23,7 @@ export default function LandDetail() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: property, isLoading, error } = useCommercialProperty(id);
 
@@ -41,7 +42,7 @@ export default function LandDetail() {
         <div className="px-4 pt-3"><BackButton /></div>
         <div className="px-4 py-12 text-center">
           <p className="text-sm text-muted-foreground">
-            {isRu ? 'Участок не найден' : 'Plot not found'}
+            {isRu ? 'Участок не найден' : isTh ? 'ไม่พบที่ดิน' : 'Plot not found'}
           </p>
         </div>
       </div>
@@ -80,13 +81,13 @@ export default function LandDetail() {
           <div className="absolute top-3 left-3 flex gap-1.5">
             <Badge className="bg-background/95 text-foreground">{typeLabel}</Badge>
             <Badge className={isRent ? 'bg-primary/95 text-white' : 'bg-accent/95 text-white'}>
-              {isRent ? (isRu ? 'Аренда' : 'Rent') : isRu ? 'Продажа' : 'Sale'}
+              {isRent ? (isRu ? 'Аренда' : isTh ? 'เช่า' : 'Rent') : isRu ? 'Продажа' : isTh ? 'ขาย' : 'Sale'}
             </Badge>
           </div>
           {property.is_verified && (
             <Badge className="absolute top-3 right-3 bg-success/95 text-white gap-1">
               <BadgeCheck className="w-3 h-3" />
-              {isRu ? 'Проверено' : 'Verified'}
+              {isRu ? 'Проверено' : isTh ? 'ผ่านการตรวจสอบ' : 'Verified'}
             </Badge>
           )}
         </div>
@@ -100,10 +101,10 @@ export default function LandDetail() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {priceMain && <Metric label={isRu ? 'Цена' : 'Price'} value={priceMain} />}
-            {sizeLabel && <Metric label={isRu ? 'Размер' : 'Size'} value={sizeLabel} />}
+            {priceMain && <Metric label={isRu ? 'Цена' : isTh ? 'ราคา' : 'Price'} value={priceMain} />}
+            {sizeLabel && <Metric label={isRu ? 'Размер' : isTh ? 'ขนาด' : 'Size'} value={sizeLabel} />}
             {property.frontage_m != null && (
-              <Metric label={isRu ? 'Фасад' : 'Frontage'} value={`${property.frontage_m} m`} />
+              <Metric label={isRu ? 'Фасад' : isTh ? 'หน้ากว้าง' : 'Frontage'} value={`${property.frontage_m} m`} />
             )}
           </div>
 
@@ -115,13 +116,13 @@ export default function LandDetail() {
 
           <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
             {titleDeed && (
-              <SpecRow icon={<ShieldCheck className="w-3.5 h-3.5" />} label={isRu ? 'Документ' : 'Title deed'} value={titleDeed} />
+              <SpecRow icon={<ShieldCheck className="w-3.5 h-3.5" />} label={isRu ? 'Документ' : isTh ? 'โฉนด' : 'Title deed'} value={titleDeed} />
             )}
             {property.zoning && (
-              <SpecRow icon={<ShieldCheck className="w-3.5 h-3.5" />} label={isRu ? 'Зонирование' : 'Zoning'} value={property.zoning} />
+              <SpecRow icon={<ShieldCheck className="w-3.5 h-3.5" />} label={isRu ? 'Зонирование' : isTh ? 'การจัดโซน' : 'Zoning'} value={property.zoning} />
             )}
             {property.road_access && (
-              <SpecRow icon={<Route className="w-3.5 h-3.5" />} label={isRu ? 'Подъезд' : 'Road access'} value={property.road_access} />
+              <SpecRow icon={<Route className="w-3.5 h-3.5" />} label={isRu ? 'Подъезд' : isTh ? 'ทางเข้าออก' : 'Road access'} value={property.road_access} />
             )}
           </div>
 
@@ -129,7 +130,7 @@ export default function LandDetail() {
             <Button className="flex-1" asChild>
               <a href={`mailto:capital@myuno.app?subject=${encodeURIComponent(`Inquiry: ${title}`)}`}>
                 <Mail className="w-4 h-4 mr-1.5" />
-                {isRu ? 'Запросить просмотр' : 'Request viewing'}
+                {isRu ? 'Запросить просмотр' : isTh ? 'ขอเข้าชม' : 'Request viewing'}
               </a>
             </Button>
           </div>

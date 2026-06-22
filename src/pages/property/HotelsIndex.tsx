@@ -21,15 +21,16 @@ import { HotelFiltersSheet, type HotelFiltersValue } from '@/components/property
 import { PersonaGatePrompt } from '@/components/property/commercial/PersonaGatePrompt';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 
-const MODES: { id: HotelMode; labelEn: string; labelRu: string }[] = [
-  { id: 'buy', labelEn: 'Buy', labelRu: 'Купить' },
-  { id: 'lease', labelEn: 'Lease', labelRu: 'Аренда' },
-  { id: 'management', labelEn: 'Operator opportunities', labelRu: 'Под оператора' },
+const MODES: { id: HotelMode; labelEn: string; labelRu: string; labelTh: string }[] = [
+  { id: 'buy', labelEn: 'Buy', labelRu: 'Купить', labelTh: 'ซื้อ' },
+  { id: 'lease', labelEn: 'Lease', labelRu: 'Аренда', labelTh: 'เช่า' },
+  { id: 'management', labelEn: 'Operator opportunities', labelRu: 'Под оператора', labelTh: 'โอกาสสำหรับผู้ดำเนินการ' },
 ];
 
 export default function HotelsIndex() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [searchParams, setSearchParams] = useSearchParams();
   const [hmaOpen, setHmaOpen] = useState(false);
 
@@ -80,8 +81,8 @@ export default function HotelsIndex() {
   const headerLabel = useMemo(() => {
     const m = MODES.find((x) => x.id === mode);
     if (!m) return '';
-    return isRu ? m.labelRu : m.labelEn;
-  }, [mode, isRu]);
+    return isRu ? m.labelRu : isTh ? m.labelTh : m.labelEn;
+  }, [mode, isRu, isTh]);
 
   return (
     <>
@@ -89,11 +90,15 @@ export default function HotelsIndex() {
         title={
           isRu
             ? 'Отели на Пхукете — купить, арендовать, передать в управление | myUNO'
+            : isTh
+            ? 'โรงแรมในภูเก็ต — ซื้อ เช่า หรือมอบให้ผู้ดำเนินการ | myUNO'
             : 'Hotels in Phuket — buy, lease, hand over to operator | myUNO'
         }
         description={
           isRu
             ? 'Готовый отельный бизнес: покупка, долгосрочная аренда здания, передача в управление бренду. ADR, RevPAR, occupancy.'
+            : isTh
+            ? 'ธุรกิจโรงแรมพร้อมดำเนินการ: ซื้อ เช่าอาคารระยะยาว มอบให้แบรนด์บริหาร ADR, RevPAR, อัตราการเข้าพัก'
             : 'Turnkey hotel businesses: acquisition, long-term lease, hand-over to brand operators. ADR, RevPAR, occupancy.'
         }
       />
@@ -107,12 +112,14 @@ export default function HotelsIndex() {
           <div className="flex items-center gap-2 mb-1.5">
             <Hotel className="w-5 h-5 text-accent dark:text-accent" />
             <h1 className="text-2xl font-bold text-foreground">
-              {isRu ? 'Отели' : 'Hotels'}
+              {isRu ? 'Отели' : isTh ? 'โรงแรม' : 'Hotels'}
             </h1>
           </div>
           <p className="text-sm text-muted-foreground">
             {isRu
               ? 'Купить, арендовать здание или передать отель в управление бренду.'
+              : isTh
+              ? 'ซื้อ เช่าอาคาร หรือมอบโรงแรมให้แบรนด์บริหาร'
               : 'Buy, lease the building, or hand over to a brand operator.'}
           </p>
         </div>
@@ -137,7 +144,7 @@ export default function HotelsIndex() {
                     : 'text-muted-foreground hover:text-foreground',
                 )}
               >
-                {isRu ? m.labelRu : m.labelEn}
+                {isRu ? m.labelRu : isTh ? m.labelTh : m.labelEn}
               </button>
             ))}
           </div>
@@ -148,9 +155,13 @@ export default function HotelsIndex() {
               {isLoading
                 ? isRu
                   ? 'Загрузка...'
+                  : isTh
+                  ? 'กำลังโหลด...'
                   : 'Loading...'
                 : isRu
                 ? `${items.length} объект(ов) · ${headerLabel}`
+                : isTh
+                ? `${items.length} รายการ · ${headerLabel}`
                 : `${items.length} listing(s) · ${headerLabel}`}
             </p>
             <HotelFiltersSheet value={filterValues} onChange={updateFilters} />
@@ -167,7 +178,7 @@ export default function HotelsIndex() {
 
           {!isLoading && error && (
             <div className="text-sm text-destructive p-4 rounded-none bg-destructive/5">
-              {isRu ? 'Не удалось загрузить отели' : 'Failed to load hotels'}
+              {isRu ? 'Не удалось загрузить отели' : isTh ? 'ไม่สามารถโหลดโรงแรมได้' : 'Failed to load hotels'}
             </div>
           )}
 
@@ -175,15 +186,17 @@ export default function HotelsIndex() {
             <div className="text-center py-16 px-4 border border-dashed border-border rounded-none">
               <Building2 className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-sm font-medium text-foreground mb-1">
-                {isRu ? 'Пока нет объектов' : 'No listings yet'}
+                {isRu ? 'Пока нет объектов' : isTh ? 'ยังไม่มีรายการ' : 'No listings yet'}
               </p>
               <p className="text-xs text-muted-foreground mb-4">
                 {isRu
                   ? 'Мы формируем закрытый пул отельных активов. Свяжитесь, чтобы получить доступ к черновику пайплайна.'
+                  : isTh
+                  ? 'เรากำลังคัดสรรพูลสินทรัพย์โรงแรมแบบปิด ติดต่อเราเพื่อเข้าถึงไปป์ไลน์ก่อนใคร'
                   : 'We are curating a private pool of hotel assets. Reach out for early pipeline access.'}
               </p>
               <Button size="sm" variant="outline" onClick={() => setHmaOpen(true)}>
-                {isRu ? 'Опубликовать отель' : 'Submit a hotel'}
+                {isRu ? 'Опубликовать отель' : isTh ? 'ส่งโรงแรม' : 'Submit a hotel'}
               </Button>
             </div>
           )}

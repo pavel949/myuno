@@ -23,6 +23,7 @@ export default function ManagementCompanyProfile() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: company, isLoading } = useManagementCompanyBySlug(slug);
 
@@ -53,10 +54,10 @@ export default function ManagementCompanyProfile() {
           <div className="text-center">
             <Building2 className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
             <h2 className="text-lg font-semibold mb-2">
-              {isRu ? 'Компания не найдена' : 'Company not found'}
+              {isRu ? 'Компания не найдена' : isTh ? 'ไม่พบบริษัท' : 'Company not found'}
             </h2>
             <Button variant="outline" onClick={() => navigate('/property')}>
-              {isRu ? 'К объектам' : 'Browse properties'}
+              {isRu ? 'К объектам' : isTh ? 'ดูรายการอสังหาฯ' : 'Browse properties'}
             </Button>
           </div>
         </div>
@@ -105,7 +106,7 @@ export default function ManagementCompanyProfile() {
                   {company.is_verified && (
                     <Badge variant="secondary" className="gap-1 text-xs">
                       <Shield className="w-3 h-3" />
-                      {isRu ? 'Проверено' : 'Verified'}
+                      {isRu ? 'Проверено' : isTh ? 'ผ่านการตรวจสอบ' : 'Verified'}
                     </Badge>
                   )}
                 </div>
@@ -127,7 +128,7 @@ export default function ManagementCompanyProfile() {
                   {company.founded_year && (
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
-                      {isRu ? `с ${company.founded_year}` : `est. ${company.founded_year}`}
+                      {isRu ? `с ${company.founded_year}` : isTh ? `ก่อตั้ง ${company.founded_year}` : `est. ${company.founded_year}`}
                     </span>
                   )}
                 </div>
@@ -166,7 +167,7 @@ export default function ManagementCompanyProfile() {
                 <Button variant="outline" size="sm" className="gap-1.5" asChild>
                   <a href={`tel:${company.phone}`}>
                     <Phone className="w-3.5 h-3.5" />
-                    {isRu ? 'Позвонить' : 'Call'}
+                    {isRu ? 'Позвонить' : isTh ? 'โทร' : 'Call'}
                   </a>
                 </Button>
               )}
@@ -190,7 +191,7 @@ export default function ManagementCompanyProfile() {
                 <Button variant="outline" size="sm" className="gap-1.5" asChild>
                   <a href={company.website} target="_blank" rel="noopener noreferrer">
                     <Globe className="w-3.5 h-3.5" />
-                    {isRu ? 'Сайт' : 'Website'}
+                    {isRu ? 'Сайт' : isTh ? 'เว็บไซต์' : 'Website'}
                   </a>
                 </Button>
               )}
@@ -201,7 +202,7 @@ export default function ManagementCompanyProfile() {
         {/* Portfolio */}
         <div className="px-4 mt-6">
           <h2 className="text-lg font-bold mb-3">
-            {isRu ? 'Объекты под управлением' : 'Managed properties'}
+            {isRu ? 'Объекты под управлением' : isTh ? 'อสังหาฯ ภายใต้การดูแล' : 'Managed properties'}
             {properties.length > 0 && (
               <span className="text-sm font-normal text-muted-foreground ml-2">
                 ({properties.length})
@@ -223,7 +224,7 @@ export default function ManagementCompanyProfile() {
             <div className="text-center py-12 text-muted-foreground">
               <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p className="text-sm">
-                {isRu ? 'Объекты пока не добавлены' : 'No properties listed yet'}
+                {isRu ? 'Объекты пока не добавлены' : isTh ? 'ยังไม่มีการเพิ่มทรัพย์' : 'No properties listed yet'}
               </p>
             </div>
           )}

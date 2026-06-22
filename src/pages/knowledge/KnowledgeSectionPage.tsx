@@ -63,7 +63,7 @@ export default function KnowledgeSectionPage() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={language === 'ru' ? 'Назад' : 'Back'}
+            aria-label={language === 'ru' ? 'Назад' : language === 'th' ? 'ย้อนกลับ' : 'Back'}
             onClick={() => navigate('/knowledge')}
             className="shrink-0"
           >

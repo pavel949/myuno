@@ -292,6 +292,8 @@ export default function ServicesIndex() {
           <p className="text-[13px] text-muted-foreground leading-snug">
             {isRu
               ? <>Не нашли категорию «{unknownSlug}» — показываем похожие услуги по поиску.</>
+              : isTh
+              ? <>ไม่พบหมวดหมู่ "{unknownSlug}" — กำลังแสดงบริการที่คล้ายกันจากการค้นหา</>
               : <>Couldn't find category "{unknownSlug}" — showing similar services from search.</>}
           </p>
         </div>
@@ -303,7 +305,7 @@ export default function ServicesIndex() {
           <div className="flex items-center gap-2 mb-3">
             <Zap className="h-4 w-4 text-primary" />
             <h3 className="font-semibold text-sm">
-              {isRu ? 'Популярные услуги' : 'Popular Services'}
+              {isRu ? 'Популярные услуги' : isTh ? 'บริการยอดนิยม' : 'Popular Services'}
             </h3>
           </div>
           <div className="grid gap-2">
@@ -328,7 +330,7 @@ export default function ServicesIndex() {
             {categories.find(c => c.id === selectedCategory)?.name}
           </h3>
           <Badge variant="secondary" className="ml-auto">
-            {filteredFunctions.length} {isRu ? 'услуг' : 'services'}
+            {filteredFunctions.length} {isRu ? 'услуг' : isTh ? 'บริการ' : 'services'}
           </Badge>
         </div>
       )}
@@ -340,21 +342,21 @@ export default function ServicesIndex() {
         <div className="rounded-none border border-border bg-card p-4 sm:p-5 space-y-3">
           <div className="space-y-1">
             <h4 className="font-display text-[17px] font-semibold tracking-tight text-foreground">
-              {isRu ? intro.titleRu : intro.titleEn}
+              {isRu ? intro.titleRu : isTh ? intro.titleTh : intro.titleEn}
             </h4>
             <p className="text-[13px] text-muted-foreground leading-snug">
-              {isRu ? intro.descRu : intro.descEn}
+              {isRu ? intro.descRu : isTh ? intro.descTh : intro.descEn}
             </p>
           </div>
           <Button asChild className="w-full sm:w-auto" size="lg">
             <a
-              href={whatsappLink(introCategoryLabel, language as 'ru' | 'en')}
+              href={whatsappLink(introCategoryLabel, language as 'ru' | 'en' | 'th')}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2"
             >
               <MessageCircle className="h-4 w-4" />
-              {isRu ? 'Описать задачу в WhatsApp' : 'Describe the task on WhatsApp'}
+              {isRu ? 'Описать задачу в WhatsApp' : isTh ? 'อธิบายงานทาง WhatsApp' : 'Describe the task on WhatsApp'}
             </a>
           </Button>
         </div>
@@ -363,7 +365,7 @@ export default function ServicesIndex() {
       {filteredFunctions.length === 0 ? (
         <EmptyState
           icon={Wrench}
-          title={isRu ? 'Услуги не найдены' : 'No services found'}
+          title={isRu ? 'Услуги не найдены' : isTh ? 'ไม่พบบริการ' : 'No services found'}
         />
       ) : (
         <>

@@ -44,6 +44,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [expanded, setExpanded] = useState(false);
 
   const name = isRu ? project.name_ru : project.name_en;
@@ -59,7 +60,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Building2 className="h-4 w-4 text-primary" />
-          {isRu ? 'Проект / ЖК' : 'Project / Complex'}
+          {isRu ? 'Проект / ЖК' : isTh ? 'โครงการ / คอมเพล็กซ์' : 'Project / Complex'}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -99,7 +100,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
               {project.total_units && (
                 <Badge variant="outline" className="text-xs">
                   <Users className="h-3 w-3 mr-1" />
-                  {project.total_units} {isRu ? 'юнитов' : 'units'}
+                  {project.total_units} {isRu ? 'юнитов' : isTh ? 'ยูนิต' : 'units'}
                 </Badge>
               )}
             </div>
@@ -110,7 +111,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
         {amenities.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">
-              {isRu ? 'Удобства территории' : 'Project Amenities'}
+              {isRu ? 'Удобства территории' : isTh ? 'สิ่งอำนวยความสะดวกในโครงการ' : 'Project Amenities'}
             </p>
             <div className="flex flex-wrap gap-2">
               {amenities.slice(0, expanded ? undefined : 6).map((amenity) => {
@@ -160,12 +161,12 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
             {expanded ? (
               <>
                 <ChevronUp className="h-4 w-4 mr-1" />
-                {isRu ? 'Свернуть' : 'Show less'}
+                {isRu ? 'Свернуть' : isTh ? 'แสดงน้อยลง' : 'Show less'}
               </>
             ) : (
               <>
                 <ChevronDown className="h-4 w-4 mr-1" />
-                {isRu ? 'Подробнее о проекте' : 'More about project'}
+                {isRu ? 'Подробнее о проекте' : isTh ? 'ข้อมูลเพิ่มเติมเกี่ยวกับโครงการ' : 'More about project'}
               </>
             )}
           </Button>
@@ -175,7 +176,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
         {expanded && project.images && project.images.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">
-              {isRu ? 'Фото территории' : 'Territory Photos'}
+              {isRu ? 'Фото территории' : isTh ? 'ภาพถ่ายพื้นที่โครงการ' : 'Territory Photos'}
             </p>
             <div className="grid grid-cols-4 gap-1.5">
               {project.images.slice(0, 4).map((img, idx) => (
@@ -195,7 +196,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
           <Button variant="outline" size="sm" className="w-full" asChild>
             <a href={project.video_url} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4 mr-2" />
-              {isRu ? 'Смотреть видео' : 'Watch Video'}
+              {isRu ? 'Смотреть видео' : isTh ? 'ดูวิดีโอ' : 'Watch Video'}
             </a>
           </Button>
         )}
@@ -208,7 +209,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
           onClick={handleExploreProject}
         >
           <Building2 className="h-4 w-4" />
-          {isRu ? 'Исследовать комплекс' : 'Explore Complex'}
+          {isRu ? 'Исследовать комплекс' : isTh ? 'สำรวจคอมเพล็กซ์' : 'Explore Complex'}
         </Button>
       </CardContent>
     </Card>

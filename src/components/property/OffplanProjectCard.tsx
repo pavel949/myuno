@@ -36,23 +36,23 @@ interface OffplanProjectCardProps {
   variant?: 'carousel' | 'grid';
 }
 
-const STATUS_CONFIG: Record<ProjectStatus, { 
-  label: { en: string; ru: string }; 
+const STATUS_CONFIG: Record<ProjectStatus, {
+  label: { en: string; ru: string; th: string };
   icon: React.ElementType;
   color: string;
 }> = {
   offplan: {
-    label: { en: 'Off-Plan', ru: 'Новостройка' },
+    label: { en: 'Off-Plan', ru: 'Новостройка', th: 'Off-Plan' },
     icon: Building2,
     color: 'bg-primary/10 text-primary border-primary/30',
   },
   under_construction: {
-    label: { en: 'Under Construction', ru: 'Строится' },
+    label: { en: 'Under Construction', ru: 'Строится', th: 'กำลังก่อสร้าง' },
     icon: HardHat,
     color: 'bg-accent/10 text-accent-foreground border-accent/30',
   },
   completed: {
-    label: { en: 'Completed', ru: 'Готово' },
+    label: { en: 'Completed', ru: 'Готово', th: 'สร้างเสร็จแล้ว' },
     icon: CheckCircle2,
     color: 'bg-secondary/20 text-secondary-foreground border-secondary/30',
   },
@@ -67,6 +67,7 @@ export function OffplanProjectCard({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { user } = useAuth();
   const { isInCollection, toggleCollection } = useUserCollections();
   const isFav = isInCollection('newbuild_project', project.id);
@@ -83,7 +84,7 @@ export function OffplanProjectCard({
   const handleFav = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
-      toast.error(isRu ? 'Войдите, чтобы добавить в избранное' : 'Sign in to favourite');
+      toast.error(isRu ? 'Войдите, чтобы добавить в избранное' : isTh ? 'เข้าสู่ระบบเพื่อบันทึกรายการโปรด' : 'Sign in to favourite');
       navigate('/auth');
       return;
     }
@@ -142,7 +143,7 @@ export function OffplanProjectCard({
         <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 max-w-[70%]">
           <Badge className={cn("gap-1 text-xs border", status.color)}>
             <StatusIcon className="w-3 h-3" />
-            {isRu ? status.label.ru : status.label.en}
+            {isRu ? status.label.ru : isTh ? status.label.th : status.label.en}
           </Badge>
 
           {/* ClearView recommendation badge (BUY / WATCH / AVOID) */}
@@ -154,7 +155,7 @@ export function OffplanProjectCard({
                 project.offplanCatalog.rec === 'WATCH' && 'bg-warning text-warning-foreground',
                 project.offplanCatalog.rec === 'AVOID' && 'bg-destructive text-destructive-foreground',
               )}
-              title={isRu ? 'Рекомендация ClearView V3' : 'ClearView V3 recommendation'}
+              title={isRu ? 'Рекомендация ClearView V3' : isTh ? 'คำแนะนำ ClearView V3' : 'ClearView V3 recommendation'}
             >
               {project.offplanCatalog.rec}
             </Badge>
@@ -163,14 +164,14 @@ export function OffplanProjectCard({
           {/* Brokered / not ClearView-rated */}
           {!project.isClearviewRated && (
             <Badge variant="outline" className="text-[10px] bg-background border-warning/40 text-warning">
-              {isRu ? 'Не оценён ClearView' : 'Not ClearView rated'}
+              {isRu ? 'Не оценён ClearView' : isTh ? 'ยังไม่ได้รับเรตติง ClearView' : 'Not ClearView rated'}
             </Badge>
           )}
 
           {project.isFeatured && (
             <Badge className="bg-primary text-primary-foreground border-0 gap-1">
               <Sparkles className="w-3 h-3" />
-              {isRu ? 'Топ' : 'Hot'}
+              {isRu ? 'Топ' : isTh ? 'ฮอต' : 'Hot'}
             </Badge>
           )}
         </div>
@@ -185,7 +186,7 @@ export function OffplanProjectCard({
         {/* Favorite (alerts on new units) */}
         <button
           type="button"
-          aria-label={isRu ? 'Добавить в избранное' : 'Add to favourites'}
+          aria-label={isRu ? 'Добавить в избранное' : isTh ? 'เพิ่มในรายการโปรด' : 'Add to favourites'}
           onClick={handleFav}
           className={cn(
             'absolute right-3 flex items-center justify-center w-8 h-8 min-h-[44px] min-w-[44px] rounded-full',
@@ -202,7 +203,7 @@ export function OffplanProjectCard({
         {project.projectStatus !== 'completed' && project.constructionProgress > 0 && (
           <div className="absolute bottom-0 left-0 right-0 p-3">
             <div className="flex items-center justify-between text-xs text-primary-foreground mb-1">
-              <span>{isRu ? 'Прогресс' : 'Progress'}</span>
+              <span>{isRu ? 'Прогресс' : isTh ? 'ความคืบหน้า' : 'Progress'}</span>
               <span className="font-semibold">{project.constructionProgress}%</span>
             </div>
             <Progress 
@@ -241,7 +242,7 @@ export function OffplanProjectCard({
         {/* Price */}
         {project.priceFrom && (
           <p className="text-base">
-            <span className="text-muted-foreground text-sm">{isRu ? 'от' : 'from'} </span>
+            <span className="text-muted-foreground text-sm">{isRu ? 'от' : isTh ? 'เริ่มต้น' : 'from'} </span>
             <span className="font-bold text-primary">
               {formatPrice(project.priceFrom)}
             </span>
@@ -258,12 +259,12 @@ export function OffplanProjectCard({
           {project.riskLevel ? (
             <>
               <ShieldCheck className="w-3.5 h-3.5" />
-              {isRu ? 'Due Diligence пройден' : 'Due Diligence Complete'}
+              {isRu ? 'Due Diligence пройден' : isTh ? 'ตรวจสอบสถานะเสร็จสมบูรณ์' : 'Due Diligence Complete'}
             </>
           ) : (
             <>
               <ShieldAlert className="w-3.5 h-3.5" />
-              {isRu ? 'Запросить оценку рисков' : 'Request Risk Assessment'}
+              {isRu ? 'Запросить оценку рисков' : isTh ? 'ขอประเมินความเสี่ยง' : 'Request Risk Assessment'}
             </>
           )}
         </div>
@@ -289,7 +290,7 @@ export function OffplanProjectCard({
           {/* Units available */}
           {project.unitsAvailable > 0 && (
             <div className="text-xs text-muted-foreground ml-auto">
-              {project.unitsAvailable} {isRu ? 'доступно' : 'units'}
+              {project.unitsAvailable} {isRu ? 'доступно' : isTh ? 'ยูนิต' : 'units'}
             </div>
           )}
         </div>

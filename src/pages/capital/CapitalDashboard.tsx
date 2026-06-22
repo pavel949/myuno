@@ -54,7 +54,7 @@ export default function CapitalDashboard() {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{isRu ? 'Дашборд' : 'Dashboard'}</h1>
+        <h1 className="text-xl font-bold">{isRu ? 'Дашборд' : isTh ? 'แดชบอร์ด' : 'Dashboard'}</h1>
         <Badge className="bg-success/20 text-success">Ignatev Capital</Badge>
       </div>
 
@@ -84,7 +84,7 @@ export default function CapitalDashboard() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="font-medium">{isRu ? 'Касания на сегодня' : "Today's touches"}</h2>
+            <h2 className="font-medium">{isRu ? 'Касания на сегодня' : isTh ? 'การติดต่อวันนี้' : "Today's touches"}</h2>
             <p className="text-3xl font-bold text-success mt-1">{stats.todayTouchesCount}</p>
           </div>
           <ArrowRight className="w-5 h-5 text-muted-foreground" />
@@ -94,10 +94,10 @@ export default function CapitalDashboard() {
       {/* Pipeline Funnel */}
       <div className="rounded-none border border-border/50 p-4">
         <h2 className="font-medium mb-4 flex items-center gap-2">
-          <KanbanSquare className="w-4 h-4" /> {isRu ? 'Воронка' : 'Pipeline'}
+          <KanbanSquare className="w-4 h-4" /> {isRu ? 'Воронка' : isTh ? 'ไปป์ไลน์' : 'Pipeline'}
         </h2>
         {chartData.every((d) => d.count === 0) ? (
-          <p className="text-sm text-muted-foreground text-center py-8">{isRu ? 'Нет данных в воронке' : 'No pipeline data yet'}</p>
+          <p className="text-sm text-muted-foreground text-center py-8">{isRu ? 'Нет данных в воронке' : isTh ? 'ยังไม่มีข้อมูลไปป์ไลน์' : 'No pipeline data yet'}</p>
         ) : (
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={chartData} layout="vertical" margin={{ left: 80, right: 20 }}>
@@ -120,9 +120,9 @@ export default function CapitalDashboard() {
       {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {[
-          { label: isRu ? 'Контакты' : 'Contacts', path: '/capital/contacts', icon: Users },
-          { label: isRu ? 'Проекты' : 'Projects', path: '/capital/projects', icon: Megaphone },
-          { label: isRu ? 'Воронка' : 'Pipeline', path: '/capital/pipeline', icon: KanbanSquare },
+          { label: isRu ? 'Контакты' : isTh ? 'ผู้ติดต่อ' : 'Contacts', path: '/capital/contacts', icon: Users },
+          { label: isRu ? 'Проекты' : isTh ? 'โครงการ' : 'Projects', path: '/capital/projects', icon: Megaphone },
+          { label: isRu ? 'Воронка' : isTh ? 'ไปป์ไลน์' : 'Pipeline', path: '/capital/pipeline', icon: KanbanSquare },
         ].map((link) => (
           <div
             key={link.path}

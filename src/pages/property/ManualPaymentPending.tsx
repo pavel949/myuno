@@ -45,6 +45,7 @@ export default function ManualPaymentPending() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const [request, setRequest] = useState<ManualPaymentRequestRow | null>(null);
   const [order, setOrder] = useState<OrderRow | null>(null);
@@ -93,18 +94,18 @@ export default function ManualPaymentPending() {
           const next = payload.new as ManualPaymentRequestRow;
           setRequest(next);
           if (next.status === 'confirmed') {
-            toast.success(isRu ? 'Оплата подтверждена!' : 'Payment confirmed!');
+            toast.success(isRu ? 'Оплата подтверждена!' : isTh ? 'ยืนยันการชำระเงินแล้ว!' : 'Payment confirmed!');
           } else if (next.status === 'rejected') {
-            toast.error(isRu ? 'Заявка отклонена' : 'Request rejected');
+            toast.error(isRu ? 'Заявка отклонена' : isTh ? 'คำขอถูกปฏิเสธ' : 'Request rejected');
           }
         },
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [orderId, isRu]);
+  }, [orderId, isRu, isTh]);
 
   const orderMeta = (order?.metadata || {}) as Record<string, any>;
-  const propertyTitle: string = orderMeta.property_title || (isRu ? 'Объект' : 'Property');
+  const propertyTitle: string = orderMeta.property_title || (isRu ? 'Объект' : isTh ? 'ทรัพย์' : 'Property');
   const guests: number = Number(orderMeta.guests || 0);
   const nights: number = Number(orderMeta.nights || 0);
 
@@ -112,16 +113,18 @@ export default function ManualPaymentPending() {
     const num = order?.order_number || orderId?.slice(0, 8) || '';
     return isRu
       ? `Здравствуйте! Я отправил(а) заявку на оплату в рублях, заявка #${num}. Жду реквизиты для оплаты.`
+      : isTh
+      ? `สวัสดีครับ/ค่ะ ฉันเพิ่งส่งคำขอชำระเงินเป็นรูเบิล หมายเลขอ้างอิง #${num} ขอรายละเอียดการชำระเงินด้วยครับ/ค่ะ`
       : `Hi! I just submitted a Russian-Ruble payment request, ref #${num}. Could you send me the payment details?`;
-  }, [order?.order_number, orderId, isRu]);
+  }, [order?.order_number, orderId, isRu, isTh]);
 
   const whatsappUrl = `${COMPANY_CONTACTS.whatsapp.link}?text=${encodeURIComponent(whatsappMessage)}`;
 
   const copyOrderNumber = () => {
     const num = order?.order_number || orderId || '';
     navigator.clipboard.writeText(num).then(
-      () => toast.success(isRu ? 'Скопировано' : 'Copied'),
-      () => toast.error(isRu ? 'Не удалось скопировать' : 'Could not copy'),
+      () => toast.success(isRu ? 'Скопировано' : isTh ? 'คัดลอกแล้ว' : 'Copied'),
+      () => toast.error(isRu ? 'Не удалось скопировать' : isTh ? 'คัดลอกไม่สำเร็จ' : 'Could not copy'),
     );
   };
 
@@ -138,11 +141,11 @@ export default function ManualPaymentPending() {
       <div className="p-6 text-center space-y-4">
         <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground" />
         <h1 className="text-xl font-display font-bold">
-          {isRu ? 'Заявка не найдена' : 'Request not found'}
+          {isRu ? 'Заявка не найдена' : isTh ? 'ไม่พบคำขอ' : 'Request not found'}
         </h1>
         <Button onClick={() => navigate('/')} variant="outline">
           <Home className="w-4 h-4 mr-2" />
-          {isRu ? 'На главную' : 'Go home'}
+          {isRu ? 'На главную' : isTh ? 'กลับหน้าแรก' : 'Go home'}
         </Button>
       </div>
     );
@@ -157,7 +160,7 @@ export default function ManualPaymentPending() {
   const holdExpiresAt = parseISO(request.hold_expires_at);
   const expiresInLabel = formatDistanceToNow(holdExpiresAt, {
     addSuffix: true,
-    locale: isRu ? ruLocale : undefined,
+    locale: isRu ? ruLocale : undefined, // date-fns th locale not imported → EN fallback
   });
 
   return (
@@ -166,7 +169,7 @@ export default function ManualPaymentPending() {
           <div className="flex items-center gap-4 p-4">
             <BackButton fallbackPath="/" variant="ghost" />
             <h1 className="text-lg font-display font-bold">
-              {isRu ? 'Оплата в рублях' : 'Russian-Ruble payment'}
+              {isRu ? 'Оплата в рублях' : isTh ? 'ชำระเงินด้วยรูเบิล' : 'Russian-Ruble payment'}
             </h1>
           </div>
         </div>
@@ -179,11 +182,13 @@ export default function ManualPaymentPending() {
                 <CheckCircle2 className="w-8 h-8 text-success shrink-0" />
                 <div className="space-y-1">
                   <h2 className="font-display font-bold text-lg">
-                    {isRu ? 'Оплата подтверждена!' : 'Payment confirmed!'}
+                    {isRu ? 'Оплата подтверждена!' : isTh ? 'ยืนยันการชำระเงินแล้ว!' : 'Payment confirmed!'}
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {isRu
                       ? 'Бронирование подтверждено. Ваучер отправлен на email.'
+                      : isTh
+                      ? 'ยืนยันการจองแล้ว ส่งวอชเชอร์ไปยังอีเมลของคุณแล้ว'
                       : 'Your booking is confirmed. Voucher sent to email.'}
                   </p>
                 </div>
@@ -197,7 +202,7 @@ export default function ManualPaymentPending() {
                 <XCircle className="w-8 h-8 text-destructive shrink-0" />
                 <div className="space-y-1">
                   <h2 className="font-display font-bold text-lg">
-                    {isRu ? 'Заявка отклонена' : 'Request rejected'}
+                    {isRu ? 'Заявка отклонена' : isTh ? 'คำขอถูกปฏิเสธ' : 'Request rejected'}
                   </h2>
                   {request.rejected_reason && (
                     <p className="text-sm text-muted-foreground">{request.rejected_reason}</p>
@@ -213,11 +218,13 @@ export default function ManualPaymentPending() {
                 <Clock className="w-8 h-8 text-muted-foreground shrink-0" />
                 <div className="space-y-1">
                   <h2 className="font-display font-bold text-lg">
-                    {isRu ? 'Срок ожидания истёк' : 'Hold expired'}
+                    {isRu ? 'Срок ожидания истёк' : isTh ? 'หมดเวลากันสิทธิ์' : 'Hold expired'}
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {isRu
                       ? 'Даты освобождены. Если хотите забронировать снова — напишите нам.'
+                      : isTh
+                      ? 'ปล่อยวันที่แล้ว หากต้องการจองอีกครั้ง โปรดติดต่อเรา'
                       : 'Dates released. Reach out if you still want to book.'}
                   </p>
                 </div>
@@ -231,11 +238,13 @@ export default function ManualPaymentPending() {
                 <CheckCircle2 className="w-8 h-8 text-primary shrink-0" />
                 <div className="space-y-1">
                   <h2 className="font-display font-bold text-lg">
-                    {isRu ? 'Заявка отправлена!' : 'Request submitted!'}
+                    {isRu ? 'Заявка отправлена!' : isTh ? 'ส่งคำขอแล้ว!' : 'Request submitted!'}
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {isRu
                       ? 'Менеджер myUNO свяжется с вами в течение 30 минут (9:00–22:00 ICT).'
+                      : isTh
+                      ? 'ผู้จัดการ myUNO จะติดต่อคุณภายใน 30 นาที (9:00–22:00 น. ICT)'
                       : 'A myUNO manager will reach out within 30 minutes (9am–10pm ICT).'}
                   </p>
                 </div>
@@ -247,7 +256,7 @@ export default function ManualPaymentPending() {
           <Card>
             <CardContent className="p-4 space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">{isRu ? 'Номер заявки' : 'Request #'}</span>
+                <span className="text-muted-foreground">{isRu ? 'Номер заявки' : isTh ? 'หมายเลขคำขอ' : 'Request #'}</span>
                 <button
                   onClick={copyOrderNumber}
                   className="font-mono font-semibold flex items-center gap-1.5 hover:text-primary transition-colors"
@@ -258,24 +267,24 @@ export default function ManualPaymentPending() {
               </div>
               <Separator className="my-1" />
               <div className="flex justify-between">
-                <span className="text-muted-foreground">{isRu ? 'Объект' : 'Property'}</span>
+                <span className="text-muted-foreground">{isRu ? 'Объект' : isTh ? 'ทรัพย์' : 'Property'}</span>
                 <span className="font-medium text-right max-w-[60%] truncate">{propertyTitle}</span>
               </div>
               {nights > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">{isRu ? 'Ночей' : 'Nights'}</span>
+                  <span className="text-muted-foreground">{isRu ? 'Ночей' : isTh ? 'จำนวนคืน' : 'Nights'}</span>
                   <span>{nights}</span>
                 </div>
               )}
               {guests > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">{isRu ? 'Гостей' : 'Guests'}</span>
+                  <span className="text-muted-foreground">{isRu ? 'Гостей' : isTh ? 'จำนวนผู้เข้าพัก' : 'Guests'}</span>
                   <span>{guests}</span>
                 </div>
               )}
               <Separator className="my-1" />
               <div className="flex justify-between items-baseline">
-                <span className="text-muted-foreground">{isRu ? 'Полная сумма' : 'Total'}</span>
+                <span className="text-muted-foreground">{isRu ? 'Полная сумма' : isTh ? 'ยอดรวม' : 'Total'}</span>
                 <div className="text-right">
                   {request.amount_rub_estimate != null && (
                     <div className="font-semibold text-base">
@@ -291,6 +300,8 @@ export default function ManualPaymentPending() {
                 <p className="text-[11px] text-muted-foreground italic">
                   {isRu
                     ? 'Финальная сумма уточняется по курсу на момент оплаты'
+                    : isTh
+                    ? 'ยอดสุดท้ายยืนยันตามอัตราแลกเปลี่ยน ณ เวลาที่ชำระเงิน'
                     : 'Exact amount confirmed at the time of payment'}
                 </p>
               )}
@@ -301,19 +312,19 @@ export default function ManualPaymentPending() {
           {isAwaiting && (
             <Card>
               <CardContent className="p-4 space-y-3">
-                <h3 className="font-semibold text-sm">{isRu ? 'Что дальше' : 'What happens next'}</h3>
+                <h3 className="font-semibold text-sm">{isRu ? 'Что дальше' : isTh ? 'ขั้นตอนถัดไป' : 'What happens next'}</h3>
                 <ol className="space-y-2 text-sm">
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary font-semibold text-xs flex items-center justify-center">1</span>
-                    <span>{isRu ? 'Менеджер свяжется в WhatsApp / по email' : 'Manager contacts you on WhatsApp / email'}</span>
+                    <span>{isRu ? 'Менеджер свяжется в WhatsApp / по email' : isTh ? 'ผู้จัดการจะติดต่อคุณทาง WhatsApp / อีเมล' : 'Manager contacts you on WhatsApp / email'}</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary font-semibold text-xs flex items-center justify-center">2</span>
-                    <span>{isRu ? 'Получаете реквизиты СБП или карты РФ' : 'You receive SBP / Russian-card transfer details'}</span>
+                    <span>{isRu ? 'Получаете реквизиты СБП или карты РФ' : isTh ? 'คุณจะได้รับรายละเอียดการโอนผ่าน SBP / บัตรรัสเซีย' : 'You receive SBP / Russian-card transfer details'}</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary font-semibold text-xs flex items-center justify-center">3</span>
-                    <span>{isRu ? 'После оплаты подтверждаем бронь и присылаем ваучер' : 'After payment we confirm the booking and email the voucher'}</span>
+                    <span>{isRu ? 'После оплаты подтверждаем бронь и присылаем ваучер' : isTh ? 'หลังชำระเงิน เรายืนยันการจองและส่งวอชเชอร์ทางอีเมล' : 'After payment we confirm the booking and email the voucher'}</span>
                   </li>
                 </ol>
               </CardContent>
@@ -327,6 +338,8 @@ export default function ManualPaymentPending() {
               <p>
                 {isRu
                   ? `Даты заблокированы ${expiresInLabel}. Если оплата не поступит — бронирование автоматически отменится и даты освободятся.`
+                  : isTh
+                  ? `วันที่ถูกกันไว้ ${expiresInLabel} หากไม่ได้รับการชำระเงินทันเวลา การจองจะถูกยกเลิกอัตโนมัติและปล่อยวันที่`
                   : `Dates are held ${expiresInLabel}. If payment doesn't arrive in time the booking is cancelled automatically and dates released.`}
               </p>
             </div>
@@ -342,7 +355,7 @@ export default function ManualPaymentPending() {
               >
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="w-5 h-5" />
-                  {isRu ? 'Открыть WhatsApp с менеджером' : 'Open WhatsApp with manager'}
+                  {isRu ? 'Открыть WhatsApp с менеджером' : isTh ? 'เปิด WhatsApp กับผู้จัดการ' : 'Open WhatsApp with manager'}
                 </a>
               </Button>
             )}
@@ -353,18 +366,20 @@ export default function ManualPaymentPending() {
                 onClick={() => navigate(`/bookings/${orderId}`)}
               >
                 <FileCheck2 className="w-5 h-5" />
-                {isRu ? 'Открыть бронирование' : 'Open booking'}
+                {isRu ? 'Открыть бронирование' : isTh ? 'เปิดการจอง' : 'Open booking'}
               </Button>
             )}
             <Button variant="outline" size="lg" className="w-full h-12 gap-2" onClick={() => navigate('/')}>
               <Home className="w-5 h-5" />
-              {isRu ? 'На главную' : 'Back to home'}
+              {isRu ? 'На главную' : isTh ? 'กลับหน้าแรก' : 'Back to home'}
             </Button>
           </div>
 
           <p className="text-[11px] text-center text-muted-foreground">
             {isRu
               ? 'Никогда не отправляйте оплату до получения официальных реквизитов от менеджера myUNO.'
+              : isTh
+              ? 'อย่าโอนเงินจนกว่าจะได้รับรายละเอียดอย่างเป็นทางการจากผู้จัดการ myUNO'
               : 'Never send payment until you receive official details from a myUNO manager.'}
           </p>
         </div>

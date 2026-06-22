@@ -19,25 +19,27 @@ import { usePropertiesForMap, transformPropertiesToMarkers } from '@/hooks/usePr
 
 /** 0 = no distance filter (show all markers). Do not use a km radius for "All" — users far from Phuket would see an empty map. */
 const distanceOptions = [
-  { value: 0, labelEn: 'All', labelRu: 'Все' },
-  { value: 2, labelEn: '2 km', labelRu: '2 км' },
-  { value: 5, labelEn: '5 km', labelRu: '5 км' },
-  { value: 10, labelEn: '10 km', labelRu: '10 км' },
-  { value: 25, labelEn: '25 km', labelRu: '25 км' },
-  { value: 50, labelEn: '50 km', labelRu: '50 км' },
+  { value: 0, labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { value: 2, labelEn: '2 km', labelRu: '2 км', labelTh: '2 กม.' },
+  { value: 5, labelEn: '5 km', labelRu: '5 км', labelTh: '5 กม.' },
+  { value: 10, labelEn: '10 km', labelRu: '10 км', labelTh: '10 กม.' },
+  { value: 25, labelEn: '25 km', labelRu: '25 км', labelTh: '25 กม.' },
+  { value: 50, labelEn: '50 km', labelRu: '50 км', labelTh: '50 กม.' },
 ];
 
 const propertyTypes = [
-  { id: 'all', labelEn: 'All', labelRu: 'Все' },
-  { id: 'villa', labelEn: 'Villa', labelRu: 'Вилла' },
-  { id: 'apartment', labelEn: 'Apartment', labelRu: 'Квартира' },
-  { id: 'condo', labelEn: 'Condo', labelRu: 'Кондо' },
-  { id: 'townhouse', labelEn: 'Townhouse', labelRu: 'Таунхаус' },
-  { id: 'house', labelEn: 'House', labelRu: 'Дом' },
+  { id: 'all', labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด' },
+  { id: 'villa', labelEn: 'Villa', labelRu: 'Вилла', labelTh: 'วิลล่า' },
+  { id: 'apartment', labelEn: 'Apartment', labelRu: 'Квартира', labelTh: 'อพาร์ตเมนต์' },
+  { id: 'condo', labelEn: 'Condo', labelRu: 'Кондо', labelTh: 'คอนโด' },
+  { id: 'townhouse', labelEn: 'Townhouse', labelRu: 'Таунхаус', labelTh: 'ทาวน์เฮาส์' },
+  { id: 'house', labelEn: 'House', labelRu: 'Дом', labelTh: 'บ้าน' },
 ];
 
 export default function PropertyMap() {
   const { language } = useLanguage();
+  const isRu = language === 'ru';
+  const isTh = language === 'th';
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -107,7 +109,7 @@ export default function PropertyMap() {
           <BackButton fallbackPath={APP_ROUTES.PROPERTY} variant="ghost" size="sm" />
           
           <h1 className="font-display font-semibold">
-            {language === 'ru' ? 'Карта объектов' : 'Property Map'}
+            {isRu ? 'Карта объектов' : isTh ? 'แผนที่อสังหาฯ' : 'Property Map'}
             {properties && properties.length > 0 && (
               <span className="ml-2 text-xs text-muted-foreground font-normal">
                 ({properties.length})
@@ -117,14 +119,14 @@ export default function PropertyMap() {
           
           <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label={language === 'ru' ? 'Фильтры' : 'Filters'}>
+              <Button variant="ghost" size="icon" aria-label={isRu ? 'Фильтры' : isTh ? 'ตัวกรอง' : 'Filters'}>
                 <Sliders className="w-5 h-5" />
               </Button>
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
                 <SheetTitle>
-                  {language === 'ru' ? 'Фильтры' : 'Filters'}
+                  {isRu ? 'Фильтры' : isTh ? 'ตัวกรอง' : 'Filters'}
                 </SheetTitle>
               </SheetHeader>
               
@@ -132,13 +134,13 @@ export default function PropertyMap() {
                 {/* Property type filter */}
                 <div>
                   <label className="text-sm font-medium mb-3 block">
-                    {language === 'ru' ? 'Тип недвижимости' : 'Property Type'}
+                    {isRu ? 'Тип недвижимости' : isTh ? 'ประเภทอสังหาฯ' : 'Property Type'}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {propertyTypes.map((type) => (
                       <FilterChip
                         key={type.id}
-                        label={language === 'ru' ? type.labelRu : type.labelEn}
+                        label={isRu ? type.labelRu : isTh ? type.labelTh : type.labelEn}
                         isActive={selectedType === type.id}
                         onToggle={() => setSelectedType(type.id)}
                       />
@@ -149,13 +151,13 @@ export default function PropertyMap() {
                 {/* Distance filter */}
                 <div>
                   <label className="text-sm font-medium mb-3 block">
-                    {language === 'ru' ? 'Расстояние' : 'Distance'}
+                    {isRu ? 'Расстояние' : isTh ? 'ระยะทาง' : 'Distance'}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {distanceOptions.map((opt) => (
                       <FilterChip
                         key={opt.value}
-                        label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                        label={isRu ? opt.labelRu : isTh ? opt.labelTh : opt.labelEn}
                         isActive={distanceFilter === opt.value}
                         onToggle={() => setDistanceFilter(opt.value)}
                       />
@@ -168,14 +170,16 @@ export default function PropertyMap() {
                   <div className="flex items-center gap-2 mb-2">
                     <MapPin className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">
-                      {language === 'ru' ? 'Ваша локация' : 'Your Location'}
+                      {isRu ? 'Ваша локация' : isTh ? 'ตำแหน่งของคุณ' : 'Your Location'}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {userLocation 
                       ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}`
-                      : language === 'ru' 
-                        ? 'Определение...' 
+                      : isRu
+                        ? 'Определение...'
+                        : isTh
+                        ? 'กำลังระบุตำแหน่ง...'
                         : 'Detecting...'}
                   </p>
                 </div>
@@ -184,7 +188,7 @@ export default function PropertyMap() {
                   className="w-full"
                   onClick={() => setIsFilterOpen(false)}
                 >
-                  {language === 'ru' ? 'Применить' : 'Apply'}
+                  {isRu ? 'Применить' : isTh ? 'ใช้' : 'Apply'}
                 </Button>
               </div>
             </SheetContent>
@@ -196,17 +200,17 @@ export default function PropertyMap() {
           <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 border-b border-border/30">
             <MapPin className="w-3.5 h-3.5 text-primary" aria-hidden />
             <span className="text-xs text-foreground">
-              {language === 'ru' ? 'Район:' : 'Area:'}{' '}
+              {isRu ? 'Район:' : isTh ? 'พื้นที่:' : 'Area:'}{' '}
               <span className="font-medium">{districtParam}</span>
             </span>
             <button
               type="button"
               onClick={clearDistrict}
               className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-              aria-label={language === 'ru' ? 'Сбросить фильтр района' : 'Clear area filter'}
+              aria-label={isRu ? 'Сбросить фильтр района' : isTh ? 'ล้างตัวกรองพื้นที่' : 'Clear area filter'}
             >
               <X className="w-3 h-3" aria-hidden />
-              {language === 'ru' ? 'Сбросить' : 'Clear'}
+              {isRu ? 'Сбросить' : isTh ? 'ล้าง' : 'Clear'}
             </button>
           </div>
         )}
@@ -216,7 +220,7 @@ export default function PropertyMap() {
           {distanceOptions.map((opt) => (
             <FilterChip
               key={opt.value}
-              label={language === 'ru' ? opt.labelRu : opt.labelEn}
+              label={isRu ? opt.labelRu : isTh ? opt.labelTh : opt.labelEn}
               isActive={distanceFilter === opt.value}
               onToggle={() => setDistanceFilter(opt.value)}
             />
@@ -229,7 +233,7 @@ export default function PropertyMap() {
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
               <span className="text-sm text-muted-foreground">
-                {language === 'ru' ? 'Загрузка объектов...' : 'Loading properties...'}
+                {isRu ? 'Загрузка объектов...' : isTh ? 'กำลังโหลดอสังหาฯ...' : 'Loading properties...'}
               </span>
             </div>
           </div>
@@ -241,18 +245,20 @@ export default function PropertyMap() {
             <div className="text-center p-6">
               <MapPin className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
               <h3 className="font-medium text-lg mb-2">
-                {language === 'ru' ? 'Объекты не найдены' : 'No properties found'}
+                {isRu ? 'Объекты не найдены' : isTh ? 'ไม่พบอสังหาฯ' : 'No properties found'}
               </h3>
               <p className="text-sm text-muted-foreground">
                 {districtParam
-                  ? (language === 'ru'
+                  ? (isRu
                       ? `В районе «${districtParam}» пока нет активных объектов на карте.`
+                      : isTh
+                      ? `ยังไม่มีรายการบนแผนที่ที่ใช้งานอยู่ในพื้นที่ “${districtParam}”`
                       : `No active map listings in “${districtParam}” yet.`)
-                  : (language === 'ru' ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters')}
+                  : (isRu ? 'Попробуйте изменить фильтры' : isTh ? 'ลองปรับตัวกรอง' : 'Try adjusting your filters')}
               </p>
               {districtParam && (
                 <Button variant="outline" size="sm" className="mt-4" onClick={clearDistrict}>
-                  {language === 'ru' ? 'Показать все районы' : 'Show all areas'}
+                  {isRu ? 'Показать все районы' : isTh ? 'แสดงทุกพื้นที่' : 'Show all areas'}
                 </Button>
               )}
             </div>

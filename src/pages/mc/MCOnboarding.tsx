@@ -58,6 +58,7 @@ const MCOnboarding: React.FC = () => {
   const { setActiveCompanyId } = useActiveCompany();
   const queryClient = useQueryClient();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -84,15 +85,15 @@ const MCOnboarding: React.FC = () => {
     const nameEn = form.name_en.trim();
     const nameRu = form.name_ru.trim();
     if (!nameEn || !nameRu) {
-      toast.error(isRu ? 'Заполните названия компании' : 'Fill in company names');
+      toast.error(isRu ? 'Заполните названия компании' : isTh ? 'กรุณากรอกชื่อบริษัท' : 'Fill in company names');
       return;
     }
     if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      toast.error(isRu ? 'Некорректный email' : 'Invalid email address');
+      toast.error(isRu ? 'Некорректный email' : isTh ? 'อีเมลไม่ถูกต้อง' : 'Invalid email address');
       return;
     }
     if (form.phone.trim() && !/^\+?[\d\s-()]{7,20}$/.test(form.phone.trim())) {
-      toast.error(isRu ? 'Некорректный телефон' : 'Invalid phone number');
+      toast.error(isRu ? 'Некорректный телефон' : isTh ? 'หมายเลขโทรศัพท์ไม่ถูกต้อง' : 'Invalid phone number');
       return;
     }
     setLoading(true);
@@ -128,14 +129,14 @@ const MCOnboarding: React.FC = () => {
       await queryClient.invalidateQueries({ queryKey: ['user-roles'] });
       await queryClient.invalidateQueries({ queryKey: ['user-context'] });
       setActiveCompanyId(data.company_id);
-      toast.success(isRu ? 'Компания создана!' : 'Company created!');
+      toast.success(isRu ? 'Компания создана!' : isTh ? 'สร้างบริษัทเรียบร้อยแล้ว!' : 'Company created!');
       setStep(2);
     } catch (err: unknown) {
-      toast.error((err instanceof Error ? err.message : '') || (isRu ? 'Ошибка при создании' : 'Failed to create company'));
+      toast.error((err instanceof Error ? err.message : '') || (isRu ? 'Ошибка при создании' : isTh ? 'สร้างบริษัทล้มเหลว' : 'Failed to create company'));
     } finally {
       setLoading(false);
     }
-  }, [form, isRu, queryClient, setActiveCompanyId]);
+  }, [form, isRu, isTh, queryClient, setActiveCompanyId]);
 
   // Step 2: Upload logo
   const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,14 +165,14 @@ const MCOnboarding: React.FC = () => {
         .eq('id', companyId);
       if (updateError) throw updateError;
 
-      toast.success(isRu ? 'Логотип загружен' : 'Logo uploaded');
+      toast.success(isRu ? 'Логотип загружен' : isTh ? 'อัปโหลดโลโก้แล้ว' : 'Logo uploaded');
     } catch (err: unknown) {
       toast.error((err instanceof Error ? err.message : '') || 'Upload failed');
     } finally {
       setLoading(false);
       setStep(3);
     }
-  }, [logoFile, companyId, isRu]);
+  }, [logoFile, companyId, isRu, isTh]);
 
   // Step 3: Invite team
   const addInvite = () => {
@@ -207,14 +208,14 @@ const MCOnboarding: React.FC = () => {
         invite.sent = true;
       }
       setInvites([...invites]);
-      toast.success(isRu ? 'Приглашения отправлены' : 'Invitations sent');
+      toast.success(isRu ? 'Приглашения отправлены' : isTh ? 'ส่งคำเชิญแล้ว' : 'Invitations sent');
     } catch (err: unknown) {
       toast.error((err instanceof Error ? err.message : '') || 'Failed to send invitations');
     } finally {
       setLoading(false);
       setStep(4);
     }
-  }, [invites, companyId, isRu]);
+  }, [invites, companyId, isRu, isTh]);
 
   const handleGoBack = () => {
     if (step > 1) setStep(step - 1);
@@ -225,7 +226,7 @@ const MCOnboarding: React.FC = () => {
       currentStep={step}
       totalSteps={4}
       steps={mcOnboardingSteps}
-      title={isRu ? 'Регистрация УК' : 'Register Company'}
+      title={isRu ? 'Регистрация УК' : isTh ? 'ลงทะเบียนบริษัท' : 'Register Company'}
       titleRu="Регистрация УК"
       showBack={step > 1 && step < 4}
       onBack={handleGoBack}
@@ -241,19 +242,19 @@ const MCOnboarding: React.FC = () => {
                 <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   <Building2 className="h-7 w-7 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold">{isRu ? 'О компании' : 'Company Details'}</h2>
+                <h2 className="text-xl font-bold">{isRu ? 'О компании' : isTh ? 'รายละเอียดบริษัท' : 'Company Details'}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {isRu ? 'Основная информация об управляющей компании' : 'Basic information about your management company'}
+                  {isRu ? 'Основная информация об управляющей компании' : isTh ? 'ข้อมูลพื้นฐานเกี่ยวกับบริษัทบริหารจัดการของคุณ' : 'Basic information about your management company'}
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="onboard-name-en">{isRu ? 'Название (EN) *' : 'Name (EN) *'}</Label>
+                  <Label htmlFor="onboard-name-en">{isRu ? 'Название (EN) *' : isTh ? 'ชื่อ (EN) *' : 'Name (EN) *'}</Label>
                   <Input id="onboard-name-en" value={form.name_en} onChange={e => updateField('name_en', e.target.value)} placeholder="Sunrise Property Management" />
                 </div>
                 <div>
-                  <Label htmlFor="onboard-name-ru">{isRu ? 'Название (RU) *' : 'Name (RU) *'}</Label>
+                  <Label htmlFor="onboard-name-ru">{isRu ? 'Название (RU) *' : isTh ? 'ชื่อ (RU) *' : 'Name (RU) *'}</Label>
                   <Input id="onboard-name-ru" value={form.name_ru} onChange={e => updateField('name_ru', e.target.value)} placeholder="Санрайз Управление Недвижимостью" />
                 </div>
                 {form.name_en && (
@@ -267,25 +268,25 @@ const MCOnboarding: React.FC = () => {
                     <Input id="onboard-email" type="email" value={form.email} onChange={e => updateField('email', e.target.value)} placeholder="info@company.com" />
                   </div>
                   <div>
-                    <Label htmlFor="onboard-phone">{isRu ? 'Телефон' : 'Phone'}</Label>
+                    <Label htmlFor="onboard-phone">{isRu ? 'Телефон' : isTh ? 'โทรศัพท์' : 'Phone'}</Label>
                     <Input id="onboard-phone" value={form.phone} onChange={e => updateField('phone', e.target.value)} placeholder="+66..." />
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="onboard-address">{isRu ? 'Адрес офиса' : 'Office Address'}</Label>
+                  <Label htmlFor="onboard-address">{isRu ? 'Адрес офиса' : isTh ? 'ที่อยู่สำนักงาน' : 'Office Address'}</Label>
                   <Input id="onboard-address" value={form.address} onChange={e => updateField('address', e.target.value)} />
                 </div>
                 <div>
-                  <Label htmlFor="onboard-description-en">{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label>
+                  <Label htmlFor="onboard-description-en">{isRu ? 'Описание (EN)' : isTh ? 'คำอธิบาย (EN)' : 'Description (EN)'}</Label>
                   <Textarea id="onboard-description-en" value={form.description_en} onChange={e => updateField('description_en', e.target.value)} rows={2} />
                 </div>
                 <div>
-                  <Label htmlFor="onboard-description-ru">{isRu ? 'Описание (RU)' : 'Description (RU)'}</Label>
+                  <Label htmlFor="onboard-description-ru">{isRu ? 'Описание (RU)' : isTh ? 'คำอธิบาย (RU)' : 'Description (RU)'}</Label>
                   <Textarea id="onboard-description-ru" value={form.description_ru} onChange={e => updateField('description_ru', e.target.value)} rows={2} />
                 </div>
 
                 <Button className="w-full" size="lg" onClick={handleRegister} disabled={loading || !form.name_en.trim() || !form.name_ru.trim()}>
-                  {loading ? (isRu ? 'Создание...' : 'Creating...') : (isRu ? 'Создать компанию' : 'Create Company')}
+                  {loading ? (isRu ? 'Создание...' : isTh ? 'กำลังสร้าง...' : 'Creating...') : (isRu ? 'Создать компанию' : isTh ? 'สร้างบริษัท' : 'Create Company')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -299,9 +300,9 @@ const MCOnboarding: React.FC = () => {
                 <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   <Upload className="h-7 w-7 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold">{isRu ? 'Логотип компании' : 'Company Logo'}</h2>
+                <h2 className="text-xl font-bold">{isRu ? 'Логотип компании' : isTh ? 'โลโก้บริษัท' : 'Company Logo'}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {isRu ? 'Загрузите логотип для брендирования' : 'Upload your logo for branding'}
+                  {isRu ? 'Загрузите логотип для брендирования' : isTh ? 'อัปโหลดโลโก้ของคุณสำหรับการสร้างแบรนด์' : 'Upload your logo for branding'}
                 </p>
               </div>
 
@@ -314,7 +315,7 @@ const MCOnboarding: React.FC = () => {
                       <Upload className="h-10 w-10 text-muted-foreground mb-3" />
                     )}
                     <span className="text-sm text-muted-foreground">
-                      {logoPreview ? (isRu ? 'Нажмите чтобы заменить' : 'Click to replace') : (isRu ? 'Нажмите для загрузки' : 'Click to upload')}
+                      {logoPreview ? (isRu ? 'Нажмите чтобы заменить' : isTh ? 'คลิกเพื่อเปลี่ยน' : 'Click to replace') : (isRu ? 'Нажмите для загрузки' : isTh ? 'คลิกเพื่ออัปโหลด' : 'Click to upload')}
                     </span>
                     <input type="file" accept="image/*" className="hidden" onChange={handleLogoSelect} />
                   </label>
@@ -323,10 +324,10 @@ const MCOnboarding: React.FC = () => {
 
               <div className="flex gap-3 mt-6">
                 <Button variant="outline" className="flex-1" onClick={() => setStep(3)} disabled={loading}>
-                  {isRu ? 'Пропустить' : 'Skip'}
+                  {isRu ? 'Пропустить' : isTh ? 'ข้าม' : 'Skip'}
                 </Button>
                 <Button className="flex-1" onClick={handleLogoUpload} disabled={loading || !logoFile}>
-                  {loading ? (isRu ? 'Загрузка...' : 'Uploading...') : (isRu ? 'Загрузить' : 'Upload')}
+                  {loading ? (isRu ? 'Загрузка...' : isTh ? 'กำลังอัปโหลด...' : 'Uploading...') : (isRu ? 'Загрузить' : isTh ? 'อัปโหลด' : 'Upload')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -340,9 +341,9 @@ const MCOnboarding: React.FC = () => {
                 <div className="w-14 h-14 rounded-none bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   <Users className="h-7 w-7 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold">{isRu ? 'Пригласите команду' : 'Invite Your Team'}</h2>
+                <h2 className="text-xl font-bold">{isRu ? 'Пригласите команду' : isTh ? 'เชิญทีมของคุณ' : 'Invite Your Team'}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {isRu ? 'До 3 сотрудников. Можно пропустить.' : 'Up to 3 members. You can skip this.'}
+                  {isRu ? 'До 3 сотрудников. Можно пропустить.' : isTh ? 'สูงสุด 3 คน คุณสามารถข้ามขั้นตอนนี้ได้' : 'Up to 3 members. You can skip this.'}
                 </p>
               </div>
 
@@ -355,7 +356,7 @@ const MCOnboarding: React.FC = () => {
                           <Input
                             value={inv.full_name}
                             onChange={e => updateInvite(i, 'full_name', e.target.value)}
-                            placeholder={isRu ? 'Имя сотрудника' : 'Employee name'}
+                            placeholder={isRu ? 'Имя сотрудника' : isTh ? 'ชื่อพนักงาน' : 'Employee name'}
                             disabled={inv.sent}
                           />
                           <Input
@@ -370,16 +371,16 @@ const MCOnboarding: React.FC = () => {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="manager">{isRu ? 'Менеджер' : 'Manager'}</SelectItem>
-                              <SelectItem value="staff">{isRu ? 'Сотрудник' : 'Staff'}</SelectItem>
-                              <SelectItem value="accountant">{isRu ? 'Бухгалтер' : 'Accountant'}</SelectItem>
+                              <SelectItem value="manager">{isRu ? 'Менеджер' : isTh ? 'ผู้จัดการ' : 'Manager'}</SelectItem>
+                              <SelectItem value="staff">{isRu ? 'Сотрудник' : isTh ? 'พนักงาน' : 'Staff'}</SelectItem>
+                              <SelectItem value="accountant">{isRu ? 'Бухгалтер' : isTh ? 'นักบัญชี' : 'Accountant'}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         {inv.sent ? (
                           <Check className="h-5 w-5 text-primary mt-2" />
                         ) : invites.length > 1 ? (
-                          <Button variant="ghost" size="icon" onClick={() => removeInvite(i)} className="mt-1" aria-label={isRu ? 'Удалить' : 'Remove'}>
+                          <Button variant="ghost" size="icon" onClick={() => removeInvite(i)} className="mt-1" aria-label={isRu ? 'Удалить' : isTh ? 'ลบ' : 'Remove'}>
                             <X className="h-4 w-4" />
                           </Button>
                         ) : null}
@@ -391,17 +392,17 @@ const MCOnboarding: React.FC = () => {
                 {invites.length < 3 && (
                   <Button variant="outline" size="sm" onClick={addInvite} className="w-full">
                     <Plus className="h-4 w-4 mr-1" />
-                    {isRu ? 'Добавить ещё' : 'Add Another'}
+                    {isRu ? 'Добавить ещё' : isTh ? 'เพิ่มอีก' : 'Add Another'}
                   </Button>
                 )}
               </div>
 
               <div className="flex gap-3 mt-6">
                 <Button variant="outline" className="flex-1" onClick={() => setStep(4)} disabled={loading}>
-                  {isRu ? 'Пропустить' : 'Skip'}
+                  {isRu ? 'Пропустить' : isTh ? 'ข้าม' : 'Skip'}
                 </Button>
                 <Button className="flex-1" onClick={handleInviteTeam} disabled={loading}>
-                  {loading ? (isRu ? 'Отправка...' : 'Sending...') : (isRu ? 'Пригласить' : 'Invite')}
+                  {loading ? (isRu ? 'Отправка...' : isTh ? 'กำลังส่ง...' : 'Sending...') : (isRu ? 'Пригласить' : isTh ? 'เชิญ' : 'Invite')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -415,10 +416,12 @@ const MCOnboarding: React.FC = () => {
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Rocket className="h-8 w-8 text-primary" />
                 </div>
-                <h2 className="text-2xl font-bold">{isRu ? 'Всё готово!' : 'All Set!'}</h2>
+                <h2 className="text-2xl font-bold">{isRu ? 'Всё готово!' : isTh ? 'เสร็จเรียบร้อย!' : 'All Set!'}</h2>
                 <p className="text-muted-foreground mt-2">
                   {isRu
                     ? 'Ваша управляющая компания создана. Добавьте первый объект или перейдите в панель управления.'
+                    : isTh
+                    ? 'สร้างบริษัทบริหารจัดการของคุณเรียบร้อยแล้ว เพิ่มทรัพย์สินแรกหรือไปที่แดชบอร์ดของคุณ'
                     : 'Your management company is created. Add your first property or go to your dashboard.'}
                 </p>
               </div>
@@ -426,10 +429,10 @@ const MCOnboarding: React.FC = () => {
               <div className="space-y-3">
                 <Button className="w-full" size="lg" onClick={() => navigate('/mc/properties/new')}>
                   <Building2 className="mr-2 h-5 w-5" />
-                  {isRu ? 'Добавить первый объект' : 'Add First Property'}
+                  {isRu ? 'Добавить первый объект' : isTh ? 'เพิ่มทรัพย์สินแรก' : 'Add First Property'}
                 </Button>
                 <Button variant="outline" className="w-full" size="lg" onClick={() => navigate('/mc')}>
-                  {isRu ? 'Перейти в панель управления' : 'Go to Dashboard'}
+                  {isRu ? 'Перейти в панель управления' : isTh ? 'ไปที่แดชบอร์ด' : 'Go to Dashboard'}
                 </Button>
               </div>
             </motion.div>
