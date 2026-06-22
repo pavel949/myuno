@@ -25,6 +25,7 @@ export function LandPlotCard({ property, className }: Props) {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const isRent = property.listing_type === 'rent';
   const title = (isRu ? property.title_ru : property.title_en) || property.title_en;
@@ -74,13 +75,13 @@ export function LandPlotCard({ property, className }: Props) {
                 : 'bg-accent/95 text-white hover:bg-accent',
             )}
           >
-            {isRent ? (isRu ? 'Аренда' : 'Rent') : isRu ? 'Продажа' : 'Sale'}
+            {isRent ? (isRu ? 'Аренда' : isTh ? 'เช่า' : 'Rent') : isRu ? 'Продажа' : isTh ? 'ขาย' : 'Sale'}
           </Badge>
         </div>
         {property.is_verified && (
           <Badge className="absolute top-3 right-3 bg-success/95 text-white hover:bg-success gap-1">
             <BadgeCheck className="w-3 h-3" />
-            {isRu ? 'Проверено' : 'Verified'}
+            {isRu ? 'Проверено' : isTh ? 'ผ่านการตรวจสอบ' : 'Verified'}
           </Badge>
         )}
       </div>
@@ -111,7 +112,7 @@ export function LandPlotCard({ property, className }: Props) {
           {property.frontage_m != null && (
             <span className="inline-flex items-center gap-1">
               <Route className="w-3 h-3" />
-              {property.frontage_m}m {isRu ? 'фасад' : 'frontage'}
+              {property.frontage_m}m {isRu ? 'фасад' : isTh ? 'หน้ากว้าง' : 'frontage'}
             </span>
           )}
           {property.zoning && (

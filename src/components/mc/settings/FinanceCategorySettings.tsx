@@ -577,9 +577,9 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" size="sm" onClick={() => setEditCustom(null)}>{isRu ? 'Отмена' : 'Cancel'}</Button>
+            <Button variant="outline" size="sm" onClick={() => setEditCustom(null)}>{isRu ? 'Отмена' : isTh ? 'ยกเลิก' : 'Cancel'}</Button>
             <Button size="sm" disabled={!editCustomNameEn.trim()} onClick={handleSaveCustomEdit}>
-              {isRu ? 'Сохранить' : 'Save'}
+              {isRu ? 'Сохранить' : isTh ? 'บันทึก' : 'Save'}
             </Button>
           </DialogFooter>
         </DialogContent>

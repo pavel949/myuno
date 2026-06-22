@@ -13,6 +13,7 @@ export function PersonaGatePrompt() {
   const { language } = useLanguage();
   const { personas, togglePersona, isToggling } = useUserPersonas();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const hasBusiness = personas.includes('business');
   const hasInvestor = personas.includes('investor');
@@ -24,11 +25,15 @@ export function PersonaGatePrompt() {
         <p className="text-sm font-medium text-foreground">
           {isRu
             ? 'Включить роль «Бизнес» или «Инвестор», чтобы видеть этот раздел в навигации?'
+            : isTh
+            ? 'เปิดบทบาท “ธุรกิจ” หรือ “นักลงทุน” เพื่อให้ส่วนนี้แสดงในเมนูนำทางของคุณหรือไม่?'
             : 'Enable “Business” or “Investor” persona to see this section in your navigation?'}
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           {isRu
             ? 'Раздел доступен по ссылке всем — но в навигации появится только при выбранной роли.'
+            : isTh
+            ? 'ส่วนนี้เปิดให้ทุกคนผ่านลิงก์โดยตรง — จะแสดงในเมนูนำทางเมื่อเปิดบทบาทเท่านั้น'
             : 'Section is open to anyone via direct link — it only appears in nav when the role is enabled.'}
         </p>
       </div>
