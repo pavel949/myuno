@@ -59,7 +59,9 @@ const LEGACY_PALETTE_REGEX =
 const GLASSMORPHISM_REGEX = "\\bbackdrop-blur(?:-(?:none|sm|md|lg|xl|2xl|3xl))?\\b";
 
 const LEGACY_RADII_REGEX =
-  "\\brounded(?:-(?:sm|md|lg|xl|2xl|3xl))?(?![-_a-z0-9])";
+  // rounded-sm (2px) is canon-permitted for mini-badges/chips (DESIGN.md §5),
+  // so it is intentionally excluded; bare `rounded` and md..3xl remain forbidden.
+  "\\brounded(?:-(?:md|lg|xl|2xl|3xl))?(?![-_a-z0-9])";
 
 // Bible-v2 §00 H03 — no hardcoded hex colors outside tokens.css.
 // Matches "#RRGGBB" with word boundary; ignores 3-char shortcuts to avoid

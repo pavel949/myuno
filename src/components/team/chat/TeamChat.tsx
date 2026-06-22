@@ -178,10 +178,11 @@ function ChatInput({ onSend, isSending, placeholder }: ChatInputProps) {
           className="flex-1"
           disabled={isSending}
         />
-        <Button 
-          onClick={handleSend} 
+        <Button
+          onClick={handleSend}
           disabled={!message.trim() || isSending}
           size="icon"
+          aria-label={language === 'ru' ? 'Отправить' : 'Send'}
         >
           {isSending ? (
             <Loader2 className="h-4 w-4 animate-spin" />

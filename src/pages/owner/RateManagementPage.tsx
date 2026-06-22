@@ -430,7 +430,7 @@ function ActivityActionBadge({ action, isRu }: { action: string; isRu: boolean }
     base_price_changed: ['Base Price', 'Базовая цена', 'bg-primary/10 text-primary dark:bg-primary/30 dark:text-primary'],
     season_created: ['Season Created', 'Сезон создан', 'bg-success/10 text-success dark:bg-success/30 dark:text-success'],
     season_updated: ['Season Updated', 'Сезон обновлён', 'bg-accent/10 text-accent dark:bg-accent/30 dark:text-accent'],
-    season_deleted: ['Season Deleted', 'Сезон удалён', 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'],
+    season_deleted: ['Season Deleted', 'Сезон удалён', 'bg-destructive text-destructive dark:bg-destructive/30 dark:text-destructive'],
     availability_changed: ['Availability', 'Доступность', 'bg-success/10 text-success dark:bg-success/30 dark:text-success'],
   };
   const [en, rur, color] = labels[action] || [action, action, 'bg-muted text-muted-foreground'];

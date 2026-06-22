@@ -205,7 +205,7 @@ const AdminOfficialNews: React.FC = () => {
                   className="grid grid-cols-[1.4fr_0.7fr_1fr_1fr_0.8fr] gap-3 px-4 py-3 text-[13px] border-b border-border last:border-0 items-center"
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <st.Icon className={`w-4 h-4 shrink-0 ${st.tone === 'ok' ? 'text-emerald-600' : st.tone === 'warn' ? 'text-amber-600' : 'text-destructive'}`} />
+                    <st.Icon className={`w-4 h-4 shrink-0 ${st.tone === 'ok' ? 'text-success' : st.tone === 'warn' ? 'text-warning' : 'text-destructive'}`} />
                     <div className="min-w-0">
                       <div className="font-medium text-foreground truncate">{s.label}</div>
                       <div className="text-[11px] text-muted-foreground">{s.source} · {st.label}</div>
@@ -243,7 +243,7 @@ const AdminOfficialNews: React.FC = () => {
                         <span className="text-muted-foreground tabular-nums">+{f.inserted}</span>
                         {f.error
                           ? <span className="text-destructive text-[11px] truncate max-w-[260px]">{f.error}</span>
-                          : <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+                          : <CheckCircle2 className="w-3.5 h-3.5 text-success" />}
                       </span>
                     </li>
                   ))}
@@ -277,7 +277,7 @@ const AdminOfficialNews: React.FC = () => {
 const SummaryCard: React.FC<{ label: string; value: string; sub?: string; tone?: 'ok' | 'warn' }> = ({ label, value, sub, tone }) => (
   <div className="rounded-none border border-border bg-card px-3 py-3">
     <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
-    <div className={`text-lg font-semibold mt-1 ${tone === 'warn' ? 'text-amber-600' : 'text-foreground'}`}>{value}</div>
+    <div className={`text-lg font-semibold mt-1 ${tone === 'warn' ? 'text-warning' : 'text-foreground'}`}>{value}</div>
     {sub && <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>}
   </div>
 );

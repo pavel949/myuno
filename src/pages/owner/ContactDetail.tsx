@@ -1115,7 +1115,7 @@ export default function ContactDetail() {
                       : null;
                     return (
                       <div key={task.id} className={cn('flex items-center gap-3 p-3 rounded-none border border-l-4 bg-card', dueState)}>
-                        <button onClick={() => handleCompleteTask(task.id)} className="shrink-0">
+                        <button onClick={() => handleCompleteTask(task.id)} aria-label={isRu ? 'Завершить задачу' : 'Complete task'} className="shrink-0">
                           <CheckCircle className={cn('h-5 w-5', task.status === 'completed' ? 'text-success' : 'text-muted-foreground/30 hover:text-success/60')} />
                         </button>
                         <div className="flex-1 min-w-0">

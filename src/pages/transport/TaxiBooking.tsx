@@ -470,6 +470,7 @@ export default function TaxiBooking() {
                 type="button"
                 onClick={() => handlePassengerChange(-1)}
                 disabled={formData.passengers <= 1}
+                aria-label={language === 'ru' ? 'Меньше пассажиров' : 'Decrease passengers'}
                 className="w-10 h-10 rounded-full bg-muted flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 transition-colors"
               >
                 <Minus className="w-4 h-4" />
@@ -486,6 +487,7 @@ export default function TaxiBooking() {
                 type="button"
                 onClick={() => handlePassengerChange(1)}
                 disabled={formData.passengers >= (selectedVehicle?.max_passengers || 4)}
+                aria-label={language === 'ru' ? 'Больше пассажиров' : 'Increase passengers'}
                 className="w-10 h-10 rounded-full bg-muted flex items-center justify-center disabled:opacity-50 hover:bg-muted/80 transition-colors"
               >
                 <Plus className="w-4 h-4" />

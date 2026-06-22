@@ -188,7 +188,7 @@ export function VendorOutreachPanel() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-red-500" />
+              <AlertCircle className="h-4 w-4 text-destructive" />
               <span className="text-xs text-muted-foreground">{isRu ? 'Финальный' : 'Final'}</span>
             </div>
             {statsLoading ? (

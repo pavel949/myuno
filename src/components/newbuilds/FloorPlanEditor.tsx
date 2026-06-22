@@ -384,7 +384,7 @@ export function FloorPlanEditor({ projectId }: Props) {
                     setActiveFloorId(floorPlans.find(p => p.id !== plan.id)?.id ?? null);
                   }
                 }}
-                className="text-[hsl(var(--nb-muted))] hover:text-red-400"
+                className="text-[hsl(var(--nb-muted))] hover:text-destructive"
                 title="Удалить этаж"
               >
                 <Trash2 className="w-3.5 h-3.5" />

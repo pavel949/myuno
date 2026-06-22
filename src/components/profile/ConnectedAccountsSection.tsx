@@ -56,7 +56,7 @@ const providers = [
         />
       </svg>
     ),
-    bgColor: 'bg-white border',
+    bgColor: 'bg-card border',
     textColor: 'text-gray-700',
   },
   {

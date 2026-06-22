@@ -78,7 +78,7 @@ export default function OwnerPerformance() {
     const positive = value > 0;
     const Icon = positive ? TrendingUp : TrendingDown;
     return (
-      <span className={cn('inline-flex items-center gap-0.5 text-xs font-medium', positive ? 'text-success' : 'text-red-500')}>
+      <span className={cn('inline-flex items-center gap-0.5 text-xs font-medium', positive ? 'text-success' : 'text-destructive')}>
         <Icon className="w-3 h-3" />
         {positive ? '+' : ''}{value}{suffix}
       </span>

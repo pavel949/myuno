@@ -42,8 +42,8 @@ export const OfficialNews: React.FC = () => {
         {isLoading
           ? Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="px-4 py-3 animate-pulse">
-                <div className="h-3 bg-muted rounded w-3/4 mb-2" />
-                <div className="h-2 bg-muted rounded w-1/3" />
+                <div className="h-3 bg-muted rounded-none w-3/4 mb-2" />
+                <div className="h-2 bg-muted rounded-none w-1/3" />
               </div>
             ))
           : (data ?? []).map((n) => {

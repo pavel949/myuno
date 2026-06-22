@@ -168,7 +168,7 @@ export default function DeveloperAcceptClaim() {
 
             {state === 'invalid' && (
               <>
-                <AlertCircle className="w-14 h-14 text-red-400 mx-auto" />
+                <AlertCircle className="w-14 h-14 text-destructive mx-auto" />
                 <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))]">Профиль не найден</h1>
                 <p className="text-[hsl(var(--nb-text-secondary))]">
                   Ссылка недействительна или профиль застройщика удалён.
@@ -178,7 +178,7 @@ export default function DeveloperAcceptClaim() {
 
             {state === 'error' && (
               <>
-                <AlertCircle className="w-14 h-14 text-red-400 mx-auto" />
+                <AlertCircle className="w-14 h-14 text-destructive mx-auto" />
                 <h1 className="nb-display text-2xl text-[hsl(var(--nb-text))]">Ошибка</h1>
                 <p className="text-[hsl(var(--nb-text-secondary))]">{errorMsg}</p>
                 <Button variant="outline" onClick={() => void load()}>Повторить</Button>

@@ -77,7 +77,7 @@ export function MarketHero({ totalProducts, totalCategories, freeDeliveryThresho
         {/* CTA Buttons */}
         <div className="flex flex-wrap gap-2 mb-5">
           <Button 
-            className="bg-white text-primary hover:bg-white/90 shadow-lg rounded-full gap-1.5"
+            className="bg-card text-primary hover:bg-white/90 shadow-lg rounded-full gap-1.5"
             onClick={() => navigate('/market/categories')}
           >
             {isRu ? 'Каталог' : 'Browse'}

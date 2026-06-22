@@ -339,8 +339,9 @@ export function LifeOSQualityTab() {
               <ShieldCheck className="w-4 h-4 text-muted-foreground" />
               <span>{isRussian ? 'Запросить верификацию' : 'Request verification'}</span>
             </div>
-            <div className="ml-auto text-xs text-muted-foreground">
-              ❌ {isRussian ? 'Изменение цен/доступности запрещено' : 'Price/availability changes prohibited'}
+            <div className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
+              <XCircle className="w-4 h-4 text-destructive" />
+              <span>{isRussian ? 'Изменение цен/доступности запрещено' : 'Price/availability changes prohibited'}</span>
             </div>
           </div>
         </CardContent>
