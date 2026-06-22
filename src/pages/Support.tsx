@@ -198,7 +198,7 @@ export default function Support() {
             </div>
             <div className="flex-1">
               <h2 className="font-semibold text-lg">
-                {isRu ? 'Чат с UNO' : 'Chat with UNO'}
+                {isRu ? 'Чат с myUNO' : 'Chat with myUNO'}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {isRu ? 'Быстрые ответы 24/7' : 'Quick answers 24/7'}
