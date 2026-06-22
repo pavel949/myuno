@@ -270,7 +270,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold">{isRu ? 'UNO AI Ассистент' : 'UNO AI Assistant'}</h3>
+                    <h3 className="font-semibold">{isRu ? 'myUNO AI Ассистент' : 'myUNO AI Assistant'}</h3>
                     <p className="text-sm opacity-80">
                       {isRu ? 'Мгновенные ответы 24/7' : 'Instant answers 24/7'}
                     </p>
@@ -383,7 +383,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
                       <Sparkles className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <DrawerTitle className="text-base">UNO Assistant</DrawerTitle>
+                      <DrawerTitle className="text-base">myUNO Assistant</DrawerTitle>
                       <p className="text-xs text-muted-foreground">
                         {isRu ? 'AI-помощник · 24/7' : 'AI Support · 24/7'}
                       </p>
@@ -509,7 +509,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
           'md:bottom-6 md:w-14 md:h-14',
           className,
         )}
-        aria-label={isRu ? 'Открыть помощник UNO' : 'Open UNO assistant'}
+        aria-label={isRu ? 'Открыть помощник myUNO' : 'Open myUNO assistant'}
       >
         <Sparkles className="w-5 h-5 md:w-6 md:h-6" />
         <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-success rounded-full border-2 border-background" />
