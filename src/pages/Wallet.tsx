@@ -132,18 +132,20 @@ const Wallet = () => {
 
   const handleTopUp = async () => {
     if (!user || topUpAmount < 100) {
-      toast.error(language === 'ru' ? 'Минимальная сумма 100 ₽' : 'Minimum amount is 100 ₽');
+      toast.error(language === 'ru' ? 'Минимальная сумма 100 ฿' : 'Minimum amount is 100 ฿');
       return;
     }
 
     setIsProcessing(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
-      
+
       const response = await supabase.functions.invoke('create-checkout-session', {
-        body: { 
+        body: {
           amount: topUpAmount,
-          currency: 'rub',
+          // Wallets are denominated in THB; charge in THB so the credited balance
+          // matches the amount actually collected (no implicit FX mismatch).
+          currency: 'thb',
         },
       });
 
@@ -205,7 +207,7 @@ const Wallet = () => {
   };
 
   const formatCurrency = (amount: number, currency: string) => {
-    const symbol = currency === 'RUB' ? '₽' : currency;
+    const symbol = currency === 'RUB' ? '₽' : currency === 'THB' ? '฿' : currency;
     return `${amount >= 0 ? '+' : ''}${amount.toLocaleString()} ${symbol}`;
   };
 
@@ -254,7 +256,7 @@ const Wallet = () => {
                   </span>
                 </div>
                 <div className="text-4xl font-bold mb-4" data-testid="wallet-balance">
-                  {wallet?.balance.toLocaleString() || 0} ₽
+                  {(wallet?.balance ?? 0).toLocaleString()} {wallet?.currency === 'RUB' ? '₽' : '฿'}
                 </div>
                 <div className="text-sm opacity-75">
                   {language === 'ru' 

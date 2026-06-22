@@ -2,6 +2,16 @@
 
 Functions moved here on **2026-04-29** as part of cleanup Wave 1.
 
+> **2026-06-22 — Partial restore.** A system-wide audit found the "zero references"
+> premise below was wrong for several functions: live frontend code still invokes
+> them. The following were restored to `supabase/functions/` and re-added to
+> `config.toml` (verify_jwt = false): `create-cleaning-checkout`,
+> `create-wellness-checkout`, `create-pet-checkout`, `canonical-persona-detect`,
+> `ai-legal-assistant`, `ocr-receipt`, `proxy-image`, `yacht-calendar-export`.
+> If they were already deleted server-side, they must be redeployed.
+> Before archiving any function in future, grep `src/` for `functions.invoke('<name>')`
+> **and** raw `/functions/v1/<name>` fetch URLs (the original audit missed the latter).
+
 ## Why archived
 Each of these had **zero references** found in:
 - Frontend (`src/`)

@@ -61,7 +61,16 @@ Deno.serve(async (req) => {
         const stripe = createStripeClient();
         const sub = await stripe.subscriptions.retrieve(company.stripe_subscription_id);
         subscriptionStatus = sub.status;
-        subscriptionEnd = new Date(sub.current_period_end * 1000).toISOString();
+        // In Stripe API 2025-08-27.basil `current_period_end` moved off the subscription
+        // root onto each subscription item. Read it from there, falling back to the
+        // legacy root field, and guard against an invalid timestamp.
+        const periodEndUnix =
+          (sub.items?.data?.[0] as { current_period_end?: number } | undefined)?.current_period_end ??
+          (sub as unknown as { current_period_end?: number }).current_period_end;
+        subscriptionEnd =
+          typeof periodEndUnix === "number" && Number.isFinite(periodEndUnix)
+            ? new Date(periodEndUnix * 1000).toISOString()
+            : null;
         
         // Sync paid_slots from Stripe quantity
         const stripeQuantity = sub.items.data[0]?.quantity || 0;

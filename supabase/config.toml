@@ -47,10 +47,30 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.create-yacht-checkout]
     verify_jwt = false
+  # Restored from _archive 2026-06-22 — still invoked by live frontend code.
+  # These do their own auth (getUser / requireAuth) or are intentionally public
+  # (proxy-image in <img>, yacht-calendar-export for OTA fetches, persona-detect
+  # during anonymous onboarding), matching sibling checkout/AI functions.
+  [functions.create-cleaning-checkout]
+    verify_jwt = false
+  [functions.create-wellness-checkout]
+    verify_jwt = false
+  [functions.create-pet-checkout]
+    verify_jwt = false
+  [functions.canonical-persona-detect]
+    verify_jwt = false
+  [functions.ai-legal-assistant]
+    verify_jwt = false
+  [functions.ocr-receipt]
+    verify_jwt = false
+  [functions.proxy-image]
+    verify_jwt = false
+  [functions.yacht-calendar-export]
+    verify_jwt = false
   [functions.create-vendor-subscription]
     verify_jwt = false
   [functions.crm-ai-assistant]
-    verify_jwt = false
+    verify_jwt = true
   [functions.detect-crm-duplicates]
     verify_jwt = false
   [functions.enrich-projects]

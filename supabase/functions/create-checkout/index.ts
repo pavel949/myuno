@@ -1,6 +1,6 @@
  // Deno.serve used (native edge runtime)
 import { createStripeClient } from "../_shared/stripe.ts";
-import { createClient } from "../_shared/supabase.ts";
+import { createClient, createServiceClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
  const corsHeaders = {
@@ -95,11 +95,28 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
        },
      });
  
-     // Update order status to pending payment
-     await supabaseClient
+     // Persist the Stripe session id WITHOUT clobbering existing booking metadata.
+     // Merge into the current metadata using the service client so the write is not
+     // dropped by RLS (the anon client could silently fail to update the row).
+     const serviceClient = createServiceClient();
+     const { data: existingOrder } = await serviceClient
        .from('orders')
-       .update({ metadata: { stripe_session_id: session.id } })
+       .select('metadata')
+       .eq('id', order_id)
+       .maybeSingle();
+
+     const mergedMetadata = {
+       ...((existingOrder?.metadata as Record<string, unknown> | null) ?? {}),
+       stripe_session_id: session.id,
+     };
+
+     const { error: updateError } = await serviceClient
+       .from('orders')
+       .update({ metadata: mergedMetadata })
        .eq('id', order_id);
+     if (updateError) {
+       console.error("[create-checkout] Failed to persist stripe_session_id:", updateError.message);
+     }
  
      console.info(`[create-checkout] Session created: ${session.id}`);
  

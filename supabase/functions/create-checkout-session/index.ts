@@ -47,9 +47,10 @@ Deno.serve(async (req) => {
 
     console.info("Authenticated user:", user.id, user.email);
 
-    // Parse request body
-    const { amount, currency = "rub" } = await req.json();
-    
+    // Parse request body. Wallets are denominated in THB — default to THB so the
+    // charge currency matches the credited balance currency.
+    const { amount, currency = "thb" } = await req.json();
+
     if (!amount || amount < 100) {
       console.error("Invalid amount:", amount);
       throw new Error("Minimum amount is 100");
@@ -101,7 +102,7 @@ Deno.serve(async (req) => {
               name: "Wallet Top Up",
               description: `Top up wallet with ${amount} ${currency.toUpperCase()}`,
             },
-            unit_amount: amount * 100, // Stripe expects amount in kopeks/cents
+            unit_amount: Math.round(amount * 100), // Stripe expects an integer minor unit
           },
           quantity: 1,
         },

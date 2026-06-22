@@ -35,9 +35,6 @@ export interface UniversalLeadInput {
   notes?: string;
 }
 
-// Verticals that trigger WhatsApp notifications (home_services goes via dedicated function, others via notify-admin-order)
-const WHATSAPP_NOTIFICATION_VERTICALS = ['home_services'];
-
 export function useUniversalLead() {
   const { user } = useAuth();
   const { language } = useLanguage();
@@ -86,15 +83,12 @@ export function useUniversalLead() {
         .single();
 
       if (error) throw error;
-      
-      // Trigger WhatsApp notification for specific verticals
-      if (data && WHATSAPP_NOTIFICATION_VERTICALS.includes(input.vertical_id)) {
-        supabase.functions.invoke('notify-lead-whatsapp', {
-          body: { leadId: data.id },
-        }).catch(() => { /* fire & forget */ });
-      }
 
-      // Notify admin about new lead via email (fire & forget)
+      // Notify admin via email + WhatsApp for ALL verticals (fire & forget).
+      // notify-admin-order sends the admin WhatsApp (UltraMSG) unconditionally, so it
+      // covers every lead vertical — the old per-vertical notify-lead-whatsapp path was
+      // redundant (and broken: it used the unconfigured Meta Cloud API), causing a
+      // double WhatsApp for home_services. Routed through this single function now.
       if (data) {
         supabase.functions.invoke('notify-admin-order', {
           body: {

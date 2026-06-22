@@ -80,10 +80,13 @@ export default function AccountTypeSelection() {
           return;
         }
 
-        // Create organization
+        // Create organization. A management company operates properties on behalf of
+        // owners, which maps to the 'operator' org_type (the orgs.org_type enum only
+        // accepts vendor | owner | operator | platform — 'management_company' is not a
+        // valid value and previously threw on insert, failing every MC signup).
         await createOrg({
           name: companyName,
-          org_type: 'management_company' as any,
+          org_type: 'operator',
         });
 
         toast.success(isRu ? 'Компания создана!' : 'Company created!');

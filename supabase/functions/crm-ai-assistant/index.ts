@@ -1,9 +1,16 @@
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Roles permitted to query CRM contact/deal data through this assistant.
+const CRM_STAFF_ROLES = [
+  'admin', 'uno_team', 'support', 'finance', 'sales',
+  'broker', 'partner', 'property_manager', 'vendor', 'staff',
+];
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,7 +18,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { action, contact_id, deal_id, company_id } = await req.json();
+    // Auth: block anonymous callers — this handler returns CRM PII.
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
 
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
     if (!lovableApiKey) {
@@ -22,6 +31,21 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createServiceClient();
+
+    // Authorization: only CRM staff may read contact/deal data.
+    const { data: roleRows } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', auth.user.id);
+    const isStaff = (roleRows ?? []).some((r: { role: string }) => CRM_STAFF_ROLES.includes(r.role));
+    if (!isStaff) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { action, contact_id, deal_id, company_id } = await req.json();
 
     // Gather context
     let contactData = null;
