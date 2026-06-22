@@ -13,7 +13,6 @@ import { useUserTracking } from '@/hooks/useUserTracking';
 import { usePlatformAnalytics } from '@/hooks/usePlatformAnalytics';
 import { InstallBanner } from '@/components/pwa/InstallBanner';
 import { MobileInstallSheet } from '@/components/pwa/MobileInstallSheet';
-import { UnifiedChatFAB } from '@/components/chat/UnifiedChatFAB';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { NavShell } from '@/components/nav/NavShell';
 import { useUserContext } from '@/hooks/useUserContext';
@@ -122,7 +121,6 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
 
           {finalShowFooter && <Footer />}
           {consumerChrome && <MobileInstallSheet />}
-          {consumerChrome && <UnifiedChatFAB />}
         </div>
       </NavShell>
     );
