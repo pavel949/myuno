@@ -25,6 +25,7 @@ export function FundingProgress({
 }: FundingProgressProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   if (!fundingGoal) return null;
 
@@ -69,7 +70,7 @@ export function FundingProgress({
           {percentage}%
           {isFunded && (
             <span className="ml-1 text-xs font-normal">
-              {isRu ? 'Собрано!' : 'Funded!'}
+              {isRu ? 'Собрано!' : isTh ? 'ระดมทุนครบแล้ว!' : 'Funded!'}
             </span>
           )}
         </span>
@@ -102,8 +103,10 @@ export function FundingProgress({
         )}>
           <Users className="h-3 w-3" />
           <span>
-            {investorsCount} {isRu 
+            {investorsCount} {isRu
               ? (investorsCount === 1 ? 'инвестор' : 'инвесторов')
+              : isTh
+              ? 'นักลงทุน'
               : (investorsCount === 1 ? 'investor' : 'investors')
             }
           </span>

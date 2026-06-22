@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 export default function OwnerAnalyticsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: rows = [], isLoading } = useOwnerProfitability();
 
   if (isLoading) return <div className="flex items-center justify-center min-h-[60vh]"><LoadingSpinner size="lg" /></div>;
@@ -26,28 +27,30 @@ export default function OwnerAnalyticsPage() {
       <div>
         <div className="flex items-center gap-2">
           <Crown className="w-5 h-5 text-primary" />
-          <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'Аналитика собственников' : 'Owner Analytics'}</h1>
+          <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'Аналитика собственников' : isTh ? 'การวิเคราะห์เจ้าของทรัพย์สิน' : 'Owner Analytics'}</h1>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
           {isRu
             ? 'Прибыльность каждого собственника за последние 12 месяцев.'
+            : isTh
+            ? 'การจัดอันดับความสามารถในการทำกำไรของเจ้าของแต่ละรายในช่วง 12 เดือนที่ผ่านมา'
             : 'Profitability ranking per owner over the last 12 months.'}
         </p>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
         <Card><CardContent className="p-3">
-          <p className="text-xs text-muted-foreground">{isRu ? 'Собственников' : 'Owners'}</p>
+          <p className="text-xs text-muted-foreground">{isRu ? 'Собственников' : isTh ? 'เจ้าของ' : 'Owners'}</p>
           <p className="text-2xl font-bold tabular-nums mt-0.5">{rows.length}</p>
         </CardContent></Card>
         <Card><CardContent className="p-3">
-          <p className="text-xs text-muted-foreground">{isRu ? 'Доход (12м)' : 'Revenue (12m)'}</p>
+          <p className="text-xs text-muted-foreground">{isRu ? 'Доход (12м)' : isTh ? 'รายได้ (12 ด.)' : 'Revenue (12m)'}</p>
           <p className="text-xl font-bold tabular-nums mt-0.5">
             {Math.round(totalRevenue / 1000).toLocaleString()}K
           </p>
         </CardContent></Card>
         <Card><CardContent className="p-3">
-          <p className="text-xs text-muted-foreground">{isRu ? 'Чистая (12м)' : 'Net (12m)'}</p>
+          <p className="text-xs text-muted-foreground">{isRu ? 'Чистая (12м)' : isTh ? 'สุทธิ (12 ด.)' : 'Net (12m)'}</p>
           <p className={cn('text-xl font-bold tabular-nums mt-0.5', totalNet >= 0 ? 'text-success' : 'text-destructive')}>
             {Math.round(totalNet / 1000).toLocaleString()}K
           </p>
@@ -58,7 +61,7 @@ export default function OwnerAnalyticsPage() {
         {rows.length === 0 ? (
           <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">
             <Crown className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">{isRu ? 'Нет данных по собственникам.' : 'No owner data yet.'}</p>
+            <p className="text-sm">{isRu ? 'Нет данных по собственникам.' : isTh ? 'ยังไม่มีข้อมูลเจ้าของทรัพย์สิน' : 'No owner data yet.'}</p>
           </CardContent></Card>
         ) : rows.map((r, idx) => (
           <Card key={r.owner_id}>
@@ -69,9 +72,9 @@ export default function OwnerAnalyticsPage() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium font-mono">{r.owner_id.slice(0, 8)}…</p>
                 <p className="text-xs text-muted-foreground">
-                  {r.property_count} {isRu ? 'объектов' : 'properties'}
+                  {r.property_count} {isRu ? 'объектов' : isTh ? 'ทรัพย์สิน' : 'properties'}
                   {' · '}
-                  {isRu ? 'доход ' : 'revenue '}
+                  {isRu ? 'доход ' : isTh ? 'รายได้ ' : 'revenue '}
                   {Number(r.revenue_12m).toLocaleString()}
                 </p>
               </div>

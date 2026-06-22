@@ -18,20 +18,21 @@ import { CheckCircle2, Circle, Rocket, ArrowRight, X, Building2, Users, Home, Ta
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 
-const STEP_META: Record<OnboardingStepKey, { icon: any; route: string; descEn: string; descRu: string }> = {
-  step_company_profile: { icon: Building2, route: APP_ROUTES.MC_SETTINGS, descEn: 'Logo, contacts, legal info', descRu: 'Логотип, контакты, реквизиты' },
-  step_team_invited: { icon: Users, route: APP_ROUTES.MC_STAFF, descEn: 'Invite cleaners, managers, accountant', descRu: 'Пригласите уборщиков, менеджеров, бухгалтера' },
-  step_first_property: { icon: Home, route: APP_ROUTES.MC_PROPERTIES, descEn: 'Add your first property to manage', descRu: 'Добавьте первый объект для управления' },
-  step_pricing_set: { icon: Tag, route: APP_ROUTES.MC_RATES, descEn: 'Set seasonal rates and rules', descRu: 'Сезонные тарифы и правила' },
-  step_channel_connected: { icon: Radio, route: APP_ROUTES.MC_CHANNELS, descEn: 'Sync with Airbnb / Booking.com', descRu: 'Синхронизация с Airbnb / Booking.com' },
-  step_payment_method: { icon: CreditCard, route: APP_ROUTES.MC_SUBSCRIPTION, descEn: 'Activate subscription', descRu: 'Активация подписки' },
-  step_first_booking: { icon: CalendarCheck, route: APP_ROUTES.MC_BOOKINGS_LIST, descEn: 'Receive your first booking', descRu: 'Получите первое бронирование' },
+const STEP_META: Record<OnboardingStepKey, { icon: any; route: string; descEn: string; descRu: string; descTh: string }> = {
+  step_company_profile: { icon: Building2, route: APP_ROUTES.MC_SETTINGS, descEn: 'Logo, contacts, legal info', descRu: 'Логотип, контакты, реквизиты', descTh: 'โลโก้ ข้อมูลติดต่อ ข้อมูลทางกฎหมาย' },
+  step_team_invited: { icon: Users, route: APP_ROUTES.MC_STAFF, descEn: 'Invite cleaners, managers, accountant', descRu: 'Пригласите уборщиков, менеджеров, бухгалтера', descTh: 'เชิญแม่บ้าน ผู้จัดการ และนักบัญชี' },
+  step_first_property: { icon: Home, route: APP_ROUTES.MC_PROPERTIES, descEn: 'Add your first property to manage', descRu: 'Добавьте первый объект для управления', descTh: 'เพิ่มทรัพย์สินแรกที่จะบริหารจัดการ' },
+  step_pricing_set: { icon: Tag, route: APP_ROUTES.MC_RATES, descEn: 'Set seasonal rates and rules', descRu: 'Сезонные тарифы и правила', descTh: 'ตั้งค่าราคาตามฤดูกาลและกฎเกณฑ์' },
+  step_channel_connected: { icon: Radio, route: APP_ROUTES.MC_CHANNELS, descEn: 'Sync with Airbnb / Booking.com', descRu: 'Синхронизация с Airbnb / Booking.com', descTh: 'ซิงค์กับ Airbnb / Booking.com' },
+  step_payment_method: { icon: CreditCard, route: APP_ROUTES.MC_SUBSCRIPTION, descEn: 'Activate subscription', descRu: 'Активация подписки', descTh: 'เปิดใช้งานการสมัครสมาชิก' },
+  step_first_booking: { icon: CalendarCheck, route: APP_ROUTES.MC_BOOKINGS_LIST, descEn: 'Receive your first booking', descRu: 'Получите первое бронирование', descTh: 'รับการจองครั้งแรกของคุณ' },
 };
 
 export default function McOnboardingWizardPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { activeCompany, isLoading: companyLoading } = useActiveCompany();
   const { data: progress, isLoading } = useMcOnboarding();
   const updateStep = useUpdateOnboardingStep();
@@ -56,13 +57,13 @@ export default function McOnboardingWizardPage() {
             <Rocket className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'Запустим вашу компанию за 30 минут' : 'Set up your company in 30 minutes'}</h1>
+            <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'Запустим вашу компанию за 30 минут' : isTh ? 'ตั้งค่าบริษัทของคุณภายใน 30 นาที' : 'Set up your company in 30 minutes'}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {isRu ? '7 шагов, чтобы превратить myUNO в полноценную ERP вашего агентства.' : '7 steps to turn myUNO into a full ERP for your agency.'}
+              {isRu ? '7 шагов, чтобы превратить myUNO в полноценную ERP вашего агентства.' : isTh ? '7 ขั้นตอนเพื่อเปลี่ยน myUNO ให้เป็นระบบ ERP เต็มรูปแบบสำหรับเอเจนซีของคุณ' : '7 steps to turn myUNO into a full ERP for your agency.'}
             </p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => dismiss.mutate()} title={isRu ? 'Закрыть' : 'Dismiss'} aria-label={isRu ? 'Закрыть' : 'Dismiss'}>
+        <Button variant="ghost" size="icon" onClick={() => dismiss.mutate()} title={isRu ? 'Закрыть' : isTh ? 'ปิด' : 'Dismiss'} aria-label={isRu ? 'Закрыть' : isTh ? 'ปิด' : 'Dismiss'}>
           <X className="w-4 h-4" />
         </Button>
       </div>
@@ -70,12 +71,12 @@ export default function McOnboardingWizardPage() {
       <Card>
         <CardContent className="p-4 space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-semibold">{isRu ? 'Прогресс' : 'Progress'}</span>
+            <span className="font-semibold">{isRu ? 'Прогресс' : isTh ? 'ความคืบหน้า' : 'Progress'}</span>
             <span className="tabular-nums font-bold text-primary">{pct}%</span>
           </div>
           <Progress value={pct} />
           <p className="text-xs text-muted-foreground">
-            {ONBOARDING_STEPS.filter((s) => (progress as any)?.[s.key]).length} / {ONBOARDING_STEPS.length} {isRu ? 'выполнено' : 'completed'}
+            {ONBOARDING_STEPS.filter((s) => (progress as any)?.[s.key]).length} / {ONBOARDING_STEPS.length} {isRu ? 'выполнено' : isTh ? 'เสร็จสิ้น' : 'completed'}
           </p>
         </CardContent>
       </Card>
@@ -105,11 +106,11 @@ export default function McOnboardingWizardPage() {
                     {idx + 1}. {isRu ? step.ru : step.en}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                    {isRu ? meta.descRu : meta.descEn}
+                    {isRu ? meta.descRu : isTh ? meta.descTh : meta.descEn}
                   </p>
                 </div>
                 <Button size="sm" variant={done ? 'ghost' : 'outline'} onClick={() => navigate(meta.route)} className="shrink-0">
-                  {isRu ? 'Перейти' : 'Open'} <ArrowRight className="w-3 h-3 ml-1" />
+                  {isRu ? 'Перейти' : isTh ? 'เปิด' : 'Open'} <ArrowRight className="w-3 h-3 ml-1" />
                 </Button>
               </CardContent>
             </Card>
@@ -121,12 +122,12 @@ export default function McOnboardingWizardPage() {
         <Card className="bg-gradient-to-br from-primary/10 to-success/10 border-primary/30">
           <CardContent className="p-6 text-center space-y-3">
             <Rocket className="w-12 h-12 mx-auto text-primary" />
-            <h3 className="text-lg font-bold">{isRu ? 'Поздравляем — компания готова!' : 'Congratulations — your company is live!'}</h3>
+            <h3 className="text-lg font-bold">{isRu ? 'Поздравляем — компания готова!' : isTh ? 'ขอแสดงความยินดี — บริษัทของคุณพร้อมใช้งานแล้ว!' : 'Congratulations — your company is live!'}</h3>
             <p className="text-sm text-muted-foreground">
-              {isRu ? 'Вы прошли все 7 шагов. Теперь myUNO — ваша операционная система.' : 'You completed all 7 steps. myUNO is now your operating system.'}
+              {isRu ? 'Вы прошли все 7 шагов. Теперь myUNO — ваша операционная система.' : isTh ? 'คุณทำครบทั้ง 7 ขั้นตอนแล้ว ตอนนี้ myUNO คือระบบปฏิบัติการของคุณ' : 'You completed all 7 steps. myUNO is now your operating system.'}
             </p>
             <Button onClick={() => { complete.mutate(); navigate(APP_ROUTES.MC); }}>
-              {isRu ? 'В дашборд' : 'Go to dashboard'}
+              {isRu ? 'В дашборд' : isTh ? 'ไปที่แดชบอร์ด' : 'Go to dashboard'}
             </Button>
           </CardContent>
         </Card>

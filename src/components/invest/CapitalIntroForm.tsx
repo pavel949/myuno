@@ -30,6 +30,7 @@ export function CapitalIntroForm({
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const mutation = useCapitalIntroRequest();
 
   const [name, setName] = useState('');
@@ -54,28 +55,28 @@ export function CapitalIntroForm({
   };
 
   const ranges: { v: CapitalRangeBand; l: string }[] = [
-    { v: '<5M', l: isRu ? 'до 5 млн ฿' : 'Under 5M ฿' },
+    { v: '<5M', l: isRu ? 'до 5 млн ฿' : isTh ? 'ต่ำกว่า 5M ฿' : 'Under 5M ฿' },
     { v: '5-20M', l: '5–20M ฿' },
     { v: '20-100M', l: '20–100M ฿' },
     { v: '100M+', l: '100M+ ฿' },
   ];
 
   const timelines: { v: CapitalTimeline; l: string }[] = [
-    { v: 'now', l: isRu ? 'Сейчас' : 'Now' },
-    { v: '1-3m', l: isRu ? '1–3 мес' : '1–3 months' },
-    { v: '3-6m', l: isRu ? '3–6 мес' : '3–6 months' },
-    { v: '6-12m', l: isRu ? '6–12 мес' : '6–12 months' },
+    { v: 'now', l: isRu ? 'Сейчас' : isTh ? 'ตอนนี้' : 'Now' },
+    { v: '1-3m', l: isRu ? '1–3 мес' : isTh ? '1–3 เดือน' : '1–3 months' },
+    { v: '3-6m', l: isRu ? '3–6 мес' : isTh ? '3–6 เดือน' : '3–6 months' },
+    { v: '6-12m', l: isRu ? '6–12 мес' : isTh ? '6–12 เดือน' : '6–12 months' },
   ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="ci-name">{isRu ? 'Имя' : 'Name'}</Label>
+          <Label htmlFor="ci-name">{isRu ? 'Имя' : isTh ? 'ชื่อ' : 'Name'}</Label>
           <Input id="ci-name" required value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="ci-phone">{isRu ? 'Телефон / WhatsApp' : 'Phone / WhatsApp'}</Label>
+          <Label htmlFor="ci-phone">{isRu ? 'Телефон / WhatsApp' : isTh ? 'โทรศัพท์ / WhatsApp' : 'Phone / WhatsApp'}</Label>
           <Input id="ci-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
       </div>
@@ -93,10 +94,10 @@ export function CapitalIntroForm({
 
       {showCapitalRange && (
         <div className="space-y-1.5">
-          <Label>{isRu ? 'Капитал' : 'Capital range'}</Label>
+          <Label>{isRu ? 'Капитал' : isTh ? 'ช่วงเงินทุน' : 'Capital range'}</Label>
           <Select value={capitalRange} onValueChange={(v) => setCapitalRange(v as CapitalRangeBand)}>
             <SelectTrigger>
-              <SelectValue placeholder={isRu ? 'Выберите диапазон' : 'Select range'} />
+              <SelectValue placeholder={isRu ? 'Выберите диапазон' : isTh ? 'เลือกช่วง' : 'Select range'} />
             </SelectTrigger>
             <SelectContent>
               {ranges.map((r) => (
@@ -111,10 +112,10 @@ export function CapitalIntroForm({
 
       {showTimeline && (
         <div className="space-y-1.5">
-          <Label>{isRu ? 'Горизонт' : 'Timeline'}</Label>
+          <Label>{isRu ? 'Горизонт' : isTh ? 'กรอบเวลา' : 'Timeline'}</Label>
           <Select value={timeline} onValueChange={(v) => setTimeline(v as CapitalTimeline)}>
             <SelectTrigger>
-              <SelectValue placeholder={isRu ? 'Когда планируете?' : 'When are you planning?'} />
+              <SelectValue placeholder={isRu ? 'Когда планируете?' : isTh ? 'วางแผนเมื่อใด?' : 'When are you planning?'} />
             </SelectTrigger>
             <SelectContent>
               {timelines.map((t) => (
@@ -128,7 +129,7 @@ export function CapitalIntroForm({
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="ci-msg">{isRu ? 'Комментарий' : 'Message'}</Label>
+        <Label htmlFor="ci-msg">{isRu ? 'Комментарий' : isTh ? 'ข้อความ' : 'Message'}</Label>
         <Textarea
           id="ci-msg"
           rows={4}
@@ -137,6 +138,8 @@ export function CapitalIntroForm({
           placeholder={
             isRu
               ? 'Расскажите кратко о целях, опыте, предпочтениях…'
+              : isTh
+              ? 'เล่าสั้น ๆ เกี่ยวกับเป้าหมาย ประสบการณ์ และความต้องการของคุณ…'
               : 'Briefly: goals, background, preferences…'
           }
         />
@@ -148,12 +151,14 @@ export function CapitalIntroForm({
         ) : (
           <Send className="h-4 w-4" />
         )}
-        {isRu ? 'Отправить заявку' : 'Submit request'}
+        {isRu ? 'Отправить заявку' : isTh ? 'ส่งคำขอ' : 'Submit request'}
       </Button>
 
       <p className="text-xs text-muted-foreground text-center">
         {isRu
           ? 'Заявка попадёт в наш CRM. Мы свяжемся в течение 24 часов.'
+          : isTh
+          ? 'คำขอจะเข้าสู่ระบบ CRM ของเรา เราจะติดต่อกลับภายใน 24 ชั่วโมง'
           : 'Lands in our CRM. We will respond within 24 hours.'}
       </p>
     </form>

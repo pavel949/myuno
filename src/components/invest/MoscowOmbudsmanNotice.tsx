@@ -12,6 +12,7 @@ import { Scale } from 'lucide-react';
 export function MoscowOmbudsmanNotice({ className }: { className?: string }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   return (
     <div
@@ -22,11 +23,13 @@ export function MoscowOmbudsmanNotice({ className }: { className?: string }) {
         <Scale className="w-3.5 h-3.5 mt-0.5 text-muted-foreground shrink-0" />
         <div className="min-w-0">
           <div className="font-medium text-foreground">
-            {isRu ? 'Защита через омбудсмена Москвы' : 'Moscow Business Ombudsman channel'}
+            {isRu ? 'Защита через омбудсмена Москвы' : isTh ? 'ช่องทางผู้ตรวจการธุรกิจกรุงมอสโก' : 'Moscow Business Ombudsman channel'}
           </div>
           <p className="text-muted-foreground mt-0.5">
             {isRu
               ? 'Для резидентов Москвы доступен канал эскалации споров через Уполномоченного по защите прав предпринимателей в городе Москве. Канал применяется при необходимости и по согласованию сторон сделки.'
+              : isTh
+              ? 'ผู้ที่พำนักในกรุงมอสโกสามารถใช้ช่องทางการยกระดับข้อพิพาทผ่านผู้ตรวจการธุรกิจประจำนครมอสโกได้ ใช้ตามความจำเป็นและโดยความยินยอมของคู่สัญญาในดีล'
               : 'Residents of Moscow may use the dispute escalation channel via the City of Moscow Business Ombudsman. Used on demand and with the consent of the deal parties.'}
           </p>
         </div>

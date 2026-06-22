@@ -295,6 +295,138 @@ const VISA_TYPES = {
       ],
       bestFor: ['Цифровые кочевники', 'Инвесторы', 'Долгосрочные резиденты', 'VIP-путешественники']
     }
+  ],
+  th: [
+    {
+      id: 'tourist',
+      name: 'วีซ่าท่องเที่ยว',
+      icon: Plane,
+      color: 'bg-primary',
+      duration: '60 วัน',
+      extendable: 'ได้ +30 วัน',
+      cost: '฿1,900',
+      description: 'สำหรับนักท่องเที่ยวที่เดินทางมาประเทศไทยเพื่อพักผ่อน ชมสถานที่ หรือเยี่ยมเพื่อน/ครอบครัว',
+      requirements: [
+        'หนังสือเดินทางที่มีอายุเหลือ 6 เดือนขึ้นไป',
+        'แบบฟอร์มขอวีซ่าที่กรอกครบถ้วน',
+        'รูปถ่ายขนาดติดหนังสือเดินทาง',
+        'หลักฐานที่พัก',
+        'หลักฐานการเงินเพียงพอ (20,000 บาท)',
+        'แผนการเดินทางเที่ยวบิน'
+      ],
+      bestFor: ['พักผ่อนระยะสั้น', 'ผู้มาเยือนครั้งแรก', 'ท่องเที่ยว']
+    },
+    {
+      id: 'visa_exempt',
+      name: 'ยกเว้นวีซ่า',
+      icon: Globe,
+      color: 'bg-success',
+      duration: '30-90 วัน',
+      extendable: 'ได้ +30 วัน',
+      cost: 'ฟรี',
+      description: 'พลเมืองของประเทศที่มีสิทธิ์สามารถเข้าประเทศไทยเพื่อการท่องเที่ยวได้โดยไม่ต้องมีวีซ่า',
+      requirements: [
+        'หนังสือเดินทางที่มีอายุเหลือ 6 เดือนขึ้นไป',
+        'หลักฐานการเดินทางออกนอกประเทศ',
+        'หลักฐานที่พัก',
+        'หลักฐานการเงินเพียงพอ'
+      ],
+      bestFor: ['ทริปสั้น ๆ', 'ประชุมธุรกิจ', 'ผ่านแดน']
+    },
+    {
+      id: 'education',
+      name: 'วีซ่านักเรียน (ED)',
+      icon: GraduationCap,
+      color: 'bg-primary',
+      duration: '90 วัน - 1 ปี',
+      extendable: 'ได้ ต่ออายุได้',
+      cost: '฿2,000',
+      description: 'สำหรับนักเรียนที่ลงทะเบียนในสถาบันการศึกษา โรงเรียนสอนภาษา หรือหลักสูตรฝึกอบรมในประเทศไทย',
+      requirements: [
+        'หนังสือเดินทางที่มีอายุเหลือ 6 เดือนขึ้นไป',
+        'หนังสือตอบรับจากสถานศึกษา',
+        'แบบฟอร์มขอวีซ่า ED ที่กรอกครบถ้วน',
+        'หลักฐานทางการเงิน',
+        'รูปถ่ายขนาดติดหนังสือเดินทาง',
+        'ใบแสดงผลการเรียน'
+      ],
+      bestFor: ['ผู้เรียนภาษา', 'นักศึกษามหาวิทยาลัย', 'ฝึกศิลปะการต่อสู้']
+    },
+    {
+      id: 'business',
+      name: 'วีซ่าธุรกิจ (Non-B)',
+      icon: Briefcase,
+      color: 'bg-accent',
+      duration: '90 วัน - 1 ปี',
+      extendable: 'ได้ พร้อมใบอนุญาตทำงาน',
+      cost: '฿2,000',
+      description: 'สำหรับการทำธุรกิจ การจ้างงาน หรือการจัดตั้งบริษัทในประเทศไทย',
+      requirements: [
+        'หนังสือเดินทางที่มีอายุเหลือ 6 เดือนขึ้นไป',
+        'หนังสือรับรองจากบริษัทไทย',
+        'เอกสารจดทะเบียนบริษัท',
+        'สัญญาจ้างงาน',
+        'หลักฐานคุณวุฒิ',
+        'งบการเงิน'
+      ],
+      bestFor: ['พนักงาน', 'เจ้าของธุรกิจ', 'นักลงทุน']
+    },
+    {
+      id: 'marriage',
+      name: 'วีซ่าสมรส (Non-O)',
+      icon: Heart,
+      color: 'bg-accent',
+      duration: '90 วัน - 1 ปี',
+      extendable: 'ได้ รายปี',
+      cost: '฿2,000',
+      description: 'สำหรับผู้ที่สมรสกับคนไทยหรือผู้ที่อุปการะสมาชิกครอบครัวในประเทศไทย',
+      requirements: [
+        'หนังสือเดินทางที่มีอายุเหลือ 6 เดือนขึ้นไป',
+        'ทะเบียนสมรส',
+        'บัตรประชาชนและทะเบียนบ้านของคู่สมรส',
+        'หลักฐานรายได้ (40,000 บาท/เดือน) หรือ 400,000 บาทในบัญชี',
+        'รูปถ่าย',
+        'แบบฟอร์มที่กรอกครบถ้วน'
+      ],
+      bestFor: ['สมรสกับคนไทย', 'ครอบครัวคนไทย']
+    },
+    {
+      id: 'retirement',
+      name: 'วีซ่าเกษียณอายุ (O-A/O-X)',
+      icon: Users,
+      color: 'bg-success',
+      duration: '1 ปี (O-A) / 5 ปี (O-X)',
+      extendable: 'ได้ รายปี',
+      cost: '฿2,000 / ฿10,000',
+      description: 'สำหรับผู้เกษียณอายุ 50 ปีขึ้นไปที่ต้องการพำนักในประเทศไทยระยะยาว',
+      requirements: [
+        'อายุ 50 ปีขึ้นไป',
+        'หนังสือเดินทางที่มีอายุเหลือ 6 เดือนขึ้นไป',
+        '800,000 บาทในธนาคารไทย (O-A) หรือ 3,000,000 บาท (O-X)',
+        'ประกันสุขภาพ (ผู้ป่วยนอก 40,000 บาท ผู้ป่วยใน 400,000 บาท)',
+        'ใบรับรองแพทย์',
+        'หนังสือรับรองความประพฤติ'
+      ],
+      bestFor: ['ผู้เกษียณอายุ', 'ผู้พำนักระยะยาว', 'ชาวต่างชาติวัย 50+']
+    },
+    {
+      id: 'elite',
+      name: 'Thailand Elite Visa',
+      icon: Crown,
+      color: 'bg-accent',
+      duration: '5-20 ปี',
+      extendable: 'ผ่านการสมัครสมาชิกใหม่',
+      cost: '฿600,000 - ฿2,140,000',
+      description: 'โปรแกรมวีซ่าระยะยาวระดับพรีเมียมพร้อมสิทธิประโยชน์และบริการ VIP',
+      requirements: [
+        'หนังสือเดินทางที่ยังมีอายุ',
+        'ประวัติอาชญากรรมสะอาด',
+        'ชำระค่าสมาชิก',
+        'ไม่มีโรคร้ายแรง',
+        'ใบสมัครที่กรอกครบถ้วน'
+      ],
+      bestFor: ['ดิจิทัลโนแมด', 'นักลงทุน', 'ผู้พำนักระยะยาว', 'นักเดินทาง VIP']
+    }
   ]
 };
 
@@ -349,13 +481,38 @@ const EXTENSION_INFO = {
       'Одевайтесь уместно (без шорт/сандалий)',
       'Берите наличные в тайских батах'
     ]
+  },
+  th: {
+    title: 'การต่ออายุวีซ่า',
+    description: 'วีซ่าส่วนใหญ่สามารถต่ออายุได้ที่สำนักงานตรวจคนเข้าเมือง นี่คือสิ่งที่คุณควรทราบ:',
+    steps: [
+      'ไปที่สำนักงานตรวจคนเข้าเมืองก่อนวีซ่าหมดอายุ',
+      'กรอกแบบฟอร์ม TM.7',
+      'เตรียมรูปถ่ายขนาด 4x6 ซม.',
+      'ชำระค่าธรรมเนียมการต่ออายุ (฿1,900 สำหรับวีซ่าส่วนใหญ่)',
+      'รอดำเนินการ (ภายในวันเดียวหรือ 1-3 วัน)'
+    ],
+    documents: [
+      'หนังสือเดินทางพร้อมวีซ่าปัจจุบัน',
+      'บัตรขาออก TM.6',
+      'แบบฟอร์ม TM.7 ที่กรอกครบถ้วน',
+      'รูปถ่ายขนาด 4x6 ซม. หนึ่งใบ',
+      'ค่าธรรมเนียมการต่ออายุ',
+      'สำเนาหน้าหนังสือเดินทาง'
+    ],
+    tips: [
+      'ยื่นล่วงหน้า 7-14 วันก่อนหมดอายุ',
+      'มาแต่เช้า (แนะนำ 8 โมงเช้า)',
+      'แต่งกายให้เหมาะสม (ห้ามกางเกงขาสั้น/รองเท้าแตะ)',
+      'นำเงินสดสกุลบาทมาด้วย'
+    ]
   }
 };
 
 // Immigration offices
 const IMMIGRATION_OFFICES = [
   {
-    name: { en: 'Chaeng Wattana Immigration Center', ru: 'Иммиграционный центр Чаенг Ваттана' },
+    name: { en: 'Chaeng Wattana Immigration Center', ru: 'Иммиграционный центр Чаенг Ваттана', th: 'ศูนย์ตรวจคนเข้าเมืองแจ้งวัฒนะ' },
     location: 'Bangkok',
     address: 'Immigration Bureau Building B, Chaeng Wattana Soi 7',
     phone: '+66 2 141 9889',
@@ -363,7 +520,7 @@ const IMMIGRATION_OFFICES = [
     services: ['All visa types', 'Work Permits', '90-day reporting']
   },
   {
-    name: { en: 'Phuket Immigration', ru: 'Иммиграция Пхукета' },
+    name: { en: 'Phuket Immigration', ru: 'Иммиграция Пхукета', th: 'ตรวจคนเข้าเมืองภูเก็ต' },
     location: 'Phuket',
     address: '482 Phuket Road, Taladyai, Muang',
     phone: '+66 76 221 905',
@@ -371,7 +528,7 @@ const IMMIGRATION_OFFICES = [
     services: ['Tourist extensions', '90-day reporting', 'Re-entry permits']
   },
   {
-    name: { en: 'Chiang Mai Immigration', ru: 'Иммиграция Чиангмая' },
+    name: { en: 'Chiang Mai Immigration', ru: 'Иммиграция Чиангмая', th: 'ตรวจคนเข้าเมืองเชียงใหม่' },
     location: 'Chiang Mai',
     address: 'Promenada Mall, 192/1-4 Moo 2',
     phone: '+66 53 101 755',
@@ -379,7 +536,7 @@ const IMMIGRATION_OFFICES = [
     services: ['Tourist extensions', '90-day reporting', 'Non-Immigrant visas']
   },
   {
-    name: { en: 'Koh Samui Immigration', ru: 'Иммиграция Ко Самуи' },
+    name: { en: 'Koh Samui Immigration', ru: 'Иммиграция Ко Самуи', th: 'ตรวจคนเข้าเมืองเกาะสมุย' },
     location: 'Koh Samui',
     address: 'Na Thon, Moo 3',
     phone: '+66 77 421 069',
@@ -394,8 +551,8 @@ export default function VisaImmigrationPage() {
   const { services: visaServices, isLoading } = useVisaServices();
   const [selectedVisaType, setSelectedVisaType] = useState<string | null>(null);
   
-  const visaTypes = language === 'ru' ? VISA_TYPES.ru : VISA_TYPES.en;
-  const extensionInfo = language === 'ru' ? EXTENSION_INFO.ru : EXTENSION_INFO.en;
+  const visaTypes = language === 'ru' ? VISA_TYPES.ru : language === 'th' ? VISA_TYPES.th : VISA_TYPES.en;
+  const extensionInfo = language === 'ru' ? EXTENSION_INFO.ru : language === 'th' ? EXTENSION_INFO.th : EXTENSION_INFO.en;
 
   const selectedVisa = selectedVisaType 
     ? visaTypes.find(v => v.id === selectedVisaType) 
@@ -413,11 +570,13 @@ export default function VisaImmigrationPage() {
               <Plane className="w-8 h-8" />
             </div>
             <h1 className="text-2xl font-bold mb-2">
-              {language === 'ru' ? 'Визы и Иммиграция' : 'Visa & Immigration'}
+              {language === 'ru' ? 'Визы и Иммиграция' : language === 'th' ? 'วีซ่าและตรวจคนเข้าเมือง' : 'Visa & Immigration'}
             </h1>
             <p className="text-white/80 text-sm max-w-md mx-auto">
-              {language === 'ru' 
+              {language === 'ru'
                 ? 'Полная информация о типах виз, требованиях и процедурах для пребывания в Таиланде'
+                : language === 'th'
+                ? 'คู่มือฉบับสมบูรณ์เกี่ยวกับประเภทวีซ่า ข้อกำหนด และขั้นตอนสำหรับการพำนักในประเทศไทย'
                 : 'Complete guide to visa types, requirements and procedures for staying in Thailand'}
             </p>
           </div>
@@ -430,11 +589,13 @@ export default function VisaImmigrationPage() {
               <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-warning">
-                  {language === 'ru' ? 'Важная информация' : 'Important Notice'}
+                  {language === 'ru' ? 'Важная информация' : language === 'th' ? 'ข้อควรทราบ' : 'Important Notice'}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {language === 'ru' 
+                  {language === 'ru'
                     ? 'Визовые правила могут меняться. Всегда проверяйте актуальную информацию в Иммиграционном бюро Таиланда или посольстве.'
+                    : language === 'th'
+                    ? 'กฎระเบียบเกี่ยวกับวีซ่าอาจมีการเปลี่ยนแปลง โปรดตรวจสอบข้อมูลล่าสุดกับสำนักงานตรวจคนเข้าเมืองหรือสถานทูตเสมอ'
                     : 'Visa rules may change. Always verify current information with Thai Immigration Bureau or embassy.'}
                 </p>
               </div>
@@ -446,16 +607,16 @@ export default function VisaImmigrationPage() {
         <Tabs defaultValue="types" className="px-4 pt-6">
           <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger value="tracker" className="text-xs sm:text-sm">
-              {language === 'ru' ? 'Трекер' : 'Tracker'}
+              {language === 'ru' ? 'Трекер' : language === 'th' ? 'ติดตามสถานะ' : 'Tracker'}
             </TabsTrigger>
             <TabsTrigger value="types" className="text-xs sm:text-sm">
-              {language === 'ru' ? 'Типы виз' : 'Visa Types'}
+              {language === 'ru' ? 'Типы виз' : language === 'th' ? 'ประเภทวีซ่า' : 'Visa Types'}
             </TabsTrigger>
             <TabsTrigger value="extension" className="text-xs sm:text-sm">
-              {language === 'ru' ? 'Продление' : 'Extension'}
+              {language === 'ru' ? 'Продление' : language === 'th' ? 'ต่ออายุ' : 'Extension'}
             </TabsTrigger>
             <TabsTrigger value="services" className="text-xs sm:text-sm">
-              {language === 'ru' ? 'Услуги' : 'Services'}
+              {language === 'ru' ? 'Услуги' : language === 'th' ? 'บริการ' : 'Services'}
             </TabsTrigger>
           </TabsList>
 
@@ -474,7 +635,7 @@ export default function VisaImmigrationPage() {
                   className="mb-2 -ml-2"
                   onClick={() => setSelectedVisaType(null)}
                 >
-                  ← {language === 'ru' ? 'Назад к списку' : 'Back to list'}
+                  ← {language === 'ru' ? 'Назад к списку' : language === 'th' ? 'กลับไปที่รายการ' : 'Back to list'}
                 </Button>
                 
                 <div className="flex items-center gap-3 mb-4">
@@ -493,7 +654,7 @@ export default function VisaImmigrationPage() {
                     <CardContent className="p-3 text-center">
                       <Clock className="w-4 h-4 mx-auto mb-1 text-primary" />
                       <p className="text-xs text-muted-foreground">
-                        {language === 'ru' ? 'Срок' : 'Duration'}
+                        {language === 'ru' ? 'Срок' : language === 'th' ? 'ระยะเวลา' : 'Duration'}
                       </p>
                       <p className="text-sm font-semibold">{selectedVisa.duration}</p>
                     </CardContent>
@@ -502,7 +663,7 @@ export default function VisaImmigrationPage() {
                     <CardContent className="p-3 text-center">
                       <RefreshCw className="w-4 h-4 mx-auto mb-1 text-primary" />
                       <p className="text-xs text-muted-foreground">
-                        {language === 'ru' ? 'Продление' : 'Extend'}
+                        {language === 'ru' ? 'Продление' : language === 'th' ? 'ต่ออายุ' : 'Extend'}
                       </p>
                       <p className="text-sm font-semibold">{selectedVisa.extendable}</p>
                     </CardContent>

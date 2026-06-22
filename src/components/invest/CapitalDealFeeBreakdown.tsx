@@ -30,6 +30,7 @@ function fmtThb(n: number): string {
 export function CapitalDealFeeBreakdown({ sampleDealUsd = 300000, className }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { getRate } = useRevenueRates();
 
   const dealFeePct = getRate('investment_deal_fee'); // %
@@ -40,12 +41,13 @@ export function CapitalDealFeeBreakdown({ sampleDealUsd = 300000, className }: P
   const dealFeeUsd = sampleDealUsd * (dealFeePct / 100);
   const escrowUsd = sampleDealUsd * (escrowPct / 100);
 
-  const rows: { id: string; label: { ru: string; en: string }; value: string; mandatory: boolean }[] = [
+  const rows: { id: string; label: { ru: string; en: string; th: string }; value: string; mandatory: boolean }[] = [
     {
       id: 'deal',
       label: {
         ru: `Комиссия сделки — ${dealFeePct}% от суммы (платит покупатель)`,
         en: `Deal fee — ${dealFeePct}% of deal value (paid by buyer)`,
+        th: `ค่าธรรมเนียมดีล — ${dealFeePct}% ของมูลค่าดีล (ผู้ซื้อเป็นผู้ชำระ)`,
       },
       value: fmtUsd(dealFeeUsd),
       mandatory: true,
@@ -55,6 +57,7 @@ export function CapitalDealFeeBreakdown({ sampleDealUsd = 300000, className }: P
       label: {
         ru: `Эскроу-сопровождение — ${escrowPct}% от суммы`,
         en: `Escrow handling — ${escrowPct}% of deal value`,
+        th: `การดูแลบัญชีเอสโครว์ — ${escrowPct}% ของมูลค่าดีล`,
       },
       value: fmtUsd(escrowUsd),
       mandatory: true,
@@ -64,6 +67,7 @@ export function CapitalDealFeeBreakdown({ sampleDealUsd = 300000, className }: P
       label: {
         ru: 'WorldCheck KYC / AML (обязательно для сделок от 200 000 USD)',
         en: 'WorldCheck KYC / AML (required for deals from USD 200 000)',
+        th: 'WorldCheck KYC / AML (จำเป็นสำหรับดีลตั้งแต่ 200,000 USD ขึ้นไป)',
       },
       value: fmtThb(wcThb),
       mandatory: true,
@@ -73,6 +77,7 @@ export function CapitalDealFeeBreakdown({ sampleDealUsd = 300000, className }: P
       label: {
         ru: 'ROI-отчёт по объекту — по запросу',
         en: 'Investment ROI report — on request',
+        th: 'รายงานผลตอบแทนการลงทุน (ROI) — ตามคำขอ',
       },
       value: fmtThb(roiThb),
       mandatory: false,
@@ -94,6 +99,8 @@ export function CapitalDealFeeBreakdown({ sampleDealUsd = 300000, className }: P
       <p className="text-[11.5px] text-muted-foreground mb-2 leading-snug">
         {isRu
           ? `Расчёт показан для сделки ${fmtUsd(sampleDealUsd)}. Все ставки — публичные.`
+          : isTh
+          ? `ตัวอย่างการคำนวณสำหรับดีลมูลค่า ${fmtUsd(sampleDealUsd)} อัตราทั้งหมดเป็นข้อมูลสาธารณะ`
           : `Worked example: deal of ${fmtUsd(sampleDealUsd)}. All rates are public.`}
       </p>
 
@@ -102,11 +109,11 @@ export function CapitalDealFeeBreakdown({ sampleDealUsd = 300000, className }: P
           <li key={row.id} className="py-2 flex items-start gap-3">
             <div className="flex-1 min-w-0">
               <div className="text-[12.5px] text-foreground leading-snug">
-                {isRu ? row.label.ru : row.label.en}
+                {isRu ? row.label.ru : isTh ? row.label.th : row.label.en}
               </div>
               {!row.mandatory && (
                 <div className="text-[10.5px] text-muted-foreground mt-0.5">
-                  {isRu ? 'Опционально' : 'Optional'}
+                  {isRu ? 'Опционально' : isTh ? 'ทางเลือก' : 'Optional'}
                 </div>
               )}
             </div>
@@ -121,6 +128,8 @@ export function CapitalDealFeeBreakdown({ sampleDealUsd = 300000, className }: P
         <p className="text-[11px] text-muted-foreground leading-snug">
           {isRu
             ? `${MONETIZATION_LABELS.serviceOperator.ru}: myUNO Pte. Ltd. Все суммы фиксируются в реестре операций (аудит-маркер на странице платежа).`
+            : isTh
+            ? `${MONETIZATION_LABELS.serviceOperator.en}: myUNO Pte. Ltd. ทุกจำนวนเงินถูกบันทึกในบัญชีแยกประเภท (แสดงเครื่องหมายตรวจสอบบนหน้าชำระเงิน)`
             : `${MONETIZATION_LABELS.serviceOperator.en}: myUNO Pte. Ltd. All amounts are recorded in the ledger (audit marker shown on the payment screen).`}
         </p>
       </footer>

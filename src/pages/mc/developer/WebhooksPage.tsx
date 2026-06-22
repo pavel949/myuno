@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 export default function WebhooksPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data: endpoints = [], isLoading } = useWebhookEndpoints();
   const createMutation = useCreateWebhook();
   const toggleMutation = useToggleWebhook();
@@ -50,11 +51,11 @@ export default function WebhooksPage() {
             <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'Webhooks' : 'Webhooks'}</h1>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Получайте события компании на ваш URL в реальном времени.' : 'Receive company events on your URL in real time.'}
+            {isRu ? 'Получайте события компании на ваш URL в реальном времени.' : isTh ? 'รับเหตุการณ์ของบริษัทไปยัง URL ของคุณแบบเรียลไทม์' : 'Receive company events on your URL in real time.'}
           </p>
         </div>
         <Button onClick={() => setOpen(true)}>
-          <Plus className="w-4 h-4 mr-1" /> {isRu ? 'Добавить' : 'Add'}
+          <Plus className="w-4 h-4 mr-1" /> {isRu ? 'Добавить' : isTh ? 'เพิ่ม' : 'Add'}
         </Button>
       </div>
 
@@ -62,7 +63,7 @@ export default function WebhooksPage() {
         {endpoints.length === 0 ? (
           <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">
             <Webhook className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">{isRu ? 'Нет webhook-ов.' : 'No webhooks yet.'}</p>
+            <p className="text-sm">{isRu ? 'Нет webhook-ов.' : isTh ? 'ยังไม่มี webhook' : 'No webhooks yet.'}</p>
           </CardContent></Card>
         ) : endpoints.map((e) => (
           <Card key={e.id} className={cn(!e.is_active && 'opacity-60')}>
@@ -78,7 +79,7 @@ export default function WebhooksPage() {
                   </div>
                   <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground">
                     {e.last_success_at && <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-success" />{new Date(e.last_success_at).toLocaleDateString()}</span>}
-                    {e.failure_count > 0 && <span className="flex items-center gap-1"><XCircle className="w-3 h-3 text-destructive" />{e.failure_count} {isRu ? 'ошибок' : 'fails'}</span>}
+                    {e.failure_count > 0 && <span className="flex items-center gap-1"><XCircle className="w-3 h-3 text-destructive" />{e.failure_count} {isRu ? 'ошибок' : isTh ? 'ครั้งที่ล้มเหลว' : 'fails'}</span>}
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -95,18 +96,18 @@ export default function WebhooksPage() {
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="bottom" className="max-h-[90vh] overflow-y-auto">
-          <SheetHeader><SheetTitle>{isRu ? 'Новый webhook' : 'New webhook'}</SheetTitle></SheetHeader>
+          <SheetHeader><SheetTitle>{isRu ? 'Новый webhook' : isTh ? 'webhook ใหม่' : 'New webhook'}</SheetTitle></SheetHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium">URL</label>
               <Input value={url} onChange={(ev) => setUrl(ev.target.value)} placeholder="https://your-server.com/webhook" />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-medium">{isRu ? 'Описание' : 'Description'}</label>
+              <label className="text-xs font-medium">{isRu ? 'Описание' : isTh ? 'คำอธิบาย' : 'Description'}</label>
               <Textarea value={description} onChange={(ev) => setDescription(ev.target.value)} rows={2} />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-medium">{isRu ? 'События' : 'Events'} ({selectedEvents.length})</label>
+              <label className="text-xs font-medium">{isRu ? 'События' : isTh ? 'เหตุการณ์' : 'Events'} ({selectedEvents.length})</label>
               <div className="grid grid-cols-1 gap-1.5 max-h-64 overflow-y-auto border rounded-none p-2">
                 {WEBHOOK_EVENTS.map((ev) => (
                   <label key={ev} className="flex items-center gap-2 text-xs cursor-pointer hover:bg-muted/50 px-2 py-1 rounded-none">
@@ -117,7 +118,7 @@ export default function WebhooksPage() {
               </div>
             </div>
             <Button className="w-full" onClick={handleCreate} disabled={!url.trim() || selectedEvents.length === 0 || createMutation.isPending}>
-              {createMutation.isPending ? (isRu ? 'Создание…' : 'Creating…') : (isRu ? 'Создать' : 'Create')}
+              {createMutation.isPending ? (isRu ? 'Создание…' : isTh ? 'กำลังสร้าง…' : 'Creating…') : (isRu ? 'Создать' : isTh ? 'สร้าง' : 'Create')}
             </Button>
           </div>
         </SheetContent>

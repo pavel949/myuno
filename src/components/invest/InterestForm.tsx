@@ -45,6 +45,7 @@ export function InterestForm({
   const { language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   
   const { 
     hasExpressedInterest, 
@@ -91,12 +92,14 @@ export function InterestForm({
         <div className="flex items-center gap-2 text-success">
           <CheckCircle className="h-5 w-5" />
           <span className="font-medium">
-            {isRu ? 'Вы уже выразили интерес' : 'Interest submitted'}
+            {isRu ? 'Вы уже выразили интерес' : isTh ? 'ส่งความสนใจแล้ว' : 'Interest submitted'}
           </span>
         </div>
         <p className="text-sm text-success mt-1">
-          {isRu 
+          {isRu
             ? 'Наш эксперт свяжется с вами в течение 24 часов.'
+            : isTh
+            ? 'ทีมงานของเราจะติดต่อคุณภายใน 24 ชั่วโมง'
             : 'Our team will contact you within 24 hours.'
           }
         </p>
@@ -112,14 +115,14 @@ export function InterestForm({
           className={cn('w-full gap-2', className)}
         >
           <TrendingUp className="h-5 w-5" />
-          {isRu ? 'Выразить интерес' : 'Express Interest'}
+          {isRu ? 'Выразить интерес' : isTh ? 'แสดงความสนใจ' : 'Express Interest'}
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isRu ? 'Выразить интерес' : 'Express Interest'}
+            {isRu ? 'Выразить интерес' : isTh ? 'แสดงความสนใจ' : 'Express Interest'}
           </DialogTitle>
           <DialogDescription>
             {projectTitle}
@@ -129,21 +132,23 @@ export function InterestForm({
         {!user && !authLoading ? (
           <div className="py-6 text-center space-y-4">
             <p className="text-muted-foreground">
-              {isRu 
+              {isRu
                 ? 'Войдите, чтобы выразить интерес к проекту'
+                : isTh
+                ? 'เข้าสู่ระบบเพื่อแสดงความสนใจในโครงการนี้'
                 : 'Sign in to express interest in this project'
               }
             </p>
             <Button onClick={() => navigate('/auth', { state: { from: `/invest/${projectId}` } })}>
               <LogIn className="h-4 w-4 mr-2" />
-              {isRu ? 'Войти' : 'Sign In'}
+              {isRu ? 'Войти' : isTh ? 'เข้าสู่ระบบ' : 'Sign In'}
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Interest type */}
             <div className="space-y-3">
-              <Label>{isRu ? 'Тип запроса' : 'Request Type'}</Label>
+              <Label>{isRu ? 'Тип запроса' : isTh ? 'ประเภทคำขอ' : 'Request Type'}</Label>
               <RadioGroup 
                 value={interestType} 
                 onValueChange={(v) => setInterestType(v as any)}
@@ -155,10 +160,10 @@ export function InterestForm({
                     <TrendingUp className="h-4 w-4 text-success" />
                     <div>
                       <div className="font-medium">
-                        {isRu ? 'Хочу инвестировать' : 'I want to invest'}
+                        {isRu ? 'Хочу инвестировать' : isTh ? 'ฉันต้องการลงทุน' : 'I want to invest'}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {isRu ? 'Готов обсудить условия' : 'Ready to discuss terms'}
+                        {isRu ? 'Готов обсудить условия' : isTh ? 'พร้อมหารือเงื่อนไข' : 'Ready to discuss terms'}
                       </div>
                     </div>
                   </Label>
@@ -170,10 +175,10 @@ export function InterestForm({
                     <MessageCircle className="h-4 w-4 text-primary" />
                     <div>
                       <div className="font-medium">
-                        {isRu ? 'Хочу узнать больше' : 'I want to learn more'}
+                        {isRu ? 'Хочу узнать больше' : isTh ? 'ฉันต้องการข้อมูลเพิ่มเติม' : 'I want to learn more'}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {isRu ? 'Получить документы и информацию' : 'Get documents and info'}
+                        {isRu ? 'Получить документы и информацию' : isTh ? 'รับเอกสารและข้อมูล' : 'Get documents and info'}
                       </div>
                     </div>
                   </Label>
@@ -185,10 +190,10 @@ export function InterestForm({
                     <Phone className="h-4 w-4 text-accent" />
                     <div>
                       <div className="font-medium">
-                        {isRu ? 'Запрос на звонок' : 'Request a call'}
+                        {isRu ? 'Запрос на звонок' : isTh ? 'ขอให้โทรกลับ' : 'Request a call'}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {isRu ? 'Эксперт перезвонит вам' : 'Expert will call you back'}
+                        {isRu ? 'Эксперт перезвонит вам' : isTh ? 'ผู้เชี่ยวชาญจะโทรกลับหาคุณ' : 'Expert will call you back'}
                       </div>
                     </div>
                   </Label>
@@ -200,7 +205,7 @@ export function InterestForm({
             {interestType === 'invest' && (
               <div className="space-y-2">
                 <Label htmlFor="amount">
-                  {isRu ? 'Предполагаемая сумма' : 'Intended Amount'} ({currency})
+                  {isRu ? 'Предполагаемая сумма' : isTh ? 'จำนวนเงินที่ตั้งใจ' : 'Intended Amount'} ({currency})
                 </Label>
                 <Input
                   id="amount"
@@ -212,7 +217,7 @@ export function InterestForm({
                 />
                 {minInvestment && (
                   <p className="text-xs text-muted-foreground">
-                    {isRu ? 'Минимальный вход:' : 'Minimum entry:'} ${minInvestment.toLocaleString()}
+                    {isRu ? 'Минимальный вход:' : isTh ? 'ขั้นต่ำในการเข้า:' : 'Minimum entry:'} ${minInvestment.toLocaleString()}
                   </p>
                 )}
               </div>
@@ -221,11 +226,11 @@ export function InterestForm({
             {/* Notes */}
             <div className="space-y-2">
               <Label htmlFor="notes">
-                {isRu ? 'Комментарий (необязательно)' : 'Notes (optional)'}
+                {isRu ? 'Комментарий (необязательно)' : isTh ? 'หมายเหตุ (ไม่บังคับ)' : 'Notes (optional)'}
               </Label>
               <Textarea
                 id="notes"
-                placeholder={isRu ? 'Ваши вопросы или пожелания...' : 'Your questions or preferences...'}
+                placeholder={isRu ? 'Ваши вопросы или пожелания...' : isTh ? 'คำถามหรือความต้องการของคุณ...' : 'Your questions or preferences...'}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
@@ -236,16 +241,18 @@ export function InterestForm({
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {isRu ? 'Отправка...' : 'Submitting...'}
+                  {isRu ? 'Отправка...' : isTh ? 'กำลังส่ง...' : 'Submitting...'}
                 </>
               ) : (
-                isRu ? 'Отправить' : 'Submit'
+                isRu ? 'Отправить' : isTh ? 'ส่ง' : 'Submit'
               )}
             </Button>
 
             <p className="text-xs text-center text-muted-foreground">
-              {isRu 
+              {isRu
                 ? 'Наш эксперт свяжется с вами в течение 24 часов'
+                : isTh
+                ? 'ผู้เชี่ยวชาญของเราจะติดต่อคุณภายใน 24 ชั่วโมง'
                 : 'Our expert will contact you within 24 hours'
               }
             </p>
