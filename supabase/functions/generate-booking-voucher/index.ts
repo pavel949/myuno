@@ -158,8 +158,8 @@ Deno.serve(async (req) => {
         const { data } = await supabase.from('orders').select('customer_user_id').eq('id', orderId).single();
         userId = data?.customer_user_id;
       } else if (bookingId) {
-        const { data } = await supabase.from('property_bookings').select('user_id').eq('id', bookingId).single();
-        userId = data?.user_id;
+        const { data } = await supabase.from('property_bookings').select('guest_id, owner_id').eq('id', bookingId).single();
+        userId = data?.guest_id || data?.owner_id;
       }
 
       if (userId) {
