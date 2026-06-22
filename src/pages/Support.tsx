@@ -237,8 +237,8 @@ export default function Support() {
 
           <p className="text-sm text-muted-foreground mb-4">
             {isRu 
-              ? 'Не хотите искать сами? Менеджер UNO подберёт подходящие варианты, договорится о цене и забронирует за вас:' 
-              : 'Don\'t want to search yourself? UNO manager will find suitable options, negotiate the price and book for you:'}
+              ? 'Не хотите искать сами? Менеджер myUNO подберёт подходящие варианты, договорится о цене и забронирует за вас:' 
+              : 'Don\'t want to search yourself? myUNO manager will find suitable options, negotiate the price and book for you:'}
           </p>
 
           <div className="grid grid-cols-2 gap-2 mb-4">
