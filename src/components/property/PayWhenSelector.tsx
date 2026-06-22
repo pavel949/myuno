@@ -36,11 +36,12 @@ export function PayWhenSelector({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const balance = Math.max(totalAmount - prepayAmount, 0);
 
   const formatBalanceDate = (d: Date) => {
     try {
-      return d.toLocaleDateString(isRu ? 'ru-RU' : 'en-GB', {
+      return d.toLocaleDateString(isRu ? 'ru-RU' : isTh ? 'th-TH' : 'en-GB', {
         day: 'numeric',
         month: 'short',
       });
@@ -54,7 +55,7 @@ export function PayWhenSelector({
       <div className="flex items-center gap-2">
         <Wallet className="w-5 h-5 text-primary" />
         <h2 className="text-lg font-semibold">
-          {isRu ? 'Когда оплачивать' : 'Choose when to pay'}
+          {isRu ? 'Когда оплачивать' : isTh ? 'เลือกเวลาชำระเงิน' : 'Choose when to pay'}
         </h2>
       </div>
 
@@ -75,12 +76,14 @@ export function PayWhenSelector({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium">
-                {isRu ? `Оплатить ${formatPrice(totalAmount)} сейчас` : `Pay ${formatPrice(totalAmount)} now`}
+                {isRu ? `Оплатить ${formatPrice(totalAmount)} сейчас` : isTh ? `ชำระ ${formatPrice(totalAmount)} ตอนนี้` : `Pay ${formatPrice(totalAmount)} now`}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {isRu
                 ? 'Списание сразу. Никаких дополнительных платежей до заезда.'
+                : isTh
+                ? 'ตัดเงินทันที ไม่มีการชำระเพิ่มจนกว่าจะเช็คอิน'
                 : 'Charged immediately. Nothing else until check-in.'}
             </p>
           </div>
@@ -100,23 +103,27 @@ export function PayWhenSelector({
               <span className="font-medium">
                 {isRu
                   ? `Часть сейчас, остаток позже`
+                  : isTh
+                  ? `จ่ายบางส่วนตอนนี้ ที่เหลือภายหลัง`
                   : `Pay part now, part later`}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {isRu
                 ? `${formatPrice(prepayAmount)} (${prepayPercent}%) сейчас, ${formatPrice(balance)}`
+                : isTh
+                ? `${formatPrice(prepayAmount)} (${prepayPercent}%) ตอนนี้, ${formatPrice(balance)}`
                 : `${formatPrice(prepayAmount)} (${prepayPercent}%) due now, ${formatPrice(balance)}`}
               {balanceDueDate ? (
                 <>
                   {' '}
                   <CalendarClock className="inline w-3 h-3 -mt-0.5" />{' '}
-                  {isRu ? 'к' : 'on'} {formatBalanceDate(balanceDueDate)}
+                  {isRu ? 'к' : isTh ? 'ภายใน' : 'on'} {formatBalanceDate(balanceDueDate)}
                 </>
               ) : (
                 <>
                   {' '}
-                  {isRu ? 'до заезда' : 'before check-in'}
+                  {isRu ? 'до заезда' : isTh ? 'ก่อนเช็คอิน' : 'before check-in'}
                 </>
               )}
             </p>

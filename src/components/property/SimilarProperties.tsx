@@ -30,6 +30,7 @@ export function SimilarProperties({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: similar = [] } = useQuery({
     queryKey: ['similar-properties', propertyId, district],
@@ -61,7 +62,7 @@ export function SimilarProperties({
   return (
     <div>
       <h3 className="text-lg font-semibold mb-3">
-        {isRu ? 'Похожие объекты' : 'Similar Properties'}
+        {isRu ? 'Похожие объекты' : isTh ? 'ทรัพย์ที่คล้ายกัน' : 'Similar Properties'}
       </h3>
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x scrollbar-hide">
         {similar.map(p => {
@@ -80,7 +81,7 @@ export function SimilarProperties({
                   <img src={p.cover_image} alt="" className="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                    {isRu ? 'Нет фото' : 'No photo'}
+                    {isRu ? 'Нет фото' : isTh ? 'ไม่มีรูปภาพ' : 'No photo'}
                   </div>
                 )}
                 {/* Price pill — Airbnb pattern: prominent on the image to scan
@@ -91,17 +92,17 @@ export function SimilarProperties({
                     className="absolute bottom-2 left-2 bg-background/95 text-foreground border border-border/40 font-semibold shadow-sm"
                   >
                     {showTotal
-                      ? `${formatPrice(total!)} ${isRu ? 'за ' + nights + (nights === 1 ? ' ночь' : nights < 5 ? ' ночи' : ' ночей') : 'for ' + nights + (nights === 1 ? ' night' : ' nights')}`
-                      : `${formatPrice(nightly)}/${isRu ? 'ночь' : 'night'}`}
+                      ? `${formatPrice(total!)} ${isRu ? 'за ' + nights + (nights === 1 ? ' ночь' : nights < 5 ? ' ночи' : ' ночей') : isTh ? 'สำหรับ ' + nights + ' คืน' : 'for ' + nights + (nights === 1 ? ' night' : ' nights')}`
+                      : `${formatPrice(nightly)}/${isRu ? 'ночь' : isTh ? 'คืน' : 'night'}`}
                   </Badge>
                 )}
                 {favourite && (
                   <span
                     className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-background/95 px-2 py-0.5 text-[10px] font-semibold text-foreground border border-border/40 shadow-sm"
-                    title={isRu ? 'Любимец гостей' : 'Guest favorite'}
+                    title={isRu ? 'Любимец гостей' : isTh ? 'ทรัพย์ยอดนิยมของผู้เข้าพัก' : 'Guest favorite'}
                   >
                     <Award className="w-3 h-3 text-primary" />
-                    {isRu ? 'Любимец' : 'Favorite'}
+                    {isRu ? 'Любимец' : isTh ? 'ยอดนิยม' : 'Favorite'}
                   </span>
                 )}
               </div>

@@ -89,33 +89,33 @@ export interface PropertyCardProps {
 
 // ============= HELPERS =============
 
-function getApprovalConfig(status: string | undefined, isRu: boolean): ApprovalConfig {
+function getApprovalConfig(status: string | undefined, isRu: boolean, isTh: boolean): ApprovalConfig {
   switch (status) {
     case 'pending':
       return {
         icon: Clock,
-        label: isRu ? 'На рассмотрении' : 'Under Review',
+        label: isRu ? 'На рассмотрении' : isTh ? 'อยู่ระหว่างตรวจสอบ' : 'Under Review',
         color: 'text-warning',
         bgColor: 'bg-warning/10 border-warning/20',
       };
     case 'approved':
       return {
         icon: CheckCircle,
-        label: isRu ? 'Активен' : 'Active',
+        label: isRu ? 'Активен' : isTh ? 'ใช้งานอยู่' : 'Active',
         color: 'text-success',
         bgColor: 'bg-success/10 border-success/20',
       };
     case 'rejected':
       return {
         icon: XCircle,
-        label: isRu ? 'Требует доработки' : 'Needs Revision',
+        label: isRu ? 'Требует доработки' : isTh ? 'ต้องแก้ไข' : 'Needs Revision',
         color: 'text-destructive',
         bgColor: 'bg-destructive/10 border-destructive/20',
       };
     default:
       return {
         icon: FileEdit,
-        label: isRu ? 'Черновик' : 'Draft',
+        label: isRu ? 'Черновик' : isTh ? 'ฉบับร่าง' : 'Draft',
         color: 'text-muted-foreground',
         bgColor: 'bg-muted border-border',
       };
@@ -123,47 +123,48 @@ function getApprovalConfig(status: string | undefined, isRu: boolean): ApprovalC
 }
 
 function getOperationalStatus(
-  approvalStatus: string | undefined, 
-  stats: PropertyCardStats | undefined, 
-  isRu: boolean
+  approvalStatus: string | undefined,
+  stats: PropertyCardStats | undefined,
+  isRu: boolean,
+  isTh: boolean
 ) {
   if (approvalStatus === 'pending') {
-    return { 
-      icon: Clock, 
-      label: isRu ? 'На модерации' : 'Pending Review',
+    return {
+      icon: Clock,
+      label: isRu ? 'На модерации' : isTh ? 'รอตรวจสอบ' : 'Pending Review',
       color: 'bg-warning/10 text-warning border-warning/20'
     };
   }
   if (stats?.activeBooking) {
-    return { 
-      icon: Users, 
-      label: isRu ? 'Гости в объекте' : 'Guests Staying',
+    return {
+      icon: Users,
+      label: isRu ? 'Гости в объекте' : isTh ? 'มีผู้เข้าพัก' : 'Guests Staying',
       color: 'bg-success/10 text-success border-success/20'
     };
   }
   if (stats?.pendingTasks && stats.pendingTasks > 0) {
-    return { 
-      icon: AlertTriangle, 
-      label: `${stats.pendingTasks} ${isRu ? 'задач' : 'tasks'}`,
+    return {
+      icon: AlertTriangle,
+      label: `${stats.pendingTasks} ${isRu ? 'задач' : isTh ? 'งาน' : 'tasks'}`,
       color: 'bg-warning/10 text-warning border-warning/20'
     };
   }
-  return { 
-    icon: CheckCircle2, 
-    label: isRu ? 'Готово к заезду' : 'Ready',
+  return {
+    icon: CheckCircle2,
+    label: isRu ? 'Готово к заезду' : isTh ? 'พร้อมเข้าพัก' : 'Ready',
     color: 'bg-muted text-muted-foreground border-border'
   };
 }
 
-function formatPrice(price: number | undefined, period: string | undefined, isRu: boolean): string {
+function formatPrice(price: number | undefined, period: string | undefined, isRu: boolean, isTh: boolean): string {
   if (!price) return '';
   const symbol = getCurrencySymbol('THB');
   const periodLabel = period === 'day' || period === 'night'
-    ? (isRu ? '/ночь' : '/night')
+    ? (isRu ? '/ночь' : isTh ? '/คืน' : '/night')
     : period === 'month'
-      ? (isRu ? '/мес' : '/mo')
+      ? (isRu ? '/мес' : isTh ? '/เดือน' : '/mo')
       : period === 'year'
-        ? (isRu ? '/год' : '/yr')
+        ? (isRu ? '/год' : isTh ? '/ปี' : '/yr')
         : '';
   return `${symbol}${price.toLocaleString()}${periodLabel}`;
 }
@@ -174,11 +175,12 @@ interface HeroVariantProps {
   cardProps: UnifiedPropertyCardProps;
   stats?: PropertyCardStats;
   isRu: boolean;
+  isTh: boolean;
   onClick: () => void;
 }
 
-function HeroVariant({ cardProps, stats, isRu, onClick }: HeroVariantProps) {
-  const status = getOperationalStatus(cardProps.approvalStatus, stats, isRu);
+function HeroVariant({ cardProps, stats, isRu, isTh, onClick }: HeroVariantProps) {
+  const status = getOperationalStatus(cardProps.approvalStatus, stats, isRu, isTh);
   const StatusIcon = status.icon;
 
   return (
@@ -235,7 +237,7 @@ function HeroVariant({ cardProps, stats, isRu, onClick }: HeroVariantProps) {
         <h3 className="font-semibold text-base truncate mb-1">{cardProps.title}</h3>
         <p className="text-sm text-muted-foreground">
           {cardProps.propertyType ? getPropertyTypeLabel(cardProps.propertyType, isRu ? 'ru' : 'en') : 'Property'}
-          {cardProps.bedrooms && ` · ${cardProps.bedrooms} ${isRu ? 'спален' : 'bed'}`}
+          {cardProps.bedrooms && ` · ${cardProps.bedrooms} ${isRu ? 'спален' : isTh ? 'ห้องนอน' : 'bed'}`}
           {getTypeSpecBadges(cardProps.propertyType, {
             floor: cardProps.floor, unitNumber: cardProps.unitNumber,
             plotSizeSqm: cardProps.plotSizeSqm, poolType: cardProps.poolType,
@@ -246,7 +248,7 @@ function HeroVariant({ cardProps, stats, isRu, onClick }: HeroVariantProps) {
         {/* Revenue if available */}
         {stats?.thisMonthRevenue !== undefined && stats.thisMonthRevenue > 0 && (
           <p className="text-sm font-medium text-success mt-2">
-            {getCurrencySymbol('THB')}{stats.thisMonthRevenue.toLocaleString()} {isRu ? 'в этом месяце' : 'this month'}
+            {getCurrencySymbol('THB')}{stats.thisMonthRevenue.toLocaleString()} {isRu ? 'в этом месяце' : isTh ? 'เดือนนี้' : 'this month'}
           </p>
         )}
       </div>
@@ -261,6 +263,7 @@ interface ListVariantProps {
   property: OwnerProperty | VendorProperty;
   mode: PropertyCardMode;
   isRu: boolean;
+  isTh: boolean;
   companyName?: string;
   complexName?: string;
   showApprovalStatus: boolean;
@@ -280,6 +283,7 @@ function ListVariant({
   property,
   mode,
   isRu,
+  isTh,
   companyName,
   complexName,
   showApprovalStatus,
@@ -293,7 +297,7 @@ function ListVariant({
   onToggleActive,
   onClick,
 }: ListVariantProps) {
-  const approvalConfig = getApprovalConfig(cardProps.approvalStatus, isRu);
+  const approvalConfig = getApprovalConfig(cardProps.approvalStatus, isRu, isTh);
   const ApprovalIcon = approvalConfig.icon;
   const isInactive = 'is_active' in property && property.is_active === false;
 
@@ -343,7 +347,7 @@ function ListVariant({
               {/* Title row with badges */}
               <div className="flex items-start gap-2 mb-1">
                 <h3 className="font-semibold text-sm line-clamp-2 leading-snug group-hover:text-primary transition-colors flex-1">
-                  {cardProps.title || (isRu ? 'Без названия' : 'Untitled')}
+                  {cardProps.title || (isRu ? 'Без названия' : isTh ? 'ไม่มีชื่อ' : 'Untitled')}
                 </h3>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {showInstantBadge && cardProps.instantBooking && (
@@ -364,12 +368,12 @@ function ListVariant({
                   {(property as any).listing_modes?.includes('platform') && (
                     <Badge variant="outline" className="text-xs h-5 px-1.5 border-success/40 text-success bg-success/10">
                       <Globe className="h-3 w-3 mr-0.5" />
-                      {isRu ? 'Платформа' : 'Platform'}
+                      {isRu ? 'Платформа' : isTh ? 'แพลตฟอร์ม' : 'Platform'}
                     </Badge>
                   )}
                   {isInactive && (
                     <Badge variant="outline" className="text-xs h-5">
-                      {isRu ? 'Неактивен' : 'Inactive'}
+                      {isRu ? 'Неактивен' : isTh ? 'ไม่ใช้งาน' : 'Inactive'}
                     </Badge>
                   )}
                 </div>
@@ -436,7 +440,7 @@ function ListVariant({
             {/* Price */}
             {cardProps.price && (
               <p className="font-bold text-primary text-sm mt-1">
-                {formatPrice(cardProps.price, cardProps.pricePeriod, isRu)}
+                {formatPrice(cardProps.price, cardProps.pricePeriod, isRu, isTh)}
               </p>
             )}
           </div>
@@ -450,10 +454,10 @@ function ListVariant({
                   variant="outline"
                   className="h-7 text-xs px-2 whitespace-nowrap"
                   onClick={() => onEdit(property.id)}
-                  aria-label={isRu ? 'Редактировать' : 'Edit'}
+                  aria-label={isRu ? 'Редактировать' : isTh ? 'แก้ไข' : 'Edit'}
                 >
                   <Pencil className="h-3 w-3" />
-                  <span className="hidden sm:inline ml-1">{isRu ? 'Ред.' : 'Edit'}</span>
+                  <span className="hidden sm:inline ml-1">{isRu ? 'Ред.' : isTh ? 'แก้ไข' : 'Edit'}</span>
                 </Button>
                 <Button 
                   size="sm" 
@@ -462,7 +466,7 @@ function ListVariant({
                   onClick={() => onView(property.id)}
                 >
                   <Eye className="h-3 w-3 mr-1" />
-                  {isRu ? 'Просмотр' : 'View'}
+                  {isRu ? 'Просмотр' : isTh ? 'ดู' : 'View'}
                 </Button>
               </div>
             )}
@@ -470,7 +474,7 @@ function ListVariant({
             {(mode === 'admin' || (mode === 'owner' && (onDuplicate || onToggleActive || onDelete))) && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Действия' : 'Actions'}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Действия' : isTh ? 'การดำเนินการ' : 'Actions'}>
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -478,19 +482,19 @@ function ListVariant({
                   {onView && (
                     <DropdownMenuItem onClick={() => onView(property.id)}>
                       <Eye className="h-4 w-4 mr-2" />
-                      {isRu ? 'Открыть' : 'View'}
+                      {isRu ? 'Открыть' : isTh ? 'เปิด' : 'View'}
                     </DropdownMenuItem>
                   )}
                   {onEdit && (
                     <DropdownMenuItem onClick={() => onEdit(property.id)}>
                       <Pencil className="h-4 w-4 mr-2" />
-                      {isRu ? 'Редактировать' : 'Edit'}
+                      {isRu ? 'Редактировать' : isTh ? 'แก้ไข' : 'Edit'}
                     </DropdownMenuItem>
                   )}
                   {onDuplicate && (
                     <DropdownMenuItem onClick={() => onDuplicate(property.id)}>
                       <Copy className="h-4 w-4 mr-2" />
-                      {isRu ? 'Создать на основе' : 'Duplicate'}
+                      {isRu ? 'Создать на основе' : isTh ? 'ทำสำเนา' : 'Duplicate'}
                     </DropdownMenuItem>
                   )}
                   {onToggleActive && (
@@ -498,12 +502,12 @@ function ListVariant({
                       {isInactive ? (
                         <>
                           <CheckCircle className="h-4 w-4 mr-2 text-success" />
-                          {isRu ? 'Активировать' : 'Activate'}
+                          {isRu ? 'Активировать' : isTh ? 'เปิดใช้งาน' : 'Activate'}
                         </>
                       ) : (
                         <>
                           <XCircle className="h-4 w-4 mr-2 text-warning" />
-                          {isRu ? 'Деактивировать' : 'Deactivate'}
+                          {isRu ? 'Деактивировать' : isTh ? 'ปิดใช้งาน' : 'Deactivate'}
                         </>
                       )}
                     </DropdownMenuItem>
@@ -514,7 +518,7 @@ function ListVariant({
                       onClick={() => onDelete(property.id)}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      {isRu ? 'Удалить' : 'Delete'}
+                      {isRu ? 'Удалить' : isTh ? 'ลบ' : 'Delete'}
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
@@ -532,10 +536,11 @@ function ListVariant({
 interface CompactVariantProps {
   cardProps: UnifiedPropertyCardProps;
   isRu: boolean;
+  isTh: boolean;
   onClick: () => void;
 }
 
-function CompactVariant({ cardProps, isRu, onClick }: CompactVariantProps) {
+function CompactVariant({ cardProps, isRu, isTh, onClick }: CompactVariantProps) {
   return (
     <Card 
       className="overflow-hidden cursor-pointer hover:shadow-md transition-all group"
@@ -561,7 +566,7 @@ function CompactVariant({ cardProps, isRu, onClick }: CompactVariantProps) {
           {/* Content */}
           <div className="flex-1 min-w-0 py-0.5">
             <h4 className="font-medium text-sm truncate group-hover:text-primary transition-colors">
-              {cardProps.title || (isRu ? 'Без названия' : 'Untitled')}
+              {cardProps.title || (isRu ? 'Без названия' : isTh ? 'ไม่มีชื่อ' : 'Untitled')}
             </h4>
             
             <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
@@ -578,7 +583,7 @@ function CompactVariant({ cardProps, isRu, onClick }: CompactVariantProps) {
 
             {cardProps.price && (
               <p className="font-semibold text-primary text-xs mt-1">
-                {formatPrice(cardProps.price, cardProps.pricePeriod, isRu)}
+                {formatPrice(cardProps.price, cardProps.pricePeriod, isRu, isTh)}
               </p>
             )}
           </div>
@@ -613,6 +618,7 @@ export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
     const navigate = useNavigate();
     const { language } = useLanguage();
     const isRu = language === 'ru';
+    const isTh = language === 'th';
 
     // Normalize data via adapter
     const cardProps = mapPropertyToCardProps(property, language);
@@ -632,11 +638,12 @@ export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
     return (
       <div ref={ref} className={className}>
         {variant === 'hero' && (
-          <HeroVariant 
-            cardProps={cardProps} 
-            stats={stats} 
-            isRu={isRu} 
-            onClick={handleClick} 
+          <HeroVariant
+            cardProps={cardProps}
+            stats={stats}
+            isRu={isRu}
+            isTh={isTh}
+            onClick={handleClick}
           />
         )}
         
@@ -648,6 +655,7 @@ export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
             companyName={companyName}
             complexName={complexName}
             isRu={isRu}
+            isTh={isTh}
             showApprovalStatus={showApprovalStatus}
             showInstantBadge={showInstantBadge}
             showProtectionBadge={showProtectionBadge}
@@ -662,10 +670,11 @@ export const PropertyCard = forwardRef<HTMLDivElement, PropertyCardProps>(
         )}
         
         {variant === 'compact' && (
-          <CompactVariant 
-            cardProps={cardProps} 
-            isRu={isRu} 
-            onClick={handleClick} 
+          <CompactVariant
+            cardProps={cardProps}
+            isRu={isRu}
+            isTh={isTh}
+            onClick={handleClick}
           />
         )}
       </div>

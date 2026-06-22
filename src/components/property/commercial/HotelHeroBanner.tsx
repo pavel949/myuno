@@ -18,33 +18,34 @@ interface Props {
 export function HotelHeroBanner({ onOpenHmaForm }: Props) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const cards = [
     {
       icon: ShoppingCart,
-      title: isRu ? 'Купить отель' : 'Buy a hotel',
-      desc: isRu ? 'Готовый бизнес с проверенным P&L' : 'Turnkey assets with verified P&L',
+      title: isRu ? 'Купить отель' : isTh ? 'ซื้อโรงแรม' : 'Buy a hotel',
+      desc: isRu ? 'Готовый бизнес с проверенным P&L' : isTh ? 'ธุรกิจพร้อมดำเนินการพร้อม P&L ที่ตรวจสอบแล้ว' : 'Turnkey assets with verified P&L',
       to: `${APP_ROUTES.HOTELS}?mode=buy`,
       tone: 'amber' as const,
     },
     {
       icon: Tag,
-      title: isRu ? 'Продать отель' : 'Sell a hotel',
-      desc: isRu ? 'Закрытый пул инвесторов и операторов' : 'Private buyer & operator pool',
+      title: isRu ? 'Продать отель' : isTh ? 'ขายโรงแรม' : 'Sell a hotel',
+      desc: isRu ? 'Закрытый пул инвесторов и операторов' : isTh ? 'พูลผู้ซื้อและผู้ดำเนินการแบบปิด' : 'Private buyer & operator pool',
       to: `${APP_ROUTES.MC_PROPERTY_NEW}?asset=commercial&type=hotel_building`,
       tone: 'blue' as const,
     },
     {
       icon: KeyRound,
-      title: isRu ? 'Арендовать здание' : 'Lease the building',
-      desc: isRu ? 'Долгосрочная аренда под отель' : 'Long-term hotel building lease',
+      title: isRu ? 'Арендовать здание' : isTh ? 'เช่าอาคาร' : 'Lease the building',
+      desc: isRu ? 'Долгосрочная аренда под отель' : isTh ? 'เช่าอาคารโรงแรมระยะยาว' : 'Long-term hotel building lease',
       to: `${APP_ROUTES.HOTELS}?mode=lease`,
       tone: 'emerald' as const,
     },
     {
       icon: Handshake,
-      title: isRu ? 'Передать в управление' : 'Hand over to operator',
-      desc: isRu ? 'Найти бренд / управляющую компанию' : 'Find a brand / management company',
+      title: isRu ? 'Передать в управление' : isTh ? 'มอบให้ผู้ดำเนินการ' : 'Hand over to operator',
+      desc: isRu ? 'Найти бренд / управляющую компанию' : isTh ? 'หาแบรนด์ / บริษัทบริหารจัดการ' : 'Find a brand / management company',
       onClick: onOpenHmaForm,
       tone: 'violet' as const,
     },

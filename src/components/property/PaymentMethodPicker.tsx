@@ -14,44 +14,47 @@ interface PaymentMethodPickerProps {
 interface MethodConfig {
   id: PaymentMethodId;
   Icon: typeof CreditCard;
-  title: { en: string; ru: string };
-  hint: { en: string; ru: string };
-  badge?: { en: string; ru: string };
+  title: { en: string; ru: string; th: string };
+  hint: { en: string; ru: string; th: string };
+  badge?: { en: string; ru: string; th: string };
 }
 
 const METHODS: MethodConfig[] = [
   {
     id: 'card',
     Icon: CreditCard,
-    title: { en: 'Credit / debit card', ru: 'Банковская карта' },
-    hint: { en: 'Visa · Mastercard · Apple Pay · Google Pay', ru: 'Visa · Mastercard · Apple Pay · Google Pay' },
+    title: { en: 'Credit / debit card', ru: 'Банковская карта', th: 'บัตรเครดิต / เดบิต' },
+    hint: { en: 'Visa · Mastercard · Apple Pay · Google Pay', ru: 'Visa · Mastercard · Apple Pay · Google Pay', th: 'Visa · Mastercard · Apple Pay · Google Pay' },
   },
   {
     id: 'rub_manual',
     Icon: Wallet,
-    title: { en: 'Pay in Russian Rubles', ru: 'Оплата в рублях (Россия)' },
+    title: { en: 'Pay in Russian Rubles', ru: 'Оплата в рублях (Россия)', th: 'ชำระเป็นรูเบิลรัสเซีย' },
     hint: {
       en: 'Manager sends SBP or Russian-card transfer details',
       ru: 'Менеджер пришлёт реквизиты СБП или перевод на карту РФ',
+      th: 'ผู้จัดการจะส่งรายละเอียดการโอนผ่าน SBP หรือบัตรรัสเซีย',
     },
-    badge: { en: '🇷🇺 RUB', ru: '🇷🇺 ₽' },
+    badge: { en: '🇷🇺 RUB', ru: '🇷🇺 ₽', th: '🇷🇺 RUB' },
   },
   {
     id: 'transfer',
     Icon: Building2,
-    title: { en: 'Bank transfer', ru: 'Банковский перевод' },
+    title: { en: 'Bank transfer', ru: 'Банковский перевод', th: 'โอนเงินผ่านธนาคาร' },
     hint: {
       en: 'Manager confirms instructions in chat',
       ru: 'Менеджер пришлёт реквизиты в чате',
+      th: 'ผู้จัดการจะยืนยันรายละเอียดในแชท',
     },
   },
   {
     id: 'whatsapp',
     Icon: MessageCircle,
-    title: { en: 'Pay via WhatsApp manager', ru: 'Оплата через менеджера WhatsApp' },
+    title: { en: 'Pay via WhatsApp manager', ru: 'Оплата через менеджера WhatsApp', th: 'ชำระผ่านผู้จัดการ WhatsApp' },
     hint: {
       en: 'For custom terms, crypto, or wire',
       ru: 'Для индивидуальных условий, крипты или SWIFT',
+      th: 'สำหรับเงื่อนไขพิเศษ คริปโต หรือการโอนผ่าน SWIFT',
     },
   },
 ];
@@ -69,6 +72,7 @@ const METHODS: MethodConfig[] = [
 export function PaymentMethodPicker({ value, onChange, className }: PaymentMethodPickerProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   return (
     <RadioGroup
@@ -91,14 +95,14 @@ export function PaymentMethodPicker({ value, onChange, className }: PaymentMetho
             <Icon className={cn('w-5 h-5 shrink-0', selected ? 'text-primary' : 'text-muted-foreground')} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-medium">{isRu ? title.ru : title.en}</p>
+                <p className="text-sm font-medium">{isRu ? title.ru : isTh ? title.th : title.en}</p>
                 {badge && (
                   <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-none bg-warning/15 text-warning border border-warning/20">
-                    {isRu ? badge.ru : badge.en}
+                    {isRu ? badge.ru : isTh ? badge.th : badge.en}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground truncate">{isRu ? hint.ru : hint.en}</p>
+              <p className="text-xs text-muted-foreground truncate">{isRu ? hint.ru : isTh ? hint.th : hint.en}</p>
             </div>
           </label>
         );

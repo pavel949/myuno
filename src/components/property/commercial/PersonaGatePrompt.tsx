@@ -46,7 +46,7 @@ export function PersonaGatePrompt() {
           className="gap-1.5"
         >
           <Briefcase className="w-3.5 h-3.5" />
-          {isRu ? 'Бизнес' : 'Business'}
+          {isRu ? 'Бизнес' : isTh ? 'ธุรกิจ' : 'Business'}
         </Button>
         <Button
           size="sm"
@@ -56,7 +56,7 @@ export function PersonaGatePrompt() {
           className="gap-1.5"
         >
           <TrendingUp className="w-3.5 h-3.5" />
-          {isRu ? 'Инвестор' : 'Investor'}
+          {isRu ? 'Инвестор' : isTh ? 'นักลงทุน' : 'Investor'}
         </Button>
       </div>
     </div>

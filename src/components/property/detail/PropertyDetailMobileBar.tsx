@@ -47,6 +47,7 @@ export function PropertyDetailMobileBar({
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const handleReserve = () => {
     if (dateRange?.from && dateRange?.to) {
@@ -67,7 +68,7 @@ export function PropertyDetailMobileBar({
         {isSaleListing ? (
           <>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
+              <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : isTh ? 'ราคา' : 'Price'}</p>
               <span className="text-xl font-bold text-foreground">{formatPrice(salePrice)}</span>
               {ownershipLabel && (
                 <p className="text-[11px] text-muted-foreground mt-0.5">{ownershipLabel}</p>
@@ -96,16 +97,16 @@ export function PropertyDetailMobileBar({
                     onClick={onOpenDatePicker}
                     className="text-sm font-medium text-foreground underline decoration-dotted underline-offset-2"
                   >
-                    {isRu ? 'Изменить даты' : 'Change dates'}
+                    {isRu ? 'Изменить даты' : isTh ? 'เปลี่ยนวันที่' : 'Change dates'}
                   </button>
                 </>
               ) : (
                 <>
                   <p className="text-sm font-semibold text-foreground">
-                    {isRu ? 'Добавьте даты' : 'Add dates'}
+                    {isRu ? 'Добавьте даты' : isTh ? 'เพิ่มวันที่' : 'Add dates'}
                   </p>
                   <p className="text-[11px] text-muted-foreground">
-                    {isRu ? 'Чтобы увидеть итоговую цену' : 'To see the total price'}
+                    {isRu ? 'Чтобы увидеть итоговую цену' : isTh ? 'เพื่อดูราคารวม' : 'To see the total price'}
                   </p>
                 </>
               )}
@@ -130,18 +131,18 @@ export function PropertyDetailMobileBar({
                 instantBooking ? (
                   <>
                     <Zap className="w-4 h-4 mr-2" />
-                    {isRu ? 'Забронировать' : 'Book Now'}
+                    {isRu ? 'Забронировать' : isTh ? 'จองเลย' : 'Book Now'}
                   </>
                 ) : (
                   <>
                     <CalendarIcon className="w-4 h-4 mr-2" />
-                    {isRu ? 'Забронировать' : 'Reserve'}
+                    {isRu ? 'Забронировать' : isTh ? 'จอง' : 'Reserve'}
                   </>
                 )
               ) : (
                 <>
                   <CalendarIcon className="w-4 h-4 mr-2" />
-                  {isRu ? 'Выбрать даты' : 'Select dates'}
+                  {isRu ? 'Выбрать даты' : isTh ? 'เลือกวันที่' : 'Select dates'}
                 </>
               )}
             </Button>
