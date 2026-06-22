@@ -326,9 +326,9 @@ export default function Support() {
           </div>
         </SectionCard>
 
-        {/* Why UNO Section */}
+        {/* Why myUNO Section */}
         <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">
-          {isRu ? 'Почему UNO?' : 'Why UNO?'}
+          {isRu ? 'Почему myUNO?' : 'Why myUNO?'}
         </div>
         <SectionCard className="bg-gradient-to-br from-muted/50 to-muted/30">
           <div className="grid grid-cols-1 gap-4">
