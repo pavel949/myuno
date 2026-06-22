@@ -8,7 +8,8 @@ import { useCart } from '@/contexts/CartContext';
 import { useBooking } from '@/hooks/useBooking';
 import { useRestaurant } from '@/hooks/useRestaurants';
 import { supabase } from '@/integrations/supabase/client';
-import { 
+import { toast } from 'sonner';
+import {
   BookingContactForm,
   BookingPaymentSelect,
   BookingBottomBar,
@@ -36,6 +37,7 @@ export default function DeliveryCheckout() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [isSuccess, setIsSuccess] = useState(false);
   const [bookingId, setBookingId] = useState('');
+  const [isProcessingOnline, setIsProcessingOnline] = useState(false);
   
   const [contactData, setContactData] = useState<ContactFormData>({
     name: '',
@@ -78,6 +80,7 @@ export default function DeliveryCheckout() {
 
   const handleSubmit = async () => {
     if (!user || !isFormValid) return;
+    if (isSubmitting || isProcessingOnline) return; // guard against double-submit
 
     const bookingItems = cartItems.map(item => ({
       item_type: 'food',
@@ -118,47 +121,58 @@ export default function DeliveryCheckout() {
     };
 
     if (paymentMethod === 'online') {
-      const result = await createBooking({
-        ...bookingParams,
-        payment: { ...bookingParams.payment, status: 'pending' as const },
-      });
-
-      if (!result.success || !result.booking_id) return;
+      // Do NOT create a booking up front: create-restaurant-checkout creates the
+      // canonical order itself (via the shared checkout handler). Creating one here
+      // too produced a duplicate, orphaned, never-paid order for every online order.
+      setIsProcessingOnline(true);
 
       const checkoutItems = cartItems.map(item => ({
         name: language === 'ru' ? (item.nameRu || item.name) : item.name,
         quantity: item.quantity,
         price: item.price,
       }));
-      
+
       checkoutItems.push({
         name: language === 'ru' ? 'Доставка' : 'Delivery',
         quantity: 1,
         price: deliveryFee,
       });
 
-      const response = await supabase.functions.invoke('create-restaurant-checkout', {
-        body: {
-          booking_id: result.booking_id,
-          booking_type: 'food_delivery',
-          restaurant_id: restaurant.id,
-          restaurant_name: restaurant.name_en,
-          amount: total,
-          currency: 'thb',
-          items: checkoutItems,
-          metadata: {
-            booking_id: result.booking_id,
-            delivery_address: address,
-            contact_name: contactData.name,
-            contact_phone: contactData.phone,
+      try {
+        const response = await supabase.functions.invoke('create-restaurant-checkout', {
+          body: {
+            booking_type: 'food_delivery',
+            restaurant_id: restaurant.id,
+            restaurant_name: restaurant.name_en,
+            amount: total,
+            currency: 'thb',
+            items: checkoutItems,
+            metadata: {
+              delivery_address: address,
+              contact_name: contactData.name,
+              contact_phone: contactData.phone,
+              notes: contactData.notes,
+            },
           },
-        },
-      });
+        });
 
-      if (response.data?.url) {
-        clearByProvider(id || '');
-        window.location.href = response.data.url;
-        return;
+        if (response.error) throw response.error;
+
+        if (response.data?.url) {
+          clearByProvider(id || '');
+          window.location.href = response.data.url;
+          return;
+        }
+        throw new Error('No checkout URL received');
+      } catch (err) {
+        console.error('[DeliveryCheckout] online checkout failed:', err);
+        toast.error(
+          language === 'ru'
+            ? 'Не удалось создать оплату. Попробуйте ещё раз.'
+            : 'Could not start payment. Please try again.'
+        );
+      } finally {
+        setIsProcessingOnline(false);
       }
       return;
     }

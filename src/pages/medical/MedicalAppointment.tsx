@@ -115,8 +115,13 @@ export default function MedicalAppointment() {
         ? `${language === 'ru' ? 'Консультация:' : 'Consultation:'} ${language === 'ru' ? selectedDoctor.name_ru : selectedDoctor.name_en}`
         : (language === 'ru' ? 'Консультация врача' : 'Medical Consultation');
 
-    // Online card payment → Stripe checkout
-    if (paymentMethod === 'card') {
+    // Any online payment method (card / online / PromptPay) → Stripe checkout.
+    // Only cash and wallet are settled through the local booking flow below;
+    // previously only the (unselectable) 'card' id triggered Stripe, so the
+    // visible 'online'/'promptpay' options created a booking that collected no money.
+    const isOnlinePayment =
+      paymentMethod === 'card' || paymentMethod === 'online' || paymentMethod === 'promptpay';
+    if (isOnlinePayment) {
       await createCheckout('create-wellness-checkout', {
         vertical: 'medical',
         items: [{
@@ -254,11 +259,11 @@ export default function MedicalAppointment() {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={paymentMethod === 'card' ? Math.round(price * 1.1) : price}
+          total={price}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!date || !time || !contactData.name || !contactData.phone}
-          submitLabel={paymentMethod === 'card'
+          submitLabel={(paymentMethod === 'card' || paymentMethod === 'online' || paymentMethod === 'promptpay')
             ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
             : (language === 'ru' ? 'Записаться' : 'Book Appointment')}
         />

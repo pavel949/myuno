@@ -95,8 +95,12 @@ export default function FitnessBooking() {
 
     const scheduledAt = date || new Date();
 
-    // Online card payment → Stripe checkout
-    if (paymentMethod === 'card') {
+    // Any online method (card / online / PromptPay) → Stripe checkout. Only cash and
+    // wallet settle locally; the visible 'online' option previously fell through and
+    // created a booking that collected no money.
+    const isOnlinePayment =
+      paymentMethod === 'card' || paymentMethod === 'online' || paymentMethod === 'promptpay';
+    if (isOnlinePayment) {
       await createCheckout('create-wellness-checkout', {
         vertical: 'fitness',
         items: [{
@@ -208,11 +212,11 @@ export default function FitnessBooking() {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={paymentMethod === 'card' ? Math.round(membership.price * 1.1) : membership.price}
+          total={membership.price}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!contactData.name || !contactData.phone}
-          submitLabel={paymentMethod === 'card'
+          submitLabel={(paymentMethod === 'card' || paymentMethod === 'online' || paymentMethod === 'promptpay')
             ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
             : (language === 'ru' ? 'Подтвердить' : 'Confirm')}
         />

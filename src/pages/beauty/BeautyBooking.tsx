@@ -105,8 +105,12 @@ export default function BeautyBooking() {
       : undefined;
 
     try {
-      // Online card payment → Stripe checkout
-      if (paymentMethod === 'card') {
+      // Any online method (card / online / PromptPay) → Stripe checkout. Only cash
+      // and wallet settle through the local booking flow; the visible 'online' option
+      // previously fell through and created a booking that collected no money.
+      const isOnlinePayment =
+        paymentMethod === 'card' || paymentMethod === 'online' || paymentMethod === 'promptpay';
+      if (isOnlinePayment) {
         const success = await createCheckout('create-wellness-checkout', {
           vertical: 'beauty',
           items: selectedServiceDetails.map((service: any) => ({
@@ -259,11 +263,11 @@ export default function BeautyBooking() {
 
         {/* Bottom Bar */}
         <BookingBottomBar
-          total={paymentMethod === 'card' ? Math.round(totalPrice * 1.1) : totalPrice}
+          total={totalPrice}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting || isStripeProcessing}
           disabled={!date || !time || !contactData.name || !contactData.phone}
-          submitLabel={paymentMethod === 'card' 
+          submitLabel={(paymentMethod === 'card' || paymentMethod === 'online' || paymentMethod === 'promptpay')
             ? (language === 'ru' ? 'Оплатить онлайн' : 'Pay Online')
             : (language === 'ru' ? 'Подтвердить бронирование' : 'Confirm Booking')}
           hint={language === 'ru' ? '🔒 Безопасное бронирование' : '🔒 Secure booking'}
