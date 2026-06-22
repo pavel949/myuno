@@ -44,7 +44,7 @@ import {
   Building, Search, LineChart, Palette, Scissors, Crown, Bike, Shirt,
   Compass, Anchor, Dumbbell, CalendarDays, GraduationCap, PawPrint,
   Hammer, Wind, TreePine, Bug, KeyRound, Warehouse, Route, Waves, Pill, Flower2, Truck,
-  Briefcase, Globe, BookOpen, Heart as HeartIcon,
+  Briefcase, Globe, BookOpen, HeartHandshake, Heart as HeartIcon,
   Stethoscope as VetIcon,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -643,10 +643,10 @@ export const CATEGORIES: CategoryEntry[] = [
       },
       {
         id: 'halal-knowledge',
-        path: APP_ROUTES.KNOWLEDGE,
+        path: APP_ROUTES.COMMUNITIES,
         labelRu: 'Вера и обычаи',
         labelEn: 'Faith & customs guides',
-        icon: BookOpen,
+        icon: HeartHandshake,
         status: 'available',
         personaTags: ['tourist','resident','family','relocation'],
         jtbdClusters: ['I','G'],
