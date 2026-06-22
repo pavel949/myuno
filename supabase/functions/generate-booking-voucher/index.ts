@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
         const property = (booking as any).properties;
 
         voucherData = {
-          voucher_number: booking.booking_code || `BK-${bookingId.slice(0, 8).toUpperCase()}`,
+          voucher_number: `BK-${bookingId.slice(0, 8).toUpperCase()}`,
           booking_type: 'property',
           title: isRu
             ? (property?.title_ru || property?.title_en || property?.title || 'Property')
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
           end_time: '11:00',
           location: property?.address,
           guest_name: booking.guest_name,
-          guests_count: booking.guests || 1,
+          guests_count: booking.guests_count || 1,
           amount: booking.total_amount,
           currency: booking.currency || 'THB',
           status: booking.status === 'completed' ? 'used' :
