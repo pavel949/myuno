@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
         const property = (booking as any).properties;
 
         voucherData = {
-          voucher_number: booking.booking_code || `BK-${bookingId.slice(0, 8).toUpperCase()}`,
+          voucher_number: `BK-${bookingId.slice(0, 8).toUpperCase()}`,
           booking_type: 'property',
           title: isRu
             ? (property?.title_ru || property?.title_en || property?.title || 'Property')
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
           end_time: '11:00',
           location: property?.address,
           guest_name: booking.guest_name,
-          guests_count: booking.guests || 1,
+          guests_count: booking.guests_count || 1,
           amount: booking.total_amount,
           currency: booking.currency || 'THB',
           status: booking.status === 'completed' ? 'used' :
@@ -158,8 +158,8 @@ Deno.serve(async (req) => {
         const { data } = await supabase.from('orders').select('customer_user_id').eq('id', orderId).single();
         userId = data?.customer_user_id;
       } else if (bookingId) {
-        const { data } = await supabase.from('property_bookings').select('user_id').eq('id', bookingId).single();
-        userId = data?.user_id;
+        const { data } = await supabase.from('property_bookings').select('guest_id, owner_id').eq('id', bookingId).single();
+        userId = data?.guest_id || data?.owner_id;
       }
 
       if (userId) {
