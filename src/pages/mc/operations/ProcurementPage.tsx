@@ -27,6 +27,7 @@ import { useCityCurrency } from '@/hooks/useCityCurrency';
 export default function ProcurementPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [creating, setCreating] = useState(false);
   const [openPO, setOpenPO] = useState<string | null>(null);
 
@@ -46,46 +47,46 @@ export default function ProcurementPage() {
         <div>
           <div className="flex items-center gap-2">
             <PackageOpen className="w-5 h-5 text-primary" />
-            <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'Закупки' : 'Procurement'}</h1>
+            <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'Закупки' : isTh ? 'การจัดซื้อ' : 'Procurement'}</h1>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Заказ → Получение → Инвойс (3-way match).' : 'PO → Goods Receipt → Invoice (3-way match).'}
+            {isRu ? 'Заказ → Получение → Инвойс (3-way match).' : isTh ? 'ใบสั่งซื้อ → การรับสินค้า → ใบแจ้งหนี้ (จับคู่ 3 ทาง)' : 'PO → Goods Receipt → Invoice (3-way match).'}
           </p>
         </div>
         <Sheet open={creating} onOpenChange={setCreating}>
           <SheetTrigger asChild>
-            <Button size="sm"><Plus className="w-4 h-4 mr-1.5" />{isRu ? 'Заказ' : 'PO'}</Button>
+            <Button size="sm"><Plus className="w-4 h-4 mr-1.5" />{isRu ? 'Заказ' : isTh ? 'ใบสั่งซื้อ' : 'PO'}</Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-            <SheetHeader><SheetTitle>{isRu ? 'Новый заказ' : 'New purchase order'}</SheetTitle></SheetHeader>
+            <SheetHeader><SheetTitle>{isRu ? 'Новый заказ' : isTh ? 'ใบสั่งซื้อใหม่' : 'New purchase order'}</SheetTitle></SheetHeader>
             <CreatePOForm onClose={() => setCreating(false)} />
           </SheetContent>
         </Sheet>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <StatCard label={isRu ? 'Черновики' : 'Draft'} value={stats.draft} cls="text-muted-foreground" />
-        <StatCard label={isRu ? 'В пути' : 'In transit'} value={stats.sent} cls="text-warning" />
-        <StatCard label={isRu ? 'Получено' : 'Received'} value={stats.received} cls="text-success" />
+        <StatCard label={isRu ? 'Черновики' : isTh ? 'ฉบับร่าง' : 'Draft'} value={stats.draft} cls="text-muted-foreground" />
+        <StatCard label={isRu ? 'В пути' : isTh ? 'อยู่ระหว่างจัดส่ง' : 'In transit'} value={stats.sent} cls="text-warning" />
+        <StatCard label={isRu ? 'Получено' : isTh ? 'รับแล้ว' : 'Received'} value={stats.received} cls="text-success" />
       </div>
 
       <div className="space-y-2">
         {orders.length === 0 ? (
           <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground">
             <PackageOpen className="w-10 h-10 mx-auto opacity-30 mb-3" />
-            <p className="text-sm">{isRu ? 'Заказов пока нет.' : 'No purchase orders yet.'}</p>
+            <p className="text-sm">{isRu ? 'Заказов пока нет.' : isTh ? 'ยังไม่มีใบสั่งซื้อ' : 'No purchase orders yet.'}</p>
           </CardContent></Card>
         ) : orders.map(po => {
           const cfg = STATUS_CFG[po.status];
           return (
             <Card key={po.id} className="cursor-pointer hover:bg-accent/30 transition" onClick={() => setOpenPO(po.id)}>
               <CardContent className="p-4 flex items-center gap-3">
-                <Badge variant="outline" className={cn('text-xs', cfg.cls)}>{isRu ? cfg.ru : cfg.en}</Badge>
+                <Badge variant="outline" className={cn('text-xs', cfg.cls)}>{isRu ? cfg.ru : isTh ? cfg.th : cfg.en}</Badge>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{po.po_number} · {po.vendor_name}</p>
                   <p className="text-xs text-muted-foreground">
                     {format(new Date(po.created_at), 'd MMM', { locale: isRu ? ru : undefined })}
-                    {po.expected_date && ` · ${isRu ? 'ожид.' : 'expected'} ${po.expected_date}`}
+                    {po.expected_date && ` · ${isRu ? 'ожид.' : isTh ? 'คาดว่า' : 'expected'} ${po.expected_date}`}
                   </p>
                 </div>
                 <span className="text-sm font-semibold tabular-nums">
@@ -107,14 +108,14 @@ export default function ProcurementPage() {
   );
 }
 
-const STATUS_CFG: Record<string, { ru: string; en: string; cls: string }> = {
-  draft: { ru: 'Черновик', en: 'Draft', cls: 'bg-muted text-muted-foreground' },
-  sent: { ru: 'Отправлен', en: 'Sent', cls: 'bg-primary/15 text-primary' },
-  partially_received: { ru: 'Частично', en: 'Partial', cls: 'bg-warning/15 text-warning' },
-  received: { ru: 'Получен', en: 'Received', cls: 'bg-success/15 text-success' },
-  invoiced: { ru: 'С инвойсом', en: 'Invoiced', cls: 'bg-success/15 text-success' },
-  closed: { ru: 'Закрыт', en: 'Closed', cls: 'bg-muted text-muted-foreground' },
-  cancelled: { ru: 'Отменён', en: 'Cancelled', cls: 'bg-destructive/15 text-destructive' },
+const STATUS_CFG: Record<string, { ru: string; en: string; th: string; cls: string }> = {
+  draft: { ru: 'Черновик', en: 'Draft', th: 'ฉบับร่าง', cls: 'bg-muted text-muted-foreground' },
+  sent: { ru: 'Отправлен', en: 'Sent', th: 'ส่งแล้ว', cls: 'bg-primary/15 text-primary' },
+  partially_received: { ru: 'Частично', en: 'Partial', th: 'บางส่วน', cls: 'bg-warning/15 text-warning' },
+  received: { ru: 'Получен', en: 'Received', th: 'รับแล้ว', cls: 'bg-success/15 text-success' },
+  invoiced: { ru: 'С инвойсом', en: 'Invoiced', th: 'ออกใบแจ้งหนี้แล้ว', cls: 'bg-success/15 text-success' },
+  closed: { ru: 'Закрыт', en: 'Closed', th: 'ปิดแล้ว', cls: 'bg-muted text-muted-foreground' },
+  cancelled: { ru: 'Отменён', en: 'Cancelled', th: 'ยกเลิกแล้ว', cls: 'bg-destructive/15 text-destructive' },
 };
 
 function StatCard({ label, value, cls }: { label: string; value: number; cls: string }) {
@@ -129,6 +130,7 @@ function StatCard({ label, value, cls }: { label: string; value: number; cls: st
 function PODetail({ poId, onClose }: { poId: string; onClose: () => void }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { data, isLoading } = usePurchaseOrderDetail(poId);
   const updateStatus = useUpdatePOStatus();
   const receive = useReceiveGoods();
@@ -149,13 +151,13 @@ function PODetail({ poId, onClose }: { poId: string; onClose: () => void }) {
       </div>
 
       <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Позиции' : 'Items'}</p>
+        <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Позиции' : isTh ? 'รายการ' : 'Items'}</p>
         {items.map(it => (
           <div key={it.id} className="flex items-center gap-2 p-2 rounded-none border bg-muted/20">
             <div className="flex-1 min-w-0">
               <p className="text-sm truncate">{it.description}</p>
               <p className="text-xs text-muted-foreground">
-                {it.quantity} × {Number(it.unit_price).toLocaleString()} · {isRu ? 'получено' : 'received'} {it.received_quantity}
+                {it.quantity} × {Number(it.unit_price).toLocaleString()} · {isRu ? 'получено' : isTh ? 'รับแล้ว' : 'received'} {it.received_quantity}
               </p>
             </div>
             {po.status !== 'received' && po.status !== 'closed' && po.status !== 'cancelled' && (
@@ -175,7 +177,7 @@ function PODetail({ poId, onClose }: { poId: string; onClose: () => void }) {
         <div className="grid grid-cols-2 gap-2">
           {po.status === 'draft' && (
             <Button size="sm" variant="outline" onClick={() => updateStatus.mutate({ id: po.id, status: 'sent' })}>
-              <Truck className="w-3.5 h-3.5 mr-1.5" />{isRu ? 'Отправить' : 'Send'}
+              <Truck className="w-3.5 h-3.5 mr-1.5" />{isRu ? 'Отправить' : isTh ? 'ส่ง' : 'Send'}
             </Button>
           )}
           <Button size="sm" className="col-span-1"
@@ -188,14 +190,14 @@ function PODetail({ poId, onClose }: { poId: string; onClose: () => void }) {
               setReceiveQty({});
             }}
             disabled={receive.isPending}>
-            <FileCheck className="w-3.5 h-3.5 mr-1.5" />{isRu ? 'Принять' : 'Receive'}
+            <FileCheck className="w-3.5 h-3.5 mr-1.5" />{isRu ? 'Принять' : isTh ? 'รับสินค้า' : 'Receive'}
           </Button>
         </div>
       )}
 
       {receipts.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Получения' : 'Receipts'}</p>
+          <p className="text-xs font-semibold uppercase text-muted-foreground">{isRu ? 'Получения' : isTh ? 'การรับสินค้า' : 'Receipts'}</p>
           {receipts.map(r => (
             <div key={r.id} className="p-2 rounded-none border text-xs space-y-0.5">
               <p>{format(new Date(r.received_at), 'd MMM HH:mm', { locale: isRu ? ru : undefined })}</p>
@@ -211,6 +213,7 @@ function PODetail({ poId, onClose }: { poId: string; onClose: () => void }) {
 function CreatePOForm({ onClose }: { onClose: () => void }) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const { code: cityCurrencyCode } = useCityCurrency();
   const create = useCreatePurchaseOrder();
   const [vendor, setVendor] = useState('');
@@ -234,23 +237,23 @@ function CreatePOForm({ onClose }: { onClose: () => void }) {
       onClose();
     }}>
       <div className="space-y-1.5">
-        <Label>{isRu ? 'Поставщик' : 'Vendor'}</Label>
+        <Label>{isRu ? 'Поставщик' : isTh ? 'ผู้จำหน่าย' : 'Vendor'}</Label>
         <Input value={vendor} onChange={(e) => setVendor(e.target.value)} required />
       </div>
       <div className="space-y-1.5">
-        <Label>{isRu ? 'Ожидаемая дата' : 'Expected date'}</Label>
+        <Label>{isRu ? 'Ожидаемая дата' : isTh ? 'วันที่คาดว่าจะได้รับ' : 'Expected date'}</Label>
         <Input type="date" value={expected} onChange={(e) => setExpected(e.target.value)} />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label>{isRu ? 'Позиции' : 'Items'}</Label>
+          <Label>{isRu ? 'Позиции' : isTh ? 'รายการ' : 'Items'}</Label>
           <Button type="button" size="sm" variant="ghost" onClick={() => setItems([...items, { description: '', quantity: 1, unit_price: 0 }])}>
-            <Plus className="w-3 h-3 mr-1" />{isRu ? 'Добавить' : 'Add'}
+            <Plus className="w-3 h-3 mr-1" />{isRu ? 'Добавить' : isTh ? 'เพิ่ม' : 'Add'}
           </Button>
         </div>
         {items.map((it, idx) => (
           <div key={idx} className="grid grid-cols-12 gap-1.5 items-center">
-            <Input className="col-span-6" placeholder={isRu ? 'Описание' : 'Description'} value={it.description}
+            <Input className="col-span-6" placeholder={isRu ? 'Описание' : isTh ? 'คำอธิบาย' : 'Description'} value={it.description}
               onChange={(e) => {
                 const next = [...items]; next[idx].description = e.target.value; setItems(next);
               }} />
@@ -259,7 +262,7 @@ function CreatePOForm({ onClose }: { onClose: () => void }) {
             <Input className="col-span-3" type="number" min={0} step={0.01} value={it.unit_price}
               onChange={(e) => { const next = [...items]; next[idx].unit_price = Number(e.target.value); setItems(next); }} />
             <Button type="button" size="icon" variant="ghost" className="col-span-1 min-h-[44px] min-w-[44px]"
-              aria-label={isRu ? 'Удалить позицию' : 'Remove item'}
+              aria-label={isRu ? 'Удалить позицию' : isTh ? 'ลบรายการ' : 'Remove item'}
               onClick={() => setItems(items.filter((_, i) => i !== idx))}>
               <X className="w-3 h-3" />
             </Button>
@@ -267,16 +270,16 @@ function CreatePOForm({ onClose }: { onClose: () => void }) {
         ))}
       </div>
       <div className="space-y-1.5">
-        <Label>{isRu ? 'Заметки' : 'Notes'}</Label>
+        <Label>{isRu ? 'Заметки' : isTh ? 'หมายเหตุ' : 'Notes'}</Label>
         <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
       <div className="flex items-center justify-between p-2 rounded-none bg-muted/40">
-        <span className="text-sm font-medium">{isRu ? 'Итого' : 'Total'}</span>
+        <span className="text-sm font-medium">{isRu ? 'Итого' : isTh ? 'รวม' : 'Total'}</span>
         <span className="text-base font-bold tabular-nums">{total.toLocaleString()} {cityCurrencyCode}</span>
       </div>
       <Button type="submit" className="w-full" disabled={create.isPending}>
         <Check className="w-4 h-4 mr-1.5" />
-        {create.isPending ? (isRu ? 'Создание…' : 'Creating…') : (isRu ? 'Создать заказ' : 'Create PO')}
+        {create.isPending ? (isRu ? 'Создание…' : isTh ? 'กำลังสร้าง…' : 'Creating…') : (isRu ? 'Создать заказ' : isTh ? 'สร้างใบสั่งซื้อ' : 'Create PO')}
       </Button>
     </form>
   );

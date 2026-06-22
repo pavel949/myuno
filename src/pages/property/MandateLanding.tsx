@@ -14,7 +14,8 @@ import LandingSeoHead from '@/components/seo/LandingSeoHead';
 const MandateLanding = () => {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+  const isTh = language === 'th';
+  const t = <T,>(p: { ru: T; en: T; th?: T }): T => (isRu ? p.ru : isTh ? (p.th ?? p.en) : p.en);
 
   const seoLanding = {
     personaCode: 'P9' as const,
@@ -47,7 +48,7 @@ const MandateLanding = () => {
       <article className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
         <header className="mb-10">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary">
-            {t({ ru: 'Только по приглашению', en: 'Invite-only' })}
+            {t({ ru: 'Только по приглашению', en: 'Invite-only', th: 'เฉพาะผู้ได้รับเชิญ' })}
           </div>
           <h1 className="text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl">
             {t({ ru: 'Deal Room', en: 'Deal Room' })}
@@ -56,16 +57,17 @@ const MandateLanding = () => {
             {t({
               ru: 'Закрытый канал недвижимости Пхукета для клиентов с мандатом. First Look объекты до публичной выдачи, юрист и налоговый консультант на одном договоре, NDA до раскрытия.',
               en: 'A private Phuket real-estate channel for clients under mandate. First Look properties before public release, lawyer and tax advisor under one engagement, NDA before disclosure.',
+              th: 'ช่องทางอสังหาริมทรัพย์ภูเก็ตแบบปิดสำหรับลูกค้าที่มีแมนเดต ทรัพย์ First Look ก่อนเปิดสู่สาธารณะ ทนายความและที่ปรึกษาภาษีในสัญญาเดียว ลงนาม NDA ก่อนเปิดเผยข้อมูล',
             })}
           </p>
         </header>
 
         <section className="mb-10 grid gap-4 sm:grid-cols-2">
           {[
-            { ru: 'First Look — за 7–14 дней до публичной выдачи', en: 'First Look — 7–14 days before public listing' },
-            { ru: 'Шорт-лист 5–8 объектов под ваш мандат', en: 'Shortlist of 5–8 properties matching your mandate' },
-            { ru: 'NDA подписывается до раскрытия объектов', en: 'NDA signed before any disclosure' },
-            { ru: 'Юрист, налоговый консультант, asset manager — единый договор', en: 'Lawyer, tax advisor, asset manager — single engagement' },
+            { ru: 'First Look — за 7–14 дней до публичной выдачи', en: 'First Look — 7–14 days before public listing', th: 'First Look — 7–14 วันก่อนเปิดประกาศสู่สาธารณะ' },
+            { ru: 'Шорт-лист 5–8 объектов под ваш мандат', en: 'Shortlist of 5–8 properties matching your mandate', th: 'รายการคัดสรร 5–8 ทรัพย์ที่ตรงกับแมนเดตของคุณ' },
+            { ru: 'NDA подписывается до раскрытия объектов', en: 'NDA signed before any disclosure', th: 'ลงนาม NDA ก่อนเปิดเผยข้อมูลใด ๆ' },
+            { ru: 'Юрист, налоговый консультант, asset manager — единый договор', en: 'Lawyer, tax advisor, asset manager — single engagement', th: 'ทนายความ ที่ปรึกษาภาษี ผู้จัดการสินทรัพย์ — สัญญาเดียว' },
           ].map((item, i) => (
             <div key={i} className="rounded-none border border-border bg-card p-4">
               <p className="text-sm text-foreground/90">{t(item)}</p>
@@ -75,22 +77,23 @@ const MandateLanding = () => {
 
         <section className="mb-10 rounded-none border border-border bg-muted/30 p-6">
           <h2 className="mb-2 text-lg font-semibold text-foreground">
-            {t({ ru: 'Как получить доступ', en: 'How to get access' })}
+            {t({ ru: 'Как получить доступ', en: 'How to get access', th: 'วิธีขอเข้าถึง' })}
           </h2>
           <p className="text-sm text-muted-foreground">
             {t({
               ru: 'Минимальный портфель от 15 млн THB (~$420K) или 1+ сделка с myUNO в течение года. Запросите шорт-лист — партнёр свяжется в течение 24 часов.',
               en: 'Minimum portfolio from 15M THB (~$420K) or 1+ closed deal with myUNO within a year. Request a shortlist — a partner will respond within 24 hours.',
+              th: 'พอร์ตขั้นต่ำตั้งแต่ 15 ล้านบาท (~$420K) หรือปิดดีลกับ myUNO อย่างน้อย 1 รายการภายในหนึ่งปี ขอรายการคัดสรร — พาร์ทเนอร์จะติดต่อกลับภายใน 24 ชั่วโมง',
             })}
           </p>
         </section>
 
         <div className="border-t border-border pt-8">
           <Button asChild size="lg">
-            <a href="/for/hnw">{t({ ru: 'Запросить шорт-лист', en: 'Request a shortlist' })}</a>
+            <a href="/for/hnw">{t({ ru: 'Запросить шорт-лист', en: 'Request a shortlist', th: 'ขอรายการคัดสรร' })}</a>
           </Button>
           <p className="mt-2 text-xs text-muted-foreground">
-            {t({ ru: 'Конфиденциально. Без публикации.', en: 'Confidential. No public disclosure.' })}
+            {t({ ru: 'Конфиденциально. Без публикации.', en: 'Confidential. No public disclosure.', th: 'เป็นความลับ ไม่เปิดเผยต่อสาธารณะ' })}
           </p>
         </div>
       </article>

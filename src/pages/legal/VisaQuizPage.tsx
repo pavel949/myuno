@@ -276,44 +276,50 @@ export default function VisaQuizPage() {
 
       {!started ? (
         <StartPageLayout
-          cluster={isRu ? 'Визы и документы' : 'Visas & documents'}
-          title={isRu ? 'Подберите подходящую визу за 4 шага' : 'Find the right visa in 4 steps'}
+          cluster={isRu ? 'Визы и документы' : isTh ? 'วีซ่าและเอกสาร' : 'Visas & documents'}
+          title={isRu ? 'Подберите подходящую визу за 4 шага' : isTh ? 'หาวีซ่าที่เหมาะกับคุณใน 4 ขั้นตอน' : 'Find the right visa in 4 steps'}
           summary={isRu
             ? 'Короткий квиз, который покажет, какая тайская виза подходит вашей цели поездки. В конце — стоимость, сроки и контакт юриста.'
+            : isTh
+            ? 'แบบทดสอบสั้น ๆ ที่ช่วยเลือกวีซ่าไทยที่เหมาะกับการเดินทางของคุณ จบด้วยค่าใช้จ่าย ระยะเวลา และช่องทางติดต่อทนายความ'
             : 'A short quiz that picks the right Thai visa for your trip. Ends with cost, timing, and a lawyer contact.'}
           meta={{
-            duration: isRu ? '2 мин' : '2 min',
-            cost: isRu ? 'Бесплатно' : 'Free',
-            eligibility: isRu ? 'Любой паспорт' : 'Any passport',
-            requirements: isRu ? 'Цель и срок поездки' : 'Trip purpose & duration',
+            duration: isRu ? '2 мин' : isTh ? '2 นาที' : '2 min',
+            cost: isRu ? 'Бесплатно' : isTh ? 'ฟรี' : 'Free',
+            eligibility: isRu ? 'Любой паспорт' : isTh ? 'ทุกหนังสือเดินทาง' : 'Any passport',
+            requirements: isRu ? 'Цель и срок поездки' : isTh ? 'วัตถุประสงค์และระยะเวลาเดินทาง' : 'Trip purpose & duration',
           }}
           eligibility={isRu
             ? ['Едете в Таиланд впервые или повторно', 'Любой состав поездки: один, пара, семья', 'Любая цель: туризм, работа, учёба, пенсия']
+            : isTh
+            ? ['เดินทางมาครั้งแรกหรือกลับมาอีกครั้ง', 'เดินทางได้ทุกรูปแบบ: คนเดียว คู่รัก ครอบครัว', 'ทุกวัตถุประสงค์: ท่องเที่ยว ทำงาน เรียน เกษียณ']
             : ['First trip or returning', 'Any party: solo, couple, family', 'Any purpose: tourism, work, study, retirement']}
           requirements={isRu
             ? ['Знаете цель поездки', 'Знаете планируемый срок', 'Знаете тип паспорта']
+            : isTh
+            ? ['ทราบวัตถุประสงค์ในการเดินทาง', 'ทราบระยะเวลาที่วางแผนจะพำนัก', 'ทราบประเภทหนังสือเดินทาง']
             : ['You know your trip purpose', 'You know how long you plan to stay', 'You know your passport type']}
-          startLabel={isRu ? 'Начать квиз' : 'Start the quiz'}
+          startLabel={isRu ? 'Начать квиз' : isTh ? 'เริ่มแบบทดสอบ' : 'Start the quiz'}
           onStart={() => setStarted(true)}
-          secondaryLabel={isRu ? 'Назад' : 'Back'}
+          secondaryLabel={isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'}
           onSecondary={() => navigate(-1)}
-          lastUpdated={isRu ? 'Апр 2026' : 'Apr 2026'}
+          lastUpdated={isRu ? 'Апр 2026' : isTh ? 'เม.ย. 2026' : 'Apr 2026'}
         />
       ) : (
         <>
           {/* Header */}
       <div className="sticky top-0 z-40 bg-background border-b border-border/50">
         <div className="flex items-center gap-3 px-4 py-3">
-          <Button variant="ghost" size="icon" aria-label={isRu ? 'Назад' : 'Back'} className="shrink-0 min-h-[44px] min-w-[44px]" onClick={step === 0 && !showResult ? () => navigate(-1) : handleBack}>
+          <Button variant="ghost" size="icon" aria-label={isRu ? 'Назад' : isTh ? 'ย้อนกลับ' : 'Back'} className="shrink-0 min-h-[44px] min-w-[44px]" onClick={step === 0 && !showResult ? () => navigate(-1) : handleBack}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex-1 min-w-0">
             <h1 className="text-sm font-semibold truncate">
-              {isRu ? 'Какая виза мне нужна?' : 'Which Visa Do I Need?'}
+              {isRu ? 'Какая виза мне нужна?' : isTh ? 'ฉันต้องใช้วีซ่าแบบไหน?' : 'Which Visa Do I Need?'}
             </h1>
             <p className="text-xs text-muted-foreground">
               {showResult
-                ? (isRu ? 'Результат' : 'Result')
+                ? (isRu ? 'Результат' : isTh ? 'ผลลัพธ์' : 'Result')
                 : `${step + 1} / ${QUIZ_STEPS.length}`}
             </p>
           </div>
@@ -328,7 +334,7 @@ export default function VisaQuizPage() {
         {!showResult && currentStep ? (
           <div className="space-y-4">
             <h2 className="text-xl font-bold">
-              {isRu ? currentStep.questionRu : currentStep.questionEn}
+              {isRu ? currentStep.questionRu : isTh ? currentStep.questionTh : currentStep.questionEn}
             </h2>
             <div className="space-y-3">
               {currentStep.options.map(opt => (
@@ -344,7 +350,7 @@ export default function VisaQuizPage() {
                   )}
                 >
                   <span className="text-2xl">{opt.emoji}</span>
-                  <span className="font-medium text-sm">{isRu ? opt.labelRu : opt.labelEn}</span>
+                  <span className="font-medium text-sm">{isRu ? opt.labelRu : isTh ? opt.labelTh : opt.labelEn}</span>
                   <ChevronRight className="w-4 h-4 ml-auto text-muted-foreground" />
                 </button>
               ))}
@@ -360,24 +366,24 @@ export default function VisaQuizPage() {
                     <Badge className={cn("mb-2", complexityColors[result.complexity])}>
                       {complexityLabels[result.complexity]}
                     </Badge>
-                    <h2 className="text-lg font-bold">{isRu ? result.titleRu : result.titleEn}</h2>
+                    <h2 className="text-lg font-bold">{isRu ? result.titleRu : isTh ? result.titleTh : result.titleEn}</h2>
                   </div>
                   <CheckCircle2 className="w-8 h-8 text-primary shrink-0" />
                 </div>
-                <p className="text-sm text-muted-foreground">{isRu ? result.descRu : result.descEn}</p>
+                <p className="text-sm text-muted-foreground">{isRu ? result.descRu : isTh ? result.descTh : result.descEn}</p>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex items-center gap-2 p-3 rounded-none bg-background">
                     <Clock className="w-4 h-4 text-muted-foreground" />
                     <div>
-                      <p className="text-[10px] text-muted-foreground">{isRu ? 'Срок' : 'Duration'}</p>
+                      <p className="text-[10px] text-muted-foreground">{isRu ? 'Срок' : isTh ? 'ระยะเวลา' : 'Duration'}</p>
                       <p className="text-xs font-semibold">{result.duration}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 p-3 rounded-none bg-background">
                     <DollarSign className="w-4 h-4 text-muted-foreground" />
                     <div>
-                      <p className="text-[10px] text-muted-foreground">{isRu ? 'Стоимость' : 'Cost'}</p>
+                      <p className="text-[10px] text-muted-foreground">{isRu ? 'Стоимость' : isTh ? 'ค่าใช้จ่าย' : 'Cost'}</p>
                       <p className="text-xs font-semibold">{result.cost}</p>
                     </div>
                   </div>
@@ -389,12 +395,12 @@ export default function VisaQuizPage() {
             <div className="space-y-2">
               <h3 className="text-sm font-semibold flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 text-warning" />
-                {isRu ? 'Важные советы' : 'Important Tips'}
+                {isRu ? 'Важные советы' : isTh ? 'ข้อแนะนำสำคัญ' : 'Important Tips'}
               </h3>
               {result.tips.map((tip, i) => (
                 <div key={i} className="flex items-start gap-2 p-3 rounded-none bg-muted/50">
                   <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <p className="text-sm">{isRu ? tip.ru : tip.en}</p>
+                  <p className="text-sm">{isRu ? tip.ru : isTh ? tip.th : tip.en}</p>
                 </div>
               ))}
             </div>
@@ -408,11 +414,13 @@ export default function VisaQuizPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-sm">
-                      {isRu ? 'Консультация с юристом' : 'Lawyer Consultation'}
+                      {isRu ? 'Консультация с юристом' : isTh ? 'ปรึกษาทนายความ' : 'Lawyer Consultation'}
                     </h3>
                     <p className="text-xs text-muted-foreground">
                       {isRu
                         ? 'Разберём ваш кейс и подготовим документы'
+                        : isTh
+                        ? 'เราจะตรวจสอบกรณีของคุณและจัดเตรียมเอกสาร'
                         : "We'll review your case & prepare documents"}
                     </p>
                   </div>
@@ -421,19 +429,19 @@ export default function VisaQuizPage() {
                   <span className="text-lg font-bold text-primary">฿2,000</span>
                   <Badge variant="outline" className="text-[10px]">
                     <CreditCard className="w-3 h-3 mr-1" />
-                    {isRu ? 'Оплата онлайн' : 'Pay Online'}
+                    {isRu ? 'Оплата онлайн' : isTh ? 'ชำระเงินออนไลน์' : 'Pay Online'}
                   </Badge>
                 </div>
                 <Button
                   className="w-full"
                   onClick={() => navigate(
                     `/legal/booking/visa-consultation?service=${encodeURIComponent(
-                      isRu ? 'Визовая консультация' : 'Visa Consultation'
+                      isRu ? 'Визовая консультация' : isTh ? 'การปรึกษาเรื่องวีซ่า' : 'Visa Consultation'
                     )}&visa_type=${encodeURIComponent(result.titleEn)}`
                   )}
                 >
                   <Scale className="w-4 h-4 mr-2" />
-                  {isRu ? 'Записаться на консультацию' : 'Book Consultation'}
+                  {isRu ? 'Записаться на консультацию' : isTh ? 'จองการปรึกษา' : 'Book Consultation'}
                 </Button>
               </CardContent>
             </Card>
@@ -442,10 +450,10 @@ export default function VisaQuizPage() {
             <div className="space-y-3">
               <Button variant="outline" className="w-full" onClick={() => navigate('/legal')}>
                 <FileText className="w-4 h-4 mr-2" />
-                {isRu ? 'Все юридические услуги' : 'Browse All Legal Services'}
+                {isRu ? 'Все юридические услуги' : isTh ? 'ดูบริการกฎหมายทั้งหมด' : 'Browse All Legal Services'}
               </Button>
               <Button variant="ghost" className="w-full" onClick={handleRestart}>
-                {isRu ? 'Пройти заново' : 'Retake Quiz'}
+                {isRu ? 'Пройти заново' : isTh ? 'ทำแบบทดสอบใหม่' : 'Retake Quiz'}
               </Button>
             </div>
           </div>

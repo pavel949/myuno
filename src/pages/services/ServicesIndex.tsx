@@ -44,55 +44,70 @@ const CATEGORY_ALIAS: Record<string, ServiceCategory> = {
  * have a per-service booking flow today — gives users a WhatsApp path
  * to the coordinator instead of an empty list.
  */
-const CATEGORY_INTRO: Record<string, { titleRu: string; titleEn: string; descRu: string; descEn: string }> = {
-  laundry:        { titleRu: 'Прачечная с доставкой', titleEn: 'Laundry & dry-cleaning',
+const CATEGORY_INTRO: Record<string, { titleRu: string; titleEn: string; titleTh: string; descRu: string; descEn: string; descTh: string }> = {
+  laundry:        { titleRu: 'Прачечная с доставкой', titleEn: 'Laundry & dry-cleaning', titleTh: 'ซักรีดพร้อมจัดส่ง',
                     descRu: 'Опишите задачу — координатор найдёт проверенную прачечную и привезёт чистое.',
-                    descEn: 'Tell us what you need — our coordinator picks a vetted laundry and delivers.' },
-  pest_control:   { titleRu: 'Дезинсекция',           titleEn: 'Pest control',
+                    descEn: 'Tell us what you need — our coordinator picks a vetted laundry and delivers.',
+                    descTh: 'บอกความต้องการของคุณ — ผู้ประสานงานจะเลือกร้านซักรีดที่ผ่านการตรวจสอบและจัดส่งให้' },
+  pest_control:   { titleRu: 'Дезинсекция',           titleEn: 'Pest control', titleTh: 'กำจัดแมลง',
                     descRu: 'Опишите проблему — пришлём специалиста с сертификатом в течение 24 ч.',
-                    descEn: 'Describe the pest — we send a certified specialist within 24 h.' },
-  handyman:       { titleRu: 'Мастер на час',         titleEn: 'Handyman',
+                    descEn: 'Describe the pest — we send a certified specialist within 24 h.',
+                    descTh: 'อธิบายปัญหาแมลง — เราจะส่งผู้เชี่ยวชาญที่ได้รับการรับรองภายใน 24 ชม.' },
+  handyman:       { titleRu: 'Мастер на час',         titleEn: 'Handyman', titleTh: 'ช่างซ่อมทั่วไป',
                     descRu: 'Опишите, что нужно сделать — мастер с инструментами приедет в течение 2 ч.',
-                    descEn: 'Describe the task — a handyman with tools shows up within 2 hours.' },
-  plumbing:       { titleRu: 'Сантехника',            titleEn: 'Plumbing',
+                    descEn: 'Describe the task — a handyman with tools shows up within 2 hours.',
+                    descTh: 'อธิบายงานที่ต้องทำ — ช่างพร้อมเครื่องมือจะมาถึงภายใน 2 ชั่วโมง' },
+  plumbing:       { titleRu: 'Сантехника',            titleEn: 'Plumbing', titleTh: 'ประปา',
                     descRu: 'Опишите проблему — фотофиксация, смета до выезда, работа в день обращения.',
-                    descEn: 'Describe the issue — photo quote up front, work the same day.' },
-  electrical:     { titleRu: 'Электрика',             titleEn: 'Electrical',
+                    descEn: 'Describe the issue — photo quote up front, work the same day.',
+                    descTh: 'อธิบายปัญหา — ประเมินราคาจากรูปภาพล่วงหน้า ดำเนินงานภายในวันเดียวกัน' },
+  electrical:     { titleRu: 'Электрика',             titleEn: 'Electrical', titleTh: 'ไฟฟ้า',
                     descRu: 'Опишите задачу — лицензированный электрик с протоколом безопасности.',
-                    descEn: 'Describe the job — licensed electrician with safety protocol.' },
-  ac:             { titleRu: 'Кондиционеры',          titleEn: 'Air conditioning',
+                    descEn: 'Describe the job — licensed electrician with safety protocol.',
+                    descTh: 'อธิบายงาน — ช่างไฟฟ้าที่มีใบอนุญาตพร้อมมาตรฐานความปลอดภัย' },
+  ac:             { titleRu: 'Кондиционеры',          titleEn: 'Air conditioning', titleTh: 'เครื่องปรับอากาศ',
                     descRu: 'Чистка, дозаправка фреона, ремонт — фикс-ставки, без сюрпризов.',
-                    descEn: 'Cleaning, refrigerant top-up, repair — fixed rates, no surprises.' },
-  security:       { titleRu: 'Замки',                 titleEn: 'Locksmith',
+                    descEn: 'Cleaning, refrigerant top-up, repair — fixed rates, no surprises.',
+                    descTh: 'ทำความสะอาด เติมน้ำยา ซ่อม — ราคาคงที่ ไม่มีค่าใช้จ่ายแอบแฝง' },
+  security:       { titleRu: 'Замки',                 titleEn: 'Locksmith', titleTh: 'ช่างกุญแจ',
                     descRu: 'Срочно — на месте за час. Плановая замена — в удобное время.',
-                    descEn: 'Urgent — on-site within an hour. Planned change — at your time.' },
-  garden:         { titleRu: 'Сад и двор',            titleEn: 'Garden & yard',
+                    descEn: 'Urgent — on-site within an hour. Planned change — at your time.',
+                    descTh: 'เร่งด่วน — ถึงที่ภายในหนึ่งชั่วโมง เปลี่ยนตามแผน — เวลาที่คุณสะดวก' },
+  garden:         { titleRu: 'Сад и двор',            titleEn: 'Garden & yard', titleTh: 'สวนและบริเวณบ้าน',
                     descRu: 'Стрижка, полив, уход за пальмами и орхидеями. Разово или по графику.',
-                    descEn: 'Trimming, watering, palm and orchid care. One-off or scheduled.' },
-  moving:         { titleRu: 'Переезд и хранение',    titleEn: 'Moving & storage',
+                    descEn: 'Trimming, watering, palm and orchid care. One-off or scheduled.',
+                    descTh: 'ตัดแต่ง รดน้ำ ดูแลปาล์มและกล้วยไม้ ครั้งเดียวหรือตามตารางเวลา' },
+  moving:         { titleRu: 'Переезд и хранение',    titleEn: 'Moving & storage', titleTh: 'ขนย้ายและจัดเก็บ',
                     descRu: 'Локальные переезды и склад для вещей. Опишите объём — пришлём смету.',
-                    descEn: 'Local moves and storage. Tell us the volume — we send a quote.' },
+                    descEn: 'Local moves and storage. Tell us the volume — we send a quote.',
+                    descTh: 'ขนย้ายในพื้นที่และพื้นที่จัดเก็บของ บอกปริมาณ — เราจะส่งใบเสนอราคา' },
   // Categories without dedicated inventory — chip points to nearest trade,
   // intro card explains the real service path (coordinator dispatches).
-  'road-assistance':     { titleRu: 'Помощь на дороге',  titleEn: 'Roadside assistance',
+  'road-assistance':     { titleRu: 'Помощь на дороге',  titleEn: 'Roadside assistance', titleTh: 'ช่วยเหลือฉุกเฉินบนถนน',
                             descRu: 'Замена колеса, прикурить, эвакуатор. Координатор подключит ближайшую бригаду 24/7.',
-                            descEn: 'Tyre change, jump-start, tow truck. Coordinator dispatches the nearest crew 24/7.' },
-  photography:           { titleRu: 'Фото и видео',       titleEn: 'Photo & video',
+                            descEn: 'Tyre change, jump-start, tow truck. Coordinator dispatches the nearest crew 24/7.',
+                            descTh: 'เปลี่ยนยาง พ่วงแบตเตอรี่ รถลาก ผู้ประสานงานจัดส่งทีมที่ใกล้ที่สุดตลอด 24/7' },
+  photography:           { titleRu: 'Фото и видео',       titleEn: 'Photo & video', titleTh: 'ภาพถ่ายและวิดีโอ',
                             descRu: 'Свадьба, семейная съёмка, контент для бизнеса. Подберём команду под бюджет и стиль.',
-                            descEn: 'Wedding, family shoot, business content. We match a team to your budget and style.' },
-  maintenance:           { titleRu: 'Обслуживание дома',  titleEn: 'Home maintenance',
+                            descEn: 'Wedding, family shoot, business content. We match a team to your budget and style.',
+                            descTh: 'งานแต่งงาน ถ่ายภาพครอบครัว คอนเทนต์สำหรับธุรกิจ จัดทีมให้เหมาะกับงบและสไตล์ของคุณ' },
+  maintenance:           { titleRu: 'Обслуживание дома',  titleEn: 'Home maintenance', titleTh: 'ดูแลบ้าน',
                             descRu: 'Регулярный осмотр и плановые работы. Опишите объект — соберём пакет.',
-                            descEn: 'Routine inspections and planned works. Tell us about the property — we build a package.' },
-  'property-management': { titleRu: 'Управление недвижимостью', titleEn: 'Property management',
+                            descEn: 'Routine inspections and planned works. Tell us about the property — we build a package.',
+                            descTh: 'ตรวจสอบตามรอบและงานตามแผน บอกรายละเอียดที่พัก — เราจะจัดแพ็กเกจให้' },
+  'property-management': { titleRu: 'Управление недвижимостью', titleEn: 'Property management', titleTh: 'บริหารจัดการอสังหาริมทรัพย์',
                             descRu: 'Уборка, чек-ин гостей, оплата счетов. Опишите задачу — подключим МС-партнёра.',
-                            descEn: 'Cleaning, guest check-in, bill pay. Tell us the scope — we plug in an MC partner.' },
+                            descEn: 'Cleaning, guest check-in, bill pay. Tell us the scope — we plug in an MC partner.',
+                            descTh: 'ทำความสะอาด เช็กอินแขก ชำระบิล บอกขอบเขตงาน — เราจะเชื่อมต่อพันธมิตร MC ให้' },
 };
 
 const COORDINATOR_WHATSAPP = '66922407355';
 
-function whatsappLink(categoryLabel: string, language: 'ru' | 'en'): string {
+function whatsappLink(categoryLabel: string, language: 'ru' | 'en' | 'th'): string {
   const summary = language === 'ru'
     ? `Здравствуйте! Нужна помощь по категории «${categoryLabel}». Опишу детали в ответ.`
+    : language === 'th'
+    ? `สวัสดีครับ/ค่ะ ต้องการความช่วยเหลือเกี่ยวกับ "${categoryLabel}" จะอธิบายรายละเอียดเพิ่มเติมในข้อความถัดไป`
     : `Hello! I need help with "${categoryLabel}". I'll describe the details in a follow-up.`;
   return `https://wa.me/${COORDINATOR_WHATSAPP}?text=${encodeURIComponent(summary)}`;
 }
@@ -104,6 +119,7 @@ export default function ServicesIndex() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -172,7 +188,7 @@ export default function ServicesIndex() {
 
   const introCategoryKey = originalSlug ?? (selectedCategory === 'all' ? null : selectedCategory);
   const intro = introCategoryKey ? CATEGORY_INTRO[introCategoryKey] : null;
-  const introCategoryLabel = intro ? (isRu ? intro.titleRu : intro.titleEn) : '';
+  const introCategoryLabel = intro ? (isRu ? intro.titleRu : isTh ? intro.titleTh : intro.titleEn) : '';
 
   const filteredFunctions = useMemo(() => {
     let result: LocalizedServiceFunction[] = [];
@@ -251,11 +267,13 @@ export default function ServicesIndex() {
 
   const subtitle = isRu
     ? `Сантехника · электрика · уборка · ремонт · сад. ${filteredFunctions.length} услуг.`
+    : isTh
+    ? `ประปา · ไฟฟ้า · ทำความสะอาด · ซ่อมแซม · สวน ${filteredFunctions.length} บริการ`
     : `Plumbing · electrical · cleaning · repair · garden. ${filteredFunctions.length} services.`;
 
   return (
     <MiniAppLayout
-      title={isRu ? 'Услуги для дома' : 'Home services'}
+      title={isRu ? 'Услуги для дома' : isTh ? 'บริการสำหรับบ้าน' : 'Home services'}
       subtitle={subtitle}
       fallbackPath="/discover"
       categories={categoryRibbon}
@@ -263,7 +281,7 @@ export default function ServicesIndex() {
       onCategoryChange={handleCategoryChange}
       searchValue={searchQuery}
       onSearchChange={handleSearchChange}
-      searchPlaceholder={isRu ? 'Поиск услуг…' : 'Search services…'}
+      searchPlaceholder={isRu ? 'Поиск услуг…' : isTh ? 'ค้นหาบริการ…' : 'Search services…'}
       showHero={false}
       showFilter={false}
     >

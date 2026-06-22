@@ -21,7 +21,7 @@ type Verdict = "ok" | "warn" | "block";
 
 interface CheckResult {
   verdict: Verdict;
-  reason: { ru: string; en: string };
+  reason: { ru: string; en: string; th: string };
 }
 
 function evaluate(amountUsd: number, sourceCountry: string, hasFet: boolean): CheckResult {
@@ -32,6 +32,7 @@ function evaluate(amountUsd: number, sourceCountry: string, hasFet: boolean): Ch
       reason: {
         ru: "Укажите сумму перевода в USD.",
         en: "Please enter the transfer amount in USD.",
+        th: "กรุณาระบุจำนวนเงินโอนเป็นสกุล USD",
       },
     };
   }
@@ -41,6 +42,7 @@ function evaluate(amountUsd: number, sourceCountry: string, hasFet: boolean): Ch
       reason: {
         ru: "Сумма ≥ USD 50 000 — для иностранной квоты ОБЯЗАТЕЛЕН FET (Foreign Exchange Transaction). Без FET Land Office не оформит chanote на иностранца.",
         en: "Amount ≥ USD 50,000 — FET (Foreign Exchange Transaction) is MANDATORY for foreign quota registration. Without FET the Land Office won't issue a chanote in a foreigner's name.",
+        th: "จำนวนเงิน ≥ USD 50,000 — FET (Foreign Exchange Transaction) เป็นเอกสารบังคับสำหรับการจดทะเบียนโควตาต่างชาติ หากไม่มี FET สำนักงานที่ดินจะไม่ออกโฉนด (chanote) ในชื่อชาวต่างชาติ",
       },
     };
   }
@@ -50,6 +52,7 @@ function evaluate(amountUsd: number, sourceCountry: string, hasFet: boolean): Ch
       reason: {
         ru: "Перевод из России: банк-получатель в Таиланде потребует расширенный compliance (sanctions screening). Заранее согласуйте маршрут.",
         en: "Transfer from Russia: the receiving Thai bank will require enhanced compliance (sanctions screening). Coordinate the route in advance.",
+        th: "การโอนเงินจากรัสเซีย: ธนาคารผู้รับในไทยจะต้องตรวจสอบ compliance เพิ่มเติม (การคัดกรองมาตรการคว่ำบาตร) ควรวางแผนเส้นทางการโอนล่วงหน้า",
       },
     };
   }
@@ -58,6 +61,7 @@ function evaluate(amountUsd: number, sourceCountry: string, hasFet: boolean): Ch
     reason: {
       ru: "На уровне базовых параметров критических блокеров нет. Полный отчёт покажет ставки, документы и риски по конкретному банку.",
       en: "No critical blockers at the basic level. The full report will surface bank-specific fees, documents and risks.",
+      th: "ในระดับพารามิเตอร์พื้นฐานยังไม่พบอุปสรรคสำคัญ รายงานฉบับเต็มจะแสดงค่าธรรมเนียม เอกสาร และความเสี่ยงเฉพาะของแต่ละธนาคาร",
     },
   };
 }
@@ -65,6 +69,7 @@ function evaluate(amountUsd: number, sourceCountry: string, hasFet: boolean): Ch
 export default function FETPage() {
   const { language } = useLanguage();
   const isRu = language === "ru";
+  const isTh = language === "th";
   const [amount, setAmount] = useState("");
   const [country, setCountry] = useState("");
   const [hasFet, setHasFet] = useState<"yes" | "no" | "">("");
@@ -87,11 +92,15 @@ export default function FETPage() {
         title={
           isRu
             ? "FET и иностранная квота для покупки кондо в Таиланде — бесплатная проверка | myUNO"
+            : isTh
+            ? "FET และโควตาต่างชาติสำหรับการซื้อคอนโดในไทย — ตรวจสอบฟรี | myUNO"
             : "FET & foreign quota for buying a condo in Thailand — free check | myUNO"
         }
         description={
           isRu
             ? "Проверьте, нужен ли вам Foreign Exchange Transaction (FET) и попадаете ли вы в иностранную квоту кондоминиума. Бесплатная экспресс-проверка за 30 секунд."
+            : isTh
+            ? "ตรวจสอบว่าคุณต้องใช้ Foreign Exchange Transaction (FET) หรือไม่ และการซื้อคอนโดของคุณอยู่ในโควตาต่างชาติหรือไม่ ตรวจสอบด่วนฟรีภายใน 30 วินาที"
             : "Check whether you need a Foreign Exchange Transaction (FET) and whether your condo purchase fits the foreign quota. Free 30-second express check."
         }
         
@@ -105,11 +114,15 @@ export default function FETPage() {
             <h1 className="text-3xl font-semibold tracking-tight">
               {isRu
                 ? "FET и иностранная квота — бесплатная проверка"
+                : isTh
+                ? "FET และโควตาต่างชาติ — ตรวจสอบฟรี"
                 : "FET & foreign quota — free check"}
             </h1>
             <p className="mt-2 text-muted-foreground">
               {isRu
                 ? "30-секундный экспресс-чекер: определит, нужен ли FET и какие блокеры ждут в банке и Land Office."
+                : isTh
+                ? "เครื่องมือตรวจสอบด่วน 30 วินาที: บอกได้ว่าต้องใช้ FET หรือไม่ และมีอุปสรรคใดรออยู่ที่ธนาคารและสำนักงานที่ดิน"
                 : "30-second express checker: tells you whether FET is required and which blockers wait at the bank and Land Office."}
             </p>
           </div>
@@ -118,13 +131,13 @@ export default function FETPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">
-              {isRu ? "Параметры сделки" : "Deal parameters"}
+              {isRu ? "Параметры сделки" : isTh ? "รายละเอียดธุรกรรม" : "Deal parameters"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="amount">
-                {isRu ? "Сумма перевода (USD)" : "Transfer amount (USD)"}
+                {isRu ? "Сумма перевода (USD)" : isTh ? "จำนวนเงินโอน (USD)" : "Transfer amount (USD)"}
               </Label>
               <Input
                 id="amount"
@@ -136,18 +149,18 @@ export default function FETPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="country">
-                {isRu ? "Страна-источник средств" : "Source country of funds"}
+                {isRu ? "Страна-источник средств" : isTh ? "ประเทศต้นทางของเงินทุน" : "Source country of funds"}
               </Label>
               <Input
                 id="country"
-                placeholder={isRu ? "например: UAE, Russia, Cyprus" : "e.g. UAE, Russia, Cyprus"}
+                placeholder={isRu ? "например: UAE, Russia, Cyprus" : isTh ? "เช่น UAE, Russia, Cyprus" : "e.g. UAE, Russia, Cyprus"}
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
               />
             </div>
             <div className="space-y-2">
               <Label>
-                {isRu ? "У вас есть FET от тайского банка?" : "Do you have an FET from a Thai bank?"}
+                {isRu ? "У вас есть FET от тайского банка?" : isTh ? "คุณมี FET จากธนาคารไทยหรือไม่?" : "Do you have an FET from a Thai bank?"}
               </Label>
               <div className="flex gap-2">
                 <Button
@@ -155,20 +168,20 @@ export default function FETPage() {
                   variant={hasFet === "yes" ? "default" : "outline"}
                   onClick={() => setHasFet("yes")}
                 >
-                  {isRu ? "Да" : "Yes"}
+                  {isRu ? "Да" : isTh ? "มี" : "Yes"}
                 </Button>
                 <Button
                   type="button"
                   variant={hasFet === "no" ? "default" : "outline"}
                   onClick={() => setHasFet("no")}
                 >
-                  {isRu ? "Нет / не знаю" : "No / not sure"}
+                  {isRu ? "Нет / не знаю" : isTh ? "ไม่มี / ไม่แน่ใจ" : "No / not sure"}
                 </Button>
               </div>
             </div>
 
             <Button className="w-full" size="lg" onClick={onCheck}>
-              {isRu ? "Проверить" : "Run check"}
+              {isRu ? "Проверить" : isTh ? "ตรวจสอบ" : "Run check"}
             </Button>
           </CardContent>
         </Card>
@@ -179,29 +192,31 @@ export default function FETPage() {
               {verdictIcon[result.verdict]}
               <CardTitle className="text-base">
                 {result.verdict === "block"
-                  ? isRu ? "Блокер — без FET сделка не пройдёт" : "Blocker — deal cannot proceed without FET"
+                  ? isRu ? "Блокер — без FET сделка не пройдёт" : isTh ? "อุปสรรค — ธุรกรรมดำเนินการไม่ได้หากไม่มี FET" : "Blocker — deal cannot proceed without FET"
                   : result.verdict === "warn"
-                  ? isRu ? "Внимание — есть риски" : "Caution — risks identified"
-                  : isRu ? "Базово всё в порядке" : "Looks OK at the basic level"}
+                  ? isRu ? "Внимание — есть риски" : isTh ? "ข้อควรระวัง — พบความเสี่ยง" : "Caution — risks identified"
+                  : isRu ? "Базово всё в порядке" : isTh ? "เบื้องต้นดูเรียบร้อยดี" : "Looks OK at the basic level"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-muted-foreground">
-              <p>{isRu ? result.reason.ru : result.reason.en}</p>
+              <p>{isRu ? result.reason.ru : isTh ? result.reason.th : result.reason.en}</p>
               <div className="rounded-none border bg-muted/40 p-4 text-foreground">
                 <p className="text-sm font-medium">
                   {isRu
                     ? "Полный отчёт ฿1,500 — bank-by-bank, расчёт комиссий, шаблоны заявлений (готовится)"
+                    : isTh
+                    ? "รายงานฉบับเต็ม ฿1,500 — แยกตามธนาคาร รายละเอียดค่าธรรมเนียม แบบฟอร์มคำขอ (เร็ว ๆ นี้)"
                     : "Full report ฿1,500 — bank-by-bank, fee breakdown, application templates (coming soon)"}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button asChild variant="outline" size="sm">
                     <Link to={APP_ROUTES.CONTRACT_ANALYSIS}>
-                      {isRu ? "Проверить договор за ฿4,900" : "Check contract for ฿4,900"}
+                      {isRu ? "Проверить договор за ฿4,900" : isTh ? "ตรวจสอบสัญญาในราคา ฿4,900" : "Check contract for ฿4,900"}
                     </Link>
                   </Button>
                   <Button asChild variant="ghost" size="sm">
                     <Link to={APP_ROUTES.LEGAL_CLUSTER}>
-                      {isRu ? "К другим юр-сервисам" : "More legal services"}
+                      {isRu ? "К другим юр-сервисам" : isTh ? "บริการกฎหมายอื่น ๆ" : "More legal services"}
                     </Link>
                   </Button>
                 </div>
@@ -209,6 +224,8 @@ export default function FETPage() {
               <p className="text-xs">
                 {isRu
                   ? "Информационный сервис, не юридическая консультация. Для полного DD обратитесь к лицензированному юристу."
+                  : isTh
+                  ? "บริการให้ข้อมูล ไม่ใช่คำปรึกษาทางกฎหมาย สำหรับการตรวจสอบสถานะ (DD) ฉบับเต็ม โปรดปรึกษาทนายความที่มีใบอนุญาต"
                   : "Informational service, not legal advice. For full DD consult a licensed lawyer."}
               </p>
             </CardContent>

@@ -42,32 +42,39 @@ interface ZoneCardProps {
   icon: React.ElementType;
   titleRu: string;
   titleEn: string;
+  titleTh: string;
   descRu: string;
   descEn: string;
-  bullets: { ru: string; en: string }[];
+  descTh: string;
+  bullets: { ru: string; en: string; th: string }[];
   ctaPath: string;
   accentClass: string;
   iconBgClass: string;
   badgeRu?: string;
   badgeEn?: string;
+  badgeTh?: string;
 }
 
 function ZoneCard({
   icon: Icon,
   titleRu,
   titleEn,
+  titleTh,
   descRu,
   descEn,
+  descTh,
   bullets,
   ctaPath,
   accentClass,
   iconBgClass,
   badgeRu,
   badgeEn,
+  badgeTh,
 }: ZoneCardProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   return (
     <Card
       className={cn(
@@ -83,24 +90,24 @@ function ZoneCard({
           </div>
           {badgeRu && (
             <Badge variant="secondary" className="text-[10px]">
-              {isRu ? badgeRu : badgeEn}
+              {isRu ? badgeRu : isTh ? badgeTh : badgeEn}
             </Badge>
           )}
         </div>
         <div>
-          <h3 className="font-bold text-base leading-tight">{isRu ? titleRu : titleEn}</h3>
-          <p className="text-xs text-muted-foreground mt-1">{isRu ? descRu : descEn}</p>
+          <h3 className="font-bold text-base leading-tight">{isRu ? titleRu : isTh ? titleTh : titleEn}</h3>
+          <p className="text-xs text-muted-foreground mt-1">{isRu ? descRu : isTh ? descTh : descEn}</p>
         </div>
         <ul className="space-y-1">
           {bullets.map((b, idx) => (
             <li key={idx} className="text-xs text-muted-foreground flex items-start gap-1.5">
               <span className="text-primary mt-0.5">•</span>
-              <span>{isRu ? b.ru : b.en}</span>
+              <span>{isRu ? b.ru : isTh ? b.th : b.en}</span>
             </li>
           ))}
         </ul>
         <div className="flex items-center text-xs text-primary font-medium pt-1">
-          {isRu ? 'Перейти к разделу' : 'Go to section'}
+          {isRu ? 'Перейти к разделу' : isTh ? 'ไปยังหมวด' : 'Go to section'}
           <ChevronRight className="w-3.5 h-3.5 ml-1 transition-transform" />
         </div>
       </CardContent>
@@ -113,6 +120,7 @@ export default function InvestmentHubLanding() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: featured, isLoading: loadingFeatured } = useFeaturedInvestments();
   const { data: allProjects, isLoading: loadingAll } = useInvestmentProjects();
@@ -135,7 +143,7 @@ export default function InvestmentHubLanding() {
     if (!projects?.length) {
       return (
         <div className="text-center py-6 text-sm text-muted-foreground">
-          {isRu ? 'Скоро здесь появятся проекты' : 'Projects coming soon'}
+          {isRu ? 'Скоро здесь появятся проекты' : isTh ? 'โครงการจะปรากฏที่นี่เร็ว ๆ นี้' : 'Projects coming soon'}
         </div>
       );
     }
@@ -154,19 +162,21 @@ export default function InvestmentHubLanding() {
   return (
     <>
       <Helmet>
-        <title>{isRu ? 'Инвестиции в Таиланде | myUNO' : 'Invest in Thailand | myUNO'}</title>
+        <title>{isRu ? 'Инвестиции в Таиланде | myUNO' : isTh ? 'ลงทุนในประเทศไทย | myUNO' : 'Invest in Thailand | myUNO'}</title>
         <meta
           name="description"
           content={
             isRu
               ? 'Капитал в Пхукете: недвижимость, готовый бизнес, франшизы, советы и сопровождение сделок'
+              : isTh
+              ? 'นำเงินทุนเข้าสู่ภูเก็ต: อสังหาริมทรัพย์ ธุรกิจพร้อมขาย แฟรนไชส์ advisory และการดำเนินดีล'
               : 'Move capital into Phuket: real estate, businesses for sale, franchises, advisory & deal execution'
           }
         />
       </Helmet>
 
       <MiniAppLayout
-        title={isRu ? 'Инвестиции' : 'Invest'}
+        title={isRu ? 'Инвестиции' : isTh ? 'การลงทุน' : 'Invest'}
         showSearch={false}
         headerActions={
           user ? (
@@ -177,7 +187,7 @@ export default function InvestmentHubLanding() {
               className="gap-1.5"
             >
               <User className="h-4 w-4" />
-              {isRu ? 'Личный кабинет' : 'Cabinet'}
+              {isRu ? 'Личный кабинет' : isTh ? 'บัญชีของฉัน' : 'Cabinet'}
             </Button>
           ) : null
         }
@@ -191,11 +201,13 @@ export default function InvestmentHubLanding() {
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg font-semibold text-foreground leading-tight">
-                  {isRu ? 'Инвестиции в Таиланде' : 'Investments in Thailand'}
+                  {isRu ? 'Инвестиции в Таиланде' : isTh ? 'การลงทุนในประเทศไทย' : 'Investments in Thailand'}
                 </h1>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {isRu
                     ? 'Недвижимость, готовый бизнес, франшизы, юридическое сопровождение'
+                    : isTh
+                    ? 'อสังหาริมทรัพย์ ธุรกิจ แฟรนไชส์ การสนับสนุนด้านกฎหมาย'
                     : 'Real estate, businesses, franchises, legal advisory'}
                 </p>
               </div>
@@ -219,21 +231,21 @@ export default function InvestmentHubLanding() {
                 className="gap-1"
               >
                 <Calculator className="h-3.5 w-3.5" />
-                {isRu ? 'Инструменты' : 'Tools'}
+                {isRu ? 'Инструменты' : isTh ? 'เครื่องมือ' : 'Tools'}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
               >
-                {isRu ? 'Сделки' : 'Deals'}
+                {isRu ? 'Сделки' : isTh ? 'ดีล' : 'Deals'}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => navigate(APP_ROUTES.INVEST_SUBMIT)}
               >
-                {isRu ? 'Подать' : 'Submit'}
+                {isRu ? 'Подать' : isTh ? 'ส่ง' : 'Submit'}
               </Button>
             </div>
           </div>
@@ -244,52 +256,60 @@ export default function InvestmentHubLanding() {
 
           {/* 5 Zones */}
           <section className="space-y-3">
-            <h2 className="text-lg font-bold px-1">{isRu ? 'Направления хаба' : 'Hub Zones'}</h2>
+            <h2 className="text-lg font-bold px-1">{isRu ? 'Направления хаба' : isTh ? 'โซนของฮับ' : 'Hub Zones'}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <ZoneCard
                 icon={Building2}
                 titleRu="Недвижимость"
                 titleEn="Real Estate"
+                titleTh="อสังหาริมทรัพย์"
                 descRu="Off-plan, аренда, вторичка, ROI"
                 descEn="Off-plan, rental, resale, ROI"
+                descTh="Off-plan, ปล่อยเช่า, ขายต่อ, ROI"
                 bullets={[
-                  { ru: 'Новостройки от застройщиков', en: 'Off-plan from developers' },
-                  { ru: 'Арендный бизнес и переуступки', en: 'Rental business & assignments' },
-                  { ru: 'Калькулятор доходности', en: 'ROI & yield calculator' },
+                  { ru: 'Новостройки от застройщиков', en: 'Off-plan from developers', th: 'โครงการ off-plan จากผู้พัฒนา' },
+                  { ru: 'Арендный бизнес и переуступки', en: 'Rental business & assignments', th: 'ธุรกิจปล่อยเช่าและการโอนสิทธิ' },
+                  { ru: 'Калькулятор доходности', en: 'ROI & yield calculator', th: 'เครื่องคำนวณ ROI และผลตอบแทน' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_REAL_ESTATE}
                 accentClass="hover:bg-success/5"
                 iconBgClass="bg-success/10 text-success dark:text-success"
                 badgeRu="Популярно"
                 badgeEn="Popular"
+                badgeTh="ยอดนิยม"
               />
               <ZoneCard
                 icon={Briefcase}
                 titleRu="Готовый бизнес"
                 titleEn="Business"
+                titleTh="ธุรกิจ"
                 descRu="Покупка, франшизы, проекты"
                 descEn="Buy, franchise, projects"
+                descTh="ซื้อ แฟรนไชส์ โครงการ"
                 bullets={[
-                  { ru: 'Действующий бизнес на продажу', en: 'Operating businesses for sale' },
-                  { ru: 'Франшизы и партнёрство', en: 'Franchises & partnerships' },
-                  { ru: 'F&B, отели, retail, marine, import/export', en: 'F&B, hotels, retail, marine, trade' },
+                  { ru: 'Действующий бизнес на продажу', en: 'Operating businesses for sale', th: 'ธุรกิจที่เปิดดำเนินการพร้อมขาย' },
+                  { ru: 'Франшизы и партнёрство', en: 'Franchises & partnerships', th: 'แฟรนไชส์และความร่วมมือ' },
+                  { ru: 'F&B, отели, retail, marine, import/export', en: 'F&B, hotels, retail, marine, trade', th: 'F&B โรงแรม ค้าปลีก มารีน การค้า' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_BUSINESS}
                 accentClass="hover:bg-accent/5"
                 iconBgClass="bg-accent/10 text-accent dark:text-accent"
                 badgeRu="Новое"
                 badgeEn="New"
+                badgeTh="ใหม่"
               />
               <ZoneCard
                 icon={BookOpen}
                 titleRu="Знания"
                 titleEn="Knowledge"
+                titleTh="ความรู้"
                 descRu="Гайды по бизнесу в Таиланде"
                 descEn="Doing business in Thailand"
+                descTh="คู่มือการทำธุรกิจในไทย"
                 bullets={[
-                  { ru: 'Структуры собственности (Thai Ltd, BOI)', en: 'Ownership structures (Thai Ltd, BOI)' },
-                  { ru: 'Налоги, виза, work permit', en: 'Taxes, visa, work permit' },
-                  { ru: 'Как открыть ресторан / отель / spa', en: 'How to open restaurant / hotel / spa' },
+                  { ru: 'Структуры собственности (Thai Ltd, BOI)', en: 'Ownership structures (Thai Ltd, BOI)', th: 'โครงสร้างการถือครอง (Thai Ltd, BOI)' },
+                  { ru: 'Налоги, виза, work permit', en: 'Taxes, visa, work permit', th: 'ภาษี วีซ่า ใบอนุญาตทำงาน' },
+                  { ru: 'Как открыть ресторан / отель / spa', en: 'How to open restaurant / hotel / spa', th: 'วิธีเปิดร้านอาหาร / โรงแรม / สปา' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_KNOWLEDGE}
                 accentClass="hover:bg-primary/5"
@@ -299,12 +319,14 @@ export default function InvestmentHubLanding() {
                 icon={Handshake}
                 titleRu="Услуги"
                 titleEn="Services"
+                titleTh="บริการ"
                 descRu="Юристы, advisory, представители"
                 descEn="Legal, advisory, representation"
+                descTh="กฎหมาย advisory การเป็นตัวแทน"
                 bullets={[
-                  { ru: 'Представляйте мои интересы', en: 'Represent my interests' },
-                  { ru: 'Юристы, accountants, BOI', en: 'Lawyers, accountants, BOI' },
-                  { ru: 'Due diligence и M&A', en: 'Due diligence & M&A' },
+                  { ru: 'Представляйте мои интересы', en: 'Represent my interests', th: 'เป็นตัวแทนผลประโยชน์ของฉัน' },
+                  { ru: 'Юристы, accountants, BOI', en: 'Lawyers, accountants, BOI', th: 'ทนายความ นักบัญชี BOI' },
+                  { ru: 'Due diligence и M&A', en: 'Due diligence & M&A', th: 'การตรวจสอบสถานะและ M&A' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_SERVICES}
                 accentClass="hover:bg-primary/5"
@@ -314,29 +336,34 @@ export default function InvestmentHubLanding() {
                 icon={Wrench}
                 titleRu="Инструменты инвестора"
                 titleEn="Investor tools"
+                titleTh="เครื่องมือนักลงทุน"
                 descRu="ClearView рейтинг, калькулятор, advisory, DD-пакеты"
                 descEn="ClearView rating, calculator, advisory, DD packs"
+                descTh="เรตติง ClearView เครื่องคำนวณ advisory แพ็ก DD"
                 bullets={[
-                  { ru: 'ClearView™ — рейтинг AAA–CCC', en: 'ClearView™ — AAA–CCC rating' },
-                  { ru: 'Калькулятор ROI и yield', en: 'ROI & yield calculator' },
-                  { ru: 'Due diligence отчёты', en: 'Due diligence reports' },
+                  { ru: 'ClearView™ — рейтинг AAA–CCC', en: 'ClearView™ — AAA–CCC rating', th: 'ClearView™ — เรตติง AAA–CCC' },
+                  { ru: 'Калькулятор ROI и yield', en: 'ROI & yield calculator', th: 'เครื่องคำนวณ ROI และผลตอบแทน' },
+                  { ru: 'Due diligence отчёты', en: 'Due diligence reports', th: 'รายงานการตรวจสอบสถานะ' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_TOOLS}
                 accentClass="hover:bg-primary/5"
                 iconBgClass="bg-primary/10 text-primary dark:text-primary"
                 badgeRu="Moat"
                 badgeEn="Moat"
+                badgeTh="Moat"
               />
               <ZoneCard
                 icon={Megaphone}
                 titleRu="Привлечь капитал"
                 titleEn="Raise Capital"
+                titleTh="ระดมทุน"
                 descRu="Проекты, бизнес на продажу, стартапы"
                 descEn="Projects, business sales, startups"
+                descTh="โครงการ การขายธุรกิจ สตาร์ทอัพ"
                 bullets={[
-                  { ru: 'Разместить проект недвижимости', en: 'List a property project' },
-                  { ru: 'Продать действующий бизнес', en: 'Sell an operating business' },
-                  { ru: 'Найти ко-инвестора', en: 'Find a co-investor' },
+                  { ru: 'Разместить проект недвижимости', en: 'List a property project', th: 'ลงประกาศโครงการอสังหาฯ' },
+                  { ru: 'Продать действующий бизнес', en: 'Sell an operating business', th: 'ขายธุรกิจที่กำลังดำเนินการอยู่' },
+                  { ru: 'Найти ко-инвестора', en: 'Find a co-investor', th: 'หาผู้ร่วมลงทุน' },
                 ]}
                 ctaPath={APP_ROUTES.INVEST_RAISE}
                 accentClass="hover:bg-accent/5 sm:col-span-2"
@@ -348,11 +375,11 @@ export default function InvestmentHubLanding() {
 
           {/* Featured selection */}
           {featured && featured.length > 0 && (
-            <section className="space-y-3" aria-label={isRu ? 'Подборка' : 'Selection'}>
+            <section className="space-y-3" aria-label={isRu ? 'Подборка' : isTh ? 'คัดสรร' : 'Selection'}>
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-muted-foreground" />
-                  <h2 className="font-semibold text-lg text-foreground">{isRu ? 'Подборка' : 'Selection'}</h2>
+                  <h2 className="font-semibold text-lg text-foreground">{isRu ? 'Подборка' : isTh ? 'คัดสรร' : 'Selection'}</h2>
                 </div>
                 <Button
                   variant="ghost"
@@ -360,7 +387,7 @@ export default function InvestmentHubLanding() {
                   onClick={() => navigate(APP_ROUTES.INVEST_REAL_ESTATE)}
                   className="text-muted-foreground"
                 >
-                  {isRu ? 'Все записи' : 'All entries'}
+                  {isRu ? 'Все записи' : isTh ? 'รายการทั้งหมด' : 'All entries'}
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
@@ -373,7 +400,7 @@ export default function InvestmentHubLanding() {
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-foreground" />
-                <h2 className="font-semibold text-lg text-foreground">{isRu ? 'Недвижимость' : 'Real Estate'}</h2>
+                <h2 className="font-semibold text-lg text-foreground">{isRu ? 'Недвижимость' : isTh ? 'อสังหาริมทรัพย์' : 'Real Estate'}</h2>
               </div>
               <Button
                 variant="ghost"
@@ -381,7 +408,7 @@ export default function InvestmentHubLanding() {
                 onClick={() => navigate(APP_ROUTES.INVEST_REAL_ESTATE)}
                 className="text-muted-foreground"
               >
-                {isRu ? 'Перейти к разделу' : 'Go to section'}
+                {isRu ? 'Перейти к разделу' : isTh ? 'ไปยังหมวด' : 'Go to section'}
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
@@ -395,7 +422,7 @@ export default function InvestmentHubLanding() {
                   onClick={() => navigate(`${APP_ROUTES.INVEST_REAL_ESTATE}?type=${cat.key}`)}
                 >
                   <span className="mr-1">{cat.icon}</span>
-                  {isRu ? cat.ru : cat.en}
+                  {isRu ? cat.ru : cat.en}{/* th label not in source taxonomy → EN fallback */}
                 </Badge>
               ))}
             </div>
@@ -406,7 +433,7 @@ export default function InvestmentHubLanding() {
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-foreground" />
-                <h2 className="font-semibold text-lg text-foreground">{isRu ? 'Бизнес и франшизы' : 'Business & Franchises'}</h2>
+                <h2 className="font-semibold text-lg text-foreground">{isRu ? 'Бизнес и франшизы' : isTh ? 'ธุรกิจและแฟรนไชส์' : 'Business & Franchises'}</h2>
               </div>
               <Button
                 variant="ghost"
@@ -414,7 +441,7 @@ export default function InvestmentHubLanding() {
                 onClick={() => navigate(APP_ROUTES.INVEST_BUSINESS)}
                 className="text-muted-foreground"
               >
-                {isRu ? 'Перейти к разделу' : 'Go to section'}
+                {isRu ? 'Перейти к разделу' : isTh ? 'ไปยังหมวด' : 'Go to section'}
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
@@ -429,7 +456,7 @@ export default function InvestmentHubLanding() {
                     onClick={() => navigate(`${APP_ROUTES.INVEST_BUSINESS}?type=${cat.key}`)}
                   >
                     <span className="mr-1">{cat.icon}</span>
-                    {isRu ? cat.ru : cat.en}
+                    {isRu ? cat.ru : cat.en}{/* th label not in source taxonomy → EN fallback */}
                   </Badge>
                 ))}
               </div>
@@ -448,11 +475,13 @@ export default function InvestmentHubLanding() {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-base text-foreground">
-                  {isRu ? 'Бизнес в Таиланде. Справочник' : 'Doing Business in Thailand. Handbook'}
+                  {isRu ? 'Бизнес в Таиланде. Справочник' : isTh ? 'ทำธุรกิจในไทย คู่มือ' : 'Doing Business in Thailand. Handbook'}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isRu
                     ? 'Структуры компаний, налоги, разрешение на работу, BOI, импорт-экспорт, кейсы.'
+                    : isTh
+                    ? 'โครงสร้างบริษัท ภาษี ใบอนุญาตทำงาน BOI นำเข้า-ส่งออก กรณีศึกษา'
                     : 'Company structures, taxes, work permit, BOI, import-export, case studies.'}
                 </p>
               </div>
@@ -471,11 +500,13 @@ export default function InvestmentHubLanding() {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-base text-foreground">
-                  {isRu ? 'Сопровождение проекта' : 'Project representation'}
+                  {isRu ? 'Сопровождение проекта' : isTh ? 'การดูแลโครงการ' : 'Project representation'}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isRu
                     ? 'Подбор местного партнёра, юриста, бухгалтера или оператора для ведения проекта на месте.'
+                    : isTh
+                    ? 'จัดหาพาร์ทเนอร์ท้องถิ่น ทนายความ นักบัญชี หรือผู้ดำเนินการเพื่อดูแลโครงการในพื้นที่'
                     : 'Local partner, lawyer, accountant or operator running the project on the ground.'}
                 </p>
               </div>

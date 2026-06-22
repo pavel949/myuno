@@ -11,6 +11,7 @@ export default function PropertyDepositSuccess() {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const sessionId = searchParams.get('session_id');
   const propertyId = searchParams.get('property_id');
@@ -27,19 +28,21 @@ export default function PropertyDepositSuccess() {
 
         {/* Title */}
         <h1 className="text-2xl font-display font-bold text-center mb-2">
-          {isRu ? 'Предоплата получена!' : 'Deposit Received!'}
+          {isRu ? 'Предоплата получена!' : isTh ? 'รับเงินมัดจำแล้ว!' : 'Deposit Received!'}
         </h1>
         
         <p className="text-muted-foreground text-center max-w-sm mb-6">
-          {isRu 
+          {isRu
             ? 'Ваша предоплата 10% успешно обработана. Команда myUNO свяжется с вами для подтверждения бронирования.'
+            : isTh
+            ? 'เงินมัดจำ 10% ของคุณได้รับการดำเนินการเรียบร้อยแล้ว ทีม myUNO จะติดต่อคุณเพื่อยืนยันการจอง'
             : 'Your 10% deposit has been processed successfully. The myUNO team will contact you to confirm your booking.'}
         </p>
 
         {/* What's Next Card */}
         <Card className="w-full max-w-sm mb-6">
           <CardContent className="p-4 space-y-4">
-            <h3 className="font-semibold">{isRu ? 'Что дальше?' : "What's Next?"}</h3>
+            <h3 className="font-semibold">{isRu ? 'Что дальше?' : isTh ? 'ขั้นตอนถัดไป?' : "What's Next?"}</h3>
             
             <div className="space-y-3">
               <div className="flex items-start gap-3">
@@ -47,8 +50,10 @@ export default function PropertyDepositSuccess() {
                   <span className="text-xs font-bold text-primary">1</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {isRu 
+                  {isRu
                     ? 'Мы проверим доступность объекта и заблокируем даты'
+                    : isTh
+                    ? 'เราจะตรวจสอบความว่างของทรัพย์และล็อกวันที่ให้'
                     : 'We will verify availability and block the dates'}
                 </p>
               </div>
@@ -58,8 +63,10 @@ export default function PropertyDepositSuccess() {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {isRu 
+                  {isRu
                     ? 'Вы получите подтверждение бронирования на email'
+                    : isTh
+                    ? 'คุณจะได้รับการยืนยันการจองทางอีเมล'
                     : 'You will receive booking confirmation via email'}
                 </p>
               </div>
@@ -69,8 +76,10 @@ export default function PropertyDepositSuccess() {
                   <span className="text-xs font-bold text-primary">3</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {isRu 
+                  {isRu
                     ? 'Остаток суммы оплачивается при заезде'
+                    : isTh
+                    ? 'ชำระยอดคงเหลือเมื่อเช็คอิน'
                     : 'Remaining balance is paid at check-in'}
                 </p>
               </div>
@@ -93,7 +102,7 @@ export default function PropertyDepositSuccess() {
           {orderId && (
             <Button onClick={() => navigate(`/orders/${orderId}`)} className="w-full gap-2">
               <ArrowRight className="w-4 h-4" />
-              {isRu ? 'Детали заказа' : 'Order Details'}
+              {isRu ? 'Детали заказа' : isTh ? 'รายละเอียดคำสั่งซื้อ' : 'Order Details'}
             </Button>
           )}
           
@@ -103,19 +112,19 @@ export default function PropertyDepositSuccess() {
             className="w-full gap-2"
           >
             <Calendar className="w-4 h-4" />
-            {isRu ? 'Мои заказы' : 'My Orders'}
+            {isRu ? 'Мои заказы' : isTh ? 'คำสั่งซื้อของฉัน' : 'My Orders'}
           </Button>
           
           <Button variant="ghost" onClick={() => navigate('/property')} className="w-full gap-2">
             <Home className="w-4 h-4" />
-            {isRu ? 'К списку недвижимости' : 'Browse Properties'}
+            {isRu ? 'К списку недвижимости' : isTh ? 'ดูรายการอสังหาฯ' : 'Browse Properties'}
           </Button>
         </div>
 
         {/* Reference ID */}
         {sessionId && (
           <p className="text-xs text-muted-foreground mt-6">
-            {isRu ? 'Номер транзакции' : 'Transaction ID'}: {sessionId.slice(0, 20)}...
+            {isRu ? 'Номер транзакции' : isTh ? 'รหัสธุรกรรม' : 'Transaction ID'}: {sessionId.slice(0, 20)}...
           </p>
         )}
       </div>

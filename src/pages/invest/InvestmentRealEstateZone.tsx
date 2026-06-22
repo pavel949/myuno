@@ -36,10 +36,12 @@ interface CatalogTile {
   icon: typeof Building2;
   titleRu: string;
   titleEn: string;
+  titleTh: string;
   descRu: string;
   descEn: string;
+  descTh: string;
   path: string;
-  badge?: { ru: string; en: string };
+  badge?: { ru: string; en: string; th: string };
 }
 
 const CATALOGS: CatalogTile[] = [
@@ -47,42 +49,52 @@ const CATALOGS: CatalogTile[] = [
     icon: Building2,
     titleRu: 'Новостройки',
     titleEn: 'Off-plan',
+    titleTh: 'โครงการ Off-plan',
     descRu: 'Проекты от застройщиков, рассрочка, гарантии доходности',
     descEn: 'Developer projects, instalments, rental guarantees',
+    descTh: 'โครงการจากผู้พัฒนา ผ่อนชำระ และการันตีผลตอบแทน',
     path: APP_ROUTES.OFFPLAN,
-    badge: { ru: 'Популярно', en: 'Popular' },
+    badge: { ru: 'Популярно', en: 'Popular', th: 'ยอดนิยม' },
   },
   {
     icon: ArrowLeftRight,
     titleRu: 'Вторичка и переуступки',
     titleEn: 'Resale & assignments',
+    titleTh: 'ขายต่อและโอนสิทธิ',
     descRu: 'Готовые объекты и уступки контрактов',
     descEn: 'Ready stock and contract assignments',
+    descTh: 'ทรัพย์พร้อมอยู่และการโอนสิทธิตามสัญญา',
     path: APP_ROUTES.RESALE,
   },
   {
     icon: Briefcase,
     titleRu: 'Коммерческая',
     titleEn: 'Commercial',
+    titleTh: 'อสังหาฯ เชิงพาณิชย์',
     descRu: 'Cap rate 6–9%, действующие арендаторы',
     descEn: 'Cap rate 6–9%, active tenants',
+    descTh: 'Cap rate 6–9% มีผู้เช่าที่กำลังดำเนินการอยู่',
     path: `${APP_ROUTES.COMMERCIAL}?intent=sale`,
-    badge: { ru: 'Доходность', en: 'High yield' },
+    badge: { ru: 'Доходность', en: 'High yield', th: 'ผลตอบแทนสูง' },
   },
   {
     icon: Hotel,
     titleRu: 'Отели и hospitality',
     titleEn: 'Hotels & hospitality',
+    titleTh: 'โรงแรมและการบริการ',
     descRu: 'Действующие отели, бутик-резорты',
     descEn: 'Operating hotels and boutique resorts',
+    descTh: 'โรงแรมที่เปิดดำเนินการและบูทีครีสอร์ท',
     path: APP_ROUTES.HOTELS,
   },
   {
     icon: Trees,
     titleRu: 'Земля',
     titleEn: 'Land',
+    titleTh: 'ที่ดิน',
     descRu: 'Участки под девелопмент и собственный дом',
     descEn: 'Plots for development or private build',
+    descTh: 'ที่ดินสำหรับพัฒนาหรือสร้างบ้านส่วนตัว',
     path: APP_ROUTES.LAND,
   },
 ];
@@ -91,6 +103,7 @@ export default function InvestmentRealEstateZone() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
 
   const { data: featured, isLoading: loadingFeatured } = useFeaturedInvestments();
   const { data: allProjects, isLoading: loadingAll } = useInvestmentProjects();
@@ -101,18 +114,20 @@ export default function InvestmentRealEstateZone() {
   return (
     <>
       <Helmet>
-        <title>{isRu ? 'Недвижимость для инвестиций | myUNO' : 'Real estate investments | myUNO'}</title>
+        <title>{isRu ? 'Недвижимость для инвестиций | myUNO' : isTh ? 'อสังหาฯ เพื่อการลงทุน | myUNO' : 'Real estate investments | myUNO'}</title>
         <meta
           name="description"
           content={
             isRu
               ? 'Недвижимость Пхукета для инвестиций: новостройки, вторичка, коммерческая, отели и земля.'
+              : isTh
+              ? 'อสังหาริมทรัพย์ภูเก็ตเพื่อการลงทุน: off-plan, ขายต่อ, เชิงพาณิชย์, โรงแรม และที่ดิน'
               : 'Phuket real estate for investors: off-plan, resale, commercial, hotels and land.'
           }
         />
       </Helmet>
 
-      <MiniAppLayout title={isRu ? 'Недвижимость' : 'Real estate'} showSearch={false}>
+      <MiniAppLayout title={isRu ? 'Недвижимость' : isTh ? 'อสังหาฯ' : 'Real estate'} showSearch={false}>
         <div className="space-y-6 pb-10">
           {/* Hero */}
           <div className="rounded-none border border-border bg-card p-5 space-y-2">
@@ -122,11 +137,13 @@ export default function InvestmentRealEstateZone() {
               </div>
               <div className="min-w-0">
                 <h1 className="text-lg font-semibold text-foreground leading-tight">
-                  {isRu ? 'Недвижимость для инвестиций' : 'Real estate for investors'}
+                  {isRu ? 'Недвижимость для инвестиций' : isTh ? 'อสังหาริมทรัพย์เพื่อการลงทุน' : 'Real estate for investors'}
                 </h1>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {isRu
                     ? 'Один каталог объектов с фильтрами по типу, бюджету и доходности.'
+                    : isTh
+                    ? 'แคตตาล็อกเดียวพร้อมตัวกรองตามประเภท งบประมาณ และผลตอบแทน'
                     : 'One catalog with filters by type, budget and yield.'}
                 </p>
               </div>
@@ -136,7 +153,7 @@ export default function InvestmentRealEstateZone() {
           {/* Catalog tiles */}
           <section className="space-y-3">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground px-1">
-              {isRu ? 'Каталоги' : 'Catalogs'}
+              {isRu ? 'Каталоги' : isTh ? 'แคตตาล็อก' : 'Catalogs'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {CATALOGS.map((tile) => {
@@ -154,16 +171,16 @@ export default function InvestmentRealEstateZone() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold text-sm">
-                            {isRu ? tile.titleRu : tile.titleEn}
+                            {isRu ? tile.titleRu : isTh ? tile.titleTh : tile.titleEn}
                           </h3>
                           {tile.badge && (
                             <span className="text-[10px] px-1.5 py-0.5 rounded-none bg-accent/15 text-accent">
-                              {isRu ? tile.badge.ru : tile.badge.en}
+                              {isRu ? tile.badge.ru : isTh ? tile.badge.th : tile.badge.en}
                             </span>
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {isRu ? tile.descRu : tile.descEn}
+                          {isRu ? tile.descRu : isTh ? tile.descTh : tile.descEn}
                         </p>
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
@@ -179,7 +196,7 @@ export default function InvestmentRealEstateZone() {
             <section className="space-y-3">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  {isRu ? 'Подборка' : 'Featured'}
+                  {isRu ? 'Подборка' : isTh ? 'คัดสรร' : 'Featured'}
                 </h2>
                 <Button
                   variant="ghost"
@@ -187,7 +204,7 @@ export default function InvestmentRealEstateZone() {
                   onClick={() => navigate(APP_ROUTES.INVEST_DEALS_BOARD)}
                   className="text-muted-foreground"
                 >
-                  {isRu ? 'Все сделки' : 'All deals'}
+                  {isRu ? 'Все сделки' : isTh ? 'ดีลทั้งหมด' : 'All deals'}
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
@@ -214,7 +231,7 @@ export default function InvestmentRealEstateZone() {
           {realEstateProjects.length > 0 && (
             <section className="space-y-3">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground px-1">
-                {isRu ? 'Все проекты недвижимости' : 'All real-estate projects'}
+                {isRu ? 'Все проекты недвижимости' : isTh ? 'โครงการอสังหาฯ ทั้งหมด' : 'All real-estate projects'}
               </h2>
               <ScrollArea className="w-full whitespace-nowrap">
                 <div className="flex gap-3 pb-4">
@@ -229,14 +246,14 @@ export default function InvestmentRealEstateZone() {
 
           {!loadingAll && realEstateProjects.length === 0 && featured && featured.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-6">
-              {isRu ? 'Скоро здесь появятся проекты' : 'Projects coming soon'}
+              {isRu ? 'Скоро здесь появятся проекты' : isTh ? 'โครงการจะปรากฏที่นี่เร็ว ๆ นี้' : 'Projects coming soon'}
             </p>
           )}
 
           {/* Tools */}
           <section className="space-y-3">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground px-1">
-              {isRu ? 'Инструменты' : 'Tools'}
+              {isRu ? 'Инструменты' : isTh ? 'เครื่องมือ' : 'Tools'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Card
@@ -246,9 +263,9 @@ export default function InvestmentRealEstateZone() {
                 <CardContent className="p-4 flex items-start gap-3">
                   <Calculator className="h-5 w-5 text-foreground shrink-0" />
                   <div>
-                    <h3 className="text-sm font-semibold">{isRu ? 'Калькулятор ROI' : 'ROI calculator'}</h3>
+                    <h3 className="text-sm font-semibold">{isRu ? 'Калькулятор ROI' : isTh ? 'เครื่องคำนวณ ROI' : 'ROI calculator'}</h3>
                     <p className="text-xs text-muted-foreground">
-                      {isRu ? 'Доходность, окупаемость, IRR' : 'Yield, payback, IRR'}
+                      {isRu ? 'Доходность, окупаемость, IRR' : isTh ? 'ผลตอบแทน ระยะคืนทุน IRR' : 'Yield, payback, IRR'}
                     </p>
                   </div>
                 </CardContent>
@@ -262,7 +279,7 @@ export default function InvestmentRealEstateZone() {
                   <div>
                     <h3 className="text-sm font-semibold">ClearView</h3>
                     <p className="text-xs text-muted-foreground">
-                      {isRu ? 'Независимый рейтинг проекта' : 'Independent project rating'}
+                      {isRu ? 'Независимый рейтинг проекта' : isTh ? 'เรตติงโครงการอิสระ' : 'Independent project rating'}
                     </p>
                   </div>
                 </CardContent>
@@ -278,7 +295,7 @@ export default function InvestmentRealEstateZone() {
                       {isRu ? 'Capital Advisory' : 'Capital Advisory'}
                     </h3>
                     <p className="text-xs text-muted-foreground">
-                      {isRu ? 'Частный канал от $2M' : 'Private channel from $2M'}
+                      {isRu ? 'Частный канал от $2M' : isTh ? 'ช่องทางส่วนตัวตั้งแต่ $2M' : 'Private channel from $2M'}
                     </p>
                   </div>
                 </CardContent>
@@ -297,11 +314,13 @@ export default function InvestmentRealEstateZone() {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-base">
-                  {isRu ? 'Привлечь капитал в проект' : 'Raise capital for a project'}
+                  {isRu ? 'Привлечь капитал в проект' : isTh ? 'ระดมทุนสำหรับโครงการ' : 'Raise capital for a project'}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isRu
                     ? 'Разместите проект недвижимости или продажу остатков квартир.'
+                    : isTh
+                    ? 'ลงประกาศโครงการอสังหาฯ หรือขายยูนิตคงเหลือ'
                     : 'List a real-estate project or remaining inventory for sale.'}
                 </p>
               </div>

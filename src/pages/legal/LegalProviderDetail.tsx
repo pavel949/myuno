@@ -26,7 +26,8 @@ const LegalProviderDetail = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  
+  const isTh = language === 'th';
+
   const { service, isLoading } = useLegalService(id || '');
 
   if (isLoading) {
@@ -45,10 +46,10 @@ const LegalProviderDetail = () => {
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
           <AlertCircle className="w-12 h-12 text-muted-foreground" />
           <p className="text-muted-foreground text-center">
-            {isRu ? 'Услуга не найдена' : 'Service not found'}
+            {isRu ? 'Услуга не найдена' : isTh ? 'ไม่พบบริการ' : 'Service not found'}
           </p>
           <Button variant="outline" onClick={() => navigate('/legal')}>
-            {isRu ? 'К списку услуг' : 'Back to services'}
+            {isRu ? 'К списку услуг' : isTh ? 'กลับไปที่รายการบริการ' : 'Back to services'}
           </Button>
         </div>
       </AppLayout>
@@ -57,13 +58,13 @@ const LegalProviderDetail = () => {
 
   const name = isRu ? service.name_ru : service.name_en;
   const description = isRu ? service.description_ru : service.description_en;
-  const serviceTypeLabel = service.service_type === 'law_firm' 
-    ? (isRu ? 'Юридическая фирма' : 'Law Firm')
+  const serviceTypeLabel = service.service_type === 'law_firm'
+    ? (isRu ? 'Юридическая фирма' : isTh ? 'สำนักงานกฎหมาย' : 'Law Firm')
     : service.service_type === 'notary'
-    ? (isRu ? 'Нотариус' : 'Notary')
+    ? (isRu ? 'Нотариус' : isTh ? 'โนตารี' : 'Notary')
     : service.service_type === 'visa_agent'
-    ? (isRu ? 'Визовый агент' : 'Visa Agent')
-    : (isRu ? 'Юридические услуги' : 'Legal Services');
+    ? (isRu ? 'Визовый агент' : isTh ? 'ตัวแทนวีซ่า' : 'Visa Agent')
+    : (isRu ? 'Юридические услуги' : isTh ? 'บริการกฎหมาย' : 'Legal Services');
 
   return (
     <AppLayout>
@@ -119,8 +120,8 @@ const LegalProviderDetail = () => {
         {/* Tabs */}
         <Tabs defaultValue="about" className="px-4 pt-4">
           <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="about">{isRu ? "О нас" : "About"}</TabsTrigger>
-            <TabsTrigger value="specializations">{isRu ? "Услуги" : "Services"}</TabsTrigger>
+            <TabsTrigger value="about">{isRu ? "О нас" : isTh ? "เกี่ยวกับเรา" : "About"}</TabsTrigger>
+            <TabsTrigger value="specializations">{isRu ? "Услуги" : isTh ? "บริการ" : "Services"}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="about" className="space-y-4 mt-4">
@@ -133,7 +134,7 @@ const LegalProviderDetail = () => {
 
             {/* Contact Info */}
             <div className="bg-card border border-border rounded-none p-4 space-y-3">
-              <h3 className="font-semibold">{isRu ? "Контакты" : "Contact"}</h3>
+              <h3 className="font-semibold">{isRu ? "Контакты" : isTh ? "ติดต่อ" : "Contact"}</h3>
               <div className="space-y-2">
                 {service.address && (
                   <div className="flex items-center gap-3 text-sm">
@@ -178,7 +179,7 @@ const LegalProviderDetail = () => {
               <div className="bg-card border border-border rounded-none p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Languages className="w-4 h-4 text-primary" />
-                  <h3 className="font-semibold">{isRu ? "Языки" : "Languages"}</h3>
+                  <h3 className="font-semibold">{isRu ? "Языки" : isTh ? "ภาษา" : "Languages"}</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {service.languages.map((lang) => (
@@ -204,7 +205,7 @@ const LegalProviderDetail = () => {
               ))
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                {isRu ? 'Специализации не указаны' : 'No specializations listed'}
+                {isRu ? 'Специализации не указаны' : isTh ? 'ไม่ได้ระบุความเชี่ยวชาญ' : 'No specializations listed'}
               </div>
             )}
 
@@ -213,9 +214,9 @@ const LegalProviderDetail = () => {
               <div className="bg-primary/5 border border-primary/20 rounded-none p-4 mt-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold">{isRu ? 'Консультация' : 'Consultation'}</p>
+                    <p className="font-semibold">{isRu ? 'Консультация' : isTh ? 'การปรึกษา' : 'Consultation'}</p>
                     <p className="text-sm text-muted-foreground">
-                      {isRu ? 'Первичная консультация' : 'Initial consultation'}
+                      {isRu ? 'Первичная консультация' : isTh ? 'การปรึกษาเบื้องต้น' : 'Initial consultation'}
                     </p>
                   </div>
                   <div className="text-right">
@@ -229,7 +230,7 @@ const LegalProviderDetail = () => {
                   onClick={() => navigate(`/legal/booking/${id}`)}
                 >
                   <Calendar className="w-4 h-4 mr-2" />
-                  {isRu ? "Записаться на консультацию" : "Book Consultation"}
+                  {isRu ? "Записаться на консультацию" : isTh ? "จองการปรึกษา" : "Book Consultation"}
                 </Button>
               </div>
             )}
@@ -246,7 +247,7 @@ const LegalProviderDetail = () => {
                 onClick={() => window.open(`tel:${service.phone}`)}
               >
                 <Phone className="w-4 h-4 mr-2" />
-                {isRu ? "Позвонить" : "Call"}
+                {isRu ? "Позвонить" : isTh ? "โทร" : "Call"}
               </Button>
             )}
             <Button
@@ -258,9 +259,13 @@ const LegalProviderDetail = () => {
               {service.price_consultation
                 ? isRu
                   ? `Забронировать — ${service.currency} ${service.price_consultation.toLocaleString()}`
+                  : isTh
+                  ? `จอง — ${service.currency} ${service.price_consultation.toLocaleString()}`
                   : `Book Consultation — ${service.currency} ${service.price_consultation.toLocaleString()}`
                 : isRu
                   ? "Забронировать консультацию"
+                  : isTh
+                  ? "จองการปรึกษา"
                   : "Book Consultation"
               }
             </Button>

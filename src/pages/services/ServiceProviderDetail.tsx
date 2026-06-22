@@ -79,12 +79,12 @@ const ServiceProviderDetail = () => {
 
   const badges = useMemo(() => {
     const list: { icon: typeof Shield; text: string }[] = [];
-    if (provider?.is_verified) list.push({ icon: Shield, text: isRu ? "Проверен" : "Verified" });
-    if ((provider as any)?.has_insurance) list.push({ icon: Award, text: isRu ? "Страховка" : "Insured" });
+    if (provider?.is_verified) list.push({ icon: Shield, text: isRu ? "Проверен" : isTh ? "ตรวจสอบแล้ว" : "Verified" });
+    if ((provider as any)?.has_insurance) list.push({ icon: Award, text: isRu ? "Страховка" : isTh ? "มีประกัน" : "Insured" });
     if ((provider as any)?.response_time_minutes && (provider as any).response_time_minutes <= 30)
-      list.push({ icon: Clock, text: isRu ? "Быстрый отклик" : "Fast Response" });
+      list.push({ icon: Clock, text: isRu ? "Быстрый отклик" : isTh ? "ตอบกลับรวดเร็ว" : "Fast Response" });
     return list;
-  }, [provider, isRu]);
+  }, [provider, isRu, isTh]);
 
   const getServiceInCart = (serviceId: string) =>
     items.find((item) => item.id === serviceId && item.type === "service");
@@ -134,14 +134,16 @@ const ServiceProviderDetail = () => {
       <AppLayout>
         <div className="p-6 text-center space-y-3">
           <BackButton fallbackPath="/services" />
-          <p className="text-lg font-medium">{isRu ? "Мастер не найден" : "Provider not found"}</p>
+          <p className="text-lg font-medium">{isRu ? "Мастер не найден" : isTh ? "ไม่พบผู้ให้บริการ" : "Provider not found"}</p>
           <p className="text-sm text-muted-foreground">
             {isRu
               ? "Возможно, профиль удалён или ссылка устарела."
+              : isTh
+              ? "โปรไฟล์นี้อาจถูกลบหรือลิงก์ล้าสมัยแล้ว"
               : "This profile may have been removed or the link is outdated."}
           </p>
           <Button onClick={() => navigate("/services")}>
-            {isRu ? "К списку мастеров" : "Browse providers"}
+            {isRu ? "К списку мастеров" : isTh ? "ดูรายชื่อผู้ให้บริการ" : "Browse providers"}
           </Button>
         </div>
       </AppLayout>
@@ -183,7 +185,7 @@ const ServiceProviderDetail = () => {
             </div>
             {provider.is_active && (
               <Badge variant="default" className="bg-success">
-                {isRu ? "Доступен" : "Available"}
+                {isRu ? "Доступен" : isTh ? "พร้อมให้บริการ" : "Available"}
               </Badge>
             )}
           </div>
@@ -194,7 +196,7 @@ const ServiceProviderDetail = () => {
               <Star className="w-4 h-4 fill-accent text-accent" />
               <span className="font-semibold">{rating.toFixed(1)}</span>
               <span className="text-muted-foreground">
-                ({reviewCount} {isRu ? "отзывов" : "reviews"})
+                ({reviewCount} {isRu ? "отзывов" : isTh ? "รีวิว" : "reviews"})
               </span>
             </div>
             {(provider as any)?.response_time_minutes && (
@@ -203,6 +205,8 @@ const ServiceProviderDetail = () => {
                 <span>
                   {isRu
                     ? `Ответ за ${(provider as any).response_time_minutes} мин`
+                    : isTh
+                    ? `ตอบกลับใน ${(provider as any).response_time_minutes} นาที`
                     : `Responds in ${(provider as any).response_time_minutes} min`}
                 </span>
               </div>
@@ -240,13 +244,13 @@ const ServiceProviderDetail = () => {
               <Button variant="outline" className="flex-1 gap-2" asChild>
                 <a href={`tel:${provider.phone}`}>
                   <Phone className="w-4 h-4" />
-                  {isRu ? "Позвонить" : "Call"}
+                  {isRu ? "Позвонить" : isTh ? "โทร" : "Call"}
                 </a>
               </Button>
             )}
             <Button variant="outline" className="flex-1 gap-2">
               <MessageCircle className="w-4 h-4" />
-              {isRu ? "Написать" : "Message"}
+              {isRu ? "Написать" : isTh ? "ส่งข้อความ" : "Message"}
             </Button>
           </div>
         </div>
@@ -258,19 +262,19 @@ const ServiceProviderDetail = () => {
               value="services"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3"
             >
-              {isRu ? "Услуги" : "Services"}
+              {isRu ? "Услуги" : isTh ? "บริการ" : "Services"}
             </TabsTrigger>
             <TabsTrigger
               value="about"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3"
             >
-              {isRu ? "О мастере" : "About"}
+              {isRu ? "О мастере" : isTh ? "เกี่ยวกับ" : "About"}
             </TabsTrigger>
             <TabsTrigger
               value="reviews"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-3"
             >
-              {isRu ? "Отзывы" : "Reviews"}
+              {isRu ? "Отзывы" : isTh ? "รีวิว" : "Reviews"}
             </TabsTrigger>
           </TabsList>
 
@@ -278,8 +282,8 @@ const ServiceProviderDetail = () => {
             {servicesList.length === 0 ? (
               <EmptyState
                 icon={PackageOpen}
-                title={isRu ? "Мастер ещё не добавил услуги" : "No services yet"}
-                hint={isRu ? "Загляните позже или напишите напрямую" : "Check back later or message directly"}
+                title={isRu ? "Мастер ещё не добавил услуги" : isTh ? "ยังไม่มีบริการ" : "No services yet"}
+                hint={isRu ? "Загляните позже или напишите напрямую" : isTh ? "กลับมาดูใหม่ภายหลังหรือส่งข้อความได้โดยตรง" : "Check back later or message directly"}
               />
             ) : (
               <div className="space-y-3">
@@ -308,7 +312,7 @@ const ServiceProviderDetail = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              aria-label={isRu ? 'Удалить из корзины' : 'Remove from cart'}
+                              aria-label={isRu ? 'Удалить из корзины' : isTh ? 'นำออกจากตะกร้า' : 'Remove from cart'}
                               onClick={() => handleRemoveFromCart(service.id)}
                               className="min-h-[44px] px-3 border-destructive text-destructive hover:bg-destructive/10"
                             >
@@ -321,7 +325,7 @@ const ServiceProviderDetail = () => {
                               className="h-10 px-3"
                             >
                               <Plus className="w-4 h-4 mr-1" />
-                              {isRu ? "В корзину" : "Add"}
+                              {isRu ? "В корзину" : isTh ? "เพิ่ม" : "Add"}
                             </Button>
                           )}
                         </div>
@@ -339,7 +343,7 @@ const ServiceProviderDetail = () => {
                 <p className="text-muted-foreground leading-relaxed">{about}</p>
               ) : (
                 <p className="text-sm text-muted-foreground italic">
-                  {isRu ? "Мастер пока не добавил описание." : "No description yet."}
+                  {isRu ? "Мастер пока не добавил описание." : isTh ? "ยังไม่มีคำอธิบาย" : "No description yet."}
                 </p>
               )}
 
@@ -347,13 +351,13 @@ const ServiceProviderDetail = () => {
                 <div className="p-4 bg-card rounded-none border border-border">
                   <p className="text-2xl font-bold text-primary">{reviewCount}</p>
                   <p className="text-sm text-muted-foreground">
-                    {isRu ? "Отзывов" : "Reviews"}
+                    {isRu ? "Отзывов" : isTh ? "รีวิว" : "Reviews"}
                   </p>
                 </div>
                 <div className="p-4 bg-card rounded-none border border-border">
                   <p className="text-2xl font-bold text-primary">{rating.toFixed(1)}</p>
                   <p className="text-sm text-muted-foreground">
-                    {isRu ? "Средний рейтинг" : "Average rating"}
+                    {isRu ? "Средний рейтинг" : isTh ? "คะแนนเฉลี่ย" : "Average rating"}
                   </p>
                 </div>
               </div>
@@ -370,8 +374,8 @@ const ServiceProviderDetail = () => {
             ) : reviews.length === 0 ? (
               <EmptyState
                 icon={MessageSquareOff}
-                title={isRu ? "Пока нет отзывов" : "No reviews yet"}
-                hint={isRu ? "Станьте первым после бронирования" : "Be the first after your booking"}
+                title={isRu ? "Пока нет отзывов" : isTh ? "ยังไม่มีรีวิว" : "No reviews yet"}
+                hint={isRu ? "Станьте первым после бронирования" : isTh ? "เป็นคนแรกหลังการจองของคุณ" : "Be the first after your booking"}
               />
             ) : (
               <div className="space-y-4">
@@ -379,7 +383,7 @@ const ServiceProviderDetail = () => {
                   <div key={review.id} className="p-4 bg-card rounded-none border border-border">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium">
-                        {review.profile?.full_name || (isRu ? "Гость" : "Guest")}
+                        {review.profile?.full_name || (isRu ? "Гость" : isTh ? "ผู้เยี่ยมชม" : "Guest")}
                       </span>
                       <span className="text-sm text-muted-foreground">
                         {formatDistanceToNow(new Date(review.created_at), {
@@ -417,6 +421,8 @@ const ServiceProviderDetail = () => {
             <span className="text-muted-foreground">
               {isRu
                 ? `Услуг в корзине: ${servicesInCart.length}`
+                : isTh
+                ? `บริการในตะกร้า: ${servicesInCart.length}`
                 : `Services in cart: ${servicesInCart.length}`}
             </span>
             <span className="font-bold text-primary">
@@ -432,7 +438,7 @@ const ServiceProviderDetail = () => {
               className="flex-1 h-14 text-lg font-semibold gap-2"
             >
               <ShoppingBag className="w-5 h-5" />
-              {isRu ? "Корзина" : "Cart"}
+              {isRu ? "Корзина" : isTh ? "ตะกร้า" : "Cart"}
             </Button>
           )}
           <Button
@@ -442,7 +448,7 @@ const ServiceProviderDetail = () => {
             }`}
           >
             <Calendar className="w-5 h-5" />
-            {isRu ? "Забронировать" : "Book Now"}
+            {isRu ? "Забронировать" : isTh ? "จองเลย" : "Book Now"}
           </Button>
         </div>
       </div>

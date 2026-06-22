@@ -34,7 +34,8 @@ export default function InvestmentCalculatorPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isRu = language === 'ru';
-  const t = <T,>(p: { ru: T; en: T }): T => (isRu ? p.ru : p.en);
+  const isTh = language === 'th';
+  const t = <T,>(p: { ru: T; en: T; th: T }): T => (isRu ? p.ru : isTh ? p.th : p.en);
   const { submitLead, isSubmitting } = useUniversalLead();
 
   // Inputs (THB)
@@ -76,7 +77,7 @@ export default function InvestmentCalculatorPage() {
 
   const handleLead = async () => {
     if (!name.trim() || !phone.trim()) {
-      toast.error(t({ ru: 'Заполните имя и телефон', en: 'Enter name and phone' }));
+      toast.error(t({ ru: 'Заполните имя и телефон', en: 'Enter name and phone', th: 'กรอกชื่อและเบอร์โทร' }));
       return;
     }
     await submitLead.mutateAsync({
@@ -104,10 +105,12 @@ export default function InvestmentCalculatorPage() {
         title={t({
           ru: 'Калькулятор доходности недвижимости Пхукета — myUNO',
           en: 'Phuket real-estate ROI calculator — myUNO',
+          th: 'เครื่องคำนวณ ROI อสังหาฯ ภูเก็ต — myUNO',
         })}
         description={t({
           ru: 'Посчитайте доходность инвестиции в недвижимость Пхукета: ADR, загрузка, OPEX, рост стоимости.',
           en: 'Estimate Phuket real-estate ROI: ADR, occupancy, OPEX, capital appreciation.',
+          th: 'ประเมิน ROI อสังหาฯ ภูเก็ต: ADR อัตราการเข้าพัก OPEX และการเติบโตของมูลค่า',
         })}
       />
 
@@ -115,7 +118,7 @@ export default function InvestmentCalculatorPage() {
         <div className="mx-auto max-w-6xl px-4 h-14 flex items-center">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4 mr-1.5" />
-            {t({ ru: 'Назад', en: 'Back' })}
+            {t({ ru: 'Назад', en: 'Back', th: 'ย้อนกลับ' })}
           </Button>
         </div>
       </header>
@@ -123,18 +126,20 @@ export default function InvestmentCalculatorPage() {
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary">
           <Calculator className="h-3.5 w-3.5" />
-          {t({ ru: 'Калькулятор доходности', en: 'ROI calculator' })}
+          {t({ ru: 'Калькулятор доходности', en: 'ROI calculator', th: 'เครื่องคำนวณ ROI' })}
         </div>
         <h1 className="text-3xl sm:text-5xl font-semibold leading-tight tracking-tight text-foreground">
           {t({
             ru: 'Сколько принесёт ваша инвестиция в Пхукет',
             en: 'What your Phuket investment will return',
+            th: 'การลงทุนในภูเก็ตของคุณจะให้ผลตอบแทนเท่าใด',
           })}
         </h1>
         <p className="mt-3 text-base text-muted-foreground max-w-2xl">
           {t({
             ru: 'Введите параметры объекта и сценарий аренды — посчитаем валовую и чистую доходность, рост капитала и совокупный возврат за горизонт.',
             en: 'Enter unit parameters and a rental scenario — we compute gross/net yield, capital growth and cumulative return over your horizon.',
+            th: 'กรอกพารามิเตอร์ของยูนิตและสถานการณ์การเช่า — เราจะคำนวณผลตอบแทนขั้นต้น/สุทธิ การเติบโตของทุน และผลตอบแทนสะสมตลอดช่วงเวลาของคุณ',
           })}
         </p>
 
@@ -144,7 +149,7 @@ export default function InvestmentCalculatorPage() {
             <CardContent className="p-6 space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="price">
-                  {t({ ru: 'Цена объекта, ฿', en: 'Property price, ฿' })}
+                  {t({ ru: 'Цена объекта, ฿', en: 'Property price, ฿', th: 'ราคาทรัพย์, ฿' })}
                 </Label>
                 <Input
                   id="price"
@@ -156,7 +161,7 @@ export default function InvestmentCalculatorPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="adr">
-                  {t({ ru: 'Средняя цена за ночь (ADR), ฿', en: 'Avg daily rate (ADR), ฿' })}
+                  {t({ ru: 'Средняя цена за ночь (ADR), ฿', en: 'Avg daily rate (ADR), ฿', th: 'ราคาเฉลี่ยต่อคืน (ADR), ฿' })}
                 </Label>
                 <Input
                   id="adr"
@@ -168,7 +173,7 @@ export default function InvestmentCalculatorPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>{t({ ru: 'Загрузка', en: 'Occupancy' })}</Label>
+                  <Label>{t({ ru: 'Загрузка', en: 'Occupancy', th: 'อัตราการเข้าพัก' })}</Label>
                   <span className="text-sm font-mono text-muted-foreground">{occupancy}%</span>
                 </div>
                 <Slider
@@ -182,7 +187,7 @@ export default function InvestmentCalculatorPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>{t({ ru: 'OPEX (% от валового)', en: 'OPEX (% of gross)' })}</Label>
+                  <Label>{t({ ru: 'OPEX (% от валового)', en: 'OPEX (% of gross)', th: 'OPEX (% ของรายได้ขั้นต้น)' })}</Label>
                   <span className="text-sm font-mono text-muted-foreground">{opexPct}%</span>
                 </div>
                 <Slider
@@ -196,7 +201,7 @@ export default function InvestmentCalculatorPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>{t({ ru: 'Рост стоимости в год', en: 'Annual appreciation' })}</Label>
+                  <Label>{t({ ru: 'Рост стоимости в год', en: 'Annual appreciation', th: 'การเพิ่มมูลค่าต่อปี' })}</Label>
                   <span className="text-sm font-mono text-muted-foreground">{appreciation}%</span>
                 </div>
                 <Slider
@@ -210,7 +215,7 @@ export default function InvestmentCalculatorPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>{t({ ru: 'Горизонт, лет', en: 'Horizon, years' })}</Label>
+                  <Label>{t({ ru: 'Горизонт, лет', en: 'Horizon, years', th: 'ระยะเวลา, ปี' })}</Label>
                   <span className="text-sm font-mono text-muted-foreground">{horizon}</span>
                 </div>
                 <Slider
@@ -229,33 +234,33 @@ export default function InvestmentCalculatorPage() {
             <div className="grid grid-cols-2 gap-3">
               <ResultTile
                 icon={Percent}
-                label={t({ ru: 'Валовая доходность', en: 'Gross yield' })}
+                label={t({ ru: 'Валовая доходность', en: 'Gross yield', th: 'ผลตอบแทนขั้นต้น' })}
                 value={`${calc.grossYield.toFixed(2)}%`}
               />
               <ResultTile
                 icon={Percent}
-                label={t({ ru: 'Чистая доходность', en: 'Net yield' })}
+                label={t({ ru: 'Чистая доходность', en: 'Net yield', th: 'ผลตอบแทนสุทธิ' })}
                 value={`${calc.netYield.toFixed(2)}%`}
                 accent
               />
               <ResultTile
                 icon={Coins}
-                label={t({ ru: 'NOI / год', en: 'NOI / year' })}
+                label={t({ ru: 'NOI / год', en: 'NOI / year', th: 'NOI / ปี' })}
                 value={`฿${fmt(calc.noi)}`}
               />
               <ResultTile
                 icon={TrendingUp}
-                label={t({ ru: `Стоимость ч-з ${horizon}л`, en: `Value in ${horizon}y` })}
+                label={t({ ru: `Стоимость ч-з ${horizon}л`, en: `Value in ${horizon}y`, th: `มูลค่าใน ${horizon} ปี` })}
                 value={`฿${fmt(calc.futureValue)}`}
               />
               <ResultTile
                 icon={Coins}
-                label={t({ ru: 'Совокупный NOI', en: 'Cumulative NOI' })}
+                label={t({ ru: 'Совокупный NOI', en: 'Cumulative NOI', th: 'NOI สะสม' })}
                 value={`฿${fmt(calc.cumulativeNoi)}`}
               />
               <ResultTile
                 icon={TrendingUp}
-                label={t({ ru: 'Total return', en: 'Total return' })}
+                label={t({ ru: 'Total return', en: 'Total return', th: 'ผลตอบแทนรวม' })}
                 value={`${calc.totalReturnPct.toFixed(0)}%`}
                 accent
               />
@@ -264,22 +269,23 @@ export default function InvestmentCalculatorPage() {
             <Card>
               <CardContent className="p-6 space-y-4">
                 <h3 className="text-lg font-semibold">
-                  {t({ ru: 'Получить персональную подборку', en: 'Get a personal shortlist' })}
+                  {t({ ru: 'Получить персональную подборку', en: 'Get a personal shortlist', th: 'รับรายการคัดสรรส่วนตัว' })}
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {t({
                     ru: 'Пришлём 3–5 объектов под ваш бюджет с реальной доходностью.',
                     en: 'We will send 3–5 properties matching your budget with real-world yields.',
+                    th: 'เราจะส่งทรัพย์ 3–5 รายการที่ตรงกับงบประมาณของคุณพร้อมผลตอบแทนจริง',
                   })}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Input
-                    placeholder={t({ ru: 'Имя', en: 'Name' })}
+                    placeholder={t({ ru: 'Имя', en: 'Name', th: 'ชื่อ' })}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                   <Input
-                    placeholder={t({ ru: 'Телефон / WhatsApp', en: 'Phone / WhatsApp' })}
+                    placeholder={t({ ru: 'Телефон / WhatsApp', en: 'Phone / WhatsApp', th: 'โทรศัพท์ / WhatsApp' })}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                   />
@@ -292,8 +298,8 @@ export default function InvestmentCalculatorPage() {
                 />
                 <Button className="w-full" size="lg" disabled={isSubmitting} onClick={handleLead}>
                   {isSubmitting
-                    ? t({ ru: 'Отправляем…', en: 'Sending…' })
-                    : t({ ru: 'Получить подборку', en: 'Get shortlist' })}
+                    ? t({ ru: 'Отправляем…', en: 'Sending…', th: 'กำลังส่ง…' })
+                    : t({ ru: 'Получить подборку', en: 'Get shortlist', th: 'รับรายการคัดสรร' })}
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
                 <Button
@@ -301,12 +307,13 @@ export default function InvestmentCalculatorPage() {
                   className="w-full"
                   onClick={() => navigate(APP_ROUTES.CAPITAL_ADVISORY)}
                 >
-                  {t({ ru: 'Капитал от $2M — Capital Advisory', en: 'Capital from $2M — Capital Advisory' })}
+                  {t({ ru: 'Капитал от $2M — Capital Advisory', en: 'Capital from $2M — Capital Advisory', th: 'เงินทุนตั้งแต่ $2M — Capital Advisory' })}
                 </Button>
                 <p className="text-[11px] text-muted-foreground text-center">
                   {t({
                     ru: 'Расчёт ориентировочный. Не является инвестиционной рекомендацией.',
                     en: 'Indicative calculation. Not an investment recommendation.',
+                    th: 'การคำนวณเป็นเพียงค่าประมาณ ไม่ถือเป็นคำแนะนำการลงทุน',
                   })}
                 </p>
               </CardContent>

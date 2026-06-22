@@ -25,6 +25,7 @@ export default function TeamShiftsPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+  const isTh = language === 'th';
   const [tab, setTab] = useState<'schedule' | 'mine' | 'timesheets'>('schedule');
   const [creating, setCreating] = useState(false);
 
@@ -49,18 +50,18 @@ export default function TeamShiftsPage() {
         <div>
           <div className="flex items-center gap-2">
             <CalendarClock className="w-5 h-5 text-primary" />
-            <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'Смены и табель' : 'Shifts & Timesheets'}</h1>
+            <h1 className="text-xl md:text-2xl font-bold">{isRu ? 'Смены и табель' : isTh ? 'กะงานและบันทึกเวลา' : 'Shifts & Timesheets'}</h1>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            {isRu ? 'Планирование смен и учёт рабочего времени персонала.' : 'Plan shifts and track staff time.'}
+            {isRu ? 'Планирование смен и учёт рабочего времени персонала.' : isTh ? 'วางแผนกะงานและบันทึกเวลาทำงานของพนักงาน' : 'Plan shifts and track staff time.'}
           </p>
         </div>
         <Sheet open={creating} onOpenChange={setCreating}>
           <SheetTrigger asChild>
-            <Button size="sm"><Plus className="w-4 h-4 mr-1.5" />{isRu ? 'Смена' : 'Shift'}</Button>
+            <Button size="sm"><Plus className="w-4 h-4 mr-1.5" />{isRu ? 'Смена' : isTh ? 'กะงาน' : 'Shift'}</Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-            <SheetHeader><SheetTitle>{isRu ? 'Запланировать смену' : 'Schedule shift'}</SheetTitle></SheetHeader>
+            <SheetHeader><SheetTitle>{isRu ? 'Запланировать смену' : isTh ? 'จัดตารางกะงาน' : 'Schedule shift'}</SheetTitle></SheetHeader>
             <CreateShiftForm onClose={() => setCreating(false)} />
           </SheetContent>
         </Sheet>
@@ -73,21 +74,21 @@ export default function TeamShiftsPage() {
           <div className="flex-1">
             <p className="text-sm font-medium">
               {openTimesheet
-                ? (isRu ? `На смене с ${format(new Date(openTimesheet.clock_in_at), 'HH:mm')}` : `On shift since ${format(new Date(openTimesheet.clock_in_at), 'HH:mm')}`)
-                : (isRu ? 'Не на смене' : 'Not clocked in')}
+                ? (isRu ? `На смене с ${format(new Date(openTimesheet.clock_in_at), 'HH:mm')}` : isTh ? `เข้ากะตั้งแต่ ${format(new Date(openTimesheet.clock_in_at), 'HH:mm')}` : `On shift since ${format(new Date(openTimesheet.clock_in_at), 'HH:mm')}`)
+                : (isRu ? 'Не на смене' : isTh ? 'ยังไม่ได้เข้ากะ' : 'Not clocked in')}
             </p>
           </div>
           {openTimesheet ? (
             <Button size="sm" variant="destructive"
               onClick={() => clockOut.mutate({ timesheet_id: openTimesheet.id, shift_id: openTimesheet.shift_id ?? undefined })}
               disabled={clockOut.isPending}>
-              <Square className="w-3.5 h-3.5 mr-1.5" />{isRu ? 'Завершить' : 'Clock out'}
+              <Square className="w-3.5 h-3.5 mr-1.5" />{isRu ? 'Завершить' : isTh ? 'ออกกะ' : 'Clock out'}
             </Button>
           ) : (
             <Button size="sm"
               onClick={() => clockIn.mutate({})}
               disabled={clockIn.isPending}>
-              <Play className="w-3.5 h-3.5 mr-1.5" />{isRu ? 'Начать' : 'Clock in'}
+              <Play className="w-3.5 h-3.5 mr-1.5" />{isRu ? 'Начать' : isTh ? 'เข้ากะ' : 'Clock in'}
             </Button>
           )}
         </CardContent>
@@ -95,9 +96,9 @@ export default function TeamShiftsPage() {
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="schedule">{isRu ? 'Неделя' : 'Week'}</TabsTrigger>
-          <TabsTrigger value="mine">{isRu ? 'Мои' : 'Mine'}</TabsTrigger>
-          <TabsTrigger value="timesheets">{isRu ? 'Табель' : 'Timesheets'}</TabsTrigger>
+          <TabsTrigger value="schedule">{isRu ? 'Неделя' : isTh ? 'สัปดาห์' : 'Week'}</TabsTrigger>
+          <TabsTrigger value="mine">{isRu ? 'Мои' : isTh ? 'ของฉัน' : 'Mine'}</TabsTrigger>
+          <TabsTrigger value="timesheets">{isRu ? 'Табель' : isTh ? 'บันทึกเวลา' : 'Timesheets'}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="schedule" className="space-y-3 mt-4">
@@ -111,8 +112,8 @@ export default function TeamShiftsPage() {
                     {format(day, 'EEE d MMM', { locale: isRu ? ru : undefined })}
                   </p>
                   {dayShifts.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">{isRu ? 'Нет смен' : 'No shifts'}</p>
-                  ) : dayShifts.map(s => <ShiftRow key={s.id} shift={s} isRu={isRu} />)}
+                    <p className="text-xs text-muted-foreground italic">{isRu ? 'Нет смен' : isTh ? 'ไม่มีกะงาน' : 'No shifts'}</p>
+                  ) : dayShifts.map(s => <ShiftRow key={s.id} shift={s} isRu={isRu} isTh={isTh} />)}
                 </CardContent>
               </Card>
             );
@@ -122,17 +123,17 @@ export default function TeamShiftsPage() {
         <TabsContent value="mine" className="space-y-2 mt-4">
           {myShifts.length === 0 ? (
             <Card className="border-dashed"><CardContent className="py-12 text-center text-sm text-muted-foreground">
-              {isRu ? 'Нет назначенных смен.' : 'No assigned shifts.'}
+              {isRu ? 'Нет назначенных смен.' : isTh ? 'ไม่มีกะงานที่ได้รับมอบหมาย' : 'No assigned shifts.'}
             </CardContent></Card>
           ) : myShifts.map(s => (
-            <Card key={s.id}><CardContent className="p-3"><ShiftRow shift={s} isRu={isRu} /></CardContent></Card>
+            <Card key={s.id}><CardContent className="p-3"><ShiftRow shift={s} isRu={isRu} isTh={isTh} /></CardContent></Card>
           ))}
         </TabsContent>
 
         <TabsContent value="timesheets" className="space-y-2 mt-4">
           {timesheets.length === 0 ? (
             <Card className="border-dashed"><CardContent className="py-12 text-center text-sm text-muted-foreground">
-              {isRu ? 'Записей пока нет.' : 'No records yet.'}
+              {isRu ? 'Записей пока нет.' : isTh ? 'ยังไม่มีบันทึก' : 'No records yet.'}
             </CardContent></Card>
           ) : timesheets.slice(0, 50).map(t => (
             <Card key={t.id}><CardContent className="p-3 flex items-center gap-3">
@@ -148,7 +149,7 @@ export default function TeamShiftsPage() {
                   </p>
                 )}
               </div>
-              {!t.clock_out_at && <Badge variant="outline" className="bg-success/15 text-success text-xs">{isRu ? 'Активно' : 'Active'}</Badge>}
+              {!t.clock_out_at && <Badge variant="outline" className="bg-success/15 text-success text-xs">{isRu ? 'Активно' : isTh ? 'กำลังทำงาน' : 'Active'}</Badge>}
             </CardContent></Card>
           ))}
         </TabsContent>
