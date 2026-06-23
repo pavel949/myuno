@@ -139,9 +139,13 @@
 ### Базы данных
 | Роль | Supabase project ref | URL | Кто пишет |
 |---|---|---|---|
-| **PRIMARY (prod)** | `kakkwibljrjsawxgnupk` | `https://kakkwibljrjsawxgnupk.supabase.co` | Frontend + Edge Functions |
+| **PRIMARY (prod) — Lovable Cloud** | `kakkwibljrjsawxgnupk` | `https://kakkwibljrjsawxgnupk.supabase.co` | Frontend + Edge Functions |
 | **MIRROR (опц.)** | `erfwtoavipwjqmylpizt` | standalone | Только ручной экспорт через `scripts/` |
 | ~~PEYLAA~~ | мигрирована в PRIMARY | `slug=peylaa-phuket-marriott` | Frontend через стандартный supabase client |
+
+⚠️ **Единственная production-БД проекта — `kakkwibljrjsawxgnupk` (Lovable Cloud, managed Supabase).** Это та БД, которую использует myuno.app (реальные пользователи и платежи), и она же зашита как fallback `VITE_SUPABASE_URL` в `vite.config.ts`. Миграции применяются через Lovable Cloud, а не вручную.
+
+> 🛑 **Для AI-агентов:** Supabase MCP в этих сессиях НЕ имеет доступа к prod-проекту `kakkwibljrjsawxgnupk`. Он показывает другой проект — `hueotfhvvbxaijccmhnc` («myUNO - Main DB») — это **НЕ** production. Никогда не применяй миграции/DDL к `hueotfhvvbxaijccmhnc`, считая его боевым. Миграции коммить в `supabase/migrations/` и применять через Lovable Cloud.
 
 ⚠️ **Все записи (CRM, лиды, бронирования, юзеры, платежи) идут в `kakkwibljrjsawxgnupk`.** Локальная разработка использует **ту же** production-БД — отдельного staging нет. Тестовые данные помечайте маркерами.
 
