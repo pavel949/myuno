@@ -13,7 +13,12 @@ dist-ssr
 *.local
 
 # Local Claude Code agent state (per-machine, never committed)
-.claude/
+.claude/*
+# ...except the shared SessionStart hook (must be committed to run on web sessions)
+!.claude/settings.json
+!.claude/hooks/
+.claude/hooks/*
+!.claude/hooks/session-start.sh
 
 # Export data (large JSON files)
 tmp/
