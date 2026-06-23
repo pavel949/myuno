@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
         if (propertyId) {
           const { data } = await supabase
             .from('properties')
-            .select('title, title_en, title_ru, address')
+            .select('title, title_en, title_ru, address, district')
             .eq('id', propertyId)
             .single();
           property = data;
