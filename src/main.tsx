@@ -3,6 +3,10 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { reportWebVitals } from "./lib/webVitals";
 import App from "./App.tsx";
+import { inject } from '@vercel/analytics';
+
+// Initialize Vercel Web Analytics
+inject();
 
 function renderBootstrapError(message: string) {
   const root = document.getElementById("root");
