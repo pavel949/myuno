@@ -99,6 +99,15 @@
 
 ## 3. БЛОКИ РАБОТ (по приоритету)
 
+### 🏪 THAI BUSINESS LAYER (Local Services) — за флагом `feature_flag:thai_business_layer` (default OFF)
+**Статус:** MVP в разработке (ветка `claude/thai-services-integration-*`)
+- B2B self-serve кабинет тайского бизнеса (`/vendor/thai-business`) + B2C каталог (`/thai-services`) + лендинги (`/ts/:slug`)
+- Dedicated tables `thai_businesses` / `thai_business_services` / `thai_bookings` / `thai_chats` / `thai_chat_messages` / `thai_business_reviews`
+- Авто-перевод RU↔TH/EN: поля бизнеса/услуг — клиентский вызов `ai-translate`; чат — edge `thai-chat-send` (хранит оригинал + перевод)
+- Edge functions: `thai-chat-send`, `thai-notify` (WhatsApp/email через `_shared`)
+- Owner авторизуется через существующий `vendor` app_role; модерация в `/admin/thai-business`
+- Подробности: `src/pages/thaiServices/README.md`
+
 ### 🏠 STAYS (Property Management)
 **Статус:** ~80% готово
 - `src/pages/owner/` — 80+ страниц PM dashboard
