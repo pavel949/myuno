@@ -39,7 +39,15 @@ const FLAGS: Record<string, FeatureFlag> = {
     description: 'AI-powered vendor outreach automation',
     allowedRoles: ['admin', 'uno_team'],
   },
-  
+
+  // Local Services / Thai Business Layer (B2B self-serve + B2C surface).
+  // OFF by default — the whole module is dormant until enabled in system_settings.
+  THAI_BUSINESS_LAYER: {
+    key: 'thai_business_layer',
+    enabled: false,
+    description: 'Thai Business / Local Services layer (B2B dashboard + B2C catalogue + landings)',
+  },
+
   // Payment Features
   STRIPE_PAYMENTS: {
     key: 'stripe_payments',

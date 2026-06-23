@@ -371,6 +371,8 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Newbuilds (Premium New Developments) ── */}
         {/* Project microsite — standalone, no app shell, custom SEO */}
         <Route path="/p/:slug" element={<LazyPage><Pages.ProjectMicrosite /></LazyPage>} />
+        {/* Thai business landing — standalone Russian microsite per business */}
+        <Route path="/ts/:slug" element={<LazyPage><Pages.ThaiBusinessLanding /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS} element={<LazyPage><Pages.NewbuildsLanding /></LazyPage>} />
         <Route path={APP_ROUTES.NEWBUILDS_PROJECTS} element={<Navigate to={APP_ROUTES.OFFPLAN} replace />} />
         <Route path="/newbuilds/projects/:slug" element={<NewbuildProjectToOffplanRedirect />} />
@@ -687,6 +689,11 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/welcome" element={<LazyPage><Pages.WelcomeFlow /></LazyPage>} />
         <Route path="/welcome/:bookingId" element={<LazyPage><Pages.WelcomeFlow /></LazyPage>} />
         
+        {/* ── Thai Business / Local Services (B2C) — gated in-page by feature flag ── */}
+        <Route path={APP_ROUTES.THAI_SERVICES} element={<LazyPage><Pages.ThaiServicesIndex /></LazyPage>} />
+        <Route path={APP_ROUTES.THAI_MY_BOOKINGS} element={<LazyPage><AuthGuard><Pages.ThaiMyBookings /></AuthGuard></LazyPage>} />
+        <Route path="/thai-services/:id" element={<LazyPage><Pages.ThaiBusinessDetail /></LazyPage>} />
+
         {/* ── Provider/Vendor ── */}
         <Route path="/provider/onboarding" element={<Navigate to="/become-partner" replace />} />
         <Route path="/vendor/join" element={<LazyPage><Pages.VendorLanding /></LazyPage>} />
@@ -715,6 +722,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor/legal" element={<Pages.VendorLegal />} />
           <Route path="/vendor/pets" element={<Pages.VendorPets />} />
           <Route path="/vendor/cleaning" element={<Pages.VendorCleaning />} />
+          <Route path="/vendor/thai-business" element={<Pages.VendorThaiBusiness />} />
           <Route path="/vendor/babysitters" element={<Pages.VendorBabysitters />} />
           <Route path="/vendor/flowers" element={<Pages.VendorFlowers />} />
           <Route path="/vendor/pharmacy" element={<Pages.VendorPharmacy />} />

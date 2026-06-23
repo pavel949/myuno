@@ -336,6 +336,17 @@ export const APP_ROUTES = {
   // ── Delivery ──
   DELIVERY: '/delivery',
 
+  // ── Thai Business / Local Services (feature_flag:thai_business_layer) ──
+  THAI_SERVICES: '/thai-services',
+  THAI_SERVICES_DETAIL: (id: string) => `/thai-services/${id}`,
+  THAI_MY_BOOKINGS: '/thai-services/my-bookings',
+  /** B2B owner dashboard (inside VendorLayout). */
+  VENDOR_THAI_BUSINESS: '/vendor/thai-business',
+  /** Admin moderation queue. */
+  ADMIN_THAI_BUSINESS: '/admin/thai-business',
+  /** Public Russian landing per business (standalone, custom SEO). */
+  THAI_LANDING: (slug: string) => `/ts/${slug}`,
+
   // ── Market ──
   MARKET: '/market',
   MARKET_CATEGORIES: '/market/categories',

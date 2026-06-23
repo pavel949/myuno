@@ -53,6 +53,7 @@ export const adminRoutes = (
     <Route path="/admin/legal" element={<Pages.AdminLegal />} />
     <Route path="/admin/pets" element={<Pages.AdminPets />} />
     <Route path="/admin/cleaning" element={<Pages.AdminCleaning />} />
+    <Route path="/admin/thai-business" element={<Pages.AdminThaiBusiness />} />
     <Route path="/admin/babysitters" element={<Pages.AdminBabysitters />} />
     <Route path="/admin/flowers" element={<Pages.AdminFlowers />} />
     <Route path="/admin/relocation-articles" element={<Pages.AdminRelocationArticles />} />

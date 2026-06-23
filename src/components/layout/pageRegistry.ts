@@ -296,6 +296,14 @@ export const BabysitterBooking = lazy(() => import('@/pages/babysitter/Babysitte
 // ── Delivery ──
 export const DeliveryIndex = lazy(() => import('@/pages/delivery/DeliveryIndex'));
 
+// ── Thai Business / Local Services (feature_flag:thai_business_layer) ──
+export const ThaiServicesIndex = lazy(() => import('@/pages/thaiServices/ThaiServicesIndex'));
+export const ThaiBusinessDetail = lazy(() => import('@/pages/thaiServices/ThaiBusinessDetail'));
+export const ThaiMyBookings = lazy(() => import('@/pages/thaiServices/ThaiMyBookings'));
+export const ThaiBusinessLanding = lazy(() => import('@/pages/thaiServices/ThaiBusinessLanding'));
+export const VendorThaiBusiness = lazy(() => import('@/pages/vendor/thaiBusiness/ThaiBusinessDashboard'));
+export const AdminThaiBusiness = lazy(() => import('@/pages/admin/AdminThaiBusiness'));
+
 // ── Market ──
 export const MarketIndex = lazy(() => import('@/pages/market/MarketIndex'));
 export const MarketCatalogPage = lazy(() => import('@/pages/market/MarketCatalogPage'));

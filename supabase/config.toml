@@ -173,3 +173,7 @@ verify_jwt = false
     verify_jwt = false
   [functions.apply-referral]
     verify_jwt = false
+  [functions.thai-chat-send]
+    verify_jwt = false
+  [functions.thai-notify]
+    verify_jwt = false
