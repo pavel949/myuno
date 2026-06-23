@@ -2,9 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// TODO: drop `as never` / `(supabase as any)` casts once Supabase types
-// are regenerated to include `relocation_articles`.
-
 export interface AdminRelocationArticleRow {
   id: string;
   slug: string;
@@ -34,7 +31,7 @@ export function useAdminRelocationArticlesList() {
     queryKey: LIST_KEY,
     queryFn: async (): Promise<AdminRelocationArticleRow[]> => {
       const { data, error } = await supabase
-        .from('relocation_articles' as never)
+        .from('relocation_articles')
         .select(
           'id, slug, category, title_en, title_ru, summary_en, summary_ru, content_en, content_ru, related_route, sort_order, is_published, updated_at, created_at'
         )
@@ -42,7 +39,7 @@ export function useAdminRelocationArticlesList() {
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return (data ?? []) as unknown as AdminRelocationArticleRow[];
+      return data ?? [];
     },
   });
 }
@@ -61,14 +58,10 @@ export function useUpsertRelocationArticle() {
         slug: input.slug.trim().toLowerCase(),
         category: input.category.trim().toLowerCase(),
       };
-      const { error } = await (supabase as unknown as {
-        from: (t: string) => {
-          upsert: (v: unknown, opts?: { onConflict?: string }) => Promise<{ error: unknown }>;
-        };
-      })
+      const { error } = await supabase
         .from('relocation_articles')
         .upsert(payload, { onConflict: 'slug' });
-      if (error) throw error as Error;
+      if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Статья сохранена');
@@ -85,15 +78,11 @@ export function useTogglePublishRelocationArticle() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, is_published }: { id: string; is_published: boolean }) => {
-      const { error } = await (supabase as unknown as {
-        from: (t: string) => {
-          update: (v: unknown) => { eq: (c: string, v: string) => Promise<{ error: unknown }> };
-        };
-      })
+      const { error } = await supabase
         .from('relocation_articles')
         .update({ is_published })
         .eq('id', id);
-      if (error) throw error as Error;
+      if (error) throw error;
     },
     onSuccess: (_, vars) => {
       toast.success(vars.is_published ? 'Опубликовано' : 'Снято с публикации');
@@ -110,15 +99,11 @@ export function useDeleteRelocationArticle() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase as unknown as {
-        from: (t: string) => {
-          delete: () => { eq: (c: string, v: string) => Promise<{ error: unknown }> };
-        };
-      })
+      const { error } = await supabase
         .from('relocation_articles')
         .delete()
         .eq('id', id);
-      if (error) throw error as Error;
+      if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Статья удалена');
@@ -137,15 +122,11 @@ export function useRenameRelocationCategory() {
     mutationFn: async ({ from, to }: { from: string; to: string }) => {
       const target = to.trim().toLowerCase();
       if (!target) throw new Error('Новое имя категории пустое');
-      const { error } = await (supabase as unknown as {
-        from: (t: string) => {
-          update: (v: unknown) => { eq: (c: string, v: string) => Promise<{ error: unknown }> };
-        };
-      })
+      const { error } = await supabase
         .from('relocation_articles')
         .update({ category: target })
         .eq('category', from);
-      if (error) throw error as Error;
+      if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Категория переименована');
