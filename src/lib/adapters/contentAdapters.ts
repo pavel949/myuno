@@ -266,7 +266,7 @@ export function mapHomeServiceProviderToCardProps(
     responseTimeMinutes: provider.response_time_minutes,
     hasInsurance: provider.has_insurance ?? false,
     hasGuarantee: provider.has_guarantee ?? false,
-    languages: [], // TODO: Add languages field to providers table
+    languages: provider.languages || [],
     serviceDomains: provider.service_domains || [],
     phone: provider.phone,
     email: provider.email,
