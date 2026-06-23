@@ -72,16 +72,17 @@ Deno.serve(async (req) => {
           property = data;
         }
 
+        const orderFallbackLocation = isRu ? 'Адрес уточняется' : 'Address on request';
         voucherData = {
           voucher_number: order.order_number,
           booking_type: order.order_type,
           title: property
-            ? ((isRu ? property.title_ru : property.title_en) || property.title || 'Property')
+            ? ((isRu ? property.title_ru : property.title_en) || property.title || (isRu ? 'Объект' : 'Property'))
             : items?.[0]?.item_name || order.order_type,
           subtitle: items?.map((i: any) => i.item_name).join(', '),
           date: order.start_at?.split('T')[0] || order.metadata?.check_in,
           time: order.start_at?.split('T')[1]?.slice(0, 5) || order.metadata?.time,
-          location: property?.address || order.metadata?.location,
+          location: (property?.address?.trim() || property?.district?.trim() || order.metadata?.location?.trim() || orderFallbackLocation),
           guest_name: participants?.name,
           guests_count: order.metadata?.guests_count || 1,
           amount: order.total_amount,
