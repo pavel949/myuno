@@ -17,6 +17,7 @@ import { PendingPaymentsChip } from '@/components/home/PendingPaymentsChip';
 import { AppDrawer } from '@/components/nav/AppDrawer';
 import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
 import { ActiveSituation } from '@/components/home/ActiveSituation';
+import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
 import { NowInPhuket } from '@/components/home/NowInPhuket';
 import { RoleSheet } from '@/components/home/RoleSheet';
 import { OfficialNews } from '@/components/home/OfficialNews';
@@ -71,6 +72,9 @@ const Index: React.FC = () => {
           personas={[...activePersonas]}
           onRoleSheetOpen={() => setRoleSheetOpen(true)}
         />
+
+        {/* 3.5 Lifecycle smart tips — § 9.4 triggers (only when a signal fires) */}
+        <LifecycleSmartTip />
 
         {/* 4. PersonalGrid — top-8 mini-apps ranked by role + personas */}
         <PersonalGrid />
