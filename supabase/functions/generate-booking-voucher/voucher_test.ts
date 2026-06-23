@@ -12,7 +12,8 @@
  * (property `92e61eea-df7b-42bd-bae1-14e5110841d5`, address = "").
  */
 
-import "https://deno.land/std@0.224.0/dotenv/load.ts";
+import { loadSync } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
+loadSync({ export: true, examplePath: null, allowEmptyValues: true });
 import {
   assert,
   assertEquals,
