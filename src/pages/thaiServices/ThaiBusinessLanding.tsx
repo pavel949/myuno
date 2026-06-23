@@ -25,8 +25,7 @@ export default function ThaiBusinessLanding() {
       event_name: 'thai_landing_view',
       page_path: `/ts/${slug}`,
       event_data: { business_id: data.business.id, slug },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    });
   }, [data?.business?.id, slug]);
 
   if (isLoading) return <LoadingState />;
