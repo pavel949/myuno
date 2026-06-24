@@ -123,11 +123,15 @@ const LazyPage = ({ children }: { children: React.ReactNode }) => (
 
 const AdminRouteLayout = () => (
   <AdminGuard>
-    <AdminLayout>
-      <Suspense fallback={<LoadingState />}>
-        <Outlet />
-      </Suspense>
-    </AdminLayout>
+    {/* ActiveCompanyProvider lets admins act inside an MC context (house MC) —
+        powers the CompanySwitcher and the lead→deal bridge target company. */}
+    <ActiveCompanyProvider>
+      <AdminLayout>
+        <Suspense fallback={<LoadingState />}>
+          <Outlet />
+        </Suspense>
+      </AdminLayout>
+    </ActiveCompanyProvider>
   </AdminGuard>
 );
 
