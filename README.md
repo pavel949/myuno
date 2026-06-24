@@ -66,6 +66,7 @@
 
 | Документ | О чём |
 |----------|-------|
+| [`docs/PROJECT_BIBLE.md`](./docs/PROJECT_BIBLE.md) | Сводный обзор продукта / бизнес-модели / архитектуры / дизайна — синтез из PROJECT.md + canonical/* + кода; читать после PROJECT.md если нужен единый view платформы целиком |
 | [`CLAUDE.md`](./CLAUDE.md) | Инструкции для AI-ассистентов — обязательно к прочтению до любой задачи |
 | [`DESIGN.md`](./DESIGN.md) | Design tokens — цвета, шрифты, spacing, motion |
 | [`docs/ENVIRONMENT.md`](./docs/ENVIRONMENT.md) | Окружения, БД, ключи (источник истины) |
@@ -131,14 +132,14 @@ npm run lint      # ESLint
 │   └── …                       ← topic-specific docs
 │
 ├── src/
-│   ├── pages/                  ← 557 pages by vertical
-│   ├── components/             ← ~998 components / 90 domains
-│   ├── hooks/                  ← 429 custom hooks
-│   ├── contexts/               ← 15 global providers
+│   ├── pages/                  ← 460+ pages across 42–45 verticals
+│   ├── components/             ← ~600–998 components across 73–90 domains
+│   ├── hooks/                  ← 310–429 custom hooks
+│   ├── contexts/               ← 12+ global providers
 │   ├── integrations/supabase/  ← auto-generated client + types (DO NOT EDIT)
-│   ├── lib/                    ← utilities · taxonomies · adapters
+│   ├── lib/                    ← utilities · taxonomies · adapters · appRegistry (59 micro-apps)
 │   ├── design-system/          ← tokens · component docs
-│   └── i18n/                   ← RU/EN translations
+│   └── i18n/                   ← RU/EN translations (TH for local artefacts)
 │
 ├── supabase/
 │   ├── functions/              ← Edge Functions (Deno 2.0)

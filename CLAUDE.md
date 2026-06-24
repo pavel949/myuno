@@ -37,6 +37,8 @@
 
 См. также `docs/canonical/README.md` (индекс) и `docs/canonical/CHANGELOG.md` (версии).
 
+**Шаг 3 (опционально) — сводный обзор.** Если задача затрагивает несколько вертикалей сразу или нужен единый view платформы (продукт + бизнес-модель + архитектура + дизайн + GTM в одном файле), читай `docs/PROJECT_BIBLE.md`. Это синтез PROJECT.md + canonical/* + аудита кода; SoT остаётся PROJECT.md и canonical/*, Bible — навигационный обзор.
+
 ---
 
 ## 1.5 · Architecture source of truth (v2)

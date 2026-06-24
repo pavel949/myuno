@@ -1445,15 +1445,17 @@ mcc_landing_events, mcc_ai_recommendations, lifecycle_executions
 | Файл | Назначение |
 |------|------------|
 | `docs/ENVIRONMENT.md` | Все окружения, ключи, DBs |
-| `docs/ARCHITECTURE.md` | Project structure |
 | `docs/DATABASE.md` | Schema overview |
 | `docs/EDGE_FUNCTIONS.md` | Reference на все edge functions |
-| `docs/MCC_ARCHITECTURE.md` | Marketing Command Center детали |
-| `docs/SYSTEM_OVERVIEW.md` | Полное описание системы (snapshot 2026-03) |
-| `docs/UNICORN_ANALYSIS.md` | Gap-анализ для $1B |
+| `docs/DESIGN_BIBLE.md` | Полный design bible (комплимент к canonical 05) |
+| `docs/DESIGN_TOKENS.md` | Документация по design tokens |
+| `docs/INFO_ARCHITECTURE.md` | Информационная архитектура (subdomains, navigation, SSO) |
 | `docs/UX_CONTRACT.md` | UX контракты |
 | `docs/CONVENTIONS.md` | Coding standards |
 | `docs/BUILD_AND_CI.md` | Build, deploy |
+| `docs/PERSONA_JOURNEYS_DEVELOPER_INVESTOR.md` | Сценарии Sergey/Dmitry в деталях |
+
+> Примечание: ранее в этом разделе ссылался на `docs/SYSTEM_OVERVIEW.md`, `docs/UNICORN_ANALYSIS.md`, `docs/ARCHITECTURE.md`, `docs/MCC_ARCHITECTURE.md` — эти файлы были удалены/сконсолидированы в `docs/canonical/*` и в этот Bible. Если ищешь старый контент: SYSTEM_OVERVIEW → разделы 4, 7, 9 этого документа + canonical/00-master-taxonomy.md; UNICORN_ANALYSIS → разделы 11–15.
 
 ### 19.3. Версия и статус
 
