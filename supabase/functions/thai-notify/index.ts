@@ -10,6 +10,7 @@
  *   { kind: 'new_booking', bookingId }
  *   { kind: 'booking_status', bookingId }
  *   { kind: 'new_message', messageId }
+ *   { kind: 'partner_lead', leadId }   // B2B acquisition lead from /thai-business
  */
 import { createServiceClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
@@ -62,7 +63,7 @@ Deno.serve(async (req) => {
 
   try {
     const sb = createServiceClient();
-    const { kind, bookingId, messageId } = await req.json();
+    const { kind, bookingId, messageId, leadId } = await req.json();
 
     if (kind === "new_booking" || kind === "booking_status") {
       const { data: booking } = await sb
@@ -174,6 +175,52 @@ Deno.serve(async (req) => {
           whatsappBody: `💬 Клиент пишет (${bizName}): ${preview}`,
         });
       }
+      return json({ success: true }, 200, corsHeaders);
+    }
+
+    if (kind === "partner_lead") {
+      const { data: lead } = await sb
+        .from("thai_partner_leads")
+        .select("id, contact_name, business_name, phone, email, category, interests, message, preferred_lang, created_at")
+        .eq("id", leadId)
+        .maybeSingle();
+      if (!lead) return json({ success: false, error: "lead not found" }, 404, corsHeaders);
+
+      const adminWa = await getAdminWhatsApp();
+      const adminEmails = await getAdminEmails();
+      const when = lead.created_at
+        ? new Date(lead.created_at).toLocaleString("ru-RU", { timeZone: "Asia/Bangkok" })
+        : "—";
+      const interests = Array.isArray(lead.interests) && lead.interests.length
+        ? lead.interests.join(", ")
+        : "—";
+      const sections: Section[] = [
+        { label: "Контакт / Contact", value: lead.contact_name || "—" },
+        { label: "Бизнес / Business", value: lead.business_name || "—" },
+        { label: "Телефон / Phone", value: lead.phone || "—" },
+        { label: "Email", value: lead.email || "—" },
+        { label: "Категория / Category", value: lead.category || "—" },
+        { label: "Интересы / Interests", value: interests },
+        { label: "Сообщение / Message", value: (lead.message || "—").slice(0, 300) },
+        { label: "Язык / Lang", value: lead.preferred_lang || "—" },
+        { label: "Получено / Received", value: when },
+      ];
+      const body =
+        `🤝 Новая заявка тайского бизнеса (myUNO)\n` +
+        `${lead.contact_name}${lead.business_name ? ` — ${lead.business_name}` : ""}\n` +
+        `📞 ${lead.phone}\n` +
+        `${interests !== "—" ? `Интересы: ${interests}\n` : ""}` +
+        `${lead.message ? `«${String(lead.message).slice(0, 120)}»` : ""}`;
+      await notify({
+        phone: adminWa,
+        emails: adminEmails,
+        title: "Новая заявка тайского бизнеса",
+        subtitle: lead.business_name || lead.contact_name,
+        sections,
+        ctaText: "Открыть админку",
+        ctaUrl: `${SITE_URL}/admin/thai-business`,
+        whatsappBody: body,
+      });
       return json({ success: true }, 200, corsHeaders);
     }
 
