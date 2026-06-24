@@ -25,21 +25,19 @@ export function AdminCrmDashboard() {
     { label: isRu ? 'Всего лидов' : 'Total Leads', value: stats.totalLeads, icon: Users, color: 'text-primary' },
     { label: isRu ? 'В работе' : 'Active', value: stats.activeLeads, icon: Activity, color: 'text-warning' },
     { label: isRu ? 'Конверсия' : 'Conversion', value: `${stats.overallConversion}%`, icon: TrendingUp, color: 'text-success' },
-    { label: isRu ? 'Вендоры (B2B)' : 'Vendors (B2B)', value: stats.vendors.total, icon: Target, sub: isRu ? `Won: ${stats.vendors.won}` : `Won: ${stats.vendors.won}` },
-    { label: isRu ? 'Пользователи (B2C)' : 'Users (B2C)', value: stats.users.total, icon: Users, sub: isRu ? `Горячие: ${stats.users.hot}` : `Hot: ${stats.users.hot}` },
+    { label: isRu ? 'Вендоры (B2B)' : 'Vendors (B2B)', value: stats.vendors.total, icon: Target, sub: `Won: ${stats.vendors.won}` },
     { label: isRu ? 'Собственники' : 'Owners', value: stats.owners.total, icon: Building2, sub: isRu ? `Интерес: ${stats.owners.interested}` : `Interested: ${stats.owners.interested}` },
   ];
 
   const funnelData = [
     { name: isRu ? 'Вендоры' : 'Vendors', total: stats.vendors.total, converted: stats.vendors.won },
-    { name: isRu ? 'Пользователи' : 'Users', total: stats.users.total, converted: stats.users.converted },
     { name: isRu ? 'Собственники' : 'Owners', total: stats.owners.total, converted: stats.owners.converted },
   ];
 
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {kpis.map((kpi) => (
           <Card key={kpi.label}>
             <CardContent className="p-4">
