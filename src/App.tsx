@@ -46,6 +46,7 @@ import { composeProviders } from "@/lib/composeProviders";
 import { useEnsureMultiRoleQaBundle } from "@/hooks/useEnsureMultiRoleQaBundle";
 import { PlatformViewAsBanner } from "@/components/layout/PlatformViewAsBanner";
 import { LanguageProfileHydrate } from "@/components/providers/LanguageProfileHydrate";
+import { SplashScreen } from "@/components/uno/SplashScreen";
 
 const queryClient = new QueryClient({
   defaultOptions: defaultQueryClientOptions,
@@ -128,6 +129,7 @@ function AppContent() {
   
     return (
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <SplashScreen />
         <LanguageProfileHydrate />
         <SkipToContent />
         <PlatformViewAsBanner />
