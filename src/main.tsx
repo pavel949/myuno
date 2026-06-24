@@ -71,11 +71,14 @@ if (sentryDsn && import.meta.env.PROD && typeof window !== "undefined") {
 // VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY through the platform.
 reportWebVitals(undefined, { debug: import.meta.env.DEV });
 
-// ── Service Worker cleanup on non-production hosts ──
-// Only myuno.app / www.myuno.app should keep a registered SW. On preview,
-// sandbox, localhost, or any iframe we proactively unregister stale SWs
-// (left by previous PWA builds) and clear their caches. This eliminates
-// the recurring "Failed to update a ServiceWorker ... Not found" errors.
+// ── Service Worker: register on production, clean up everywhere else ──
+// Only myuno.app / www.myuno.app (and the Capacitor WebView, which loads them)
+// should run a SW. There we register the auto-updating Workbox worker so the
+// app is installable in one tap and refreshes itself across deploys without a
+// reinstall. On preview, sandbox, localhost, or any iframe we proactively
+// unregister stale SWs (left by previous PWA builds) and clear their caches —
+// this eliminates the recurring "Failed to update a ServiceWorker ... Not
+// found" errors and editor reload loops.
 (() => {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
@@ -88,17 +91,44 @@ reportWebVitals(undefined, { debug: import.meta.env.DEV });
     isInIframe = true;
   }
 
-  if (isProductionHost && !isInIframe) return;
-
-  navigator.serviceWorker.getRegistrations().then((regs) => {
-    regs.forEach((r) => r.unregister().catch(() => {}));
-  }).catch(() => {});
-
-  if ("caches" in window) {
-    caches.keys().then((keys) => {
-      keys.forEach((k) => caches.delete(k).catch(() => {}));
+  if (!isProductionHost || isInIframe) {
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      regs.forEach((r) => r.unregister().catch(() => {}));
     }).catch(() => {});
+
+    if ("caches" in window) {
+      caches.keys().then((keys) => {
+        keys.forEach((k) => caches.delete(k).catch(() => {}));
+      }).catch(() => {});
+    }
+    return;
   }
+
+  // Production: register the auto-updating service worker. `registerType:
+  // 'autoUpdate'` bakes skipWaiting + clientsClaim into the worker, so a new
+  // build installs and activates in the background. We deliberately do NOT
+  // force a reload here — VersionWatcher / PWAUpdatePrompt own the "when to
+  // refresh" UX so users aren't yanked mid-action. The periodic update() keeps
+  // long-lived installed sessions (PWA left open for days) current.
+  import("virtual:pwa-register")
+    .then(({ registerSW }) => {
+      registerSW({
+        immediate: true,
+        onRegisteredSW(_swUrl, registration) {
+          if (!registration) return;
+          const ONE_HOUR = 60 * 60 * 1000;
+          setInterval(() => {
+            registration.update().catch(() => {});
+          }, ONE_HOUR);
+        },
+        onRegisterError() {
+          /* SW registration failure is non-fatal — the app still works online. */
+        },
+      });
+    })
+    .catch(() => {
+      /* virtual:pwa-register unavailable (e.g. dev) — non-fatal. */
+    });
 })();
 
 // ── HTTP 412 recovery (auth-bridge / preview proxy) ──
