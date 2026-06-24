@@ -32,6 +32,7 @@ import { pluralizeNights, pluralizeGuests } from '@/lib/i18n/pluralize';
 import { differenceInDays, format, parseISO, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { InquiryConfirmation } from '@/components/property/InquiryConfirmation';
 
 export default function PropertyInquiry() {
   const { id } = useParams();
@@ -151,6 +152,7 @@ export default function PropertyInquiry() {
   const [contactOpen, setContactOpen] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedOrderId, setSubmittedOrderId] = useState<string | null>(null);
 
   // A1 — "Choose when to pay". Only used when rentalTerms.allow_pay_later is on.
   // Default 'split' preserves the legacy behavior (charge prepay only).
@@ -326,6 +328,11 @@ export default function PropertyInquiry() {
     moderate: { en: 'Free cancellation up to 5 days before check-in', ru: 'Бесплатная отмена за 5 дней до заезда' },
     strict: { en: 'Non-refundable after booking', ru: 'Невозвратная после бронирования' },
   };
+
+  // Show confirmation screen after a successful viewing request submission.
+  if (submittedOrderId) {
+    return <InquiryConfirmation orderId={submittedOrderId} />;
+  }
 
   // If no dates, prompt the user to go back
   if (!hasDates) {
@@ -920,9 +927,9 @@ export default function PropertyInquiry() {
                       try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
                     }
                     toast.success(isRu
-                      ? 'Запрос отправлен! Хозяин ответит в течение 24 часов.'
-                      : 'Request sent! The host will respond within 24 hours.');
-                    navigate(`/bookings/${result.order_id}`, { replace: true });
+                      ? 'Запрос отправлен! Свяжемся с вами в WhatsApp в течение 24 часов.'
+                      : "Request sent! We'll WhatsApp you within 24 hours.");
+                    setSubmittedOrderId(result.order_id);
                   } else {
                     // Bug #3 fix: surface failures from createOrder so the user
                     // is never left staring at a silent footer.
@@ -958,8 +965,8 @@ export default function PropertyInquiry() {
                       ? (isRu ? 'Менеджер свяжется в течение 30 минут (9:00–22:00 ICT)' : 'Manager replies within 30 min (9am–10pm ICT)')
                       : (isRu ? 'Менеджер свяжется в WhatsApp' : 'Manager will reach out on WhatsApp'))
                 : (isRu
-                    ? 'Оплата не списывается. Хозяин подтвердит бронирование.'
-                    : "You won't be charged. The host will confirm your booking.")}
+                    ? 'Оплата не списывается. Хозяин свяжется в WhatsApp в течение 24 часов.'
+                    : "You won't be charged. The host will confirm via WhatsApp within 24h.")}
             </p>
           </div>
         )}
