@@ -12,6 +12,8 @@ import { ru } from './ru';
 
 export type Language = 'ru' | 'en' | 'th';
 
+export { pickLang, type LangValues } from '@/lib/i18n/pickLang';
+
 // Default language loaded eagerly; others loaded on first use
 const translationCache: Partial<Record<Language, Record<string, string>>> = { ru };
 

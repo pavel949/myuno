@@ -2,6 +2,7 @@ import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getStoredLang } from '@/lib/languageConfig';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface Props {
   children: ReactNode;
@@ -35,16 +36,16 @@ export class WidgetErrorBoundary extends Component<Props, State> {
   render() {
     if (!this.state.hasError) return this.props.children;
 
-    const isRu = getStoredLang() === 'ru';
+    const lang = getStoredLang();
     return (
       <div className="flex items-center gap-3 p-4 rounded-none border border-border bg-muted/30 text-muted-foreground">
         <AlertTriangle className="h-4 w-4 shrink-0 text-warning" />
         <span className="text-sm flex-1">
-          {isRu ? 'Виджет временно недоступен' : 'Widget temporarily unavailable'}
+          {pickLang(lang, { ru: 'Виджет временно недоступен', en: 'Widget temporarily unavailable', th: 'วิดเจ็ตไม่พร้อมใช้งานชั่วคราว' })}
         </span>
         <Button variant="ghost" size="sm" onClick={this.handleRetry} className="h-7 text-xs">
           <RefreshCw className="h-3 w-3 mr-1" />
-          {isRu ? 'Повтор' : 'Retry'}
+          {pickLang(lang, { ru: 'Повтор', en: 'Retry', th: 'ลองใหม่' })}
         </Button>
       </div>
     );

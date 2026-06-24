@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { UnifiedCatalogMap } from '@/components/map/UnifiedCatalogMap';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useThaiBusiness } from '@/hooks/thaiServices/useThaiServices';
@@ -46,15 +47,20 @@ export default function ThaiBusinessDetail() {
   }
 
   const { business, services } = data;
-  const name = business.name_ru || business.name_en || business.name_th;
+  const name = pickLang(language, {
+    ru: business.name_ru || business.name_th,
+    en: business.name_en || business.name_th,
+    th: business.name_th,
+  });
   const cat = thaiCategoryMeta(business.category);
   const ownership = business.ownership_type ? THAI_OWNERSHIP_LABELS[business.ownership_type] : null;
-  const svcName = (s: ThaiService) => (language === 'ru' ? s.name_ru || s.name_th : s.name_th);
-  const svcDesc = (s: ThaiService) => (language === 'ru' ? s.description_ru || s.description_th : s.description_th);
+  const svcName = (s: ThaiService) => pickLang(language, { ru: s.name_ru || s.name_th, en: s.name_th, th: s.name_th });
+  const svcDesc = (s: ThaiService) =>
+    pickLang(language, { ru: s.description_ru || s.description_th || '', en: s.description_th || '', th: s.description_th || '' });
   const paymentLabels = business.payment_methods
     .map((m) => THAI_PAYMENT_METHODS.find((p) => p.id === m))
     .filter(Boolean)
-    .map((p) => (language === 'ru' ? p!.ru : p!.en));
+    .map((p) => pickLang(language, p!));
 
   return (
     <div className="pb-24">
@@ -69,7 +75,7 @@ export default function ThaiBusinessDetail() {
           ))}
           {!business.gallery_urls?.length && !business.logo_url && (
             <div className="h-56 w-full bg-muted flex items-center justify-center text-muted-foreground">
-              {language === 'ru' ? cat.ru : cat.en}
+              {pickLang(language, cat)}
             </div>
           )}
         </div>
@@ -86,17 +92,17 @@ export default function ThaiBusinessDetail() {
             )}
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <span>{language === 'ru' ? cat.ru : cat.en}</span>
+            <span>{pickLang(language, cat)}</span>
             {business.district && <span className="inline-flex items-center gap-0.5"><MapPin className="w-3.5 h-3.5" />{business.district}</span>}
           </div>
-          {ownership && <Badge variant="secondary" className="mt-2">{language === 'ru' ? ownership.ru : ownership.en}</Badge>}
+          {ownership && <Badge variant="secondary" className="mt-2">{pickLang(language, ownership)}</Badge>}
         </div>
 
         {(business.description_ru || business.description_th) && (
           <section>
             <h2 className="font-medium text-foreground mb-1">{t('thai.detail.about')}</h2>
             <p className="text-sm text-muted-foreground whitespace-pre-line">
-              {language === 'ru' ? business.description_ru || business.description_th : business.description_th}
+              {pickLang(language, { ru: business.description_ru || business.description_th || '', en: business.description_th || '', th: business.description_th || '' })}
             </p>
           </section>
         )}

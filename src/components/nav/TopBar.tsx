@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { MiniCart } from '@/components/market/MiniCart';
 import { Button } from '@/components/ui/button';
@@ -103,7 +104,7 @@ export const TopBar = memo(function TopBar({
           {sidebarVisible && (
             <SidebarTrigger
               className="flex h-11 w-11 shrink-0 md:h-9 md:w-9 md:mr-1"
-              title={isRu ? 'Меню' : 'Menu'}
+              title={pickLang(language, { ru: 'Меню', en: 'Menu', th: 'เมนู' })}
             />
           )}
 
@@ -117,7 +118,7 @@ export const TopBar = memo(function TopBar({
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.path, item.exact);
-                const label = isRu ? item.labelRu : item.labelEn;
+                const label = pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh });
                 return (
                   <NavLink
                     key={item.path}
@@ -151,7 +152,7 @@ export const TopBar = memo(function TopBar({
           >
             <Search className="size-5 text-muted-foreground group-hover/search:text-foreground transition-colors shrink-0" />
             <span className="text-[13px] text-muted-foreground flex-1 text-left truncate">
-              {isRu ? 'Поиск сервисов...' : 'Search services...'}
+              {pickLang(language, { ru: 'Поиск сервисов...', en: 'Search services...', th: 'ค้นหาบริการ...' })}
             </span>
             <kbd className="hidden xl:inline-flex items-center px-1.5 py-0.5 rounded-none text-[10px] font-mono text-muted-foreground bg-[hsl(var(--bg-base)/0.6)] border border-border">
               ⌘K
@@ -171,7 +172,7 @@ export const TopBar = memo(function TopBar({
             <button
               onClick={() => setSearchOpen(true)}
               className="lg:hidden flex items-center justify-center w-11 h-11 rounded-none hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              aria-label={isRu ? 'Поиск' : 'Search'}
+              aria-label={pickLang(language, { ru: 'Поиск', en: 'Search', th: 'ค้นหา' })}
             >
               <Search className="size-5 text-muted-foreground" />
             </button>

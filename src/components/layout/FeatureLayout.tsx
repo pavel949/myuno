@@ -15,6 +15,7 @@ import { MiniAppHero } from '@/components/miniapp/MiniAppHero';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { UniversalFilter, type FilterConfig, type FilterValues } from '@/components/filters/UniversalFilter';
 import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedFilterRibbon, type FilterRibbonItem } from '@/components/shared/UnifiedFilterRibbon';
@@ -35,6 +36,8 @@ export interface MiniAppCategory {
   id: string;
   labelEn: string;
   labelRu: string;
+  /** Thai label; falls back to English when absent. */
+  labelTh?: string;
   icon?: string;
 }
 
@@ -42,6 +45,8 @@ export interface QuickFilterOption {
   id: string;
   labelEn: string;
   labelRu: string;
+  /** Thai label; falls back to English when absent. */
+  labelTh?: string;
   icon?: string;
 }
 
@@ -325,7 +330,7 @@ function MiniappMode({
 
   const categoryItems: FilterRibbonItem[] = categories.map((cat) => ({
     id: cat.id,
-    label: language === 'ru' ? cat.labelRu : cat.labelEn,
+    label: pickLang(language, { ru: cat.labelRu, en: cat.labelEn, th: cat.labelTh }),
     emoji: cat.icon,
   }));
 
@@ -381,7 +386,7 @@ function MiniappMode({
                       return (
                         <FilterChip
                           key={`${section.id}-${opt.id}`}
-                          label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                          label={pickLang(language, { ru: opt.labelRu, en: opt.labelEn, th: opt.labelTh })}
                           icon={opt.icon}
                           isActive={isActive}
                           onToggle={() => handleQuickFilterToggle(section.id, opt.id)}
@@ -428,7 +433,7 @@ function MiniappMode({
                 return (
                   <FilterChip
                     key={`${section.id}-${opt.id}`}
-                    label={language === 'ru' ? opt.labelRu : opt.labelEn}
+                    label={pickLang(language, { ru: opt.labelRu, en: opt.labelEn, th: opt.labelTh })}
                     icon={opt.icon}
                     isActive={isActive}
                     onToggle={() => handleQuickFilterToggle(section.id, opt.id)}

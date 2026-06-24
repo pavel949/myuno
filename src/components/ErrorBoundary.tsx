@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { getStoredLang as getLang } from '@/lib/languageConfig';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 const errorLog = createErrorHandler('ErrorBoundary');
 
@@ -22,15 +23,15 @@ interface State {
 // Bilingual error messages
 const ERROR_MESSAGES = {
   chunk: {
-    title: { en: 'Connection issue', ru: 'Проблема с подключением' },
-    desc: { en: 'Some components could not be loaded. Please check your connection and try again.', ru: 'Не удалось загрузить некоторые компоненты. Проверьте подключение и попробуйте снова.' },
+    title: { en: 'Connection issue', ru: 'Проблема с подключением', th: 'ปัญหาการเชื่อมต่อ' },
+    desc: { en: 'Some components could not be loaded. Please check your connection and try again.', ru: 'Не удалось загрузить некоторые компоненты. Проверьте подключение и попробуйте снова.', th: 'ไม่สามารถโหลดบางส่วนได้ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง' },
   },
   generic: {
-    title: { en: 'This page failed to load', ru: 'Страница не загрузилась' },
-    desc: { en: 'Try again, or reload the page. We have logged the issue.', ru: 'Попробуйте снова или перезагрузите страницу. Мы записали ошибку.' },
+    title: { en: 'This page failed to load', ru: 'Страница не загрузилась', th: 'หน้านี้โหลดไม่สำเร็จ' },
+    desc: { en: 'Try again, or reload the page. We have logged the issue.', ru: 'Попробуйте снова или перезагрузите страницу. Мы записали ошибку.', th: 'ลองอีกครั้งหรือรีเฟรชหน้านี้ เราได้บันทึกปัญหาไว้แล้ว' },
   },
-  tryAgain: { en: 'Try again', ru: 'Попробовать снова' },
-  reload: { en: 'Reload page', ru: 'Перезагрузить' },
+  tryAgain: { en: 'Try again', ru: 'Попробовать снова', th: 'ลองอีกครั้ง' },
+  reload: { en: 'Reload page', ru: 'Перезагрузить', th: 'รีเฟรชหน้า' },
 };
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -189,12 +190,14 @@ export function useGlobalErrorHandler() {
           window.location.reload();
         } else {
           toast.error(
-            lang === 'ru'
-              ? 'Не удалось загрузить компонент. Обновите страницу.'
-              : 'Failed to load component. Please refresh the page.',
+            pickLang(lang, {
+              ru: 'Не удалось загрузить компонент. Обновите страницу.',
+              en: 'Failed to load component. Please refresh the page.',
+              th: 'โหลดคอมโพเนนต์ไม่สำเร็จ โปรดรีเฟรชหน้า',
+            }),
             {
               action: {
-                label: lang === 'ru' ? 'Обновить' : 'Refresh',
+                label: pickLang(lang, { ru: 'Обновить', en: 'Refresh', th: 'รีเฟรช' }),
                 onClick: () => window.location.reload(),
               },
             }
@@ -202,9 +205,11 @@ export function useGlobalErrorHandler() {
         }
       } else {
         toast.error(
-          lang === 'ru'
-            ? 'Запрос не выполнен. Попробуйте ещё раз.'
-            : 'Request failed. Please try again.'
+          pickLang(lang, {
+            ru: 'Запрос не выполнен. Попробуйте ещё раз.',
+            en: 'Request failed. Please try again.',
+            th: 'คำขอไม่สำเร็จ โปรดลองอีกครั้ง',
+          })
         );
       }
       
@@ -216,9 +221,11 @@ export function useGlobalErrorHandler() {
       if (event.error?.message?.includes('dynamically imported')) {
         event.preventDefault();
         toast.error(
-          lang === 'ru'
-            ? 'Проблема с подключением. Обновите страницу.'
-            : 'Connection issue. Please refresh the page.'
+          pickLang(lang, {
+            ru: 'Проблема с подключением. Обновите страницу.',
+            en: 'Connection issue. Please refresh the page.',
+            th: 'ปัญหาการเชื่อมต่อ โปรดรีเฟรชหน้า',
+          })
         );
       }
     };

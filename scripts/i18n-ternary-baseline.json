@@ -1,0 +1,5 @@
+{
+  "_comment": "Baseline for the binary ru/en ternary backlog enforced by i18n-audit --strict. New violations above these counts fail CI. Lower these numbers as the backlog shrinks; never raise them. Regenerate with: node scripts/i18n-audit.mjs --update-baseline",
+  "ternaryTotal": 20921,
+  "ternaryFiles": 1265
+}

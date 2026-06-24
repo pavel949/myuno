@@ -82,8 +82,12 @@ Deno.serve(async (req) => {
         : { data: null };
 
       const bizName = business?.name_ru || business?.name_en || business?.name_th || "—";
+      // The business owner is Thai — address them in Thai (name_th first).
+      const bizNameTh = business?.name_th || business?.name_en || business?.name_ru || "—";
       const svcName = service?.name_ru || service?.name_th || "—";
+      const svcNameTh = service?.name_th || service?.name_ru || "—";
       const when = booking.date_time ? new Date(booking.date_time).toLocaleString("ru-RU", { timeZone: "Asia/Bangkok" }) : "—";
+      const whenTh = booking.date_time ? new Date(booking.date_time).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" }) : "—";
       const sections: Section[] = [
         { label: "Бизнес / Business", value: bizName },
         { label: "Услуга / Service", value: svcName },
@@ -93,20 +97,28 @@ Deno.serve(async (req) => {
       ];
 
       if (kind === "new_booking") {
-        // → business owner phone + admin
+        // → business owner phone (Thai) + admin (RU)
         const adminWa = await getAdminWhatsApp();
         const adminEmails = await getAdminEmails();
         const { data: ownerProfile } = business?.owner_id
           ? await sb.from("profiles").select("email").eq("id", business.owner_id).maybeSingle()
           : { data: null };
-        const body = `🆕 Новая заявка myUNO\n${bizName}\n${svcName}\n${when}\n฿${booking.total_amount_thb ?? 0}`;
+        // Thai-native copy for the owner who receives this alert.
+        const sectionsTh: Section[] = [
+          { label: "ธุรกิจ", value: bizNameTh },
+          { label: "บริการ", value: svcNameTh },
+          { label: "วันและเวลา", value: whenTh },
+          { label: "ยอดเงิน", value: `฿${booking.total_amount_thb ?? 0}` },
+          { label: "สถานะ", value: booking.status },
+        ];
+        const body = `🆕 คำขอจองใหม่ myUNO\n${bizNameTh}\n${svcNameTh}\n${whenTh}\n฿${booking.total_amount_thb ?? 0}`;
         await notify({
           phone: business?.phone || adminWa,
           emails: [ownerProfile?.email, ...adminEmails],
-          title: "Новая заявка на бронирование",
-          subtitle: bizName,
-          sections,
-          ctaText: "Открыть кабинет",
+          title: "มีคำขอจองใหม่ / New booking request",
+          subtitle: bizNameTh,
+          sections: sectionsTh,
+          ctaText: "เปิดหน้าผู้ขาย",
           ctaUrl: `${SITE_URL}/vendor/thai-business`,
           whatsappBody: body,
         });
@@ -145,16 +157,18 @@ Deno.serve(async (req) => {
       if (!chat || !business) return json({ success: false, error: "chat not found" }, 404, corsHeaders);
 
       const bizName = business.name_ru || business.name_en || business.name_th || "—";
+      const bizNameTh = business.name_th || business.name_en || business.name_ru || "—";
       // If the business owner sent it, notify the customer; otherwise notify the owner.
       const senderIsOwner = msg.sender_id === business.owner_id;
       const preview = (msg.text_translated || msg.text_original || "").slice(0, 120);
 
       if (senderIsOwner) {
+        // → customer: show the translated preview the customer can read, RU/EN copy.
         const { data: customer } = await sb.from("profiles").select("email, phone").eq("id", chat.customer_id).maybeSingle();
         await notify({
           phone: customer?.phone,
           emails: [customer?.email],
-          title: "Новое сообщение",
+          title: "Новое сообщение / New message",
           subtitle: bizName,
           sections: [{ label: "Сообщение / Message", value: preview }],
           ctaText: "Открыть чат",
@@ -162,16 +176,17 @@ Deno.serve(async (req) => {
           whatsappBody: `💬 ${bizName}: ${preview}`,
         });
       } else {
+        // → business owner (Thai): Thai-native copy.
         const { data: ownerProfile } = await sb.from("profiles").select("email").eq("id", business.owner_id).maybeSingle();
         await notify({
           phone: business.phone,
           emails: [ownerProfile?.email],
-          title: "Новое сообщение от клиента",
-          subtitle: bizName,
-          sections: [{ label: "Сообщение / Message", value: preview }],
-          ctaText: "Открыть кабинет",
+          title: "ข้อความใหม่จากลูกค้า / New message from customer",
+          subtitle: bizNameTh,
+          sections: [{ label: "ข้อความ", value: preview }],
+          ctaText: "เปิดหน้าผู้ขาย",
           ctaUrl: `${SITE_URL}/vendor/thai-business`,
-          whatsappBody: `💬 Клиент пишет (${bizName}): ${preview}`,
+          whatsappBody: `💬 ลูกค้าส่งข้อความ (${bizNameTh}): ${preview}`,
         });
       }
       return json({ success: true }, 200, corsHeaders);

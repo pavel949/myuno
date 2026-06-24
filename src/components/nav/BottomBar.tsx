@@ -14,6 +14,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { triggerHaptic } from '@/hooks/useHapticFeedback';
 import { playSound } from '@/hooks/useSoundEffects';
 import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
@@ -109,9 +110,9 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       : totalCols === 3 ? 'grid-cols-3'
       : 'grid-cols-5';
 
-    const renderItem = ({ path, icon: Icon, labelEn, labelRu, exact }: NavItem) => {
-      const active = isActive({ path, icon: Icon, labelEn, labelRu, exact });
-      const label = language === 'ru' ? labelRu : labelEn;
+    const renderItem = ({ path, icon: Icon, labelEn, labelRu, labelTh, exact }: NavItem) => {
+      const active = isActive({ path, icon: Icon, labelEn, labelRu, labelTh, exact });
+      const label = pickLang(language, { ru: labelRu, en: labelEn, th: labelTh });
       return (
         <NavLink
           key={path}
@@ -180,14 +181,14 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
                   handleNavClick(e);
                   setAppsOpen(true);
                 }}
-                aria-label={language === 'ru' ? 'Все сервисы' : 'All apps'}
+                aria-label={pickLang(language, { ru: 'Все сервисы', en: 'All apps', th: 'บริการทั้งหมด' })}
                 className="flex flex-col items-center justify-center gap-[3px] pt-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-none"
               >
                 <div className="w-10 h-10 rounded-none flex items-center justify-center bg-primary/10 border border-primary/25">
                   <LayoutGrid className="w-5 h-5 text-primary" aria-hidden />
                 </div>
                 <span className="text-[10px] font-medium text-muted-foreground/80 leading-none">
-                  {language === 'ru' ? 'Сервисы' : 'Apps'}
+                  {pickLang(language, { ru: 'Сервисы', en: 'Apps', th: 'บริการ' })}
                 </span>
               </button>
             )}
