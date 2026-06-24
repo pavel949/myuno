@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useOrderBySession } from '@/data/repositories/orders/queries';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
 
@@ -27,39 +26,10 @@ export default function WellnessOrderSuccess() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
-  const [order, setOrder] = useState<OrderRow | null>(null);
-  const [loading, setLoading] = useState(!!sessionId);
-
-  useEffect(() => {
-    if (!sessionId) { setLoading(false); return; }
-
-    let attempts = 0;
-    const maxAttempts = 10;
-    let timer: ReturnType<typeof setTimeout>;
-
-    const poll = async () => {
-      const { data } = await (supabase
-        .from('orders') as any)
-        .select('id, order_number, status, total_amount, currency, metadata, created_at')
-        .eq('stripe_session_id', sessionId)
-        .limit(1);
-
-
-      if (data && data.length > 0) {
-        setOrder(data[0] as OrderRow);
-        setLoading(false);
-        return;
-      }
-      if (++attempts < maxAttempts) {
-        timer = setTimeout(poll, 2000);
-      } else {
-        setLoading(false);
-      }
-    };
-
-    poll();
-    return () => clearTimeout(timer);
-  }, [sessionId]);
+  const { order, isResolving: loading } = useOrderBySession<OrderRow>({
+    sessionId,
+    columns: 'id, order_number, status, total_amount, currency, metadata, created_at',
+  });
 
   const vertical = String(order?.metadata?.vertical || 'beauty');
   const info = VERTICAL_PATHS[vertical] || VERTICAL_PATHS.beauty;

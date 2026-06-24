@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Plane, MapPin, Clock, User } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useOrderById } from '@/data/repositories/orders/queries';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
 
@@ -26,40 +26,20 @@ interface OrderDetails {
 export default function TransferSuccess() {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
-  const [order, setOrder] = useState<OrderDetails | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
   const orderId = searchParams.get('order_id');
 
-  useEffect(() => {
-    if (!orderId) {
-      setIsLoading(false);
-      return;
-    }
-
-    const fetchOrder = async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          order_number,
-          total_amount,
-          currency,
-          start_at,
-          metadata,
-          order_addresses(address_type, address_text),
-          order_participants(name, phone)
-        `)
-        .eq('id', orderId)
-        .single();
-
-      if (!error && data) {
-        setOrder(data as OrderDetails);
-      }
-      setIsLoading(false);
-    };
-
-    fetchOrder();
-  }, [orderId]);
+  const { order, isLoading } = useOrderById<OrderDetails>({
+    orderId,
+    columns: `
+      order_number,
+      total_amount,
+      currency,
+      start_at,
+      metadata,
+      order_addresses(address_type, address_text),
+      order_participants(name, phone)
+    `,
+  });
 
   const isRu = language === 'ru';
   const metadata = order?.metadata || {};

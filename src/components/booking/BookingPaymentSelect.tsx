@@ -1,9 +1,8 @@
 import { useState, useEffect, forwardRef } from 'react';
 import { CreditCard, Wallet, Banknote, Smartphone, Loader2, ChevronRight, Star, QrCode } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { usePaymentMethods } from '@/hooks/usePaymentMethods';
+import { useWalletBalance } from '@/hooks/useWalletBalance';
 import { cn } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
@@ -76,30 +75,11 @@ export const BookingPaymentSelect = forwardRef<HTMLDivElement, BookingPaymentSel
   onCardSelect,
 }, ref) => {
   const { language } = useLanguage();
-  const { user } = useAuth();
-  const [walletBalance, setWalletBalance] = useState<number | null>(null);
-  const [loadingWallet, setLoadingWallet] = useState(false);
   const [showCardSheet, setShowCardSheet] = useState(false);
-  
-  const { paymentMethods, isLoading: cardsLoading, defaultMethod } = usePaymentMethods();
 
-  useEffect(() => {
-    if (!showWallet || !user) return;
-    let isMounted = true;
-    setLoadingWallet(true);
-    supabase
-      .from('wallets')
-      .select('balance')
-      .eq('user_id', user.id)
-      .single()
-      .then(({ data }) => {
-        if (isMounted) {
-          setWalletBalance(data?.balance ?? 0);
-          setLoadingWallet(false);
-        }
-      });
-    return () => { isMounted = false; };
-  }, [user, showWallet]);
+  const { paymentMethods, isLoading: cardsLoading, defaultMethod } = usePaymentMethods();
+  const { data: walletData, isLoading: loadingWallet } = useWalletBalance({ enabled: showWallet });
+  const walletBalance = showWallet ? walletData ?? null : null;
 
   useEffect(() => {
     if (selected === 'online' && defaultMethod && !selectedCardId && onCardSelect) {

@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { Calendar, MapPin, Phone } from 'lucide-react';
 import { resolveIcon } from '@/lib/iconMap';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useOrderBySession } from '@/data/repositories/orders/queries';
 import { format } from 'date-fns';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
@@ -36,34 +35,12 @@ export default function ServiceOrderSuccess() {
     functionIcon?: string;
   } | null) || {};
 
-  const [order, setOrder] = useState<OrderData | null>(null);
-  const [loading, setLoading] = useState(!!sessionId);
-
-  useEffect(() => {
-    if (!sessionId) return;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    const fetchOrder = async () => {
-      const { data } = await supabase
-        .from('orders')
-        .select('id, order_number, total_amount, currency, status, start_at, metadata')
-        .eq('order_type', 'service')
-        .filter('metadata->>stripe_session_id', 'eq', sessionId)
-        .maybeSingle();
-
-      if (data) {
-        setOrder(data as unknown as OrderData);
-        setLoading(false);
-      } else if (++attempts < maxAttempts) {
-        setTimeout(fetchOrder, 2000);
-      } else {
-        setLoading(false);
-      }
-    };
-
-    fetchOrder();
-  }, [sessionId]);
+  const { order, isResolving: loading } = useOrderBySession<OrderData>({
+    sessionId,
+    orderType: 'service',
+    sessionColumn: 'metadata->>stripe_session_id',
+    columns: 'id, order_number, total_amount, currency, status, start_at, metadata',
+  });
 
   const details = order ? (
     <div className="space-y-2 text-sm">
