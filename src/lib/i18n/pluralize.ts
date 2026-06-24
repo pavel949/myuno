@@ -39,6 +39,11 @@ export function pluralizeDays(n: number, lang: Lang): string {
   return pickRu(n, ['день', 'дня', 'дней']);
 }
 
+export function pluralizeServices(n: number, lang: Lang): string {
+  if (!isRussian(lang)) return n === 1 ? 'service' : 'services';
+  return pickRu(n, ['услуга', 'услуги', 'услуг']);
+}
+
 /**
  * Convenience: returns "5 ночей" / "5 nights"
  */
@@ -48,4 +53,11 @@ export function formatNights(n: number, lang: Lang): string {
 
 export function formatGuests(n: number, lang: Lang): string {
   return `${n} ${pluralizeGuests(n, lang)}`;
+}
+
+/**
+ * Convenience: returns "5 услуг" / "5 services"
+ */
+export function formatServices(n: number, lang: Lang): string {
+  return `${n} ${pluralizeServices(n, lang)}`;
 }

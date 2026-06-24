@@ -6,7 +6,7 @@
  * Calm, authoritative, GOV-style — answers one question per screen:
  * "what should I do next?".
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Search, SlidersHorizontal, X, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -22,9 +22,14 @@ import { cn } from '@/lib/utils';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import { trackSituationClick } from '@/lib/analytics/track';
+import { formatServices } from '@/lib/i18n/pluralize';
+import { getWhatsAppUrl } from '@/lib/config/contacts';
+import { createErrorHandler } from '@/lib/errorHandler';
 import { NavigatorClusterSection } from './NavigatorClusterSection';
 import { PersonalGrid } from '@/components/superapp/PersonalGrid';
 import type { LifeSituation } from '@/hooks/useLifeOS';
+
+const errorLog = createErrorHandler('NavigatorPageV3');
 
 const CLUSTER_ORDER: ClusterId[] = ['arrive', 'live', 'legal', 'manage', 'invest', 'build'];
 
@@ -70,17 +75,26 @@ function buildSituationClusterMap(): Record<string, ClusterId> {
   return Object.fromEntries(Object.entries(map).map(([k, v]) => [k, v.clusterId]));
 }
 
+/** situationCode -> primary clusterId — derived from a static SSOT, computed once. */
+const SITUATION_CLUSTER_MAP: Record<string, ClusterId> = buildSituationClusterMap();
+
 export default function NavigatorPageV3() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const { data: situations, isLoading, isError } = useLifeSituations();
-  const { data: counts } = useSituationServiceCounts();
+  const { data: counts, isError: countsError } = useSituationServiceCounts();
   const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
   const role = useLifeOSRole();
   const [query, setQuery] = useState('');
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
 
-  const situationClusterMap = useMemo(buildSituationClusterMap, []);
+  // Service counts are an enhancement, not a blocker — but surface the failure
+  // to monitoring instead of silently showing every situation as "open".
+  useEffect(() => {
+    if (countsError) {
+      errorLog.silent(new Error('useSituationServiceCounts failed'), 'load_service_counts');
+    }
+  }, [countsError]);
 
   const rankedSituations = useMemo(() => {
     if (!situations) return [];
@@ -105,11 +119,11 @@ export default function NavigatorPageV3() {
       arrive: [], live: [], manage: [], invest: [], legal: [], build: [],
     };
     for (const s of filteredSituations) {
-      const cid = situationClusterMap[s.code] ?? 'live';
+      const cid = SITUATION_CLUSTER_MAP[s.code] ?? 'live';
       buckets[cid].push(s);
     }
     return buckets;
-  }, [filteredSituations, situationClusterMap]);
+  }, [filteredSituations]);
 
   // code -> {ru,en} label map for MiniAppCard hint resolution
   const situationLabels = useMemo(() => {
@@ -143,9 +157,9 @@ export default function NavigatorPageV3() {
   const forYou = useMemo(() => {
     const allowed = new Set([...visibleClusters.primary, ...visibleClusters.rest]);
     return filteredSituations
-      .filter((s) => allowed.has(situationClusterMap[s.code] ?? 'live'))
+      .filter((s) => allowed.has(SITUATION_CLUSTER_MAP[s.code] ?? 'live'))
       .slice(0, 3);
-  }, [filteredSituations, visibleClusters, situationClusterMap]);
+  }, [filteredSituations, visibleClusters]);
 
   const hasRealPersonas = personas.length > 0;
 
@@ -167,7 +181,11 @@ export default function NavigatorPageV3() {
           </p>
 
           {/* Persona chip-row */}
-          <div className="mt-6 flex items-center gap-2 flex-wrap">
+          <div
+            className="mt-6 flex items-center gap-2 flex-wrap"
+            role="group"
+            aria-label={isRu ? 'Ваша роль' : 'Your role'}
+          >
             <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
               {isRu ? 'Роль' : 'Role'}
             </span>
@@ -194,7 +212,7 @@ export default function NavigatorPageV3() {
               onClick={() => setRoleSheetOpen(true)}
               className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors min-h-[28px]"
             >
-              <SlidersHorizontal className="w-3 h-3" strokeWidth={2} />
+              <SlidersHorizontal aria-hidden="true" className="w-3 h-3" strokeWidth={2} />
               {isRu ? 'Изменить' : 'Edit'}
             </button>
           </div>
@@ -202,6 +220,7 @@ export default function NavigatorPageV3() {
           {/* Search */}
           <div className="mt-5 relative">
             <Search
+              aria-hidden="true"
               className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground pointer-events-none"
               strokeWidth={1.75}
             />
@@ -224,7 +243,7 @@ export default function NavigatorPageV3() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
                 aria-label={isRu ? 'Очистить' : 'Clear'}
               >
-                <X className="w-4 h-4" strokeWidth={1.75} />
+                <X aria-hidden="true" className="w-4 h-4" strokeWidth={1.75} />
               </button>
             )}
           </div>
@@ -235,7 +254,7 @@ export default function NavigatorPageV3() {
               to="/map"
               className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
             >
-              <MapPin className="w-3.5 h-3.5" strokeWidth={1.75} />
+              <MapPin aria-hidden="true" className="w-3.5 h-3.5" strokeWidth={1.75} />
               {isRu ? 'Показать на карте' : 'See on map'}
             </Link>
           </div>
@@ -250,7 +269,7 @@ export default function NavigatorPageV3() {
         {isLoading && (
           <div className="space-y-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-14 w-full rounded-none" />
+              <Skeleton key={`nav-skeleton-${i}`} className="h-14 w-full rounded-none" />
             ))}
           </div>
         )}
@@ -281,13 +300,14 @@ export default function NavigatorPageV3() {
                 const title = isRu ? s.title_ru : s.title_en;
                 const desc = isRu ? s.description_ru : s.description_en;
                 const c = counts?.[s.id];
+                const href = resolveSituationHref(s.code);
                 return (
                   <li key={s.id}>
                     <Link
-                      to={resolveSituationHref(s.code)}
+                      to={href}
                       onClick={() => trackSituationClick(s.code, {
                         source: 'navigator_v3_for_you',
-                        href: resolveSituationHref(s.code),
+                        href,
                         count: c,
                       })}
                       className="group flex items-center gap-4 py-5 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[64px]"
@@ -303,9 +323,10 @@ export default function NavigatorPageV3() {
                         )}
                       </div>
                       <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
-                        {typeof c === 'number' && c > 0 ? c : '—'}
+                        {typeof c === 'number' && c > 0 ? formatServices(c, language) : (isRu ? 'Открыть' : 'Open')}
                       </span>
                       <ArrowRight
+                        aria-hidden="true"
                         className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors"
                         strokeWidth={1.75}
                       />
@@ -375,7 +396,11 @@ export default function NavigatorPageV3() {
               {isRu ? 'Ситуации скоро появятся' : 'Situations are coming soon'}
             </h2>
             <a
-              href="https://wa.me/66922407355"
+              href={getWhatsAppUrl(
+                isRu
+                  ? 'Здравствуйте! Подскажите по сервисам myUNO.'
+                  : 'Hello! I have a question about myUNO services.',
+              )}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block mt-4 text-[13px] underline text-primary hover:no-underline"

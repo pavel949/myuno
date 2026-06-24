@@ -16,12 +16,14 @@ import {
   type LifeOSCatalogItem,
   type LifeSituation,
 } from '@/hooks/useLifeOS';
-import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { useUserPersonas, type UserPersona } from '@/hooks/useUserPersonas';
 import { useSituationServiceCounts } from '@/hooks/useSituationServiceCounts';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import { trackSituationClick } from '@/lib/analytics/track';
+import { formatServices } from '@/lib/i18n/pluralize';
+import { hexTint, accentColor } from '@/lib/ui/colorTint';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getEntityType, getEntityTypeLabel } from '@/lib/config/entityTypes';
@@ -67,18 +69,22 @@ function ServiceCard({ item, isRu }: { item: LifeOSCatalogItem; isRu: boolean })
       className={cn(
         'group flex flex-col gap-3 p-4 min-h-[140px]',
         'border border-border bg-card text-card-foreground',
-        'transition-all duration-150',
+        'transition-[border-color,transform] duration-150',
         'hover:border-primary/40 hover:-translate-y-px',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
       )}
     >
       <div className="flex items-center gap-2">
-        <TypeIcon className="w-4 h-4 text-muted-foreground" strokeWidth={1.75} />
+        <TypeIcon aria-hidden="true" className="w-4 h-4 text-muted-foreground" strokeWidth={1.75} />
         <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
           {typeLabel}
         </span>
         {isVerified && (
-          <ShieldCheck className="w-3.5 h-3.5 text-accent ml-auto" strokeWidth={1.75} />
+          <ShieldCheck
+            className="w-3.5 h-3.5 text-accent ml-auto"
+            strokeWidth={1.75}
+            aria-label={isRu ? 'Проверено' : 'Verified'}
+          />
         )}
       </div>
 
@@ -89,7 +95,7 @@ function ServiceCard({ item, isRu }: { item: LifeOSCatalogItem; isRu: boolean })
       <div className="mt-auto flex items-end justify-between gap-2 pt-2">
         {item.location && (
           <span className="inline-flex items-center gap-1 text-[12px] text-muted-foreground truncate">
-            <MapPin className="w-3 h-3 shrink-0" strokeWidth={1.75} />
+            <MapPin aria-hidden="true" className="w-3 h-3 shrink-0" strokeWidth={1.75} />
             <span className="truncate">{item.location}</span>
           </span>
         )}
@@ -114,7 +120,7 @@ function ServiceCard({ item, isRu }: { item: LifeOSCatalogItem; isRu: boolean })
 function pickRelatedSituations(
   current: LifeSituation,
   all: LifeSituation[],
-  effectivePersonas: ReturnType<typeof useUserPersonas>['effectivePersonas'],
+  effectivePersonas: UserPersona[],
   limit = 3,
 ): LifeSituation[] {
   if (!all || all.length <= 1) return [];
@@ -152,6 +158,12 @@ export default function SituationDetailPage() {
 
   const situation = situations?.find((s) => s.code === code);
 
+  // Situation-derived view values (computed once; avoids in-JSX IIFE/double-eval)
+  const sTitle = situation ? (isRu ? situation.title_ru : situation.title_en) : '';
+  const sDesc = situation ? (isRu ? situation.description_ru : situation.description_en) : null;
+  const sTint = hexTint(situation?.color, 0.125);
+  const sIconColor = accentColor(situation?.color);
+
   const relatedSituations = useMemo(() => {
     if (!situation || !situations) return [];
     return pickRelatedSituations(situation, situations, effectivePersonas, 3);
@@ -164,7 +176,7 @@ export default function SituationDetailPage() {
           to="/discover"
           className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
-          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
+          <ArrowLeft aria-hidden="true" className="w-4 h-4" strokeWidth={1.75} />
           {isRu ? 'Все ситуации' : 'All situations'}
         </Link>
 
@@ -190,30 +202,24 @@ export default function SituationDetailPage() {
         {situation && (
           <>
             <header className="mb-8 md:mb-10">
-              {(() => {
-                const c = situation.color ?? null;
-                const tint = c && c.startsWith('#') ? `${c}20` : 'hsl(var(--primary) / 0.12)';
-                const iconColor = c ?? 'hsl(var(--primary))';
-                return (
-                  <div
-                    className="w-16 h-16 flex items-center justify-center mb-5"
-                    style={{ backgroundColor: tint }}
-                  >
-                    <DynamicIcon
-                      name={situation.icon || 'Compass'}
-                      className="w-8 h-8"
-                      style={{ color: iconColor }}
-                      strokeWidth={1.5}
-                    />
-                  </div>
-                );
-              })()}
+              <div
+                className="w-16 h-16 flex items-center justify-center mb-5"
+                style={{ backgroundColor: sTint }}
+              >
+                <DynamicIcon
+                  name={situation.icon || 'Compass'}
+                  aria-hidden="true"
+                  className="w-8 h-8"
+                  style={{ color: sIconColor }}
+                  strokeWidth={1.5}
+                />
+              </div>
               <h1 className="text-[28px] sm:text-[36px] font-serif font-semibold leading-[1.1] tracking-[-0.02em] text-foreground">
-                {isRu ? situation.title_ru : situation.title_en}
+                {sTitle}
               </h1>
-              {(isRu ? situation.description_ru : situation.description_en) && (
+              {sDesc && (
                 <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground max-w-2xl leading-[1.5]">
-                  {isRu ? situation.description_ru : situation.description_en}
+                  {sDesc}
                 </p>
               )}
             </header>
@@ -239,7 +245,7 @@ export default function SituationDetailPage() {
               {itemsLoading && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="h-[140px] rounded-none" />
+                    <Skeleton key={`service-skeleton-${i}`} className="h-[140px] rounded-none" />
                   ))}
                 </div>
               )}
@@ -274,23 +280,23 @@ export default function SituationDetailPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {relatedSituations.map((rel) => {
-                    const rc = rel.color ?? null;
-                    const tint = rc && rc.startsWith('#') ? `${rc}1A` : 'hsl(var(--primary) / 0.10)';
-                    const iconColor = rc ?? 'hsl(var(--primary))';
+                    const tint = hexTint(rel.color, 0.10);
+                    const iconColor = accentColor(rel.color);
                     const count = counts?.[rel.id];
+                    const href = resolveSituationHref(rel.code);
                     return (
                       <Link
                         key={rel.id}
-                        to={resolveSituationHref(rel.code)}
+                        to={href}
                         onClick={() => trackSituationClick(rel.code, {
                           source: 'related_situations',
-                          href: resolveSituationHref(rel.code),
+                          href,
                           count,
                         })}
                         className={cn(
                           'group flex items-start gap-3 p-4 min-h-[88px]',
                           'border border-border bg-card text-card-foreground',
-                          'transition-all duration-150',
+                          'transition-[border-color,transform] duration-150',
                           'hover:border-primary/40 hover:-translate-y-px',
                           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                         )}
@@ -301,6 +307,7 @@ export default function SituationDetailPage() {
                         >
                           <DynamicIcon
                             name={rel.icon || 'Compass'}
+                            aria-hidden="true"
                             className="w-5 h-5"
                             style={{ color: iconColor }}
                             strokeWidth={1.75}
@@ -312,13 +319,14 @@ export default function SituationDetailPage() {
                               {isRu ? rel.title_ru : rel.title_en}
                             </span>
                             <ArrowUpRight
-                              className="w-3.5 h-3.5 text-muted-foreground/60 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0"
+                              aria-hidden="true"
+                              className="w-3.5 h-3.5 text-muted-foreground/60 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-[color,transform] shrink-0"
                               strokeWidth={2}
                             />
                           </div>
                           {typeof count === 'number' && count > 0 && (
                             <span className="mt-1 inline-block font-mono text-[10px] text-muted-foreground">
-                              {count} {isRu ? (count === 1 ? 'сервис' : 'сервисов') : (count === 1 ? 'service' : 'services')}
+                              {formatServices(count, language)}
                             </span>
                           )}
                         </div>
