@@ -271,7 +271,14 @@ Deno.serve(async (req) => {
         .upsert({ user_id: app.user_id, role: "vendor" }, { onConflict: "user_id,role" });
 
       if (roleErr) {
+        // Fatal: without the vendor role the applicant cannot access /vendor even
+        // though their rows are active. Leave the application pending so an admin
+        // can retry — the upsert is idempotent (onConflict) so retry is safe.
         console.error("[approve-partner-application] user_roles upsert failed:", roleErr);
+        return new Response(
+          JSON.stringify({ error: "Failed to grant vendor role", details: roleErr.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
     }
 

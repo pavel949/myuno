@@ -44,7 +44,7 @@ export function ResultStep({ result, lang, onReset }: Props) {
           {COPY.proposalLine[lang]} <strong className="text-foreground">{stageLabel}</strong> · <span data-testid="onboarding-result-persona">{proposal.detected_persona}</span>
         </p>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
-          {proposal.active_clusters.map((c) => (
+          {(proposal.active_clusters ?? []).map((c) => (
             <span
               key={c}
               className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"

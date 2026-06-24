@@ -7,8 +7,7 @@
  */
 import { sendEmail, buildEmailHtml } from "../_shared/notify-utils.ts";
 import { createServiceClient, createClient } from "../_shared/supabase.ts";
-
-const ADMIN_EMAILS = ["pavel@ignatevestate.com", "pi@myuno.app"];
+import { getAdminEmails } from "../_shared/admin-config.ts";
 const FROM = Deno.env.get("RESEND_FROM_EMAIL") ?? "myUNO Partners <onboarding@resend.dev>";
 
 const corsHeaders = {
@@ -86,7 +85,7 @@ Deno.serve(async (req) => {
     });
 
     const adminResult = await sendEmail({
-      to: ADMIN_EMAILS,
+      to: await getAdminEmails(),
       subject: `New partner application: ${app.business_name ?? "Unknown"}`,
       html: adminHtml,
       from: FROM,

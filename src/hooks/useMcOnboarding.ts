@@ -43,11 +43,13 @@ export function useMcOnboarding() {
         .eq('company_id', activeCompany.company_id)
         .maybeSingle();
       if (error) throw error;
-      // Auto-create row if missing
+      // Auto-create row if missing. Use upsert (company_id is UNIQUE) so two
+      // concurrent query subscribers that both read null don't race into a
+      // duplicate-key error — the loser simply gets the existing row back.
       if (!data) {
         const { data: created, error: insErr } = await supabase
           .from('mc_onboarding_progress')
-          .insert({ company_id: activeCompany.company_id })
+          .upsert({ company_id: activeCompany.company_id }, { onConflict: 'company_id' })
           .select()
           .single();
         if (insErr) throw insErr;
