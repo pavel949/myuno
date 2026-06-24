@@ -177,6 +177,31 @@ export default tseslint.config(
       "no-restricted-syntax": ["error", ...TONE_OF_VOICE_RULES, ...CANONICAL_SYNONYM_RULES],
     },
   },
+  // ── Architecture · data-access boundary (warn) ──
+  // ARCHITECTURE_V2 §13 + Increment 1: presentation layers (components, pages)
+  // must not talk to Supabase directly. Data access belongs in a domain hook
+  // (src/hooks/*) or a src/data repository, where caching, error handling and
+  // RLS reasoning live in one place. Warn-level + ratchet (scripts/validate-
+  // architecture.mjs) so the ~243 existing call-sites can be paid down without
+  // blocking CI. Flip to "error" per-folder as each is migrated (Increment 2).
+  {
+    files: ["src/components/**/*.{ts,tsx}", "src/pages/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "warn",
+        {
+          paths: [
+            {
+              name: "@/integrations/supabase/client",
+              message:
+                "Architecture §13: components/pages must not import the raw Supabase client. " +
+                "Use a domain hook (src/hooks/*) or a src/data repository. See src/data/README.md.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // ── Source-of-truth files: opt out of the canonical-synonyms rule ──
   // These files legitimately list forbidden terms as data / regex patterns,
   // so applying the rule to them would create a self-referential lint error.

@@ -1,0 +1,88 @@
+name: Validate Architecture
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate-architecture:
+    name: Architecture boundaries (ARCHITECTURE_V2 §13)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history so `git ls-files` inside the validator behaves as it
+          # does locally.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Prepare report directory
+        run: mkdir -p reports/architecture
+
+      # Full per-group listing for the artifact + job log.
+      - name: Run validate:architecture (verbose, non-strict)
+        run: |
+          set -o pipefail
+          node scripts/validate-architecture.mjs --verbose \
+            > >(tee reports/architecture/validate-architecture.verbose.log) \
+            2> >(tee reports/architecture/validate-architecture.verbose.err >&2)
+        continue-on-error: true
+
+      # Ratchet gate: fails if cross-cluster / raw-supabase counts EXCEED the
+      # committed architecture-baseline.json, or if a page folder is unmapped.
+      - name: Run validate:architecture:strict (ratchet gate)
+        id: strict
+        run: |
+          set -o pipefail
+          node scripts/validate-architecture.mjs --strict \
+            > >(tee reports/architecture/validate-architecture.strict.log) \
+            2> >(tee reports/architecture/validate-architecture.strict.err >&2)
+        continue-on-error: true
+
+      # Dead-code report — informational only (never blocks).
+      - name: Run knip (warn-only)
+        run: |
+          set -o pipefail
+          npm run knip \
+            > >(tee reports/architecture/knip.log) \
+            2> >(tee reports/architecture/knip.err >&2) || true
+        continue-on-error: true
+
+      - name: Append summary to GitHub job summary
+        if: always()
+        run: |
+          {
+            echo '# Architecture validation';
+            echo '';
+            echo '```';
+            cat reports/architecture/validate-architecture.strict.log 2>/dev/null | tail -n 25 || true;
+            echo '```';
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload architecture report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validate-architecture-report-${{ github.run_id }}
+          path: reports/architecture/
+          retention-days: 30
+          if-no-files-found: warn
+
+      # Re-fail after artifact upload so the report is always downloadable.
+      - name: Enforce ratchet outcome
+        if: always() && steps.strict.outcome != 'success'
+        run: |
+          echo "::error::validate:architecture:strict reported a ratchet regression. See artifact 'validate-architecture-report-${{ github.run_id }}'."
+          exit 1
