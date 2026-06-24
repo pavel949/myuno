@@ -337,6 +337,8 @@ export const APP_ROUTES = {
   DELIVERY: '/delivery',
 
   // ── Thai Business / Local Services (feature_flag:thai_business_layer) ──
+  /** Public B2B acquisition landing — invites Thai businesses to partner. */
+  THAI_BUSINESS_PARTNER: '/thai-business',
   THAI_SERVICES: '/thai-services',
   THAI_SERVICES_DETAIL: (id: string) => `/thai-services/${id}`,
   THAI_MY_BOOKINGS: '/thai-services/my-bookings',

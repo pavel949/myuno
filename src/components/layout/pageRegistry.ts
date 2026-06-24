@@ -301,6 +301,7 @@ export const ThaiServicesIndex = lazy(() => import('@/pages/thaiServices/ThaiSer
 export const ThaiBusinessDetail = lazy(() => import('@/pages/thaiServices/ThaiBusinessDetail'));
 export const ThaiMyBookings = lazy(() => import('@/pages/thaiServices/ThaiMyBookings'));
 export const ThaiBusinessLanding = lazy(() => import('@/pages/thaiServices/ThaiBusinessLanding'));
+export const ThaiBusinessPartner = lazy(() => import('@/pages/thaiServices/ThaiBusinessPartner'));
 export const VendorThaiBusiness = lazy(() => import('@/pages/vendor/thaiBusiness/ThaiBusinessDashboard'));
 export const AdminThaiBusiness = lazy(() => import('@/pages/admin/AdminThaiBusiness'));
 
