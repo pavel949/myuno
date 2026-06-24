@@ -68,18 +68,39 @@ Deno.serve(async (req) => {
       metadata: { order_id, transfer_reject_reason: String(reason || "operator_reject").slice(0, 240) },
     });
 
-    await sb().from("orders").update({
+    // The Stripe refund already moved real money. If the DB write recording it
+    // fails, the platform would still show the order as 'confirmed' while the
+    // customer has been refunded — a books/Stripe divergence. Surface a 500 with
+    // the refund id so a human can reconcile, instead of returning success on an
+    // inconsistent state.
+    const { error: orderUpdateError } = await sb().from("orders").update({
       status: "refunded",
       metadata: { ...meta, refunded_at: new Date().toISOString(), refund_method: "stripe", refund_id: refund.id, refund_reason: reason || null },
     }).eq("id", order_id);
 
-    // Audit trail: record the status transition to 'refunded'.
-    await sb().from("order_status_history").insert({
+    if (orderUpdateError) {
+      console.error(`[refund-transfer-order] CRITICAL: Stripe refund ${refund.id} succeeded but orders.update failed for order ${order_id}:`, orderUpdateError);
+      return new Response(
+        JSON.stringify({
+          error: "Refund processed by Stripe but the order could not be updated. Please contact support for reconciliation.",
+          refund_id: refund.id,
+          needs_reconciliation: true,
+        }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Audit trail: record the status transition to 'refunded' (non-fatal, but log
+    // so a gap in the history is visible).
+    const { error: historyError } = await sb().from("order_status_history").insert({
       order_id,
       from_status: order.status || null,
       to_status: "refunded",
       reason: `Stripe refund ${refund.id}: ${String(reason || "operator_reject")}`,
     });
+    if (historyError) {
+      console.error(`[refund-transfer-order] order_status_history insert failed for order ${order_id} (refund ${refund.id}):`, historyError);
+    }
 
     // TODO(ledger): no reversing-ledger RPC exists yet (only record_ledger_entries
     // for forward postings). Until a `reverse_ledger_entries`/refund RPC is added,
