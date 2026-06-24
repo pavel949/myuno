@@ -1,5 +1,6 @@
 import { toast } from 'sonner';
 import { getStoredLang } from '@/lib/languageConfig';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { supabase } from '@/integrations/supabase/client';
 
 type ErrorSeverity = 'info' | 'warning' | 'error' | 'critical';
@@ -16,8 +17,10 @@ interface ErrorHandlerOptions {
   showToast?: boolean;
   toastTitle?: string;
   toastTitleRu?: string;
+  toastTitleTh?: string;
   toastDescription?: string;
   toastDescriptionRu?: string;
+  toastDescriptionTh?: string;
   context?: ErrorContext;
   silent?: boolean;
 }
@@ -46,30 +49,36 @@ function isAbortError(error: unknown): boolean {
 }
 
 // Default error messages by type
-const DEFAULT_MESSAGES: Record<string, { en: string; ru: string }> = {
+const DEFAULT_MESSAGES: Record<string, { en: string; ru: string; th: string }> = {
   network: {
     en: 'Network error. Please check your connection.',
     ru: 'Ошибка сети. Проверьте подключение.',
+    th: 'เกิดข้อผิดพลาดของเครือข่าย โปรดตรวจสอบการเชื่อมต่อ',
   },
   auth: {
     en: 'Authentication error. Please sign in again.',
     ru: 'Ошибка авторизации. Войдите снова.',
+    th: 'เกิดข้อผิดพลาดในการยืนยันตัวตน โปรดเข้าสู่ระบบอีกครั้ง',
   },
   permission: {
     en: 'You don\'t have permission for this action.',
     ru: 'У вас нет прав для этого действия.',
+    th: 'คุณไม่มีสิทธิ์ดำเนินการนี้',
   },
   validation: {
     en: 'Please check the entered data.',
     ru: 'Проверьте введённые данные.',
+    th: 'โปรดตรวจสอบข้อมูลที่กรอก',
   },
   server: {
     en: 'Server error. Please try again later.',
     ru: 'Ошибка сервера. Попробуйте позже.',
+    th: 'เกิดข้อผิดพลาดของเซิร์ฟเวอร์ โปรดลองอีกครั้งภายหลัง',
   },
   unknown: {
     en: 'An unexpected error occurred.',
     ru: 'Произошла непредвиденная ошибка.',
+    th: 'เกิดข้อผิดพลาดที่ไม่คาดคิด',
   },
 };
 
@@ -172,15 +181,16 @@ export function handleError(error: unknown, options: ErrorHandlerOptions = {}): 
     showToast = true,
     toastTitle,
     toastTitleRu,
+    toastTitleTh,
     toastDescription,
     toastDescriptionRu,
+    toastDescriptionTh,
     context = {},
     silent = false,
   } = options;
 
   const errorType = detectErrorType(error);
   const lang = getCurrentLanguage();
-  const isRu = lang === 'ru';
   const isDev = import.meta.env.DEV;
 
   // Ignore expected request-cancellation noise during navigation.
@@ -204,14 +214,20 @@ export function handleError(error: unknown, options: ErrorHandlerOptions = {}): 
   // Show toast notification
   if (showToast && !silent) {
     const defaultMsg = DEFAULT_MESSAGES[errorType];
-    
-    const title = isRu 
-      ? (toastTitleRu || toastTitle || (severity === 'error' ? 'Ошибка' : 'Внимание'))
-      : (toastTitle || (severity === 'error' ? 'Error' : 'Warning'));
-    
-    const description = isRu
-      ? (toastDescriptionRu || toastDescription || defaultMsg.ru)
-      : (toastDescription || defaultMsg.en);
+
+    // Tri-lingual: th → en fallback for custom titles (callers rarely pass Thai yet),
+    // but DEFAULT_MESSAGES carries proper Thai so the generic case is fully localised.
+    const title = pickLang(lang, {
+      ru: toastTitleRu || toastTitle || (severity === 'error' ? 'Ошибка' : 'Внимание'),
+      en: toastTitle || (severity === 'error' ? 'Error' : 'Warning'),
+      th: toastTitleTh || toastTitle || (severity === 'error' ? 'ข้อผิดพลาด' : 'แจ้งเตือน'),
+    });
+
+    const description = pickLang(lang, {
+      ru: toastDescriptionRu || toastDescription || defaultMsg.ru,
+      en: toastDescription || defaultMsg.en,
+      th: toastDescriptionTh || toastDescription || defaultMsg.th,
+    });
 
     if (severity === 'error' || severity === 'critical') {
       toast.error(title, { description });

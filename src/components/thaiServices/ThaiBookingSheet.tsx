@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCreateThaiBooking } from '@/hooks/thaiServices/useThaiServices';
 import { buildIcs, downloadIcs } from '@/lib/thaiServices/ics';
@@ -44,7 +45,7 @@ export function ThaiBookingSheet({ business, services, open, onOpenChange, prese
   const [payment, setPayment] = useState<'on_site' | 'deposit'>('on_site');
 
   const service = useMemo(() => services.find((s) => s.id === serviceId) ?? null, [services, serviceId]);
-  const svcName = (s: ThaiService) => (language === 'ru' ? s.name_ru || s.name_th : s.name_th);
+  const svcName = (s: ThaiService) => pickLang(language, { ru: s.name_ru || s.name_th, en: s.name_th, th: s.name_th });
 
   const submit = async () => {
     const notes = [name && `Имя: ${name}`, phone && `Тел: ${phone}`, `Оплата: ${payment}`].filter(Boolean).join(' · ');
@@ -63,7 +64,7 @@ export function ThaiBookingSheet({ business, services, open, onOpenChange, prese
   const addToCalendar = () => {
     const start = dateTime ? new Date(dateTime) : new Date();
     const ics = buildIcs({
-      title: `${business.name_ru || business.name_th} — ${service ? svcName(service) : ''}`,
+      title: `${pickLang(language, { ru: business.name_ru || business.name_th, en: business.name_en || business.name_th, th: business.name_th })} — ${service ? svcName(service) : ''}`,
       start,
       durationMinutes: service?.duration_minutes ?? 60,
       location: business.address ?? '',
@@ -147,7 +148,7 @@ export function ThaiBookingSheet({ business, services, open, onOpenChange, prese
             <div className="space-y-3">
               <Label>{t('thai.booking.summary')}</Label>
               <div className="border border-border p-3 text-sm space-y-1">
-                <div className="flex justify-between"><span className="text-muted-foreground">{business.name_ru || business.name_th}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">{pickLang(language, { ru: business.name_ru || business.name_th, en: business.name_en || business.name_th, th: business.name_th })}</span></div>
                 {service && <div className="flex justify-between"><span>{svcName(service)}</span><span className="font-mono">{formatPrice(service.price_thb)}</span></div>}
                 {dateTime && <div className="flex justify-between"><span className="text-muted-foreground">{new Date(dateTime).toLocaleString()}</span></div>}
               </div>

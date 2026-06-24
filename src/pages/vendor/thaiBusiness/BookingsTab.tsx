@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useBusinessBookings, useUpdateThaiBookingStatus } from '@/hooks/thaiServices/useThaiServices';
 import { THAI_BOOKING_STATUS_LABELS, canTransition } from '@/lib/thaiServices/booking';
 import type { ThaiBooking, ThaiBookingStatus } from '@/types/thaiBusiness';
@@ -35,7 +36,7 @@ export function BookingsTab({ businessId }: { businessId: string }) {
             onClick={() => setStatusFilter(f)}
             className={`text-sm rounded-full border px-3 py-1.5 ${statusFilter === f ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground'}`}
           >
-            {f === 'all' ? 'Все' : (language === 'ru' ? THAI_BOOKING_STATUS_LABELS[f].ru : THAI_BOOKING_STATUS_LABELS[f].en)}
+            {f === 'all' ? pickLang(language, { ru: 'Все', en: 'All', th: 'ทั้งหมด' }) : pickLang(language, THAI_BOOKING_STATUS_LABELS[f])}
           </button>
         ))}
       </div>
@@ -52,7 +53,7 @@ export function BookingsTab({ businessId }: { businessId: string }) {
                 <div key={b.id} className="border border-border p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <Badge variant={b.status === 'cancelled' ? 'destructive' : 'secondary'}>
-                      {language === 'ru' ? status.ru : status.en}
+                      {pickLang(language, status)}
                     </Badge>
                     <span className="font-mono text-sm">฿{b.total_amount_thb.toLocaleString()}</span>
                   </div>
@@ -73,7 +74,7 @@ export function BookingsTab({ businessId }: { businessId: string }) {
                       )}
                       {canTransition(b.status, 'completed') && (
                         <Button size="sm" variant="outline" onClick={() => update.mutate({ id: b.id, status: 'completed' })}>
-                          {language === 'ru' ? 'Завершить' : 'Complete'}
+                          {pickLang(language, { ru: 'Завершить', en: 'Complete', th: 'ทำเครื่องหมายว่าเสร็จสิ้น' })}
                         </Button>
                       )}
                       {canTransition(b.status, 'cancelled') && (

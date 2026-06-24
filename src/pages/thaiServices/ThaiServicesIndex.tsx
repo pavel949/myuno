@@ -12,6 +12,7 @@ import { MiniAppLayout, type MiniAppCategory } from '@/components/miniapp/MiniAp
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFeatureFlag } from '@/hooks/useFeatureFlags';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useThaiBusinesses, type ThaiBusinessFilters } from '@/hooks/thaiServices/useThaiServices';
 import { thaiBusinessesToMarkers } from '@/lib/thaiServices/mapMarkerAdapter';
@@ -41,8 +42,8 @@ export default function ThaiServicesIndex() {
   const markers = useMemo(() => thaiBusinessesToMarkers(businesses), [businesses]);
   const categories: MiniAppCategory[] = useMemo(
     () => [
-      { id: 'all', labelEn: 'All', labelRu: 'Все', icon: 'store' },
-      ...THAI_CATEGORIES.map((c) => ({ id: c.id, labelEn: c.en, labelRu: c.ru, icon: c.icon })),
+      { id: 'all', labelEn: 'All', labelRu: 'Все', labelTh: 'ทั้งหมด', icon: 'store' },
+      ...THAI_CATEGORIES.map((c) => ({ id: c.id, labelEn: c.en, labelRu: c.ru, labelTh: c.th, icon: c.icon })),
     ],
     [],
   );
@@ -78,7 +79,7 @@ export default function ThaiServicesIndex() {
         />
         <FilterChips
           value={paymentMethod}
-          options={THAI_PAYMENT_METHODS.map((p) => ({ id: p.id, label: language === 'ru' ? p.ru : p.en }))}
+          options={THAI_PAYMENT_METHODS.map((p) => ({ id: p.id, label: pickLang(language, p) }))}
           onChange={(v) => setPaymentMethod(v as ThaiPaymentMethod | null)}
           allLabel={t('thai.filter.payment')}
         />
