@@ -107,8 +107,12 @@ export function useAvailabilityCheck() {
       return result;
 
     } catch (error) {
+      // Fail closed: if we cannot confirm availability we must NOT report the slot
+      // as available, otherwise a transient RPC/network error silently enables
+      // double-bookings / over-capacity. Callers should surface the `error` field
+      // ("couldn't check availability, try again") rather than allowing checkout.
       const result: AvailabilityResult = {
-        available: true, // Default to available on error to not block bookings
+        available: false,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
       setLastResult(result);

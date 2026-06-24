@@ -7,6 +7,7 @@ import {
   Phone, Mail, MessageCircle, CheckCircle2, XCircle, LogIn, LogOut,
   Plus, Download, Building2, Clock, ArrowUpDown, Eye, Check, X,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
@@ -315,7 +316,11 @@ export default function MCBookingsPage() {
               onClick={() => {
                 // Mark confirmed
                 const ids = Array.from(selectedIds);
-                supabase.from('orders').update({ status: 'confirmed' }).in('id', ids).then(() => {
+                supabase.from('orders').update({ status: 'confirmed' }).in('id', ids).then(({ error }) => {
+                  if (error) {
+                    toast.error(isRu ? 'Не удалось подтвердить брони' : 'Failed to confirm bookings');
+                    return;
+                  }
                   setSelectedIds(new Set());
                   window.location.reload();
                 });
@@ -329,7 +334,11 @@ export default function MCBookingsPage() {
               variant="outline"
               onClick={() => {
                 const ids = Array.from(selectedIds);
-                supabase.from('orders').update({ status: 'cancelled' }).in('id', ids).then(() => {
+                supabase.from('orders').update({ status: 'cancelled' }).in('id', ids).then(({ error }) => {
+                  if (error) {
+                    toast.error(isRu ? 'Не удалось отменить брони' : 'Failed to cancel bookings');
+                    return;
+                  }
                   setSelectedIds(new Set());
                   window.location.reload();
                 });

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 export interface FinancialSummary {
   totalGmv: number;
@@ -7,6 +8,8 @@ export interface FinancialSummary {
   vendorPayouts: number;
   pendingPayouts: number;
   subscriptionRevenue: number;
+  /** True when the subscription-revenue RPC failed; the value above is a fallback 0. */
+  subscriptionRevenueUnavailable?: boolean;
   averageTakeRate: number;
   orderCount: number;
 }
@@ -98,8 +101,12 @@ export function useAdminFinance(days: number = 30) {
       const { data: subRevenue, error: subError } = await supabase
         .rpc('get_subscription_revenue', { p_days: days });
 
+      // Do NOT silently swallow: a failed subscription-revenue RPC means the
+      // finance dashboard would show 0 with no signal, and payout/burn decisions
+      // would be made on wrong data. Flag it so the UI can render "unavailable"
+      // instead of a misleading zero.
       if (subError) {
-        // Silently handle — subscriptionRevenue will default to 0
+        logger.error('[useAdminFinance] get_subscription_revenue failed:', subError);
       }
 
       // Extract monthly revenue from RPC result
@@ -113,6 +120,7 @@ export function useAdminFinance(days: number = 30) {
         vendorPayouts,
         pendingPayouts,
         subscriptionRevenue,
+        subscriptionRevenueUnavailable: !!subError,
         averageTakeRate,
         orderCount: orders?.length || 0,
       };

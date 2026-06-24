@@ -182,16 +182,20 @@ const queryClient = useQueryClient();
         if (intentError) errorLog.silent(intentError, 'mark_payment_succeeded');
       }
 
-      // Create notification for customer
-      await supabase.from('notifications').insert({
+      // Create notification for customer. The order is already created at this
+      // point, so a notification failure must NOT bubble up and make the caller
+      // report the order as failed (which would prompt a duplicate retry). Treat
+      // it as non-fatal and log silently.
+      const { error: notifyError } = await supabase.from('notifications').insert({
         user_id: user.id,
         title: language === 'ru' ? 'Заказ создан' : 'Order Created',
-        body: language === 'ru' 
+        body: language === 'ru'
           ? `Ваш заказ ${orderNumber} успешно создан`
           : `Your order ${orderNumber} has been created`,
         type: 'booking',
         data: { order_id: orderId, order_type: input.order_type },
       });
+      if (notifyError) errorLog.silent(notifyError, 'create_order_notification');
 
       // Send customer email notification (non-blocking)
       supabase.functions.invoke('send-order-email', {
