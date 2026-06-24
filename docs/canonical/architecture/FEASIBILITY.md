@@ -10,9 +10,9 @@
 ✓ **Role system** — `app_role` ENUM (16 values), `ROLE_METADATA` EN/RU, `SWITCHABLE_ROLES`, self-activation flags.
 ✓ **Vertical registry** — `src/lib/verticals.ts` with 40+ entries as single source of truth.
 ✓ **Route registry** — `APP_ROUTES` in `src/lib/config/routes.ts`, `LEGACY_REDIRECTS`, lazy loading via `pageRegistry`.
-✓ **Supabase + RLS** — public schema, RPC (`record_ledger_entries`, `process_payout`), 60+ edge functions, Deno 2.0 in flight.
+✓ **Supabase + RLS** — public schema, RPC (`record_ledger_entries`, `process_payout`), 130+ edge functions, Deno 2.0 in flight.
 ✓ **MiniAppLayout** — every vertical already uses one shell wrapper.
-✓ **Design tokens** — `src/styles/tokens.css` is SoT; Golos + DM Sans + JetBrains Mono; dark+light modes; shadcn/ui primitives.
+✓ **Design tokens** — `src/styles/tokens.css` is SoT; Source Serif 4 + Geist + IBM Plex Mono (DS 2.1; Golos/DM Sans/JetBrains retired); dark+light modes; shadcn/ui primitives.
 
 ⚠ **Partial:** AI agents (specs in `.lovable/` but no unified runtime registry), event bus (specs exist, no typed app-level bus).
 
