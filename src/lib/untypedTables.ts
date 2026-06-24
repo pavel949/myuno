@@ -37,6 +37,22 @@ export function typedFrom(table: string): any {
   return (supabase as any).from(table);
 }
 
+/**
+ * Escape hatch for RPCs missing from the auto-generated Database type (e.g. a
+ * function added in a migration that hasn't been re-typed yet). Mirrors
+ * {@link typedFrom}. Cast the awaited `.data` at the call site.
+ *
+ * @example
+ *   const { data, error } = await untypedRpc('my_fn', { p_id: id });
+ */
+export function untypedRpc(
+  fn: string,
+  args?: Record<string, unknown>,
+): Promise<{ data: unknown; error: { message: string } | null }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (supabase as any).rpc(fn, args);
+}
+
 // ============= Pre-defined table accessors =============
 
 // --- Row interfaces for common untyped tables ---
