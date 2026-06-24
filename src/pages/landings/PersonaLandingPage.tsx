@@ -30,6 +30,8 @@ import { LandingContainer } from '@/components/landings/LandingPrimitives';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { ArrowRight, CheckCircle2, MapPin, Sparkles, Grid3x3 } from 'lucide-react';
 import { getAppsForPersona, withPersonaParam } from '@/lib/landings/personaTagMap';
+import { getBundleForPersona } from '@/lib/segmentation/bundles';
+import { BundleCard } from '@/components/segmentation/BundleCard';
 
 /**
  * Wave 3 — map persona slug to a Universal Lead vertical so the inline
@@ -78,6 +80,9 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
   // "All apps for you" — pulled from the canonical app registry, filtered by
   // persona (with show-all fallback when no specific apps match).
   const personaApps = useMemo(() => getAppsForPersona(landing.slug), [landing.slug]);
+
+  // § 10 — ready-made service bundle for this persona (if any).
+  const bundle = useMemo(() => getBundleForPersona(landing.personaCode), [landing.personaCode]);
 
   return (
     <AppLayout>
@@ -205,6 +210,20 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
                 </li>
               ))}
             </ul>
+          </section>
+        ) : null}
+
+        {/* ─── READY-MADE BUNDLE (§ 10) ──────────────────────────── */}
+        {bundle ? (
+          <section className="mb-12">
+            <h2 className="mb-5 text-2xl font-semibold text-foreground">
+              {isRu ? 'Готовый пакет' : 'Ready-made bundle'}
+            </h2>
+            <BundleCard
+              bundle={bundle}
+              ctaHref={wp(landing.primaryCta.href)}
+              accent={tokenColor(theme.color, 0.15)}
+            />
           </section>
         ) : null}
 
