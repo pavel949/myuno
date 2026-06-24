@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 interface InquiryConfirmationProps {
   orderId: string;
@@ -30,10 +31,10 @@ export function InquiryConfirmation({ orderId }: InquiryConfirmationProps) {
       </p>
 
       <div className="flex flex-col gap-3 w-full max-w-xs">
-        <Button size="lg" onClick={() => navigate(`/bookings/${orderId}`)}>
+        <Button size="lg" onClick={() => navigate(APP_ROUTES.BOOKING_DETAIL(orderId))}>
           {isRu ? 'Открыть бронирование' : 'View booking'}
         </Button>
-        <Button variant="outline" size="lg" onClick={() => navigate('/property')}>
+        <Button variant="outline" size="lg" onClick={() => navigate(APP_ROUTES.PROPERTY)}>
           {isRu ? 'Смотреть объекты' : 'Browse properties'}
         </Button>
       </div>
