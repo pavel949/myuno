@@ -1,6 +1,6 @@
 /**
  * OffplanDetail - Detailed view of an off-plan project
- * Shows gallery, developer info, muUNO scoring, investment metrics
+ * Shows gallery, developer info, myUNO scoring, investment metrics
  */
 
 import React, { useState } from 'react';
@@ -46,7 +46,7 @@ import { useProjectDocuments, DOCUMENT_CATEGORIES } from '@/hooks/useProjectDocu
 import { useNewbuildProject } from '@/hooks/useNewbuildProjects';
 import { useDeveloper } from '@/hooks/useDevelopers';
 import { NewbuildProjectDeepTabs } from '@/components/newbuilds/NewbuildProjectDeepTabs';
-import { MuunoScoreWidget, ScoreBreakdown } from '@/components/invest';
+import { MyunoScoreWidget, ScoreBreakdown } from '@/components/invest';
 import { FundingProgress } from '@/components/invest/FundingProgress';
 import { DeveloperBadge } from '@/components/property/DeveloperBadge';
 import { DevelopmentUnitsSection } from '@/components/property/DevelopmentUnitsSection';
@@ -122,15 +122,15 @@ export default function OffplanDetail() {
 
   const seoTitle = `${name}${project.district ? ` · ${project.district}` : ''}, Phuket`;
   const seoDescription = isRu
-    ? `${name} — ${project.district || 'Пхукет'}. ${status.label.ru}. ${project.priceFrom ? `Цена от ${formatPrice(project.priceFrom)}.` : ''} ${project.roiProjected ? `ROI ${project.roiProjected}%.` : ''} muUNO Score, due diligence, инвестиционная аналитика.`.trim()
-    : `${name} — ${project.district || 'Phuket'}. ${status.label.en}. ${project.priceFrom ? `From ${formatPrice(project.priceFrom)}.` : ''} ${project.roiProjected ? `${project.roiProjected}% projected ROI.` : ''} muUNO Score, due diligence, investment analytics.`.trim();
+    ? `${name} — ${project.district || 'Пхукет'}. ${status.label.ru}. ${project.priceFrom ? `Цена от ${formatPrice(project.priceFrom)}.` : ''} ${project.roiProjected ? `ROI ${project.roiProjected}%.` : ''} myUNO Score, due diligence, инвестиционная аналитика.`.trim()
+    : `${name} — ${project.district || 'Phuket'}. ${status.label.en}. ${project.priceFrom ? `From ${formatPrice(project.priceFrom)}.` : ''} ${project.roiProjected ? `${project.roiProjected}% projected ROI.` : ''} myUNO Score, due diligence, investment analytics.`.trim();
   const seoImage = project.coverImage || 'https://www.myuno.app/og-image.png';
   const canonicalUrl = `https://www.myuno.app${APP_ROUTES.OFFPLAN_DETAIL(project.id)}`;
   const listingSchema = createRealEstateListingSchema({
     name,
     description: seoDescription,
     price: project.priceFrom ?? undefined,
-    currency: ((project as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase(),
+    currency: ((project as { currency?: string | null }).currency || currentCity?.default_currency || 'THB').toUpperCase(),
     image: seoImage,
     url: canonicalUrl,
     address: project.district ?? undefined,
@@ -230,10 +230,10 @@ export default function OffplanDetail() {
 
         {/* Key metrics cards */}
         <div className="grid grid-cols-2 gap-3">
-          {/* muUNO Score */}
+          {/* myUNO Score */}
           {project.muunoScore && (
             <div className="rounded-none border bg-card p-3">
-              <MuunoScoreWidget score={project.muunoScore} size="md" showLabel />
+              <MyunoScoreWidget score={project.muunoScore} size="md" showLabel />
             </div>
           )}
 
@@ -369,8 +369,8 @@ export default function OffplanDetail() {
                   <p className="text-sm text-muted-foreground mt-1">
                     {project.riskLevel 
                       ? (isRu 
-                          ? 'Проект прошёл независимую экспертизу muUNO. Получите персональный отчёт с детальной оценкой рисков.' 
-                          : 'Project has passed independent muUNO assessment. Get a personalized report with detailed risk analysis.')
+                          ? 'Проект прошёл независимую экспертизу myUNO. Получите персональный отчёт с детальной оценкой рисков.' 
+                          : 'Project has passed independent myUNO assessment. Get a personalized report with detailed risk analysis.')
                       : (isRu 
                           ? 'Этот проект ещё не прошёл независимую экспертизу. Запросите оценку рисков, чтобы принять взвешенное решение.'
                           : 'This project has not yet been independently assessed. Request a risk evaluation to make an informed decision.')
@@ -509,7 +509,7 @@ export default function OffplanDetail() {
                   </div>
                   <div className="rounded-none bg-muted/50 p-3 text-center">
                     <div className="text-2xl font-bold">{developer.muunoScore || '—'}</div>
-                    <div className="text-xs text-muted-foreground">muUNO Score</div>
+                    <div className="text-xs text-muted-foreground">myUNO Score</div>
                   </div>
                 </div>
 

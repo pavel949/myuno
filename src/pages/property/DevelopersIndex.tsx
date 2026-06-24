@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDevelopers } from '@/hooks/useDevelopers';
-import { MuunoScoreWidget } from '@/components/invest/MuunoScoreWidget';
+import { MyunoScoreWidget } from '@/components/invest/MyunoScoreWidget';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -34,7 +34,7 @@ export default function DevelopersIndex() {
                 {isRu ? 'Застройщики Пхукета' : 'Phuket Developers'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {isRu ? 'Проверенные партнёры с рейтингом muUNO' : 'Verified partners with muUNO rating'}
+                {isRu ? 'Проверенные партнёры с рейтингом myUNO' : 'Verified partners with myUNO rating'}
               </p>
             </div>
           </div>
@@ -119,7 +119,7 @@ export default function DevelopersIndex() {
 
                   {/* Score */}
                   {dev.muunoScore && (
-                    <MuunoScoreWidget score={dev.muunoScore} size="sm" />
+                    <MyunoScoreWidget score={dev.muunoScore} size="sm" />
                   )}
                 </div>
 

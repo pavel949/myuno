@@ -202,7 +202,7 @@ export default function InvestmentHubLanding() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               <Badge variant="secondary" className="text-[10px]">
-                <Shield className="h-3 w-3 mr-1" /> muUNO Score
+                <Shield className="h-3 w-3 mr-1" /> myUNO Score
               </Badge>
               <Badge variant="secondary" className="text-[10px]">
                 <FileText className="h-3 w-3 mr-1" /> Due Diligence
