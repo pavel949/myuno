@@ -15,6 +15,9 @@ import {
 } from '@/lib/propertyAttributeRegistry';
 
 // ============= PROPERTY TYPES =============
+// Single source of truth for property types across the app (marketplace vertical
+// specs, owner/vendor wizards, cards). Superset that covers both residential and
+// land/commercial listings — keep snake_case-free `id`s aligned with the DB.
 export const PROPERTY_TYPES = [
   { id: 'villa', labelEn: 'Villa', labelRu: 'Вилла', icon: '🏡', popular: true },
   { id: 'condo', labelEn: 'Condo', labelRu: 'Кондо', icon: '🏢', popular: true },
@@ -24,6 +27,8 @@ export const PROPERTY_TYPES = [
   { id: 'penthouse', labelEn: 'Penthouse', labelRu: 'Пентхаус', icon: '🌆', popular: false },
   { id: 'studio', labelEn: 'Studio', labelRu: 'Студия', icon: '🛏️', popular: true },
   { id: 'bungalow', labelEn: 'Bungalow', labelRu: 'Бунгало', icon: '🌴', popular: false },
+  { id: 'land', labelEn: 'Land plot', labelRu: 'Участок', icon: '🏞️', popular: false },
+  { id: 'commercial', labelEn: 'Commercial', labelRu: 'Коммерческая', icon: '🏪', popular: false },
 ] as const;
 
 // ============= PHUKET DISTRICTS =============

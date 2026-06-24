@@ -47,11 +47,26 @@ const STATIC_VERTICALS: VerticalConfig[] = [
   { id: 'marketplace_vendors', table: 'marketplace_vendors', keywords: ['vendor', 'продавец', 'seller', 'merchant'] },
 ];
 
+// Tables the bulk-import edge function will accept. Mirror of ALLOWED_TABLES in
+// supabase/functions/bulk-import/index.ts — keep in sync. Used to drop DB-configured
+// verticals that point at a table bulk-import would reject, so invalid configs never
+// produce items that fail silently at the approve step.
+const ALLOWED_INTAKE_TABLES = new Set<string>([
+  'providers', 'marketplace_products', 'marketplace_vendors', 'vendor_services',
+  'yachts', 'tours', 'water_activities', 'restaurants', 'salons', 'clinics', 'gyms',
+  'vehicles', 'babysitters', 'cleaning_providers', 'pet_services', 'lawyers',
+  'education_centers', 'properties', 'owner_properties', 'flower_shops', 'bouquets',
+  'user_listings', 'listings', 'services', 'crm_contacts', 'events',
+]);
+
 // Cache for loaded verticals (per-request scope)
 let cachedVerticals: VerticalConfig[] | null = null;
 
 /**
- * Load vertical configs from database with static fallback
+ * Load vertical configs from database with static fallback.
+ * DB rows whose target_table is not in ALLOWED_INTAKE_TABLES are dropped (with a
+ * warning) rather than cached — an invalid table name would otherwise create items
+ * that bulk-import silently rejects on approval.
  */
 async function loadVerticalConfigs(supabase: any): Promise<VerticalConfig[]> {
   if (cachedVerticals) return cachedVerticals;
@@ -69,11 +84,26 @@ async function loadVerticalConfigs(supabase: any): Promise<VerticalConfig[]> {
       return STATIC_VERTICALS;
     }
 
-    const loaded: VerticalConfig[] = data.map((row: any) => ({
-      id: row.vertical_id,
-      table: row.target_table,
-      keywords: row.keywords || [],
-    }));
+    const loaded: VerticalConfig[] = [];
+    for (const row of data) {
+      if (!row.target_table || !ALLOWED_INTAKE_TABLES.has(row.target_table)) {
+        console.warn(
+          `[INTAKE] Skipping vertical "${row.vertical_id}" — target_table "${row.target_table}" not in allow-list`,
+        );
+        continue;
+      }
+      loaded.push({
+        id: row.vertical_id,
+        table: row.target_table,
+        keywords: row.keywords || [],
+      });
+    }
+
+    if (loaded.length === 0) {
+      console.info('[INTAKE] No valid DB verticals, using static fallback');
+      cachedVerticals = STATIC_VERTICALS;
+      return STATIC_VERTICALS;
+    }
 
     cachedVerticals = loaded;
     console.info(`[INTAKE] Loaded ${loaded.length} verticals from DB`);
@@ -83,6 +113,26 @@ async function loadVerticalConfigs(supabase: any): Promise<VerticalConfig[]> {
     cachedVerticals = STATIC_VERTICALS;
     return STATIC_VERTICALS;
   }
+}
+
+/**
+ * POST with bounded exponential backoff. Retries on 429 (rate limit) and 5xx
+ * (transient gateway errors); returns immediately on success or any other status
+ * (e.g. 402 = out of credits, which retrying cannot fix).
+ */
+async function fetchAIWithRetry(url: string, init: RequestInit, attempts = 3): Promise<Response> {
+  let lastResp: Response | undefined;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    const resp = await fetch(url, init);
+    if (resp.ok || (resp.status !== 429 && resp.status < 500)) return resp;
+    lastResp = resp;
+    if (attempt < attempts - 1) {
+      const delayMs = 1000 * 2 ** attempt; // 1s, 2s, 4s
+      console.warn(`[INTAKE] AI gateway ${resp.status}; retry ${attempt + 1}/${attempts - 1} in ${delayMs}ms`);
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+  return lastResp as Response;
 }
 
 // URL detection regex
@@ -167,16 +217,21 @@ function splitAgentMessage(text: string): string[] {
     const lastChunk = itemChunks[itemChunks.length - 1];
     const lastChunkLines = lastChunk.split('\n');
     
-    // Walk backwards from the last chunk to find footer start
+    // Walk backwards through the trailing region and take the EARLIEST footer-keyword
+    // line as the footer start. Multi-line footers often interleave plain lines (a
+    // bare phone number, "min 1 month"); breaking on the first non-footer line would
+    // merge the rest of the footer into the last listing. We bound the scan and stop
+    // at item content (a listing URL) so we never swallow the whole item.
     let footerStartInLastChunk = lastChunkLines.length;
-    for (let i = lastChunkLines.length - 1; i >= 1; i--) {
+    const SCAN_LIMIT = 8;
+    const scanStart = Math.max(1, lastChunkLines.length - SCAN_LIMIT);
+    for (let i = lastChunkLines.length - 1; i >= scanStart; i--) {
       const line = lastChunkLines[i].trim();
       if (!line) continue;
-      const isFooter = footerKeywords.some(kw => kw.test(line));
-      if (isFooter) {
+      // A listing URL marks the item's own content — stop, it's not footer.
+      if (/https?:\/\//i.test(line)) break;
+      if (footerKeywords.some(kw => kw.test(line))) {
         footerStartInLastChunk = i;
-      } else {
-        break;
       }
     }
     
@@ -595,7 +650,7 @@ Return valid JSON only.`;
     const modelToUse = (globalThis as any).__intakeModel || "google/gemini-3-flash-preview";
     const tempToUse = (globalThis as any).__intakeTemperature ?? 0.3;
     
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetchAIWithRetry("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
