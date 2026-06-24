@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LeadSource, getLeadVerticalById } from '@/lib/leadVerticalConfig';
+import { logger } from '@/lib/logger';
 import type { Json } from '@/integrations/supabase/types';
 
 export interface UniversalLeadInput {
@@ -87,14 +88,16 @@ export function useUniversalLead() {
 
       if (error) throw error;
       
-      // Trigger WhatsApp notification for specific verticals
+      // Trigger WhatsApp notification for specific verticals. Non-blocking, but a
+      // silent failure means Pavel never hears about a new lead — log it (with the
+      // lead id) so the failure is detectable instead of vanishing.
       if (data && WHATSAPP_NOTIFICATION_VERTICALS.includes(input.vertical_id)) {
         supabase.functions.invoke('notify-lead-whatsapp', {
           body: { leadId: data.id },
-        }).catch(() => { /* fire & forget */ });
+        }).catch((e) => logger.error(`[useUniversalLead] notify-lead-whatsapp failed for lead ${data.id}:`, e));
       }
 
-      // Notify admin about new lead via email (fire & forget)
+      // Notify admin about new lead via email (non-blocking, logged on failure).
       if (data) {
         supabase.functions.invoke('notify-admin-order', {
           body: {
@@ -108,14 +111,14 @@ export function useUniversalLead() {
             customer_phone: input.phone,
             notes: input.notes || `Lead: ${input.request_type} via ${input.entry_point}`,
           },
-        }).catch(() => { /* fire & forget */ });
+        }).catch((e) => logger.error(`[useUniversalLead] notify-admin-order failed for lead ${data.id}:`, e));
       }
 
-      // Trigger auto lead scoring (fire & forget)
+      // Trigger auto lead scoring (non-blocking, logged on failure).
       if (data) {
         supabase.functions.invoke('auto-lead-scoring', {
           body: { leadId: data.id },
-        }).catch(() => { /* fire & forget */ });
+        }).catch((e) => logger.error(`[useUniversalLead] auto-lead-scoring failed for lead ${data.id}:`, e));
       }
 
       return data;

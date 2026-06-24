@@ -66,33 +66,33 @@ export function InvestorInterestModal({ open, onOpenChange, dealId, dealTitle }:
 
         <div className="space-y-3">
           <div>
-            <Label>Имя *</Label>
-            <Input value={form.investor_name} onChange={(e) => set('investor_name', e.target.value)} />
+            <Label htmlFor="iim-name">Имя *</Label>
+            <Input id="iim-name" value={form.investor_name} onChange={(e) => set('investor_name', e.target.value)} />
           </div>
           <div>
-            <Label>Email *</Label>
-            <Input type="email" value={form.investor_email} onChange={(e) => set('investor_email', e.target.value)} />
+            <Label htmlFor="iim-email">Email *</Label>
+            <Input id="iim-email" type="email" value={form.investor_email} onChange={(e) => set('investor_email', e.target.value)} />
           </div>
           <div>
-            <Label>WhatsApp</Label>
-            <Input value={form.investor_whatsapp} onChange={(e) => set('investor_whatsapp', e.target.value)} placeholder="+66..." />
+            <Label htmlFor="iim-whatsapp">WhatsApp</Label>
+            <Input id="iim-whatsapp" value={form.investor_whatsapp} onChange={(e) => set('investor_whatsapp', e.target.value)} placeholder="+66..." />
           </div>
           <div>
-            <Label>I am a...</Label>
+            <Label id="iim-type-label">I am a...</Label>
             <Select value={form.investor_type} onValueChange={(v) => set('investor_type', v as InvestorType)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-labelledby="iim-type-label"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {INVESTOR_TYPES.map((t) => <SelectItem key={t.key} value={t.key}>{t.labelEn}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div>
-            <Label>Approximate capacity (USD)</Label>
-            <Input type="number" value={form.investment_capacity_usd} onChange={(e) => set('investment_capacity_usd', e.target.value)} placeholder="500000" />
+            <Label htmlFor="iim-capacity">Approximate capacity (USD)</Label>
+            <Input id="iim-capacity" type="number" value={form.investment_capacity_usd} onChange={(e) => set('investment_capacity_usd', e.target.value)} placeholder="500000" />
           </div>
           <div>
-            <Label>Message (optional)</Label>
-            <Textarea value={form.message} onChange={(e) => set('message', e.target.value)} rows={3} />
+            <Label htmlFor="iim-message">Message (optional)</Label>
+            <Textarea id="iim-message" value={form.message} onChange={(e) => set('message', e.target.value)} rows={3} />
           </div>
         </div>
 

@@ -638,9 +638,11 @@ export default function Bookings() {
                     className="bg-card border border-border rounded-none hover:border-primary/30 transition-all"
                   >
                     {/* Card body */}
-                    <div
+                    <button
+                      type="button"
                       onClick={() => navigate(`/bookings/${booking.id}`)}
-                      className="p-4 cursor-pointer"
+                      className="p-4 w-full text-left"
+                      aria-label={language === 'ru' ? `Открыть бронирование: ${booking.title}` : `Open booking: ${booking.title}`}
                     >
                       <div className="flex gap-3">
                         <div className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center">
@@ -668,9 +670,9 @@ export default function Bookings() {
                             )}
                           </div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0 self-center" />
+                        <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0 self-center" aria-hidden="true" />
                       </div>
-                    </div>
+                    </button>
 
                     {/* Timeline toggle + content */}
                     <div className="border-t border-border/60">

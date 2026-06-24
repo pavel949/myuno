@@ -4,6 +4,7 @@
  */
 // Deno.serve used (native edge runtime)
 import { requireAuth } from "../_shared/auth-guard.ts";
+import { validateExternalUrlForSSRF } from "../_shared/ssrf-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
@@ -343,6 +344,16 @@ Deno.serve(async (req) => {
     let formattedUrl = url.trim();
     if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
       formattedUrl = `https://${formattedUrl}`;
+    }
+
+    // SSRF guard: `url` is user-supplied. Block loopback / private / metadata
+    // targets before any server-side fetch (Yandex/Google/Firecrawl branches).
+    const ssrf = validateExternalUrlForSSRF(formattedUrl);
+    if (!ssrf.allowed) {
+      return new Response(
+        JSON.stringify({ success: false, error: `URL not allowed: ${ssrf.reason}` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.info('Processing URL:', formattedUrl);

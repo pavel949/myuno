@@ -232,7 +232,14 @@ const EventDetail = () => {
 
         {/* Venue Card */}
         {venue ? (
-          <Card className="mb-6 cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/venues/${venue.id}`)}>
+          <Card
+            className="mb-6 cursor-pointer hover:shadow-md transition-shadow"
+            role="button"
+            tabIndex={0}
+            aria-label={language === 'ru' ? `Открыть площадку: ${venue.name_ru}` : `Open venue: ${venue.name_en}`}
+            onClick={() => navigate(`/venues/${venue.id}`)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/venues/${venue.id}`); } }}
+          >
             <CardContent className="p-3 flex items-center gap-3">
               <div className="w-16 h-16 rounded-none overflow-hidden flex-shrink-0">
                 <img src={venue.cover_image || '/placeholder.svg'} alt={language === 'ru' ? venue.name_ru : venue.name_en} className="w-full h-full object-cover" />

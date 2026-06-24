@@ -131,7 +131,7 @@ export function HeroGreeting({ personas, onRoleSheetOpen, onAppDrawerOpen }: Her
               color: 'hsl(var(--primary-foreground))',
             }}
           >
-            <Sparkles className="w-[18px] h-[18px]" strokeWidth={2} />
+            <Sparkles className="w-[18px] h-[18px]" strokeWidth={2} aria-hidden="true" />
           </span>
           <span className="flex-1 min-w-0">
             <span className="block text-[14px] font-semibold text-primary-foreground truncate">
@@ -141,7 +141,7 @@ export function HeroGreeting({ personas, onRoleSheetOpen, onAppDrawerOpen }: Her
               {isRu ? 'Жильё · услуги · документы — одной строкой' : 'Stay · services · docs — in one line'}
             </span>
           </span>
-          <Search className="w-4 h-4 text-primary-foreground/60 flex-shrink-0" strokeWidth={2} />
+          <Search className="w-4 h-4 text-primary-foreground/60 flex-shrink-0" strokeWidth={2} aria-hidden="true" />
         </button>
       </div>
 

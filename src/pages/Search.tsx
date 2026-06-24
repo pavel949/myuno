@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Search as SearchIcon, X, Star, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -212,9 +212,9 @@ export default function Search() {
                     const Icon = config?.icon || SearchIcon;
                     return (
                       <AnimatedItem key={item.id}>
-                        <div
-                          onClick={() => navigate(item.path)}
-                          className="flex gap-3 p-3 rounded-none bg-card border border-border hover:border-primary/30 transition-all cursor-pointer"
+                        <Link
+                          to={item.path}
+                          className="flex gap-3 p-3 rounded-none bg-card border border-border hover:border-primary/30 transition-all"
                         >
                           {item.image ? (
                             <img
@@ -257,7 +257,7 @@ export default function Search() {
                               </span>
                             )}
                           </div>
-                        </div>
+                        </Link>
                       </AnimatedItem>
                     );
                   })}

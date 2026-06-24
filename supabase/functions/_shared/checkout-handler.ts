@@ -247,11 +247,16 @@ export function createCheckoutHandler(config: CheckoutConfig) {
           }
         }
 
-        // Insert addresses
+        // Insert addresses. Non-fatal (the order + payment still proceed), but a
+        // silent failure leaves delivery/transfer orders with no address, so log
+        // prominently with the order id for reconciliation.
         if (result.addresses && result.addresses.length > 0) {
-          await supabaseAdmin.from("order_addresses").insert(
+          const { error: addrError } = await supabaseAdmin.from("order_addresses").insert(
             result.addresses.map((a) => ({ order_id: orderId!, ...a })),
           );
+          if (addrError) {
+            console.error(`[${config.endpoint}] order_addresses insert failed for order ${orderId}:`, addrError);
+          }
         }
 
         // Insert participants
@@ -275,19 +280,25 @@ export function createCheckoutHandler(config: CheckoutConfig) {
         }
 
         if (providedParticipants.length > 0) {
-          await supabaseAdmin.from("order_participants").insert(
+          const { error: partError } = await supabaseAdmin.from("order_participants").insert(
             providedParticipants.map((p) => ({ order_id: orderId!, ...p })),
           );
+          if (partError) {
+            console.error(`[${config.endpoint}] order_participants insert failed for order ${orderId}:`, partError);
+          }
         }
 
-        // Status history
-        await supabaseAdmin.from("order_status_history").insert({
+        // Status history (non-fatal, but log so the audit trail gap is visible).
+        const { error: statusError } = await supabaseAdmin.from("order_status_history").insert({
           order_id: orderId,
           from_status: null,
           to_status: "pending",
           actor_user_id: user.id,
           reason: result.statusReason || "Order created",
         });
+        if (statusError) {
+          console.error(`[${config.endpoint}] order_status_history insert failed for order ${orderId}:`, statusError);
+        }
 
         // Vertical-specific child rows (e.g. order_item_yacht_details)
         if (result.afterOrderCreated) {
@@ -300,8 +311,11 @@ export function createCheckoutHandler(config: CheckoutConfig) {
 
 
 
-        // Payment intent
-        const { data: pi } = await supabaseAdmin
+        // Payment intent. If this insert fails, the Stripe session metadata gets
+        // no payment_intent_id and the webhook can't transition the intent to
+        // succeeded → reconciliation_alerts will flag the order permanently.
+        // Non-fatal to checkout, but must be logged loudly with the order id.
+        const { data: pi, error: piError } = await supabaseAdmin
           .from("payment_intents")
           .insert({
             order_id: orderId,
@@ -312,6 +326,9 @@ export function createCheckoutHandler(config: CheckoutConfig) {
           })
           .select("id")
           .single();
+        if (piError) {
+          console.error(`[${config.endpoint}] payment_intents insert failed for order ${orderId} — webhook linkage/reconciliation at risk:`, piError);
+        }
         paymentIntentId = pi?.id || null;
       }
 

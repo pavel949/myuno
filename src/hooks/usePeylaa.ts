@@ -10,6 +10,7 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { recordAttribution } from '@/lib/newbuilds/attribution';
+import { logger } from '@/lib/logger';
 import type {
   PeylaaUnit,
   PeylaaLead,
@@ -363,8 +364,10 @@ export function useSubmitPeylaaLead() {
 
       if (error) throw error;
 
-      // 3. Notify (fire-and-forget)
-      supabase.functions.invoke('peylaa-lead-notify', { body: data }).catch(() => {});
+      // 3. Notify (non-blocking, but log on failure so a dropped lead alert is
+      // detectable instead of silently lost).
+      supabase.functions.invoke('peylaa-lead-notify', { body: data })
+        .catch((e) => logger.error('[usePeylaa] peylaa-lead-notify failed:', e));
 
       return data;
     },

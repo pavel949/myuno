@@ -12,7 +12,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 const cardVariants: Record<CardVariant, string> = {
   surface: "bg-muted/30 dark:bg-muted/10 rounded-none",
   content: "bg-card border border-border/60 rounded-none [box-shadow:var(--shadow-elevation-2)]",
-  interactive: "bg-card border border-border/60 rounded-none [box-shadow:var(--shadow-elevation-2)] hover:[box-shadow:var(--shadow-elevation-3)] transition-all duration-150 cursor-pointer",
+  interactive: "bg-card border border-border/60 rounded-none [box-shadow:var(--shadow-elevation-2)] hover:[box-shadow:var(--shadow-elevation-3)] transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
   elevated: "bg-card border border-border/60 rounded-none [box-shadow:var(--shadow-elevation-4)]",
 };
 

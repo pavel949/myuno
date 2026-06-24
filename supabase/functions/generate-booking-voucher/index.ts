@@ -186,6 +186,19 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Escape all user-derived string fields before they are interpolated into the
+    // voucher HTML below. Fields like guest_name / title / location / subtitle come
+    // from booking/order records and are attacker-influencable, so interpolating
+    // them raw is a stored-XSS vector in the rendered/emailed voucher.
+    const escapeHtml = (v: unknown): string =>
+      String(v ?? '').replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string),
+      );
+    const vd = voucherData as Record<string, unknown>;
+    for (const k of ['title', 'subtitle', 'date', 'time', 'guest_name', 'location', 'booking_type', 'voucher_number', 'status', 'currency']) {
+      if (typeof vd[k] === 'string') vd[k] = escapeHtml(vd[k]);
+    }
+
     // Generate HTML voucher
     const voucherHtml = `
       <!DOCTYPE html>

@@ -1,5 +1,7 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -40,6 +42,13 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Require an authenticated user (admin-only tool) + AI rate limit so this
+  // LLM-backed endpoint can't be hit anonymously to drain the API key.
+  const auth = await requireAuth(req, corsHeaders);
+  if (auth instanceof Response) return auth;
+  const rl = await withRateLimit(req, 'ai-generate-description', RATE_LIMITS.ai, corsHeaders, auth.user.id);
+  if (rl) return rl;
 
   const startTime = Date.now();
 

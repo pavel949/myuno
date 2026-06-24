@@ -1,4 +1,5 @@
 import { createClient } from '../_shared/supabase.ts';
+import { validateExternalUrlForSSRF } from '../_shared/ssrf-guard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -384,7 +385,13 @@ async function syncCalendar(
   
   try {
     console.info(`Fetching iCal from: ${calendar.name} (${calendar.ical_url})`);
-    
+
+    // SSRF guard: ical_url is user-supplied DB data.
+    const ssrf = validateExternalUrlForSSRF(calendar.ical_url ?? '');
+    if (!ssrf.allowed) {
+      throw new Error(`Blocked iCal URL: ${ssrf.reason}`);
+    }
+
     const response = await fetch(calendar.ical_url, {
       headers: { 'User-Agent': 'UNO Calendar Sync/2.0' },
     });
