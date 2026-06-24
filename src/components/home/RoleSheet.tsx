@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { PERSONA_OPTIONS_PRIMARY, PERSONA_OPTIONS_LIFESTYLE } from '@/hooks/useUserPersonas';
@@ -41,6 +41,10 @@ export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: Role
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
       <SheetContent side="bottom" className="h-[85vh] rounded-none p-0 overflow-auto">
+        {/* Visually hidden title gives the Sheet dialog an accessible name for screen readers */}
+        <SheetHeader className="sr-only">
+          <SheetTitle>{isRu ? 'Ваши роли' : 'Your roles'}</SheetTitle>
+        </SheetHeader>
         <div className="p-5 pb-8">
           {/* Drag handle */}
           <div className="w-9 h-1 rounded-full bg-border/60 mx-auto mb-5" />

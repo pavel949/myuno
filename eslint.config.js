@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 import tseslint from "typescript-eslint";
 import { FORBIDDEN_SYNONYMS } from "./src/content/semantic/forbiddenSynonyms.ts";
 
@@ -26,6 +27,14 @@ import { FORBIDDEN_SYNONYMS } from "./src/content/semantic/forbiddenSynonyms.ts"
 // ─────────────────────────────────────────────────────────────────────────────
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// jsx-a11y recommended rules default to `error`. Enabling them as errors across
+// the existing ~1000 components would break CI on pre-existing a11y debt, so we
+// surface them at `warn` (consistent with the other wider-codebase guards here).
+// New code can be escalated once the backlog is burned down.
+const JSX_A11Y_WARN_RULES = Object.fromEntries(
+  Object.keys(jsxA11y.configs.recommended.rules).map((rule) => [rule, "warn"]),
+);
 
 // Compiled case-sensitive — §14 explicitly demands exact casing for brand
 // tokens (e.g. canonical `myUNO` vs forbidden `MyUNO`).
@@ -147,10 +156,12 @@ export default tseslint.config(
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      "jsx-a11y": jsxA11y,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      ...JSX_A11Y_WARN_RULES,
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "warn",
       // Allow console.warn / console.error everywhere (deliberate signals);

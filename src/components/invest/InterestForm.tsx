@@ -143,10 +143,11 @@ export function InterestForm({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Interest type */}
             <div className="space-y-3">
-              <Label>{isRu ? 'Тип запроса' : 'Request Type'}</Label>
-              <RadioGroup 
-                value={interestType} 
+              <Label id="if-request-type-label">{isRu ? 'Тип запроса' : 'Request Type'}</Label>
+              <RadioGroup
+                value={interestType}
                 onValueChange={(v) => setInterestType(v as any)}
+                aria-labelledby="if-request-type-label"
                 className="space-y-2"
               >
                 <div className="flex items-center space-x-3 p-3 rounded-none border border-border hover:bg-muted/50 transition-colors">

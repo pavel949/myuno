@@ -30,7 +30,7 @@ export const AppTile: React.FC<AppTileProps> = ({
   const inner = (
     <>
       <div className="relative w-12 h-12 flex items-center justify-center bg-muted/60 border border-border group-hover:border-primary/50 group-hover:bg-primary/5 transition-colors">
-        <Icon className="w-[26px] h-[26px] text-foreground" strokeWidth={1.75} />
+        <Icon className="w-[26px] h-[26px] text-foreground" strokeWidth={1.75} aria-hidden="true" />
         {isSoon && (
           <span
             aria-hidden

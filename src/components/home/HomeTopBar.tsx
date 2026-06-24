@@ -113,15 +113,20 @@ export function HomeTopBar({
         {/* Bell — 44px tap target, badge only when there's something pending */}
         <button
           onClick={() => navigate('/account?tab=notifications')}
-          aria-label="Notifications"
+          aria-label={
+            hasUnread
+              ? (isRu ? 'Уведомления — есть непрочитанные' : 'Notifications — unread items')
+              : (isRu ? 'Уведомления' : 'Notifications')
+          }
           className={cn(
             'relative w-11 h-11 rounded-full flex items-center justify-center transition-colors',
             borderedButtonCls,
           )}
         >
-          <Bell className="w-[17px] h-[17px]" />
+          <Bell className="w-[17px] h-[17px]" aria-hidden="true" />
           {hasUnread && (
             <span
+              aria-hidden="true"
               className={cn(
                 'absolute top-[9px] right-[10px] w-[6px] h-[6px] rounded-full',
                 // On navy the navy dot would disappear — switch to the
