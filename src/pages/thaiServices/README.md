@@ -2,7 +2,9 @@
 
 Self-serve vertical for Thai small businesses (B2B) + a Russian-first catalogue
 for customers (B2C), with auto-translated RU↔TH/EN chat and per-business landing
-pages. Gated behind `feature_flag:thai_business_layer` (default **OFF**).
+pages. Gated behind `feature_flag:thai_business_layer` (**ON** since GA 2026-06-24;
+the `system_settings` row still works as a kill-switch — set it to
+`{"enabled": false}` to force-disable without a redeploy).
 
 ## Entities (DB — `supabase/migrations/20260623120000_thai_business_layer.sql`)
 
