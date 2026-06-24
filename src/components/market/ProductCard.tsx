@@ -6,8 +6,14 @@ import { MarketplaceProduct } from '@/types/marketplace';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatProductUnit, formatPricePerUnit } from '@/utils/formatProductUnit';
-import { BADGE_STYLES } from '@/lib/designTokens';
 import { cn } from '@/lib/utils';
+
+// Badge variant classes (inlined from DS tokens — bg-semantic + rounded-none)
+const BADGE_CLS = {
+  new: 'bg-primary text-primary-foreground font-medium rounded-none',
+  discount: 'bg-destructive text-destructive-foreground font-medium rounded-none',
+  hot: 'bg-foreground text-background font-medium rounded-none',
+} as const;
 
 interface ProductCardProps {
   product: MarketplaceProduct;
@@ -52,12 +58,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             className="w-full h-full object-cover transition-transform duration-300 "
           />
           {product.is_new && (
-            <Badge className={cn("absolute top-1 left-1 text-[10px] px-1.5 py-0", BADGE_STYLES.new)}>
+            <Badge className={cn("absolute top-1 left-1 text-[10px] px-1.5 py-0", BADGE_CLS.new)}>
               NEW
             </Badge>
           )}
           {discount > 0 && (
-            <Badge className={cn("absolute top-1 right-1 text-[10px] px-1.5 py-0", BADGE_STYLES.discount)}>
+            <Badge className={cn("absolute top-1 right-1 text-[10px] px-1.5 py-0", BADGE_CLS.discount)}>
               -{discount}%
             </Badge>
           )}
@@ -142,19 +148,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.is_new && (
-            <Badge className={cn("text-[10px] px-1.5 py-0", BADGE_STYLES.new)}>
+            <Badge className={cn("text-[10px] px-1.5 py-0", BADGE_CLS.new)}>
               NEW
             </Badge>
           )}
           {product.is_popular && !product.is_new && (
-            <Badge className={cn("text-[10px] px-1.5 py-0", BADGE_STYLES.hot)}>
+            <Badge className={cn("text-[10px] px-1.5 py-0", BADGE_CLS.hot)}>
               🔥 HIT
             </Badge>
           )}
         </div>
         
         {discount > 0 && (
-          <Badge className={cn("absolute top-2 right-2 text-[10px] px-1.5 py-0", BADGE_STYLES.discount)}>
+          <Badge className={cn("absolute top-2 right-2 text-[10px] px-1.5 py-0", BADGE_CLS.discount)}>
             -{discount}%
           </Badge>
         )}
