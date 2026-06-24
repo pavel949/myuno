@@ -1,0 +1,338 @@
+# Instincts generated from https://github.com/pavel949/myuno
+# Generated: 2026-06-24T02:10:23.903Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: myuno-commit-conventional
+trigger: "when writing a commit message"
+confidence: 0.85
+domain: git
+source: repo-analysis
+source_repo: https://github.com/pavel949/myuno
+---
+
+# Myuno Commit Conventional
+
+## Action
+
+Use conventional commit format with prefixes: feat
+
+## Evidence
+
+- 1 commits analyzed
+- Detected conventional commit pattern
+- Examples: feat: add WhatsApp confirmation screen for property viewing requests
+
+---
+id: myuno-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/pavel949/myuno
+---
+
+# Myuno Commit Length
+
+## Action
+
+Write moderate-length commit messages (~68 characters)
+
+## Evidence
+
+- Average commit message length: 68 chars
+- Based on 1 commits
+
+---
+id: myuno-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/pavel949/myuno
+---
+
+# Myuno Naming Files
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: PascalCase
+
+---
+id: myuno-import-alias
+trigger: "when importing modules"
+confidence: 0.85
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/pavel949/myuno
+---
+
+# Myuno Import Alias
+
+## Action
+
+Use path aliases (@/, ~/) instead of relative imports
+
+## Evidence
+
+- Import analysis shows alias pattern
+- Example: import { x } from '@/lib/x'
+
+---
+id: myuno-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/pavel949/myuno
+---
+
+# Myuno Export Style
+
+## Action
+
+Prefer mixed exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: mixed
+
+---
+id: myuno-arch-type-based
+trigger: "when adding new code"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: https://github.com/pavel949/myuno
+---
+
+# Myuno Arch Type Based
+
+## Action
+
+Place code in the appropriate type folder (components/, services/, utils/, etc.)
+
+## Evidence
+
+- Type-based module organization detected
+- Folders: components, pages
+
+---
+id: myuno-instinct-file-naming
+trigger: "When creating a new file in the codebase"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct File Naming
+
+## Action
+
+Name the file using PascalCase (e.g., MyComponent.tsx)
+
+## Evidence
+
+- Pattern in namingConventions.files: PascalCase
+
+---
+id: myuno-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct Function Naming
+
+## Action
+
+Use camelCase for the function name
+
+## Evidence
+
+- Pattern in namingConventions.functions: camelCase
+
+---
+id: myuno-instinct-class-naming
+trigger: "When creating a new class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct Class Naming
+
+## Action
+
+Use PascalCase for the class name
+
+## Evidence
+
+- Pattern in namingConventions.classes: PascalCase
+
+---
+id: myuno-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for the constant name
+
+## Evidence
+
+- Pattern in namingConventions.constants: SCREAMING_SNAKE_CASE
+
+---
+id: myuno-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct Import Style
+
+## Action
+
+Use alias-based imports instead of relative paths
+
+## Evidence
+
+- Pattern in importStyle: alias
+
+---
+id: myuno-instinct-export-style
+trigger: "When exporting modules or components"
+confidence: 0.6
+domain: code-style
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct Export Style
+
+## Action
+
+Use both named and default exports as appropriate (mixed export style)
+
+## Evidence
+
+- Pattern in exportStyle: mixed
+
+---
+id: myuno-instinct-commit-format
+trigger: "When making a git commit"
+confidence: 0.8
+domain: git
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct Commit Format
+
+## Action
+
+Format the commit message as 'feat: [description]' for new features
+
+## Evidence
+
+- Pattern in commits.prefixes: feat
+- Example: feat: add WhatsApp confirmation screen for property viewing requests
+
+---
+id: myuno-instinct-commit-length
+trigger: "When writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct Commit Length
+
+## Action
+
+Keep the commit message concise, around 68 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength: 68
+
+---
+id: myuno-instinct-error-handling
+trigger: "When handling errors in code"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct Error Handling
+
+## Action
+
+Use try-catch blocks for error handling
+
+## Evidence
+
+- Pattern in errorHandling.style: try-catch
+
+---
+id: myuno-instinct-test-location
+trigger: "When adding new tests"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct Test Location
+
+## Action
+
+Place tests in mixed locations (alongside code or in separate folders as appropriate)
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation: mixed
+
+---
+id: myuno-instinct-type-based-organization
+trigger: "When organizing modules or files"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: pavel949/myuno
+---
+
+# Myuno Instinct Type Based Organization
+
+## Action
+
+Group by type (e.g., components, pages) rather than by feature
+
+## Evidence
+
+- Pattern in architecture.moduleOrganization: type-based
+- Pattern in srcLayout: components, pages
+
