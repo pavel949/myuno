@@ -192,6 +192,9 @@ const MCOnboarding: React.FC = () => {
     if (validInvites.length === 0) { setStep(4); return; }
 
     setLoading(true);
+    // Track successfully-sent emails so we update state immutably and a retry
+    // does not re-send the ones that already went out.
+    const sentEmails = new Set<string>();
     try {
       for (const invite of validInvites) {
         const { data, error } = await supabase.functions.invoke('invite-team-member', {
@@ -204,15 +207,19 @@ const MCOnboarding: React.FC = () => {
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
-        invite.sent = true;
+        sentEmails.add(invite.email.trim());
       }
-      setInvites([...invites]);
+      setInvites(prev => prev.map(inv => (sentEmails.has(inv.email.trim()) ? { ...inv, sent: true } : inv)));
       toast.success(isRu ? 'Приглашения отправлены' : 'Invitations sent');
+      // Only advance when every invite actually succeeded.
+      setStep(4);
     } catch (err: unknown) {
+      if (sentEmails.size > 0) {
+        setInvites(prev => prev.map(inv => (sentEmails.has(inv.email.trim()) ? { ...inv, sent: true } : inv)));
+      }
       toast.error((err instanceof Error ? err.message : '') || 'Failed to send invitations');
     } finally {
       setLoading(false);
-      setStep(4);
     }
   }, [invites, companyId, isRu]);
 

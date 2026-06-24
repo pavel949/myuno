@@ -240,12 +240,16 @@ export function useUserContext() {
   });
 
   // Get orgs by type - memoized
+  // Only count orgs that are actually active. A pending (is_active=false) org —
+  // e.g. a vendor application awaiting admin approval — must NOT grant access or
+  // trigger the "you're already a vendor" redirect, otherwise applicants get
+  // bounced out of onboarding into a redirect loop.
   const vendorOrgs = useMemo(
-    () => memberships?.filter(m => m.org?.org_type === 'vendor') || [],
+    () => memberships?.filter(m => m.org?.org_type === 'vendor' && m.org?.is_active === true) || [],
     [memberships]
   );
   const ownerOrgs = useMemo(
-    () => memberships?.filter(m => m.org?.org_type === 'owner') || [],
+    () => memberships?.filter(m => m.org?.org_type === 'owner' && m.org?.is_active === true) || [],
     [memberships]
   );
 

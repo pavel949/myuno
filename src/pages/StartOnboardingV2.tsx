@@ -84,7 +84,9 @@ export default function StartOnboardingV2() {
   const lang = (language === 'ru' ? 'ru' : 'en') as L;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const flagOn = useFeatureFlag('concierge_routing_v2_canonical', true);
+  // Default OFF: gate until GA and avoid a render-flash + broken writes while the
+  // system_settings flag is still loading or absent.
+  const flagOn = useFeatureFlag('concierge_routing_v2_canonical', false);
 
   const returnTo = useMemo(
     () => sanitizeReturnPath(searchParams.get('return')),

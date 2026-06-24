@@ -3,6 +3,7 @@
  * Route: /mc/onboarding/wizard
  */
 import React, { useEffect } from 'react';
+import { toast } from 'sonner';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
@@ -62,7 +63,7 @@ export default function McOnboardingWizardPage() {
             </p>
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => dismiss.mutate()} title={isRu ? 'Закрыть' : 'Dismiss'} aria-label={isRu ? 'Закрыть' : 'Dismiss'}>
+        <Button variant="ghost" size="icon" onClick={() => dismiss.mutate(undefined, { onError: () => toast.error(isRu ? 'Не удалось закрыть' : 'Could not dismiss') })} title={isRu ? 'Закрыть' : 'Dismiss'} aria-label={isRu ? 'Закрыть' : 'Dismiss'}>
           <X className="w-4 h-4" />
         </Button>
       </div>
@@ -89,7 +90,7 @@ export default function McOnboardingWizardPage() {
             <Card key={step.key} className={cn('transition-all', done && 'bg-success/5 border-success/30')}>
               <CardContent className="p-4 flex items-center gap-3">
                 <button
-                  onClick={() => updateStep.mutate({ step: step.key, value: !done })}
+                  onClick={() => updateStep.mutate({ step: step.key, value: !done }, { onError: () => toast.error(isRu ? 'Не удалось сохранить шаг' : 'Could not save step') })}
                   className="shrink-0"
                   aria-label={done ? 'mark incomplete' : 'mark complete'}
                 >
@@ -125,7 +126,10 @@ export default function McOnboardingWizardPage() {
             <p className="text-sm text-muted-foreground">
               {isRu ? 'Вы прошли все 7 шагов. Теперь myUNO — ваша операционная система.' : 'You completed all 7 steps. myUNO is now your operating system.'}
             </p>
-            <Button onClick={() => { complete.mutate(); navigate(APP_ROUTES.MC); }}>
+            <Button onClick={() => complete.mutate(undefined, {
+              onSuccess: () => navigate(APP_ROUTES.MC),
+              onError: () => toast.error(isRu ? 'Не удалось завершить' : 'Could not finish'),
+            })}>
               {isRu ? 'В дашборд' : 'Go to dashboard'}
             </Button>
           </CardContent>

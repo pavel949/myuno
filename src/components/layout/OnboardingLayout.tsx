@@ -1,6 +1,5 @@
 import React, { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { APP_ROUTES } from '@/lib/config/routes';
 import { ArrowLeft, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -69,7 +68,9 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     if (onBack) {
       onBack();
     } else {
-      navigate(APP_ROUTES.HOME);
+      // No explicit step handler: go back in history rather than jumping HOME,
+      // so a multi-step flow that forgot to pass onBack doesn't eject the user.
+      navigate(-1);
     }
   };
   
