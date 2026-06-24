@@ -55,9 +55,7 @@ import {
   ShieldCheck,
   User,
   Wallet,
-  Building2,
   CalendarDays,
-  MapPin,
   MessageCircle,
   MoreVertical,
   UserCheck,
@@ -77,9 +75,6 @@ import {
   useCreateStaffMember,
   useUpdateStaffMember,
   useDeactivateStaffMember,
-  useStaffPropertyAssignments,
-  useAssignStaffToProperty,
-  useRemoveStaffAssignment,
   STAFF_ROLES,
   PAY_TYPES,
   StaffMember,
@@ -251,7 +246,6 @@ function StaffCard({
   onEdit,
   onDeactivate,
   onReactivate,
-  properties,
   onViewTasks,
   onEditPermissions,
   onViewActivity,
@@ -262,7 +256,6 @@ function StaffCard({
   onEdit: () => void;
   onDeactivate: () => void;
   onReactivate: () => void;
-  properties: { property_id: string; title: string; title_ru: string }[];
   onViewTasks: () => void;
   onEditPermissions: () => void;
   onViewActivity: () => void;
@@ -271,8 +264,7 @@ function StaffCard({
   const t = (en: string, ru: string) => isRu ? ru : en;
   const roleLabel = STAFF_ROLES.find(r => r.value === staff.role)?.[isRu ? 'labelRu' : 'labelEn'] ?? staff.role;
   const colorClass = ROLE_COLORS[staff.role] ?? 'text-muted-foreground bg-muted';
-  const { data: assignments } = useStaffPropertyAssignments(staff.id);
-  
+
   const payLabel = (() => {
     if (staff.monthly_salary) return `฿${staff.monthly_salary.toLocaleString()}/${t('mo', 'мес')}`;
     if (staff.daily_rate) return `฿${staff.daily_rate.toLocaleString()}/${t('day', 'день')}`;
@@ -283,10 +275,6 @@ function StaffCard({
   const hireDate = format(new Date(staff.created_at), isRu ? 'd MMM yyyy' : 'MMM d, yyyy', {
     locale: isRu ? ruLocale : undefined,
   });
-
-  const assignedProperties = (assignments || [])
-    .map(a => properties.find(p => p.property_id === a.property_id))
-    .filter(Boolean);
 
   return (
     <Card className={!staff.is_active ? 'opacity-60' : undefined}>
@@ -338,24 +326,6 @@ function StaffCard({
                 </a>
               )}
             </div>
-
-            {/* Assigned properties */}
-            {assignedProperties.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-border/40">
-                <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {t('Assigned to', 'Назначен на')}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {assignedProperties.map(p => (
-                    <Badge key={p!.property_id} variant="secondary" className="text-xs font-normal">
-                      <Building2 className="h-3 w-3 mr-1" />
-                      {isRu ? p!.title_ru || p!.title : p!.title}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Notes preview */}
             {staff.notes && (
@@ -463,8 +433,6 @@ export default function StaffPage() {
   const deactivateMutation = useDeactivateStaffMember();
   const { allProperties } = useMyProperties();
   const { activeCompany } = useActiveCompany();
-  const assignStaff = useAssignStaffToProperty();
-  const removeAssignment = useRemoveStaffAssignment();
   const canManage = useCanManagePermissions();
 
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -565,8 +533,6 @@ export default function StaffPage() {
   };
 
   const isBusy = createMutation.isPending || updateMutation.isPending;
-
-  const properties = allProperties.map(p => ({ ...p, id: p.property_id }));
 
   return (
     <PageContainer>
@@ -690,7 +656,6 @@ export default function StaffPage() {
               onEdit={() => openEdit(s)}
               onDeactivate={() => setDeactivateTarget(s)}
               onReactivate={() => handleReactivate(s)}
-              properties={allProperties}
               onViewTasks={() => navigate(`/mc/tasks?assignee=${s.id}`)}
               onEditPermissions={() => setPermissionsTarget({ userId: s.id, name: s.name, staffId: s.id, customTitle: s.custom_title })}
               onViewActivity={() => setActivityTarget({ userId: s.id, name: s.name })}
@@ -853,20 +818,6 @@ export default function StaffPage() {
               />
             </section>
 
-            {/* Property Assignments (edit mode only) */}
-            {editing && allProperties.length > 0 && (
-              <section className="space-y-3">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t('Property Assignments', 'Назначения на объекты')}</h4>
-                <StaffPropertyAssignments
-                  staffId={editing.id}
-                  properties={allProperties}
-                  isRu={isRu}
-                  onAssign={(propertyId) => assignStaff.mutate({ staffId: editing.id, propertyId })}
-                  onRemove={(assignmentId) => removeAssignment.mutate(assignmentId)}
-                />
-              </section>
-            )}
-
             {/* Staff Documents (edit mode only) */}
             {editing && (
               <section className="space-y-3">
@@ -937,72 +888,5 @@ export default function StaffPage() {
         memberName={activityTarget?.name}
       />
     </PageContainer>
-  );
-}
-
-/** Inline component for property assignments in the edit form */
-function StaffPropertyAssignments({
-  staffId,
-  properties,
-  isRu,
-  onAssign,
-  onRemove,
-}: {
-  staffId: string;
-  properties: { property_id: string; title: string; title_ru: string }[];
-  isRu: boolean;
-  onAssign: (propertyId: string) => void;
-  onRemove: (assignmentId: string) => void;
-}) {
-  const { data: assignments, isLoading } = useStaffPropertyAssignments(staffId);
-  const assignedIds = new Set((assignments || []).map(a => a.property_id));
-  const unassigned = properties.filter(p => !assignedIds.has(p.property_id));
-
-  return (
-    <div className="space-y-2">
-      {isLoading ? (
-        <Skeleton className="h-8 w-full" />
-      ) : (
-        <>
-          {(assignments || []).length > 0 && (
-            <div className="space-y-1.5">
-              {(assignments || []).map(a => {
-                const prop = properties.find(p => p.property_id === a.property_id);
-                return (
-                  <div key={a.id} className="flex items-center justify-between py-2 px-3 rounded-none bg-muted/50">
-                    <span className="text-sm flex items-center gap-2">
-                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                      {prop ? (isRu ? prop.title_ru || prop.title : prop.title) : a.property_id.slice(0, 8)}
-                    </span>
-                    <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => onRemove(a.id)}>
-                      {isRu ? 'Убрать' : 'Remove'}
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {unassigned.length > 0 && (
-            <Select onValueChange={onAssign}>
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder={isRu ? '+ Добавить объект' : '+ Add property'} />
-              </SelectTrigger>
-              <SelectContent>
-                {unassigned.map(p => (
-                  <SelectItem key={p.property_id} value={p.property_id}>
-                    {isRu ? p.title_ru || p.title : p.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-
-          {(assignments || []).length === 0 && unassigned.length === 0 && (
-            <p className="text-xs text-muted-foreground">{isRu ? 'Нет объектов для назначения' : 'No properties available'}</p>
-          )}
-        </>
-      )}
-    </div>
   );
 }
