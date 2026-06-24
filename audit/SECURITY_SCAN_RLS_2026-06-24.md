@@ -96,6 +96,16 @@ intentional (read-only or write-only tables) — quick confirm.
 
 ---
 
+## 3f. Remediation applied — RLS-011 (UPDATE missing WITH CHECK)
+A fix migration was generated: **`supabase/migrations/20260624150000_rls011_update_with_check.sql`**.
+- Adds `WITH CHECK` (mirroring each policy's existing `USING`) to **142** UPDATE policies via
+  `ALTER POLICY ... WITH CHECK (...)` — minimal, atomic, leaves `USING`/roles/command untouched.
+- **8 status-restricted policies** (USING limits to a mutable `status`, e.g. `'pending'`/`'draft'`)
+  are left **commented out for manual review** at the bottom of the migration, because mirroring
+  them verbatim would block the legitimate status transition the update performs.
+- Verified: re-scanning the post-fix state drops RLS-011 from **150 → 8**; SQL validated with pglast.
+- **Not auto-applied** — review and apply via Lovable Cloud.
+
 ## 4. Suggested next steps
 
 1. **Run a remote scan** for full coverage (storage tables, `service_role`,
