@@ -1,12 +1,26 @@
-// Unified Property Card
-export { 
-  PropertyCard, 
+/**
+ * Canonical property cards — keep this list small and intentional:
+ *  - PropertyCard        → admin/owner dashboards (hero/list/compact variants)
+ *  - PropertyListingCard → public marketplace (rent/buy), Airbnb-style
+ *  - ResalePropertyCard  → secondary-market listings (distinct `ResaleProperty`
+ *                          entity: asking price, assignment premium, ROI)
+ *  - commercial/*, HotelPropertyCard, LandPlotCard, OffplanProjectCard,
+ *    ProjectInfoCard     → asset-class-specific, distinct data shapes
+ * Removed: PropertyPreviewCard (unused duplicate of PropertyListingCard).
+ */
+
+// Unified admin/owner Property Card
+export {
+  PropertyCard,
   PropertyCardSkeleton,
   type PropertyCardProps,
   type PropertyCardVariant,
   type PropertyCardMode,
   type PropertyCardStats,
 } from './PropertyCard';
+
+// Canonical public marketplace card
+export { PropertyListingCard } from './PropertyListingCard';
 
 // Other exports
 export { IncludedServices } from './IncludedServices';
@@ -20,7 +34,6 @@ export { PropertyBookingCard } from './PropertyBookingCard';
 export { PropertyRooms } from './PropertyRooms';
 export { PropertyCalendar } from './PropertyCalendar';
 export { SeasonalPricing } from './SeasonalPricing';
-export { PropertyPreviewCard } from './PropertyPreviewCard';
 export { GuestPropertyChat } from './GuestPropertyChat';
 export { MessageHostButton } from './MessageHostButton';
 export { CancellationPolicySelector } from './CancellationPolicySelector';
