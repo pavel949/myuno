@@ -500,4 +500,16 @@ html:not([lang]) {
   --cv-grade-b:       42 60% 56%;
   --cv-grade-c:       18 67% 62%;
   --cv-grade-d:        3 64% 64%;
+
+  /* Cluster hues — dark inversion. The light values (lightness 25–32%) read as
+     near-black on navy-900 and made the auth value-panel chips illegible. Same
+     hue/saturation, lightness raised to ~58–62% for clean contrast on dark. */
+  --cluster-arrive:   211 60% 62%;   /* navy → light blue */
+  --cluster-live:     211 60% 62%;   /* navy → light blue */
+  --cluster-legal:    220 14% 62%;   /* neutral-dark → light neutral */
+  --cluster-invest:   22  79% 58%;   /* brand-orange, brightened */
+  --cluster-manage:   220 14% 62%;   /* partner neutral */
+  --cluster-build:    28  30% 62%;   /* stone, lifted off black */
+  --cluster-enjoy:    22  79% 58%;   /* brand-orange, brightened */
+  --cluster-family:   211 60% 62%;   /* navy → light blue */
 }

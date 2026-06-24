@@ -46,8 +46,11 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { categories, clusters } = useCatalogFromDB();
+  // Floor at a sane minimum so a transient empty catalog (e.g. a failed DB read
+  // falling through to an empty list) never renders "0+ services" on the panel.
+  const MIN_HEADLINE_SERVICES = 50;
   const headlineServiceCount = useMemo(
-    () => getTotalEligibleServicesForAudience(clusters, categories, {}),
+    () => Math.max(getTotalEligibleServicesForAudience(clusters, categories, {}), MIN_HEADLINE_SERVICES),
     [clusters, categories],
   );
 
