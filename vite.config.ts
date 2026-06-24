@@ -90,14 +90,20 @@ export default defineConfig(({ mode, command }) => {
       },
       mode === "development" && componentTagger(),
       VitePWA({
-        // Temporary kill-switch worker: clears stale production caches that kept
-        // serving old split chunks, then unregisters itself.
-        strategies: 'injectManifest',
-        srcDir: 'src',
-        filename: 'sw.ts',
+        // Auto-updating Workbox service worker. Two jobs:
+        //  1. Installability — a SW with a fetch handler + the manifest below
+        //     satisfies Chrome/Edge install criteria so `beforeinstallprompt`
+        //     fires and the in-app "Install" button is a genuine one-tap install.
+        //  2. Auto-update without reinstall — each deploy ships a new precache
+        //     revision; the SW installs it in the background, `skipWaiting` +
+        //     `clientsClaim` activate it immediately, and `cleanupOutdatedCaches`
+        //     evicts the old shell. The next reload (driven by VersionWatcher /
+        //     PWAUpdatePrompt) serves the fresh build — no app-store reinstall,
+        //     and the same flow updates the Capacitor WebView shells.
+        // Registered manually in src/main.tsx (production host only).
         registerType: 'autoUpdate',
         injectRegister: false,
-        
+
         manifest: {
           name: 'myUNO — Phuket SuperApp',
           short_name: 'myUNO',
@@ -173,13 +179,63 @@ export default defineConfig(({ mode, command }) => {
         },
         
         includeAssets: ['favicon.ico', 'icons/*.png'],
-        
-        injectManifest: {
-          injectionPoint: undefined,
-          globPatterns: [],
-          maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+
+        workbox: {
+          // Precache only the app shell (HTML/CSS/icons/manifest) so install
+          // stays light — the 557-route JS graph is cached at runtime on demand
+          // (see runtimeCaching) instead of force-downloading every chunk up front.
+          globPatterns: ['**/*.{css,html,ico,svg,webmanifest}', 'icons/**/*.png'],
+          // Old precache revisions are content-hashed; remove them on activate so
+          // a stale shell can never be served after a deploy.
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+          maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+          // SPA: serve the cached index.html for navigations (incl. offline launch),
+          // which is also what makes the app installable.
+          navigateFallback: '/index.html',
+          navigateFallbackDenylist: [
+            /^\/api\//,
+            /^\/auth\//,
+            /^\/functions\//,
+            /\/version\.json$/,
+          ],
+          runtimeCaching: [
+            {
+              // Hashed JS/CSS/worker chunks — safe to cache, revalidate in the
+              // background so a new deploy's chunks are picked up without a wipe.
+              urlPattern: ({ request }) =>
+                request.destination === 'script' ||
+                request.destination === 'style' ||
+                request.destination === 'worker',
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'myuno-assets',
+                expiration: { maxEntries: 250, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
+            {
+              urlPattern: ({ request }) => request.destination === 'image',
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'myuno-images',
+                expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
+            {
+              urlPattern: ({ url }) =>
+                url.origin === 'https://fonts.googleapis.com' ||
+                url.origin === 'https://fonts.gstatic.com',
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts',
+                cacheableResponse: { statuses: [0, 200] },
+                expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              },
+            },
+          ],
         },
-        
+
         devOptions: {
           enabled: false,
         },
