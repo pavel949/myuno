@@ -4,6 +4,7 @@ import { useReferral } from '@/hooks/useReferral';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SectionCard } from './SectionCard';
 import { PremiumButton } from './PremiumButton';
+import { ShareCTA } from '@/components/share/ShareCTA';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +24,6 @@ export const ReferralCard: React.FC<ReferralCardProps> = ({
     stats,
     isLoading,
     copyReferralCode,
-    copyShareLink,
   } = useReferral();
 
   const handleCopyCode = async () => {
@@ -33,12 +33,15 @@ export const ReferralCard: React.FC<ReferralCardProps> = ({
     }
   };
 
-  const handleShare = async () => {
-    const success = await copyShareLink();
-    if (success) {
-      toast.success(language === 'ru' ? 'Ссылка скопирована!' : 'Link copied!');
-    }
-  };
+  // Share target: the /auth route — ShareCTA appends ?ref=<code> + UTM so the
+  // invite is attributed and the friend lands on signup with the code pre-filled.
+  const shareUrl = `${window.location.origin}/auth`;
+  const shareTitle = language === 'ru'
+    ? `Получи ${settings?.referred_bonus || 50} ₽ на myUNO`
+    : `Get ${settings?.referred_bonus || 50} ₽ on myUNO`;
+  const shareText = language === 'ru'
+    ? `Регистрируйся на myUNO по моей ссылке — получишь ${settings?.referred_bonus || 50} ₽ на счёт.`
+    : `Sign up to myUNO with my link and get ${settings?.referred_bonus || 50} ₽ credit.`;
 
   if (isLoading) {
     return (
@@ -67,10 +70,14 @@ export const ReferralCard: React.FC<ReferralCardProps> = ({
               </p>
             </div>
           </div>
-          <PremiumButton size="sm" onClick={handleShare}>
-            <Share2 className="w-4 h-4 mr-1" />
-            {language === 'ru' ? 'Поделиться' : 'Share'}
-          </PremiumButton>
+          <ShareCTA url={shareUrl} title={shareTitle} text={shareText} referralCode={referralCode}>
+            <PremiumButton size="sm" asChild>
+              <button type="button">
+                <Share2 className="w-4 h-4 mr-1" />
+                {language === 'ru' ? 'Поделиться' : 'Share'}
+              </button>
+            </PremiumButton>
+          </ShareCTA>
         </div>
       </SectionCard>
     );
@@ -137,10 +144,14 @@ export const ReferralCard: React.FC<ReferralCardProps> = ({
 
       {/* Actions */}
       <div className="flex gap-2">
-        <PremiumButton className="flex-1" onClick={handleShare}>
-          <Share2 className="w-4 h-4 mr-2" />
-          {language === 'ru' ? 'Поделиться ссылкой' : 'Share link'}
-        </PremiumButton>
+        <ShareCTA url={shareUrl} title={shareTitle} text={shareText} referralCode={referralCode}>
+          <PremiumButton className="flex-1" asChild>
+            <button type="button">
+              <Share2 className="w-4 h-4 mr-2" />
+              {language === 'ru' ? 'Поделиться ссылкой' : 'Share link'}
+            </button>
+          </PremiumButton>
+        </ShareCTA>
       </div>
 
       {/* Stats */}
