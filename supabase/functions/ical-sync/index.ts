@@ -4,6 +4,7 @@
 // finance reports from being polluted by technical sync records.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { validateExternalUrlForSSRF } from "../_shared/ssrf-guard.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -253,6 +254,12 @@ Deno.serve(async (req) => {
     for (const calendar of calendars || []) {
       try {
         console.info(`Fetching iCal: ${calendar.name}`);
+        // SSRF guard: ical_url is user-supplied DB data — block loopback,
+        // private ranges and cloud-metadata targets before fetching.
+        const ssrf = validateExternalUrlForSSRF(calendar.ical_url ?? '');
+        if (!ssrf.allowed) {
+          throw new Error(`Blocked iCal URL: ${ssrf.reason}`);
+        }
         const response = await fetch(calendar.ical_url, {
           headers: { 'User-Agent': 'UNO Calendar Sync/1.0' },
         });
