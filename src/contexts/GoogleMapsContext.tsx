@@ -113,13 +113,19 @@ const loadingValue: GoogleMapsContextValue = {
 export function GoogleMapsProvider({ children }: { children: React.ReactNode }) {
   const { language: appLang } = useLanguage();
   const requestedLanguage = resolveMapsLanguage(appLang);
-  const [forceFallbackLang, setForceFallbackLang] = useState(false);
-  const mapsLanguage = forceFallbackLang ? 'en' : requestedLanguage;
 
-  // Reset fallback if the user changes app language (give the new language a fresh try)
-  useEffect(() => {
-    setForceFallbackLang(false);
-  }, [requestedLanguage]);
+  // The underlying @googlemaps/js-api-loader is a global singleton and throws
+  // "Loader must not be called again with different options" if we re-invoke
+  // useJsApiLoader with a different `language`/`id`. That used to crash the
+  // entire app on language switch (ErrorBoundary → "This page failed to load").
+  // We lock the maps script language to whatever was active on first mount;
+  // a full page reload re-localizes Google Maps to the new app language.
+  const lockedLanguageRef = useRef<string | null>(null);
+  if (lockedLanguageRef.current === null) {
+    lockedLanguageRef.current = requestedLanguage;
+  }
+  const [forceFallbackLang, setForceFallbackLang] = useState(false);
+  const mapsLanguage = forceFallbackLang ? 'en' : lockedLanguageRef.current;
 
   const handleLanguageFallback = React.useCallback(() => {
     setForceFallbackLang(true);
