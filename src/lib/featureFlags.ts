@@ -41,10 +41,12 @@ const FLAGS: Record<string, FeatureFlag> = {
   },
 
   // Local Services / Thai Business Layer (B2B self-serve + B2C surface).
-  // OFF by default — the whole module is dormant until enabled in system_settings.
+  // Enabled (GA 2026-06-24). The system_settings DB override still acts as a
+  // kill-switch: setting feature_flag:thai_business_layer to {"enabled": false}
+  // force-disables the whole module without a redeploy.
   THAI_BUSINESS_LAYER: {
     key: 'thai_business_layer',
-    enabled: false,
+    enabled: true,
     description: 'Thai Business / Local Services layer (B2B dashboard + B2C catalogue + landings)',
   },
 
