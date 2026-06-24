@@ -1,12 +1,9 @@
 // Auto-translate a record's fields into ru/en/th and save into the record's i18n jsonb column.
 // Body: { table: 'listings'|'providers'|'marketplace_products'|'services', id: uuid, source_lang: 'ru'|'en'|'th', fields: Record<string,string> }
 import { createClient } from "npm:@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const ALLOWED_TABLES = new Set(["listings", "providers", "marketplace_products", "services", "bouquets"]);
 const LANGS = ["ru", "en", "th"] as const;
@@ -19,7 +16,15 @@ const langNames: Record<Lang, string> = {
 };
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // Require an authenticated user + AI rate limit. This endpoint writes i18n
+  // back to records with the service role, so it must never be anonymous.
+  const auth = await requireAuth(req, corsHeaders);
+  if (auth instanceof Response) return auth;
+  const rl = await withRateLimit(req, 'auto-translate-record', RATE_LIMITS.ai, corsHeaders, auth.user.id);
+  if (rl) return rl;
 
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
