@@ -21,6 +21,7 @@ import { rankServices } from '@/lib/superapp/rankServices';
 import { MiniAppCard } from '@/components/superapp/MiniAppCard';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import { trackSituationClick } from '@/lib/analytics/track';
+import { formatServices } from '@/lib/i18n/pluralize';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface NavigatorClusterSectionProps {
@@ -51,18 +52,7 @@ const CLUSTER_LABEL_EN: Record<ClusterId, string> = {
   build: 'Build',
 };
 
-function formatCount(n: number, isRu: boolean): string {
-  if (isRu) {
-    const mod10 = n % 10;
-    const mod100 = n % 100;
-    if (mod10 === 1 && mod100 !== 11) return `${n} услуга`;
-    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${n} услуги`;
-    return `${n} услуг`;
-  }
-  return `${n} ${n === 1 ? 'service' : 'services'}`;
-}
-
-export function NavigatorClusterSection({
+function NavigatorClusterSectionImpl({
   clusterId,
   situations,
   counts,
@@ -98,7 +88,10 @@ export function NavigatorClusterSection({
         >
           {label}
         </h2>
-        <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
+        <span
+          className="font-mono text-[11px] text-muted-foreground tabular-nums"
+          aria-label={`${situations.length} ${isRu ? 'ситуаций' : 'situations'}`}
+        >
           {situations.length}
         </span>
       </header>
@@ -122,21 +115,20 @@ export function NavigatorClusterSection({
         </div>
       )}
 
-
-
       <ul className="divide-y divide-border">
         {situations.map((s) => {
           const title = isRu ? s.title_ru : s.title_en;
           const desc = isRu ? s.description_ru : s.description_en;
           const count = counts?.[s.id];
+          const href = resolveSituationHref(s.code);
           return (
             <li key={s.id}>
               <Link
-                to={resolveSituationHref(s.code)}
+                to={href}
                 onClick={() => trackSituationClick(s.code, {
                   source: 'cluster_section',
                   cluster: clusterId,
-                  href: resolveSituationHref(s.code),
+                  href,
                   count,
                 })}
                 className="group flex items-center gap-4 py-4 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[56px]"
@@ -152,9 +144,10 @@ export function NavigatorClusterSection({
                   )}
                 </div>
                 <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
-                  {typeof count === 'number' && count > 0 ? formatCount(count, isRu) : (isRu ? 'открыть' : 'open')}
+                  {typeof count === 'number' && count > 0 ? formatServices(count, language) : (isRu ? 'открыть' : 'open')}
                 </span>
                 <ArrowRight
+                  aria-hidden="true"
                   className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors"
                   strokeWidth={1.75}
                 />
@@ -166,3 +159,5 @@ export function NavigatorClusterSection({
     </section>
   );
 }
+
+export const NavigatorClusterSection = React.memo(NavigatorClusterSectionImpl);

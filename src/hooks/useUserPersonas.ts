@@ -386,7 +386,7 @@ export const PERSONA_INFO: Record<UserPersona, {
     labelEn: 'Business', labelRu: 'Бизнес',
     descEn: 'Incorporation, workspace, insurance, and day-to-day ops for your company',
     descRu: 'Компания, офис и коворкинг, страховка и сервисы для эксплуатации бизнеса',
-    icon: 'Briefcase', color: 'text-slate-600', bgColor: 'bg-slate-500/10',
+    icon: 'Briefcase', color: 'text-muted-foreground', bgColor: 'bg-muted',
   },
   nomad: {
     labelEn: 'Nomad', labelRu: 'Номад',

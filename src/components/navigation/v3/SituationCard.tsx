@@ -4,6 +4,8 @@ import { ArrowUpRight } from 'lucide-react';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { hexTint, accentColor } from '@/lib/ui/colorTint';
+import { formatServices } from '@/lib/i18n/pluralize';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import { trackSituationClick } from '@/lib/analytics/track';
 import type { LifeSituation } from '@/hooks/useLifeOS';
@@ -31,28 +33,38 @@ export function SituationCard({
   const title = isRu ? situation.title_ru : situation.title_en;
   const description = isRu ? situation.description_ru : situation.description_en;
   const color = situation.color ?? null;
-  const tint = color && color.startsWith('#') ? `${color}20` : 'hsl(var(--primary) / 0.12)';
-  const iconColor = color ?? 'hsl(var(--primary))';
+  const tint = hexTint(color, 0.125);
+  const iconColor = accentColor(color);
+  const href = resolveSituationHref(situation.code);
+
+  const countLabel =
+    typeof serviceCount === 'number' && serviceCount > 0
+      ? formatServices(serviceCount, language)
+      : isRu ? 'Открыть' : 'Open';
+
+  // Compose a complete accessible name — an aria-label REPLACES the element's
+  // name, so it must carry the title, description and localized count.
+  const accessibleName = [title, description, countLabel].filter(Boolean).join('. ');
 
   return (
     <Link
-      to={resolveSituationHref(situation.code)}
+      to={href}
       onClick={() => trackSituationClick(situation.code, {
         source: 'situation_card',
         cluster: clusterId,
-        href: resolveSituationHref(situation.code),
+        href,
         count: serviceCount,
       })}
       className={cn(
         'group relative flex flex-col gap-4 p-5 min-h-[180px]',
         'border border-border bg-card text-card-foreground',
-        'transition-all duration-150',
+        'transition-[border-color,transform] duration-150',
         'hover:border-primary/40 hover:-translate-y-px',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
         className,
       )}
       style={clusterColor ? { borderLeftWidth: 3, borderLeftColor: clusterColor } : undefined}
-      aria-label={`${title}${typeof serviceCount === 'number' ? ` — ${serviceCount}` : ''}`}
+      aria-label={accessibleName}
     >
       <div className="flex items-start justify-between gap-3">
         <div
@@ -67,6 +79,7 @@ export function SituationCard({
           />
         </div>
         <ArrowUpRight
+          aria-hidden="true"
           className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors"
           strokeWidth={1.75}
         />
@@ -85,9 +98,7 @@ export function SituationCard({
 
       <div className="pt-3 border-t border-border/60 flex items-center justify-between gap-3">
         <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
-          {typeof serviceCount === 'number' && serviceCount > 0
-            ? `${serviceCount} ${isRu ? (serviceCount === 1 ? 'услуга' : serviceCount < 5 ? 'услуги' : 'услуг') : serviceCount === 1 ? 'service' : 'services'}`
-            : isRu ? 'Открыть' : 'Open'}
+          {countLabel}
         </span>
         {clusterId && (
           <span
