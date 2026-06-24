@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
-import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
-import { searchNavigationIndex, type NavSearchContext } from '@/lib/search/navigationIndex';
+import { searchStaticIndex } from '@/lib/search/staticIndex';
+import { type NavSearchContext } from '@/lib/search/navigationIndex';
 import { useSearchContext } from './useSearchContext';
 
 export interface SearchResult {
@@ -31,55 +31,20 @@ export interface AiSmartAnswer {
   suggestedServices: Array<{ type: string; query: string; reason: string }>;
 }
 
-
-interface TableConfig {
-  table: string;
-  type: string;
-  titleEn: string;
-  titleRu: string;
+/** Row shape returned by the `search_catalog` Postgres RPC. */
+interface CatalogSearchRow {
+  entity_type: string;
+  entity_id: string;
+  vertical: string | null;
+  title_en: string | null;
+  title_ru: string | null;
+  subtitle: string | null;
+  path: string;
   image: string | null;
-  price: string | null;
-  locationEn: string | null;
-  locationRu: string | null;
-  rating: string | null;
-  pathPrefix: string;
-  idField: string;
-  hasApprovalStatus: boolean;
-  /** Extra columns also matched against the search term via OR ilike */
-  extraSearchFields?: string[];
+  price: number | null;
+  rating: number | null;
+  district: string | null;
 }
-
-// Vertical-to-path mapping for listings table
-const LISTING_VERTICAL_PATHS: Record<string, string> = {
-  yacht: '/yachts/',
-  experience: '/tours/',
-  vehicle: '/transport/vehicle/',
-  restaurant: '/restaurants/',
-  clinic: '/medical/clinic/',
-  education: '/education/tutor/',
-  bank: '/banking/',
-  babysitter: '/babysitter/',
-  cleaning: '/cleaning/',
-  pet_service: '/pets/',
-  bouquet: '/flowers/bouquet/',
-};
-
-// Tables NOT migrated to listings (still queried individually)
-const searchTables: TableConfig[] = [
-  { table: 'properties', type: 'property', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/property/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru', 'address'] },
-  { table: 'salons', type: 'beauty', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/beauty/salon/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru', 'address'] },
-  { table: 'gyms', type: 'fitness', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_day_pass', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/fitness/gym/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru'] },
-  { table: 'events', type: 'events', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_ru', rating: 'rating', pathPrefix: '/events/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru'] },
-  { table: 'water_activities', type: 'water', titleEn: 'title_en', titleRu: 'title_ru', image: 'cover_image', price: 'price', locationEn: 'location_name', locationRu: 'location_name', rating: 'rating', pathPrefix: '/water/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru'] },
-  // tours: migrated to listings.experience — searched via unified listings query above
-  { table: 'legal_services', type: 'legal', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price_consultation', locationEn: 'district', locationRu: 'district', rating: 'rating', pathPrefix: '/legal/provider/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru'] },
-  { table: 'flower_shops', type: 'flowers', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/flowers/shop/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['address'] },
-  { table: 'pharmacies', type: 'pharmacy', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/pharmacy/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['address'] },
-  { table: 'stores', type: 'market', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: null, locationEn: 'address', locationRu: 'address', rating: 'rating', pathPrefix: '/market/store/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['address'] },
-  { table: 'services', type: 'services', titleEn: 'name_en', titleRu: 'name_ru', image: null, price: 'price', locationEn: null, locationRu: null, rating: null, pathPrefix: '/services/provider/', idField: 'id', hasApprovalStatus: true, extraSearchFields: ['description_en', 'description_ru'] },
-  { table: 'marketplace_products', type: 'product', titleEn: 'name_en', titleRu: 'name_ru', image: 'cover_image', price: 'price', locationEn: 'vendor_name', locationRu: 'vendor_name_ru', rating: 'rating', pathPrefix: '/market/product/', idField: 'id', hasApprovalStatus: false, extraSearchFields: ['description_en', 'description_ru'] },
-  { table: 'marketplace_categories', type: 'marketCategory', titleEn: 'name_en', titleRu: 'name_ru', image: 'image_url', price: null, locationEn: null, locationRu: null, rating: null, pathPrefix: '/market/category/', idField: 'slug', hasApprovalStatus: false },
-];
 
 // Keyword synonyms: each entry has keywords (all must match) and priority (higher = preferred)
 interface SynonymEntry {
@@ -120,7 +85,6 @@ const SEARCH_SYNONYM_ENTRIES: SynonymEntry[] = [
   { keywords: ['house'], priority: 5, result: mkCat('cat-house', 'Houses', 'Дома', '/property?type=house') },
   // Medical
   { keywords: ['dentist'], priority: 10, result: mkCat('cat-dentist', 'Dental Clinics', 'Стоматология', '/medical?specialty=dental') },
-  { keywords: ['стоматолог'], priority: 10, result: mkCat('cat-dentist', 'Dental Clinics', 'Стоматология', '/medical?specialty=dental') },
   { keywords: ['стоматолог'], priority: 10, result: mkCat('cat-dentist', 'Dental Clinics', 'Стоматология', '/medical?specialty=dental') },
   { keywords: ['зубн'], priority: 10, result: mkCat('cat-dentist', 'Dental Clinics', 'Стоматология', '/medical?specialty=dental') },
   { keywords: ['dental'], priority: 10, result: mkCat('cat-dentist', 'Dental Clinics', 'Стоматология', '/medical?specialty=dental') },
@@ -221,6 +185,12 @@ const SEARCH_SYNONYM_ENTRIES: SynonymEntry[] = [
 ];
 
 const CACHE_TTL_MS = 5000;
+const MAX_RESULTS = 25;
+const DB_RESULT_LIMIT = 12;
+
+/** Section ordering: actions → categories → catalogue entities. */
+const sectionRank = (r: SearchResult): number =>
+  r.isAction ? 0 : r.isCategory ? 1 : 2;
 
 export function useGlobalSearch(query: string, enabled: boolean = true) {
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -243,225 +213,80 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    const searchTermLower = sanitizeSearchTerm(searchTerm.toLowerCase());
-    const allResults: SearchResult[] = [];
+    const sanitized = sanitizeSearchTerm(searchTerm);
+    const searchTermLower = sanitized.toLowerCase();
 
-    // 0. Navigation index — actions/pages/mini-apps (persona/role aware)
-    const navHits = searchNavigationIndex(searchTerm, ctxRef.current, 6);
-    for (const hit of navHits) {
-      allResults.push({
-        id: hit.target.id,
-        type: 'action',
-        titleEn: hit.target.titleEn,
-        titleRu: hit.target.titleRu,
-        descriptionEn: hit.target.descriptionEn ?? null,
-        descriptionRu: hit.target.descriptionRu ?? null,
-        image: null,
-        price: null,
-        locationEn: null,
-        locationRu: null,
-        rating: null,
-        path: hit.target.path,
-        isAction: true,
-      });
-    }
+    // ── Tier 1 — client static index + curated synonyms (synchronous, instant)
+    const tier1 = searchStaticIndex(searchTerm, ctxRef.current, DB_RESULT_LIMIT);
+    const seenPaths = new Set(tier1.map((r) => r.path));
 
-    // 1. Synonym matches — pick highest-priority entries where ALL keywords match
-    const matchedSynonyms: SynonymEntry[] = [];
-    for (const entry of SEARCH_SYNONYM_ENTRIES) {
-      const allMatch = entry.keywords.every(kw => searchTermLower.includes(kw));
-      if (allMatch) {
-        matchedSynonyms.push(entry);
-      }
-    }
-    matchedSynonyms.sort((a, b) => b.priority - a.priority);
-    const seenIds = new Set<string>(allResults.map((r) => r.id));
+    const matchedSynonyms = SEARCH_SYNONYM_ENTRIES
+      .filter((entry) => entry.keywords.every((kw) => searchTermLower.includes(kw)))
+      .sort((a, b) => b.priority - a.priority);
     for (const entry of matchedSynonyms) {
-      if (!seenIds.has(entry.result.id)) {
-        seenIds.add(entry.result.id);
-        allResults.push(entry.result);
+      if (!seenPaths.has(entry.result.path)) {
+        seenPaths.add(entry.result.path);
+        tier1.push(entry.result);
       }
     }
+    tier1.sort((a, b) => sectionRank(a) - sectionRank(b));
 
+    // Paint Tier 1 immediately — this is never cleared by a Tier 2 failure.
+    setResults(tier1.slice(0, MAX_RESULTS));
+
+    // ── Tier 2 — DB full-text catalog search (resilient)
     try {
-      // 2. Category matches
-      const { data: categoryData } = await supabase
-        .from('categories')
-        .select('id, slug, name_en, name_ru, icon, color, mini_app_type')
-        .eq('is_active', true)
-        .or(`name_en.ilike.%${searchTermLower}%,name_ru.ilike.%${searchTermLower}%`)
-        .limit(4);
+      // search_catalog is a custom RPC not yet in generated types.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase.rpc as any)('search_catalog', {
+        q: sanitized,
+        lang: language,
+        max_results: DB_RESULT_LIMIT,
+      });
 
       if (controller.signal.aborted) return;
 
-      if (categoryData) {
-        categoryData.forEach((cat) => {
-          let path = `/${cat.slug}`;
-          if (cat.mini_app_type) {
-            const typePathMap: Record<string, string> = {
-              'real-estate': '/property',
-              'property': '/property',
-              'beauty-spa': '/beauty',
-              'beauty': '/beauty',
-              'medical': '/medical',
-              'transport': '/transport',
-              'tours': '/tours',
-              'restaurants': '/restaurants',
-              'food': '/restaurants',
-              'fitness': '/fitness',
-              'yachts': '/yachts',
-              'services': '/services',
-              'education': '/education',
-              'legal': '/legal',
-              'pets': '/pets',
-              'pharmacy': '/pharmacy',
-              'flowers': '/flowers',
-              'transfers': '/transport/airport-transfer',
-              'events': '/events',
-              'marketplace': '/market',
-              'food-delivery': '/food-delivery',
-              'visa': '/visa',
-            };
-            path = typePathMap[cat.mini_app_type] || `/${cat.slug}`;
+      if (!error && Array.isArray(data)) {
+        const entities: SearchResult[] = (data as CatalogSearchRow[]).map((row) => ({
+          id: `db-${row.entity_type}-${row.entity_id}`,
+          type: row.vertical || row.entity_type,
+          titleEn: row.title_en || row.title_ru || '',
+          titleRu: row.title_ru || row.title_en || '',
+          image: row.image,
+          price: row.price,
+          locationEn: row.subtitle || row.district,
+          locationRu: row.district || row.subtitle,
+          rating: row.rating,
+          path: row.path,
+        }));
+
+        const merged = [...tier1];
+        for (const e of entities) {
+          if (!seenPaths.has(e.path)) {
+            seenPaths.add(e.path);
+            merged.push(e);
           }
-          allResults.push({
-            id: `cat-${cat.id}`,
-            type: 'category',
-            titleEn: cat.name_en,
-            titleRu: cat.name_ru,
-            image: null,
-            price: null,
-            locationEn: null,
-            locationRu: null,
-            rating: null,
-            path,
-            isCategory: true,
-          });
+        }
+        merged.sort((a, b) => {
+          const sa = sectionRank(a);
+          const sb = sectionRank(b);
+          if (sa !== sb) return sa - sb;
+          return (b.rating || 0) - (a.rating || 0);
         });
-      }
 
-      // 3. Unified listings search (migrated verticals)
-      try {
-        const listingOrFields = [
-          'name_en', 'name_ru', 'category',
-          'description_en', 'description_ru',
-          'district', 'address',
-        ];
-        const listingsOr = listingOrFields
-          .map((f) => `${f}.ilike.%${searchTermLower}%`)
-          .join(',');
-
-        const { data: listingsData } = await supabase
-          .from('listings')
-          .select('id, vertical, name_en, name_ru, cover_image, price, address, district, rating')
-          .eq('is_active', true)
-          .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
-          .or(listingsOr)
-          .limit(10);
-
-        if (controller.signal.aborted) return;
-
-        if (listingsData) {
-          listingsData.forEach((item) => {
-            const pathPrefix = LISTING_VERTICAL_PATHS[item.vertical] || `/${item.vertical}/`;
-            allResults.push({
-              id: item.id,
-              type: item.vertical,
-              titleEn: item.name_en || '',
-              titleRu: item.name_ru || '',
-              image: item.cover_image,
-              price: item.price,
-              locationEn: item.address || item.district,
-              locationRu: item.district,
-              rating: item.rating,
-              path: `${pathPrefix}${item.id}`,
-            });
-          });
-        }
-      } catch {
-        // Listings query failed silently
-      }
-
-      // 4. Non-migrated entity tables in parallel
-      const searchPromises = searchTables.map(async (config) => {
-        try {
-          const selectFields = [
-            config.idField, config.titleEn, config.titleRu,
-            config.image, config.price, config.locationEn,
-            config.locationRu, config.rating,
-          ].filter((f): f is string => f !== null);
-
-          const uniqueFields = [...new Set(selectFields)];
-
-          const orFields = [config.titleEn, config.titleRu, ...(config.extraSearchFields ?? [])];
-          const uniqueOr = [...new Set(orFields)];
-          const orParts = uniqueOr.map((f) => `${f}.ilike.%${searchTermLower}%`);
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          let queryBuilder = (supabase.from as any)(config.table)
-            .select(uniqueFields.join(','))
-            .eq('is_active', true)
-            .or(orParts.join(','))
-            .limit(5);
-
-          if (config.hasApprovalStatus) {
-            queryBuilder = queryBuilder.eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS);
-          }
-
-          const { data, error } = await queryBuilder;
-
-          if (error) return [];
-          if (!data) return [];
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return data.map((item: Record<string, any>) => ({
-            id: item[config.idField],
-            type: config.type,
-            titleEn: item[config.titleEn] || '',
-            titleRu: item[config.titleRu] || '',
-            image: config.image ? item[config.image] : null,
-            price: config.price ? item[config.price] : null,
-            locationEn: config.locationEn ? item[config.locationEn] : null,
-            locationRu: config.locationRu ? item[config.locationRu] : null,
-            rating: config.rating ? item[config.rating] : null,
-            path: `${config.pathPrefix}${item[config.idField]}`,
-          }));
-        } catch {
-          return [];
-        }
-      });
-
-      const tableResults = await Promise.all(searchPromises);
-
-      if (controller.signal.aborted) return;
-
-      tableResults.forEach(items => allResults.push(...items));
-
-      // Sort: actions → categories → entities (entities by rating desc)
-      const sectionRank = (r: SearchResult) =>
-        r.isAction ? 0 : r.isCategory ? 1 : 2;
-      allResults.sort((a, b) => {
-        const sa = sectionRank(a);
-        const sb = sectionRank(b);
-        if (sa !== sb) return sa - sb;
-        return (b.rating || 0) - (a.rating || 0);
-      });
-
-      const finalResults = allResults.slice(0, 25);
-
-      cacheRef.current.set(searchTerm, { results: finalResults, timestamp: Date.now() });
-
-      if (!controller.signal.aborted) {
-        setResults(finalResults);
-        setIsLoading(false);
+        const finalResults = merged.slice(0, MAX_RESULTS);
+        cacheRef.current.set(searchTerm, { results: finalResults, timestamp: Date.now() });
+        if (!controller.signal.aborted) setResults(finalResults);
+      } else {
+        // RPC failed — keep Tier 1 results, just cache them.
+        cacheRef.current.set(searchTerm, { results: tier1.slice(0, MAX_RESULTS), timestamp: Date.now() });
       }
     } catch {
-      if (!controller.signal.aborted) {
-        setResults([]);
-        setIsLoading(false);
-      }
+      // Network error — Tier 1 results stay on screen.
+    } finally {
+      if (!controller.signal.aborted) setIsLoading(false);
     }
-  }, []);
+  }, [language]);
 
   // Optional AI smart-search call (only for question-shaped or long queries).
   const callAiSmartSearch = useCallback(async (searchTerm: string) => {
@@ -546,4 +371,3 @@ export function useGlobalSearch(query: string, enabled: boolean = true) {
 
   return { results, isLoading, aiAnswer, aiLoading };
 }
-
