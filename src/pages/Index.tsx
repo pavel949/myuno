@@ -143,4 +143,9 @@ const IndexLegacy: React.FC = () => {
   );
 };
 
+const Index: React.FC = () => {
+  const homeV2 = useFeatureFlag('home_v2', false);
+  return homeV2 ? <IndexV2 /> : <IndexLegacy />;
+};
+
 export default Index;
