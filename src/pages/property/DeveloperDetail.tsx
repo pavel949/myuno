@@ -24,7 +24,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDeveloper } from '@/hooks/useDevelopers';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
-import { MuunoScoreWidget } from '@/components/invest/MuunoScoreWidget';
+import { MyunoScoreWidget } from '@/components/invest/MyunoScoreWidget';
 import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
 import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 
@@ -131,7 +131,7 @@ export default function DeveloperDetail() {
             </div>
 
             {developer.muunoScore && (
-              <MuunoScoreWidget score={developer.muunoScore} size="md" />
+              <MyunoScoreWidget score={developer.muunoScore} size="md" />
             )}
           </div>
         </div>

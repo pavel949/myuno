@@ -177,7 +177,7 @@ export default function OffplanIndex() {
                 {isRu ? 'Новостройки Пхукета' : 'Phuket New Developments'}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {isRu ? 'Фильтры как в OFFPLAN-каталоге + muUNO' : 'OFFPLAN-style filters + muUNO'}
+                {isRu ? 'Фильтры как в OFFPLAN-каталоге + myUNO' : 'OFFPLAN-style filters + myUNO'}
               </p>
             </div>
           </div>
@@ -419,7 +419,7 @@ export default function OffplanIndex() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium mb-2 block">muUNO {isRu ? 'мин.' : 'min.'}</label>
+                  <label className="text-sm font-medium mb-2 block">myUNO {isRu ? 'мин.' : 'min.'}</label>
                   <Select value={String(minScore)} onValueChange={(v) => setMinScore(Number(v))}>
                     <SelectTrigger>
                       <SelectValue />
@@ -462,7 +462,7 @@ export default function OffplanIndex() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="score">{isRu ? 'muUNO score' : 'muUNO score'}</SelectItem>
+              <SelectItem value="score">{isRu ? 'myUNO score' : 'myUNO score'}</SelectItem>
               <SelectItem value="rating">{isRu ? 'Рейтинг каталога' : 'Catalog rating'}</SelectItem>
               <SelectItem value="price_asc">{isRu ? 'Цена ↑' : 'Price ↑'}</SelectItem>
               <SelectItem value="price_desc">{isRu ? 'Цена ↓' : 'Price ↓'}</SelectItem>
@@ -508,7 +508,7 @@ export default function OffplanIndex() {
         <div className="rounded-none bg-gradient-to-br from-primary/10 to-primary/5 p-4 border border-primary/20 mt-6">
           <h3 className="font-semibold mb-2">{isRu ? 'Хотите привлечь инвестиции?' : 'Want to raise investment?'}</h3>
           <p className="text-sm text-muted-foreground mb-3">
-            {isRu ? 'Разместите свой проект на платформе muUNO' : 'List your project on the muUNO platform'}
+            {isRu ? 'Разместите свой проект на платформе myUNO' : 'List your project on the myUNO platform'}
           </p>
           <Button onClick={() => navigate('/property/invest/raise')} className="w-full">
             {isRu ? 'Подать заявку' : 'Submit Application'}

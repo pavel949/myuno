@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Shield, AlertTriangle, TrendingUp, CheckCircle2 } from 'lucide-react';
 
-interface MuunoScoreWidgetProps {
+interface MyunoScoreWidgetProps {
   score: number | null;
   riskLevel?: string | null;
   size?: 'sm' | 'md' | 'lg';
@@ -13,7 +13,7 @@ interface MuunoScoreWidgetProps {
   className?: string;
 }
 
-export function MuunoScoreWidget({
+export function MyunoScoreWidget({
   score,
   riskLevel,
   size = 'md',
@@ -21,7 +21,7 @@ export function MuunoScoreWidget({
   showRisk = true,
   showScore = true,
   className,
-}: MuunoScoreWidgetProps) {
+}: MyunoScoreWidgetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -145,11 +145,11 @@ export function MuunoScoreWidget({
         </div>
       )}
 
-      {/* muUNO label */}
+      {/* myUNO label */}
       {showLabel && (
         <span className="text-[10px] text-muted-foreground flex items-center gap-1">
           <Shield className="h-2.5 w-2.5" />
-          muUNO Score
+          myUNO Score
         </span>
       )}
     </div>

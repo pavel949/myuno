@@ -1,6 +1,6 @@
 /**
  * OffplanProjectCard - Premium card for off-plan property projects
- * Shows construction status, developer, muUNO score, pricing, ROI
+ * Shows construction status, developer, myUNO score, pricing, ROI
  */
 
 import React, { useMemo } from 'react';
@@ -26,7 +26,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { cn } from '@/lib/utils';
 import { DeveloperBadge } from './DeveloperBadge';
-import { MuunoScoreWidget } from '@/components/invest/MuunoScoreWidget';
+import { MyunoScoreWidget } from '@/components/invest/MyunoScoreWidget';
 import type { OffplanProject, ProjectStatus } from '@/hooks/useOffplanProjects';
 import { surfaceFromOffplanProject } from '@/lib/real-estate/listingViewModel';
 
@@ -175,10 +175,10 @@ export function OffplanProjectCard({
           )}
         </div>
 
-        {/* muUNO Score badge — show only score dots, no risk label or numeric value on public cards */}
+        {/* myUNO Score badge — show only score dots, no risk label or numeric value on public cards */}
         {project.isClearviewRated && project.muunoScore && (
           <div className="absolute top-3 right-3">
-            <MuunoScoreWidget score={project.muunoScore} size="sm" showRisk={false} showLabel={false} showScore={false} />
+            <MyunoScoreWidget score={project.muunoScore} size="sm" showRisk={false} showLabel={false} showScore={false} />
           </div>
         )}
 

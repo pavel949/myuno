@@ -561,7 +561,7 @@ export default function AdminDevelopers() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Target className="h-5 w-5" />
-                    muUNO Score
+                    myUNO Score
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
