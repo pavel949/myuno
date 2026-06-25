@@ -430,6 +430,7 @@ export const APP_ROUTES = {
   VENDOR_ONBOARDING: '/vendor/onboarding',
   VENDOR_BOOKINGS: '/vendor/bookings',
   VENDOR_SERVICES: '/vendor/services',
+  VENDOR_EXCHANGE: '/vendor/exchange',
   VENDOR_SETTINGS: '/vendor/settings',
 
   // ── Management Company (MC) Workspace ──

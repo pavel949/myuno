@@ -1,75 +1,81 @@
 /**
- * ExchangeBot — Currency exchange rates & exchanger map for Phuket
- * Bible cluster: ARRIVE
+ * ExchangeBot — Currency exchange rates & exchanger comparison for Phuket
+ * Master Taxonomy cluster: ARRIVE
+ *
+ * Reference THB rates and verified exchanger listings come from Supabase
+ * (`currency_rates` + `exchangers`). Monetisation surfaces (affiliate rails,
+ * "become a verified partner") are gated behind `feature_flag:currency_exchange`.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SEOHead } from '@/components/seo';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowUpDown, TrendingUp, TrendingDown, MapPin, Clock, RefreshCw } from 'lucide-react';
+import {
+  ArrowUpDown, MapPin, Clock, ShieldCheck, BadgeCheck, Store, ArrowRight, Info,
+} from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { getClusterById, getClusterHeaderLabel } from '@/lib/nav/clusterCatalog';
+import {
+  useReferenceRates,
+  useExchangers,
+  useExchangeAffiliate,
+} from '@/hooks/exchange/useExchange';
+import {
+  CURRENCY_LABELS,
+  type Exchanger,
+  type ExchangeCurrency,
+} from '@/types/exchange';
 
-interface ExchangeRate {
-  pair: string;
-  pairLabel: string;
-  pairLabelRu: string;
-  rate: number;
-  change24h: number;
-  inverseRate: number;
+function formatRate(value: number): string {
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: value >= 1 ? 2 : 4,
+    maximumFractionDigits: value >= 1 ? 2 : 4,
+  });
 }
-
-interface Exchanger {
-  id: string;
-  name: string;
-  nameRu: string;
-  area: string;
-  areaRu: string;
-  rating: number;
-  hours: string;
-  lat: number;
-  lng: number;
-  spreadPercent: number;
-}
-
-// Static rates (will be replaced with API call later)
-const EXCHANGE_RATES: ExchangeRate[] = [
-  { pair: 'RUB/THB', pairLabel: 'Russian Ruble → Thai Baht', pairLabelRu: 'Российский рубль → Тайский бат', rate: 0.385, change24h: 0.3, inverseRate: 2.597 },
-  { pair: 'USD/THB', pairLabel: 'US Dollar → Thai Baht', pairLabelRu: 'Доллар США → Тайский бат', rate: 33.85, change24h: -0.12, inverseRate: 0.0295 },
-  { pair: 'EUR/THB', pairLabel: 'Euro → Thai Baht', pairLabelRu: 'Евро → Тайский бат', rate: 37.20, change24h: 0.15, inverseRate: 0.0269 },
-  { pair: 'GBP/THB', pairLabel: 'British Pound → Thai Baht', pairLabelRu: 'Британский фунт → Тайский бат', rate: 43.10, change24h: -0.08, inverseRate: 0.0232 },
-  { pair: 'CNY/THB', pairLabel: 'Chinese Yuan → Thai Baht', pairLabelRu: 'Китайский юань → Тайский бат', rate: 4.68, change24h: 0.05, inverseRate: 0.2137 },
-];
-
-const EXCHANGERS: Exchanger[] = [
-  { id: '1', name: 'SuperRich Phuket', nameRu: 'SuperRich Пхукет', area: 'Phuket Town', areaRu: 'Пхукет-Таун', rating: 4.8, hours: '09:00-18:00', lat: 7.8804, lng: 98.3923, spreadPercent: 0.5 },
-  { id: '2', name: 'SiamExchange Patong', nameRu: 'SiamExchange Патонг', area: 'Patong', areaRu: 'Патонг', rating: 4.5, hours: '10:00-22:00', lat: 7.8965, lng: 98.2961, spreadPercent: 1.2 },
-  { id: '3', name: 'Phuket Airport Exchange', nameRu: 'Обменник в аэропорту', area: 'Airport', areaRu: 'Аэропорт', rating: 3.9, hours: '06:00-00:00', lat: 8.1082, lng: 98.3169, spreadPercent: 3.0 },
-  { id: '4', name: 'K79 Exchange Chalong', nameRu: 'K79 Exchange Чалонг', area: 'Chalong', areaRu: 'Чалонг', rating: 4.6, hours: '09:30-17:30', lat: 7.8385, lng: 98.3405, spreadPercent: 0.8 },
-  { id: '5', name: 'TT Currency Kata', nameRu: 'TT Currency Ката', area: 'Kata', areaRu: 'Ката', rating: 4.4, hours: '10:00-20:00', lat: 7.8206, lng: 98.2989, spreadPercent: 1.0 },
-];
 
 const ExchangeBotPage: React.FC = () => {
   const { language } = useLanguage();
   const t = language === 'ru';
   const arriveCluster = getClusterById('arrive');
   const arrivePill = arriveCluster ? getClusterHeaderLabel(arriveCluster, language) : 'Arrival';
-  const [amount, setAmount] = useState('1000');
-  const [selectedPair, setSelectedPair] = useState('RUB/THB');
-  const [lastUpdated] = useState(new Date());
 
-  const currentRate = EXCHANGE_RATES.find(r => r.pair === selectedPair)!;
-  const convertedAmount = parseFloat(amount || '0') * currentRate.rate;
+  const ratesQuery = useReferenceRates();
+  const exchangersQuery = useExchangers();
+  const affiliateQuery = useExchangeAffiliate();
+  const monetisationOn = useFeatureFlag('currency_exchange');
+
+  const rates = ratesQuery.data ?? [];
+  const exchangers = exchangersQuery.data ?? [];
+  const affiliate = affiliateQuery.data;
+
+  const [amount, setAmount] = useState('1000');
+  const [selected, setSelected] = useState<ExchangeCurrency>('RUB');
+
+  const currentRate = rates.find((r) => r.currency === selected) ?? null;
+  const lastUpdated = currentRate?.updatedAt ? new Date(currentRate.updatedAt) : null;
+  const convertedAmount = currentRate ? parseFloat(amount || '0') * currentRate.thbPerUnit : 0;
+
+  // Honest comparison: exchangers that quote the selected currency, best rate first.
+  const { ordered, bestId } = useMemo(() => {
+    const withRate = exchangers
+      .filter((e) => typeof e.quoted_rates?.[selected] === 'number')
+      .sort((a, b) => (b.quoted_rates[selected]! - a.quoted_rates[selected]!));
+    const withoutRate = exchangers.filter((e) => typeof e.quoted_rates?.[selected] !== 'number');
+    return { ordered: [...withRate, ...withoutRate], bestId: withRate[0]?.id ?? null };
+  }, [exchangers, selected]);
 
   return (
     <AppLayout>
       <SEOHead
         title={t ? 'Курс валют на Пхукете — Обменники | myUNO' : 'Phuket Exchange Rates — Currency Exchangers | myUNO'}
-        description={t ? 'Актуальные курсы валют THB/RUB/USD/EUR. Карта обменников Пхукета с рейтингами.' : 'Live THB/RUB/USD/EUR exchange rates. Phuket currency exchangers map with ratings.'}
+        description={t ? 'Актуальные курсы THB/RUB/USD/EUR и проверенные обменники Пхукета с возможностью сравнить курс.' : 'Live THB/RUB/USD/EUR rates and verified Phuket exchangers — compare the best rate.'}
       />
 
       <div className="px-4 md:px-6 lg:px-8 py-6 pb-20 md:pb-8 max-w-[1200px] mx-auto space-y-6">
@@ -80,12 +86,14 @@ const ExchangeBotPage: React.FC = () => {
             {arrivePill}
           </div>
           <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-            {t ? '💱 Курсы валют на Пхукете' : '💱 Phuket Exchange Rates'}
+            {t ? 'Обмен валюты на Пхукете' : 'Currency Exchange in Phuket'}
           </h1>
-          <p className="text-muted-foreground flex items-center justify-center gap-2 text-sm">
-            <Clock className="w-3.5 h-3.5" />
-            {t ? 'Обновлено' : 'Updated'}: {lastUpdated.toLocaleTimeString()}
-          </p>
+          {lastUpdated && (
+            <p className="text-muted-foreground flex items-center justify-center gap-2 text-sm">
+              <Clock className="w-3.5 h-3.5" />
+              {t ? 'Справочный курс обновлён' : 'Reference rate updated'}: {lastUpdated.toLocaleDateString()}
+            </p>
+          )}
         </div>
 
         <Tabs defaultValue="rates" className="space-y-4">
@@ -94,8 +102,8 @@ const ExchangeBotPage: React.FC = () => {
             <TabsTrigger value="exchangers">{t ? 'Обменники' : 'Exchangers'}</TabsTrigger>
           </TabsList>
 
+          {/* RATES TAB */}
           <TabsContent value="rates" className="space-y-4">
-            {/* Converter */}
             <Card className="border-cluster-arrive/20">
               <CardContent className="p-5 space-y-4">
                 <h2 className="font-semibold text-foreground">{t ? 'Калькулятор' : 'Converter'}</h2>
@@ -112,12 +120,12 @@ const ExchangeBotPage: React.FC = () => {
                   <div className="flex-1 min-w-[140px]">
                     <label className="text-xs text-muted-foreground mb-1 block">{t ? 'Валюта' : 'Currency'}</label>
                     <select
-                      value={selectedPair}
-                      onChange={(e) => setSelectedPair(e.target.value)}
+                      value={selected}
+                      onChange={(e) => setSelected(e.target.value as ExchangeCurrency)}
                       className="w-full h-10 rounded-none border border-input bg-background px-3 text-sm"
                     >
-                      {EXCHANGE_RATES.map(r => (
-                        <option key={r.pair} value={r.pair}>{r.pair}</option>
+                      {rates.map((r) => (
+                        <option key={r.currency} value={r.currency}>{r.currency}/THB</option>
                       ))}
                     </select>
                   </div>
@@ -131,95 +139,228 @@ const ExchangeBotPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Rates Table */}
+            {/* Reference rate list */}
             <div className="space-y-3">
-              {EXCHANGE_RATES.map(rate => (
-                <Card key={rate.pair} className="hover:border-cluster-arrive/30 transition-colors cursor-pointer" onClick={() => setSelectedPair(rate.pair)}>
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <div className="font-semibold text-foreground">{rate.pair}</div>
-                      <div className="text-xs text-muted-foreground">{t ? rate.pairLabelRu : rate.pairLabel}</div>
-                    </div>
-                    <div className="text-right space-y-0.5">
-                      <div className="text-lg font-mono font-bold text-foreground">
-                        {rate.rate.toFixed(rate.rate >= 1 ? 2 : 4)}
+              {ratesQuery.isLoading &&
+                Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-[68px] w-full" />)}
+
+              {ratesQuery.isError && (
+                <Card><CardContent className="p-4 text-sm text-muted-foreground">
+                  {t ? 'Не удалось загрузить курсы. Попробуйте позже.' : 'Could not load rates. Please try again later.'}
+                </CardContent></Card>
+              )}
+
+              {!ratesQuery.isLoading && rates.map((rate) => {
+                const labels = CURRENCY_LABELS[rate.currency];
+                return (
+                  <Card
+                    key={rate.currency}
+                    className="hover:border-cluster-arrive/30 transition-colors cursor-pointer"
+                    onClick={() => setSelected(rate.currency)}
+                  >
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <div className="font-semibold text-foreground">{rate.currency}/THB</div>
+                        <div className="text-xs text-muted-foreground">{t ? labels.ru : labels.en}</div>
                       </div>
-                      <div className={`flex items-center gap-1 text-xs justify-end ${rate.change24h >= 0 ? 'text-success' : 'text-destructive'}`}>
-                        {rate.change24h >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                        {rate.change24h >= 0 ? '+' : ''}{rate.change24h}%
+                      <div className="text-right">
+                        <div className="text-lg font-mono font-bold text-foreground">{formatRate(rate.thbPerUnit)}</div>
+                        <div className="text-[11px] text-muted-foreground">{t ? `฿ за 1 ${rate.currency}` : `THB per 1 ${rate.currency}`}</div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
-            <p className="text-xs text-muted-foreground text-center">
+            <p className="text-xs text-muted-foreground flex items-start gap-1.5">
+              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
               {t
-                ? '⚠️ Курсы ориентировочные. Реальный курс в обменнике может отличаться.'
-                : '⚠️ Rates are indicative. Actual exchanger rates may differ.'}
+                ? 'Справочный курс по данным мировых FX-источников. Проверенные обменники указывают собственный курс — сравните их на вкладке «Обменники».'
+                : 'Reference rate from global FX sources. Verified exchangers quote their own rate — compare them in the “Exchangers” tab.'}
             </p>
           </TabsContent>
 
+          {/* EXCHANGERS TAB */}
           <TabsContent value="exchangers" className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {t
+                ? `Сравнение курса на ${selected} — лучший курс выделен.`
+                : `Comparing rates for ${selected} — best rate highlighted.`}
+            </p>
+
+            {exchangersQuery.isLoading &&
+              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
+
+            {!exchangersQuery.isLoading && ordered.length === 0 && (
+              <Card><CardContent className="p-6 text-center text-sm text-muted-foreground">
+                {t ? 'Список обменников пока пуст.' : 'No exchangers listed yet.'}
+              </CardContent></Card>
+            )}
+
             <div className="space-y-3">
-              {EXCHANGERS.map(ex => (
-                <Card key={ex.id} className="hover:border-cluster-arrive/30 transition-colors">
-                  <CardContent className="p-4 space-y-2">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-semibold text-foreground">{t ? ex.nameRu : ex.name}</h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="w-3.5 h-3.5" />
-                          {t ? ex.areaRu : ex.area}
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="text-xs">
-                        ⭐ {ex.rating}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Clock className="w-3.5 h-3.5" />
-                        {ex.hours}
-                      </div>
-                      <div className={`text-xs font-medium ${ex.spreadPercent <= 1 ? 'text-success' : ex.spreadPercent <= 2 ? 'text-warning' : 'text-destructive'}`}>
-                        {t ? 'Спред' : 'Spread'}: {ex.spreadPercent}%
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full mt-1"
-                      onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${ex.lat},${ex.lng}`, '_blank')}
-                    >
-                      <MapPin className="w-3.5 h-3.5 mr-1" />
-                      {t ? 'Показать на карте' : 'Show on Map'}
-                    </Button>
-                  </CardContent>
-                </Card>
+              {ordered.map((ex) => (
+                <ExchangerCard
+                  key={ex.id}
+                  exchanger={ex}
+                  currency={selected}
+                  isBest={ex.id === bestId}
+                  isRu={t}
+                />
               ))}
             </div>
 
-            {/* Tips */}
+            {/* How the exchange works — process guidance */}
             <Card className="bg-cluster-arrive/5 border-cluster-arrive/20">
               <CardContent className="p-5 space-y-2">
                 <h2 className="font-display font-semibold text-foreground">
-                  {t ? '💡 Советы по обмену' : '💡 Exchange Tips'}
+                  {t ? 'Как проходит обмен' : 'How the exchange works'}
                 </h2>
                 <ul className="space-y-1.5 text-sm text-muted-foreground">
-                  <li>• {t ? 'Избегайте обмена в аэропорту — курс на 2-5% хуже' : 'Avoid airport exchanges — rates are 2-5% worse'}</li>
-                  <li>• {t ? 'SuperRich и K79 — выгодные курсы на острове' : 'SuperRich and K79 offer competitive rates on the island'}</li>
-                  <li>• {t ? 'Банкоматы берут комиссию 220฿ за снятие. Банк Bangkok Bank — минимальная комиссия' : 'ATMs charge ฿220 withdrawal fee. Bangkok Bank has lowest fees'}</li>
-                  <li>• {t ? 'Visa/Mastercard в крупных магазинах — курс банка, без наценки' : 'Visa/Mastercard at large stores — bank rate, no markup'}</li>
+                  <li>• {t ? 'Возьмите паспорт — для крупных сумм его попросят.' : 'Bring your passport — required for larger amounts.'}</li>
+                  <li>• {t ? 'Уточните курс и сумму к получению до передачи денег.' : 'Confirm the rate and the amount you receive before handing over cash.'}</li>
+                  <li>• {t ? 'Пересчитайте полученные купюры на месте.' : 'Count the cash you receive before leaving the counter.'}</li>
+                  <li>• {t ? 'Курс в аэропорту обычно хуже, чем в городе.' : 'Airport rates are usually worse than in-town exchangers.'}</li>
                 </ul>
               </CardContent>
             </Card>
+
+            {/* Monetisation surfaces — gated behind the feature flag */}
+            {monetisationOn && affiliate && (affiliate.wise_url || affiliate.crypto_onramp_url) && (
+              <Card className="border-cluster-arrive/20">
+                <CardContent className="p-5 space-y-3">
+                  <h2 className="font-display font-semibold text-foreground">
+                    {t ? 'Перевод вместо наличных' : 'Transfer instead of cash'}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {t
+                      ? 'Для крупных сумм цифровой перевод часто выгоднее наличного обмена.'
+                      : 'For larger amounts a digital transfer is often better than cash exchange.'}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {affiliate.wise_url && (
+                      <Button asChild variant="outline" size="sm">
+                        <a href={affiliate.wise_url} target="_blank" rel="noopener noreferrer">Wise</a>
+                      </Button>
+                    )}
+                    {affiliate.crypto_onramp_url && (
+                      <Button asChild variant="outline" size="sm">
+                        <a href={affiliate.crypto_onramp_url} target="_blank" rel="noopener noreferrer">USDT</a>
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {monetisationOn && (
+              <Card className="border-dashed">
+                <CardContent className="p-5 flex items-center gap-4">
+                  <Store className="w-8 h-8 text-cluster-arrive shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground">
+                      {t ? 'Вы — обменник?' : 'Run an exchange office?'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {t ? 'Станьте проверенным партнёром и показывайте свой курс.' : 'Become a verified partner and publish your rate.'}
+                    </p>
+                  </div>
+                  <Button asChild size="sm">
+                    <Link to="/vendor/onboarding">
+                      {t ? 'Подключиться' : 'Join'}
+                      <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
     </AppLayout>
   );
 };
+
+interface ExchangerCardProps {
+  exchanger: Exchanger;
+  currency: ExchangeCurrency;
+  isBest: boolean;
+  isRu: boolean;
+}
+
+function ExchangerCard({ exchanger: ex, currency, isBest, isRu }: ExchangerCardProps) {
+  const quoted = ex.quoted_rates?.[currency];
+  const name = isRu ? ex.name_ru || ex.name : ex.name;
+  const area = isRu ? ex.area_ru || ex.area : ex.area;
+  const mapUrl =
+    ex.lat != null && ex.lng != null
+      ? `https://www.google.com/maps/search/?api=1&query=${ex.lat},${ex.lng}`
+      : null;
+
+  return (
+    <Card className={isBest ? 'border-cluster-arrive ring-1 ring-cluster-arrive/30' : ''}>
+      <CardContent className="p-4 space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <h3 className="font-semibold text-foreground">{name}</h3>
+              {ex.is_verified && (
+                <Badge variant="outline" className="text-[10px] gap-1 border-cluster-arrive/40 text-cluster-arrive">
+                  <BadgeCheck className="w-3 h-3" />
+                  {isRu ? 'Проверен' : 'Verified'}
+                </Badge>
+              )}
+              {ex.is_featured && (
+                <Badge variant="outline" className="text-[10px]">
+                  {isRu ? 'Партнёр' : 'Partner'}
+                </Badge>
+              )}
+            </div>
+            {area && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
+                <MapPin className="w-3.5 h-3.5" />
+                {area}
+              </div>
+            )}
+          </div>
+          <div className="text-right shrink-0">
+            {typeof quoted === 'number' ? (
+              <>
+                <div className="text-lg font-mono font-bold text-foreground">{formatRate(quoted)}</div>
+                <div className="text-[10px] text-muted-foreground">{isRu ? `฿ за 1 ${currency}` : `THB / ${currency}`}</div>
+              </>
+            ) : (
+              <div className="text-xs text-muted-foreground">{isRu ? 'Курс по запросу' : 'Rate on request'}</div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 text-sm">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            {ex.hours && (
+              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{ex.hours}</span>
+            )}
+            {ex.rating != null && <span>⭐ {ex.rating}</span>}
+          </div>
+          {isBest && (
+            <span className="flex items-center gap-1 text-xs font-medium text-cluster-arrive">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {isRu ? 'Лучший курс' : 'Best rate'}
+            </span>
+          )}
+        </div>
+
+        {mapUrl && (
+          <Button asChild variant="outline" size="sm" className="w-full mt-1">
+            <a href={mapUrl} target="_blank" rel="noopener noreferrer">
+              <MapPin className="w-3.5 h-3.5 mr-1" />
+              {isRu ? 'Показать на карте' : 'Show on Map'}
+            </a>
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default ExchangeBotPage;

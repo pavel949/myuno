@@ -22,8 +22,24 @@ for (const v of Object.values(VERTICALS)) {
   verticalMap[v.id] = v;
 }
 
-// Filter groups relevant for vendors (exclude help)
-const VENDOR_GROUPS = VERTICAL_GROUPS.filter(g => g.id !== 'help');
+// Catch-all so a provider from ANY vertical/cluster can always onboard — even
+// business types we haven't modelled yet (admin re-categorises in moderation).
+const OTHER_GROUP: VerticalGroup = {
+  id: 'other',
+  labelEn: 'Other',
+  labelRu: 'Другое',
+  labelTh: 'อื่นๆ',
+  icon: 'shapes',
+  items: [
+    { route: 'other', icon: 'shapes', labelEn: 'Other business', labelRu: 'Другой бизнес', labelTh: 'ธุรกิจอื่นๆ' },
+  ],
+};
+
+// Filter groups relevant for vendors (exclude help), always offer the catch-all last.
+const VENDOR_GROUPS = [
+  ...VERTICAL_GROUPS.filter(g => g.id !== 'help'),
+  OTHER_GROUP,
+];
 
 function resolveItem(item: VerticalGroupItem) {
   if (item.verticalId && verticalMap[item.verticalId]) {

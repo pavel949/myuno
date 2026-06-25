@@ -214,6 +214,17 @@ export const VERTICALS = {
       labelRu: 'Банки',
       bookable: false,
     },
+    EXCHANGE: {
+      id: 'exchange',
+      plural: 'exchangers',
+      table: 'exchangers',
+      icon: 'arrow-left-right',
+      labelEn: 'Currency exchange',
+      labelRu: 'Обмен валют',
+      // Not a cart/checkout booking — monetized via verified listing + lead-gen,
+      // exchangers self-report live rates from the vendor panel.
+      bookable: false,
+    },
    } as const;
  
  export type VerticalKey = keyof typeof VERTICALS;
