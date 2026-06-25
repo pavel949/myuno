@@ -186,7 +186,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
         }
       }
     }
-  }, [pageContext]);
+  }, [pageContext, isRu]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
