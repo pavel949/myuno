@@ -38,7 +38,8 @@ interface Message {
   content: string;
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-support-chat`;
+// Wave 1: route every client-facing chat through ai-orchestrator (civic-tone, agent registry, logging).
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-orchestrator`;
 const HISTORY_KEY = 'uno_chat_history_v1';
 const HISTORY_LIMIT = 20;
 
@@ -132,6 +133,16 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
       const error = await resp.json().catch(() => ({ error: 'Unknown error' }));
       throw new Error(error.error || 'Failed to get response');
     }
+    // Orchestrator can return a calm JSON escalation (HTTP 202) instead of an SSE stream.
+    const contentType = resp.headers.get('content-type') ?? '';
+    if (!contentType.includes('text/event-stream')) {
+      const payload = await resp.json().catch(() => null) as { message?: string; error?: string } | null;
+      const fallback = payload?.message ?? payload?.error ?? (isRu
+        ? 'Передал специалисту, ответ в течение 2 часов.'
+        : 'Forwarded to a specialist, reply within 2 hours.');
+      setMessages((prev) => [...prev, { role: 'assistant', content: fallback }]);
+      return;
+    }
     if (!resp.body) throw new Error('No response body');
 
     const reader = resp.body.getReader();
@@ -175,7 +186,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
         }
       }
     }
-  }, [pageContext]);
+  }, [pageContext, isRu]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
