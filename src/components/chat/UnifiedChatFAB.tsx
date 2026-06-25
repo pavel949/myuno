@@ -133,6 +133,16 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
       const error = await resp.json().catch(() => ({ error: 'Unknown error' }));
       throw new Error(error.error || 'Failed to get response');
     }
+    // Orchestrator can return a calm JSON escalation (HTTP 202) instead of an SSE stream.
+    const contentType = resp.headers.get('content-type') ?? '';
+    if (!contentType.includes('text/event-stream')) {
+      const payload = await resp.json().catch(() => null) as { message?: string; error?: string } | null;
+      const fallback = payload?.message ?? payload?.error ?? (isRu
+        ? 'Передал специалисту, ответ в течение 2 часов.'
+        : 'Forwarded to a specialist, reply within 2 hours.');
+      setMessages((prev) => [...prev, { role: 'assistant', content: fallback }]);
+      return;
+    }
     if (!resp.body) throw new Error('No response body');
 
     const reader = resp.body.getReader();
