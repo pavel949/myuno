@@ -104,19 +104,44 @@ function isPageModuleReferenced(modName, declaredIn) {
   return hits;
 }
 
+// Routes that are intentionally reachable from outside our codebase
+// (OAuth providers, email links, push-notification deep links, search engines).
+// Never tier these HIGH no matter what the heuristic says.
+const EXTERNAL_DEEPLINK_PATTERNS = [
+  /^\/auth(\/|$)/, /^\/oauth(\/|$)/, /^\/api(\/|$)/, /^\/webhook(\/|$)/,
+  /\*$/, // catch-all parents (`/marketplace/*` etc.) — child routes nest here
+];
+
+function isExternalDeeplink(route) {
+  return EXTERNAL_DEEPLINK_PATTERNS.some((re) => re.test(route));
+}
+
+// Inspect the declaration line to detect legacy redirect routes — these
+// exist on purpose for backward compat. Never tier them HIGH.
+function isLegacyRedirect(declaredIn) {
+  const [file, lineNum] = declaredIn.split(':');
+  const text = fileText(path.join(ROOT, file));
+  if (!text) return false;
+  const line = text.split('\n')[parseInt(lineNum, 10) - 1] ?? '';
+  return /<Navigate\s+to=/.test(line);
+}
+
 const tiers = { HIGH: [], MEDIUM: [], LOW: [] };
 
 for (const o of orphans) {
   const textRef = isReferencedInText(o.route, o.declaredIn.split(':')[0]);
   const mod = inferPageModule(o.declaredIn);
   const modHits = isPageModuleReferenced(mod, o.declaredIn);
+  const redirect = isLegacyRedirect(o.declaredIn);
+  const external = isExternalDeeplink(o.route);
 
   let tier = 'LOW';
-  if (!textRef && (modHits === null || modHits === 0)) tier = 'HIGH';
+  if (external || redirect) tier = 'LOW';
+  else if (!textRef && (modHits === null || modHits === 0)) tier = 'HIGH';
   else if (!textRef) tier = 'MEDIUM';
   else tier = 'LOW';
 
-  tiers[tier].push({ ...o, mod, modHits, textRef });
+  tiers[tier].push({ ...o, mod, modHits, textRef, redirect, external });
 }
 
 const md = [];
