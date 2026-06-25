@@ -12,7 +12,9 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import IndexV2 from './IndexV2';
+
 
 import { HeroGreeting } from '@/components/home/HeroGreeting';
 import { PendingPaymentsChip } from '@/components/home/PendingPaymentsChip';
@@ -144,8 +146,16 @@ const IndexLegacy: React.FC = () => {
 };
 
 const Index: React.FC = () => {
-  const homeV2 = useFeatureFlag('home_v2', false);
-  return homeV2 ? <IndexV2 /> : <IndexLegacy />;
+  // Wave 2 — Home V2 rollout gate.
+  // DB flag `feature_flag:home_v2` is the global kill-switch (set to `{enabled: true}`).
+  // While we observe internal feedback, the *client* additionally restricts V2 to
+  // signed-in admins / uno_team members. Everyone else keeps the legacy 5-zone Home.
+  // When ready for GA, drop the `isAdmin` guard or invert it.
+  const homeV2Flag = useFeatureFlag('home_v2', false);
+  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
+  if (adminLoading) return <IndexLegacy />;
+  return homeV2Flag && isAdmin ? <IndexV2 /> : <IndexLegacy />;
 };
 
 export default Index;
+
