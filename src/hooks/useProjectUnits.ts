@@ -114,7 +114,8 @@ export function useProjectUnits(projectId?: string) {
         .order('price', { ascending: true });
 
       if (legacyErr) return [];
-      return (legacy || []).map((u: LegacyDevelopmentUnitRow) => ({
+      const legacyRows = (legacy || []) as unknown as LegacyDevelopmentUnitRow[];
+      return legacyRows.map((u) => ({
         id: u.id,
         name: u.name,
         name_ru: u.name_ru,

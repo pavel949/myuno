@@ -108,8 +108,7 @@ export function useUserStateDistribution() {
       const distribution: Record<string, number> = {};
       const byLanding: Record<string, Record<string, number>> = {};
       
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (data || []).forEach((row: any) => {
+      (data || []).forEach((row: { state: string; source_landing: string | null }) => {
         distribution[row.state] = (distribution[row.state] || 0) + 1;
         if (row.source_landing) {
           if (!byLanding[row.source_landing]) byLanding[row.source_landing] = {};

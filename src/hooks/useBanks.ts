@@ -76,7 +76,8 @@ async function fetchBanks(): Promise<Bank[]> {
     .order('rating', { ascending: false });
 
   if (error) throw error;
-  return (data || []).map((raw: ListingRow) => {
+  const rows = (data || []) as unknown as ListingRow[];
+  return rows.map((raw) => {
     const attrs: BankAttributes = raw.attributes || {};
     return {
       id: raw.id,

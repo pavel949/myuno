@@ -120,7 +120,7 @@ export function useStartDriveImport() {
       qc.invalidateQueries({ queryKey: ['drive-jobs', vars.projectId] });
       toast.success('Импорт запущен');
     },
-    onError: (e: any) => toast.error(e.message || 'Ошибка запуска импорта'),
+    onError: (e: Error) => toast.error(e.message || 'Ошибка запуска импорта'),
   });
 }
 
