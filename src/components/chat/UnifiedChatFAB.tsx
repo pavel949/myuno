@@ -38,7 +38,8 @@ interface Message {
   content: string;
 }
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-support-chat`;
+// Wave 1: route every client-facing chat through ai-orchestrator (civic-tone, agent registry, logging).
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-orchestrator`;
 const HISTORY_KEY = 'uno_chat_history_v1';
 const HISTORY_LIMIT = 20;
 
