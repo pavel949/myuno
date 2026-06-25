@@ -24,6 +24,7 @@ import { ActiveSituation } from '@/components/home/ActiveSituation';
 import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
 import { RoleSheet } from '@/components/home/RoleSheet';
 import { PersonalGrid } from '@/components/superapp/PersonalGrid';
+import { WhyChip } from '@/components/home/WhyChip';
 import { CLUSTERS, FLAT_SERVICES } from '@/lib/catalog/taxonomy';
 
 const TOTAL_CLUSTERS = CLUSTERS.length;
@@ -62,6 +63,7 @@ const IndexV2: React.FC = () => {
 
         {/* Zone 3 — For You (6 mini-apps) + двери в полный каталог/роли */}
         <section aria-label={isRu ? 'Для вас' : 'For you'}>
+          <WhyChip onOpenRoleSheet={() => setRoleSheetOpen(true)} />
           <PersonalGrid limit={6} />
 
           <div className="px-4 mt-6">
