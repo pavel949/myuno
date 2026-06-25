@@ -93,24 +93,17 @@
 
 ---
 
-## 5. Изменения, которые я уже подготовил (этот PR)
-
-Без активации — за фича-флагом `feature_flag:home_v2` в `system_settings`. По умолчанию выключен, ничего в проде не меняется.
+## 5. Wave 1 deliverable (этот шаг)
 
 | Файл | Назначение |
 |---|---|
 | `scripts/audit-routes.mjs` | Авто-инвентаризатор маршрутов (CSV + MD), идемпотентный |
-| `docs/audits/route-inventory.{csv,md}` | Текущая инвентаризация (540 routes) |
+| `docs/audits/route-inventory.{csv,md}` | Текущая инвентаризация (540 routes, 7 дубликатов, 390 orphan-кандидатов) |
 | `docs/audits/2026-06-ux-ia-audit.md` | Этот документ |
-| `src/components/personalization/WhyChip.tsx` + `WhyPanel.tsx` | «Почему вы это видите» — управляемая экосистема |
-| `src/hooks/usePersonalizationReason.ts` | Источник сигналов для WhyChip |
-| `src/components/home/NextBestAction.tsx` | Приоритезатор: 1 карточка вместо Pending+Situation+Tip |
-| `src/components/nav/CommandPalette.tsx` | ⌘K поиск по 59 апам — заменяет AppDrawer |
-| `src/components/onboarding/HomeCoachmarks.tsx` | First-run тур, dismissable |
-| `src/pages/IndexV2.tsx` | Home в 3 зоны (Hero · NextBestAction · ForYou + Why) |
-| `src/lib/featureFlags.ts` (расширение) | Чтение `feature_flag:home_v2` с graceful fallback |
+| `/tmp/browser/uxaudit/screenshots/*.png` | 20 PNG: 10 маршрутов × 375/1280 |
+| `/tmp/browser/uxaudit/run.py` | Playwright-скрипт для пересборки |
 
-`IndexV2` подключён в `AnimatedRoutes` как условный рендер на `/` за флагом — переключение делается одним INSERT в `system_settings`, откат — DELETE.
+Код-изменений в `src/` нет — Wave 1 чисто диагностическая.
 
 ---
 
