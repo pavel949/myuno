@@ -1,0 +1,436 @@
+# Route Inventory — auto-generated
+
+Generated: 2026-06-25T11:11:24.073Z
+
+## Summary
+
+- Declared routes: **540**
+- Referenced URL strings: **416**
+- Pages (`src/pages/**/*.tsx`): **570**
+- Duplicate route declarations: **7**
+- Orphaned routes (no Link/navigate found): **390**
+
+## Duplicate route declarations
+
+- `/cluster/:cluster` — 2x
+  - src/components/layout/AnimatedRoutes.tsx:839
+  - src/pages/landings/__tests__/ClusterLandingPage.test.tsx:51
+- `/for/:persona` — 2x
+  - src/components/layout/AnimatedRoutes.tsx:816
+  - src/pages/landings/__tests__/PersonaLandingPage.test.tsx:49
+- `contacts` — 2x
+  - src/components/layout/AnimatedRoutes.tsx:755
+  - src/components/layout/routes/mcRoutes.tsx:80
+- `contacts/:id` — 2x
+  - src/components/layout/AnimatedRoutes.tsx:756
+  - src/components/layout/routes/mcRoutes.tsx:81
+- `developers` — 2x
+  - src/components/layout/AnimatedRoutes.tsx:766
+  - src/components/layout/routes/propertyHubRoutes.tsx:77
+- `projects` — 4x
+  - src/components/layout/AnimatedRoutes.tsx:399
+  - src/components/layout/AnimatedRoutes.tsx:757
+  - src/components/layout/routes/mcRoutes.tsx:31
+  - src/components/layout/routes/propertyHubRoutes.tsx:80
+- `team` — 2x
+  - src/components/layout/AnimatedRoutes.tsx:406
+  - src/components/layout/routes/mcRoutes.tsx:65
+
+## Orphaned routes (heuristic — no `Link to=` / `navigate(...)` match)
+
+> Dynamic segments are wildcard-matched. False positives possible (deep links, redirects, server-rendered URLs).
+
+- `:id/inquiry` — declared at src/components/layout/routes/propertyHubRoutes.tsx:119
+- `/about` — declared at src/components/layout/AnimatedRoutes.tsx:639
+- `/account/saved-searches` — declared at src/components/layout/AnimatedRoutes.tsx:256
+- `/admin/acquisition-metrics` — declared at src/components/layout/routes/adminRoutes.tsx:63
+- `/admin/activities` — declared at src/components/layout/routes/adminRoutes.tsx:32
+- `/admin/add` — declared at src/components/layout/routes/adminRoutes.tsx:96
+- `/admin/ai-knowledge` — declared at src/components/layout/routes/adminRoutes.tsx:94
+- `/admin/analytics/events` — declared at src/components/layout/routes/adminRoutes.tsx:21
+- `/admin/api-keys` — declared at src/components/layout/routes/adminRoutes.tsx:109
+- `/admin/babysitters` — declared at src/components/layout/routes/adminRoutes.tsx:57
+- `/admin/bouquets` — declared at src/components/layout/routes/adminRoutes.tsx:60
+- `/admin/bulk-publish` — declared at src/components/layout/routes/adminRoutes.tsx:73
+- `/admin/cities` — declared at src/components/layout/routes/adminRoutes.tsx:83
+- `/admin/claims` — declared at src/components/layout/routes/adminRoutes.tsx:26
+- `/admin/cleaning` — declared at src/components/layout/routes/adminRoutes.tsx:55
+- `/admin/clinics` — declared at src/components/layout/routes/adminRoutes.tsx:45
+- `/admin/consultations` — declared at src/components/layout/routes/adminRoutes.tsx:74
+- `/admin/crm` — declared at src/components/layout/routes/adminRoutes.tsx:101
+- `/admin/data-import` — declared at src/components/layout/routes/adminRoutes.tsx:91
+- `/admin/diagnostics/google-maps` — declared at src/components/layout/routes/adminRoutes.tsx:110
+- `/admin/disputes` — declared at src/components/layout/routes/adminRoutes.tsx:80
+- `/admin/education` — declared at src/components/layout/routes/adminRoutes.tsx:52
+- `/admin/events` — declared at src/components/layout/routes/adminRoutes.tsx:51
+- `/admin/experience-categories` — declared at src/components/layout/routes/adminRoutes.tsx:104
+- `/admin/finance` — declared at src/components/layout/routes/adminRoutes.tsx:79
+- `/admin/gyms` — declared at src/components/layout/routes/adminRoutes.tsx:46
+- `/admin/inbox` — declared at src/components/layout/routes/adminRoutes.tsx:13
+- `/admin/insurance` — declared at src/components/layout/routes/adminRoutes.tsx:68
+- `/admin/intake` — declared at src/components/layout/routes/adminRoutes.tsx:97
+- `/admin/investments` — declared at src/components/layout/routes/adminRoutes.tsx:35
+- `/admin/investor-demo` — declared at src/components/layout/routes/adminRoutes.tsx:28
+- `/admin/investor-metrics` — declared at src/components/layout/routes/adminRoutes.tsx:81
+- `/admin/legal` — declared at src/components/layout/routes/adminRoutes.tsx:53
+- `/admin/legal-documents` — declared at src/components/layout/routes/adminRoutes.tsx:107
+- `/admin/lifecycle-messaging` — declared at src/components/layout/routes/adminRoutes.tsx:103
+- `/admin/lifeos` — declared at src/components/layout/routes/adminRoutes.tsx:106
+- `/admin/location-knowledge` — declared at src/components/layout/routes/adminRoutes.tsx:85
+- `/admin/lookups` — declared at src/components/layout/routes/adminRoutes.tsx:61
+- `/admin/marketing` — declared at src/components/layout/routes/adminRoutes.tsx:102
+- `/admin/marketplace/categories` — declared at src/components/layout/routes/adminRoutes.tsx:88
+- `/admin/marketplace/products` — declared at src/components/layout/routes/adminRoutes.tsx:87
+- `/admin/marketplace/subcategories` — declared at src/components/layout/routes/adminRoutes.tsx:89
+- `/admin/marketplace/vendors` — declared at src/components/layout/routes/adminRoutes.tsx:90
+- `/admin/master-catalog` — declared at src/components/layout/routes/adminRoutes.tsx:16
+- `/admin/mc-dashboard` — declared at src/components/layout/routes/adminRoutes.tsx:40
+- `/admin/moderation` — declared at src/components/layout/routes/adminRoutes.tsx:72
+- `/admin/nb-leads` — declared at src/components/layout/routes/adminRoutes.tsx:75
+- `/admin/newbuilds/projects/:id/documents` — declared at src/components/layout/routes/adminRoutes.tsx:38
+- `/admin/official-news` — declared at src/components/layout/routes/adminRoutes.tsx:111
+- `/admin/partner-applications` — declared at src/components/layout/routes/adminRoutes.tsx:25
+- `/admin/pets` — declared at src/components/layout/routes/adminRoutes.tsx:54
+- `/admin/pharmacies` — declared at src/components/layout/routes/adminRoutes.tsx:66
+- `/admin/pitch-deck` — declared at src/components/layout/routes/adminRoutes.tsx:27
+- `/admin/pm-companies` — declared at src/components/layout/routes/adminRoutes.tsx:39
+- `/admin/qa-test-runner` — declared at src/components/layout/routes/adminRoutes.tsx:108
+- `/admin/quick-listings` — declared at src/components/layout/routes/adminRoutes.tsx:69
+- `/admin/relocation-articles` — declared at src/components/layout/routes/adminRoutes.tsx:59
+- `/admin/restaurants` — declared at src/components/layout/routes/adminRoutes.tsx:42
+- `/admin/restaurants/data-quality` — declared at src/components/layout/routes/adminRoutes.tsx:43
+- `/admin/salons` — declared at src/components/layout/routes/adminRoutes.tsx:44
+- `/admin/settings` — declared at src/components/layout/routes/adminRoutes.tsx:82
+- `/admin/stores` — declared at src/components/layout/routes/adminRoutes.tsx:67
+- `/admin/taxonomy` — declared at src/components/layout/routes/adminRoutes.tsx:62
+- `/admin/thai-business` — declared at src/components/layout/routes/adminRoutes.tsx:56
+- `/admin/tours` — declared at src/components/layout/routes/adminRoutes.tsx:31
+- `/admin/transfer-operators` — declared at src/components/layout/routes/adminRoutes.tsx:50
+- `/admin/transfers/sla` — declared at src/components/layout/routes/adminRoutes.tsx:49
+- `/admin/translations` — declared at src/components/layout/routes/adminRoutes.tsx:84
+- `/admin/trash` — declared at src/components/layout/routes/adminRoutes.tsx:17
+- `/admin/uno-team` — declared at src/components/layout/routes/adminRoutes.tsx:77
+- `/admin/user-analytics` — declared at src/components/layout/routes/adminRoutes.tsx:86
+- `/admin/users` — declared at src/components/layout/routes/adminRoutes.tsx:14
+- `/admin/vehicles` — declared at src/components/layout/routes/adminRoutes.tsx:47
+- `/admin/vendor-content` — declared at src/components/layout/routes/adminRoutes.tsx:19
+- `/admin/vendor-prospects` — declared at src/components/layout/routes/adminRoutes.tsx:100
+- `/admin/water-activities` — declared at src/components/layout/routes/adminRoutes.tsx:70
+- `/admin/yachts` — declared at src/components/layout/routes/adminRoutes.tsx:30
+- `/airport-transfer` — declared at src/components/layout/AnimatedRoutes.tsx:369
+- `/area/:slug` — declared at src/components/layout/AnimatedRoutes.tsx:843
+- `/auth/callback` — declared at src/components/layout/AnimatedRoutes.tsx:212
+- `/auth/callback/*` — declared at src/components/layout/AnimatedRoutes.tsx:213
+- `/auth/setup-password` — declared at src/components/layout/AnimatedRoutes.tsx:219
+- `/b/:slug` — declared at src/components/layout/AnimatedRoutes.tsx:302
+- `/babysitter/:id/book` — declared at src/components/layout/AnimatedRoutes.tsx:603
+- `/babysitters` — declared at src/components/layout/AnimatedRoutes.tsx:600
+- `/bloom` — declared at src/components/layout/AnimatedRoutes.tsx:442
+- `/bloom/*` — declared at src/components/layout/AnimatedRoutes.tsx:443
+- `/build` — declared at src/components/layout/AnimatedRoutes.tsx:492
+- `/catalog` — declared at src/components/layout/AnimatedRoutes.tsx:227
+- `/categories` — declared at src/components/layout/AnimatedRoutes.tsx:228
+- `/cleaning` — declared at src/components/layout/AnimatedRoutes.tsx:595
+- `/clinics` — declared at src/components/layout/AnimatedRoutes.tsx:325
+- `/cluster/:cluster` — declared at src/components/layout/AnimatedRoutes.tsx:839
+- `/company/:slug` — declared at src/components/layout/AnimatedRoutes.tsx:338
+- `/complexes` — declared at src/components/layout/AnimatedRoutes.tsx:345
+- `/demo` — declared at src/components/layout/AnimatedRoutes.tsx:659
+- `/demo/*` — declared at src/components/layout/AnimatedRoutes.tsx:660
+- `/developer-portal` — declared at src/components/layout/AnimatedRoutes.tsx:397
+- `/developer-portal/onboarding/:step` — declared at src/components/layout/AnimatedRoutes.tsx:297
+- `/developers` — declared at src/components/layout/AnimatedRoutes.tsx:343
+- `/developers/:id` — declared at src/components/layout/AnimatedRoutes.tsx:344
+- `/education/course/:id` — declared at src/components/layout/AnimatedRoutes.tsx:436
+- `/education/tutor/:id` — declared at src/components/layout/AnimatedRoutes.tsx:437
+- `/events/success` — declared at src/components/layout/AnimatedRoutes.tsx:431
+- `/flowers/order/:id` — declared at src/components/layout/AnimatedRoutes.tsx:448
+- `/flowers/shop` — declared at src/components/layout/AnimatedRoutes.tsx:445
+- `/flowers/shop/:id` — declared at src/components/layout/AnimatedRoutes.tsx:446
+- `/flowers/success` — declared at src/components/layout/AnimatedRoutes.tsx:449
+- `/food` — declared at src/components/layout/AnimatedRoutes.tsx:351
+- `/food/checkout` — declared at src/components/layout/AnimatedRoutes.tsx:353
+- `/food/restaurant/:id` — declared at src/components/layout/AnimatedRoutes.tsx:352
+- `/for` — declared at src/components/layout/AnimatedRoutes.tsx:800
+- `/for/:persona/in/:area` — declared at src/components/layout/AnimatedRoutes.tsx:813
+- `/for/agent` — declared at src/components/layout/AnimatedRoutes.tsx:804
+- `/for/arrive` — declared at src/components/layout/AnimatedRoutes.tsx:806
+- `/for/build` — declared at src/components/layout/AnimatedRoutes.tsx:811
+- `/for/invest` — declared at src/components/layout/AnimatedRoutes.tsx:809
+- `/for/investor` — declared at src/components/layout/AnimatedRoutes.tsx:803
+- `/for/legal` — declared at src/components/layout/AnimatedRoutes.tsx:810
+- `/for/live` — declared at src/components/layout/AnimatedRoutes.tsx:807
+- `/for/manage` — declared at src/components/layout/AnimatedRoutes.tsx:808
+- `/for/second-home` — declared at src/components/layout/AnimatedRoutes.tsx:802
+- `/for/vendor/:category` — declared at src/components/layout/AnimatedRoutes.tsx:815
+- `/guest/guidebook/:propertyId` — declared at src/components/layout/AnimatedRoutes.tsx:690
+- `/guest/profile` — declared at src/components/layout/AnimatedRoutes.tsx:691
+- `/gyms` — declared at src/components/layout/AnimatedRoutes.tsx:324
+- `/how-it-works` — declared at src/components/layout/AnimatedRoutes.tsx:640
+- `/index` — declared at src/components/layout/AnimatedRoutes.tsx:196
+- `/invest-hub` — declared at src/components/layout/AnimatedRoutes.tsx:556
+- `/invest/articles/:slug` — declared at src/components/layout/AnimatedRoutes.tsx:549
+- `/invest/clearview` — declared at src/components/layout/AnimatedRoutes.tsx:545
+- `/invest/deal/:id` — declared at src/components/layout/AnimatedRoutes.tsx:546
+- `/invest/execution` — declared at src/components/layout/AnimatedRoutes.tsx:348
+- `/invest/market` — declared at src/components/layout/AnimatedRoutes.tsx:346
+- `/invest/network` — declared at src/components/layout/AnimatedRoutes.tsx:347
+- `/invest/pitch` — declared at src/components/layout/AnimatedRoutes.tsx:532
+- `/invest/thailand` — declared at src/components/layout/AnimatedRoutes.tsx:530
+- `/invite` — declared at src/components/layout/AnimatedRoutes.tsx:199
+- `/l/:slug` — declared at src/components/layout/AnimatedRoutes.tsx:827
+- `/legal/company` — declared at src/components/layout/AnimatedRoutes.tsx:823
+- `/legal/tax` — declared at src/components/layout/AnimatedRoutes.tsx:824
+- `/legal/visa` — declared at src/components/layout/AnimatedRoutes.tsx:822
+- `/life` — declared at src/components/layout/AnimatedRoutes.tsx:411
+- `/life-flow/:code` — declared at src/components/layout/AnimatedRoutes.tsx:306
+- `/list-with-us` — declared at src/components/layout/AnimatedRoutes.tsx:309
+- `/live` — declared at src/components/layout/AnimatedRoutes.tsx:490
+- `/manage` — declared at src/components/layout/AnimatedRoutes.tsx:491
+- `/manager` — declared at src/components/layout/AnimatedRoutes.tsx:681
+- `/manager/calendar` — declared at src/components/layout/AnimatedRoutes.tsx:684
+- `/manager/properties` — declared at src/components/layout/AnimatedRoutes.tsx:682
+- `/manager/properties/:id` — declared at src/components/layout/AnimatedRoutes.tsx:683
+- `/market/store/:id` — declared at src/components/layout/AnimatedRoutes.tsx:617
+- `/market/success` — declared at src/components/layout/AnimatedRoutes.tsx:619
+- `/market/wishlist` — declared at src/components/layout/AnimatedRoutes.tsx:616
+- `/marketplace` — declared at src/components/layout/AnimatedRoutes.tsx:609
+- `/marketplace/*` — declared at src/components/layout/AnimatedRoutes.tsx:610
+- `/mc/register` — declared at src/components/layout/AnimatedRoutes.tsx:745
+- `/mc/sequences` — declared at src/components/layout/AnimatedRoutes.tsx:314
+- `/me/bookings` — declared at src/components/layout/AnimatedRoutes.tsx:254
+- `/newbuilds/areas/:slug` — declared at src/components/layout/AnimatedRoutes.tsx:392
+- `/newbuilds/developers/:slug` — declared at src/components/layout/AnimatedRoutes.tsx:386
+- `/newbuilds/projects/:slug` — declared at src/components/layout/AnimatedRoutes.tsx:384
+- `/oauth/callback` — declared at src/components/layout/AnimatedRoutes.tsx:214
+- `/oauth/callback/*` — declared at src/components/layout/AnimatedRoutes.tsx:215
+- `/offplan` — declared at src/components/layout/AnimatedRoutes.tsx:341
+- `/offplan/:id` — declared at src/components/layout/AnimatedRoutes.tsx:342
+- `/onboarding` — declared at src/components/layout/AnimatedRoutes.tsx:204
+- `/onboarding/destination` — declared at src/components/layout/AnimatedRoutes.tsx:205
+- `/onboarding/map` — declared at src/components/layout/AnimatedRoutes.tsx:207
+- `/onboarding/questions` — declared at src/components/layout/AnimatedRoutes.tsx:206
+- `/operate/transfers` — declared at src/components/layout/AnimatedRoutes.tsx:794
+- `/operate/transfers/confirm` — declared at src/components/layout/AnimatedRoutes.tsx:793
+- `/owner/finance` — declared at src/components/layout/AnimatedRoutes.tsx:776
+- `/owner/full-management` — declared at src/components/layout/AnimatedRoutes.tsx:781
+- `/owner/guide` — declared at src/components/layout/AnimatedRoutes.tsx:773
+- `/owner/landing` — declared at src/components/layout/AnimatedRoutes.tsx:771
+- `/owner/portfolio` — declared at src/components/layout/AnimatedRoutes.tsx:775
+- `/owner/setup` — declared at src/components/layout/AnimatedRoutes.tsx:774
+- `/p/:slug` — declared at src/components/layout/AnimatedRoutes.tsx:377
+- `/partner-terms` — declared at src/components/layout/AnimatedRoutes.tsx:653
+- `/pets/transport` — declared at src/components/layout/AnimatedRoutes.tsx:585
+- `/peylaa/unit/:unitNo` — declared at src/components/layout/AnimatedRoutes.tsx:244
+- `/properties` — declared at src/components/layout/AnimatedRoutes.tsx:334
+- `/property/for/:persona` — declared at src/components/layout/AnimatedRoutes.tsx:831
+- `/provider/onboarding` — declared at src/components/layout/AnimatedRoutes.tsx:704
+- `/ref/:code` — declared at src/components/layout/AnimatedRoutes.tsx:277
+- `/restaurants/:id/experience/:setId` — declared at src/components/layout/AnimatedRoutes.tsx:359
+- `/restaurants/:id/reserve` — declared at src/components/layout/AnimatedRoutes.tsx:357
+- `/salons` — declared at src/components/layout/AnimatedRoutes.tsx:322
+- `/spa` — declared at src/components/layout/AnimatedRoutes.tsx:323
+- `/start/v2` — declared at src/components/layout/AnimatedRoutes.tsx:209
+- `/stays` — declared at src/components/layout/AnimatedRoutes.tsx:819
+- `/taxi-booking` — declared at src/components/layout/AnimatedRoutes.tsx:409
+- `/team` — declared at src/components/layout/AnimatedRoutes.tsx:670
+- `/team/chat` — declared at src/components/layout/AnimatedRoutes.tsx:672
+- `/team/content` — declared at src/components/layout/AnimatedRoutes.tsx:671
+- `/team/inbox` — declared at src/components/layout/AnimatedRoutes.tsx:675
+- `/team/leaderboard` — declared at src/components/layout/AnimatedRoutes.tsx:673
+- `/team/leads` — declared at src/components/layout/AnimatedRoutes.tsx:677
+- `/team/moderation` — declared at src/components/layout/AnimatedRoutes.tsx:678
+- `/team/support` — declared at src/components/layout/AnimatedRoutes.tsx:676
+- `/thai-services/:id` — declared at src/components/layout/AnimatedRoutes.tsx:701
+- `/tours` — declared at src/components/layout/AnimatedRoutes.tsx:572
+- `/tours/:id` — declared at src/components/layout/AnimatedRoutes.tsx:573
+- `/tours/:id/book` — declared at src/components/layout/AnimatedRoutes.tsx:574
+- `/transfers` — declared at src/components/layout/AnimatedRoutes.tsx:410
+- `/transport/airport` — declared at src/components/layout/AnimatedRoutes.tsx:368
+- `/trip-planner` — declared at src/components/layout/AnimatedRoutes.tsx:308
+- `/ts/:slug` — declared at src/components/layout/AnimatedRoutes.tsx:379
+- `/unsubscribe` — declared at src/components/layout/AnimatedRoutes.tsx:846
+- `/vendor/activities` — declared at src/components/layout/AnimatedRoutes.tsx:716
+- `/vendor/babysitters` — declared at src/components/layout/AnimatedRoutes.tsx:732
+- `/vendor/beauty` — declared at src/components/layout/AnimatedRoutes.tsx:721
+- `/vendor/cleaning` — declared at src/components/layout/AnimatedRoutes.tsx:730
+- `/vendor/clinics` — declared at src/components/layout/AnimatedRoutes.tsx:723
+- `/vendor/education` — declared at src/components/layout/AnimatedRoutes.tsx:727
+- `/vendor/events` — declared at src/components/layout/AnimatedRoutes.tsx:726
+- `/vendor/fitness` — declared at src/components/layout/AnimatedRoutes.tsx:722
+- `/vendor/flowers` — declared at src/components/layout/AnimatedRoutes.tsx:733
+- `/vendor/insurance` — declared at src/components/layout/AnimatedRoutes.tsx:735
+- `/vendor/legal` — declared at src/components/layout/AnimatedRoutes.tsx:728
+- `/vendor/messages` — declared at src/components/layout/AnimatedRoutes.tsx:739
+- `/vendor/orders` — declared at src/components/layout/AnimatedRoutes.tsx:738
+- `/vendor/payouts` — declared at src/components/layout/AnimatedRoutes.tsx:713
+- `/vendor/pets` — declared at src/components/layout/AnimatedRoutes.tsx:729
+- `/vendor/pharmacy` — declared at src/components/layout/AnimatedRoutes.tsx:734
+- `/vendor/products` — declared at src/components/layout/AnimatedRoutes.tsx:737
+- `/vendor/properties` — declared at src/components/layout/AnimatedRoutes.tsx:714
+- `/vendor/restaurants` — declared at src/components/layout/AnimatedRoutes.tsx:725
+- `/vendor/thai-business` — declared at src/components/layout/AnimatedRoutes.tsx:731
+- `/vendor/tours` — declared at src/components/layout/AnimatedRoutes.tsx:715
+- `/vendor/transport` — declared at src/components/layout/AnimatedRoutes.tsx:720
+- `/view-history` — declared at src/components/layout/AnimatedRoutes.tsx:655
+- `/water` — declared at src/components/layout/AnimatedRoutes.tsx:575
+- `/water_activities` — declared at src/components/layout/AnimatedRoutes.tsx:326
+- `/water/:id` — declared at src/components/layout/AnimatedRoutes.tsx:576
+- `/water/:id/book` — declared at src/components/layout/AnimatedRoutes.tsx:577
+- `/welcome-landing` — declared at src/components/layout/AnimatedRoutes.tsx:201
+- `/welcome/:bookingId` — declared at src/components/layout/AnimatedRoutes.tsx:696
+- `account-settings` — declared at src/components/layout/routes/mcRoutes.tsx:125
+- `analytics` — declared at src/components/layout/AnimatedRoutes.tsx:405
+- `assignment` — declared at src/components/layout/routes/mcRoutes.tsx:110
+- `auto-messaging` — declared at src/components/layout/routes/mcRoutes.tsx:60
+- `automations` — declared at src/components/layout/routes/mcRoutes.tsx:105
+- `booking/manual-payment/:orderId` — declared at src/components/layout/routes/propertyHubRoutes.tsx:120
+- `bookings-list` — declared at src/components/layout/routes/mcRoutes.tsx:122
+- `browse` — declared at src/components/layout/routes/propertyHubRoutes.tsx:40
+- `budget` — declared at src/components/layout/routes/mcRoutes.tsx:54
+- `buy` — declared at src/components/layout/routes/propertyHubRoutes.tsx:46
+- `calendar` — declared at src/components/layout/routes/mcRoutes.tsx:47
+- `campaigns` — declared at src/components/layout/AnimatedRoutes.tsx:758
+- `campaigns/launch` — declared at src/components/layout/AnimatedRoutes.tsx:759
+- `catalog` — declared at src/components/layout/routes/mcRoutes.tsx:25
+- `catalog/:vertical` — declared at src/components/layout/routes/mcRoutes.tsx:26
+- `catalog/:vertical/:id` — declared at src/components/layout/routes/mcRoutes.tsx:27
+- `channels` — declared at src/components/layout/routes/mcRoutes.tsx:64
+- `chat/:type/:id` — declared at src/components/layout/routes/mcRoutes.tsx:61
+- `clearview` — declared at src/components/layout/routes/propertyHubRoutes.tsx:88
+- `clearview/apply` — declared at src/components/layout/routes/propertyHubRoutes.tsx:89
+- `commercial` — declared at src/components/layout/routes/propertyHubRoutes.tsx:92
+- `commercial/:id` — declared at src/components/layout/routes/propertyHubRoutes.tsx:94
+- `commercial/browse` — declared at src/components/layout/routes/propertyHubRoutes.tsx:93
+- `companies` — declared at src/components/layout/routes/mcRoutes.tsx:108
+- `company` — declared at src/components/layout/AnimatedRoutes.tsx:402
+- `complexes` — declared at src/components/layout/routes/mcRoutes.tsx:30
+- `consultation` — declared at src/components/layout/routes/propertyHubRoutes.tsx:68
+- `contacts` — declared at src/components/layout/AnimatedRoutes.tsx:755
+- `contacts/:id` — declared at src/components/layout/AnimatedRoutes.tsx:756
+- `contacts/import` — declared at src/components/layout/routes/mcRoutes.tsx:82
+- `contacts/import-odoo` — declared at src/components/layout/routes/mcRoutes.tsx:83
+- `crm-dashboard` — declared at src/components/layout/routes/mcRoutes.tsx:99
+- `crm-emails` — declared at src/components/layout/routes/mcRoutes.tsx:103
+- `crm-emails/settings` — declared at src/components/layout/routes/mcRoutes.tsx:104
+- `crm-templates` — declared at src/components/layout/routes/mcRoutes.tsx:106
+- `deals/newbuilds` — declared at src/components/layout/AnimatedRoutes.tsx:763
+- `deposit-success` — declared at src/components/layout/routes/propertyHubRoutes.tsx:69
+- `developer/api-keys` — declared at src/components/layout/routes/mcRoutes.tsx:95
+- `developer/webhooks` — declared at src/components/layout/routes/mcRoutes.tsx:96
+- `developers` — declared at src/components/layout/AnimatedRoutes.tsx:766
+- `developers/:id` — declared at src/components/layout/routes/propertyHubRoutes.tsx:78
+- `documents` — declared at src/components/layout/routes/mcRoutes.tsx:113
+- `documents/signatures` — declared at src/components/layout/routes/mcRoutes.tsx:90
+- `duplicates` — declared at src/components/layout/routes/mcRoutes.tsx:107
+- `expenses/quick` — declared at src/components/layout/routes/mcRoutes.tsx:57
+- `finance` — declared at src/components/layout/routes/mcRoutes.tsx:50
+- `finance/ar-aging` — declared at src/components/layout/routes/mcRoutes.tsx:86
+- `finance/owner-payouts` — declared at src/components/layout/routes/mcRoutes.tsx:85
+- `finance/planning` — declared at src/components/layout/routes/mcRoutes.tsx:55
+- `finance/statement-approvals` — declared at src/components/layout/routes/mcRoutes.tsx:89
+- `finance/tax-center` — declared at src/components/layout/routes/mcRoutes.tsx:88
+- `financials` — declared at src/components/layout/routes/mcRoutes.tsx:51
+- `financials/:id` — declared at src/components/layout/routes/mcRoutes.tsx:53
+- `financials/new` — declared at src/components/layout/routes/mcRoutes.tsx:52
+- `forms` — declared at src/components/layout/routes/mcRoutes.tsx:109
+- `full-management` — declared at src/components/layout/routes/mcRoutes.tsx:133
+- `guide` — declared at src/components/layout/routes/mcRoutes.tsx:129
+- `help` — declared at src/components/layout/routes/mcRoutes.tsx:78
+- `hotels` — declared at src/components/layout/routes/propertyHubRoutes.tsx:102
+- `hotels/:id` — declared at src/components/layout/routes/propertyHubRoutes.tsx:103
+- `income/quick` — declared at src/components/layout/routes/mcRoutes.tsx:58
+- `insights/owner-analytics` — declared at src/components/layout/routes/mcRoutes.tsx:94
+- `inspection` — declared at src/components/layout/routes/mcRoutes.tsx:132
+- `inventory` — declared at src/components/layout/routes/mcRoutes.tsx:112
+- `invest/dashboard` — declared at src/components/layout/routes/propertyHubRoutes.tsx:107
+- `invest/execution` — declared at src/components/layout/routes/propertyHubRoutes.tsx:111
+- `invest/market` — declared at src/components/layout/routes/propertyHubRoutes.tsx:109
+- `invest/network` — declared at src/components/layout/routes/propertyHubRoutes.tsx:110
+- `invest/raise` — declared at src/components/layout/routes/propertyHubRoutes.tsx:108
+- `investment-deals` — declared at src/components/layout/AnimatedRoutes.tsx:764
+- `investment-deals/:id` — declared at src/components/layout/AnimatedRoutes.tsx:765
+- `invoices` — declared at src/components/layout/routes/mcRoutes.tsx:84
+- `land` — declared at src/components/layout/routes/propertyHubRoutes.tsx:97
+- `land/:id` — declared at src/components/layout/routes/propertyHubRoutes.tsx:99
+- `land/browse` — declared at src/components/layout/routes/propertyHubRoutes.tsx:98
+- `leads` — declared at src/components/layout/AnimatedRoutes.tsx:403
+- `leads/:id` — declared at src/components/layout/AnimatedRoutes.tsx:404
+- `listings/:id/edit` — declared at src/components/layout/routes/mcRoutes.tsx:24
+- `listings/new` — declared at src/components/layout/routes/mcRoutes.tsx:22
+- `listings/new/:vertical` — declared at src/components/layout/routes/mcRoutes.tsx:23
+- `maintenance-plan` — declared at src/components/layout/routes/mcRoutes.tsx:68
+- `management-terms` — declared at src/components/layout/routes/mcRoutes.tsx:69
+- `marketing` — declared at src/components/layout/routes/mcRoutes.tsx:114
+- `meetings` — declared at src/components/layout/routes/mcRoutes.tsx:102
+- `message-templates` — declared at src/components/layout/routes/mcRoutes.tsx:63
+- `messages` — declared at src/components/layout/routes/mcRoutes.tsx:59
+- `modules` — declared at src/components/layout/routes/mcRoutes.tsx:28
+- `my` — declared at src/components/layout/routes/propertyHubRoutes.tsx:115
+- `offplan` — declared at src/components/layout/routes/propertyHubRoutes.tsx:75
+- `offplan/:id` — declared at src/components/layout/routes/propertyHubRoutes.tsx:76
+- `onboarding/wizard` — declared at src/components/layout/routes/mcRoutes.tsx:97
+- `operations` — declared at src/components/layout/routes/mcRoutes.tsx:49
+- `owners` — declared at src/components/layout/routes/mcRoutes.tsx:120
+- `owners/:id` — declared at src/components/layout/routes/mcRoutes.tsx:121
+- `performance` — declared at src/components/layout/routes/mcRoutes.tsx:123
+- `pipeline` — declared at src/components/layout/AnimatedRoutes.tsx:761
+- `pipelines` — declared at src/components/layout/routes/mcRoutes.tsx:72
+- `portfolio` — declared at src/components/layout/routes/mcRoutes.tsx:128
+- `procurement` — declared at src/components/layout/routes/mcRoutes.tsx:93
+- `project/:id` — declared at src/components/layout/routes/propertyHubRoutes.tsx:72
+- `projects` — declared at src/components/layout/AnimatedRoutes.tsx:399
+- `projects/:id` — declared at src/components/layout/AnimatedRoutes.tsx:401
+- `projects/new` — declared at src/components/layout/AnimatedRoutes.tsx:400
+- `properties` — declared at src/components/layout/routes/mcRoutes.tsx:29
+- `properties/:id` — declared at src/components/layout/routes/mcRoutes.tsx:34
+- `properties/:id/editor` — declared at src/components/layout/routes/mcRoutes.tsx:38
+- `properties/:id/guidebook` — declared at src/components/layout/routes/mcRoutes.tsx:37
+- `properties/:id/inventory` — declared at src/components/layout/routes/mcRoutes.tsx:44
+- `properties/:id/juristic-requests` — declared at src/components/layout/routes/mcRoutes.tsx:45
+- `properties/:id/manage` — declared at src/components/layout/routes/mcRoutes.tsx:43
+- `properties/:id/portal-settings` — declared at src/components/layout/routes/mcRoutes.tsx:46
+- `properties/:id/setup` — declared at src/components/layout/routes/mcRoutes.tsx:36
+- `properties/:id/terms` — declared at src/components/layout/routes/mcRoutes.tsx:35
+- `properties/import` — declared at src/components/layout/routes/mcRoutes.tsx:33
+- `properties/new` — declared at src/components/layout/routes/mcRoutes.tsx:32
+- `quick-expense` — declared at src/components/layout/routes/mcRoutes.tsx:56
+- `quick-sale` — declared at src/components/layout/routes/propertyHubRoutes.tsx:63
+- `quotes` — declared at src/components/layout/routes/mcRoutes.tsx:101
+- `rates` — declared at src/components/layout/routes/mcRoutes.tsx:117
+- `rent` — declared at src/components/layout/routes/propertyHubRoutes.tsx:42
+- `rent/long-term` — declared at src/components/layout/routes/propertyHubRoutes.tsx:58
+- `rent/medium-term` — declared at src/components/layout/routes/propertyHubRoutes.tsx:54
+- `rent/short-term` — declared at src/components/layout/routes/propertyHubRoutes.tsx:50
+- `reports` — declared at src/components/layout/routes/mcRoutes.tsx:66
+- `resale` — declared at src/components/layout/routes/propertyHubRoutes.tsx:83
+- `resale/:id` — declared at src/components/layout/routes/propertyHubRoutes.tsx:84
+- `reviews-management` — declared at src/components/layout/routes/mcRoutes.tsx:118
+- `sales` — declared at src/components/layout/routes/mcRoutes.tsx:73
+- `sales/:id` — declared at src/components/layout/routes/mcRoutes.tsx:79
+- `sales/analytics` — declared at src/components/layout/routes/mcRoutes.tsx:75
+- `sales/new` — declared at src/components/layout/routes/mcRoutes.tsx:74
+- `sales/settings` — declared at src/components/layout/routes/mcRoutes.tsx:76
+- `search` — declared at src/components/layout/routes/propertyHubRoutes.tsx:67
+- `sequences` — declared at src/components/layout/routes/mcRoutes.tsx:100
+- `service-request` — declared at src/components/layout/routes/mcRoutes.tsx:131
+- `settings` — declared at src/components/layout/routes/mcRoutes.tsx:77
+- `setup` — declared at src/components/layout/routes/mcRoutes.tsx:130
+- `staff` — declared at src/components/layout/routes/mcRoutes.tsx:70
+- `subscription` — declared at src/components/layout/routes/mcRoutes.tsx:71
+- `superhost` — declared at src/components/layout/routes/mcRoutes.tsx:126
+- `support-chat` — declared at src/components/layout/routes/mcRoutes.tsx:62
+- `tasks` — declared at src/components/layout/routes/mcRoutes.tsx:98
+- `team` — declared at src/components/layout/AnimatedRoutes.tsx:406
+- `team/shifts` — declared at src/components/layout/routes/mcRoutes.tsx:92
+- `templates` — declared at src/components/layout/AnimatedRoutes.tsx:762
+- `transparency/:propertyId` — declared at src/components/layout/routes/mcRoutes.tsx:67
+- `trends` — declared at src/components/layout/routes/mcRoutes.tsx:124
+- `vault` — declared at src/components/layout/routes/mcRoutes.tsx:116
+- `vendor-acquisition` — declared at src/components/layout/routes/mcRoutes.tsx:115
+- `vendors` — declared at src/components/layout/routes/mcRoutes.tsx:111
+- `why-myuno` — declared at src/components/layout/routes/propertyHubRoutes.tsx:87
+
+## Full inventory
+
+See `route-inventory.csv`.
