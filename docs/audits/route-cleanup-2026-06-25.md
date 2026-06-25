@@ -13,42 +13,18 @@ Source orphan list: `docs/audits/route-inventory.md`.
 
 | Tier | Count |
 |------|-------|
-| HIGH | 29 |
+| HIGH | 5 |
 | MEDIUM | 17 |
-| LOW | 344 |
+| LOW | 368 |
 
-## HIGH (29)
+## HIGH (5)
 
 | Route | Declared in | Page module | Text refs |
 |-------|-------------|-------------|-----------|
-| `/admin/bouquets` | src/components/layout/routes/adminRoutes.tsx:60 | — (?) | — |
-| `/admin/investor-demo` | src/components/layout/routes/adminRoutes.tsx:28 | — (?) | — |
-| `/admin/marketplace/categories` | src/components/layout/routes/adminRoutes.tsx:88 | — (?) | — |
-| `/admin/marketplace/products` | src/components/layout/routes/adminRoutes.tsx:87 | — (?) | — |
-| `/admin/marketplace/subcategories` | src/components/layout/routes/adminRoutes.tsx:89 | — (?) | — |
-| `/admin/marketplace/vendors` | src/components/layout/routes/adminRoutes.tsx:90 | — (?) | — |
-| `/admin/pitch-deck` | src/components/layout/routes/adminRoutes.tsx:27 | — (?) | — |
-| `/admin/user-analytics` | src/components/layout/routes/adminRoutes.tsx:86 | — (?) | — |
-| `/auth/callback/*` | src/components/layout/AnimatedRoutes.tsx:213 | — (?) | — |
-| `/bloom` | src/components/layout/AnimatedRoutes.tsx:442 | — (?) | — |
-| `/bloom/*` | src/components/layout/AnimatedRoutes.tsx:443 | — (?) | — |
-| `/demo/*` | src/components/layout/AnimatedRoutes.tsx:660 | — (?) | — |
-| `/food/checkout` | src/components/layout/AnimatedRoutes.tsx:353 | — (?) | — |
 | `/food/restaurant/:id` | src/components/layout/AnimatedRoutes.tsx:352 | — (?) | — |
 | `/for/:persona/in/:area` | src/components/layout/AnimatedRoutes.tsx:813 | — (?) | — |
-| `/invest/clearview` | src/components/layout/AnimatedRoutes.tsx:545 | — (?) | — |
-| `/manager/calendar` | src/components/layout/AnimatedRoutes.tsx:684 | — (?) | — |
-| `/marketplace/*` | src/components/layout/AnimatedRoutes.tsx:610 | — (?) | — |
-| `/oauth/callback` | src/components/layout/AnimatedRoutes.tsx:214 | — (?) | — |
-| `/oauth/callback/*` | src/components/layout/AnimatedRoutes.tsx:215 | — (?) | — |
-| `/onboarding/destination` | src/components/layout/AnimatedRoutes.tsx:205 | — (?) | — |
-| `/onboarding/map` | src/components/layout/AnimatedRoutes.tsx:207 | — (?) | — |
-| `/onboarding/questions` | src/components/layout/AnimatedRoutes.tsx:206 | — (?) | — |
-| `/owner/portfolio` | src/components/layout/AnimatedRoutes.tsx:775 | — (?) | — |
-| `/owner/setup` | src/components/layout/AnimatedRoutes.tsx:774 | — (?) | — |
 | `/tours/:id/book` | src/components/layout/AnimatedRoutes.tsx:574 | — (?) | — |
 | `/water/:id/book` | src/components/layout/AnimatedRoutes.tsx:577 | — (?) | — |
-| `properties/:id/manage` | src/components/layout/routes/mcRoutes.tsx:43 | — (?) | — |
 | `rent/medium-term` | src/components/layout/routes/propertyHubRoutes.tsx:54 | — (?) | — |
 
 ## MEDIUM (17)
@@ -73,7 +49,7 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `properties/:id/setup` | src/components/layout/routes/mcRoutes.tsx:36 | PropertyQuickSetup (2) | — |
 | `properties/:id/terms` | src/components/layout/routes/mcRoutes.tsx:35 | OwnerRentalTerms (2) | — |
 
-## LOW (344)
+## LOW (368)
 
 | Route | Declared in | Page module | Text refs |
 |-------|-------------|-------------|-----------|
@@ -86,6 +62,7 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `/admin/ai-knowledge` | src/components/layout/routes/adminRoutes.tsx:94 | AdminAIKnowledge (2) | src/lib/nav/navigationModel.ts |
 | `/admin/api-keys` | src/components/layout/routes/adminRoutes.tsx:109 | AdminApiKeys (2) | src/components/admin/control/ControlSystemTab.tsx |
 | `/admin/babysitters` | src/components/layout/routes/adminRoutes.tsx:57 | AdminBabysitters (2) | src/components/admin/ContentCreatorMenu.tsx |
+| `/admin/bouquets` | src/components/layout/routes/adminRoutes.tsx:60 | — (?) | — |
 | `/admin/bulk-publish` | src/components/layout/routes/adminRoutes.tsx:73 | AdminBulkPublish (2) | src/lib/nav/navigationModel.ts |
 | `/admin/cities` | src/components/layout/routes/adminRoutes.tsx:83 | AdminCities (2) | src/components/admin/AdminCommandPalette.tsx |
 | `/admin/cleaning` | src/components/layout/routes/adminRoutes.tsx:55 | AdminCleaning (2) | src/components/admin/catalog/CatalogServicesTab.tsx |
@@ -104,6 +81,7 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `/admin/insurance` | src/components/layout/routes/adminRoutes.tsx:68 | AdminInsurance (2) | src/components/admin/catalog/CatalogServicesTab.tsx |
 | `/admin/intake` | src/components/layout/routes/adminRoutes.tsx:97 | AdminIntake (2) | src/components/admin/ai-agents/UtilityAgentCard.tsx |
 | `/admin/investments` | src/components/layout/routes/adminRoutes.tsx:35 | AdminInvestments (2) | src/lib/nav/navigationModel.ts |
+| `/admin/investor-demo` | src/components/layout/routes/adminRoutes.tsx:28 | — (?) | — |
 | `/admin/investor-metrics` | src/components/layout/routes/adminRoutes.tsx:81 | AdminInvestorMetrics (2) | src/lib/nav/navigationModel.ts |
 | `/admin/legal` | src/components/layout/routes/adminRoutes.tsx:53 | AdminLegal (2) | src/components/admin/AdminCommandPalette.tsx |
 | `/admin/legal-documents` | src/components/layout/routes/adminRoutes.tsx:107 | AdminLegalDocuments (2) | src/components/admin/AdminCommandPalette.tsx |
@@ -112,6 +90,10 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `/admin/location-knowledge` | src/components/layout/routes/adminRoutes.tsx:85 | AdminLocationKnowledge (2) | src/components/admin/control/ControlSystemTab.tsx |
 | `/admin/lookups` | src/components/layout/routes/adminRoutes.tsx:61 | AdminLookups (2) | src/components/admin/control/ControlSystemTab.tsx |
 | `/admin/marketing` | src/components/layout/routes/adminRoutes.tsx:102 | MarketingDashboard (6) | src/components/admin/AdminCommandPalette.tsx |
+| `/admin/marketplace/categories` | src/components/layout/routes/adminRoutes.tsx:88 | — (?) | — |
+| `/admin/marketplace/products` | src/components/layout/routes/adminRoutes.tsx:87 | — (?) | — |
+| `/admin/marketplace/subcategories` | src/components/layout/routes/adminRoutes.tsx:89 | — (?) | — |
+| `/admin/marketplace/vendors` | src/components/layout/routes/adminRoutes.tsx:90 | — (?) | — |
 | `/admin/master-catalog` | src/components/layout/routes/adminRoutes.tsx:16 | AdminMasterCatalog (2) | src/lib/nav/navigationModel.ts |
 | `/admin/mc-dashboard` | src/components/layout/routes/adminRoutes.tsx:40 | AdminMCDashboard (2) | src/components/admin/AdminCommandPalette.tsx |
 | `/admin/moderation` | src/components/layout/routes/adminRoutes.tsx:72 | — (?) | src/hooks/useNavigationDirection.ts |
@@ -120,6 +102,7 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `/admin/partner-applications` | src/components/layout/routes/adminRoutes.tsx:25 | PartnerApplicationsAdmin (2) | src/components/admin/dashboard/AdminOperationalAlerts.tsx |
 | `/admin/pets` | src/components/layout/routes/adminRoutes.tsx:54 | AdminPets (2) | src/components/admin/catalog/CatalogServicesTab.tsx |
 | `/admin/pharmacies` | src/components/layout/routes/adminRoutes.tsx:66 | AdminPharmacies (2) | src/components/admin/catalog/CatalogServicesTab.tsx |
+| `/admin/pitch-deck` | src/components/layout/routes/adminRoutes.tsx:27 | — (?) | — |
 | `/admin/pm-companies` | src/components/layout/routes/adminRoutes.tsx:39 | AdminPMCompanies (2) | src/components/admin/AdminCommandPalette.tsx |
 | `/admin/qa-test-runner` | src/components/layout/routes/adminRoutes.tsx:108 | AdminQATestRunner (2) | src/components/admin/AdminCommandPalette.tsx |
 | `/admin/quick-listings` | src/components/layout/routes/adminRoutes.tsx:69 | AdminQuickListings (2) | src/lib/nav/navigationModel.ts |
@@ -135,6 +118,7 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `/admin/translations` | src/components/layout/routes/adminRoutes.tsx:84 | AdminTranslations (2) | src/components/admin/AdminCommandPalette.tsx |
 | `/admin/trash` | src/components/layout/routes/adminRoutes.tsx:17 | AdminTrash (2) | src/lib/nav/navigationModel.ts |
 | `/admin/uno-team` | src/components/layout/routes/adminRoutes.tsx:77 | AdminUnoTeam (2) | src/components/admin/AdminCommandPalette.tsx |
+| `/admin/user-analytics` | src/components/layout/routes/adminRoutes.tsx:86 | — (?) | — |
 | `/admin/users` | src/components/layout/routes/adminRoutes.tsx:14 | AdminUsersAccess (2) | src/components/admin/AdminCommandPalette.tsx |
 | `/admin/vehicles` | src/components/layout/routes/adminRoutes.tsx:47 | AdminVehicles (2) | src/components/admin/ContentCreatorMenu.tsx |
 | `/admin/vendor-content` | src/components/layout/routes/adminRoutes.tsx:19 | AdminVendorContentCreator (2) | src/components/admin/AdminCommandPalette.tsx |
@@ -144,9 +128,12 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `/airport-transfer` | src/components/layout/AnimatedRoutes.tsx:369 | — (?) | src/components/home/AudienceEntries.tsx |
 | `/area/:slug` | src/components/layout/AnimatedRoutes.tsx:843 | AreaLandingPage (2) | src/components/admin/AdminKeyboardShortcuts.tsx |
 | `/auth/callback` | src/components/layout/AnimatedRoutes.tsx:212 | — (?) | src/components/auth/GoogleSignInButton.tsx |
+| `/auth/callback/*` | src/components/layout/AnimatedRoutes.tsx:213 | — (?) | — |
 | `/auth/setup-password` | src/components/layout/AnimatedRoutes.tsx:219 | SetupPassword (2) | src/pages/admin/AdminTransferOperators.tsx |
 | `/b/:slug` | src/components/layout/AnimatedRoutes.tsx:302 | StorefrontPage (2) | src/App.tsx |
 | `/babysitters` | src/components/layout/AnimatedRoutes.tsx:600 | — (?) | src/components/admin/ContentCreatorMenu.tsx |
+| `/bloom` | src/components/layout/AnimatedRoutes.tsx:442 | — (?) | — |
+| `/bloom/*` | src/components/layout/AnimatedRoutes.tsx:443 | — (?) | — |
 | `/build` | src/components/layout/AnimatedRoutes.tsx:492 | — (?) | src/components/account/AccountFlatMenu.tsx |
 | `/catalog` | src/components/layout/AnimatedRoutes.tsx:227 | — (?) | src/components/admin/AdminCommandPalette.tsx |
 | `/categories` | src/components/layout/AnimatedRoutes.tsx:228 | — (?) | src/components/admin/AdminCommandPalette.tsx |
@@ -156,6 +143,7 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `/company/:slug` | src/components/layout/AnimatedRoutes.tsx:338 | ManagementCompanyProfile (2) | src/components/admin/AdminCommandPalette.tsx |
 | `/complexes` | src/components/layout/AnimatedRoutes.tsx:345 | — (?) | src/components/admin/taxonomy/TaxonomyBulkActions.tsx |
 | `/demo` | src/components/layout/AnimatedRoutes.tsx:659 | — (?) | src/components/home/ActiveSituation.tsx |
+| `/demo/*` | src/components/layout/AnimatedRoutes.tsx:660 | — (?) | — |
 | `/developer-portal` | src/components/layout/AnimatedRoutes.tsx:397 | DeveloperPortalLayout (2) | src/components/chat/UnifiedChatFAB.tsx |
 | `/developer-portal/onboarding/:step` | src/components/layout/AnimatedRoutes.tsx:297 | DeveloperOnboarding (2) | src/lib/config/routes.ts |
 | `/developers` | src/components/layout/AnimatedRoutes.tsx:343 | — (?) | src/components/admin/developers/BulkLogoUploadModal.tsx |
@@ -168,6 +156,7 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `/flowers/shop/:id` | src/components/layout/AnimatedRoutes.tsx:446 | FlowerShopDetail (2) | src/hooks/useBrowseByType.ts |
 | `/flowers/success` | src/components/layout/AnimatedRoutes.tsx:449 | FlowersSuccess (2) | src/lib/config/routes.ts |
 | `/food` | src/components/layout/AnimatedRoutes.tsx:351 | — (?) | src/components/admin/AdminCommandPalette.tsx |
+| `/food/checkout` | src/components/layout/AnimatedRoutes.tsx:353 | — (?) | — |
 | `/for` | src/components/layout/AnimatedRoutes.tsx:800 | — (?) | src/App.tsx |
 | `/for/agent` | src/components/layout/AnimatedRoutes.tsx:804 | AgentLandingPage (2) | src/pages/landings/AgentLandingPage.tsx |
 | `/for/arrive` | src/components/layout/AnimatedRoutes.tsx:806 | ArriveSurfaceLandingPage (2) | src/lib/landings/surfaceLandings.ts |
@@ -186,6 +175,7 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `/index` | src/components/layout/AnimatedRoutes.tsx:196 | — (?) | src/components/ErrorBoundary.tsx |
 | `/invest-hub` | src/components/layout/AnimatedRoutes.tsx:556 | — (?) | src/lib/appRegistry.ts |
 | `/invest/articles/:slug` | src/components/layout/AnimatedRoutes.tsx:549 | InvestmentArticleDetail (2) | src/components/layout/pageRegistry.ts |
+| `/invest/clearview` | src/components/layout/AnimatedRoutes.tsx:545 | — (?) | — |
 | `/invest/deal/:id` | src/components/layout/AnimatedRoutes.tsx:546 | InvestmentDealPublicDetail (2) | src/lib/config/routes.ts |
 | `/invest/execution` | src/components/layout/AnimatedRoutes.tsx:348 | — (?) | src/components/layout/routes/propertyHubRoutes.tsx |
 | `/invest/market` | src/components/layout/AnimatedRoutes.tsx:346 | — (?) | src/components/layout/routes/propertyHubRoutes.tsx |
@@ -203,26 +193,35 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `/live` | src/components/layout/AnimatedRoutes.tsx:490 | — (?) | src/components/account/PersonaDetectionPreview.test.tsx |
 | `/manage` | src/components/layout/AnimatedRoutes.tsx:491 | — (?) | src/components/account/PersonaDetectionPreview.test.tsx |
 | `/manager` | src/components/layout/AnimatedRoutes.tsx:681 | — (?) | src/components/admin/MCMemberManager.tsx |
+| `/manager/calendar` | src/components/layout/AnimatedRoutes.tsx:684 | — (?) | — |
 | `/manager/properties` | src/components/layout/AnimatedRoutes.tsx:682 | — (?) | src/lib/config/routes.ts |
 | `/manager/properties/:id` | src/components/layout/AnimatedRoutes.tsx:683 | — (?) | src/lib/config/routes.ts |
 | `/market/store/:id` | src/components/layout/AnimatedRoutes.tsx:617 | StoreDetail (2) | src/hooks/useBrowseByType.ts |
 | `/market/success` | src/components/layout/AnimatedRoutes.tsx:619 | MarketSuccess (2) | supabase/functions/create-market-checkout/index.ts |
 | `/market/wishlist` | src/components/layout/AnimatedRoutes.tsx:616 | WishlistPage (2) | src/components/market/drawer/QuickAccessSection.tsx |
 | `/marketplace` | src/components/layout/AnimatedRoutes.tsx:609 | — (?) | src/components/admin/ContentCreatorMenu.tsx |
+| `/marketplace/*` | src/components/layout/AnimatedRoutes.tsx:610 | — (?) | — |
 | `/mc/sequences` | src/components/layout/AnimatedRoutes.tsx:314 | — (?) | src/lib/config/routes.ts |
 | `/me/bookings` | src/components/layout/AnimatedRoutes.tsx:254 | MeBookings (3) | src/components/home/PersonaHalo.tsx |
 | `/newbuilds/areas/:slug` | src/components/layout/AnimatedRoutes.tsx:392 | NewbuildsAreaDetail (2) | src/lib/config/routes.ts |
 | `/newbuilds/developers/:slug` | src/components/layout/AnimatedRoutes.tsx:386 | — (?) | src/components/routing/NewbuildLegacyRedirects.tsx |
 | `/newbuilds/projects/:slug` | src/components/layout/AnimatedRoutes.tsx:384 | — (?) | src/components/layout/routes/adminRoutes.tsx |
+| `/oauth/callback` | src/components/layout/AnimatedRoutes.tsx:214 | — (?) | — |
+| `/oauth/callback/*` | src/components/layout/AnimatedRoutes.tsx:215 | — (?) | — |
 | `/offplan` | src/components/layout/AnimatedRoutes.tsx:341 | — (?) | src/components/clearview/ClearViewBadgePopover.tsx |
 | `/offplan/:id` | src/components/layout/AnimatedRoutes.tsx:342 | — (?) | src/components/clearview/ClearViewBadgePopover.tsx |
 | `/onboarding` | src/components/layout/AnimatedRoutes.tsx:204 | — (?) | src/components/account/PersonaDetectionPreview.tsx |
+| `/onboarding/destination` | src/components/layout/AnimatedRoutes.tsx:205 | — (?) | — |
+| `/onboarding/map` | src/components/layout/AnimatedRoutes.tsx:207 | — (?) | — |
+| `/onboarding/questions` | src/components/layout/AnimatedRoutes.tsx:206 | — (?) | — |
 | `/operate/transfers` | src/components/layout/AnimatedRoutes.tsx:794 | OperatorTransfers (2) | src/pages/admin/AdminTransferOperators.tsx |
 | `/operate/transfers/confirm` | src/components/layout/AnimatedRoutes.tsx:793 | OperatorTransferConfirm (2) | supabase/functions/_shared/transactional-email-templates/transfer-operator-new.tsx |
 | `/owner/finance` | src/components/layout/AnimatedRoutes.tsx:776 | — (?) | src/lib/search/navigationIndex.ts |
 | `/owner/full-management` | src/components/layout/AnimatedRoutes.tsx:781 | — (?) | src/pages/owner/FullManagement.tsx |
 | `/owner/guide` | src/components/layout/AnimatedRoutes.tsx:773 | — (?) | src/lib/config/routes.ts |
 | `/owner/landing` | src/components/layout/AnimatedRoutes.tsx:771 | — (?) | src/lib/config/routes.ts |
+| `/owner/portfolio` | src/components/layout/AnimatedRoutes.tsx:775 | — (?) | — |
+| `/owner/setup` | src/components/layout/AnimatedRoutes.tsx:774 | — (?) | — |
 | `/p/:slug` | src/components/layout/AnimatedRoutes.tsx:377 | ProjectMicrosite (3) | src/App.tsx |
 | `/partner-terms` | src/components/layout/AnimatedRoutes.tsx:653 | — (?) | src/test/ia/no-orphan-top-level-routes.test.ts |
 | `/pets/transport` | src/components/layout/AnimatedRoutes.tsx:585 | PetTransport (2) | src/lib/config/routes.ts |
@@ -384,6 +383,7 @@ Source orphan list: `docs/audits/route-inventory.md`.
 | `projects/new` | src/components/layout/AnimatedRoutes.tsx:400 | DeveloperProjectEditor (2) | src/lib/config/routes.ts |
 | `properties` | src/components/layout/routes/mcRoutes.tsx:29 | OwnerProperties (3) | src/components/admin/AdminCommandPalette.tsx |
 | `properties/:id` | src/components/layout/routes/mcRoutes.tsx:34 | OwnerPropertyDetail (2) | src/components/admin/AdminCommandPalette.tsx |
+| `properties/:id/manage` | src/components/layout/routes/mcRoutes.tsx:43 | — (?) | — |
 | `properties/import` | src/components/layout/routes/mcRoutes.tsx:33 | OwnerPropertyImport (2) | src/lib/config/routes.ts |
 | `properties/new` | src/components/layout/routes/mcRoutes.tsx:32 | AddProperty (3) | src/components/owner/PropertySubmissionSuccess.tsx |
 | `quick-expense` | src/components/layout/routes/mcRoutes.tsx:56 | QuickExpense (2) | src/components/owner/dashboard/RoleQuickActions.tsx |
