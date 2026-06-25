@@ -21,6 +21,20 @@ const distanceOptions = [
   { value: 50, labelEn: '50 km', labelRu: '50 км' },
 ];
 
+// Phuket bounding box used for approximate salon placement until the `salons`
+// table gains real lat/lng columns. Derived deterministically from the salon id so
+// markers stay put across re-renders (previously Math.random() jittered every render).
+const PHUKET_BOUNDS = { latBase: 7.85, latSpan: 0.15, lngBase: 98.28, lngSpan: 0.1 };
+
+/** Stable [0, 1) fraction hashed from a salon id — same id always maps to the same point. */
+function stableFraction(id: string): number {
+  let hash = 0;
+  for (let i = 0; i < id.length; i += 1) {
+    hash = (hash * 31 + id.charCodeAt(i)) | 0;
+  }
+  return (Math.abs(hash) % 10000) / 10000;
+}
+
 export default function BeautyMap() {
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -36,8 +50,10 @@ export default function BeautyMap() {
       id: s.id,
       name: s.name_en,
       nameRu: s.name_ru,
-      lat: 7.85 + Math.random() * 0.15, // TODO: add lat/lng columns to salons table
-      lng: 98.28 + Math.random() * 0.1,
+      // TODO: replace with real coordinates once `salons` table has lat/lng columns.
+      // Until then, derive a stable approximate point from the id (no per-render jitter).
+      lat: PHUKET_BOUNDS.latBase + stableFraction(`${s.id}lat`) * PHUKET_BOUNDS.latSpan,
+      lng: PHUKET_BOUNDS.lngBase + stableFraction(`${s.id}lng`) * PHUKET_BOUNDS.lngSpan,
       rating: s.rating ?? 0,
       priceFrom: s.price_from ?? 0,
       image: s.cover_image || undefined,

@@ -22,7 +22,11 @@ import { PeylaaROICalculator } from './components/PeylaaROICalculator';
 import { LandingContainer } from '@/components/landings';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 
-const STORAGE_BASE = 'https://bhmvnorkswapjkmbvykk.supabase.co/storage/v1/object/public/media';
+// PEYLAA media lives in the PRIMARY Supabase project (see CLAUDE.md §4).
+// Derive the storage base from the configured env so it always tracks the active
+// project — never hardcode a project ref (the old `bhmvnorkswapjkmbvykk` ref was a
+// dead mirror and 404'd in production).
+const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/media`;
 const HERO_BG = `${STORAGE_BASE}/exterior/peylaa_drone-shot-with-3d-building.jpg`;
 
 const STATS = [

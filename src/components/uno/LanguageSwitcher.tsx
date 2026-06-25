@@ -38,6 +38,8 @@ export function LanguageSwitcher({
           <button
             type="button"
             data-testid="language-switch"
+            aria-label={`Change language — current: ${currentLang.shortName} (${currentLang.name})`}
+            title={`Change language — current: ${currentLang.shortName}`}
             className={cn(
               "inline-flex items-center gap-1 px-2 py-1.5 rounded-none",
               "bg-secondary/60 hover:bg-secondary text-foreground",
