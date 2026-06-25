@@ -16,11 +16,25 @@ function coerce(value: unknown): boolean {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'number') return value === 1;
   if (typeof value === 'string') {
-    const v = value.toLowerCase().trim();
+    const trimmed = value.trim();
+    // Some legacy rows store JSON-stringified objects like '{"enabled": true}'.
+    if (trimmed.startsWith('{')) {
+      try {
+        return coerce(JSON.parse(trimmed));
+      } catch {
+        return false;
+      }
+    }
+    const v = trimmed.toLowerCase();
     return v === 'true' || v === 'on' || v === '1';
+  }
+  // Canonical jsonb shape: { enabled: boolean, rolloutPct?: number }
+  if (value && typeof value === 'object' && 'enabled' in value) {
+    return Boolean((value as { enabled: unknown }).enabled);
   }
   return false;
 }
+
 
 async function fetchFlags(): Promise<Record<string, boolean>> {
   const { data, error } = await supabase
