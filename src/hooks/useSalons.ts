@@ -12,6 +12,8 @@ export interface Salon {
   images: string[];
   address: string | null;
   district: string | null;
+  lat: number | null;
+  lng: number | null;
   phone: string | null;
   services: string[];
   amenities: string[];

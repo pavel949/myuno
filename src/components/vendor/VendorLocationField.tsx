@@ -146,13 +146,6 @@ export function VendorLocationField({
     );
   }, [onChange, reverseGeocode, value]);
 
-  // Reset stale geocode session when value resets externally
-  useEffect(() => {
-    if (!value.address && hasPin) {
-      // user cleared address but still has a pin — keep pin
-    }
-  }, [value.address, hasPin]);
-
   const labelText =
     label ?? (isRu ? 'Адрес и точка на карте' : 'Address & map pin');
 

@@ -193,6 +193,7 @@ export function ProjectLocationPicker({ value, onChange }: ProjectLocationPicker
   useEffect(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
       setAddressResults([]);
+      setSearching(false);
       return;
     }
     if (searchDebounce.current) clearTimeout(searchDebounce.current);

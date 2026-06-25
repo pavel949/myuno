@@ -29,15 +29,15 @@ export default function BeautyMap() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { salons, isLoading } = useSalons();
 
-  // Map DB salons to SalonMarker format
+  // Map DB salons to SalonMarker format — only those with real coordinates.
   const salonMarkers: SalonMarker[] = (salons || [])
-    .filter(s => s.address) // only salons with location data
+    .filter(s => s.lat != null && s.lng != null)
     .map(s => ({
       id: s.id,
       name: s.name_en,
       nameRu: s.name_ru,
-      lat: 7.85 + Math.random() * 0.15, // TODO: add lat/lng columns to salons table
-      lng: 98.28 + Math.random() * 0.1,
+      lat: Number(s.lat),
+      lng: Number(s.lng),
       rating: s.rating ?? 0,
       priceFrom: s.price_from ?? 0,
       image: s.cover_image || undefined,

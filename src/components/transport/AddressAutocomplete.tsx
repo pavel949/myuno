@@ -319,16 +319,29 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
       async (pos) => {
         try {
           const { latitude, longitude } = pos.coords;
+          // Try the in-browser Google geocoder first (when the Maps SDK is loaded).
+          let handled = false;
           if (useGoogle) {
             const result = await googleGeocode.reverseGeocode(latitude, longitude);
-            if (result?.address) onChange(result.address, { lat: result.lat ?? latitude, lng: result.lng ?? longitude, placeId: result.placeId ?? undefined });
-          } else {
+            if (result?.address) {
+              onChange(result.address, { lat: result.lat ?? latitude, lng: result.lng ?? longitude, placeId: result.placeId ?? undefined });
+              handled = true;
+            }
+          }
+          // Fall back to the edge function if Google isn't ready yet (key present but
+          // SDK still loading) or returned no match — otherwise the button silently no-ops.
+          if (!handled) {
             const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/geocode-address?lat=${latitude}&lng=${longitude}&language=${language}`;
             const res = await fetch(url, {
               headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
             });
-            const json = await res.json();
-            if (json.results?.[0]) onChange(json.results[0].address || json.results[0].name, { lat: latitude, lng: longitude });
+            const json = await res.json().catch(() => null);
+            if (json?.results?.[0]) {
+              onChange(json.results[0].address || json.results[0].name, { lat: latitude, lng: longitude });
+            } else {
+              // Last resort: commit the raw coordinates so the user's tap isn't lost.
+              onChange(`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`, { lat: latitude, lng: longitude });
+            }
           }
         } catch (err) {
           console.error('[AddressAutocomplete] reverse geocode error:', err);
