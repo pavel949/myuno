@@ -11,6 +11,8 @@ import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import IndexV2 from './IndexV2';
 
 import { HeroGreeting } from '@/components/home/HeroGreeting';
 import { PendingPaymentsChip } from '@/components/home/PendingPaymentsChip';
