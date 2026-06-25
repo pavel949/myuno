@@ -63,6 +63,12 @@
   ],
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.myuno.app" }],
+      "destination": "https://myuno.app/:path*",
+      "permanent": true
+    },
+    {
       "source": "/",
       "has": [{ "type": "host", "value": "crm.bymyuno.com" }],
       "destination": "/capital",
