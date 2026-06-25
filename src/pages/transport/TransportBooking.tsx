@@ -17,7 +17,9 @@ import { useVehicle } from "@/hooks/useVehicles";
 import { useAvailabilityCheck } from "@/hooks/useAvailabilityCheck";
 import { useConciergeAdvance } from "@/hooks/useConciergeAdvance";
 import { useStripeUnifiedCheckout } from "@/hooks/useStripeUnifiedCheckout";
+import { useStripeLive } from "@/hooks/useStripeLive";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { ConciergeAdvanceOption } from "@/components/booking/ConciergeAdvanceOption";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageContainer } from "@/components/uno/PageContainer";
@@ -48,6 +50,8 @@ export default function TransportBooking() {
   const { checkAvailability, isChecking: checkingAvailability } = useAvailabilityCheck();
   const { createAdvanceRequest, navigateToAdvanceRequested, calculateFee, isProcessing: advanceProcessing, feePercent } = useConciergeAdvance();
   const { createCheckout, isProcessing: stripeProcessing } = useStripeUnifiedCheckout();
+  // Hide the online-card option until Stripe live keys are configured (test mode = real cards fail).
+  const { isLive: isStripeLive } = useStripeLive();
 
   // Get vehicle from DB
   const { vehicle, isLoading: vehicleLoading } = useVehicle(id || '');
@@ -182,6 +186,7 @@ export default function TransportBooking() {
     if (!contactData.name || !contactData.phone) return;
     if (availabilityError) return;
 
+    try {
     const scheduledAt = pickupDate.toISOString();
     const endAt = (returnDate || addDays(pickupDate, 1)).toISOString();
 
@@ -291,6 +296,20 @@ export default function TransportBooking() {
       }
 
       setBookingResult({ success: true, bookingId: result.order_id });
+    } else {
+      toast.error(
+        language === 'ru'
+          ? 'Не удалось создать бронирование. Попробуйте ещё раз.'
+          : 'Could not create the booking. Please try again.'
+      );
+    }
+    } catch (err) {
+      console.error('Vehicle booking failed:', err);
+      toast.error(
+        language === 'ru'
+          ? 'Ошибка при бронировании. Попробуйте ещё раз.'
+          : 'Booking failed. Please try again.'
+      );
     }
   };
 
@@ -379,7 +398,7 @@ export default function TransportBooking() {
             currency="THB"
             showWallet
             showCash
-            showOnline
+            showOnline={isStripeLive}
           />
 
           {/* Concierge Advance Option */}
@@ -393,6 +412,13 @@ export default function TransportBooking() {
             />
           </div>
         </div>
+
+        {/* Licence / insurance disclaimer */}
+        <p className="text-xs text-muted-foreground leading-relaxed mb-4 px-1">
+          {language === 'ru'
+            ? 'Для аренды нужны действующие водительские права и международное водительское удостоверение (IDP). Уточните страховое покрытие и депозит до начала аренды.'
+            : 'A valid driving licence and an International Driving Permit (IDP) are required. Confirm insurance coverage and the deposit before your rental.'}
+        </p>
 
         {/* Bottom Bar */}
         <BookingBottomBar

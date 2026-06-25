@@ -98,6 +98,13 @@ export default function VehicleDetail() {
   });
   const localizedFeatures = getLocalizedFeatures(filteredFeatures, lang);
 
+  // myUNO concierge contact for enquiries (lead model — matches _shared/admin-config.ts default
+  // and the WhatsApp number used in AirportTransferBooking). The concierge handles the provider.
+  const CONCIERGE_WA = '66922407355';
+  const enquiryText = encodeURIComponent(
+    isRu ? `Здравствуйте! Интересует аренда: ${name}` : `Hi! I'm interested in renting: ${name}`
+  );
+
   return (
     <AppLayout showBottomNav={false}>
       <div className="pb-28">
@@ -319,6 +326,11 @@ export default function VehicleDetail() {
                   <TermRow icon={Gauge} text={vehicle.mileage_policy} />
                 )}
               </div>
+              <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+                {isRu
+                  ? 'Для аренды нужны действующие водительские права и международное водительское удостоверение (IDP). Уточните страховое покрытие и депозит до начала аренды.'
+                  : 'A valid driving licence and an International Driving Permit (IDP) are required. Confirm insurance coverage and the deposit before your rental.'}
+              </p>
             </div>
 
             {/* FAQ placeholder */}
@@ -348,11 +360,15 @@ export default function VehicleDetail() {
                 <span className="text-xs font-normal text-muted-foreground ml-0.5">/{isRu ? 'день' : 'day'}</span>
               </p>
             </div>
-            <Button variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Позвонить' : 'Call'}>
-              <Phone className="w-4 h-4" />
+            <Button asChild variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Позвонить' : 'Call'}>
+              <a href={`tel:+${CONCIERGE_WA}`}>
+                <Phone className="w-4 h-4" />
+              </a>
             </Button>
-            <Button variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Написать' : 'Message'}>
-              <MessageCircle className="w-4 h-4" />
+            <Button asChild variant="outline" size="icon" className="shrink-0" aria-label={isRu ? 'Написать' : 'Message'}>
+              <a href={`https://wa.me/${CONCIERGE_WA}?text=${enquiryText}`} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="w-4 h-4" />
+              </a>
             </Button>
             <Button
               className="flex-1 h-11 rounded-none font-semibold"
