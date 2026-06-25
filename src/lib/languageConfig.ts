@@ -96,6 +96,27 @@ export const SUPPORTED_LANGUAGES: Record<string, LanguageInfo> = {
     nameRu: 'Хинди',
     color: 'orange',
   },
+  mn: {
+    code: 'mn',
+    flag: '🇲🇳',
+    nameEn: 'Mongolian',
+    nameRu: 'Монгольский',
+    color: 'sky',
+  },
+  bn: {
+    code: 'bn',
+    flag: '🇧🇩',
+    nameEn: 'Bengali',
+    nameRu: 'Бенгальский',
+    color: 'teal',
+  },
+  ar: {
+    code: 'ar',
+    flag: '🇸🇦',
+    nameEn: 'Arabic',
+    nameRu: 'Арабский',
+    color: 'stone',
+  },
 };
 
 // Machine translation indicator
@@ -186,6 +207,25 @@ const NORMALIZATION_MAP: Record<string, string> = {
   'hi': 'hi',
   'hin': 'hi',
   'хинди': 'hi',
+
+  // Mongolian variants
+  'mongolian': 'mn',
+  'mn': 'mn',
+  'mon': 'mn',
+  'монгольский': 'mn',
+
+  // Bengali variants
+  'bengali': 'bn',
+  'bn': 'bn',
+  'ben': 'bn',
+  'bangla': 'bn',
+  'бенгальский': 'bn',
+
+  // Arabic variants
+  'arabic': 'ar',
+  'ar': 'ar',
+  'ara': 'ar',
+  'арабский': 'ar',
 };
 
 /**
