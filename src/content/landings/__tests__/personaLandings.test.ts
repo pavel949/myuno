@@ -19,8 +19,11 @@ import {
 import { PERSONA_CODES } from '@/types/canonical';
 
 describe('PERSONA_LANDINGS — coverage', () => {
-  it('contains 27 persona landings (25 canonical P1..P25 + P22 developer-partner alias + P26 conscious-eaters)', () => {
-    expect(PERSONA_LANDINGS).toHaveLength(27);
+  it('contains 33 persona landings (27 M10b + 6 Sprint C Relocator-segment personas)', () => {
+    // 27 = 25 canonical P1..P25 + P22 developer-partner alias + P26 conscious-eaters.
+    // +6 from Sprint C orphan coverage (Relocator segment): long-stay,
+    // relocator-family, relocator-solo, returnee, employee-expat, property-owner.
+    expect(PERSONA_LANDINGS).toHaveLength(33);
   });
 
   it('covers every canonical PersonaCode P1..P25 at least once', () => {
@@ -72,6 +75,13 @@ describe('PERSONA_LANDINGS — Sprint 1–2 live promotions', () => {
     'students',
     // P26 — dietary cluster (legacy persona, outside Master Taxonomy v1.0 P01–P25 but kept live)
     'conscious-eaters',
+    // Sprint C — Relocator-segment personas (all promoted live with full SEO blocks)
+    'long-stay',
+    'relocator-family',
+    'relocator-solo',
+    'returnee',
+    'employee-expat',
+    'property-owner',
   ];
 
   it('has exactly the M10b live slug set', () => {

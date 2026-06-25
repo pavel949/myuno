@@ -56,6 +56,12 @@ const APPROVED_TOP_LEVEL = new Set<string>([
   '/partner-agreement', '/ip-policy', '/dispute-resolution',
   // ── Misc utility ──
   '/clearview', '/vip', '/account-type',
+  // ── Invite/referral acquisition + backward-compat redirect aliases ──
+  // `/join` is the invite/referral landing; the other three are pure
+  // <Navigate replace> aliases to already-approved routes
+  // (`/invite`→/join, `/bloom`→/flowers, `/marketplace`→/market), so they
+  // add no new content surface.
+  '/join', '/invite', '/bloom', '/marketplace',
 ]);
 
 describe('IA Wave-1 — Top-level URL allowlist', () => {

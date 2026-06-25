@@ -32,6 +32,17 @@ interface SitemapEntry {
 }
 
 /**
+ * `/for/*` is a shared marketing namespace: besides persona landings it also
+ * hosts Surface landings (Sprint 2: arrive/live/manage/invest/legal/build) and
+ * high-conversion segment landings (Sprint 1: second-home/investor/agent).
+ * Those are NOT personas and must be excluded from persona-orphan detection.
+ */
+const NON_PERSONA_FOR_SLUGS = new Set<string>([
+  'arrive', 'live', 'manage', 'invest', 'legal', 'build',
+  'second-home', 'investor', 'agent',
+]);
+
+/**
  * Parse `<url>…</url>` blocks from the sitemap into a slug→entry map for
  * `/for/:slug` URLs only (persona scope).
  */
@@ -48,6 +59,8 @@ function parsePersonaEntries(xml: string): Map<string, SitemapEntry> {
     const slug = loc.slice(`${ORIGIN}/for/`.length).replace(/\/$/, '');
     // Wave 4 — skip persona×area long-tail combos `/for/:persona/in/:area`.
     if (slug.includes('/')) continue;
+    // Skip Surface + segment landings that share the `/for/*` namespace.
+    if (NON_PERSONA_FOR_SLUGS.has(slug)) continue;
 
     const hreflangs: Record<string, string> = {};
     const altRe = /<xhtml:link\s+rel="alternate"\s+hreflang="([^"]+)"\s+href="([^"]+)"\s*\/>/g;
