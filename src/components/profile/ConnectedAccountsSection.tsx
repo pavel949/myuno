@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { lovable } from '@/integrations/lovable/index';
+import { supabase } from '@/integrations/supabase/client';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { toast } from 'sonner';
 
@@ -17,6 +18,9 @@ const texts = {
     disconnect: 'Отключить',
     connected: 'Подключён',
     connectError: 'Ошибка подключения',
+    disconnectError: 'Не удалось отключить аккаунт',
+    disconnectSuccess: 'Аккаунт отключён',
+    cannotUnlinkLast: 'Нельзя отключить единственный способ входа',
     google: 'Google',
     apple: 'Apple',
   },
@@ -27,6 +31,9 @@ const texts = {
     disconnect: 'Disconnect',
     connected: 'Connected',
     connectError: 'Connection error',
+    disconnectError: 'Could not disconnect account',
+    disconnectSuccess: 'Account disconnected',
+    cannotUnlinkLast: 'Cannot remove your only sign-in method',
     google: 'Google',
     apple: 'Apple',
   },
@@ -103,6 +110,44 @@ export function ConnectedAccountsSection() {
     }
   };
 
+  const handleDisconnect = async (providerId: 'google' | 'apple') => {
+    setConnectingProvider(providerId);
+    try {
+      // Read fresh identities — unlinkIdentity needs the full identity object,
+      // and we must never remove the user's only sign-in method.
+      const { data: { user: freshUser }, error: getErr } = await supabase.auth.getUser();
+      if (getErr || !freshUser) {
+        toast.error(t.disconnectError);
+        return;
+      }
+      const identities = freshUser.identities ?? [];
+      if (identities.length <= 1) {
+        toast.error(t.cannotUnlinkLast);
+        return;
+      }
+      const identity = identities.find((i) => i.provider === providerId);
+      if (!identity) {
+        toast.error(t.disconnectError);
+        return;
+      }
+      const { error } = await supabase.auth.unlinkIdentity(identity);
+      if (error) {
+        toast.error(t.disconnectError);
+        console.error('Unlink error:', error);
+        return;
+      }
+      toast.success(t.disconnectSuccess);
+      // Refresh the session so user.app_metadata.providers reflects the change
+      // and the button flips back to "Connect".
+      await supabase.auth.refreshSession();
+    } catch (error) {
+      toast.error(t.disconnectError);
+      console.error('Disconnect error:', error);
+    } finally {
+      setConnectingProvider(null);
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
       <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
@@ -138,7 +183,7 @@ export function ConnectedAccountsSection() {
                 <Button
                   variant={isConnected ? 'outline' : 'default'}
                   size="sm"
-                  onClick={() => handleConnect(provider.id)}
+                  onClick={() => (isConnected ? handleDisconnect(provider.id) : handleConnect(provider.id))}
                   disabled={isConnecting}
                 >
                   {isConnecting ? (

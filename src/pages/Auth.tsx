@@ -52,6 +52,11 @@ export default function Auth() {
   const [referralCode, setReferralCode] = useState(searchParams.get('ref') || '');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // OAuth callback watchdog: true once we've waited on /auth/callback long
+  // enough for Supabase detectSessionInUrl to consume the hash and still have
+  // no session — i.e. the sign-in silently failed (dropped tokens, broker
+  // hiccup) without an explicit ?error. Drives a dedicated retry screen.
+  const [callbackStalled, setCallbackStalled] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [signupStep, setSignupStep] = useState<SignupStep>('phone');
@@ -72,6 +77,7 @@ export default function Auth() {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
+  const isOAuthCallback = location.pathname.startsWith('/auth/callback');
   const isRu = language === 'ru';
   const isTh = language === 'th';
   const { activeRole, isLoading: userContextLoading } = useUserContext();
@@ -169,6 +175,22 @@ export default function Auth() {
     // Strip the error params so a refresh / re-render doesn't re-fire the toast.
     window.history.replaceState({}, '', window.location.pathname);
   }, [isRu, isTh]);
+
+  // OAuth callback watchdog. On /auth/callback the session is established
+  // asynchronously by Supabase detectSessionInUrl (it parses the hash, then
+  // fires SIGNED_IN). If after a grace period there is still no user and the
+  // provider returned no explicit ?error, the sign-in silently failed — show
+  // the retry screen instead of bouncing the user to a bare login form.
+  useEffect(() => {
+    if (!isOAuthCallback) return;
+    if (user) { setCallbackStalled(false); return; }
+    const params = new URLSearchParams(
+      `${window.location.search.replace(/^\?/, '')}&${window.location.hash.replace(/^#/, '')}`,
+    );
+    if (params.get('error')) return; // explicit error handled by the effect above
+    const timer = window.setTimeout(() => setCallbackStalled(true), 8000);
+    return () => window.clearTimeout(timer);
+  }, [isOAuthCallback, user]);
 
   const validatePhoneStep = () => {
     const newErrors: Record<string, string> = {};
@@ -441,6 +463,42 @@ export default function Auth() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // On the OAuth callback route with no session yet: keep showing the spinner
+  // while Supabase consumes the hash, and switch to an explicit retry screen if
+  // the watchdog fires — never flash the bare login form mid-callback.
+  if (isOAuthCallback && !user) {
+    if (!callbackStalled) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      );
+    }
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-6">
+        <div className="w-full max-w-sm text-center space-y-4">
+          <h1 className="text-xl font-semibold text-foreground">
+            {isTh ? 'การเข้าสู่ระบบไม่สำเร็จ' : isRu ? 'Не удалось завершить вход' : 'Sign-in didn’t complete'}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {isTh
+              ? 'เราไม่ได้รับเซสชันจากผู้ให้บริการ กรุณาลองเข้าสู่ระบบอีกครั้ง'
+              : isRu
+                ? 'Мы не получили сессию от провайдера. Пожалуйста, попробуйте войти ещё раз.'
+                : 'We didn’t receive a session from the provider. Please try signing in again.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => { setCallbackStalled(false); navigate('/auth', { replace: true }); }}
+            className="w-full h-12 inline-flex items-center justify-center bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            {isTh ? 'ลองอีกครั้ง' : isRu ? 'Попробовать снова' : 'Try again'}
+          </button>
+        </div>
       </div>
     );
   }
