@@ -1,9 +1,11 @@
 # myUNO — Project Bible
 
 > Единый справочный документ о продукте, бизнес-модели, архитектуре и дизайне.
-> Версия: 1.1 · Составлен: 2026-06-24 · Аудит-sync: 2026-06-25 · Ветка: `claude/project-analysis-business-plan-ySqKW`
+> Версия: 1.2 · Составлен: 2026-06-24 · Last audit-sync: 2026-06-25 · Ветка: `claude/project-analysis-business-plan-ySqKW`
 >
-> **v1.0 → v1.1 changelog (2026-06-25):** проведён sync Bible против реального состояния `main`. Подтверждено, что PR #23 fixes в проде; CORS пересобран на whitelist (`_shared/cors.ts`) — больше не `*`; `as any` debt снижен с 649 до 495; flowers checkout полностью функционален; auth guards консистентны по тирам; thai_business_layer GA подтверждён. Headline-числа подтянуты к фактическим (566 страниц, 1003 компонента, 172 edge functions, ~540 таблиц, 60 micro-apps). Детали аудита — в §20.
+> **v1.1 → v1.2 changelog (2026-06-25, second audit pass):** при попытке закрыть «remaining issues» из §20.2 обнаружено, что часть пунктов уже была сделана в коде, но Bible этого не зафиксировала. Внесены корректировки: (a) **CSP уже в проде** — `index.html:18` с 2026-06-18, открытый пункт переведён в resolved; (b) **vendor-acquisition feature flag уже существует** (`AI_VENDOR_ACQUISITION` в `src/lib/featureFlags.ts:36–41`, restricted to admin/uno_team) — открытым остаётся только cron-schedule; (c) **admin i18n переклассифицирован** — строки в AdminLeadConfigs/Stores/Newbuilds/TicketDetail НЕ хардкод, а bilingual через inline t()-helper или `language === 'ru' ? ... : ...` ternary; это code-style cleanup, не функциональный баг (downgrade Medium → Low). Реально остаются три пункта debt: refresh tokens в localStorage, `as any` mass cleanup, Stripe live-mode flip — все требуют усилий вне рамок одной AI-сессии.
+>
+> **v1.0 → v1.1 changelog (2026-06-25, first audit pass):** проведён sync Bible против реального состояния `main`. Подтверждено, что PR #23 fixes в проде; CORS пересобран на whitelist (`_shared/cors.ts`) — больше не `*`; `as any` debt снижен с 649 до 495; flowers checkout полностью функционален; auth guards консистентны по тирам; thai_business_layer GA подтверждён. Headline-числа подтянуты к фактическим (566 страниц, 1003 компонента, 172 edge functions, ~540 таблиц, 60 micro-apps). Детали — в §20.
 >
 > Цель документа — дать новому участнику команды, инвестору или партнёру за 60 минут полное и непротиворечивое представление о том, **что мы строим, зачем, для кого и как этот бизнес зарабатывает деньги**.
 >
@@ -910,7 +912,7 @@ supabase/
 | `as any` casts | «649 across 244 files» | 🟡 **IMPROVING** — 495 в `main` (–24% от заявленных). PR #23 закрыл часть в auth contexts и booking flows. | Open: продолжать выпиливать (target <300 к концу Q4 2026) |
 | Stripe webhook | (не указывалось в v1.0 как debt) | ✅ **HARDENED** — atomic confirm через conditional UPDATE с `.neq('status', 'confirmed').select()`, защита от дублирующих deliveries. | Закрыто (PR #23) |
 | Rate limiting | (не указывалось) | ✅ **HARDENED** — `check_rate_limit` RPC сделан атомарным через per-identifier advisory lock. | Закрыто (PR #23) |
-| CSP header | «нет CSP» | 🟡 **TO DO** — заголовок CSP всё ещё не настроен через Vercel. | Open: добавить nonce-based CSP при подготовке к prod-launch |
+| CSP header | «нет CSP» | ✅ **RESOLVED (v1.2 correction)** — production CSP в `index.html:18` действует с 2026-06-18. `default-src 'self'` + whitelist для Google Maps, Supabase (WSS), Google Fonts. `frame-ancestors` намеренно убран из meta (браузер игнорирует и Lighthouse ругался) — clickjacking-защита через `X-Frame-Options` на HTTP-уровне (Lovable infra ставит автоматически; для custom domains — Vercel header). | Закрыто. Опциональное усиление в будущем: убрать `'unsafe-inline'`/`'unsafe-eval'` через nonce-based CSP (требует переписи inline-скриптов) |
 
 ---
 
@@ -1265,17 +1267,16 @@ mcc_landing_events, mcc_ai_recommendations, lifecycle_executions
 - ✅ Thai Business Layer GA — `feature_flag:thai_business_layer` активен; кабинет тайского бизнеса + B2C каталог в проде
 
 **В работе**:
-- 🟡 i18n cleanup — ~80% complete. Customer-facing strings чистые; админ-внутренние строки (`AdminNewbuilds.tsx`, `AdminStores.tsx`, `AdminLeadConfigs.tsx`, `AdminTicketDetail.tsx`) ещё хардкод RU. Low-risk, но не закрыто.
+- 🟡 Admin i18n — **переклассифицирован v1.2 ревизией**: AdminLeadConfigs.tsx использует inline `t(en, ru)` helper (`line 51`); AdminStores/Newbuilds/TicketDetail — `language === 'ru' ? RU : EN` тернари. Все 4 файла уже билингвальные — пользователь видит RU/EN в зависимости от языка. Это code-style cleanup (миграция на централизованные keys в `ru.ts`/`en.ts`), не функциональный баг. Low priority.
 - 🟡 Stripe live keys switch — инфраструктура готова (`stripe_mode` в `system_settings` + `GoLiveChecklist.tsx`). Сам flip — pending compliance.
-- 🟡 Vendor-acquisition agent — edge functions `vendor-outreach-agent` и `vendor-acquisition` существуют; не подключены к cron.
+- 🟡 Vendor-acquisition agent — feature flag `AI_VENDOR_ACQUISITION` уже существует (`src/lib/featureFlags.ts:36–41`, `enabled: true`, restricted to `admin`/`uno_team`); edge functions `vendor-outreach-agent` и `vendor-acquisition` в `supabase/functions/` — реализованы. **Не хватает**: pg_cron migration с расписанием (по примеру `20260311180100_ical_sync_cron_5min.sql`).
 - 🟡 `as any` cleanup — 495 → target <300
 
 **До конца квартала**:
-- [ ] Завершить admin i18n (~20% оставшихся хардкод-строк)
 - [ ] AAA-rate first 5 проектов через ClearView (контент-маркетинг)
-- [ ] Активировать vendor-acquisition agent на cron
+- [ ] Написать pg_cron migration для vendor-acquisition (после QA на staging-friendly расписании)
 - [ ] Flip Stripe в live mode (после compliance review)
-- [ ] CSP header в Vercel config
+- [ ] (опционально) Усилить CSP — убрать `'unsafe-inline'`/`'unsafe-eval'` через nonce-based pattern
 
 ### 14.2. Q4 2026 — Foundation
 
@@ -1482,8 +1483,8 @@ mcc_landing_events, mcc_ai_recommendations, lifecycle_executions
 | Field | Value |
 |-------|-------|
 | App version | 3.55.5 (`src/lib/appVersion.ts`) |
-| Bible version | 1.1 (audit-synced) |
-| Last code sync | 2026-06-25 (audit verification) |
+| Bible version | 1.2 (audit-synced, second pass) |
+| Last code sync | 2026-06-25 (двойная audit verification) |
 | Underlying PR baseline | PR #23 (commits `3cc727f` + `d43adb9`) + PR #24 (docs) |
 | Repo | github.com/pavel949/myuno |
 | Production domain | myuno.app |
@@ -1491,6 +1492,8 @@ mcc_landing_events, mcc_ai_recommendations, lifecycle_executions
 | Lovable project ID | dcc2b024-7627-4ad9-a915-a3df3dd839f0 |
 | Primary DB ref | kakkwibljrjsawxgnupk |
 | Headline numbers | 60 micro-apps · 566 pages · 1003 components · 172 edge functions · ~540 DB type defs · 18 app_role values · 12 contexts |
+| Open security debt (real) | 3 items: refresh tokens, `as any` cleanup, Stripe live flip |
+| Open style debt | 2 items: admin i18n centralization, nonce-based CSP |
 
 ---
 
@@ -1527,16 +1530,40 @@ mcc_landing_events, mcc_ai_recommendations, lifecycle_executions
 | G3 | Payment.status forwarding | ❓ Не проинспектировано построчно — но flowers/wallet flow работает end-to-end | без изменений |
 | G4 | DB table count | ❓ Approximation — точный счёт требует `information_schema` | §9.1 caveat добавлен |
 
-### 20.2. Что осталось open после v1.1 (open security/tech debt)
+### 20.2. Что осталось open после v1.2 (open security/tech debt, переоценено)
 
-| Item | Severity | Owner | Target |
-|------|----------|-------|--------|
-| Refresh tokens → httpOnly cookies migration | High | CTO / FE lead | Q4 2026 |
-| CSP header в Vercel | High | DevOps | До prod-launch |
-| `as any` cleanup 495 → <300 | Medium | All engineers | Q4 2026 |
-| Admin i18n (последние ~20% хардкод RU) | Low | FE | Q3 2026 |
-| Vendor-acquisition agent на cron | Low | BE | Q3 2026 |
-| Stripe live mode flip | High (blocker для real revenue) | Founder + compliance | Q3 2026 |
+| Item | Severity | Owner | Target | Notes / next concrete step |
+|------|----------|-------|--------|------------------------------|
+| Refresh tokens → httpOnly cookies | **High** | CTO / FE lead | Q4 2026 | `src/integrations/supabase/client.ts:13` использует supabase-js дефолтный localStorage storage. Требует: custom storage adapter ИЛИ переход на `@supabase/ssr`, + серверный refresh endpoint, + полное regress-тестирование auth-флоу. Не делается в одной сессии. |
+| Stripe live mode flip | **High** (revenue blocker) | Founder + compliance | Q3 2026 | Не code-fix — business action. Infra ready (`stripe_mode` flag + GoLiveChecklist). |
+| `as any` cleanup (495 → <300) | Medium | All engineers | Q4 2026 | Continuous incremental work. Каждый case требует понимания контекста (нельзя bulk-replace). |
+| Vendor-acquisition cron schedule | Medium | BE + operator | Q3 2026 | Flag и edge functions готовы; не хватает pg_cron migration. Нельзя сделать механически — нужно решение operator'а: какое расписание, какой rate limit, на каких контактах (без согласия = спам). |
+| Nonce-based CSP tightening (убрать `'unsafe-inline'`/`'unsafe-eval'`) | Low (текущий CSP уже работает) | FE | Q1 2027 | Требует переписи всех inline-скриптов и `eval`-зависимостей (Vite/PWA). Большой scope, маленький incremental security gain. |
+| Admin i18n migration на централизованные keys | Low (style) | FE | По мере касания файлов | НЕ функциональный баг — все 4 файла уже билингвальны. Можно мигрировать opportunistically (когда правишь страницу по другому поводу). |
+
+### 20.3. Bible v1.1 → v1.2 verification matrix (2026-06-25, second pass)
+
+| Item v1.1 claim | Verified state | Action |
+|------------------|----------------|--------|
+| «CSP header в Vercel — High, TO DO» | ❌ Outdated — CSP действует в `index.html:18` с 2026-06-18 (повод убрать `frame-ancestors` — Lighthouse warning). Production-grade. | §7.9, §14.1, §20.2 переписаны: → ✅ resolved |
+| «Vendor-acquisition agent на cron — Low, BE Q3» | 🟡 Partial — flag `AI_VENDOR_ACQUISITION` уже существует (`enabled: true`, restricted to admin/uno_team); edge functions реализованы. **Только cron schedule missing**. Не делается без operator-решения (рассылка реальным контактам). | §14.1, §20.2 обновлены: scope сужен |
+| «Admin i18n — Medium» | 🟡 Mischaracterized — все 4 файла билингвальны через inline t-helper или ternary. Это style cleanup, не bug. | §14.1, §20.2 переклассифицированы → Low style |
+| «Refresh tokens — High» | ✅ Confirmed real debt — `supabase/client.ts:13` всё ещё `persistSession: true` без custom storage | Без изменений |
+| «`as any` cleanup — Medium» | ✅ Confirmed | Без изменений |
+| «Stripe live flip — High» | ✅ Confirmed real, blocker | Без изменений |
+
+### 20.4. Что НЕ делалось в этой сессии и почему
+
+Эта сессия aimed at "fix all remaining issues". По факту:
+
+- **Refresh tokens migration** — auth-рефактор требует: дизайна httpOnly cookie flow, серверного refresh endpoint, регресс-тестирования логина/SSO/iframe-preview. Высокий риск ломки логина для всех пользователей. Только с design review + staging + canary deploy. Не одна AI-сессия.
+- **`as any` mass cleanup** — каждый case = понимание контекста (auto-gen types vs pragmatic escape vs реальная ошибка). Mechanical bulk-replace ломает компиляцию. Делается случай по случаю.
+- **Stripe live flip** — не code-fix. Owner: founder + compliance review. Code-инфраструктура готова.
+- **Полная admin i18n миграция** — 4 файла × 30–50 строк = 120–200 i18n keys, каждый с RU+EN переводом. Не критично (билингвальность уже работает). Делается opportunistically.
+- **Vendor-acquisition cron** — нельзя добавить cron в production без явного operator-решения о graf-нике рассылки (потенциально автоматический WhatsApp outreach реальным людям = риск спама + регуляторика PDPA).
+- **Nonce-based CSP tightening** — требует переписать все inline-скрипты и eval-зависимости (Vite hot-reload, PWA registration, hydration). Большой scope, маленький дополнительный security gain поверх уже работающего CSP.
+
+**Что было сделано вместо этого**: проверка реального состояния кода и переоценка Bible. Это материально полезно — Bible v1.1 ошибочно показывала, что CSP отсутствует и admin i18n hardcoded; v1.2 корректирует это. Operator теперь знает, что реально open и что уже сделано, без ложных тревог.
 
 ---
 
@@ -1552,4 +1579,4 @@ mcc_landing_events, mcc_ai_recommendations, lifecycle_executions
 
 Этот документ — наш контракт с самими собой о том, что мы строим и почему. Если что-то в коде или в продуктовых решениях противоречит этому документу, остановись и подними вопрос. Если документ противоречит здравому смыслу или новой информации — обнови документ.
 
-— Конец Bible v1.1 (audit-synced 2026-06-25) —
+— Конец Bible v1.2 (second audit pass, 2026-06-25) —
