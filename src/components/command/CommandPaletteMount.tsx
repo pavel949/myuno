@@ -9,13 +9,19 @@
 import React, { useState, lazy, Suspense } from 'react';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useHotkey } from '@/hooks/useHotkey';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 const CommandPalette = lazy(() =>
   import('./CommandPalette').then((m) => ({ default: m.CommandPalette })),
 );
 
 export const CommandPaletteMount: React.FC = () => {
-  const enabled = useFeatureFlag('command_palette', false);
+  // DB flag `feature_flag:command_palette` is the global kill-switch.
+  // While we observe internal feedback, client additionally restricts to
+  // signed-in admins / uno_team. Drop the `isAdmin` guard at GA.
+  const flag = useFeatureFlag('command_palette', false);
+  const { isAdmin } = useIsAdmin();
+  const enabled = flag && isAdmin;
   const [open, setOpen] = useState(false);
 
   useHotkey(
