@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useContactSearch, CrmContact } from '@/hooks/useCrmContacts';
-import { cn } from '@/lib/utils';
-import { UserCircle, X } from 'lucide-react';
+import { CreateContactSheet } from '@/components/owner/contacts/CreateContactSheet';
+import { UserCircle, UserPlus, X } from 'lucide-react';
 
 interface Props {
   companyId: string;
@@ -12,9 +12,17 @@ interface Props {
   isRu: boolean;
 }
 
+/** True when the query reads like a person's name (so we can pre-fill it). */
+function looksLikeName(query: string): boolean {
+  const q = query.trim();
+  if (!q || q.includes('@')) return false;
+  return /[a-zA-Zа-яА-ЯёЁ]/.test(q) && !/^\+?[\d\s()-]+$/.test(q);
+}
+
 export function ContactSearchInput({ companyId, onSelect, onClear, selectedContact, isRu }: Props) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const { data: results = [] } = useContactSearch(companyId, query);
 
@@ -36,19 +44,25 @@ export function ContactSearchInput({ companyId, onSelect, onClear, selectedConta
     );
   }
 
+  const openCreate = () => {
+    setCreateOpen(true);
+    setOpen(false);
+  };
+
   return (
     <div ref={ref} className="relative">
       <Input
         placeholder={isRu ? 'Поиск: имя, телефон, email, компания...' : 'Search: name, phone, email, company...'}
         value={query}
         onChange={e => { setQuery(e.target.value); setOpen(true); }}
-        onFocus={() => query.length >= 1 && setOpen(true)}
+        onFocus={() => setOpen(true)}
       />
-      {open && results.length > 0 && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-none shadow-lg max-h-48 overflow-y-auto">
+      {open && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-none shadow-lg max-h-60 overflow-y-auto">
           {results.map(c => (
             <button
               key={c.id}
+              type="button"
               onClick={() => { onSelect(c); setQuery(''); setOpen(false); }}
               className="w-full text-left px-3 py-2 hover:bg-accent text-sm flex items-center gap-2"
             >
@@ -56,8 +70,30 @@ export function ContactSearchInput({ companyId, onSelect, onClear, selectedConta
               {c.phone && <span className="text-xs text-muted-foreground">{c.phone}</span>}
             </button>
           ))}
+          {query.length >= 1 && results.length === 0 && (
+            <p className="px-3 py-2 text-xs text-muted-foreground">
+              {isRu ? 'Контакты не найдены' : 'No contacts found'}
+            </p>
+          )}
+          {/* Always offer creating a brand-new contact for the opportunity */}
+          <button
+            type="button"
+            onClick={openCreate}
+            className="w-full text-left px-3 py-2 hover:bg-accent text-sm flex items-center gap-2 border-t text-primary font-medium sticky bottom-0 bg-popover"
+          >
+            <UserPlus className="h-4 w-4 shrink-0" />
+            {isRu ? 'Добавить новый контакт' : 'Add new contact'}
+          </button>
         </div>
       )}
+
+      <CreateContactSheet
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        companyId={companyId}
+        prefillName={looksLikeName(query) ? query : undefined}
+        onCreated={(c) => { onSelect(c); setQuery(''); }}
+      />
     </div>
   );
 }
