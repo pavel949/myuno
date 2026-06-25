@@ -214,18 +214,25 @@ export default function MapView() {
     },
   });
 
+  const defaultCenter = useMemo(() => {
+    const cityConfig = getCityConfig();
+    if (cityConfig) return { lat: cityConfig.lat, lng: cityConfig.lng };
+    const c = getMapCenter(DEFAULT_CITY);
+    return { lat: c[1], lng: c[0] };
+  }, [getCityConfig]);
+
   // OSM POI layer (OpenStreetMap, ODbL). Loaded on toggle.
   const [showOsm, setShowOsm] = useState(false);
   const [osmCategory, setOsmCategory] = useState<string>('all');
   const { data: osmPois } = useQuery({
-    queryKey: ['osm-pois', osmCategory],
+    queryKey: ['osm-pois', osmCategory, defaultCenter.lat, defaultCenter.lng],
     enabled: showOsm,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const cats = osmCategory === 'all' ? null : [osmCategory];
       const { data, error } = await supabase.rpc('nearby_pois', {
-        in_lat: 7.88,
-        in_lng: 98.39,
+        in_lat: defaultCenter.lat,
+        in_lng: defaultCenter.lng,
         in_radius_m: 30000,
         in_categories: cats,
         in_limit: 600,
@@ -347,13 +354,6 @@ export default function MapView() {
       return true;
     });
   }, [allMarkers, selectedVertical, selectedPrice, selectedAvailability]);
-
-  const defaultCenter = useMemo(() => {
-    const cityConfig = getCityConfig();
-    if (cityConfig) return { lat: cityConfig.lat, lng: cityConfig.lng };
-    const c = getMapCenter(DEFAULT_CITY);
-    return { lat: c[1], lng: c[0] };
-  }, [getCityConfig]);
 
   // Adapt vendor + OSM markers to MapLibre format.
   const mlMarkers = useMemo<MapMarker[]>(() => {

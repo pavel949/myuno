@@ -96,11 +96,15 @@ export function AddressPickerInput({
     [reverseGeocode]
   );
 
+  // On each open, re-seed from the committed `value` and drop any stale pin from
+  // a prior session that was dismissed without confirming. Coordinates aren't
+  // passed back in as a prop, so they can't be restored — clearing them keeps
+  // the shown address and the map pin from drifting out of sync.
   useEffect(() => {
-    if (!isOpen || !selectedCoords) return;
+    if (!isOpen) return;
     setSelectedAddress(value);
-    setSelectedCoords(selectedCoords);
-  }, [isOpen]);
+    setSelectedCoords(null);
+  }, [isOpen, value]);
 
   const searchLocation = async () => {
     if (!searchQuery.trim()) return;
