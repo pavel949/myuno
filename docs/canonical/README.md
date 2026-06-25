@@ -61,6 +61,7 @@
 |---|---|
 | [phuket-proptech-market](./research/phuket-proptech-market.md) | Рынок proptech на Пхукете: $1.25B, 30k STR-листингов, конкуренты |
 | [myuno-taxonomy-canonical](./research/myuno-taxonomy-canonical.md) | 6-уровневая таксономия: 12 ситуаций × 140 микроситуаций × 38 персон × 36 приложений |
+| [no-budget-growth-playbook](./research/no-budget-growth-playbook.md) | Операционный плейбук органического роста: карта built-активов, barbell-таргетинг 4 аудиторий, no-budget каналы, 90-дневный спринт + путь к Y1 |
 
 ## ✅ Audits / вехи (`audits/`)
 

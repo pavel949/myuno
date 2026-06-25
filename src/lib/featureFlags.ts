@@ -129,6 +129,18 @@ const FLAGS: Record<string, FeatureFlag> = {
     rolloutPercentage: 100,
   },
 
+  // Growth — no-budget viral loop (see docs/canonical/research/no-budget-growth-playbook.md)
+  REFERRAL_PROGRAM: {
+    key: 'referral_program',
+    enabled: true,
+    description: 'Refer-a-friend loop: invite code, share link, wallet bonuses',
+  },
+  SHARE_CTA: {
+    key: 'share_cta',
+    enabled: true,
+    description: 'Reusable share CTA with referral link + UTM attribution',
+  },
+
   // Verticals — kill-switch for each business vertical
   VERTICAL_PROPERTY: {
     key: 'vertical_property',
