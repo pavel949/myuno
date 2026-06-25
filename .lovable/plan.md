@@ -1,78 +1,63 @@
-## Wave 4 + Wave 5 + Route Cleanup
+## MVP AI Orchestrator (Wave 1)
 
-Беру три блока подряд под общим фича-флагом, чтобы при необходимости можно было выключить без редеплоя. Все изменения дизайн-токенами (DS 2.1), без новых хардкод-цветов и без новых top-level маршрутов.
+Цель: связать существующие AI-функции (`ai-agent`, `crm-ai-assistant`, `intake-listing-agent`, `listing-quality-analyzer`, `ai-support-chat`, `concierge-route`, `notify-lead-whatsapp`) в один детерминированный роутер с контекстом пользователя, логированием в `ai_agent_logs` и canon-tone guardrails. Без новых UI-виджетов, без нового RPC, без новой таблицы `crm_leads`.
 
----
+### 1. База данных (migration)
+- Проверить и при необходимости добавить колонки в `public.ai_agents`: `agent_token` (unique), `model_engine`, `temperature`, `system_prompt`, `is_active`.
+- Проверить `ai_agent_knowledge` (`agent_id`, `category`, `content_ru`, `content_en`, `version`) и `ai_agent_logs` (`user_id`, `agent_id`, `input_tokens`, `output_tokens`, `execution_status`, `latency_ms`, `route_reason`).
+- GRANT/RLS: чтение `ai_agents` + `ai_agent_knowledge` всем `authenticated`; запись `ai_agent_logs` только через `service_role` (edge).
+- Сид-строки для 5 канонических агентов: `concierge`, `crm-scouter`, `intake-listing`, `listing-quality`, `guest-autoreply` с civic-tone system_prompt (RU/EN, без эмодзи, без капса, без давления).
 
-### Wave 4 — Command Palette (⌘K)
+### 2. Edge function `supabase/functions/ai-orchestrator/index.ts` (новая)
+Единая точка входа. Контракт: `POST { intent, message, context_override? }`.
 
-**Цель:** заменить громоздкий AppDrawer быстрым поиском по 59 micro-apps, ролям и ситуациям.
+Логика:
+1. Аутентификация через `getClaims()` (verify_jwt в коде, как в остальных функциях).
+2. Контекст: подтянуть из `profiles` — `primary_role`, `roles_stack`, `locale`, активный `lifecycle_phase` (из `user_active_context`).
+3. Роутер (deterministic switch по `intent` + эвристика на `message`):
+   - `realestate_high_value` (триггер $100K+ или ключи property/invest) → инвок `crm-ai-assistant` для драфта в `crm_contacts` (поля `lead_status`, `lead_score`, источник `ai_orchestrator`), затем `notify-lead-whatsapp` → Pavel.
+   - `listing_intake` / `listing_edit` → последовательно `intake-listing-agent` затем `listing-quality-analyzer`.
+   - `stays_guest_request` → `ai-support-chat` с system_prompt агента `guest-autoreply`, SLA-таймер фиксируется в `ai_agent_logs.latency_ms`.
+   - default → `ai-agent` (Lovable AI Gateway, `google/gemini-3-flash-preview`) с system_prompt агента `concierge`.
+4. Tone guardrail: к каждому system_prompt префикс из `ai_agent_knowledge` категории `tone-civic` (запрет эмодзи/капса, требование locale-match).
+5. Логирование: каждый запуск пишет `ai_agent_logs` (`success` / `failed` / `escalated`). При `failed` или необработанном edge case — статус `escalated`, отправка в Telegram через существующий `_shared/telegram.ts` + возврат структурированного fallback `{ status: 'escalated', sla_hours: 2 }`.
 
-- Новый компонент `src/components/command/CommandPalette.tsx` поверх `cmdk` (уже в `package.json` через shadcn) — модалка `Sheet` на мобилке, `Dialog` на desktop.
-- Источники данных (read-only, без новых таблиц):
-  - `src/lib/appRegistry.ts` — 59 приложений (title, route, cluster, icon)
-  - `src/lib/taxonomies/master.ts` — 6 surfaces + 10 JTBD clusters
-  - `src/lib/situations/*` — situation cards (для Navigator V3)
-  - `useUserPersonas` — активные роли пользователя (для бустинга релевантности)
-- Хоткеи: `⌘K` / `Ctrl+K` / `/` глобально через `useHotkey` (новый хук в `src/hooks/useHotkey.ts`).
-- Recent searches → `localStorage` (`myuno.cmdk.recent`, last 5).
-- Триггеры открытия:
-  - Кнопка поиска в `Hero` на `IndexV2`
-  - Floating button в `MobileNavBar` (заменяет «Все приложения»)
-  - Хоткей глобально из `App.tsx`
-- Аналитика: событие `command_palette_opened` / `command_palette_navigate` в существующий `track()` (если есть) или no-op fallback.
-- Под фича-флагом `feature_flag:command_palette` (default OFF) — миграция-сидер.
+### 3. Frontend (минимальная проводка)
+- Расширить `src/hooks/useAIAgents.ts` (или добавить тонкий `useAIChat.ts`-обёртку поверх него), чтобы `FloatingConcierge` и `useConciergeAdvance` ходили в `ai-orchestrator` вместо прямого вызова `ai-agent` / `concierge-route`.
+- Локаль и role-stack читать из существующего `LanguageContext` + `useAuth` — передавать в body вызова.
+- При ответе `status: 'escalated'` показывать calm-fallback (через `sonner`) с текстом «Передал специалисту, ответ в течение 2 часов» (i18n ключ `ai.escalated.fallback`).
+- Никаких новых компонентов; `MiniAppLayout`, рендер payment-sheet, audit-marker, `calculate_order_totals` RPC — вне MVP (Wave 2).
 
-### Wave 5 — Onboarding coachmarks
+### 4. Tone enforcement
+- Единственный canonical system_prompt живёт в `ai_agent_knowledge.category = 'tone-civic'`, версионируется через `version`.
+- Lint-правило (опц., если успеет): простой regex-тест в `src/test/` который проверяет seed-промпты на отсутствие emoji/«!!!».
 
-**Цель:** объяснить персонализацию новому пользователю за 3 шага без редиректа.
+### 5. Реконсиляция / выход
+- `tsgo` чистый, `bun run build` зелёный.
+- README в `supabase/functions/ai-orchestrator/README.md`: контракт, intents, fallback.
+- Smoke-тест: 4 curl-сценария (default concierge, high-value lead → проверка записи в `crm_contacts` + лог WhatsApp, listing intake, escalated failure → запись `ai_agent_logs.execution_status='escalated'`).
+- Финальный отчёт пользователю: список таблиц с GRANT'ами, путь edge function, маппинг intents → агенты.
 
-- Новый компонент `src/components/onboarding/Coachmarks.tsx` — лёгкий tour без библиотек: абсолютный overlay + spotlight через `getBoundingClientRect` целевых элементов по `data-coach="..."` атрибутам.
-- Шаги для `IndexV2`:
-  1. **WhyChip** — «Подбираем под вашу роль. Тап — сменить.»
-  2. **Next Best Action** — «Здесь приоритетные действия по вашим заказам.»
-  3. **Command Palette trigger** — «⌘K — мгновенный поиск по всем сервисам.»
-- Прогресс хранится в `profiles.onboarding_state` jsonb (новая колонка, default `{}`) — поля `home_v2_tour_completed`, `home_v2_tour_dismissed_at`. Миграция + RLS update.
-- Логика показа: только если `home_v2` ON, юзер залогинен, тур не пройден/не закрыт, и `IndexV2` смонтирован.
-- Закрытие: ESC / кнопка «Понял» / клик вне → пишем `dismissed_at`. Повторный показ через 30 дней, если не completed.
-- Все строки — через `t()` (i18n RU/EN).
-
-### Route cleanup
-
-**Цель:** убрать orphan-маршруты из ~390 кандидатов аудита (`docs/audits/route-inventory.md`).
-
-- Запускаю обновлённый `scripts/audit-routes.mjs` со списком `--reachable` (BFS от Index + nav + appRegistry) — получаю свежий список «не достижим ни через UI, ни через registry, ни через canonical taxonomy».
-- Фильтрую безопасные кандидаты:
-  - **Удаляем** (~80–120 маршрутов): дубли legacy `/v1/*`, тестовые `/sandbox/*`, мёртвые `/coming-soon/*`, и страницы, которые `git log` показывает как unmerged drafts.
-  - **Оставляем под пометкой `// @route-orphan: intentional`** все маршруты, где есть бэклинк из edge-функции, email-шаблона или внешнего домена (выявляются `rg`-сканом по `supabase/functions/**` и `src/i18n/**/emails.*`).
-- Для каждого удаления — `rm` страницы + удаление `<Route>` в `src/components/layout/routes/*` + удаление из `pageRegistry.ts`.
-- Финальный отчёт: `docs/audits/route-cleanup-2026-06-25.md` — список удалённого с причиной и diff-сводкой.
-- **Без переименований существующих рабочих маршрутов** — только удаление мёртвого.
-
----
+### Что НЕ входит в MVP (вынесено в следующие волны)
+- AIConciergeWidget.tsx, useAIChat транзакционный sheet, рендер price breakdown.
+- RPC `calculate_order_totals` и audit-marker `[TX_ID · LEDGER_REF · TIMESTAMP]`.
+- Привязка к `create-*-checkout` и post-webhook карточка успеха.
+- e2e тесты онбординга и полный type-safety pass по AI state.
 
 ### Технические детали
+```text
+client (FloatingConcierge / useConciergeAdvance)
+   │  useAIAgents.invoke(intent, message)
+   ▼
+supabase/functions/ai-orchestrator
+   ├── ctx = loadContext(uid)
+   ├── agent = route(intent, message, ctx)
+   ├── prompt = tonePrefix + agent.system_prompt
+   ├── call → ai-agent | crm-ai-assistant | intake-listing-agent
+   │           | listing-quality-analyzer | ai-support-chat
+   ├── on lead → notify-lead-whatsapp
+   ├── log → ai_agent_logs
+   └── on error → telegram + status:escalated
+```
 
-- **БД-миграции (2):**
-  1. `feature_flag:command_palette` в `system_settings` (default disabled).
-  2. `profiles.onboarding_state jsonb default '{}'::jsonb` + index по `(user_id) where (onboarding_state ->> 'home_v2_tour_completed') is null`.
-- **i18n-ключи:** `command.*` (~12 ключей), `onboarding.home_v2.*` (~8 ключей) — RU + EN сразу.
-- **Хук `useHotkey`** — generic, чтобы переиспользовать дальше (Esc-close, `g h` для home и т.п.).
-- **Тесты:** smoke на `CommandPalette` (открытие/фильтр/выбор) через Playwright; route-cleanup проверяется `npm run build` (Vite упадёт, если осталась импортная битая ссылка).
-- **DS 2.1:** только семантические токены (`bg-card`, `text-foreground`, `border-border`), `--radius: 0`, без mint/glow.
-- **Обратная совместимость:** AppDrawer остаётся как fallback, если флаг OFF; coachmarks не показываются без `home_v2`.
-
-### Порядок работ
-
-1. Миграции (БД) — атомарно.
-2. Wave 4: хук + palette + триггеры + i18n.
-3. Wave 5: coachmarks + i18n + сохранение прогресса.
-4. Route cleanup: скрипт → отчёт → удаление файлов → `npm run build` для верификации.
-5. Финальный smoke через Playwright + краткий отчёт в чат.
-
-### Что НЕ делаю в этом проходе
-
-- Не включаю `home_v2` / `command_palette` для всех — флаги остаются OFF, активируются point-and-click через `system_settings`.
-- Не трогаю i18n-долг 610 RU-литералов (отдельный трек).
-- Не запускаю security-скан (отдельная команда).
-- Не публикую — публикация отдельным шагом после QA.
+**Рекомендую** утвердить план as-is — он закрывает §1, §2, §4 и §5 из спецификации без риска регрессий в Stays/CRM/Checkout. Транзакционный цикл (§3) пойдёт отдельной волной после стабилизации роутера.
