@@ -447,12 +447,17 @@ export type Database = {
           correlation_id: string | null
           created_at: string
           error_code: string | null
+          execution_status: string | null
           feedback: string | null
           id: string
+          input_tokens: number | null
+          intent: string | null
           is_success: boolean | null
           messages_count: number | null
           model: string | null
+          output_tokens: number | null
           response_time_ms: number | null
+          route_reason: string | null
           session_id: string | null
           tokens_used: number | null
           user_id: string | null
@@ -464,12 +469,17 @@ export type Database = {
           correlation_id?: string | null
           created_at?: string
           error_code?: string | null
+          execution_status?: string | null
           feedback?: string | null
           id?: string
+          input_tokens?: number | null
+          intent?: string | null
           is_success?: boolean | null
           messages_count?: number | null
           model?: string | null
+          output_tokens?: number | null
           response_time_ms?: number | null
+          route_reason?: string | null
           session_id?: string | null
           tokens_used?: number | null
           user_id?: string | null
@@ -481,12 +491,17 @@ export type Database = {
           correlation_id?: string | null
           created_at?: string
           error_code?: string | null
+          execution_status?: string | null
           feedback?: string | null
           id?: string
+          input_tokens?: number | null
+          intent?: string | null
           is_success?: boolean | null
           messages_count?: number | null
           model?: string | null
+          output_tokens?: number | null
           response_time_ms?: number | null
+          route_reason?: string | null
           session_id?: string | null
           tokens_used?: number | null
           user_id?: string | null
