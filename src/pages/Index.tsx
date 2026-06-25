@@ -11,6 +11,8 @@ import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import IndexV2 from './IndexV2';
 
 import { HeroGreeting } from '@/components/home/HeroGreeting';
 import { PendingPaymentsChip } from '@/components/home/PendingPaymentsChip';
@@ -40,7 +42,7 @@ const ROLE_VISIBLE_CLUSTERS: Record<LifeOSRole, ClusterId[]> = {
   vendor:    ['manage', 'legal', 'live'],
 };
 
-const Index: React.FC = () => {
+const IndexLegacy: React.FC = () => {
   const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
   const { language } = useLanguage();
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
@@ -139,6 +141,11 @@ const Index: React.FC = () => {
       />
     </AppLayout>
   );
+};
+
+const Index: React.FC = () => {
+  const homeV2 = useFeatureFlag('home_v2', false);
+  return homeV2 ? <IndexV2 /> : <IndexLegacy />;
 };
 
 export default Index;
