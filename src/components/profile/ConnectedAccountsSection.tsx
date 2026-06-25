@@ -86,7 +86,9 @@ export function ConnectedAccountsSection() {
     setConnectingProvider(providerId);
     try {
       const { error } = await lovable.auth.signInWithOAuth(providerId, {
-        redirect_uri: window.location.origin,
+        // Stable callback URL shared with all OAuth call-sites (see
+        // GoogleSignInButton) so the redirect_uri allow-list stays single-entry.
+        redirect_uri: `${window.location.origin}/auth/callback`,
       });
       
       if (error) {

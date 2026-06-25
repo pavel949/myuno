@@ -74,7 +74,7 @@ export default function Auth() {
   const location = useLocation();
   const isRu = language === 'ru';
   const isTh = language === 'th';
-  const { activeRole } = useUserContext();
+  const { activeRole, isLoading: userContextLoading } = useUserContext();
   const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
 
   // Bible-v2 audit B3: parse sessionStorage payload `{ path, ts }` and ignore
@@ -129,7 +129,11 @@ export default function Auth() {
       navigate(redirectPath, { replace: true });
       return;
     }
-    if (ownerTypeLoading) return;
+    // Wait for BOTH the owner-type query and the user-context (role) query to
+    // settle before computing a role-based destination. Otherwise activeRole
+    // defaults to 'user' mid-load and a vendor/investor/owner gets routed to
+    // '/' with no self-correction (navigate uses replace:true).
+    if (ownerTypeLoading || userContextLoading) return;
     const dest =
       activeRole === 'vendor' ? '/vendor'
       : activeRole === 'investor' ? '/invest'
@@ -138,7 +142,7 @@ export default function Auth() {
       : isMCPortal ? '/my-property'
       : '/';
     navigate(dest, { replace: true });
-  }, [user, authLoading, ownerTypeLoading, navigate, redirectPath, activeRole, isMCPortal]);
+  }, [user, authLoading, ownerTypeLoading, userContextLoading, navigate, redirectPath, activeRole, isMCPortal]);
 
   // OAuth callback error surfacing — `/auth/callback` renders this same page and
   // relies on Supabase auto session-detection. When the provider returns an

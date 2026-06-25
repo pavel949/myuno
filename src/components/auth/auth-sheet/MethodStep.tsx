@@ -42,7 +42,9 @@ export function MethodStep({ phoneEnabled, onPickEmail, onPickPhone, onSuccess, 
     setOauthLoading(provider);
     try {
       const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
+        // Keep one stable callback URL across all OAuth call-sites so the
+        // broker/provider redirect_uri allow-list only needs /auth/callback.
+        redirect_uri: `${window.location.origin}/auth/callback`,
       });
       if (result.error) {
         toast.error(isRu ? 'Не удалось войти' : 'Sign-in failed');
