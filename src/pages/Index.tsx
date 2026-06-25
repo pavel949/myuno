@@ -42,10 +42,7 @@ const ROLE_VISIBLE_CLUSTERS: Record<LifeOSRole, ClusterId[]> = {
   vendor:    ['manage', 'legal', 'live'],
 };
 
-const Index: React.FC = () => {
-  const homeV2 = useFeatureFlag('home_v2', false);
-  if (homeV2) return <IndexV2 />;
-
+const IndexLegacy: React.FC = () => {
   const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
   const { language } = useLanguage();
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
