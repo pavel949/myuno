@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
       const { data } = await sb.from("thai_chats").select("id, business_id, customer_id").eq("id", chatId).maybeSingle();
       chat = data;
     }
-    let bizId = chat?.business_id ?? businessId;
+    const bizId = chat?.business_id ?? businessId;
     if (!bizId) return json({ error: "businessId required" }, 400, corsHeaders);
 
     const { data: business } = await sb.from("thai_businesses").select("id, owner_id").eq("id", bizId).maybeSingle();
