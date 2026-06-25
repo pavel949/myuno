@@ -714,6 +714,7 @@ export const AnimatedRoutes: React.FC = () => {
           <Route path="/vendor/yachts" element={<Pages.VendorYachts />} />
           <Route path="/vendor/yachts/:id/calendar" element={<Pages.VendorYachtCalendar />} />
           <Route path="/vendor/transport" element={<Pages.VendorTransport />} />
+          <Route path="/vendor/exchange" element={<Pages.VendorExchange />} />
           <Route path="/vendor/beauty" element={<Pages.VendorBeauty />} />
           <Route path="/vendor/fitness" element={<Pages.VendorFitness />} />
           <Route path="/vendor/clinics" element={<Pages.VendorClinics />} />

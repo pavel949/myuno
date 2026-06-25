@@ -497,6 +497,7 @@ export const VendorExperiences = lazy(() => import('@/pages/vendor/VendorExperie
 export const VendorYachts = lazy(() => import('@/pages/vendor/VendorYachts'));
 export const VendorYachtCalendar = lazy(() => import('@/pages/vendor/VendorYachtCalendar'));
 export const VendorTransport = lazy(() => import('@/pages/vendor/VendorTransport'));
+export const VendorExchange = lazy(() => import('@/pages/vendor/VendorExchange'));
 export const VendorBeauty = lazy(() => import('@/pages/vendor/VendorBeauty'));
 export const VendorFitness = lazy(() => import('@/pages/vendor/VendorFitness'));
 export const VendorClinics = lazy(() => import('@/pages/vendor/VendorClinics'));
