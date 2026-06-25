@@ -1,5 +1,5 @@
 // Updates public.currency_rates daily from a free FX API.
-// Base = THB. Targets: USD, EUR, RUB (extend via TARGETS env or query param).
+// Base = THB. Targets: USD, EUR, RUB, GBP, CNY (extend via TARGETS env or query param).
 // Uses UPSERT with source='api'. No auth required (invoked by pg_cron).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const DEFAULT_TARGETS = ["USD", "EUR", "RUB"];
+const DEFAULT_TARGETS = ["USD", "EUR", "RUB", "GBP", "CNY"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
