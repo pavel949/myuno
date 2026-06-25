@@ -25,6 +25,8 @@ import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
 import { RoleSheet } from '@/components/home/RoleSheet';
 import { PersonalGrid } from '@/components/superapp/PersonalGrid';
 import { WhyChip } from '@/components/home/WhyChip';
+import { Coachmarks } from '@/components/onboarding/Coachmarks';
+import { useAuth } from '@/contexts/AuthContext';
 import { CLUSTERS, FLAT_SERVICES } from '@/lib/catalog/taxonomy';
 
 const TOTAL_CLUSTERS = CLUSTERS.length;
@@ -33,6 +35,7 @@ const TOTAL_SERVICES = FLAT_SERVICES.length;
 const IndexV2: React.FC = () => {
   const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
   const { language } = useLanguage();
+  const { user } = useAuth();
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
   const [appDrawerOpen, setAppDrawerOpen] = useState(false);
 
@@ -52,7 +55,10 @@ const IndexV2: React.FC = () => {
         {/* Zone 2 — Next Best Action.
             Каждый под-блок самоскрывающийся: реально на экране окажется
             не более одного приоритетного сигнала. */}
-        <section aria-label={isRu ? 'Приоритетное действие' : 'Next best action'}>
+        <section
+          aria-label={isRu ? 'Приоритетное действие' : 'Next best action'}
+          data-coach="next-best-action"
+        >
           <PendingPaymentsChip />
           <ActiveSituation
             personas={[...activePersonas]}
@@ -63,10 +69,12 @@ const IndexV2: React.FC = () => {
 
         {/* Zone 3 — For You (6 mini-apps) + двери в полный каталог/роли */}
         <section aria-label={isRu ? 'Для вас' : 'For you'}>
-          <WhyChip onOpenRoleSheet={() => setRoleSheetOpen(true)} />
+          <div data-coach="why-chip">
+            <WhyChip onOpenRoleSheet={() => setRoleSheetOpen(true)} />
+          </div>
           <PersonalGrid limit={6} />
 
-          <div className="px-4 mt-6">
+          <div className="px-4 mt-6" data-coach="all-apps">
             <button
               type="button"
               onClick={() => setAppDrawerOpen(true)}
@@ -78,8 +86,8 @@ const IndexV2: React.FC = () => {
                 </span>
                 <span className="block text-[12px] text-muted-foreground mt-0.5">
                   {isRu
-                    ? `${TOTAL_CLUSTERS} кластеров · ${TOTAL_SERVICES} сервисов`
-                    : `${TOTAL_CLUSTERS} clusters · ${TOTAL_SERVICES} services`}
+                    ? `${TOTAL_CLUSTERS} кластеров · ${TOTAL_SERVICES} сервисов · ⌘K поиск`
+                    : `${TOTAL_CLUSTERS} clusters · ${TOTAL_SERVICES} services · ⌘K search`}
                 </span>
               </span>
               <ArrowRight className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
@@ -97,6 +105,9 @@ const IndexV2: React.FC = () => {
           </div>
         </section>
       </div>
+
+      {/* Wave 5 — onboarding tour. Self-gates via localStorage; only for signed-in users. */}
+      {user && <Coachmarks />}
 
       <RoleSheet
         open={roleSheetOpen}

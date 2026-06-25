@@ -1,12 +1,12 @@
 # Route Inventory — auto-generated
 
-Generated: 2026-06-25T11:11:24.073Z
+Generated: 2026-06-25T11:32:37.912Z
 
 ## Summary
 
 - Declared routes: **540**
 - Referenced URL strings: **416**
-- Pages (`src/pages/**/*.tsx`): **570**
+- Pages (`src/pages/**/*.tsx`): **571**
 - Duplicate route declarations: **7**
 - Orphaned routes (no Link/navigate found): **390**
 

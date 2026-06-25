@@ -1,135 +1,78 @@
-# UX/UI Аудит myUNO + план упрощения
+## Wave 4 + Wave 5 + Route Cleanup
 
-## 0. Что я нашёл (краткая диагностика)
-
-**Масштаб:**
-- 94 top-level директорий страниц, 702 объявления `<Route>`, 59 микро-приложений, 6 surfaces × 10 JTBD × 25 personas, role-stack из 18 ролей.
-- Главная (`Index.tsx`) — 9 вертикальных секций: Hero, WorkspaceBanner, Pending, ActiveSituation, LifecycleTip, PersonalGrid, до 4 ClusterRail, NowInPhuket, OfficialNews, «Все приложения».
-- 3 параллельные навигации: `NavShell` (TopBar+BottomBar+SideRail), `AppDrawer`, `RoleSheet`, плюс `Navigator v3` на `/discover`.
-
-**Главные UX-проблемы:**
-1. **Перегрузка Home.** 9 секций × несколько rails = пользователь скроллит «стену иконок» вместо одного фокусного экрана. Нет визуальной иерархии «что сделать сейчас».
-2. **Невидимость персонализации.** Система ранжирует по role+persona, но юзер не понимает *почему* видит именно это. Нет «бейджа причины» («Потому что вы Owner + Investor»), нет управления видимостью прямо из карточки.
-3. **Двойные двери в каталог.** Home rails ↔ `/discover` (Navigator v3) ↔ AppDrawer ↔ Cluster pages — четыре способа найти то же. Юзер не знает, какой канонический.
-4. **702 маршрута, нет карты.** Часть маршрутов осиротевшая (нет ссылок из UI), часть дублируется (`/property/*`, `/newbuilds`, `/invest/*`). Нет inventory-страницы.
-5. **Нет онбординг-подсказок in-app.** Role/Persona Sheet существует, но не подсвечивается. Новый юзер не знает, что приложение подстраивается.
-6. **Cognitive load на ролях.** 18 app_role + 7 consumer ролей + role-stack — это внутренняя модель, утёкшая в UI (RoleSheet перечисляет всё подряд).
-7. **Mobile chrome.** На 375px Hero + Banner + Pending + ActiveSituation + LifecycleTip съедают весь первый экран ещё до контента.
+Беру три блока подряд под общим фича-флагом, чтобы при необходимости можно было выключить без редеплоя. Все изменения дизайн-токенами (DS 2.1), без новых хардкод-цветов и без новых top-level маршрутов.
 
 ---
 
-## 1. Скоуп аудита (что произведём как deliverable)
+### Wave 4 — Command Palette (⌘K)
 
-В `/docs/audits/2026-06-ux-ia-audit.md` — единый документ:
-- **A. Route inventory** — авто-скрипт `scripts/audit-routes.mjs` собирает все `<Route>`, помечает осиротевших (нет `Link to=`), дубли, неиспользуемые `pages/*`. CSV + markdown.
-- **B. Heatmap главных экранов** — Home, /discover, /me, /wallet, /operate, /property, кластерные хабы. Скриншоты через Playwright @ 375/768/1280, аннотации проблем.
-- **C. User journey audit** — 5 канонических персон (P01 Tourist, P05 Resident, P10 Owner, P15 Investor, P20 Developer): «от старта до целевого действия за N тапов». Цель ≤3 тапа.
-- **D. Heuristic checklist** — Nielsen-10 × текущий код, с file:line ссылками.
+**Цель:** заменить громоздкий AppDrawer быстрым поиском по 59 micro-apps, ролям и ситуациям.
 
-## 2. Концептуальные изменения IA
+- Новый компонент `src/components/command/CommandPalette.tsx` поверх `cmdk` (уже в `package.json` через shadcn) — модалка `Sheet` на мобилке, `Dialog` на desktop.
+- Источники данных (read-only, без новых таблиц):
+  - `src/lib/appRegistry.ts` — 59 приложений (title, route, cluster, icon)
+  - `src/lib/taxonomies/master.ts` — 6 surfaces + 10 JTBD clusters
+  - `src/lib/situations/*` — situation cards (для Navigator V3)
+  - `useUserPersonas` — активные роли пользователя (для бустинга релевантности)
+- Хоткеи: `⌘K` / `Ctrl+K` / `/` глобально через `useHotkey` (новый хук в `src/hooks/useHotkey.ts`).
+- Recent searches → `localStorage` (`myuno.cmdk.recent`, last 5).
+- Триггеры открытия:
+  - Кнопка поиска в `Hero` на `IndexV2`
+  - Floating button в `MobileNavBar` (заменяет «Все приложения»)
+  - Хоткей глобально из `App.tsx`
+- Аналитика: событие `command_palette_opened` / `command_palette_navigate` в существующий `track()` (если есть) или no-op fallback.
+- Под фича-флагом `feature_flag:command_palette` (default OFF) — миграция-сидер.
 
-### 2.1 Home → «Один экран — одна задача»
-Сжать 9 секций в **3 фиксированных зоны** + 1 опциональную:
+### Wave 5 — Onboarding coachmarks
 
-```text
-┌────────────────────────────────┐
-│ Z1 HERO (compact, 1 экран)     │
-│  Привет, Павел · Owner ▾       │  ← один тап → RoleSwitch
-│  [AI search:  «что вам нужно?»]│
-│  Почему так? ⓘ                 │  ← объясняет персонализацию
-├────────────────────────────────┤
-│ Z2 NEXT BEST ACTION (1 карточка)│
-│  «У вас 2 платежа · оплатить»  │  ← Pending + LifecycleTip + Situation
-│                          [→]    │   агрегированы в одну приоритетную
-├────────────────────────────────┤
-│ Z3 FOR YOU (max 6 иконок)      │
-│  «Подобрано: Owner + Investor» │  ← бейдж причины
-│  [icon] [icon] ... [Все →]     │
-└────────────────────────────────┘
-   (Z4 — кластерные rails только под кнопкой "Развернуть")
-```
+**Цель:** объяснить персонализацию новому пользователю за 3 шага без редиректа.
 
-Эффект: первый экран = приветствие + 1 CTA + 6 иконок. Всё остальное — за свайпом/тапом.
+- Новый компонент `src/components/onboarding/Coachmarks.tsx` — лёгкий tour без библиотек: абсолютный overlay + spotlight через `getBoundingClientRect` целевых элементов по `data-coach="..."` атрибутам.
+- Шаги для `IndexV2`:
+  1. **WhyChip** — «Подбираем под вашу роль. Тап — сменить.»
+  2. **Next Best Action** — «Здесь приоритетные действия по вашим заказам.»
+  3. **Command Palette trigger** — «⌘K — мгновенный поиск по всем сервисам.»
+- Прогресс хранится в `profiles.onboarding_state` jsonb (новая колонка, default `{}`) — поля `home_v2_tour_completed`, `home_v2_tour_dismissed_at`. Миграция + RLS update.
+- Логика показа: только если `home_v2` ON, юзер залогинен, тур не пройден/не закрыт, и `IndexV2` смонтирован.
+- Закрытие: ESC / кнопка «Понял» / клик вне → пишем `dismissed_at`. Повторный показ через 30 дней, если не completed.
+- Все строки — через `t()` (i18n RU/EN).
 
-### 2.2 Один канонический каталог
-- **Home Z3 = быстрый доступ (top-6).**
-- **/discover = единственная «карта приложений»** (Navigator v3 уже там).
-- **AppDrawer убрать** или превратить в command-palette `⌘K` (поиск по 59 апам) — без визуального дублирования.
-- Все «Все приложения», «Show more» с других экранов ведут на `/discover`.
+### Route cleanup
 
-### 2.3 Видимая персонализация (главный запрос пользователя)
-Ввести системный паттерн **«Why-chip»** — маленький бейдж под каждым персонализированным блоком:
+**Цель:** убрать orphan-маршруты из ~390 кандидатов аудита (`docs/audits/route-inventory.md`).
 
-```text
-[Для вас сейчас]  ⓘ Owner · Investor · был на Property вчера
-```
+- Запускаю обновлённый `scripts/audit-routes.mjs` со списком `--reachable` (BFS от Index + nav + appRegistry) — получаю свежий список «не достижим ни через UI, ни через registry, ни через canonical taxonomy».
+- Фильтрую безопасные кандидаты:
+  - **Удаляем** (~80–120 маршрутов): дубли legacy `/v1/*`, тестовые `/sandbox/*`, мёртвые `/coming-soon/*`, и страницы, которые `git log` показывает как unmerged drafts.
+  - **Оставляем под пометкой `// @route-orphan: intentional`** все маршруты, где есть бэклинк из edge-функции, email-шаблона или внешнего домена (выявляются `rg`-сканом по `supabase/functions/**` и `src/i18n/**/emails.*`).
+- Для каждого удаления — `rm` страницы + удаление `<Route>` в `src/components/layout/routes/*` + удаление из `pageRegistry.ts`.
+- Финальный отчёт: `docs/audits/route-cleanup-2026-06-25.md` — список удалённого с причиной и diff-сводкой.
+- **Без переименований существующих рабочих маршрутов** — только удаление мёртвого.
 
-При тапе — `WhyPanel` (Sheet снизу):
-- Какие роли/персоны активны.
-- Какие сигналы использованы (last visit, bookings, situation).
-- **Кнопка «Изменить»** → RoleSheet.
-- **Кнопка «Скрыть это»** → персональное правило.
+---
 
-Это превращает «магическую ленту» в **управляемую экосистему**, как просит пользователь.
+### Технические детали
 
-### 2.4 Подсказки и онбординг in-app
-- **First-run coachmarks** (4 шага) на Home: Hero/Role · Next Action · For You · Discover. Один раз, dismissable, хранить в `profiles.ui_flags.home_coach_v1`.
-- **Empty states с микро-туром** на /discover, /wallet, /me — вместо пустого экрана объясняют, что появится после действия.
-- **Tooltip-«i»** на каждом непонятном термине (ClearView AAA, Operate, Wallet) → ссылка на `/help/<slug>`.
-- **Командная палитра ⌘K / иконка поиска** в TopBar — мгновенный доступ к любому из 59 апов + команды («открыть кошелёк», «сменить роль»).
+- **БД-миграции (2):**
+  1. `feature_flag:command_palette` в `system_settings` (default disabled).
+  2. `profiles.onboarding_state jsonb default '{}'::jsonb` + index по `(user_id) where (onboarding_state ->> 'home_v2_tour_completed') is null`.
+- **i18n-ключи:** `command.*` (~12 ключей), `onboarding.home_v2.*` (~8 ключей) — RU + EN сразу.
+- **Хук `useHotkey`** — generic, чтобы переиспользовать дальше (Esc-close, `g h` для home и т.п.).
+- **Тесты:** smoke на `CommandPalette` (открытие/фильтр/выбор) через Playwright; route-cleanup проверяется `npm run build` (Vite упадёт, если осталась импортная битая ссылка).
+- **DS 2.1:** только семантические токены (`bg-card`, `text-foreground`, `border-border`), `--radius: 0`, без mint/glow.
+- **Обратная совместимость:** AppDrawer остаётся как fallback, если флаг OFF; coachmarks не показываются без `home_v2`.
 
-### 2.5 Чистота UI
-- Удалить из Home: WorkspaceHomeBanner (показывать только в workspace вариантах), NowInPhuket и OfficialNews → перенести на `/discover` как нижние секции.
-- Свернуть PendingPaymentsChip + LifecycleSmartTip + ActiveSituation в один компонент `NextBestAction` с приоритезатором (показывает только #1 по весу).
-- Все cluster rails → за кнопкой «Развернуть категории» (по умолчанию свёрнуты).
-- Соблюдать DS 2.1: убрать остаточные `bg-card/0.06`, скруглённые 12–16px, glow — gate'нуть линтером в CI.
+### Порядок работ
 
-## 3. Конкретные wireframe-изменения (по экранам)
+1. Миграции (БД) — атомарно.
+2. Wave 4: хук + palette + триггеры + i18n.
+3. Wave 5: coachmarks + i18n + сохранение прогресса.
+4. Route cleanup: скрипт → отчёт → удаление файлов → `npm run build` для верификации.
+5. Финальный smoke через Playwright + краткий отчёт в чат.
 
-| Экран | Сейчас | Станет |
-|---|---|---|
-| **/ (Home)** | 9 секций, 4+ rails, 30+ иконок | 3 зоны: Hero, NextBestAction, ForYou(6) + Why-chip |
-| **/discover** | Situation grid | + поиск ⌘K + табы Surfaces/Situations + footer «Что нового» |
-| **/me** | Список ссылок | Профиль-карточка с прогрессом «насколько персонализировано» + быстрый Role/Persona edit |
-| **/wallet** | Списки | Виджет «Что оплатить сейчас» наверху + история свёрнута |
-| **/operate** | Workspace dashboard | Без изменений (это другой режим), но Home-баннер появляется только тут |
-| **Cluster /arrive, /live…** | Длинные списки | Hero + 6 топ-сервисов + «Все сервисы кластера →» |
-| **Property/Invest detail** | Длинная страница | Sticky bottom-bar CTA «Запросить просмотр», Why-chip «Подходит вам, потому что…» |
+### Что НЕ делаю в этом проходе
 
-## 4. Маршруты — план чистки
-
-1. Авто-инвентаризация `scripts/audit-routes.mjs` → 3 списка: **Active**, **Orphaned**, **Duplicate**.
-2. Канонизация: для каждой пары дубликатов выбрать SSOT, остальные → 301 redirect через `<Navigate replace>` в `routes/*.tsx`.
-3. Гейт: PR-чек, что новые `<Route>` имеют хотя бы один `Link to=` или явно помечены `// internal-only`.
-4. Документ `/docs/ROUTE_MAP.md` — авто-генерируется из аудита.
-
-## 5. Поэтапная реализация (после аппрува)
-
-| Wave | Что | Срок |
-|---|---|---|
-| **W1 — Audit & Inventory** | Скрипт маршрутов + Playwright screenshots + аудит-документ | 1 день |
-| **W2 — Home compact** | Сжать Index.tsx до 3 зон, агрегировать NextBestAction, спрятать rails | 1 день |
-| **W3 — Why-chip + WhyPanel** | Новый shared компонент, подключить к PersonalGrid/ClusterRail/Detail | 1 день |
-| **W4 — Command palette ⌘K** | TopBar search → fuzzy по 59 апам, заменяет AppDrawer | 1 день |
-| **W5 — Coachmarks + tooltips** | First-run тур, `ui_flags`, помощь по терминам | 0.5 дня |
-| **W6 — Cluster/detail polish** | Top-6 паттерн на кластерных хабах, sticky CTA на detail | 1 день |
-| **W7 — Routes cleanup** | Redirects, удаление осиротевших страниц, ROUTE_MAP.md | 1 день |
-
-**Рекомендую начать с W1 (аудит-документ + скрипт маршрутов).** Почему: даст объективную карту, без которой W2–W7 — догадки. Параллельно я подготовлю прототип Home-3-зоны как визуальный референс для аппрува до того, как трогать прод-код.
-
-## 6. Технические детали
-
-- Новые файлы: `src/components/home/NextBestAction.tsx`, `src/components/personalization/WhyChip.tsx` + `WhyPanel.tsx`, `src/components/nav/CommandPalette.tsx`, `src/components/onboarding/HomeCoachmarks.tsx`.
-- Хук `usePersonalizationReason(blockId)` — возвращает массив сигналов для Why-panel.
-- Таблица `system_settings` → `feature_flag:home_v2` для постепенной раскатки.
-- Скрипт `scripts/audit-routes.mjs` (Node, читает `src/components/layout/routes/**`, ast-grep по `<Route`).
-- Хранение прогресса онбординга: `profiles.ui_flags jsonb` (миграция).
-- i18n: новые ключи `home.why.*`, `home.next_action.*`, `palette.*`, `coach.*` (RU+EN).
-- DS: всё через токены `tokens.css`, sharp corners, без новых цветов.
-
-## 7. Что НЕ входит в скоуп
-
-- Реструктуризация Master Taxonomy (6 surfaces / 10 JTBD / 25 personas) — она остаётся SSOT.
-- Backend / RLS изменения, кроме одной миграции `ui_flags`.
-- Редизайн брендинга, шрифтов, палитры — DS 2.1 фиксирован.
-- Перевод 610 RU-литералов — отдельный i18n cleanup трек.
+- Не включаю `home_v2` / `command_palette` для всех — флаги остаются OFF, активируются point-and-click через `system_settings`.
+- Не трогаю i18n-долг 610 RU-литералов (отдельный трек).
+- Не запускаю security-скан (отдельная команда).
+- Не публикую — публикация отдельным шагом после QA.
