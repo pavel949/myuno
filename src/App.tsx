@@ -27,6 +27,7 @@ import { PWAInstallProvider } from "@/contexts/PWAInstallContext";
 import { LifeSituationProvider } from "@/contexts/LifeSituationContext";
 import { AnimatedRoutes } from "@/components/layout/AnimatedRoutes";
 import { UnifiedChatFAB } from "@/components/chat/UnifiedChatFAB";
+import { CommandPaletteMount } from "@/components/command/CommandPaletteMount";
 import { InstallAppButton } from "@/components/pwa/InstallAppButton";
 import { OrganizationJsonLdHydrator } from "@/components/seo/OrganizationJsonLdHydrator";
 
@@ -152,6 +153,7 @@ function AppContent() {
             <AnimatedRoutes />
           </div>
           <UnifiedChatFAB />
+          <CommandPaletteMount />
           <InstallAppButton />
           <CookieConsentBanner />
         </BrowserRouter>
