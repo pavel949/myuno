@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Mail, Phone, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { thaiCategoryMeta } from '@/types/thaiBusiness';
+import { thaiCategoryMeta, THAI_CATEGORIES, type ThaiCategory } from '@/types/thaiBusiness';
 import {
   useThaiPartnerLeads,
   useUpdateThaiLeadStatus,
@@ -31,6 +31,12 @@ const INTEREST_RU: Record<string, string> = {
   payments: 'Платежи',
   translation: 'Перевод/чат',
 };
+
+const VALID_CATEGORY_IDS = new Set<string>(THAI_CATEGORIES.map((c) => c.id));
+
+function isThaiCategory(value: string): value is ThaiCategory {
+  return VALID_CATEGORY_IDS.has(value);
+}
 
 function formatDate(iso: string): string {
   try {
@@ -90,7 +96,7 @@ export default function ThaiLeadsPanel() {
       ) : (
         <div className="space-y-3">
           {filtered.map((lead) => {
-            const cat = lead.category ? thaiCategoryMeta(lead.category) : null;
+            const cat = lead.category && isThaiCategory(lead.category) ? thaiCategoryMeta(lead.category) : null;
             return (
               <div key={lead.id} className="border border-border p-4">
                 <div className="flex items-start justify-between gap-3">
