@@ -43,6 +43,26 @@ interface ProjectUnitRow {
   unit_status: string | null;
 }
 
+interface LegacyDevelopmentUnitRow {
+  id: string;
+  name: string;
+  name_ru: string | null;
+  unit_type: string | null;
+  area_sqm: number;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  price: number;
+  price_per_sqm: number | null;
+  floor_from: number | null;
+  floor_to: number | null;
+  floor_plan_url: string | null;
+  views: string[] | null;
+  features: string[] | null;
+  total_units: number | null;
+  available_units: number | null;
+  status: string | null;
+}
+
 function mapRow(u: ProjectUnitRow): ProjectUnit {
   const floor = u.floor ?? u.floor_number ?? null;
   return {
@@ -94,8 +114,7 @@ export function useProjectUnits(projectId?: string) {
         .order('price', { ascending: true });
 
       if (legacyErr) return [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (legacy || []).map((u: any) => ({
+      return (legacy || []).map((u: LegacyDevelopmentUnitRow) => ({
         id: u.id,
         name: u.name,
         name_ru: u.name_ru,

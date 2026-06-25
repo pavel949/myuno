@@ -32,6 +32,40 @@ export interface Bank {
   created_at: string;
 }
 
+interface BankAttributes {
+  logo?: string | null;
+  bank_type?: string;
+  services?: string[];
+  accepts_foreigners?: boolean;
+  online_banking?: boolean;
+  mobile_app?: boolean;
+  swift_code?: string | null;
+  min_deposit?: number | null;
+}
+
+interface ListingRow {
+  id: string;
+  provider_id: string | null;
+  name_en: string;
+  name_ru: string | null;
+  description_en: string | null;
+  description_ru: string | null;
+  cover_image: string | null;
+  category: string | null;
+  features: string[] | null;
+  languages: string[] | null;
+  website: string | null;
+  phone: string | null;
+  email: string | null;
+  currency: string | null;
+  rating: number | null;
+  review_count: number | null;
+  is_active: boolean;
+  is_featured: boolean;
+  created_at: string;
+  attributes: BankAttributes | null;
+}
+
 async function fetchBanks(): Promise<Bank[]> {
   const { data, error } = await supabase
     .from('listings')
@@ -42,9 +76,8 @@ async function fetchBanks(): Promise<Bank[]> {
     .order('rating', { ascending: false });
 
   if (error) throw error;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data || []).map((raw: any) => {
-    const attrs = raw.attributes || {};
+  return (data || []).map((raw: ListingRow) => {
+    const attrs: BankAttributes = raw.attributes || {};
     return {
       id: raw.id,
       provider_id: raw.provider_id,

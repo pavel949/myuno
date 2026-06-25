@@ -57,7 +57,7 @@ export function useActivePromotions(listingType: string) {
         .eq('status', 'active')
         .gte('expires_at', new Date().toISOString());
       if (error) throw error;
-      return new Set((data || []).map((d: any) => d.listing_id));
+      return new Set((data || []).map((d: { listing_id: string }) => d.listing_id));
     },
     staleTime: 60_000,
   });

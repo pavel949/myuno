@@ -48,7 +48,7 @@ export function useOwnerBookingRevenue(propertyId?: string) {
       }
       const { data: propertyRows, error: propertyError } = await propertiesQuery;
       if (propertyError) throw propertyError;
-      const propertyIds = (propertyRows || []).map((p: any) => p.id);
+      const propertyIds = (propertyRows || []).map((p: { id: string }) => p.id);
 
       if (propertyIds.length === 0) {
         return {

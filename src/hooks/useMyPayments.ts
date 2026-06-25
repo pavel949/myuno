@@ -31,17 +31,29 @@ export interface MyPaymentsResult {
   currency: string;
 }
 
-function mapRow(r: any): MyPaymentRow {
+interface OrderRow {
+  id: string;
+  order_number?: string | null;
+  order_type?: string | null;
+  vertical?: string | null;
+  total_amount?: number | string | null;
+  currency?: string | null;
+  status?: string | null;
+  created_at?: string | null;
+  paid_at?: string | null;
+}
+
+function mapRow(r: OrderRow): MyPaymentRow {
   return {
-    id: r.id as string,
-    orderId: r.id as string,
+    id: r.id,
+    orderId: r.id,
     orderNumber: r.order_number ?? null,
-    orderType: (r.order_type as string) ?? 'order',
+    orderType: r.order_type ?? 'order',
     vertical: r.vertical ?? null,
     amount: Number(r.total_amount ?? 0),
-    currency: (r.currency as string) ?? 'THB',
-    status: (r.status as string) ?? 'pending',
-    createdAt: (r.created_at as string) ?? new Date().toISOString(),
+    currency: r.currency ?? 'THB',
+    status: r.status ?? 'pending',
+    createdAt: r.created_at ?? new Date().toISOString(),
     paidAt: r.paid_at ?? null,
   };
 }

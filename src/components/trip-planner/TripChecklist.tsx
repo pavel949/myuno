@@ -222,8 +222,10 @@ export function TripChecklist() {
                       <div className="px-3.5 pb-3.5">
                         <ArrivalCardBlock
                           onAssisted={() => {
-                            // TODO: navigate to arrival card assistance order flow
+                            // Route to the immigration/visa assistance hub where the
+                            // arrival-card (TM6) help + paid assistance flow lives.
                             toggle(item.id);
+                            navigate('/visa');
                           }}
                         />
                       </div>

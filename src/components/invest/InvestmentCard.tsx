@@ -67,7 +67,7 @@ export function InvestmentCard({
           {/* Badges */}
           <div className="absolute top-2 left-2 flex gap-1.5">
             {project.is_hot && (
-              <Badge className="bg-warning text-white text-[10px] px-1.5 py-0.5">
+              <Badge className="bg-warning text-warning-foreground text-[10px] px-1.5 py-0.5">
                 <Flame className="h-3 w-3 mr-0.5" />
                 HOT
               </Badge>
@@ -177,7 +177,7 @@ export function InvestmentCard({
         {/* Badges */}
         <div className="absolute top-3 left-3 flex gap-2">
           {project.is_hot && (
-            <Badge className="bg-warning text-white">
+            <Badge className="bg-warning text-warning-foreground">
               <Flame className="h-3.5 w-3.5 mr-1" />
               HOT DEAL
             </Badge>

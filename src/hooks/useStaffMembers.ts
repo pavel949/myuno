@@ -93,8 +93,8 @@ export function useCreateStaffMember() {
     mutationFn: async (payload: StaffMemberInsert) => {
       if (!user) throw new Error('Not authenticated');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const insertData: any = { 
-        ...payload, 
+      const insertData: any = {
+        ...payload,
         owner_id: user.id,
       };
       // Auto-link to active MC if user is a member

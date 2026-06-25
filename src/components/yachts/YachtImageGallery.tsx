@@ -85,7 +85,7 @@ export function YachtImageGallery({ images, name, isVerified, isFeatured }: Yach
           </Badge>
         )}
         {isFeatured && (
-          <Badge className="bg-accent-amber text-white">
+          <Badge className="bg-accent-amber text-accent-amber-foreground">
             <Star className="w-3 h-3 mr-1" />{language === 'ru' ? 'Рекомендуем' : 'Featured'}
           </Badge>
         )}

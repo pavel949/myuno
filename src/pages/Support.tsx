@@ -194,7 +194,7 @@ export default function Support() {
         <SectionCard className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-14 h-14 rounded-full bg-success flex items-center justify-center">
-              <WhatsAppIcon className="w-8 h-8 text-white" />
+              <WhatsAppIcon className="w-8 h-8 text-success-foreground" />
             </div>
             <div className="flex-1">
               <h2 className="font-semibold text-lg">
@@ -207,7 +207,7 @@ export default function Support() {
           </div>
           
           <PremiumButton 
-            className="w-full bg-success hover:bg-success/90 text-white"
+            className="w-full bg-success hover:bg-success/90 text-success-foreground"
             onClick={() => startSupportChat()}
           >
             <WhatsAppIcon className="w-5 h-5 mr-2" />

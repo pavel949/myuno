@@ -598,7 +598,7 @@ const VendorServices = () => {
                               <span className="text-xs text-muted-foreground uppercase tracking-wide">
                                 {isRussian ? 'Время' : 'Duration'}
                               </span>
-                              <p className="font-medium">{formData.duration_minutes} мин</p>
+                              <p className="font-medium">{formData.duration_minutes} {isRussian ? 'мин' : 'min'}</p>
                             </div>
                           )}
                           <div>
