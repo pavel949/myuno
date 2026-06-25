@@ -254,3 +254,33 @@ VALUES
  NULL, NULL, NULL, 'en',
  ARRAY['meetup','expat','community','online'], NULL, 'Phuket', 'Phuket',
  NULL, NULL, true);
+
+-- 3) Service schedules for Christian churches (rendered on CommunityDetail).
+--    Mass/Liturgy times in Phuket vary seasonally and are not reliably
+--    published, so structured day-times are set only where verified
+--    (Phuket International Church); the rest carry an honest "confirm before
+--    visiting" note. notes_en/notes_ru are localized free text.
+UPDATE public.communities SET schedule = '{
+  "notes_en": "Sunday Mass in Thai and English (morning and evening). Times vary by season — confirm on the parish noticeboard or the church Facebook page before visiting.",
+  "notes_ru": "Воскресная месса на тайском и английском (утром и вечером). Расписание зависит от сезона — уточняйте на доске объявлений прихода или в Facebook перед визитом."
+}'::jsonb
+WHERE slug = 'holy-redeemer-catholic-church';
+
+UPDATE public.communities SET schedule = '{
+  "notes_en": "Catholic parish serving Thai and international Christians. Sunday Mass times vary by season — confirm with the parish before visiting.",
+  "notes_ru": "Католический приход для тайских и иностранных христиан. Время воскресной мессы зависит от сезона — уточняйте в приходе перед визитом."
+}'::jsonb
+WHERE slug = 'our-lady-of-the-assumption-phuket';
+
+UPDATE public.communities SET schedule = '{
+  "notes_en": "Open daily 08:00–20:00. Divine Liturgy on Sundays and major Orthodox feast days (e.g. the Nativity vigil from 23:00 on 6 January). Confirm service times before visiting.",
+  "notes_ru": "Открыт ежедневно 08:00–20:00. Божественная литургия по воскресеньям и в большие православные праздники (напр., рождественская служба с 23:00 6 января). Уточняйте время служб перед визитом."
+}'::jsonb
+WHERE slug = 'holy-trinity-orthodox-church-phuket';
+
+UPDATE public.communities SET schedule = '{
+  "sun": ["10:00"],
+  "notes_en": "English-language Sunday worship at 10:00 at the Land & Houses Park clubhouse, Chalong, with a kids program and baby care. Venue can change — confirm before visiting.",
+  "notes_ru": "Воскресное богослужение на английском в 10:00 в клубном доме Land & Houses Park, Чалонг; есть детская программа и присмотр за малышами. Место может меняться — уточняйте перед визитом."
+}'::jsonb
+WHERE slug = 'phuket-international-church';

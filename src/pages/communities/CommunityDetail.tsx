@@ -9,10 +9,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  MapPin, Globe, Phone, Mail, MessageCircle, ChevronLeft, ExternalLink,
+  MapPin, Globe, Phone, Mail, MessageCircle, ChevronLeft, ExternalLink, Clock,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCommunityBySlug } from '@/hooks/useCommunities';
+import { useCommunityBySlug, type CommunitySchedule } from '@/hooks/useCommunities';
 import { pickLocalized } from '@/lib/i18n/pickLocalized';
 import { countryFlag } from '@/lib/utils/countryFlag';
 
@@ -23,7 +23,34 @@ const STR = {
   contact: { ru: 'Контакты',            en: 'Contact',                th: 'ติดต่อ' },
   routes:  { ru: 'Маршрут',             en: 'Directions',             th: 'เส้นทาง' },
   source:  { ru: 'Источник данных',     en: 'Data source',            th: 'แหล่งข้อมูล' },
+  schedule:{ ru: 'Расписание служб',    en: 'Service schedule',       th: 'ตารางพิธี' },
 };
+
+const DAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+type DayKey = (typeof DAY_ORDER)[number];
+
+const DAY_LABEL: Record<DayKey, { ru: string; en: string; th: string }> = {
+  mon: { ru: 'Пн', en: 'Mon', th: 'จ.' },
+  tue: { ru: 'Вт', en: 'Tue', th: 'อ.' },
+  wed: { ru: 'Ср', en: 'Wed', th: 'พ.' },
+  thu: { ru: 'Чт', en: 'Thu', th: 'พฤ.' },
+  fri: { ru: 'Пт', en: 'Fri', th: 'ศ.' },
+  sat: { ru: 'Сб', en: 'Sat', th: 'ส.' },
+  sun: { ru: 'Вс', en: 'Sun', th: 'อา.' },
+};
+
+function scheduleNote(s: CommunitySchedule, lang: 'ru' | 'en' | 'th'): string {
+  return (
+    s[`notes_${lang}` as 'notes_en'] ||
+    s.notes_en || s.notes_ru || s.notes_th || s.notes || ''
+  );
+}
+
+function hasSchedule(s: CommunitySchedule | null | undefined): s is CommunitySchedule {
+  if (!s) return false;
+  const hasDay = DAY_ORDER.some((d) => Array.isArray(s[d]) && s[d]!.length > 0);
+  return hasDay || Boolean(scheduleNote(s, 'en'));
+}
 
 export default function CommunityDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -112,6 +139,32 @@ export default function CommunityDetail() {
             </div>
           </CardContent>
         </Card>
+
+        {hasSchedule(item.schedule) && (
+          <Card>
+            <CardContent className="p-6 space-y-3">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                {STR.schedule[lang] ?? STR.schedule.en}
+              </h2>
+              {DAY_ORDER.some((d) => item.schedule![d]?.length) && (
+                <div className="space-y-1.5 text-sm">
+                  {DAY_ORDER.filter((d) => item.schedule![d]?.length).map((d) => (
+                    <div key={d} className="flex items-baseline gap-3">
+                      <span className="w-10 shrink-0 font-medium text-muted-foreground">
+                        {DAY_LABEL[d][lang] ?? DAY_LABEL[d].en}
+                      </span>
+                      <span className="text-foreground">{item.schedule![d]!.join(', ')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {scheduleNote(item.schedule, lang) && (
+                <p className="text-sm text-muted-foreground">{scheduleNote(item.schedule, lang)}</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {(item.phone || item.email || item.whatsapp || item.telegram) && (
           <Card>

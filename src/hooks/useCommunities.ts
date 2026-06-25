@@ -6,6 +6,23 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export type CommunityKind = 'religion' | 'club' | 'consulate' | 'meetup';
+
+/** Weekly service/opening schedule. Day keys hold time strings ("10:00") or
+ *  ranges ("08:00–20:00"); notes are localized free text. */
+export interface CommunitySchedule {
+  mon?: string[];
+  tue?: string[];
+  wed?: string[];
+  thu?: string[];
+  fri?: string[];
+  sat?: string[];
+  sun?: string[];
+  notes_en?: string;
+  notes_ru?: string;
+  notes_th?: string;
+  notes?: string;
+}
+
 export type ReligionBranch =
   | 'buddhist'
   | 'christian_catholic'
@@ -43,6 +60,7 @@ export interface Community {
   website: string | null;
   whatsapp: string | null;
   telegram: string | null;
+  schedule?: CommunitySchedule | null;
   source_url: string | null;
   is_active: boolean;
 }
