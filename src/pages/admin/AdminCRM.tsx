@@ -9,6 +9,7 @@ import { AdminOwnerProspects } from '@/components/admin/crm/AdminOwnerProspects'
 import { AdminCrmActivityLog } from '@/components/admin/crm/AdminCrmActivityLog';
 import { VendorOutreachPanel } from '@/components/admin/crm/VendorOutreachPanel';
 import { BarChart3, Target, Building2, Activity, Kanban, Table, Send } from 'lucide-react';
+import { CompanySwitcher } from '@/components/crm/CompanySwitcher';
 
 export default function AdminCRM() {
   const { language } = useLanguage();
@@ -18,11 +19,15 @@ export default function AdminCRM() {
 
   return (
     <div className="p-4 md:p-6 space-y-4">
-      <div>
-        <h1 className="text-xl font-bold">{isRu ? 'CRM — Привлечение' : 'CRM — Acquisition Hub'}</h1>
-        <p className="text-muted-foreground text-sm">
-          {isRu ? 'Единый центр привлечения вендоров, пользователей и собственников' : 'Unified hub for vendor, user & owner acquisition'}
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-xl font-bold">{isRu ? 'CRM — Привлечение' : 'CRM — Acquisition Hub'}</h1>
+          <p className="text-muted-foreground text-sm">
+            {isRu ? 'Единый центр привлечения вендоров, пользователей и собственников' : 'Unified hub for vendor, user & owner acquisition'}
+          </p>
+        </div>
+        {/* Admin ↔ MC context: switch into the house MC (or any company you belong to). */}
+        <CompanySwitcher />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

@@ -24,10 +24,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { ru as ruLocale, enUS as enLocale } from 'date-fns/locale';
+import { bucketForLeadStatus, type InboxStatusBucket } from '@/config/leadStatus';
 
 type InboxSource = 'partner_applications' | 'listing_applications' | 'consultation_requests' | 'nb_leads' | 'property_inquiries';
 
-type InboxStatus = 'new' | 'in_progress' | 'escalated' | 'closed';
+type InboxStatus = InboxStatusBucket;
 
 interface InboxItem {
   id: string;
@@ -51,11 +52,11 @@ const SOURCE_META: Record<InboxSource, { labelRu: string; labelEn: string; icon:
 };
 
 function normalizeStatus(source: InboxSource, raw: string | null): InboxStatus {
-  const s = (raw || '').toLowerCase();
-  if (['closed', 'rejected', 'completed', 'converted', 'archived', 'cancelled'].includes(s)) return 'closed';
-  if (['escalated', 'urgent', 'sla_breach'].includes(s)) return 'escalated';
-  if (['in_progress', 'contacted', 'reviewing', 'qualified', 'follow_up'].includes(s)) return 'in_progress';
-  return 'new';
+  // Centralized in src/config/leadStatus.ts so new per-table statuses don't
+  // silently collapse into "new". Unknown statuses are logged in dev.
+  return bucketForLeadStatus(raw, (s) =>
+    import.meta.env.DEV && console.warn(`[AdminInbox] unmapped ${source} status: "${s}"`),
+  );
 }
 
 async function fetchInbox(): Promise<InboxItem[]> {

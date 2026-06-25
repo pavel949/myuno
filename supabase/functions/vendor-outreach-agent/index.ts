@@ -307,15 +307,27 @@ Deno.serve(async (req) => {
     let contacts: OutreachContact[] = [];
     let sequence = 1;
 
+    // crm_contacts is shared across every MC's private book. Vendor outreach is a
+    // platform activity, so scope it to the house MC — never message a tenant's
+    // own "vendor"-typed contacts. Runs with the service role (bypasses RLS), so
+    // this filter is the only thing enforcing the boundary.
+    const { data: houseCompany } = await supabase
+      .from("management_companies")
+      .select("id")
+      .eq("slug", "myuno-house")
+      .maybeSingle();
+    const houseCompanyId = houseCompany?.id as string | undefined;
+
     if (action === "initial") {
       // Get contacts that haven't been contacted yet
-      const { data } = await supabase
+      let q = supabase
         .from("crm_contacts")
         .select("id, first_name, last_name, company_name, email, phone, category, outreach_status, outreach_sent_at")
         .eq("contact_type", "vendor")
         .eq("outreach_status", "not_contacted")
-        .not("email", "is", null)
-        .limit(limit);
+        .not("email", "is", null);
+      if (houseCompanyId) q = q.eq("company_id", houseCompanyId);
+      const { data } = await q.limit(limit);
 
       contacts = (data || []) as OutreachContact[];
       sequence = 1;

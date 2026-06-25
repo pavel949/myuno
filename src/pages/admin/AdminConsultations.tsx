@@ -7,6 +7,7 @@ import { LeadActivityTimeline } from '@/components/admin/LeadActivityTimeline';
 import { LeadAIInsights } from '@/components/admin/leads/LeadAIInsights';
 import { FollowUpGenerator } from '@/components/admin/leads/FollowUpGenerator';
 import { BatchScoreButton } from '@/components/admin/leads/BatchScoreButton';
+import { ConvertLeadToDealButton } from '@/components/crm/ConvertLeadToDealButton';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,13 +46,15 @@ const STATUS_CONFIG: Record<ConsultationStatus, { labelRu: string; labelEn: stri
   cancelled: { labelRu: 'Отменена', labelEn: 'Cancelled', color: 'bg-destructive', icon: XCircle },
 };
 
-// Extended type to include AI fields
+// Extended type to include AI + lead→deal conversion fields
 interface ExtendedConsultationRequest extends ConsultationRequest {
   ai_score?: number | null;
   ai_priority?: string | null;
   ai_reasoning?: string | null;
   ai_recommended_action?: string | null;
   ai_analysis_at?: string | null;
+  converted_deal_id?: string | null;
+  converted_at?: string | null;
 }
 
 function ConsultationCard({ 
@@ -340,13 +343,19 @@ function ConsultationCard({
 
             {/* Quick status buttons */}
             {consultation.status === 'pending' && (
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 onClick={() => onStatusChange(consultation.id, 'contacted')}
               >
                 {isRu ? 'Связался' : 'Contacted'}
               </Button>
             )}
+
+            {/* Lead → deal bridge */}
+            <ConvertLeadToDealButton
+              leadId={consultation.id}
+              convertedDealId={consultation.converted_deal_id}
+            />
           </div>
         </div>
       </CardContent>
