@@ -60,7 +60,7 @@ import Unsubscribe from '@/pages/Unsubscribe';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Index = React.lazy(() => import('@/pages/Index'));
-const WelcomeLanding = React.lazy(() => import('@/pages/WelcomeLanding'));
+// WelcomeLanding stays imported indirectly via EcosystemPage (/ecosystem route).
 const Landing = React.lazy(() => import('@/pages/Landing'));
 const EcosystemPage = React.lazy(() => import('@/pages/EcosystemPage'));
 
