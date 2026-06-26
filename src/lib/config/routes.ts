@@ -66,6 +66,9 @@ export const APP_ROUTES = {
   BECOME_PARTNER: '/become-partner',
   PARTNER_STATUS: '/partner/status',
 
+  // ── Ecosystem (breadth catalogue, secondary entry from Landing) ──
+  ECOSYSTEM: '/ecosystem',
+
   // ── B2B landing pages (public marketing) ──
   FOR_OWNERS: '/for-owners',
   FOR_MANAGEMENT_COMPANIES: '/for-management-companies',
