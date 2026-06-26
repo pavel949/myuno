@@ -61,6 +61,8 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Index = React.lazy(() => import('@/pages/Index'));
 const WelcomeLanding = React.lazy(() => import('@/pages/WelcomeLanding'));
+const Landing = React.lazy(() => import('@/pages/Landing'));
+const EcosystemPage = React.lazy(() => import('@/pages/EcosystemPage'));
 
 
 // All lazy page imports from centralized registry
@@ -82,12 +84,15 @@ const MandateLanding = React.lazy(() => import('@/pages/property/MandateLanding'
 // Magnet visual-builder landings (`/l/:slug`)
 const MagnetLandingPage = React.lazy(() => import('@/pages/landings/MagnetLandingPage'));
 
-// Home router: guests see marketing landing, authed users see Index
+// Home router: guests see the trust-first Landing, authed users see Index.
+// WelcomeLanding (breadth-first) is preserved and reachable at /ecosystem
+// via EcosystemPage. To roll back to the old guest homepage, swap
+// <Landing /> back to <WelcomeLanding /> here.
 const HomeRouter = () => {
   const { user, isLoading } = useAuth();
   if (isLoading) return <LoadingState />;
   if (!user) {
-    return <WelcomeLanding />;
+    return <Landing />;
   }
   return <Index />;
 };
