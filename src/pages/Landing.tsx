@@ -34,7 +34,6 @@ import {
   Gavel,
   Plane,
   TrendingUp,
-  Building2,
   Users,
   Send,
   CircleAlert,
