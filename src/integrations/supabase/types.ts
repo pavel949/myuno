@@ -33489,6 +33489,7 @@ export type Database = {
         | "sales"
         | "investor"
         | "broker"
+        | "property_manager"
       booking_status:
         | "draft"
         | "submitted"
@@ -33897,6 +33898,7 @@ export const Constants = {
         "sales",
         "investor",
         "broker",
+        "property_manager",
       ],
       booking_status: [
         "draft",
