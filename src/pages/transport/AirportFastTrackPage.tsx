@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { Plane, Shield, Clock, Users, Plus, Minus, ChevronLeft, Loader2, AlertCircle, Check, Star, Crown, Sparkles } from 'lucide-react';
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useAirportServices, type AirportService } from '@/hooks/useAirportServices';
+import { useBookingDraft } from '@/hooks/useBookingDraft';
 import { TransferUpsellScreen } from '@/components/transport/TransferUpsellScreen';
 import { PriceDisplay } from '@/components/uno/PriceDisplay';
 import { cn } from '@/lib/utils';
@@ -81,6 +82,33 @@ export default function AirportFastTrackPage() {
   const [step, setStep] = useState<'service' | 'passenger' | 'review'>('service');
   const [showUpsell, setShowUpsell] = useState(false);
 
+  // Persist the whole form so a guest who is bounced to /auth (and returned via
+  // ?redirect) — or who simply refreshes — doesn't lose passport data they typed.
+  // selectedAddons is a Set, so it's (de)serialized as an array.
+  const { clear: clearDraft } = useBookingDraft(
+    'fasttrack_airport',
+    {
+      direction, selectedServiceId, flightNumber, airline, flightDate, flightTime,
+      contactWhatsapp, contactEmail, preferredLang, specialNotes,
+      passengers, selectedAddons: Array.from(selectedAddons), step,
+    },
+    (draft) => {
+      if (draft.direction) setDirection(draft.direction as Direction);
+      if (draft.selectedServiceId !== undefined) setSelectedServiceId((draft.selectedServiceId as string | null) ?? null);
+      if (typeof draft.flightNumber === 'string') setFlightNumber(draft.flightNumber);
+      if (typeof draft.airline === 'string') setAirline(draft.airline);
+      if (typeof draft.flightDate === 'string') setFlightDate(draft.flightDate);
+      if (typeof draft.flightTime === 'string') setFlightTime(draft.flightTime);
+      if (typeof draft.contactWhatsapp === 'string') setContactWhatsapp(draft.contactWhatsapp);
+      if (typeof draft.contactEmail === 'string') setContactEmail(draft.contactEmail);
+      if (draft.preferredLang) setPreferredLang(draft.preferredLang as Language);
+      if (typeof draft.specialNotes === 'string') setSpecialNotes(draft.specialNotes);
+      if (Array.isArray(draft.passengers) && draft.passengers.length) setPassengers(draft.passengers as PassengerData[]);
+      if (Array.isArray(draft.selectedAddons)) setSelectedAddons(new Set(draft.selectedAddons as string[]));
+      if (draft.step === 'service' || draft.step === 'passenger' || draft.step === 'review') setStep(draft.step);
+    },
+  );
+
   // ─── Derived ───
   const directionServices = useMemo(() => {
     return fastTrackServices.filter(s => s.direction === direction || s.direction === 'both');
@@ -108,7 +136,9 @@ export default function AirportFastTrackPage() {
   const cutoffViolated = useMemo(() => {
     if (!flightDate || !flightTime) return false;
     try {
-      const flightDT = new Date(`${flightDate}T${flightTime}`);
+      // The flight time is Phuket local (ICT, UTC+7). Pin the offset so the
+      // 24h cutoff is correct regardless of the traveller's device timezone.
+      const flightDT = new Date(`${flightDate}T${flightTime}:00+07:00`);
       const cutoff = new Date(Date.now() + 24 * 60 * 60 * 1000);
       return flightDT < cutoff;
     } catch { return false; }
@@ -125,6 +155,16 @@ export default function AirportFastTrackPage() {
     });
     return { base, nightSurcharge, addonsTotal, total: base + nightSurcharge + addonsTotal };
   }, [selectedService, passengers.length, isNightFlight, selectedAddons, addons]);
+
+  // Switching to a service with a smaller capacity must not leave more
+  // passengers selected than allowed — otherwise pricing bills for pax the
+  // service can't carry. Trim down to the new max.
+  useEffect(() => {
+    const max = selectedService?.max_passengers;
+    if (max && passengers.length > max) {
+      setPassengers(prev => prev.slice(0, max));
+    }
+  }, [selectedService, passengers.length]);
 
   // Reset service selection when direction changes
   const handleDirectionChange = (d: Direction) => {
@@ -207,8 +247,10 @@ export default function AirportFastTrackPage() {
 
   const handleSubmit = async () => {
     if (!user) {
+      // Draft is already persisted in sessionStorage; send the guest to /auth
+      // with a return path so they land back here and the form restores.
       toast.error(isRu ? 'Войдите в аккаунт' : 'Please sign in');
-      navigate('/auth');
+      navigate(`/auth?redirect=${encodeURIComponent(APP_ROUTES.FAST_TRACK)}`);
       return;
     }
     if (!selectedService) return;
@@ -254,6 +296,8 @@ export default function AirportFastTrackPage() {
       toast(isRu ? 'Бронирование создано!' : 'Booking created!', {
         description: isRu ? 'Мы свяжемся с вами для подтверждения' : "We'll contact you to confirm",
       });
+
+      clearDraft();
 
       if (direction === 'arrival') {
         setShowUpsell(true);

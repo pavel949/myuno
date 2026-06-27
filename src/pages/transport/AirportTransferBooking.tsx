@@ -69,8 +69,11 @@ export default function AirportTransferBooking() {
     destinationAddress: '',
     selectedDestinationId: '',
     flightNumber: '',
-    arrivalDate: '',
-    arrivalTime: '',
+    // Prefill flight date/time when arriving from the Fast Track upsell
+    // (/transport/airport-transfer?from=fast-track&date=…&time=…) so the user
+    // doesn't re-enter what they already gave on the Fast Track form.
+    arrivalDate: searchParams.get('date') || '',
+    arrivalTime: searchParams.get('time') || '',
     passengers: '1',
     luggage: '1',
     vehicleType: '',
@@ -148,11 +151,18 @@ export default function AirportTransferBooking() {
     getPosition();
   };
 
+  // Honor the `vehicle` hint from the Fast Track upsell (sedan|van|suv) by
+  // matching it the same way TransferUpsellScreen does (name_en contains the
+  // type). Falls back to the first vehicle when there's no hint or no match.
+  const vehicleParam = searchParams.get('vehicle');
   useEffect(() => {
     if (vehicleTypes.length > 0 && !formData.vehicleType) {
-      setFormData(prev => ({ ...prev, vehicleType: vehicleTypes[0].id }));
+      const matched = vehicleParam
+        ? vehicleTypes.find(v => v.name_en.toLowerCase().includes(vehicleParam.toLowerCase()))
+        : undefined;
+      setFormData(prev => ({ ...prev, vehicleType: (matched || vehicleTypes[0]).id }));
     }
-  }, [vehicleTypes, formData.vehicleType]);
+  }, [vehicleTypes, formData.vehicleType, vehicleParam]);
 
   useEffect(() => {
     if (profile && !formData.name && !formData.phone && !formData.email) {
@@ -310,6 +320,10 @@ export default function AirportTransferBooking() {
         transfer_type: 'airport',
         direction: formData.direction,
         terminal: formData.terminal,
+        // Persist the free-text destination so the stripe-webhook can rebuild the
+        // operator notification (it reads metadata.destination_address) when it
+        // re-fires notify-transfer-booking on payment confirmation.
+        destination_address: formData.destinationAddress,
         flight_number: formData.flightNumber,
         vehicle_type: formData.vehicleType,
         vehicle_name: vehicleName,
@@ -403,9 +417,13 @@ export default function AirportTransferBooking() {
         }
         if (error) logger.error('[Notify] Transfer notification failed (giving up):', error);
       };
-      if (formData.paymentMethod === 'stripe') {
-        sendNotify().catch(() => {});
-      } else {
+      // For Stripe we deliberately do NOT notify the operator/customer here:
+      // dispatching the operator before the customer has paid produces phantom
+      // bookings when checkout is abandoned. The stripe-webhook re-fires
+      // notify-transfer-booking (idempotently, guarded by booking_notifications_log)
+      // on checkout.session.completed. Cash / concierge advance settle offline,
+      // so we notify immediately.
+      if (formData.paymentMethod !== 'stripe') {
         await sendNotify();
       }
 
@@ -428,6 +446,10 @@ export default function AirportTransferBooking() {
             window.location.href = data.url;
             return;
           }
+          // No error but no redirect URL — surface it instead of leaving the CTA
+          // stuck on "Processing…" forever (which pushed users to reload and
+          // create a duplicate order).
+          throw new Error('Checkout session did not return a redirect URL');
         } catch (err) {
           logger.error('Stripe checkout error:', err);
           toast.error(language === 'ru' ? 'Ошибка оплаты' : 'Payment Error', {
