@@ -74,6 +74,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    const cleanMessages = (messages as Array<{ role: string; content: unknown }>)
+      .filter((m) => !!m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+      .map((m) => ({ role: m.role as "user" | "assistant", content: String(m.content).slice(0, 4000) }))
+      .slice(-20);
+
+    if (cleanMessages.length === 0) {
+      return new Response(JSON.stringify({ error: "No valid user/assistant messages" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -93,7 +105,7 @@ Deno.serve(async (req) => {
 
     // RAG: retrieve top knowledge chunks based on the last user message.
     try {
-      const lastUser = [...messages].reverse().find((m: { role: string; content: string }) => m.role === "user");
+      const lastUser = [...cleanMessages].reverse().find((m) => m.role === "user");
       const queryText = lastUser?.content?.toString().slice(0, 2000);
       if (queryText && queryText.length > 3) {
         const embedRes = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
@@ -143,7 +155,7 @@ Deno.serve(async (req) => {
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...cleanMessages,
         ],
         stream: true,
       }),

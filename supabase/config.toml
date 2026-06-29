@@ -15,6 +15,16 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.ai-generate-offer]
     verify_jwt = false
+  [functions.ai-knowledge-ingest]
+    verify_jwt = false
+  [functions.ai-knowledge-search]
+    verify_jwt = false
+  [functions.ai-orchestrator]
+    verify_jwt = false
+  [functions.ai-smart-data]
+    verify_jwt = false
+  [functions.concierge-route]
+    verify_jwt = false
   [functions.ai-owner-nurture]
     verify_jwt = false
   [functions.ai-platform-intelligence]

@@ -7,6 +7,8 @@
  * Falls back gracefully to deterministic rules if Lovable AI is unreachable
  * or rate-limited. Public endpoint (no JWT) — anonymous users must reach it.
  */
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
@@ -197,6 +199,9 @@ Recommend 3-5 routes from the whitelist. First = primary CTA.`;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
+
+  const rl = await withRateLimit(req, 'concierge-route', RATE_LIMITS.ai, corsHeaders);
+  if (rl) return rl;
 
   try {
     const body = await req.json();

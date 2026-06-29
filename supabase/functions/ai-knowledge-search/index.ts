@@ -1,6 +1,8 @@
 // AI Knowledge semantic search: embeds query, calls match_ai_knowledge RPC.
-// Public (used by ai-support-chat and admin UI).
+// Public (used by ai-support-chat and admin UI). Rate-limited by IP to cap
+// embedding-token spend from anonymous callers.
 import { createClient } from "../_shared/supabase.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,6 +16,9 @@ const EMBED_DIMS = 1536;
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const rl = await withRateLimit(req, 'ai-knowledge-search', RATE_LIMITS.ai, corsHeaders);
+  if (rl) return rl;
+
   try {
     const body = await req.json().catch(() => null);
     if (!body?.query || typeof body.query !== "string") {
@@ -22,7 +27,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { query, match_count = 5, similarity_threshold = 0.45, lang = null } = body;
+    const query = body.query.slice(0, 2000);
+    const match_count = body.match_count ?? 5;
+    const similarity_threshold = body.similarity_threshold ?? 0.45;
+    const lang = body.lang ?? null;
 
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) throw new Error("LOVABLE_API_KEY not configured");

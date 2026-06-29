@@ -52,6 +52,18 @@ Deno.serve(async (req) => {
       );
     }
 
+    const cleanMessages = messages
+      .filter((m): m is ChatMessage => !!m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+      .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }))
+      .slice(-20);
+
+    if (cleanMessages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "No valid user/assistant messages" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -142,7 +154,7 @@ Deno.serve(async (req) => {
         max_tokens: agent.max_tokens || 2000,
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...cleanMessages,
         ],
         stream: true,
       }),
@@ -175,7 +187,7 @@ Deno.serve(async (req) => {
       agent_id: agent.id,
       user_id: userId,
       session_id: sessionId || null,
-      messages_count: messages.length,
+      messages_count: cleanMessages.length,
       response_time_ms: Date.now() - startTime,
     });
 

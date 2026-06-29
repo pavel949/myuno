@@ -1,5 +1,6 @@
 // Deno.serve used (native edge runtime)
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -15,6 +16,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const auth = await requireAuth(req, corsHeaders);
+  if (auth instanceof Response) return auth;
 
   const startTime = Date.now();
 
@@ -44,18 +48,7 @@ Deno.serve(async (req) => {
     const model = agentConfig?.model || DEFAULT_MODEL;
     const temperature = agentConfig?.temperature || DEFAULT_TEMPERATURE;
 
-    // P1-1: Extract user ID from auth header if available
-    let userId: string | undefined;
-    const authHeader = req.headers.get("authorization");
-    if (authHeader?.startsWith("Bearer ")) {
-      const token = authHeader.slice(7);
-      const anonClient = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_ANON_KEY")!
-      );
-      const { data: { user } } = await anonClient.auth.getUser(token);
-      userId = user?.id;
-    }
+    const userId = auth.user.id;
 
     // P1-1: Apply rate limiting for AI translation endpoint
     const rateLimitResponse = await withRateLimit(

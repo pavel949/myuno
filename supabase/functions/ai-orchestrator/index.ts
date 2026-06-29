@@ -313,6 +313,17 @@ Deno.serve(async (req) => {
     });
   }
 
+  const cleanMessages = body.messages
+    .filter((m) => !!m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+    .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }))
+    .slice(-20);
+
+  if (cleanMessages.length === 0) {
+    return new Response(JSON.stringify({ error: "No valid user/assistant messages" }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) {
     return new Response(JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }), {
@@ -337,7 +348,7 @@ Deno.serve(async (req) => {
       model: agent.model,
       temperature: Number(agent.temperature ?? 0.5),
       max_tokens: agent.max_tokens ?? 1500,
-      messages: [{ role: "system", content: systemPrompt }, ...body.messages],
+      messages: [{ role: "system", content: systemPrompt }, ...cleanMessages],
       stream: true,
     }),
   });
@@ -345,7 +356,7 @@ Deno.serve(async (req) => {
   if (!upstream.ok) {
     const errText = await upstream.text().catch(() => "");
     console.error("[ai-orchestrator] gateway error:", upstream.status, errText);
-    await notifyEscalation(`gateway ${upstream.status}`, ctx, { lastMessage: body.messages[body.messages.length - 1] });
+    await notifyEscalation(`gateway ${upstream.status}`, ctx, { lastMessage: cleanMessages[cleanMessages.length - 1] });
     await logRun({
       agentId: agent.id, userId: ctx.userId, intent: "default", status: "escalated",
       routeReason: `${reason}:gateway_${upstream.status}`,

@@ -1,6 +1,7 @@
 // AI Knowledge ingest: chunks text, generates embeddings via Lovable AI Gateway,
 // inserts into ai_knowledge_documents. Admin-only.
 import { createClient } from "../_shared/supabase.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -73,6 +74,9 @@ Deno.serve(async (req) => {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const rl = await withRateLimit(req, 'ai-knowledge-ingest', RATE_LIMITS.ai, corsHeaders, user.id);
+    if (rl) return rl;
 
     const body = await req.json().catch(() => null);
     if (!body) return new Response(JSON.stringify({ error: "Invalid JSON" }), {

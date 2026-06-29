@@ -22,6 +22,50 @@ function timingSafeEqual(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
+/**
+ * Accept either an internal-secret/service-role caller (cron, pg_cron, sibling
+ * functions) OR an authenticated user with the "admin" role (manual admin-UI
+ * triggers). Returns null on success, a Response on failure.
+ */
+export async function requireInternalOrAdmin(
+  req: Request,
+  corsHeaders: Record<string, string>
+): Promise<Response | null> {
+  // Fast path: internal secret or service-role JWT.
+  const internalFail = requireInternalSecret(req, corsHeaders);
+  if (!internalFail) return null;
+
+  // Fall back to authenticated admin.
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return internalFail;
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !supabaseAnonKey || !serviceKey) return internalFail;
+
+  const { createClient } = await import("npm:@supabase/supabase-js@2");
+  const anon = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } },
+  });
+  const { data: { user } } = await anon.auth.getUser();
+  if (!user) return internalFail;
+
+  const svc = createClient(supabaseUrl, serviceKey);
+  const { data: isAdmin } = await svc.rpc("has_role", {
+    _user_id: user.id,
+    _role: "admin",
+  });
+  if (!isAdmin) {
+    return new Response(
+      JSON.stringify({ error: "Forbidden", message: "Admin role required" }),
+      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  return null;
+}
+
 export function requireInternalSecret(
   req: Request,
   corsHeaders: Record<string, string>

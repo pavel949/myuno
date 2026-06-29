@@ -19,6 +19,8 @@
  * (no API key required from user — `LOVABLE_API_KEY` is provisioned).
  */
 
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
@@ -235,6 +237,9 @@ async function callAI(
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
+
+  const rl = await withRateLimit(req, 'concierge-intent', RATE_LIMITS.ai, corsHeaders);
+  if (rl) return rl;
 
   try {
     const body = await req.json();
