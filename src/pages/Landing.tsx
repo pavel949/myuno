@@ -552,9 +552,6 @@ export default function Landing() {
       <LandingSection>
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
-            <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Когда доверие важнее, чем выбор', en: 'When trust matters more than browsing', th: 'เมื่อความน่าเชื่อถือสำคัญกว่าการค้นหา' })}
-            </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
               {tx(language, { ru: 'Ситуации, ради которых построена платформа', en: 'Situations the platform is built for' })}
             </h2>
@@ -591,9 +588,6 @@ export default function Landing() {
       <LandingSection>
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
-            <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Сравнение', en: 'Comparison', th: 'การเปรียบเทียบ' })}
-            </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
               {tx(language, {
                 ru: 'Чем это безопаснее обычной локальной координации',
@@ -644,9 +638,6 @@ export default function Landing() {
           <span id="emergency" className="block -mt-20 pt-20" aria-hidden />
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_minmax(0,1.2fr)]">
             <div className="space-y-3">
-              <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-                {tx(language, { ru: 'Когда нужна помощь сейчас', en: 'When help is needed now', th: 'เมื่อต้องการความช่วยเหลือทันที' })}
-              </p>
               <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
                 {tx(language, { ru: 'Экстренная поддержка', en: 'Emergency support', th: 'ความช่วยเหลือฉุกเฉิน' })}
               </h2>
@@ -685,9 +676,6 @@ export default function Landing() {
       <LandingSection>
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
-            <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Аудитории', en: 'Audiences', th: 'กลุ่มเป้าหมาย' })}
-            </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
               {tx(language, { ru: 'Для иностранцев на Пхукете', en: 'For foreigners in Phuket' })}
             </h2>
@@ -723,9 +711,6 @@ export default function Landing() {
           <span id="ecosystem-link" className="block -mt-20 pt-20" aria-hidden />
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="max-w-2xl space-y-3">
-              <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-                {tx(language, { ru: 'Глубина платформы', en: 'Depth of the platform', th: 'ความลึกของแพลตฟอร์ม' })}
-              </p>
               <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
                 {tx(language, {
                   ru: 'За одной заявкой — целая операционная экосистема',
@@ -764,9 +749,6 @@ export default function Landing() {
             <span id="for-partners" className="block -mt-20 pt-20" aria-hidden />
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
               <div className="max-w-2xl space-y-3">
-                <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-                  {tx(language, { ru: 'Для исполнителей', en: 'For providers', th: 'สำหรับผู้ให้บริการ' })}
-                </p>
                 <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
                   {tx(language, {
                     ru: 'Проверенные исполнители — в одну структуру с прозрачными правилами',
