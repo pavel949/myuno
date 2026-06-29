@@ -417,6 +417,16 @@ export const en: Record<string, string> = {
   'propertyHub.landing.row.seeAll': 'See all',
   'propertyHub.landing.row.empty': 'Listings coming soon',
   'propertyHub.landing.resale.howItWorks': 'How resale works',
+  // Hub trust strip
+  'propertyHub.landing.trust.verified': 'Verified listings',
+  'propertyHub.landing.trust.escrow': 'Escrow via lawyer',
+  'propertyHub.landing.trust.clearview': 'ClearView™ rating',
+  'propertyHub.landing.trust.localTeam': 'Local team in Phuket',
+  // Hub ClearView callout
+  'propertyHub.landing.clearview.title': 'Know before you buy',
+  'propertyHub.landing.clearview.desc': 'Independent AAA–CCC rating on developers and off-plan projects across eight risk categories.',
+  'propertyHub.landing.clearview.cta': 'Explore ClearView™',
+  'propertyHub.landing.clearview.why': 'Why myUNO',
 
   'account.property.section': 'Property',
   'account.property.hub': 'Overview & scenarios',

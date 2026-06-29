@@ -21,6 +21,8 @@ import {
   OffplanFeaturedRow,
   ResaleFeaturedRow,
   InvestTeaserRow,
+  HubTrustStrip,
+  ClearViewCallout,
 } from '@/components/property/hub';
 
 export default function PropertyLanding() {
@@ -41,6 +43,8 @@ export default function PropertyLanding() {
         <RentFeaturedRow t={t} />
         <OffplanFeaturedRow t={t} />
         <ResaleFeaturedRow t={t} />
+        <HubTrustStrip t={t} />
+        <ClearViewCallout t={t} />
         <InvestTeaserRow t={t} />
         <CapitalLane t={t} />
         <ProLane t={t} />

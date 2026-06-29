@@ -8,3 +8,5 @@ export {
   ResaleFeaturedRow,
   InvestTeaserRow,
 } from './FeaturedRows';
+export { HubTrustStrip } from './HubTrustStrip';
+export { ClearViewCallout } from './ClearViewCallout';
