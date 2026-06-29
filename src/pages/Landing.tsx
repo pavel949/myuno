@@ -51,6 +51,7 @@ import {
   LandingSection,
 } from '@/components/landings/LandingPrimitives';
 import { ConciergeHelpSheet, type HelpTopic } from '@/components/concierge/ConciergeHelpSheet';
+import heroPhuket from '@/assets/hero-phuket-desktop.webp';
 
 type Bi = { ru: string; en: string; th?: string };
 type Lang = 'ru' | 'en' | 'th';
@@ -443,6 +444,24 @@ export default function Landing() {
                 {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
               </Link>
             </p>
+
+            {/* Supporting hero visual — real Phuket establishing shot */}
+            <motion.figure
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mt-10 overflow-hidden border border-border"
+            >
+              <img
+                src={heroPhuket}
+                alt={tx(language, { ru: 'Пхукет: побережье и город', en: 'Phuket coastline and town', th: 'ภูเก็ต' })}
+                width={1920}
+                height={1080}
+                loading="eager"
+                decoding="async"
+                className="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[21/9]"
+              />
+            </motion.figure>
 
             {/* Trust strip — 4 signals under hero */}
             <motion.ul
