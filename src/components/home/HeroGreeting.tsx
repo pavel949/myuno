@@ -64,16 +64,7 @@ export function HeroGreeting({ personas, onRoleSheetOpen, onAppDrawerOpen }: Her
 
   return (
     <div className="relative overflow-hidden bg-primary text-primary-foreground">
-      {/* Decorative radial — adds depth without breaking the canonical palette */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(120% 80% at 100% 0%, hsl(var(--brand-orange-400) / 0.18) 0%, transparent 55%), radial-gradient(80% 60% at 0% 100%, hsl(var(--brand-navy-700) / 0.45) 0%, transparent 60%)',
-        }}
-      />
-      {/* Subtle grid texture */}
+      {/* Subtle grid texture (flat, no glow — canon §6) */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.07]"
