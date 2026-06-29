@@ -25843,6 +25843,424 @@ export type Database = {
         }
         Relationships: []
       }
+      thai_bookings: {
+        Row: {
+          business_id: string
+          created_at: string
+          customer_id: string
+          date_time: string | null
+          id: string
+          notes: string | null
+          payment_status: string
+          service_id: string | null
+          status: string
+          total_amount_thb: number
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          customer_id: string
+          date_time?: string | null
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          service_id?: string | null
+          status?: string
+          total_amount_thb?: number
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          customer_id?: string
+          date_time?: string | null
+          id?: string
+          notes?: string | null
+          payment_status?: string
+          service_id?: string | null
+          status?: string
+          total_amount_thb?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_bookings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "thai_businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_bookings_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_canonical"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "thai_business_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thai_business_reviews: {
+        Row: {
+          booking_id: string | null
+          business_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          images: string[] | null
+          rating: number
+          text: string | null
+        }
+        Insert: {
+          booking_id?: string | null
+          business_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          images?: string[] | null
+          rating: number
+          text?: string | null
+        }
+        Update: {
+          booking_id?: string | null
+          business_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          images?: string[] | null
+          rating?: number
+          text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_business_reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "thai_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "thai_businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_business_reviews_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_business_reviews_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_canonical"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thai_business_services: {
+        Row: {
+          business_id: string
+          created_at: string
+          description_ru: string | null
+          description_th: string | null
+          duration_minutes: number | null
+          id: string
+          name_ru: string | null
+          name_th: string
+          options: Json | null
+          price_thb: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description_ru?: string | null
+          description_th?: string | null
+          duration_minutes?: number | null
+          id?: string
+          name_ru?: string | null
+          name_th: string
+          options?: Json | null
+          price_thb?: number
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description_ru?: string | null
+          description_th?: string | null
+          duration_minutes?: number | null
+          id?: string
+          name_ru?: string | null
+          name_th?: string
+          options?: Json | null
+          price_thb?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_business_services_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "thai_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thai_businesses: {
+        Row: {
+          address: string | null
+          category: string
+          created_at: string
+          description_ru: string | null
+          description_th: string | null
+          district: string | null
+          gallery_urls: string[] | null
+          id: string
+          is_active: boolean
+          landing_subtitle_ru: string | null
+          landing_title_ru: string | null
+          lat: number | null
+          line_id: string | null
+          lng: number | null
+          logo_url: string | null
+          name_en: string | null
+          name_ru: string | null
+          name_th: string
+          owner_id: string
+          ownership_type: string | null
+          payment_methods: string[] | null
+          phone: string | null
+          provider_id: string | null
+          rating_avg: number | null
+          rating_count: number
+          slug: string
+          updated_at: string
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          category: string
+          created_at?: string
+          description_ru?: string | null
+          description_th?: string | null
+          district?: string | null
+          gallery_urls?: string[] | null
+          id?: string
+          is_active?: boolean
+          landing_subtitle_ru?: string | null
+          landing_title_ru?: string | null
+          lat?: number | null
+          line_id?: string | null
+          lng?: number | null
+          logo_url?: string | null
+          name_en?: string | null
+          name_ru?: string | null
+          name_th: string
+          owner_id: string
+          ownership_type?: string | null
+          payment_methods?: string[] | null
+          phone?: string | null
+          provider_id?: string | null
+          rating_avg?: number | null
+          rating_count?: number
+          slug: string
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          created_at?: string
+          description_ru?: string | null
+          description_th?: string | null
+          district?: string | null
+          gallery_urls?: string[] | null
+          id?: string
+          is_active?: boolean
+          landing_subtitle_ru?: string | null
+          landing_title_ru?: string | null
+          lat?: number | null
+          line_id?: string | null
+          lng?: number | null
+          logo_url?: string | null
+          name_en?: string | null
+          name_ru?: string | null
+          name_th?: string
+          owner_id?: string
+          ownership_type?: string | null
+          payment_methods?: string[] | null
+          phone?: string | null
+          provider_id?: string | null
+          rating_avg?: number | null
+          rating_count?: number
+          slug?: string
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_businesses_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_businesses_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_canonical"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_businesses_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_businesses_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
+          },
+        ]
+      }
+      thai_chat_messages: {
+        Row: {
+          chat_id: string
+          created_at: string
+          id: string
+          image_url: string | null
+          is_image: boolean
+          is_read: boolean
+          lang_original: string
+          lang_target: string
+          sender_id: string
+          text_original: string
+          text_translated: string
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_image?: boolean
+          is_read?: boolean
+          lang_original?: string
+          lang_target?: string
+          sender_id: string
+          text_original?: string
+          text_translated?: string
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_image?: boolean
+          is_read?: boolean
+          lang_original?: string
+          lang_target?: string
+          sender_id?: string
+          text_original?: string
+          text_translated?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_chat_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "thai_chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_canonical"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thai_chats: {
+        Row: {
+          business_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          last_message_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          last_message_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          last_message_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thai_chats_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "thai_businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_chats_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_chats_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "v_profiles_canonical"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_messages: {
         Row: {
           attachments: Json | null
