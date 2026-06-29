@@ -402,6 +402,13 @@ export const ru: Record<string, string> = {
   'propertyHub.landing.personaPrompt.enableBusiness': 'Я Бизнес',
   'propertyHub.landing.personaPrompt.enableInvestor': 'Я Инвестор',
   'propertyHub.landing.proBadge': 'Pro',
+  // Hub hero search
+  'propertyHub.landing.hero.tabRent': 'Аренда',
+  'propertyHub.landing.hero.tabBuy': 'Купить',
+  'propertyHub.landing.hero.tabNew': 'Новостройки',
+  'propertyHub.landing.hero.cta': 'Искать',
+  'propertyHub.landing.hero.searchPlaceholder': 'Район, проект или пляж…',
+  'propertyHub.landing.hero.anyArea': 'Весь Пхукет',
 
   'account.property.section': 'Недвижимость',
   'account.property.hub': 'Обзор и сценарии',

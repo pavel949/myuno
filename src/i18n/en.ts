@@ -402,6 +402,13 @@ export const en: Record<string, string> = {
   'propertyHub.landing.personaPrompt.enableBusiness': 'I am Business',
   'propertyHub.landing.personaPrompt.enableInvestor': 'I am Investor',
   'propertyHub.landing.proBadge': 'Pro',
+  // Hub hero search
+  'propertyHub.landing.hero.tabRent': 'Rent',
+  'propertyHub.landing.hero.tabBuy': 'Buy',
+  'propertyHub.landing.hero.tabNew': 'New builds',
+  'propertyHub.landing.hero.cta': 'Search',
+  'propertyHub.landing.hero.searchPlaceholder': 'Area, project, or beach…',
+  'propertyHub.landing.hero.anyArea': 'Anywhere in Phuket',
 
   'account.property.section': 'Property',
   'account.property.hub': 'Overview & scenarios',
