@@ -409,6 +409,14 @@ export const ru: Record<string, string> = {
   'propertyHub.landing.hero.cta': 'Искать',
   'propertyHub.landing.hero.searchPlaceholder': 'Район, проект или пляж…',
   'propertyHub.landing.hero.anyArea': 'Весь Пхукет',
+  // Hub featured rows
+  'propertyHub.landing.row.rentTitle': 'Заехать сегодня',
+  'propertyHub.landing.row.offplanTitle': 'Новостройки',
+  'propertyHub.landing.row.resaleTitle': 'Вторичный рынок',
+  'propertyHub.landing.row.investTitle': 'Инвестиции на Пхукете',
+  'propertyHub.landing.row.seeAll': 'Все',
+  'propertyHub.landing.row.empty': 'Скоро появятся объекты',
+  'propertyHub.landing.resale.howItWorks': 'Как работает вторичка',
 
   'account.property.section': 'Недвижимость',
   'account.property.hub': 'Обзор и сценарии',

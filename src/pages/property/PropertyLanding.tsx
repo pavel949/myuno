@@ -12,7 +12,16 @@ import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { PROPERTY_VERTICAL_PAGE_GUTTER } from '@/design-system/propertyVertical';
-import { HubHero, SeekerLane, CapitalLane, ProLane } from '@/components/property/hub';
+import {
+  HubHero,
+  SeekerLane,
+  CapitalLane,
+  ProLane,
+  RentFeaturedRow,
+  OffplanFeaturedRow,
+  ResaleFeaturedRow,
+  InvestTeaserRow,
+} from '@/components/property/hub';
 
 export default function PropertyLanding() {
   const { t, language } = useLanguage();
@@ -29,6 +38,10 @@ export default function PropertyLanding() {
       <div className={cn(PROPERTY_VERTICAL_PAGE_GUTTER, 'py-8 pb-24 space-y-10')}>
         <HubHero t={t} isRu={isRu} />
         <SeekerLane t={t} />
+        <RentFeaturedRow t={t} />
+        <OffplanFeaturedRow t={t} />
+        <ResaleFeaturedRow t={t} />
+        <InvestTeaserRow t={t} />
         <CapitalLane t={t} />
         <ProLane t={t} />
 
