@@ -1,3 +1,7 @@
+import { requireAuth } from '../_shared/auth-guard.ts';
+import { validateExternalUrlForSSRF } from '../_shared/ssrf-guard.ts';
+import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -9,6 +13,14 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Require a valid session — this endpoint consumes the platform's paid
+    // Firecrawl quota and proxies outbound fetches, so it must not be open.
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+
+    const limited = await withRateLimit(req, 'firecrawl-scrape', RATE_LIMITS.ai, corsHeaders, auth.user.id);
+    if (limited) return limited;
+
     const { url, options } = await req.json();
 
     if (!url) {
@@ -26,9 +38,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    let formattedUrl = url.trim();
+    let formattedUrl = String(url).trim();
     if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
       formattedUrl = `https://${formattedUrl}`;
+    }
+
+    // Block SSRF — reject loopback, private/link-local ranges, cloud metadata
+    // endpoints, *.local/*.internal and bare IP literals before fetching.
+    const ssrf = validateExternalUrlForSSRF(formattedUrl);
+    if (!ssrf.allowed) {
+      return new Response(
+        JSON.stringify({ success: false, error: `URL not allowed: ${ssrf.reason}` }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.info('Scraping URL:', formattedUrl);

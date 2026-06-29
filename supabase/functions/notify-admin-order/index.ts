@@ -189,9 +189,23 @@ Deno.serve(async (req) => {
 
     const orderTypeLabel = orderTypeLabels[payload.order_type] || `📦 ${payload.order_type}`;
 
+    // Escape user-controlled values before interpolating into the HTML email.
+    // The payload arrives from a public (possibly anonymous) lead/order form, so
+    // fields like customer_name, notes and address_text are attacker-influenced
+    // and must not be injected raw into HTML (email-client XSS / injection).
+    const esc = (v: unknown): string => {
+      if (v === null || v === undefined) return '';
+      return String(v)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+
     // Format items list
-    const itemsList = payload.items?.map(item => 
-      `• ${item.name} x${item.quantity} - ${item.price} ${payload.currency}`
+    const itemsList = payload.items?.map(item =>
+      `• ${esc(item.name)} x${esc(item.quantity)} - ${esc(item.price)} ${esc(payload.currency)}`
     ).join('\n') || 'No items specified';
 
     // Format scheduled time
@@ -228,31 +242,31 @@ Deno.serve(async (req) => {
         <div class="container">
           <div class="header">
             <h1 style="margin: 0;">🔔 New Order Received!</h1>
-            <p style="margin: 5px 0 0 0; opacity: 0.9;">${orderTypeLabel}</p>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">${esc(orderTypeLabel)}</p>
           </div>
           
           <div class="content">
             <div class="order-details">
               <div class="label">Order Number</div>
-              <div class="value" style="font-size: 20px; font-weight: bold;">#${payload.order_number}</div>
-              
+              <div class="value" style="font-size: 20px; font-weight: bold;">#${esc(payload.order_number)}</div>
+
               <div class="label">Total Amount</div>
-              <div class="total">${payload.total_amount} ${payload.currency}</div>
+              <div class="total">${esc(payload.total_amount)} ${esc(payload.currency)}</div>
             </div>
 
             <div class="order-details">
               <div class="label">Customer Information</div>
               <div class="value">
-                <strong>${payload.customer_name || 'Guest'}</strong><br>
-                ${payload.customer_email ? `📧 ${payload.customer_email}<br>` : ''}
-                ${payload.customer_phone ? `📱 ${payload.customer_phone}` : ''}
+                <strong>${esc(payload.customer_name || 'Guest')}</strong><br>
+                ${payload.customer_email ? `📧 ${esc(payload.customer_email)}<br>` : ''}
+                ${payload.customer_phone ? `📱 ${esc(payload.customer_phone)}` : ''}
               </div>
             </div>
 
             ${payload.provider_name ? `
             <div class="order-details">
               <div class="label">Provider</div>
-              <div class="value">${payload.provider_name}</div>
+              <div class="value">${esc(payload.provider_name)}</div>
             </div>
             ` : ''}
 
@@ -267,12 +281,12 @@ Deno.serve(async (req) => {
               
               ${payload.payment_method ? `
               <div class="label" style="margin-top: 10px;">Payment Method</div>
-              <div class="value">${payload.payment_method === 'cash' ? '💵 Cash' : payload.payment_method === 'wallet' ? '👛 Wallet' : payload.payment_method === 'stripe' ? '💳 Card' : payload.payment_method}</div>
+              <div class="value">${payload.payment_method === 'cash' ? '💵 Cash' : payload.payment_method === 'wallet' ? '👛 Wallet' : payload.payment_method === 'stripe' ? '💳 Card' : esc(payload.payment_method)}</div>
               ` : ''}
               
               ${payload.notes ? `
               <div class="label" style="margin-top: 10px;">Notes</div>
-              <div class="value">${payload.notes}</div>
+              <div class="value">${esc(payload.notes)}</div>
               ` : ''}
             </div>
 
@@ -281,8 +295,8 @@ Deno.serve(async (req) => {
               <div class="label">📍 Addresses</div>
               ${payload.addresses.map(a => `
                 <div style="margin-top: 8px;">
-                  <strong style="text-transform: capitalize; font-size: 12px; color: #6b7280;">${a.address_type === 'pickup' ? '📍 From' : a.address_type === 'dropoff' ? '🏁 To' : a.address_type === 'service' ? '📍 Location' : a.address_type}:</strong>
-                  <div>${a.address_text}</div>
+                  <strong style="text-transform: capitalize; font-size: 12px; color: #6b7280;">${a.address_type === 'pickup' ? '📍 From' : a.address_type === 'dropoff' ? '🏁 To' : a.address_type === 'service' ? '📍 Location' : esc(a.address_type)}:</strong>
+                  <div>${esc(a.address_text)}</div>
                 </div>
               `).join('')}
             </div>
@@ -293,7 +307,7 @@ Deno.serve(async (req) => {
                 View in Operations Hub →
               </a>
               ${payload.customer_email ? `
-              <a href="mailto:${payload.customer_email}" class="button" style="background: #374151;">
+              <a href="mailto:${esc(payload.customer_email)}" class="button" style="background: #374151;">
                 Reply to Customer →
               </a>
               ` : ''}
