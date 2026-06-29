@@ -23,6 +23,7 @@ import NotFound from '@/pages/NotFound';
 import { Button } from '@/components/ui/button';
 import LandingSeoHead from '@/components/seo/LandingSeoHead';
 import { LandingContainer } from '@/components/landings/LandingPrimitives';
+import { PersonaClusterHero } from '@/components/landings/PersonaClusterHero';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import {
   ArrowRight, CheckCircle2, Sparkles, Plane, Shield,
@@ -91,53 +92,23 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
       <LandingSeoHead landing={landing} type="cluster" language={language as 'ru' | 'en'} />
 
       {/* ─── HERO ───────────────────────────────────────────────── */}
-      <header
-        className="relative overflow-hidden border-b border-border"
-        style={{
-          background: `linear-gradient(135deg, ${tokenColor(theme.color, 0.18)} 0%, ${tokenColor(theme.colorAccent, 0.08)} 60%, transparent 100%)`,
+      <PersonaClusterHero
+        icon={Icon}
+        accentColor={theme.color}
+        eyebrow={t(theme.tagline)}
+        title={t(landing.h1)}
+        subtitle={t(landing.subtitle)}
+        primary={{
+          label: t(landing.primaryCta.label),
+          href: withPersona(landing.primaryCta.href),
+          subtitle: landing.primaryCta.subtitle ? t(landing.primaryCta.subtitle) : undefined,
         }}
-      >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full blur-3xl"
-          style={{ background: tokenColor(theme.color, 0.25) }}
-        />
-        <LandingContainer className="relative max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
-          <div
-            className="mb-5 inline-flex items-center gap-2 border bg-background px-3 py-1.5"
-            style={{ borderColor: tokenColor(theme.color, 0.4) }}
-          >
-            <Icon className="h-4 w-4" style={{ color: tokenColor(theme.color) }} />
-            <span className="text-xs font-medium uppercase tracking-wider text-foreground">
-              {t(theme.tagline)}
-            </span>
-          </div>
-          <h1 className="text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
-            {t(landing.h1)}
-          </h1>
-          <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-            {t(landing.subtitle)}
-          </p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" className="shadow-lg">
-              <a href={withPersona(landing.primaryCta.href)}>
-                {t(landing.primaryCta.label)}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-            {landing.secondaryCta ? (
-              <Button asChild size="lg" variant="outline">
-                <a href={withPersona(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
-              </Button>
-            ) : null}
-          </div>
-          {landing.primaryCta.subtitle ? (
-            <p className="mt-3 text-xs text-muted-foreground">
-              {t(landing.primaryCta.subtitle)}
-            </p>
-          ) : null}
-        </LandingContainer>
-      </header>
+        secondary={
+          landing.secondaryCta
+            ? { label: t(landing.secondaryCta.label), href: withPersona(landing.secondaryCta.href) }
+            : undefined
+        }
+      />
 
       {/* ─── SURFACE CROSS-LINK (Master Taxonomy v1.0) ──────────── */}
       {(() => {
@@ -184,7 +155,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         {/* ─── JOBS (lifecycle phrases) ──────────────────────────── */}
         {landing.jobs.length > 0 ? (
           <section className="mb-12">
-            <h2 className="mb-5 text-2xl font-semibold text-foreground">
+            <h2 className="mb-5 font-display text-h2 font-normal tracking-tight text-foreground">
               {isRu ? 'Что делают на этом этапе' : 'What people do at this stage'}
             </h2>
             <ul className="space-y-2">
@@ -201,7 +172,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         {/* ─── SERVICES ──────────────────────────────────────────── */}
         {landing.services.length > 0 ? (
           <section className="mb-12">
-            <h2 className="mb-5 text-2xl font-semibold text-foreground">
+            <h2 className="mb-5 font-display text-h2 font-normal tracking-tight text-foreground">
               {isRu ? 'Услуги кластера' : 'Cluster services'}
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2">
@@ -250,7 +221,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         {/* ─── RELATED PERSONAS ─────────────────────────────────── */}
         {livePersonaLinks.length > 0 ? (
           <section className="mb-12">
-            <h2 className="mb-5 text-2xl font-semibold text-foreground">
+            <h2 className="mb-5 font-display text-h2 font-normal tracking-tight text-foreground">
               {isRu ? 'Кому актуально' : 'Who this is for'}
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2">
@@ -274,7 +245,7 @@ const ClusterLandingView = ({ landing }: ClusterLandingViewProps) => {
         {/* ─── FAQ ───────────────────────────────────────────────── */}
         {landing.faq.length > 0 ? (
           <section className="mb-12">
-            <h2 className="mb-5 text-2xl font-semibold text-foreground">
+            <h2 className="mb-5 font-display text-h2 font-normal tracking-tight text-foreground">
               {isRu ? 'Вопросы и ответы' : 'Questions & answers'}
             </h2>
             <dl className="space-y-5">

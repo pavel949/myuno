@@ -393,8 +393,7 @@ export default function ForBusinessPage() {
         <LandingChrome isRu={isRu} />
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-16 md:py-24 px-4">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+        <section className="relative overflow-hidden border-b border-border py-16 md:py-24 px-4">
           <div className="relative max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -405,7 +404,7 @@ export default function ForBusinessPage() {
                 <Building2 className="w-3.5 h-3.5" />
                 {t(UI.heroBadge)}
               </Badge>
-              <h1 className="text-3xl md:text-5xl font-bold font-display tracking-tight mb-4">
+              <h1 className="font-display text-h1 sm:text-display font-normal leading-[1.05] tracking-tight mb-4">
                 {t(UI.heroTitle)}
               </h1>
               <p className="text-muted-foreground text-base md:text-lg mb-8">
