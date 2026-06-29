@@ -37,7 +37,7 @@ export default function LegalSurfaceLandingPage() {
       <LandingLayout
         icon={Scale}
         title={t ? 'Юридическая помощь' : 'Legal help'}
-        subtitle={t ? 'Виза, компания, семья, споры и налоги — юристы RU+EN с фиксированной ценой и SLA на ответ' : 'Visa, company, family, disputes and tax — EN+RU lawyers with fixed price and answer SLA'}
+        subtitle={t ? 'Виза, компания, семья, споры и налоги — юристы RU+EN с фиксированной ценой и SLA на ответ' : 'Visa, company, family, disputes and tax, EN+RU lawyers with fixed price and answer SLA'}
         gradient="from-cluster-legal via-primary to-accent"
         heroCta={{ label: t ? 'Подобрать визу' : 'Match a visa', onClick: () => navigate(APP_ROUTES.VISA_QUIZ) }}
         whatsappUrl={whatsappUrl}

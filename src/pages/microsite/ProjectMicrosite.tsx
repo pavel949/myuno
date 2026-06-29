@@ -49,7 +49,7 @@ export default function ProjectMicrosite() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const proj = project as any;
-  const title = proj.meta_title || `${project.name_en} — ${project.location_area || 'Phuket'}`;
+  const title = proj.meta_title || `${project.name_en}, ${project.location_area || 'Phuket'}`;
   const description = proj.meta_description || project.description_en || project.tagline || '';
   const ogImage = proj.og_image_url || project.cover_image || '';
   const canonical = typeof window !== 'undefined' ? `${window.location.origin}/p/${slug}` : '';

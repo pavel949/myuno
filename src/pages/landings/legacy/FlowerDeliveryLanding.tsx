@@ -25,7 +25,7 @@ export default function FlowerDeliveryLanding() {
   return (
     <>
       <Helmet>
-        <title>{isRu ? 'Доставка цветов в Пхукете — Фиксированная цена, реальные фото' : 'Flower Delivery in Phuket — Fixed Price, Real Photos'}</title>
+        <title>{isRu ? 'Доставка цветов в Пхукете — Фиксированная цена, реальные фото' : 'Flower Delivery in Phuket, Fixed Price, Real Photos'}</title>
         <meta name="description" content={isRu
           ? 'Закажите букет в Пхукете. Реальные фото, фиксированная цена, доставка в тот же день.'
           : 'Order flowers in Phuket. Real photos, fixed price, same-day delivery.'
@@ -137,14 +137,14 @@ export default function FlowerDeliveryLanding() {
                 title: isRu ? 'Букет как на фото' : 'Bouquet as pictured',
                 desc: isRu
                   ? 'Каждый дизайн снят в студии. Размер влияет на количество цветов — стиль и палитра всегда совпадают.'
-                  : 'Every design is studio-photographed. Size affects flower count — style and color palette always match.',
+                  : 'Every design is studio-photographed. Size affects flower count, style and color palette always match.',
               },
               {
                 icon: Clock,
                 title: isRu ? 'Доставка в тот же день' : 'Same-day delivery',
                 desc: isRu
                   ? 'Закажите до 14:00 — доставим сегодня. Выберите удобный временной слот.'
-                  : 'Order before 2 PM — delivered today. Choose a convenient time slot.',
+                  : 'Order before 2 PM, delivered today. Choose a convenient time slot.',
               },
               {
                 icon: Heart,
@@ -242,7 +242,7 @@ export default function FlowerDeliveryLanding() {
                 title: isRu ? 'Выберите букет' : 'Choose a bouquet',
                 desc: isRu
                   ? 'Размер, стиль и палитра — всё видно на фото.'
-                  : 'Size, style, and palette — all visible in photos.',
+                  : 'Size, style, and palette, all visible in photos.',
               },
               {
                 step: '2',
@@ -258,7 +258,7 @@ export default function FlowerDeliveryLanding() {
                 title: isRu ? 'Оплатите и готово' : 'Pay and done',
                 desc: isRu
                   ? 'Картой или при получении. Подтверждение — сразу.'
-                  : 'By card or on delivery. Confirmation — instant.',
+                  : 'By card or on delivery. Confirmation, instant.',
               },
             ].map(({ step, icon: Icon, title, desc }) => (
               <div key={step} className="flex gap-4 items-start">
@@ -293,7 +293,7 @@ export default function FlowerDeliveryLanding() {
             <p className="text-sm text-muted-foreground text-center mt-1.5 mb-5">
               {isRu
                 ? 'Выберите букет — мы доставим сегодня.'
-                : 'Choose a bouquet — we deliver today.'
+                : 'Choose a bouquet, we deliver today.'
               }
             </p>
             <Button

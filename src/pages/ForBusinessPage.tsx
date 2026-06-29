@@ -224,8 +224,8 @@ const BUSINESS_TYPES: Array<{ value: string; label: Tri }> = [
 const UI = {
   metaTitle: {
     ru: 'myUNO для бизнеса Пхукета — Foreign-Ready услуги | myUNO',
-    en: 'myUNO for Phuket Business — Foreign-Ready services | myUNO',
-    th: 'myUNO สำหรับธุรกิจภูเก็ต — บริการ Foreign-Ready | myUNO',
+    en: 'myUNO for Phuket Business, Foreign-Ready services | myUNO',
+    th: 'myUNO สำหรับธุรกิจภูเก็ต, บริการ Foreign-Ready | myUNO',
   },
   metaDesc: {
     ru: 'Подготовим ваш ресторан, салон, клинику или венье к работе с иностранцами: меню, сайт, бронирование, маркетинг, капитал, реструктуризация, визы и дистрибуция через myUNO.',
@@ -244,8 +244,8 @@ const UI = {
   },
   heroDesc: {
     ru: 'Меню, сайты, бронирование, маркетинг, капитал, визы и дистрибуция — один партнёр на весь цикл.',
-    en: 'Menus, websites, bookings, marketing, capital, visas and distribution — one partner end-to-end.',
-    th: 'เมนู เว็บไซต์ ระบบจอง การตลาด เงินทุน วีซ่า และการจัดจำหน่าย — พาร์ทเนอร์เดียวครบวงจร',
+    en: 'Menus, websites, bookings, marketing, capital, visas and distribution, one partner end-to-end.',
+    th: 'เมนู เว็บไซต์ ระบบจอง การตลาด เงินทุน วีซ่า และการจัดจำหน่าย, พาร์ทเนอร์เดียวครบวงจร',
   },
   ctaInquiry: { ru: 'Оставить заявку', en: 'Send inquiry', th: 'ส่งคำขอ' },
   ctaPartner: {
@@ -256,13 +256,13 @@ const UI = {
   servicesTitle: { ru: 'Меню услуг', en: 'Services menu', th: 'รายการบริการ' },
   servicesHint: {
     ru: 'Отметьте интересующие — мы соберём индивидуальное предложение.',
-    en: 'Pick what you need — we will tailor a proposal.',
-    th: 'เลือกรายการที่สนใจ — เราจะจัดข้อเสนอเฉพาะให้คุณ',
+    en: 'Pick what you need, we will tailor a proposal.',
+    th: 'เลือกรายการที่สนใจ, เราจะจัดข้อเสนอเฉพาะให้คุณ',
   },
   formTitle: { ru: 'Заявка на консультацию', en: 'Request a consultation', th: 'ขอคำปรึกษา' },
   formHint: (n: number): Tri => ({
     ru: `Выбрано услуг: ${n}. Заполните контакты — свяжемся в течение рабочего дня.`,
-    en: `Services selected: ${n}. Leave your contacts — we reply within one business day.`,
+    en: `Services selected: ${n}. Leave your contacts, we reply within one business day.`,
     th: `เลือกบริการ: ${n} รายการ กรอกข้อมูลติดต่อ เราจะตอบกลับภายใน 1 วันทำการ`,
   }),
   bizName: { ru: 'Название бизнеса *', en: 'Business name *', th: 'ชื่อธุรกิจ *' },

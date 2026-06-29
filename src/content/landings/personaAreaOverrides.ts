@@ -51,7 +51,7 @@ const OVERRIDES: OverrideMap = {
     'passive-investors': {
       intro: {
         ru: 'Bang Tao — флагманский кластер Laguna с самым прозрачным рынком аренды на Пхукете: лицензированные отельные операторы, гарантированная доходность от застройщиков и ликвидный вторичный рынок.',
-        en: 'Bang Tao is the flagship Laguna cluster — Phuket\'s most transparent rental market with licensed hotel operators, developer rental guarantees and a liquid resale market.',
+        en: 'Bang Tao is the flagship Laguna cluster, Phuket\'s most transparent rental market with licensed hotel operators, developer rental guarantees and a liquid resale market.',
       },
       reasons: {
         ru: [
@@ -60,9 +60,9 @@ const OVERRIDES: OverrideMap = {
           'Готовая инфраструктура: Boat Avenue, Porto de Phuket, Blue Tree, UWC школа — премия к арендной ставке +25%.',
         ],
         en: [
-          '6–8% USD net yield via hotel-licensed pools (Banyan Tree, Angsana, Cassia, Dusit, Avani).',
-          'Most liquid resale market on the island: 4–6 month average sale vs. 9–12 in Kamala/Patong.',
-          'Mature infrastructure — Boat Avenue, Porto de Phuket, Blue Tree, UWC school — adds +25% rental premium.',
+          '6-8% USD net yield via hotel-licensed pools (Banyan Tree, Angsana, Cassia, Dusit, Avani).',
+          'Most liquid resale market on the island: 4-6 month average sale vs. 9-12 in Kamala/Patong.',
+          'Mature infrastructure, Boat Avenue, Porto de Phuket, Blue Tree, UWC school, adds +25% rental premium.',
         ],
       },
       whatsappMessage: {
@@ -77,7 +77,7 @@ const OVERRIDES: OverrideMap = {
     snowbirds: {
       intro: {
         ru: 'Bang Tao — лучший район для второго дома на 3–6 месяцев в году: бренд-резиденции с консьержем, прямой пляж 6 км, международные школы и сервис «закрыл-уехал» от управляющих компаний.',
-        en: 'Bang Tao is the prime second-home district for 3–6 month stays: branded residences with concierge, 6 km of unbroken beach, international schools and full lock-up-and-leave management.',
+        en: 'Bang Tao is the prime second-home district for 3-6 month stays: branded residences with concierge, 6 km of unbroken beach, international schools and full lock-up-and-leave management.',
       },
       reasons: {
         ru: [
@@ -86,14 +86,14 @@ const OVERRIDES: OverrideMap = {
           'Готовое международное комьюнити (EN/RU/TH): врачи, репетиторы, фитнес — мягкая адаптация при сезонном проживании.',
         ],
         en: [
-          'Branded residences (Banyan Tree, Angsana, Dusit) — fully managed, lock-up-and-leave with hotel-grade service.',
+          'Branded residences (Banyan Tree, Angsana, Dusit), fully managed, lock-up-and-leave with hotel-grade service.',
           'Quiet north-shore: 6 km family beach, no nightclubs, 25-min direct airport transfer.',
-          'Established international community (EN/RU/TH) — doctors, tutors, fitness — soft landing for seasonal residents.',
+          'Established international community (EN/RU/TH), doctors, tutors, fitness, soft landing for seasonal residents.',
         ],
       },
       whatsappMessage: {
         ru: 'Здравствуйте! Ищу второй дом в Bang Tao на 3–6 месяцев в году. Расскажите про бренд-резиденции и сервис управления.',
-        en: 'Hello! I am looking for a second home in Bang Tao for 3–6 months a year. Please walk me through branded residences and management.',
+        en: 'Hello! I am looking for a second home in Bang Tao for 3-6 months a year. Please walk me through branded residences and management.',
       },
       whatsappLabel: {
         ru: 'Обсудить второй дом',
@@ -112,9 +112,9 @@ const OVERRIDES: OverrideMap = {
           'Безопасные виллы с огороженным бассейном и большой парковкой — формат «жить + учить детей» 12 месяцев.',
         ],
         en: [
-          'UWC Thailand (IB curriculum, $24–32K/year) — 5 minutes by scooter, school buses from most residences.',
+          'UWC Thailand (IB curriculum, $24-32K/year), 5 minutes by scooter, school buses from most residences.',
           'Family infrastructure: Blue Tree, Splash Jungle, BIS Laguna campus, Bangkok Hospital paediatrics 15 min away.',
-          'Safe villas with fenced pools and large parking — designed for «live + school» year-round families.',
+          'Safe villas with fenced pools and large parking, designed for «live + school» year-round families.',
         ],
       },
       whatsappMessage: {
@@ -144,9 +144,9 @@ const OVERRIDES: OverrideMap = {
           'Прозрачный exit: вторичный рынок Patong самый активный, объект продаётся в среднем за 5 месяцев.',
         ],
         en: [
-          'Highest occupancy on the island — 78–85% year-round vs. 55–65% in Bang Tao.',
-          'Low entry: hotel-pool studios from ฿4.5M ($125K) with 6–7% guaranteed yield.',
-          'Clean exit path — Patong has the most active secondary market, average 5-month sale time.',
+          'Highest occupancy on the island, 78-85% year-round vs. 55-65% in Bang Tao.',
+          'Low entry: hotel-pool studios from ฿4.5M ($125K) with 6-7% guaranteed yield.',
+          'Clean exit path, Patong has the most active secondary market, average 5-month sale time.',
         ],
       },
       whatsappMessage: {
@@ -161,7 +161,7 @@ const OVERRIDES: OverrideMap = {
     snowbirds: {
       intro: {
         ru: 'Patong для второго дома — формат «город у моря»: больница, рестораны, фитнес, ТЦ и аэропорт-такси без зависимости от машины. Подходит тем, кто прилетает на 2–4 месяца и хочет «жизнь в шаговой доступности».',
-        en: 'Patong as a second home is «city by the sea»: hospital, restaurants, gyms, malls and airport transfers without a car. Perfect for 2–4 month stays where you want everything within walking distance.',
+        en: 'Patong as a second home is «city by the sea»: hospital, restaurants, gyms, malls and airport transfers without a car. Perfect for 2-4 month stays where you want everything within walking distance.',
       },
       reasons: {
         ru: [
@@ -170,14 +170,14 @@ const OVERRIDES: OverrideMap = {
           'Прямые ночные рейсы из Москвы/Дубая в HKT, такси до Patong 45 минут — удобно прилетать на сезон.',
         ],
         en: [
-          'Everything walkable: Bangkok Hospital Patong, Jungceylon, Banzaan Market, gyms — no car needed.',
+          'Everything walkable: Bangkok Hospital Patong, Jungceylon, Banzaan Market, gyms, no car needed.',
           'Low entry: Wyndham / Andamaya residences from $180K with hotel-grade management.',
-          'Direct overnight flights from Moscow/Dubai to HKT, 45-min taxi — easy seasonal arrivals.',
+          'Direct overnight flights from Moscow/Dubai to HKT, 45-min taxi, easy seasonal arrivals.',
         ],
       },
       whatsappMessage: {
         ru: 'Здравствуйте! Хочу второй дом в Patong на 2–4 месяца в году. Подберите апартаменты с управлением и без необходимости в машине.',
-        en: 'Hello! Looking for a second home in Patong for 2–4 months a year. Please find a managed apartment within walking distance of everything.',
+        en: 'Hello! Looking for a second home in Patong for 2-4 months a year. Please find a managed apartment within walking distance of everything.',
       },
       whatsappLabel: {
         ru: 'Обсудить второй дом',
@@ -196,9 +196,9 @@ const OVERRIDES: OverrideMap = {
           'BIS Phuket в 25 мин на машине — реально возить детей в международную школу, оставаясь в городе.',
         ],
         en: [
-          'Bangkok Hospital Patong with paediatrics — 5 minutes from anywhere in the area, key for young families.',
-          'Quiet hillside residences (Kalim, Tri Trang) — calm nights, bay views, 7 minutes to the beach.',
-          'BIS Phuket 25-min drive — viable international school commute while staying in town.',
+          'Bangkok Hospital Patong with paediatrics, 5 minutes from anywhere in the area, key for young families.',
+          'Quiet hillside residences (Kalim, Tri Trang), calm nights, bay views, 7 minutes to the beach.',
+          'BIS Phuket 25-min drive, viable international school commute while staying in town.',
         ],
       },
       whatsappMessage: {
@@ -219,7 +219,7 @@ const OVERRIDES: OverrideMap = {
     'passive-investors': {
       intro: {
         ru: 'Kamala — район-апсайд: миллиард-долларовый кластер MontAzure меняет профиль с тихого пляжа на премиум-курорт InterContinental + Como + Twinpalms. Раннее вхождение даёт 30–40% capital growth за 3 года.',
-        en: 'Kamala is Phuket\'s upside play: the billion-dollar MontAzure cluster is transforming a quiet beach into a premium InterContinental + Como + Twinpalms hub. Early entry has delivered 30–40% capital growth over 3 years.',
+        en: 'Kamala is Phuket\'s upside play: the billion-dollar MontAzure cluster is transforming a quiet beach into a premium InterContinental + Como + Twinpalms hub. Early entry has delivered 30-40% capital growth over 3 years.',
       },
       reasons: {
         ru: [
@@ -229,7 +229,7 @@ const OVERRIDES: OverrideMap = {
         ],
         en: [
           'MontAzure ecosystem: InterContinental live, Twinpalms open, 4 more brands in pipeline by 2027.',
-          'Capital growth 30–40% over 3 years vs. 12–18% in Bang Tao — re-positioning phase.',
+          'Capital growth 30-40% over 3 years vs. 12-18% in Bang Tao, re-positioning phase.',
           'Thinner resale supply = lower competition on exit, modest liquidity premium.',
         ],
       },
@@ -254,14 +254,14 @@ const OVERRIDES: OverrideMap = {
           'Локально: Café del Mar, HQ Beach Club, Twinpalms — есть где провести вечер без поездки в Patong.',
         ],
         en: [
-          'Branded residences (InterContinental, Twinpalms) — 5* hotel service without hotel crowds.',
-          '2 km of uncrowded beach — quiet morning swims without charter-tourist traffic.',
-          'On-site: Café del Mar, HQ Beach Club, Twinpalms — full evening scene without driving to Patong.',
+          'Branded residences (InterContinental, Twinpalms), 5* hotel service without hotel crowds.',
+          '2 km of uncrowded beach, quiet morning swims without charter-tourist traffic.',
+          'On-site: Café del Mar, HQ Beach Club, Twinpalms, full evening scene without driving to Patong.',
         ],
       },
       whatsappMessage: {
         ru: 'Здравствуйте! Ищу второй дом в Kamala — нужна бренд-резиденция с управлением и видом на море.',
-        en: 'Hello! Looking for a second home in Kamala — branded residence, fully managed, sea views.',
+        en: 'Hello! Looking for a second home in Kamala, branded residence, fully managed, sea views.',
       },
       whatsappLabel: {
         ru: 'Обсудить второй дом',
@@ -271,7 +271,7 @@ const OVERRIDES: OverrideMap = {
     families: {
       intro: {
         ru: 'Kamala для семей — «тихая гавань с школой через перевал»: HeadStart International School в Kamala, безопасный длинный пляж и виллы по разумной цене в сравнении с Bang Tao (-15–20%).',
-        en: 'Kamala for families is a quiet harbour with a school over the headland: HeadStart International School in Kamala itself, a safe long beach and villas 15–20% cheaper than Bang Tao.',
+        en: 'Kamala for families is a quiet harbour with a school over the headland: HeadStart International School in Kamala itself, a safe long beach and villas 15-20% cheaper than Bang Tao.',
       },
       reasons: {
         ru: [
@@ -280,9 +280,9 @@ const OVERRIDES: OverrideMap = {
           'Безопасный пляж 2 км с пологим входом, watch-tower и кафе вдоль набережной — комфорт для маленьких детей.',
         ],
         en: [
-          'HeadStart International School (British curriculum) inside Kamala — 5 minutes from most residences.',
-          'Villas 15–20% cheaper than Bang Tao at comparable infrastructure and quiet.',
-          'Safe 2 km beach with gentle entry, watch-towers and seafront cafés — perfect for young children.',
+          'HeadStart International School (British curriculum) inside Kamala, 5 minutes from most residences.',
+          'Villas 15-20% cheaper than Bang Tao at comparable infrastructure and quiet.',
+          'Safe 2 km beach with gentle entry, watch-towers and seafront cafés, perfect for young children.',
         ],
       },
       whatsappMessage: {
@@ -303,7 +303,7 @@ const OVERRIDES: OverrideMap = {
     'passive-investors': {
       intro: {
         ru: 'Laguna Phuket — закрытый интегрированный курорт на 1000 акров с 8 отелями (Banyan Tree, Angsana, Dusit, Cassia, Avani, SAii, Outrigger) и собственным channel-manager. Самый институциональный pool аренды на острове.',
-        en: 'Laguna Phuket is a gated 1000-acre integrated resort with 8 hotels (Banyan Tree, Angsana, Dusit, Cassia, Avani, SAii, Outrigger) and an in-house channel manager — the most institutional rental pool on the island.',
+        en: 'Laguna Phuket is a gated 1000-acre integrated resort with 8 hotels (Banyan Tree, Angsana, Dusit, Cassia, Avani, SAii, Outrigger) and an in-house channel manager, the most institutional rental pool on the island.',
       },
       reasons: {
         ru: [
@@ -312,9 +312,9 @@ const OVERRIDES: OverrideMap = {
           'Самая высокая ликвидность вторички в премиум-сегменте: brand recognition ускоряет exit на 40%.',
         ],
         en: [
-          '6–7% guaranteed yield via Laguna Property Management — 30-year track record, zero defaults.',
+          '6-7% guaranteed yield via Laguna Property Management, 30-year track record, zero defaults.',
           'Only cluster with its own 18-hole golf course, 3 beach clubs and lagoon shuttle service.',
-          'Highest premium resale liquidity — brand recognition accelerates exit by 40%.',
+          'Highest premium resale liquidity, brand recognition accelerates exit by 40%.',
         ],
       },
       whatsappMessage: {
@@ -339,13 +339,13 @@ const OVERRIDES: OverrideMap = {
         ],
         en: [
           '24/7 gated perimeter: security, Bangkok Hospital Laguna clinic, inter-hotel and beach shuttle.',
-          '18-hole golf, tennis, 12 km of bike paths around the lagoon — a lifestyle, not a vacation.',
+          '18-hole golf, tennis, 12 km of bike paths around the lagoon, a lifestyle, not a vacation.',
           'Resort-grade service while owning your home: housekeeping, room service, F&B credit.',
         ],
       },
       whatsappMessage: {
         ru: 'Здравствуйте! Ищу второй дом в Laguna Phuket — нужна резиденция с гольф-видом и управлением от Laguna.',
-        en: 'Hello! Looking for a second home in Laguna Phuket — residence with golf views and Laguna-managed service.',
+        en: 'Hello! Looking for a second home in Laguna Phuket, residence with golf views and Laguna-managed service.',
       },
       whatsappLabel: {
         ru: 'Обсудить резиденцию',
@@ -364,9 +364,9 @@ const OVERRIDES: OverrideMap = {
           'Bangkok Hospital Laguna Clinic + педиатрия — 3 минуты от любой резиденции.',
         ],
         en: [
-          'BIS Phuket (British curriculum, £20–28K/year) inside Laguna — kids bike to school, no bus needed.',
+          'BIS Phuket (British curriculum, £20-28K/year) inside Laguna, kids bike to school, no bus needed.',
           '1000-acre gated perimeter with 24/7 security: independent kids at the pool, beach and bike paths.',
-          'Bangkok Hospital Laguna Clinic + paediatrics — 3 minutes from any residence.',
+          'Bangkok Hospital Laguna Clinic + paediatrics, 3 minutes from any residence.',
         ],
       },
       whatsappMessage: {
@@ -387,7 +387,7 @@ const OVERRIDES: OverrideMap = {
     'passive-investors': {
       intro: {
         ru: 'Cherngtalay — «расширение Bang Tao» с ценами на 20–25% ниже и теми же арендаторами. Растущий кластер кондоминиумов рядом с Boat Avenue и Porto de Phuket с доходностью 7–8% при меньшем входе.',
-        en: 'Cherngtalay is the «Bang Tao extension» — 20–25% cheaper at identical tenant demand. A growing condo cluster next to Boat Avenue and Porto de Phuket delivering 7–8% yield at a lower entry point.',
+        en: 'Cherngtalay is the «Bang Tao extension», 20-25% cheaper at identical tenant demand. A growing condo cluster next to Boat Avenue and Porto de Phuket delivering 7-8% yield at a lower entry point.',
       },
       reasons: {
         ru: [
@@ -396,14 +396,14 @@ const OVERRIDES: OverrideMap = {
           'Boat Avenue + Porto de Phuket в шаговой доступности — premium-тренд для семейных и snowbird-арендаторов.',
         ],
         en: [
-          'Price per sqm 20–25% below Bang Tao at the same rental rate — best yield-per-baht on the west coast.',
-          'Active 2026–2028 new-build pipeline: early entry yields 15–20% capital growth by handover.',
-          'Boat Avenue + Porto de Phuket within walking distance — premium pull for family and snowbird tenants.',
+          'Price per sqm 20-25% below Bang Tao at the same rental rate, best yield-per-baht on the west coast.',
+          'Active 2026-2028 new-build pipeline: early entry yields 15-20% capital growth by handover.',
+          'Boat Avenue + Porto de Phuket within walking distance, premium pull for family and snowbird tenants.',
         ],
       },
       whatsappMessage: {
         ru: 'Здравствуйте! Интересует инвестиция в Cherngtalay — пришлите off-plan с ранним входом и расчётом доходности.',
-        en: 'Hello! Interested in Cherngtalay investments — please share off-plan options with early-entry pricing and yield breakdown.',
+        en: 'Hello! Interested in Cherngtalay investments, please share off-plan options with early-entry pricing and yield breakdown.',
       },
       whatsappLabel: {
         ru: 'Получить off-plan подборку',
@@ -422,14 +422,14 @@ const OVERRIDES: OverrideMap = {
           'Цены на резиденции на 20% ниже Bang Tao при том же качестве застройщиков (Banyan Tree, Anantara, Layan Green Park).',
         ],
         en: [
-          'Quieter than Bang Tao: fewer tourists, direct 5–8 min access to Layan/Bang Tao.',
-          'Infrastructure across the road: Villa Market, Boat Avenue, gyms, restaurants — no long drives.',
+          'Quieter than Bang Tao: fewer tourists, direct 5-8 min access to Layan/Bang Tao.',
+          'Infrastructure across the road: Villa Market, Boat Avenue, gyms, restaurants, no long drives.',
           'Residence prices 20% below Bang Tao at the same developer quality (Banyan Tree, Anantara, Layan Green Park).',
         ],
       },
       whatsappMessage: {
         ru: 'Здравствуйте! Ищу второй дом в Cherngtalay на 3–6 месяцев — нужна резиденция рядом с Boat Avenue.',
-        en: 'Hello! Looking for a second home in Cherngtalay for 3–6 months — residence near Boat Avenue preferred.',
+        en: 'Hello! Looking for a second home in Cherngtalay for 3-6 months, residence near Boat Avenue preferred.',
       },
       whatsappLabel: {
         ru: 'Обсудить второй дом',
@@ -439,7 +439,7 @@ const OVERRIDES: OverrideMap = {
     families: {
       intro: {
         ru: 'Cherngtalay для семьи — оптимум по цене/качеству: UWC и BIS в 7–10 минутах, виллы с большими участками (от 600 м²) и тихие soi без сквозного трафика. Подходит семьям, которым нужен сад и пространство.',
-        en: 'Cherngtalay for families is the best price/quality fit: UWC and BIS 7–10 minutes away, villas with large plots (600 m²+) and quiet soi streets with no through-traffic. Built for families who want a garden and space.',
+        en: 'Cherngtalay for families is the best price/quality fit: UWC and BIS 7-10 minutes away, villas with large plots (600 m²+) and quiet soi streets with no through-traffic. Built for families who want a garden and space.',
       },
       reasons: {
         ru: [
@@ -448,9 +448,9 @@ const OVERRIDES: OverrideMap = {
           'Семейная деревня: педиатры, детские кружки, Villa Market, Tesco Lotus — всё в 5 минутах.',
         ],
         en: [
-          'UWC Thailand 7 min, BIS Phuket 10 min — realistic school commute with no traffic.',
-          'Villas with 600–1200 m² plots at Bang Tao townhouse prices — garden, BBQ, room for a dog.',
-          'Family village: paediatricians, kids clubs, Villa Market, Tesco Lotus — all within 5 minutes.',
+          'UWC Thailand 7 min, BIS Phuket 10 min, realistic school commute with no traffic.',
+          'Villas with 600-1200 m² plots at Bang Tao townhouse prices, garden, BBQ, room for a dog.',
+          'Family village: paediatricians, kids clubs, Villa Market, Tesco Lotus, all within 5 minutes.',
         ],
       },
       whatsappMessage: {

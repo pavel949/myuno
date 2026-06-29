@@ -9,7 +9,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const SERVICES = [
-  { icon: Building, labelEn: 'Off-plan & new builds', labelRu: 'Off-plan и новостройки', descEn: 'Vetted developers, ClearView AAA–CCC', descRu: 'Проверенные девелоперы, ClearView AAA–CCC', path: '/newbuilds', color: 'primary' },
+  { icon: Building, labelEn: 'Off-plan & new builds', labelRu: 'Off-plan и новостройки', descEn: 'Vetted developers, ClearView AAA-CCC', descRu: 'Проверенные девелоперы, ClearView AAA–CCC', path: '/newbuilds', color: 'primary' },
   { icon: ShieldCheck, labelEn: 'ClearView rating', labelRu: 'Рейтинг ClearView', descEn: '8 criteria, independent score', descRu: '8 критериев, независимая оценка', path: '/clearview', color: 'cluster-invest' },
   { icon: FileSearch, labelEn: 'Due diligence', labelRu: 'Юридический due diligence', descEn: 'Title, EIA, developer track record', descRu: 'Титул, EIA, история девелопера', path: APP_ROUTES.LEGAL, color: 'accent-purple' },
   { icon: Coins, labelEn: 'Capital deals', labelRu: 'Capital-сделки', descEn: 'Mandate-based, $2M+ tickets', descRu: 'Mandate-режим, чеки от $2M', path: APP_ROUTES.INVEST_DEALS_BOARD, color: 'accent-amber' },
@@ -18,8 +18,8 @@ const SERVICES = [
 ];
 
 const STATS = [
-  { numRu: 'AAA–CCC', numEn: 'AAA–CCC', labelEn: 'ClearView scale', labelRu: 'Шкала ClearView' },
-  { numRu: '6–9%', numEn: '6–9%', labelEn: 'Net yield p.a.', labelRu: 'Чистая доходность' },
+  { numRu: 'AAA-CCC', numEn: 'AAA-CCC', labelEn: 'ClearView scale', labelRu: 'Шкала ClearView' },
+  { numRu: '6-9%', numEn: '6-9%', labelEn: 'Net yield p.a.', labelRu: 'Чистая доходность' },
   { numRu: '$200K+', numEn: '$200K+', labelEn: 'Ticket from', labelRu: 'Чек от' },
 ];
 
@@ -37,7 +37,7 @@ export default function InvestSurfaceLandingPage() {
       <LandingLayout
         icon={TrendingUp}
         title={t ? 'Инвестиции на Пхукете' : 'Invest in Phuket'}
-        subtitle={t ? 'Недвижимость, бизнес, capital-сделки — с независимым ClearView-рейтингом и юридической чистотой' : 'Real estate, business and capital deals — with independent ClearView ratings and clean legal structure'}
+        subtitle={t ? 'Недвижимость, бизнес, capital-сделки — с независимым ClearView-рейтингом и юридической чистотой' : 'Real estate, business and capital deals, with independent ClearView ratings and clean legal structure'}
         gradient="from-cluster-invest via-primary to-accent"
         heroCta={{ label: t ? 'Подобрать объект' : 'Match a deal', onClick: () => navigate(APP_ROUTES.INVEST_QUIZ) }}
         whatsappUrl={whatsappUrl}

@@ -16,16 +16,16 @@ export const P5_SNOWBIRDS: PersonaLanding = {
   },
   subtitle: {
     ru: 'Если вы возвращаетесь сюда каждую зиму — расчёт «свой vs аренда» обычно сходится за 5–6 сезонов. Покажем цифры на ваших данных.',
-    en: 'If you return every winter, owning typically beats renting in 5–6 seasons. We’ll show the numbers on your real data.',
+    en: 'If you return every winter, owning typically beats renting in 5-6 seasons. We’ll show the numbers on your real data.',
   },
   pains: [
     {
       ru: 'Каждый год платите за аренду 3–5 месяцев — и не получаете актив.',
-      en: 'You pay for 3–5 months of rent every year — and own nothing at the end.',
+      en: 'You pay for 3-5 months of rent every year, and own nothing at the end.',
     },
     {
       ru: 'Хотите свой ключ, мебель, кухню — но не хотите 12-месячную операционку.',
-      en: 'You want your own key, furniture and kitchen — without year-round operations.',
+      en: 'You want your own key, furniture and kitchen, without year-round operations.',
     },
     {
       ru: 'Не понятно, что выгоднее: condo с rental program или villa-leasehold.',
@@ -70,7 +70,7 @@ export const P5_SNOWBIRDS: PersonaLanding = {
       q: { ru: 'Через сколько лет владение «отбивает» аренду?', en: 'How many years until owning beats renting?' },
       a: {
         ru: 'При 4 мес жизни + 8 мес сдачи через PM — типично 5–6 сезонов до точки безубыточности с учётом cap rate, transaction fees и FX.',
-        en: 'With 4 months of self-use + 8 months of PM rental, breakeven is typically 5–6 seasons, including cap rate, transaction fees and FX.',
+        en: 'With 4 months of self-use + 8 months of PM rental, breakeven is typically 5-6 seasons, including cap rate, transaction fees and FX.',
       },
     },
     {
@@ -84,14 +84,14 @@ export const P5_SNOWBIRDS: PersonaLanding = {
       q: { ru: 'Что если я хочу прилетать в любое время, не только зимой?', en: 'What if I want to come outside winter too?' },
       a: {
         ru: 'Owner-blocked dates через PMS-календарь: блокируете нужные даты, на остальные — аренда. Минимальное окно — 5 дней.',
-        en: 'Owner-blocked dates via the PMS calendar: block the dates you need, the rest goes to rental. Minimum window — 5 days.',
+        en: 'Owner-blocked dates via the PMS calendar: block the dates you need, the rest goes to rental. Minimum window, 5 days.',
       },
     },
     {
       q: { ru: 'Какой freehold-кондо в моём бюджете?', en: 'Which freehold condos fit my budget?' },
       a: {
         ru: 'Базовый сегмент Snowbird — Standard (฿3.5–8M). Запустите калькулятор: подберём 5 проектов под ваш бюджет с available foreign quota.',
-        en: 'The base Snowbird segment is Standard (฿3.5–8M). Run the calculator: we’ll match 5 projects with available foreign quota.',
+        en: 'The base Snowbird segment is Standard (฿3.5-8M). Run the calculator: we’ll match 5 projects with available foreign quota.',
       },
     },
   ],
@@ -107,7 +107,7 @@ export const P5_SNOWBIRDS: PersonaLanding = {
   seo: {
     metaTitle: {
       ru: 'Свой зимний дом на Пхукете — myUNO',
-      en: 'Your winter home in Phuket — myUNO',
+      en: 'Your winter home in Phuket, myUNO',
     },
     metaDescription: {
       ru: 'Расчёт «свой vs аренда» для зимовщика на Пхукете. Кондо с rental program, freehold quota, управление 8 мес в ваше отсутствие.',

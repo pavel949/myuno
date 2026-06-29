@@ -60,7 +60,7 @@ const AREA_LINKS: Record<string, {
 function buildSeo(area: PhuketArea): AreaLanding['seo'] {
   const path = `/area/${area.slug}`;
   const titleRu = `${area.name_ru} (${area.name_en}) — район Пхукета · myUNO`;
-  const titleEn = `${area.name_en}, Phuket — area guide · myUNO`;
+  const titleEn = `${area.name_en}, Phuket, area guide · myUNO`;
   const yieldStr = `${area.avg_yield}%`;
   const priceStr = `฿${(area.avg_price_sqm / 1000).toFixed(0)}K/м²`;
   const priceEn = `฿${(area.avg_price_sqm / 1000).toFixed(0)}K/sqm`;
