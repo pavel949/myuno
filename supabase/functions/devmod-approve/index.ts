@@ -10,11 +10,7 @@
 import { createClient, createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { sendEmail, buildEmailHtml } from "../_shared/notify-utils.ts";
-
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 async function sendTelegram(message: string): Promise<void> {
   const token = Deno.env.get("TELEGRAM_BOT_TOKEN");
@@ -32,6 +28,9 @@ async function sendTelegram(message: string): Promise<void> {
 }
 
 Deno.serve(async (req) => {
+  // Restrict CORS to the allow-listed origins — this endpoint verifies
+  // developers (grants is_verified) and must not be wildcard-open.
+  const CORS = getCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
   try {

@@ -4,6 +4,7 @@
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { NOTIFY_CORS as corsHeaders } from "../_shared/notify-utils.ts";
+import { requireInternalSecret } from "../_shared/internal-secret.ts";
 
 const sb = () => createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -13,6 +14,14 @@ const sb = () => createClient(
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
+    // Refunds move real money and are irreversible. This endpoint is only ever
+    // invoked server-to-server (confirm-transfer-operator reject flow + admin
+    // tooling, both via the service-role client), so gate it behind the internal
+    // secret / service-role key. Without this, an unauthenticated caller who
+    // learns or guesses an order_id could trigger arbitrary Stripe refunds.
+    const denied = requireInternalSecret(req, corsHeaders);
+    if (denied) return denied;
+
     const { order_id, reason } = await req.json();
     if (!order_id) {
       return new Response(JSON.stringify({ error: "order_id required" }), {

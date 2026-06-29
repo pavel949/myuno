@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ExternalLink, Newspaper } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOfficialNews } from '@/hooks/useOfficialNews';
+import { safeLinkHref } from '@/lib/sanitize';
 
 const formatDate = (iso: string | null, locale: string) => {
   if (!iso) return '';
@@ -51,7 +52,7 @@ export const OfficialNews: React.FC = () => {
               return (
               <a
                 key={n.id}
-                href={n.url}
+                href={safeLinkHref(n.url)}
                 target="_blank"
                 rel="noopener noreferrer nofollow"
                 className="block px-4 py-3 hover:bg-primary/5 transition-colors"

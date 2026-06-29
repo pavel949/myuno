@@ -74,7 +74,6 @@ export const createMapPopupHtml = (params: {
           src="${safeImageUrl}"
           alt="${escapedName}"
           class="w-full h-24 object-cover rounded-none mb-2"
-          onerror="this.style.display='none'"
         />
       ` : ''}
       <h3 class="font-bold text-sm text-gray-900 line-clamp-2">${escapedName}</h3>
@@ -88,9 +87,35 @@ export const createMapPopupHtml = (params: {
     </div>
   `;
 
-  // Final sanitization pass on the assembled HTML
+  // Final sanitization pass on the assembled HTML. Note: event-handler
+  // attributes (onerror, onclick, …) are on DOMPurify's permanent deny-list and
+  // are stripped regardless of ALLOWED_ATTR — never list them here.
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ['div', 'img', 'h3', 'span', 'p'],
-    ALLOWED_ATTR: ['class', 'src', 'alt', 'onerror'],
+    ALLOWED_ATTR: ['class', 'src', 'alt'],
   });
+};
+
+/**
+ * Returns a URL that is safe to use as an anchor `href`, or `undefined` if the
+ * scheme is not allowed. Blocks `javascript:`, `data:`, `vbscript:` and other
+ * script-capable schemes that can execute when a user clicks a link whose URL
+ * came from the database / user input (stored XSS).
+ *
+ * @param url - The candidate URL (may be relative)
+ * @returns The original URL when its scheme is http/https/mailto/tel, else undefined
+ */
+export const safeLinkHref = (url: string | null | undefined): string | undefined => {
+  if (url == null || url === '') return undefined;
+  const trimmed = String(url).trim();
+  try {
+    const base = typeof window !== 'undefined' ? window.location.href : 'https://www.myuno.app';
+    const parsed = new URL(trimmed, base);
+    if (['https:', 'http:', 'mailto:', 'tel:'].includes(parsed.protocol)) {
+      return trimmed;
+    }
+  } catch {
+    /* malformed URL — fall through to undefined */
+  }
+  return undefined;
 };

@@ -2,6 +2,7 @@
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createAnonClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
+import { getAllowedOrigin } from "../_shared/cors.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -57,7 +58,11 @@ Deno.serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Stripe customer found", { customerId });
 
-    const origin = req.headers.get("origin") || "https://uno.app";
+    // Validate the Origin against the allow-list before using it as the Stripe
+    // billing-portal return_url. A raw, attacker-controlled Origin header would
+    // otherwise let a forged request produce a portal session that redirects the
+    // customer to an arbitrary domain after billing actions (open redirect).
+    const origin = getAllowedOrigin(req.headers.get("origin"));
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
