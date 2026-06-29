@@ -181,7 +181,7 @@ const USE_CASES: { icon: LucideIcon; title: Bi; body: Bi }[] = [
     title: { ru: 'Удалённое управление недвижимостью', en: 'Remote property management' },
     body: {
       ru: 'Когда вы за границей, а в доме нужны уборка, ремонт, гости, отчёт по доходам — без чата в трёх мессенджерах.',
-      en: 'When you are abroad and the home needs cleaning, repairs, guests and an owner statement — without three messenger threads.',
+      en: 'When you are abroad and the home needs cleaning, repairs, guests and an owner statement, without three messenger threads.',
     },
   },
   {
@@ -232,7 +232,7 @@ const AUDIENCES: { icon: LucideIcon; title: Bi; body: Bi }[] = [
     title: { ru: 'Резиденты и экспаты', en: 'Residents & expats' },
     body: {
       ru: 'Жильё, дети, медицина, банк, бытовые сервисы — без поиска новых исполнителей каждый месяц.',
-      en: 'Housing, children, medicine, banking, daily services — without re-sourcing providers every month.',
+      en: 'Housing, children, medicine, banking, daily services, without re-sourcing providers every month.',
     },
   },
   {
@@ -395,7 +395,7 @@ export default function Landing() {
             >
               {tx(language, {
                 ru: 'Одна заявка. Консьерж myUNO подбирает проверенного исполнителя и ведёт задачу до результата — на русском, английском или тайском.',
-                en: 'One request. The myUNO concierge coordinates a verified provider and stays involved through delivery — in Russian, English or Thai.',
+                en: 'One request. The myUNO concierge coordinates a verified provider and stays involved through delivery, in Russian, English or Thai.',
                 th: 'หนึ่งคำขอ คอนเซียร์จของ myUNO จะจัดหาผู้ให้บริการที่ตรวจสอบแล้ว และดูแลจนกระทั่งงานเสร็จสมบูรณ์',
               })}
             </motion.p>
@@ -653,7 +653,7 @@ export default function Landing() {
               <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
                 {tx(language, {
                   ru: 'Доступно без аккаунта. Дежурный консьерж принимает запрос круглосуточно — на русском, английском или тайском.',
-                  en: 'Available without an account. The duty concierge takes requests 24/7 — in Russian, English or Thai.',
+                  en: 'Available without an account. The duty concierge takes requests 24/7, in Russian, English or Thai.',
                 })}
               </p>
               <button
@@ -694,7 +694,7 @@ export default function Landing() {
             <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
               {tx(language, {
                 ru: 'Одна и та же модель доверенной координации — от первой поездки до владения недвижимостью.',
-                en: 'The same trusted-coordination model — from a first visit to property ownership.',
+                en: 'The same trusted-coordination model, from a first visit to property ownership.',
               })}
             </p>
           </div>
@@ -735,13 +735,13 @@ export default function Landing() {
               <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
                 {tx(language, {
                   ru: 'Недвижимость, юриспруденция, медицина, релокация, владение, бытовые сервисы — на платформе myUNO. Вам не нужно изучать каждый раздел; задача консьержа — соединить вас с правильным.',
-                  en: 'Property, legal, medical, relocation, ownership, daily services — all on the myUNO platform. You do not need to learn every section; the concierge connects you to the right one.',
+                  en: 'Property, legal, medical, relocation, ownership, daily services, all on the myUNO platform. You do not need to learn every section; the concierge connects you to the right one.',
                 })}
               </p>
               <p className="pt-2 font-sans text-body-sm text-muted-foreground">
                 {tx(language, {
                   ru: 'Если интересно, что доступно — посмотрите экосистему отдельно.',
-                  en: 'If you are curious what is available — explore the ecosystem separately.',
+                  en: 'If you are curious what is available, explore the ecosystem separately.',
                 })}
               </p>
             </div>
@@ -770,7 +770,7 @@ export default function Landing() {
                 <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
                   {tx(language, {
                     ru: 'Проверенные исполнители — в одну структуру с прозрачными правилами',
-                    en: 'Verified providers — into one structure with transparent rules',
+                    en: 'Verified providers, in one structure with transparent rules',
                   })}
                 </h2>
                 <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
@@ -808,7 +808,7 @@ export default function Landing() {
           <p className="mt-5 font-sans text-body-sm text-muted-foreground sm:text-body">
             {tx(language, {
               ru: 'Опишите задачу — консьерж возьмёт её в работу и подберёт проверенного исполнителя.',
-              en: 'Describe the task — the concierge takes it from there and matches a verified provider.',
+              en: 'Describe the task. The concierge takes it from there and matches a verified provider.',
             })}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
