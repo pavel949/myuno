@@ -13,6 +13,8 @@ project_id = "erfwtoavipwjqmylpizt"
     verify_jwt = false
   [functions.ai-cross-sell]
     verify_jwt = false
+  [functions.ai-generate-offer]
+    verify_jwt = false
   [functions.ai-owner-nurture]
     verify_jwt = false
   [functions.ai-platform-intelligence]

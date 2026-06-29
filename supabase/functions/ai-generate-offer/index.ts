@@ -1,5 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import Anthropic from 'npm:@anthropic-ai/sdk@0.30.0';
+import { requireAuth } from '../_shared/auth-guard.ts';
+import { RATE_LIMITS, withRateLimit } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,6 +14,18 @@ serve(async (req) => {
   }
 
   try {
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+
+    const rateLimited = await withRateLimit(
+      req,
+      'ai-generate-offer',
+      RATE_LIMITS.ai,
+      corsHeaders,
+      auth.user.id,
+    );
+    if (rateLimited) return rateLimited;
+
     const { system, user, language, dealType, channel, clientName, dealId } = await req.json();
 
     if (!system || !user) {
