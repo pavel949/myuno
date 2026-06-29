@@ -150,7 +150,7 @@ function HubCardGrid({
           className={cn(
             'group flex flex-col rounded-none border p-5 shadow-sm transition-all',
             highlight
-              ? 'border-accent/40 bg-gradient-to-br from-accent/5 to-card hover:border-accent/40 hover:shadow-md'
+              ? 'border-accent/40 bg-card hover:border-accent/40 hover:shadow-md'
               : 'border-border/60 bg-card hover:border-primary/40 hover:shadow-md'
           )}
         >
@@ -189,7 +189,7 @@ function CapitalPersonaPrompt({
   isToggling: boolean;
 }) {
   return (
-    <div className="rounded-none border border-accent/40 bg-gradient-to-br from-accent/5 via-card to-card p-5 shadow-sm">
+    <div className="rounded-none border border-accent/40 bg-card p-5 shadow-sm">
       <div className="flex items-start gap-3 mb-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-accent/15 text-accent dark:text-accent">
           <Sparkles className="h-5 w-5" />
