@@ -237,7 +237,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             <p className="mb-5 text-sm text-muted-foreground">
               {isRu
                 ? 'Любое приложение знает, что вы пришли с этой страницы — каталог откроется уже отфильтрованным.'
-                : 'Every app knows you came from this page — the catalogue opens pre-filtered.'}
+                : 'Every app knows you came from this page, the catalogue opens pre-filtered.'}
             </p>
             <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               {personaApps.slice(0, 16).map((app) => (
@@ -370,7 +370,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             <section className="mt-8">
               <div className="mb-4">
                 <h3 className="text-xl font-semibold text-foreground">
-                  {isRu ? 'Оставьте заявку — ответим за 24 часа' : 'Leave a request — reply within 24 hours'}
+                  {isRu ? 'Оставьте заявку — ответим за 24 часа' : 'Leave a request, reply within 24 hours'}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {isRu

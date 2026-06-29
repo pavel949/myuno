@@ -8,7 +8,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const STEPS = [
-  { icon: Home, labelEn: 'Find your home', labelRu: 'Подобрать дом', descEn: 'Vetted villas & condos $200K–$500K', descRu: 'Проверенные виллы и кондо $200–500K', path: APP_ROUTES.PROPERTY_BROWSE + '?mode=buy', color: 'primary' },
+  { icon: Home, labelEn: 'Find your home', labelRu: 'Подобрать дом', descEn: 'Vetted villas & condos $200K-$500K', descRu: 'Проверенные виллы и кондо $200–500K', path: APP_ROUTES.PROPERTY_BROWSE + '?mode=buy', color: 'primary' },
   { icon: FileCheck, labelEn: 'Legal & ownership', labelRu: 'Юристы и оформление', descEn: 'Freehold, leasehold, due diligence', descRu: 'Freehold, leasehold, due diligence', path: APP_ROUTES.LEGAL, color: 'accent-purple' },
   { icon: Wrench, labelEn: 'Property management', labelRu: 'Управление недвижимостью', descEn: 'We take care while you are away', descRu: 'Заботимся, пока вас нет', path: '/owner/landing', color: 'cluster-manage' },
   { icon: Key, labelEn: 'Rental income (optional)', labelRu: 'Аренда (опционально)', descEn: 'Cover expenses with seasonal lets', descRu: 'Покрыть расходы сезонной арендой', path: '/owner/landing#rental', color: 'cluster-invest' },
@@ -17,8 +17,8 @@ const STEPS = [
 ];
 
 const TRUST = [
-  { numRu: '$200–500K', numEn: '$200–500K', labelEn: 'Typical budget', labelRu: 'Типичный бюджет' },
-  { numRu: '60–120 дн/год', numEn: '60–120 days/yr', labelEn: 'You stay', labelRu: 'Вы живёте' },
+  { numRu: '$200-500K', numEn: '$200-500K', labelEn: 'Typical budget', labelRu: 'Типичный бюджет' },
+  { numRu: '60–120 дн/год', numEn: '60-120 days/yr', labelEn: 'You stay', labelRu: 'Вы живёте' },
   { numRu: '5% / сделка', numEn: '5% / deal', labelEn: 'Transparent commission', labelRu: 'Прозрачная комиссия' },
 ];
 
@@ -31,14 +31,14 @@ export default function SecondHomeLandingPage() {
   return (
     <>
       <SEOHead
-        title={t ? 'Второй дом на Пхукете — myUNO' : 'Second home in Phuket — myUNO'}
-        description={t ? 'Подберём виллу или кондо $200–500K, оформим, будем управлять, пока вас нет. Прозрачная комиссия 5%.' : 'We find your villa or condo $200K–$500K, handle ownership, and manage it while you are away. Transparent 5% commission.'}
+        title={t ? 'Второй дом на Пхукете — myUNO' : 'Second home in Phuket, myUNO'}
+        description={t ? 'Подберём виллу или кондо $200–500K, оформим, будем управлять, пока вас нет. Прозрачная комиссия 5%.' : 'We find your villa or condo $200K-$500K, handle ownership, and manage it while you are away. Transparent 5% commission.'}
         url="https://www.myuno.app/for/second-home"
       />
       <LandingLayout
         icon={Sun}
         title={t ? 'Второй дом на Пхукете' : 'Second home in Phuket'}
-        subtitle={t ? 'Найти, оформить, управлять — пока вы наслаждаетесь зимой без снега' : 'Find it, own it, manage it — while you enjoy winters without snow'}
+        subtitle={t ? 'Найти, оформить, управлять — пока вы наслаждаетесь зимой без снега' : 'Find it, own it, manage it, while you enjoy winters without snow'}
         gradient="from-primary via-primary to-accent"
         heroCta={{ label: t ? 'Подобрать дом' : 'Find My Home', onClick: () => navigate(APP_ROUTES.PROPERTY_BROWSE + '?mode=buy') }}
         whatsappUrl={whatsappUrl}
@@ -55,7 +55,7 @@ export default function SecondHomeLandingPage() {
 
         <div className="px-4 py-6 max-w-lg mx-auto space-y-3">
           <h2 className="text-xl font-bold font-display text-foreground mb-4 text-center">
-            {t ? 'Полный цикл — под одной крышей' : 'Full cycle — under one roof'}
+            {t ? 'Полный цикл — под одной крышей' : 'Full cycle, under one roof'}
           </h2>
           {STEPS.map((s, i) => {
             const Icon = s.icon;

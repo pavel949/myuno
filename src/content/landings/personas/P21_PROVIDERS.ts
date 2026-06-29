@@ -14,7 +14,7 @@ export const P21_PROVIDERS: PersonaLanding = {
   subtitle: { ru: 'Получайте заказы от УК, владельцев и гостей. Без комиссии за вход, оплата на счёт компании, прозрачный рейтинг.', en: 'Get orders from MCs, owners and guests. No entry fee, payouts to your company account, transparent rating.' },
   pains: [
     { ru: 'Поток заказов нестабилен, всё держится на сарафане.', en: 'Order flow is unstable, everything depends on word of mouth.' },
-    { ru: 'Платформы берут комиссию 25–30%, оставляя крошки.', en: 'Platforms charge 25–30% commission, leaving crumbs.' },
+    { ru: 'Платформы берут комиссию 25–30%, оставляя крошки.', en: 'Platforms charge 25-30% commission, leaving crumbs.' },
     { ru: 'Гости пишут на разных языках, нет единого окна.', en: 'Guests message in many languages, no single inbox.' },
     { ru: 'Сложно доказать качество без публичного рейтинга.', en: 'Hard to prove quality without a public rating.' },
   ],

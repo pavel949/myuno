@@ -9,7 +9,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const SERVICES = [
-  { icon: Home, labelEn: 'Long-stay housing', labelRu: 'Долгосрочная аренда', descEn: 'Condos & villas 1–12 months', descRu: 'Кондо и виллы 1–12 месяцев', path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`, color: 'primary', external: false },
+  { icon: Home, labelEn: 'Long-stay housing', labelRu: 'Долгосрочная аренда', descEn: 'Condos & villas 1-12 months', descRu: 'Кондо и виллы 1–12 месяцев', path: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`, color: 'primary', external: false },
   { icon: Landmark, labelEn: 'Thai bank account', labelRu: 'Тайский счёт', descEn: 'Bangkok Bank, Kasikorn, SCB', descRu: 'Bangkok Bank, Kasikorn, SCB', path: APP_ROUTES.BANKING, color: 'cluster-invest', external: false },
   { icon: GraduationCap, labelEn: 'Schools & kindergartens', labelRu: 'Школы и сады', descEn: '15+ international schools', descRu: '15+ международных школ', path: APP_ROUTES.SCHOOL_FINDER, color: 'accent-amber', external: false },
   { icon: Stethoscope, labelEn: 'Medical & insurance', labelRu: 'Медицина и страховка', descEn: 'Bangkok Hospital cashless', descRu: 'Bangkok Hospital cashless', path: APP_ROUTES.MEDICAL, color: 'destructive', external: false },
@@ -19,7 +19,7 @@ const SERVICES = [
 ];
 
 const STATS = [
-  { numRu: '฿35–80K', numEn: '฿35–80K', labelEn: 'Long-stay rent/mo', labelRu: 'Аренда/мес' },
+  { numRu: '฿35-80K', numEn: '฿35-80K', labelEn: 'Long-stay rent/mo', labelRu: 'Аренда/мес' },
   { numRu: '฿1,200/мес', numEn: '$1,200/mo', labelEn: 'Family cost-of-living', labelRu: 'Семейный бюджет' },
   { numRu: '15+', numEn: '15+', labelEn: 'Int. schools', labelRu: 'Межд. школ' },
 ];
@@ -38,7 +38,7 @@ export default function LiveSurfaceLandingPage() {
       <LandingLayout
         icon={Sunset}
         title={t ? 'Жизнь на Пхукете' : 'Live in Phuket'}
-        subtitle={t ? 'Дом, школа, банк, страховка, права — всё, что нужно для долгой жизни на острове' : 'Home, school, bank, insurance, licence — everything you need for the long haul'}
+        subtitle={t ? 'Дом, школа, банк, страховка, права — всё, что нужно для долгой жизни на острове' : 'Home, school, bank, insurance, licence, everything you need for the long haul'}
         gradient="from-primary via-cluster-arrive to-accent"
         heroCta={{ label: t ? 'Спланировать переезд' : 'Plan my move', onClick: () => navigate(APP_ROUTES.RELOCATE) }}
         whatsappUrl={whatsappUrl}
@@ -55,7 +55,7 @@ export default function LiveSurfaceLandingPage() {
 
         <div className="px-4 py-6 max-w-lg mx-auto space-y-3">
           <h2 className="text-xl font-bold font-display text-foreground mb-4 text-center">
-            {t ? 'Всё для жизни — в одном месте' : 'Everything for living — in one place'}
+            {t ? 'Всё для жизни — в одном месте' : 'Everything for living, in one place'}
           </h2>
           {SERVICES.map((s, i) => {
             const Icon = s.icon;
@@ -83,7 +83,7 @@ export default function LiveSurfaceLandingPage() {
           <p className="text-sm text-muted-foreground mb-2">{t ? 'Полный пакет переезда' : 'Full relocation pack'}</p>
           <p className="text-3xl font-bold font-display text-foreground tabular-nums">฿15,000 — ฿50,000</p>
           <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
-            {t ? 'Координатор, виза, банк, школа, страховка — под ключ. Договор RU+EN.' : 'Coordinator, visa, bank, school, insurance — turnkey. Contract in EN+RU.'}
+            {t ? 'Координатор, виза, банк, школа, страховка — под ключ. Договор RU+EN.' : 'Coordinator, visa, bank, school, insurance, turnkey. Contract in EN+RU.'}
           </p>
         </div>
       </LandingLayout>

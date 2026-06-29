@@ -9,7 +9,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 
 const SERVICES = [
-  { icon: Car, labelEn: 'Airport transfer', labelRu: 'Трансфер из аэропорта', descEn: 'Sedan ฿800, minivan ฿1,200 — fixed price', descRu: 'Седан ฿800, минивэн ฿1 200 — фикс', path: APP_ROUTES.TRANSPORT, color: 'cluster-arrive' },
+  { icon: Car, labelEn: 'Airport transfer', labelRu: 'Трансфер из аэропорта', descEn: 'Sedan ฿800, minivan ฿1,200, fixed price', descRu: 'Седан ฿800, минивэн ฿1 200 — фикс', path: APP_ROUTES.TRANSPORT, color: 'cluster-arrive' },
   { icon: Wifi, labelEn: 'eSIM in 5 min', labelRu: 'eSIM за 5 минут', descEn: '4G island-wide, RU/EN support', descRu: '4G по острову, поддержка RU/EN', path: '/sim', color: 'accent-cyan' },
   { icon: Landmark, labelEn: 'Cash & exchange', labelRu: 'Наличные и обмен', descEn: 'SuperRich map, ATM fees', descRu: 'Карта SuperRich, комиссии ATM', path: '/exchange', color: 'cluster-invest' },
   { icon: Hotel, labelEn: 'First-week stay', labelRu: 'Жильё на первую неделю', descEn: 'Verified condos & hotels, no scams', descRu: 'Проверенные кондо и отели', path: `${APP_ROUTES.PROPERTY_BROWSE}?tenancy=short`, color: 'primary' },

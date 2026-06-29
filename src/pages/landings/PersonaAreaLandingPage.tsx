@@ -65,7 +65,7 @@ const PersonaAreaLandingPage = () => {
   const description = (isRu ? descRu : descEn).slice(0, 160);
   const ogAlt = isRu
     ? `${t(persona.h1)} в ${a.name_ru} — myUNO`
-    : `${t(persona.h1)} in ${a.name_en} — myUNO`;
+    : `${t(persona.h1)} in ${a.name_en}, myUNO`;
 
   const pros = isRu ? a.pros_ru : a.pros_en;
   const cons = isRu ? a.cons_ru : a.cons_en;
@@ -274,7 +274,7 @@ const PersonaAreaLandingPage = () => {
             <h3 className="text-xl font-semibold text-foreground">
               {isRu
                 ? `Подборка под ${a.name_ru} — за 24 часа`
-                : `Curated picks for ${a.name_en} — within 24 hours`}
+                : `Curated picks for ${a.name_en}, within 24 hours`}
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {isRu

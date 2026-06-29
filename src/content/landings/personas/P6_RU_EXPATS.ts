@@ -16,12 +16,12 @@ export const P6_RU_EXPATS: PersonaLanding = {
   },
   subtitle: {
     ru: 'Вы живёте здесь больше 6 месяцев. Платите аренду, которая больше не вернётся. Покажем, что меняется при покупке — на ваших расходах, не в общих цифрах.',
-    en: 'You’ve been living here for over 6 months. Rent you’ll never see again. We’ll show what changes when you buy — based on your real expenses, not generic numbers.',
+    en: 'You’ve been living here for over 6 months. Rent you’ll never see again. We’ll show what changes when you buy, based on your real expenses, not generic numbers.',
   },
   pains: [
     {
       ru: 'Аренда ฿40–80K/мес уходит в никуда, дом не становится «своим».',
-      en: '฿40–80K/mo rent disappears with nothing to show for it.',
+      en: '฿40-80K/mo rent disappears with nothing to show for it.',
     },
     {
       ru: 'Хочется сделать ремонт под себя, держать животных, не зависеть от owner-а.',
@@ -33,7 +33,7 @@ export const P6_RU_EXPATS: PersonaLanding = {
     },
     {
       ru: 'Боитесь застрять с активом, который сложно продать через 3–5 лет.',
-      en: 'You worry about being stuck with an asset that’s hard to sell in 3–5 years.',
+      en: 'You worry about being stuck with an asset that’s hard to sell in 3-5 years.',
     },
   ],
   services: [
@@ -67,14 +67,14 @@ export const P6_RU_EXPATS: PersonaLanding = {
       q: { ru: 'Когда покупка дешевле аренды для resident?', en: 'When does buying beat renting for a resident?' },
       a: {
         ru: 'При плане жить 4+ года — обычно дешевле owning. На горизонте 1–2 года — аренда (transaction costs не успеют отыграться).',
-        en: 'If you plan to stay 4+ years, owning is usually cheaper. For 1–2 years — rent (transaction costs won’t pay back).',
+        en: 'If you plan to stay 4+ years, owning is usually cheaper. For 1-2 years, rent (transaction costs won’t pay back).',
       },
     },
     {
       q: { ru: 'Можно ли иностранцу владеть кондо в собственность (freehold)?', en: 'Can a foreigner own a condo freehold?' },
       a: {
         ru: 'Да, до 49% площади здания. Виллы — только leasehold (30+30+30 лет) или через тайскую компанию.',
-        en: 'Yes, up to 49% of the building floor area. Villas — only leasehold (30+30+30 yrs) or via a Thai company.',
+        en: 'Yes, up to 49% of the building floor area. Villas, only leasehold (30+30+30 yrs) or via a Thai company.',
       },
     },
     {
@@ -103,7 +103,7 @@ export const P6_RU_EXPATS: PersonaLanding = {
   seo: {
     metaTitle: {
       ru: 'Купить жильё на Пхукете для жизни — myUNO',
-      en: 'Buy a home to live in in Phuket — myUNO',
+      en: 'Buy a home to live in in Phuket, myUNO',
     },
     metaDescription: {
       ru: 'От аренды к собственности на Пхукете. Калькулятор для resident, leasehold vs freehold, налоги, готовое жильё (resale).',

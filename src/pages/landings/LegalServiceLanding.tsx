@@ -36,7 +36,7 @@ export default function LegalServiceLanding() {
   const waUrl = getWhatsAppUrl((WA_MSG[lang] ?? WA_MSG.en)(cfg.id));
 
   const canonicalPath = `/legal/${cfg.id}`;
-  const pageTitle = `${hero.title} — myUNO Legal`;
+  const pageTitle = `${hero.title}, myUNO Legal`;
   const pageDesc = hero.subtitle.slice(0, 155);
 
   return (

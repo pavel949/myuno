@@ -30,14 +30,14 @@ export default function AgentLandingPage() {
   return (
     <>
       <SEOHead
-        title={t ? 'Для агентов недвижимости — myUNO Partners' : 'For property agents — myUNO Partners'}
-        description={t ? 'Приводите клиентов на Пхукет — делим комиссию 50/50. Закрытие сделки, юрист, эскроу — на нас.' : 'Bring buyers to Phuket — we split 5% commission 50/50. Closing, legal, escrow — on us.'}
+        title={t ? 'Для агентов недвижимости — myUNO Partners' : 'For property agents, myUNO Partners'}
+        description={t ? 'Приводите клиентов на Пхукет — делим комиссию 50/50. Закрытие сделки, юрист, эскроу — на нас.' : 'Bring buyers to Phuket, we split 5% commission 50/50. Closing, legal, escrow, on us.'}
         url="https://www.myuno.app/for/agent"
       />
       <LandingLayout
         icon={Handshake}
         title={t ? 'Для агентов недвижимости' : 'For property agents'}
-        subtitle={t ? 'Приводите клиента — закрываем сделку — делим комиссию 50/50' : 'Bring the client — we close the deal — split commission 50/50'}
+        subtitle={t ? 'Приводите клиента — закрываем сделку — делим комиссию 50/50' : 'Bring the client, we close the deal, split commission 50/50'}
         gradient="from-primary via-accent to-cluster-invest"
         heroCta={{ label: t ? 'Стать партнёром' : 'Become a partner', onClick: () => navigate('/agent/join') }}
         whatsappUrl={whatsappUrl}

@@ -26,7 +26,7 @@ export default function NewDevelopmentsLanding() {
   return (
     <>
       <Helmet>
-        <title>{isRu ? 'Новостройки Пхукета — Независимая оценка проектов' : 'Phuket New Developments — Independent Project Ratings'}</title>
+        <title>{isRu ? 'Новостройки Пхукета — Независимая оценка проектов' : 'Phuket New Developments, Independent Project Ratings'}</title>
         <meta name="description" content={isRu
           ? 'Независимая оценка новостроек Пхукета. Рейтинги проектов, проверка застройщиков, анализ рисков.'
           : 'Independent ratings for Phuket new developments. Project scoring, developer track records, risk analysis.'
@@ -73,7 +73,7 @@ export default function NewDevelopmentsLanding() {
             >
               {isRu
                 ? 'Независимые рейтинги проектов. Проверка застройщиков. Оценка рисков — до того, как вы подпишете контракт.'
-                : 'Independent project ratings. Developer due diligence. Risk assessment — before you sign anything.'
+                : 'Independent project ratings. Developer due diligence. Risk assessment, before you sign anything.'
               }
             </motion.p>
 
@@ -237,7 +237,7 @@ export default function NewDevelopmentsLanding() {
           <p className="text-sm text-muted-foreground mb-6">
             {isRu
               ? 'Единый балл 0–100, скорректированный на риск. Пять критериев с прозрачными весами.'
-              : 'A single 0–100 score, adjusted for risk. Five criteria with transparent weights.'
+              : 'A single 0-100 score, adjusted for risk. Five criteria with transparent weights.'
             }
           </p>
 
@@ -348,7 +348,7 @@ export default function NewDevelopmentsLanding() {
           <p className="text-center text-[11px] text-muted-foreground mt-5 leading-relaxed max-w-xs mx-auto">
             {isRu
               ? 'Ваши исследования сохраняются в аккаунте myUNO. Рейтинги, отчёты и история запросов — в одном месте.'
-              : 'Your research is saved in your myUNO account. Ratings, reports, and request history — all in one place.'
+              : 'Your research is saved in your myUNO account. Ratings, reports, and request history, all in one place.'
             }
           </p>
         </section>
