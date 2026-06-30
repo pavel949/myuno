@@ -29,7 +29,14 @@ export function ManagementCompanyCard({ company, isRu }: ManagementCompanyCardPr
     >
       <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-none border bg-muted">
         {company.logo ? (
-          <img src={company.logo} alt={name} className="h-full w-full object-cover" />
+          <img
+            src={company.logo}
+            alt={name}
+            width={56}
+            height={56}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <Building2 className="h-6 w-6 text-muted-foreground" />
         )}

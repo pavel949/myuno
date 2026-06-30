@@ -4,17 +4,41 @@
  * public profile at /company/:slug.
  */
 import React from 'react';
-import { SEOHead } from '@/components/seo';
+import { SEOHead, createBreadcrumbSchema } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useManagementCompanies } from '@/hooks/useManagementCompanies';
 import { ManagementCompanyCard } from '@/components/property/ManagementCompanyCard';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { PROPERTY_VERTICAL_PAGE_GUTTER } from '@/design-system/propertyVertical';
 import { cn } from '@/lib/utils';
+
+const SITE = 'https://www.myuno.app';
 
 export default function ManagementCompaniesIndex() {
   const { t, language } = useLanguage();
   const isRu = language === 'ru';
   const { data = [], isLoading } = useManagementCompanies();
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      createBreadcrumbSchema([
+        { name: isRu ? 'Недвижимость' : 'Property', url: `${SITE}${APP_ROUTES.PROPERTY}` },
+        { name: t('mcDirectory.title'), url: `${SITE}${APP_ROUTES.PROPERTY_COMPANIES}` },
+      ]),
+      {
+        '@type': 'ItemList',
+        name: t('mcDirectory.title'),
+        numberOfItems: data.length,
+        itemListElement: data.map((company, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          url: `${SITE}${APP_ROUTES.MANAGEMENT_COMPANY(company.slug)}`,
+          name: isRu ? company.name_ru : company.name_en,
+        })),
+      },
+    ],
+  };
 
   return (
     <>
@@ -23,6 +47,7 @@ export default function ManagementCompaniesIndex() {
         description={isRu
           ? 'Каталог проверенных управляющих компаний Пхукета: рейтинг, район, портфель объектов.'
           : 'Directory of verified Phuket management companies — ratings, districts, and managed portfolios.'}
+        jsonLd={jsonLd}
       />
       <div className={cn(PROPERTY_VERTICAL_PAGE_GUTTER, 'py-8 pb-24')}>
         <h1 className="text-2xl font-bold tracking-tight mb-1">
