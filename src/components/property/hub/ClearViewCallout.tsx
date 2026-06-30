@@ -1,16 +1,29 @@
 /**
- * ClearViewCallout — a single editorial callout surfacing the ClearView™ rating
- * as the hub's trust differentiator. One accent border; links to the ClearView
- * product page and the "why myUNO" explainer.
+ * ClearViewCallout — editorial callout surfacing ClearView™ as a trust
+ * differentiator. Content-driven so it can be reused across the property hub
+ * and the investor hub (callers pass their own copy + routes).
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Gauge, ArrowRight } from 'lucide-react';
-import { APP_ROUTES } from '@/lib/config/routes';
 
-type TFn = (key: string) => string;
+interface ClearViewCalloutProps {
+  title: string;
+  desc: string;
+  ctaLabel: string;
+  ctaTo: string;
+  secondaryLabel?: string;
+  secondaryTo?: string;
+}
 
-export function ClearViewCallout({ t }: { t: TFn }) {
+export function ClearViewCallout({
+  title,
+  desc,
+  ctaLabel,
+  ctaTo,
+  secondaryLabel,
+  secondaryTo,
+}: ClearViewCalloutProps) {
   return (
     <section
       aria-labelledby="hub-clearview-heading"
@@ -25,25 +38,25 @@ export function ClearViewCallout({ t }: { t: TFn }) {
             id="hub-clearview-heading"
             className="font-display text-lg font-semibold tracking-tight text-foreground"
           >
-            {t('propertyHub.landing.clearview.title')}
+            {title}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-            {t('propertyHub.landing.clearview.desc')}
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{desc}</p>
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
             <Link
-              to={APP_ROUTES.CLEARVIEW}
+              to={ctaTo}
               className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
             >
-              {t('propertyHub.landing.clearview.cta')}
+              {ctaLabel}
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link
-              to={APP_ROUTES.WHY_MYUNO}
-              className="text-xs font-medium text-muted-foreground hover:text-foreground"
-            >
-              {t('propertyHub.landing.clearview.why')}
-            </Link>
+            {secondaryLabel && secondaryTo && (
+              <Link
+                to={secondaryTo}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                {secondaryLabel}
+              </Link>
+            )}
           </div>
         </div>
       </div>
