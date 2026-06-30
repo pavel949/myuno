@@ -33530,6 +33530,10 @@ export type Database = {
           tax_id: string
         }[]
       }
+      get_my_signer_access_token: {
+        Args: { _signer_id: string }
+        Returns: string
+      }
       get_or_create_loyalty_status: {
         Args: { p_user_id: string }
         Returns: Json

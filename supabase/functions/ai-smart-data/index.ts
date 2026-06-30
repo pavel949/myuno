@@ -1,5 +1,7 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -40,6 +42,11 @@ Deno.serve(async (req) => {
   const startTime = Date.now();
 
   try {
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+    const rl = await withRateLimit(req, 'ai-smart-data', RATE_LIMITS.ai, corsHeaders, auth.user.id);
+    if (rl) return rl;
+
     // Create Supabase client
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,

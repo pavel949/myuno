@@ -94,7 +94,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
-    "dompurify": "^3.4.7",
+    "dompurify": "^3.4.11",
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "exceljs": "^4.4.0",
@@ -159,6 +159,31 @@
     "vitest": "^3.2.6"
   },
   "overrides": {
-    "uuid": "^11.1.1"
+    "uuid": "^11.1.1",
+    "lodash": "^4.17.21",
+    "lodash.template": "npm:lodash@^4.17.21",
+    "serialize-javascript": "^6.0.2",
+    "minimatch": "^9.0.5",
+    "brace-expansion": "^2.0.2",
+    "fast-uri": "^3.1.0",
+    "picomatch": "^4.0.3",
+    "ajv": "^8.17.1",
+    "tmp": "^0.2.5",
+    "glob": "^10.4.5",
+    "rollup": "^4.52.5",
+    "@babel/plugin-transform-modules-systemjs": "^7.28.4",
+    "dompurify": "^3.4.11"
+  },
+  "resolutions": {
+    "lodash": "^4.17.21",
+    "serialize-javascript": "^6.0.2",
+    "minimatch": "^9.0.5",
+    "brace-expansion": "^2.0.2",
+    "fast-uri": "^3.1.0",
+    "picomatch": "^4.0.3",
+    "ajv": "^8.17.1",
+    "tmp": "^0.2.5",
+    "rollup": "^4.52.5",
+    "dompurify": "^3.4.11"
   }
 }
