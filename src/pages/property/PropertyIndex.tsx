@@ -28,6 +28,8 @@ import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { filterValuesToPropertyFilters } from '@/lib/propertyCatalogServerFilters';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { isBlockedFromNightly } from '@/lib/real-estate/strEligibility';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import {
   serializeFilters,
@@ -208,6 +210,10 @@ export default function PropertyIndex() {
 
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
+  // Hotels-in-STR kill-switch (feature_flag:hotels_in_str in system_settings).
+  const hotelsInStr = useFeatureFlag('hotels_in_str', false);
+  const isNightlySearch = propertyMode === 'rent' && rentTenancy === 'short';
+
   // Category ribbon only — DB filters handled server-side
   const filteredProperties = useMemo(() => {
     let result = allProperties;
@@ -216,6 +222,12 @@ export default function PropertyIndex() {
       result = result.filter((p) =>
         selectedCategories.every((cat) => matchesCategory(p, cat))
       );
+    }
+
+    // Thai Hotel Act safety gate: in nightly (<30-night) search, keep condos and
+    // unlicensed hotels out of results. Behind the kill-switch; off ⇒ unchanged.
+    if (hotelsInStr && isNightlySearch) {
+      result = result.filter((p) => !isBlockedFromNightly(p));
     }
 
     // Persona filter — uses tags + amenities + persona_tags. Falls back to
@@ -229,7 +241,7 @@ export default function PropertyIndex() {
     });
 
     return result;
-  }, [allProperties, selectedCategories, applyPersonaFilter]);
+  }, [allProperties, selectedCategories, applyPersonaFilter, hotelsInStr, isNightlySearch]);
 
   const handlePropertyClick = useCallback((id: string) => {
     navigate(APP_ROUTES.PROPERTY_DETAIL(id));

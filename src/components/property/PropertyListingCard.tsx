@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Star, Zap, Building2 } from 'lucide-react';
+import { Star, Zap, Building2, Hotel, BadgeCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { PropertyImageCarousel } from './PropertyImageCarousel';
@@ -18,6 +18,7 @@ import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
+import { isHotel as isHotelListing, strComplianceStatus } from '@/lib/real-estate/strEligibility';
 import type { Property } from '@/hooks/useProperties';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { TrustStrip } from './TrustStrip';
@@ -71,6 +72,10 @@ export function PropertyListingCard({
 
   const surface = useMemo(() => surfaceFromProperty(property, mode), [property, mode]);
   const title = isRu ? surface.titleRu : surface.titleEn;
+
+  // Hotel (STR embedding): show rooms/stars + a "Hotel"/"Licensed" treatment.
+  const isHotelCard = isHotelListing(property);
+  const isLicensedShortStay = isHotelCard && strComplianceStatus(property) === 'licensed';
   const images = property.images?.length ? property.images : [property.cover_image || FALLBACK_IMAGE];
 
   const viewIds = useMemo(() => normalizeViewTypes(property.view_type), [property.view_type]);
@@ -179,6 +184,12 @@ export function PropertyListingCard({
               {isRu ? 'Мгновенное' : 'Instant'}
             </Badge>
           )}
+          {isHotelCard && (
+            <Badge className="bg-background/90 text-foreground border-0 shadow-sm text-[10px] font-semibold gap-1 rounded-full px-2 py-0.5">
+              <Hotel className="w-3 h-3" />
+              {isRu ? 'Отель' : 'Hotel'}
+            </Badge>
+          )}
         </div>
 
         {/* ClearView grade overlay — bottom-left of image */}
@@ -210,24 +221,45 @@ export function PropertyListingCard({
           )}
         </div>
 
-        {/* Row 2: Property type · bedrooms */}
-        <p className="text-[11px] sm:text-sm text-muted-foreground line-clamp-1">
-          {property.property_type
-            ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en')
-            : title}
-          {property.bedrooms != null && property.bedrooms > 0 && (
-            <> · {property.bedrooms} {isRu ? (property.bedrooms === 1 ? 'сп.' : 'сп.') : (property.bedrooms === 1 ? 'bed' : 'beds')}</>
-          )}
-          {property.bathrooms != null && property.bathrooms > 0 && (
-            <span className="hidden sm:inline"> · {property.bathrooms} {isRu ? (property.bathrooms === 1 ? 'ванная' : 'ванных') : (property.bathrooms === 1 ? 'bath' : 'baths')}</span>
-          )}
-          {property.area_sqm != null && property.area_sqm > 0 && (
-            <span> · {Math.round(property.area_sqm)} m²</span>
-          )}
-          {property.max_guests != null && property.max_guests > 0 && (
-            <span className="hidden sm:inline"> · {isRu ? `до ${property.max_guests} гостей` : `up to ${property.max_guests} guests`}</span>
-          )}
-        </p>
+        {/* Row 2: Property type · bedrooms (hotels show rooms + stars instead) */}
+        {isHotelCard ? (
+          <p className="text-[11px] sm:text-sm text-muted-foreground line-clamp-1">
+            {property.property_type
+              ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en')
+              : title}
+            {property.hotel_keys != null && property.hotel_keys > 0 && (
+              <> · {property.hotel_keys} {isRu ? 'номеров' : 'rooms'}</>
+            )}
+            {property.hotel_star_rating != null && property.hotel_star_rating > 0 && (
+              <span> · {property.hotel_star_rating}★</span>
+            )}
+          </p>
+        ) : (
+          <p className="text-[11px] sm:text-sm text-muted-foreground line-clamp-1">
+            {property.property_type
+              ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en')
+              : title}
+            {property.bedrooms != null && property.bedrooms > 0 && (
+              <> · {property.bedrooms} {isRu ? (property.bedrooms === 1 ? 'сп.' : 'сп.') : (property.bedrooms === 1 ? 'bed' : 'beds')}</>
+            )}
+            {property.bathrooms != null && property.bathrooms > 0 && (
+              <span className="hidden sm:inline"> · {property.bathrooms} {isRu ? (property.bathrooms === 1 ? 'ванная' : 'ванных') : (property.bathrooms === 1 ? 'bath' : 'baths')}</span>
+            )}
+            {property.area_sqm != null && property.area_sqm > 0 && (
+              <span> · {Math.round(property.area_sqm)} m²</span>
+            )}
+            {property.max_guests != null && property.max_guests > 0 && (
+              <span className="hidden sm:inline"> · {isRu ? `до ${property.max_guests} гостей` : `up to ${property.max_guests} guests`}</span>
+            )}
+          </p>
+        )}
+
+        {isLicensedShortStay && (
+          <span className="mt-1 inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-primary">
+            <BadgeCheck className="w-3 h-3 shrink-0" />
+            {isRu ? 'Лицензия на посуточно' : 'Licensed for short stays'}
+          </span>
+        )}
 
         {highlightChips.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">

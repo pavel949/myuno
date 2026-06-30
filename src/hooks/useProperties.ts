@@ -73,6 +73,12 @@ export interface Property {
   pool_type?: string;
   parking_type?: string;
   is_for_sale?: boolean;
+  // Asset/tenancy + hotel fields (selected in list queries; consumed by strEligibility.ts)
+  asset_class?: string | null;
+  tenancy_modes?: string[] | null;
+  hotel_keys?: number | null;
+  hotel_star_rating?: number | null;
+  hotel_license_type?: string | null;
 }
 
 export interface PropertyProject {
