@@ -434,6 +434,16 @@ export const ru: Record<string, string> = {
   'mcDirectory.title': 'Управляющие компании',
   'mcDirectory.subtitle': 'Проверенные УК Пхукета — сравните рейтинги, районы и портфели объектов.',
   'mcDirectory.empty': 'Пока нет управляющих компаний.',
+  // Investor hub — trust band + ClearView callout
+  'investHub.trust.verified': 'Проверенные проекты',
+  'investHub.trust.score': 'myUNO Score',
+  'investHub.trust.dueDiligence': 'Доступ к due diligence',
+  'investHub.trust.advisory': 'Сопровождение сделок',
+  'investHub.trust.clearview': 'Рейтинг ClearView™',
+  'investHub.clearview.title': 'Оценка до сделки',
+  'investHub.clearview.desc': 'Независимые рейтинги ClearView™ AAA–CCC по застройщикам и новостройкам — та же проверка за каждой сделкой.',
+  'investHub.clearview.cta': 'Открыть ClearView™',
+  'investHub.clearview.secondary': 'Консультация по капиталу',
 
   'account.property.section': 'Недвижимость',
   'account.property.hub': 'Обзор и сценарии',

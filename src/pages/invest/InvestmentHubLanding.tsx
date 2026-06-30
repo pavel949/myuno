@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { HubTrustStrip, ClearViewCallout } from '@/components/property/hub';
 
 interface ZoneCardProps {
   icon: React.ElementType;
@@ -110,9 +111,16 @@ function ZoneCard({
 
 export default function InvestmentHubLanding() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
+
+  const investTrustItems = [
+    { icon: ShieldCheck, label: t('investHub.trust.verified') },
+    { icon: TrendingUp, label: t('investHub.trust.score') },
+    { icon: FileText, label: t('investHub.trust.dueDiligence') },
+    { icon: Handshake, label: t('investHub.trust.advisory') },
+  ];
 
   const { data: featured, isLoading: loadingFeatured } = useFeaturedInvestments();
   const { data: allProjects, isLoading: loadingAll } = useInvestmentProjects();
@@ -241,6 +249,16 @@ export default function InvestmentHubLanding() {
           {/* Wave 1: removed duplicate "Capital marketplace" card.
               Hero CTAs above (Deal list / Raise) cover the same action. */}
 
+          {/* Trust band + ClearView — shared with the property hub */}
+          <HubTrustStrip items={investTrustItems} ariaLabel={t('investHub.trust.clearview')} />
+          <ClearViewCallout
+            title={t('investHub.clearview.title')}
+            desc={t('investHub.clearview.desc')}
+            ctaLabel={t('investHub.clearview.cta')}
+            ctaTo={APP_ROUTES.CLEARVIEW}
+            secondaryLabel={t('investHub.clearview.secondary')}
+            secondaryTo={APP_ROUTES.CAPITAL_ADVISORY}
+          />
 
           {/* 5 Zones */}
           <section className="space-y-3">
