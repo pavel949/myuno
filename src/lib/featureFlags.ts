@@ -130,6 +130,11 @@ const FLAGS: Record<string, FeatureFlag> = {
     enabled: true,
     description: 'Reusable share CTA with referral link + UTM attribution',
   },
+  PROVIDER_REFERRAL: {
+    key: 'provider_referral',
+    enabled: true,
+    description: 'Provider-to-provider (B2B) referral: commission discount for referring providers',
+  },
 
   // Verticals — kill-switch for each business vertical
   VERTICAL_PROPERTY: {
