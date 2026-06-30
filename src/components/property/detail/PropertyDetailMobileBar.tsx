@@ -27,6 +27,9 @@ interface PropertyDetailMobileBarProps {
   dateRange?: DateRange;
   guestCount: number;
   onOpenDatePicker: () => void;
+  /** Overrides the default "Reserve" CTA label (e.g. hotels: "Request to book"). */
+  reserveLabelEn?: string;
+  reserveLabelRu?: string;
 }
 
 export function PropertyDetailMobileBar({
@@ -42,6 +45,8 @@ export function PropertyDetailMobileBar({
   dateRange,
   guestCount,
   onOpenDatePicker,
+  reserveLabelEn,
+  reserveLabelRu,
 }: PropertyDetailMobileBarProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -135,7 +140,7 @@ export function PropertyDetailMobileBar({
                 ) : (
                   <>
                     <CalendarIcon className="w-4 h-4 mr-2" />
-                    {isRu ? 'Забронировать' : 'Reserve'}
+                    {(isRu ? reserveLabelRu : reserveLabelEn) ?? (isRu ? 'Забронировать' : 'Reserve')}
                   </>
                 )
               ) : (

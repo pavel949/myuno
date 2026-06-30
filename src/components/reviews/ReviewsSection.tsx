@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useReviews } from "@/hooks/useReviews";
 import { ReviewCard } from "@/components/uno/ReviewCard";
 import { ReviewStats } from "@/components/uno/ReviewStats";
+import { ReviewSubScores, type ReviewSubScores as ReviewSubScoresData } from "./ReviewSubScores";
 import { WriteReviewModal } from "./WriteReviewModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,11 @@ interface ReviewsSectionProps {
   itemId: string;
   itemName: string;
   showStats?: boolean;
+  /**
+   * Optional category sub-scores (0–5). Display-ready: renders a category
+   * breakdown only when present; absent today (no backing columns yet).
+   */
+  subscores?: ReviewSubScoresData | null;
 }
 
 type SortOption = 'newest' | 'oldest' | 'highest' | 'lowest' | 'helpful';
@@ -32,6 +38,7 @@ export const ReviewsSection = ({
   itemId,
   itemName,
   showStats = true,
+  subscores,
 }: ReviewsSectionProps) => {
   const { language } = useLanguage();
   /** Sort/filter labels are RU/EN only; fall back to EN for Thai and other locales */
@@ -169,12 +176,15 @@ export const ReviewsSection = ({
 
       {/* Stats */}
       {showStats && stats.total > 0 && (
-        <ReviewStats 
-          average={stats.average} 
-          total={stats.total} 
-          distribution={stats.distribution} 
+        <ReviewStats
+          average={stats.average}
+          total={stats.total}
+          distribution={stats.distribution}
         />
       )}
+
+      {/* Category sub-scores — renders only when data is present (display-ready). */}
+      <ReviewSubScores subscores={subscores} />
 
       {/* Filters & Sort */}
       {reviews.length > 0 && (

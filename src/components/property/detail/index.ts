@@ -7,3 +7,5 @@ export { PropertyDetailHighlights } from './PropertyDetailHighlights';
 export { PropertyDetailDateSheet } from './PropertyDetailDateSheet';
 export { PropertyDetailMobileBar } from './PropertyDetailMobileBar';
 export { PropertyHeroFacts } from './PropertyHeroFacts';
+export { NearbyPlaces } from './NearbyPlaces';
+export { PropertyFaq } from './PropertyFaq';

@@ -4,6 +4,7 @@ export {
   createServiceSchema, 
   createBreadcrumbSchema,
   createRealEstateListingSchema,
+  createHotelSchema,
   createTouristAttractionSchema,
   createProductSchema,
 } from './SEOHead';

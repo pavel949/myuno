@@ -202,6 +202,43 @@ export const createRealEstateListingSchema = (listing: {
   ...(listing.area && { floorSize: { '@type': 'QuantitativeValue', value: listing.area, unitCode: 'MTK' } }),
 });
 
+export const createHotelSchema = (hotel: {
+  name: string;
+  description: string;
+  image?: string;
+  url?: string;
+  priceFrom?: number;
+  currency?: string;
+  starRating?: number;
+  address?: string;
+}) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Hotel',
+  name: hotel.name,
+  description: hotel.description,
+  ...(hotel.url && { url: hotel.url }),
+  ...(hotel.image && { image: hotel.image }),
+  ...(hotel.starRating && {
+    starRating: { '@type': 'Rating', ratingValue: hotel.starRating },
+  }),
+  ...(hotel.priceFrom && {
+    priceRange: hotel.priceFrom.toString(),
+    makesOffer: {
+      '@type': 'Offer',
+      price: hotel.priceFrom,
+      priceCurrency: hotel.currency || 'THB',
+    },
+  }),
+  ...(hotel.address && {
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: hotel.address,
+      addressRegion: 'Phuket',
+      addressCountry: 'TH',
+    },
+  }),
+});
+
 export const createTouristAttractionSchema = (attraction: {
   name: string;
   description: string;

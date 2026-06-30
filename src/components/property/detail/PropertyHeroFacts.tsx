@@ -13,6 +13,11 @@ interface PropertyHeroFactsProps {
   bathrooms?: number | null;
   maxGuests?: number | null;
   className?: string;
+  /** When true, render the hotel summary (rooms · stars · brand) instead. */
+  isHotel?: boolean;
+  hotelKeys?: number | null;
+  hotelStarRating?: number | null;
+  hotelBrand?: string | null;
 }
 
 export function PropertyHeroFacts({
@@ -21,11 +26,40 @@ export function PropertyHeroFacts({
   bathrooms,
   maxGuests,
   className,
+  isHotel = false,
+  hotelKeys,
+  hotelStarRating,
+  hotelBrand,
 }: PropertyHeroFactsProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
   const parts: string[] = [];
+
+  // Hotel variant: "120 rooms · 4★ · Marriott" (omit missing parts).
+  if (isHotel) {
+    if (hotelKeys && hotelKeys > 0) {
+      parts.push(
+        isRu
+          ? `${hotelKeys} ${hotelKeys === 1 ? 'номер' : hotelKeys < 5 ? 'номера' : 'номеров'}`
+          : `${hotelKeys} ${hotelKeys === 1 ? 'room' : 'rooms'}`,
+      );
+    }
+    if (hotelStarRating && hotelStarRating > 0) {
+      parts.push(`${hotelStarRating}★`);
+    }
+    if (hotelBrand && hotelBrand.trim().length > 0) {
+      parts.push(hotelBrand.trim());
+    }
+
+    if (parts.length === 0) return null;
+
+    return (
+      <p className={className ?? 'text-sm text-muted-foreground mt-1'}>
+        {parts.join(' · ')}
+      </p>
+    );
+  }
 
   if (maxGuests && maxGuests > 0) {
     parts.push(

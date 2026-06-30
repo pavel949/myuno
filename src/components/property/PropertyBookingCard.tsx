@@ -39,6 +39,9 @@ interface PropertyBookingCardProps {
   customLengthDiscounts?: Array<{ min_nights: number; discount_percent: number }>;
   negotiationEnabled?: boolean;
   seasonalPricing?: any[];
+  /** Overrides the default "Reserve" CTA label (e.g. hotels: "Request to book"). */
+  reserveLabelEn?: string;
+  reserveLabelRu?: string;
 }
 
 export function PropertyBookingCard({
@@ -58,6 +61,8 @@ export function PropertyBookingCard({
   customLengthDiscounts,
   negotiationEnabled,
   seasonalPricing,
+  reserveLabelEn,
+  reserveLabelRu,
 }: PropertyBookingCardProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -413,7 +418,7 @@ export function PropertyBookingCard({
           ) : rentalTerms?.instant_booking ? (
             <><Zap className="w-4 h-4 mr-2" />{isRu ? 'Мгновенное бронирование' : 'Book instantly'}</>
           ) : (
-            isRu ? 'Забронировать' : 'Reserve'
+            (isRu ? reserveLabelRu : reserveLabelEn) ?? (isRu ? 'Забронировать' : 'Reserve')
           )}
         </Button>
         

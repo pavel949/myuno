@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   MapPin, Star, BedDouble, Bath, Users, Maximize,
-  Share2, Loader2, Home, Sofa, Building2, Shield,
+  Share2, Loader2, Home, Sofa, Building2, Shield, BadgeCheck,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
@@ -36,7 +36,7 @@ import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { RelatedServicesSection } from '@/components/crosssell';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
 import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
-import { SEOHead, createRealEstateListingSchema } from '@/components/seo';
+import { SEOHead, createRealEstateListingSchema, createHotelSchema } from '@/components/seo';
 import { HostProfileSection } from '@/components/property/HostProfileSection';
 import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
 import { SimilarProperties } from '@/components/property/SimilarProperties';
@@ -48,6 +48,8 @@ import {
   PropertyDetailDateSheet,
   PropertyDetailMobileBar,
   PropertyHeroFacts,
+  NearbyPlaces,
+  PropertyFaq,
 } from '@/components/property/detail';
 import { GuestFavoriteBadge } from '@/components/property/GuestFavoriteBadge';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
@@ -55,6 +57,8 @@ import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { TrustStrip } from '@/components/property/TrustStrip';
 import { InstallmentTimeline } from '@/components/property/InstallmentTimeline';
 import { getInstallmentPreset, type InstallmentMilestone } from '@/lib/real-estate/installmentPresets';
+import { isHotel as isHotelProperty, strComplianceStatus } from '@/lib/real-estate/strEligibility';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {
   sea: { en: 'Sea View', ru: 'Вид на море' },
@@ -87,6 +91,8 @@ export default function PropertyDetail() {
   const [dateSheetOpen, setDateSheetOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [guestCount, setGuestCount] = useState(2);
+
+  const hotelsInStrEnabled = useFeatureFlag('hotels_in_str', false);
 
   const { availability } = usePropertyAvailabilityManagement(id);
   const unavailableDates = useMemo(
@@ -148,8 +154,24 @@ export default function PropertyDetail() {
     guest_extra_fees?: GuestExtraFee[] | null;
     price_per_month?: number | null;
     min_lease_months?: number | null;
+    /** Hotel brand is selected by the detail query but not in the Property type. */
+    hotel_brand?: string | null;
+    /** Whole-property wifi flag (selected by the detail query, not in Property type). */
+    wifi_included?: boolean | null;
+    /**
+     * Optional category review sub-scores (0–5). No backing column yet — this is
+     * display-ready: undefined today, lights up ReviewSubScores when it appears.
+     */
+    review_subscores?: import('@/components/reviews/ReviewSubScores').ReviewSubScores | null;
   };
   const propertyExt = property as unknown as typeof property & PropertyExt;
+
+  // Hotel-guest experience (Phase 1): only active when the listing is a hotel
+  // AND the `hotels_in_str` flag is on. When off, hotels fall back to the
+  // standard (villa) rendering so behaviour is byte-for-byte unchanged.
+  const isHotel = hotelsInStrEnabled && isHotelProperty(property);
+  const isLicensedForShortStays =
+    isHotel && strComplianceStatus(property) === 'licensed';
 
   const images = (property.images && property.images.length > 0)
     ? property.images
@@ -214,18 +236,29 @@ export default function PropertyDetail() {
         description={propertyDesc.slice(0, 160)}
         image={property.cover_image || undefined}
         type="product"
-        jsonLd={createRealEstateListingSchema({
-          name: propertyTitle || '',
-          description: propertyDesc.slice(0, 300),
-          price: pricePerNight || undefined,
-          currency: listingCurrency,
-          image: property.cover_image || undefined,
-          url: `https://www.myuno.app/property/${id}`,
-          bedrooms: property.bedrooms || undefined,
-          bathrooms: property.bathrooms || undefined,
-          area: property.area_sqm || undefined,
-          address: property.district || undefined,
-        })}
+        jsonLd={isHotel
+          ? createHotelSchema({
+              name: propertyTitle || '',
+              description: propertyDesc.slice(0, 300),
+              image: property.cover_image || undefined,
+              url: `https://www.myuno.app/property/${id}`,
+              priceFrom: pricePerNight || undefined,
+              currency: listingCurrency,
+              starRating: property.hotel_star_rating || undefined,
+              address: property.district || undefined,
+            })
+          : createRealEstateListingSchema({
+              name: propertyTitle || '',
+              description: propertyDesc.slice(0, 300),
+              price: pricePerNight || undefined,
+              currency: listingCurrency,
+              image: property.cover_image || undefined,
+              url: `https://www.myuno.app/property/${id}`,
+              bedrooms: property.bedrooms || undefined,
+              bathrooms: property.bathrooms || undefined,
+              area: property.area_sqm || undefined,
+              address: property.district || undefined,
+            })}
       />
       <div className="pb-28">
         {/* Sticky Header */}
@@ -293,13 +326,24 @@ export default function PropertyDetail() {
                 <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-foreground leading-tight">
                   {isRu ? property.title_ru : property.title_en}
                 </h1>
-                {/* Hero facts — Airbnb-style sub-title (e.g. "4 guests · 2 bedrooms · 1 bath") */}
+                {/* Hero facts — Airbnb-style sub-title (e.g. "4 guests · 2 bedrooms · 1 bath").
+                    Hotels show "<rooms> · <stars>★ · <brand>" instead. */}
                 <PropertyHeroFacts
                   bedrooms={property.bedrooms}
                   beds={propertyExt.beds ?? null}
                   bathrooms={property.bathrooms}
                   maxGuests={property.max_guests || rentalTerms?.max_guests}
+                  isHotel={isHotel}
+                  hotelKeys={property.hotel_keys}
+                  hotelStarRating={property.hotel_star_rating}
+                  hotelBrand={propertyExt.hotel_brand}
                 />
+                {isLicensedForShortStays && (
+                  <span className="mt-2 inline-flex items-center gap-1.5 border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-foreground">
+                    <BadgeCheck className="w-3.5 h-3.5 text-primary" />
+                    {isRu ? 'Лицензия на посуточно' : 'Licensed for short stays'}
+                  </span>
+                )}
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm lg:text-base">
                   {property.rating && (
                     <>
@@ -384,14 +428,23 @@ export default function PropertyDetail() {
 
               <Separator />
 
-              {/* Specs Grid */}
+              {/* Specs Grid — hotels show rooms/stars instead of bedroom/bath breakdown,
+                  which would otherwise render zeroes for a whole-hotel listing. */}
               <div className="grid grid-cols-2 xs:grid-cols-4 gap-2 lg:gap-4">
-                {[
-                  { icon: BedDouble, value: property.bedrooms || 0, label: isRu ? 'Спальни' : 'Beds' },
-                  { icon: Bath, value: property.bathrooms || 0, label: isRu ? 'Ванные' : 'Baths' },
-                  { icon: Maximize, value: property.area_sqm || 0, label: 'м²' },
-                  { icon: Users, value: property.max_guests || rentalTerms?.max_guests || 0, label: isRu ? 'Гости' : 'Guests' },
-                ].filter((spec) => spec.value > 0).map((spec, i) => (
+                {(isHotel
+                  ? [
+                      { icon: BedDouble, value: property.hotel_keys || 0, label: isRu ? 'Номера' : 'Rooms' },
+                      { icon: Star, value: property.hotel_star_rating || 0, label: isRu ? 'Звёзды' : 'Stars' },
+                      { icon: Maximize, value: property.area_sqm || 0, label: 'м²' },
+                      { icon: Users, value: property.max_guests || rentalTerms?.max_guests || 0, label: isRu ? 'Гости' : 'Guests' },
+                    ]
+                  : [
+                      { icon: BedDouble, value: property.bedrooms || 0, label: isRu ? 'Спальни' : 'Beds' },
+                      { icon: Bath, value: property.bathrooms || 0, label: isRu ? 'Ванные' : 'Baths' },
+                      { icon: Maximize, value: property.area_sqm || 0, label: 'м²' },
+                      { icon: Users, value: property.max_guests || rentalTerms?.max_guests || 0, label: isRu ? 'Гости' : 'Guests' },
+                    ]
+                ).filter((spec) => spec.value > 0).map((spec, i) => (
                   <div key={i} className="flex flex-col items-center p-3 lg:p-5 rounded-none bg-muted/50">
                     <spec.icon className="w-5 h-5 lg:w-6 lg:h-6 text-muted-foreground mb-1" />
                     <span className="text-lg lg:text-xl font-bold">{spec.value}</span>
@@ -569,11 +622,30 @@ export default function PropertyDetail() {
                 </>
               )}
 
+              {/* FAQ — derived from structured fields. Renders for hotels (and any
+                  listing with answerable fields); self-hides when nothing applies. */}
+              {(isHotel || rentalTerms) && (
+                <>
+                  <Separator />
+                  <PropertyFaq
+                    checkInTime={rentalTerms?.check_in_time}
+                    checkOutTime={rentalTerms?.check_out_time}
+                    wifiIncluded={propertyExt.wifi_included ?? null}
+                    parkingIncluded={rentalTerms?.parking_included}
+                    petsAllowed={rentalTerms?.pets_allowed}
+                    cancellationPolicy={rentalTerms?.cancellation_policy}
+                    quietHoursStart={rentalTerms?.quiet_hours_start}
+                    quietHoursEnd={rentalTerms?.quiet_hours_end}
+                  />
+                </>
+              )}
+
               <Separator />
               <ReviewsSection
                 itemType="property"
                 itemId={id || ''}
                 itemName={isRu ? property.title_ru : property.title_en}
+                subscores={propertyExt.review_subscores}
               />
 
               <Separator />
@@ -583,6 +655,15 @@ export default function PropertyDetail() {
                 district={property.district}
                 address={property.address}
               />
+
+              {/* What's nearby — POIs around the listing. Self-hides when there
+                  are no coords or no POIs, so it benefits villas and hotels alike. */}
+              {property.lat != null && property.lng != null && (
+                <>
+                  <Separator />
+                  <NearbyPlaces lat={property.lat} lng={property.lng} />
+                </>
+              )}
 
               <Separator />
               <SimilarProperties
@@ -682,6 +763,8 @@ export default function PropertyDetail() {
                     customLengthDiscounts={property?.custom_length_discounts as any ?? undefined}
                     negotiationEnabled={property?.negotiation_enabled ?? false}
                     seasonalPricing={rentalTerms?.seasonal_pricing as any ?? undefined}
+                    reserveLabelEn={isHotel ? 'Request to book' : undefined}
+                    reserveLabelRu={isHotel ? 'Запросить бронь' : undefined}
                   />
                   <MessageHostButton
                     propertyId={id || 'prop-1'}
@@ -728,6 +811,8 @@ export default function PropertyDetail() {
           dateRange={dateRange}
           guestCount={guestCount}
           onOpenDatePicker={() => setDateSheetOpen(true)}
+          reserveLabelEn={isHotel ? 'Request to book' : undefined}
+          reserveLabelRu={isHotel ? 'Запросить бронь' : undefined}
         />
 
         {/* Mobile Date Picker Sheet */}
