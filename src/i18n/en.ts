@@ -402,6 +402,31 @@ export const en: Record<string, string> = {
   'propertyHub.landing.personaPrompt.enableBusiness': 'I am Business',
   'propertyHub.landing.personaPrompt.enableInvestor': 'I am Investor',
   'propertyHub.landing.proBadge': 'Pro',
+  // Hub hero search
+  'propertyHub.landing.hero.tabRent': 'Rent',
+  'propertyHub.landing.hero.tabBuy': 'Buy',
+  'propertyHub.landing.hero.tabNew': 'New builds',
+  'propertyHub.landing.hero.cta': 'Search',
+  'propertyHub.landing.hero.searchPlaceholder': 'Area, project, or beach…',
+  'propertyHub.landing.hero.anyArea': 'Anywhere in Phuket',
+  // Hub featured rows
+  'propertyHub.landing.row.rentTitle': 'Stay tonight',
+  'propertyHub.landing.row.offplanTitle': 'New developments',
+  'propertyHub.landing.row.resaleTitle': 'Secondary market',
+  'propertyHub.landing.row.investTitle': 'Invest in Phuket',
+  'propertyHub.landing.row.seeAll': 'See all',
+  'propertyHub.landing.row.empty': 'Listings coming soon',
+  'propertyHub.landing.resale.howItWorks': 'How resale works',
+  // Hub trust strip
+  'propertyHub.landing.trust.verified': 'Verified listings',
+  'propertyHub.landing.trust.escrow': 'Escrow via lawyer',
+  'propertyHub.landing.trust.clearview': 'ClearView™ rating',
+  'propertyHub.landing.trust.localTeam': 'Local team in Phuket',
+  // Hub ClearView callout
+  'propertyHub.landing.clearview.title': 'Know before you buy',
+  'propertyHub.landing.clearview.desc': 'Independent AAA–CCC rating on developers and off-plan projects across eight risk categories.',
+  'propertyHub.landing.clearview.cta': 'Explore ClearView™',
+  'propertyHub.landing.clearview.why': 'Why myUNO',
 
   'account.property.section': 'Property',
   'account.property.hub': 'Overview & scenarios',

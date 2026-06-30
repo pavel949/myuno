@@ -402,6 +402,31 @@ export const ru: Record<string, string> = {
   'propertyHub.landing.personaPrompt.enableBusiness': 'Я Бизнес',
   'propertyHub.landing.personaPrompt.enableInvestor': 'Я Инвестор',
   'propertyHub.landing.proBadge': 'Pro',
+  // Hub hero search
+  'propertyHub.landing.hero.tabRent': 'Аренда',
+  'propertyHub.landing.hero.tabBuy': 'Купить',
+  'propertyHub.landing.hero.tabNew': 'Новостройки',
+  'propertyHub.landing.hero.cta': 'Искать',
+  'propertyHub.landing.hero.searchPlaceholder': 'Район, проект или пляж…',
+  'propertyHub.landing.hero.anyArea': 'Весь Пхукет',
+  // Hub featured rows
+  'propertyHub.landing.row.rentTitle': 'Заехать сегодня',
+  'propertyHub.landing.row.offplanTitle': 'Новостройки',
+  'propertyHub.landing.row.resaleTitle': 'Вторичный рынок',
+  'propertyHub.landing.row.investTitle': 'Инвестиции на Пхукете',
+  'propertyHub.landing.row.seeAll': 'Все',
+  'propertyHub.landing.row.empty': 'Скоро появятся объекты',
+  'propertyHub.landing.resale.howItWorks': 'Как работает вторичка',
+  // Hub trust strip
+  'propertyHub.landing.trust.verified': 'Проверенные объекты',
+  'propertyHub.landing.trust.escrow': 'Эскроу через юриста',
+  'propertyHub.landing.trust.clearview': 'Рейтинг ClearView™',
+  'propertyHub.landing.trust.localTeam': 'Команда на Пхукете',
+  // Hub ClearView callout
+  'propertyHub.landing.clearview.title': 'Знайте до покупки',
+  'propertyHub.landing.clearview.desc': 'Независимый рейтинг AAA–CCC по застройщикам и проектам новостроек — по восьми категориям риска.',
+  'propertyHub.landing.clearview.cta': 'Открыть ClearView™',
+  'propertyHub.landing.clearview.why': 'Почему myUNO',
 
   'account.property.section': 'Недвижимость',
   'account.property.hub': 'Обзор и сценарии',
