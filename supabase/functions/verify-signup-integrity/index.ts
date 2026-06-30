@@ -8,6 +8,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
 
 interface RequestBody {
   user_id: string;
@@ -29,11 +30,20 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
 
   try {
+    const auth = await requireAuth(req, cors);
+    if (auth instanceof Response) return auth;
+
     const { user_id, expected_phone } = (await req.json()) as RequestBody;
     if (!user_id || typeof user_id !== "string") {
       return new Response(
         JSON.stringify({ error: "user_id is required" }),
         { status: 400, headers: { ...cors, "Content-Type": "application/json" } },
+      );
+    }
+    if (user_id !== auth.user.id) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden" }),
+        { status: 403, headers: { ...cors, "Content-Type": "application/json" } },
       );
     }
 
