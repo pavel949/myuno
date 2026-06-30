@@ -4,6 +4,7 @@ export { SeekerLane, CapitalLane, ProLane } from './PersonaLanes';
 export { FeaturedRow } from './FeaturedRow';
 export {
   RentFeaturedRow,
+  HotelsFeaturedRow,
   OffplanFeaturedRow,
   ResaleFeaturedRow,
   InvestTeaserRow,

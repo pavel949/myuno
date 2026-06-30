@@ -33,6 +33,7 @@ import { Badge } from '@/components/ui/badge';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 interface HubCardDef {
   to: string;
@@ -82,6 +83,18 @@ const SEEKER_CARDS: HubCardDef[] = [
     descKey: 'propertyHub.landing.invest.desc',
   },
 ];
+
+/**
+ * Standalone STR "Hotels" seeker card — appended to the seeker lane only when
+ * the hotels_in_str flag is on. Distinct from the residences nightly card and
+ * from the capital-lane investment "Hotels" card (buy/lease/operate).
+ */
+const STR_HOTELS_CARD: HubCardDef = {
+  to: `${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short&stayType=hotels`,
+  icon: Hotel,
+  titleKey: 'propertyHub.landing.strHotels.title',
+  descKey: 'propertyHub.landing.strHotels.desc',
+};
 
 const CAPITAL_CARDS: HubCardDef[] = [
   {
@@ -238,6 +251,13 @@ function CapitalPersonaPrompt({
 
 /** Seeker lane — rent / buy / new / resale / invest. Always visible. */
 export function SeekerLane({ t }: { t: TFn }) {
+  const hotelsInStr = useFeatureFlag('hotels_in_str', false);
+  // Slot the standalone STR Hotels card right after the nightly residences
+  // card so the two short-stay options read as siblings.
+  const cards = hotelsInStr
+    ? [SEEKER_CARDS[0], STR_HOTELS_CARD, ...SEEKER_CARDS.slice(1)]
+    : SEEKER_CARDS;
+
   return (
     <section aria-labelledby="property-seekers-heading">
       <h2
@@ -246,7 +266,7 @@ export function SeekerLane({ t }: { t: TFn }) {
       >
         {t('propertyHub.landing.sectionSeekers')}
       </h2>
-      <HubCardGrid items={SEEKER_CARDS} t={t} />
+      <HubCardGrid items={cards} t={t} />
     </section>
   );
 }

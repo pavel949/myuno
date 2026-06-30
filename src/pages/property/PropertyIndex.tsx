@@ -29,7 +29,8 @@ import { filterValuesToPropertyFilters } from '@/lib/propertyCatalogServerFilter
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 import { useFeatureFlag } from '@/hooks/useFeatureFlag';
-import { isBlockedFromNightly } from '@/lib/real-estate/strEligibility';
+import { isBlockedFromNightly, isHotel } from '@/lib/real-estate/strEligibility';
+import { StayTypeTabs, type StayType } from '@/components/property/StayTypeTabs';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import {
   serializeFilters,
@@ -214,6 +215,16 @@ export default function PropertyIndex() {
   const hotelsInStr = useFeatureFlag('hotels_in_str', false);
   const isNightlySearch = propertyMode === 'rent' && rentTenancy === 'short';
 
+  // Standalone STR category split: Residences (whole-unit) vs Hotels (licensed
+  // hotel properties). Persisted in the URL so it stays a faithful share link.
+  const stayType: StayType = searchParamsUrl.get('stayType') === 'hotels' ? 'hotels' : 'residences';
+  const setStayType = useCallback((next: StayType) => {
+    const params = new URLSearchParams(searchParamsUrl);
+    if (next === 'residences') params.delete('stayType');
+    else params.set('stayType', next);
+    setSearchParamsUrl(params, { replace: true });
+  }, [searchParamsUrl, setSearchParamsUrl]);
+
   // Category ribbon only — DB filters handled server-side
   const filteredProperties = useMemo(() => {
     let result = allProperties;
@@ -224,10 +235,16 @@ export default function PropertyIndex() {
       );
     }
 
-    // Thai Hotel Act safety gate: in nightly (<30-night) search, keep condos and
-    // unlicensed hotels out of results. Behind the kill-switch; off ⇒ unchanged.
+    // Thai Hotel Act safety gate + standalone STR category split. In nightly
+    // (<30-night) search keep condos and unlicensed hotels out, then split the
+    // remainder by stay type: Hotels shows only licensed hotels, Residences
+    // shows whole-unit listings (everything else). Behind the kill-switch;
+    // off ⇒ unchanged.
     if (hotelsInStr && isNightlySearch) {
       result = result.filter((p) => !isBlockedFromNightly(p));
+      result = stayType === 'hotels'
+        ? result.filter((p) => isHotel(p))
+        : result.filter((p) => !isHotel(p));
     }
 
     // Persona filter — uses tags + amenities + persona_tags. Falls back to
@@ -241,7 +258,7 @@ export default function PropertyIndex() {
     });
 
     return result;
-  }, [allProperties, selectedCategories, applyPersonaFilter, hotelsInStr, isNightlySearch]);
+  }, [allProperties, selectedCategories, applyPersonaFilter, hotelsInStr, isNightlySearch, stayType]);
 
   const handlePropertyClick = useCallback((id: string) => {
     navigate(APP_ROUTES.PROPERTY_DETAIL(id));
@@ -340,6 +357,13 @@ export default function PropertyIndex() {
             </div>
           </div>
         </div>
+
+        {/* Standalone STR category split — Residences | Hotels */}
+        {hotelsInStr && isNightlySearch && (
+          <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "pt-3")}>
+            <StayTypeTabs value={stayType} onChange={setStayType} />
+          </div>
+        )}
 
         {/* Active filter badges */}
         {(selectedCategories.length > 0 || activeFilterCount > 0) && (

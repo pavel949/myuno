@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFeaturedProperties } from '@/hooks/useProperties';
+import { useFeaturedProperties, useFeaturedHotels } from '@/hooks/useProperties';
 import { useOffplanProjects } from '@/hooks/useOffplanProjects';
 import { useResaleProperties } from '@/hooks/useResaleProperties';
 import { useFeaturedInvestments } from '@/hooks/useInvestmentProjects';
@@ -15,6 +15,8 @@ import { OffplanProjectCard } from '@/components/property/OffplanProjectCard';
 import { ResalePropertyCard } from '@/components/property/ResalePropertyCard';
 import { InvestmentCard } from '@/components/invest/InvestmentCard';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { isHotel } from '@/lib/real-estate/strEligibility';
 import { FeaturedRow } from './FeaturedRow';
 
 type TFn = (key: string) => string;
@@ -22,12 +24,42 @@ type TFn = (key: string) => string;
 const HUB_LIMIT = 8;
 
 export function RentFeaturedRow({ t }: { t: TFn }) {
+  const hotelsInStr = useFeatureFlag('hotels_in_str', false);
   const { data = [], isLoading } = useFeaturedProperties(HUB_LIMIT);
+  // When the standalone Hotels category is live, keep the Rent rail to
+  // residences only — hotels get their own rail below.
+  const items = hotelsInStr ? data.filter((p) => !isHotel(p)) : data;
 
   return (
     <FeaturedRow
       title={t('propertyHub.landing.row.rentTitle')}
       seeAllTo={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`}
+      seeAllLabel={t('propertyHub.landing.row.seeAll')}
+      emptyLabel={t('propertyHub.landing.row.empty')}
+      isLoading={isLoading}
+      isEmpty={items.length === 0}
+    >
+      {items.map((property) => (
+        <PropertyListingCard key={property.id} property={property} mode="rent" />
+      ))}
+    </FeaturedRow>
+  );
+}
+
+/**
+ * Standalone "Hotels" STR rail — licensed, nightly-eligible hotels only.
+ * Self-hides when there is nothing to show (the row is mounted behind the
+ * hotels_in_str flag by PropertyLanding, so an empty rail should disappear
+ * rather than render an empty-state placeholder).
+ */
+export function HotelsFeaturedRow({ t }: { t: TFn }) {
+  const { data = [], isLoading } = useFeaturedHotels(HUB_LIMIT);
+  if (!isLoading && data.length === 0) return null;
+
+  return (
+    <FeaturedRow
+      title={t('propertyHub.landing.row.hotelsTitle')}
+      seeAllTo={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short&stayType=hotels`}
       seeAllLabel={t('propertyHub.landing.row.seeAll')}
       emptyLabel={t('propertyHub.landing.row.empty')}
       isLoading={isLoading}

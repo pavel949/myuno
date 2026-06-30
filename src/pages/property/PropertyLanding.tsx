@@ -13,12 +13,14 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { PROPERTY_VERTICAL_PAGE_GUTTER } from '@/design-system/propertyVertical';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import {
   HubHero,
   SeekerLane,
   CapitalLane,
   ProLane,
   RentFeaturedRow,
+  HotelsFeaturedRow,
   OffplanFeaturedRow,
   ResaleFeaturedRow,
   InvestTeaserRow,
@@ -29,6 +31,7 @@ import {
 export default function PropertyLanding() {
   const { t, language } = useLanguage();
   const isRu = language === 'ru';
+  const hotelsInStr = useFeatureFlag('hotels_in_str', false);
 
   const trustItems = [
     { icon: BadgeCheck, label: t('propertyHub.landing.trust.verified') },
@@ -49,6 +52,7 @@ export default function PropertyLanding() {
         <HubHero t={t} isRu={isRu} />
         <SeekerLane t={t} />
         <RentFeaturedRow t={t} />
+        {hotelsInStr && <HotelsFeaturedRow t={t} />}
         <OffplanFeaturedRow t={t} />
         <ResaleFeaturedRow t={t} />
         <HubTrustStrip items={trustItems} ariaLabel={t('propertyHub.landing.trust.clearview')} />

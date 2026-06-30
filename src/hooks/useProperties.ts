@@ -4,6 +4,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { isHotel, isNightlyEligible } from '@/lib/real-estate/strEligibility';
 import {
   normalizePropertyTaxonomyArrays,
   normalizeListingAmenities,
@@ -230,6 +231,16 @@ const PROPERTY_LIST_COLUMNS = `
   view_type, furnishing_level, highlights, monthly_discount,
   weekly_discount, management_company_id, sale_price,
   ownership_form, pool_type, parking_type, is_for_sale
+`;
+
+/**
+ * List columns plus the hotel-specific fields needed to detect and label hotels
+ * in featured rails (asset_class + tenancy + licence + keys/stars). The base
+ * list set omits these to stay lean; only the STR "Hotels" rail needs them.
+ */
+const PROPERTY_HOTEL_LIST_COLUMNS = `
+  ${PROPERTY_LIST_COLUMNS},
+  asset_class, tenancy_modes, hotel_license_type, hotel_keys, hotel_star_rating
 `;
 
 /**
@@ -604,6 +615,37 @@ export function useFeaturedProperties(limit = 6) {
       if (error) throw error;
       const rows = (data || []) as unknown as Property[];
       return rows.map((p) => normalizePropertyTaxonomyArrays(p));
+    },
+  });
+}
+
+/**
+ * Featured licensed hotels for the STR "Hotels" rail. Reads commercial-class
+ * rows, then narrows client-side to nightly-eligible hotels (full licence +
+ * short-flagged) via the shared strEligibility gate. Always safe to call; the
+ * STR "Hotels" category is feature-flagged at the call site, not here.
+ */
+export function useFeaturedHotels(limit = 8) {
+  return useQuery({
+    queryKey: ['featured-hotels', limit],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('properties')
+        .select(PROPERTY_HOTEL_LIST_COLUMNS)
+        .eq('is_active', true)
+        .eq('asset_class', 'commercial')
+        .order('is_featured', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(limit * 3);
+
+      if (error) throw error;
+      const rows = (data || []) as unknown as Property[];
+      return rows
+        .filter((p) => isHotel(p) && isNightlyEligible(p))
+        .slice(0, limit)
+        .map((p) => normalizePropertyTaxonomyArrays(p));
     },
   });
 }
