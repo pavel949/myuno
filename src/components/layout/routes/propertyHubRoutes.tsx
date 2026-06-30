@@ -111,6 +111,9 @@ export const propertyHubRoutes = (
     <Route path="invest/execution" element={<Navigate to={APP_ROUTES.INVEST_EXECUTION} replace />} />
     <Route path="invest/:id" element={<InvestIdRedirect />} />
 
+    {/* Public directory of management companies → /company/:slug profiles */}
+    <Route path="companies" element={<LazyPage><Pages.ManagementCompaniesIndex /></LazyPage>} />
+
     {/* My Property */}
     <Route path="my" element={<LazyPage><Pages.PropertyMySection /></LazyPage>} />
 

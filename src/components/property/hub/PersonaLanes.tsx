@@ -139,6 +139,12 @@ const PRO_CARDS: HubCardDef[] = [
     titleKey: 'propertyHub.landing.listWithUs.title',
     descKey: 'propertyHub.landing.listWithUs.desc',
   },
+  {
+    to: APP_ROUTES.PROPERTY_COMPANIES,
+    icon: Building2,
+    titleKey: 'propertyHub.landing.findMc.title',
+    descKey: 'propertyHub.landing.findMc.desc',
+  },
 ];
 
 function HubCardGrid({ items, t }: { items: HubCardDef[]; t: TFn }) {

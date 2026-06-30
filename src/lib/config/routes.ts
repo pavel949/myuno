@@ -101,6 +101,7 @@ export const APP_ROUTES = {
   PROJECT_DETAIL: (id: string) => `/property/project/${id}`,
   COMPLEXES: '/property/projects',
   MANAGEMENT_COMPANY: (slug: string) => `/company/${slug}`,
+  PROPERTY_COMPANIES: '/property/companies',
 
   // ── Offplan & Developers (under Property Hub) ──
   OFFPLAN: '/property/offplan',

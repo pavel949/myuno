@@ -427,6 +427,13 @@ export const ru: Record<string, string> = {
   'propertyHub.landing.clearview.desc': 'Независимый рейтинг AAA–CCC по застройщикам и проектам новостроек — по восьми категориям риска.',
   'propertyHub.landing.clearview.cta': 'Открыть ClearView™',
   'propertyHub.landing.clearview.why': 'Почему myUNO',
+  // Hub → management-company directory entry
+  'propertyHub.landing.findMc.title': 'Найти управляющую компанию',
+  'propertyHub.landing.findMc.desc': 'Проверенные УК Пхукета — по району и рейтингу.',
+  // Management companies directory page
+  'mcDirectory.title': 'Управляющие компании',
+  'mcDirectory.subtitle': 'Проверенные УК Пхукета — сравните рейтинги, районы и портфели объектов.',
+  'mcDirectory.empty': 'Пока нет управляющих компаний.',
 
   'account.property.section': 'Недвижимость',
   'account.property.hub': 'Обзор и сценарии',
