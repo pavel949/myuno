@@ -32,6 +32,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    const rl = await withRateLimit(req, 'place-details', RATE_LIMITS.publicRead, corsHeaders);
+    if (rl) return rl;
+
     if (!GOOGLE_KEY) {
       return json({ error: "GOOGLE_MAPS_API_KEY is not configured" }, 500);
     }
