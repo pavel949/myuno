@@ -59,6 +59,7 @@ export const DeveloperDetail = lazy(() => import('@/pages/property/DeveloperDeta
 export const PropertyConsultation = lazy(() => import('@/pages/property/PropertyConsultation'));
 export const PropertyMySection = lazy(() => import('@/pages/property/PropertyMySection'));
 export const ManagementCompanyProfile = lazy(() => import('@/pages/property/ManagementCompanyProfile'));
+export const ManagementCompaniesIndex = lazy(() => import('@/pages/property/ManagementCompaniesIndex'));
 export const ResaleIndex = lazy(() => import('@/pages/property/ResaleIndex'));
 export const PricingPage = lazy(() => import('@/pages/PricingPage'));
 export const JoinInvite = lazy(() => import('@/pages/JoinInvite'));

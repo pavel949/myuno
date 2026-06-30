@@ -427,6 +427,23 @@ export const en: Record<string, string> = {
   'propertyHub.landing.clearview.desc': 'Independent AAA–CCC rating on developers and off-plan projects across eight risk categories.',
   'propertyHub.landing.clearview.cta': 'Explore ClearView™',
   'propertyHub.landing.clearview.why': 'Why myUNO',
+  // Hub → management-company directory entry
+  'propertyHub.landing.findMc.title': 'Find a management company',
+  'propertyHub.landing.findMc.desc': 'Browse verified Phuket management companies by district and rating.',
+  // Management companies directory page
+  'mcDirectory.title': 'Management companies',
+  'mcDirectory.subtitle': 'Verified Phuket management companies — compare ratings, districts, and managed portfolios.',
+  'mcDirectory.empty': 'No management companies listed yet.',
+  // Investor hub — trust band + ClearView callout
+  'investHub.trust.verified': 'Verified projects',
+  'investHub.trust.score': 'myUNO Score',
+  'investHub.trust.dueDiligence': 'Due-diligence access',
+  'investHub.trust.advisory': 'Advisory support',
+  'investHub.trust.clearview': 'ClearView™ rating',
+  'investHub.clearview.title': 'Rated before you commit',
+  'investHub.clearview.desc': 'Independent ClearView™ AAA–CCC ratings on developers and off-plan projects — the same diligence behind every deal.',
+  'investHub.clearview.cta': 'Explore ClearView™',
+  'investHub.clearview.secondary': 'Talk to capital advisory',
 
   'account.property.section': 'Property',
   'account.property.hub': 'Overview & scenarios',

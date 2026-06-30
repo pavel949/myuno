@@ -7,10 +7,11 @@
  */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Home } from 'lucide-react';
+import { Home, BadgeCheck, Scale, ShieldCheck, MapPin } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { PROPERTY_VERTICAL_PAGE_GUTTER } from '@/design-system/propertyVertical';
 import {
   HubHero,
@@ -29,6 +30,13 @@ export default function PropertyLanding() {
   const { t, language } = useLanguage();
   const isRu = language === 'ru';
 
+  const trustItems = [
+    { icon: BadgeCheck, label: t('propertyHub.landing.trust.verified') },
+    { icon: Scale, label: t('propertyHub.landing.trust.escrow') },
+    { icon: ShieldCheck, label: t('propertyHub.landing.trust.clearview') },
+    { icon: MapPin, label: t('propertyHub.landing.trust.localTeam') },
+  ];
+
   return (
     <>
       <SEOHead
@@ -43,8 +51,15 @@ export default function PropertyLanding() {
         <RentFeaturedRow t={t} />
         <OffplanFeaturedRow t={t} />
         <ResaleFeaturedRow t={t} />
-        <HubTrustStrip t={t} />
-        <ClearViewCallout t={t} />
+        <HubTrustStrip items={trustItems} ariaLabel={t('propertyHub.landing.trust.clearview')} />
+        <ClearViewCallout
+          title={t('propertyHub.landing.clearview.title')}
+          desc={t('propertyHub.landing.clearview.desc')}
+          ctaLabel={t('propertyHub.landing.clearview.cta')}
+          ctaTo={APP_ROUTES.CLEARVIEW}
+          secondaryLabel={t('propertyHub.landing.clearview.why')}
+          secondaryTo={APP_ROUTES.WHY_MYUNO}
+        />
         <InvestTeaserRow t={t} />
         <CapitalLane t={t} />
         <ProLane t={t} />

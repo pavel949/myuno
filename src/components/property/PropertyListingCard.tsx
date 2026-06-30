@@ -5,8 +5,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Star, Zap } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Star, Zap, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { PropertyImageCarousel } from './PropertyImageCarousel';
@@ -16,6 +16,7 @@ import { useCurrency } from '@/contexts/CurrencyContext';
 import { getDistrictLabel, getPropertyTypeLabel, getHighlightLabel, getViewTypeLabel } from '@/lib/taxonomies';
 import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
@@ -274,6 +275,20 @@ export function PropertyListingCard({
           isRu={isRu}
           className="mt-1.5 [&>div]:text-[10px] [&>div]:px-1.5 [&>div]:py-0.5 [&_svg]:w-3 [&_svg]:h-3"
         />
+
+        {/* Managed by — links to the public management-company profile */}
+        {companySlug && companyName && (
+          <Link
+            to={APP_ROUTES.MANAGEMENT_COMPANY(companySlug)}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-1.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground hover:underline"
+          >
+            <Building2 className="w-3 h-3 shrink-0" />
+            <span className="line-clamp-1">
+              {isRu ? 'Управляет' : 'Managed by'} {companyName}
+            </span>
+          </Link>
+        )}
       </div>
     </div>
   );
