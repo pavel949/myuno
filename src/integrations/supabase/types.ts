@@ -33457,6 +33457,7 @@ export type Database = {
       devmod_is_broker_or_admin: { Args: never; Returns: boolean }
       devmod_my_developer_id: { Args: never; Returns: string }
       devmod_release_expired_holds: { Args: never; Returns: number }
+      email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
