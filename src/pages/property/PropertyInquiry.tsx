@@ -22,6 +22,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
 import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
+import { useRoomTypes } from '@/hooks/useRoomTypes';
 import { useRareFindBadge } from '@/hooks/useRareFindBadge';
 import { DepositPaymentOptions, type DepositPaymentOptionsHandle } from '@/components/property/DepositPaymentOptions';
 import { PayWhenSelector, type PayWhenChoice } from '@/components/property/PayWhenSelector';
@@ -255,7 +256,21 @@ export default function PropertyInquiry() {
     return differenceInDays(checkOut, checkIn);
   }, [checkIn, checkOut]);
 
-  const pricePerNight = rentalTerms?.price_per_night || property?.price || 0;
+  // Room-type booking (Part 5B): when arriving from a hotel room picker, the
+  // order is a room_rental against the selected room type, priced by the room's
+  // nightly rate. Falls back to whole-property pricing if the room is not found
+  // (e.g. the table is not live yet).
+  const roomTypeIdParam = searchParams.get('roomType');
+  const roomNameParam = searchParams.get('roomName');
+  const { data: roomTypes = [] } = useRoomTypes(roomTypeIdParam ? id : undefined);
+  const selectedRoom = roomTypeIdParam
+    ? roomTypes.find((r) => r.id === roomTypeIdParam) ?? null
+    : null;
+
+  const pricePerNight =
+    selectedRoom?.base_price_per_night != null
+      ? selectedRoom.base_price_per_night
+      : rentalTerms?.price_per_night || property?.price || 0;
 
   // Pull rate seasons (per-property pricing overrides) for the central engine.
   const { data: rateSeasons } = usePropertyRateSeasons(id);
@@ -901,18 +916,30 @@ export default function PropertyInquiry() {
                       prepay_amount: pricing.prepayAmount,
                       prepay_percent: pricing.prepayPercent,
                       booking_mode: 'request',
+                      ...(selectedRoom
+                        ? {
+                            room_type_id: selectedRoom.id,
+                            room_type_title: roomNameParam || selectedRoom.name_en,
+                          }
+                        : {}),
                       ...(rentalExt?.manager_email ? { manager_email: rentalExt.manager_email } : {}),
                       ...(rentalExt?.manager_phone ? { manager_phone: rentalExt.manager_phone } : {}),
                     },
                     items: [{
-                      item_name: propertyTitle || 'Property booking',
-                      item_type: 'property_rental',
+                      item_name: selectedRoom
+                        ? `${propertyTitle || 'Hotel'} — ${roomNameParam || selectedRoom.name_en}`
+                        : propertyTitle || 'Property booking',
+                      item_type: selectedRoom ? 'room_rental' : 'property_rental',
+                      resource_id: selectedRoom ? selectedRoom.id : undefined,
                       qty: nights,
                       unit_price: pricePerNight,
                       amount: pricing.total,
                       start_at: checkIn!,
                       end_at: checkOut!,
-                      metadata: { source_id: id },
+                      metadata: {
+                        source_id: id,
+                        ...(selectedRoom ? { room_type_id: selectedRoom.id } : {}),
+                      },
                     }],
                     participants: [{
                       role: 'primary',

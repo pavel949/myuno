@@ -19,7 +19,10 @@ import { AIIntakePanel } from '@/components/owner/property-wizard/AIIntakePanel'
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Bed, Calendar, UsersRound, Eye, Loader2, Check, Rocket, EyeOff } from 'lucide-react';
+import { Bed, BedDouble, Calendar, UsersRound, Eye, Loader2, Check, Rocket, EyeOff } from 'lucide-react';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { isHotel } from '@/lib/real-estate/strEligibility';
+import { RoomTypesTab } from '@/components/property/owner/RoomTypesTab';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { normalizeFurnishingLevel, normalizeViewTypes, primaryViewType } from '@/lib/propertyFormNormalizers';
 
@@ -112,6 +115,16 @@ export default function PropertyEditor() {
 const isRu = language === 'ru';
 
   const { data: property, isLoading } = useOwnerProperty(id);
+
+  // Hotel room types tab (Part 5B) — only for licensed-hotel properties, behind
+  // the STR-hotels flag.
+  const hotelsInStr = useFeatureFlag('hotels_in_str', false);
+  const isHotelProperty =
+    hotelsInStr &&
+    isHotel({
+      asset_class: (property as { asset_class?: string | null } | undefined)?.asset_class ?? null,
+      property_type: (property as { property_type?: string | null } | undefined)?.property_type ?? null,
+    });
   const updateProperty = useUpdateOwnerProperty();
   const autosaveProperty = useUpdateOwnerProperty();
   const { availability, syncAvailability, isSaving: isSavingAvailability } = usePropertyAvailabilityManagement(id);
@@ -441,6 +454,15 @@ const isRu = language === 'ru';
 
   // Extra tabs for owner mode
   const extraTabs: ExtraTab[] = useMemo(() => [
+    ...(isHotelProperty && id
+      ? [{
+          id: 'room_types',
+          icon: BedDouble,
+          labelEn: 'Room types',
+          labelRu: 'Типы номеров',
+          content: <RoomTypesTab propertyId={id} />,
+        }]
+      : []),
     {
       id: 'rooms',
       icon: Bed,
@@ -469,7 +491,7 @@ const isRu = language === 'ru';
       labelRu: 'Команда',
       content: <PropertyTeamTab propertyId={id || ''} />,
     },
-  ], [rooms, localAvailability, formData?.price_per_night, formData?.seasonal_pricing, id]);
+  ], [rooms, localAvailability, formData?.price_per_night, formData?.seasonal_pricing, id, isHotelProperty]);
 
   // Loading state
   if (isLoading) {

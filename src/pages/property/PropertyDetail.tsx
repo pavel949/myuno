@@ -35,6 +35,7 @@ import {
 import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { RelatedServicesSection } from '@/components/crosssell';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
+import { RoomTypesSection } from '@/components/property/detail/RoomTypesSection';
 import { ExitIntentModal } from '@/components/leads/ExitIntentModal';
 import { SEOHead, createRealEstateListingSchema, createHotelSchema } from '@/components/seo';
 import { HostProfileSection } from '@/components/property/HostProfileSection';
@@ -472,6 +473,19 @@ export default function PropertyDetail() {
                   propertyType={property.property_type}
                 />
               </div>
+
+              {/* Hotel room types (Part 5B) — self-hides until the hotel has
+                  bookable room_types; otherwise the whole-property flow stands. */}
+              {isHotel && id && (
+                <>
+                  <Separator />
+                  <RoomTypesSection
+                    propertyId={id}
+                    dateRange={dateRange}
+                    guestCount={guestCount}
+                  />
+                </>
+              )}
 
               {property.project && (
                 <>
