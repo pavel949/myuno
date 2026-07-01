@@ -51,6 +51,7 @@ import {
   LandingSection,
 } from '@/components/landings/LandingPrimitives';
 import { ConciergeHelpSheet, type HelpTopic } from '@/components/concierge/ConciergeHelpSheet';
+import heroPhuket from '@/assets/hero-phuket-desktop.webp';
 
 type Bi = { ru: string; en: string; th?: string };
 type Lang = 'ru' | 'en' | 'th';
@@ -181,7 +182,7 @@ const USE_CASES: { icon: LucideIcon; title: Bi; body: Bi }[] = [
     title: { ru: 'Удалённое управление недвижимостью', en: 'Remote property management' },
     body: {
       ru: 'Когда вы за границей, а в доме нужны уборка, ремонт, гости, отчёт по доходам — без чата в трёх мессенджерах.',
-      en: 'When you are abroad and the home needs cleaning, repairs, guests and an owner statement — without three messenger threads.',
+      en: 'When you are abroad and the home needs cleaning, repairs, guests and an owner statement, without three messenger threads.',
     },
   },
   {
@@ -232,7 +233,7 @@ const AUDIENCES: { icon: LucideIcon; title: Bi; body: Bi }[] = [
     title: { ru: 'Резиденты и экспаты', en: 'Residents & expats' },
     body: {
       ru: 'Жильё, дети, медицина, банк, бытовые сервисы — без поиска новых исполнителей каждый месяц.',
-      en: 'Housing, children, medicine, banking, daily services — without re-sourcing providers every month.',
+      en: 'Housing, children, medicine, banking, daily services, without re-sourcing providers every month.',
     },
   },
   {
@@ -395,7 +396,7 @@ export default function Landing() {
             >
               {tx(language, {
                 ru: 'Одна заявка. Консьерж myUNO подбирает проверенного исполнителя и ведёт задачу до результата — на русском, английском или тайском.',
-                en: 'One request. The myUNO concierge coordinates a verified provider and stays involved through delivery — in Russian, English or Thai.',
+                en: 'One request. The myUNO concierge coordinates a verified provider and stays involved through delivery, in Russian, English or Thai.',
                 th: 'หนึ่งคำขอ คอนเซียร์จของ myUNO จะจัดหาผู้ให้บริการที่ตรวจสอบแล้ว และดูแลจนกระทั่งงานเสร็จสมบูรณ์',
               })}
             </motion.p>
@@ -443,6 +444,24 @@ export default function Landing() {
                 {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
               </Link>
             </p>
+
+            {/* Supporting hero visual — real Phuket establishing shot */}
+            <motion.figure
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mt-10 overflow-hidden border border-border"
+            >
+              <img
+                src={heroPhuket}
+                alt={tx(language, { ru: 'Пхукет: побережье и город', en: 'Phuket coastline and town', th: 'ภูเก็ต' })}
+                width={1920}
+                height={1080}
+                loading="eager"
+                decoding="async"
+                className="aspect-[16/9] w-full object-cover sm:aspect-[2/1] lg:aspect-[21/9]"
+              />
+            </motion.figure>
 
             {/* Trust strip — 4 signals under hero */}
             <motion.ul
@@ -552,9 +571,6 @@ export default function Landing() {
       <LandingSection>
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
-            <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Когда доверие важнее, чем выбор', en: 'When trust matters more than browsing', th: 'เมื่อความน่าเชื่อถือสำคัญกว่าการค้นหา' })}
-            </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
               {tx(language, { ru: 'Ситуации, ради которых построена платформа', en: 'Situations the platform is built for' })}
             </h2>
@@ -591,9 +607,6 @@ export default function Landing() {
       <LandingSection>
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
-            <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Сравнение', en: 'Comparison', th: 'การเปรียบเทียบ' })}
-            </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
               {tx(language, {
                 ru: 'Чем это безопаснее обычной локальной координации',
@@ -644,16 +657,13 @@ export default function Landing() {
           <span id="emergency" className="block -mt-20 pt-20" aria-hidden />
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_minmax(0,1.2fr)]">
             <div className="space-y-3">
-              <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-                {tx(language, { ru: 'Когда нужна помощь сейчас', en: 'When help is needed now', th: 'เมื่อต้องการความช่วยเหลือทันที' })}
-              </p>
               <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
                 {tx(language, { ru: 'Экстренная поддержка', en: 'Emergency support', th: 'ความช่วยเหลือฉุกเฉิน' })}
               </h2>
               <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
                 {tx(language, {
                   ru: 'Доступно без аккаунта. Дежурный консьерж принимает запрос круглосуточно — на русском, английском или тайском.',
-                  en: 'Available without an account. The duty concierge takes requests 24/7 — in Russian, English or Thai.',
+                  en: 'Available without an account. The duty concierge takes requests 24/7, in Russian, English or Thai.',
                 })}
               </p>
               <button
@@ -685,16 +695,13 @@ export default function Landing() {
       <LandingSection>
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
-            <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Аудитории', en: 'Audiences', th: 'กลุ่มเป้าหมาย' })}
-            </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
               {tx(language, { ru: 'Для иностранцев на Пхукете', en: 'For foreigners in Phuket' })}
             </h2>
             <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
               {tx(language, {
                 ru: 'Одна и та же модель доверенной координации — от первой поездки до владения недвижимостью.',
-                en: 'The same trusted-coordination model — from a first visit to property ownership.',
+                en: 'The same trusted-coordination model, from a first visit to property ownership.',
               })}
             </p>
           </div>
@@ -723,9 +730,6 @@ export default function Landing() {
           <span id="ecosystem-link" className="block -mt-20 pt-20" aria-hidden />
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="max-w-2xl space-y-3">
-              <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-                {tx(language, { ru: 'Глубина платформы', en: 'Depth of the platform', th: 'ความลึกของแพลตฟอร์ม' })}
-              </p>
               <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
                 {tx(language, {
                   ru: 'За одной заявкой — целая операционная экосистема',
@@ -735,13 +739,13 @@ export default function Landing() {
               <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
                 {tx(language, {
                   ru: 'Недвижимость, юриспруденция, медицина, релокация, владение, бытовые сервисы — на платформе myUNO. Вам не нужно изучать каждый раздел; задача консьержа — соединить вас с правильным.',
-                  en: 'Property, legal, medical, relocation, ownership, daily services — all on the myUNO platform. You do not need to learn every section; the concierge connects you to the right one.',
+                  en: 'Property, legal, medical, relocation, ownership, daily services, all on the myUNO platform. You do not need to learn every section; the concierge connects you to the right one.',
                 })}
               </p>
               <p className="pt-2 font-sans text-body-sm text-muted-foreground">
                 {tx(language, {
                   ru: 'Если интересно, что доступно — посмотрите экосистему отдельно.',
-                  en: 'If you are curious what is available — explore the ecosystem separately.',
+                  en: 'If you are curious what is available, explore the ecosystem separately.',
                 })}
               </p>
             </div>
@@ -764,13 +768,10 @@ export default function Landing() {
             <span id="for-partners" className="block -mt-20 pt-20" aria-hidden />
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
               <div className="max-w-2xl space-y-3">
-                <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-                  {tx(language, { ru: 'Для исполнителей', en: 'For providers', th: 'สำหรับผู้ให้บริการ' })}
-                </p>
                 <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
                   {tx(language, {
                     ru: 'Проверенные исполнители — в одну структуру с прозрачными правилами',
-                    en: 'Verified providers — into one structure with transparent rules',
+                    en: 'Verified providers, in one structure with transparent rules',
                   })}
                 </h2>
                 <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
@@ -808,7 +809,7 @@ export default function Landing() {
           <p className="mt-5 font-sans text-body-sm text-muted-foreground sm:text-body">
             {tx(language, {
               ru: 'Опишите задачу — консьерж возьмёт её в работу и подберёт проверенного исполнителя.',
-              en: 'Describe the task — the concierge takes it from there and matches a verified provider.',
+              en: 'Describe the task. The concierge takes it from there and matches a verified provider.',
             })}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">

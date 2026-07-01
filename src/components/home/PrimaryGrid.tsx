@@ -153,16 +153,7 @@ export function PrimaryGrid() {
             'transition-all hover:shadow-lg active:scale-[0.99]',
           )}
         >
-          {/* Decorative orange glow */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-8 -top-8 w-40 h-40 rounded-full opacity-30"
-            style={{
-              background:
-                'radial-gradient(circle, hsl(var(--brand-orange-400) / 0.7) 0%, transparent 70%)',
-            }}
-          />
-          {/* Subtle grid */}
+          {/* Subtle grid (flat, no glow — canon §6) */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 opacity-[0.06]"

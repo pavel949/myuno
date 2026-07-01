@@ -32,12 +32,12 @@ const UI = {
     en: (c: string) => `Hi! I want to join myUNO as a partner (${c})`,
     th: (c: string) => `สวัสดีครับ/ค่ะ ต้องการเข้าร่วม myUNO ในฐานะพาร์ทเนอร์ (${c})`,
   },
-  pageTitleSuffix: { ru: ' — myUNO для партнёров', en: ' — myUNO for partners', th: ' — myUNO สำหรับพาร์ทเนอร์' },
+  pageTitleSuffix: { ru: ' — myUNO для партнёров', en: ', myUNO for partners', th: ', myUNO สำหรับพาร์ทเนอร์' },
   steps: [
     {
       ru: 'Регистрация: имя, категория, телефон — 2 минуты.',
-      en: 'Register: name, category, phone — 2 minutes.',
-      th: 'สมัคร: ชื่อ หมวดหมู่ เบอร์โทร — ใช้เวลา 2 นาที',
+      en: 'Register: name, category, phone, 2 minutes.',
+      th: 'สมัคร: ชื่อ หมวดหมู่ เบอร์โทร, ใช้เวลา 2 นาที',
     },
     {
       ru: 'Верификация: загрузите документы и фото. Проверим за 24 часа.',
@@ -46,8 +46,8 @@ const UI = {
     },
     {
       ru: 'Опубликуйте услуги — и принимайте брони.',
-      en: 'Publish services — and start taking bookings.',
-      th: 'เผยแพร่บริการ — แล้วเริ่มรับการจองได้เลย',
+      en: 'Publish services, and start taking bookings.',
+      th: 'เผยแพร่บริการ, แล้วเริ่มรับการจองได้เลย',
     },
   ],
 };

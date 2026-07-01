@@ -86,7 +86,7 @@ export default function PersonaDirectoryPage() {
 
   const metaTitle = isRu
     ? 'Подбор по аудитории — myUNO'
-    : 'Find your page — myUNO';
+    : 'Find your page, myUNO';
   const metaDescription = isRu
     ? '26 страниц для разных жителей и гостей Пхукета: туристы, инвесторы, семьи, номады, halal, vegan, питомцы и другие.'
     : '26 tailored pages for Phuket residents and guests: tourists, investors, families, nomads, halal, vegan, pets and more.';
@@ -118,7 +118,7 @@ export default function PersonaDirectoryPage() {
           <p className="mt-3 max-w-2xl text-base text-muted-foreground">
             {t(
               '26 страниц с пользой и услугами под конкретную аудиторию — выберите свою или ту, что описывает вашу ситуацию ближе всего.',
-              '26 tailored pages with services for specific audiences — pick yours or the one that fits you best.',
+              '26 tailored pages with services for specific audiences, pick yours or the one that fits you best.',
             )}
           </p>
         </LandingContainer>
@@ -131,7 +131,7 @@ export default function PersonaDirectoryPage() {
             {t('По жизненному циклу', 'By lifecycle')}
           </h2>
           <p className="mb-4 text-sm text-muted-foreground">
-            {t('Шесть кластеров — от прибытия до строительства.', 'Six clusters — from arrival to building.')}
+            {t('Шесть кластеров — от прибытия до строительства.', 'Six clusters, from arrival to building.')}
           </p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {SURFACE_LANDINGS.map((s) => {

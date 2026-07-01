@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import LandingSeoHead from '@/components/seo/LandingSeoHead';
 import { LandingLeadForm } from '@/components/landings/LandingLeadForm';
 import { LandingContainer } from '@/components/landings/LandingPrimitives';
+import { PersonaClusterHero } from '@/components/landings/PersonaClusterHero';
 import { tokenColor } from '@/lib/utils/hslAlpha';
 import { ArrowRight, CheckCircle2, MapPin, Sparkles, Grid3x3 } from 'lucide-react';
 import { getAppsForPersona, withPersonaParam } from '@/lib/landings/personaTagMap';
@@ -89,54 +90,23 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
       <LandingSeoHead landing={landing} type="persona" language={language as 'ru' | 'en'} />
 
       {/* ─── HERO ───────────────────────────────────────────────── */}
-      <header
-        className="relative overflow-hidden border-b border-border"
-        style={{
-          background: `linear-gradient(135deg, ${tokenColor(theme.color, 0.18)} 0%, ${tokenColor(theme.colorAccent, 0.08)} 60%, transparent 100%)`,
+      <PersonaClusterHero
+        icon={Icon}
+        accentColor={theme.color}
+        eyebrow={t(theme.tagline)}
+        title={t(landing.h1)}
+        subtitle={t(landing.subtitle)}
+        primary={{
+          label: t(landing.primaryCta.label),
+          href: wp(landing.primaryCta.href),
+          subtitle: landing.primaryCta.subtitle ? t(landing.primaryCta.subtitle) : undefined,
         }}
-      >
-        {/* Decorative orb */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full blur-3xl"
-          style={{ background: tokenColor(theme.color, 0.25) }}
-        />
-        <LandingContainer className="relative max-w-3xl px-4 py-12 sm:px-6 sm:py-20">
-          <div
-            className="mb-5 inline-flex items-center gap-2 border border-border bg-background px-3 py-1.5"
-            style={{ borderColor: tokenColor(theme.color, 0.4) }}
-          >
-            <Icon className="h-4 w-4" style={{ color: tokenColor(theme.color) }} />
-            <span className="text-xs font-medium uppercase tracking-wider text-foreground">
-              {t(theme.tagline)}
-            </span>
-          </div>
-          <h1 className="text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
-            {t(landing.h1)}
-          </h1>
-          <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-            {t(landing.subtitle)}
-          </p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" className="shadow-lg">
-              <a href={wp(landing.primaryCta.href)}>
-                {t(landing.primaryCta.label)}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-            {landing.secondaryCta ? (
-              <Button asChild size="lg" variant="outline">
-                <a href={wp(landing.secondaryCta.href)}>{t(landing.secondaryCta.label)}</a>
-              </Button>
-            ) : null}
-          </div>
-          {landing.primaryCta.subtitle ? (
-            <p className="mt-3 text-xs text-muted-foreground">
-              {t(landing.primaryCta.subtitle)}
-            </p>
-          ) : null}
-        </LandingContainer>
-      </header>
+        secondary={
+          landing.secondaryCta
+            ? { label: t(landing.secondaryCta.label), href: wp(landing.secondaryCta.href) }
+            : undefined
+        }
+      />
 
       {/* ─── TRUST STRIP ────────────────────────────────────────── */}
       <section className="border-b border-border bg-card/40">
@@ -154,7 +124,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
         {/* ─── PAINS ─────────────────────────────────────────────── */}
         {landing.pains.length > 0 ? (
           <section className="mb-12">
-            <h2 className="mb-5 text-2xl font-semibold text-foreground">
+            <h2 className="mb-5 font-display text-h2 font-normal tracking-tight text-foreground">
               {isRu ? 'Что вы решаете' : 'What you solve'}
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2">
@@ -183,7 +153,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
         {/* ─── SERVICES ──────────────────────────────────────────── */}
         {landing.services.length > 0 ? (
           <section className="mb-12">
-            <h2 className="mb-5 text-2xl font-semibold text-foreground">
+            <h2 className="mb-5 font-display text-h2 font-normal tracking-tight text-foreground">
               {isRu ? 'Услуги под вашу задачу' : 'Services for your goal'}
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2">
@@ -216,7 +186,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
         {/* ─── READY-MADE BUNDLE (§ 10) ──────────────────────────── */}
         {bundle ? (
           <section className="mb-12">
-            <h2 className="mb-5 text-2xl font-semibold text-foreground">
+            <h2 className="mb-5 font-display text-h2 font-normal tracking-tight text-foreground">
               {isRu ? 'Готовый пакет' : 'Ready-made bundle'}
             </h2>
             <BundleCard
@@ -230,14 +200,14 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
         {/* ─── ALL APPS FOR YOU ──────────────────────────────────── */}
         {personaApps.length > 0 ? (
           <section className="mb-12">
-            <h2 className="mb-2 flex items-center gap-2 text-2xl font-semibold text-foreground">
+            <h2 className="mb-2 flex items-center gap-2 font-display text-h2 font-normal tracking-tight text-foreground">
               <Grid3x3 className="h-5 w-5" style={{ color: tokenColor(theme.color) }} />
               {isRu ? 'Все приложения для вас' : 'All apps for you'}
             </h2>
             <p className="mb-5 text-sm text-muted-foreground">
               {isRu
                 ? 'Любое приложение знает, что вы пришли с этой страницы — каталог откроется уже отфильтрованным.'
-                : 'Every app knows you came from this page — the catalogue opens pre-filtered.'}
+                : 'Every app knows you came from this page, the catalogue opens pre-filtered.'}
             </p>
             <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               {personaApps.slice(0, 16).map((app) => (
@@ -287,7 +257,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
         {/* ─── AREA CROSS-LINK ───────────────────────────────────── */}
         {relatedAreas.length > 0 ? (
           <section className="mb-12">
-            <h2 className="mb-5 flex items-center gap-2 text-2xl font-semibold text-foreground">
+            <h2 className="mb-5 flex items-center gap-2 font-display text-h2 font-normal tracking-tight text-foreground">
               <MapPin className="h-5 w-5" style={{ color: tokenColor(theme.color) }} />
               {isRu ? 'Подходящие районы' : 'Best-fit areas'}
             </h2>
@@ -321,7 +291,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
           if (related.length === 0) return null;
           return (
             <section className="mb-12">
-              <h2 className="mb-5 text-2xl font-semibold text-foreground">
+              <h2 className="mb-5 font-display text-h2 font-normal tracking-tight text-foreground">
                 {isRu ? 'Похожие профили' : 'Related profiles'}
               </h2>
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -348,7 +318,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
         {/* ─── FAQ ───────────────────────────────────────────────── */}
         {landing.faq.length > 0 ? (
           <section className="mb-12">
-            <h2 className="mb-5 text-2xl font-semibold text-foreground">
+            <h2 className="mb-5 font-display text-h2 font-normal tracking-tight text-foreground">
               {isRu ? 'Вопросы и ответы' : 'Questions & answers'}
             </h2>
             <dl className="space-y-5">
@@ -370,7 +340,7 @@ const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
             <section className="mt-8">
               <div className="mb-4">
                 <h3 className="text-xl font-semibold text-foreground">
-                  {isRu ? 'Оставьте заявку — ответим за 24 часа' : 'Leave a request — reply within 24 hours'}
+                  {isRu ? 'Оставьте заявку — ответим за 24 часа' : 'Leave a request, reply within 24 hours'}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {isRu

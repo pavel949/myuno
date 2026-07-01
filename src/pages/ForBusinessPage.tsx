@@ -224,8 +224,8 @@ const BUSINESS_TYPES: Array<{ value: string; label: Tri }> = [
 const UI = {
   metaTitle: {
     ru: 'myUNO для бизнеса Пхукета — Foreign-Ready услуги | myUNO',
-    en: 'myUNO for Phuket Business — Foreign-Ready services | myUNO',
-    th: 'myUNO สำหรับธุรกิจภูเก็ต — บริการ Foreign-Ready | myUNO',
+    en: 'myUNO for Phuket Business, Foreign-Ready services | myUNO',
+    th: 'myUNO สำหรับธุรกิจภูเก็ต, บริการ Foreign-Ready | myUNO',
   },
   metaDesc: {
     ru: 'Подготовим ваш ресторан, салон, клинику или венье к работе с иностранцами: меню, сайт, бронирование, маркетинг, капитал, реструктуризация, визы и дистрибуция через myUNO.',
@@ -244,8 +244,8 @@ const UI = {
   },
   heroDesc: {
     ru: 'Меню, сайты, бронирование, маркетинг, капитал, визы и дистрибуция — один партнёр на весь цикл.',
-    en: 'Menus, websites, bookings, marketing, capital, visas and distribution — one partner end-to-end.',
-    th: 'เมนู เว็บไซต์ ระบบจอง การตลาด เงินทุน วีซ่า และการจัดจำหน่าย — พาร์ทเนอร์เดียวครบวงจร',
+    en: 'Menus, websites, bookings, marketing, capital, visas and distribution, one partner end-to-end.',
+    th: 'เมนู เว็บไซต์ ระบบจอง การตลาด เงินทุน วีซ่า และการจัดจำหน่าย, พาร์ทเนอร์เดียวครบวงจร',
   },
   ctaInquiry: { ru: 'Оставить заявку', en: 'Send inquiry', th: 'ส่งคำขอ' },
   ctaPartner: {
@@ -256,13 +256,13 @@ const UI = {
   servicesTitle: { ru: 'Меню услуг', en: 'Services menu', th: 'รายการบริการ' },
   servicesHint: {
     ru: 'Отметьте интересующие — мы соберём индивидуальное предложение.',
-    en: 'Pick what you need — we will tailor a proposal.',
-    th: 'เลือกรายการที่สนใจ — เราจะจัดข้อเสนอเฉพาะให้คุณ',
+    en: 'Pick what you need, we will tailor a proposal.',
+    th: 'เลือกรายการที่สนใจ, เราจะจัดข้อเสนอเฉพาะให้คุณ',
   },
   formTitle: { ru: 'Заявка на консультацию', en: 'Request a consultation', th: 'ขอคำปรึกษา' },
   formHint: (n: number): Tri => ({
     ru: `Выбрано услуг: ${n}. Заполните контакты — свяжемся в течение рабочего дня.`,
-    en: `Services selected: ${n}. Leave your contacts — we reply within one business day.`,
+    en: `Services selected: ${n}. Leave your contacts, we reply within one business day.`,
     th: `เลือกบริการ: ${n} รายการ กรอกข้อมูลติดต่อ เราจะตอบกลับภายใน 1 วันทำการ`,
   }),
   bizName: { ru: 'Название бизнеса *', en: 'Business name *', th: 'ชื่อธุรกิจ *' },
@@ -393,8 +393,7 @@ export default function ForBusinessPage() {
         <LandingChrome isRu={isRu} />
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-16 md:py-24 px-4">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+        <section className="relative overflow-hidden border-b border-border py-16 md:py-24 px-4">
           <div className="relative max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -405,7 +404,7 @@ export default function ForBusinessPage() {
                 <Building2 className="w-3.5 h-3.5" />
                 {t(UI.heroBadge)}
               </Badge>
-              <h1 className="text-3xl md:text-5xl font-bold font-display tracking-tight mb-4">
+              <h1 className="font-display text-h1 sm:text-display font-normal leading-[1.05] tracking-tight mb-4">
                 {t(UI.heroTitle)}
               </h1>
               <p className="text-muted-foreground text-base md:text-lg mb-8">

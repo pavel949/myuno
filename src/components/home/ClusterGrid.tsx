@@ -73,12 +73,6 @@ export function ClusterGrid({ personas }: ClusterGridProps) {
                 className="absolute inset-y-[10px] left-[4px] w-[2px] opacity-70 transition-opacity group-hover:opacity-100"
                 style={{ background: c.color }}
               />
-              {/* Soft navy corner wash — lifts the card off the cream
-                  background and intensifies on hover. */}
-              <div
-                className="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'radial-gradient(circle, hsl(var(--primary) / 0.10), transparent 70%)' }}
-              />
               <div className="relative">
                 <div className="text-[10px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold">
                   {isRu ? 'Направление' : 'Cluster'}

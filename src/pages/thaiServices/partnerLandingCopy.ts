@@ -142,7 +142,7 @@ export const PARTNER_COPY: Record<PartnerLang, PartnerCopy> = {
       eyebrow: 'For Thai businesses in Phuket',
       title: "Bring your business to Phuket's foreign customers",
       subtitle:
-        'myUNO helps Thai businesses get ready for international clients — multilingual menus, websites, online marketing, and automated booking & payments.',
+        'myUNO helps Thai businesses get ready for international clients, multilingual menus, websites, online marketing, and automated booking & payments.',
       cta: 'Apply / Free consultation',
       chips: ['Multilingual menus', 'Website', 'Online marketing', 'Bookings'],
     },
