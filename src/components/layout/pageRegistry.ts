@@ -478,6 +478,7 @@ export const AdminFinance = lazy(() => import('@/pages/admin/AdminFinance'));
 export const AdminSystemSettings = lazy(() => import('@/pages/admin/AdminSystemSettings'));
 export const AdminApiKeys = lazy(() => import('@/pages/admin/AdminApiKeys'));
 export const AdminGoogleMapsDiagnostics = lazy(() => import('@/pages/admin/AdminGoogleMapsDiagnostics'));
+export const AdminGoogleMapsSettings = lazy(() => import('@/pages/admin/AdminGoogleMapsSettings'));
 
 // ── Provider ── (ProviderOnboarding removed 2026-06-12; duplicated /become-partner. /provider/onboarding now redirects.)
 

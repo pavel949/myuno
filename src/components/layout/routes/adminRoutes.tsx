@@ -108,6 +108,7 @@ export const adminRoutes = (
     <Route path="/admin/qa-test-runner" element={<Pages.AdminQATestRunner />} />
     <Route path="/admin/api-keys" element={<Pages.AdminApiKeys />} />
     <Route path="/admin/diagnostics/google-maps" element={<Pages.AdminGoogleMapsDiagnostics />} />
+    <Route path="/admin/settings/google-maps" element={<Pages.AdminGoogleMapsSettings />} />
     <Route path="/admin/official-news" element={<Pages.AdminOfficialNews />} />
   </>
 );
