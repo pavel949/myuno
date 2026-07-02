@@ -1,14 +1,34 @@
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { requireInternalSecret } from "../_shared/internal-secret.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Accept either internal-secret (scheduler) or an authenticated staff user.
+  const internalOk = requireInternalSecret(req, corsHeaders);
+  if (internalOk !== null) {
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+    const supaCheck = createServiceClient();
+    const { data: roleRow } = await supaCheck
+      .from("user_roles").select("role").eq("user_id", auth.user.id);
+    const roles = (roleRow || []).map((r: any) => r.role);
+    const allowed = roles.some((r: string) => ["admin", "uno_team", "staff"].includes(r));
+    if (!allowed) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
   }
 
   try {

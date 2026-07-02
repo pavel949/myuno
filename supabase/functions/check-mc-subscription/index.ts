@@ -31,6 +31,28 @@ Deno.serve(async (req) => {
     const { company_id } = await req.json();
     if (!company_id) throw new Error("company_id is required");
 
+    // IDOR guard: only members of the company (or platform staff) can read
+    // subscription/slot state.
+    const { data: roleRow } = await supabase
+      .from("user_roles").select("role").eq("user_id", userData.user.id);
+    const roles = (roleRow || []).map((r: any) => r.role);
+    const isAdmin = roles.includes("admin") || roles.includes("uno_team");
+    if (!isAdmin) {
+      const { data: member } = await supabase
+        .from("management_company_members")
+        .select("user_id")
+        .eq("company_id", company_id)
+        .eq("user_id", userData.user.id)
+        .eq("is_active", true)
+        .maybeSingle();
+      if (!member) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Get company data
     const { data: company } = await supabase
       .from("management_companies")

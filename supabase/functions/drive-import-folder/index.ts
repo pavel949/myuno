@@ -10,12 +10,14 @@
  *   - connector: через Google Drive OAuth connector gateway
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { requireAuth } from '../_shared/auth-guard.ts';
+import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
 declare const EdgeRuntime: { waitUntil: (promise: Promise<unknown>) => void };
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
 };
 
 const GOOGLE_DRIVE_API = 'https://www.googleapis.com/drive/v3';
@@ -295,6 +297,16 @@ async function extractUnitsFromFile(
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
+  // Allow either an authenticated caller (manual trigger) or the internal
+  // cron secret (drive-watch-cron scheduler).
+  const internalOk = requireInternalSecret(req, corsHeaders);
+  let callerUserId: string | null = null;
+  if (internalOk !== null) {
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+    callerUserId = auth.user.id;
+  }
+
   try {
     const { sourceId, projectId, driveUrl, accessMode = 'public', triggerMode = 'manual' } = await req.json();
 
@@ -306,6 +318,34 @@ Deno.serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+
+    // If caller is a user, verify they can manage the target project
+    // (admin/uno_team, or developer owner of the project).
+    if (callerUserId) {
+      const { data: roles } = await admin
+        .from('user_roles').select('role').eq('user_id', callerUserId);
+      const roleSet = new Set((roles || []).map((r: any) => r.role));
+      const isStaff = roleSet.has('admin') || roleSet.has('uno_team') || roleSet.has('staff');
+      if (!isStaff) {
+        const { data: proj } = await admin
+          .from('property_projects')
+          .select('id, developer_id')
+          .eq('id', projectId)
+          .maybeSingle();
+        let ownsProject = false;
+        if (proj?.developer_id) {
+          const { data: dev } = await admin
+            .from('developers').select('user_id').eq('id', proj.developer_id).maybeSingle();
+          ownsProject = dev?.user_id === callerUserId;
+        }
+        if (!ownsProject) {
+          return new Response(JSON.stringify({ error: 'Forbidden' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+    }
+
     const folderId = extractFolderId(driveUrl);
     if (!folderId) throw new Error('Invalid Google Drive URL');
 

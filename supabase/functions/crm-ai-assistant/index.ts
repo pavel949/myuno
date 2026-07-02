@@ -1,4 +1,6 @@
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -9,6 +11,12 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const auth = await requireAuth(req, corsHeaders);
+  if (auth instanceof Response) return auth;
+
+  const rl = await withRateLimit(req, 'crm-ai-assistant', RATE_LIMITS.ai, corsHeaders, auth.user.id);
+  if (rl) return rl;
 
   try {
     const { action, contact_id, deal_id, company_id } = await req.json();
@@ -23,14 +31,23 @@ Deno.serve(async (req) => {
 
     const supabase = createServiceClient();
 
-    // Gather context
-    let contactData = null;
-    let dealData = null;
+    // Authorization: caller must be admin/uno_team OR active MC member of the contact/deal owner company.
+    const { data: roleRow } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', auth.user.id);
+    const roles = (roleRow || []).map((r: any) => r.role);
+    const isStaff = roles.includes('admin') || roles.includes('uno_team') || roles.includes('staff');
+
+    let contactData: any = null;
+    let dealData: any = null;
     let activities: any[] = [];
+    let ownerCompanyId: string | null = company_id || null;
 
     if (contact_id) {
       const { data } = await supabase.from('crm_contacts').select('*').eq('id', contact_id).single();
       contactData = data;
+      ownerCompanyId = ownerCompanyId || data?.company_id || null;
 
       const { data: acts } = await supabase.from('crm_activities')
         .select('*').eq('contact_id', contact_id)
@@ -41,9 +58,29 @@ Deno.serve(async (req) => {
     if (deal_id) {
       const { data } = await supabase.from('agent_deals').select('*').eq('id', deal_id).single();
       dealData = data;
+      ownerCompanyId = ownerCompanyId || data?.company_id || null;
     }
 
-    // Build prompt based on action
+    if (!isStaff) {
+      if (!ownerCompanyId) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const { data: mcMember } = await supabase
+        .from('management_company_members')
+        .select('user_id')
+        .eq('company_id', ownerCompanyId)
+        .eq('user_id', auth.user.id)
+        .eq('is_active', true)
+        .maybeSingle();
+      if (!mcMember) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     const prompts: Record<string, string> = {
       summarize: `Summarize this CRM contact in 3-5 bullet points for a real estate agent. Include key facts, activity history, and deal status.`,
       next_action: `Based on this contact's profile and recent activity, suggest the top 3 next best actions for the agent. Be specific and actionable.`,
@@ -64,7 +101,6 @@ Contact: ${JSON.stringify(contactData, null, 2)}
 Deal: ${JSON.stringify(dealData, null, 2)}
 Recent Activities (last 10): ${JSON.stringify(activities, null, 2)}`;
 
-    // Call Lovable AI (Gemini 2.5 Flash)
     const aiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
