@@ -24,6 +24,29 @@ Deno.serve(async (req) => {
     const { company_id } = await req.json();
     if (!company_id) throw new Error("company_id is required");
 
+    // IDOR guard: caller must be an active member of the requested MC
+    // (or a platform admin).
+    const { data: roleRow } = await supabase
+      .from("user_roles").select("role").eq("user_id", userData.user.id);
+    const roles = (roleRow || []).map((r: any) => r.role);
+    const isAdmin = roles.includes("admin") || roles.includes("uno_team");
+    if (!isAdmin) {
+      const { data: member } = await supabase
+        .from("management_company_members")
+        .select("user_id, role")
+        .eq("company_id", company_id)
+        .eq("user_id", userData.user.id)
+        .eq("is_active", true)
+        .maybeSingle();
+      const memberRole = (member as any)?.role;
+      if (!member || !["owner", "admin", "billing"].includes(memberRole)) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     const { data: company } = await supabase
       .from("management_companies")
       .select("stripe_customer_id")
