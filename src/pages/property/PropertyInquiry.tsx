@@ -22,7 +22,8 @@ import { useProfile } from '@/hooks/useProfile';
 import { usePropertyWithRentalTerms } from '@/hooks/useProperties';
 import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
 import { usePropertyRateSeasons } from '@/hooks/usePropertyRateSeasons';
-import { useRoomTypes } from '@/hooks/useRoomTypes';
+import { useRoomTypes, useRoomTypeRateSeasons } from '@/hooks/useRoomTypes';
+import { checkRoomTypeAvailability } from '@/hooks/useRoomTypeAvailability';
 import { useRareFindBadge } from '@/hooks/useRareFindBadge';
 import { DepositPaymentOptions, type DepositPaymentOptionsHandle } from '@/components/property/DepositPaymentOptions';
 import { PayWhenSelector, type PayWhenChoice } from '@/components/property/PayWhenSelector';
@@ -275,9 +276,19 @@ export default function PropertyInquiry() {
   // Pull rate seasons (per-property pricing overrides) for the central engine.
   const { data: rateSeasons } = usePropertyRateSeasons(id);
 
+  // 2b: when a specific room is selected, price off ITS OWN seasons — reusing the
+  // same engine — so seasonal rates are room-accurate. Room seasons mirror the
+  // property_rate_seasons shape (a stand-in property_id keeps the engine happy;
+  // it never reads that field). Otherwise property-level seasons apply.
+  const { data: roomSeasons = [] } = useRoomTypeRateSeasons(selectedRoom?.id);
+  const effectiveSeasons = useMemo(
+    () => (selectedRoom ? roomSeasons.map((s) => ({ ...s, property_id: id ?? '' })) : rateSeasons),
+    [selectedRoom, roomSeasons, rateSeasons, id],
+  );
+
   // Single source of truth for ALL pricing — same engine PropertyBookingCard uses.
   const pricing = useMemo(() => {
-    const baseRules: PricingRules = rateSeasons && rateSeasons.length > 0
+    const baseRules: PricingRules = effectiveSeasons && effectiveSeasons.length > 0
       ? buildPricingRulesFromSeasons(
           {
             price_per_night: pricePerNight,
@@ -293,7 +304,7 @@ export default function PropertyInquiry() {
             payment_policy: rentalExt?.payment_policy || 'prepay_10',
             prepay_percent: rentalExt?.prepay_percent,
           },
-          rateSeasons,
+          effectiveSeasons,
         )
       : {
           pricePerNight,
@@ -315,7 +326,7 @@ export default function PropertyInquiry() {
       return calculatePricing(baseRules, new Date(), new Date()); // empty breakdown
     }
     return calculatePricing(baseRules, checkIn, checkOut);
-  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property, listingCurrency]);
+  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, effectiveSeasons, property, listingCurrency]);
 
   const validationErrors = useMemo(() => {
     const errors: string[] = [];
@@ -887,6 +898,24 @@ export default function PropertyInquiry() {
                     );
                     setIsSubmitting(false);
                     return;
+                  }
+
+                  // 2b: server-authoritative room inventory check before booking
+                  // a specific room type. Fails open (returns available) when the
+                  // RPC is not live yet, so the whole-property flow is unaffected.
+                  if (selectedRoom && checkIn && checkOut) {
+                    const roomAvailable = await checkRoomTypeAvailability(
+                      selectedRoom.id,
+                      format(checkIn, 'yyyy-MM-dd'),
+                      format(checkOut, 'yyyy-MM-dd'),
+                    );
+                    if (!roomAvailable) {
+                      toast.error(isRu
+                        ? 'Этот номер недоступен на выбранные даты.'
+                        : 'This room is not available for the selected dates.');
+                      setIsSubmitting(false);
+                      return;
+                    }
                   }
 
                   // 2. Create order for booking tracking

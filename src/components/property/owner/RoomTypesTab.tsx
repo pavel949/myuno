@@ -8,7 +8,7 @@
  * (2b); this tab covers the room definition + its base nightly rate (2a).
  */
 import React, { useState } from 'react';
-import { Plus, Pencil, Trash2, BedDouble } from 'lucide-react';
+import { Plus, Pencil, Trash2, BedDouble, CalendarClock } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +35,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useRoomTypes, type RoomType } from '@/hooks/useRoomTypes';
 import { useSaveRoomType, useDeleteRoomType } from '@/hooks/useRoomTypeMutations';
+import { RoomTypeSeasonsSheet } from './RoomTypeSeasonsSheet';
 
 interface RoomTypesTabProps {
   propertyId: string;
@@ -94,6 +95,7 @@ export function RoomTypesTab({ propertyId }: RoomTypesTabProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<RoomForm>(emptyForm);
   const [deleteTarget, setDeleteTarget] = useState<RoomType | null>(null);
+  const [seasonsFor, setSeasonsFor] = useState<RoomType | null>(null);
 
   const openAdd = () => {
     setEditingId(null);
@@ -197,6 +199,9 @@ export function RoomTypesTab({ propertyId }: RoomTypesTabProps) {
                 </p>
               </div>
               <div className="flex shrink-0 gap-1">
+                <Button size="icon" variant="ghost" onClick={() => setSeasonsFor(room)} aria-label={tt('Seasonal rates', 'Сезонные тарифы')}>
+                  <CalendarClock className="h-4 w-4" />
+                </Button>
                 <Button size="icon" variant="ghost" onClick={() => openEdit(room)} aria-label={tt('Edit', 'Изменить')}>
                   <Pencil className="h-4 w-4" />
                 </Button>
@@ -342,6 +347,15 @@ export function RoomTypesTab({ propertyId }: RoomTypesTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {seasonsFor && (
+        <RoomTypeSeasonsSheet
+          roomTypeId={seasonsFor.id}
+          roomName={isRu ? seasonsFor.name_ru || seasonsFor.name_en : seasonsFor.name_en}
+          open={!!seasonsFor}
+          onOpenChange={(o) => !o && setSeasonsFor(null)}
+        />
+      )}
     </div>
   );
 }
