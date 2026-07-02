@@ -1,32 +1,36 @@
 /**
- * IndexV2 — Wave 2 Home: 3 зоны (Hero / Next Best Action / For You).
+ * IndexV2 — mockup-faithful multi-role Home ("control center").
  *
- * Включается фича-флагом `feature_flag:home_v2` в `system_settings`.
- * Сохраняет ровно те же точки переходов, что и legacy 5-зонный Home:
- *  - HeroGreeting → AI-поиск, AppDrawer, RoleSheet
- *  - PendingPaymentsChip / ActiveSituation / LifecycleSmartTip → existing CTAs
- *  - PersonalGrid (limit=6) → mini-app routes
- *  - «Все приложения» → AppDrawer
- *  - «Изменить роль» → RoleSheet
+ * Ported from the design handoff (`myuno-design · home.html / screen.jsx`) into
+ * the shipped DS 2.1 system: light-first, navy/orange, sharp corners, muted
+ * per-role tints — no dark/mint/rainbow (see docs FEASIBILITY §"do not
+ * introduce new colours"). Section order matches the mockup exactly:
  *
- * Wave 3 добавит why-chip к карточкам For You поверх этого layout.
+ *   HeroGreeting → SignalStack → NowInPhuket → PersonalGrid (For you) →
+ *   HomeConcierge → HomeActivityFeed → ClusterGridCards → TrustMarker →
+ *   All-apps door + Change-role
+ *
+ * Gated behind `feature_flag:home_v2` (see `Index.tsx`). Every navigation entry
+ * point of the legacy Home is preserved. No new route, no new shell.
  */
 import React, { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 import { HeroGreeting } from '@/components/home/HeroGreeting';
-import { PendingPaymentsChip } from '@/components/home/PendingPaymentsChip';
-import { AppDrawer } from '@/components/nav/AppDrawer';
-import { ActiveSituation } from '@/components/home/ActiveSituation';
-import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
-import { RoleSheet } from '@/components/home/RoleSheet';
+import { SignalStack } from '@/components/home/SignalStack';
+import { NowInPhuket } from '@/components/home/NowInPhuket';
 import { PersonalGrid } from '@/components/superapp/PersonalGrid';
-import { WhyChip } from '@/components/home/WhyChip';
+import { HomeConcierge } from '@/components/home/HomeConcierge';
+import { HomeActivityFeed } from '@/components/home/HomeActivityFeed';
+import { ClusterGridCards } from '@/components/home/ClusterGridCards';
+import { TrustMarker } from '@/components/home/TrustMarker';
+import { RoleSheet } from '@/components/home/RoleSheet';
+import { AppDrawer } from '@/components/nav/AppDrawer';
 import { Coachmarks } from '@/components/onboarding/Coachmarks';
-import { useAuth } from '@/contexts/AuthContext';
 import { CLUSTERS, FLAT_SERVICES } from '@/lib/catalog/taxonomy';
 
 const TOTAL_CLUSTERS = CLUSTERS.length;
@@ -39,74 +43,74 @@ const IndexV2: React.FC = () => {
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
   const [appDrawerOpen, setAppDrawerOpen] = useState(false);
 
-  const activePersonas = effectivePersonas;
+  const activePersonas = [...effectivePersonas];
   const isRu = language === 'ru';
 
   return (
     <AppLayout showHeader={false} showFooter={false}>
       <div className="pb-24">
-        {/* Zone 1 — Hero */}
+        {/* 1 — Hero: greeting, persona chip, AI concierge search */}
         <HeroGreeting
-          personas={[...activePersonas]}
+          personas={activePersonas}
           onRoleSheetOpen={() => setRoleSheetOpen(true)}
           onAppDrawerOpen={() => setAppDrawerOpen(true)}
         />
 
-        {/* Zone 2 — Next Best Action.
-            Каждый под-блок самоскрывающийся: реально на экране окажется
-            не более одного приоритетного сигнала. */}
-        <section
-          aria-label={isRu ? 'Приоритетное действие' : 'Next best action'}
-          data-coach="next-best-action"
-        >
-          <PendingPaymentsChip />
-          <ActiveSituation
-            personas={[...activePersonas]}
-            onRoleSheetOpen={() => setRoleSheetOpen(true)}
-          />
-          <LifecycleSmartTip />
-        </section>
+        {/* 2 — Blended signal stack: primary hero card + slim secondaries */}
+        <SignalStack personas={activePersonas} onRoleSheetOpen={() => setRoleSheetOpen(true)} />
 
-        {/* Zone 3 — For You (6 mini-apps) + двери в полный каталог/роли */}
-        <section aria-label={isRu ? 'Для вас' : 'For you'}>
-          <div data-coach="why-chip">
-            <WhyChip onOpenRoleSheet={() => setRoleSheetOpen(true)} />
-          </div>
-          <PersonalGrid limit={6} />
+        {/* 3 — Now in Phuket: weather · AQI · FX */}
+        <NowInPhuket />
 
-          <div className="px-4 mt-6" data-coach="all-apps">
-            <button
-              type="button"
-              onClick={() => setAppDrawerOpen(true)}
-              className="w-full flex items-center justify-between rounded-none border border-border bg-card px-4 py-4 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
-            >
-              <span>
-                <span className="block text-[15px] font-semibold tracking-tight text-foreground">
-                  {isRu ? 'Все приложения' : 'All apps'}
-                </span>
-                <span className="block text-[12px] text-muted-foreground mt-0.5">
-                  {isRu
-                    ? `${TOTAL_CLUSTERS} кластеров · ${TOTAL_SERVICES} сервисов · ⌘K поиск`
-                    : `${TOTAL_CLUSTERS} clusters · ${TOTAL_SERVICES} services · ⌘K search`}
-                </span>
+        {/* 4 — For you: role-weighted quick actions */}
+        <PersonalGrid limit={8} />
+
+        {/* 5 — Concierge nudge (intent, never auto-executes money moves) */}
+        <HomeConcierge />
+
+        {/* 6 — Cross-role activity feed */}
+        <HomeActivityFeed personas={activePersonas} />
+
+        {/* 7 — Persona-ranked cluster grid */}
+        <ClusterGridCards personas={activePersonas} />
+
+        {/* 8 — Trust marker */}
+        <TrustMarker />
+
+        {/* All-apps door */}
+        <div className="px-4">
+          <button
+            type="button"
+            onClick={() => setAppDrawerOpen(true)}
+            className="w-full flex items-center justify-between rounded-none border border-border bg-card px-4 py-4 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
+          >
+            <span>
+              <span className="block text-[15px] font-semibold tracking-tight text-foreground">
+                {isRu ? 'Все приложения' : 'All apps'}
               </span>
-              <ArrowRight className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
-            </button>
-          </div>
+              <span className="block text-[12px] text-muted-foreground mt-0.5">
+                {isRu
+                  ? `${TOTAL_CLUSTERS} кластеров · ${TOTAL_SERVICES} сервисов · ⌘K поиск`
+                  : `${TOTAL_CLUSTERS} clusters · ${TOTAL_SERVICES} services · ⌘K search`}
+              </span>
+            </span>
+            <ArrowRight className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
+          </button>
+        </div>
 
-          <div className="px-4 mt-3 text-center">
-            <button
-              type="button"
-              onClick={() => setRoleSheetOpen(true)}
-              className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {isRu ? 'Изменить роль' : 'Change role'}
-            </button>
-          </div>
-        </section>
+        {/* Change role */}
+        <div className="px-4 mt-3 text-center">
+          <button
+            type="button"
+            onClick={() => setRoleSheetOpen(true)}
+            className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isRu ? 'Изменить роль' : 'Change role'}
+          </button>
+        </div>
       </div>
 
-      {/* Wave 5 — onboarding tour. Self-gates via localStorage; only for signed-in users. */}
+      {/* Onboarding tour — self-gates via localStorage; signed-in users only */}
       {user && <Coachmarks />}
 
       <RoleSheet
@@ -120,7 +124,7 @@ const IndexV2: React.FC = () => {
       <AppDrawer
         open={appDrawerOpen}
         onOpenChange={setAppDrawerOpen}
-        personas={[...activePersonas]}
+        personas={activePersonas}
         onSwitchRole={() => setRoleSheetOpen(true)}
       />
     </AppLayout>
