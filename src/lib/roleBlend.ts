@@ -175,3 +175,99 @@ export const SIGNAL_SEED: Record<UserPersona, { lead: string; leadRu: string; va
   pet_owner:               { lead: 'Vet visit',          leadRu: 'Приём ветеринара',   value: 'Fri 15:00',    tail: 'Dr. Amara · Phuket Animal Hospital',  tailRu: 'Д-р Амара · Phuket Animal Hospital', state: 'active' },
   relocation:              { lead: 'Visa',               leadRu: 'Виза',               value: 'In review',    tail: 'Siam Legal · documents in 3 days',    tailRu: 'Siam Legal · документы через 3 дня', state: 'warn'   },
 };
+
+/**
+ * A single cross-role activity row. `meta` is a short mono value (money /
+ * status word), `when` a relative timestamp. Every string is bilingual so the
+ * home feed reads natively in RU and EN.
+ *
+ * These are **seed** rows — they illustrate the blended, role-tagged feed on
+ * the mockup-faithful Home before a real activity source is wired in. They are
+ * surfaced with a "demo" affordance, consistent with `SignalStack`'s honesty
+ * about seed signals (we never present fake *live* data on money surfaces).
+ */
+export interface HomeFeedItem {
+  title: string;
+  titleRu: string;
+  detail: string;
+  detailRu: string;
+  meta: string;
+  metaRu: string;
+  when: string;
+  whenRu: string;
+}
+
+/** A blended feed row carries the persona it originated from. */
+export type BlendedFeedItem = HomeFeedItem & { persona: UserPersona };
+
+export const HOME_FEED_SEED: Partial<Record<UserPersona, HomeFeedItem[]>> = {
+  tourist: [
+    { title: 'Transfer confirmed',  titleRu: 'Трансфер подтверждён', detail: 'Phuket Premium Taxi · 08:40', detailRu: 'Phuket Premium Taxi · 08:40', meta: '฿ 650',   metaRu: '฿ 650',   when: '2h', whenRu: '2ч' },
+    { title: 'Table held at Suay',  titleRu: 'Столик в Suay',         detail: 'Thu 19:00 · party of 4',      detailRu: 'Чт 19:00 · на 4 гостя',      meta: 'Hold',    metaRu: 'Бронь',   when: '4h', whenRu: '4ч' },
+  ],
+  resident: [
+    { title: 'Rent scheduled',      titleRu: 'Аренда запланирована', detail: 'Villa Saiyuan · auto-pay 1st', detailRu: 'Villa Saiyuan · автоплатёж 1-го', meta: '฿ 45,000', metaRu: '฿ 45 000', when: '14h', whenRu: '14ч' },
+    { title: 'Cleaning · weekly',   titleRu: 'Уборка · еженедельно', detail: 'Tomorrow 10:00 · same team',   detailRu: 'Завтра 10:00 · та же команда', meta: '฿ 900',   metaRu: '฿ 900',   when: '1d',  whenRu: '1д' },
+  ],
+  property_owner: [
+    { title: 'Payout received',     titleRu: 'Выплата получена',     detail: 'October · 28 nights occupied', detailRu: 'Октябрь · 28 ночей занято',  meta: '฿ 184,300', metaRu: '฿ 184 300', when: '1d', whenRu: '1д' },
+    { title: 'Maintenance · AC',    titleRu: 'Обслуживание · кондиционер', detail: 'Scheduled Thu · ฿ 1,800 est', detailRu: 'Назначено на чт · ~฿ 1 800', meta: 'Approve', metaRu: 'Одобрить', when: '2d', whenRu: '2д' },
+  ],
+  investor: [
+    { title: 'Distribution posted', titleRu: 'Начислен доход',       detail: 'Q3 · Layan syndicate',        detailRu: 'Q3 · синдикат Layan',        meta: '฿ 96,000', metaRu: '฿ 96 000', when: '3h', whenRu: '3ч' },
+    { title: 'New deal in review',  titleRu: 'Новая сделка на рассмотрении', detail: 'Budget ฿ 25–35M · Laguna', detailRu: 'Бюджет ฿ 25–35M · Laguna', meta: 'Review', metaRu: 'Смотреть', when: '5h', whenRu: '5ч' },
+  ],
+  real_estate_developer: [
+    { title: 'Reservation · B-412', titleRu: 'Бронирование · B-412', detail: 'HNW · in-house channel',       detailRu: 'HNW · собственный канал',    meta: '฿ 12.8M', metaRu: '฿ 12,8M', when: '1h', whenRu: '1ч' },
+    { title: 'Construction milestone', titleRu: 'Веха стройки',      detail: 'Tower B · slab 7 poured',      detailRu: 'Башня B · залита 7-я плита',  meta: 'On track', metaRu: 'В графике', when: '1d', whenRu: '1д' },
+  ],
+  local_services_provider: [
+    { title: 'Booking · 18:30',     titleRu: 'Бронь · 18:30',        detail: 'Party of 4 · outdoor',         detailRu: 'На 4 гостя · терраса',       meta: 'Confirm', metaRu: 'Принять', when: '1h', whenRu: '1ч' },
+    { title: 'Menu · out of stock', titleRu: 'Меню · нет в наличии', detail: 'Phuket Lobster',               detailRu: 'Пхукетский лобстер',         meta: 'Update',  metaRu: 'Обновить', when: '2h', whenRu: '2ч' },
+  ],
+  family: [
+    { title: 'School event',        titleRu: 'Школьное событие',     detail: 'BISP · parents evening Thu',   detailRu: 'BISP · родительский вечер чт', meta: 'RSVP',  metaRu: 'Ответить', when: '6h', whenRu: '6ч' },
+  ],
+  couple: [
+    { title: 'Weekend getaway',     titleRu: 'Выезд на выходные',    detail: 'Similan Islands · 2 nights',   detailRu: 'Симиланы · 2 ночи',          meta: 'Hold',  metaRu: 'Бронь',   when: '1d', whenRu: '1д' },
+  ],
+  nightlife: [
+    { title: 'Guestlist confirmed', titleRu: 'Гостевой список',      detail: 'Illuzion · Patong · Sat',      detailRu: 'Illuzion · Патонг · сб',     meta: 'Table', metaRu: 'Стол',    when: '3h', whenRu: '3ч' },
+  ],
+  active: [
+    { title: 'Session booked',      titleRu: 'Тренировка забронирована', detail: 'Tiger Muay Thai · 07:00',  detailRu: 'Tiger Muay Thai · 07:00',    meta: '฿ 500', metaRu: '฿ 500',   when: '12h', whenRu: '12ч' },
+  ],
+  business: [
+    { title: 'Company renewal',     titleRu: 'Продление компании',   detail: 'Annual filing · 45 days',      detailRu: 'Годовая отчётность · 45 дней', meta: 'Review', metaRu: 'Смотреть', when: '2d', whenRu: '2д' },
+  ],
+  nomad: [
+    { title: 'SIM top-up',          titleRu: 'Пополнение SIM',       detail: 'AIS · 12 GB remaining',        detailRu: 'AIS · осталось 12 ГБ',       meta: '฿ 300', metaRu: '฿ 300',   when: '8h', whenRu: '8ч' },
+  ],
+  pet_owner: [
+    { title: 'Vet appointment',     titleRu: 'Приём ветеринара',     detail: 'Dr. Amara · Fri 15:00',        detailRu: 'Д-р Амара · пт 15:00',       meta: 'Confirm', metaRu: 'Принять', when: '1d', whenRu: '1д' },
+  ],
+  relocation: [
+    { title: 'Documents ready',     titleRu: 'Документы готовы',     detail: 'Siam Legal · 2 to sign',       detailRu: 'Siam Legal · 2 на подпись',  meta: 'Sign',  metaRu: 'Подписать', when: '2d', whenRu: '2д' },
+  ],
+};
+
+/**
+ * Blend the per-persona feed seeds into one cross-role activity stream.
+ *
+ * Interleaves round-robin, **primary persona first** within each round, tags
+ * every row with its origin persona (for the colour chip), and caps the list.
+ * Mirrors the mockup's `blendFeed`. Personas with no seed are skipped.
+ */
+export function blendFeed(personas: UserPersona[], limit = 7): BlendedFeedItem[] {
+  const ordered = personas.filter((p) => HOME_FEED_SEED[p]?.length);
+  if (!ordered.length) return [];
+  const maxLen = Math.max(...ordered.map((p) => HOME_FEED_SEED[p]!.length));
+  const out: BlendedFeedItem[] = [];
+  for (let i = 0; i < maxLen; i++) {
+    for (const p of ordered) {
+      const item = HOME_FEED_SEED[p]?.[i];
+      if (item) out.push({ ...item, persona: p });
+    }
+  }
+  return out.slice(0, limit);
+}
