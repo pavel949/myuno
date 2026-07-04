@@ -33,7 +33,8 @@ const FRONTEND_VARS = [
   { key: 'VITE_SUPABASE_URL', label: 'Backend URL', managedBy: 'system' },
   { key: 'VITE_SUPABASE_PUBLISHABLE_KEY', label: 'Backend Anon Key', managedBy: 'system' },
   { key: 'VITE_SUPABASE_PROJECT_ID', label: 'Project ID', managedBy: 'system' },
-  { key: 'VITE_GOOGLE_MAPS_API_KEY', label: 'Google Maps API Key', managedBy: 'manual' },
+  { key: 'VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY', label: 'Google Maps Browser Key', managedBy: 'connector' },
+  { key: 'VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID', label: 'Google Maps Tracking ID', managedBy: 'connector' },
   { key: 'VITE_BYPASS_COMING_SOON', label: 'Bypass Coming Soon Gate', managedBy: 'manual' },
 ];
 

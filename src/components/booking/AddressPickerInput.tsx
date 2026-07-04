@@ -163,7 +163,7 @@ export function AddressPickerInput({
   const showMap = hasKey && isLoaded;
   const mapPlaceholder = !hasKey && (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-muted p-4 text-center text-sm text-muted-foreground">
-      <p>{language === 'ru' ? 'Задайте VITE_GOOGLE_MAPS_API_KEY в .env' : 'Set VITE_GOOGLE_MAPS_API_KEY in .env'}</p>
+      <p>{language === 'ru' ? 'Подключите Google Maps Platform connector' : 'Connect the Google Maps Platform connector'}</p>
     </div>
   );
 
