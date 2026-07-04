@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Send, Loader2, ChevronLeft, MessagesSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
