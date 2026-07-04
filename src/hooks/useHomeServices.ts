@@ -41,6 +41,7 @@ export interface HomeServiceProvider {
   has_insurance: boolean | null;
   has_guarantee: boolean | null;
   service_domains: string[] | null;
+  languages: string[] | null;
 }
 
 const defaultImages: Record<string, string> = {
@@ -81,7 +82,7 @@ export function useHomeServices(options: UseHomeServicesOptions = {}) {
       try {
         let query = supabase
           .from('providers')
-          .select('id, name, description_en, description_ru, business_category, phone, email, address, rating, review_count, logo_url, is_verified, is_active, provider_type, response_time_minutes, has_insurance, has_guarantee, service_domains')
+          .select('id, name, description_en, description_ru, business_category, phone, email, address, rating, review_count, logo_url, is_verified, is_active, provider_type, response_time_minutes, has_insurance, has_guarantee, service_domains, languages')
           .in('business_category', HOME_SERVICE_CATEGORY_IDS)
           .eq('is_active', true);
 
