@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://kakkwibljrjsawxgnupk.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "myuno-mcp",
+      "version": "0.1.0",
+      "title": "myUNO"
+    },
+    "tools": [
+      {
+        "name": "search_properties",
+        "title": "Search properties",
+        "description": "Search myUNO property listings on Phuket. Filter by city, min/max price (USD/THB stored as numeric) and bedrooms. Returns up to `limit` rows.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "description": "Free-text query matched against title/description.",
+              "type": "string",
+              "maxLength": 200
+            },
+            "city": {
+              "description": "City filter, e.g. 'Phuket'.",
+              "type": "string",
+              "maxLength": 80
+            },
+            "minPrice": {
+              "type": "number",
+              "minimum": 0
+            },
+            "maxPrice": {
+              "type": "number",
+              "minimum": 0
+            },
+            "bedrooms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "limit": {
+              "default": 10,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_services",
+        "title": "List services",
+        "description": "List services from the myUNO catalog. Optionally filter by category slug and free-text query.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "category": {
+              "description": "Category slug, e.g. 'legal'.",
+              "type": "string",
+              "maxLength": 80
+            },
+            "limit": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "whoami",
+        "title": "Who am I",
+        "description": "Returns the signed-in myUNO user's id and email.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
