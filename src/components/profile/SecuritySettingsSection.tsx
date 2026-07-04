@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { KeyRound, Smartphone, Monitor, Trash2, ChevronRight, Shield, Plus, Pencil, RotateCcw } from 'lucide-react';
+import { KeyRound, Smartphone, Monitor, Trash2, ChevronRight, Shield, Plus, Pencil, RotateCcw, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { Button } from '@/components/ui/button';
@@ -49,6 +49,16 @@ const texts = {
     activeSessionsDesc: 'Управление устройствами',
     deleteAccount: 'Удалить аккаунт',
     deleteAccountDesc: 'Безвозвратное удаление всех данных',
+    exportData: 'Экспорт моих данных',
+    exportDataDesc: 'Скачать копию ваших данных (JSON)',
+    exportStarted: 'Готовим ваши данные…',
+    exportDone: 'Данные скачаны',
+    exportError: 'Не удалось экспортировать данные',
+    deleteTypeToConfirm: 'Введите УДАЛИТЬ, чтобы подтвердить',
+    deleteConfirmWord: 'УДАЛИТЬ',
+    deleting: 'Удаление…',
+    deleteError: 'Не удалось удалить аккаунт',
+    deleteSuccess: 'Аккаунт удалён',
     currentPassword: 'Текущий пароль',
     newPassword: 'Новый пароль',
     confirmPassword: 'Подтвердите пароль',
@@ -80,6 +90,16 @@ const texts = {
     activeSessionsDesc: 'Manage your devices',
     deleteAccount: 'Delete Account',
     deleteAccountDesc: 'Permanently delete all your data',
+    exportData: 'Export my data',
+    exportDataDesc: 'Download a copy of your data (JSON)',
+    exportStarted: 'Preparing your data…',
+    exportDone: 'Data downloaded',
+    exportError: 'Failed to export data',
+    deleteTypeToConfirm: 'Type DELETE to confirm',
+    deleteConfirmWord: 'DELETE',
+    deleting: 'Deleting…',
+    deleteError: 'Failed to delete account',
+    deleteSuccess: 'Account deleted',
     currentPassword: 'Current Password',
     newPassword: 'New Password',
     confirmPassword: 'Confirm Password',
@@ -110,9 +130,12 @@ export function SecuritySettingsSection() {
   const { signOut } = useAuth();
   const { hasPin, isLoading: pinLoading, checkHasPin } = usePinManagement();
   const t = texts[language === 'th' ? 'en' : language] || texts.en;
-  
+
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [pinDialogMode, setPinDialogMode] = useState<PinDialogMode>(null);
   const [passwordForm, setPasswordForm] = useState({
     newPassword: '',
@@ -158,8 +181,45 @@ export function SecuritySettingsSection() {
     }
   };
 
+  const handleExportData = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    toast.loading(t.exportStarted, { id: 'export-data' });
+    try {
+      const { data, error } = await supabase.functions.invoke('export-user-data');
+      if (error) throw error;
+      const content = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+      const blob = new Blob([content], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `myuno-data-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(t.exportDone, { id: 'export-data' });
+    } catch (error: unknown) {
+      console.error('Data export error:', error);
+      toast.error(t.exportError, { id: 'export-data' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const handleDeleteAccount = async () => {
-    toast.error('Contact support to delete your account');
+    if (deleteConfirmText.trim().toUpperCase() !== t.deleteConfirmWord) return;
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase.functions.invoke('delete-account', {
+        body: { confirm: true },
+      });
+      if (error) throw error;
+      toast.success(t.deleteSuccess);
+      await signOut(); // clears caches + session
+    } catch (error: unknown) {
+      console.error('Account deletion error:', error);
+      toast.error(t.deleteError);
+      setIsDeleting(false);
+    }
   };
 
   const handlePinAction = (action: PinDialogMode) => {
@@ -195,6 +255,13 @@ export function SecuritySettingsSection() {
       action: handleLogoutAllDevices,
       badge: t.thisDevice,
       badgeColor: 'text-info bg-info/10',
+    },
+    {
+      icon: Download,
+      label: t.exportData,
+      description: t.exportDataDesc,
+      action: handleExportData,
+      badge: isExporting ? '...' : null,
     },
   ];
 
@@ -258,7 +325,7 @@ export function SecuritySettingsSection() {
         ))}
         
         {/* Delete Account */}
-        <AlertDialog>
+        <AlertDialog onOpenChange={(open) => { if (!open) setDeleteConfirmText(''); }}>
           <AlertDialogTrigger asChild>
             <button className="w-full flex items-center gap-3 p-4 hover:bg-destructive/10 transition-colors text-left">
               <Trash2 className="w-5 h-5 text-destructive flex-shrink-0" />
@@ -274,10 +341,28 @@ export function SecuritySettingsSection() {
               <AlertDialogTitle>{t.deleteConfirmTitle}</AlertDialogTitle>
               <AlertDialogDescription>{t.deleteConfirmDesc}</AlertDialogDescription>
             </AlertDialogHeader>
+            <div className="py-2">
+              <Label className="text-xs text-muted-foreground">{t.deleteTypeToConfirm}</Label>
+              <Input
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder={t.deleteConfirmWord}
+                className="mt-1"
+                autoComplete="off"
+              />
+            </div>
             <AlertDialogFooter>
-              <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                {t.deleteConfirm}
+              <AlertDialogCancel disabled={isDeleting}>{t.cancel}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  // Keep the dialog open while the async deletion runs.
+                  e.preventDefault();
+                  handleDeleteAccount();
+                }}
+                disabled={isDeleting || deleteConfirmText.trim().toUpperCase() !== t.deleteConfirmWord}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? t.deleting : t.deleteConfirm}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

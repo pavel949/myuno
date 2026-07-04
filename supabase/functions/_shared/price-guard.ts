@@ -14,7 +14,24 @@
  * turns thrown errors into a 400, so the flow fails closed.
  */
 
-import type { SupabaseClient } from "./supabase.ts";
+/**
+ * Minimal structural shape of the Supabase client this module needs
+ * (`admin.from(table).select(cols).in(col, ids)`). Declared locally rather than
+ * importing the full `SupabaseClient` type so this file has no dependency on the
+ * Deno-only `./supabase.ts` module — that keeps it importable from vitest unit
+ * tests without dragging `npm:`/`Deno` specifiers into the app tsc program. The
+ * real service client is structurally assignable to this.
+ */
+export interface PriceGuardClient {
+  from(table: string): {
+    select(columns: string): {
+      in(column: string, values: readonly string[]): PromiseLike<{
+        data: unknown;
+        error: { message: string } | null;
+      }>;
+    };
+  };
+}
 
 export interface PriceValidationSpec {
   /** Table holding the authoritative price, e.g. "marketplace_products". */
@@ -64,7 +81,7 @@ function allowedPricesFor(row: Record<string, unknown>, spec: PriceValidationSpe
  * Throws on the first invalid line. Resolves silently when all lines are valid.
  */
 export async function validateItemPrices(
-  supabaseAdmin: SupabaseClient,
+  supabaseAdmin: PriceGuardClient,
   spec: PriceValidationSpec,
   items: LineToValidate[],
   endpoint: string,
@@ -131,7 +148,7 @@ export async function validateItemPrices(
  * cleaning/legal/pet service). Throws on mismatch.
  */
 export async function validateSinglePrice(
-  supabaseAdmin: SupabaseClient,
+  supabaseAdmin: PriceGuardClient,
   spec: PriceValidationSpec,
   id: string,
   submittedPrice: number,

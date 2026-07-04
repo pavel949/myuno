@@ -3,13 +3,17 @@ import {
   validateItemPrices,
   validateSinglePrice,
   type PriceValidationSpec,
+  type PriceGuardClient,
 } from "../../../supabase/functions/_shared/price-guard.ts";
 
 /**
  * Minimal stub of the Supabase query builder surface used by price-guard:
  *   supabaseAdmin.from(table).select(cols).in(col, ids) -> { data, error }
  */
-function stubClient(rows: Record<string, unknown>[], error: unknown = null) {
+function stubClient(
+  rows: Record<string, unknown>[],
+  error: { message: string } | null = null,
+): PriceGuardClient {
   return {
     from() {
       return {
@@ -22,8 +26,7 @@ function stubClient(rows: Record<string, unknown>[], error: unknown = null) {
         },
       };
     },
-    // deno-lint-ignore no-explicit-any
-  } as any;
+  };
 }
 
 const spec: PriceValidationSpec = {
