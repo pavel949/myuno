@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 
 interface OwnerContext {
   propertiesCount?: number;
