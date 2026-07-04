@@ -1,6 +1,7 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { fetchUserRoles, hasAnyRole, forbidden, STAFF_ROLES } from "../_shared/authz.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -32,12 +33,8 @@ Deno.serve(async (req) => {
     const supabase = createServiceClient();
 
     // Authorization: caller must be admin/uno_team OR active MC member of the contact/deal owner company.
-    const { data: roleRow } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', auth.user.id);
-    const roles = (roleRow || []).map((r: any) => r.role);
-    const isStaff = roles.includes('admin') || roles.includes('uno_team') || roles.includes('staff');
+    const roles = await fetchUserRoles(supabase, auth.user.id);
+    const isStaff = hasAnyRole(roles, STAFF_ROLES);
 
     let contactData: any = null;
     let dealData: any = null;
@@ -62,11 +59,7 @@ Deno.serve(async (req) => {
     }
 
     if (!isStaff) {
-      if (!ownerCompanyId) {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), {
-          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
+      if (!ownerCompanyId) return forbidden(corsHeaders);
       const { data: mcMember } = await supabase
         .from('management_company_members')
         .select('user_id')
@@ -74,11 +67,7 @@ Deno.serve(async (req) => {
         .eq('user_id', auth.user.id)
         .eq('is_active', true)
         .maybeSingle();
-      if (!mcMember) {
-        return new Response(JSON.stringify({ error: 'Forbidden' }), {
-          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
+      if (!mcMember) return forbidden(corsHeaders);
     }
 
     const prompts: Record<string, string> = {

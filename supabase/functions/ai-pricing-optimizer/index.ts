@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
-import { requireInternalSecret } from "../_shared/internal-secret.ts";
-import { requireAuth } from "../_shared/auth-guard.ts";
+import { requireInternalOrUser, fetchUserRoles, hasAnyRole, forbidden, STAFF_ROLES } from "../_shared/authz.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -12,13 +11,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   // Dual-mode: internal secret (cron) OR authenticated property owner / staff
-  const internalOk = requireInternalSecret(req, corsHeaders);
-  let authedUserId: string | null = null;
-  if (internalOk !== null) {
-    const auth = await requireAuth(req, corsHeaders);
-    if (auth instanceof Response) return auth;
-    authedUserId = auth.user.id;
-  }
+  const gate = await requireInternalOrUser(req, corsHeaders);
+  if (gate instanceof Response) return gate;
+  const authedUserId = gate.mode === "user" ? gate.userId : null;
 
   try {
     const { property_id } = await req.json();
@@ -45,16 +40,10 @@ serve(async (req) => {
 
     // Ownership check for user-mode calls
     if (authedUserId) {
-      const { data: roleRows } = await supabase
-        .from("user_roles").select("role").eq("user_id", authedUserId);
-      const roles = (roleRows || []).map((r: any) => r.role);
-      const isStaff = roles.some((r: string) => ["admin", "uno_team", "staff", "property_manager"].includes(r));
+      const roles = await fetchUserRoles(supabase, authedUserId);
+      const isStaff = hasAnyRole(roles, [...STAFF_ROLES, "property_manager"]);
       const isOwner = (property as any).owner_id === authedUserId;
-      if (!isStaff && !isOwner) {
-        return new Response(JSON.stringify({ error: "Forbidden" }), {
-          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (!isStaff && !isOwner) return forbidden(corsHeaders);
     }
 
     // Fetch bookings last 90 days for occupancy analysis

@@ -1,5 +1,6 @@
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
+import { requireCompanyMember } from "../_shared/authz.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -33,25 +34,8 @@ Deno.serve(async (req) => {
 
     // IDOR guard: only members of the company (or platform staff) can read
     // subscription/slot state.
-    const { data: roleRow } = await supabase
-      .from("user_roles").select("role").eq("user_id", userData.user.id);
-    const roles = (roleRow || []).map((r: any) => r.role);
-    const isAdmin = roles.includes("admin") || roles.includes("uno_team");
-    if (!isAdmin) {
-      const { data: member } = await supabase
-        .from("management_company_members")
-        .select("user_id")
-        .eq("company_id", company_id)
-        .eq("user_id", userData.user.id)
-        .eq("is_active", true)
-        .maybeSingle();
-      if (!member) {
-        return new Response(
-          JSON.stringify({ error: "Forbidden" }),
-          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-    }
+    const guard = await requireCompanyMember(supabase, userData.user.id, company_id, corsHeaders);
+    if (guard) return guard;
 
     // Get company data
     const { data: company } = await supabase

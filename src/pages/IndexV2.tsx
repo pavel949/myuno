@@ -13,7 +13,7 @@
  * Gated behind `feature_flag:home_v2` (see `Index.tsx`). Every navigation entry
  * point of the legacy Home is preserved. No new route, no new shell.
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
@@ -43,7 +43,8 @@ const IndexV2: React.FC = () => {
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
   const [appDrawerOpen, setAppDrawerOpen] = useState(false);
 
-  const activePersonas = [...effectivePersonas];
+  // Stable identity so memoized children (e.g. ClusterGridCards' blendClusters) don't recompute every render.
+  const activePersonas = useMemo(() => [...effectivePersonas], [effectivePersonas]);
   const isRu = language === 'ru';
 
   return (
