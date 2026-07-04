@@ -16,6 +16,7 @@ import { ChatMessageTranslation } from '@/components/chat/ChatMessageTranslation
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { ModerationResult } from '@/lib/chatModerationPatterns';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 
 interface GuestPropertyChatProps {
   propertyId: string;
