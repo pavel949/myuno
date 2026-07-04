@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalSecret } from "../_shared/internal-secret.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -10,8 +11,14 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const guard = requireInternalSecret(req, corsHeaders);
-  if (guard) return guard;
+  // Dual-mode: internal secret (cron) OR authenticated property owner / staff
+  const internalOk = requireInternalSecret(req, corsHeaders);
+  let authedUserId: string | null = null;
+  if (internalOk !== null) {
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+    authedUserId = auth.user.id;
+  }
 
   try {
     const { property_id } = await req.json();
@@ -26,7 +33,7 @@ serve(async (req) => {
     // Fetch property
     const { data: property, error: pErr } = await supabase
       .from("properties")
-      .select("id, title, district, property_type, bedrooms, price_per_night, currency")
+      .select("id, title, district, property_type, bedrooms, price_per_night, currency, owner_id")
       .eq("id", property_id)
       .single();
 
@@ -34,6 +41,20 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Property not found" }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Ownership check for user-mode calls
+    if (authedUserId) {
+      const { data: roleRows } = await supabase
+        .from("user_roles").select("role").eq("user_id", authedUserId);
+      const roles = (roleRows || []).map((r: any) => r.role);
+      const isStaff = roles.some((r: string) => ["admin", "uno_team", "staff", "property_manager"].includes(r));
+      const isOwner = (property as any).owner_id === authedUserId;
+      if (!isStaff && !isOwner) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Fetch bookings last 90 days for occupancy analysis

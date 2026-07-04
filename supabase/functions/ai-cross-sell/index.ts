@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalSecret } from "../_shared/internal-secret.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -10,8 +11,14 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const guard = requireInternalSecret(req, corsHeaders);
-  if (guard) return guard;
+  // Dual-mode: internal secret (cron) OR authenticated user who owns the booking / is staff
+  const internalOk = requireInternalSecret(req, corsHeaders);
+  let authedUserId: string | null = null;
+  if (internalOk !== null) {
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+    authedUserId = auth.user.id;
+  }
 
   try {
     const { booking_id } = await req.json();
@@ -26,7 +33,7 @@ serve(async (req) => {
     // Fetch booking details
     const { data: booking, error: bErr } = await supabase
       .from("property_bookings")
-      .select("id, check_in, check_out, guest_name, guests_count, property_id, total_amount, currency")
+      .select("id, check_in, check_out, guest_name, guests_count, property_id, total_amount, currency, guest_id")
       .eq("id", booking_id)
       .single();
 
@@ -35,6 +42,25 @@ serve(async (req) => {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Ownership check for user-mode calls: caller must be the booking guest,
+    // the owning property's owner, or a platform staff role.
+    if (authedUserId) {
+      const { data: prop } = await supabase
+        .from("properties").select("owner_id").eq("id", booking.property_id).single();
+      const { data: roleRows } = await supabase
+        .from("user_roles").select("role").eq("user_id", authedUserId);
+      const roles = (roleRows || []).map((r: any) => r.role);
+      const isStaff = roles.some((r: string) => ["admin", "uno_team", "staff"].includes(r));
+      const isOwner = prop?.owner_id === authedUserId;
+      const isGuest = booking.guest_id === authedUserId;
+      if (!isStaff && !isOwner && !isGuest) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
 
     // Fetch property details for context
     const { data: property } = await supabase
