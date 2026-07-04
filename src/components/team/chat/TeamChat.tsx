@@ -179,6 +179,11 @@ function ChatInput({ onSend, isSending, placeholder }: ChatInputProps) {
           className="flex-1"
           disabled={isSending}
         />
+        <VoiceInputButton
+          variant="outline"
+          onTranscript={(text) => setMessage((prev) => appendTranscript(prev, text))}
+          disabled={isSending}
+        />
         <Button 
           onClick={handleSend} 
           disabled={!message.trim() || isSending}
