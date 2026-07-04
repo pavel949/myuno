@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import {
   Select,
   SelectContent,
@@ -219,19 +220,26 @@ export function ConciergeHelpSheet({
               <Label htmlFor="hr-message">
                 {isRu ? 'Опишите задачу' : 'Describe your need'} *
               </Label>
-              <Textarea
-                id="hr-message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={5}
-                maxLength={5000}
-                required
-                placeholder={
-                  isRu
-                    ? 'Что нужно сделать, сроки, бюджет, особенности…'
-                    : 'What you need, timeline, budget, specifics…'
-                }
-              />
+              <div className="relative">
+                <Textarea
+                  id="hr-message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={5}
+                  maxLength={5000}
+                  required
+                  placeholder={
+                    isRu
+                      ? 'Что нужно сделать, сроки, бюджет, особенности…'
+                      : 'What you need, timeline, budget, specifics…'
+                  }
+                  className="pr-12"
+                />
+                <VoiceInputButton
+                  onTranscript={(t) => setMessage((prev) => appendTranscript(prev, t))}
+                  className="absolute bottom-2 right-2"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">

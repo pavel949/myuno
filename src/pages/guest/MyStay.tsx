@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { User, Sparkles, Car, ShoppingBag, Wrench, Star, Calendar, MapPin, ChevronRight, History } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -217,12 +218,18 @@ export default function MyStay() {
             </div>
             <div>
               <Label>{isRu ? 'Комментарий' : 'Notes'}</Label>
-              <Textarea
-                value={orderNotes}
-                onChange={(e) => setOrderNotes(e.target.value)}
-                placeholder={isRu ? 'Опишите что нужно...' : 'Describe what you need...'}
-                className="mt-2"
-              />
+              <div className="relative mt-2">
+                <Textarea
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                  placeholder={isRu ? 'Опишите что нужно...' : 'Describe what you need...'}
+                  className="pr-12"
+                />
+                <VoiceInputButton
+                  onTranscript={(t) => setOrderNotes((prev) => appendTranscript(prev, t))}
+                  className="absolute bottom-2 right-2"
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>

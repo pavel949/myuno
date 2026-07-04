@@ -31,6 +31,7 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { SectionCard } from '@/components/uno/SectionCard';
 import { PremiumButton } from '@/components/uno/PremiumButton';
 import { Textarea } from '@/components/ui/textarea';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { useSupportChat, UNO_WHATSAPP } from '@/hooks/useChat';
 import { COMPANY_CONTACTS } from '@/lib/config';
 
@@ -290,12 +291,18 @@ export default function Support() {
           {isRu ? 'Или напишите сразу' : 'Or write directly'}
         </div>
         <SectionCard>
-          <Textarea
-            placeholder={isRu ? 'Опишите ваш вопрос...' : 'Describe your question...'}
-            value={quickMessage}
-            onChange={(e) => setQuickMessage(e.target.value)}
-            className="min-h-[100px] mb-3"
-          />
+          <div className="relative">
+            <Textarea
+              placeholder={isRu ? 'Опишите ваш вопрос...' : 'Describe your question...'}
+              value={quickMessage}
+              onChange={(e) => setQuickMessage(e.target.value)}
+              className="min-h-[100px] mb-3 pr-12"
+            />
+            <VoiceInputButton
+              onTranscript={(t) => setQuickMessage((prev) => appendTranscript(prev, t))}
+              className="absolute bottom-5 right-2"
+            />
+          </div>
           <PremiumButton 
             className="w-full"
             onClick={handleSendQuickMessage}
