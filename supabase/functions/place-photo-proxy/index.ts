@@ -9,9 +9,10 @@ const GOOGLE_KEY =
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_maps";
 
-// Google photo references are long opaque base64-ish strings (typically 100-300 chars,
-// alphanumerics plus -_). Reject anything that doesn't look like one to deter enumeration.
-const PHOTO_REF_RE = /^[A-Za-z0-9_\-]{40,500}$/;
+// Places API (New) photo resource names look like `places/{place_id}/photos/{photo_id}`.
+// Legacy opaque references are still accepted for cached records, but may require rehydrating
+// details through Places API (New) before photo streaming works.
+const PHOTO_REF_RE = /^(places\/[A-Za-z0-9_\-]+\/photos\/[A-Za-z0-9_\-]+|[A-Za-z0-9_\-]{40,500})$/;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
