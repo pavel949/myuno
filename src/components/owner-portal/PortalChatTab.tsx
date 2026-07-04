@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Send, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 
 interface Props {
   propertyId: string;
