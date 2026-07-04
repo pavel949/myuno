@@ -1,60 +1,95 @@
-## Taxonomy Spine v2 — Wave A (TS-only foundation)
+## Что делаем
 
-Принятые ответы по §15:
-- §15.1 **property_manager** → добавить в DB enum `app_role` (Wave A.5, отдельная миграция)
-- §15.5 **readiness enum** → 6 значений: `ready / lead_only / preview / hidden / parked / deprecated`
-- DRI — Павел (по умолчанию, можно переопределить позже)
+Добавляем голосовой ввод с автоматической транскрибацией во все ключевые пользовательские текстовые поля. По кнопке микрофона у поля пользователь диктует речь → Lovable AI (Gemini/OpenAI STT через AI Gateway) возвращает текст → текст дописывается в поле.
 
-### Что делаем в Wave A (без бизнес-логики, без правок UI)
+## Архитектура
 
-**A.1 — Создать Spine типы и константы**
-- Новый файл `src/lib/taxonomies/spine.ts`:
-  - `SpineAppId` — канонический union из 60 приложений (источник: `appRegistry.ts`, он считается primary)
-  - `Readiness` — `'ready' | 'lead_only' | 'preview' | 'hidden' | 'parked' | 'deprecated'`
-  - `SpineAppNode` — `{ id, surface, jtbd[], personas[], readiness, monetization, route, leadTable? }`
-  - `SPINE: Record<SpineAppId, SpineAppNode>` — единая запись на приложение
+```text
+┌──────────────┐    audio blob    ┌────────────────────┐    multipart      ┌──────────────────────┐
+│ VoiceInput   │  ───────────────>│ edge fn:           │  ───────────────> │ Lovable AI Gateway   │
+│ Button (UI)  │                  │ voice-transcribe   │                   │ /audio/transcriptions │
+│              │  <─── text ───── │ (Deno)             │  <── {text} ───── │ openai/gpt-4o-mini   │
+└──────────────┘                  └────────────────────┘                   └──────────────────────┘
+       │
+       └─ onTranscript(text) → append to input/textarea value
+```
 
-**A.2 — Адаптеры (read-only)**
-- `src/lib/taxonomies/spine/adapters.ts`:
-  - `fromAppRegistry()` — мост к существующему `appRegistry.ts`
-  - `fromCatalogTaxonomy()` — мост к `catalog/taxonomy.ts`
-  - Никакие данные в этих файлах не правятся — только сверка
+Работает без пользовательских API-ключей: используем встроенный `LOVABLE_API_KEY` в edge-функции + модель `openai/gpt-4o-mini-transcribe`.
 
-**A.3 — Contract test**
-- `src/lib/taxonomies/__tests__/spine.contract.test.ts`:
-  - Каждый `SpineAppId` существует либо в `appRegistry`, либо в `catalog/taxonomy`
-  - Каждое приложение из `appRegistry` имеет запись в Spine (или явно помечено `deprecated`)
-  - Расхождения логируются в snapshot `docs/audits/taxonomy-spine-drift.json`
-  - Тест **не падает** на drift в Wave A (warning-режим) — станет blocking в Wave C
+## Компоненты
 
-**A.4 — Документация**
-- `docs/canonical/architecture/TAXONOMY_SPINE.md` — описание модели, инвариантов, как добавлять новые ноды
-- Обновить `mem://index.md`: добавить ссылку на Spine как future SSOT (параллельно с текущими реестрами, без отмены)
+### 1. Edge-функция `supabase/functions/voice-transcribe/index.ts`
+- Принимает `multipart/form-data` с полем `file` (audio blob) и опциональным `language` (`ru`/`en`).
+- Проксирует в `https://ai.gateway.lovable.dev/v1/audio/transcriptions` с моделью `openai/gpt-4o-mini-transcribe`, авторизацией через `Deno.env.get('LOVABLE_API_KEY')`.
+- Обрабатывает 402 (нет кредитов) / 429 (rate-limit) → отдаёт понятные ошибки.
+- CORS headers через `_shared/cors.ts`. `verify_jwt = true` (только для авторизованных).
+- Валидация: размер файла ≤ 20 MB, MIME `audio/*`.
 
-**A.5 — DB enum `property_manager` (отдельная миграция, последний шаг)**
-- `supabase/migrations/<ts>_app_role_add_property_manager.sql`:
-  - `ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'property_manager';`
-  - Без RLS-изменений, без новых grant'ов
-- Проверить, что `src/types/auth.ts` уже содержит `property_manager` (по аудиту — содержит) → drift закрыт
+### 2. Хук `src/hooks/useVoiceTranscription.ts`
+- Запрашивает `navigator.mediaDevices.getUserMedia({ audio: true })`.
+- Использует `MediaRecorder` c одним `stop()` (полный самодостаточный файл — не timeslice), приоритет WAV → webm → mp4 в зависимости от браузера.
+- Правильное расширение файла по MIME (Safari = mp4, Chrome/Firefox = webm).
+- Guard: если blob < 2 KB → toast «Запись пустая, попробуйте ещё раз».
+- Отправляет blob в `voice-transcribe` через `supabase.functions.invoke`.
+- Возвращает `{ isRecording, isTranscribing, start, stop, error }`.
 
-### Что НЕ делаем в Wave A
-- Не правим `appRegistry.ts`, `catalog/taxonomy.ts`, `verticalGroups.ts`, `clusterCatalog.ts`
-- Не трогаем RLS, routes, UI, i18n
-- Не вводим унифицированный `leads view` (это Wave B)
-- Не вводим геоиерархию (Wave D)
-- Не меняем persona/JTBD enums в DB (Wave C, после ревью Spine)
+### 3. Компонент `src/components/ui/voice-input-button.tsx`
+- Иконка `Mic` / `Square` (Lucide), состояния: idle / recording (пульсирующий красный dot) / transcribing (спиннер).
+- `onTranscript(text: string)` — колбэк, потребитель решает как вставить (append / replace).
+- Локализация RU/EN через `useLanguage`. Доступность: `aria-label`, `aria-pressed`, tooltip.
+- Обработка отказа в микрофоне → toast с инструкцией.
 
-### Acceptance
-1. `tsgo` зелёный
-2. Contract test проходит (drift-snapshot создан и закоммичен)
-3. Миграция `property_manager` применена, `app_role` в DB содержит 18 значений
-4. Документ `TAXONOMY_SPINE.md` опубликован, индекс памяти обновлён
+### 4. Интеграция в поля (первая волна — «разумные места»)
 
-### Откат
-- Wave A полностью обратима: удалить `src/lib/taxonomies/spine*`, тест, доку; миграцию enum откатить нельзя (Postgres), но добавленное значение безопасно — нигде не используется как required.
+Все места, где пользователь пишет свободный текст (описание задачи, сообщение, комментарий):
 
-### Следующие волны (для контекста, не реализуем сейчас)
-- **Wave B** — унифицированный `leads_unified` view + адаптер инбокса
-- **Wave C** — sync DB enums (persona, jtbd) ↔ `master.ts`, contract test → blocking
-- **Wave D** — Geo-иерархия (country → region → city → district)
-- **Wave E** — Monetization tagging + Spine как primary SSOT, deprecate дубли
+| Файл | Поле |
+|---|---|
+| `src/components/concierge/ConciergeHelpSheet.tsx` | «Опишите задачу» (основной textarea + subject) |
+| `src/pages/guest/MyStay.tsx` | «Опишите что нужно…» |
+| `src/pages/Support.tsx` | Форма поддержки — describe |
+| `src/pages/owner/ServiceRequest.tsx` | Описание запроса |
+| `src/pages/legal/LegalBooking.tsx` | «Briefly describe…» |
+| `src/pages/medical/MedicalAppointment.tsx` | Симптомы / комментарий |
+| `src/pages/insurance/InsuranceQuote.tsx` | Комментарий к заявке |
+| `src/components/category/CategorySuggestionDialog.tsx` | Предложение категории |
+| Чаты: `thai-chat`, concierge chat, поддержка | Поле ввода сообщения |
+
+Кнопка размещается справа в поле (для Input — absolute inside wrapper) или под textarea справа.
+
+Не добавляем в: email, телефон, пароль, суммы, даты, коды купонов, поиск с автокомплитом.
+
+## UX-детали
+
+- Первая запись: браузер спросит доступ к микрофону. Если отказ — кнопка становится disabled с tooltip.
+- Во время записи — визуальный индикатор (мигающая точка) + подсказка «Говорите… Нажмите ещё раз чтобы завершить».
+- Транскрибация: спиннер + текст «Распознаём…».
+- Результат **дописывается** к тексту в поле (не затирает), с пробелом-разделителем.
+- Язык: определяется автоматически моделью (не передаём `language` в первой версии).
+
+## Технические ограничения
+
+- Модель: `openai/gpt-4o-mini-transcribe` (дефолт по нашему AI-катaлогу, дешёвая, стрим не нужен для коротких записей).
+- **Не стримим** в первой версии — записываем полный WAV/webm и одним запросом получаем `text`. Стрим (SSE) добавим второй итерацией, если понадобится живой субтитр.
+- Лимит одной записи ~2 минуты в UI (soft-limit через таймер), защита от гигантских файлов.
+- Работает только в HTTPS (production `myuno.app` — OK; localhost — OK; preview `*.lovable.app` — OK).
+
+## Что НЕ делаем в этой итерации
+
+- Стриминг с живыми субтитрами (можно добавить позже).
+- Диаризация / временные метки.
+- Голосовые команды / wake-word.
+- Замена нативной клавиатурной диктовки iOS/Android (наша кнопка работает поверх — универсально во всех браузерах).
+
+## Порядок реализации
+
+1. Edge-функция `voice-transcribe` + деплой.
+2. Хук `useVoiceTranscription` + компонент `VoiceInputButton`.
+3. Подключение в `ConciergeHelpSheet` (флагман — там самая длинная форма).
+4. Подключение в остальные 8 форм из таблицы.
+5. Ручная проверка в Chrome (webm) и Safari iOS (mp4) на preview-URL.
+
+## Оценка
+
+- ~1 edge-функция, 1 хук, 1 UI-компонент, 9 точечных правок форм.
+- Кода нового: ~300 строк, правок в существующие файлы: ~10 строк каждая.
