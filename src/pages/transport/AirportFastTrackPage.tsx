@@ -215,7 +215,7 @@ export default function AirportFastTrackPage() {
       passengers.forEach((p, i) => {
         const result = passengerSchema.safeParse(p);
         if (!result.success) {
-          result.error.errors.forEach(e => {
+          result.error.issues.forEach(e => {
             newErrors[`passenger_${i}_${e.path[0]}`] = e.message;
           });
         }
