@@ -190,6 +190,11 @@ export const OwnerAIAssistant: React.FC<OwnerAIAssistantProps> = ({
             disabled={isLoading}
             className="flex-1"
           />
+          <VoiceInputButton
+            variant="outline"
+            onTranscript={(text) => setInput((prev) => appendTranscript(prev, text))}
+            disabled={isLoading}
+          />
           <Button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
