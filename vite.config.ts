@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 // Lucide icon strategy:
 // We tried tiered chunking (core/extended/rare) — it didn't reduce the entry
@@ -89,6 +90,7 @@ export default defineConfig(({ mode, command }) => {
         },
       },
       mode === "development" && componentTagger(),
+      mcpPlugin(),
       VitePWA({
         // Auto-updating Workbox service worker. Two jobs:
         //  1. Installability — a SW with a fetch handler + the manifest below
