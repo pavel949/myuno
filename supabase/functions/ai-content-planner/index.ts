@@ -1,5 +1,6 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalSecret } from "../_shared/internal-secret.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -12,8 +13,21 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const guard = requireInternalSecret(req, corsHeaders);
-  if (guard) return guard;
+  // Dual-mode: internal secret (cron) OR authenticated admin/uno_team staff
+  const internalOk = requireInternalSecret(req, corsHeaders);
+  if (internalOk !== null) {
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+    const supaCheck = createServiceClient();
+    const { data: roleRows } = await supaCheck
+      .from("user_roles").select("role").eq("user_id", auth.user.id);
+    const roles = (roleRows || []).map((r: any) => r.role);
+    if (!roles.some((r: string) => ["admin", "uno_team"].includes(r))) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
 
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
