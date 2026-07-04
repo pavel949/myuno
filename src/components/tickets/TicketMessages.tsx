@@ -197,15 +197,20 @@ export function TicketMessages({
                 }
               }}
             />
-            <Button
-              onClick={handleSend}
-              disabled={!newMessage.trim() || isSending}
-              size="icon"
-              className="shrink-0"
-              aria-label="Отправить"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+            <div className="flex flex-col gap-1 shrink-0">
+              <Button
+                onClick={handleSend}
+                disabled={!newMessage.trim() || isSending}
+                size="icon"
+                aria-label="Отправить"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+              <VoiceInputButton
+                variant="outline"
+                onTranscript={(text) => setNewMessage((prev) => appendTranscript(prev, text))}
+              />
+            </div>
           </div>
         </div>
       )}
