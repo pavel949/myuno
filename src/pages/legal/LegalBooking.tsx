@@ -23,6 +23,7 @@ import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { VoiceInputButton, appendTranscript } from "@/components/ui/voice-input-button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -300,15 +301,21 @@ export default function LegalBooking() {
               <Label className="font-semibold mb-4 block">
                 {language === 'ru' ? 'Опишите ваш вопрос' : 'Describe Your Question'}
               </Label>
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder={language === 'ru' 
-                  ? 'Кратко опишите, с чем вам нужна помощь...'
-                  : 'Briefly describe what you need help with...'}
-                rows={4}
-                className="mt-2"
-              />
+              <div className="relative mt-2">
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder={language === 'ru' 
+                    ? 'Кратко опишите, с чем вам нужна помощь...'
+                    : 'Briefly describe what you need help with...'}
+                  rows={4}
+                  className="pr-12"
+                />
+                <VoiceInputButton
+                  onTranscript={(t) => setDescription((prev) => appendTranscript(prev, t))}
+                  className="absolute bottom-2 right-2"
+                />
+              </div>
             </div>
 
             <div className="flex gap-3">
