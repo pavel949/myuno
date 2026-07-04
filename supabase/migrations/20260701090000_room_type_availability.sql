@@ -71,7 +71,17 @@ DECLARE
   v_units INT;
   v_blocked BOOLEAN;
 BEGIN
+  -- Input validation for a public (anon-callable) SECURITY DEFINER function:
+  -- NULLs make the range comparison evaluate to NULL (not false), which would
+  -- otherwise fall through the loop and wrongly return "available".
+  IF p_check_in IS NULL OR p_check_out IS NULL OR p_units IS NULL THEN
+    RETURN false;
+  END IF;
   IF p_check_out <= p_check_in THEN
+    RETURN false;
+  END IF;
+  -- Bound the per-night loop against absurd ranges (~2 years max).
+  IF p_check_out - p_check_in > 730 THEN
     RETURN false;
   END IF;
 

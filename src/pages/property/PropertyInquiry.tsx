@@ -833,6 +833,22 @@ export default function PropertyInquiry() {
                     return;
                   }
                   setIsSubmitting(true);
+                  // 2b: gate a specific-room instant booking on live inventory
+                  // (fail-open pre-migration, so whole-property is unaffected).
+                  if (selectedRoom && checkIn && checkOut) {
+                    const roomAvailable = await checkRoomTypeAvailability(
+                      selectedRoom.id,
+                      format(checkIn, 'yyyy-MM-dd'),
+                      format(checkOut, 'yyyy-MM-dd'),
+                    );
+                    if (!roomAvailable) {
+                      toast.error(isRu
+                        ? 'Этот номер недоступен на выбранные даты.'
+                        : 'This room is not available for the selected dates.');
+                      setIsSubmitting(false);
+                      return;
+                    }
+                  }
                   try {
                     await depositPaymentRef.current.submit();
                   } finally {
@@ -874,6 +890,24 @@ export default function PropertyInquiry() {
                     return;
                   }
 
+                  // 2b: gate a specific-room request on live room inventory
+                  // before creating the inquiry row (mirrors the property-level
+                  // availability check ordering above). Fail-open pre-migration.
+                  if (selectedRoom && checkIn && checkOut) {
+                    const roomAvailable = await checkRoomTypeAvailability(
+                      selectedRoom.id,
+                      format(checkIn, 'yyyy-MM-dd'),
+                      format(checkOut, 'yyyy-MM-dd'),
+                    );
+                    if (!roomAvailable) {
+                      toast.error(isRu
+                        ? 'Этот номер недоступен на выбранные даты.'
+                        : 'This room is not available for the selected dates.');
+                      setIsSubmitting(false);
+                      return;
+                    }
+                  }
+
                   // 1. Save to property_inquiries for owner dashboard visibility
                   const { error: inquiryError } = await supabase
                     .from('property_inquiries')
@@ -898,24 +932,6 @@ export default function PropertyInquiry() {
                     );
                     setIsSubmitting(false);
                     return;
-                  }
-
-                  // 2b: server-authoritative room inventory check before booking
-                  // a specific room type. Fails open (returns available) when the
-                  // RPC is not live yet, so the whole-property flow is unaffected.
-                  if (selectedRoom && checkIn && checkOut) {
-                    const roomAvailable = await checkRoomTypeAvailability(
-                      selectedRoom.id,
-                      format(checkIn, 'yyyy-MM-dd'),
-                      format(checkOut, 'yyyy-MM-dd'),
-                    );
-                    if (!roomAvailable) {
-                      toast.error(isRu
-                        ? 'Этот номер недоступен на выбранные даты.'
-                        : 'This room is not available for the selected dates.');
-                      setIsSubmitting(false);
-                      return;
-                    }
                   }
 
                   // 2. Create order for booking tracking
