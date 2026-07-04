@@ -11,8 +11,14 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const guard = requireInternalSecret(req, corsHeaders);
-  if (guard) return guard;
+  // Dual-mode: internal secret (cron) OR authenticated user who owns the booking / is staff
+  const internalOk = requireInternalSecret(req, corsHeaders);
+  let authedUserId: string | null = null;
+  if (internalOk !== null) {
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
+    authedUserId = auth.user.id;
+  }
 
   try {
     const { booking_id } = await req.json();
@@ -27,7 +33,7 @@ serve(async (req) => {
     // Fetch booking details
     const { data: booking, error: bErr } = await supabase
       .from("property_bookings")
-      .select("id, check_in, check_out, guest_name, guests_count, property_id, total_amount, currency")
+      .select("id, check_in, check_out, guest_name, guests_count, property_id, total_amount, currency, guest_id")
       .eq("id", booking_id)
       .single();
 
