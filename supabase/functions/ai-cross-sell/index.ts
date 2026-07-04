@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
-import { requireInternalSecret } from "../_shared/internal-secret.ts";
-import { requireAuth } from "../_shared/auth-guard.ts";
+import { requireInternalOrUser, fetchUserRoles, hasAnyRole, forbidden, STAFF_ROLES } from "../_shared/authz.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -12,13 +11,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   // Dual-mode: internal secret (cron) OR authenticated user who owns the booking / is staff
-  const internalOk = requireInternalSecret(req, corsHeaders);
-  let authedUserId: string | null = null;
-  if (internalOk !== null) {
-    const auth = await requireAuth(req, corsHeaders);
-    if (auth instanceof Response) return auth;
-    authedUserId = auth.user.id;
-  }
+  const gate = await requireInternalOrUser(req, corsHeaders);
+  if (gate instanceof Response) return gate;
+  const authedUserId = gate.mode === "user" ? gate.userId : null;
 
   try {
     const { booking_id } = await req.json();
@@ -46,19 +41,14 @@ serve(async (req) => {
     // Ownership check for user-mode calls: caller must be the booking guest,
     // the owning property's owner, or a platform staff role.
     if (authedUserId) {
-      const { data: prop } = await supabase
-        .from("properties").select("owner_id").eq("id", booking.property_id).single();
-      const { data: roleRows } = await supabase
-        .from("user_roles").select("role").eq("user_id", authedUserId);
-      const roles = (roleRows || []).map((r: any) => r.role);
-      const isStaff = roles.some((r: string) => ["admin", "uno_team", "staff"].includes(r));
+      const [{ data: prop }, roles] = await Promise.all([
+        supabase.from("properties").select("owner_id").eq("id", booking.property_id).single(),
+        fetchUserRoles(supabase, authedUserId),
+      ]);
+      const isStaff = hasAnyRole(roles, STAFF_ROLES);
       const isOwner = prop?.owner_id === authedUserId;
       const isGuest = booking.guest_id === authedUserId;
-      if (!isStaff && !isOwner && !isGuest) {
-        return new Response(JSON.stringify({ error: "Forbidden" }), {
-          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (!isStaff && !isOwner && !isGuest) return forbidden(corsHeaders);
     }
 
 

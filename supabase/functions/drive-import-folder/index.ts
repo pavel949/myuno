@@ -10,8 +10,7 @@
  *   - connector: через Google Drive OAuth connector gateway
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
-import { requireAuth } from '../_shared/auth-guard.ts';
-import { requireInternalSecret } from '../_shared/internal-secret.ts';
+import { requireInternalOrUser, hasAnyRole, forbidden, STAFF_ROLES } from '../_shared/authz.ts';
 
 declare const EdgeRuntime: { waitUntil: (promise: Promise<unknown>) => void };
 
@@ -299,13 +298,9 @@ Deno.serve(async (req) => {
 
   // Allow either an authenticated caller (manual trigger) or the internal
   // cron secret (drive-watch-cron scheduler).
-  const internalOk = requireInternalSecret(req, corsHeaders);
-  let callerUserId: string | null = null;
-  if (internalOk !== null) {
-    const auth = await requireAuth(req, corsHeaders);
-    if (auth instanceof Response) return auth;
-    callerUserId = auth.user.id;
-  }
+  const gate = await requireInternalOrUser(req, corsHeaders);
+  if (gate instanceof Response) return gate;
+  const callerUserId = gate.mode === "user" ? gate.userId : null;
 
   try {
     const { sourceId, projectId, driveUrl, accessMode = 'public', triggerMode = 'manual' } = await req.json();
@@ -322,10 +317,10 @@ Deno.serve(async (req) => {
     // If caller is a user, verify they can manage the target project
     // (admin/uno_team, or developer owner of the project).
     if (callerUserId) {
-      const { data: roles } = await admin
+      const { data: roleRows } = await admin
         .from('user_roles').select('role').eq('user_id', callerUserId);
-      const roleSet = new Set((roles || []).map((r: any) => r.role));
-      const isStaff = roleSet.has('admin') || roleSet.has('uno_team') || roleSet.has('staff');
+      const roles = (roleRows || []).map((r: any) => r.role);
+      const isStaff = hasAnyRole(roles, STAFF_ROLES);
       if (!isStaff) {
         const { data: proj } = await admin
           .from('property_projects')
@@ -338,11 +333,7 @@ Deno.serve(async (req) => {
             .from('developers').select('user_id').eq('id', proj.developer_id).maybeSingle();
           ownsProject = dev?.user_id === callerUserId;
         }
-        if (!ownsProject) {
-          return new Response(JSON.stringify({ error: 'Forbidden' }), {
-            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        }
+        if (!ownsProject) return forbidden(corsHeaders);
       }
     }
 

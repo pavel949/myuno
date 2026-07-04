@@ -30,10 +30,8 @@ export function ClusterGridCards({ personas }: ClusterGridCardsProps) {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  const clusters = useMemo(
-    () => blendClusters(personas, { personas: personas as unknown as string[], role: null }),
-    [personas],
-  );
+  // blendClusters derives this exact audience context from `personas` when omitted.
+  const clusters = useMemo(() => blendClusters(personas), [personas]);
 
   if (clusters.length === 0) return null;
 
