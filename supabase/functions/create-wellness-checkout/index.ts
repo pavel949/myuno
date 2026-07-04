@@ -1,5 +1,6 @@
 import { createCheckoutHandler } from "../_shared/checkout-handler.ts";
 import type { StripeLineItem } from "../_shared/checkout-handler.ts";
+import { validateItemPrices } from "../_shared/price-guard.ts";
 
 const PLATFORM_FEE_RATE = 0.10;
 
@@ -7,7 +8,7 @@ Deno.serve(
   createCheckoutHandler({
     endpoint: "create-wellness-checkout",
 
-    build(raw, user, origin) {
+    async build(raw, user, origin, supabaseAdmin) {
       const {
         vertical,
         items = [],
@@ -26,6 +27,39 @@ Deno.serve(
         throw new Error("Invalid vertical");
       }
       if (!items || items.length === 0) throw new Error("No items selected");
+
+      // Anti-tampering: validate submitted prices against the catalogue.
+      //  - beauty  → salon_services (strict, every line must match)
+      //  - medical → medical_services, but a line id may be a doctor id rather
+      //    than a service row; validate the ones that ARE services and skip the
+      //    rest. TODO(medical): validate doctor-consultation prices once a
+      //    doctor price table/id is threaded through the payload.
+      //  - fitness → memberships are not a DB catalogue yet; skipped.
+      const lines = (items as Array<{ id: string; price: number }>).map((i) => ({ id: i.id, price: i.price }));
+      if (vertical === "beauty") {
+        await validateItemPrices(
+          supabaseAdmin,
+          { table: "salon_services", priceColumns: ["price"], activeColumn: "is_active" },
+          lines,
+          "create-wellness-checkout",
+        );
+      } else if (vertical === "medical") {
+        const ids = [...new Set(lines.map((l) => l.id))];
+        const { data: known } = await supabaseAdmin
+          .from("medical_services")
+          .select("id")
+          .in("id", ids);
+        const knownIds = new Set((known ?? []).map((r: { id: string }) => r.id));
+        const serviceLines = lines.filter((l) => knownIds.has(l.id));
+        if (serviceLines.length) {
+          await validateItemPrices(
+            supabaseAdmin,
+            { table: "medical_services", priceColumns: ["price"], activeColumn: "is_active" },
+            serviceLines,
+            "create-wellness-checkout",
+          );
+        }
+      }
 
       const serviceFee = Math.round(total_amount * PLATFORM_FEE_RATE * 100) / 100;
       const totalWithFee = total_amount + serviceFee;

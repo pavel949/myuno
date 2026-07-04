@@ -1,8 +1,10 @@
 import { createCheckoutHandler } from "../_shared/checkout-handler.ts";
+import { validateSinglePrice } from "../_shared/price-guard.ts";
 
 interface CleaningCheckoutBody {
   provider_id: string;
   provider_name: string;
+  service_id?: string;
   service_name: string;
   service_price: number;
   service_fee: number;
@@ -20,16 +22,28 @@ Deno.serve(
   createCheckoutHandler({
     endpoint: "create-cleaning-checkout",
 
-    build(raw, user, origin) {
+    async build(raw, user, origin, supabaseAdmin) {
       const body = raw as CleaningCheckoutBody;
       const {
-        provider_id, provider_name, service_name, service_price,
+        provider_id, provider_name, service_id, service_name, service_price,
         service_fee, total_amount, currency = "THB",
         scheduled_at, address, contact_name, contact_phone, contact_email, notes,
       } = body;
 
       if (!provider_id) throw new Error("Provider ID is required");
       if (total_amount < 1) throw new Error("Total must be at least 1");
+
+      // Anti-tampering: validate the service price against cleaning_services.
+      // Fail closed — a checkout that can't be tied to a catalogue service is
+      // rejected rather than trusting the client price.
+      if (!service_id) throw new Error("service_id is required");
+      await validateSinglePrice(
+        supabaseAdmin,
+        { table: "services", priceColumns: ["price"], activeColumn: "is_active" },
+        String(service_id),
+        Number(service_price),
+        "create-cleaning-checkout",
+      );
 
       const cur = currency.toLowerCase();
 

@@ -1,8 +1,10 @@
 import { createCheckoutHandler } from "../_shared/checkout-handler.ts";
+import { validateSinglePrice } from "../_shared/price-guard.ts";
 
 interface PetCheckoutBody {
   provider_id: string;
   provider_name: string;
+  service_id?: string;
   service_name: string;
   service_price: number;
   service_fee: number;
@@ -22,10 +24,10 @@ Deno.serve(
   createCheckoutHandler({
     endpoint: "create-pet-checkout",
 
-    build(raw, user, origin) {
+    async build(raw, user, origin, supabaseAdmin) {
       const body = raw as PetCheckoutBody;
       const {
-        provider_id, provider_name, service_name, service_price,
+        provider_id, provider_name, service_id, service_name, service_price,
         service_fee, total_amount, currency = "THB",
         scheduled_at, pet_type, pet_name, pet_breed,
         contact_name, contact_phone, contact_email, notes,
@@ -33,6 +35,18 @@ Deno.serve(
 
       if (!provider_id) throw new Error("Provider ID is required");
       if (total_amount < 1) throw new Error("Total must be at least 1");
+
+      // Anti-tampering: validate the service price against pet_services.
+      // Fail closed — reject checkouts that can't be tied to a catalogue row.
+      if (!service_id) throw new Error("service_id is required");
+      // Pet services are rows in the generic `listings` table (vertical='pet_service').
+      await validateSinglePrice(
+        supabaseAdmin,
+        { table: "listings", priceColumns: ["price"], activeColumn: "is_active" },
+        String(service_id),
+        Number(service_price),
+        "create-pet-checkout",
+      );
 
       const cur = currency.toLowerCase();
 

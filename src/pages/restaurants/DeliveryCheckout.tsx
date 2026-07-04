@@ -125,12 +125,17 @@ export default function DeliveryCheckout() {
 
       if (!result.success || !result.booking_id) return;
 
-      const checkoutItems = cartItems.map(item => ({
-        name: language === 'ru' ? (item.nameRu || item.name) : item.name,
-        quantity: item.quantity,
-        price: item.price,
-      }));
-      
+      const checkoutItems: Array<{ id?: string; name: string; quantity: number; price: number }> =
+        cartItems.map(item => ({
+          // Menu-item id (restaurant_menu_items.id) for server-side price validation.
+          id: item.id,
+          name: language === 'ru' ? (item.nameRu || item.name) : item.name,
+          quantity: item.quantity,
+          price: item.price,
+        }));
+
+      // Delivery is a fee line, not a menu item — no id, so it is skipped by
+      // the server-side menu-price validation.
       checkoutItems.push({
         name: language === 'ru' ? 'Доставка' : 'Delivery',
         quantity: 1,

@@ -13,7 +13,7 @@ Deno.serve(
   createCheckoutHandler({
     endpoint: "create-yacht-checkout",
 
-    build(raw, user, origin) {
+    async build(raw, user, origin, supabaseAdmin) {
       const {
         yacht_id,
         yacht_name,
@@ -39,6 +39,42 @@ Deno.serve(
       if (!yacht_id) throw new Error("yacht_id is required");
       if (!base_price || base_price < 1) throw new Error("base_price must be greater than 0");
       if (!scheduled_at) throw new Error("scheduled_at is required");
+
+      // Anti-tampering: yachts are rows in the generic `listings` table; the
+      // per-charter prices live in `listings.attributes` (price_half_day /
+      // _full_day / _sunset / _overnight), with the flat `listings.price`
+      // column acting as the full-day fallback (see src/hooks/useYachts.ts).
+      // Validate the submitted base_price against those authoritative values
+      // (fail closed — never trust the client price).
+      const { data: yachtRow, error: yachtErr } = await supabaseAdmin
+        .from("listings")
+        .select("price, attributes, is_active")
+        .eq("id", yacht_id)
+        .maybeSingle();
+      if (yachtErr) {
+        console.error("[create-yacht-checkout] listing lookup failed:", yachtErr.message);
+        throw new Error("Failed to validate prices");
+      }
+      if (!yachtRow || yachtRow.is_active === false) {
+        throw new Error("Invalid or unavailable yacht");
+      }
+      const attrs = (yachtRow.attributes ?? {}) as Record<string, unknown>;
+      const allowedCharterPrices = [
+        yachtRow.price,
+        attrs.price_full_day,
+        attrs.price_half_day,
+        attrs.price_sunset,
+        attrs.price_overnight,
+      ]
+        .map((p) => Number(p))
+        .filter((p) => Number.isFinite(p) && p > 0);
+      const baseOk = allowedCharterPrices.some((p) => Math.abs(p - Number(base_price)) <= 0.5);
+      if (!baseOk) {
+        console.warn(
+          `[create-yacht-checkout] price tamper rejected: yacht=${yacht_id} base_price=${base_price} allowed=[${allowedCharterPrices.join(",")}]`,
+        );
+        throw new Error("Price mismatch — please refresh your booking");
+      }
 
       const cur = String(currency).toLowerCase();
       const upperCurrency = String(currency).toUpperCase();

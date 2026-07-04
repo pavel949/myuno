@@ -1,6 +1,8 @@
 // Deno.serve used (native edge runtime)
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { getAllowedOrigin } from "../_shared/cors.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -63,6 +65,17 @@ Deno.serve(async (req) => {
     }
 
     logStep("User authenticated", { userId: user.id, email: user.email });
+
+    // Rate limiting — payment endpoint. This function bypasses the shared
+    // checkout handler, so the throttle must be applied explicitly here.
+    const rateLimitResponse = await withRateLimit(
+      req,
+      "create-property-deposit-checkout",
+      RATE_LIMITS.payment,
+      corsHeaders,
+      user.id,
+    );
+    if (rateLimitResponse) return rateLimitResponse;
 
     const body: PropertyDepositRequest = await req.json();
     const {
@@ -229,7 +242,9 @@ Deno.serve(async (req) => {
       logStep("New customer created", { customerId });
     }
 
-    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
+    // Validate the attacker-controlled Origin header against the allow-list
+    // before interpolating it into the Stripe redirect URLs (open-redirect guard).
+    const origin = getAllowedOrigin(req.headers.get("origin"));
 
     // Build Stripe line items — separate deposit and cleaning fee
     const lineItems: Array<{

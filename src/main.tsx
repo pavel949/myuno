@@ -45,11 +45,28 @@ if (sentryDsn && import.meta.env.PROD && typeof window !== "undefined") {
         release: `myuno@${document.querySelector('meta[name="version"]')?.getAttribute('content') ?? 'unknown'}`,
         integrations: [
           Sentry.browserTracingIntegration(),
-          Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
+          // PII protection: this app renders passport/visa/bank/payment data.
+          // Mask ALL text and block ALL media in session replays so those never
+          // leave the browser. Do NOT set these to false.
+          Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
         ],
         tracesSampleRate: 0.1,
         replaysSessionSampleRate: 0.01,
         replaysOnErrorSampleRate: 1.0,
+        // Defence-in-depth scrubber: strip common PII from the request URL/query
+        // and known sensitive fields before any event is sent to Sentry.
+        beforeSend(event) {
+          try {
+            if (event.request?.url) {
+              event.request.url = event.request.url.replace(/([?&](email|phone|token|access_token|session_id)=)[^&]+/gi, "$1[redacted]");
+            }
+            if (event.user) {
+              delete event.user.email;
+              delete event.user.ip_address;
+            }
+          } catch { /* never let scrubbing break error reporting */ }
+          return event;
+        },
       });
     }).catch(() => { /* Sentry is non-critical — silent fail */ });
   };

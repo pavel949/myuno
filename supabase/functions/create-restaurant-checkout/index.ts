@@ -1,11 +1,12 @@
 import { createCheckoutHandler } from "../_shared/checkout-handler.ts";
 import type { StripeLineItem } from "../_shared/checkout-handler.ts";
+import { validateItemPrices } from "../_shared/price-guard.ts";
 
 Deno.serve(
   createCheckoutHandler({
     endpoint: "create-restaurant-checkout",
 
-    build(raw, user, origin) {
+    async build(raw, user, origin, supabaseAdmin) {
       const {
         booking_type,
         restaurant_id,
@@ -17,6 +18,23 @@ Deno.serve(
       } = raw as Record<string, any>;
 
       if (!amount || amount < 1) throw new Error("Amount must be greater than 0");
+
+      // Anti-tampering: validate any à-la-carte line that carries a menu-item
+      // id against restaurant_menu_items. (Delivery-fee lines and set-menu /
+      // reservation-deposit flows carry no menu id and are not validated here —
+      // see follow-up to fully fail-close those paths against set_menus and a
+      // server-side deposit rule.)
+      const menuLines = (items as Array<{ id?: string; price: number }>)
+        .filter((i) => typeof i.id === "string" && i.id.length)
+        .map((i) => ({ id: i.id as string, price: i.price }));
+      if (menuLines.length) {
+        await validateItemPrices(
+          supabaseAdmin,
+          { table: "restaurant_menu_items", priceColumns: ["price"], activeColumn: "is_active" },
+          menuLines,
+          "create-restaurant-checkout",
+        );
+      }
 
       const cur = String(currency).toLowerCase();
       const upperCurrency = String(currency).toUpperCase();
