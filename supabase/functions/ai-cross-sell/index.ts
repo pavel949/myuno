@@ -43,6 +43,25 @@ serve(async (req) => {
       });
     }
 
+    // Ownership check for user-mode calls: caller must be the booking guest,
+    // the owning property's owner, or a platform staff role.
+    if (authedUserId) {
+      const { data: prop } = await supabase
+        .from("properties").select("owner_id").eq("id", booking.property_id).single();
+      const { data: roleRows } = await supabase
+        .from("user_roles").select("role").eq("user_id", authedUserId);
+      const roles = (roleRows || []).map((r: any) => r.role);
+      const isStaff = roles.some((r: string) => ["admin", "uno_team", "staff"].includes(r));
+      const isOwner = prop?.owner_id === authedUserId;
+      const isGuest = booking.guest_id === authedUserId;
+      if (!isStaff && !isOwner && !isGuest) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
+
     // Fetch property details for context
     const { data: property } = await supabase
       .from("properties")
