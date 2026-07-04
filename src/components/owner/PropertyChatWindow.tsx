@@ -227,6 +227,11 @@ export const PropertyChatWindow: React.FC<PropertyChatWindowProps> = ({
             disabled={isSending}
             className="flex-1"
           />
+          <VoiceInputButton
+            variant="outline"
+            onTranscript={(text) => handleMessageChange(appendTranscript(newMessage, text))}
+            disabled={isSending}
+          />
           <Button
             onClick={handleSend}
             disabled={!newMessage.trim() || isSending}
