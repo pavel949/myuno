@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -329,22 +330,36 @@ export default function ServiceRequest() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>{isRu ? 'Описание задачи' : 'Task Description'}</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder={isRu ? 'Опишите, что нужно сделать...' : 'Describe what needs to be done...'}
-                rows={3}
-              />
+              <div className="relative">
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder={isRu ? 'Опишите, что нужно сделать...' : 'Describe what needs to be done...'}
+                  rows={3}
+                  className="pr-12"
+                />
+                <VoiceInputButton
+                  onTranscript={(t) => setFormData(prev => ({ ...prev, description: appendTranscript(prev.description, t) }))}
+                  className="absolute bottom-2 right-2"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label>{isRu ? 'Особые инструкции' : 'Special Instructions'}</Label>
-              <Textarea
-                value={formData.special_instructions}
-                onChange={(e) => setFormData(prev => ({ ...prev, special_instructions: e.target.value }))}
-                placeholder={isRu ? 'Код от ворот, где ключи...' : 'Gate code, where are the keys...'}
-                rows={2}
-              />
+              <div className="relative">
+                <Textarea
+                  value={formData.special_instructions}
+                  onChange={(e) => setFormData(prev => ({ ...prev, special_instructions: e.target.value }))}
+                  placeholder={isRu ? 'Код от ворот, где ключи...' : 'Gate code, where are the keys...'}
+                  rows={2}
+                  className="pr-12"
+                />
+                <VoiceInputButton
+                  onTranscript={(t) => setFormData(prev => ({ ...prev, special_instructions: appendTranscript(prev.special_instructions, t) }))}
+                  className="absolute bottom-2 right-2"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

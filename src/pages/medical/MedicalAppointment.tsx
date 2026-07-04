@@ -21,6 +21,7 @@ import {
 import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Textarea } from "@/components/ui/textarea";
+import { VoiceInputButton, appendTranscript } from "@/components/ui/voice-input-button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -228,13 +229,19 @@ export default function MedicalAppointment() {
           <Label className="font-semibold mb-4 block">
             {language === 'ru' ? 'Опишите симптомы' : 'Describe Symptoms'}
           </Label>
-          <Textarea
-            value={symptoms}
-            onChange={(e) => setSymptoms(e.target.value)}
-            placeholder={language === 'ru' ? 'Что вас беспокоит?' : 'What concerns do you have?'}
-            rows={4}
-            className="mt-2"
-          />
+          <div className="relative mt-2">
+            <Textarea
+              value={symptoms}
+              onChange={(e) => setSymptoms(e.target.value)}
+              placeholder={language === 'ru' ? 'Что вас беспокоит?' : 'What concerns do you have?'}
+              rows={4}
+              className="pr-12"
+            />
+            <VoiceInputButton
+              onTranscript={(t) => setSymptoms((prev) => appendTranscript(prev, t))}
+              className="absolute bottom-2 right-2"
+            />
+          </div>
         </div>
 
         {/* Payment Method */}
