@@ -15,6 +15,7 @@ import {
   Hash, Megaphone, Send, Smile, Reply, MoreVertical,
   Headphones, TrendingUp, FileEdit, Loader2
 } from 'lucide-react';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 
@@ -176,6 +177,11 @@ function ChatInput({ onSend, isSending, placeholder }: ChatInputProps) {
           onKeyDown={handleKeyDown}
           placeholder={placeholder || (isRu ? 'Напишите сообщение...' : 'Type a message...')}
           className="flex-1"
+          disabled={isSending}
+        />
+        <VoiceInputButton
+          variant="outline"
+          onTranscript={(text) => setMessage((prev) => appendTranscript(prev, text))}
           disabled={isSending}
         />
         <Button 

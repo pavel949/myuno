@@ -16,6 +16,7 @@ import { ChatMessageTranslation } from '@/components/chat/ChatMessageTranslation
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { ModerationResult } from '@/lib/chatModerationPatterns';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 
 interface GuestPropertyChatProps {
   propertyId: string;
@@ -233,19 +234,26 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
             className="flex-1 min-h-[40px] max-h-[100px] resize-none"
             rows={1}
           />
-          <Button
-            onClick={handleSend}
-            disabled={!newMessage.trim() || isSending || (preSendWarning?.severity === 'critical')}
-            size="icon"
-            className="flex-shrink-0 self-end"
-            aria-label={isRu ? 'Отправить' : 'Send'}
-          >
-            {isSending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
-          </Button>
+          <div className="flex flex-col gap-1 self-end">
+            <Button
+              onClick={handleSend}
+              disabled={!newMessage.trim() || isSending || (preSendWarning?.severity === 'critical')}
+              size="icon"
+              className="flex-shrink-0"
+              aria-label={isRu ? 'Отправить' : 'Send'}
+            >
+              {isSending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+            </Button>
+            <VoiceInputButton
+              variant="outline"
+              onTranscript={(text) => handleMessageChange(appendTranscript(newMessage, text))}
+              disabled={isSending}
+            />
+          </div>
         </div>
       </div>
     </div>

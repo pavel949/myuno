@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 
 interface OwnerContext {
   propertiesCount?: number;
@@ -188,6 +189,11 @@ export const OwnerAIAssistant: React.FC<OwnerAIAssistantProps> = ({
             onKeyPress={handleKeyPress}
             disabled={isLoading}
             className="flex-1"
+          />
+          <VoiceInputButton
+            variant="outline"
+            onTranscript={(text) => setInput((prev) => appendTranscript(prev, text))}
+            disabled={isLoading}
           />
           <Button
             onClick={handleSend}
