@@ -10,6 +10,7 @@ import { ru } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import type { TicketMessage } from '@/hooks/useTickets';
 import { cn } from '@/lib/utils';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 
 interface TicketMessagesProps {
   ticketId: string;
