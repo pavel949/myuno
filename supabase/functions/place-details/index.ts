@@ -30,7 +30,7 @@ const FIELDS = [
   "formattedAddress",
   "nationalPhoneNumber",
   "internationalPhoneNumber",
-  "website",
+  "websiteUri",
   "googleMapsUri",
   "rating",
   "userRatingCount",
