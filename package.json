@@ -21,6 +21,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "typecheck": "tsc -b --noEmit",
     "dev:open": "vite --open",
     "dev:fresh": "vite --force",
     "prebuild": "node scripts/validate-fonts.mjs && node scripts/validate-service-tags.mjs && node scripts/validate-catalog-life-map.mjs && node scripts/generate-version.mjs",

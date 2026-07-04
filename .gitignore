@@ -42,3 +42,6 @@ test-results/
 .vercel
 .tmp-design/
 design-archive/
+
+# TypeScript incremental build info (from npm run typecheck)
+*.tsbuildinfo

@@ -1,5 +1,14 @@
 import { createCheckoutHandler } from "../_shared/checkout-handler.ts";
 
+// Legal consultations are not yet a per-provider DB catalogue: the frontend
+// (LegalBooking.tsx) charges a single fixed consultation price. Until real
+// per-service pricing is wired into `legal_services.price_consultation`, we
+// fail closed against the server-authoritative constant so a client cannot POST
+// consultation_price=1. MUST stay in sync with the frontend constant.
+// Owner action: move legal pricing into the DB and validate by service id.
+const ALLOWED_CONSULTATION_PRICE = 2000;
+const PRICE_TOLERANCE = 0.5;
+
 interface LegalCheckoutBody {
   provider_id: string;
   provider_name: string;
@@ -31,6 +40,15 @@ Deno.serve(
 
       if (!provider_id) throw new Error("Provider ID is required");
       if (total_amount < 1) throw new Error("Total must be at least 1");
+
+      // Anti-tampering: the consultation price must match the server-authoritative
+      // fixed price (fail closed). Never trust the client-supplied amount.
+      if (Math.abs(Number(consultation_price) - ALLOWED_CONSULTATION_PRICE) > PRICE_TOLERANCE) {
+        console.warn(
+          `[create-legal-checkout] price tamper rejected: submitted=${consultation_price} allowed=${ALLOWED_CONSULTATION_PRICE}`,
+        );
+        throw new Error("Price mismatch — please refresh and try again");
+      }
 
       const cur = currency.toLowerCase();
 

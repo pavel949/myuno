@@ -19,6 +19,7 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBooking } from '@/hooks/useBooking';
+import { usePetService } from '@/hooks/usePetServices';
 import { useStripeUnifiedCheckout } from '@/hooks/useStripeUnifiedCheckout';
 import { addDays, format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -42,6 +43,9 @@ export default function PetServiceBooking() {
   const { createCheckout, isProcessing: isStripeProcessing } = useStripeUnifiedCheckout();
 
   const selectedServiceFromState = location.state?.selectedService;
+  // Price must come from the DB (listings) so it matches the server-side
+  // anti-tampering validation in create-pet-checkout. Nav state is only a hint.
+  const { service: dbPetService } = usePetService(id || '');
 
   const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 1));
   const [time, setTime] = useState('');
@@ -54,9 +58,9 @@ export default function PetServiceBooking() {
 
   const service = {
     id: id || 'pet-service',
-    name: 'Pet Service',
-    nameRu: 'Услуга для питомцев',
-    price: selectedServiceFromState?.price || 1500,
+    name: dbPetService?.name_en || selectedServiceFromState?.name || 'Pet Service',
+    nameRu: dbPetService?.name_ru || 'Услуга для питомцев',
+    price: dbPetService?.price_from ?? selectedServiceFromState?.price ?? 1500,
   };
 
   // Auth redirect
@@ -94,6 +98,8 @@ export default function PetServiceBooking() {
     if (paymentMethod === 'online') {
       await createCheckout('create-pet-checkout', {
         provider_id: id,
+        // Catalogue row id (listings.id) for server-side price validation.
+        service_id: id,
         provider_name: language === 'ru' ? service.nameRu : service.name,
         service_name: selectedServiceFromState?.name || service.name,
         service_price: service.price,
