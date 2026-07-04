@@ -7,26 +7,68 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const GOOGLE_KEY =
-  Deno.env.get("GOOGLE_MAPS_API_KEY") ?? Deno.env.get("GOOGLE_MAPS_API") ?? "";
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_maps";
+
+function getGatewayHeaders(extra?: Record<string, string>) {
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const googleMapsKey = Deno.env.get("GOOGLE_MAPS_API_KEY") ?? Deno.env.get("GOOGLE_MAPS_API");
+
+  if (!lovableKey || !googleMapsKey) {
+    throw new Error("Google Maps connector credentials are not configured");
+  }
+
+  return {
+    Authorization: `Bearer ${lovableKey}`,
+    "X-Connection-Api-Key": googleMapsKey,
+    ...extra,
+  };
+}
 
 const FIELDS = [
-  "place_id",
-  "name",
-  "formatted_address",
-  "formatted_phone_number",
-  "international_phone_number",
+  "id",
+  "displayName",
+  "formattedAddress",
+  "nationalPhoneNumber",
+  "internationalPhoneNumber",
   "website",
-  "url",
+  "googleMapsUri",
   "rating",
-  "user_ratings_total",
-  "price_level",
-  "opening_hours",
-  "geometry",
+  "userRatingCount",
+  "priceLevel",
+  "regularOpeningHours",
+  "location",
   "types",
   "photos",
-  "business_status",
+  "businessStatus",
 ].join(",");
+
+function toLegacyPlace(place: Record<string, unknown>) {
+  const location = place.location as { latitude?: number; longitude?: number } | undefined;
+  const displayName = place.displayName as { text?: string } | undefined;
+  const photos = Array.isArray(place.photos) ? place.photos as Array<Record<string, unknown>> : [];
+
+  return {
+    place_id: place.id,
+    name: displayName?.text ?? place.id,
+    formatted_address: place.formattedAddress,
+    formatted_phone_number: place.nationalPhoneNumber,
+    international_phone_number: place.internationalPhoneNumber,
+    website: place.websiteUri ?? place.website,
+    url: place.googleMapsUri,
+    rating: place.rating,
+    user_ratings_total: place.userRatingCount,
+    price_level: place.priceLevel,
+    opening_hours: place.regularOpeningHours,
+    geometry: location ? { location: { lat: location.latitude, lng: location.longitude } } : undefined,
+    types: place.types,
+    photos: photos.map((photo) => ({
+      ...photo,
+      photo_reference: photo.name,
+    })),
+    business_status: place.businessStatus,
+    _places_new: place,
+  };
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -34,10 +76,6 @@ Deno.serve(async (req) => {
   try {
     const rl = await withRateLimit(req, 'place-details', RATE_LIMITS.publicRead, corsHeaders);
     if (rl) return rl;
-
-    if (!GOOGLE_KEY) {
-      return json({ error: "GOOGLE_MAPS_API_KEY is not configured" }, 500);
-    }
 
     const body = await req.json().catch(() => ({}));
     const placeId: string | undefined = body.place_id;
@@ -48,15 +86,26 @@ Deno.serve(async (req) => {
     // 1. Resolve place_id (either supplied or find-by-name+location)
     let resolvedId = placeId;
     if (!resolvedId && query?.name && query.lat != null && query.lng != null) {
-      const findUrl = new URL("https://maps.googleapis.com/maps/api/place/findplacefromtext/json");
-      findUrl.searchParams.set("input", query.name);
-      findUrl.searchParams.set("inputtype", "textquery");
-      findUrl.searchParams.set("fields", "place_id");
-      findUrl.searchParams.set("locationbias", `point:${query.lat},${query.lng}`);
-      findUrl.searchParams.set("key", GOOGLE_KEY);
-      const findRes = await fetch(findUrl).then((r) => r.json());
-      resolvedId = findRes?.candidates?.[0]?.place_id;
-      if (!resolvedId) return json({ error: "place_not_found", findRes }, 404);
+      const findRes = await fetch(`${GATEWAY_URL}/places/v1/places:searchText`, {
+        method: "POST",
+        headers: getGatewayHeaders({
+          "Content-Type": "application/json",
+          "X-Goog-FieldMask": "places.id",
+        }),
+        body: JSON.stringify({
+          textQuery: query.name,
+          locationBias: {
+            circle: {
+              center: { latitude: query.lat, longitude: query.lng },
+              radius: 1000,
+            },
+          },
+          maxResultCount: 1,
+        }),
+      });
+      const findJson = await findRes.json().catch(() => ({}));
+      resolvedId = findJson?.places?.[0]?.id;
+      if (!resolvedId) return json({ error: "place_not_found", findRes: findJson }, 404);
     }
 
     if (!resolvedId) return json({ error: "place_id or query required" }, 400);
@@ -73,18 +122,15 @@ Deno.serve(async (req) => {
     }
 
     // 3. Fresh fetch
-    const detailsUrl = new URL("https://maps.googleapis.com/maps/api/place/details/json");
-    detailsUrl.searchParams.set("place_id", resolvedId);
-    detailsUrl.searchParams.set("fields", FIELDS);
-    detailsUrl.searchParams.set("language", "en");
-    detailsUrl.searchParams.set("key", GOOGLE_KEY);
-
-    const res = await fetch(detailsUrl).then((r) => r.json());
-    if (res.status !== "OK") {
-      return json({ error: "google_error", status: res.status, message: res.error_message }, 502);
+    const detailsRes = await fetch(`${GATEWAY_URL}/places/v1/places/${encodeURIComponent(resolvedId)}?languageCode=en`, {
+      headers: getGatewayHeaders({ "X-Goog-FieldMask": FIELDS }),
+    });
+    const detailsJson = await detailsRes.json().catch(() => ({}));
+    if (!detailsRes.ok) {
+      return json({ error: "google_error", status: detailsRes.status, message: detailsJson?.error?.message }, 502);
     }
 
-    const place = res.result;
+    const place = toLegacyPlace(detailsJson);
     const lat = place?.geometry?.location?.lat ?? null;
     const lng = place?.geometry?.location?.lng ?? null;
 
@@ -102,8 +148,8 @@ Deno.serve(async (req) => {
 
     return json({ source: "google", place });
   } catch (err) {
-    console.error("[place-details] error", err);
-    return json({ error: String(err?.message ?? err) }, 500);
+    const message = err instanceof Error ? err.message : String(err);
+    return json({ error: message }, 500);
   }
 });
 

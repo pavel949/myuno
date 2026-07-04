@@ -6,6 +6,8 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 
 const GOOGLE_KEY =
   Deno.env.get("GOOGLE_MAPS_API_KEY") ?? Deno.env.get("GOOGLE_MAPS_API") ?? "";
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_maps";
 
 // Google photo references are long opaque base64-ish strings (typically 100-300 chars,
 // alphanumerics plus -_). Reject anything that doesn't look like one to deter enumeration.
@@ -17,7 +19,7 @@ Deno.serve(async (req) => {
   const rl = await withRateLimit(req, 'place-photo-proxy', RATE_LIMITS.publicRead, corsHeaders);
   if (rl) return rl;
 
-  if (!GOOGLE_KEY) return new Response("photo proxy disabled", { status: 500, headers: corsHeaders });
+  if (!GOOGLE_KEY || !LOVABLE_API_KEY) return new Response("photo proxy disabled", { status: 500, headers: corsHeaders });
 
   const url = new URL(req.url);
   const ref = url.searchParams.get("ref");
@@ -25,12 +27,16 @@ Deno.serve(async (req) => {
   if (!ref) return new Response("missing ref", { status: 400, headers: corsHeaders });
   if (!PHOTO_REF_RE.test(ref)) return new Response("invalid ref", { status: 400, headers: corsHeaders });
 
-  const upstream = new URL("https://maps.googleapis.com/maps/api/place/photo");
-  upstream.searchParams.set("photoreference", ref);
-  upstream.searchParams.set("maxwidth", String(maxwidth));
-  upstream.searchParams.set("key", GOOGLE_KEY);
+  const upstream = new URL(`${GATEWAY_URL}/places/v1/${ref}/media`);
+  upstream.searchParams.set("maxWidthPx", String(maxwidth));
 
-  const res = await fetch(upstream.toString(), { redirect: "follow" });
+  const res = await fetch(upstream.toString(), {
+    redirect: "follow",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "X-Connection-Api-Key": GOOGLE_KEY,
+    },
+  });
   if (!res.ok || !res.body) {
     return new Response(`upstream ${res.status}`, { status: 502, headers: corsHeaders });
   }
