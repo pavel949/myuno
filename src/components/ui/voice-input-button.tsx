@@ -69,6 +69,8 @@ export function VoiceInputButton({
 
   const label = isRecording ? recLabel : isTranscribing ? transLabel : idleLabel;
 
+  const isBusy = isRecording || isTranscribing;
+
   return (
     <Button
       type="button"
@@ -78,26 +80,43 @@ export function VoiceInputButton({
       disabled={disabled || isTranscribing}
       aria-label={label}
       aria-pressed={isRecording}
+      aria-busy={isBusy}
       title={label}
+      data-state={isTranscribing ? 'transcribing' : isRecording ? 'recording' : 'idle'}
       className={cn(
-        'relative shrink-0',
-        isRecording && 'text-destructive',
+        'relative shrink-0 transition-colors',
+        isRecording && 'text-destructive ring-2 ring-destructive/60 ring-offset-1 ring-offset-background',
+        isTranscribing && 'cursor-wait opacity-90',
         className,
       )}
       {...rest}
     >
+      {isRecording && (
+        <span
+          aria-hidden
+          className="absolute inset-0 rounded-[inherit] bg-destructive/20 animate-ping"
+        />
+      )}
       {isTranscribing ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : isRecording ? (
         <>
-          <Square className="h-4 w-4 fill-current" />
+          <Square className="relative h-3.5 w-3.5 fill-current" />
           <span
             aria-hidden
             className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-destructive animate-pulse"
           />
+          <span className="sr-only" role="status" aria-live="polite">
+            {recLabel}
+          </span>
         </>
       ) : (
         <Mic className="h-4 w-4" />
+      )}
+      {isTranscribing && (
+        <span className="sr-only" role="status" aria-live="polite">
+          {transLabel}
+        </span>
       )}
     </Button>
   );
