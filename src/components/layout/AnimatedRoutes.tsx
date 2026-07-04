@@ -55,6 +55,7 @@ const LifeFlowAlias = () => {
 // (~30 home components + persona logic) and we don't want to block first
 // paint on /auth, /property/:id, deep links, etc.
 import Auth from '@/pages/Auth';
+import OAuthConsent from '@/pages/OAuthConsent';
 import NotFound from '@/pages/NotFound';
 import Unsubscribe from '@/pages/Unsubscribe';
 import { useAuth } from '@/contexts/AuthContext';
@@ -224,6 +225,7 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.AUTH_FORGOT_PASSWORD} element={<LazyPage><Pages.ForgotPassword /></LazyPage>} />
         <Route path={APP_ROUTES.AUTH_RESET_PASSWORD} element={<LazyPage><Pages.ResetPassword /></LazyPage>} />
         <Route path="/auth/setup-password" element={<LazyPage><Pages.SetupPassword /></LazyPage>} />
+        <Route path="/.lovable/oauth/consent" element={<PageTransition><OAuthConsent /></PageTransition>} />
         
         {/* ── User ── */}
         {/* Wave-1 IA cleanup: /discover — единственная каноническая «дверь» в каталог.
