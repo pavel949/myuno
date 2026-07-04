@@ -15,6 +15,7 @@ import {
   Hash, Megaphone, Send, Smile, Reply, MoreVertical,
   Headphones, TrendingUp, FileEdit, Loader2
 } from 'lucide-react';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 
