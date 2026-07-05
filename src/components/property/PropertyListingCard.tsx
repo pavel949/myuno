@@ -51,7 +51,7 @@ const formatPriceLabel = (period: string, lang: string) => {
   return labels[period]?.[lang as 'en' | 'ru'] || '';
 };
 
-export function PropertyListingCard({
+function PropertyListingCardBase({
   property,
   mode = 'rent',
   isHovered = false,
@@ -293,5 +293,10 @@ export function PropertyListingCard({
     </div>
   );
 }
+
+// Memoized: the parent grid (PropertySearchPage) holds hover state, so without
+// memo every card re-renders on each hover. onHover/onSelect are stable setters,
+// so memo cuts hover re-renders from O(gridSize) to the two cards that changed.
+export const PropertyListingCard = React.memo(PropertyListingCardBase);
 
 export default PropertyListingCard;

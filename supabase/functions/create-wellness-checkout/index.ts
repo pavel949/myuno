@@ -29,12 +29,15 @@ Deno.serve(
       if (!items || items.length === 0) throw new Error("No items selected");
 
       // Anti-tampering: validate submitted prices against the catalogue.
+      // Fail closed — every line must be validated against an authoritative
+      // source, or checkout is rejected. No line's price is ever trusted as-is.
       //  - beauty  → salon_services (strict, every line must match)
-      //  - medical → medical_services, but a line id may be a doctor id rather
-      //    than a service row; validate the ones that ARE services and skip the
-      //    rest. TODO(medical): validate doctor-consultation prices once a
-      //    doctor price table/id is threaded through the payload.
-      //  - fitness → memberships are not a DB catalogue yet; skipped.
+      //  - medical → medical_services (service lines) OR doctors.consultation_price
+      //    (doctor-consultation lines). Any line matching neither is rejected.
+      //  - fitness → fixed membership price table (day/week/month); the price
+      //    must be one of the authoritative values (mirrors the client catalogue
+      //    in src/pages/fitness/FitnessBooking.tsx). There is no DB table yet.
+      const ALLOWED_FITNESS_PRICES = [800, 4500, 15000];
       const lines = (items as Array<{ id: string; price: number }>).map((i) => ({ id: i.id, price: i.price }));
       if (vertical === "beauty") {
         await validateItemPrices(
@@ -45,12 +48,23 @@ Deno.serve(
         );
       } else if (vertical === "medical") {
         const ids = [...new Set(lines.map((l) => l.id))];
-        const { data: known } = await supabaseAdmin
-          .from("medical_services")
-          .select("id")
-          .in("id", ids);
-        const knownIds = new Set((known ?? []).map((r: { id: string }) => r.id));
-        const serviceLines = lines.filter((l) => knownIds.has(l.id));
+        const [{ data: svc }, { data: docs }] = await Promise.all([
+          supabaseAdmin.from("medical_services").select("id").in("id", ids),
+          supabaseAdmin.from("doctors").select("id").in("id", ids),
+        ]);
+        const serviceIds = new Set((svc ?? []).map((r: { id: string }) => r.id));
+        const doctorIds = new Set((docs ?? []).map((r: { id: string }) => r.id));
+
+        const serviceLines = lines.filter((l) => serviceIds.has(l.id));
+        const doctorLines = lines.filter((l) => !serviceIds.has(l.id) && doctorIds.has(l.id));
+        const unknownLines = lines.filter((l) => !serviceIds.has(l.id) && !doctorIds.has(l.id));
+
+        if (unknownLines.length) {
+          console.warn(
+            `[create-wellness-checkout] medical line(s) not in medical_services/doctors: ${unknownLines.map((l) => l.id).join(",")}`,
+          );
+          throw new Error("Invalid service selection — please refresh and try again");
+        }
         if (serviceLines.length) {
           await validateItemPrices(
             supabaseAdmin,
@@ -58,6 +72,20 @@ Deno.serve(
             serviceLines,
             "create-wellness-checkout",
           );
+        }
+        if (doctorLines.length) {
+          await validateItemPrices(
+            supabaseAdmin,
+            { table: "doctors", priceColumns: ["consultation_price"], activeColumn: "is_available" },
+            doctorLines,
+            "create-wellness-checkout",
+          );
+        }
+      } else if (vertical === "fitness") {
+        const bad = lines.find((l) => !ALLOWED_FITNESS_PRICES.includes(Math.round(Number(l.price))));
+        if (bad) {
+          console.warn(`[create-wellness-checkout] fitness price tamper rejected: ${bad.id} price=${bad.price}`);
+          throw new Error("Invalid membership price — please refresh and try again");
         }
       }
 

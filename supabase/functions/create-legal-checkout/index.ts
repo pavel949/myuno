@@ -29,6 +29,10 @@ interface LegalCheckoutBody {
 Deno.serve(
   createCheckoutHandler({
     endpoint: "create-legal-checkout",
+    // Force orders.total_amount to equal the sum of the Stripe line items so the
+    // persisted total (and the ledger derived from it) can never diverge from
+    // the amount actually charged. Legal charges the full amount up-front.
+    enforceLineItemTotal: true,
 
     build(raw, user, origin) {
       const body = raw as LegalCheckoutBody;
@@ -50,6 +54,17 @@ Deno.serve(
         throw new Error("Price mismatch — please refresh and try again");
       }
 
+      // service_fee is client-supplied and feeds a Stripe line item. Bound it:
+      // must be a finite, non-negative number no larger than the consultation
+      // price (today the frontend always sends 0). enforceLineItemTotal above
+      // then anchors orders.total_amount to consultation_price + service_fee.
+      const validatedServiceFee = Number(service_fee);
+      if (!Number.isFinite(validatedServiceFee) || validatedServiceFee < 0
+          || validatedServiceFee > ALLOWED_CONSULTATION_PRICE) {
+        console.warn(`[create-legal-checkout] invalid service_fee: ${service_fee}`);
+        throw new Error("Invalid service fee");
+      }
+
       const cur = currency.toLowerCase();
 
       const lineItems = [
@@ -63,12 +78,12 @@ Deno.serve(
         },
       ];
 
-      if (service_fee > 0) {
+      if (validatedServiceFee > 0) {
         lineItems.push({
           price_data: {
             currency: cur,
             product_data: { name: "Service Fee / Сервисный сбор" },
-            unit_amount: Math.round(service_fee * 100),
+            unit_amount: Math.round(validatedServiceFee * 100),
           },
           quantity: 1,
         });
