@@ -52,13 +52,23 @@ CREATE POLICY "capital_team manages all deals"
 -- (no-op — intentional)
 
 -- ----------------------------------------------------------------------------
--- 4) Documents. investment_deals.documents_urls is a bare URL array; real
---    confidentiality depends on the STORAGE BUCKET, not this table.
---    ACTION IS MANUAL and depends on verify-prod-rls.sql §4 output:
---      * Identify which bucket backs documents_urls on real deals.
---      * That bucket MUST be `public=false`.
---      * Object-read RLS must require capital_team/admin (interim) until the
---        Sprint-3 deal_access_grants model exists.
+-- 4) Documents — THE column fix above is HALF the risk.
+--    investment_deals.documents_urls is a bare URL array. If the storage bucket
+--    serving those files is `public=true`, locking the DB column changes nothing
+--    — anyone holding a URL still pulls the document straight from storage.
+--    The real fix is: PRIVATE bucket + SIGNED URLs (short-lived), not the column.
+--
+--    ACTION (depends on verify-prod-rls.sql §4 output):
+--      a) Identify which bucket backs documents_urls on real deals.
+--      b) That bucket MUST be `public=false`.
+--      c) Object-read RLS must require capital_team/admin (interim) until the
+--         Sprint-3 deal_access_grants model exists.
+--      d) *** CODE CHANGE REQUIRED (not just SQL) ***: once the bucket is private,
+--         every place that renders a deal document must switch from a stored
+--         public URL to `supabase.storage.from(bucket).createSignedUrl(path, ttl)`.
+--         Flipping the bucket private WITHOUT this will break document rendering
+--         for legitimate staff — do them together. (I can prepare this diff.)
+--
 --    Example (uncomment + set <BUCKET> only after confirming the bucket id):
 --
 --    UPDATE storage.buckets SET public = false WHERE id = '<BUCKET>';

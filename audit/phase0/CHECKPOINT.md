@@ -57,5 +57,15 @@ If your check of `verify-prod-rls.sql` (§a) shows the bucket backing `documents
 
 ---
 
+---
+
+## Post-sign-off actions (2026-07-05, after Pavel's green-light)
+
+- **Prod access re-attempted and hard-denied.** Called Supabase MCP `get_project` and `execute_sql` directly against `kakkwibljrjsawxgnupk` → `MCP error -32600: You do not have permission`. Confirmed: this session cannot run `verify-prod-rls.sql`. **You must run it, or add prod to the session's access.** Also flagged operationally: prod being unreachable with no controlled access path for your engineer is its own risk to fix.
+- **`external-data-api`: DELETE stripped now** (`supabase/functions/external-data-api/index.ts`) — CORS allow-methods reduced to `GET, POST, PATCH, OPTIONS`; the DELETE branch now returns 405. Removes the "someone wipes the CRM" scenario today. **Not** rotated; CORS wildcard left for the coordinated cutover; awaiting your consumer list. Treat the token as **possibly already leaked** (static + `*` CORS + service-role) and prioritise rotation accordingly.
+- **Column fix held pending prod confirmation** (per your condition) — `proposed-tier3-rls-hardening.sql` stays a draft; apply only after `verify-prod-rls.sql` §5 shows `authenticated`/`anon` actually hold private-column grants.
+- **Document risk sharpened** — the draft now states the real fix is **private bucket + signed URLs**, and flags the required app-side switch to `createSignedUrl` (locking the DB column alone does nothing if the bucket is public). `verify-prod-rls.sql` §4 checks bucket publicity.
+- **Added `verify-prod-rls.sql` §6** — lists users with a self-assigned `investor` persona and whether they hold a real role, so you can grant legit investors a role (so the guard change doesn't lock them out) and gauge who could have poked the surface.
+
 ## Ready for Phase 1?
 Phase 1 (buyer-signal engine + identity bridge) does not depend on the prod-RLS answer, but the mission ordering puts this checkpoint first. **Awaiting your sign-off**, and specifically your decision on: (1) how to resolve the prod-RLS verification, (2) whether to approve the Tier-3 RLS hardening draft, (3) the token-rotation go-ahead + consumer list.
