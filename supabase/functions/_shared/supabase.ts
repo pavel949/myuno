@@ -1,4 +1,3 @@
-// @ts-nocheck -- Deno runtime file, not typechecked by app tsconfig
 /**
  * Shared Supabase client for Edge Functions
  * Use this module to ensure consistent versioning across all functions.
