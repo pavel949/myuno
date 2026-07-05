@@ -5,16 +5,20 @@
 //   GET    /external-data-api?table=property_projects&select=id,name_en&limit=10
 //   POST   /external-data-api  body: { "table": "property_projects", "rows": [{...}] }
 //   PATCH  /external-data-api  body: { "table": "property_projects", "match": {"id":"..."}, "values": {...} }
-//   DELETE /external-data-api?table=...&id=...
 //
 // Allowed tables are whitelisted to prevent abuse.
+//
+// [P8] DELETE was removed 2026-07-05: nothing legitimate needs to delete CRM
+// contacts / providers through this static-token proxy, and it took a
+// "someone wipes the CRM" scenario off the table. Rotation of EXTERNAL_API_TOKEN
+// and CORS tightening are handled separately in the coordinated cutover.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
 };
 
 // Whitelist — add tables you want exposed
@@ -112,20 +116,11 @@ Deno.serve(async (req) => {
       return json({ data, updated: Array.isArray(data) ? data.length : 0 });
     }
 
-    // DELETE — by ?id= (or any single column filter)
+    // DELETE — intentionally unsupported ([P8]). Removing rows via this
+    // static-token, service-role proxy is not a legitimate need and is too
+    // destructive to expose. Use the Supabase dashboard / a scoped script.
     if (method === "DELETE") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let q: any = admin.from(table).delete();
-      let applied = 0;
-      url.searchParams.forEach((v, k) => {
-        if (k === "table") return;
-        q = q.eq(k, v);
-        applied++;
-      });
-      if (applied === 0) return json({ error: "Refusing DELETE without filters" }, 400);
-      const { error, count } = await q.select("*", { count: "exact" });
-      if (error) return json({ error: error.message }, 400);
-      return json({ deleted: count });
+      return json({ error: "DELETE is disabled on this endpoint" }, 405);
     }
 
     return json({ error: "Method not allowed" }, 405);

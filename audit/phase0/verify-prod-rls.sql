@@ -88,6 +88,20 @@ GROUP BY grantee;
 -- RED FLAG if `authenticated` (or `anon`) lists documents_urls / submitter_email /
 -- title_private / description_private / admin_notes / platform_fee_estimate_usd.
 
+-- 6) Who currently reaches /capital via a SELF-ASSIGNED investor persona?
+--    Pre-hardening, InvestorGuard let anyone with this persona in. After the
+--    guard fix they lose UI access unless granted a real role. Use this to (a)
+--    size who to grant a legit role to, and (b) gauge who *could* have poked at
+--    the surface. Cross-check against user_roles to see who has NO server role.
+SELECT up.user_id,
+       (SELECT count(*) FROM public.user_roles ur
+         WHERE ur.user_id = up.user_id
+           AND ur.role IN ('investor','capital_team','uno_team','admin')) AS has_privileged_role
+FROM public.user_personas up
+WHERE up.persona = 'investor' AND up.is_active = true
+ORDER BY has_privileged_role;
+-- has_privileged_role=0 → was relying on the self-toggle; grant a role if legit.
+
 -- ============================================================================
 -- If (1) returns rows, or (2) shows rls_enabled=false on any table, or (4) shows
 -- a public bucket holding deal/owner/KYC docs, or (5) grants private columns to
