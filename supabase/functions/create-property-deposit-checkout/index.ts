@@ -102,6 +102,78 @@ Deno.serve(async (req) => {
       cleaning_fee,
     });
 
+    // Use service role client for DB operations
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // ── Server-side price-tampering guard ──────────────────────────────────
+    // `total_amount` / `deposit_amount` / `cleaning_fee` arrive from the client.
+    // Stripe charges `deposit_amount`, and orders.total_amount + the ledger are
+    // derived from these, so we must anchor them to authoritative DB values.
+    // The exact nightly total involves seasonal rates + weekly/monthly discounts
+    // that are non-trivial to replicate here, so instead of recomputing we
+    // enforce a conservative FLOOR: the client total may not fall below the
+    // authoritative base rate minus a generous discount allowance. This blocks
+    // gross undervaluation (e.g. a 50,000 THB stay submitted as 100 THB) while
+    // still permitting legitimate discounted bookings.
+    const MAX_RENTAL_DISCOUNT = 0.6; // tolerate up to 60% off the base nightly rate
+    const { data: propertyRow, error: propErr } = await supabaseAdmin
+      .from("properties")
+      .select("price_per_night, price, cleaning_fee, status, is_active")
+      .eq("id", property_id)
+      .maybeSingle();
+
+    if (propErr) {
+      logStep("ERROR: Property lookup failed", { error: propErr.message });
+      return new Response(
+        JSON.stringify({ error: "Could not verify property pricing" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+    if (!propertyRow) {
+      logStep("ERROR: Property not found", { property_id });
+      return new Response(
+        JSON.stringify({ error: "Property not found" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
+      );
+    }
+
+    const authoritativeRate = Number(
+      (propertyRow.price_per_night as number | null) ?? (propertyRow.price as number | null) ?? 0
+    );
+    if (!Number.isFinite(authoritativeRate) || authoritativeRate <= 0) {
+      logStep("ERROR: Property has no valid nightly rate", { property_id });
+      return new Response(
+        JSON.stringify({ error: "Property is not bookable" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    const minPlausibleTotal = Math.round(authoritativeRate * nights * (1 - MAX_RENTAL_DISCOUNT));
+    if (!Number.isFinite(total_amount) || total_amount < minPlausibleTotal) {
+      logStep("ERROR: total_amount below authoritative floor", {
+        total_amount, minPlausibleTotal, authoritativeRate, nights,
+      });
+      return new Response(
+        JSON.stringify({ error: "Invalid booking total" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    // Cleaning fee may not exceed the property's authoritative cleaning fee.
+    const authoritativeCleaningFee = Number((propertyRow.cleaning_fee as number | null) ?? 0);
+    if ((cleaning_fee ?? 0) > authoritativeCleaningFee + 0.01) {
+      logStep("ERROR: cleaning_fee exceeds authoritative value", {
+        cleaning_fee, authoritativeCleaningFee,
+      });
+      return new Response(
+        JSON.stringify({ error: "Invalid cleaning fee" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
     // Validate deposit amount (should be ~10% of total)
     const expectedDeposit = Math.round(total_amount * 0.1);
     if (deposit_amount < expectedDeposit * 0.95 || deposit_amount > expectedDeposit * 1.05) {
@@ -111,12 +183,6 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
-
-    // Use service role client for DB operations
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
 
     // P0 FIX: Check availability BEFORE creating the order
     const { data: isAvailable, error: availError } = await supabaseAdmin.rpc(

@@ -177,6 +177,19 @@ Deno.serve(async (req) => {
 
       case "add_role": {
         if (!role) throw new Error("role is required for add_role");
+        // A single admin must not be able to silently mint another platform
+        // admin via this generic endpoint (no second-admin approval exists).
+        // Granting the highest-privilege roles is intentionally not available
+        // here — provision those through a dedicated, audited flow / migration.
+        if (["admin", "uno_team"].includes(role)) {
+          return new Response(
+            JSON.stringify({
+              error: "Forbidden",
+              message: "Granting platform-admin roles is not permitted via this endpoint",
+            }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
         const { error } = await admin
           .from("user_roles")
           .upsert({ user_id, role }, { onConflict: "user_id,role" });

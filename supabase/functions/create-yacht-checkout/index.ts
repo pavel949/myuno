@@ -79,8 +79,24 @@ Deno.serve(
       const cur = String(currency).toLowerCase();
       const upperCurrency = String(currency).toUpperCase();
 
-      // Stripe charges only the deposit amount up-front
+      // Stripe charges only the deposit amount up-front. `deposit_amount` is
+      // client-supplied, so anchor it to the authoritative deposit percentage
+      // (listings.attributes.deposit_percent, default 50%) applied to the
+      // already-validated base_price. Experiences/service_fee only raise the
+      // real total, so base_price × pct is a safe LOWER bound — this blocks the
+      // "deposit_amount: 1" tamper while allowing the legitimate deposit.
       const chargeAmount = deposit_amount && deposit_amount > 0 ? deposit_amount : total_amount;
+      const authoritativeDepositPct = Number(attrs.deposit_percent ?? 50);
+      const safeDepositPct = Number.isFinite(authoritativeDepositPct) && authoritativeDepositPct > 0
+        ? authoritativeDepositPct
+        : 50;
+      const minDeposit = Math.round(Number(base_price) * safeDepositPct / 100 * 0.9); // 10% tolerance
+      if (!Number.isFinite(chargeAmount) || chargeAmount < minDeposit) {
+        console.warn(
+          `[create-yacht-checkout] deposit tamper rejected: yacht=${yacht_id} charge=${chargeAmount} minDeposit=${minDeposit} pct=${safeDepositPct}`,
+        );
+        throw new Error("Invalid deposit amount — please refresh your booking");
+      }
 
       const lineItems: StripeLineItem[] = [{
         price_data: {

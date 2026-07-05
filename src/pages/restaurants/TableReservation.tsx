@@ -8,6 +8,7 @@ import { useBooking } from '@/hooks/useBooking';
 import { useRestaurant } from '@/hooks/useRestaurants';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { 
   BookingDateTimeSelect, 
@@ -109,7 +110,7 @@ export default function TableReservation() {
 
     // If deposit required, redirect to Stripe for payment
     if (depositRequired && depositAmount > 0) {
-      const response = await supabase.functions.invoke('create-restaurant-checkout', {
+      const { data, error } = await supabase.functions.invoke('create-restaurant-checkout', {
         body: {
           booking_type: 'table_reservation',
           restaurant_id: restaurant.id,
@@ -126,10 +127,14 @@ export default function TableReservation() {
         },
       });
 
-      if (response.data?.url) {
-        window.location.href = response.data.url;
+      // A deposit is required: never fall through to the no-payment booking path
+      // on a checkout failure — that would confirm an unpaid reservation.
+      if (error || !data?.url) {
+        toast.error(language === 'ru' ? 'Не удалось создать оплату' : 'Could not start payment');
         return;
       }
+      window.location.href = data.url;
+      return;
     }
 
     const result = await createBooking({

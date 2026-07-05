@@ -1,6 +1,7 @@
 // Deno.serve used (native edge runtime)
-import { createClient } from "../_shared/supabase.ts";
+import { createClient, createServiceClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
+import { requireInternalOrUser, forbidden, fetchUserRoles, hasAnyRole, STAFF_ROLES } from '../_shared/authz.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -13,12 +14,22 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Auth: this endpoint is invoked internally (stripe-webhook, confirm-manual-
+    // payment via service-role) OR — potentially — by an end user. It returns
+    // guest PII, amounts, address and a check-in QR, so it must not be an
+    // unauthenticated IDOR. Internal callers pass; user callers must be
+    // authenticated AND own the order/booking (or hold a staff role).
+    const gate = await requireInternalOrUser(req, corsHeaders);
+    if (gate instanceof Response) return gate;
+    const callerUserId = gate.mode === 'user' ? gate.userId : null;
+
     // Rate limiting - public read endpoints (100/min)
     const rateLimitResponse = await withRateLimit(
       req,
       'generate-booking-voucher',
       RATE_LIMITS.publicRead,
-      corsHeaders
+      corsHeaders,
+      callerUserId ?? undefined,
     );
     if (rateLimitResponse) return rateLimitResponse;
 
@@ -36,6 +47,7 @@ Deno.serve(async (req) => {
     const isRu = language === 'ru';
     let voucherData: any = null;
     let entityType = 'order';
+    let ownerUserId: string | null = null;
 
     // Try fetching as order first
     if (orderId) {
@@ -46,6 +58,7 @@ Deno.serve(async (req) => {
         .single();
 
       if (!orderError && order) {
+        ownerUserId = order.customer_user_id ?? null;
         // Fetch participants
         const { data: participants } = await supabase
           .from('order_participants')
@@ -108,6 +121,7 @@ Deno.serve(async (req) => {
 
       if (!bookingError && booking) {
         entityType = 'property_booking';
+        ownerUserId = (booking as any).guest_id ?? (booking as any).owner_id ?? null;
         const property = (booking as any).properties;
         const fallbackTitle = isRu ? 'Объект' : 'Property';
         const fallbackLocation = isRu ? 'Адрес уточняется' : 'Address on request';
@@ -137,6 +151,19 @@ Deno.serve(async (req) => {
 
     if (!voucherData) {
       throw new Error('Order or booking not found');
+    }
+
+    // Ownership enforcement for user-mode callers (internal callers are trusted).
+    // The caller must own the order/booking or hold a staff role — otherwise this
+    // would leak another customer's PII, amount, and check-in QR.
+    if (callerUserId) {
+      const isOwner = ownerUserId !== null && ownerUserId === callerUserId;
+      if (!isOwner) {
+        const roles = await fetchUserRoles(createServiceClient(), callerUserId);
+        if (!hasAnyRole(roles, STAFF_ROLES)) {
+          return forbidden(corsHeaders);
+        }
+      }
     }
 
     // Generate QR code data - contains verification URL
