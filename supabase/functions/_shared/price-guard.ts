@@ -89,7 +89,7 @@ export async function validateItemPrices(
   }
 
   const rowById = new Map<string, Record<string, unknown>>();
-  for (const row of (data ?? []) as Record<string, unknown>[]) {
+  for (const row of ((data ?? []) as unknown) as Record<string, unknown>[]) {
     rowById.set(String(row[idColumn]), row);
   }
 
