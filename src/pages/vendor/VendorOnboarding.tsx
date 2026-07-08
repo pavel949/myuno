@@ -155,10 +155,22 @@ const VendorOnboarding = () => {
         throw appErr ?? new Error('Failed to create application');
       }
 
-      // Fire-and-forget admin notification.
-      supabase.functions
-        .invoke('notify-admin-partner-application', { body: { application_id: appRow.id } })
-        .catch(() => {});
+      // [F12] Notify admins. The application is already queued in
+      // partner_applications, so a notification failure must NOT fail the
+      // submission — but it must also not be swallowed silently (previously a
+      // dropped alert left the application unseen). Surface it for observability.
+      try {
+        const { error: notifyErr } = await supabase.functions.invoke(
+          'notify-admin-partner-application',
+          { body: { application_id: appRow.id } },
+        );
+        if (notifyErr) throw notifyErr;
+      } catch (notifyError) {
+        console.error(
+          'notify-admin-partner-application failed (application still queued):',
+          notifyError,
+        );
+      }
 
       setCurrentStep(1);
     } catch (error) {
