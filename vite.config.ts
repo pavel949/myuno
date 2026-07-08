@@ -200,8 +200,13 @@ export default defineConfig(({ mode, command }) => {
             /^\/api\//,
             /^\/auth\//,
             /^\/functions\//,
+            // OAuth broker paths must always hit the network — Lovable's proxy
+            // worker intercepts these on the edge. If the SW returns the SPA
+            // shell instead, Google sign-in dies with a client-side 404.
+            /^\/~oauth(\/|$)/,
             /\/version\.json$/,
           ],
+
           runtimeCaching: [
             {
               // Hashed JS/CSS/worker chunks — safe to cache, revalidate in the
