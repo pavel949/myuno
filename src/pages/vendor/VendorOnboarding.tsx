@@ -25,7 +25,11 @@ const VendorOnboarding = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, createProfile, isLoading: profileLoading } = useVendorProfile();
-  const { vendorOrgs, isLoading: contextLoading } = useUserContext();
+  const { vendorOrgs, hasRole, isLoading: contextLoading } = useUserContext();
+  // [F5] Approved vendors (server-resolved role) belong in the cabinet; a pending
+  // applicant has an org but no vendor role yet and must NOT be sent to /vendor
+  // (VendorGuard would bounce them back here → redirect loop).
+  const isApprovedVendor = hasRole('vendor') || hasRole('admin') || hasRole('uno_team');
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdProviderId, setCreatedProviderId] = useState<string | null>(null);
@@ -51,8 +55,16 @@ const VendorOnboarding = () => {
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {
-    if (!contextLoading && vendorOrgs.length > 0) navigate('/vendor');
-  }, [vendorOrgs, contextLoading, navigate]);
+    if (contextLoading) return;
+    // Approved vendors → cabinet.
+    if (isApprovedVendor) {
+      navigate('/vendor');
+      return;
+    }
+    // [F5] Pending applicant who already has an org/application: show the
+    // "pending review" step instead of looping through /vendor ⇄ onboarding.
+    if (vendorOrgs.length > 0) setCurrentStep(2);
+  }, [vendorOrgs, isApprovedVendor, contextLoading, navigate]);
 
   const handleStep1Submit = async () => {
     if (!businessName.trim()) {
