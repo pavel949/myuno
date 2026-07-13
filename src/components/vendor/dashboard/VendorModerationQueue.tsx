@@ -43,16 +43,25 @@ interface VendorModerationQueueProps {
   className?: string;
 }
 
-// Tables to query for moderation status
-const MODERATION_TABLES = [
-  { table: 'marketplace_products', nameField: 'name_en', providerField: 'vendor_id', useVendorId: true, path: '/vendor/marketplace' },
-  { table: 'vendor_services', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/services' },
-  { table: 'yachts', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/yachts' },
-  { table: 'tours', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/tours' },
-  { table: 'salons', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/beauty' },
-  { table: 'clinics', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/clinics' },
-  { table: 'gyms', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/fitness' },
-  { table: 'vehicles', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/transport' },
+// Tables to query for moderation status.
+// `hasRejectionReason` reflects actual live schema — tours/clinics/vehicles
+// don't have a rejection_reason column yet, so we must not select it.
+// vendor_services has no approval_status/rejection_reason at all → excluded.
+const MODERATION_TABLES: Array<{
+  table: string;
+  nameField: string;
+  providerField: string;
+  useVendorId: boolean;
+  path: string;
+  hasRejectionReason: boolean;
+}> = [
+  { table: 'marketplace_products', nameField: 'name_en', providerField: 'vendor_id', useVendorId: true, path: '/vendor/marketplace', hasRejectionReason: true },
+  { table: 'yachts', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/yachts', hasRejectionReason: true },
+  { table: 'tours', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/tours', hasRejectionReason: false },
+  { table: 'salons', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/beauty', hasRejectionReason: true },
+  { table: 'clinics', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/clinics', hasRejectionReason: false },
+  { table: 'gyms', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/fitness', hasRejectionReason: true },
+  { table: 'vehicles', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/transport', hasRejectionReason: false },
 ];
 
 export function VendorModerationQueue({
@@ -87,9 +96,12 @@ export function VendorModerationQueue({
           if (!id) continue;
 
           try {
+            const selectCols = tableConfig.hasRejectionReason
+              ? `id, ${tableConfig.nameField}, approval_status, rejection_reason, created_at`
+              : `id, ${tableConfig.nameField}, approval_status, created_at`;
             const { data, error } = await supabase
               .from(tableConfig.table as any)
-              .select(`id, ${tableConfig.nameField}, approval_status, rejection_reason, created_at`)
+              .select(selectCols)
               .eq(tableConfig.providerField, id)
               .in('approval_status', ['pending', 'rejected'])
               .order('created_at', { ascending: false })
@@ -107,7 +119,7 @@ export function VendorModerationQueue({
                   name: item[tableConfig.nameField] || 'Untitled',
                   table: tableConfig.table,
                   status: (item.approval_status || 'pending') as ApprovalStatus,
-                  rejectionReason: item.rejection_reason,
+                  rejectionReason: tableConfig.hasRejectionReason ? item.rejection_reason : null,
                   createdAt: item.created_at,
                 });
               }
