@@ -96,9 +96,12 @@ export function VendorModerationQueue({
           if (!id) continue;
 
           try {
+            const selectCols = tableConfig.hasRejectionReason
+              ? `id, ${tableConfig.nameField}, approval_status, rejection_reason, created_at`
+              : `id, ${tableConfig.nameField}, approval_status, created_at`;
             const { data, error } = await supabase
               .from(tableConfig.table as any)
-              .select(`id, ${tableConfig.nameField}, approval_status, rejection_reason, created_at`)
+              .select(selectCols)
               .eq(tableConfig.providerField, id)
               .in('approval_status', ['pending', 'rejected'])
               .order('created_at', { ascending: false })
@@ -116,7 +119,7 @@ export function VendorModerationQueue({
                   name: item[tableConfig.nameField] || 'Untitled',
                   table: tableConfig.table,
                   status: (item.approval_status || 'pending') as ApprovalStatus,
-                  rejectionReason: item.rejection_reason,
+                  rejectionReason: tableConfig.hasRejectionReason ? item.rejection_reason : null,
                   createdAt: item.created_at,
                 });
               }
