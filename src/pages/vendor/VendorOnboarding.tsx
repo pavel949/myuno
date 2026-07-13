@@ -50,9 +50,20 @@ const VendorOnboarding = () => {
     if (!authLoading && !user) navigate('/auth');
   }, [user, authLoading, navigate]);
 
+  // Only redirect to /vendor if the user already had a vendor org BEFORE starting
+  // the wizard. Once Step 1 creates a provider/org, vendorOrgs populates — we must
+  // NOT bounce the user out mid-wizard (they'd land on /vendor without an approved
+  // vendor role and hit AccessDenied). Guard by createdProviderId + currentStep.
+  const hasCheckedInitialOrgs = React.useRef(false);
   React.useEffect(() => {
-    if (!contextLoading && vendorOrgs.length > 0) navigate('/vendor');
-  }, [vendorOrgs, contextLoading, navigate]);
+    if (contextLoading) return;
+    if (hasCheckedInitialOrgs.current) return;
+    hasCheckedInitialOrgs.current = true;
+    if (vendorOrgs.length > 0 && !createdProviderId && currentStep === 0) {
+      navigate('/vendor');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextLoading]);
 
   const handleStep1Submit = async () => {
     if (!businessName.trim()) {
