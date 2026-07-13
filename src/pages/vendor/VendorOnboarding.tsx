@@ -25,11 +25,7 @@ const VendorOnboarding = () => {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { profile, createProfile, isLoading: profileLoading } = useVendorProfile();
-  const { vendorOrgs, hasRole, isLoading: contextLoading } = useUserContext();
-  // [F5] Approved vendors (server-resolved role) belong in the cabinet; a pending
-  // applicant has an org but no vendor role yet and must NOT be sent to /vendor
-  // (VendorGuard would bounce them back here → redirect loop).
-  const isApprovedVendor = hasRole('vendor') || hasRole('admin') || hasRole('uno_team');
+  const { vendorOrgs, isLoading: contextLoading } = useUserContext();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdProviderId, setCreatedProviderId] = useState<string | null>(null);
@@ -54,17 +50,20 @@ const VendorOnboarding = () => {
     if (!authLoading && !user) navigate('/auth');
   }, [user, authLoading, navigate]);
 
+  // Only redirect to /vendor if the user already had a vendor org BEFORE starting
+  // the wizard. Once Step 1 creates a provider/org, vendorOrgs populates — we must
+  // NOT bounce the user out mid-wizard (they'd land on /vendor without an approved
+  // vendor role and hit AccessDenied). Guard by createdProviderId + currentStep.
+  const hasCheckedInitialOrgs = React.useRef(false);
   React.useEffect(() => {
     if (contextLoading) return;
-    // Approved vendors → cabinet.
-    if (isApprovedVendor) {
+    if (hasCheckedInitialOrgs.current) return;
+    hasCheckedInitialOrgs.current = true;
+    if (vendorOrgs.length > 0 && !createdProviderId && currentStep === 0) {
       navigate('/vendor');
-      return;
     }
-    // [F5] Pending applicant who already has an org/application: show the
-    // "pending review" step instead of looping through /vendor ⇄ onboarding.
-    if (vendorOrgs.length > 0) setCurrentStep(2);
-  }, [vendorOrgs, isApprovedVendor, contextLoading, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextLoading]);
 
   const handleStep1Submit = async () => {
     if (!businessName.trim()) {
@@ -167,22 +166,10 @@ const VendorOnboarding = () => {
         throw appErr ?? new Error('Failed to create application');
       }
 
-      // [F12] Notify admins. The application is already queued in
-      // partner_applications, so a notification failure must NOT fail the
-      // submission — but it must also not be swallowed silently (previously a
-      // dropped alert left the application unseen). Surface it for observability.
-      try {
-        const { error: notifyErr } = await supabase.functions.invoke(
-          'notify-admin-partner-application',
-          { body: { application_id: appRow.id } },
-        );
-        if (notifyErr) throw notifyErr;
-      } catch (notifyError) {
-        console.error(
-          'notify-admin-partner-application failed (application still queued):',
-          notifyError,
-        );
-      }
+      // Fire-and-forget admin notification.
+      supabase.functions
+        .invoke('notify-admin-partner-application', { body: { application_id: appRow.id } })
+        .catch(() => {});
 
       setCurrentStep(1);
     } catch (error) {

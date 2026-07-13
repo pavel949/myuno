@@ -87,14 +87,11 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } }
     );
-    // [F8] Accept uno_team as admin-equivalent (matches the UI guards + RLS elsewhere).
-    // Previously gated on 'admin' only, so a uno_team operator opened the admin page
-    // then hit a 403 here on approve/reject.
-    const [{ data: isAdmin }, { data: isUnoTeam }] = await Promise.all([
-      supabaseAnon.rpc("has_role", { _user_id: adminId, _role: "admin" }),
-      supabaseAnon.rpc("has_role", { _user_id: adminId, _role: "uno_team" }),
-    ]);
-    if (!isAdmin && !isUnoTeam) {
+    const { data: isAdmin } = await supabaseAnon.rpc("has_role", {
+      _user_id: adminId,
+      _role: "admin",
+    });
+    if (!isAdmin) {
       return new Response(
         JSON.stringify({ error: "Admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -139,16 +139,9 @@ export default function ForLocalServices() {
         </section>
 
         <section className="max-w-3xl mx-auto px-4 pb-20 text-center space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button variant="secondary" onClick={() => navigate(APP_ROUTES.LIST_WITH_US)}>
-              {isRu ? 'Разместить объект или услугу' : 'List a property or service'}
-            </Button>
-            {/* [F2] Discoverability: the Thai-business self-serve entry was not linked
-                anywhere in-app. Surface it here for local Thai SMBs. */}
-            <Button variant="outline" onClick={() => navigate(APP_ROUTES.THAI_BUSINESS_PARTNER)}>
-              {isRu ? 'Тайский бизнес? Разместить бесплатно' : 'Thai business? Get listed free'}
-            </Button>
-          </div>
+          <Button variant="secondary" onClick={() => navigate(APP_ROUTES.LIST_WITH_US)}>
+            {isRu ? 'Разместить объект или услугу' : 'List a property or service'}
+          </Button>
           <p className="text-xs text-muted-foreground">
             {isRu
               ? 'Уже есть аккаунт — войдите и откройте панель вендора из профиля.'
