@@ -223,6 +223,36 @@ export function VendorModerationQueue({
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 space-y-2">
+        {loadErrors.length > 0 && (
+          <div
+            role="alert"
+            className="flex items-start gap-2 p-3 border border-destructive/30 bg-destructive/10 text-destructive text-xs rounded-none"
+            title={loadErrors.map(e => `${e.table}: ${e.message}`).join('\n')}
+          >
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="font-medium">
+                {isRu
+                  ? 'Не удалось загрузить часть очереди модерации'
+                  : 'Some moderation data failed to load'}
+              </p>
+              <p className="opacity-80 mt-0.5 break-words">
+                {isRu ? 'Разделы: ' : 'Sections: '}
+                {errorTableLabels}
+                {'. '}
+                {isRu
+                  ? 'Ошибка схемы БД — сообщите в поддержку. Список ниже может быть неполным.'
+                  : 'Database schema error — please contact support. The list below may be incomplete.'}
+              </p>
+              {loadErrors[0]?.message && (
+                <p className="opacity-70 mt-1 font-mono text-[10px] break-all">
+                  {loadErrors[0].message}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         {items.map((item) => (
           <div
             key={`${item.table}-${item.id}`}
