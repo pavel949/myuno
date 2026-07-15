@@ -193,10 +193,12 @@ export function VendorModerationQueue({
     );
   }
 
-  // Don't show if nothing pending/rejected
-  if (items.length === 0) {
+  // Don't show if nothing pending/rejected AND no errors to surface
+  if (items.length === 0 && loadErrors.length === 0) {
     return null;
   }
+
+  const errorTableLabels = loadErrors.map(e => getTableLabel(e.table)).join(', ');
 
   return (
     <Card className={className}>
