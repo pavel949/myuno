@@ -78,6 +78,7 @@ export function VendorModerationQueue({
   const [isLoading, setIsLoading] = useState(true);
   const [pendingCount, setPendingCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
+  const [loadErrors, setLoadErrors] = useState<Array<{ table: string; message: string }>>([]);
 
   useEffect(() => {
     const fetchModerationItems = async () => {
@@ -88,6 +89,7 @@ export function VendorModerationQueue({
 
       setIsLoading(true);
       const allItems: ModerationItem[] = [];
+      const errors: Array<{ table: string; message: string }> = [];
 
       try {
         // Query each table for pending/rejected items
@@ -109,6 +111,7 @@ export function VendorModerationQueue({
 
             if (error) {
               logger.warn(`Error fetching ${tableConfig.table}:`, error.message);
+              errors.push({ table: tableConfig.table, message: error.message });
               continue;
             }
 
@@ -124,19 +127,20 @@ export function VendorModerationQueue({
                 });
               }
             }
-          } catch (e) {
-            // Table might not exist, skip silently
+          } catch (e: any) {
+            errors.push({ table: tableConfig.table, message: e?.message || String(e) });
           }
         }
 
         // Sort by created date and limit
-        allItems.sort((a, b) => 
+        allItems.sort((a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
 
         setItems(allItems.slice(0, limit));
         setPendingCount(allItems.filter(i => i.status === APPROVAL_STATUSES.PENDING).length);
         setRejectedCount(allItems.filter(i => i.status === APPROVAL_STATUSES.REJECTED).length);
+        setLoadErrors(errors);
       } catch (err) {
         console.error('Error fetching moderation items:', err);
       } finally {
