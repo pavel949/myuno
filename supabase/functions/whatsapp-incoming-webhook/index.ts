@@ -95,6 +95,36 @@ Deno.serve(async (req) => {
 
     const supabase = createServiceClient();
 
+    // [A0] Reply-halt: any inbound message from a vendor we are cold-outreaching
+    // stops the machine. STOP-style keywords opt them out permanently; any other
+    // reply marks them "responded" so a human takes over. Either way, cancel
+    // pending follow-ups so no further automated message goes out.
+    try {
+      const isOptOut = /\b(stop|стоп|unsubscribe|отпис\w*|ยกเลิก|หยุด)\b/i.test(messageBody);
+      const { data: vendorContacts } = await supabase
+        .from("crm_contacts")
+        .select("id, outreach_status")
+        .eq("contact_type", "vendor")
+        .or(`phone.eq.${phone},phone.eq.+${phone}`);
+      const inFlight = (vendorContacts ?? []).filter(
+        (c: { outreach_status: string | null }) =>
+          c.outreach_status && !["opted_out", "responded"].includes(c.outreach_status),
+      );
+      for (const c of inFlight) {
+        await supabase
+          .from("crm_contacts")
+          .update({ outreach_status: isOptOut ? "opted_out" : "responded" })
+          .eq("id", c.id);
+        await supabase
+          .from("vendor_outreach_log")
+          .update({ next_followup_at: null })
+          .eq("contact_id", c.id)
+          .not("next_followup_at", "is", null);
+      }
+    } catch (e) {
+      console.warn("[WhatsApp Incoming] reply-halt failed:", e);
+    }
+
     // Check if we already have a recent lead from this phone (last 24h) to avoid duplicates
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data: existingLead } = await supabase
