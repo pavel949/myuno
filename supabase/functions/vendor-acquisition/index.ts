@@ -2,6 +2,7 @@
 import { createClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { promoteVendorProspect } from "../_shared/prospect-promotion.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -76,6 +77,8 @@ Deno.serve(async (req) => {
         return await handleBatchImport(supabase, body);
       case 'analyze-url':
         return await handleAnalyzeUrl(supabase, body);
+      case 'promote':
+        return await handlePromote(supabase, body);
       default:
         return new Response(
           JSON.stringify({ error: "Unknown endpoint" }),
@@ -90,6 +93,35 @@ Deno.serve(async (req) => {
     );
   }
 });
+
+// [A1] Promote a vendor prospect into the house crm_contacts book so the
+// outreach sender can pick it up. Idempotent; never grants a role.
+async function handlePromote(supabase: any, body: { prospectId?: string; prospect_id?: string }) {
+  const prospectId = body.prospectId ?? body.prospect_id;
+  if (!prospectId) {
+    return new Response(
+      JSON.stringify({ error: "prospectId required" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+  const { data: prospect, error } = await supabase
+    .from("vendor_prospects")
+    .select("id, business_name, contact_name, email, phone, whatsapp, category, crm_contact_id")
+    .eq("id", prospectId)
+    .single();
+  if (error || !prospect) {
+    return new Response(
+      JSON.stringify({ error: "Prospect not found" }),
+      { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+  const result = await promoteVendorProspect(supabase, prospect);
+  const ok = !!result.contactId;
+  return new Response(
+    JSON.stringify({ success: ok, ...result }),
+    { status: ok ? 200 : 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
 
 async function handleScore(supabase: any, body: { prospectId?: string; prospectData?: ProspectData }) {
   const { prospectId, prospectData } = body;
