@@ -10,11 +10,69 @@
 
 import { createServiceClient } from "../_shared/supabase.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
+import { requireInternalOrStaff, PLATFORM_ADMIN_ROLES } from "../_shared/authz.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-internal-secret",
 };
+
+// [A0] Default outbound caps (per channel, per UTC day). Overridable via
+// system_settings key `outreach_daily_caps`. Deliberately conservative — start
+// low to warm the WhatsApp number / email domain and avoid UltraMSG bans.
+const DEFAULT_CAPS = { whatsapp: 10, email: 30 };
+
+// Contacts in these states must never be messaged again by the machine.
+const HALT_STATUSES = new Set(["opted_out", "responded", "unsubscribed"]);
+
+/** Opt-out footer appended to every WhatsApp template (PDPA / anti-spam). */
+const WA_OPTOUT = "\n\n_Reply STOP to opt out · Ответьте СТОП, чтобы отписаться_";
+
+/** True if the email is on the platform suppression list (unsubscribe/bounce/complaint). */
+async function isEmailSuppressed(
+  supabase: ReturnType<typeof createServiceClient>,
+  email: string,
+): Promise<boolean> {
+  const { data } = await supabase
+    .from("suppressed_emails")
+    .select("email")
+    .eq("email", email.toLowerCase())
+    .maybeSingle();
+  return !!data;
+}
+
+/** Read per-channel daily caps from system_settings, falling back to defaults. */
+async function getDailyCaps(
+  supabase: ReturnType<typeof createServiceClient>,
+): Promise<{ whatsapp: number; email: number }> {
+  const { data } = await supabase
+    .from("system_settings")
+    .select("value")
+    .eq("key", "outreach_daily_caps")
+    .maybeSingle();
+  const v = (data?.value ?? {}) as { whatsapp?: number; email?: number };
+  return {
+    whatsapp: typeof v.whatsapp === "number" ? v.whatsapp : DEFAULT_CAPS.whatsapp,
+    email: typeof v.email === "number" ? v.email : DEFAULT_CAPS.email,
+  };
+}
+
+/** Count sends already logged today (UTC) per channel, to enforce caps. */
+async function countSentToday(
+  supabase: ReturnType<typeof createServiceClient>,
+  channel: "email" | "whatsapp",
+): Promise<number> {
+  const startOfDay = new Date();
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  const { count } = await supabase
+    .from("vendor_outreach_log")
+    .select("id", { count: "exact", head: true })
+    .eq("channel", channel)
+    .eq("status", "sent")
+    .gte("created_at", startOfDay.toISOString());
+  return count ?? 0;
+}
 
 interface OutreachContact {
   id: string;
@@ -229,21 +287,56 @@ async function sendEmail(
 async function processOutreach(
   supabase: ReturnType<typeof createServiceClient>,
   contacts: OutreachContact[],
-  sequence: number
+  sequence: number,
+  caps: { whatsapp: number; email: number },
+  sentToday: { whatsapp: number; email: number }
 ): Promise<OutreachResult[]> {
   const results: OutreachResult[] = [];
 
   for (const contact of contacts) {
+    // [A0] Never re-contact someone who replied or opted out. The follow-up
+    // query keys off log status, so a contact who responded can still surface
+    // here — this is the authoritative stop.
+    if (HALT_STATUSES.has(contact.outreach_status)) {
+      console.info(`[Outreach] Skipping ${contact.id} — status ${contact.outreach_status}`);
+      continue;
+    }
+
     // Determine channel: prefer WhatsApp if phone available
     const channel: "email" | "whatsapp" = contact.phone ? "whatsapp" : "email";
-    
+
     if (channel === "email" && !contact.email) {
       console.info(`[Outreach] Skipping ${contact.id} — no contact info`);
       continue;
     }
 
-    // Generate personalized message
-    const message = await generatePersonalizedMessage(contact, sequence, channel);
+    // [A0] Per-channel daily cap — protects the UltraMSG number / email domain.
+    if (sentToday[channel] >= caps[channel]) {
+      console.info(`[Outreach] ${channel} daily cap reached (${caps[channel]}) — skipping rest`);
+      continue;
+    }
+
+    // [A0] Honor email suppression list (unsubscribe / bounce / complaint).
+    if (channel === "email" && contact.email && (await isEmailSuppressed(supabase, contact.email))) {
+      console.info(`[Outreach] Skipping ${contact.id} — email suppressed`);
+      await supabase.from("vendor_outreach_log").insert({
+        contact_id: contact.id,
+        channel,
+        status: "suppressed",
+        followup_sequence: sequence,
+      });
+      continue;
+    }
+
+    // [A0] WhatsApp is TEMPLATE-ONLY (no free AI generation) so every WA message
+    // is a vetted, opt-out-terminated template. Email keeps AI personalization.
+    const message =
+      channel === "whatsapp"
+        ? (() => {
+            const t = getTemplateMessage(contact, sequence, "whatsapp");
+            return { ...t, body: t.body + WA_OPTOUT };
+          })()
+        : await generatePersonalizedMessage(contact, sequence, "email");
 
     let success = false;
     let error: string | undefined;
@@ -255,6 +348,8 @@ async function processOutreach(
       success = await sendEmail(contact.email, message.subject!, message.body);
       if (!success) error = "Email send failed";
     }
+
+    if (success) sentToday[channel] += 1;
 
     // Calculate next follow-up date
     const nextFollowupDays = FOLLOW_UP_DELAYS_DAYS[sequence - 1];
@@ -287,8 +382,9 @@ async function processOutreach(
 
     results.push({ contact_id: contact.id, channel, success, error });
 
-    // Small delay between sends to avoid rate limiting
-    await new Promise(r => setTimeout(r, 500));
+    // [A0] Human-paced jitter (3–6s) between sends — reduces spam/burst signals
+    // that get UltraMSG numbers flagged.
+    await new Promise(r => setTimeout(r, 3000 + Math.floor(Math.random() * 3000)));
   }
 
   return results;
@@ -299,10 +395,23 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // [A0] Dual-mode gate: internal secret / service-role (cron) OR an authed
+  // admin/uno_team (the manual VendorOutreachPanel buttons). This function
+  // sends real WhatsApp/email — it must never be publicly invocable.
+  const gate = await requireInternalOrStaff(req, corsHeaders, PLATFORM_ADMIN_ROLES);
+  if (gate instanceof Response) return gate;
+
   try {
     const supabase = createServiceClient();
     const body = await req.json().catch(() => ({}));
     const { action = "initial", limit = 10 } = body;
+
+    // [A0] Load caps + today's usage once per run so both branches share budget.
+    const caps = await getDailyCaps(supabase);
+    const sentToday = {
+      whatsapp: await countSentToday(supabase, "whatsapp"),
+      email: await countSentToday(supabase, "email"),
+    };
 
     let contacts: OutreachContact[] = [];
     let sequence = 1;
@@ -325,7 +434,10 @@ Deno.serve(async (req) => {
         .select("id, first_name, last_name, company_name, email, phone, category, outreach_status, outreach_sent_at")
         .eq("contact_type", "vendor")
         .eq("outreach_status", "not_contacted")
-        .not("email", "is", null);
+        // [A0] Was `.not("email","is",null)` which silently dropped phone-only
+        // prospects even though WhatsApp is the preferred channel. Require SOME
+        // reachable contact point instead.
+        .or("email.not.is.null,phone.not.is.null");
       if (houseCompanyId) q = q.eq("company_id", houseCompanyId);
       const { data } = await q.limit(limit);
 
@@ -368,7 +480,7 @@ Deno.serve(async (req) => {
 
     console.info(`[Outreach] Processing ${contacts.length} contacts (sequence ${sequence})`);
 
-    const results = await processOutreach(supabase, contacts, sequence);
+    const results = await processOutreach(supabase, contacts, sequence, caps, sentToday);
     const successful = results.filter(r => r.success).length;
 
     return new Response(

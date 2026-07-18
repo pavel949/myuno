@@ -9,8 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { statusConfig, priorityConfig, useUpdateProspect, useScoreProspect, useGenerateOutreach, useLogActivity, type VendorProspect } from '@/hooks/useVendorAcquisition';
 import { supabase } from '@/integrations/supabase/client';
-import { getOrCreateContactByEmail } from '@/lib/crm/getOrCreateContact';
-import { useMyCompanyId } from '@/hooks/useAgentDeals';
 import { 
   MapPin, Phone, Mail, Globe, Instagram, Star, 
   Send, Bot, Copy, MessageSquare, UserPlus,
@@ -33,8 +31,7 @@ const updateProspect = useUpdateProspect();
   const scoreProspect = useScoreProspect();
   const generateOutreach = useGenerateOutreach();
   const logActivity = useLogActivity();
-  const { data: myCompany } = useMyCompanyId();
-  
+
   const [generatedMessage, setGeneratedMessage] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isScoring, setIsScoring] = useState(false);
@@ -95,70 +92,38 @@ const updateProspect = useUpdateProspect();
   };
 
   const handleConvertToCrm = async () => {
-    if (!myCompany?.company_id) {
-      toast.error(isRussian ? 'Нет активной компании' : 'No active company');
-      return;
-    }
     setIsConvertingToCrm(true);
     try {
-      const nameParts = (prospect.contact_name || prospect.business_name || '').split(' ');
-      const firstName = nameParts[0] || prospect.business_name;
-      const lastName = nameParts.slice(1).join(' ') || '';
-
-      // De-dup is handled by getOrCreateContactByEmail, scoped to this company —
-      // no separate unscoped email lookup (which could match another tenant's row).
-
-      // Extract enriched data from source_data
-      const sd = (prospect.source_data || {}) as Record<string, any>;
-      const tags = [
-        prospect.category,
-        sd.price_tier,
-        ...(sd.is_verified ? ['verified'] : []),
-        'ai_discovery',
-      ].filter(Boolean) as string[];
-
-      // Rich CRM mapping (idempotent by email)
-      const { existed } = await getOrCreateContactByEmail({
-        company_id: myCompany.company_id,
-        first_name: firstName,
-        last_name: lastName || null,
-        email: prospect.email,
-        phone: prospect.phone,
-        whatsapp: prospect.whatsapp || prospect.phone,
-        instagram: prospect.instagram,
-        facebook: prospect.facebook,
-        website: prospect.website,
-        company_name: prospect.business_name,
-        contact_type: 'vendor',
-        source: 'ai_discovery',
-        lead_score: prospect.ai_score,
-        lead_temperature: prospect.ai_priority === 'hot' ? 'hot' : prospect.ai_priority === 'warm' ? 'warm' : 'cold',
-        address_city: prospect.city || 'Phuket',
-        address_street: prospect.address,
-        tags,
-        notes: [
-          `[Supplier Discovery] ${prospect.business_name}`,
-          prospect.category ? `Category: ${prospect.category}` : null,
-          `AI Score: ${prospect.ai_score || 'N/A'}`,
-          prospect.ai_reasoning,
-          sd.services_offered?.length ? `Services: ${sd.services_offered.join(', ')}` : null,
-          sd.working_hours ? `Hours: ${sd.working_hours}` : null,
-          sd.description_ru ? `RU: ${sd.description_ru}` : null,
-        ].filter(Boolean).join(' | '),
-        lifecycle_stage: 'lead',
+      // [A1] Promote into the HOUSE crm_contacts book (contact_type='vendor'),
+      // which is where vendor-outreach-agent reads. This links crm_contact_id +
+      // promoted_at and enters the outreach queue. It NEVER grants a role —
+      // activation stays in the partner_applications moderation flow.
+      // (Was: a local insert into the admin's own company that set status 'won'
+      // and never linked the contact, so the sender never saw it.)
+      const { data, error } = await supabase.functions.invoke('vendor-acquisition/promote', {
+        body: { prospectId: prospect.id },
       });
-      if (existed) {
-        toast.info(isRussian ? 'Контакт уже был в CRM — открыт существующий' : 'Contact already in CRM — opened existing');
+      if (error) throw error;
+
+      if (data?.skipped === 'no_contact_point') {
+        toast.error(isRussian ? 'Нет email или телефона для связи' : 'No email or phone to reach');
+        return;
+      }
+      if (data?.skipped === 'no_house_company') {
+        toast.error(isRussian ? 'Домашняя компания не настроена' : 'House company not configured');
+        return;
       }
 
-      // Mark prospect as converted
-      updateProspect.mutate({ id: prospect.id, status: 'won' });
+      // Refresh the prospect list so promoted_at is reflected (no status change).
+      updateProspect.mutate({ id: prospect.id, status: prospect.status });
 
-      toast(isRussian ? 'Контакт добавлен в CRM' : 'Contact added to CRM', {
-        description: `${firstName} ${lastName} — ${tags.join(', ')}`,
+      toast(isRussian ? 'Добавлен в аутрич-очередь' : 'Added to outreach queue', {
+        description: data?.created
+          ? (isRussian ? 'Создан новый контакт' : 'New contact created')
+          : (isRussian ? 'Связан с существующим контактом' : 'Linked to existing contact'),
       });
     } catch (error: any) {
-      toast.error(isRussian ? 'Ошибка добавления в CRM' : 'Failed to add to CRM', {
+      toast.error(isRussian ? 'Ошибка добавления в аутрич' : 'Failed to add to outreach', {
         description: error.message,
       });
     } finally {
