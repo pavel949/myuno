@@ -1,5 +1,6 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalSecret } from '../_shared/internal-secret.ts';
+import { promoteVendorProspect } from "../_shared/prospect-promotion.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://myuno.app",
@@ -18,25 +19,26 @@ Deno.serve(async (req) => {
     if (guardResponse) return guardResponse;
     
     const supabase = createServiceClient();
-    const results = { scored: 0, outreach: 0, followup: 0, errors: 0 };
+    const results = { scored: 0, promoted: 0, errors: 0 };
 
-    // 1. Auto-score new prospects that haven't been scored yet
+    // 1. Auto-score new prospects that haven't been scored yet.
     const { data: newProspects } = await supabase
       .from("vendor_prospects")
-      .select("*")
+      .select("id")
       .eq("status", "new")
       .is("ai_score", null)
       .limit(20);
 
     for (const prospect of newProspects || []) {
       try {
-        // Try to invoke vendor-acquisition for scoring
-        await supabase.functions.invoke("vendor-acquisition", {
-          body: { action: "score", prospect_id: prospect.id },
+        // [A2] vendor-acquisition routes by URL PATH and reads body.prospectId.
+        // The previous call ("vendor-acquisition" + prospect_id) 404'd, so scoring
+        // never actually ran. Correct path + body key here.
+        await supabase.functions.invoke("vendor-acquisition/score", {
+          body: { prospectId: prospect.id },
         });
         results.scored++;
 
-        // Log activity
         await supabase.from("vendor_prospect_activity").insert({
           prospect_id: prospect.id,
           activity_type: "auto_scored",
@@ -48,77 +50,30 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2. Auto-outreach for hot prospects (scored >= 70) that haven't been contacted
+    // 2. [A2] Promote hot prospects (ai_score >= 70) not yet promoted into the
+    // house crm_contacts book. The A3 cron then lets vendor-outreach-agent message
+    // them (rate-limited, opt-out-aware). This replaces the old no-op that flipped
+    // status to 'contacted' without ever promoting or sending anything. Promotion
+    // never grants a role — activation stays in the partner_applications flow.
     const { data: hotProspects } = await supabase
       .from("vendor_prospects")
-      .select("*")
+      .select("id, business_name, contact_name, email, phone, whatsapp, category, ai_score, crm_contact_id")
       .gte("ai_score", 70)
-      .eq("status", "new")
+      .is("crm_contact_id", null)
       .limit(10);
 
     for (const prospect of hotProspects || []) {
       try {
-        // Check if already contacted
-        const { data: activities } = await supabase
-          .from("vendor_prospect_activity")
-          .select("id")
-          .eq("prospect_id", prospect.id)
-          .in("activity_type", ["outreach_sent", "auto_outreach"])
-          .limit(1);
-
-        if (activities && activities.length > 0) continue;
-
-        // Update status to contacted
-        await supabase
-          .from("vendor_prospects")
-          .update({ status: "contacted", updated_at: new Date().toISOString() })
-          .eq("id", prospect.id);
-
-        // Log outreach
-        await supabase.from("vendor_prospect_activity").insert({
-          prospect_id: prospect.id,
-          activity_type: "auto_outreach",
-          description: `Автоматический outreach для ${prospect.business_name || prospect.name}`,
-          metadata: { automated: true, score: prospect.ai_score },
-        });
-
-        results.outreach++;
-      } catch {
-        results.errors++;
-      }
-    }
-
-    // 3. Follow-up for contacted prospects with no response after 3 days
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-
-    const { data: staleContacted } = await supabase
-      .from("vendor_prospects")
-      .select("*")
-      .eq("status", "contacted")
-      .lt("updated_at", threeDaysAgo.toISOString())
-      .limit(10);
-
-    for (const prospect of staleContacted || []) {
-      try {
-        // Check if follow-up already sent
-        const { data: followups } = await supabase
-          .from("vendor_prospect_activity")
-          .select("id")
-          .eq("prospect_id", prospect.id)
-          .eq("activity_type", "auto_followup")
-          .limit(1);
-
-        if (followups && followups.length > 0) continue;
-
-        await supabase.from("vendor_prospect_activity").insert({
-          prospect_id: prospect.id,
-          activity_type: "auto_followup",
-          description: `Автоматический follow-up (3 дня без ответа)`,
-          metadata: { automated: true, days_since_contact: 3 },
-        });
-
-        results.followup++;
+        const result = await promoteVendorProspect(supabase, prospect);
+        if (result.contactId) {
+          results.promoted++;
+          await supabase.from("vendor_prospect_activity").insert({
+            prospect_id: prospect.id,
+            activity_type: "auto_promoted",
+            description: `Автопродвижение в аутрич (score ${prospect.ai_score})`,
+            metadata: { automated: true, crm_contact_id: result.contactId, created: result.created },
+          });
+        }
       } catch {
         results.errors++;
       }

@@ -1,6 +1,6 @@
 // Deno.serve used (native edge runtime)
 import { createClient } from "../_shared/supabase.ts";
-import { requireAuth } from "../_shared/auth-guard.ts";
+import { requireInternalOrStaff, STAFF_ROLES } from "../_shared/authz.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { promoteVendorProspect } from "../_shared/prospect-promotion.ts";
 
@@ -53,10 +53,11 @@ Deno.serve(async (req) => {
   const rlResponse = await withRateLimit(req, 'vendor-acquisition', RATE_LIMITS.ai, corsHeaders);
   if (rlResponse) return rlResponse;
 
-  // AUTH REQUIRED: admin-only endpoint
-  const authResult = await requireAuth(req, corsHeaders);
-  if (authResult instanceof Response) return authResult;
-  const userId = authResult.user.id;
+  // [A2] Dual-mode: internal-secret/service-role (cron, e.g. auto-vendor-nurture)
+  // OR an authed staff member (the admin panel). Previously requireAuth-only,
+  // which both blocked cron calls AND allowed any logged-in user — now staff-only.
+  const gate = await requireInternalOrStaff(req, corsHeaders, STAFF_ROLES);
+  if (gate instanceof Response) return gate;
 
   const url = new URL(req.url);
   const path = url.pathname.split('/').pop();
