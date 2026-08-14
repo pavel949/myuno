@@ -83,16 +83,44 @@ const IndexLegacy: React.FC = () => {
         {/* 4. PersonalGrid — top-8 mini-apps ranked by role + personas */}
         <PersonalGrid />
 
-        {/* 5. Cluster rails — role-gated icon grids */}
-        {visibleClusters.map((cid) => (
+        {/* 5. Первый (главный для роли) кластер всегда виден */}
+        {visibleClusters.slice(0, 1).map((cid) => (
           <ClusterRail key={cid} clusterId={cid} />
         ))}
 
-        {/* 6. Now in Phuket — narrow ambient strip */}
-        <NowInPhuket />
+        {/* 6. Всё остальное — за одной кнопкой «Ещё» (progressive disclosure) */}
+        {(visibleClusters.length > 1 || true) && (
+          <div className="px-4 mt-4">
+            <button
+              type="button"
+              onClick={() => setShowMore((v) => !v)}
+              aria-expanded={showMore}
+              className="w-full flex items-center justify-between border border-border bg-card px-4 py-3 text-left hover:border-primary/40 hover:bg-primary/5 transition-colors"
+            >
+              <span className="text-[14px] font-medium text-foreground">
+                {showMore
+                  ? (isRu ? 'Свернуть' : 'Show less')
+                  : (isRu ? 'Ещё: другие сферы, погода, новости' : 'More: other areas, weather, news')}
+              </span>
+              <ChevronDown
+                className={`w-4 h-4 text-muted-foreground transition-transform ${showMore ? 'rotate-180' : ''}`}
+                strokeWidth={2}
+              />
+            </button>
+          </div>
+        )}
 
-        {/* 7. Official news — TAT/PRD/Phuket Gov/Nation/Bangkok Post */}
-        <OfficialNews />
+        {showMore && (
+          <>
+            {visibleClusters.slice(1).map((cid) => (
+              <ClusterRail key={cid} clusterId={cid} />
+            ))}
+            <NowInPhuket />
+            <OfficialNews />
+          </>
+        )}
+
+
 
         {/* 5. «Все приложения» — single explicit door to everything else */}
         <div className="px-4 mt-6">
