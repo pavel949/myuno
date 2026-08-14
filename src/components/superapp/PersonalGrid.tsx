@@ -21,8 +21,8 @@ export const PersonalGrid: React.FC<PersonalGridProps> = ({
 }) => {
   const { effectivePersonas } = useUserPersonas();
   const role = useLifeOSRole();
-  const { language, t } = useLanguage();
-  const isRu = language === 'ru';
+  const { t } = useLanguage();
+
 
   const ranked = useMemo(
     () =>
