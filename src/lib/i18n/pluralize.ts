@@ -61,3 +61,13 @@ export function formatGuests(n: number, lang: Lang): string {
 export function formatServices(n: number, lang: Lang): string {
   return `${n} ${pluralizeServices(n, lang)}`;
 }
+
+export function pluralizeSituations(n: number, lang: Lang): string {
+  if (!isRussian(lang)) return n === 1 ? 'situation' : 'situations';
+  return pickRu(n, ['ситуация', 'ситуации', 'ситуаций']);
+}
+
+export function formatSituations(n: number, lang: Lang): string {
+  return `${n} ${pluralizeSituations(n, lang)}`;
+}
+
