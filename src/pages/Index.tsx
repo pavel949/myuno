@@ -7,7 +7,7 @@
  * AnimatedRoutes уже ленивит и оборачивает все маршруты в Suspense.
  */
 import React, { useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -49,6 +49,7 @@ const IndexLegacy: React.FC = () => {
   const { language } = useLanguage();
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
   const [appDrawerOpen, setAppDrawerOpen] = useState(false);
+  const [showMore, setShowMore] = useState(false);
 
   const activePersonas = effectivePersonas;
   const isRu = language === 'ru';
