@@ -90,8 +90,7 @@ const IndexLegacy: React.FC = () => {
         ))}
 
         {/* 6. Всё остальное — за одной кнопкой «Ещё» (progressive disclosure) */}
-        {(
-          <div className="px-4 mt-4">
+        <div className="px-4 mt-4">
             <button
               type="button"
               onClick={() => setShowMore((v) => !v)}
@@ -107,9 +106,8 @@ const IndexLegacy: React.FC = () => {
                 className={`w-4 h-4 text-muted-foreground transition-transform ${showMore ? 'rotate-180' : ''}`}
                 strokeWidth={2}
               />
-            </button>
-          </div>
-        )}
+          </button>
+        </div>
 
         {showMore && (
           <>
