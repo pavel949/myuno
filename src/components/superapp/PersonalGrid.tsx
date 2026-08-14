@@ -21,8 +21,8 @@ export const PersonalGrid: React.FC<PersonalGridProps> = ({
 }) => {
   const { effectivePersonas } = useUserPersonas();
   const role = useLifeOSRole();
-  const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const { t } = useLanguage();
+
 
   const ranked = useMemo(
     () =>
@@ -36,16 +36,13 @@ export const PersonalGrid: React.FC<PersonalGridProps> = ({
 
   return (
     <IconGrid
-      title={isRu ? 'Для вас сейчас' : 'For you now'}
-      caption={
-        isRu
-          ? 'Подобрано под вашу роль и предпочтения'
-          : 'Tuned to your role and preferences'
-      }
+      title={t('discover.forYouNow')}
+      caption={t('discover.forYouNowCaption')}
       services={ranked}
       showCategoryCaption
     />
   );
+
 };
 
 export default PersonalGrid;

@@ -1,14 +1,15 @@
 /**
  * NavigatorPage v3 — civic-grade /discover surface.
  *
- * Single vertical column: persona chip-row → "For you" top-3 → clusters as
- * compact lists, role-gated. One source of truth for service counts (RPC).
+ * Single vertical column: compact role+search row → "For you" top-3 → first 3
+ * clusters as compact lists, role-gated. Additional clusters collapsed behind
+ * "More". One source of truth for service counts (RPC).
  * Calm, authoritative, GOV-style — answers one question per screen:
  * "what should I do next?".
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Search, SlidersHorizontal, X, ArrowRight } from 'lucide-react';
+import { MapPin, Search, SlidersHorizontal, X, ArrowRight, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLifeSituations, useLifeOSRole, type LifeOSRole } from '@/hooks/useLifeOS';
@@ -32,6 +33,7 @@ import type { LifeSituation } from '@/hooks/useLifeOS';
 const errorLog = createErrorHandler('NavigatorPageV3');
 
 const CLUSTER_ORDER: ClusterId[] = ['arrive', 'live', 'legal', 'manage', 'invest', 'build'];
+const MAX_VISIBLE_CLUSTERS = 3;
 
 /** Which clusters each LifeOSRole sees, in order (first = default emphasis). */
 const ROLE_VISIBLE_CLUSTERS: Record<LifeOSRole, ClusterId[]> = {
@@ -79,7 +81,7 @@ function buildSituationClusterMap(): Record<string, ClusterId> {
 const SITUATION_CLUSTER_MAP: Record<string, ClusterId> = buildSituationClusterMap();
 
 export default function NavigatorPageV3() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRu = language === 'ru';
   const { data: situations, isLoading, isError } = useLifeSituations();
   const { data: counts, isError: countsError } = useSituationServiceCounts();
@@ -87,6 +89,7 @@ export default function NavigatorPageV3() {
   const role = useLifeOSRole();
   const [query, setQuery] = useState('');
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
+  const [showMore, setShowMore] = useState(false);
 
   // Service counts are an enhancement, not a blocker — but surface the failure
   // to monitoring instead of silently showing every situation as "open".
@@ -134,22 +137,23 @@ export default function NavigatorPageV3() {
     return m;
   }, [situations]);
 
-
-
-  // Role-gated cluster order — hidden clusters disappear entirely
+  // Role-gated cluster order — show at most 3 primary clusters, rest collapsible
   const roleClusters = ROLE_VISIBLE_CLUSTERS[role];
   const hiddenClusters = ROLE_HIDDEN_CLUSTERS[role];
   const visibleClusters = useMemo(() => {
     const hidden = new Set(hiddenClusters);
-    const primary = roleClusters.filter(
+    const rolePrimary = roleClusters.filter(
       (cid) => !hidden.has(cid) && grouped[cid].length > 0,
     );
-    const rest = CLUSTER_ORDER.filter(
+    const other = CLUSTER_ORDER.filter(
       (cid) =>
         !hidden.has(cid) &&
-        !primary.includes(cid) &&
+        !rolePrimary.includes(cid) &&
         grouped[cid].length > 0,
     );
+    const primary = rolePrimary.slice(0, MAX_VISIBLE_CLUSTERS);
+    const overflowRole = rolePrimary.slice(MAX_VISIBLE_CLUSTERS);
+    const rest = [...overflowRole, ...other];
     return { primary, rest };
   }, [roleClusters, hiddenClusters, grouped]);
 
@@ -163,106 +167,92 @@ export default function NavigatorPageV3() {
 
   const hasRealPersonas = personas.length > 0;
 
+  const roleLabel = useMemo(() => {
+    if (!hasRealPersonas) return t('discover.roleEmpty');
+    const firstPersona = effectivePersonas[0];
+    const meta = ROLE_META[firstPersona];
+    if (!meta) return firstPersona;
+    return isRu ? meta.labelRu : meta.label;
+  }, [hasRealPersonas, effectivePersonas, isRu, t]);
+
   return (
     <AppLayout>
       <div className="px-4 pt-6 pb-24 md:px-6 md:pt-10 max-w-3xl mx-auto">
         {/* Header */}
         <header className="mb-8 md:mb-10">
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
-            {isRu ? 'Навигатор' : 'Navigator'}
+            {t('discover.navigator')}
           </p>
           <h1 className="text-[28px] sm:text-[34px] font-serif font-semibold leading-[1.1] tracking-[-0.02em] text-foreground">
-            {isRu ? 'Что вам сейчас нужно?' : 'What do you need now?'}
+            {t('discover.title')}
           </h1>
           <p className="mt-3 text-[14px] sm:text-[15px] text-muted-foreground leading-[1.5] max-w-2xl">
-            {isRu
-              ? 'Выберите ситуацию — покажем сервисы, контакты и понятные шаги. Сгруппировано по сферам жизни и адаптировано под вашу роль.'
-              : 'Pick a situation — we surface services, contacts and clear next steps, grouped by life area and tuned to your role.'}
+            {t('discover.subtitle')}
           </p>
 
-          {/* Persona chip-row */}
-          <div
-            className="mt-6 flex items-center gap-2 flex-wrap"
-            role="group"
-            aria-label={isRu ? 'Ваша роль' : 'Your role'}
-          >
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              {isRu ? 'Роль' : 'Role'}
-            </span>
-            {hasRealPersonas ? (
-              effectivePersonas.slice(0, 3).map((persona) => {
-                const meta = ROLE_META[persona];
-                if (!meta) return null;
-                return (
-                  <span
-                    key={persona}
-                    className="inline-flex items-center px-2.5 py-1 text-[12px] font-medium text-foreground bg-muted border-l-2 border-primary"
-                  >
-                    {isRu ? meta.labelRu : meta.label}
-                  </span>
-                );
-              })
-            ) : (
-              <span className="text-[12px] text-muted-foreground italic">
-                {isRu ? 'не выбрана' : 'not set'}
-              </span>
-            )}
+          {/* Role + search single row */}
+          <div className="mt-6 flex items-center gap-3">
             <button
               type="button"
               onClick={() => setRoleSheetOpen(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors min-h-[28px]"
+              className="inline-flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium border border-border text-foreground hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors shrink-0 min-h-[44px]"
+              aria-label={t('discover.editRole')}
             >
-              <SlidersHorizontal aria-hidden="true" className="w-3 h-3" strokeWidth={2} />
-              {isRu ? 'Изменить' : 'Edit'}
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                {t('discover.role')}
+              </span>
+              <span className="inline-flex items-center px-2 py-0.5 bg-muted border-l-2 border-primary">
+                {roleLabel}
+              </span>
+              <SlidersHorizontal aria-hidden="true" className="w-3 h-3 text-muted-foreground" strokeWidth={2} />
             </button>
-          </div>
 
-          {/* Search */}
-          <div className="mt-5 relative">
-            <Search
-              aria-hidden="true"
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground pointer-events-none"
-              strokeWidth={1.75}
-            />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={isRu ? 'Поиск по ситуациям…' : 'Search situations…'}
-              className={cn(
-                'w-full pl-[46px] pr-12 py-3.5 text-[14px] outline-none',
-                'border border-border bg-card text-foreground placeholder:text-muted-foreground',
-                'focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/30',
+            <div className="relative flex-1 min-w-0">
+              <Search
+                aria-hidden="true"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground pointer-events-none"
+                strokeWidth={1.75}
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t('discover.search.placeholder')}
+                className={cn(
+                  'w-full pl-[46px] pr-12 py-3.5 text-[14px] outline-none',
+                  'border border-border bg-card text-foreground placeholder:text-muted-foreground',
+                  'focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/30',
+                )}
+                aria-label={t('discover.search.label')}
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={t('discover.clearSearch')}
+                >
+                  <X aria-hidden="true" className="w-4 h-4" strokeWidth={1.75} />
+                </button>
               )}
-              aria-label={isRu ? 'Поиск по ситуациям' : 'Search situations'}
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={isRu ? 'Очистить' : 'Clear'}
-              >
-                <X aria-hidden="true" className="w-4 h-4" strokeWidth={1.75} />
-              </button>
-            )}
+            </div>
           </div>
 
           {/* Map link */}
-          <div className="mt-4">
+          <div className="mt-4 flex justify-end">
             <Link
               to="/map"
               className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
             >
               <MapPin aria-hidden="true" className="w-3.5 h-3.5" strokeWidth={1.75} />
-              {isRu ? 'Показать на карте' : 'See on map'}
+              {t('discover.map')}
             </Link>
           </div>
         </header>
 
         {isError && (
           <div className="border border-destructive/40 bg-destructive/5 text-destructive p-4 text-sm mb-6">
-            {isRu ? 'Не удалось загрузить ситуации.' : 'Failed to load situations.'}
+            {t('discover.errorLoad')}
           </div>
         )}
 
@@ -289,7 +279,7 @@ export default function NavigatorPageV3() {
                 id="for-you-title"
                 className="font-mono text-[11px] uppercase tracking-[0.18em] text-primary"
               >
-                {isRu ? 'Ситуации для вас' : 'Situations for you'}
+                {t('discover.forYou')}
               </h2>
               <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
                 {forYou.length}
@@ -323,7 +313,7 @@ export default function NavigatorPageV3() {
                         )}
                       </div>
                       <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
-                        {typeof c === 'number' && c > 0 ? formatServices(c, language) : (isRu ? 'Открыть' : 'Open')}
+                        {typeof c === 'number' && c > 0 ? formatServices(c, language) : t('discover.open')}
                       </span>
                       <ArrowRight
                         aria-hidden="true"
@@ -353,23 +343,35 @@ export default function NavigatorPageV3() {
           </div>
         )}
 
-        {/* Other clusters (muted, expandable) */}
+        {/* Other clusters (collapsed behind "More") */}
         {!isLoading && visibleClusters.rest.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-border">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-6">
-              {isRu ? 'Другие сферы' : 'Other areas'}
-            </p>
-            <div className="space-y-10">
-              {visibleClusters.rest.map((cid) => (
-                <NavigatorClusterSection
-                  key={cid}
-                  clusterId={cid}
-                  situations={grouped[cid]}
-                  counts={counts}
-                  hideAppGrid
-                />
-              ))}
-            </div>
+          <div className="mt-12">
+            <button
+              type="button"
+              onClick={() => setShowMore((v) => !v)}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 border border-border text-[13px] font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+            >
+              {showMore ? t('discover.showLess') : t('discover.moreAreas').replace('{count}', String(visibleClusters.rest.length))}
+              <ChevronDown
+                aria-hidden="true"
+                className={cn('w-4 h-4 transition-transform', showMore && 'rotate-180')}
+                strokeWidth={1.75}
+              />
+            </button>
+            {showMore && (
+              <div className="mt-8 pt-8 border-t border-border space-y-10">
+                {visibleClusters.rest.map((cid) => (
+                  <NavigatorClusterSection
+                    key={cid}
+                    clusterId={cid}
+                    situations={grouped[cid]}
+                    counts={counts}
+                    hideAppGrid
+                    situationLabels={situationLabels}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -377,14 +379,14 @@ export default function NavigatorPageV3() {
         {!isLoading && situations && situations.length > 0 && filteredSituations.length === 0 && (
           <div className="text-center py-16 border border-border">
             <p className="text-muted-foreground text-sm mb-4">
-              {isRu ? `Ничего не найдено по запросу «${query}».` : `No matches for "${query}".`}
+              {t('discover.emptySearch').replace('{query}', query)}
             </p>
             <button
               type="button"
               onClick={() => setQuery('')}
               className="text-[13px] underline text-primary hover:no-underline"
             >
-              {isRu ? 'Сбросить поиск' : 'Clear search'}
+              {t('discover.clearSearchAction')}
             </button>
           </div>
         )}
@@ -393,7 +395,7 @@ export default function NavigatorPageV3() {
         {!isLoading && situations && situations.length === 0 && (
           <div className="border border-border bg-card p-8 text-center">
             <h2 className="text-[18px] font-serif font-semibold text-foreground mb-2">
-              {isRu ? 'Ситуации скоро появятся' : 'Situations are coming soon'}
+              {t('discover.situationsSoon')}
             </h2>
             <a
               href={getWhatsAppUrl(
@@ -405,7 +407,7 @@ export default function NavigatorPageV3() {
               rel="noopener noreferrer"
               className="inline-block mt-4 text-[13px] underline text-primary hover:no-underline"
             >
-              {isRu ? 'Связаться с консьержем' : 'Talk to concierge'}
+              {t('discover.contactConcierge')}
             </a>
           </div>
         )}
