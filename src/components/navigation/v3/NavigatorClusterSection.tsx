@@ -21,7 +21,7 @@ import { rankServices } from '@/lib/superapp/rankServices';
 import { MiniAppCard } from '@/components/superapp/MiniAppCard';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import { trackSituationClick } from '@/lib/analytics/track';
-import { formatServices } from '@/lib/i18n/pluralize';
+import { formatServices, formatSituations } from '@/lib/i18n/pluralize';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface NavigatorClusterSectionProps {
@@ -34,24 +34,6 @@ interface NavigatorClusterSectionProps {
   situationLabels?: Record<string, { ru: string; en: string }>;
 }
 
-const CLUSTER_LABEL_RU: Record<ClusterId, string> = {
-  arrive: 'Прибытие',
-  live: 'Жизнь',
-  manage: 'Управление',
-  invest: 'Инвестиции',
-  legal: 'Документы и право',
-  build: 'Девелопмент',
-};
-
-const CLUSTER_LABEL_EN: Record<ClusterId, string> = {
-  arrive: 'Arrive',
-  live: 'Live',
-  manage: 'Manage',
-  invest: 'Invest',
-  legal: 'Legal',
-  build: 'Build',
-};
-
 function NavigatorClusterSectionImpl({
   clusterId,
   situations,
@@ -59,7 +41,7 @@ function NavigatorClusterSectionImpl({
   hideAppGrid,
   situationLabels,
 }: NavigatorClusterSectionProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRu = language === 'ru';
   const { effectivePersonas } = useUserPersonas();
   const role = useLifeOSRole();
@@ -73,7 +55,7 @@ function NavigatorClusterSectionImpl({
 
   if (!cluster || situations.length === 0) return null;
 
-  const label = isRu ? CLUSTER_LABEL_RU[clusterId] : CLUSTER_LABEL_EN[clusterId];
+  const label = t(`discover.cluster.${clusterId}`);
 
   return (
     <section
@@ -90,7 +72,7 @@ function NavigatorClusterSectionImpl({
         </h2>
         <span
           className="font-mono text-[11px] text-muted-foreground tabular-nums"
-          aria-label={`${situations.length} ${isRu ? 'ситуаций' : 'situations'}`}
+          aria-label={formatSituations(situations.length, language)}
         >
           {situations.length}
         </span>
@@ -99,7 +81,7 @@ function NavigatorClusterSectionImpl({
       {topServices.length > 0 && (
         <div className="mt-4 mb-5">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 mb-2">
-            {isRu ? 'Мини-приложения для вас' : 'Mini-apps for you'}
+            {t('discover.miniAppsForYou')}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {topServices.map((svc) => (
@@ -144,7 +126,7 @@ function NavigatorClusterSectionImpl({
                   )}
                 </div>
                 <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
-                  {typeof count === 'number' && count > 0 ? formatServices(count, language) : (isRu ? 'открыть' : 'open')}
+                  {typeof count === 'number' && count > 0 ? formatServices(count, language) : t('discover.open')}
                 </span>
                 <ArrowRight
                   aria-hidden="true"
