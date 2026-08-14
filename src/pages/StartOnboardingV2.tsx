@@ -33,13 +33,14 @@ const T = (c: { en: string; ru: string }, l: L) => c[l] ?? c.en;
 const COPY = {
   title: { en: 'Welcome to myUNO', ru: 'Добро пожаловать в myUNO' },
   subtitle: {
-    en: '3 questions to understand your stage in Phuket.',
-    ru: '3 вопроса, чтобы понять вашу ситуацию на Пхукете.',
+    en: '2 quick questions — details are optional.',
+    ru: '2 быстрых вопроса — детали по желанию.',
   },
   q1: { en: 'Where are you in the journey?', ru: 'На каком этапе пути вы сейчас?' },
   q2: { en: 'How do you act here?', ru: 'Какая у вас роль?' },
-  q3: { en: 'Anything specific to consider?', ru: 'Есть что-то особенное?' },
+  q3: { en: 'Anything specific to consider? (optional)', ru: 'Есть что-то особенное? (необязательно)' },
   next: { en: 'Continue', ru: 'Дальше' },
+  refine: { en: 'Add details', ru: 'Уточнить детали' },
   back: { en: 'Back', ru: 'Назад' },
   finish: { en: 'See my recommendations', ru: 'Показать рекомендации' },
   saving: { en: 'Preparing your map…', ru: 'Готовим карту…' },
@@ -161,7 +162,11 @@ export default function StartOnboardingV2() {
                 className="space-y-4"
               >
                 <h2 className="text-lg font-semibold">{T(COPY.q1, lang)}</h2>
-                <LifecycleStep value={o.lifecycle} onChange={o.setLifecycle} lang={lang} />
+                <LifecycleStep
+                  value={o.lifecycle}
+                  onChange={(v) => { o.setLifecycle(v); setTimeout(o.next, 180); }}
+                  lang={lang}
+                />
               </motion.section>
             )}
 
@@ -175,7 +180,11 @@ export default function StartOnboardingV2() {
                 className="space-y-4"
               >
                 <h2 className="text-lg font-semibold">{T(COPY.q2, lang)}</h2>
-                <RoleStep value={o.role} onChange={o.setRole} lang={lang} />
+                <RoleStep
+                  value={o.role}
+                  onChange={(v) => { o.setRole(v); }}
+                  lang={lang}
+                />
               </motion.section>
             )}
 
@@ -226,11 +235,30 @@ export default function StartOnboardingV2() {
                 {T(COPY.back, lang)}
               </Button>
 
-              {o.step < 2 ? (
+              {o.step === 0 ? (
                 <Button type="button" onClick={o.next} disabled={!stepValid}>
                   {T(COPY.next, lang)}
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
+              ) : o.step === 1 ? (
+                <div className="flex items-center gap-2">
+                  <Button type="button" variant="ghost" size="sm" onClick={o.next} disabled={!stepValid}>
+                    {T(COPY.refine, lang)}
+                  </Button>
+                  <Button type="button" onClick={o.submit} disabled={!o.canSubmit || o.isSubmitting}>
+                    {o.isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                        {T(COPY.saving, lang)}
+                      </>
+                    ) : (
+                      <>
+                        {T(COPY.finish, lang)}
+                        <Sparkles className="ml-1 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </div>
               ) : (
                 <Button type="button" onClick={o.submit} disabled={!o.canSubmit || o.isSubmitting}>
                   {o.isSubmitting ? (
