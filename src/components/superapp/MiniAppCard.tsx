@@ -53,6 +53,7 @@ function pickHint(
   activeSituationCode: string | undefined,
   situationLabels: Record<string, SituationLabel> | undefined,
   isRu: boolean,
+  t: (key: string) => string,
 ): string | null {
   if (
     activeSituationCode &&
@@ -60,14 +61,14 @@ function pickHint(
     situationLabels?.[activeSituationCode]
   ) {
     const lbl = situationLabels[activeSituationCode];
-    return `${isRu ? 'Ситуация' : 'Situation'}: ${isRu ? lbl.ru : lbl.en}`;
+    return `${t('discover.situation')}: ${isRu ? lbl.ru : lbl.en}`;
   }
 
   if (svc.personaTags?.length && personas.length) {
     for (const p of personas) {
       if (svc.personaTags.includes(p)) {
         const info = PERSONA_INFO[p];
-        if (info) return `${isRu ? 'Для' : 'For'}: ${isRu ? info.labelRu : info.labelEn}`;
+        if (info) return `${t('discover.for')}: ${isRu ? info.labelRu : info.labelEn}`;
       }
     }
   }
@@ -76,7 +77,7 @@ function pickHint(
     const roleTags = ROLE_TO_TAGS[role] ?? [];
     if (svc.roleTags.some((t) => t === 'all' || roleTags.includes(t))) {
       const lbl = ROLE_LABELS[role];
-      return `${isRu ? 'Роль' : 'Role'}: ${isRu ? lbl.ru : lbl.en}`;
+      return `${t('discover.roleLabel')}: ${isRu ? lbl.ru : lbl.en}`;
     }
   }
 
@@ -85,13 +86,14 @@ function pickHint(
     for (const code of svc.situationCodes) {
       if (situationLabels[code]) {
         const lbl = situationLabels[code];
-        return `${isRu ? 'Ситуация' : 'Situation'}: ${isRu ? lbl.ru : lbl.en}`;
+        return `${t('discover.situation')}: ${isRu ? lbl.ru : lbl.en}`;
       }
     }
   }
 
   return null;
 }
+
 
 export const MiniAppCard: React.FC<MiniAppCardProps> = ({
   svc,
@@ -100,14 +102,14 @@ export const MiniAppCard: React.FC<MiniAppCardProps> = ({
   activeSituationCode,
   situationLabels,
 }) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRu = language === 'ru';
   const Icon = svc.icon;
   const isSoon = svc.status === 'soon';
 
   const label = isRu ? svc.labelRu : svc.labelEn;
   const category = isRu ? svc.categoryLabelRu : svc.categoryLabelEn;
-  const hint = pickHint(svc, personas, role, activeSituationCode, situationLabels, isRu);
+  const hint = pickHint(svc, personas, role, activeSituationCode, situationLabels, isRu, t);
 
   return (
     <Link
@@ -126,9 +128,10 @@ export const MiniAppCard: React.FC<MiniAppCardProps> = ({
         </div>
         {isSoon ? (
           <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
-            {isRu ? 'скоро' : 'soon'}
+            {t('discover.soon')}
           </span>
         ) : (
+
           <ArrowUpRight
             className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors"
             strokeWidth={2}
