@@ -90,7 +90,7 @@ const IndexLegacy: React.FC = () => {
         ))}
 
         {/* 6. Всё остальное — за одной кнопкой «Ещё» (progressive disclosure) */}
-        {(visibleClusters.length > 1 || true) && (
+        {(
           <div className="px-4 mt-4">
             <button
               type="button"
