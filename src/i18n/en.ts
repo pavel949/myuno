@@ -358,8 +358,8 @@ export const en: Record<string, string> = {
   'booking.unavailable': 'Unavailable',
   'booking.expires': 'Expires:',
   'booking.allCategories': 'All categories',
-  'booking.noBookings': 'No bookings yet',
-  'booking.noBookingsDesc': 'Start exploring services to make your first booking',
+  'booking.noBookings': 'Nothing booked yet',
+  'booking.noBookingsDesc': 'When you book a service, it will appear here with its status and price.',
   'booking.results': 'Results',
   'booking.found': 'found',
   
