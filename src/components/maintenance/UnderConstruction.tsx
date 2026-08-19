@@ -207,7 +207,7 @@ export function UnderConstruction() {
 
         {/* Footer */}
         <p className="text-xs text-muted-foreground pt-8">
-          © 2025–2026 myUNO • Phuket Edition
+          © 2025–2026 myUNO · Toplight Asia Pacific Co., Ltd., Phuket
         </p>
       </motion.div>
     </div>

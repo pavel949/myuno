@@ -871,7 +871,7 @@ export default function WelcomeLanding() {
 
           <p className="mt-6 inline-flex items-center gap-1.5 font-sans text-caption tracking-[0.08em] text-muted-foreground/60">
             <Languages className="h-3 w-3" />
-            RU · EN · TH · © myUNO
+            RU · EN · TH · © myUNO · Toplight Asia Pacific Co., Ltd., Phuket
           </p>
         </LandingContainer>
       </LandingSection>

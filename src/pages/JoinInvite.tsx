@@ -390,7 +390,7 @@ export default function JoinInvite() {
 
         <footer className="border-t border-border/60 bg-background">
           <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-3 px-5 py-6 text-[12px] text-muted-foreground sm:flex-row sm:items-center">
-            <div>© myUNO · Phuket, Thailand</div>
+            <div>© myUNO · Toplight Asia Pacific Co., Ltd., Phuket, Thailand</div>
             <div className="flex gap-5">
               <Link to="/legal/privacy" className="hover:text-foreground">{isRu ? 'Приватность' : 'Privacy'}</Link>
               <Link to="/legal/terms" className="hover:text-foreground">{isRu ? 'Условия' : 'Terms'}</Link>

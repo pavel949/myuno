@@ -841,7 +841,7 @@ export const th: Record<string, string> = {
   'welcome.footer.linkTerms': 'ข้อกำหนด',
   'welcome.footer.linkSupport': 'ซัพพอร์ต',
   'welcome.footer.linkContact': 'ติดต่อ',
-  'welcome.footer.copyright': '© myUNO · ภูเก็ต · เพื่อชีวิตและธุรกิจในต่างประเทศ',
+  'welcome.footer.copyright': '© myUNO · บริษัท ท๊อปไลท์ เอเชีย แปซิฟิค จำกัด · ภูเก็ต',
 
   // Property form (parity with ru/en)
   'propertyForm.furnishingLevelDesign': 'ระดับเฟอร์นิเจอร์และการออกแบบ',
