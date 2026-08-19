@@ -165,7 +165,9 @@ export default function ContactPage() {
           <CardContent>
             <p className="text-sm text-muted-foreground">
               <strong>{COMPANY_CONTACTS.legal.companyName}</strong><br />
-              Tax ID: {COMPANY_CONTACTS.legal.taxId}<br />
+              {COMPANY_CONTACTS.legal.companyNameTh}<br />
+              {isRu ? COMPANY_CONTACTS.legal.addressRu : COMPANY_CONTACTS.legal.addressEn}<br />
+              {COMPANY_CONTACTS.legal.phone} · {COMPANY_CONTACTS.legal.email}<br />
               {isRu 
                 ? `Зарегистрировано в Королевстве ${COMPANY_CONTACTS.legal.registrationCountry}`
                 : `Registered in the Kingdom of ${COMPANY_CONTACTS.legal.registrationCountry}`}

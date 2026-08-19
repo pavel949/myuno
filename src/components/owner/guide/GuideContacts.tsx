@@ -103,7 +103,7 @@ export function GuideContacts() {
           <span className="text-sm font-medium">myuno.app</span>
         </div>
         <p className="text-xs text-muted-foreground mt-4">
-          © myUNO Pte. Ltd.
+          © Toplight Asia Pacific Co., Ltd.
         </p>
       </div>
     </div>

@@ -18,7 +18,7 @@ export default function TermsPage() {
   const definitions = [
     { 
       term: isRu ? '«Платформа»' : '"Platform"', 
-      def: isRu ? 'Веб-сайт www.myuno.app и мобильное приложение myUNO, управляемые myUNO Pte. Ltd. (Сингапур).' : 'The website www.myuno.app and myUNO mobile application operated by myUNO Pte. Ltd. (Singapore).' 
+      def: isRu ? 'Веб-сайт www.myuno.app и мобильное приложение myUNO, управляемые Toplight Asia Pacific Co., Ltd. (Пхукет, Таиланд).' : 'The website www.myuno.app and myUNO mobile application operated by Toplight Asia Pacific Co., Ltd. (Phuket, Thailand).' 
     },
     { 
       term: isRu ? '«Пользователь»' : '"User"', 
@@ -138,8 +138,8 @@ export default function TermsPage() {
     {
       title: isRu ? 'Собственность myUNO' : 'myUNO Ownership',
       content: isRu 
-        ? 'Весь Контент Платформы, включая описания, фотографии, отзывы, данные о ценах, алгоритмы и аналитику, является исключительной собственностью myUNO Pte. Ltd..'
-        : 'All Platform Content, including descriptions, photos, reviews, pricing data, algorithms, and analytics, is the exclusive property of myUNO Pte. Ltd..',
+        ? 'Весь Контент Платформы, включая описания, фотографии, отзывы, данные о ценах, алгоритмы и аналитику, является исключительной собственностью Toplight Asia Pacific Co., Ltd.'
+        : 'All Platform Content, including descriptions, photos, reviews, pricing data, algorithms, and analytics, is the exclusive property of Toplight Asia Pacific Co., Ltd.',
     },
     {
       title: isRu ? 'Лицензия пользователя' : 'User License',
@@ -161,8 +161,8 @@ export default function TermsPage() {
       icon: FileText,
       title: isRu ? '1. Общие положения' : '1. General Provisions',
       content: isRu 
-        ? 'Настоящие Условия использования («Условия») представляют собой юридически обязывающее соглашение между вами и myUNO Pte. Ltd. (регистрация: Thailand/UAE). Используя Платформу, вы подтверждаете, что прочитали, поняли и согласны соблюдать эти Условия. Если вы не согласны — не используйте Платформу.'
-        : 'These Terms of Use ("Terms") constitute a legally binding agreement between you and myUNO Pte. Ltd. (registration: Thailand/UAE). By using the Platform, you confirm that you have read, understood, and agree to comply with these Terms. If you disagree — do not use the Platform.',
+        ? 'Настоящие Условия использования («Условия») представляют собой юридически обязывающее соглашение между вами и Toplight Asia Pacific Co., Ltd. (регистрация: Таиланд, Пхукет). Используя Платформу, вы подтверждаете, что прочитали, поняли и согласны соблюдать эти Условия. Если вы не согласны — не используйте Платформу.'
+        : 'These Terms of Use ("Terms") constitute a legally binding agreement between you and Toplight Asia Pacific Co., Ltd. (registered in Phuket, Thailand). By using the Platform, you confirm that you have read, understood, and agree to comply with these Terms. If you disagree — do not use the Platform.',
     },
     {
       id: 'updates',
@@ -574,9 +574,9 @@ export default function TermsPage() {
               </p>
               <p className="text-sm font-medium">legal@myuno.app</p>
               <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
-                <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
-                <p>{isRu ? 'Регистрация: Сингапур' : 'Incorporated in Singapore'}</p>
-                <p>{isRu ? 'Сервисное подразделение: Таиланд' : 'Service Operations: Thailand'}</p>
+                <p className="font-medium text-foreground mb-1">Toplight Asia Pacific Co., Ltd.</p>
+                <p>{isRu ? '63/202 Moo 2, Koh Kaew, Muang Phuket, Пхукет 83000, Таиланд' : '63/202 Moo 2, Koh Kaew, Muang Phuket, Phuket 83000, Thailand'}</p><p>+66 95 424 3332 · pavel@myuno.app</p>
+                <p>{isRu ? 'Юрисдикция: Таиланд' : 'Jurisdiction: Thailand'}</p>
                 <p className="mt-1">www.myuno.app</p>
               </div>
             </div>

@@ -17,10 +17,10 @@ export default function IPPolicyPage() {
   const isRu = language === 'ru';
 
   const platformRights = {
-    title: isRu ? 'Исключительные права myUNO Pte. Ltd.' : 'Exclusive Rights of myUNO Pte. Ltd.',
+    title: isRu ? 'Исключительные права Toplight Asia Pacific Co., Ltd.' : 'Exclusive Rights of Toplight Asia Pacific Co., Ltd.',
     description: isRu 
-      ? 'Весь контент, размещённый на Платформе www.myuno.app, является исключительной собственностью myUNO Pte. Ltd. (Сингапур), если явно не указано иное. Это включает, но не ограничивается:'
-      : 'All content on the Platform www.myuno.app is the exclusive property of myUNO Pte. Ltd. (Singapore) unless explicitly stated otherwise. This includes but is not limited to:',
+      ? 'Весь контент, размещённый на Платформе www.myuno.app, является исключительной собственностью Toplight Asia Pacific Co., Ltd. (Пхукет, Таиланд), если явно не указано иное. Это включает, но не ограничивается:'
+      : 'All content on the Platform www.myuno.app is the exclusive property of Toplight Asia Pacific Co., Ltd. (Phuket, Thailand) unless explicitly stated otherwise. This includes but is not limited to:',
     categories: [
       {
         icon: Database,
@@ -174,8 +174,8 @@ export default function IPPolicyPage() {
     grant: {
       title: isRu ? 'Предоставляемая лицензия' : 'License Grant',
       intro: isRu 
-        ? 'Загружая любой контент на Платформу, вы безвозмездно предоставляете myUNO Pte. Ltd.:'
-        : 'By uploading any content to the Platform, you grant myUNO Pte. Ltd. free of charge:',
+        ? 'Загружая любой контент на Платформу, вы безвозмездно предоставляете Toplight Asia Pacific Co., Ltd.:'
+        : 'By uploading any content to the Platform, you grant Toplight Asia Pacific Co., Ltd. free of charge:',
       rights: isRu 
         ? [
             'Всемирную, бессрочную, безотзывную лицензию',
@@ -276,7 +276,7 @@ export default function IPPolicyPage() {
         'Watermarking контента для отслеживания',
         'Canary traps (ловушки) в базе данных',
         'Сотрудничество с правоохранительными органами',
-        'Судебное преследование в Сингапуре, Таиланде, ОАЭ',
+        'Судебное преследование в Таиланде и других применимых юрисдикциях',
         'Взыскание убытков и штрафных санкций',
       ]
     : [
@@ -286,7 +286,7 @@ export default function IPPolicyPage() {
         'Content watermarking for tracking',
         'Canary traps in database',
         'Cooperation with law enforcement',
-        'Legal prosecution in Singapore, Thailand, UAE',
+        'Legal prosecution in Thailand and other applicable jurisdictions',
         'Damages and penalties recovery',
       ];
 
@@ -311,8 +311,8 @@ export default function IPPolicyPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   {isRu 
-                    ? 'Вся информация на Платформе www.myuno.app защищена законодательством Республики Сингапур, международными соглашениями (Бернская конвенция, TRIPS, WIPO) и локальными законами юрисдикций присутствия.'
-                    : 'All information on www.myuno.app is protected by Republic of Singapore law, international agreements (Berne Convention, TRIPS, WIPO) and local laws of operating jurisdictions.'}
+                    ? 'Вся информация на Платформе www.myuno.app защищена законодательством Королевства Таиланд, международными соглашениями (Бернская конвенция, TRIPS, WIPO) и локальными законами юрисдикций присутствия.'
+                    : 'All information on www.myuno.app is protected by the laws of the Kingdom of Thailand, international agreements (Berne Convention, TRIPS, WIPO) and local laws of operating jurisdictions.'}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
                   {isRu ? 'Последнее обновление: Январь 2026' : 'Last updated: January 2026'}
@@ -597,8 +597,8 @@ export default function IPPolicyPage() {
           <CardContent>
             <p className="text-sm text-muted-foreground">
               {isRu 
-                ? 'Эта политика регулируется законодательством Республики Сингапур. Споры подлежат разрешению в судах Сингапура или через арбитраж SIAC. Для нарушений на территории Таиланда — дополнительно THAC.'
-                : 'This policy is governed by the laws of the Republic of Singapore. Disputes are subject to resolution in Singapore courts or through SIAC arbitration. For violations in Thailand — additionally THAC.'}
+                ? 'Эта политика регулируется законодательством Королевства Таиланд. Споры подлежат разрешению в судах Таиланда или через арбитраж THAC.'
+                : 'This policy is governed by the laws of the Kingdom of Thailand. Disputes are subject to resolution in Thai courts or through THAC arbitration.'}
             </p>
           </CardContent>
         </Card>
@@ -625,8 +625,8 @@ export default function IPPolicyPage() {
                 : 'IP questions: ip@myuno.app'}
             </p>
             <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
-              <p>{isRu ? 'Сингапур | Сервисное подразделение: Таиланд' : 'Singapore | Service Operations: Thailand'}</p>
+              <p className="font-medium text-foreground mb-1">Toplight Asia Pacific Co., Ltd.</p>
+              <p>{isRu ? '63/202 Moo 2, Koh Kaew, Muang Phuket, Пхукет 83000, Таиланд' : '63/202 Moo 2, Koh Kaew, Muang Phuket, Phuket 83000, Thailand'}</p><p>+66 95 424 3332 · pavel@myuno.app</p>
               <p className="mt-1">www.myuno.app</p>
             </div>
           </CardContent>
