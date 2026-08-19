@@ -74,6 +74,22 @@ const TRUST_SIGNALS: { icon: LucideIcon; text: Bi }[] = [
   { icon: Headphones, text: { ru: 'С вами всегда живой человек', en: 'A real person stays with you', th: 'การกำกับดูแลโดยคอนเซียร์จ' } },
 ];
 
+/** Concrete asks people bring us — shown in the hero so the offer is never abstract. */
+const SERVICE_EXAMPLES: Bi[] = [
+  { ru: 'Снять жильё', en: 'Rent a home', th: 'เช่าที่พัก' },
+  { ru: 'Продлить визу', en: 'Renew a visa', th: 'ต่อวีซ่า' },
+  { ru: 'Найти врача', en: 'Find a doctor', th: 'หาแพทย์' },
+  { ru: 'Купить страховку', en: 'Get insurance', th: 'ซื้อประกัน' },
+  { ru: 'Права и машина', en: 'Licence and car', th: 'ใบขับขี่และรถ' },
+  { ru: 'Школа и садик', en: 'School and nursery', th: 'โรงเรียน' },
+  { ru: 'Открыть компанию', en: 'Open a company', th: 'จดทะเบียนบริษัท' },
+  { ru: 'Юрист и договоры', en: 'Lawyer and contracts', th: 'ทนายและสัญญา' },
+  { ru: 'Банк и налоги', en: 'Bank and taxes', th: 'ธนาคารและภาษี' },
+  { ru: 'Уход за домом', en: 'Home upkeep', th: 'ดูแลบ้าน' },
+  { ru: 'Купить недвижимость', en: 'Buy property', th: 'ซื้ออสังหาฯ' },
+  { ru: 'Сдать в аренду', en: 'Rent your place out', th: 'ปล่อยเช่า' },
+];
+
 const TRUST_FACTS: { icon: LucideIcon; title: Bi; body: Bi }[] = [
   {
     icon: ShieldCheck,
