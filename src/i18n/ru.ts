@@ -5,12 +5,12 @@
 export const ru: Record<string, string> = {
   // Navigation
   'nav.home': 'Главная',
-  'nav.discover': 'Каталог',
+  'nav.discover': 'Услуги',
   'nav.map': 'Карта',
   'nav.support': 'Чат',
   'nav.market': 'Маркет',
   'nav.property': 'Недвижимость',
-  'nav.bookings': 'Брони',
+  'nav.bookings': 'Заказы',
   'nav.profile': 'Профиль',
 
   // Discover
