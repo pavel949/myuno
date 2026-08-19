@@ -485,7 +485,7 @@ export const ru: Record<string, string> = {
   'account.property.section': 'Недвижимость',
   'account.property.hub': 'С чего начать',
   'account.property.rentShort': 'Снять на несколько дней',
-  'account.property.rentLong': 'Снять на長 длительный срок',
+  'account.property.rentLong': 'Снять на длительный срок',
   'account.property.buy': 'Купить жильё',
   'account.property.newBuild': 'Новостройки',
   'account.property.resale': 'Готовое жильё',
