@@ -1,7 +1,7 @@
 {
-  "name": "myUNO — Phuket SuperApp",
+  "name": "myUNO — Phuket Super-App for Foreigners",
   "short_name": "myUNO",
-  "description": "Digital infrastructure for foreigners in Phuket: rentals, services, legal help and real estate deals in one app.",
+  "description": "myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.",
   "id": "/myuno-pwa-2025",
   "start_url": "/?source=pwa",
   "scope": "/",
