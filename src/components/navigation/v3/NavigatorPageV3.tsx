@@ -27,7 +27,7 @@ import { formatServices } from '@/lib/i18n/pluralize';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { NavigatorClusterSection } from './NavigatorClusterSection';
-import { PersonalGrid } from '@/components/superapp/PersonalGrid';
+import { PersonalGrid, PERSONAL_GRID_DEFAULT_LIMIT, usePersonalGridServiceIds } from '@/components/superapp/PersonalGrid';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 const errorLog = createErrorHandler('NavigatorPageV3');
@@ -169,6 +169,8 @@ export default function NavigatorPageV3() {
    * Situations already shown in "For you" must not repeat inside the cluster
    * lists below — otherwise Arrival/Emergency/Tourist appear twice.
    */
+  const personalGridServiceIds = usePersonalGridServiceIds(PERSONAL_GRID_DEFAULT_LIMIT);
+
   const forYouIds = useMemo(() => new Set(forYou.map((s) => s.id)), [forYou]);
   const sectionSituations = React.useCallback(
     (cid: ClusterId) =>
@@ -349,6 +351,7 @@ export default function NavigatorPageV3() {
                 situations={sectionSituations(cid)}
                 counts={counts}
                 situationLabels={situationLabels}
+                excludeServiceIds={personalGridServiceIds}
               />
             ))}
           </div>
