@@ -165,6 +165,17 @@ export default function NavigatorPageV3() {
       .slice(0, 3);
   }, [filteredSituations, visibleClusters]);
 
+  /**
+   * Situations already shown in "For you" must not repeat inside the cluster
+   * lists below — otherwise Arrival/Emergency/Tourist appear twice.
+   */
+  const forYouIds = useMemo(() => new Set(forYou.map((s) => s.id)), [forYou]);
+  const sectionSituations = React.useCallback(
+    (cid: ClusterId) =>
+      query ? grouped[cid] : grouped[cid].filter((s) => !forYouIds.has(s.id)),
+    [grouped, forYouIds, query],
+  );
+
   const hasRealPersonas = personas.length > 0;
 
   const roleLabel = useMemo(() => {
@@ -335,7 +346,7 @@ export default function NavigatorPageV3() {
               <NavigatorClusterSection
                 key={cid}
                 clusterId={cid}
-                situations={grouped[cid]}
+                situations={sectionSituations(cid)}
                 counts={counts}
                 situationLabels={situationLabels}
               />
@@ -364,7 +375,7 @@ export default function NavigatorPageV3() {
                   <NavigatorClusterSection
                     key={cid}
                     clusterId={cid}
-                    situations={grouped[cid]}
+                    situations={sectionSituations(cid)}
                     counts={counts}
                     hideAppGrid
                     situationLabels={situationLabels}

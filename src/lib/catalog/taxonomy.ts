@@ -352,7 +352,7 @@ export const CATEGORIES: CategoryEntry[] = [
       { id: 'fast-track', path: APP_ROUTES.FAST_TRACK,        labelRu: 'Fast Track',  labelEn: 'Fast Track', icon: Zap,         status: 'available', personaTags: ['tourist','business','relocation'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird'], roleTags: ['consumer'], situationCodes: ['arrival','tourist','transit'] },
       { id: 'vehicle',    path: APP_ROUTES.TRANSPORT,         labelRu: 'Авто и байки',labelEn: 'Car & bike', icon: Car,         status: 'available', verticalId: 'vehicle', personaTags: ['tourist','resident','nomad','active','family'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident'], roleTags: ['consumer'], situationCodes: ['arrival','tourist','living','resident','leisure'] },
       { id: 'sim',        path: APP_ROUTES.SIM_START,         labelRu: 'SIM-карты',   labelEn: 'SIM cards',  icon: Smartphone,  status: 'available', personaTags: ['tourist','relocation','nomad'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','settler'], roleTags: ['consumer'], situationCodes: ['arrival','tourist','first_time','transit'] },
-      { id: 'exchange',   path: APP_ROUTES.EXCHANGE,          labelRu: 'Курсы валют', labelEn: 'Exchange',   icon: ArrowLeftRight, status: 'available', personaTags: ['tourist','resident','nomad','investor','business'], jtbdClusters: ['A'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident','absentee'], roleTags: ['consumer','investor-passive'], situationCodes: ['arrival','tourist','investing','investor'] },
+      
     ],
   },
   {
@@ -587,6 +587,8 @@ export const CATEGORIES: CategoryEntry[] = [
     services: [
       { id: 'banking', path: APP_ROUTES.BANKING, labelRu: 'Банк',     labelEn: 'Banking', icon: Landmark,   status: 'available', verticalId: 'bank', personaTags: ['resident','property_owner','investor','nomad','relocation','business'], jtbdClusters: ['G'], lifecycleStages: ['settler','resident','snowbird','absentee'], roleTags: ['consumer','investor-passive','investor-active','operator'], situationCodes: ['settling','visa_renewal','investing','investor','business','managing','departure'] },
       { id: 'tax',     path: APP_ROUTES.TAX_NAV, labelRu: 'Налоги',   labelEn: 'Taxes',   icon: Calculator, status: 'available', personaTags: ['resident','property_owner','investor','business'], jtbdClusters: ['G'], lifecycleStages: ['settler','resident','absentee','returnee'], roleTags: ['consumer','investor-passive','investor-active','operator'], situationCodes: ['settling','investing','managing','business','property_owner'] },
+      // Currency rates belong to Finance, not Transport (was mis-categorised).
+      { id: 'exchange', path: APP_ROUTES.EXCHANGE, labelRu: 'Курсы валют', labelEn: 'Exchange rates', icon: ArrowLeftRight, status: 'available', personaTags: ['tourist','resident','nomad','investor','business'], jtbdClusters: ['A','G'], lifecycleStages: ['tourist','snowbird','nomad','settler','resident','absentee'], roleTags: ['consumer','investor-passive'], situationCodes: ['arrival','tourist','investing','investor','settling'] },
     ],
   },
   // IA: Halal & Faith stays under the Legal surface (six surfaces / canon 02
