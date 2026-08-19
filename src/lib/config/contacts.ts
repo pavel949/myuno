@@ -57,6 +57,13 @@ export const COMPANY_CONTACTS = {
     companyNameTh: 'บริษัท ท๊อปไลท์ เอเชีย แปซิฟิค จำกัด',
     registrationCountry: 'Thailand',
     city: 'Phuket',
+    /**
+     * Thai company registration number (เลขทะเบียนนิติบุคคล) and Tax ID.
+     * Required on commercial Thai websites — fill in to display automatically
+     * in every legal block. Left empty until officially confirmed.
+     */
+    registrationNumber: '' as string,
+    taxId: '' as string,
     addressEn: 'MC 2, 63/202 Moo 2, Thepkrasattri Rd, Koh Kaew, Muang Phuket, Phuket 83000, Thailand',
     addressRu: 'MC 2, 63/202 Moo 2, Thepkrasattri Rd, Koh Kaew, Muang Phuket, Пхукет 83000, Таиланд',
     addressTh: 'MC 2, 63/202 หมู่ที่ 2 ถนนเทพกระษัตรี ตำบลเกาะแก้ว อำเภอเมืองภูเก็ต จังหวัดภูเก็ต 83000',
