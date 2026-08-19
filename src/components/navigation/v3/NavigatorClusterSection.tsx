@@ -32,6 +32,8 @@ interface NavigatorClusterSectionProps {
   hideAppGrid?: boolean;
   /** code -> {ru,en} map for hint resolution inside MiniAppCard. */
   situationLabels?: Record<string, { ru: string; en: string }>;
+  /** Service ids already rendered in the page-level "For you" grid. */
+  excludeServiceIds?: string[];
 }
 
 function NavigatorClusterSectionImpl({
@@ -40,6 +42,7 @@ function NavigatorClusterSectionImpl({
   counts,
   hideAppGrid,
   situationLabels,
+  excludeServiceIds,
 }: NavigatorClusterSectionProps) {
   const { language, t } = useLanguage();
   const isRu = language === 'ru';
@@ -49,9 +52,13 @@ function NavigatorClusterSectionImpl({
 
   const topServices = useMemo(() => {
     if (hideAppGrid) return [];
-    const inCluster = AVAILABLE_SERVICES.filter((s) => s.clusterId === clusterId);
+    // Skip services already shown in the page-level "For you" grid.
+    const skip = new Set(excludeServiceIds ?? []);
+    const inCluster = AVAILABLE_SERVICES.filter(
+      (s) => s.clusterId === clusterId && !skip.has(s.id),
+    );
     return rankServices(inCluster, { role, personas: effectivePersonas }).slice(0, 6);
-  }, [clusterId, role, effectivePersonas, hideAppGrid]);
+  }, [clusterId, role, effectivePersonas, hideAppGrid, excludeServiceIds]);
 
   if (!cluster || situations.length === 0) return null;
 
