@@ -5,12 +5,12 @@
 export const en: Record<string, string> = {
   // Navigation
   'nav.home': 'Home',
-  'nav.discover': 'Discover',
+  'nav.discover': 'Services',
   'nav.map': 'Map',
   'nav.support': 'Chat',
   'nav.market': 'Market',
   'nav.property': 'Property',
-  'nav.bookings': 'Bookings',
+  'nav.bookings': 'Orders',
   'nav.profile': 'Profile',
 
   // Discover
@@ -35,12 +35,12 @@ export const en: Record<string, string> = {
   'discover.errorLoad': 'We could not load the list. Please refresh, or message us and we will help by hand.',
   'discover.open': 'Open',
   'discover.miniAppsForYou': 'Mini-apps for you',
-  'discover.cluster.arrive': 'Arrive',
-  'discover.cluster.live': 'Live',
-  'discover.cluster.manage': 'Manage',
-  'discover.cluster.invest': 'Invest',
-  'discover.cluster.legal': 'Legal',
-  'discover.cluster.build': 'Build',
+  'discover.cluster.arrive': 'Arriving and first days',
+  'discover.cluster.live': 'Everyday life',
+  'discover.cluster.manage': 'My home and rentals',
+  'discover.cluster.invest': 'Investing',
+  'discover.cluster.legal': 'Documents and law',
+  'discover.cluster.build': 'Building and development',
   'discover.situation': 'Situation',
   'discover.for': 'For',
   'discover.roleLabel': 'Role',

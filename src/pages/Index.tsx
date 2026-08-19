@@ -27,10 +27,9 @@ import { RoleSheet } from '@/components/home/RoleSheet';
 import { OfficialNews } from '@/components/home/OfficialNews';
 import { PersonalGrid } from '@/components/superapp/PersonalGrid';
 import { ClusterRail } from '@/components/superapp/ClusterRail';
-import { CLUSTERS, FLAT_SERVICES, type ClusterId } from '@/lib/catalog/taxonomy';
+import { FLAT_SERVICES, type ClusterId } from '@/lib/catalog/taxonomy';
 import { useLifeOSRole, type LifeOSRole } from '@/hooks/useLifeOS';
 
-const TOTAL_CLUSTERS = CLUSTERS.length;
 const TOTAL_SERVICES = FLAT_SERVICES.length;
 
 /** Same gating as Navigator v3 — what each role sees on Home as icon rails. */
@@ -100,7 +99,7 @@ const IndexLegacy: React.FC = () => {
               <span className="text-[14px] font-medium text-foreground">
                 {showMore
                   ? (isRu ? 'Свернуть' : 'Show less')
-                  : (isRu ? 'Ещё: другие сферы, погода, новости' : 'More: other areas, weather, news')}
+                  : (isRu ? 'Показать больше: разделы, погода, новости' : 'Show more: sections, weather, news')}
               </span>
               <ChevronDown
                 className={`w-4 h-4 text-muted-foreground transition-transform ${showMore ? 'rotate-180' : ''}`}
@@ -130,12 +129,12 @@ const IndexLegacy: React.FC = () => {
           >
             <span>
               <span className="block text-[15px] font-semibold tracking-tight text-foreground">
-                {isRu ? 'Все приложения' : 'All apps'}
+                {isRu ? 'Все услуги и приложения' : 'All services and apps'}
               </span>
               <span className="block text-[12px] text-muted-foreground mt-0.5">
                 {isRu
-                  ? `${TOTAL_CLUSTERS} кластеров · ${TOTAL_SERVICES} сервисов`
-                  : `${TOTAL_CLUSTERS} clusters · ${TOTAL_SERVICES} services`}
+                  ? `Жильё, визы, врач, транспорт и ещё ${Math.max(TOTAL_SERVICES - 4, 0)} сервисов`
+                  : `Housing, visas, doctors, transport and ${Math.max(TOTAL_SERVICES - 4, 0)} more services`}
               </span>
             </span>
             <ArrowRight className="w-5 h-5 text-muted-foreground" strokeWidth={2} />

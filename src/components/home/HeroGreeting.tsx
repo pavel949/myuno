@@ -135,10 +135,10 @@ export function HeroGreeting({ personas, onRoleSheetOpen, onAppDrawerOpen }: Her
           </span>
           <span className="flex-1 min-w-0">
             <span className="block text-[14px] font-semibold text-primary-foreground truncate">
-              {isRu ? 'Спросите AI-консьержа' : 'Ask the AI concierge'}
+              {isRu ? 'Спросите — подскажем' : 'Ask us anything'}
             </span>
             <span className="block text-[11px] text-primary-foreground/65 truncate">
-              {isRu ? 'Жильё · услуги · документы — одной строкой' : 'Stay · services · docs — in one line'}
+              {isRu ? 'Жильё, визы, врач, документы — напишите своими словами' : 'Housing, visas, doctors, documents — in your own words'}
             </span>
           </span>
           <Search className="w-4 h-4 text-primary-foreground/60 flex-shrink-0" strokeWidth={2} aria-hidden="true" />

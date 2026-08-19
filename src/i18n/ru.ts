@@ -5,12 +5,12 @@
 export const ru: Record<string, string> = {
   // Navigation
   'nav.home': 'Главная',
-  'nav.discover': 'Каталог',
+  'nav.discover': 'Услуги',
   'nav.map': 'Карта',
   'nav.support': 'Чат',
   'nav.market': 'Маркет',
   'nav.property': 'Недвижимость',
-  'nav.bookings': 'Брони',
+  'nav.bookings': 'Заказы',
   'nav.profile': 'Профиль',
 
   // Discover
@@ -35,12 +35,12 @@ export const ru: Record<string, string> = {
   'discover.errorLoad': 'Не получилось загрузить список. Обновите страницу или напишите нам — поможем вручную.',
   'discover.open': 'Открыть',
   'discover.miniAppsForYou': 'Мини-приложения для вас',
-  'discover.cluster.arrive': 'Прибытие',
-  'discover.cluster.live': 'Жизнь',
-  'discover.cluster.manage': 'Управление',
+  'discover.cluster.arrive': 'Приезд и первые дни',
+  'discover.cluster.live': 'Повседневная жизнь',
+  'discover.cluster.manage': 'Мой дом и аренда',
   'discover.cluster.invest': 'Инвестиции',
   'discover.cluster.legal': 'Документы и право',
-  'discover.cluster.build': 'Девелопмент',
+  'discover.cluster.build': 'Стройка и девелопмент',
   'discover.situation': 'Ситуация',
   'discover.for': 'Для',
   'discover.roleLabel': 'Роль',

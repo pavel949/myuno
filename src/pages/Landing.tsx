@@ -74,6 +74,22 @@ const TRUST_SIGNALS: { icon: LucideIcon; text: Bi }[] = [
   { icon: Headphones, text: { ru: 'С вами всегда живой человек', en: 'A real person stays with you', th: 'การกำกับดูแลโดยคอนเซียร์จ' } },
 ];
 
+/** Concrete asks people bring us — shown in the hero so the offer is never abstract. */
+const SERVICE_EXAMPLES: Bi[] = [
+  { ru: 'Снять жильё', en: 'Rent a home', th: 'เช่าที่พัก' },
+  { ru: 'Продлить визу', en: 'Renew a visa', th: 'ต่อวีซ่า' },
+  { ru: 'Найти врача', en: 'Find a doctor', th: 'หาแพทย์' },
+  { ru: 'Купить страховку', en: 'Get insurance', th: 'ซื้อประกัน' },
+  { ru: 'Права и машина', en: 'Licence and car', th: 'ใบขับขี่และรถ' },
+  { ru: 'Школа и садик', en: 'School and nursery', th: 'โรงเรียน' },
+  { ru: 'Открыть компанию', en: 'Open a company', th: 'จดทะเบียนบริษัท' },
+  { ru: 'Юрист и договоры', en: 'Lawyer and contracts', th: 'ทนายและสัญญา' },
+  { ru: 'Банк и налоги', en: 'Bank and taxes', th: 'ธนาคารและภาษี' },
+  { ru: 'Уход за домом', en: 'Home upkeep', th: 'ดูแลบ้าน' },
+  { ru: 'Купить недвижимость', en: 'Buy property', th: 'ซื้ออสังหาฯ' },
+  { ru: 'Сдать в аренду', en: 'Rent your place out', th: 'ปล่อยเช่า' },
+];
+
 const TRUST_FACTS: { icon: LucideIcon; title: Bi; body: Bi }[] = [
   {
     icon: ShieldCheck,
@@ -401,6 +417,44 @@ export default function Landing() {
                 th: 'หนึ่งคำขอ คอนเซียร์จของ myUNO จะจัดหาผู้ให้บริการที่ตรวจสอบแล้ว และดูแลจนกระทั่งงานเสร็จสมบูรณ์',
               })}
             </motion.p>
+
+            {/* Concrete asks — each chip opens the request sheet */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.12 }}
+              className="mt-6 max-w-2xl"
+            >
+              <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
+                {tx(language, {
+                  ru: 'С чем мы помогаем каждый день',
+                  en: 'What we help with every day',
+                  th: 'สิ่งที่เราช่วยได้ทุกวัน',
+                })}
+              </p>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {SERVICE_EXAMPLES.map((s) => (
+                  <li key={s.en}>
+                    <button
+                      type="button"
+                      onClick={() => openRequest('general')}
+                      className="inline-flex min-h-[36px] items-center rounded-none border border-border bg-card px-3 font-sans text-body-sm text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {tx(language, s)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 font-sans text-caption text-muted-foreground">
+                {tx(language, {
+                  ru: 'Нет вашего случая? Напишите своими словами — разберёмся.',
+                  en: 'Not on the list? Write it in your own words — we will sort it out.',
+                  th: 'ไม่มีในรายการ? เขียนมาได้เลย',
+                })}
+              </p>
+            </motion.div>
+
+
 
             <motion.div
               initial={{ opacity: 0, y: 12 }}
