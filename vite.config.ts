@@ -107,9 +107,9 @@ export default defineConfig(({ mode, command }) => {
         injectRegister: false,
 
         manifest: {
-          name: 'myUNO — Phuket SuperApp',
+          name: 'myUNO — Phuket Super-App for Foreigners',
           short_name: 'myUNO',
-          description: 'Digital infrastructure for foreigners in Phuket: rentals, services, legal help and real estate deals in one app.',
+          description: 'myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.',
           // PWA manifest spec (https://www.w3.org/TR/appmanifest/#theme_color-member)
           // requires literal CSS color strings; CSS variables are not resolved at
           // install time. Synced 2026-06-18 with DS 2.1 navy palette.
