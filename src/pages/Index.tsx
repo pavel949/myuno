@@ -100,7 +100,7 @@ const IndexLegacy: React.FC = () => {
               <span className="text-[14px] font-medium text-foreground">
                 {showMore
                   ? (isRu ? 'Свернуть' : 'Show less')
-                  : (isRu ? 'Ещё: другие сферы, погода, новости' : 'More: other areas, weather, news')}
+                  : (isRu ? 'Показать больше: разделы, погода, новости' : 'Show more: sections, weather, news')}
               </span>
               <ChevronDown
                 className={`w-4 h-4 text-muted-foreground transition-transform ${showMore ? 'rotate-180' : ''}`}
