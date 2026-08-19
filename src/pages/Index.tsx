@@ -27,10 +27,9 @@ import { RoleSheet } from '@/components/home/RoleSheet';
 import { OfficialNews } from '@/components/home/OfficialNews';
 import { PersonalGrid } from '@/components/superapp/PersonalGrid';
 import { ClusterRail } from '@/components/superapp/ClusterRail';
-import { CLUSTERS, FLAT_SERVICES, type ClusterId } from '@/lib/catalog/taxonomy';
+import { FLAT_SERVICES, type ClusterId } from '@/lib/catalog/taxonomy';
 import { useLifeOSRole, type LifeOSRole } from '@/hooks/useLifeOS';
 
-const TOTAL_CLUSTERS = CLUSTERS.length;
 const TOTAL_SERVICES = FLAT_SERVICES.length;
 
 /** Same gating as Navigator v3 — what each role sees on Home as icon rails. */
