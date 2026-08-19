@@ -70,14 +70,14 @@ const getStatusColor = (status: string) => {
 
 const getStatusLabel = (status: string, language: string) => {
   const labels: Record<string, { en: string; ru: string }> = {
-    pending: { en: 'Pending', ru: 'Ожидает' },
-    submitted: { en: 'Submitted', ru: 'Отправлено' },
+    pending: { en: 'Waiting for confirmation', ru: 'Ждём подтверждения' },
+    submitted: { en: 'Sent to the provider', ru: 'Отправлено исполнителю' },
     confirmed: { en: 'Confirmed', ru: 'Подтверждено' },
-    completed: { en: 'Completed', ru: 'Завершено' },
+    completed: { en: 'Done', ru: 'Выполнено' },
     cancelled: { en: 'Cancelled', ru: 'Отменено' },
-    cancelled_by_user: { en: 'Cancelled', ru: 'Отменено' },
-    cancelled_by_provider: { en: 'Declined', ru: 'Отклонено' },
-    in_progress: { en: 'In Progress', ru: 'В процессе' },
+    cancelled_by_user: { en: 'Cancelled by you', ru: 'Вы отменили' },
+    cancelled_by_provider: { en: 'Provider declined', ru: 'Исполнитель отказал' },
+    in_progress: { en: 'In progress', ru: 'В работе' },
   };
   return labels[status]?.[language === 'ru' ? 'ru' : 'en'] || status;
 };
@@ -573,7 +573,7 @@ export default function Bookings() {
           {filterIsActive && (
             <div className="flex items-center gap-2 mb-3 px-1">
               <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground font-semibold">
-                {language === 'ru' ? 'Фильтр' : 'Filter'}
+                {language === 'ru' ? 'Показываем' : 'Showing'}
               </span>
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs font-medium border border-primary/20">
                 {clusterParam && CLUSTER_FILTER_LABEL[clusterParam]
@@ -582,16 +582,16 @@ export default function Bookings() {
                       : CLUSTER_FILTER_LABEL[clusterParam].en)
                   : null}
                 {clusterParam && statusParam === 'open' ? ' · ' : ''}
-                {statusParam === 'open' ? (language === 'ru' ? 'Открытые' : 'Open') : null}
+                {statusParam === 'open' ? (language === 'ru' ? 'В работе' : 'Still active') : null}
               </span>
               <button
                 type="button"
                 onClick={clearFilter}
                 className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={language === 'ru' ? 'Сбросить фильтр' : 'Clear filter'}
+                aria-label={language === 'ru' ? 'Показать все заказы' : 'Show all orders'}
               >
                 <X className="w-3 h-3" />
-                {language === 'ru' ? 'Сбросить' : 'Clear'}
+                {language === 'ru' ? 'Показать все' : 'Show all'}
               </button>
             </div>
           )}
@@ -599,11 +599,11 @@ export default function Bookings() {
           {loadError ? (
             <EmptyState
               icon={AlertCircle}
-              title={language === 'ru' ? 'Ошибка загрузки' : 'Failed to load'}
-              description={language === 'ru' ? 'Потяните вниз, чтобы повторить' : 'Pull down to retry'}
+              title={language === 'ru' ? 'Не удалось загрузить заказы' : 'We could not load your orders'}
+              description={language === 'ru' ? 'Проверьте связь и попробуйте ещё раз — или потяните экран вниз.' : 'Check your connection and try again — or pull the screen down.'}
               action={
                 <PremiumButton onClick={handleRetry}>
-                  {language === 'ru' ? 'Повторить' : 'Retry'}
+                  {language === 'ru' ? 'Попробовать снова' : 'Try again'}
                 </PremiumButton>
               }
             />
@@ -611,14 +611,14 @@ export default function Bookings() {
             <EmptyState
               icon={Calendar}
               title={filterIsActive
-                ? (language === 'ru' ? 'Ничего не найдено' : 'Nothing found')
+                ? (language === 'ru' ? 'Здесь пока пусто' : 'Nothing here yet')
                 : t('booking.noBookings')}
               description={filterIsActive
-                ? (language === 'ru' ? 'По выбранному фильтру нет заказов.' : 'No orders match the selected filter.')
+                ? (language === 'ru' ? 'По этому фильтру заказов нет. Посмотрите все заказы.' : 'No orders match this filter. Have a look at all of them.')
                 : t('booking.noBookingsDesc')}
               action={filterIsActive ? (
                 <PremiumButton onClick={clearFilter}>
-                  {language === 'ru' ? 'Сбросить фильтр' : 'Clear filter'}
+                  {language === 'ru' ? 'Показать все заказы' : 'Show all orders'}
                 </PremiumButton>
               ) : (
                 <PremiumButton onClick={() => navigate('/discover')}>
@@ -642,7 +642,7 @@ export default function Bookings() {
                       type="button"
                       onClick={() => navigate(`/bookings/${booking.id}`)}
                       className="p-4 w-full text-left"
-                      aria-label={language === 'ru' ? `Открыть бронирование: ${booking.title}` : `Open booking: ${booking.title}`}
+                      aria-label={language === 'ru' ? `Открыть заказ: ${booking.title}` : `Open order: ${booking.title}`}
                     >
                       <div className="flex gap-3">
                         <div className="w-16 h-16 rounded-none bg-primary/10 flex items-center justify-center">
@@ -687,7 +687,7 @@ export default function Bookings() {
                         className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors min-h-[44px]"
                       >
                         <span className="uppercase tracking-[0.08em] flex items-center gap-1.5">
-                          {language === 'ru' ? 'История статусов' : 'Status timeline'}
+                          {language === 'ru' ? 'Что происходило с заказом' : 'What happened so far'}
                           {historyLoading ? (
                             <span
                               className="inline-block h-3 w-3 rounded-full border border-muted-foreground/30 border-t-transparent animate-spin"
