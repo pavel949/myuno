@@ -14,7 +14,7 @@ export default function MeBookings() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   return (
-    <MeShellLayout title={isRu ? 'Мои бронирования' : 'My bookings'}>
+    <MeShellLayout title={isRu ? 'Мои заказы и брони' : 'My orders and bookings'}>
       {/* Bookings page already manages its own AppLayout chrome — but
           rendering it inside MeShell is the simplest way to inherit the
           nav. The duplicate top-bar is acceptable in this transition step
