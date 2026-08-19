@@ -24264,9 +24264,43 @@ export type Database = {
           },
         ]
       }
+      signature_request_signer_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          id: string
+          signer_id: string
+          signer_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string
+          created_at?: string
+          id?: string
+          signer_id: string
+          signer_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          id?: string
+          signer_id?: string
+          signer_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_request_signer_tokens_signer_id_fkey"
+            columns: ["signer_id"]
+            isOneToOne: true
+            referencedRelation: "signature_request_signers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       signature_request_signers: {
         Row: {
-          access_token: string | null
           created_at: string
           decline_reason: string | null
           declined_at: string | null
@@ -24287,7 +24321,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          access_token?: string | null
           created_at?: string
           decline_reason?: string | null
           declined_at?: string | null
@@ -24308,7 +24341,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          access_token?: string | null
           created_at?: string
           decline_reason?: string | null
           declined_at?: string | null
