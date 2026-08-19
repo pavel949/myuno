@@ -358,8 +358,8 @@ export const ru: Record<string, string> = {
   'booking.unavailable': 'Недоступно',
   'booking.expires': 'Истекает:',
   'booking.allCategories': 'Все категории',
-  'booking.noBookings': 'Нет бронирований',
-  'booking.noBookingsDesc': 'Начните изучать услуги, чтобы сделать первое бронирование',
+  'booking.noBookings': 'Пока ничего не заказано',
+  'booking.noBookingsDesc': 'Когда вы закажете услугу, она появится здесь — со статусом и суммой.',
   'booking.results': 'Результаты',
   'booking.found': 'найдено',
   
