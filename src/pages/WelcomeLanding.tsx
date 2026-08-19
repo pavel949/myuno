@@ -58,6 +58,7 @@ import {
   LandingSection,
 } from '@/components/landings/LandingPrimitives';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
+import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
 type Bi = { ru: string; en: string; th?: string };
 type Lang = 'ru' | 'en' | 'th';
@@ -871,7 +872,7 @@ export default function WelcomeLanding() {
 
           <p className="mt-6 inline-flex items-center gap-1.5 font-sans text-caption tracking-[0.08em] text-muted-foreground/60">
             <Languages className="h-3 w-3" />
-            RU · EN · TH · © myUNO · Toplight Asia Pacific Co., Ltd., Phuket
+            RU · EN · TH · <LegalCopyright />
           </p>
         </LandingContainer>
       </LandingSection>

@@ -21,6 +21,7 @@ import { ECOSYSTEM_FOOTER_UI, pickTriplet } from '@/lib/ecosystemGlossary';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
 import { SURFACE_LANDINGS } from '@/lib/landings/surfaceLandings';
+import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
 export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
@@ -141,7 +142,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
           {/* Row 3 — copyright + made-in */}
           <div className="mt-6 flex flex-col gap-2 border-t border-border/40 pt-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="font-sans text-caption tracking-[0.04em] text-muted-foreground/70">
-              © {new Date().getFullYear()} myUNO · Toplight Asia Pacific Co., Ltd., Phuket
+              <LegalCopyright />
             </p>
             <p className="font-sans text-caption tracking-[0.04em] text-muted-foreground/70">
               {t(ECOSYSTEM_FOOTER_UI.madeIn)}
@@ -223,7 +224,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
         </nav>
 
         <p className="text-center font-sans text-caption text-muted-foreground/70">
-          © {new Date().getFullYear()} myUNO · Toplight Asia Pacific Co., Ltd., Phuket
+          <LegalCopyright />
         </p>
       </div>
     </footer>

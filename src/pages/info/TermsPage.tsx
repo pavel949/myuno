@@ -10,6 +10,7 @@ import {
   Gavel, BookOpen, MessageSquare, RefreshCw
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { LegalEntityBlock } from '@/components/legal/LegalEntityInfo';
 
 export default function TermsPage() {
   const { language } = useLanguage();
@@ -573,12 +574,7 @@ export default function TermsPage() {
                 {isRu ? 'Юридические вопросы:' : 'Legal inquiries:'}
               </p>
               <p className="text-sm font-medium">legal@myuno.app</p>
-              <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
-                <p className="font-medium text-foreground mb-1">Toplight Asia Pacific Co., Ltd.</p>
-                <p>{isRu ? 'MC 2, 63/202 Moo 2, Thepkrasattri Rd, Koh Kaew, Muang Phuket, Пхукет 83000, Таиланд' : 'MC 2, 63/202 Moo 2, Thepkrasattri Rd, Koh Kaew, Muang Phuket, Phuket 83000, Thailand'}</p><p>+66 95 424 3332 · pavel@myuno.app</p>
-                <p>{isRu ? 'Юрисдикция: Таиланд' : 'Jurisdiction: Thailand'}</p>
-                <p className="mt-1">www.myuno.app</p>
-              </div>
+              <LegalEntityBlock className="mt-4" contactEmail="legal@myuno.app" />
             </div>
           </CardContent>
         </Card>

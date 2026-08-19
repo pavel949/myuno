@@ -32,6 +32,7 @@ import { SEOHead } from '@/components/seo';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics/track';
+import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
 const track = (event: string, props: Record<string, unknown> = {}) =>
   trackEvent(event, props);
@@ -390,7 +391,7 @@ export default function JoinInvite() {
 
         <footer className="border-t border-border/60 bg-background">
           <div className="mx-auto flex max-w-5xl flex-col items-start justify-between gap-3 px-5 py-6 text-[12px] text-muted-foreground sm:flex-row sm:items-center">
-            <div>© myUNO · Toplight Asia Pacific Co., Ltd., Phuket, Thailand</div>
+            <div><LegalCopyright /></div>
             <div className="flex gap-5">
               <Link to="/legal/privacy" className="hover:text-foreground">{isRu ? 'Приватность' : 'Privacy'}</Link>
               <Link to="/legal/terms" className="hover:text-foreground">{isRu ? 'Условия' : 'Terms'}</Link>

@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
+import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
 export function UnderConstruction() {
   const [email, setEmail] = React.useState('');
@@ -207,7 +208,7 @@ export function UnderConstruction() {
 
         {/* Footer */}
         <p className="text-xs text-muted-foreground pt-8">
-          © 2025–2026 myUNO · Toplight Asia Pacific Co., Ltd., Phuket
+          <LegalCopyright />
         </p>
       </motion.div>
     </div>
