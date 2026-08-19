@@ -9,6 +9,7 @@ import {
   Globe, Users, FileText, AlertTriangle, Settings
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { LegalEntityBlock } from '@/components/legal/LegalEntityInfo';
 
 export default function PrivacyPage() {
   const { language } = useLanguage();
@@ -217,11 +218,10 @@ export default function PrivacyPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              <strong>Toplight Asia Pacific Co., Ltd.</strong><br />
-              {isRu ? 'Адрес: ' : 'Address: '}Thailand / UAE<br />
               {isRu ? 'Email DPO: ' : 'DPO Email: '}dpo@myuno.app<br />
               {isRu ? 'Общие вопросы: ' : 'General inquiries: '}privacy@myuno.app
             </p>
+            <LegalEntityBlock className="mt-3" />
           </CardContent>
         </Card>
 
@@ -441,13 +441,7 @@ export default function PrivacyPage() {
                 <span className="font-medium">privacy@myuno.app</span>
               </p>
             </div>
-            <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">Toplight Asia Pacific Co., Ltd.</p>
-              <p>{isRu ? 'MC 2, 63/202 Moo 2, Thepkrasattri Rd, Koh Kaew, Muang Phuket, Пхукет 83000, Таиланд' : 'MC 2, 63/202 Moo 2, Thepkrasattri Rd, Koh Kaew, Muang Phuket, Phuket 83000, Thailand'}</p><p>+66 95 424 3332 · pavel@myuno.app</p>
-              <p className="mt-1">{isRu 
-                ? 'Надзорный орган: PDPC (Таиланд, PDPA), соответствующий DPA для ЕС.'
-                : 'Supervisory authority: PDPC (Thailand, PDPA), respective DPA for EU.'}</p>
-            </div>
+            <LegalEntityBlock className="mt-4" />
           </CardContent>
         </Card>
 

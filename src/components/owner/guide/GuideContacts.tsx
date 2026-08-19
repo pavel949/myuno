@@ -2,6 +2,7 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { MessageCircle, Mail, Phone, Clock, Globe, QrCode } from 'lucide-react';
+import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
 const steps = [
   { numRu: '1', numEn: '1', textRu: 'Зарегистрируйтесь в приложении UNO', textEn: 'Register in the UNO app' },
@@ -103,7 +104,7 @@ export function GuideContacts() {
           <span className="text-sm font-medium">myuno.app</span>
         </div>
         <p className="text-xs text-muted-foreground mt-4">
-          © Toplight Asia Pacific Co., Ltd.
+          <LegalCopyright />
         </p>
       </div>
     </div>
