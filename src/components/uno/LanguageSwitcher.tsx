@@ -47,7 +47,7 @@ export function LanguageSwitcher({
               className
             )}
           >
-            <span className="text-sm">{currentLang.flag}</span>
+            <span className="text-xs font-semibold tracking-wide">{currentLang.shortName}</span>
             <ChevronDown className="w-3 h-3 opacity-60" />
           </button>
         </DropdownMenuTrigger>
@@ -62,7 +62,7 @@ export function LanguageSwitcher({
               className="flex items-center justify-between cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <span className="text-base">{lang.flag}</span>
+                <span className="text-[11px] font-semibold tracking-wide text-muted-foreground w-6">{lang.shortName}</span>
                 <span className="text-sm font-medium">{lang.name}</span>
               </div>
               {language === lang.code && (
