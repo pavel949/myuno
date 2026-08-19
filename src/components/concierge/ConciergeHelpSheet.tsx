@@ -164,12 +164,12 @@ export function ConciergeHelpSheet({
       <SheetContent side="bottom" className="max-h-[92vh] overflow-y-auto">
         <SheetHeader className="text-left">
           <SheetTitle>
-            {isRu ? 'Помощь myUNO' : 'myUNO Help'} · {topicLabel}
+            {isRu ? 'Чем помочь?' : 'How can we help?'} · {topicLabel}
           </SheetTitle>
           <SheetDescription>
             {isRu
-              ? 'Опишите задачу — менеджер myUNO ответит и подберёт проверенного исполнителя.'
-              : 'Describe your need — a myUNO manager will respond and match a verified provider.'}
+              ? 'Расскажите своими словами, что нужно. Мы ответим и найдём проверенного специалиста.'
+              : 'Tell us what you need in your own words. We will reply and find a verified specialist.'}
           </SheetDescription>
         </SheetHeader>
 
@@ -179,12 +179,12 @@ export function ConciergeHelpSheet({
               <CheckCircle2 className="w-8 h-8 text-primary" />
             </div>
             <h3 className="text-lg font-semibold">
-              {isRu ? 'Заявка получена' : 'Request received'}
+              {isRu ? 'Спасибо, мы получили ваше сообщение' : 'Thank you, we have your message'}
             </h3>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto">
               {isRu
-                ? 'Менеджер свяжется в ближайшее время удобным вам способом. Все ваши заявки — в разделе «Я».'
-                : "A manager will reach out shortly via your preferred channel. Track all your requests under 'Me'."}
+                ? 'Мы свяжемся с вами удобным способом — обычно в течение 1–2 часов. Все обращения сохраняются в разделе «Я».'
+                : "We will get back to you your preferred way, usually within 1–2 hours. All your requests are saved under 'Me'."}
             </p>
             <Button onClick={() => handleClose(false)} className="mt-4">
               {isRu ? 'Закрыть' : 'Close'}
@@ -196,14 +196,14 @@ export function ConciergeHelpSheet({
               <ShieldCheck className="w-4 h-4 shrink-0 text-primary" />
               <span>
                 {isRu
-                  ? 'Все коммуникации идут через myUNO. Контакты исполнителя не передаются — мы соединим вас сами.'
-                  : 'All communication goes through myUNO. Provider contacts are not shared — we connect you.'}
+                  ? 'Общение идёт через myUNO. Мы не передаём ваши контакты третьим лицам и знакомим вас со специалистом сами.'
+                  : 'Everything goes through myUNO. We never pass on your contact details — we introduce you ourselves.'}
               </span>
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="hr-subject">
-                {isRu ? 'Заголовок (необязательно)' : 'Subject (optional)'}
+                {isRu ? 'Коротко о чём вопрос (необязательно)' : 'What is it about (optional)'}
               </Label>
               <Input
                 id="hr-subject"
@@ -211,14 +211,14 @@ export function ConciergeHelpSheet({
                 onChange={(e) => setSubject(e.target.value)}
                 maxLength={200}
                 placeholder={
-                  isRu ? 'Напр. «Education visa на 1 год»' : 'e.g. "Education visa for 1 year"'
+                  isRu ? 'Например: учебная виза на год' : 'For example: education visa for one year'
                 }
               />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="hr-message">
-                {isRu ? 'Опишите задачу' : 'Describe your need'} *
+                {isRu ? 'Расскажите, что нужно' : 'Tell us what you need'} *
               </Label>
               <div className="relative">
                 <Textarea
@@ -230,8 +230,8 @@ export function ConciergeHelpSheet({
                   required
                   placeholder={
                     isRu
-                      ? 'Что нужно сделать, сроки, бюджет, особенности…'
-                      : 'What you need, timeline, budget, specifics…'
+                      ? 'Своими словами: что нужно, к какому сроку, есть ли бюджет. Можно записать голосом.'
+                      : 'In your own words: what you need, by when, and your budget. You can also record it.'
                   }
                   className="pr-12"
                 />
@@ -244,22 +244,22 @@ export function ConciergeHelpSheet({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>{isRu ? 'Срочность' : 'Urgency'}</Label>
+                <Label>{isRu ? 'Насколько срочно' : 'How urgent is it'}</Label>
                 <Select value={urgency} onValueChange={(v) => setUrgency(v as typeof urgency)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">{isRu ? 'Не срочно' : 'Low'}</SelectItem>
-                    <SelectItem value="normal">{isRu ? 'Обычная' : 'Normal'}</SelectItem>
-                    <SelectItem value="high">{isRu ? 'Высокая' : 'High'}</SelectItem>
-                    <SelectItem value="urgent">{isRu ? 'Срочно' : 'Urgent'}</SelectItem>
+                    <SelectItem value="low">{isRu ? 'Могу подождать' : 'I can wait'}</SelectItem>
+                    <SelectItem value="normal">{isRu ? 'В обычном порядке' : 'No rush'}</SelectItem>
+                    <SelectItem value="high">{isRu ? 'Хотелось бы быстрее' : 'Soon, please'}</SelectItem>
+                    <SelectItem value="urgent">{isRu ? 'Нужно сейчас' : 'I need help now'}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-1.5">
-                <Label>{isRu ? 'Как связаться' : 'Contact via'}</Label>
+                <Label>{isRu ? 'Как с вами связаться' : 'How to reach you'}</Label>
                 <Select value={channel} onValueChange={(v) => setChannel(v as typeof channel)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -305,8 +305,8 @@ export function ConciergeHelpSheet({
               <Clock className="w-3.5 h-3.5" />
               <span>
                 {isRu
-                  ? 'Среднее время ответа: 1–2 часа в рабочее время.'
-                  : 'Average response time: 1–2 hours during business hours.'}
+                  ? 'Обычно отвечаем в течение 1–2 часов в рабочее время.'
+                  : 'We usually reply within 1–2 hours during business hours.'}
               </span>
             </div>
 
@@ -317,9 +317,9 @@ export function ConciergeHelpSheet({
                   {isRu ? 'Отправка…' : 'Sending…'}
                 </>
               ) : isRu ? (
-                'Отправить запрос'
+                'Отправить'
               ) : (
-                'Send request'
+                'Send to a concierge'
               )}
             </Button>
           </form>

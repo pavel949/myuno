@@ -67,59 +67,59 @@ const tx = (lang: Lang, v: Bi): string => {
 /* ──────────────────────────────────────────────────────────────────── */
 
 const TRUST_SIGNALS: { icon: LucideIcon; text: Bi }[] = [
-  { icon: ShieldCheck, text: { ru: 'Проверенные исполнители', en: 'Verified providers', th: 'ผู้ให้บริการที่ตรวจสอบแล้ว' } },
-  { icon: Languages, text: { ru: 'Поддержка RU · EN · TH', en: 'RU · EN · TH support', th: 'รองรับ RU · EN · TH' } },
-  { icon: Wallet, text: { ru: 'Защищённые платежи', en: 'Protected payments', th: 'การชำระเงินที่ปลอดภัย' } },
-  { icon: Headphones, text: { ru: 'Контроль консьержа', en: 'Concierge oversight', th: 'การกำกับดูแลโดยคอนเซียร์จ' } },
+  { icon: ShieldCheck, text: { ru: 'Мы проверяем каждого специалиста', en: 'Every specialist is checked', th: 'ผู้ให้บริการที่ตรวจสอบแล้ว' } },
+  { icon: Languages, text: { ru: 'Говорим по-русски, английски и тайски', en: 'We speak Russian, English and Thai', th: 'รองรับ RU · EN · TH' } },
+  { icon: Wallet, text: { ru: 'Ваши деньги под защитой', en: 'Your money stays protected', th: 'การชำระเงินที่ปลอดภัย' } },
+  { icon: Headphones, text: { ru: 'С вами всегда живой человек', en: 'A real person stays with you', th: 'การกำกับดูแลโดยคอนเซียร์จ' } },
 ];
 
 const TRUST_FACTS: { icon: LucideIcon; title: Bi; body: Bi }[] = [
   {
     icon: ShieldCheck,
-    title: { ru: 'Верификация исполнителей', en: 'Provider verification' },
+    title: { ru: 'Мы знаем, кого вам предлагаем', en: 'We know who we send you' },
     body: {
-      ru: 'KYC и проверка документов до того, как заявка дойдёт до клиента. Тайское юрлицо, отзывы и история работ привязаны к профилю.',
-      en: 'KYC and document checks before any request reaches a client. Thai-registered entity, reviews and work history bound to the profile.',
+      ru: 'Проверяем документы и лицензии до того, как знакомим вас со специалистом. У каждого — тайская компания, отзывы и история выполненных работ.',
+      en: 'We check documents and licences before we introduce anyone. Each specialist has a registered Thai company, reviews and a track record you can see.',
     },
   },
   {
     icon: ClipboardCheck,
-    title: { ru: 'Структурированная координация', en: 'Structured coordination' },
+    title: { ru: 'Ничего не потеряется', en: 'Nothing gets lost' },
     body: {
-      ru: 'Каждая заявка ведётся в системе: статус, переписка, документы, оплаты. Ничего не теряется между мессенджерами.',
-      en: 'Every request runs in one system: status, correspondence, documents, payments. Nothing slips between messaging apps.',
+      ru: 'Ваша задача живёт в одном месте: статус, переписка, документы и оплаты. Не нужно искать сообщение в трёх мессенджерах.',
+      en: 'Your request lives in one place: status, messages, documents and payments. No more hunting for a message across three apps.',
     },
   },
   {
     icon: FileCheck2,
-    title: { ru: 'Прозрачность условий', en: 'Transparent terms' },
+    title: { ru: 'Вы всё знаете заранее', en: 'You know everything upfront' },
     body: {
-      ru: 'Стоимость, сроки и ответственность фиксируются до начала работы. Аудит-метка на каждой транзакции.',
-      en: 'Price, timeline and responsibility are fixed before work begins. Audit marker on every transaction.',
+      ru: 'Цену, сроки и то, кто за что отвечает, мы согласуем до начала работы. Каждая оплата остаётся в вашей истории.',
+      en: 'We agree the price, the timing and who is responsible before work starts. Every payment stays in your history.',
     },
   },
   {
     icon: Languages,
-    title: { ru: 'Три рабочих языка', en: 'Three working languages' },
+    title: { ru: 'На вашем языке', en: 'In your own language' },
     body: {
-      ru: 'Заявка, документы и поддержка — на русском, английском или тайском. Перевод и сверку условий ведёт консьерж.',
-      en: 'Requests, documents and support work in Russian, English or Thai. The concierge handles translation and term verification.',
+      ru: 'Заявка, документы и поддержка — по-русски, по-английски или по-тайски. Мы переводим и объясняем условия простыми словами.',
+      en: 'Requests, documents and support in Russian, English or Thai. We translate and explain the terms in plain words.',
     },
   },
   {
     icon: Database,
-    title: { ru: 'Ответственность платформы', en: 'Platform accountability' },
+    title: { ru: 'Мы отвечаем за результат', en: 'We take responsibility' },
     body: {
-      ru: 'Одна точка входа. Спор решает myUNO; оплата удерживается до подтверждения исполнения.',
-      en: 'One entry point. Disputes are resolved by myUNO; payment is held until delivery is confirmed.',
+      ru: 'Если что-то пойдёт не так, разбираться будем мы, а не вы. Оплата специалисту уходит только после того, как работа сделана.',
+      en: 'If something goes wrong, we sort it out — not you. The specialist is paid only after the work is done.',
     },
   },
   {
     icon: Wallet,
-    title: { ru: 'Открытые цены', en: 'Open pricing' },
+    title: { ru: 'Честные цены', en: 'Honest prices' },
     body: {
-      ru: 'Цены и комиссии видны до подтверждения. Без скрытых платежей и переводов на личные счета.',
-      en: 'Prices and fees are visible before confirmation. No hidden charges, no payments to personal accounts.',
+      ru: 'Вы видите стоимость и наш процент до подтверждения. Никаких скрытых доплат и переводов на личные счета.',
+      en: 'You see the price and our fee before you confirm. No hidden add-ons, no transfers to personal accounts.',
     },
   },
 ];
@@ -129,24 +129,24 @@ const CONCIERGE_STEPS: { num: string; title: Bi; body: Bi }[] = [
     num: '01',
     title: { ru: 'Расскажите, что нужно', en: 'Tell us what you need', th: 'บอกเราว่าคุณต้องการอะไร' },
     body: {
-      ru: 'Короткая форма: ситуация, сроки, язык, удобный способ связи. Заявка попадает дежурному консьержу.',
-      en: 'A short form: situation, timeline, language, preferred channel. The request goes to the duty concierge.',
+      ru: 'Короткая форма: что случилось, к какому сроку и как с вами связаться. Можно писать своими словами — мы разберёмся.',
+      en: 'A short form: what you need, by when, and how to reach you. Write it in your own words — we will figure out the rest.',
     },
   },
   {
     num: '02',
-    title: { ru: 'Подбираем проверенного исполнителя', en: 'We coordinate the right verified provider', th: 'เราจัดหาผู้ให้บริการที่ตรวจสอบแล้ว' },
+    title: { ru: 'Мы находим нужного специалиста', en: 'We find the right specialist', th: 'เราจัดหาผู้ให้บริการที่ตรวจสอบแล้ว' },
     body: {
-      ru: 'Сверяем требования, выбираем исполнителя из реестра myUNO, фиксируем стоимость и сроки. Прямые контакты не показываем.',
-      en: 'We match requirements, pick a provider from the myUNO registry, lock price and timeline. Direct contacts are not exposed.',
+      ru: 'Уточняем детали, выбираем проверенного человека под вашу задачу и заранее согласуем цену и сроки.',
+      en: 'We check the details, choose a verified person for your task, and agree the price and timing with you first.',
     },
   },
   {
     num: '03',
-    title: { ru: 'Сопровождаем до результата', en: 'We stay involved through delivery', th: 'เราดูแลจนกระทั่งงานเสร็จสมบูรณ์' },
+    title: { ru: 'Остаёмся с вами до конца', en: 'We stay with you to the end', th: 'เราดูแลจนกระทั่งงานเสร็จสมบูรณ์' },
     body: {
-      ru: 'Перевод, оплата с защитой, контроль этапов и follow-up после закрытия. Спор решает платформа.',
-      en: 'Translation, protected payment, milestone oversight and follow-up after closing. Disputes resolved by the platform.',
+      ru: 'Переводим, следим за этапами, держим оплату до результата и уточняем потом, всё ли в порядке.',
+      en: 'We translate, follow each step, hold the payment until the job is done, and check in afterwards.',
     },
   },
 ];
@@ -154,112 +154,113 @@ const CONCIERGE_STEPS: { num: string; title: Bi; body: Bi }[] = [
 const USE_CASES: { icon: LucideIcon; title: Bi; body: Bi }[] = [
   {
     icon: Home,
-    title: { ru: 'Жильё и долгосрочная аренда', en: 'Housing and long-term rental' },
+    title: { ru: 'Жильё и долгая аренда', en: 'Housing and long-term rent' },
     body: {
-      ru: 'Подбор объекта, проверка договора, депозит, въезд. Без посредников, исчезающих после оплаты.',
-      en: 'Property search, contract review, deposit, move-in. Without intermediaries who vanish after payment.',
+      ru: 'Поможем найти дом, прочитаем договор, объясним про депозит и будем рядом до того дня, когда вы получите ключи.',
+      en: 'We help you find a home, read the contract with you, explain the deposit, and stay until you have the keys.',
     },
   },
   {
     icon: Scale,
-    title: { ru: 'Визы, налоги, регистрация бизнеса', en: 'Visa, tax and company setup' },
+    title: { ru: 'Визы, налоги и своя компания', en: 'Visas, taxes and your company' },
     body: {
-      ru: 'Сопровождение тайскими юристами и бухгалтерами под контролем платформы. Сроки и ответственность фиксированы.',
-      en: 'Thai lawyers and accountants working under platform oversight. Timelines and accountability are fixed.',
+      ru: 'С вами работают тайские юристы и бухгалтеры, а мы следим за сроками и объясняем каждый шаг по-человечески.',
+      en: 'Thai lawyers and accountants do the work, while we watch the deadlines and explain each step in plain language.',
     },
   },
   {
     icon: Stethoscope,
-    title: { ru: 'Медицина и срочная помощь', en: 'Medical and urgent assistance' },
+    title: { ru: 'Врач и срочная помощь', en: 'A doctor and urgent help' },
     body: {
-      ru: 'Координация с больницей, страховой и переводчиком в стрессовый момент. На вашем языке, круглосуточно.',
-      en: 'Coordination with the hospital, insurer and interpreter at the moment of stress. In your language, 24/7.',
+      ru: 'Свяжемся с больницей и страховой, найдём переводчика и останемся на линии, пока всё не решится. В любое время.',
+      en: 'We call the hospital and your insurer, bring an interpreter, and stay on the line until it is sorted. Any time of day.',
     },
   },
   {
     icon: KeyRound,
-    title: { ru: 'Удалённое управление недвижимостью', en: 'Remote property management' },
+    title: { ru: 'Ваш дом, пока вы далеко', en: 'Your home while you are away' },
     body: {
-      ru: 'Когда вы за границей, а в доме нужны уборка, ремонт, гости, отчёт по доходам — без чата в трёх мессенджерах.',
-      en: 'When you are abroad and the home needs cleaning, repairs, guests and an owner statement — without three messenger threads.',
+      ru: 'Уборка, ремонт, гости и понятный отчёт о доходах — вы получаете спокойствие, а не переписку в трёх чатах.',
+      en: 'Cleaning, repairs, guests and a clear income report — you get calm, not three group chats to follow.',
     },
   },
   {
     icon: Briefcase,
-    title: { ru: 'Сложные локальные согласования', en: 'Sensitive local coordination' },
+    title: { ru: 'Разговоры с банками и ведомствами', en: 'Dealing with banks and offices' },
     body: {
-      ru: 'Государственные органы, банки, страховые. Когда цена ошибки или языкового недопонимания высока.',
-      en: 'Government bodies, banks, insurers. When the cost of a mistake or a language gap is high.',
+      ru: 'Госорганы, банки, страховые. Там, где ошибка или недопонимание дороги, лучше идти вместе с нами.',
+      en: 'Government offices, banks, insurers. Where a mistake or a language gap costs a lot, it helps to go together.',
     },
   },
 ];
 
 const SAFER_CHAOS: Bi[] = [
-  { ru: 'Случайные контакты из чатов', en: 'Random contacts from chat groups' },
-  { ru: 'Языковые барьеры и недомолвки', en: 'Language barriers and unspoken terms' },
-  { ru: 'Непонятно, с кого спросить за результат', en: 'Unclear who is accountable for the result' },
-  { ru: 'Переписка размазана по мессенджерам', en: 'Conversations spread across messengers' },
-  { ru: 'Оплата на личные счета без защиты', en: 'Payments to personal accounts, no protection' },
+  { ru: 'Незнакомый номер из чата в Телеграме', en: 'An unknown number from a chat group' },
+  { ru: 'Договор на языке, который вы не читаете', en: 'A contract in a language you cannot read' },
+  { ru: 'Непонятно, кто отвечает, если что-то не так', en: 'No one clearly responsible if it goes wrong' },
+  { ru: 'Переписка разбросана по мессенджерам', en: 'Conversations scattered across apps' },
+  { ru: 'Перевод на личный счёт — и надежда на лучшее', en: 'A transfer to a personal account, and hope' },
 ];
 
 const SAFER_MYUNO: Bi[] = [
-  { ru: 'Одна проверенная точка входа', en: 'A single trusted entry point' },
-  { ru: 'Поддержка RU · EN · TH в одной заявке', en: 'RU · EN · TH support in one request' },
-  { ru: 'Координацию ведёт консьерж', en: 'A concierge owns the coordination' },
-  { ru: 'История, документы и оплаты в одном месте', en: 'History, documents and payments in one place' },
-  { ru: 'Платёж удерживается до результата', en: 'Payment is held until delivery' },
+  { ru: 'Одно место, где вам помогут с любым вопросом', en: 'One place that helps with anything' },
+  { ru: 'Всё объясним по-русски, английски или тайски', en: 'Everything explained in your language' },
+  { ru: 'Ваш консьерж ведёт задачу и держит вас в курсе', en: 'Your concierge keeps you informed' },
+  { ru: 'История, документы и оплаты всегда под рукой', en: 'History, documents and payments in one place' },
+  { ru: 'Деньги уходят только после результата', en: 'Money is released only after the job is done' },
 ];
 
 const EMERGENCY_ITEMS: { icon: LucideIcon; text: Bi }[] = [
-  { icon: HeartPulse, text: { ru: 'Медицинская помощь и госпитализация', en: 'Medical assistance and hospitalisation' } },
-  { icon: CarFront, text: { ru: 'ДТП и оформление страхового случая', en: 'Road accident and insurance claim' } },
-  { icon: FileWarning, text: { ru: 'Потеря документов и связь с консульством', en: 'Lost documents and consulate liaison' } },
-  { icon: Gavel, text: { ru: 'Срочный юрист и правовая защита', en: 'Urgent lawyer and legal protection' } },
-  { icon: LifeBuoy, text: { ru: 'Эвакуация и сопровождение в больнице', en: 'Evacuation and in-hospital support' } },
+  { icon: HeartPulse, text: { ru: 'Врач, скорая и госпитализация', en: 'A doctor, an ambulance, a hospital stay' } },
+  { icon: CarFront, text: { ru: 'ДТП и оформление страховки', en: 'A road accident and the insurance claim' } },
+  { icon: FileWarning, text: { ru: 'Потеряли документы — свяжемся с консульством', en: 'Lost documents — we contact your consulate' } },
+  { icon: Gavel, text: { ru: 'Срочно нужен юрист', en: 'You urgently need a lawyer' } },
+  { icon: LifeBuoy, text: { ru: 'Перевозка и человек рядом в больнице', en: 'Transport and someone beside you in hospital' } },
 ];
 
 const AUDIENCES: { icon: LucideIcon; title: Bi; body: Bi }[] = [
   {
     icon: Plane,
-    title: { ru: 'Гости и туристы', en: 'Tourists & guests' },
+    title: { ru: 'Гостям и туристам', en: 'Tourists and guests' },
     body: {
-      ru: 'Трансфер, SIM, страховка, врач на родном языке, безопасная координация на время поездки.',
-      en: 'Transfer, SIM, insurance, a doctor in your language, safe coordination throughout the stay.',
+      ru: 'Встреча в аэропорту, SIM-карта, страховка, врач на вашем языке — чтобы поездка прошла спокойно.',
+      en: 'Airport pickup, a SIM card, insurance, a doctor in your language — so the trip stays calm.',
     },
   },
   {
     icon: Home,
-    title: { ru: 'Резиденты и экспаты', en: 'Residents & expats' },
+    title: { ru: 'Тем, кто живёт здесь', en: 'Residents and expats' },
     body: {
-      ru: 'Жильё, дети, медицина, банк, бытовые сервисы — без поиска новых исполнителей каждый месяц.',
-      en: 'Housing, children, medicine, banking, daily services — without re-sourcing providers every month.',
+      ru: 'Жильё, школа для ребёнка, врач, банк, бытовые дела — без поиска новых мастеров каждый месяц.',
+      en: 'Housing, schools, doctors, banking, everyday tasks — without finding new people every month.',
     },
   },
   {
     icon: TrendingUp,
-    title: { ru: 'Инвесторы', en: 'Investors' },
+    title: { ru: 'Инвесторам', en: 'Investors' },
     body: {
-      ru: 'Подбор сделок, due diligence, независимый рейтинг ClearView, сопровождение и выход.',
-      en: 'Deal sourcing, due diligence, ClearView independent ratings, end-to-end support and exit.',
+      ru: 'Подберём объекты, проверим их, покажем независимую оценку ClearView и будем рядом до продажи.',
+      en: 'We source deals, check them carefully, share the independent ClearView rating, and stay through the exit.',
     },
   },
   {
     icon: KeyRound,
-    title: { ru: 'Собственники недвижимости', en: 'Property owners' },
+    title: { ru: 'Владельцам недвижимости', en: 'Property owners' },
     body: {
-      ru: 'Управление объектом из любой страны: бронирования, обслуживание, отчёты, налоги.',
-      en: 'Manage your property from anywhere: bookings, maintenance, owner reports, taxes.',
+      ru: 'Управляем вашим объектом из любой точки мира: гости, обслуживание, понятные отчёты и налоги.',
+      en: 'We look after your property from anywhere: guests, maintenance, clear reports and taxes.',
     },
   },
   {
     icon: Briefcase,
-    title: { ru: 'Основатели и профессионалы', en: 'Founders & professionals' },
+    title: { ru: 'Предпринимателям', en: 'Founders and professionals' },
     body: {
-      ru: 'Регистрация компании, визы команды, бухгалтерия, помещение, юридическое сопровождение.',
-      en: 'Company registration, team visas, accounting, premises, legal support.',
+      ru: 'Откроем компанию, оформим визы команде, наладим бухгалтерию, найдём офис и юриста.',
+      en: 'We register your company, arrange team visas, set up accounting, and find an office and a lawyer.',
     },
   },
 ];
+
 
 /* ──────────────────────────────────────────────────────────────────── */
 /*  Page                                                                 */
@@ -337,8 +338,8 @@ export default function Landing() {
         )}
       >
         <Send className="h-3.5 w-3.5" strokeWidth={2.5} />
-        <span className="hidden sm:inline">{tx(language, { ru: 'Подать заявку', en: 'Submit a request', th: 'ส่งคำขอ' })}</span>
-        <span className="sm:hidden">{tx(language, { ru: 'Заявка', en: 'Request', th: 'คำขอ' })}</span>
+        <span className="hidden sm:inline">{tx(language, { ru: 'Написать нам', en: 'Tell us what you need', th: 'ส่งคำขอ' })}</span>
+        <span className="sm:hidden">{tx(language, { ru: 'Написать', en: 'Ask us', th: 'คำขอ' })}</span>
       </button>
     </>
   );
@@ -371,7 +372,7 @@ export default function Landing() {
             >
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               <span className="font-semibold text-foreground">myUNO</span>
-              <span>{tx(language, { ru: 'операционный слой Пхукета', en: 'operating layer for Phuket', th: 'โครงสร้างปฏิบัติการสำหรับภูเก็ต' })}</span>
+              <span>{tx(language, { ru: 'помощь иностранцам на Пхукете', en: 'help for foreigners in Phuket', th: 'โครงสร้างปฏิบัติการสำหรับภูเก็ต' })}</span>
             </motion.div>
 
             <motion.h1
@@ -381,8 +382,8 @@ export default function Landing() {
               className="font-display mt-6 max-w-3xl text-h1 font-normal leading-[1.05] tracking-tight sm:text-display"
             >
               {tx(language, {
-                ru: 'Доверенный операционный слой для Пхукета',
-                en: 'The trusted operating layer for Phuket',
+                ru: 'Спокойная жизнь на Пхукете начинается с одного сообщения',
+                en: 'Life in Phuket gets easier with one message',
                 th: 'โครงสร้างปฏิบัติการที่น่าเชื่อถือสำหรับภูเก็ต',
               })}
             </motion.h1>
@@ -394,8 +395,8 @@ export default function Landing() {
               className="mt-5 max-w-2xl font-sans text-body-lg font-normal leading-relaxed text-muted-foreground"
             >
               {tx(language, {
-                ru: 'Одна заявка. Консьерж myUNO подбирает проверенного исполнителя и ведёт задачу до результата — на русском, английском или тайском.',
-                en: 'One request. The myUNO concierge coordinates a verified provider and stays involved through delivery — in Russian, English or Thai.',
+                ru: 'Напишите, что нужно. Ваш консьерж myUNO найдёт проверенного специалиста и будет рядом до результата — по-русски, по-английски или по-тайски.',
+                en: 'Tell us what you need. Your myUNO concierge finds a verified specialist and stays with you until it is done — in Russian, English or Thai.',
                 th: 'หนึ่งคำขอ คอนเซียร์จของ myUNO จะจัดหาผู้ให้บริการที่ตรวจสอบแล้ว และดูแลจนกระทั่งงานเสร็จสมบูรณ์',
               })}
             </motion.p>
@@ -417,7 +418,7 @@ export default function Landing() {
                 )}
               >
                 <Send className="h-4 w-4" strokeWidth={2.5} />
-                {tx(language, { ru: 'Подать заявку', en: 'Submit a request', th: 'ส่งคำขอ' })}
+                {tx(language, { ru: 'Написать нам', en: 'Tell us what you need', th: 'ส่งคำขอ' })}
               </button>
               <button
                 type="button"
@@ -429,12 +430,12 @@ export default function Landing() {
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                 )}
               >
-                {tx(language, { ru: 'Как это работает', en: 'See how it works', th: 'ดูวิธีการทำงาน' })}
+                {tx(language, { ru: 'Как мы работаем', en: 'See how we help', th: 'ดูวิธีการทำงาน' })}
               </button>
             </motion.div>
 
             <p className="mt-3 font-sans text-caption text-muted-foreground">
-              {tx(language, { ru: 'Регистрация не требуется. ', en: 'No account required. ', th: 'ไม่ต้องสมัครสมาชิก ' })}
+              {tx(language, { ru: 'Аккаунт не нужен. ', en: 'No account needed. ', th: 'ไม่ต้องสมัครสมาชิก ' })}
               <Link to={APP_ROUTES.AUTH} className="underline underline-offset-4 hover:text-foreground">
                 {tx(language, { ru: 'Войти', en: 'Sign in', th: 'เข้าสู่ระบบ' })}
               </Link>
@@ -473,15 +474,15 @@ export default function Landing() {
           <span id="trust" className="block -mt-20 pt-20" aria-hidden />
           <div className="mb-8 max-w-2xl space-y-3">
             <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Почему нам можно доверять', en: 'Why you can trust myUNO', th: 'ทำไมจึงเชื่อถือได้' })}
+              {tx(language, { ru: 'Почему нам доверяют', en: 'Why people trust us', th: 'ทำไมจึงเชื่อถือได้' })}
             </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(language, { ru: 'Факты, а не обещания', en: 'Facts, not promises', th: 'ข้อเท็จจริง ไม่ใช่คำสัญญา' })}
+              {tx(language, { ru: 'Понятные правила вместо обещаний', en: 'Clear rules, not big promises', th: 'ข้อเท็จจริง ไม่ใช่คำสัญญา' })}
             </h2>
             <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
               {tx(language, {
-                ru: 'Платформа отвечает за качество координации и за то, что исполнитель действительно тот, за кого себя выдаёт.',
-                en: 'The platform is accountable for the quality of coordination and for the provider being who they claim to be.',
+                ru: 'Мы отвечаем за то, чтобы человек, который к вам придёт, был именно тем, за кого себя выдаёт, и чтобы работа была сделана.',
+                en: 'We make sure the person who comes to you is exactly who they say they are — and that the work gets done.',
               })}
             </p>
           </div>
@@ -510,12 +511,12 @@ export default function Landing() {
           <span id="how-it-works" className="block -mt-20 pt-20" aria-hidden />
           <div className="mb-8 max-w-2xl space-y-3">
             <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Как это работает', en: 'How it works', th: 'ทำงานอย่างไร' })}
+              {tx(language, { ru: 'Как мы помогаем', en: 'How we help', th: 'ทำงานอย่างไร' })}
             </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
               {tx(language, {
-                ru: 'Не каталог исполнителей. Управляемая координация.',
-                en: 'Not a directory. A managed coordination layer.',
+                ru: 'Мы не список контактов. Мы люди, которые доводят дело до конца.',
+                en: 'We are not a contact list. We are people who see things through.',
                 th: 'ไม่ใช่สารบัญ แต่เป็นชั้นการประสานงานที่จัดการ',
               })}
             </h2>
@@ -542,7 +543,7 @@ export default function Landing() {
               className="inline-flex h-11 items-center gap-2 rounded-none bg-primary px-5 font-sans text-body font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               <Send className="h-4 w-4" strokeWidth={2.5} />
-              {tx(language, { ru: 'Подать заявку', en: 'Submit a request', th: 'ส่งคำขอ' })}
+              {tx(language, { ru: 'Написать нам', en: 'Tell us what you need', th: 'ส่งคำขอ' })}
             </button>
           </div>
         </LandingContainer>
@@ -553,10 +554,10 @@ export default function Landing() {
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
             <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Когда доверие важнее, чем выбор', en: 'When trust matters more than browsing', th: 'เมื่อความน่าเชื่อถือสำคัญกว่าการค้นหา' })}
+              {tx(language, { ru: 'Когда важно, чтобы рядом был свой человек', en: 'When you need someone on your side', th: 'เมื่อความน่าเชื่อถือสำคัญกว่าการค้นหา' })}
             </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(language, { ru: 'Ситуации, ради которых построена платформа', en: 'Situations the platform is built for' })}
+              {tx(language, { ru: 'С чем к нам приходят чаще всего', en: 'What people come to us for' })}
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-3">
@@ -577,7 +578,7 @@ export default function Landing() {
                     {tx(language, u.body)}
                   </p>
                   <span className="mt-auto inline-flex items-center gap-1 pt-3 font-sans text-caption font-medium uppercase tracking-[0.12em] text-foreground transition-transform group-hover:translate-x-0.5">
-                    {tx(language, { ru: 'Запросить помощь', en: 'Request help' })}
+                    {tx(language, { ru: 'Попросить помощь', en: 'Ask for help' })}
                     <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
                   </span>
                 </button>
@@ -592,12 +593,12 @@ export default function Landing() {
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
             <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Сравнение', en: 'Comparison', th: 'การเปรียบเทียบ' })}
+              {tx(language, { ru: 'Сравните сами', en: 'See the difference', th: 'การเปรียบเทียบ' })}
             </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
               {tx(language, {
-                ru: 'Чем это безопаснее обычной локальной координации',
-                en: 'Why this is safer than ad-hoc local coordination',
+                ru: 'Почему с нами спокойнее, чем искать наугад',
+                en: 'Why this feels safer than searching on your own',
               })}
             </h2>
           </div>
@@ -606,7 +607,7 @@ export default function Landing() {
               <div className="flex items-center gap-2">
                 <CircleAlert className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} />
                 <span className="font-sans text-caption font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                  {tx(language, { ru: 'Без координирующего слоя', en: 'Without a coordination layer' })}
+                  {tx(language, { ru: 'Если искать самому', en: 'Doing it alone' })}
                 </span>
               </div>
               <ul className="space-y-3">
@@ -622,7 +623,7 @@ export default function Landing() {
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-foreground" strokeWidth={1.75} />
                 <span className="font-sans text-caption font-semibold uppercase tracking-[0.14em] text-foreground">
-                  {tx(language, { ru: 'Через myUNO', en: 'Through myUNO' })}
+                  {tx(language, { ru: 'Вместе с myUNO', en: 'With myUNO' })}
                 </span>
               </div>
               <ul className="space-y-3">
@@ -645,15 +646,15 @@ export default function Landing() {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_minmax(0,1.2fr)]">
             <div className="space-y-3">
               <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-                {tx(language, { ru: 'Когда нужна помощь сейчас', en: 'When help is needed now', th: 'เมื่อต้องการความช่วยเหลือทันที' })}
+                {tx(language, { ru: 'Если помощь нужна прямо сейчас', en: 'If you need help right now', th: 'เมื่อต้องการความช่วยเหลือทันที' })}
               </p>
               <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-                {tx(language, { ru: 'Экстренная поддержка', en: 'Emergency support', th: 'ความช่วยเหลือฉุกเฉิน' })}
+                {tx(language, { ru: 'Мы на связи в трудный момент', en: 'We are here in an emergency', th: 'ความช่วยเหลือฉุกเฉิน' })}
               </h2>
               <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
                 {tx(language, {
-                  ru: 'Доступно без аккаунта. Дежурный консьерж принимает запрос круглосуточно — на русском, английском или тайском.',
-                  en: 'Available without an account. The duty concierge takes requests 24/7 — in Russian, English or Thai.',
+                  ru: 'Аккаунт не нужен. Дежурный консьерж отвечает круглосуточно — по-русски, по-английски или по-тайски.',
+                  en: 'No account needed. A concierge answers around the clock — in Russian, English or Thai.',
                 })}
               </p>
               <button
@@ -663,7 +664,7 @@ export default function Landing() {
                 className="mt-2 inline-flex h-11 items-center gap-2 rounded-none border border-foreground bg-foreground px-5 font-sans text-body font-semibold text-background hover:bg-foreground/90 transition-colors"
               >
                 <LifeBuoy className="h-4 w-4" strokeWidth={2} />
-                {tx(language, { ru: 'Запросить помощь', en: 'Request help', th: 'ขอความช่วยเหลือ' })}
+                {tx(language, { ru: 'Попросить помощь', en: 'Ask for help now', th: 'ขอความช่วยเหลือ' })}
               </button>
             </div>
             <ul className="grid grid-cols-1 gap-px overflow-hidden border border-border bg-border/50 sm:grid-cols-2">
@@ -686,15 +687,15 @@ export default function Landing() {
         <LandingContainer className="py-14 sm:py-20">
           <div className="mb-8 max-w-2xl space-y-3">
             <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-              {tx(language, { ru: 'Аудитории', en: 'Audiences', th: 'กลุ่มเป้าหมาย' })}
+              {tx(language, { ru: 'Кому мы помогаем', en: 'Who we help', th: 'กลุ่มเป้าหมาย' })}
             </p>
             <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
-              {tx(language, { ru: 'Для иностранцев на Пхукете', en: 'For foreigners in Phuket' })}
+              {tx(language, { ru: 'Иностранцам, которые живут и бывают на Пхукете', en: 'Foreigners living in and visiting Phuket' })}
             </h2>
             <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
               {tx(language, {
-                ru: 'Одна и та же модель доверенной координации — от первой поездки до владения недвижимостью.',
-                en: 'The same trusted-coordination model — from a first visit to property ownership.',
+                ru: 'Помогаем одинаково внимательно — и в первой поездке, и когда у вас здесь уже дом.',
+                en: 'The same care on your first trip and years later, when you own a home here.',
               })}
             </p>
           </div>
@@ -724,24 +725,24 @@ export default function Landing() {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
             <div className="max-w-2xl space-y-3">
               <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-                {tx(language, { ru: 'Глубина платформы', en: 'Depth of the platform', th: 'ความลึกของแพลตฟอร์ม' })}
+                {tx(language, { ru: 'Что ещё мы умеем', en: 'What else we do', th: 'ความลึกของแพลตฟอร์ม' })}
               </p>
               <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
                 {tx(language, {
-                  ru: 'За одной заявкой — целая операционная экосистема',
-                  en: 'Behind one request: a full operating ecosystem',
+                  ru: 'За одним сообщением — большая команда и десятки сервисов',
+                  en: 'Behind one message: a whole team and dozens of services',
                 })}
               </h2>
               <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
                 {tx(language, {
-                  ru: 'Недвижимость, юриспруденция, медицина, релокация, владение, бытовые сервисы — на платформе myUNO. Вам не нужно изучать каждый раздел; задача консьержа — соединить вас с правильным.',
-                  en: 'Property, legal, medical, relocation, ownership, daily services — all on the myUNO platform. You do not need to learn every section; the concierge connects you to the right one.',
+                  ru: 'Недвижимость, юристы, врачи, переезд, обслуживание дома и бытовые дела — всё это уже есть на myUNO. Разбираться в разделах не нужно: консьерж сам приведёт вас куда надо.',
+                  en: 'Property, lawyers, doctors, relocation, home care and everyday tasks are all here. You do not need to learn the sections — your concierge takes you to the right one.',
                 })}
               </p>
               <p className="pt-2 font-sans text-body-sm text-muted-foreground">
                 {tx(language, {
-                  ru: 'Если интересно, что доступно — посмотрите экосистему отдельно.',
-                  en: 'If you are curious what is available — explore the ecosystem separately.',
+                  ru: 'Хочется посмотреть самому — загляните в каталог сервисов.',
+                  en: 'Prefer to look around first? Browse the services.',
                 })}
               </p>
             </div>
@@ -750,7 +751,7 @@ export default function Landing() {
               data-testid="landing-cta-ecosystem"
               className="inline-flex h-12 items-center justify-center gap-2 rounded-none border border-foreground px-6 font-sans text-body font-medium text-foreground hover:bg-foreground hover:text-background transition-colors"
             >
-              {tx(language, { ru: 'Посмотреть экосистему', en: 'Explore the ecosystem', th: 'สำรวจระบบนิเวศ' })}
+              {tx(language, { ru: 'Посмотреть сервисы', en: 'Browse the services', th: 'สำรวจระบบนิเวศ' })}
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
           </div>
@@ -765,18 +766,18 @@ export default function Landing() {
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
               <div className="max-w-2xl space-y-3">
                 <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
-                  {tx(language, { ru: 'Для исполнителей', en: 'For providers', th: 'สำหรับผู้ให้บริการ' })}
+                  {tx(language, { ru: 'Специалистам и компаниям', en: 'For specialists and companies', th: 'สำหรับผู้ให้บริการ' })}
                 </p>
                 <h2 className="font-display text-h2 font-normal tracking-tight text-foreground">
                   {tx(language, {
-                    ru: 'Проверенные исполнители — в одну структуру с прозрачными правилами',
-                    en: 'Verified providers — into one structure with transparent rules',
+                    ru: 'Работайте с клиентами по понятным и честным правилам',
+                    en: 'Work with clients under clear, fair rules',
                   })}
                 </h2>
                 <p className="font-sans text-body-sm leading-relaxed text-muted-foreground">
                   {tx(language, {
-                    ru: 'Поток квалифицированных заявок, защищённая оплата, единая репутация. Условия фиксируются заранее, споры решает платформа.',
-                    en: 'Qualified inbound, protected payments, a single platform reputation. Terms are fixed upfront; disputes are resolved by the platform.',
+                    ru: 'Мы приводим готовых клиентов, защищаем вашу оплату и помогаем строить репутацию. Условия согласуем заранее, спорные ситуации решаем сами.',
+                    en: 'We bring you ready clients, protect your payment and help you build a reputation. Terms are agreed upfront, and we handle any disputes.',
                   })}
                 </p>
               </div>
@@ -786,7 +787,7 @@ export default function Landing() {
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-none border border-foreground px-6 font-sans text-body font-medium text-foreground hover:bg-foreground hover:text-background transition-colors"
               >
                 <Users className="h-4 w-4" strokeWidth={2} />
-                {tx(language, { ru: 'Стать партнёром', en: 'Become a partner', th: 'เป็นพาร์ทเนอร์' })}
+                {tx(language, { ru: 'Стать партнёром', en: 'Join as a partner', th: 'เป็นพาร์ทเนอร์' })}
               </Link>
             </div>
           </LandingContainer>
@@ -797,18 +798,18 @@ export default function Landing() {
       <LandingSection border={false}>
         <LandingContainer className="mx-auto max-w-3xl py-16 text-center sm:py-24">
           <h2 className="font-display text-h1 font-normal leading-[1.05] tracking-tight sm:text-display">
-            {tx(language, { ru: 'Одна заявка.', en: 'One request.', th: 'หนึ่งคำขอ' })}
+            {tx(language, { ru: 'Одно сообщение.', en: 'One message.', th: 'หนึ่งคำขอ' })}
             <br />
             {tx(language, {
-              ru: 'Один доверенный операционный слой для Пхукета.',
-              en: 'One trusted operating layer for Phuket.',
+              ru: 'И вы больше не решаете вопросы на Пхукете в одиночку.',
+              en: 'And you never handle Phuket alone again.',
               th: 'หนึ่งโครงสร้างปฏิบัติการที่น่าเชื่อถือสำหรับภูเก็ต',
             })}
           </h2>
           <p className="mt-5 font-sans text-body-sm text-muted-foreground sm:text-body">
             {tx(language, {
-              ru: 'Опишите задачу — консьерж возьмёт её в работу и подберёт проверенного исполнителя.',
-              en: 'Describe the task — the concierge takes it from there and matches a verified provider.',
+              ru: 'Напишите своими словами, что нужно. Дальше мы сами: найдём специалиста и будем держать вас в курсе.',
+              en: 'Tell us in your own words what you need. We take it from there and keep you posted.',
             })}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -821,13 +822,13 @@ export default function Landing() {
               )}
             >
               <Send className="h-4 w-4" strokeWidth={2.5} />
-              {tx(language, { ru: 'Подать заявку', en: 'Submit a request', th: 'ส่งคำขอ' })}
+              {tx(language, { ru: 'Написать нам', en: 'Tell us what you need', th: 'ส่งคำขอ' })}
             </button>
             <Link
               to={APP_ROUTES.ECOSYSTEM}
               className="inline-flex h-12 min-w-[220px] items-center justify-center gap-2 rounded-none border border-foreground px-6 font-sans text-body font-medium text-foreground hover:bg-foreground hover:text-background transition-colors"
             >
-              {tx(language, { ru: 'Посмотреть экосистему', en: 'Explore the ecosystem', th: 'สำรวจระบบนิเวศ' })}
+              {tx(language, { ru: 'Посмотреть сервисы', en: 'Browse the services', th: 'สำรวจระบบนิเวศ' })}
             </Link>
           </div>
 
@@ -873,7 +874,7 @@ export default function Landing() {
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-none bg-primary font-sans text-body font-semibold text-primary-foreground"
         >
           <Send className="h-4 w-4" strokeWidth={2.5} />
-          {tx(language, { ru: 'Подать заявку', en: 'Submit a request', th: 'ส่งคำขอ' })}
+          {tx(language, { ru: 'Написать нам', en: 'Tell us what you need', th: 'ส่งคำขอ' })}
         </button>
       </div>
 

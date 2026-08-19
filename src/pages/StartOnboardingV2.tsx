@@ -31,28 +31,29 @@ type L = 'en' | 'ru';
 const T = (c: { en: string; ru: string }, l: L) => c[l] ?? c.en;
 
 const COPY = {
-  title: { en: 'Welcome to myUNO', ru: 'Добро пожаловать в myUNO' },
+  title: { en: 'Welcome to myUNO', ru: 'Рады, что вы с нами' },
   subtitle: {
-    en: '2 quick questions — details are optional.',
-    ru: '2 быстрых вопроса — детали по желанию.',
+    en: 'Two quick questions, so we can show what matters to you. The rest is optional.',
+    ru: 'Два коротких вопроса — и мы покажем то, что важно именно вам. Остальное по желанию.',
   },
-  q1: { en: 'Where are you in the journey?', ru: 'На каком этапе пути вы сейчас?' },
-  q2: { en: 'How do you act here?', ru: 'Какая у вас роль?' },
-  q3: { en: 'Anything specific to consider? (optional)', ru: 'Есть что-то особенное? (необязательно)' },
+  q1: { en: 'Where are you right now?', ru: 'Где вы сейчас?' },
+  q2: { en: 'What brings you to Phuket?', ru: 'Что вас связывает с Пхукетом?' },
+  q3: { en: 'Anything we should know? (optional)', ru: 'Что нам стоит знать? (необязательно)' },
   next: { en: 'Continue', ru: 'Дальше' },
-  refine: { en: 'Add details', ru: 'Уточнить детали' },
+  refine: { en: 'Add a few details', ru: 'Добавить детали' },
   back: { en: 'Back', ru: 'Назад' },
-  finish: { en: 'See my recommendations', ru: 'Показать рекомендации' },
-  saving: { en: 'Preparing your map…', ru: 'Готовим карту…' },
-  skip: { en: 'Skip for now', ru: 'Пропустить' },
-  errorPrefix: { en: 'Could not save — please retry:', ru: 'Не удалось сохранить — попробуйте ещё раз:' },
-  flagOffTitle: { en: 'Onboarding coming soon', ru: 'Онбординг скоро' },
+  finish: { en: 'Show what suits me', ru: 'Показать, что мне подходит' },
+  saving: { en: 'Getting things ready…', ru: 'Готовим всё для вас…' },
+  skip: { en: 'Maybe later', ru: 'Позже' },
+  errorPrefix: { en: 'We could not save that. Please try again:', ru: 'Не получилось сохранить. Попробуйте ещё раз:' },
+  flagOffTitle: { en: 'This step is coming soon', ru: 'Этот шаг скоро появится' },
   flagOffBody: {
-    en: 'A canonical version of this guided flow is being prepared.',
-    ru: 'Каноническая версия этого мастера готовится.',
+    en: 'We are still finishing this part. You can start from the home page — everything works there.',
+    ru: 'Мы ещё дорабатываем этот шаг. Начните с главной — там всё уже работает.',
   },
-  goHome: { en: 'Go to home', ru: 'На главную' },
+  goHome: { en: 'Go to the home page', ru: 'На главную' },
 };
+
 
 function StepDots({ step }: { step: number }) {
   return (
