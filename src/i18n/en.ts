@@ -635,7 +635,7 @@ export const en: Record<string, string> = {
   'welcome.footer.linkTerms': 'Terms',
   'welcome.footer.linkSupport': 'Support',
   'welcome.footer.linkContact': 'Contact',
-  'welcome.footer.copyright': '© myUNO · Phuket · Made for life abroad',
+  'welcome.footer.copyright': '© myUNO · Toplight Asia Pacific Co., Ltd., Phuket',
 
   // ─── CRM (MC Boutique Real Estate Advisory) ──────────────────────────
   // Relationship tier (engagement / strategic importance, independent from HNW wealth tier)

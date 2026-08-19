@@ -194,8 +194,8 @@ export default function PrivacyPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   {isRu 
-                    ? 'myUNO Pte. Ltd. серьёзно относится к защите ваших данных. Эта политика соответствует PDPA (Thailand), GDPR (EU) и другим применимым законам.'
-                    : 'myUNO Pte. Ltd. takes your data protection seriously. This policy complies with PDPA (Thailand), GDPR (EU), and other applicable laws.'}
+                    ? 'Toplight Asia Pacific Co., Ltd. серьёзно относится к защите ваших данных. Эта политика соответствует PDPA (Thailand), GDPR (EU) и другим применимым законам.'
+                    : 'Toplight Asia Pacific Co., Ltd. takes your data protection seriously. This policy complies with PDPA (Thailand), GDPR (EU), and other applicable laws.'}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
                   <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-none">PDPA Compliant</span>
@@ -217,7 +217,7 @@ export default function PrivacyPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              <strong>myUNO Pte. Ltd.</strong><br />
+              <strong>Toplight Asia Pacific Co., Ltd.</strong><br />
               {isRu ? 'Адрес: ' : 'Address: '}Thailand / UAE<br />
               {isRu ? 'Email DPO: ' : 'DPO Email: '}dpo@myuno.app<br />
               {isRu ? 'Общие вопросы: ' : 'General inquiries: '}privacy@myuno.app
@@ -442,11 +442,11 @@ export default function PrivacyPage() {
               </p>
             </div>
             <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
-              <p>{isRu ? 'Регистрация: Сингапур | Операции: Таиланд' : 'Incorporated: Singapore | Operations: Thailand'}</p>
+              <p className="font-medium text-foreground mb-1">Toplight Asia Pacific Co., Ltd.</p>
+              <p>{isRu ? '63/202 Moo 2, Koh Kaew, Muang Phuket, Пхукет 83000, Таиланд' : '63/202 Moo 2, Koh Kaew, Muang Phuket, Phuket 83000, Thailand'}</p><p>+66 95 424 3332 · pavel@myuno.app</p>
               <p className="mt-1">{isRu 
-                ? 'Надзорный орган: PDPC (Сингапур), PDPA (Таиланд), соответствующий DPA для ЕС.'
-                : 'Supervisory authority: PDPC (Singapore), PDPA (Thailand), respective DPA for EU.'}</p>
+                ? 'Надзорный орган: PDPC (Таиланд, PDPA), соответствующий DPA для ЕС.'
+                : 'Supervisory authority: PDPC (Thailand, PDPA), respective DPA for EU.'}</p>
             </div>
           </CardContent>
         </Card>

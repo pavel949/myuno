@@ -635,7 +635,7 @@ export const ru: Record<string, string> = {
   'welcome.footer.linkTerms': 'Условия',
   'welcome.footer.linkSupport': 'Поддержка',
   'welcome.footer.linkContact': 'Контакты',
-  'welcome.footer.copyright': '© myUNO · Phuket · Для жизни и дел за рубежом',
+  'welcome.footer.copyright': '© myUNO · Toplight Asia Pacific Co., Ltd., Пхукет',
 
   // ─── CRM (MC Boutique Real Estate Advisory) ──────────────────────────
   // Уровень отношений (вовлечённость, независимо от HNW)

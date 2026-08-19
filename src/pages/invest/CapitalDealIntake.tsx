@@ -66,8 +66,8 @@ export default function CapitalDealIntake() {
               </h2>
               <p className="text-[12.5px] text-muted-foreground mt-1 leading-snug">
                 {isRu
-                  ? 'Оператор сделки — myUNO Pte. Ltd. Все ставки и сроки публичны и зафиксированы в реестре настроек платформы.'
-                  : 'Service operator — myUNO Pte. Ltd. All rates and timeframes are public and stored in the platform settings registry.'}
+                  ? 'Оператор сделки — Toplight Asia Pacific Co., Ltd. Все ставки и сроки публичны и зафиксированы в реестре настроек платформы.'
+                  : 'Service operator — Toplight Asia Pacific Co., Ltd. All rates and timeframes are public and stored in the platform settings registry.'}
               </p>
             </div>
           </div>

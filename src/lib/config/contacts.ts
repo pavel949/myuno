@@ -50,9 +50,19 @@ export const COMPANY_CONTACTS = {
     mapLink: 'https://maps.google.com/?q=7.8432,98.3424',
   },
   legal: {
-    companyName: 'UNO Platform Co., Ltd.',
-    taxId: '0835564001234',
+    /** Copyright holder / operating legal entity of the platform */
+    companyName: 'Toplight Asia Pacific Co., Ltd.',
+    companyNameTh: 'บริษัท ท๊อปไลท์ เอเชีย แปซิฟิค จำกัด',
     registrationCountry: 'Thailand',
+    city: 'Phuket',
+    addressEn: '63/202 Moo 2, Koh Kaew, Muang Phuket, Phuket 83000, Thailand',
+    addressRu: '63/202 Moo 2, Koh Kaew, Muang Phuket, Пхукет 83000, Таиланд',
+    addressTh: '63/202 หมู่ที่ 2 ตำบลเกาะแก้ว อำเภอเมืองภูเก็ต จังหวัดภูเก็ต 83000',
+    contactPerson: 'Pavel Ignatev',
+    contactPersonTh: 'นายพาเวล อิกินาทีฟ',
+    phone: '+66 95 424 3332',
+    phoneRaw: '+66954243332',
+    email: 'pavel@myuno.app',
   },
   workingHours: {
     office: '09:00 - 18:00',
