@@ -13,12 +13,12 @@ interface SEOHeadProps {
 
 const defaultMeta = {
   en: {
-    title: 'myUNO - All Services in One',
-    description: 'Your life abroad, simplified. Book transport, tours, restaurants, beauty services, and more in one app.',
+    title: 'myUNO — Phuket Super-App for Foreigners',
+    description: 'myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.',
   },
   ru: {
-    title: 'myUNO - Все услуги в одном приложении',
-    description: 'Ваша жизнь за рубежом стала проще. Бронируйте транспорт, туры, рестораны, салоны красоты и многое другое.',
+    title: 'myUNO — Phuket Super-App for Foreigners',
+    description: 'myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.',
   },
 };
 
