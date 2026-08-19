@@ -130,12 +130,12 @@ const IndexLegacy: React.FC = () => {
           >
             <span>
               <span className="block text-[15px] font-semibold tracking-tight text-foreground">
-                {isRu ? 'Все приложения' : 'All apps'}
+                {isRu ? 'Все услуги и приложения' : 'All services and apps'}
               </span>
               <span className="block text-[12px] text-muted-foreground mt-0.5">
                 {isRu
-                  ? `${TOTAL_CLUSTERS} кластеров · ${TOTAL_SERVICES} сервисов`
-                  : `${TOTAL_CLUSTERS} clusters · ${TOTAL_SERVICES} services`}
+                  ? `Жильё, визы, врач, транспорт и ещё ${Math.max(TOTAL_SERVICES - 4, 0)} сервисов`
+                  : `Housing, visas, doctors, transport and ${Math.max(TOTAL_SERVICES - 4, 0)} more services`}
               </span>
             </span>
             <ArrowRight className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
