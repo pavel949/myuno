@@ -11,11 +11,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { ChevronRight } from 'lucide-react';
 
 const ROLE_LABELS: Record<string, { en: string; ru: string; color: string }> = {
-  user: { en: 'Buyer', ru: 'Покупатель', color: 'bg-info/15 text-info' },
-  owner: { en: 'Property Owner', ru: 'Собственник', color: 'bg-accent-teal/15 text-accent-teal' },
-  vendor: { en: 'Provider', ru: 'Поставщик', color: 'bg-accent-purple/15 text-accent-purple' },
-  admin: { en: 'Admin', ru: 'Админ', color: 'bg-destructive/15 text-destructive' },
-  uno_team: { en: 'Team', ru: 'Команда', color: 'bg-success/15 text-success' },
+  user: { en: 'Client', ru: 'Клиент', color: 'bg-info/15 text-info' },
+  owner: { en: 'Property owner', ru: 'Владелец жилья', color: 'bg-accent-teal/15 text-accent-teal' },
+  vendor: { en: 'Service provider', ru: 'Исполнитель услуг', color: 'bg-accent-purple/15 text-accent-purple' },
+  admin: { en: 'Administrator', ru: 'Администратор', color: 'bg-destructive/15 text-destructive' },
+  uno_team: { en: 'myUNO team', ru: 'Команда myUNO', color: 'bg-success/15 text-success' },
 };
 
 export function AccountProfileCard() {
