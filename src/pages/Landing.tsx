@@ -67,59 +67,59 @@ const tx = (lang: Lang, v: Bi): string => {
 /* ──────────────────────────────────────────────────────────────────── */
 
 const TRUST_SIGNALS: { icon: LucideIcon; text: Bi }[] = [
-  { icon: ShieldCheck, text: { ru: 'Проверенные исполнители', en: 'Verified providers', th: 'ผู้ให้บริการที่ตรวจสอบแล้ว' } },
-  { icon: Languages, text: { ru: 'Поддержка RU · EN · TH', en: 'RU · EN · TH support', th: 'รองรับ RU · EN · TH' } },
-  { icon: Wallet, text: { ru: 'Защищённые платежи', en: 'Protected payments', th: 'การชำระเงินที่ปลอดภัย' } },
-  { icon: Headphones, text: { ru: 'Контроль консьержа', en: 'Concierge oversight', th: 'การกำกับดูแลโดยคอนเซียร์จ' } },
+  { icon: ShieldCheck, text: { ru: 'Мы проверяем каждого специалиста', en: 'Every specialist is checked', th: 'ผู้ให้บริการที่ตรวจสอบแล้ว' } },
+  { icon: Languages, text: { ru: 'Говорим по-русски, английски и тайски', en: 'We speak Russian, English and Thai', th: 'รองรับ RU · EN · TH' } },
+  { icon: Wallet, text: { ru: 'Ваши деньги под защитой', en: 'Your money stays protected', th: 'การชำระเงินที่ปลอดภัย' } },
+  { icon: Headphones, text: { ru: 'С вами всегда живой человек', en: 'A real person stays with you', th: 'การกำกับดูแลโดยคอนเซียร์จ' } },
 ];
 
 const TRUST_FACTS: { icon: LucideIcon; title: Bi; body: Bi }[] = [
   {
     icon: ShieldCheck,
-    title: { ru: 'Верификация исполнителей', en: 'Provider verification' },
+    title: { ru: 'Мы знаем, кого вам предлагаем', en: 'We know who we send you' },
     body: {
-      ru: 'KYC и проверка документов до того, как заявка дойдёт до клиента. Тайское юрлицо, отзывы и история работ привязаны к профилю.',
-      en: 'KYC and document checks before any request reaches a client. Thai-registered entity, reviews and work history bound to the profile.',
+      ru: 'Проверяем документы и лицензии до того, как знакомим вас со специалистом. У каждого — тайская компания, отзывы и история выполненных работ.',
+      en: 'We check documents and licences before we introduce anyone. Each specialist has a registered Thai company, reviews and a track record you can see.',
     },
   },
   {
     icon: ClipboardCheck,
-    title: { ru: 'Структурированная координация', en: 'Structured coordination' },
+    title: { ru: 'Ничего не потеряется', en: 'Nothing gets lost' },
     body: {
-      ru: 'Каждая заявка ведётся в системе: статус, переписка, документы, оплаты. Ничего не теряется между мессенджерами.',
-      en: 'Every request runs in one system: status, correspondence, documents, payments. Nothing slips between messaging apps.',
+      ru: 'Ваша задача живёт в одном месте: статус, переписка, документы и оплаты. Не нужно искать сообщение в трёх мессенджерах.',
+      en: 'Your request lives in one place: status, messages, documents and payments. No more hunting for a message across three apps.',
     },
   },
   {
     icon: FileCheck2,
-    title: { ru: 'Прозрачность условий', en: 'Transparent terms' },
+    title: { ru: 'Вы всё знаете заранее', en: 'You know everything upfront' },
     body: {
-      ru: 'Стоимость, сроки и ответственность фиксируются до начала работы. Аудит-метка на каждой транзакции.',
-      en: 'Price, timeline and responsibility are fixed before work begins. Audit marker on every transaction.',
+      ru: 'Цену, сроки и то, кто за что отвечает, мы согласуем до начала работы. Каждая оплата остаётся в вашей истории.',
+      en: 'We agree the price, the timing and who is responsible before work starts. Every payment stays in your history.',
     },
   },
   {
     icon: Languages,
-    title: { ru: 'Три рабочих языка', en: 'Three working languages' },
+    title: { ru: 'На вашем языке', en: 'In your own language' },
     body: {
-      ru: 'Заявка, документы и поддержка — на русском, английском или тайском. Перевод и сверку условий ведёт консьерж.',
-      en: 'Requests, documents and support work in Russian, English or Thai. The concierge handles translation and term verification.',
+      ru: 'Заявка, документы и поддержка — по-русски, по-английски или по-тайски. Мы переводим и объясняем условия простыми словами.',
+      en: 'Requests, documents and support in Russian, English or Thai. We translate and explain the terms in plain words.',
     },
   },
   {
     icon: Database,
-    title: { ru: 'Ответственность платформы', en: 'Platform accountability' },
+    title: { ru: 'Мы отвечаем за результат', en: 'We take responsibility' },
     body: {
-      ru: 'Одна точка входа. Спор решает myUNO; оплата удерживается до подтверждения исполнения.',
-      en: 'One entry point. Disputes are resolved by myUNO; payment is held until delivery is confirmed.',
+      ru: 'Если что-то пойдёт не так, разбираться будем мы, а не вы. Оплата специалисту уходит только после того, как работа сделана.',
+      en: 'If something goes wrong, we sort it out — not you. The specialist is paid only after the work is done.',
     },
   },
   {
     icon: Wallet,
-    title: { ru: 'Открытые цены', en: 'Open pricing' },
+    title: { ru: 'Честные цены', en: 'Honest prices' },
     body: {
-      ru: 'Цены и комиссии видны до подтверждения. Без скрытых платежей и переводов на личные счета.',
-      en: 'Prices and fees are visible before confirmation. No hidden charges, no payments to personal accounts.',
+      ru: 'Вы видите стоимость и наш процент до подтверждения. Никаких скрытых доплат и переводов на личные счета.',
+      en: 'You see the price and our fee before you confirm. No hidden add-ons, no transfers to personal accounts.',
     },
   },
 ];
@@ -129,24 +129,24 @@ const CONCIERGE_STEPS: { num: string; title: Bi; body: Bi }[] = [
     num: '01',
     title: { ru: 'Расскажите, что нужно', en: 'Tell us what you need', th: 'บอกเราว่าคุณต้องการอะไร' },
     body: {
-      ru: 'Короткая форма: ситуация, сроки, язык, удобный способ связи. Заявка попадает дежурному консьержу.',
-      en: 'A short form: situation, timeline, language, preferred channel. The request goes to the duty concierge.',
+      ru: 'Короткая форма: что случилось, к какому сроку и как с вами связаться. Можно писать своими словами — мы разберёмся.',
+      en: 'A short form: what you need, by when, and how to reach you. Write it in your own words — we will figure out the rest.',
     },
   },
   {
     num: '02',
-    title: { ru: 'Подбираем проверенного исполнителя', en: 'We coordinate the right verified provider', th: 'เราจัดหาผู้ให้บริการที่ตรวจสอบแล้ว' },
+    title: { ru: 'Мы находим нужного специалиста', en: 'We find the right specialist', th: 'เราจัดหาผู้ให้บริการที่ตรวจสอบแล้ว' },
     body: {
-      ru: 'Сверяем требования, выбираем исполнителя из реестра myUNO, фиксируем стоимость и сроки. Прямые контакты не показываем.',
-      en: 'We match requirements, pick a provider from the myUNO registry, lock price and timeline. Direct contacts are not exposed.',
+      ru: 'Уточняем детали, выбираем проверенного человека под вашу задачу и заранее согласуем цену и сроки.',
+      en: 'We check the details, choose a verified person for your task, and agree the price and timing with you first.',
     },
   },
   {
     num: '03',
-    title: { ru: 'Сопровождаем до результата', en: 'We stay involved through delivery', th: 'เราดูแลจนกระทั่งงานเสร็จสมบูรณ์' },
+    title: { ru: 'Остаёмся с вами до конца', en: 'We stay with you to the end', th: 'เราดูแลจนกระทั่งงานเสร็จสมบูรณ์' },
     body: {
-      ru: 'Перевод, оплата с защитой, контроль этапов и follow-up после закрытия. Спор решает платформа.',
-      en: 'Translation, protected payment, milestone oversight and follow-up after closing. Disputes resolved by the platform.',
+      ru: 'Переводим, следим за этапами, держим оплату до результата и уточняем потом, всё ли в порядке.',
+      en: 'We translate, follow each step, hold the payment until the job is done, and check in afterwards.',
     },
   },
 ];
@@ -154,112 +154,113 @@ const CONCIERGE_STEPS: { num: string; title: Bi; body: Bi }[] = [
 const USE_CASES: { icon: LucideIcon; title: Bi; body: Bi }[] = [
   {
     icon: Home,
-    title: { ru: 'Жильё и долгосрочная аренда', en: 'Housing and long-term rental' },
+    title: { ru: 'Жильё и долгая аренда', en: 'Housing and long-term rent' },
     body: {
-      ru: 'Подбор объекта, проверка договора, депозит, въезд. Без посредников, исчезающих после оплаты.',
-      en: 'Property search, contract review, deposit, move-in. Without intermediaries who vanish after payment.',
+      ru: 'Поможем найти дом, прочитаем договор, объясним про депозит и будем рядом до того дня, когда вы получите ключи.',
+      en: 'We help you find a home, read the contract with you, explain the deposit, and stay until you have the keys.',
     },
   },
   {
     icon: Scale,
-    title: { ru: 'Визы, налоги, регистрация бизнеса', en: 'Visa, tax and company setup' },
+    title: { ru: 'Визы, налоги и своя компания', en: 'Visas, taxes and your company' },
     body: {
-      ru: 'Сопровождение тайскими юристами и бухгалтерами под контролем платформы. Сроки и ответственность фиксированы.',
-      en: 'Thai lawyers and accountants working under platform oversight. Timelines and accountability are fixed.',
+      ru: 'С вами работают тайские юристы и бухгалтеры, а мы следим за сроками и объясняем каждый шаг по-человечески.',
+      en: 'Thai lawyers and accountants do the work, while we watch the deadlines and explain each step in plain language.',
     },
   },
   {
     icon: Stethoscope,
-    title: { ru: 'Медицина и срочная помощь', en: 'Medical and urgent assistance' },
+    title: { ru: 'Врач и срочная помощь', en: 'A doctor and urgent help' },
     body: {
-      ru: 'Координация с больницей, страховой и переводчиком в стрессовый момент. На вашем языке, круглосуточно.',
-      en: 'Coordination with the hospital, insurer and interpreter at the moment of stress. In your language, 24/7.',
+      ru: 'Свяжемся с больницей и страховой, найдём переводчика и останемся на линии, пока всё не решится. В любое время.',
+      en: 'We call the hospital and your insurer, bring an interpreter, and stay on the line until it is sorted. Any time of day.',
     },
   },
   {
     icon: KeyRound,
-    title: { ru: 'Удалённое управление недвижимостью', en: 'Remote property management' },
+    title: { ru: 'Ваш дом, пока вы далеко', en: 'Your home while you are away' },
     body: {
-      ru: 'Когда вы за границей, а в доме нужны уборка, ремонт, гости, отчёт по доходам — без чата в трёх мессенджерах.',
-      en: 'When you are abroad and the home needs cleaning, repairs, guests and an owner statement — without three messenger threads.',
+      ru: 'Уборка, ремонт, гости и понятный отчёт о доходах — вы получаете спокойствие, а не переписку в трёх чатах.',
+      en: 'Cleaning, repairs, guests and a clear income report — you get calm, not three group chats to follow.',
     },
   },
   {
     icon: Briefcase,
-    title: { ru: 'Сложные локальные согласования', en: 'Sensitive local coordination' },
+    title: { ru: 'Разговоры с банками и ведомствами', en: 'Dealing with banks and offices' },
     body: {
-      ru: 'Государственные органы, банки, страховые. Когда цена ошибки или языкового недопонимания высока.',
-      en: 'Government bodies, banks, insurers. When the cost of a mistake or a language gap is high.',
+      ru: 'Госорганы, банки, страховые. Там, где ошибка или недопонимание дороги, лучше идти вместе с нами.',
+      en: 'Government offices, banks, insurers. Where a mistake or a language gap costs a lot, it helps to go together.',
     },
   },
 ];
 
 const SAFER_CHAOS: Bi[] = [
-  { ru: 'Случайные контакты из чатов', en: 'Random contacts from chat groups' },
-  { ru: 'Языковые барьеры и недомолвки', en: 'Language barriers and unspoken terms' },
-  { ru: 'Непонятно, с кого спросить за результат', en: 'Unclear who is accountable for the result' },
-  { ru: 'Переписка размазана по мессенджерам', en: 'Conversations spread across messengers' },
-  { ru: 'Оплата на личные счета без защиты', en: 'Payments to personal accounts, no protection' },
+  { ru: 'Незнакомый номер из чата в Телеграме', en: 'An unknown number from a chat group' },
+  { ru: 'Договор на языке, который вы не читаете', en: 'A contract in a language you cannot read' },
+  { ru: 'Непонятно, кто отвечает, если что-то не так', en: 'No one clearly responsible if it goes wrong' },
+  { ru: 'Переписка разбросана по мессенджерам', en: 'Conversations scattered across apps' },
+  { ru: 'Перевод на личный счёт — и надежда на лучшее', en: 'A transfer to a personal account, and hope' },
 ];
 
 const SAFER_MYUNO: Bi[] = [
-  { ru: 'Одна проверенная точка входа', en: 'A single trusted entry point' },
-  { ru: 'Поддержка RU · EN · TH в одной заявке', en: 'RU · EN · TH support in one request' },
-  { ru: 'Координацию ведёт консьерж', en: 'A concierge owns the coordination' },
-  { ru: 'История, документы и оплаты в одном месте', en: 'History, documents and payments in one place' },
-  { ru: 'Платёж удерживается до результата', en: 'Payment is held until delivery' },
+  { ru: 'Одно место, где вам помогут с любым вопросом', en: 'One place that helps with anything' },
+  { ru: 'Всё объясним по-русски, английски или тайски', en: 'Everything explained in your language' },
+  { ru: 'Ваш консьерж ведёт задачу и держит вас в курсе', en: 'Your concierge keeps you informed' },
+  { ru: 'История, документы и оплаты всегда под рукой', en: 'History, documents and payments in one place' },
+  { ru: 'Деньги уходят только после результата', en: 'Money is released only after the job is done' },
 ];
 
 const EMERGENCY_ITEMS: { icon: LucideIcon; text: Bi }[] = [
-  { icon: HeartPulse, text: { ru: 'Медицинская помощь и госпитализация', en: 'Medical assistance and hospitalisation' } },
-  { icon: CarFront, text: { ru: 'ДТП и оформление страхового случая', en: 'Road accident and insurance claim' } },
-  { icon: FileWarning, text: { ru: 'Потеря документов и связь с консульством', en: 'Lost documents and consulate liaison' } },
-  { icon: Gavel, text: { ru: 'Срочный юрист и правовая защита', en: 'Urgent lawyer and legal protection' } },
-  { icon: LifeBuoy, text: { ru: 'Эвакуация и сопровождение в больнице', en: 'Evacuation and in-hospital support' } },
+  { icon: HeartPulse, text: { ru: 'Врач, скорая и госпитализация', en: 'A doctor, an ambulance, a hospital stay' } },
+  { icon: CarFront, text: { ru: 'ДТП и оформление страховки', en: 'A road accident and the insurance claim' } },
+  { icon: FileWarning, text: { ru: 'Потеряли документы — свяжемся с консульством', en: 'Lost documents — we contact your consulate' } },
+  { icon: Gavel, text: { ru: 'Срочно нужен юрист', en: 'You urgently need a lawyer' } },
+  { icon: LifeBuoy, text: { ru: 'Перевозка и человек рядом в больнице', en: 'Transport and someone beside you in hospital' } },
 ];
 
 const AUDIENCES: { icon: LucideIcon; title: Bi; body: Bi }[] = [
   {
     icon: Plane,
-    title: { ru: 'Гости и туристы', en: 'Tourists & guests' },
+    title: { ru: 'Гостям и туристам', en: 'Tourists and guests' },
     body: {
-      ru: 'Трансфер, SIM, страховка, врач на родном языке, безопасная координация на время поездки.',
-      en: 'Transfer, SIM, insurance, a doctor in your language, safe coordination throughout the stay.',
+      ru: 'Встреча в аэропорту, SIM-карта, страховка, врач на вашем языке — чтобы поездка прошла спокойно.',
+      en: 'Airport pickup, a SIM card, insurance, a doctor in your language — so the trip stays calm.',
     },
   },
   {
     icon: Home,
-    title: { ru: 'Резиденты и экспаты', en: 'Residents & expats' },
+    title: { ru: 'Тем, кто живёт здесь', en: 'Residents and expats' },
     body: {
-      ru: 'Жильё, дети, медицина, банк, бытовые сервисы — без поиска новых исполнителей каждый месяц.',
-      en: 'Housing, children, medicine, banking, daily services — without re-sourcing providers every month.',
+      ru: 'Жильё, школа для ребёнка, врач, банк, бытовые дела — без поиска новых мастеров каждый месяц.',
+      en: 'Housing, schools, doctors, banking, everyday tasks — without finding new people every month.',
     },
   },
   {
     icon: TrendingUp,
-    title: { ru: 'Инвесторы', en: 'Investors' },
+    title: { ru: 'Инвесторам', en: 'Investors' },
     body: {
-      ru: 'Подбор сделок, due diligence, независимый рейтинг ClearView, сопровождение и выход.',
-      en: 'Deal sourcing, due diligence, ClearView independent ratings, end-to-end support and exit.',
+      ru: 'Подберём объекты, проверим их, покажем независимую оценку ClearView и будем рядом до продажи.',
+      en: 'We source deals, check them carefully, share the independent ClearView rating, and stay through the exit.',
     },
   },
   {
     icon: KeyRound,
-    title: { ru: 'Собственники недвижимости', en: 'Property owners' },
+    title: { ru: 'Владельцам недвижимости', en: 'Property owners' },
     body: {
-      ru: 'Управление объектом из любой страны: бронирования, обслуживание, отчёты, налоги.',
-      en: 'Manage your property from anywhere: bookings, maintenance, owner reports, taxes.',
+      ru: 'Управляем вашим объектом из любой точки мира: гости, обслуживание, понятные отчёты и налоги.',
+      en: 'We look after your property from anywhere: guests, maintenance, clear reports and taxes.',
     },
   },
   {
     icon: Briefcase,
-    title: { ru: 'Основатели и профессионалы', en: 'Founders & professionals' },
+    title: { ru: 'Предпринимателям', en: 'Founders and professionals' },
     body: {
-      ru: 'Регистрация компании, визы команды, бухгалтерия, помещение, юридическое сопровождение.',
-      en: 'Company registration, team visas, accounting, premises, legal support.',
+      ru: 'Откроем компанию, оформим визы команде, наладим бухгалтерию, найдём офис и юриста.',
+      en: 'We register your company, arrange team visas, set up accounting, and find an office and a lawyer.',
     },
   },
 ];
+
 
 /* ──────────────────────────────────────────────────────────────────── */
 /*  Page                                                                 */
