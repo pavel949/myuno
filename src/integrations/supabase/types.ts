@@ -33453,6 +33453,19 @@ export type Database = {
         }
         Returns: Json
       }
+      create_partner_onboarding: {
+        Args: {
+          p_business_category: string
+          p_business_name: string
+          p_contact_name?: string
+          p_email?: string
+          p_language?: string
+          p_phone?: string
+          p_user_id: string
+          p_verticals?: string[]
+        }
+        Returns: Json
+      }
       credit_cashback: { Args: { p_order_id: string }; Returns: Json }
       delete_email: {
         Args: { message_id: number; queue_name: string }
