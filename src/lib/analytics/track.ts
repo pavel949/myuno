@@ -109,6 +109,8 @@ export interface SituationClickContext {
   role?: string;
   /** Service count badge value, if shown. */
   count?: number;
+  /** Visual variant of the row that was clicked ('compact' | 'prominent'). */
+  variant?: string;
 }
 
 export function trackSituationClick(
@@ -120,3 +122,29 @@ export function trackSituationClick(
     ...ctx,
   });
 }
+
+export interface SituationImpressionContext {
+  /** Where the list is rendered, e.g. 'navigator_v3_for_you', 'cluster_section'. */
+  source: string;
+  /** Visual variant of the row list ('compact' | 'prominent'). */
+  variant?: string;
+  /** Master Taxonomy cluster id, if the list belongs to one. */
+  cluster?: string;
+}
+
+/**
+ * One event per visible situation list — codes are sent as a batch so a screen
+ * with six sections produces six rows, not sixty.
+ */
+export function trackSituationImpression(
+  situationCodes: readonly string[],
+  ctx: SituationImpressionContext,
+): void {
+  if (situationCodes.length === 0) return;
+  trackEvent('situation_impression', {
+    situation_codes: [...situationCodes],
+    count: situationCodes.length,
+    ...ctx,
+  });
+}
+
