@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { hexTint, accentColor } from '@/lib/ui/colorTint';
 import { formatServices } from '@/lib/i18n/pluralize';
-import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
+import { buildSituationListUrl } from '@/lib/navigation/situationUrls';
 import { useSituationTracking } from './useSituationTracking';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
@@ -44,7 +44,7 @@ export function SituationCard({
   const color = situation.color ?? null;
   const tint = hexTint(color, 0.125);
   const iconColor = accentColor(color);
-  const href = resolveSituationHref(situation.code);
+  const href = buildSituationListUrl(situation.code);
 
   const countLabel =
     typeof serviceCount === 'number' && serviceCount > 0
