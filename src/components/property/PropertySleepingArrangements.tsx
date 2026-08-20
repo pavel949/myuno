@@ -67,8 +67,9 @@ export function PropertySleepingArrangements({ rooms }: PropertySleepingArrangem
                 .map((bed) => {
                   const raw = Number(bed.count);
                   const count = Number.isFinite(raw) && raw > 0 ? raw : 1;
-                  const label =
+                  const base =
                     BED_LABELS[bed.type as BedType]?.[locale] ?? String(bed.type ?? '').replace(/_/g, ' ');
+                  const label = locale === 'en' && count > 1 ? `${base}s` : base;
                   return label ? `${count} ${label}` : String(count);
                 })
                 .join(', ')}
