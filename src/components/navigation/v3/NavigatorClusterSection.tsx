@@ -7,8 +7,6 @@
  * single question: "what should I do here?".
  */
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   CLUSTERS,
@@ -19,10 +17,10 @@ import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLifeOSRole } from '@/hooks/useLifeOS';
 import { rankServices } from '@/lib/superapp/rankServices';
 import { MiniAppCard } from '@/components/superapp/MiniAppCard';
-import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
-import { trackSituationClick } from '@/lib/analytics/track';
-import { formatServices, formatSituations } from '@/lib/i18n/pluralize';
+import { formatSituations } from '@/lib/i18n/pluralize';
+import { SituationList } from './SituationList';
 import type { LifeSituation } from '@/hooks/useLifeOS';
+
 
 interface NavigatorClusterSectionProps {
   clusterId: ClusterId;
@@ -104,47 +102,14 @@ function NavigatorClusterSectionImpl({
         </div>
       )}
 
-      <ul className="divide-y divide-border">
-        {situations.map((s) => {
-          const title = isRu ? s.title_ru : s.title_en;
-          const desc = isRu ? s.description_ru : s.description_en;
-          const count = counts?.[s.id];
-          const href = resolveSituationHref(s.code);
-          return (
-            <li key={s.id}>
-              <Link
-                to={href}
-                onClick={() => trackSituationClick(s.code, {
-                  source: 'cluster_section',
-                  cluster: clusterId,
-                  href,
-                  count,
-                })}
-                className="group flex items-center gap-4 py-4 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[56px]"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="text-[15px] font-medium text-foreground leading-tight">
-                    {title}
-                  </div>
-                  {desc && (
-                    <div className="mt-0.5 text-[12.5px] text-muted-foreground leading-snug line-clamp-1">
-                      {desc}
-                    </div>
-                  )}
-                </div>
-                <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
-                  {typeof count === 'number' && count > 0 ? formatServices(count, language) : t('discover.open')}
-                </span>
-                <ArrowRight
-                  aria-hidden="true"
-                  className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors"
-                  strokeWidth={1.75}
-                />
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      <SituationList
+        situations={situations}
+        counts={counts}
+        source="cluster_section"
+        trackContext={{ cluster: clusterId }}
+        variant="compact"
+      />
+
     </section>
   );
 }

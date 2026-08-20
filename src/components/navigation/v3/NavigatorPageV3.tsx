@@ -9,7 +9,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Search, SlidersHorizontal, X, ArrowRight, ChevronDown } from 'lucide-react';
+import { MapPin, Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLifeSituations, useLifeOSRole, type LifeOSRole } from '@/hooks/useLifeOS';
@@ -21,19 +21,19 @@ import { RoleSheet } from '@/components/home/RoleSheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
-import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
-import { trackSituationClick } from '@/lib/analytics/track';
-import { formatServices } from '@/lib/i18n/pluralize';
+import { buildSituationSections } from '@/lib/navigation/situationSections';
 import { getWhatsAppUrl } from '@/lib/config/contacts';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { NavigatorClusterSection } from './NavigatorClusterSection';
+import { SituationList } from './SituationList';
 import { PersonalGrid, PERSONAL_GRID_DEFAULT_LIMIT, usePersonalGridServiceIds } from '@/components/superapp/PersonalGrid';
-import type { LifeSituation } from '@/hooks/useLifeOS';
 
 const errorLog = createErrorHandler('NavigatorPageV3');
 
 const CLUSTER_ORDER: ClusterId[] = ['arrive', 'live', 'legal', 'manage', 'invest', 'build'];
 const MAX_VISIBLE_CLUSTERS = 3;
+const FOR_YOU_LIMIT = 3;
+
 
 /** Which clusters each LifeOSRole sees, in order (first = default emphasis). */
 const ROLE_VISIBLE_CLUSTERS: Record<LifeOSRole, ClusterId[]> = {
@@ -116,18 +116,6 @@ export default function NavigatorPageV3() {
     });
   }, [rankedSituations, query]);
 
-  // Group situations by primary cluster
-  const grouped = useMemo(() => {
-    const buckets: Record<ClusterId, LifeSituation[]> = {
-      arrive: [], live: [], manage: [], invest: [], legal: [], build: [],
-    };
-    for (const s of filteredSituations) {
-      const cid = SITUATION_CLUSTER_MAP[s.code] ?? 'live';
-      buckets[cid].push(s);
-    }
-    return buckets;
-  }, [filteredSituations]);
-
   // code -> {ru,en} label map for MiniAppCard hint resolution
   const situationLabels = useMemo(() => {
     const m: Record<string, { ru: string; en: string }> = {};
@@ -137,46 +125,41 @@ export default function NavigatorPageV3() {
     return m;
   }, [situations]);
 
-  // Role-gated cluster order — show at most 3 primary clusters, rest collapsible
   const roleClusters = ROLE_VISIBLE_CLUSTERS[role];
   const hiddenClusters = ROLE_HIDDEN_CLUSTERS[role];
-  const visibleClusters = useMemo(() => {
-    const hidden = new Set(hiddenClusters);
-    const rolePrimary = roleClusters.filter(
-      (cid) => !hidden.has(cid) && grouped[cid].length > 0,
-    );
-    const other = CLUSTER_ORDER.filter(
-      (cid) =>
-        !hidden.has(cid) &&
-        !rolePrimary.includes(cid) &&
-        grouped[cid].length > 0,
-    );
-    const primary = rolePrimary.slice(0, MAX_VISIBLE_CLUSTERS);
-    const overflowRole = rolePrimary.slice(MAX_VISIBLE_CLUSTERS);
-    const rest = [...overflowRole, ...other];
-    return { primary, rest };
-  }, [roleClusters, hiddenClusters, grouped]);
-
-  // Top-3 "For you" — first 3 ranked situations matching a visible cluster
-  const forYou = useMemo(() => {
-    const allowed = new Set([...visibleClusters.primary, ...visibleClusters.rest]);
-    return filteredSituations
-      .filter((s) => allowed.has(SITUATION_CLUSTER_MAP[s.code] ?? 'live'))
-      .slice(0, 3);
-  }, [filteredSituations, visibleClusters]);
 
   /**
-   * Situations already shown in "For you" must not repeat inside the cluster
-   * lists below — otherwise Arrival/Emergency/Tourist appear twice.
+   * Single source of truth for the whole surface: "For you" claims its rows
+   * first, cluster buckets get what is left. Nothing can appear twice.
    */
+  const sections = useMemo(
+    () =>
+      buildSituationSections({
+        situations: filteredSituations,
+        clusterOf: (s) => SITUATION_CLUSTER_MAP[s.code] ?? 'live',
+        allowedClusters: CLUSTER_ORDER.filter((cid) => !hiddenClusters.includes(cid)),
+        featuredLimit: FOR_YOU_LIMIT,
+        flat: Boolean(query),
+      }),
+    [filteredSituations, hiddenClusters, query],
+  );
+
+  const forYou = sections.featured;
+
+  // Role-gated cluster order — show at most 3 primary clusters, rest collapsible
+  const visibleClusters = useMemo(() => {
+    const withContent = sections.clustersWithContent;
+    const rolePrimary = roleClusters.filter((cid) => withContent.includes(cid));
+    const other = withContent.filter((cid) => !rolePrimary.includes(cid));
+    return {
+      primary: rolePrimary.slice(0, MAX_VISIBLE_CLUSTERS),
+      rest: [...rolePrimary.slice(MAX_VISIBLE_CLUSTERS), ...other],
+    };
+  }, [roleClusters, sections]);
+
+  /** Service ids already rendered in the page-level "For you" grid. */
   const personalGridServiceIds = usePersonalGridServiceIds(PERSONAL_GRID_DEFAULT_LIMIT);
 
-  const forYouIds = useMemo(() => new Set(forYou.map((s) => s.id)), [forYou]);
-  const sectionSituations = React.useCallback(
-    (cid: ClusterId) =>
-      query ? grouped[cid] : grouped[cid].filter((s) => !forYouIds.has(s.id)),
-    [grouped, forYouIds, query],
-  );
 
   const hasRealPersonas = personas.length > 0;
 
@@ -298,46 +281,13 @@ export default function NavigatorPageV3() {
                 {forYou.length}
               </span>
             </header>
-            <ul className="divide-y divide-border">
-              {forYou.map((s) => {
-                const title = isRu ? s.title_ru : s.title_en;
-                const desc = isRu ? s.description_ru : s.description_en;
-                const c = counts?.[s.id];
-                const href = resolveSituationHref(s.code);
-                return (
-                  <li key={s.id}>
-                    <Link
-                      to={href}
-                      onClick={() => trackSituationClick(s.code, {
-                        source: 'navigator_v3_for_you',
-                        href,
-                        count: c,
-                      })}
-                      className="group flex items-center gap-4 py-5 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[64px]"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[17px] font-semibold text-foreground leading-tight tracking-[-0.005em]">
-                          {title}
-                        </div>
-                        {desc && (
-                          <div className="mt-1 text-[13px] text-muted-foreground leading-snug line-clamp-2">
-                            {desc}
-                          </div>
-                        )}
-                      </div>
-                      <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
-                        {typeof c === 'number' && c > 0 ? formatServices(c, language) : t('discover.open')}
-                      </span>
-                      <ArrowRight
-                        aria-hidden="true"
-                        className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors"
-                        strokeWidth={1.75}
-                      />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <SituationList
+              situations={forYou}
+              counts={counts}
+              source="navigator_v3_for_you"
+              variant="prominent"
+            />
+
           </section>
         )}
 
@@ -348,7 +298,8 @@ export default function NavigatorPageV3() {
               <NavigatorClusterSection
                 key={cid}
                 clusterId={cid}
-                situations={sectionSituations(cid)}
+                situations={sections.byCluster[cid]}
+
                 counts={counts}
                 situationLabels={situationLabels}
                 excludeServiceIds={personalGridServiceIds}
@@ -378,7 +329,7 @@ export default function NavigatorPageV3() {
                   <NavigatorClusterSection
                     key={cid}
                     clusterId={cid}
-                    situations={sectionSituations(cid)}
+                    situations={sections.byCluster[cid]}
                     counts={counts}
                     hideAppGrid
                     situationLabels={situationLabels}
