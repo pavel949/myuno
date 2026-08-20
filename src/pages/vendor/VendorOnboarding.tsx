@@ -25,7 +25,7 @@ const VendorOnboarding = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
-  const { profile, createProfile, isLoading: profileLoading } = useVendorProfile();
+  const { profile, isLoading: profileLoading } = useVendorProfile();
   const { vendorOrgs, isLoading: contextLoading } = useUserContext();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
