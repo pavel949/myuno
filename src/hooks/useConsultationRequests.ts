@@ -173,21 +173,29 @@ export function useConsultationRequests() {
     enabled: !!user,
   });
 
-  // Create consultation request (for clients)
+  // Create consultation request (for clients).
+  // Guests have no SELECT access to consultation_requests (PII), so the row is
+  // created through the security-definer RPC that returns only the new id.
   const createConsultation = useMutation({
     mutationFn: async (input: CreateConsultationInput) => {
-      const { data, error } = await supabase
-        .from('consultation_requests')
-        .insert({
-          ...input,
-          user_id: user?.id || null,
-        } as any)
-        .select()
-        .single();
+      const { data: newId, error } = await supabase.rpc('submit_consultation_request', {
+        payload: input as unknown as Record<string, unknown>,
+      });
 
       if (error) throw error;
-      return data as unknown as ConsultationRequest;
+
+      if (user?.id && newId) {
+        const { data: row } = await supabase
+          .from('consultation_requests')
+          .select('*')
+          .eq('id', newId as string)
+          .maybeSingle();
+        if (row) return row as unknown as ConsultationRequest;
+      }
+
+      return { ...(input as object), id: newId } as unknown as ConsultationRequest;
     },
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['consultation-requests'] });
       queryClient.invalidateQueries({ queryKey: ['admin-consultations'] });
