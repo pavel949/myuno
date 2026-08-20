@@ -1,5 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { sanitizeStayRuleTerms } from '@/lib/property/stayRulesSchema';
+
+/** Localized message for an unavailable date range (RU/EN/TH on one page). */
+export const DATES_UNAVAILABLE_MESSAGE = {
+  ru: 'Эти даты недоступны',
+  en: 'These dates are not available',
+  th: 'วันที่เลือกไม่ว่าง',
+} as const;
+
 
 export interface PropertyRentalTerms {
   price_per_night?: number;
