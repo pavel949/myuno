@@ -799,6 +799,24 @@ export default function PropertyInquiry() {
               onClick={async () => {
                 if (isSubmitting) return;
 
+                // Strict e-mail validation: confirmations and voucher emails are
+                // sent to this address, so a typo means a silently lost booking.
+                const emailValue = formData.email.trim();
+                if (emailValue) {
+                  const emailOk = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(emailValue)
+                    && emailValue.length <= 254
+                    && !emailValue.includes('..');
+                  if (!emailOk) {
+                    toast.error(
+                      isRu
+                        ? 'Проверьте адрес e-mail — подтверждение отправляется на него.'
+                        : 'Please check the e-mail address — the confirmation is sent there.',
+                    );
+                    return;
+                  }
+                }
+
+
                 // === INSTANT BOOKING PATH ===
                 if (isInstantBooking) {
                   // If payment options aren't visible yet, scroll into view first.
