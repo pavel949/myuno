@@ -159,6 +159,12 @@ export default function PropertyDetail() {
     guest_extra_fees?: GuestExtraFee[] | null;
     price_per_month?: number | null;
     min_lease_months?: number | null;
+    rooms?: unknown;
+    min_stay_nights?: number | null;
+    max_stay_nights?: number | null;
+    advance_notice_hours?: number | null;
+    preparation_days?: number | null;
+    booking_window_months?: number | null;
   };
   const propertyExt = property as unknown as typeof property & PropertyExt;
 
@@ -449,15 +455,15 @@ export default function PropertyDetail() {
               />
 
               {/* Sleeping arrangements from structured rooms data */}
-              <PropertySleepingArrangements rooms={property.rooms} />
+              <PropertySleepingArrangements rooms={propertyExt.rooms} />
 
               {/* Booking-window rules */}
               <StayRulesSection
-                minStayNights={rentalTerms?.min_stay_nights ?? property.min_stay_nights}
-                maxStayNights={property.max_stay_nights}
-                advanceNoticeHours={property.advance_notice_hours}
-                preparationDays={property.preparation_days}
-                bookingWindowMonths={property.booking_window_months}
+                minStayNights={rentalTerms?.min_stay_nights ?? propertyExt.min_stay_nights}
+                maxStayNights={propertyExt.max_stay_nights}
+                advanceNoticeHours={propertyExt.advance_notice_hours}
+                preparationDays={propertyExt.preparation_days}
+                bookingWindowMonths={propertyExt.booking_window_months}
               />
 
               {property.project && (
