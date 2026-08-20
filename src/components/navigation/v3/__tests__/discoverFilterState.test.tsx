@@ -52,7 +52,7 @@ class ImmediateIntersectionObserver {
 /** Counts how many times the filter value was actually applied to the list. */
 const applyCount = { value: 0 };
 
-function DiscoverScreen() {
+function DiscoverScreen({ source = 'navigator_v3_for_you' }: { source?: string }) {
   const { query, selectedSituation, filter, setQuery, mapUrl } = useDiscoverFilter();
   const visible = React.useMemo(() => {
     applyCount.value += 1;
@@ -69,7 +69,7 @@ function DiscoverScreen() {
       <Link to={mapUrl}>to-map</Link>
       <SituationList
         situations={visible}
-        source="navigator_v3_for_you"
+        source={source}
         trackContext={{ filters: filter }}
       />
     </div>
@@ -87,10 +87,10 @@ function MapScreen() {
   );
 }
 
-function renderApp(initial = '/discover') {
+function renderApp(initial = '/discover', source = 'navigator_v3_for_you') {
   const router = createMemoryRouter(
     [
-      { path: '/discover', element: <DiscoverScreen /> },
+      { path: '/discover', element: <DiscoverScreen source={source} /> },
       { path: '/map', element: <MapScreen /> },
     ],
     { initialEntries: [initial] },
@@ -190,11 +190,12 @@ describe('analytics matches what was actually applied', () => {
   });
 
   it('does not duplicate impressions across re-renders and back navigation', async () => {
-    const { router } = renderApp('/discover?q=visa');
+    const source = `impression_probe_${Math.random().toString(36).slice(2)}`;
+    const { router } = renderApp('/discover?q=visa', source);
     await waitFor(() => expect(trackSituationImpression).toHaveBeenCalledTimes(1));
     expect(trackSituationImpression).toHaveBeenCalledWith(
       ['visa_extension'],
-      expect.objectContaining({ source: 'navigator_v3_for_you' }),
+      expect.objectContaining({ source }),
     );
 
     // Same filter re-applied → no new impression for an already-seen code.

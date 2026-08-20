@@ -241,7 +241,7 @@ describe('map entry point', () => {
       resolve(process.cwd(), 'src/components/navigation/v3/NavigatorPageV3.tsx'),
       'utf8',
     );
-    const matches = src.match(/to="\/map"/g) ?? [];
+    const matches = src.match(/to=\{mapUrl\}/g) ?? [];
     expect(matches).toHaveLength(1);
   });
 });
