@@ -90,10 +90,15 @@ export function PhotoLightbox({
         {/* Image */}
         <img
           src={images[currentIndex]}
-          alt={`${isRu ? 'Фото' : 'Photo'} ${currentIndex + 1}`}
+          alt={
+            alts?.[currentIndex] ||
+            captions?.[currentIndex] ||
+            `${isRu ? 'Фото' : 'Photo'} ${currentIndex + 1}`
+          }
           className="max-h-full max-w-full object-contain select-none"
           draggable={false}
         />
+
 
         {/* Next button */}
         {currentIndex < images.length - 1 && (
