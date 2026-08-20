@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { z } from 'zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,42 +9,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  STAY_RULE_LIMITS,
+  validateStayRules,
+  describeStayRulesDbError,
+  type StayRuleField,
+} from '@/lib/property/stayRulesSchema';
 
 /**
  * Admin editor for property-level stay rules stored on public.properties.
  * All values are optional integers; empty input clears the value (NULL).
+ * Ranges mirror the database CHECK constraints (see stayRulesSchema.ts).
  */
-const optionalInt = (max: number) =>
-  z
-    .union([z.literal(''), z.string().regex(/^\d{1,6}$/)])
-    .transform((v) => (v === '' ? null : Number(v)))
-    .refine((v) => v === null || (Number.isInteger(v) && v >= 0 && v <= max), {
-      message: `0 – ${max}`,
-    });
+type StayRulesForm = Record<StayRuleField, string>;
 
-const stayRulesSchema = z
-  .object({
-    min_stay_nights: optionalInt(3650),
-    max_stay_nights: optionalInt(3650),
-    advance_notice_hours: optionalInt(8760),
-    preparation_days: optionalInt(365),
-    booking_window_months: optionalInt(60),
-  })
-  .refine(
-    (v) =>
-      v.min_stay_nights === null ||
-      v.max_stay_nights === null ||
-      v.max_stay_nights >= v.min_stay_nights,
-    { path: ['max_stay_nights'], message: 'max < min' },
-  );
-
-type StayRulesForm = {
-  min_stay_nights: string;
-  max_stay_nights: string;
-  advance_notice_hours: string;
-  preparation_days: string;
-  booking_window_months: string;
-};
 
 const EMPTY_FORM: StayRulesForm = {
   min_stay_nights: '',
