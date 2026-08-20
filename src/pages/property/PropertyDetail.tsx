@@ -55,6 +55,16 @@ import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { TrustStrip } from '@/components/property/TrustStrip';
 import { InstallmentTimeline } from '@/components/property/InstallmentTimeline';
 import { getInstallmentPreset, type InstallmentMilestone } from '@/lib/real-estate/installmentPresets';
+import {
+  mediaAlt,
+  mediaCaption,
+  usePropertyMedia,
+  type MediaLocale,
+} from '@/hooks/usePropertyListingQuality';
+import { PropertyAmenitiesSection } from '@/components/property/PropertyAmenitiesSection';
+import { PropertySleepingArrangements } from '@/components/property/PropertySleepingArrangements';
+import { PropertyReviewRatings } from '@/components/property/PropertyReviewRatings';
+import { StayRulesSection } from '@/components/property/StayRulesSection';
 
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {
   sea: { en: 'Sea View', ru: 'Вид на море' },
@@ -88,6 +98,7 @@ export default function PropertyDetail() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [guestCount, setGuestCount] = useState(2);
 
+  const { data: mediaItems = [] } = usePropertyMedia(id);
   const { availability } = usePropertyAvailabilityManagement(id);
   const unavailableDates = useMemo(
     () =>
