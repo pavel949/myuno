@@ -12,7 +12,15 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
 import { Link2Off, Layers } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  LEGACY_UNIT_TABLES_SETTING_KEY,
+  useLegacyUnitTablesEnabled,
+} from '@/lib/real-estate/unitSourceFlag';
 
 /**
  * Admin visibility into the developer -> project -> unit chain:
@@ -23,6 +31,28 @@ export function RealEstateDomainHealthPanel() {
   const isRu = language === 'ru';
   const { data: coverage, isLoading } = useRealEstateDomainCoverage();
   const { data: orphans } = useRealEstateDomainChain({ orphansOnly: true, limit: 50 });
+  const legacyEnabled = useLegacyUnitTablesEnabled();
+  const queryClient = useQueryClient();
+
+  const toggleLegacy = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const { error } = await supabase
+        .from('system_settings')
+        .upsert(
+          { key: LEGACY_UNIT_TABLES_SETTING_KEY, value: { enabled } },
+          { onConflict: 'key' },
+        );
+      if (error) throw error;
+      return enabled;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      queryClient.invalidateQueries({ queryKey: ['project-units'] });
+    },
+    onError: () => {
+      toast.error(t('Не удалось изменить настройку', 'Could not change the setting'));
+    },
+  });
 
   const t = (ru: string, en: string) => (isRu ? ru : en);
 
@@ -41,6 +71,26 @@ export function RealEstateDomainHealthPanel() {
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="flex items-start justify-between gap-4 border border-border p-3">
+          <div>
+            <p className="text-sm font-medium">
+              {t('Устаревшие таблицы юнитов', 'Legacy unit tables')}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t(
+                'Выключено — читаем только project_units. Включайте лишь для откатa на development_units.',
+                'Off — only project_units is read. Turn on only to roll back to development_units.',
+              )}
+            </p>
+          </div>
+          <Switch
+            checked={legacyEnabled}
+            disabled={toggleLegacy.isPending}
+            onCheckedChange={(v) => toggleLegacy.mutate(v)}
+            aria-label={t('Устаревшие таблицы юнитов', 'Legacy unit tables')}
+          />
+        </div>
+
         <div className="grid gap-3 sm:grid-cols-3">
           {(['developer', 'project', 'unit'] as const).map((level) => (
             <div key={level} className="border border-border p-3">
