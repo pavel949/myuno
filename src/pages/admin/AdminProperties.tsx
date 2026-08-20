@@ -585,6 +585,14 @@ export default function AdminProperties() {
                 onCancel={closeSheet}
                 isSubmitting={isSubmitting}
                 mode="admin"
+                propertyId={editingProperty?.id}
+                extraTabs={editingProperty?.id ? [{
+                  id: 'stay-rules',
+                  icon: CalendarClock,
+                  labelEn: 'Stay rules',
+                  labelRu: 'Условия аренды',
+                  content: <PropertyStayRulesPanel propertyId={editingProperty.id} />,
+                }] : []}
                 providerSelector={
                   <ProviderSelector
                     value={selectedProviderId}
@@ -594,6 +602,7 @@ export default function AdminProperties() {
                   />
                 }
               />
+
             </div>
           </SheetContent>
         </Sheet>
