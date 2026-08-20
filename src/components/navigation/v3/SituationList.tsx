@@ -60,14 +60,6 @@ function SituationListImpl({
   trackContext,
   variant = 'compact',
   className,
-}: SituationListProps) {
-function SituationListImpl({
-  situations,
-  counts,
-  source,
-  trackContext,
-  variant = 'compact',
-  className,
   isLoading = false,
   isError = false,
   onRetry,
