@@ -80,14 +80,16 @@ export function useUniversalLead() {
         priority: 'normal',
       };
 
-      const { data, error } = await supabase
-        .from('consultation_requests')
-        .insert([payload])
-        .select()
-        .single();
+      // Guests cannot read consultation_requests (PII), so insert through the
+      // security-definer RPC which returns only the new lead id.
+      const { data: leadId, error } = await supabase.rpc('submit_consultation_request', {
+        payload: payload as never,
+      });
 
       if (error) throw error;
-      
+
+      const data = leadId ? { id: leadId as string } : null;
+
       // Trigger WhatsApp notification for specific verticals. Non-blocking, but a
       // silent failure means Pavel never hears about a new lead — log it (with the
       // lead id) so the failure is detectable instead of vanishing.
@@ -122,6 +124,7 @@ export function useUniversalLead() {
       }
 
       return data;
+
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['consultation-requests'] });

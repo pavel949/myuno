@@ -10,7 +10,8 @@ import { Resend } from "npm:resend@2.0.0";
 // ── CORS ────────────────────────────────────────────────────────────────
 
 export const NOTIFY_CORS = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
+  "Access-Control-Allow-Origin": "*",
+  "Vary": "Origin",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };

@@ -84,8 +84,9 @@ export function getCorsHeaders(req: Request): Record<string, string> {
   return {
     "Access-Control-Allow-Origin": allowed,
     "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type, stripe-signature",
-    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+      "authorization, x-client-info, apikey, content-type, stripe-signature, x-internal-secret, x-supabase-api-version, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "Access-Control-Allow-Methods": "POST, GET, PATCH, DELETE, OPTIONS",
     "Vary": "Origin",
   };
 }
+

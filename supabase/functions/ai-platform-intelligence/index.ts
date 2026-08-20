@@ -1,13 +1,10 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalOrStaff, PLATFORM_ADMIN_ROLES } from "../_shared/authz.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-internal-secret",
-};
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
