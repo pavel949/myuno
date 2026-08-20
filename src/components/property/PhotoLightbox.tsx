@@ -13,12 +13,24 @@ interface PhotoLightboxProps {
   initialIndex?: number;
   open: boolean;
   onClose: () => void;
+  /** Optional per-image captions (same order as `images`), Airbnb-style. */
+  captions?: Array<string | null | undefined>;
+  /** Optional per-image alt text; falls back to the caption, then a generic label. */
+  alts?: Array<string | null | undefined>;
 }
 
-export function PhotoLightbox({ images, initialIndex = 0, open, onClose }: PhotoLightboxProps) {
+export function PhotoLightbox({
+  images,
+  initialIndex = 0,
+  open,
+  onClose,
+  captions,
+  alts,
+}: PhotoLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const { language } = useLanguage();
   const isRu = language === 'ru';
+
 
   useEffect(() => {
     if (open) setCurrentIndex(initialIndex);
