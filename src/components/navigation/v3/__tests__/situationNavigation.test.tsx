@@ -15,9 +15,11 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 const trackSituationClick = vi.fn();
+const trackSituationImpression = vi.fn();
 
 vi.mock('@/lib/analytics/track', () => ({
   trackSituationClick: (...args: unknown[]) => trackSituationClick(...args),
+  trackSituationImpression: (...args: unknown[]) => trackSituationImpression(...args),
 }));
 
 vi.mock('@/contexts/LanguageContext', () => ({
@@ -78,6 +80,7 @@ function renderList(list: TestSituation[], source = 'navigator_v3_for_you') {
 
 beforeEach(() => {
   trackSituationClick.mockClear();
+  trackSituationImpression.mockClear();
 });
 
 describe('resolveSituationHref', () => {
@@ -108,7 +111,34 @@ describe('situation rows link to the expected list', () => {
     screen.getByRole('link').click();
     expect(trackSituationClick).toHaveBeenCalledWith(
       'arrival',
-      expect.objectContaining({ source: 'cluster_section', href: '/discover/arrival' }),
+      expect.objectContaining({
+        source: 'cluster_section',
+        href: '/discover/arrival',
+        variant: 'compact',
+      }),
+    );
+  });
+
+  it('sends the same click payload shape for the prominent variant', () => {
+    render(
+      <MemoryRouter>
+        <SituationList
+          situations={asLifeSituations([situation('arrival', 'arrive')])}
+          source="navigator_v3_for_you"
+          variant="prominent"
+          counts={{ 'id-arrival': 4 }}
+        />
+      </MemoryRouter>,
+    );
+    screen.getByRole('link').click();
+    expect(trackSituationClick).toHaveBeenCalledWith(
+      'arrival',
+      expect.objectContaining({
+        source: 'navigator_v3_for_you',
+        href: '/discover/arrival',
+        variant: 'prominent',
+        count: 4,
+      }),
     );
   });
 
@@ -192,5 +222,73 @@ describe('map entry point', () => {
     );
     const matches = src.match(/to="\/map"/g) ?? [];
     expect(matches).toHaveLength(1);
+  });
+});
+
+describe('unified situation tracking layer', () => {
+  it('emits one batched impression per list, whatever the variant', () => {
+    render(
+      <MemoryRouter>
+        <SituationList
+          situations={asLifeSituations([situation('a1', 'arrive'), situation('a2', 'live')])}
+          source="impression_compact"
+          variant="compact"
+        />
+        <SituationList
+          situations={asLifeSituations([situation('b1', 'arrive')])}
+          source="impression_prominent"
+          variant="prominent"
+        />
+      </MemoryRouter>,
+    );
+    const calls = trackSituationImpression.mock.calls;
+    expect(calls).toHaveLength(2);
+    expect(calls[0][0]).toEqual(['a1', 'a2']);
+    expect(calls[0][1]).toMatchObject({ source: 'impression_compact', variant: 'compact' });
+    expect(calls[1][0]).toEqual(['b1']);
+    expect(calls[1][1]).toMatchObject({ source: 'impression_prominent', variant: 'prominent' });
+  });
+
+  it('never repeats an impression for the same situation + source', () => {
+    const list = asLifeSituations([situation('dedupe_me', 'live')]);
+    render(
+      <MemoryRouter>
+        <SituationList situations={list} source="impression_dedupe" variant="compact" />
+      </MemoryRouter>,
+    );
+    render(
+      <MemoryRouter>
+        <SituationList situations={list} source="impression_dedupe" variant="compact" />
+      </MemoryRouter>,
+    );
+    const sent = trackSituationImpression.mock.calls.flatMap((c) => c[0] as string[]);
+    expect(sent.filter((code) => code === 'dedupe_me')).toHaveLength(1);
+  });
+
+  it('cards report through the same layer', () => {
+    render(
+      <MemoryRouter>
+        <SituationCard
+          situation={asLifeSituations([situation('card_code', 'invest')])[0]}
+          clusterId="invest"
+          serviceCount={7}
+        />
+      </MemoryRouter>,
+    );
+    expect(trackSituationImpression).toHaveBeenCalledWith(
+      ['card_code'],
+      expect.objectContaining({ source: 'situation_card', variant: 'card', cluster: 'invest' }),
+    );
+    screen.getByRole('link').click();
+    expect(trackSituationClick).toHaveBeenCalledWith(
+      'card_code',
+      expect.objectContaining({
+        source: 'situation_card',
+        variant: 'card',
+        cluster: 'invest',
+        href: '/discover/card_code',
+        count: 7,
+      }),
+    );
   });
 });
