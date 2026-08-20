@@ -21,7 +21,7 @@ import { useSituationServiceCounts } from '@/hooks/useSituationServiceCounts';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
-import { trackSituationClick } from '@/lib/analytics/track';
+import { useSituationTracking } from './useSituationTracking';
 import { formatServices } from '@/lib/i18n/pluralize';
 import { hexTint, accentColor } from '@/lib/ui/colorTint';
 import { DynamicIcon } from '@/components/ui/dynamic-icon';
@@ -169,6 +169,18 @@ export default function SituationDetailPage() {
     return pickRelatedSituations(situation, situations, effectivePersonas, 3);
   }, [situation, situations, effectivePersonas]);
 
+  // Same analytics layer as SituationList / SituationCard.
+  const relatedCodes = useMemo(
+    () => relatedSituations.map((s) => s.code),
+    [relatedSituations],
+  );
+  const { containerRef: relatedRef, onSituationClick } = useSituationTracking({
+    codes: relatedCodes,
+    source: 'related_situations',
+    variant: 'compact',
+    context: { from_situation: code },
+  });
+
   return (
     <AppLayout>
       <div className="px-4 pt-6 pb-24 md:px-6 md:pt-8 max-w-6xl mx-auto">
@@ -278,7 +290,7 @@ export default function SituationDetailPage() {
                     {isRu ? 'Похожие ситуации' : 'Related situations'}
                   </h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div ref={relatedRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {relatedSituations.map((rel) => {
                     const tint = hexTint(rel.color, 0.10);
                     const iconColor = accentColor(rel.color);
@@ -288,11 +300,7 @@ export default function SituationDetailPage() {
                       <Link
                         key={rel.id}
                         to={href}
-                        onClick={() => trackSituationClick(rel.code, {
-                          source: 'related_situations',
-                          href,
-                          count,
-                        })}
+                        onClick={() => onSituationClick(rel.code, { href, count })}
                         className={cn(
                           'group flex items-start gap-3 p-4 min-h-[88px]',
                           'border border-border bg-card text-card-foreground',
