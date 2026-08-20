@@ -31,6 +31,7 @@ export function RealEstateDomainHealthPanel() {
   const isRu = language === 'ru';
   const { data: coverage, isLoading } = useRealEstateDomainCoverage();
   const { data: orphans } = useRealEstateDomainChain({ orphansOnly: true, limit: 50 });
+  const t = (ru: string, en: string) => (isRu ? ru : en);
   const legacyEnabled = useLegacyUnitTablesEnabled();
   const queryClient = useQueryClient();
 
@@ -54,8 +55,6 @@ export function RealEstateDomainHealthPanel() {
     },
   });
 
-  const t = (ru: string, en: string) => (isRu ? ru : en);
-
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -78,7 +77,7 @@ export function RealEstateDomainHealthPanel() {
             </p>
             <p className="text-sm text-muted-foreground">
               {t(
-                'Выключено — читаем только project_units. Включайте лишь для откатa на development_units.',
+                'Выключено — читаем только project_units. Включайте лишь для отката на development_units.',
                 'Off — only project_units is read. Turn on only to roll back to development_units.',
               )}
             </p>
