@@ -1140,6 +1140,54 @@ export type Database = {
         }
         Relationships: []
       }
+      amenity_catalog: {
+        Row: {
+          applies_to: string[]
+          category: string
+          code: string
+          created_at: string
+          icon: string | null
+          is_active: boolean
+          is_filterable: boolean
+          is_highlight: boolean
+          name_en: string
+          name_ru: string
+          name_th: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          applies_to?: string[]
+          category: string
+          code: string
+          created_at?: string
+          icon?: string | null
+          is_active?: boolean
+          is_filterable?: boolean
+          is_highlight?: boolean
+          name_en: string
+          name_ru: string
+          name_th?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: string[]
+          category?: string
+          code?: string
+          created_at?: string
+          icon?: string | null
+          is_active?: boolean
+          is_filterable?: boolean
+          is_highlight?: boolean
+          name_en?: string
+          name_ru?: string
+          name_th?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string
@@ -17223,6 +17271,7 @@ export type Database = {
           actual_owner_phone: string | null
           address: string | null
           advance_months_long: number | null
+          advance_notice_hours: number | null
           ai_autoreply_enabled: boolean
           ai_autoreply_instructions: string | null
           allow_pay_later: boolean
@@ -17239,6 +17288,7 @@ export type Database = {
           bathrooms: number | null
           bedrooms: number | null
           beds: Json | null
+          booking_window_months: number | null
           building_condition: string | null
           building_management_contact: string | null
           building_name: string | null
@@ -17378,6 +17428,7 @@ export type Database = {
           marketplace_property_id: string | null
           max_guests: number | null
           max_party_guests: number | null
+          max_stay_nights: number | null
           min_lease_months: number | null
           min_stay_nights: number | null
           monthly_discount: number | null
@@ -17418,6 +17469,7 @@ export type Database = {
           pm_company_id: string | null
           pool_size: string | null
           pool_type: string | null
+          preparation_days: number | null
           prepay_percent: number | null
           price: number | null
           price_per_month: number | null
@@ -17507,6 +17559,7 @@ export type Database = {
           actual_owner_phone?: string | null
           address?: string | null
           advance_months_long?: number | null
+          advance_notice_hours?: number | null
           ai_autoreply_enabled?: boolean
           ai_autoreply_instructions?: string | null
           allow_pay_later?: boolean
@@ -17523,6 +17576,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           beds?: Json | null
+          booking_window_months?: number | null
           building_condition?: string | null
           building_management_contact?: string | null
           building_name?: string | null
@@ -17662,6 +17716,7 @@ export type Database = {
           marketplace_property_id?: string | null
           max_guests?: number | null
           max_party_guests?: number | null
+          max_stay_nights?: number | null
           min_lease_months?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
@@ -17702,6 +17757,7 @@ export type Database = {
           pm_company_id?: string | null
           pool_size?: string | null
           pool_type?: string | null
+          preparation_days?: number | null
           prepay_percent?: number | null
           price?: number | null
           price_per_month?: number | null
@@ -17791,6 +17847,7 @@ export type Database = {
           actual_owner_phone?: string | null
           address?: string | null
           advance_months_long?: number | null
+          advance_notice_hours?: number | null
           ai_autoreply_enabled?: boolean
           ai_autoreply_instructions?: string | null
           allow_pay_later?: boolean
@@ -17807,6 +17864,7 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           beds?: Json | null
+          booking_window_months?: number | null
           building_condition?: string | null
           building_management_contact?: string | null
           building_name?: string | null
@@ -17946,6 +18004,7 @@ export type Database = {
           marketplace_property_id?: string | null
           max_guests?: number | null
           max_party_guests?: number | null
+          max_stay_nights?: number | null
           min_lease_months?: number | null
           min_stay_nights?: number | null
           monthly_discount?: number | null
@@ -17986,6 +18045,7 @@ export type Database = {
           pm_company_id?: string | null
           pool_size?: string | null
           pool_type?: string | null
+          preparation_days?: number | null
           prepay_percent?: number | null
           price?: number | null
           price_per_month?: number | null
@@ -18299,6 +18359,76 @@ export type Database = {
           property_id?: string
         }
         Relationships: []
+      }
+      property_amenities: {
+        Row: {
+          amenity_code: string
+          created_at: string
+          id: string
+          note_en: string | null
+          note_ru: string | null
+          property_id: string
+        }
+        Insert: {
+          amenity_code: string
+          created_at?: string
+          id?: string
+          note_en?: string | null
+          note_ru?: string | null
+          property_id: string
+        }
+        Update: {
+          amenity_code?: string
+          created_at?: string
+          id?: string
+          note_en?: string | null
+          note_ru?: string | null
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_amenities_amenity_code_fkey"
+            columns: ["amenity_code"]
+            isOneToOne: false
+            referencedRelation: "amenity_catalog"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_amenities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_analytics: {
         Row: {
@@ -20394,6 +20524,108 @@ export type Database = {
           },
         ]
       }
+      property_media: {
+        Row: {
+          alt_en: string | null
+          alt_ru: string | null
+          caption_en: string | null
+          caption_ru: string | null
+          caption_th: string | null
+          created_at: string
+          created_by: string | null
+          display_order: number
+          height_px: number | null
+          id: string
+          is_active: boolean
+          is_cover: boolean
+          kind: string
+          property_id: string
+          room_tag: string | null
+          storage_path: string | null
+          updated_at: string
+          url: string
+          width_px: number | null
+        }
+        Insert: {
+          alt_en?: string | null
+          alt_ru?: string | null
+          caption_en?: string | null
+          caption_ru?: string | null
+          caption_th?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          height_px?: number | null
+          id?: string
+          is_active?: boolean
+          is_cover?: boolean
+          kind?: string
+          property_id: string
+          room_tag?: string | null
+          storage_path?: string | null
+          updated_at?: string
+          url: string
+          width_px?: number | null
+        }
+        Update: {
+          alt_en?: string | null
+          alt_ru?: string | null
+          caption_en?: string | null
+          caption_ru?: string | null
+          caption_th?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          height_px?: number | null
+          id?: string
+          is_active?: boolean
+          is_cover?: boolean
+          kind?: string
+          property_id?: string
+          room_tag?: string | null
+          storage_path?: string | null
+          updated_at?: string
+          url?: string
+          width_px?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_media_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_notes: {
         Row: {
           author_id: string
@@ -21578,60 +21810,93 @@ export type Database = {
       }
       property_reviews: {
         Row: {
+          booking_id: string | null
           created_at: string | null
           external_id: string | null
           guest_name: string | null
           id: string
           is_public: boolean | null
+          is_verified_stay: boolean
           language: string | null
           owner_id: string
+          photos: string[]
           platform: string
           property_id: string
           rating: number | null
+          rating_accuracy: number | null
+          rating_checkin: number | null
+          rating_cleanliness: number | null
+          rating_communication: number | null
+          rating_location: number | null
+          rating_value: number | null
           responded_at: string | null
           responded_by: string | null
           response_text: string | null
           review_date: string | null
           review_text: string | null
+          reviewer_id: string | null
           sentiment: string | null
+          stay_date: string | null
           updated_at: string | null
         }
         Insert: {
+          booking_id?: string | null
           created_at?: string | null
           external_id?: string | null
           guest_name?: string | null
           id?: string
           is_public?: boolean | null
+          is_verified_stay?: boolean
           language?: string | null
           owner_id: string
+          photos?: string[]
           platform?: string
           property_id: string
           rating?: number | null
+          rating_accuracy?: number | null
+          rating_checkin?: number | null
+          rating_cleanliness?: number | null
+          rating_communication?: number | null
+          rating_location?: number | null
+          rating_value?: number | null
           responded_at?: string | null
           responded_by?: string | null
           response_text?: string | null
           review_date?: string | null
           review_text?: string | null
+          reviewer_id?: string | null
           sentiment?: string | null
+          stay_date?: string | null
           updated_at?: string | null
         }
         Update: {
+          booking_id?: string | null
           created_at?: string | null
           external_id?: string | null
           guest_name?: string | null
           id?: string
           is_public?: boolean | null
+          is_verified_stay?: boolean
           language?: string | null
           owner_id?: string
+          photos?: string[]
           platform?: string
           property_id?: string
           rating?: number | null
+          rating_accuracy?: number | null
+          rating_checkin?: number | null
+          rating_cleanliness?: number | null
+          rating_communication?: number | null
+          rating_location?: number | null
+          rating_value?: number | null
           responded_at?: string | null
           responded_by?: string | null
           response_text?: string | null
           review_date?: string | null
           review_text?: string | null
+          reviewer_id?: string | null
           sentiment?: string | null
+          stay_date?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -33310,6 +33575,7 @@ export type Database = {
         Args: { created_at: string; request_type: string }
         Returns: string
       }
+      can_manage_property: { Args: { _property_id: string }; Returns: boolean }
       canonical_provider_category: {
         Args: { input_slug: string }
         Returns: string
@@ -33791,6 +34057,7 @@ export type Database = {
         }
         Returns: Json
       }
+      property_is_public: { Args: { _property_id: string }; Returns: boolean }
       publish_property_to_marketplace: {
         Args: { p_owner_property_id: string }
         Returns: string

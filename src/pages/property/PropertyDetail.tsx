@@ -55,6 +55,16 @@ import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { TrustStrip } from '@/components/property/TrustStrip';
 import { InstallmentTimeline } from '@/components/property/InstallmentTimeline';
 import { getInstallmentPreset, type InstallmentMilestone } from '@/lib/real-estate/installmentPresets';
+import {
+  mediaAlt,
+  mediaCaption,
+  usePropertyMedia,
+  type MediaLocale,
+} from '@/hooks/usePropertyListingQuality';
+import { PropertyAmenitiesSection } from '@/components/property/PropertyAmenitiesSection';
+import { PropertySleepingArrangements } from '@/components/property/PropertySleepingArrangements';
+import { PropertyReviewRatings } from '@/components/property/PropertyReviewRatings';
+import { StayRulesSection } from '@/components/property/StayRulesSection';
 
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {
   sea: { en: 'Sea View', ru: 'Вид на море' },
@@ -88,6 +98,7 @@ export default function PropertyDetail() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [guestCount, setGuestCount] = useState(2);
 
+  const { data: mediaItems = [] } = usePropertyMedia(id);
   const { availability } = usePropertyAvailabilityManagement(id);
   const unavailableDates = useMemo(
     () =>
@@ -151,10 +162,20 @@ export default function PropertyDetail() {
   };
   const propertyExt = property as unknown as typeof property & PropertyExt;
 
-  const images = (property.images && property.images.length > 0)
+  // Structured gallery (property_media) wins over the legacy images array; the
+  // legacy array stays as a fallback for listings not migrated yet.
+  const mediaLocale: MediaLocale = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
+  const legacyImages = (property.images && property.images.length > 0)
     ? property.images
     : [property.cover_image].filter(Boolean) as string[];
+  const photoMedia = mediaItems.filter((m) => m.kind === 'photo' || m.kind === 'image');
+  const galleryMedia = photoMedia.length > 0 ? photoMedia : [];
+  const images = galleryMedia.length > 0 ? galleryMedia.map((m) => m.url) : legacyImages;
+  const galleryFallbackAlt = ((isRu ? property.title_ru : property.title_en) || '') as string;
+  const imageCaptions = galleryMedia.map((m) => mediaCaption(m, mediaLocale));
+  const imageAlts = galleryMedia.map((m) => mediaAlt(m, mediaLocale, galleryFallbackAlt));
   const amenities = property.amenities || [];
+
 
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
   // City-aware currency: prefer listing-level currency, else current city default, else USD.
@@ -280,7 +301,7 @@ export default function PropertyDetail() {
         {/* Image Gallery */}
         <PropertyDetailGallery
           images={images}
-          alt={(isRu ? property.title_ru : property.title_en) || ''}
+          alt={galleryFallbackAlt}
           onOpenLightbox={openLightbox}
         />
 
@@ -419,6 +440,25 @@ export default function PropertyDetail() {
                   propertyType={property.property_type}
                 />
               </div>
+
+              {/* Structured amenities (catalogue-backed, grouped by category) */}
+              <Separator />
+              <PropertyAmenitiesSection
+                propertyId={id}
+                fallbackAmenities={amenities as string[]}
+              />
+
+              {/* Sleeping arrangements from structured rooms data */}
+              <PropertySleepingArrangements rooms={property.rooms} />
+
+              {/* Booking-window rules */}
+              <StayRulesSection
+                minStayNights={rentalTerms?.min_stay_nights ?? property.min_stay_nights}
+                maxStayNights={property.max_stay_nights}
+                advanceNoticeHours={property.advance_notice_hours}
+                preparationDays={property.preparation_days}
+                bookingWindowMonths={property.booking_window_months}
+              />
 
               {property.project && (
                 <>
@@ -570,6 +610,7 @@ export default function PropertyDetail() {
               )}
 
               <Separator />
+              <PropertyReviewRatings propertyId={id} />
               <ReviewsSection
                 itemType="property"
                 itemId={id || ''}
@@ -754,6 +795,8 @@ export default function PropertyDetail() {
       {/* Photo Lightbox */}
       <PhotoLightbox
         images={images}
+        captions={imageCaptions.length > 0 ? imageCaptions : undefined}
+        alts={imageAlts.length > 0 ? imageAlts : undefined}
         initialIndex={lightboxIndex}
         open={showAllPhotos}
         onClose={() => setShowAllPhotos(false)}

@@ -56,3 +56,9 @@ export { GuestPriceProposal } from './GuestPriceProposal';
 // Canonical Property Form (shared across Admin/Vendor/Owner)
 export { CanonicalPropertyForm } from './canonical-form';
 export type { CanonicalPropertyFormData } from './canonical-form';
+
+// Listing-quality blocks (Zillow/Airbnb parity, phase 1)
+export { PropertyAmenitiesSection } from './PropertyAmenitiesSection';
+export { PropertySleepingArrangements } from './PropertySleepingArrangements';
+export { PropertyReviewRatings } from './PropertyReviewRatings';
+export { StayRulesSection } from './StayRulesSection';
