@@ -33,6 +33,8 @@ import { differenceInDays, format, parseISO, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { InquiryConfirmation } from '@/components/property/InquiryConfirmation';
+import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
+
 
 export default function PropertyInquiry() {
   const { id } = useParams();
@@ -303,19 +305,18 @@ export default function PropertyInquiry() {
   }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property, listingCurrency]);
 
   const validationErrors = useMemo(() => {
-    const errors: string[] = [];
-    if (nights > 0 && rentalTerms?.min_stay_nights && nights < rentalTerms.min_stay_nights) {
-      errors.push(isRu
-        ? `Минимальный срок проживания: ${rentalTerms.min_stay_nights} ночей`
-        : `Minimum stay: ${rentalTerms.min_stay_nights} nights`);
-    }
+    const errors: string[] = getStayRuleErrors(
+      { checkIn, checkOut, terms: rentalTerms },
+      language,
+    );
     if (rentalTerms?.max_guests && guests > rentalTerms.max_guests) {
       errors.push(isRu
         ? `Максимум гостей: ${rentalTerms.max_guests}`
         : `Maximum guests: ${rentalTerms.max_guests}`);
     }
     return errors;
-  }, [nights, rentalTerms, guests, isRu]);
+  }, [checkIn, checkOut, rentalTerms, guests, language, isRu]);
+
 
   const isFormValid = formData.name && formData.phone && hasDates && validationErrors.length === 0;
   const propertyTitle = isRu ? property?.title_ru : property?.title_en;
