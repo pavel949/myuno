@@ -179,8 +179,9 @@ export function useConsultationRequests() {
   const createConsultation = useMutation({
     mutationFn: async (input: CreateConsultationInput) => {
       const { data: newId, error } = await supabase.rpc('submit_consultation_request', {
-        payload: input as unknown as Record<string, unknown>,
+        payload: input as never,
       });
+
 
       if (error) throw error;
 
