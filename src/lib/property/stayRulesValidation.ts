@@ -1,10 +1,16 @@
 /**
  * Stay-rule enforcement for property booking requests.
  *
- * Single source of truth used by both the property booking card and the
- * inquiry (checkout) page so a request that is blocked in one place can never
- * be accepted in the other.
+ * Single source of truth used by the property booking card, the inquiry
+ * (checkout) page, availability calendars and API/SSR callers, so a request
+ * that is blocked in one place can never be accepted in another.
+ *
+ * Incoming rules are always normalized through `sanitizeStayRuleTerms`, which
+ * applies the exact same limits as the database CHECK constraints. Inconsistent
+ * rules are ignored instead of breaking availability.
  */
+
+import { sanitizeStayRuleTerms } from './stayRulesSchema';
 
 export interface StayRuleTerms {
   min_stay_nights?: number | null;
@@ -35,8 +41,9 @@ export interface StayRuleViolation {
   code: StayRuleCode;
   /** Rule value that was violated (nights / hours / months / days). */
   value: number;
-  message: { en: string; ru: string };
+  message: { en: string; ru: string; th: string };
 }
+
 
 export interface ValidateStayRulesInput {
   checkIn?: Date | string | null;
