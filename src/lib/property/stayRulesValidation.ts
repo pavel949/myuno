@@ -1,10 +1,16 @@
 /**
  * Stay-rule enforcement for property booking requests.
  *
- * Single source of truth used by both the property booking card and the
- * inquiry (checkout) page so a request that is blocked in one place can never
- * be accepted in the other.
+ * Single source of truth used by the property booking card, the inquiry
+ * (checkout) page, availability calendars and API/SSR callers, so a request
+ * that is blocked in one place can never be accepted in another.
+ *
+ * Incoming rules are always normalized through `sanitizeStayRuleTerms`, which
+ * applies the exact same limits as the database CHECK constraints. Inconsistent
+ * rules are ignored instead of breaking availability.
  */
+
+import { sanitizeStayRuleTerms } from './stayRulesSchema';
 
 export interface StayRuleTerms {
   min_stay_nights?: number | null;
@@ -35,8 +41,9 @@ export interface StayRuleViolation {
   code: StayRuleCode;
   /** Rule value that was violated (nights / hours / months / days). */
   value: number;
-  message: { en: string; ru: string };
+  message: { en: string; ru: string; th: string };
 }
+
 
 export interface ValidateStayRulesInput {
   checkIn?: Date | string | null;
@@ -103,7 +110,10 @@ export function validateStayRules({
   const nights = nightsBetween(from, to);
   if (nights <= 0) return violations;
 
-  const minStay = positive(terms.min_stay_nights);
+  // Normalize once: identical limits as the DB CHECK constraints.
+  const safeTerms = sanitizeStayRuleTerms(terms);
+
+  const minStay = positive(safeTerms.min_stay_nights);
   if (minStay && nights < minStay) {
     violations.push({
       code: 'min_stay',
@@ -111,11 +121,12 @@ export function validateStayRules({
       message: {
         en: `Minimum stay: ${minStay} nights`,
         ru: `Минимальный срок проживания: ${minStay} ночей`,
+        th: `พักขั้นต่ำ: ${minStay} คืน`,
       },
     });
   }
 
-  const maxStay = positive(terms.max_stay_nights);
+  const maxStay = positive(safeTerms.max_stay_nights);
   if (maxStay && nights > maxStay) {
     violations.push({
       code: 'max_stay',
@@ -123,11 +134,12 @@ export function validateStayRules({
       message: {
         en: `Maximum stay: ${maxStay} nights`,
         ru: `Максимальный срок проживания: ${maxStay} ночей`,
+        th: `พักได้สูงสุด: ${maxStay} คืน`,
       },
     });
   }
 
-  const advanceNotice = nonNegative(terms.advance_notice_hours);
+  const advanceNotice = nonNegative(safeTerms.advance_notice_hours);
   if (advanceNotice !== null) {
     const leadHours = (from.getTime() - now.getTime()) / MS_PER_HOUR;
     if (leadHours < advanceNotice) {
@@ -137,12 +149,13 @@ export function validateStayRules({
         message: {
           en: `Bookings require ${advanceNotice}h advance notice`,
           ru: `Бронирование не позднее чем за ${advanceNotice} ч до заезда`,
+          th: `ต้องจองล่วงหน้าอย่างน้อย ${advanceNotice} ชั่วโมง`,
         },
       });
     }
   }
 
-  const windowMonths = positive(terms.booking_window_months);
+  const windowMonths = positive(safeTerms.booking_window_months);
   if (windowMonths) {
     const latestCheckIn = addMonths(now, windowMonths);
     if (from.getTime() > latestCheckIn.getTime()) {
@@ -152,12 +165,13 @@ export function validateStayRules({
         message: {
           en: `Bookings open up to ${windowMonths} months ahead`,
           ru: `Бронирование доступно не более чем на ${windowMonths} мес. вперёд`,
+          th: `เปิดจองล่วงหน้าได้ไม่เกิน ${windowMonths} เดือน`,
         },
       });
     }
   }
 
-  const prepDays = positive(terms.preparation_days);
+  const prepDays = positive(safeTerms.preparation_days);
   if (prepDays && existingStays.length > 0) {
     const bufferMs = prepDays * MS_PER_DAY;
     const conflicts = existingStays.some((stay) => {
@@ -176,6 +190,7 @@ export function validateStayRules({
         message: {
           en: `${prepDays} preparation day(s) required between stays`,
           ru: `Между бронированиями нужен буфер ${prepDays} дн.`,
+          th: `ต้องเว้นเตรียมห้อง ${prepDays} วันระหว่างการเข้าพัก`,
         },
       });
     }
@@ -184,11 +199,12 @@ export function validateStayRules({
   return violations;
 }
 
-/** Convenience wrapper: localized error strings for the UI. */
+/** Convenience wrapper: localized error strings for the UI (RU/EN/TH). */
 export function getStayRuleErrors(
   input: ValidateStayRulesInput,
   language: string,
 ): string[] {
-  const isRu = language === 'ru';
-  return validateStayRules(input).map((v) => (isRu ? v.message.ru : v.message.en));
+  const locale = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
+  return validateStayRules(input).map((v) => v.message[locale]);
 }
+

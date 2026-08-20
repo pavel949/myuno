@@ -1,5 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { sanitizeStayRuleTerms } from '@/lib/property/stayRulesSchema';
+
+/** Localized message for an unavailable date range (RU/EN/TH on one page). */
+export const DATES_UNAVAILABLE_MESSAGE = {
+  ru: 'Эти даты недоступны',
+  en: 'These dates are not available',
+  th: 'วันที่เลือกไม่ว่าง',
+} as const;
+
 
 export interface PropertyRentalTerms {
   price_per_night?: number;
@@ -31,12 +40,19 @@ export interface BlockedDate {
 }
 
 // Check if a property is available for specific dates
-export function usePropertyAvailability(marketplacePropertyId?: string, checkIn?: string, checkOut?: string) {
+export function usePropertyAvailability(
+  marketplacePropertyId?: string,
+  checkIn?: string,
+  checkOut?: string,
+  language: string = 'ru',
+) {
+  const locale = language === 'en' ? 'en' : language === 'th' ? 'th' : 'ru';
+
   return useQuery({
-    queryKey: ['property-availability', marketplacePropertyId, checkIn, checkOut],
+    queryKey: ['property-availability', marketplacePropertyId, checkIn, checkOut, locale],
     queryFn: async () => {
       if (!marketplacePropertyId || !checkIn || !checkOut) {
-        return { isAvailable: true, message: '' };
+        return { isAvailable: true, message: '', code: null as null | 'dates_unavailable' };
       }
 
       // Use the database function to check availability
@@ -47,16 +63,19 @@ export function usePropertyAvailability(marketplacePropertyId?: string, checkIn?
           p_check_out: checkOut,
         });
 
-      if (error) return { isAvailable: true, message: '' };
+      if (error) return { isAvailable: true, message: '', code: null };
 
+      const isAvailable = data as boolean;
       return {
-        isAvailable: data as boolean,
-        message: data ? '' : 'These dates are not available',
+        isAvailable,
+        code: isAvailable ? null : ('dates_unavailable' as const),
+        message: isAvailable ? '' : DATES_UNAVAILABLE_MESSAGE[locale],
       };
     },
     enabled: !!marketplacePropertyId && !!checkIn && !!checkOut,
   });
 }
+
 
 // Get all blocked dates for a property
 export function usePropertyBlockedDates(marketplacePropertyId?: string) {
@@ -141,11 +160,15 @@ export function usePropertyRentalTerms(marketplacePropertyId?: string) {
         .eq('id', marketplacePropertyId)
         .maybeSingle();
 
-      if (error) {
+      if (error || !data) {
         return null;
       }
 
-      return data as PropertyRentalTerms;
+      // Normalize stay rules through the shared validator limits so filters,
+      // calendars and SSR consumers never see inconsistent rules.
+      const sanitized = sanitizeStayRuleTerms(data as PropertyRentalTerms);
+      return { ...(data as PropertyRentalTerms), ...sanitized } as PropertyRentalTerms;
+
     },
     enabled: !!marketplacePropertyId,
   });
