@@ -109,6 +109,8 @@ export interface SituationClickContext {
   role?: string;
   /** Service count badge value, if shown. */
   count?: number;
+  /** Visual variant of the row that was clicked ('compact' | 'prominent'). */
+  variant?: string;
 }
 
 export function trackSituationClick(
