@@ -181,3 +181,15 @@ describe('no duplicate situations across the Discover block', () => {
     expect(new Set(rendered.map((s) => s.id)).size).toBe(rendered.length);
   });
 });
+
+describe('map entry point', () => {
+  it('Discover header exposes exactly one /map link', async () => {
+    const { readFileSync } = await import('node:fs');
+    const src = readFileSync(
+      new URL('../NavigatorPageV3.tsx', import.meta.url),
+      'utf8',
+    );
+    const matches = src.match(/to="\/map"/g) ?? [];
+    expect(matches).toHaveLength(1);
+  });
+});
