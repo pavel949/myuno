@@ -4,16 +4,26 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrgs } from '@/hooks/useUserContext';
 import { useOwnerType } from '@/hooks/useOwnerType';
+import { supabase } from '@/integrations/supabase/client';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Home, Building2, Users, ArrowRight, Loader2 } from 'lucide-react';
+import { Home, Building2, Users, Plane, MapPin, TrendingUp, Store, ArrowRight, Loader2 } from 'lucide-react';
 import { logger } from '@/lib/logger';
 
-type AccountType = 'owner' | 'management_company' | 'representative';
+type AccountType =
+  | 'tourist'
+  | 'resident'
+  | 'owner'
+  | 'management_company'
+  | 'representative'
+  | 'investor'
+  | 'vendor';
+
+type CanonicalRole = 'tourist' | 'resident' | 'owner' | 'investor' | 'vendor';
 
 interface AccountTypeOption {
   id: AccountType;
@@ -22,9 +32,29 @@ interface AccountTypeOption {
   titleRu: string;
   descEn: string;
   descRu: string;
+  role: CanonicalRole;
+  ownerType?: string;
 }
 
 const accountTypes: AccountTypeOption[] = [
+  {
+    id: 'tourist',
+    icon: <Plane className="h-8 w-8" />,
+    titleEn: 'Visiting Phuket',
+    titleRu: 'Приехал(а) в отпуск',
+    descEn: 'Short stay — services, bookings, help on the ground',
+    descRu: 'Короткая поездка — услуги, брони, помощь на месте',
+    role: 'tourist',
+  },
+  {
+    id: 'resident',
+    icon: <MapPin className="h-8 w-8" />,
+    titleEn: 'Living in Phuket',
+    titleRu: 'Живу в Пхукете',
+    descEn: 'Everyday life: visa, home, health, schools',
+    descRu: 'Повседневная жизнь: виза, дом, здоровье, школы',
+    role: 'resident',
+  },
   {
     id: 'owner',
     icon: <Home className="h-8 w-8" />,
@@ -32,6 +62,8 @@ const accountTypes: AccountTypeOption[] = [
     titleRu: 'Собственник',
     descEn: 'I manage my own property',
     descRu: 'Управляю своим объектом',
+    role: 'owner',
+    ownerType: 'individual',
   },
   {
     id: 'management_company',
@@ -40,6 +72,8 @@ const accountTypes: AccountTypeOption[] = [
     titleRu: 'УК / Агент',
     descEn: "I manage clients' properties",
     descRu: 'Управляю объектами клиентов',
+    role: 'owner',
+    ownerType: 'management_company',
   },
   {
     id: 'representative',
@@ -48,6 +82,26 @@ const accountTypes: AccountTypeOption[] = [
     titleRu: 'Представитель',
     descEn: 'Acting on behalf of owner (POA)',
     descRu: 'Действую по доверенности',
+    role: 'owner',
+    ownerType: 'representative',
+  },
+  {
+    id: 'investor',
+    icon: <TrendingUp className="h-8 w-8" />,
+    titleEn: 'Investor',
+    titleRu: 'Инвестор',
+    descEn: 'Looking at projects, yields and due diligence',
+    descRu: 'Смотрю проекты, доходность и due diligence',
+    role: 'investor',
+  },
+  {
+    id: 'vendor',
+    icon: <Store className="h-8 w-8" />,
+    titleEn: 'Business / Service provider',
+    titleRu: 'Бизнес / Поставщик услуг',
+    descEn: 'I want to offer my services on myUNO',
+    descRu: 'Хочу предлагать свои услуги на myUNO',
+    role: 'vendor',
   },
 ];
 
@@ -59,38 +113,68 @@ export default function AccountTypeSelection() {
   const { createOrg, isCreating } = useOrgs();
   const { defaultPath: ownerDefaultPath } = useOwnerType();
   const isRu = language === 'ru';
-  const redirectTo = searchParams.get('redirect') || ownerDefaultPath || '/owner';
+
+  // Where the user was heading before authentication interrupted them.
+  const redirectParam = searchParams.get('redirect');
 
   const [selectedType, setSelectedType] = useState<AccountType | null>(null);
   const [companyName, setCompanyName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const destinationFor = (option: AccountTypeOption): string => {
+    if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+      return redirectParam;
+    }
+    switch (option.role) {
+      case 'owner':
+        return ownerDefaultPath || '/owner';
+      case 'investor':
+        return '/invest';
+      case 'vendor':
+        return '/vendor/onboarding';
+      default:
+        return '/home';
+    }
+  };
+
   const handleContinue = async () => {
-    if (!selectedType) {
+    const option = accountTypes.find((t) => t.id === selectedType);
+    if (!option) {
       toast.error(isRu ? 'Выберите тип аккаунта' : 'Select account type');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      if (selectedType === 'management_company') {
+      if (option.id === 'management_company') {
         if (!companyName.trim()) {
           toast.error(isRu ? 'Введите название компании' : 'Enter company name');
           setIsSubmitting(false);
           return;
         }
 
-        // Create organization
         await createOrg({
           name: companyName,
-          org_type: 'management_company' as any,
+          org_type: 'management_company' as never,
         });
 
         toast.success(isRu ? 'Компания создана!' : 'Company created!');
       }
 
-      // Navigate to owner dashboard or add property
-      navigate(redirectTo);
+      // Persist the choice so this mandatory step is never asked twice and the
+      // app can personalise from the first screen.
+      if (user?.id) {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            primary_role: option.role,
+            ...(option.ownerType ? { owner_type: option.ownerType } : {}),
+          })
+          .eq('id', user.id);
+        if (error) throw error;
+      }
+
+      navigate(destinationFor(option), { replace: true });
     } catch (error) {
       logger.error('Error setting up account:', error);
       toast.error(isRu ? 'Ошибка настройки аккаунта' : 'Error setting up account');
@@ -107,9 +191,9 @@ export default function AccountTypeSelection() {
             {isRu ? 'Как вы будете использовать платформу?' : 'How will you use the platform?'}
           </h1>
           <p className="text-muted-foreground">
-            {isRu 
-              ? 'Это поможет нам настроить ваш аккаунт' 
-              : 'This helps us set up your account'}
+            {isRu
+              ? 'Один шаг — и мы настроим аккаунт под вас. Изменить можно в любой момент.'
+              : 'One step and we set the account up for you. You can change it any time.'}
           </p>
         </div>
 
@@ -163,12 +247,12 @@ export default function AccountTypeSelection() {
                 <Input
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder={isRu ? 'ООО "Управляющая компания"' : 'Property Management Co.'}
+                  placeholder={isRu ? 'ООО «Управляющая компания»' : 'Property Management Co.'}
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                {isRu 
-                  ? 'Вы сможете добавить контактные данные и логотип позже' 
+                {isRu
+                  ? 'Контактные данные и логотип можно добавить позже'
                   : 'You can add contact details and logo later'}
               </p>
             </CardContent>
@@ -180,9 +264,9 @@ export default function AccountTypeSelection() {
           <Card className="border-accent-amber/30 bg-accent-amber/5">
             <CardContent className="p-6">
               <p className="text-sm">
-                {isRu 
-                  ? '📋 При добавлении объекта вы сможете указать контактные данные реального собственника. После регистрации собственника на платформе, владение объектом можно будет передать ему.' 
-                  : "📋 When adding a property, you'll be able to enter the actual owner's contact details. Once they register on the platform, ownership can be transferred to them."}
+                {isRu
+                  ? 'При добавлении объекта вы сможете указать контактные данные собственника. После его регистрации владение объектом можно передать ему.'
+                  : "When adding a property, you can enter the owner's contact details. Once they register, ownership can be transferred to them."}
               </p>
             </CardContent>
           </Card>
@@ -208,8 +292,8 @@ export default function AccountTypeSelection() {
         </Button>
 
         <p className="text-center text-xs text-muted-foreground">
-          {isRu 
-            ? 'Вы всегда можете изменить настройки в профиле' 
+          {isRu
+            ? 'Вы всегда можете изменить настройки в профиле'
             : 'You can always change settings in your profile'}
         </p>
       </div>
