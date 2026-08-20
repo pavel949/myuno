@@ -33,6 +33,7 @@ export const ru: Record<string, string> = {
   'discover.situationsSoon': 'Здесь скоро появятся ситуации. А пока просто напишите нам.',
   'discover.contactConcierge': 'Написать консьержу',
   'discover.errorLoad': 'Не получилось загрузить список. Обновите страницу или напишите нам — поможем вручную.',
+  'discover.retryAction': 'Попробовать снова',
   'discover.open': 'Открыть',
   'discover.miniAppsForYou': 'Мини-приложения для вас',
   'discover.cluster.arrive': 'Приезд и первые дни',

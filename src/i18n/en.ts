@@ -33,6 +33,7 @@ export const en: Record<string, string> = {
   'discover.situationsSoon': 'Situations are coming soon. In the meantime, just message us.',
   'discover.contactConcierge': 'Message a concierge',
   'discover.errorLoad': 'We could not load the list. Please refresh, or message us and we will help by hand.',
+  'discover.retryAction': 'Try again',
   'discover.open': 'Open',
   'discover.miniAppsForYou': 'Mini-apps for you',
   'discover.cluster.arrive': 'Arriving and first days',

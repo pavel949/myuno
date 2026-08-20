@@ -18,7 +18,7 @@ import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
 import { ROLE_META } from '@/lib/roleBlend';
 import { RoleSheet } from '@/components/home/RoleSheet';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import { cn } from '@/lib/utils';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
 import { buildSituationSections } from '@/lib/navigation/situationSections';
@@ -83,7 +83,7 @@ const SITUATION_CLUSTER_MAP: Record<string, ClusterId> = buildSituationClusterMa
 export default function NavigatorPageV3() {
   const { language, t } = useLanguage();
   const isRu = language === 'ru';
-  const { data: situations, isLoading, isError } = useLifeSituations();
+  const { data: situations, isLoading, isError, refetch } = useLifeSituations();
   const { data: counts, isError: countsError } = useSituationServiceCounts();
   const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
   const role = useLifeOSRole();
@@ -246,19 +246,21 @@ export default function NavigatorPageV3() {
           </div>
         </header>
 
-        {isError && (
-          <div className="border border-destructive/40 bg-destructive/5 text-destructive p-4 text-sm mb-6">
-            {t('discover.errorLoad')}
-          </div>
+        {/* Unified loading / error surface — same component that renders the rows,
+            so a failure never leaves sections in different states. */}
+        {(isError || isLoading) && (
+          <SituationList
+            situations={[]}
+            source="navigator_v3_root"
+            variant="prominent"
+            isError={isError}
+            isLoading={isLoading}
+            skeletonCount={6}
+            onRetry={isError ? () => { void refetch(); } : undefined}
+            className="mb-6"
+          />
         )}
 
-        {isLoading && (
-          <div className="space-y-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={`nav-skeleton-${i}`} className="h-14 w-full rounded-none" />
-            ))}
-          </div>
-        )}
 
         {/* Personalized mini-apps grid (superapp surface) */}
         {!isLoading && !query && (
