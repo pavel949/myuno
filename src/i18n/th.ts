@@ -33,6 +33,7 @@ export const th: Record<string, string> = {
   'discover.situationsSoon': 'สถานการณ์จะเปิดในเร็วๆ นี้',
   'discover.contactConcierge': 'ติดต่อคอนซีเยร์',
   'discover.errorLoad': 'ไม่สามารถโหลดสถานการณ์ได้',
+  'discover.retryAction': 'ลองอีกครั้ง',
   'discover.open': 'เปิด',
   'discover.miniAppsForYou': 'มินิแอปสำหรับคุณ',
   'discover.cluster.arrive': 'มาถึง',
