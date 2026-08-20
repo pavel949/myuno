@@ -34365,6 +34365,7 @@ export type Database = {
         Args: { p_property_id: string; p_user_id: string }
         Returns: boolean
       }
+      submit_consultation_request: { Args: { payload: Json }; Returns: string }
       sync_properties_clearview_for_project: {
         Args: { _project_id: string }
         Returns: undefined
