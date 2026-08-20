@@ -61,18 +61,78 @@ function SituationListImpl({
   variant = 'compact',
   className,
 }: SituationListProps) {
+function SituationListImpl({
+  situations,
+  counts,
+  source,
+  trackContext,
+  variant = 'compact',
+  className,
+  isLoading = false,
+  isError = false,
+  onRetry,
+  skeletonCount = 4,
+}: SituationListProps) {
   const { language, t } = useLanguage();
   const isRu = language === 'ru';
   const styles = VARIANTS[variant];
 
   // Single analytics layer — impressions + clicks, identical for every variant.
-  const codes = React.useMemo(() => situations.map((s) => s.code), [situations]);
+  // Impressions are suppressed while loading/failing so a skeleton never counts as a view.
+  const codes = React.useMemo(
+    () => (isLoading || isError ? [] : situations.map((s) => s.code)),
+    [situations, isLoading, isError],
+  );
   const { containerRef, onSituationClick } = useSituationTracking({
     codes,
     source,
     variant,
     context: trackContext,
   });
+
+  // Error state wins over everything else, so every section fails identically.
+  if (isError) {
+    return (
+      <div
+        role="alert"
+        className={cn(
+          'border border-destructive/40 bg-destructive/5 p-4 text-[13px] text-destructive',
+          className,
+        )}
+      >
+        <p>{t('discover.errorLoad')}</p>
+        {onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-2 underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
+          >
+            {t('discover.retryAction')}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <ul
+        aria-busy="true"
+        aria-live="polite"
+        className={cn('divide-y divide-border', className)}
+      >
+        {Array.from({ length: Math.max(1, skeletonCount) }).map((_, i) => (
+          <li key={`situation-skeleton-${i}`} className={cn('flex items-center gap-4', styles.row)}>
+            <div className="flex-1 min-w-0 space-y-2">
+              <Skeleton className="h-4 w-2/3 rounded-none" />
+              <Skeleton className="h-3 w-1/3 rounded-none" />
+            </div>
+            <Skeleton className="h-3 w-16 rounded-none shrink-0" />
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
   if (situations.length === 0) return null;
 
@@ -83,6 +143,7 @@ function SituationListImpl({
         const desc = isRu ? s.description_ru : s.description_en;
         const count = counts?.[s.id];
         const href = resolveSituationHref(s.code);
+
         return (
           <li key={s.id}>
             <Link
