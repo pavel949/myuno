@@ -192,6 +192,8 @@ export function PropertyStayRulesPanel({ propertyId }: PropertyStayRulesPanelPro
             <Input
               id={`stay-rule-${field.key}`}
               inputMode="numeric"
+              min={STAY_RULE_LIMITS[field.key].min}
+              max={STAY_RULE_LIMITS[field.key].max}
               value={form[field.key]}
               onChange={(e) => handleChange(field.key, e.target.value)}
               placeholder={isRussian ? 'Не задано' : 'Not set'}
@@ -199,7 +201,10 @@ export function PropertyStayRulesPanel({ propertyId }: PropertyStayRulesPanelPro
             />
             <p className="text-xs text-muted-foreground">
               {isRussian ? field.hintRu : field.hintEn}
+              {' · '}
+              {STAY_RULE_LIMITS[field.key].min}–{STAY_RULE_LIMITS[field.key].max}
             </p>
+
             {errors[field.key] && (
               <p className="text-xs text-destructive">{errors[field.key]}</p>
             )}
