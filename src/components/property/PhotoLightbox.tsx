@@ -112,7 +112,13 @@ export function PhotoLightbox({
         )}
       </div>
 
+      {/* Caption for the current photo (room tag / description) */}
+      {captions?.[currentIndex] && (
+        <p className="px-6 pt-3 text-center text-sm text-white/80">{captions[currentIndex]}</p>
+      )}
+
       {/* Thumbnail strip */}
+
       <div className="px-4 py-3 overflow-x-auto scrollbar-hide touch-pan-y">
         <div className="flex gap-2 justify-center">
           {images.map((img, i) => (
