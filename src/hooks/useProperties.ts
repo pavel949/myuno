@@ -73,6 +73,19 @@ export interface Property {
   pool_type?: string;
   parking_type?: string;
   is_for_sale?: boolean;
+  /** Structured bedrooms/bed configuration (jsonb) used by sleeping arrangements. */
+  rooms?: import('@/integrations/supabase/types').Json | null;
+  /** Number of beds across the unit. */
+  beds?: number | null;
+  // Stay rules (property-level fallbacks for property_rental_terms)
+  /** Longest stay a guest can book, in nights. */
+  max_stay_nights?: number | null;
+  /** Minimum lead time before check-in, in hours. */
+  advance_notice_hours?: number | null;
+  /** Turnaround days blocked after each stay. */
+  preparation_days?: number | null;
+  /** How far ahead bookings are accepted, in months. */
+  booking_window_months?: number | null;
 }
 
 export interface PropertyProject {
