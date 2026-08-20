@@ -122,12 +122,29 @@ function shortForm(locale: StayRuleLocale, id: StayRuleId, value: string): strin
  * Returns an empty array when no rule is configured.
  */
 export function buildStayRuleRows(
-  source: StayRuleSource | null | undefined,
+  input: StayRuleSource | null | undefined,
   locale: StayRuleLocale,
 ): StayRuleRow[] {
-  if (!source) return [];
+  if (!input) return [];
+
+  // Same limits as the DB constraints / booking validator: drop inconsistent rules.
+  const safe = sanitizeStayRuleTerms({
+    min_stay_nights: input.minStayNights,
+    max_stay_nights: input.maxStayNights,
+    advance_notice_hours: input.advanceNoticeHours,
+    preparation_days: input.preparationDays,
+    booking_window_months: input.bookingWindowMonths,
+  });
+  const source: StayRuleSource = {
+    minStayNights: safe.min_stay_nights,
+    maxStayNights: safe.max_stay_nights,
+    advanceNoticeHours: safe.advance_notice_hours,
+    preparationDays: safe.preparation_days,
+    bookingWindowMonths: safe.booking_window_months,
+  };
 
   const values: Array<{ id: StayRuleId; value: string | null }> = [
+
     {
       id: 'min_stay',
       value: withValue(positiveNumber(source.minStayNights), (n) => formatNights(locale, n)),
