@@ -13,6 +13,7 @@ import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
 import { RealEstateDomainHealthPanel } from '@/components/admin/RealEstateDomainHealthPanel';
+import { PropertyProjectBulkLinkPanel } from '@/components/admin/PropertyProjectBulkLinkPanel';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -433,6 +434,7 @@ export default function AdminProperties() {
         {/* Domain structure health: developer -> project -> unit */}
         <div className="mb-4">
           <RealEstateDomainHealthPanel />
+          <PropertyProjectBulkLinkPanel />
         </div>
 
         {/* Search & Add */}
