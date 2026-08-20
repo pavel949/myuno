@@ -125,3 +125,46 @@ export function describeStayRulesDbError(
 
   return null;
 }
+
+export interface RawStayRuleTerms {
+  min_stay_nights?: number | string | null;
+  max_stay_nights?: number | string | null;
+  advance_notice_hours?: number | string | null;
+  preparation_days?: number | string | null;
+  booking_window_months?: number | string | null;
+}
+
+const withinLimits = (field: StayRuleField, value: unknown): number | null => {
+  if (value === null || value === undefined || value === '') return null;
+  const num = Number(value);
+  if (!Number.isFinite(num) || !Number.isInteger(num)) return null;
+  const { min, max } = STAY_RULE_LIMITS[field];
+  return num >= min && num <= max ? num : null;
+};
+
+/**
+ * Normalizes stay rules coming from the database/API to the exact same limits the
+ * CHECK constraints enforce. Out-of-range, fractional or contradictory values are
+ * dropped (treated as "no rule") so legacy or inconsistent rows can never make a
+ * property permanently unavailable.
+ */
+export function sanitizeStayRuleTerms(terms?: RawStayRuleTerms | null): StayRulesValues {
+  const result: StayRulesValues = {
+    min_stay_nights: withinLimits('min_stay_nights', terms?.min_stay_nights),
+    max_stay_nights: withinLimits('max_stay_nights', terms?.max_stay_nights),
+    advance_notice_hours: withinLimits('advance_notice_hours', terms?.advance_notice_hours),
+    preparation_days: withinLimits('preparation_days', terms?.preparation_days),
+    booking_window_months: withinLimits('booking_window_months', terms?.booking_window_months),
+  };
+
+  // Contradictory pair (max < min): ignore the maximum instead of blocking all dates.
+  if (
+    result.min_stay_nights !== null &&
+    result.max_stay_nights !== null &&
+    result.max_stay_nights < result.min_stay_nights
+  ) {
+    result.max_stay_nights = null;
+  }
+
+  return result;
+}
