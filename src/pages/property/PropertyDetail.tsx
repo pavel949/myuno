@@ -149,23 +149,18 @@ export default function PropertyDetail() {
     );
   }
 
-  // Loose extension for property fields not yet in generated DB types
+  // Loose extension for property fields not yet in generated DB types.
+  // `rooms`, `beds` and the stay-rule fields now live on the Property model
+  // (see useProperties.ts) — keep only what is still untyped here.
   type GuestExtraFee = { name?: string; amount?: number; per?: string };
   type PropertyExt = {
     tenancy_modes?: string[] | null;
-    beds?: number | null;
     title_deed_type?: string | null;
     escrow_offered?: boolean | null;
     installment_plan?: { milestones?: InstallmentMilestone[]; preset_id?: string } | null;
     guest_extra_fees?: GuestExtraFee[] | null;
     price_per_month?: number | null;
     min_lease_months?: number | null;
-    rooms?: unknown;
-    min_stay_nights?: number | null;
-    max_stay_nights?: number | null;
-    advance_notice_hours?: number | null;
-    preparation_days?: number | null;
-    booking_window_months?: number | null;
   };
   const propertyExt = property as unknown as typeof property & PropertyExt;
 
