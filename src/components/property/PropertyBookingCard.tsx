@@ -165,15 +165,23 @@ export function PropertyBookingCard({
   
   // Validation
   const validationErrors = useMemo(() => {
-    const errors: string[] = [];
-    if (nights > 0 && rentalTerms?.min_stay_nights && nights < rentalTerms.min_stay_nights) {
-      errors.push(isRu ? `Мин. срок: ${rentalTerms.min_stay_nights} ночей` : `Min. stay: ${rentalTerms.min_stay_nights} nights`);
-    }
+    const errors: string[] = getStayRuleErrors(
+      {
+        checkIn: dateRange?.from,
+        checkOut: dateRange?.to,
+        terms: rentalTerms,
+        existingStays: (unavailableDates ?? [])
+          .filter((u) => u.kind === 'booked')
+          .map((u) => ({ start: u.date, end: u.date })),
+      },
+      language,
+    );
     if (rentalTerms?.max_guests && guests > rentalTerms.max_guests) {
       errors.push(isRu ? `Макс. гостей: ${rentalTerms.max_guests}` : `Max guests: ${rentalTerms.max_guests}`);
     }
     return errors;
-  }, [nights, guests, rentalTerms, isRu]);
+  }, [dateRange, guests, rentalTerms, unavailableDates, language, isRu]);
+
   
   const handleReserve = () => {
     const params = new URLSearchParams();
