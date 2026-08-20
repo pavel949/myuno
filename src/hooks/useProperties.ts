@@ -260,7 +260,6 @@ export const PROPERTY_PUBLIC_DETAIL_COLUMNS = `
   is_active, is_featured, is_verified, approval_status, status,
   available_from, min_stay_nights, min_lease_months,
   max_stay_nights, advance_notice_hours, preparation_days, booking_window_months,
-
   rating, review_count,
   created_at, updated_at, approved_at,
   instant_booking, instant_booking_enabled_at,
