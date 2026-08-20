@@ -78,7 +78,7 @@ const FIELDS: Array<{
   },
   {
     key: 'advance_notice_hours',
-    labelRu: '预 Предупреждение, часов',
+    labelRu: 'Предупреждение, часов',
     labelEn: 'Advance notice, hours',
     hintRu: 'За сколько часов до заезда можно бронировать',
     hintEn: 'How long before check-in a booking is allowed',
