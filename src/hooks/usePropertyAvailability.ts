@@ -166,7 +166,7 @@ export function usePropertyRentalTerms(marketplacePropertyId?: string) {
 
       // Normalize stay rules through the shared validator limits so filters,
       // calendars and SSR consumers never see inconsistent rules.
-      const sanitized = sanitizeStayRuleTerms(data as Record<string, number | null>);
+      const sanitized = sanitizeStayRuleTerms(data as PropertyRentalTerms);
       return { ...(data as PropertyRentalTerms), ...sanitized } as PropertyRentalTerms;
 
     },
