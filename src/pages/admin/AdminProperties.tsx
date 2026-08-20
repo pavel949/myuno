@@ -30,7 +30,9 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
-import { Building2, Plus, Loader2, Search } from 'lucide-react';
+import { Building2, Plus, Loader2, Search, CalendarClock } from 'lucide-react';
+import { PropertyStayRulesPanel } from '@/components/admin/PropertyStayRulesPanel';
+
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { CanonicalPropertyForm, CanonicalPropertyFormData } from '@/components/property/canonical-form';
 
