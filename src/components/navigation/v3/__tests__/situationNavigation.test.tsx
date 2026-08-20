@@ -78,7 +78,27 @@ function renderList(list: TestSituation[], source = 'navigator_v3_for_you') {
   );
 }
 
+/**
+ * jsdom has no real IntersectionObserver — the global setup stub never fires.
+ * Replace it with one that reports the element as visible right away so the
+ * impression layer can be asserted.
+ */
+class ImmediateIntersectionObserver {
+  constructor(private cb: IntersectionObserverCallback) {}
+  observe(target: Element) {
+    this.cb(
+      [{ isIntersecting: true, target } as unknown as IntersectionObserverEntry],
+      this as unknown as IntersectionObserver,
+    );
+  }
+  unobserve() {}
+  disconnect() {}
+  takeRecords() { return []; }
+}
+
 beforeEach(() => {
+  (globalThis as unknown as { IntersectionObserver: unknown }).IntersectionObserver =
+    ImmediateIntersectionObserver;
   trackSituationClick.mockClear();
   trackSituationImpression.mockClear();
 });
