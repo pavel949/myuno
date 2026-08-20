@@ -24,6 +24,7 @@ import { BackButton } from '@/components/uno/BackButton';
 import { YachtExperienceSelect } from '@/components/yachts/YachtExperienceSelect';
 import { useYachtExperiences } from '@/hooks/useYachtExperiences';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 type CharterType = 'half_day' | 'full_day' | 'sunset' | 'overnight';
 
@@ -98,7 +99,7 @@ export default function YachtBooking() {
   // Auth redirect - must be after all hooks
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth', { state: { from: `/yachts/${id}/booking` } });
+      redirectToAuth(navigate, { from: `/yachts/${id}/booking` });
     }
   }, [authLoading, user, navigate, id]);
 

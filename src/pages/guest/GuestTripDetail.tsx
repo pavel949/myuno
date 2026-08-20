@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface PropertyBooking {
   id: string;
@@ -116,7 +117,7 @@ export default function GuestTripDetail() {
           <p className="text-muted-foreground mb-4">
             {isRu ? 'Авторизуйтесь чтобы увидеть детали бронирования' : 'Please sign in to see booking details'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
+          <Button onClick={() => redirectToAuth(navigate)}>
             {isRu ? 'Войти' : 'Sign In'}
           </Button>
         </div>

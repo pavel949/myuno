@@ -235,6 +235,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function VendorSubscription() {
   const navigate = useNavigate();
@@ -271,7 +272,7 @@ export default function VendorSubscription() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

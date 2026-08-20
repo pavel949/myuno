@@ -46,6 +46,7 @@ import { VendorRevenueWidget } from '@/components/vendor/VendorRevenueWidget';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { getCurrencySymbol } from '@/lib/config/currencies';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const statusColors: Record<string, string> = {
   pending: 'bg-muted text-muted-foreground',
@@ -75,7 +76,7 @@ const VendorDashboard = () => {
 
   React.useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const VendorOnboarding = () => {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ const VendorOnboarding = () => {
   const { createService } = useVendorServices(createdProviderId || undefined);
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   // Only redirect to /vendor if the user already had a vendor org BEFORE starting

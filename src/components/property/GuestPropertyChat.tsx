@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { ModerationResult } from '@/lib/chatModerationPatterns';
 import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface GuestPropertyChatProps {
   propertyId: string;
@@ -122,7 +123,7 @@ export const GuestPropertyChat: React.FC<GuestPropertyChatProps> = ({
               : 'You need to be logged in to message the host'}
           </p>
         </div>
-        <Button onClick={() => navigate('/auth')} className="gap-2">
+        <Button onClick={() => redirectToAuth(navigate)} className="gap-2">
           <LogIn className="w-4 h-4" />
           {isRu ? 'Войти' : 'Log in'}
         </Button>

@@ -24,6 +24,7 @@ import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function CleaningBooking() {
   const { id } = useParams<{ id: string }>();
@@ -62,7 +63,7 @@ export default function CleaningBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/cleaning/${id}/book` } });
+    redirectToAuth(navigate, { from: `/cleaning/${id}/book` });
     return null;
   }
   

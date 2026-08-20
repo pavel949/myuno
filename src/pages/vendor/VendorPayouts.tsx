@@ -33,6 +33,7 @@ import {
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { PayoutMethodsSection } from '@/components/vendor/PayoutMethodsSection';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const paymentMethods = [
   { value: 'bank_card', labelEn: 'Bank Card', labelRu: 'Банковская карта' },
@@ -60,7 +61,7 @@ const VendorPayouts = () => {
 
   React.useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

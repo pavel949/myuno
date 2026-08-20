@@ -42,6 +42,7 @@ import { InternationalAddressForm } from '@/components/market/InternationalAddre
 import { SavedAddressSelector } from '@/components/market/SavedAddressSelector';
 import { getCurrencySymbol } from '@/lib/config/currencies';
 import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 // Order Item Card Component
 interface OrderItemProps {
@@ -278,7 +279,7 @@ const MarketCheckout = () => {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: '/market/checkout' } });
+    redirectToAuth(navigate, { from: '/market/checkout' });
     return null;
   }
 

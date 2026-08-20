@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Video, CheckCircle2 } from "lucide-react";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function LegalBooking() {
   const { id } = useParams<{ id: string }>();
@@ -72,7 +73,7 @@ export default function LegalBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/legal/booking/${id}` } });
+    redirectToAuth(navigate, { from: `/legal/booking/${id}` });
     return null;
   }
 

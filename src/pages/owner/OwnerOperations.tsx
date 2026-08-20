@@ -25,6 +25,7 @@ import {
   CalendarDays
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function OwnerOperations() {
   const { language } = useLanguage();
@@ -95,7 +96,7 @@ export default function OwnerOperations() {
           <p className="text-muted-foreground mb-6">
             {isRu ? 'Войдите для просмотра задач' : 'Sign in to view tasks'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
+          <Button onClick={() => redirectToAuth(navigate)}>
             {isRu ? 'Войти' : 'Sign In'}
           </Button>
         </div>

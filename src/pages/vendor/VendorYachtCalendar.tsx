@@ -24,6 +24,7 @@ import {
   DollarSign,
   Link2
 } from 'lucide-react';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function VendorYachtCalendar() {
   const { id } = useParams<{ id: string }>();
@@ -89,7 +90,7 @@ export default function VendorYachtCalendar() {
   }
 
   if (!user) {
-    navigate('/auth');
+    redirectToAuth(navigate);
     return null;
   }
 

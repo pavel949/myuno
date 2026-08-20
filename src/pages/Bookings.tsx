@@ -24,6 +24,7 @@ import {
   invalidateStatusHistoryCache,
 } from '@/lib/bookings/statusHistoryCache';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface BookingItem {
   id: string;
@@ -271,7 +272,7 @@ export default function Bookings() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth', { replace: true });
+      redirectToAuth(navigate, { replace: true });
     }
   }, [user, authLoading, navigate]);
 

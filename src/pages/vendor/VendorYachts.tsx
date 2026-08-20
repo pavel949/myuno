@@ -67,6 +67,7 @@ import {
   CardPreviewSection,
 } from '@/components/vendor';
 import { CancellationPolicySelector } from '@/components/yachts/CancellationPolicySelector';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const yachtTypes = [
   { value: 'motor_yacht', label: 'Motor Yacht', labelRu: 'Моторная яхта' },
@@ -222,7 +223,7 @@ const VendorYachts = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

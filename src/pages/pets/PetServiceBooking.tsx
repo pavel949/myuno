@@ -24,6 +24,7 @@ import { useStripeUnifiedCheckout } from '@/hooks/useStripeUnifiedCheckout';
 import { addDays, format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
@@ -65,7 +66,7 @@ export default function PetServiceBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/pets/${id}/booking` } });
+    redirectToAuth(navigate, { from: `/pets/${id}/booking` });
     return null;
   }
 

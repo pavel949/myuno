@@ -18,6 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner';
 import { PawPrint, Plus, MoreVertical, Edit, Trash2, Loader2, Star, MapPin } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const serviceTypes = [
   { value: 'grooming', label: 'Grooming', labelRu: 'Груминг' },
@@ -51,7 +52,7 @@ const VendorPets = () => {
   const isRussian = language === 'ru';
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {

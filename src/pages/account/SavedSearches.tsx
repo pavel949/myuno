@@ -16,6 +16,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNbSavedSearches } from '@/hooks/useNbSavedSearches';
 import { toast } from 'sonner';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function SavedSearches() {
   const { language } = useLanguage();
@@ -33,7 +34,7 @@ export default function SavedSearches() {
             icon={Bookmark}
             title={isRu ? 'Войдите в аккаунт' : 'Sign in required'}
             description={isRu ? 'Войдите, чтобы управлять поисками' : 'Sign in to manage your saved searches'}
-            action={<Button onClick={() => navigate('/auth')}>{isRu ? 'Войти' : 'Sign in'}</Button>}
+            action={<Button onClick={() => redirectToAuth(navigate)}>{isRu ? 'Войти' : 'Sign in'}</Button>}
           />
         </PageContainer>
       </AppLayout>

@@ -17,6 +17,7 @@ import { usePropertyComplexes } from '@/hooks/usePropertyComplexes';
 import { usePropertyProjects } from '@/hooks/usePropertyProjects';
 import { CalendarDays, CalendarPlus, Plus, RefreshCw, LayoutGrid, List, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 type ViewMode = 'single' | 'multi';
 
@@ -91,7 +92,7 @@ export default function OwnerCalendar() {
         <p className="text-muted-foreground mb-6">
           {isRu ? 'Войдите, чтобы просмотреть календарь' : 'Sign in to view the calendar'}
         </p>
-        <Button onClick={() => navigate('/auth')}>
+        <Button onClick={() => redirectToAuth(navigate)}>
           {isRu ? 'Войти' : 'Sign In'}
         </Button>
       </div>

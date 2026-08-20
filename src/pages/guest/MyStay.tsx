@@ -28,6 +28,7 @@ import {
   GuestMessagesBlock,
 } from '@/components/guest/dashboard';
 import { CheckInStatusStepper } from '@/components/guest/dashboard/CheckInStatusStepper';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const serviceTypes = [
   { id: 'cleaning', icon: Sparkles, label: { en: 'Cleaning', ru: 'Уборка' } },
@@ -74,7 +75,7 @@ export default function MyStay() {
           <p className="text-muted-foreground">
             {isRu ? 'Войдите для просмотра' : 'Please login to view'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
+          <Button onClick={() => redirectToAuth(navigate)}>
             {isRu ? 'Войти' : 'Login'}
           </Button>
         </div>

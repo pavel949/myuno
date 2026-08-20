@@ -36,6 +36,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { BookingStatusTimeline, BookingStatusTimelineSkeleton } from '@/components/bookings/BookingStatusTimeline';
 import { useBookingStatusHistory } from '@/hooks/useBookingStatusHistory';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 /**
  * Inline status-history block for a single vendor booking.
@@ -100,7 +101,7 @@ const VendorBookings = () => {
 
   React.useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

@@ -55,6 +55,7 @@ const TopActionsWidget = lazy(() => import('@/components/owner/dashboard/TopActi
 const SellSignalWidget = lazy(() => import('@/components/owner/dashboard/SellSignalWidget').then(m => ({ default: m.SellSignalWidget })));
 const SalesAgentCrmSnapshot = lazy(() => import('@/components/owner/dashboard/SalesAgentCrmSnapshot').then(m => ({ default: m.SalesAgentCrmSnapshot })));
 import { AlertTriangle, Briefcase, CircleDollarSign, HeartPulse, Sun } from 'lucide-react';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 function SectionSkeleton() {
   return (
@@ -403,10 +404,10 @@ export default function OwnerDashboard() {
           {isRu ? 'Профессиональное управление вашей недвижимостью на Пхукете' : 'Professional property management in Phuket'}
         </p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
-          <Button onClick={() => navigate('/auth')} size="lg" className="h-12">
+          <Button onClick={() => redirectToAuth(navigate)} size="lg" className="h-12">
             {isRu ? 'Войти' : 'Sign In'}
           </Button>
-          <Button variant="outline" onClick={() => navigate('/auth?mode=signup')} size="lg" className="h-12">
+          <Button variant="outline" onClick={() => redirectToAuth(navigate, { mode: 'signup' })} size="lg" className="h-12">
             {isRu ? 'Создать аккаунт' : 'Create Account'}
           </Button>
         </div>

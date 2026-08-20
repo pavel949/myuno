@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Home, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 // Fallback services for when no provider data is available
 const fallbackServices = [
@@ -104,7 +105,7 @@ export default function ServiceBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/services/booking/${id}` } });
+    redirectToAuth(navigate, { from: `/services/booking/${id}` });
     return null;
   }
 
