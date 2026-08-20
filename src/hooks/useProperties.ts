@@ -98,7 +98,16 @@ export interface PropertyProject {
 export interface PropertyRentalTerms {
   price_per_night?: number;
   min_stay_nights?: number;
+  /** Longest stay a guest can book, in nights. */
+  max_stay_nights?: number;
+  /** Minimum lead time before check-in, in hours. */
+  advance_notice_hours?: number;
+  /** Turnaround days blocked after each stay. */
+  preparation_days?: number;
+  /** How far ahead bookings are accepted, in months. */
+  booking_window_months?: number;
   max_guests?: number;
+
   deposit_amount?: number;
   deposit_currency?: string;
   deposit_type?: string;
@@ -250,6 +259,8 @@ export const PROPERTY_PUBLIC_DETAIL_COLUMNS = `
   lat, lng, address, district,
   is_active, is_featured, is_verified, approval_status, status,
   available_from, min_stay_nights, min_lease_months,
+  max_stay_nights, advance_notice_hours, preparation_days, booking_window_months,
+
   rating, review_count,
   created_at, updated_at, approved_at,
   instant_booking, instant_booking_enabled_at,
@@ -536,6 +547,11 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       const rentalTerms: PropertyRentalTerms = {
         price_per_night: property.price_per_night,
         min_stay_nights: property.min_stay_nights,
+        max_stay_nights: property.max_stay_nights ?? undefined,
+        advance_notice_hours: property.advance_notice_hours ?? undefined,
+        preparation_days: property.preparation_days ?? undefined,
+        booking_window_months: property.booking_window_months ?? undefined,
+
         max_guests: property.max_guests,
         deposit_amount: property.deposit_amount,
         deposit_currency: property.deposit_currency,
