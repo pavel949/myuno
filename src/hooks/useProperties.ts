@@ -98,7 +98,16 @@ export interface PropertyProject {
 export interface PropertyRentalTerms {
   price_per_night?: number;
   min_stay_nights?: number;
+  /** Longest stay a guest can book, in nights. */
+  max_stay_nights?: number;
+  /** Minimum lead time before check-in, in hours. */
+  advance_notice_hours?: number;
+  /** Turnaround days blocked after each stay. */
+  preparation_days?: number;
+  /** How far ahead bookings are accepted, in months. */
+  booking_window_months?: number;
   max_guests?: number;
+
   deposit_amount?: number;
   deposit_currency?: string;
   deposit_type?: string;
