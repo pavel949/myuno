@@ -14,6 +14,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
 import { useSituationTracking } from './useSituationTracking';
 import { formatServices } from '@/lib/i18n/pluralize';
+import { Skeleton } from '@/components/ui/skeleton';
+
 import { cn } from '@/lib/utils';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
