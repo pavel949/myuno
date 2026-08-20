@@ -21,6 +21,8 @@ import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { TrustStrip } from './TrustStrip';
+import { StayRulesInline } from './StayRulesInline';
+
 import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
 
 interface PropertyListingCardProps {
@@ -241,6 +243,20 @@ function PropertyListingCardBase({
             ))}
           </div>
         )}
+
+        {mode === 'rent' && (
+          <StayRulesInline
+            minStayNights={property.min_stay_nights}
+            maxStayNights={property.max_stay_nights}
+            advanceNoticeHours={property.advance_notice_hours}
+            preparationDays={property.preparation_days}
+            bookingWindowMonths={property.booking_window_months}
+            maxItems={3}
+            className="mt-1"
+          />
+        )}
+
+
 
         {/* Row 3: Price */}
         <div className="pt-0.5 sm:pt-1">
