@@ -33,6 +33,8 @@ import { differenceInDays, format, parseISO, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { InquiryConfirmation } from '@/components/property/InquiryConfirmation';
+import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
+
 
 export default function PropertyInquiry() {
   const { id } = useParams();
