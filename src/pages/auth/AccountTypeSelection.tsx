@@ -133,7 +133,7 @@ export default function AccountTypeSelection() {
       case 'vendor':
         return '/vendor/onboarding';
       default:
-        return '/home';
+        return APP_ROUTES.HOME;
     }
   };
 
