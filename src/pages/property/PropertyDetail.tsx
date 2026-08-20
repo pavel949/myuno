@@ -454,17 +454,23 @@ export default function PropertyDetail() {
                 fallbackAmenities={amenities as string[]}
               />
 
-              {/* Sleeping arrangements from structured rooms data */}
-              <PropertySleepingArrangements rooms={propertyExt.rooms} />
+              {/* Sleeping arrangements from structured rooms data.
+                  Both blocks self-hide when data is missing; the boundary keeps a
+                  malformed jsonb payload from taking the whole page down. */}
+              <ErrorBoundary fallback={null}>
+                <PropertySleepingArrangements rooms={propertyExt?.rooms ?? null} />
+              </ErrorBoundary>
 
               {/* Booking-window rules */}
-              <StayRulesSection
-                minStayNights={rentalTerms?.min_stay_nights ?? propertyExt.min_stay_nights}
-                maxStayNights={rentalTerms?.max_stay_nights ?? propertyExt.max_stay_nights}
-                advanceNoticeHours={rentalTerms?.advance_notice_hours ?? propertyExt.advance_notice_hours}
-                preparationDays={rentalTerms?.preparation_days ?? propertyExt.preparation_days}
-                bookingWindowMonths={rentalTerms?.booking_window_months ?? propertyExt.booking_window_months}
-              />
+              <ErrorBoundary fallback={null}>
+                <StayRulesSection
+                  minStayNights={rentalTerms?.min_stay_nights ?? propertyExt?.min_stay_nights ?? null}
+                  maxStayNights={rentalTerms?.max_stay_nights ?? propertyExt?.max_stay_nights ?? null}
+                  advanceNoticeHours={rentalTerms?.advance_notice_hours ?? propertyExt?.advance_notice_hours ?? null}
+                  preparationDays={rentalTerms?.preparation_days ?? propertyExt?.preparation_days ?? null}
+                  bookingWindowMonths={rentalTerms?.booking_window_months ?? propertyExt?.booking_window_months ?? null}
+                />
+              </ErrorBoundary>
 
 
               {property.project && (
