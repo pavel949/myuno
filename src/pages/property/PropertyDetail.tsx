@@ -460,11 +460,12 @@ export default function PropertyDetail() {
               {/* Booking-window rules */}
               <StayRulesSection
                 minStayNights={rentalTerms?.min_stay_nights ?? propertyExt.min_stay_nights}
-                maxStayNights={propertyExt.max_stay_nights}
-                advanceNoticeHours={propertyExt.advance_notice_hours}
-                preparationDays={propertyExt.preparation_days}
-                bookingWindowMonths={propertyExt.booking_window_months}
+                maxStayNights={rentalTerms?.max_stay_nights ?? propertyExt.max_stay_nights}
+                advanceNoticeHours={rentalTerms?.advance_notice_hours ?? propertyExt.advance_notice_hours}
+                preparationDays={rentalTerms?.preparation_days ?? propertyExt.preparation_days}
+                bookingWindowMonths={rentalTerms?.booking_window_months ?? propertyExt.booking_window_months}
               />
+
 
               {property.project && (
                 <>
