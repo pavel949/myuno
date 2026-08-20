@@ -62,3 +62,5 @@ export { PropertyAmenitiesSection } from './PropertyAmenitiesSection';
 export { PropertySleepingArrangements } from './PropertySleepingArrangements';
 export { PropertyReviewRatings } from './PropertyReviewRatings';
 export { StayRulesSection } from './StayRulesSection';
+export { StayRulesInline } from './StayRulesInline';
+
