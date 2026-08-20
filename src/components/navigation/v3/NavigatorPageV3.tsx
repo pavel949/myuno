@@ -18,7 +18,7 @@ import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
 import { ROLE_META } from '@/lib/roleBlend';
 import { RoleSheet } from '@/components/home/RoleSheet';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import { cn } from '@/lib/utils';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
 import { buildSituationSections } from '@/lib/navigation/situationSections';
