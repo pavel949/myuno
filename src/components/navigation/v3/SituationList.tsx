@@ -29,7 +29,16 @@ interface SituationListProps {
   trackContext?: Record<string, unknown>;
   variant?: SituationListVariant;
   className?: string;
+  /** Show skeleton rows instead of content while data is loading. */
+  isLoading?: boolean;
+  /** Show a unified inline error block (takes precedence over loading). */
+  isError?: boolean;
+  /** Optional retry handler rendered inside the error block. */
+  onRetry?: () => void;
+  /** Number of skeleton rows to render while loading. */
+  skeletonCount?: number;
 }
+
 
 const VARIANTS: Record<SituationListVariant, { row: string; title: string; desc: string }> = {
   prominent: {
