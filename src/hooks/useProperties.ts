@@ -545,6 +545,11 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       const rentalTerms: PropertyRentalTerms = {
         price_per_night: property.price_per_night,
         min_stay_nights: property.min_stay_nights,
+        max_stay_nights: property.max_stay_nights ?? undefined,
+        advance_notice_hours: property.advance_notice_hours ?? undefined,
+        preparation_days: property.preparation_days ?? undefined,
+        booking_window_months: property.booking_window_months ?? undefined,
+
         max_guests: property.max_guests,
         deposit_amount: property.deposit_amount,
         deposit_currency: property.deposit_currency,
