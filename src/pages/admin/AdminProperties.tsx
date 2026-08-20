@@ -30,7 +30,9 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
-import { Building2, Plus, Loader2, Search } from 'lucide-react';
+import { Building2, Plus, Loader2, Search, CalendarClock } from 'lucide-react';
+import { PropertyStayRulesPanel } from '@/components/admin/PropertyStayRulesPanel';
+
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { CanonicalPropertyForm, CanonicalPropertyFormData } from '@/components/property/canonical-form';
 
@@ -585,6 +587,14 @@ export default function AdminProperties() {
                 onCancel={closeSheet}
                 isSubmitting={isSubmitting}
                 mode="admin"
+                propertyId={editingProperty?.id}
+                extraTabs={editingProperty?.id ? [{
+                  id: 'stay-rules',
+                  icon: CalendarClock,
+                  labelEn: 'Stay rules',
+                  labelRu: 'Условия аренды',
+                  content: <PropertyStayRulesPanel propertyId={editingProperty.id} />,
+                }] : []}
                 providerSelector={
                   <ProviderSelector
                     value={selectedProviderId}
@@ -594,6 +604,7 @@ export default function AdminProperties() {
                   />
                 }
               />
+
             </div>
           </SheetContent>
         </Sheet>
