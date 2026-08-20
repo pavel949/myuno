@@ -13,6 +13,8 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Home, Building2, Users, Plane, MapPin, TrendingUp, Store, ArrowRight, Loader2 } from 'lucide-react';
 import { logger } from '@/lib/logger';
+import { APP_ROUTES } from '@/lib/config/routes';
+
 
 type AccountType =
   | 'tourist'
