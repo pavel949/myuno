@@ -110,7 +110,7 @@ export function useSituationTracking({
         href,
         count,
         ...ctx,
-      } as Parameters<typeof trackSituationClick>[1]);
+      });
     },
     [],
   );

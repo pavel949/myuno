@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
-import { trackSituationClick } from '@/lib/analytics/track';
+import { useSituationTracking } from './useSituationTracking';
 import { formatServices } from '@/lib/i18n/pluralize';
 import { cn } from '@/lib/utils';
 import type { LifeSituation } from '@/hooks/useLifeOS';
@@ -56,10 +56,19 @@ function SituationListImpl({
   const isRu = language === 'ru';
   const styles = VARIANTS[variant];
 
+  // Single analytics layer — impressions + clicks, identical for every variant.
+  const codes = React.useMemo(() => situations.map((s) => s.code), [situations]);
+  const { containerRef, onSituationClick } = useSituationTracking({
+    codes,
+    source,
+    variant,
+    context: trackContext,
+  });
+
   if (situations.length === 0) return null;
 
   return (
-    <ul className={cn('divide-y divide-border', className)}>
+    <ul ref={containerRef} className={cn('divide-y divide-border', className)}>
       {situations.map((s) => {
         const title = isRu ? s.title_ru : s.title_en;
         const desc = isRu ? s.description_ru : s.description_en;
@@ -69,12 +78,7 @@ function SituationListImpl({
           <li key={s.id}>
             <Link
               to={href}
-              onClick={() => trackSituationClick(s.code, {
-                source,
-                href,
-                count,
-                ...trackContext,
-              })}
+              onClick={() => onSituationClick(s.code, { href, count })}
               className={cn(
                 'group flex items-center gap-4 -mx-2 px-2 transition-colors',
                 'hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
