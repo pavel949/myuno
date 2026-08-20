@@ -67,8 +67,10 @@ function mapRow(u: ProjectUnitRow): ProjectUnit {
 }
 
 export function useProjectUnits(projectId?: string) {
+  const legacyEnabled = useLegacyUnitTablesEnabled();
+
   return useQuery({
-    queryKey: ['project-units', projectId],
+    queryKey: ['project-units', projectId, legacyEnabled],
     queryFn: async (): Promise<ProjectUnit[]> => {
       if (!projectId) return [];
 
