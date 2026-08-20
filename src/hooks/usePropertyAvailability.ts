@@ -40,12 +40,19 @@ export interface BlockedDate {
 }
 
 // Check if a property is available for specific dates
-export function usePropertyAvailability(marketplacePropertyId?: string, checkIn?: string, checkOut?: string) {
+export function usePropertyAvailability(
+  marketplacePropertyId?: string,
+  checkIn?: string,
+  checkOut?: string,
+  language: string = 'ru',
+) {
+  const locale = language === 'en' ? 'en' : language === 'th' ? 'th' : 'ru';
+
   return useQuery({
-    queryKey: ['property-availability', marketplacePropertyId, checkIn, checkOut],
+    queryKey: ['property-availability', marketplacePropertyId, checkIn, checkOut, locale],
     queryFn: async () => {
       if (!marketplacePropertyId || !checkIn || !checkOut) {
-        return { isAvailable: true, message: '' };
+        return { isAvailable: true, message: '', code: null as null | 'dates_unavailable' };
       }
 
       // Use the database function to check availability
@@ -56,16 +63,19 @@ export function usePropertyAvailability(marketplacePropertyId?: string, checkIn?
           p_check_out: checkOut,
         });
 
-      if (error) return { isAvailable: true, message: '' };
+      if (error) return { isAvailable: true, message: '', code: null };
 
+      const isAvailable = data as boolean;
       return {
-        isAvailable: data as boolean,
-        message: data ? '' : 'These dates are not available',
+        isAvailable,
+        code: isAvailable ? null : ('dates_unavailable' as const),
+        message: isAvailable ? '' : DATES_UNAVAILABLE_MESSAGE[locale],
       };
     },
     enabled: !!marketplacePropertyId && !!checkIn && !!checkOut,
   });
 }
+
 
 // Get all blocked dates for a property
 export function usePropertyBlockedDates(marketplacePropertyId?: string) {
