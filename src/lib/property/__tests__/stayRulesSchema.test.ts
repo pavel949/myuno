@@ -88,3 +88,63 @@ describe('describeStayRulesDbError', () => {
     expect(describeStayRulesDbError('network error')).toBeNull();
   });
 });
+
+describe('sanitizeStayRuleTerms + shared enforcement', () => {
+  it('drops out-of-range and fractional rules instead of blocking availability', async () => {
+    const { sanitizeStayRuleTerms } = await import('../stayRulesSchema');
+    expect(
+      sanitizeStayRuleTerms({
+        min_stay_nights: 0,
+        max_stay_nights: 999999,
+        advance_notice_hours: -5,
+        preparation_days: 2.5,
+        booking_window_months: 120,
+      }),
+    ).toEqual({
+      min_stay_nights: null,
+      max_stay_nights: null,
+      advance_notice_hours: null,
+      preparation_days: null,
+      booking_window_months: null,
+    });
+  });
+
+  it('ignores a maximum lower than the minimum', async () => {
+    const { sanitizeStayRuleTerms } = await import('../stayRulesSchema');
+    const safe = sanitizeStayRuleTerms({ min_stay_nights: 7, max_stay_nights: 3 });
+    expect(safe.min_stay_nights).toBe(7);
+    expect(safe.max_stay_nights).toBeNull();
+  });
+
+  it('booking validator ignores inconsistent rules (same source of truth)', async () => {
+    const { validateStayRules: validateBooking } = await import('../stayRulesValidation');
+    const violations = validateBooking({
+      checkIn: '2026-09-01',
+      checkOut: '2026-09-10',
+      now: new Date('2026-08-01T00:00:00Z'),
+      terms: { min_stay_nights: 0, max_stay_nights: 3, booking_window_months: 999 },
+    });
+    // max (3) < min is dropped only when min is valid; here min=0 is dropped and
+    // the invalid booking window is ignored, so only the real max rule applies.
+    expect(violations.map((v) => v.code)).toEqual(['max_stay']);
+  });
+
+  it('exposes RU/EN/TH messages for the same violation', async () => {
+    const { validateStayRules: validateBooking, getStayRuleErrors } = await import(
+      '../stayRulesValidation'
+    );
+    const input = {
+      checkIn: '2026-09-01',
+      checkOut: '2026-09-02',
+      now: new Date('2026-08-01T00:00:00Z'),
+      terms: { min_stay_nights: 3 },
+    };
+    const [violation] = validateBooking(input);
+    expect(violation.message.ru).toContain('3');
+    expect(violation.message.en).toContain('3');
+    expect(violation.message.th).toContain('3');
+    expect(getStayRuleErrors(input, 'ru')[0]).toBe(violation.message.ru);
+    expect(getStayRuleErrors(input, 'en')[0]).toBe(violation.message.en);
+    expect(getStayRuleErrors(input, 'th')[0]).toBe(violation.message.th);
+  });
+});
