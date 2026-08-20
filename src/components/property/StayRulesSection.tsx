@@ -7,40 +7,50 @@ import { CalendarClock, CalendarRange, Clock, Timer } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface StayRulesSectionProps {
-  minStayNights?: number | null;
-  maxStayNights?: number | null;
-  advanceNoticeHours?: number | null;
-  preparationDays?: number | null;
-  bookingWindowMonths?: number | null;
+  minStayNights?: number | string | null;
+  maxStayNights?: number | string | null;
+  advanceNoticeHours?: number | string | null;
+  preparationDays?: number | string | null;
+  bookingWindowMonths?: number | string | null;
 }
 
-export function StayRulesSection({
-  minStayNights,
-  maxStayNights,
-  advanceNoticeHours,
-  preparationDays,
-  bookingWindowMonths,
-}: StayRulesSectionProps) {
+/**
+ * Coerce a possibly missing / string / NaN value from the database into a
+ * positive finite number, or `null` when the field is absent or unusable.
+ */
+function positive(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const num = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(num) || num <= 0) return null;
+  return num;
+}
+
+export function StayRulesSection(props: StayRulesSectionProps = {}) {
+  const minStayNights = positive(props?.minStayNights);
+  const maxStayNights = positive(props?.maxStayNights);
+  const advanceNoticeHours = positive(props?.advanceNoticeHours);
+  const preparationDays = positive(props?.preparationDays);
+  const bookingWindowMonths = positive(props?.bookingWindowMonths);
   const { language } = useLanguage();
   const locale = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
 
   const rows: Array<{ icon: typeof Clock; label: string; value: string }> = [];
 
-  if (minStayNights && minStayNights > 0) {
+  if (minStayNights !== null) {
     rows.push({
       icon: CalendarRange,
       label: locale === 'ru' ? 'Минимальный срок' : locale === 'th' ? 'พักขั้นต่ำ' : 'Minimum stay',
       value: nights(locale, minStayNights),
     });
   }
-  if (maxStayNights && maxStayNights > 0) {
+  if (maxStayNights !== null) {
     rows.push({
       icon: CalendarRange,
       label: locale === 'ru' ? 'Максимальный срок' : locale === 'th' ? 'พักสูงสุด' : 'Maximum stay',
       value: nights(locale, maxStayNights),
     });
   }
-  if (advanceNoticeHours && advanceNoticeHours > 0) {
+  if (advanceNoticeHours !== null) {
     rows.push({
       icon: Clock,
       label:
@@ -57,7 +67,7 @@ export function StayRulesSection({
             : `${advanceNoticeHours} h`,
     });
   }
-  if (preparationDays && preparationDays > 0) {
+  if (preparationDays !== null) {
     rows.push({
       icon: Timer,
       label:
@@ -69,7 +79,7 @@ export function StayRulesSection({
       value: days(locale, preparationDays),
     });
   }
-  if (bookingWindowMonths && bookingWindowMonths > 0) {
+  if (bookingWindowMonths !== null) {
     rows.push({
       icon: CalendarClock,
       label:
