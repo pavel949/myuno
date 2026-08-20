@@ -12,6 +12,8 @@ import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { ProviderSelector } from '@/components/admin/ProviderSelector';
+import { RealEstateDomainHealthPanel } from '@/components/admin/RealEstateDomainHealthPanel';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
