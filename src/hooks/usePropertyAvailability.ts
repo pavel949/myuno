@@ -123,6 +123,11 @@ export function usePropertyRentalTerms(marketplacePropertyId?: string) {
         .select(`
           price_per_night,
           min_stay_nights,
+          max_stay_nights,
+          advance_notice_hours,
+          preparation_days,
+          booking_window_months,
+
           max_guests,
           deposit_amount,
           deposit_currency,
