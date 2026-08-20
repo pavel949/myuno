@@ -200,6 +200,8 @@ export const AnimatedRoutes: React.FC = () => {
         {/* ── Core ── */}
         <Route path={APP_ROUTES.HOME} element={<PageTransition><Suspense fallback={<LoadingState />}><HomeRouter /></Suspense></PageTransition>} />
         <Route path="/index" element={<Navigate to={APP_ROUTES.HOME} replace />} />
+        <Route path="/home" element={<Navigate to={APP_ROUTES.HOME} replace />} />
+
         {/* Secondary breadth catalogue — reached from Landing «Explore the ecosystem». */}
         <Route path={APP_ROUTES.ECOSYSTEM} element={<PageTransition><Suspense fallback={<LoadingState />}><EcosystemPage /></Suspense></PageTransition>} />
         <Route path={APP_ROUTES.PRICING} element={<LazyPage><Pages.PricingPage /></LazyPage>} />
