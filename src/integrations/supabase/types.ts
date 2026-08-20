@@ -32590,7 +32590,6 @@ export type Database = {
           lng: number | null
           management_company_id: string | null
           max_guests: number | null
-          owner_id: string | null
           price: number | null
           property_type: string | null
           sale_price: number | null
@@ -32621,7 +32620,6 @@ export type Database = {
           lng?: number | null
           management_company_id?: string | null
           max_guests?: number | null
-          owner_id?: string | null
           price?: number | null
           property_type?: string | null
           sale_price?: number | null
@@ -32652,7 +32650,6 @@ export type Database = {
           lng?: number | null
           management_company_id?: string | null
           max_guests?: number | null
-          owner_id?: string | null
           price?: number | null
           property_type?: string | null
           sale_price?: number | null
