@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { z } from 'zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,42 +9,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  STAY_RULE_LIMITS,
+  validateStayRules,
+  describeStayRulesDbError,
+  type StayRuleField,
+} from '@/lib/property/stayRulesSchema';
 
 /**
  * Admin editor for property-level stay rules stored on public.properties.
  * All values are optional integers; empty input clears the value (NULL).
+ * Ranges mirror the database CHECK constraints (see stayRulesSchema.ts).
  */
-const optionalInt = (max: number) =>
-  z
-    .union([z.literal(''), z.string().regex(/^\d{1,6}$/)])
-    .transform((v) => (v === '' ? null : Number(v)))
-    .refine((v) => v === null || (Number.isInteger(v) && v >= 0 && v <= max), {
-      message: `0 – ${max}`,
-    });
+type StayRulesForm = Record<StayRuleField, string>;
 
-const stayRulesSchema = z
-  .object({
-    min_stay_nights: optionalInt(3650),
-    max_stay_nights: optionalInt(3650),
-    advance_notice_hours: optionalInt(8760),
-    preparation_days: optionalInt(365),
-    booking_window_months: optionalInt(60),
-  })
-  .refine(
-    (v) =>
-      v.min_stay_nights === null ||
-      v.max_stay_nights === null ||
-      v.max_stay_nights >= v.min_stay_nights,
-    { path: ['max_stay_nights'], message: 'max < min' },
-  );
-
-type StayRulesForm = {
-  min_stay_nights: string;
-  max_stay_nights: string;
-  advance_notice_hours: string;
-  preparation_days: string;
-  booking_window_months: string;
-};
 
 const EMPTY_FORM: StayRulesForm = {
   min_stay_nights: '',
@@ -162,14 +139,10 @@ export function PropertyStayRulesPanel({ propertyId }: PropertyStayRulesPanelPro
   };
 
   const handleSave = async () => {
-    const parsed = stayRulesSchema.safeParse(form);
-    if (!parsed.success) {
-      const fieldErrors: Partial<Record<keyof StayRulesForm, string>> = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0] as keyof StayRulesForm | undefined;
-        if (key) fieldErrors[key] = issue.message;
-      }
-      setErrors(fieldErrors);
+    const lang = (language === 'th' ? 'th' : isRussian ? 'ru' : 'en') as 'ru' | 'en' | 'th';
+    const result = validateStayRules(form, lang);
+    if (!result.ok || !result.values) {
+      setErrors(result.errors);
       toast.error(isRussian ? 'Проверьте значения полей' : 'Check the field values');
       return;
     }
@@ -178,7 +151,7 @@ export function PropertyStayRulesPanel({ propertyId }: PropertyStayRulesPanelPro
     try {
       const { error } = await supabase
         .from('properties')
-        .update({ ...parsed.data, updated_at: new Date().toISOString() })
+        .update({ ...result.values, updated_at: new Date().toISOString() })
         .eq('id', propertyId);
 
       if (error) throw error;
@@ -188,12 +161,15 @@ export function PropertyStayRulesPanel({ propertyId }: PropertyStayRulesPanelPro
       queryClient.invalidateQueries({ queryKey: ['property', propertyId] });
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       toast.success(isRussian ? 'Условия аренды сохранены' : 'Stay rules saved');
-    } catch {
-      toast.error(isRussian ? 'Не удалось сохранить' : 'Could not save');
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : String(err);
+      const friendly = describeStayRulesDbError(raw, lang);
+      toast.error(friendly ?? (isRussian ? 'Не удалось сохранить' : 'Could not save'));
     } finally {
       setIsSaving(false);
     }
   };
+
 
   if (isLoading) {
     return (
@@ -216,6 +192,8 @@ export function PropertyStayRulesPanel({ propertyId }: PropertyStayRulesPanelPro
             <Input
               id={`stay-rule-${field.key}`}
               inputMode="numeric"
+              min={STAY_RULE_LIMITS[field.key].min}
+              max={STAY_RULE_LIMITS[field.key].max}
               value={form[field.key]}
               onChange={(e) => handleChange(field.key, e.target.value)}
               placeholder={isRussian ? 'Не задано' : 'Not set'}
@@ -223,7 +201,10 @@ export function PropertyStayRulesPanel({ propertyId }: PropertyStayRulesPanelPro
             />
             <p className="text-xs text-muted-foreground">
               {isRussian ? field.hintRu : field.hintEn}
+              {' · '}
+              {STAY_RULE_LIMITS[field.key].min}–{STAY_RULE_LIMITS[field.key].max}
             </p>
+
             {errors[field.key] && (
               <p className="text-xs text-destructive">{errors[field.key]}</p>
             )}
