@@ -83,7 +83,7 @@ const SITUATION_CLUSTER_MAP: Record<string, ClusterId> = buildSituationClusterMa
 export default function NavigatorPageV3() {
   const { language, t } = useLanguage();
   const isRu = language === 'ru';
-  const { data: situations, isLoading, isError } = useLifeSituations();
+  const { data: situations, isLoading, isError, refetch } = useLifeSituations();
   const { data: counts, isError: countsError } = useSituationServiceCounts();
   const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
   const role = useLifeOSRole();
