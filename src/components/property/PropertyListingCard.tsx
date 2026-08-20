@@ -242,6 +242,20 @@ function PropertyListingCardBase({
           </div>
         )}
 
+        {mode === 'rent' && (
+          <StayRulesInline
+            minStayNights={property.min_stay_nights}
+            maxStayNights={property.max_stay_nights}
+            advanceNoticeHours={property.advance_notice_hours}
+            preparationDays={property.preparation_days}
+            bookingWindowMonths={property.booking_window_months}
+            maxItems={3}
+            className="mt-1"
+          />
+        )}
+
+
+
         {/* Row 3: Price */}
         <div className="pt-0.5 sm:pt-1">
           <p className="text-xs sm:text-[15px] text-foreground">
