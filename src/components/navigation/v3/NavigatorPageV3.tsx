@@ -282,46 +282,13 @@ export default function NavigatorPageV3() {
                 {forYou.length}
               </span>
             </header>
-            <ul className="divide-y divide-border">
-              {forYou.map((s) => {
-                const title = isRu ? s.title_ru : s.title_en;
-                const desc = isRu ? s.description_ru : s.description_en;
-                const c = counts?.[s.id];
-                const href = resolveSituationHref(s.code);
-                return (
-                  <li key={s.id}>
-                    <Link
-                      to={href}
-                      onClick={() => trackSituationClick(s.code, {
-                        source: 'navigator_v3_for_you',
-                        href,
-                        count: c,
-                      })}
-                      className="group flex items-center gap-4 py-5 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[64px]"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[17px] font-semibold text-foreground leading-tight tracking-[-0.005em]">
-                          {title}
-                        </div>
-                        {desc && (
-                          <div className="mt-1 text-[13px] text-muted-foreground leading-snug line-clamp-2">
-                            {desc}
-                          </div>
-                        )}
-                      </div>
-                      <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
-                        {typeof c === 'number' && c > 0 ? formatServices(c, language) : t('discover.open')}
-                      </span>
-                      <ArrowRight
-                        aria-hidden="true"
-                        className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors"
-                        strokeWidth={1.75}
-                      />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <SituationList
+              situations={forYou}
+              counts={counts}
+              source="navigator_v3_for_you"
+              variant="prominent"
+            />
+
           </section>
         )}
 
@@ -332,7 +299,8 @@ export default function NavigatorPageV3() {
               <NavigatorClusterSection
                 key={cid}
                 clusterId={cid}
-                situations={sectionSituations(cid)}
+                situations={sections.byCluster[cid]}
+
                 counts={counts}
                 situationLabels={situationLabels}
                 excludeServiceIds={personalGridServiceIds}
@@ -362,7 +330,7 @@ export default function NavigatorPageV3() {
                   <NavigatorClusterSection
                     key={cid}
                     clusterId={cid}
-                    situations={sectionSituations(cid)}
+                    situations={sections.byCluster[cid]}
                     counts={counts}
                     hideAppGrid
                     situationLabels={situationLabels}
