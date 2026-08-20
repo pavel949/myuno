@@ -63,6 +63,7 @@ export function useSituationTracking({
       seenImpressions.add(key);
       return true;
     });
+    if (fresh.length === 0) return;
     trackSituationImpression(fresh, { source: src, variant: v, ...ctx });
   }, []);
 
