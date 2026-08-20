@@ -185,8 +185,9 @@ describe('no duplicate situations across the Discover block', () => {
 describe('map entry point', () => {
   it('Discover header exposes exactly one /map link', async () => {
     const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
     const src = readFileSync(
-      new URL('../NavigatorPageV3.tsx', import.meta.url),
+      resolve(process.cwd(), 'src/components/navigation/v3/NavigatorPageV3.tsx'),
       'utf8',
     );
     const matches = src.match(/to="\/map"/g) ?? [];
