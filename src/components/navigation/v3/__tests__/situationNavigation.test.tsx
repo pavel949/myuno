@@ -28,7 +28,8 @@ vi.mock('@/contexts/LanguageContext', () => ({
 
 import { SituationList } from '../SituationList';
 import { SituationCard } from '../SituationCard';
-import { resolveSituationHref, SITUATION_LANDING_OVERRIDES } from '@/lib/navigation/situationLandingMap';
+import { SITUATION_LANDING_OVERRIDES } from '@/lib/navigation/situationLandingMap';
+import { buildSituationListUrl as resolveSituationHref } from '@/lib/navigation/situationUrls';
 import { buildSituationSections } from '@/lib/navigation/situationSections';
 import type { ClusterId } from '@/lib/catalog/taxonomy';
 
