@@ -1,13 +1,10 @@
 // Deno.serve used (native edge runtime)
 import { Resend } from 'npm:resend@2.0.0';
 import { createClient } from '../_shared/supabase.ts';
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 interface PropertyModerationRequest {
   propertyId: string;
@@ -285,6 +282,7 @@ function generateRejectionEmail(property: any, ownerName: string, reason: string
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
