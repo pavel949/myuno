@@ -21,6 +21,8 @@ import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { TrustStrip } from './TrustStrip';
+import { StayRulesInline } from './StayRulesInline';
+
 import { ClearViewBadge } from '@/components/clearview/ClearViewBadge';
 
 interface PropertyListingCardProps {
