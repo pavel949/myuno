@@ -9,7 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 type BedType = 'king' | 'queen' | 'double' | 'single' | 'sofa_bed' | 'bunk';
 
 interface RoomBed {
-  type: BedType;
+  type: BedType | string;
   count?: number;
 }
 
@@ -35,14 +35,13 @@ interface PropertySleepingArrangementsProps {
   rooms?: unknown;
 }
 
-export function PropertySleepingArrangements({ rooms }: PropertySleepingArrangementsProps) {
+export function PropertySleepingArrangements({ rooms }: PropertySleepingArrangementsProps = {}) {
   const { language } = useLanguage();
   const locale = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
 
-  const parsed = normalizeRooms(rooms);
-  const sleepingRooms = parsed.filter(
-    (room) => Array.isArray(room.beds) && room.beds.length > 0,
-  );
+  const sleepingRooms = normalizeRooms(rooms)
+    .map((room) => ({ ...room, beds: normalizeBeds(room.beds) }))
+    .filter((room) => room.beds.length > 0);
 
   if (sleepingRooms.length === 0) return null;
 
@@ -64,11 +63,13 @@ export function PropertySleepingArrangements({ rooms }: PropertySleepingArrangem
                 fallbackRoomName(locale, index)}
             </p>
             <p className="text-sm text-muted-foreground">
-              {room.beds!
+              {room.beds
                 .map((bed) => {
-                  const count = bed.count && bed.count > 0 ? bed.count : 1;
-                  const label = BED_LABELS[bed.type]?.[locale] ?? bed.type;
-                  return `${count} ${label}`;
+                  const raw = Number(bed.count);
+                  const count = Number.isFinite(raw) && raw > 0 ? raw : 1;
+                  const label =
+                    BED_LABELS[bed.type as BedType]?.[locale] ?? String(bed.type ?? '').replace(/_/g, ' ');
+                  return label ? `${count} ${label}` : String(count);
                 })
                 .join(', ')}
             </p>
@@ -86,15 +87,43 @@ function fallbackRoomName(locale: 'ru' | 'en' | 'th', index: number): string {
 }
 
 function normalizeRooms(rooms: unknown): RoomLike[] {
-  if (!rooms) return [];
-  if (Array.isArray(rooms)) return rooms as RoomLike[];
-  if (typeof rooms === 'string') {
-    try {
-      const parsed = JSON.parse(rooms);
-      return Array.isArray(parsed) ? (parsed as RoomLike[]) : [];
-    } catch {
-      return [];
+  const raw = (() => {
+    if (!rooms) return [];
+    if (Array.isArray(rooms)) return rooms;
+    if (typeof rooms === 'string') {
+      try {
+        const parsed = JSON.parse(rooms);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
     }
-  }
-  return [];
+    // Some records store rooms as an object map keyed by room id.
+    if (typeof rooms === 'object') return Object.values(rooms as Record<string, unknown>);
+    return [];
+  })();
+
+  return raw.filter(
+    (room): room is RoomLike => !!room && typeof room === 'object' && !Array.isArray(room),
+  );
+}
+
+/** Keep only bed entries that can safely be rendered. */
+function normalizeBeds(beds: unknown): RoomBed[] {
+  const raw = (() => {
+    if (Array.isArray(beds)) return beds;
+    if (typeof beds === 'string') {
+      try {
+        const parsed = JSON.parse(beds);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  })();
+
+  return raw
+    .filter((bed): bed is RoomBed => !!bed && typeof bed === 'object' && !Array.isArray(bed))
+    .filter((bed) => bed.type !== null && bed.type !== undefined && bed.type !== '');
 }
