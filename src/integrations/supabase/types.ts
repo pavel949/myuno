@@ -394,6 +394,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "agent_deals_property_project_id_fkey"
+            columns: ["property_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       ai_agent_knowledge: {
@@ -3783,6 +3790,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "commission_agreements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       communities: {
@@ -4425,6 +4439,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_requests_development_project_id_fkey"
+            columns: ["development_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "consultation_requests_resale_property_id_fkey"
@@ -7173,6 +7194,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "development_units_development_id_fkey"
+            columns: ["development_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       dispute_packs: {
@@ -7469,6 +7497,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "drive_import_jobs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "drive_import_jobs_source_id_fkey"
             columns: ["source_id"]
             isOneToOne: false
@@ -7590,6 +7625,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "due_diligence_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -8237,6 +8279,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "floor_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -9609,6 +9658,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "investment_projects_property_project_id_fkey"
+            columns: ["property_project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       investor_inquiries: {
@@ -9740,6 +9796,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "juristic_contacts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "juristic_contacts_property_id_fkey"
@@ -9903,6 +9966,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "juristic_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "juristic_requests_property_id_fkey"
@@ -10145,6 +10215,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_attributions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -13337,6 +13414,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "nb_alert_log_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       nb_alert_preferences: {
@@ -13479,6 +13563,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "nb_leads_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       nb_project_updates: {
@@ -13525,6 +13616,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nb_project_updates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -16976,6 +17074,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "project_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       project_drive_sources: {
@@ -17028,6 +17133,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_drive_sources_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -17181,6 +17293,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_units_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "project_units_property_id_fkey"
@@ -18133,6 +18252,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "properties_city_id_fkey"
@@ -23433,6 +23559,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "resale_properties_development_id_fkey"
+            columns: ["development_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       reservations: {
@@ -23549,6 +23682,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "reservations_unit_id_fkey"
@@ -23894,6 +24034,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rln_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -31249,6 +31396,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "properties_management_company_id_fkey"
             columns: ["management_company_id"]
             isOneToOne: false
@@ -31816,6 +31970,13 @@ export type Database = {
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "due_diligence_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
         ]
       }
       v_founder_inbox: {
@@ -32031,6 +32192,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "property_projects"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "properties_provider_id_fkey"
@@ -32696,6 +32864,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_properties_project"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "v_real_estate_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "properties_complex_id_fkey"
             columns: ["complex_id"]
             isOneToOne: false
@@ -33004,6 +33179,58 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      v_real_estate_domain_chain: {
+        Row: {
+          city_id: string | null
+          developer_id: string | null
+          is_linked_to_project: boolean | null
+          project_id: string | null
+          unit_id: string | null
+          unit_label: string | null
+          unit_number: string | null
+          unit_source: string | null
+          unit_status: string | null
+        }
+        Relationships: []
+      }
+      v_real_estate_projects: {
+        Row: {
+          city_id: string | null
+          developer_id: string | null
+          developer_name_en: string | null
+          developer_name_legacy: string | null
+          developer_name_ru: string | null
+          developer_slug: string | null
+          has_developer_link: boolean | null
+          project_id: string | null
+          project_name_en: string | null
+          project_name_ru: string | null
+          project_slug: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_projects_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_projects_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_projects_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers_public"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_unified_contacts: {
         Row: {
