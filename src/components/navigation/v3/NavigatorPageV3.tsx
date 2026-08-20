@@ -27,7 +27,6 @@ import { createErrorHandler } from '@/lib/errorHandler';
 import { NavigatorClusterSection } from './NavigatorClusterSection';
 import { SituationList } from './SituationList';
 import { PersonalGrid, PERSONAL_GRID_DEFAULT_LIMIT, usePersonalGridServiceIds } from '@/components/superapp/PersonalGrid';
-import type { LifeSituation } from '@/hooks/useLifeOS';
 
 const errorLog = createErrorHandler('NavigatorPageV3');
 
