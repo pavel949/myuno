@@ -151,10 +151,20 @@ export default function PropertyDetail() {
   };
   const propertyExt = property as unknown as typeof property & PropertyExt;
 
-  const images = (property.images && property.images.length > 0)
+  // Structured gallery (property_media) wins over the legacy images array; the
+  // legacy array stays as a fallback for listings not migrated yet.
+  const mediaLocale: MediaLocale = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
+  const legacyImages = (property.images && property.images.length > 0)
     ? property.images
     : [property.cover_image].filter(Boolean) as string[];
+  const photoMedia = mediaItems.filter((m) => m.kind === 'photo' || m.kind === 'image');
+  const galleryMedia = photoMedia.length > 0 ? photoMedia : [];
+  const images = galleryMedia.length > 0 ? galleryMedia.map((m) => m.url) : legacyImages;
+  const galleryFallbackAlt = ((isRu ? property.title_ru : property.title_en) || '') as string;
+  const imageCaptions = galleryMedia.map((m) => mediaCaption(m, mediaLocale));
+  const imageAlts = galleryMedia.map((m) => mediaAlt(m, mediaLocale, galleryFallbackAlt));
   const amenities = property.amenities || [];
+
 
   const pricePerNight = rentalTerms?.price_per_night || property.price || 0;
   // City-aware currency: prefer listing-level currency, else current city default, else USD.
