@@ -11,7 +11,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
+import { buildSituationListUrl } from '@/lib/navigation/situationUrls';
 import { useSituationTracking } from './useSituationTracking';
 import { formatServices } from '@/lib/i18n/pluralize';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -136,7 +136,7 @@ function SituationListImpl({
         const title = isRu ? s.title_ru : s.title_en;
         const desc = isRu ? s.description_ru : s.description_en;
         const count = counts?.[s.id];
-        const href = resolveSituationHref(s.code);
+        const href = buildSituationListUrl(s.code);
 
         return (
           <li key={s.id}>

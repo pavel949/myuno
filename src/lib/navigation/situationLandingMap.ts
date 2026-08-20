@@ -19,7 +19,5 @@ export const SITUATION_LANDING_OVERRIDES: Record<string, string> = {
   vendor_onboarding: APP_ROUTES.VENDOR_JOIN,               // /vendor/join
 };
 
-/** Resolve the destination URL for a life-situation click. */
-export function resolveSituationHref(code: string): string {
-  return SITUATION_LANDING_OVERRIDES[code] ?? `/discover/${code}`;
-}
+// URL generation lives in `situationUrls.ts` (`buildSituationListUrl`) — the single
+// helper used by every surface. Do not re-implement href logic here.

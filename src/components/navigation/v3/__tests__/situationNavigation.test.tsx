@@ -28,7 +28,8 @@ vi.mock('@/contexts/LanguageContext', () => ({
 
 import { SituationList } from '../SituationList';
 import { SituationCard } from '../SituationCard';
-import { resolveSituationHref, SITUATION_LANDING_OVERRIDES } from '@/lib/navigation/situationLandingMap';
+import { SITUATION_LANDING_OVERRIDES } from '@/lib/navigation/situationLandingMap';
+import { buildSituationListUrl as resolveSituationHref } from '@/lib/navigation/situationUrls';
 import { buildSituationSections } from '@/lib/navigation/situationSections';
 import type { ClusterId } from '@/lib/catalog/taxonomy';
 
@@ -240,7 +241,7 @@ describe('map entry point', () => {
       resolve(process.cwd(), 'src/components/navigation/v3/NavigatorPageV3.tsx'),
       'utf8',
     );
-    const matches = src.match(/to="\/map"/g) ?? [];
+    const matches = src.match(/to=\{mapUrl\}/g) ?? [];
     expect(matches).toHaveLength(1);
   });
 });

@@ -27,6 +27,7 @@ import { createErrorHandler } from '@/lib/errorHandler';
 import { NavigatorClusterSection } from './NavigatorClusterSection';
 import { SituationList } from './SituationList';
 import { PersonalGrid, PERSONAL_GRID_DEFAULT_LIMIT, usePersonalGridServiceIds } from '@/components/superapp/PersonalGrid';
+import { useDiscoverFilter } from './useDiscoverFilter';
 
 const errorLog = createErrorHandler('NavigatorPageV3');
 
@@ -87,7 +88,9 @@ export default function NavigatorPageV3() {
   const { data: counts, isError: countsError } = useSituationServiceCounts();
   const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
   const role = useLifeOSRole();
-  const [query, setQuery] = useState('');
+  // Shared UI state (search query + selected situation) lives in the URL —
+  // browser back/forward restores it without re-applying the filter.
+  const { query, setQuery, mapUrl } = useDiscoverFilter();
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
@@ -237,7 +240,7 @@ export default function NavigatorPageV3() {
           {/* Map link */}
           <div className="mt-4 flex justify-end">
             <Link
-              to="/map"
+              to={mapUrl}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-medium border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
             >
               <MapPin aria-hidden="true" className="w-3.5 h-3.5" strokeWidth={1.75} />

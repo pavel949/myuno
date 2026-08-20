@@ -20,7 +20,7 @@ import { useUserPersonas, type UserPersona } from '@/hooks/useUserPersonas';
 import { useSituationServiceCounts } from '@/hooks/useSituationServiceCounts';
 import { rankSituationsByPersonas } from '@/lib/situationBlend';
 import { CLUSTER_LIFE_SITUATIONS, type ClusterId } from '@/lib/catalog/taxonomy';
-import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
+import { buildSituationListUrl } from '@/lib/navigation/situationUrls';
 import { useSituationTracking } from './useSituationTracking';
 import { formatServices } from '@/lib/i18n/pluralize';
 import { hexTint, accentColor } from '@/lib/ui/colorTint';
@@ -295,7 +295,7 @@ export default function SituationDetailPage() {
                     const tint = hexTint(rel.color, 0.10);
                     const iconColor = accentColor(rel.color);
                     const count = counts?.[rel.id];
-                    const href = resolveSituationHref(rel.code);
+                    const href = buildSituationListUrl(rel.code);
                     return (
                       <Link
                         key={rel.id}
