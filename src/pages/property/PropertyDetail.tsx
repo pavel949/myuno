@@ -301,7 +301,7 @@ export default function PropertyDetail() {
         {/* Image Gallery */}
         <PropertyDetailGallery
           images={images}
-          alt={(isRu ? property.title_ru : property.title_en) || ''}
+          alt={galleryFallbackAlt}
           onOpenLightbox={openLightbox}
         />
 
@@ -440,6 +440,25 @@ export default function PropertyDetail() {
                   propertyType={property.property_type}
                 />
               </div>
+
+              {/* Structured amenities (catalogue-backed, grouped by category) */}
+              <Separator />
+              <PropertyAmenitiesSection
+                propertyId={id}
+                fallbackAmenities={amenities as string[]}
+              />
+
+              {/* Sleeping arrangements from structured rooms data */}
+              <PropertySleepingArrangements rooms={property.rooms} />
+
+              {/* Booking-window rules */}
+              <StayRulesSection
+                minStayNights={rentalTerms?.min_stay_nights ?? property.min_stay_nights}
+                maxStayNights={property.max_stay_nights}
+                advanceNoticeHours={property.advance_notice_hours}
+                preparationDays={property.preparation_days}
+                bookingWindowMonths={property.booking_window_months}
+              />
 
               {property.project && (
                 <>
@@ -591,6 +610,7 @@ export default function PropertyDetail() {
               )}
 
               <Separator />
+              <PropertyReviewRatings propertyId={id} />
               <ReviewsSection
                 itemType="property"
                 itemId={id || ''}
@@ -775,6 +795,8 @@ export default function PropertyDetail() {
       {/* Photo Lightbox */}
       <PhotoLightbox
         images={images}
+        captions={imageCaptions.length > 0 ? imageCaptions : undefined}
+        alts={imageAlts.length > 0 ? imageAlts : undefined}
         initialIndex={lightboxIndex}
         open={showAllPhotos}
         onClose={() => setShowAllPhotos(false)}
