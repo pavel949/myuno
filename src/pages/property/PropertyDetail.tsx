@@ -62,6 +62,7 @@ import {
   type MediaLocale,
 } from '@/hooks/usePropertyListingQuality';
 import { PropertyAmenitiesSection } from '@/components/property/PropertyAmenitiesSection';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PropertySleepingArrangements } from '@/components/property/PropertySleepingArrangements';
 import { PropertyReviewRatings } from '@/components/property/PropertyReviewRatings';
 import { StayRulesSection } from '@/components/property/StayRulesSection';
