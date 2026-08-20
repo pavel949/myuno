@@ -25,6 +25,7 @@ import {
   Loader2,
   LogIn
 } from 'lucide-react';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface InterestFormProps {
   projectId: string;
@@ -62,7 +63,7 @@ export function InterestForm({
     e.preventDefault();
     
     if (!user) {
-      navigate('/auth', { state: { from: `/invest/${projectId}` } });
+      redirectToAuth(navigate, { from: `/invest/${projectId}` });
       return;
     }
 
@@ -134,7 +135,7 @@ export function InterestForm({
                 : 'Sign in to express interest in this project'
               }
             </p>
-            <Button onClick={() => navigate('/auth', { state: { from: `/invest/${projectId}` } })}>
+            <Button onClick={() => redirectToAuth(navigate, { from: `/invest/${projectId}` })}>
               <LogIn className="h-4 w-4 mr-2" />
               {isRu ? 'Войти' : 'Sign In'}
             </Button>

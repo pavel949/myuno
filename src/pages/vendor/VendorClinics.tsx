@@ -50,6 +50,7 @@ import {
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 import { VendorLocationField } from '@/components/vendor/VendorLocationField';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const clinicTypes = [
   { value: 'general', label: 'General Clinic', labelRu: 'Общая клиника' },
@@ -121,7 +122,7 @@ const VendorClinics = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

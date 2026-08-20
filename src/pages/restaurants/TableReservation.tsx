@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { BackButton } from '@/components/uno/BackButton';
 import { DetailPageSkeleton } from '@/components/ui/page-skeletons';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const DEFAULT_RESERVATION_SLOTS = [
   '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
@@ -57,7 +58,7 @@ export default function TableReservation() {
   // Auth redirect
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth', { state: { from: `/restaurants/${id}/reserve` } });
+      redirectToAuth(navigate, { from: `/restaurants/${id}/reserve` });
     }
   }, [authLoading, user, navigate, id]);
 

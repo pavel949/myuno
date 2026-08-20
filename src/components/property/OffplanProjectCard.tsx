@@ -29,6 +29,7 @@ import { DeveloperBadge } from './DeveloperBadge';
 import { MyunoScoreWidget } from '@/components/invest/MyunoScoreWidget';
 import type { OffplanProject, ProjectStatus } from '@/hooks/useOffplanProjects';
 import { surfaceFromOffplanProject } from '@/lib/real-estate/listingViewModel';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface OffplanProjectCardProps {
   project: OffplanProject;
@@ -84,7 +85,7 @@ export function OffplanProjectCard({
     e.stopPropagation();
     if (!user) {
       toast.error(isRu ? 'Войдите, чтобы добавить в избранное' : 'Sign in to favourite');
-      navigate('/auth');
+      redirectToAuth(navigate);
       return;
     }
     await toggleCollection('newbuild_project', project.id, {

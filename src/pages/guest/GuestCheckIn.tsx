@@ -250,6 +250,7 @@ import {
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { logger } from '@/lib/logger';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const countries = [
   { code: 'RU', name: { en: 'Russia', ru: 'Россия' } },
@@ -336,7 +337,7 @@ export default function GuestCheckIn() {
           <p className="text-muted-foreground">
             {isRu ? 'Войдите для онлайн регистрации' : 'Please login for online check-in'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
+          <Button onClick={() => redirectToAuth(navigate)}>
             {isRu ? 'Войти' : 'Login'}
           </Button>
         </div>

@@ -18,6 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner';
 import { Baby, Plus, MoreVertical, Edit, Trash2, Loader2, Star, ShieldCheck } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const VendorBabysitters = () => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const VendorBabysitters = () => {
   const isRussian = language === 'ru';
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {

@@ -36,6 +36,7 @@ import {
   AlertCircle,
   Book
 } from 'lucide-react';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const categoryIcons: Record<string, React.ElementType> = {
   restaurant: Utensils,
@@ -84,7 +85,7 @@ export default function GuestGuidebook() {
           <p className="text-muted-foreground">
             {isRu ? 'Войдите для просмотра гида' : 'Please login to view the guidebook'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
+          <Button onClick={() => redirectToAuth(navigate)}>
             {isRu ? 'Войти' : 'Login'}
           </Button>
         </div>

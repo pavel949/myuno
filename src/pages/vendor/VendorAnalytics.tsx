@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const VendorAnalytics = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const VendorAnalytics = () => {
 
   React.useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import { ImageUpload, MultiImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const vehicleTypes = [
   { value: 'sedan', label: 'Sedan', labelRu: 'Седан' },
@@ -119,7 +120,7 @@ const VendorTransport = () => {
 
   React.useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

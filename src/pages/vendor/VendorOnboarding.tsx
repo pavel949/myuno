@@ -19,12 +19,13 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const VendorOnboarding = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
-  const { profile, createProfile, isLoading: profileLoading } = useVendorProfile();
+  const { profile, isLoading: profileLoading } = useVendorProfile();
   const { vendorOrgs, isLoading: contextLoading } = useUserContext();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +48,7 @@ const VendorOnboarding = () => {
   const { createService } = useVendorServices(createdProviderId || undefined);
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   // Only redirect to /vendor if the user already had a vendor org BEFORE starting
@@ -97,16 +98,35 @@ const VendorOnboarding = () => {
 
     setIsSubmitting(true);
     try {
-      // BUG-10 (P2): block obvious duplicates — active application for this user in last 7 days.
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const { data: existing } = await supabase
-        .from('partner_applications')
-        .select('id')
-        .eq('user_id', user!.id)
-        .in('status', ['pending', 'reviewing'])
-        .gte('created_at', sevenDaysAgo)
-        .limit(1);
-      if (existing && existing.length > 0) {
+      // BUG-09 (P2): provider + marketplace vendor + org + membership + application
+      // are now created inside ONE database transaction by the edge function, so a
+      // failure at any step can no longer leave orphan rows in the admin queue.
+      const { data, error } = await supabase.functions.invoke('partner-onboarding-create', {
+        body: {
+          business_name: businessName.trim(),
+          business_category: category,
+          verticals: [category],
+          phone: phone.trim() || undefined,
+          language,
+        },
+      });
+
+      if (error) throw error;
+      const result = data as {
+        success?: boolean;
+        provider_id?: string;
+        application_id?: string;
+        duplicate?: boolean;
+        error?: string;
+      } | null;
+
+      if (!result?.success || !result.provider_id) {
+        throw new Error(result?.error || 'creation_failed');
+      }
+
+      setCreatedProviderId(result.provider_id);
+
+      if (result.duplicate) {
         toast(isRu ? 'У вас уже есть активная заявка' : 'You already have an active application', {
           description: isRu
             ? 'Перейдите в раздел статуса, чтобы посмотреть детали.'
@@ -116,60 +136,7 @@ const VendorOnboarding = () => {
             onClick: () => navigate('/partner/status'),
           },
         });
-        setIsSubmitting(false);
-        return;
       }
-
-      const { data, error } = await createProfile({
-        business_name: businessName.trim(),
-        business_category: category,
-        verticals: [category],
-        phone: phone.trim() || undefined,
-        email,
-        commission_rate: 10,
-        is_verified: false,
-        // P0: vendor is NOT live until admin approves the partner_application below.
-        is_active: false,
-      });
-
-      if (error) throw error;
-      const newProviderId = data?.id || null;
-      setCreatedProviderId(newProviderId);
-
-      // P0: create a partner_application so the new vendor enters the moderation queue.
-      const { data: appRow, error: appErr } = await supabase
-        .from('partner_applications')
-        .insert({
-          user_id: user!.id,
-          business_name: businessName.trim(),
-          business_category: category,
-          contact_name: user!.user_metadata?.full_name || businessName.trim(),
-          contact_email: email,
-          contact_phone: phone.trim() || null,
-          status: 'pending',
-          metadata: {
-            source: 'vendor_onboarding',
-            language,
-            provider_id: newProviderId,
-            vertical: category,
-          },
-        })
-        .select('id')
-        .single();
-
-      if (appErr || !appRow?.id) {
-        // BUG-09 (P2): rollback the orphan provider row so admin queue stays clean.
-        if (newProviderId) {
-          await supabase.from('providers').delete().eq('id', newProviderId);
-          setCreatedProviderId(null);
-        }
-        throw appErr ?? new Error('Failed to create application');
-      }
-
-      // Fire-and-forget admin notification.
-      supabase.functions
-        .invoke('notify-admin-partner-application', { body: { application_id: appRow.id } })
-        .catch(() => {});
 
       setCurrentStep(1);
     } catch (error) {

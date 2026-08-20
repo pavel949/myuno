@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const BENEFITS = [
   { icon: BarChart3, en: 'Full property analytics & P&L reports', ru: 'Полная аналитика и отчёты P&L' },
@@ -46,7 +47,7 @@ export default function MCRegistrationPage() {
   const handleSubmit = async () => {
     if (!user) {
       toast.error(isRu ? 'Необходимо войти в систему' : 'Please sign in first');
-      navigate('/auth');
+      redirectToAuth(navigate);
       return;
     }
 
@@ -209,7 +210,7 @@ export default function MCRegistrationPage() {
             )}
 
             <Button
-              onClick={user ? handleSubmit : () => navigate('/auth')}
+              onClick={user ? handleSubmit : () => redirectToAuth(navigate)}
               disabled={isSubmitting || (!nameEn.trim())}
               className="w-full"
               size="lg"

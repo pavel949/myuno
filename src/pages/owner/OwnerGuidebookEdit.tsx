@@ -18,6 +18,7 @@ import {
   Wifi, Key, Phone, MapPin, Plus, Trash2, Save, Loader2, Book, User,
   Share2, Copy, Check, Navigation, MessageSquare, ExternalLink
 } from 'lucide-react';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const tipCategories = [
   { value: 'restaurant', label: { en: 'Restaurant', ru: 'Ресторан' } },
@@ -172,7 +173,7 @@ export default function OwnerGuidebookEdit() {
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <User className="w-16 h-16 text-muted-foreground" />
           <p className="text-muted-foreground">{isRu ? 'Войдите для редактирования' : 'Please login to edit'}</p>
-          <Button onClick={() => navigate('/auth')}>{isRu ? 'Войти' : 'Login'}</Button>
+          <Button onClick={() => redirectToAuth(navigate)}>{isRu ? 'Войти' : 'Login'}</Button>
         </div>
       </PageContainer>
     );

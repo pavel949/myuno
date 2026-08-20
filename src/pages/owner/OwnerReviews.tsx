@@ -254,6 +254,7 @@ import {
 } from '@/components/ui/dialog';
 import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { cn } from '@/lib/utils';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 type FilterOption = 'all' | 'pending' | 'responded' | '5' | '4' | '3' | '2' | '1';
 
@@ -308,7 +309,7 @@ export default function OwnerReviews() {
           <p className="text-muted-foreground mb-6">
             {isRu ? 'Войдите для просмотра отзывов' : 'Sign in to view reviews'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
+          <Button onClick={() => redirectToAuth(navigate)}>
             {isRu ? 'Войти' : 'Sign In'}
           </Button>
         </div>

@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { errorHandler } from '@/lib/errorHandler';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const QUICK_AMOUNTS = [5000, 10000, 20000, 50000];
 
@@ -107,7 +108,7 @@ export default function QuickIncome() {
     }
   };
 
-  if (!user) { navigate('/auth'); return null; }
+  if (!user) { redirectToAuth(navigate); return null; }
 
   if (isSuccess) {
     return (

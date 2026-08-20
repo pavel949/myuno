@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 import { SecuritySettingsSection } from '@/components/profile/SecuritySettingsSection';
 import { ConnectedAccountsSection } from '@/components/profile/ConnectedAccountsSection';
 import { ProfileCompletionCard } from '@/components/profile/ProfileCompletionCard';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const COUNTRIES = [
   { code: 'RU', nameEn: 'Russia', nameRu: 'Россия' },
@@ -65,7 +66,7 @@ export default function ProfileSettings() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

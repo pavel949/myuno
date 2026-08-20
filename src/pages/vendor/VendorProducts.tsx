@@ -62,6 +62,7 @@ import {
   CardPreview,
   CardPreviewSection,
 } from '@/components/vendor';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface ProductFormData {
   name_en: string;
@@ -204,7 +205,7 @@ const VendorProducts = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

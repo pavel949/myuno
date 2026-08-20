@@ -31,6 +31,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { errorHandler } from '@/lib/errorHandler';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const QUICK_AMOUNTS = [500, 1000, 2000, 5000];
 
@@ -126,7 +127,7 @@ export default function QuickExpense() {
     }
   };
 
-  if (!user) { navigate('/auth'); return null; }
+  if (!user) { redirectToAuth(navigate); return null; }
 
   if (isSuccess) {
     return (

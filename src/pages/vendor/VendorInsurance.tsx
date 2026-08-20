@@ -20,6 +20,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner';
 import { Shield, Plus, MoreVertical, Edit, Trash2, Loader2, MapPin, Phone, Clock } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const INSURANCE_TYPES = [
   { value: 'health', en: 'Health', ru: 'Здоровье' },
@@ -66,7 +67,7 @@ const VendorInsurance = () => {
   const isRu = language === 'ru';
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   useEffect(() => {

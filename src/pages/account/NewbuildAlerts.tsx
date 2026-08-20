@@ -18,6 +18,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNbAlertPreferences, type NbAlertPreferences } from '@/hooks/useNbAlertPreferences';
 import { toast } from 'sonner';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function NewbuildAlerts() {
   const { language } = useLanguage();
@@ -40,7 +41,7 @@ export default function NewbuildAlerts() {
             icon={Bell}
             title={isRu ? 'Войдите в аккаунт' : 'Sign in required'}
             description={isRu ? 'Войдите, чтобы настроить уведомления' : 'Sign in to configure alerts'}
-            action={<Button onClick={() => navigate('/auth')}>{isRu ? 'Войти' : 'Sign in'}</Button>}
+            action={<Button onClick={() => redirectToAuth(navigate)}>{isRu ? 'Войти' : 'Sign in'}</Button>}
           />
         </PageContainer>
       </AppLayout>

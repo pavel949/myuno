@@ -13,6 +13,7 @@ import { useOrders, CreateOrderInput, PaymentMethod } from '@/hooks/useOrders';
 import type { Database } from '@/integrations/supabase/types';
 
 import { toast } from 'sonner';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 type BookingType = Database['public']['Enums']['booking_type'];
 
 export interface BookingItem {
@@ -147,7 +148,7 @@ const { createOrder, cancelOrder, isCreating } = useOrders();
   const createBooking = useCallback(async (params: CreateBookingParams): Promise<BookingResult> => {
     if (!user) {
       toast.error(t('booking.loginRequired'));
-      navigate('/auth');
+      redirectToAuth(navigate);
       return { success: false, error: 'not_authenticated' };
     }
 

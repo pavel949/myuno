@@ -24,6 +24,7 @@ import { StaffPickerInline } from "@/components/beauty/StaffPicker";
 import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { toast } from "sonner";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function BeautyBooking() {
   const { id } = useParams<{ id: string }>();
@@ -61,7 +62,7 @@ export default function BeautyBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/beauty/booking/${id}` } });
+    redirectToAuth(navigate, { from: `/beauty/booking/${id}` });
     return null;
   }
 

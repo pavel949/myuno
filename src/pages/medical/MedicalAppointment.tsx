@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { VoiceInputButton, appendTranscript } from "@/components/ui/voice-input-button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function MedicalAppointment() {
   const { id } = useParams<{ id: string }>();
@@ -60,7 +61,7 @@ export default function MedicalAppointment() {
   // Auth redirect
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth', { state: { from: `/medical/appointment/${id}` } });
+      redirectToAuth(navigate, { from: `/medical/appointment/${id}` });
     }
   }, [authLoading, user, navigate, id]);
 

@@ -28,6 +28,7 @@ import {
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function ExperienceBooking() {
   const { id } = useParams<{ id: string }>();
@@ -61,7 +62,7 @@ export default function ExperienceBooking() {
   // Auth redirect
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth', { state: { from: `/experiences/${id}/book` } });
+      redirectToAuth(navigate, { from: `/experiences/${id}/book` });
     }
   }, [authLoading, user, navigate, id]);
 

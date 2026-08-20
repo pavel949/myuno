@@ -122,22 +122,54 @@ export default function Auth() {
 
   useEffect(() => {
     if (!user || authLoading) return;
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.removeItem('myuno_post_auth_redirect');
-    }
-    if (redirectPath !== APP_ROUTES.HOME) {
-      navigate(redirectPath, { replace: true });
-      return;
-    }
-    if (ownerTypeLoading) return;
-    const dest =
-      activeRole === 'vendor' ? '/vendor'
-      : activeRole === 'investor' ? '/invest'
-      : (activeRole === 'owner' || activeRole === 'property_manager')
-        ? (isMCPortal ? '/my-property' : '/mc')
-      : isMCPortal ? '/my-property'
-      : '/';
-    navigate(dest, { replace: true });
+    let cancelled = false;
+
+    (async () => {
+      // Mandatory account-type step: a user without `primary_role` has never
+      // told us who they are. Sending them to the home page created a dead end
+      // (the /start wizard can be flag-disabled), so route them through
+      // /auth/account-type first and carry the intended destination along.
+      let needsAccountType = false;
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('primary_role')
+          .eq('id', user.id)
+          .maybeSingle();
+        needsAccountType = !profile?.primary_role;
+      } catch {
+        needsAccountType = false;
+      }
+      if (cancelled) return;
+
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.removeItem('myuno_post_auth_redirect');
+      }
+
+      if (needsAccountType) {
+        const target = redirectPath !== APP_ROUTES.HOME
+          ? `${APP_ROUTES.AUTH_ACCOUNT_TYPE}?redirect=${encodeURIComponent(redirectPath)}`
+          : APP_ROUTES.AUTH_ACCOUNT_TYPE;
+        navigate(target, { replace: true });
+        return;
+      }
+
+      if (redirectPath !== APP_ROUTES.HOME) {
+        navigate(redirectPath, { replace: true });
+        return;
+      }
+      if (ownerTypeLoading) return;
+      const dest =
+        activeRole === 'vendor' ? '/vendor'
+        : activeRole === 'investor' ? '/invest'
+        : (activeRole === 'owner' || activeRole === 'property_manager')
+          ? (isMCPortal ? '/my-property' : '/mc')
+        : isMCPortal ? '/my-property'
+        : '/';
+      navigate(dest, { replace: true });
+    })();
+
+    return () => { cancelled = true; };
   }, [user, authLoading, ownerTypeLoading, navigate, redirectPath, activeRole, isMCPortal]);
 
   // OAuth callback error surfacing — `/auth/callback` renders this same page and

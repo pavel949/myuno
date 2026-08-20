@@ -22,6 +22,7 @@ import { ImageUpload } from '@/components/upload/ImageUpload';
 import { ApprovalStatusBadge } from '@/components/vendor/ApprovalStatusBadge';
 import { VendorLocationField, VendorLocationValue } from '@/components/vendor/VendorLocationField';
 import { format } from 'date-fns';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const eventCategories = [
   { value: 'party', label: 'Party', labelRu: 'Вечеринка' },
@@ -67,7 +68,7 @@ const VendorEvents = () => {
   const isRussian = language === 'ru';
 
   React.useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   React.useEffect(() => {
