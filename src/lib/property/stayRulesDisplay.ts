@@ -6,6 +6,8 @@
  * preparation days and booking window identically.
  */
 
+import { sanitizeStayRuleTerms } from './stayRulesSchema';
+
 export type StayRuleLocale = 'ru' | 'en' | 'th';
 
 export type StayRuleId =
