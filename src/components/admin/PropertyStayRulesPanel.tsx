@@ -139,14 +139,10 @@ export function PropertyStayRulesPanel({ propertyId }: PropertyStayRulesPanelPro
   };
 
   const handleSave = async () => {
-    const parsed = stayRulesSchema.safeParse(form);
-    if (!parsed.success) {
-      const fieldErrors: Partial<Record<keyof StayRulesForm, string>> = {};
-      for (const issue of parsed.error.issues) {
-        const key = issue.path[0] as keyof StayRulesForm | undefined;
-        if (key) fieldErrors[key] = issue.message;
-      }
-      setErrors(fieldErrors);
+    const lang = (language === 'th' ? 'th' : isRussian ? 'ru' : 'en') as 'ru' | 'en' | 'th';
+    const result = validateStayRules(form, lang);
+    if (!result.ok || !result.values) {
+      setErrors(result.errors);
       toast.error(isRussian ? 'Проверьте значения полей' : 'Check the field values');
       return;
     }
@@ -155,7 +151,7 @@ export function PropertyStayRulesPanel({ propertyId }: PropertyStayRulesPanelPro
     try {
       const { error } = await supabase
         .from('properties')
-        .update({ ...parsed.data, updated_at: new Date().toISOString() })
+        .update({ ...result.values, updated_at: new Date().toISOString() })
         .eq('id', propertyId);
 
       if (error) throw error;
@@ -165,12 +161,15 @@ export function PropertyStayRulesPanel({ propertyId }: PropertyStayRulesPanelPro
       queryClient.invalidateQueries({ queryKey: ['property', propertyId] });
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       toast.success(isRussian ? 'Условия аренды сохранены' : 'Stay rules saved');
-    } catch {
-      toast.error(isRussian ? 'Не удалось сохранить' : 'Could not save');
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : String(err);
+      const friendly = describeStayRulesDbError(raw, lang);
+      toast.error(friendly ?? (isRussian ? 'Не удалось сохранить' : 'Could not save'));
     } finally {
       setIsSaving(false);
     }
   };
+
 
   if (isLoading) {
     return (
