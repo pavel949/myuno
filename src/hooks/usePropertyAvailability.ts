@@ -160,11 +160,15 @@ export function usePropertyRentalTerms(marketplacePropertyId?: string) {
         .eq('id', marketplacePropertyId)
         .maybeSingle();
 
-      if (error) {
+      if (error || !data) {
         return null;
       }
 
-      return data as PropertyRentalTerms;
+      // Normalize stay rules through the shared validator limits so filters,
+      // calendars and SSR consumers never see inconsistent rules.
+      const sanitized = sanitizeStayRuleTerms(data as Record<string, number | null>);
+      return { ...(data as PropertyRentalTerms), ...sanitized } as PropertyRentalTerms;
+
     },
     enabled: !!marketplacePropertyId,
   });
