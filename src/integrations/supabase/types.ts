@@ -985,6 +985,53 @@ export type Database = {
           },
         ]
       }
+      airport_passengers: {
+        Row: {
+          booking_id: string
+          created_at: string
+          date_of_birth: string | null
+          first_name: string
+          id: string
+          is_primary: boolean
+          last_name: string | null
+          nationality: string | null
+          passport_number: string | null
+          sort_order: number
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          date_of_birth?: string | null
+          first_name: string
+          id?: string
+          is_primary?: boolean
+          last_name?: string | null
+          nationality?: string | null
+          passport_number?: string | null
+          sort_order?: number
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          date_of_birth?: string | null
+          first_name?: string
+          id?: string
+          is_primary?: boolean
+          last_name?: string | null
+          nationality?: string | null
+          passport_number?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "airport_passengers_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "airport_bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       airport_services: {
         Row: {
           airport_code: string
@@ -1709,6 +1756,56 @@ export type Database = {
           },
         ]
       }
+      booking_payments: {
+        Row: {
+          amount: number | null
+          booking_id: string
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json
+          paid_at: string | null
+          payment_method: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          booking_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          booking_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_status_history: {
         Row: {
           booking_id: string
@@ -1746,6 +1843,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      booking_vouchers: {
+        Row: {
+          booking_id: string | null
+          booking_type: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          order_id: string | null
+          qr_code_data: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          valid_from: string | null
+          valid_until: string | null
+          voucher_number: string
+        }
+        Insert: {
+          booking_id?: string | null
+          booking_type?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          order_id?: string | null
+          qr_code_data?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          valid_from?: string | null
+          valid_until?: string | null
+          voucher_number: string
+        }
+        Update: {
+          booking_id?: string | null
+          booking_type?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          order_id?: string | null
+          qr_code_data?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valid_from?: string | null
+          valid_until?: string | null
+          voucher_number?: string
+        }
+        Relationships: []
       }
       bookings: {
         Row: {
@@ -5830,6 +5975,84 @@ export type Database = {
           },
         ]
       }
+      crm_nurture_queue: {
+        Row: {
+          channel: string
+          contact_id: string | null
+          created_at: string
+          deal_id: string | null
+          error: string | null
+          id: string
+          message_body: string
+          recipient_email: string | null
+          recipient_phone: string | null
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          error?: string | null
+          id?: string
+          message_body: string
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          error?: string | null
+          id?: string
+          message_body?: string
+          recipient_email?: string | null
+          recipient_phone?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_oauth_states: {
+        Row: {
+          code_verifier: string
+          created_at: string
+          expires_at: string
+          redirect_to: string | null
+          state: string
+          user_id: string
+        }
+        Insert: {
+          code_verifier: string
+          created_at?: string
+          expires_at?: string
+          redirect_to?: string | null
+          state: string
+          user_id: string
+        }
+        Update: {
+          code_verifier?: string
+          created_at?: string
+          expires_at?: string
+          redirect_to?: string | null
+          state?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       crm_pipeline_stages: {
         Row: {
           automation: Json | null
@@ -6356,6 +6579,47 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_web_form_submissions: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          data: Json
+          deal_id: string | null
+          form_id: string
+          id: string
+          source_url: string | null
+          status: string
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          data?: Json
+          deal_id?: string | null
+          form_id: string
+          id?: string
+          source_url?: string | null
+          status?: string
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          data?: Json
+          deal_id?: string | null
+          form_id?: string
+          id?: string
+          source_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_web_form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "crm_web_forms"
             referencedColumns: ["id"]
           },
         ]
@@ -13865,6 +14129,45 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      offer_history: {
+        Row: {
+          channel: string | null
+          client_name: string | null
+          created_at: string
+          deal_id: string | null
+          deal_type: string | null
+          generated_at: string
+          id: string
+          language: string | null
+          offer_text: string | null
+          subject: string | null
+        }
+        Insert: {
+          channel?: string | null
+          client_name?: string | null
+          created_at?: string
+          deal_id?: string | null
+          deal_type?: string | null
+          generated_at?: string
+          id?: string
+          language?: string | null
+          offer_text?: string | null
+          subject?: string | null
+        }
+        Update: {
+          channel?: string | null
+          client_name?: string | null
+          created_at?: string
+          deal_id?: string | null
+          deal_type?: string | null
+          generated_at?: string
+          id?: string
+          language?: string | null
+          offer_text?: string | null
+          subject?: string | null
         }
         Relationships: []
       }
@@ -26704,6 +27007,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      thai_partner_leads: {
+        Row: {
+          business_name: string | null
+          category: string | null
+          contact_name: string
+          created_at: string
+          email: string | null
+          id: string
+          interests: string[]
+          message: string | null
+          notes: string | null
+          phone: string
+          preferred_lang: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_name?: string | null
+          category?: string | null
+          contact_name: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          interests?: string[]
+          message?: string | null
+          notes?: string | null
+          phone: string
+          preferred_lang?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string | null
+          category?: string | null
+          contact_name?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          interests?: string[]
+          message?: string | null
+          notes?: string | null
+          phone?: string
+          preferred_lang?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       ticket_messages: {
         Row: {
