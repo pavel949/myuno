@@ -122,7 +122,7 @@ for (const file of allFiles) {
 
 // ─────────────────────────── 3 · route drift ───────────────────────────
 
-const routesFile = join(ROOT, 'src/lib/routes.ts');
+const routesFile = join(ROOT, 'src/lib/config/routes.ts');
 let routeDrift = [];
 try {
   const text = readFileSync(routesFile, 'utf8');
