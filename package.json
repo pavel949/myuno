@@ -42,6 +42,8 @@
     "validate:catalog-life-map:verbose": "node scripts/validate-catalog-life-map.mjs --verbose",
     "validate:catalog-life-map:strict": "node scripts/validate-catalog-life-map.mjs --strict",
     "transfer:smoke": "node scripts/transfer-smoke-test.mjs",
+    "scan:architecture": "node scripts/architecture-scan.mjs",
+    "scan:architecture:strict": "node scripts/architecture-scan.mjs --strict",
     "validate:semantic": "node scripts/validate-semantic.mjs",
     "validate:semantic:verbose": "node scripts/validate-semantic.mjs --verbose",
     "validate:semantic:strict": "node scripts/validate-semantic.mjs --strict",
