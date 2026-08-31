@@ -176,10 +176,7 @@
     "glob": "^10.4.5",
     "rollup": "^4.52.5",
     "@babel/plugin-transform-modules-systemjs": "^7.28.4",
-    "dompurify": "^3.4.14",
-    "@lovable.dev/mcp-js": {
-      "esbuild": "^0.28.2"
-    }
+    "dompurify": "^3.4.14"
   },
   "resolutions": {
     "lodash": "^4.17.21",
