@@ -652,7 +652,7 @@ export default function MapView() {
                 return (
                   <button
                     type="button"
-                    onClick={() => cfg && navigate(cfg.route(m.id))}
+                    onClick={() => cfg && navigate(cfg.route(m.routeId ?? m.id))}
                     className="text-left w-full pr-6"
                   >
                     {m.image && (
