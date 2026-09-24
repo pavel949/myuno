@@ -443,6 +443,7 @@ const VENDOR_SIDEBAR: SidebarNavGroup[] = [
     items: [
       { path: '/vendor',           labelEn: 'Dashboard', labelRu: 'Обзор',     icon: LayoutDashboard },
       { path: '/vendor/bookings',  labelEn: 'Bookings',  labelRu: 'Заказы',    icon: CalendarDays },
+      { path: '/vendor/service-desk', labelEn: 'Service desk', labelRu: 'Стол заказов', icon: CalendarDays },
       { path: '/vendor/services',  labelEn: 'Services',  labelRu: 'Услуги',    icon: Package },
       { path: '/vendor/products',  labelEn: 'Products',  labelRu: 'Товары',    icon: Store },
       { path: '/vendor/locations', labelEn: 'Locations', labelRu: 'Локации',   icon: MapPin },

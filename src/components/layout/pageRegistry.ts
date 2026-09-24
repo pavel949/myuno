@@ -490,6 +490,7 @@ export const StaysSubscriptionLanding = lazy(() => import('@/pages/landings/Stay
 export const LegalServiceLanding = lazy(() => import('@/pages/landings/LegalServiceLanding'));
 export const VendorOnboarding = lazy(() => import('@/pages/vendor/VendorOnboarding'));
 export const VendorBookings = lazy(() => import('@/pages/vendor/VendorBookings'));
+export const VendorServiceDesk = lazy(() => import('@/pages/vendor/VendorServiceDesk'));
 export const VendorServices = lazy(() => import('@/pages/vendor/VendorServices'));
 export const VendorAnalytics = lazy(() => import('@/pages/vendor/VendorAnalytics'));
 export const VendorPayouts = lazy(() => import('@/pages/vendor/VendorPayouts'));
