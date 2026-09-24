@@ -207,6 +207,7 @@ const OWNER_SIDEBAR: SidebarNavGroup[] = [
     labelEn: 'Control Tower', labelRu: 'Центр управления', defaultOpen: true,
     items: [
       { path: APP_ROUTES.MC,               labelEn: 'Dashboard',  labelRu: 'Обзор',          icon: LayoutDashboard },
+      { path: APP_ROUTES.MC_TODAY,         labelEn: 'Today',      labelRu: 'Сегодня',        icon: Sun },
       { path: APP_ROUTES.MC_BOOKINGS_LIST, labelEn: 'Bookings',   labelRu: 'Бронирования',   icon: CalendarCheck },
       { path: APP_ROUTES.MC_CALENDAR,      labelEn: 'Calendar',   labelRu: 'Календарь',      icon: CalendarDays },
       { path: APP_ROUTES.MC_TASKS,         labelEn: 'Tasks',      labelRu: 'Задачи',         icon: ClipboardList, badgeKey: 'tasks' },
