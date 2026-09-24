@@ -69,9 +69,9 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     const paths = BOTTOM_BAR_BY_ROLE.guest.map((i) => i.path);
     expect(paths).toEqual([
       APP_ROUTES.HOME,
-      APP_ROUTES.DISCOVER,
-      APP_ROUTES.MARKET,
-      APP_ROUTES.PROPERTY,
+      APP_ROUTES.GOAL_STAY,
+      APP_ROUTES.GOAL_BUY,
+      APP_ROUTES.GOAL_SERVICES,
       APP_ROUTES.ACCOUNT,
     ]);
   });
@@ -175,7 +175,7 @@ describe('isBottomBarRoute — membership check', () => {
   it('returns true for routes that belong to the role bar', () => {
     expect(isBottomBarRoute('owner', APP_ROUTES.MC_FINANCE)).toBe(true);
     expect(isBottomBarRoute('vendor', APP_ROUTES.VENDOR_PAYOUTS)).toBe(true);
-    expect(isBottomBarRoute('guest', APP_ROUTES.MARKET)).toBe(true);
+    expect(isBottomBarRoute('guest', APP_ROUTES.GOAL_BUY)).toBe(true);
   });
 
   it('returns false for routes that are not in the role bar', () => {
@@ -224,20 +224,20 @@ describe('isBottomBarItemActive — exact-match items', () => {
 });
 
 describe('isBottomBarItemActive — prefix items', () => {
-  const market = BOTTOM_BAR_BY_ROLE.guest[2]; // /market
-  const property = BOTTOM_BAR_BY_ROLE.guest[3]; // /property
+  const market = BOTTOM_BAR_BY_ROLE.guest[2]; // /discover/buy
+  const property = BOTTOM_BAR_BY_ROLE.guest[3]; // /discover/services
   const ownerProps = BOTTOM_BAR_BY_ROLE.owner[1]; // /mc/properties
 
   it('matches the path itself and any nested route', () => {
-    expect(isBottomBarItemActive(market, '/market')).toBe(true);
-    expect(isBottomBarItemActive(market, '/market/store/123')).toBe(true);
-    expect(isBottomBarItemActive(property, '/property/browse')).toBe(true);
+    expect(isBottomBarItemActive(market, '/discover/buy')).toBe(true);
+    expect(isBottomBarItemActive(market, '/discover/buy/x')).toBe(true);
+    expect(isBottomBarItemActive(property, '/discover/services')).toBe(true);
     expect(isBottomBarItemActive(ownerProps, '/mc/properties/abc/edit')).toBe(true);
   });
 
   it('does not match unrelated routes (respects "/" boundary)', () => {
-    expect(isBottomBarItemActive(market, '/marketing')).toBe(false);
-    expect(isBottomBarItemActive(property, '/properties')).toBe(false);
+    expect(isBottomBarItemActive(market, '/discover/buyer')).toBe(false);
+    expect(isBottomBarItemActive(property, '/discover/servicesx')).toBe(false);
     expect(isBottomBarItemActive(ownerProps, '/mc/finance')).toBe(false);
   });
 });
@@ -265,10 +265,10 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
     expect(getActiveBottomBarItem('owner', '/totally/unknown')).toBeNull();
   });
 
-  it('guest on /market highlights Market', () => {
-    const item = getActiveBottomBarItem('guest', '/market');
-    expect(item?.path).toBe('/market');
-    expect(item?.labelEn).toBe('Market');
+  it('guest on /discover/stay highlights Stay', () => {
+    const item = getActiveBottomBarItem('guest', '/discover/stay');
+    expect(item?.path).toBe('/discover/stay');
+    expect(item?.labelEn).toBe('Stay');
   });
 
   it('guest on / highlights Home (exact)', () => {

@@ -704,3 +704,4 @@ export const OutreachHub = lazy(() => import('@/pages/outreach/OutreachHub'));
 
 // ── Investor Quiz (real funnel, replaces /invest redirect stub) ──
 export const InvestorQuiz = lazy(() => import('@/pages/invest/InvestorQuiz'));
+export const GoalEntryPage = lazy(() => import('@/pages/discover/GoalEntryPage'));

@@ -11,7 +11,7 @@ import {
   Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
   CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
   FileCheck, Users, MessageCircle, BarChart3, FileText, TrendingUp, Inbox,
-  Briefcase,
+  Briefcase, BedDouble, Wrench,
 } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 
@@ -41,16 +41,17 @@ export type NavRoleKey =
 // ─────────────────────────────────────────────────────────────
 
 /**
- * GUEST_NAV — legacy 5-tab (Home/Discover/Market/Property/Me).
+ * GUEST_NAV — One-Stop goal-first nav (Home/Stay/Live/Buy/Services/Me).
+ * Mobile bar shows Home · Stay · [Apps] · Services · Me; desktop shows all.
  * Kept as default until `feature_flag:me_shell_v1` is enabled, then
  * `GUEST_NAV_ME_HUB` (Gosuslugi-style 5-tab) takes over via NavShell.
  */
 export const GUEST_NAV: NavItem[] = [
-  { path: APP_ROUTES.HOME,     icon: Home,        labelEn: 'Home',      labelRu: 'Главная', labelTh: 'หน้าแรก', exact: true },
-  { path: APP_ROUTES.DISCOVER, icon: Compass,     labelEn: 'Discover',  labelRu: 'Навигатор', labelTh: 'ค้นหา' },
-  { path: APP_ROUTES.MARKET,   icon: ShoppingBag, labelEn: 'Market',    labelRu: 'Маркет', labelTh: 'ตลาด' },
-  { path: APP_ROUTES.PROPERTY, icon: Building2,   labelEn: 'Property',  labelRu: 'Недвижимость', labelTh: 'อสังหาฯ' },
-  { path: APP_ROUTES.ACCOUNT,  icon: User,        labelEn: 'Me',        labelRu: 'Профиль', labelTh: 'ฉัน' },
+  { path: APP_ROUTES.HOME,          icon: Home,      labelEn: 'Home',     labelRu: 'Главная',  labelTh: 'หน้าแรก', exact: true },
+  { path: APP_ROUTES.GOAL_STAY,     icon: BedDouble, labelEn: 'Stay',     labelRu: 'Пожить',   labelTh: 'ที่พัก' },
+  { path: APP_ROUTES.GOAL_BUY,      icon: Building2, labelEn: 'Buy',      labelRu: 'Купить',   labelTh: 'ซื้อ' },
+  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench,    labelEn: 'Services', labelRu: 'Услуги',   labelTh: 'บริการ' },
+  { path: APP_ROUTES.ACCOUNT,       icon: User,      labelEn: 'Me',       labelRu: 'Профиль',  labelTh: 'ฉัน' },
 ];
 
 /**
