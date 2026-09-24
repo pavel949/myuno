@@ -122,6 +122,7 @@ export function useCreateServiceOrder() {
           guest_phone: input.guestPhone || null,
           notes: input.notes || null,
           service_type: 'marketplace',
+          service_name: 'pending', // overwritten by validate_service_order trigger
           status: 'pending',
         })
         .select('id')

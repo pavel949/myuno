@@ -43,7 +43,7 @@ export default function VendorServiceDesk() {
   const fail = () => toast.error(L('Не удалось сохранить', 'Could not save', 'บันทึกไม่สำเร็จ'));
 
   const setStatus = async (id: string, status: string) => {
-    const patch: Record<string, string> = { status };
+    const patch: { status: string; started_at?: string; completed_at?: string } = { status };
     if (status === 'in_progress') patch.started_at = new Date().toISOString();
     if (status === 'completed') patch.completed_at = new Date().toISOString();
     const { error } = await supabase.from('service_orders').update(patch).eq('id', id);
