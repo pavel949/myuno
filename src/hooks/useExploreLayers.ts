@@ -83,7 +83,7 @@ export function useExploreLayers() {
             [lat, lng] = c; approximate = true;
           }
           out.push({
-            id: `newbuild-${pr.id}`, layer: 'newbuild', routeId: pr.slug || pr.id,
+            id: `newbuild-${pr.id}`, layer: 'newbuild', routeId: pr.id,
             name: pr.name_en || 'Project', nameRu: pr.name_ru || pr.name_en || 'Проект',
             lat, lng, rating: 0, approximate,
             priceFrom: Number(pr.price_from_thb ?? pr.price_from) || 0,
