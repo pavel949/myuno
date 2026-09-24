@@ -22664,6 +22664,51 @@ export type Database = {
           },
         ]
       }
+      provider_availability: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          provider_id: string
+          start_time: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          provider_id: string
+          start_time: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          provider_id?: string
+          start_time?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
+          },
+        ]
+      }
       provider_badges: {
         Row: {
           awarded_at: string
@@ -24651,7 +24696,10 @@ export type Database = {
           created_at: string
           currency: string | null
           description: string | null
+          duration_minutes: number | null
           guest_id: string
+          guest_name: string | null
+          guest_phone: string | null
           id: string
           notes: string | null
           order_number: string | null
@@ -24662,6 +24710,7 @@ export type Database = {
           rating: number | null
           review: string | null
           scheduled_at: string | null
+          service_id: string | null
           service_name: string
           service_name_ru: string | null
           service_type: string
@@ -24679,7 +24728,10 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string | null
+          duration_minutes?: number | null
           guest_id: string
+          guest_name?: string | null
+          guest_phone?: string | null
           id?: string
           notes?: string | null
           order_number?: string | null
@@ -24690,6 +24742,7 @@ export type Database = {
           rating?: number | null
           review?: string | null
           scheduled_at?: string | null
+          service_id?: string | null
           service_name: string
           service_name_ru?: string | null
           service_type: string
@@ -24707,7 +24760,10 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string | null
+          duration_minutes?: number | null
           guest_id?: string
+          guest_name?: string | null
+          guest_phone?: string | null
           id?: string
           notes?: string | null
           order_number?: string | null
@@ -24718,6 +24774,7 @@ export type Database = {
           rating?: number | null
           review?: string | null
           scheduled_at?: string | null
+          service_id?: string | null
           service_name?: string
           service_name_ru?: string | null
           service_type?: string
@@ -24781,6 +24838,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
+          },
+          {
+            foreignKeyName: "service_orders_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -34472,6 +34536,13 @@ export type Database = {
       get_property_user_role: {
         Args: { p_property_id: string; p_user_id: string }
         Returns: string
+      }
+      get_provider_busy_slots: {
+        Args: { _from: string; _provider_id: string; _to: string }
+        Returns: {
+          ends_at: string
+          starts_at: string
+        }[]
       }
       get_subscription_revenue: {
         Args: { p_days?: number }

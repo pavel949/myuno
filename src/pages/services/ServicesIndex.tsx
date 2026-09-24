@@ -11,6 +11,7 @@ import { SERVICE_CATEGORIES, type ServiceCategory } from "@/lib/config/homeServi
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { usePersonaFilter } from "@/hooks/usePersonaFilter";
+import { MarketplaceServiceGrid } from "@/components/services/MarketplaceServiceGrid";
 
 /**
  * URL-slug → SERVICE_CATEGORIES.id normaliser.
@@ -278,6 +279,8 @@ export default function ServicesIndex() {
           </p>
         </div>
       )}
+
+      <MarketplaceServiceGrid search={searchQuery} />
 
       {/* Popular Section */}
       {showPopularBlock && (

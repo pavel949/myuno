@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.validate_service_order() FROM PUBLIC, anon, authenticated;
