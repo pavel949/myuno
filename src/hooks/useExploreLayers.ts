@@ -34,10 +34,8 @@ export function useExploreLayers() {
     queryFn: async (): Promise<ExploreItem[]> => {
       const [props, projects, providers] = await Promise.all([
         supabase
-          .from('properties')
-          .select('id, title_en, title_ru, lat, lng, district, listing_type, is_for_sale, price_per_night, price_per_month, monthly_rent_thb, sale_price, cover_image, rating, asset_class')
-          .eq('is_active', true)
-          .eq('approval_status', 'approved')
+          .from('v_properties_public')
+          .select('id, title_en, title_ru, lat, lng, district, listing_type, price, sale_price, cover_image')
           .limit(1000),
         supabase
           .from('property_projects')
@@ -55,7 +53,6 @@ export function useExploreLayers() {
 
       if (!props.error) {
         for (const p of props.data ?? []) {
-          if (p.asset_class === 'commercial' || p.asset_class === 'land') continue; // own layers
           let lat = num(p.lat), lng = num(p.lng), approximate = false;
           if (!valid(lat, lng)) {
             const c = districtCentroid(p.district, p.id);
@@ -64,13 +61,15 @@ export function useExploreLayers() {
           }
           const base = {
             name: p.title_en || 'Property', nameRu: p.title_ru || p.title_en || 'Объект',
-            lat, lng, rating: Number(p.rating) || 0, image: p.cover_image || undefined, approximate, routeId: p.id,
+            lat, lng, rating: 0, image: p.cover_image || undefined, approximate, routeId: p.id,
           };
-          const monthly = Number(p.price_per_month ?? p.monthly_rent_thb) || 0;
-          const isSale = p.listing_type === 'sale' || p.is_for_sale === true;
-          if (isSale) out.push({ ...base, id: `sale-${p.id}`, layer: 'sale', priceFrom: Number(p.sale_price) || 0 });
-          if (!isSale && Number(p.price_per_night) > 0) out.push({ ...base, id: `stay-${p.id}`, layer: 'stay', priceFrom: Number(p.price_per_night) });
-          if (monthly > 0) out.push({ ...base, id: `rent-${p.id}`, layer: 'rent', priceFrom: monthly });
+          // Public view exposes `price` without period. Today all public rentals
+          // are nightly (price_period='night'), so listing_type 'rent' → stay layer.
+          // TODO(schema): expose price_period / monthly price in v_properties_public
+          // so monthly rentals can populate the long-term layer.
+          if (p.listing_type === 'sale') out.push({ ...base, id: `sale-${p.id}`, layer: 'sale', priceFrom: Number(p.sale_price) || 0 });
+          else if (p.listing_type === 'rent') out.push({ ...base, id: `stay-${p.id}`, layer: 'stay', priceFrom: Number(p.price) || 0 });
+          else if (p.listing_type === 'long_term' || p.listing_type === 'rent_long') out.push({ ...base, id: `rent-${p.id}`, layer: 'rent', priceFrom: Number(p.price) || 0 });
         }
       }
 
