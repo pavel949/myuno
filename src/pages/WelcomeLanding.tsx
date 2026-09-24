@@ -58,6 +58,7 @@ import {
   LandingSection,
 } from '@/components/landings/LandingPrimitives';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
+import { GoalStrip } from '@/components/landings/GoalStrip';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
 type Bi = { ru: string; en: string; th?: string };
@@ -430,6 +431,13 @@ export default function WelcomeLanding() {
             ))}
           </motion.div>
         </LandingHero>
+      </LandingSection>
+
+      {/* ============ 1b. GOAL-FIRST ENTRY (One-Stop IA) ============ */}
+      <LandingSection>
+        <LandingContainer className="py-8 sm:py-10">
+          <GoalStrip />
+        </LandingContainer>
       </LandingSection>
 
       {/* ============================ 2. РАЗВИЛКА ============================ */}

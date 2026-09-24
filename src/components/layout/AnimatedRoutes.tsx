@@ -233,6 +233,9 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Wave-1 IA cleanup: /discover — единственная каноническая «дверь» в каталог.
             /navigator, /catalog, /categories — все редиректят на /discover. */}
         <Route path={APP_ROUTES.DISCOVER} element={<LazyPage><Pages.Discover /></LazyPage>} />
+        {["stay","live","buy","services"].map((g) => (
+          <Route key={g} path={`${APP_ROUTES.DISCOVER}/${g}`} element={<LazyPage><Pages.GoalEntryPage goal={g} /></LazyPage>} />
+        ))}
         <Route path={`${APP_ROUTES.DISCOVER}/:code`} element={<LazyPage><Pages.SituationDetail /></LazyPage>} />
         <Route path={APP_ROUTES.NAVIGATOR} element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
         <Route path="/catalog" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />

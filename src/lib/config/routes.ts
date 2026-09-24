@@ -16,6 +16,11 @@ export const APP_ROUTES = {
 
   // ── Discovery & Navigation ──
   DISCOVER: '/discover',
+  /** Goal-first entry pages (Phuket One-Stop IA). Mounted under /discover. */
+  GOAL_STAY: '/discover/stay',
+  GOAL_LIVE: '/discover/live',
+  GOAL_BUY: '/discover/buy',
+  GOAL_SERVICES: '/discover/services',
   NAVIGATOR: '/navigator',
   MAP: '/map',
   SEARCH: '/search',
