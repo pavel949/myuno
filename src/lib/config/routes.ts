@@ -455,6 +455,7 @@ export const APP_ROUTES = {
   MC_COMPLEXES: '/mc/complexes',
   MC_PROJECTS: '/mc/projects',
   MC_PROPERTY_IMPORT: '/mc/properties/import',
+  MC_TODAY: '/mc/today',
   MC_CALENDAR: '/mc/calendar',
   MC_CONTACTS: '/mc/contacts',
   MC_CONTACT_DETAIL: (id: string) => `/mc/contacts/${id}`,

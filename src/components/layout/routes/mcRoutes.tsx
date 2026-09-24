@@ -44,6 +44,7 @@ export const mcRoutes = (
     <Route path="properties/:id/inventory" element={<LazyPage><Pages.InventoryPage /></LazyPage>} />
     <Route path="properties/:id/juristic-requests" element={<LazyPage><Pages.JuristicRequestsPage /></LazyPage>} />
     <Route path="properties/:id/portal-settings" element={<LazyPage><Pages.OwnerPortalSettingsPage /></LazyPage>} />
+    <Route path="today" element={<LazyPage><Pages.PmsTodayPage /></LazyPage>} />
     <Route path="calendar" element={<LazyPage><Pages.OwnerCalendar /></LazyPage>} />
     <Route path="bookings" element={<Navigate to="/mc/bookings-list" replace />} />
     <Route path="operations" element={<LazyPage><Pages.OwnerOperations /></LazyPage>} />
