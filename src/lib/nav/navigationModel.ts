@@ -17,7 +17,7 @@
 import {
   // primary
   Compass, ShoppingBag, User, LayoutDashboard, Building2,
-  CalendarDays, Wallet, MessageCircle, TrendingUp, Package, Calendar,
+  CalendarDays, Sun, Wallet, MessageCircle, TrendingUp, Package, Calendar,
   UserCheck, MessageSquare, FileCheck, Users, BarChart3, FileText,
   // sidebar extras (workspace)
   Crown, CreditCard, DollarSign, Zap, CalendarCheck, ContactRound,
