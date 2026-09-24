@@ -30,6 +30,7 @@ import { useCartToast } from "@/hooks/useCartToast";
 import { PLACEHOLDER_IMAGES } from "@/lib/config/placeholders";
 import { useProviderDetails } from "@/hooks/useProviderDetails";
 import { useReviews } from "@/hooks/useReviews";
+import { ServiceBookingSheet, type BookableService } from "@/components/services/ServiceBookingSheet";
 
 interface CartService {
   id: string;
@@ -46,6 +47,7 @@ const ServiceProviderDetail = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const { showAddedToast } = useCartToast();
+  const [booking, setBooking] = useState<BookableService | null>(null);
 
   // Real DB data
   const { provider, services, isLoading } = useProviderDetails(id || null);
@@ -303,6 +305,15 @@ const ServiceProviderDetail = () => {
                           <p className="font-bold text-primary mt-1">฿{service.price}</p>
                         </div>
                         <div className="flex items-center gap-2">
+                          {id && (
+                            <Button size="sm" variant="outline" className="h-10 px-3" onClick={() => {
+                              const raw = (services ?? []).find((x) => x.id === service.id) as { duration_minutes?: number | null; lead_time_hours?: number | null } | undefined;
+                              setBooking({ id: service.id, providerId: id, name: service.name, price: service.price, durationMinutes: raw?.duration_minutes ?? null, leadTimeHours: raw?.lead_time_hours ?? null });
+                            }}>
+                              <Calendar className="w-4 h-4 mr-1" />
+                              {isRu ? "Записаться" : "Book"}
+                            </Button>
+                          )}
                           {inCart ? (
                             <Button
                               size="sm"
@@ -331,6 +342,7 @@ const ServiceProviderDetail = () => {
               </div>
             )}
           </TabsContent>
+          <ServiceBookingSheet service={booking} open={!!booking} onOpenChange={(o) => !o && setBooking(null)} />
 
           <TabsContent value="about" className="mt-0 px-4 py-4">
             <div className="space-y-4">
