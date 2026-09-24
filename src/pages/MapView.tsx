@@ -741,7 +741,7 @@ export default function MapView() {
               const cfg = vendor ? VERTICAL_CONFIG[vendor.vertical as Exclude<VerticalFilter, 'all'>] : null;
               const title = m.title || '—';
               const subtitle = vendor
-                ? (language === 'ru' ? cfg?.labelRu : cfg?.labelEn) || ''
+                ? `${(language === 'ru' ? cfg?.labelRu : cfg?.labelEn) || ''}${vendor?.approximate ? (language === 'ru' ? ' · примерный район' : ' · approximate area') : ''}`
                 : (d?.kind === 'osm' ? `${d.poi.category}${d.poi.subcategory ? ' · ' + d.poi.subcategory : ''}` : '');
               return (
                 <MapListItem
@@ -752,7 +752,7 @@ export default function MapView() {
                   title={title}
                   subtitle={subtitle}
                   rating={vendor?.rating}
-                  priceLabel={vendor && vendor.priceFrom > 0 ? `${formatPrice(vendor.priceFrom)}+` : undefined}
+                  priceLabel={vendor && vendor.priceFrom > 0 ? `${formatPrice(vendor.priceFrom)}${vendor.vertical === 'rent' ? (language === 'ru' ? '/мес' : '/mo') : vendor.vertical === 'stay' ? (language === 'ru' ? '/ночь' : '/night') : '+'}` : undefined}
                   isSelected={activeMarkerId === m.id}
                   onSelect={(id) => {
                     selectMarker(id);
