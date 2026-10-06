@@ -4,6 +4,7 @@ import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getAllowedOrigin } from "../_shared/cors.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { quotePropertyStay, bangkokToday, type PropertyPricingRow } from "../_shared/property-quote.ts";
 
 
 interface PropertyDepositRequest {
@@ -82,10 +83,9 @@ Deno.serve(async (req) => {
       check_in,
       check_out,
       guests,
-      nights,
-      total_amount,
-      deposit_amount,
-      cleaning_fee,
+    } = body;
+    let { nights, total_amount, deposit_amount, cleaning_fee } = body;
+    const {
       guest_name,
       guest_phone,
       guest_email,
@@ -106,20 +106,15 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // ── Server-side price-tampering guard ──────────────────────────────────
-    // `total_amount` / `deposit_amount` / `cleaning_fee` arrive from the client.
-    // Stripe charges `deposit_amount`, and orders.total_amount + the ledger are
-    // derived from these, so we must anchor them to authoritative DB values.
-    // The exact nightly total involves seasonal rates + weekly/monthly discounts
-    // that are non-trivial to replicate here, so instead of recomputing we
-    // enforce a conservative FLOOR: the client total may not fall below the
-    // authoritative base rate minus a generous discount allowance. This blocks
-    // gross undervaluation (e.g. a 50,000 THB stay submitted as 100 THB) while
-    // still permitting legitimate discounted bookings.
-    const MAX_RENTAL_DISCOUNT = 0.6; // tolerate up to 60% off the base nightly rate
+    // ── Authoritative server quote (F06) ───────────────────────────────────
+    // Nights are derived from the dates in the Bangkok calendar, the property
+    // must be active/THB, guests and minimum stay are enforced, the cleaning
+    // fee must equal the stored fee, the total must lie between the base price
+    // minus the property's own largest configured discount and the undiscounted
+    // base price, and the deposit is computed here (client value is ignored).
     const { data: propertyRow, error: propErr } = await supabaseAdmin
       .from("properties")
-      .select("price_per_night, price, cleaning_fee, status, is_active")
+      .select("price_per_night, price, price_period, cleaning_fee, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts")
       .eq("id", property_id)
       .maybeSingle();
 
@@ -130,57 +125,24 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
-    if (!propertyRow) {
-      logStep("ERROR: Property not found", { property_id });
-      return new Response(
-        JSON.stringify({ error: "Property not found" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 }
-      );
-    }
 
-    const authoritativeRate = Number(
-      (propertyRow.price_per_night as number | null) ?? (propertyRow.price as number | null) ?? 0
-    );
-    if (!Number.isFinite(authoritativeRate) || authoritativeRate <= 0) {
-      logStep("ERROR: Property has no valid nightly rate", { property_id });
+    const quote = quotePropertyStay(propertyRow as PropertyPricingRow | null, {
+      check_in, check_out, guests, nights, total_amount, cleaning_fee, today: bangkokToday(),
+    });
+    if (!quote.ok) {
+      logStep("ERROR: Quote rejected", { code: quote.code, property_id });
       return new Response(
-        JSON.stringify({ error: "Property is not bookable" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        JSON.stringify({ error: quote.message, code: quote.code }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: quote.code === "not_found" ? 404 : 400 }
       );
     }
-
-    const minPlausibleTotal = Math.round(authoritativeRate * nights * (1 - MAX_RENTAL_DISCOUNT));
-    if (!Number.isFinite(total_amount) || total_amount < minPlausibleTotal) {
-      logStep("ERROR: total_amount below authoritative floor", {
-        total_amount, minPlausibleTotal, authoritativeRate, nights,
-      });
-      return new Response(
-        JSON.stringify({ error: "Invalid booking total" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
+    if (typeof deposit_amount === "number" && Math.abs(deposit_amount - quote.deposit) > 1) {
+      logStep("Client deposit differs from server deposit; server value used", { deposit_amount, server: quote.deposit });
     }
-
-    // Cleaning fee may not exceed the property's authoritative cleaning fee.
-    const authoritativeCleaningFee = Number((propertyRow.cleaning_fee as number | null) ?? 0);
-    if ((cleaning_fee ?? 0) > authoritativeCleaningFee + 0.01) {
-      logStep("ERROR: cleaning_fee exceeds authoritative value", {
-        cleaning_fee, authoritativeCleaningFee,
-      });
-      return new Response(
-        JSON.stringify({ error: "Invalid cleaning fee" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
-    }
-
-    // Validate deposit amount (should be ~10% of total)
-    const expectedDeposit = Math.round(total_amount * 0.1);
-    if (deposit_amount < expectedDeposit * 0.95 || deposit_amount > expectedDeposit * 1.05) {
-      logStep("ERROR: Invalid deposit amount", { deposit_amount, expectedDeposit });
-      return new Response(
-        JSON.stringify({ error: "Invalid deposit amount" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
-    }
+    nights = quote.nights;
+    total_amount = quote.total;
+    deposit_amount = quote.deposit;
+    cleaning_fee = quote.cleaningFee;
 
     // P0 FIX: Check availability BEFORE creating the order
     const { data: isAvailable, error: availError } = await supabaseAdmin.rpc(
@@ -377,6 +339,10 @@ Deno.serve(async (req) => {
         guest_email: guest_email || user.email || "",
         order_id: order.order_id,
         order_number: order.order_number || "",
+      },
+      // Propagate linkage to the charge so refunds resolve the order (F08).
+      payment_intent_data: {
+        metadata: { order_id: order.order_id, property_id, type: "property_deposit" },
       },
     });
 
