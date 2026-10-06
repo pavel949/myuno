@@ -204,8 +204,8 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
     const labels = labelsFor('cat-tourism', 'ru');
     expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
     expect(labels).toContain('Экскурсии и отдых');
-    expect(labels).toContain('Туры');
-    expect(labels).toContain('Вода и активности');
+    expect(labels).toContain('Экскурсионные туры');
+    expect(labels).toContain('Водные виды отдыха');
   });
 
   it('plain umbrella route /services keeps its catalog SSOT label', () => {
