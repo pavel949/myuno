@@ -15,6 +15,13 @@
       "when": 1791279443520,
       "tag": "0001_restrict_lead_scores_and_project_documents",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791279957242,
+      "tag": "0002_tighten_cleaning_and_project_docs",
+      "breakpoints": true
     }
   ]
 }
