@@ -53,8 +53,11 @@ const OPEN_REQUEST = ['pending', 'new', 'assigned', 'in_progress', 'scheduled', 
 const MAINT_RE = /maint|repair|plumb|electr|air|ac_|fix|pool|pest|garden/i;
 const CLEAN_RE = /clean|housekeep|laundry|turnover/i;
 
-export const ymd = (d: Date) => d.toISOString().slice(0, 10);
-const day = (s: string) => s.slice(0, 10);
+/** Phuket-local (UTC+7) calendar date for a timestamp, "YYYY-MM-DD". */
+const PHUKET_OFFSET_MIN = 7 * 60;
+export const ymd = (d: Date) =>
+  new Date(d.getTime() + PHUKET_OFFSET_MIN * 60_000).toISOString().slice(0, 10);
+const day = (s: string) => ymd(new Date(s));
 
 export function deriveUnitState(args: {
   inHouse: boolean;
