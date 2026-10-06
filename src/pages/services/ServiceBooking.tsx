@@ -162,7 +162,7 @@ export default function ServiceBooking() {
       contact: { name: contactData.name, phone: contactData.phone, email: contactData.email, notes: contactData.notes },
       address, paymentMethod, serviceFee,
     });
-    if (!built.ok) { setSubmitError(built.reason); return; }
+    if ('reason' in built) { setSubmitError(built.reason); return; }
 
     const result = await createBooking(built.params);
     if (result.success) setBookingResult({ success: true, bookingId: result.booking_id });
