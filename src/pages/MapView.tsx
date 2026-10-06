@@ -84,18 +84,18 @@ const VERTICAL_CONFIG: Record<
   Exclude<VerticalFilter, 'all'>,
   { icon: string; color: string; labelEn: string; labelRu: string; route: (id: string) => string }
 > = {
-  stay: { icon: '🛏️', color: '#0F766E', labelEn: 'Short stays', labelRu: 'Посуточно', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
-  rent: { icon: '🔑', color: '#0A2240', labelEn: 'Long-term', labelRu: 'Долгосрочно', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
-  sale: { icon: '🏷️', color: '#D96B1A', labelEn: 'For sale', labelRu: 'Продажа', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
+  stay: { icon: '🛏️', color: '#0F766E', labelEn: 'Short stays', labelRu: 'Посуточная аренда', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
+  rent: { icon: '🔑', color: '#0A2240', labelEn: 'Long-term', labelRu: 'Долгосрочная аренда', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
+  sale: { icon: '🏷️', color: '#D96B1A', labelEn: 'For sale', labelRu: 'Продажа жилья', route: (id) => APP_ROUTES.PROPERTY_DETAIL(id) },
   newbuild: { icon: '🏗️', color: '#78716C', labelEn: 'New developments', labelRu: 'Новостройки', route: (id) => APP_ROUTES.OFFPLAN_DETAIL(id) },
   service: { icon: '🛠️', color: '#3F6212', labelEn: 'Services', labelRu: 'Услуги', route: (id) => `/services/provider/${id}` },
-  commercial: { icon: '🏢', color: '#C9A84C', labelEn: 'Commercial', labelRu: 'Коммерческая', route: (id) => `/property/commercial/${id}` },
-  land: { icon: '🌾', color: '#A0784A', labelEn: 'Land', labelRu: 'Земля', route: (id) => `/property/land/${id}` },
+  commercial: { icon: '🏢', color: '#C9A84C', labelEn: 'Commercial', labelRu: 'Коммерческая недвижимость', route: (id) => `/property/commercial/${id}` },
+  land: { icon: '🌾', color: '#A0784A', labelEn: 'Land', labelRu: 'Земельные участки', route: (id) => `/property/land/${id}` },
   beauty: { icon: '💇', color: '#6366f1', labelEn: 'Beauty', labelRu: 'Красота', route: (id) => `/beauty/salon/${id}` },
   restaurant: { icon: '🍽️', color: '#ea580c', labelEn: 'Restaurants', labelRu: 'Рестораны', route: (id) => `/restaurants/${id}` },
   fitness: { icon: '🏋️', color: '#0ea5e9', labelEn: 'Fitness', labelRu: 'Фитнес', route: (id) => `/fitness/${id}` },
   pharmacy: { icon: '💊', color: '#16a34a', labelEn: 'Pharmacy', labelRu: 'Аптеки', route: (id) => `/pharmacy/${id}` },
-  vet: { icon: '🐾', color: '#db2777', labelEn: 'Vet', labelRu: 'Ветклиники', route: (id) => `/pets/vet/${id}` },
+  vet: { icon: '🐾', color: '#db2777', labelEn: 'Vet', labelRu: 'Ветеринарные клиники', route: (id) => `/pets/vet/${id}` },
   flowers: { icon: '💐', color: '#e11d48', labelEn: 'Flowers', labelRu: 'Цветы', route: (id) => `/flowers/shop/${id}` },
   venue: { icon: '🏛️', color: '#7c3aed', labelEn: 'Venues', labelRu: 'Площадки', route: (id) => `/venues/${id}` },
   event: { icon: '🎉', color: '#f59e0b', labelEn: 'Events', labelRu: 'События', route: (id) => APP_ROUTES.EVENT_DETAIL(id) },
@@ -104,18 +104,18 @@ const VERTICAL_CONFIG: Record<
 
 const FILTER_OPTIONS: { value: VerticalFilter; labelEn: string; labelRu: string; icon: string }[] = [
   { value: 'all', labelEn: 'All', labelRu: 'Все', icon: '🗺️' },
-  { value: 'stay', labelEn: 'Short stays', labelRu: 'Посуточно', icon: '🛏️' },
-  { value: 'rent', labelEn: 'Long-term', labelRu: 'Долгосрочно', icon: '🔑' },
-  { value: 'sale', labelEn: 'For sale', labelRu: 'Продажа', icon: '🏷️' },
+  { value: 'stay', labelEn: 'Short stays', labelRu: 'Посуточная аренда', icon: '🛏️' },
+  { value: 'rent', labelEn: 'Long-term', labelRu: 'Долгосрочная аренда', icon: '🔑' },
+  { value: 'sale', labelEn: 'For sale', labelRu: 'Продажа жилья', icon: '🏷️' },
   { value: 'newbuild', labelEn: 'New developments', labelRu: 'Новостройки', icon: '🏗️' },
   { value: 'service', labelEn: 'Services', labelRu: 'Услуги', icon: '🛠️' },
   { value: 'commercial', labelEn: 'Commercial', labelRu: 'Коммерч.', icon: '🏢' },
-  { value: 'land', labelEn: 'Land', labelRu: 'Земля', icon: '🌾' },
+  { value: 'land', labelEn: 'Land', labelRu: 'Земельные участки', icon: '🌾' },
   { value: 'beauty', labelEn: 'Beauty', labelRu: 'Красота', icon: '💇' },
   { value: 'restaurant', labelEn: 'Restaurants', labelRu: 'Рестораны', icon: '🍽️' },
   { value: 'fitness', labelEn: 'Fitness', labelRu: 'Фитнес', icon: '🏋️' },
   { value: 'pharmacy', labelEn: 'Pharmacy', labelRu: 'Аптеки', icon: '💊' },
-  { value: 'vet', labelEn: 'Vet', labelRu: 'Ветклиники', icon: '🐾' },
+  { value: 'vet', labelEn: 'Vet', labelRu: 'Ветеринарные клиники', icon: '🐾' },
   { value: 'flowers', labelEn: 'Flowers', labelRu: 'Цветы', icon: '💐' },
   { value: 'venue', labelEn: 'Venues', labelRu: 'Площадки', icon: '🏛️' },
   { value: 'event', labelEn: 'Events', labelRu: 'События', icon: '🎉' },
@@ -554,10 +554,10 @@ export default function MapView() {
                   </div>
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                      {language === 'ru' ? 'OSM места (OpenStreetMap)' : 'OSM places (OpenStreetMap)'}
+                      {language === 'ru' ? 'Объекты OpenStreetMap' : 'OSM places (OpenStreetMap)'}
                     </p>
                     <FilterChipGroup scrollable>
-                      <FilterChip label={language === 'ru' ? (showOsm ? 'Скрыть OSM' : 'Показать OSM') : (showOsm ? 'Hide OSM' : 'Show OSM')} icon="🗺️" isActive={showOsm} onToggle={() => setShowOsm((v) => !v)} size="md" />
+                      <FilterChip label={language === 'ru' ? (showOsm ? 'Скрыть объекты OSM' : 'Показать объекты OSM') : (showOsm ? 'Hide OSM' : 'Show OSM')} icon="🗺️" isActive={showOsm} onToggle={() => setShowOsm((v) => !v)} size="md" />
                       {showOsm && OSM_CATEGORIES.map((c) => (
                         <FilterChip key={c} label={c === 'all' ? (language === 'ru' ? 'Все OSM' : 'All OSM') : c} isActive={osmCategory === c} onToggle={() => setOsmCategory(c)} size="md" />
                       ))}
@@ -579,11 +579,11 @@ export default function MapView() {
               <p className="text-xs text-muted-foreground">
                 {filteredMarkers.length}
                 {showOsm ? ` + ${osmPois?.length ?? 0} OSM` : ''}{' '}
-                {language === 'ru' ? 'локаций' : 'locations'}
+                {language === 'ru' ? 'объектов на карте' : 'locations'}
               </p>
               {activeFilterCount > 0 && (
                 <button type="button" onClick={resetAllFilters} className="text-xs text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-sm px-1">
-                  {language === 'ru' ? `Сбросить (${activeFilterCount})` : `Clear (${activeFilterCount})`}
+                  {language === 'ru' ? `Сбросить фильтры (${activeFilterCount})` : `Clear (${activeFilterCount})`}
                 </button>
               )}
             </div>
@@ -605,7 +605,7 @@ export default function MapView() {
               onMarkerClick={handleMarkerClick}
               fitToMarkers={mlMarkers.length > 0 && mlMarkers.length < 200 && !searchPin}
               className="absolute inset-0"
-              locateLabel={language === 'ru' ? 'Найти меня' : 'Find me'}
+              locateLabel={language === 'ru' ? 'Моё местоположение' : 'Find me'}
               activeMarkerId={activeMarkerId}
             />
 
@@ -726,7 +726,7 @@ export default function MapView() {
         title={
           <span>
             {mlMarkers.length}{' '}
-            {language === 'ru' ? 'локаций' : 'locations'}
+            {language === 'ru' ? 'объектов на карте' : 'locations'}
           </span>
         }
       >

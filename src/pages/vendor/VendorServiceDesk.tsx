@@ -35,12 +35,12 @@ export default function VendorServiceDesk() {
   const [newHours, setNewHours] = useState({ weekday: 1, start: '09:00', end: '18:00' });
 
   const STATUS: Record<string, string> = {
-    pending: L('Новый', 'New', 'ใหม่'), confirmed: L('Подтверждён', 'Confirmed', 'ยืนยันแล้ว'),
-    in_progress: L('В работе', 'In progress', 'กำลังทำ'), completed: L('Выполнен', 'Completed', 'เสร็จแล้ว'),
+    pending: L('Поступил', 'New', 'ใหม่'), confirmed: L('Подтверждён', 'Confirmed', 'ยืนยันแล้ว'),
+    in_progress: L('Выполняется', 'In progress', 'กำลังทำ'), completed: L('Выполнен', 'Completed', 'เสร็จแล้ว'),
     cancelled: L('Отменён', 'Cancelled', 'ยกเลิก'),
   };
   const WD = language === 'ru' ? ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'] : language === 'th' ? ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const fail = () => toast.error(L('Не удалось сохранить', 'Could not save', 'บันทึกไม่สำเร็จ'));
+  const fail = () => toast.error(L('Не удалось сохранить изменения', 'Could not save', 'บันทึกไม่สำเร็จ'));
 
   const setStatus = async (id: string, status: string) => {
     const patch: { status: string; started_at?: string; completed_at?: string } = { status };
@@ -68,12 +68,12 @@ export default function VendorServiceDesk() {
   };
 
   if (providerQ.isLoading) return <div className="p-4 space-y-2"><Skeleton className="h-8 w-48" /><Skeleton className="h-40" /></div>;
-  if (providerQ.isError) return <p className="p-4 text-destructive">{L('Ошибка загрузки', 'Failed to load', 'โหลดไม่สำเร็จ')}</p>;
+  if (providerQ.isError) return <p className="p-4 text-destructive">{L('Не удалось загрузить данные', 'Failed to load', 'โหลดไม่สำเร็จ')}</p>;
   if (!providerQ.data) return (
     <div className="p-6 max-w-md space-y-3">
-      <h1 className="text-xl font-serif">{L('Стол заказов', 'Service desk', 'โต๊ะบริการ')}</h1>
-      <p className="text-sm text-muted-foreground">{L('К вашему аккаунту не привязан профиль провайдера.', 'No provider profile is linked to your account.', 'ไม่มีโปรไฟล์ผู้ให้บริการในบัญชีของคุณ')}</p>
-      <Button asChild><Link to="/become-partner">{L('Стать партнёром', 'Become a partner', 'เป็นพาร์ทเนอร์')}</Link></Button>
+      <h1 className="text-xl font-serif">{L('Кабинет исполнителя', 'Service desk', 'โต๊ะบริการ')}</h1>
+      <p className="text-sm text-muted-foreground">{L('К вашей учётной записи не привязан профиль исполнителя.', 'No provider profile is linked to your account.', 'ไม่มีโปรไฟล์ผู้ให้บริการในบัญชีของคุณ')}</p>
+      <Button asChild><Link to="/become-partner">{L('Подать заявку на подключение', 'Become a partner', 'เป็นพาร์ทเนอร์')}</Link></Button>
     </div>
   );
 
@@ -83,18 +83,18 @@ export default function VendorServiceDesk() {
   return (
     <div className="p-4 space-y-4 max-w-4xl">
       <div>
-        <h1 className="text-xl font-serif">{L('Стол заказов', 'Service desk', 'โต๊ะบริการ')} · {providerQ.data.name}</h1>
-        <p className="text-sm text-muted-foreground">{L('Заказы, расписание и услуги, которые клиенты видят в разделе «Услуги».', 'Orders, schedule and the services customers see in Services.', 'คำสั่งซื้อ ตารางเวลา และบริการ')}</p>
+        <h1 className="text-xl font-serif">{L('Кабинет исполнителя', 'Service desk', 'โต๊ะบริการ')} · {providerQ.data.name}</h1>
+        <p className="text-sm text-muted-foreground">{L('Заказы, график приёма и перечень услуг, которые клиенты видят в разделе «Услуги».', 'Orders, schedule and the services customers see in Services.', 'คำสั่งซื้อ ตารางเวลา และบริการ')}</p>
       </div>
       <Tabs defaultValue="orders">
         <TabsList className="rounded-none">
           <TabsTrigger value="orders">{L('Заказы', 'Orders', 'คำสั่งซื้อ')} ({openCount})</TabsTrigger>
-          <TabsTrigger value="hours">{L('Часы работы', 'Working hours', 'เวลาทำการ')}</TabsTrigger>
+          <TabsTrigger value="hours">{L('График приёма', 'Working hours', 'เวลาทำการ')}</TabsTrigger>
           <TabsTrigger value="services">{L('Услуги', 'Services', 'บริการ')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders" className="space-y-2">
-          {ordersQ.isLoading ? <Skeleton className="h-24" /> : ordersQ.isError ? <p className="text-destructive text-sm">{L('Ошибка загрузки', 'Failed to load', 'โหลดไม่สำเร็จ')}</p>
+          {ordersQ.isLoading ? <Skeleton className="h-24" /> : ordersQ.isError ? <p className="text-destructive text-sm">{L('Не удалось загрузить данные', 'Failed to load', 'โหลดไม่สำเร็จ')}</p>
             : orders.length === 0 ? <p className="text-sm text-muted-foreground border border-border p-4">{L('Заказов пока нет.', 'No orders yet.', 'ยังไม่มีคำสั่งซื้อ')}</p>
             : orders.map((o) => (
               <div key={o.id} className="border border-border bg-card p-3 flex flex-wrap items-center gap-3 justify-between">
@@ -118,7 +118,7 @@ export default function VendorServiceDesk() {
         </TabsContent>
 
         <TabsContent value="hours" className="space-y-3">
-          <p className="text-xs text-muted-foreground">{L('Время по Пхукету. Без часов работы онлайн-запись закрыта.', 'Phuket time. Without working hours online booking stays closed.', 'เวลาภูเก็ต')}</p>
+          <p className="text-xs text-muted-foreground">{L('Время указывается по Пхукету. Пока график приёма не заполнен, онлайн-запись недоступна.', 'Phuket time. Without working hours online booking stays closed.', 'เวลาภูเก็ต')}</p>
           {(hoursQ.data ?? []).map((h) => (
             <div key={h.id} className="flex items-center gap-3 border border-border p-2 text-sm">
               <span className="w-10">{WD[h.weekday]}</span>
@@ -137,7 +137,7 @@ export default function VendorServiceDesk() {
         </TabsContent>
 
         <TabsContent value="services" className="space-y-2">
-          {(servicesQ.data ?? []).length === 0 && !servicesQ.isLoading && <p className="text-sm text-muted-foreground">{L('Услуг пока нет — добавляет команда myUNO при модерации.', 'No services yet — added by the myUNO team during review.', 'ยังไม่มีบริการ')}</p>}
+          {(servicesQ.data ?? []).length === 0 && !servicesQ.isLoading && <p className="text-sm text-muted-foreground">{L('Услуги пока не добавлены. Их добавляет команда myUNO после проверки.', 'No services yet — added by the myUNO team during review.', 'ยังไม่มีบริการ')}</p>}
           {(servicesQ.data ?? []).map((s) => (
             <div key={s.id} className="flex items-center gap-3 border border-border bg-card p-3 text-sm">
               <div className="flex-1 min-w-0">
@@ -145,7 +145,7 @@ export default function VendorServiceDesk() {
                 <div className="text-xs text-muted-foreground font-mono">{s.price != null ? `฿${Number(s.price).toLocaleString()}` : '—'} · {s.duration_minutes ?? 60} {L('мин', 'min', 'นาที')}</div>
               </div>
               {s.approval_status !== 'approved' && <Badge variant="outline" className="rounded-none">{L('На модерации', 'In review', 'รอตรวจ')}</Badge>}
-              <Switch checked={!!s.is_active} onCheckedChange={(v) => toggleService(s.id, v)} aria-label={L('Показывать', 'Visible', 'แสดง')} />
+              <Switch checked={!!s.is_active} onCheckedChange={(v) => toggleService(s.id, v)} aria-label={L('Показывать клиентам', 'Visible', 'แสดง')} />
             </div>
           ))}
         </TabsContent>
