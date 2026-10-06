@@ -238,8 +238,9 @@
          native/PWA launch icon into the React SplashScreen (same composition,
          zero flash). Kept separate from .uno-splash so in-app route fallbacks
          stay on the themed cream/navy surface. */
-      .uno-boot{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#051428}
-      .uno-boot svg{width:56px;height:56px;animation:uno-boot-pulse 1.6s ease-in-out infinite}
+      .uno-boot{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#F7F5F1}
+      html.dark .uno-boot{background:#051428}
+      .uno-boot svg{width:40px;height:40px}
       @keyframes uno-boot-pulse{0%,100%{opacity:1}50%{opacity:.55}}
       @media (prefers-reduced-motion: reduce){.uno-boot svg{animation:none}}
     </style>
