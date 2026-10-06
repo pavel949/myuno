@@ -427,7 +427,7 @@ export const CATEGORIES: CategoryEntry[] = [
       // AC + cleaning + pool + garden + pest + security + moving) via
       // src/lib/config/homeServiceFunctions.ts. Keeps the LayoutGrid-of-trades
       // pattern as an explicit umbrella inside the umbrella category.
-      { id: 'services',   path: SERVICES_URL,                          labelRu: 'Все бытовые услуги', labelEn: 'Trades catalogue', icon: Wrench, status: 'info', personaTags: ['resident','property_owner','family','nomad'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
+      { id: 'services',   path: SERVICES_URL,                          labelRu: 'Все бытовые услуги', labelEn: 'All home services', icon: Wrench, status: 'info', personaTags: ['resident','property_owner','family','nomad'], jtbdClusters: ['C','F'], lifecycleStages: ['settler','resident','absentee'], roleTags: ['consumer','operator'], situationCodes: ['living','resident','managing'] },
     ],
   },
   {

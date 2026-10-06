@@ -132,7 +132,7 @@ describe('filterCatalogForUser', () => {
 describe('getClusterHeaderLabel — catalog SSOT labels', () => {
   it('renders canonical cluster labels instead of drawer aliases', () => {
     expect(getClusterHeaderLabel(getClusterById('live')!, 'en')).toBe('Live');
-    expect(getClusterHeaderLabel(getClusterById('live')!, 'ru')).toBe('Жизнь');
+    expect(getClusterHeaderLabel(getClusterById('live')!, 'ru')).toBe('Проживание');
     expect(getClusterHeaderLabel(getClusterById('invest')!, 'en')).toBe('Invest');
     expect(getClusterHeaderLabel(getClusterById('legal')!, 'en')).toBe('Legal & Visa');
   });
@@ -184,12 +184,12 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
 
   it('Home services category exposes Laundry as a distinct label', () => {
     expect(labelsFor('cat-home-services', 'en')).toContain('Laundry');
-    expect(labelsFor('cat-home-services', 'ru')).toContain('Прачечная');
+    expect(labelsFor('cat-home-services', 'ru')).toContain('Стирка и глажение');
   });
 
   it('Home services category exposes the Services hub umbrella label', () => {
-    expect(labelsFor('cat-home-services', 'en')).toContain('Services hub');
-    expect(labelsFor('cat-home-services', 'ru')).toContain('Все услуги');
+    expect(labelsFor('cat-home-services', 'en')).toContain('All home services');
+    expect(labelsFor('cat-home-services', 'ru')).toContain('Все бытовые услуги');
   });
 
   it('Tourism & Activities renders distinct EN labels (no "Experiences" duplication)', () => {
@@ -203,7 +203,7 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
   it('Tourism & Activities renders distinct RU labels', () => {
     const labels = labelsFor('cat-tourism', 'ru');
     expect(new Set(labels).size, `dup labels: ${labels.join(' | ')}`).toBe(labels.length);
-    expect(labels).toContain('Впечатления');
+    expect(labels).toContain('Экскурсии и отдых');
     expect(labels).toContain('Туры');
     expect(labels).toContain('Вода и активности');
   });
@@ -222,7 +222,7 @@ describe('getClusterServiceLocalizedLabel — query-string disambiguation', () =
       },
       'en',
     );
-    expect(label).toBe('Services hub');
+    expect(label).toBe('All home services');
   });
 });
 
