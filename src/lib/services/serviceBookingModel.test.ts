@@ -67,7 +67,7 @@ describe('buildServiceOrderParams', () => {
   it('builds payload with mapped org as counterparty and provider kept in metadata', () => {
     const r = buildServiceOrderParams({ ...base, org: { status: 'mapped', orgId: 'org-9' } });
     expect(r.ok).toBe(true);
-    if (!r.ok) return;
+    if ('reason' in r) return;
     expect(r.params.provider_id).toBe('org-9');
     expect(r.params.provider_id).not.toBe(provider.id);
     expect(r.params.metadata).toEqual({ provider_id: 'prov-1', service_ids: ['svc-1'] });
