@@ -427,7 +427,8 @@ async function syncCalendar(
     const newEventIds = new Set(events.map(e => e.uid));
 
     // Soft-delete orders that no longer exist in external calendar
-    const toDelete = calendarOrders.filter((o: any) =>
+    // Never wipe all bookings when the feed came back empty (outage / bad response).
+    const toDelete = events.length === 0 ? [] : calendarOrders.filter((o: any) =>
       o.metadata?.external_id && !newEventIds.has(o.metadata.external_id)
     );
     const eventsRemoved = toDelete.length;
