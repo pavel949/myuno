@@ -541,6 +541,7 @@ export default function MapView() {
                         ))}
                       </FilterChipGroup>
                     )}
+                  </div>
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                       {language === 'ru' ? 'Доступность' : 'Availability'}
