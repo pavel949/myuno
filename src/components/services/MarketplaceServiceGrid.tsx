@@ -22,7 +22,7 @@ export function MarketplaceServiceGrid({ search = '' }: { search?: string }) {
     <section aria-labelledby="bookable-services">
       <div className="flex items-center gap-2 mb-3">
         <CalendarCheck className="h-4 w-4 text-primary" />
-        <h3 id="bookable-services" className="font-semibold text-sm">{L('Запись к провайдерам', 'Book a provider', 'จองผู้ให้บริการ')}</h3>
+        <h3 id="bookable-services" className="font-semibold text-sm">{L('Онлайн-запись к специалистам', 'Book a provider', 'จองผู้ให้บริการ')}</h3>
       </div>
       {isLoading ? (
         <div className="grid gap-2 sm:grid-cols-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28" />)}</div>
@@ -32,7 +32,7 @@ export function MarketplaceServiceGrid({ search = '' }: { search?: string }) {
           <Button size="sm" variant="outline" onClick={() => refetch()}>{L('Повторить', 'Retry', 'ลองใหม่')}</Button>
         </div>
       ) : list.length === 0 ? (
-        <p className="text-sm text-muted-foreground border border-border p-4">{L('Пока нет услуг с онлайн-записью.', 'No bookable services yet.', 'ยังไม่มีบริการที่จองได้')}</p>
+        <p className="text-sm text-muted-foreground border border-border p-4">{L('Услуги с онлайн-записью пока не добавлены.', 'No bookable services yet.', 'ยังไม่มีบริการที่จองได้')}</p>
       ) : (
         <div className="grid gap-2 sm:grid-cols-2">
           {list.map((s) => {
@@ -45,7 +45,7 @@ export function MarketplaceServiceGrid({ search = '' }: { search?: string }) {
                   <h4 className="font-medium text-sm leading-snug line-clamp-2">{name}</h4>
                   {s.provider && (
                     <Link to={`/services/provider/${s.provider.id}`} className="text-xs text-muted-foreground hover:underline flex items-center gap-1">
-                      {s.provider.is_verified && <Shield className="h-3 w-3 text-primary" aria-label={L('Проверен', 'Verified', 'ยืนยันแล้ว')} />}
+                      {s.provider.is_verified && <Shield className="h-3 w-3 text-primary" aria-label={L('Специалист проверен', 'Verified', 'ยืนยันแล้ว')} />}
                       {s.provider.name}
                     </Link>
                   )}
@@ -57,7 +57,7 @@ export function MarketplaceServiceGrid({ search = '' }: { search?: string }) {
                     <Button size="sm" className="min-h-[40px]" onClick={() => setSelected({
                       id: s.id, providerId: s.provider_id, name, price: s.price, currency: s.currency,
                       durationMinutes: s.duration_minutes, leadTimeHours: s.lead_time_hours,
-                    })}>{L('Записаться', 'Book', 'จอง')}</Button>
+                    })}>{L('Записаться на услугу', 'Book', 'จอง')}</Button>
                   </div>
                 </div>
               </article>

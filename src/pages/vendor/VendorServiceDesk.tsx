@@ -35,12 +35,12 @@ export default function VendorServiceDesk() {
   const [newHours, setNewHours] = useState({ weekday: 1, start: '09:00', end: '18:00' });
 
   const STATUS: Record<string, string> = {
-    pending: L('Новый', 'New', 'ใหม่'), confirmed: L('Подтверждён', 'Confirmed', 'ยืนยันแล้ว'),
-    in_progress: L('В работе', 'In progress', 'กำลังทำ'), completed: L('Выполнен', 'Completed', 'เสร็จแล้ว'),
+    pending: L('Поступил', 'New', 'ใหม่'), confirmed: L('Подтверждён', 'Confirmed', 'ยืนยันแล้ว'),
+    in_progress: L('Выполняется', 'In progress', 'กำลังทำ'), completed: L('Выполнен', 'Completed', 'เสร็จแล้ว'),
     cancelled: L('Отменён', 'Cancelled', 'ยกเลิก'),
   };
   const WD = language === 'ru' ? ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'] : language === 'th' ? ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const fail = () => toast.error(L('Не удалось сохранить', 'Could not save', 'บันทึกไม่สำเร็จ'));
+  const fail = () => toast.error(L('Не удалось сохранить изменения', 'Could not save', 'บันทึกไม่สำเร็จ'));
 
   const setStatus = async (id: string, status: string) => {
     const patch: { status: string; started_at?: string; completed_at?: string } = { status };
@@ -68,12 +68,12 @@ export default function VendorServiceDesk() {
   };
 
   if (providerQ.isLoading) return <div className="p-4 space-y-2"><Skeleton className="h-8 w-48" /><Skeleton className="h-40" /></div>;
-  if (providerQ.isError) return <p className="p-4 text-destructive">{L('Ошибка загрузки', 'Failed to load', 'โหลดไม่สำเร็จ')}</p>;
+  if (providerQ.isError) return <p className="p-4 text-destructive">{L('Не удалось загрузить данные', 'Failed to load', 'โหลดไม่สำเร็จ')}</p>;
   if (!providerQ.data) return (
     <div className="p-6 max-w-md space-y-3">
-      <h1 className="text-xl font-serif">{L('Стол заказов', 'Service desk', 'โต๊ะบริการ')}</h1>
-      <p className="text-sm text-muted-foreground">{L('К вашему аккаунту не привязан профиль провайдера.', 'No provider profile is linked to your account.', 'ไม่มีโปรไฟล์ผู้ให้บริการในบัญชีของคุณ')}</p>
-      <Button asChild><Link to="/become-partner">{L('Стать партнёром', 'Become a partner', 'เป็นพาร์ทเนอร์')}</Link></Button>
+      <h1 className="text-xl font-serif">{L('Кабинет исполнителя', 'Service desk', 'โต๊ะบริการ')}</h1>
+      <p className="text-sm text-muted-foreground">{L('К вашей учётной записи не привязан профиль исполнителя.', 'No provider profile is linked to your account.', 'ไม่มีโปรไฟล์ผู้ให้บริการในบัญชีของคุณ')}</p>
+      <Button asChild><Link to="/become-partner">{L('Подать заявку на подключение', 'Become a partner', 'เป็นพาร์ทเนอร์')}</Link></Button>
     </div>
   );
 
@@ -83,7 +83,7 @@ export default function VendorServiceDesk() {
   return (
     <div className="p-4 space-y-4 max-w-4xl">
       <div>
-        <h1 className="text-xl font-serif">{L('Стол заказов', 'Service desk', 'โต๊ะบริการ')} · {providerQ.data.name}</h1>
+        <h1 className="text-xl font-serif">{L('Кабинет исполнителя', 'Service desk', 'โต๊ะบริการ')} · {providerQ.data.name}</h1>
         <p className="text-sm text-muted-foreground">{L('Заказы, расписание и услуги, которые клиенты видят в разделе «Услуги».', 'Orders, schedule and the services customers see in Services.', 'คำสั่งซื้อ ตารางเวลา และบริการ')}</p>
       </div>
       <Tabs defaultValue="orders">
@@ -94,7 +94,7 @@ export default function VendorServiceDesk() {
         </TabsList>
 
         <TabsContent value="orders" className="space-y-2">
-          {ordersQ.isLoading ? <Skeleton className="h-24" /> : ordersQ.isError ? <p className="text-destructive text-sm">{L('Ошибка загрузки', 'Failed to load', 'โหลดไม่สำเร็จ')}</p>
+          {ordersQ.isLoading ? <Skeleton className="h-24" /> : ordersQ.isError ? <p className="text-destructive text-sm">{L('Не удалось загрузить данные', 'Failed to load', 'โหลดไม่สำเร็จ')}</p>
             : orders.length === 0 ? <p className="text-sm text-muted-foreground border border-border p-4">{L('Заказов пока нет.', 'No orders yet.', 'ยังไม่มีคำสั่งซื้อ')}</p>
             : orders.map((o) => (
               <div key={o.id} className="border border-border bg-card p-3 flex flex-wrap items-center gap-3 justify-between">

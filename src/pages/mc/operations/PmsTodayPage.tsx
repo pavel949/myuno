@@ -16,10 +16,10 @@ import { usePmsToday, type TodayBooking, type UnitState } from '@/hooks/usePmsTo
 type T = { en: string; ru: string; th: string };
 
 const STATE_META: Record<UnitState, { label: T; cls: string }> = {
-  occupied: { label: { en: 'Occupied', ru: 'Занят', th: 'มีผู้เข้าพัก' }, cls: 'border-primary bg-primary/10 text-primary' },
-  dirty: { label: { en: 'Needs cleaning', ru: 'Нужна уборка', th: 'ต้องทำความสะอาด' }, cls: 'border-accent bg-accent/10 text-accent' },
-  maintenance: { label: { en: 'Maintenance', ru: 'Ремонт', th: 'ซ่อมบำรุง' }, cls: 'border-destructive bg-destructive/10 text-destructive' },
-  clean: { label: { en: 'Vacant · clean', ru: 'Свободен · чисто', th: 'ว่าง · สะอาด' }, cls: 'border-border bg-muted text-muted-foreground' },
+  occupied: { label: { en: 'Occupied', ru: 'Гости проживают', th: 'มีผู้เข้าพัก' }, cls: 'border-primary bg-primary/10 text-primary' },
+  dirty: { label: { en: 'Needs cleaning', ru: 'Требуется уборка', th: 'ต้องทำความสะอาด' }, cls: 'border-accent bg-accent/10 text-accent' },
+  maintenance: { label: { en: 'Maintenance', ru: 'Техническое обслуживание', th: 'ซ่อมบำรุง' }, cls: 'border-destructive bg-destructive/10 text-destructive' },
+  clean: { label: { en: 'Vacant · clean', ru: 'Свободен, готов к заселению', th: 'ว่าง · สะอาด' }, cls: 'border-border bg-muted text-muted-foreground' },
 };
 
 export default function PmsTodayPage() {
@@ -40,7 +40,7 @@ export default function PmsTodayPage() {
       <div className="min-w-0">
         <p className="truncate font-medium text-foreground">{b.guest_name || t({ en: 'Guest', ru: 'Гость', th: 'ผู้เข้าพัก' })}</p>
         <p className="truncate text-sm text-muted-foreground">
-          {d.titleOf(b.property_id)} · {b.guests_count ?? 1} {t({ en: 'guests', ru: 'гост.', th: 'คน' })}
+          {d.titleOf(b.property_id)} · {b.guests_count ?? 1} {t({ en: 'guests', ru: 'чел.', th: 'คน' })}
           {kind === 'stay' && ` · ${t({ en: 'until', ru: 'до', th: 'ถึง' })} ${b.check_out.slice(5, 10)}`}
         </p>
       </div>
@@ -72,7 +72,7 @@ export default function PmsTodayPage() {
       <div className="mx-auto max-w-3xl px-4 py-12 text-center">
         <h1 className="font-serif text-2xl text-foreground">{t({ en: 'Today', ru: 'Сегодня', th: 'วันนี้' })}</h1>
         <p className="mt-2 text-muted-foreground">{t({ en: 'Add a property to see arrivals and departures here.', ru: 'Добавьте объект, чтобы видеть здесь заезды и выезды.', th: 'เพิ่มที่พักเพื่อดูการเช็คอินและเช็คเอาท์' })}</p>
-        <Button asChild className="mt-6"><Link to={APP_ROUTES.MC_PROPERTIES}>{t({ en: 'Go to properties', ru: 'К объектам', th: 'ไปที่ที่พัก' })}</Link></Button>
+        <Button asChild className="mt-6"><Link to={APP_ROUTES.MC_PROPERTIES}>{t({ en: 'Go to properties', ru: 'Перейти к объектам', th: 'ไปที่ที่พัก' })}</Link></Button>
       </div>
     );
   }

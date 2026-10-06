@@ -72,12 +72,12 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
     } catch (e) {
       const code = orderErrorCode(e);
       setError(code === 'SLOT_TAKEN'
-        ? L('Это время только что заняли. Выберите другое.', 'This time was just taken. Please pick another.', 'เวลานี้ถูกจองแล้ว กรุณาเลือกเวลาอื่น')
+        ? L('Выбранное время уже занято. Выберите другое время.', 'This time was just taken. Please pick another.', 'เวลานี้ถูกจองแล้ว กรุณาเลือกเวลาอื่น')
         : code === 'SLOT_IN_PAST'
           ? L('Это время уже прошло.', 'This time has already passed.', 'เวลานี้ผ่านไปแล้ว')
           : code === 'SERVICE_UNAVAILABLE'
             ? L('Услуга сейчас недоступна.', 'This service is not available right now.', 'บริการนี้ไม่พร้อมใช้งาน')
-            : L('Не удалось отправить заказ. Попробуйте ещё раз.', 'Could not send the order. Please try again.', 'ส่งคำสั่งซื้อไม่สำเร็จ ลองอีกครั้ง'));
+            : L('Не удалось отправить заявку. Повторите попытку.', 'Could not send the order. Please try again.', 'ส่งคำสั่งซื้อไม่สำเร็จ ลองอีกครั้ง'));
       setSlot(null);
     }
   };
@@ -96,9 +96,9 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
         {doneId ? (
           <div className="py-8 text-center space-y-3">
             <CheckCircle2 className="h-10 w-10 text-primary mx-auto" />
-            <p className="font-medium">{L('Заказ отправлен', 'Order sent', 'ส่งคำสั่งซื้อแล้ว')}</p>
+            <p className="font-medium">{L('Заявка отправлена', 'Order sent', 'ส่งคำสั่งซื้อแล้ว')}</p>
             <p className="text-sm text-muted-foreground">
-              {slot ? '' : ''}{L('Провайдер подтвердит время. Статус виден в разделе «Мои заказы».', 'The provider will confirm the time. Track it in My orders.', 'ผู้ให้บริการจะยืนยันเวลา ติดตามได้ใน คำสั่งซื้อของฉัน')}
+              {slot ? '' : ''}{L('Специалист подтвердит время приёма. Статус заявки отображается в разделе «Мои заказы».', 'The provider will confirm the time. Track it in My orders.', 'ผู้ให้บริการจะยืนยันเวลา ติดตามได้ใน คำสั่งซื้อของฉัน')}
             </p>
             <p className="text-xs font-mono text-muted-foreground">ID {doneId.slice(0, 8)}</p>
             <Button onClick={() => onOpenChange(false)} className="min-h-[44px]">{L('Готово', 'Done', 'เสร็จ')}</Button>
@@ -122,11 +122,11 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
             </div>
 
             <div>
-              <p className="text-sm font-medium mb-2">{L('Время (Пхукет)', 'Time (Phuket)', 'เวลา (ภูเก็ต)')}</p>
+              <p className="text-sm font-medium mb-2">{L('Время (по времени Пхукета)', 'Time (Phuket)', 'เวลา (ภูเก็ต)')}</p>
               {hoursQ.isLoading || busyQ.isLoading ? (
                 <div className="grid grid-cols-4 gap-2">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-11" />)}</div>
               ) : hoursQ.isError || busyQ.isError ? (
-                <p className="text-sm text-destructive">{L('Не удалось загрузить расписание.', 'Could not load the schedule.', 'โหลดตารางเวลาไม่สำเร็จ')}</p>
+                <p className="text-sm text-destructive">{L('Не удалось загрузить график приёма.', 'Could not load the schedule.', 'โหลดตารางเวลาไม่สำเร็จ')}</p>
               ) : noHours ? (
                 <div className="flex items-start gap-2 text-sm text-muted-foreground border border-border p-3">
                   <CalendarX className="h-4 w-4 mt-0.5 shrink-0" />
