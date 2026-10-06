@@ -14,7 +14,7 @@ export const P10_RETURNEE: PersonaLanding = {
     en: 'Returning to Phuket: visa, home and school reactivated',
   },
   subtitle: {
-    ru: 'Вы жили здесь раньше и возвращаетесь. Поможем восстановить налоговый статус и визу, найти жильё в знакомом районе и снова устроить детей в школу или детский сад.',
+    ru: 'Вы жили здесь раньше и возвращаетесь. Поможем восстановить налоговый статус и визу, найти жильё в знакомом районе и устроить детей в школу.',
     en: "You used to live here and you are back: we restore tax residency, reactivate your visa, find a home in your old district, and re-enrol kids in school — without explaining everything from scratch.",
   },
   pains: [
