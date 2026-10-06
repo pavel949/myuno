@@ -532,13 +532,15 @@ export default function MapView() {
                 <div className="mt-4 space-y-4">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                      {language === 'ru' ? 'Цена' : 'Price'}
+                      {language === 'ru' ? 'Цена за ночь · посуточное жильё' : 'Nightly price · short stays'}
                     </p>
-                    <FilterChipGroup scrollable>
-                      {PRICE_OPTIONS.map((opt) => (
-                        <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedPrice === opt.value} onToggle={() => { setSelectedPrice(opt.value); updateParam('price', opt.value); }} size="md" />
-                      ))}
-                    </FilterChipGroup>
+                    {['all', 'stay'].includes(selectedVertical) && (
+                      <FilterChipGroup scrollable>
+                        {PRICE_OPTIONS.map((opt) => (
+                          <FilterChip key={opt.value} label={language === 'ru' ? opt.labelRu : opt.labelEn} icon={opt.icon} isActive={selectedPrice === opt.value} onToggle={() => { setSelectedPrice(opt.value); updateParam('price', opt.value); }} size="md" />
+                        ))}
+                      </FilterChipGroup>
+                    )}
                   </div>
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">

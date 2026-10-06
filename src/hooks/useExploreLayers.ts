@@ -35,7 +35,7 @@ export function useExploreLayers() {
       const [props, projects, providers] = await Promise.all([
         supabase
           .from('v_properties_public')
-          .select('id, title_en, title_ru, lat, lng, district, listing_type, price, sale_price, cover_image')
+          .select('id, title_en, title_ru, lat, lng, district, listing_type, price, price_period, sale_price, cover_image')
           .limit(1000),
         supabase
           .from('property_projects')
@@ -63,13 +63,13 @@ export function useExploreLayers() {
             name: p.title_en || 'Property', nameRu: p.title_ru || p.title_en || 'Объект',
             lat, lng, rating: 0, image: p.cover_image || undefined, approximate, routeId: p.id,
           };
-          // Public view exposes `price` without period. Today all public rentals
-          // are nightly (price_period='night'), so listing_type 'rent' → stay layer.
-          // TODO(schema): expose price_period / monthly price in v_properties_public
-          // so monthly rentals can populate the long-term layer.
-          if (p.listing_type === 'sale') out.push({ ...base, id: `sale-${p.id}`, layer: 'sale', priceFrom: Number(p.sale_price) || 0 });
-          else if (p.listing_type === 'rent') out.push({ ...base, id: `stay-${p.id}`, layer: 'stay', priceFrom: Number(p.price) || 0 });
-          else if (p.listing_type === 'long_term' || p.listing_type === 'rent_long') out.push({ ...base, id: `rent-${p.id}`, layer: 'rent', priceFrom: Number(p.price) || 0 });
+          // properties.listing_type carries only 'rent'/'sale' — the monthly
+          // flag lives in price_period ('night' | 'month' | 'year').
+          const isMonthly = p.listing_type === 'long_term' || p.listing_type === 'rent_long'
+            || p.price_period === 'month' || p.price_period === 'year';
+          if (p.listing_type === 'sale' && !isMonthly) out.push({ ...base, id: `sale-${p.id}`, layer: 'sale', priceFrom: Number(p.sale_price) || 0 });
+          else if (isMonthly) out.push({ ...base, id: `rent-${p.id}`, layer: 'rent', priceFrom: Number(p.price) || 0 });
+          else out.push({ ...base, id: `stay-${p.id}`, layer: 'stay', priceFrom: Number(p.price) || 0 });
         }
       }
 

@@ -27,6 +27,7 @@ export default function PmsTodayPage() {
   const t = (v: T) => pickLang(language, v);
   const d = usePmsToday();
   const dateLabel = new Date().toLocaleDateString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', {
+    timeZone: 'Asia/Bangkok',
     weekday: 'long', day: 'numeric', month: 'long',
   });
 

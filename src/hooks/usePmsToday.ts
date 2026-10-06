@@ -53,8 +53,11 @@ const OPEN_REQUEST = ['pending', 'new', 'assigned', 'in_progress', 'scheduled', 
 const MAINT_RE = /maint|repair|plumb|electr|air|ac_|fix|pool|pest|garden/i;
 const CLEAN_RE = /clean|housekeep|laundry|turnover/i;
 
-export const ymd = (d: Date) => d.toISOString().slice(0, 10);
-const day = (s: string) => s.slice(0, 10);
+/** Phuket-local (UTC+7) calendar date for a timestamp, "YYYY-MM-DD". */
+const PHUKET_OFFSET_MIN = 7 * 60;
+export const ymd = (d: Date) =>
+  new Date(d.getTime() + PHUKET_OFFSET_MIN * 60_000).toISOString().slice(0, 10);
+const day = (s: string) => ymd(new Date(s));
 
 export function deriveUnitState(args: {
   inHouse: boolean;
@@ -84,8 +87,8 @@ export function usePmsToday(date: Date = new Date()) {
           .from('property_bookings')
           .select('id, property_id, guest_name, guest_phone, guests_count, check_in, check_out, status, source')
           .in('property_id', ids)
-          .lte('check_in', `${today}T23:59:59`)
-          .gte('check_out', today)
+          .lte('check_in', `${today}T23:59:59+07:00`)
+          .gte('check_out', `${today}T00:00:00+07:00`)
           .order('check_in'),
         supabase
           .from('property_service_requests')
