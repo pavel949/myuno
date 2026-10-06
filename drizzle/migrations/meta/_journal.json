@@ -8,6 +8,13 @@
       "when": 1791278165681,
       "tag": "0000_expose_price_period_in_public_property_view",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791279443520,
+      "tag": "0001_restrict_lead_scores_and_project_documents",
+      "breakpoints": true
     }
   ]
 }
