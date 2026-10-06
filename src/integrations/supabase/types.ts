@@ -22902,6 +22902,52 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_org_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          org_id: string
+          provider_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id: string
+          provider_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id?: string
+          provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_org_links_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_org_links_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_org_links_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
+          },
+        ]
+      }
       provider_payout_methods: {
         Row: {
           account_holder_name: string | null
@@ -34176,6 +34222,14 @@ export type Database = {
         }
         Returns: number
       }
+      admin_process_payout: {
+        Args: {
+          p_new_status: string
+          p_payment_reference?: string
+          p_payout_id: string
+        }
+        Returns: Json
+      }
       apply_lead_score_event: {
         Args: {
           p_contact_id: string
@@ -34364,6 +34418,25 @@ export type Database = {
           p_provider_org_id?: string
           p_start_at?: string
           p_total_amount?: number
+        }
+        Returns: Json
+      }
+      create_order_checked: {
+        Args: {
+          p_addresses: Json
+          p_currency: string
+          p_customer_user_id?: string
+          p_end_at: string
+          p_items: Json
+          p_metadata: Json
+          p_notes: string
+          p_order_type: string
+          p_participants: Json
+          p_payment_amount: number
+          p_payment_method: string
+          p_provider_org_id: string
+          p_start_at: string
+          p_total_amount: number
         }
         Returns: Json
       }
@@ -34603,6 +34676,7 @@ export type Database = {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
       }
+      is_finance_staff: { Args: { _uid: string }; Returns: boolean }
       is_mc_admin: {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean

@@ -43,6 +43,13 @@
       "when": 1791280226517,
       "tag": "0005_order_booking_sync_adopt_and_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791282482450,
+      "tag": "0006_harden_money_functions_and_provider_org_links",
+      "breakpoints": true
     }
   ]
 }
