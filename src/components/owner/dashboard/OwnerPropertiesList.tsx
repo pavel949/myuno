@@ -26,7 +26,7 @@ export function OwnerPropertiesList() {
     return (
       <div>
           <h3 className="font-semibold text-[15px] mb-4">
-            {isRu ? 'Ваши объявления' : 'Your listings'}
+            {isRu ? 'Мои объявления' : 'Your listings'}
           </h3>
         <button
           onClick={() => navigate('/mc/properties/new')}
@@ -36,8 +36,8 @@ export function OwnerPropertiesList() {
             <Plus className="h-6 w-6 text-primary" />
           </div>
           <div className="flex-1 text-left">
-            <p className="font-medium text-[15px]">{isRu ? 'Добавьте ваш первый объект' : 'Add your first property'}</p>
-            <p className="text-sm text-muted-foreground">{isRu ? 'Начните управлять с UNO' : 'Start managing with UNO'}</p>
+            <p className="font-medium text-[15px]">{isRu ? 'Добавьте объект' : 'Add your first property'}</p>
+            <p className="text-sm text-muted-foreground">{isRu ? 'Передайте объект в управление myUNO' : 'Start managing with UNO'}</p>
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground/50" />
         </button>

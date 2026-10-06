@@ -35,8 +35,8 @@ export function CleaningDashboard() {
   };
 
   const statusLabel = (status: string) => {
-    if (status === 'completed') return t('Done', 'Готово');
-    if (status === 'in_progress') return t('In Progress', 'В работе');
+    if (status === 'completed') return t('Done', 'Выполнено');
+    if (status === 'in_progress') return t('In Progress', 'Выполняется');
     return t('Pending', 'Ожидает');
   };
 

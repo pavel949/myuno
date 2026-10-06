@@ -32,13 +32,13 @@ export function FounderQuickActions() {
     },
     {
       icon: Building2,
-      label: isRu ? 'Комплекс' : 'Complex',
+      label: isRu ? 'Жилой комплекс' : 'Complex',
       path: APP_ROUTES.MC_COMPLEXES,
       color: 'text-primary',
     },
     {
       icon: Target,
-      label: isRu ? 'Вендор' : 'Vendor',
+      label: isRu ? 'Исполнитель' : 'Vendor',
       path: '/mc/vendor-acquisition',
       color: 'text-primary',
     },

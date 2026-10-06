@@ -224,7 +224,7 @@ function usePortfolioHealth() {
         id: 'reports',
         category: 'reports',
         labelEn: 'Owner Reports',
-        labelRu: 'Отчёты собственнику',
+        labelRu: 'Отчёты для собственника',
         status: hasReports ? 'ok' : 'missing',
         detail: hasReports ? 'Enabled' : 'Not configured',
         detailRu: hasReports ? 'Настроены' : 'Не настроены',
@@ -238,7 +238,7 @@ function usePortfolioHealth() {
         id: 'portal',
         category: 'portal',
         labelEn: 'Owner Portal',
-        labelRu: 'Портал собственника',
+        labelRu: 'Кабинет собственника',
         status: hasPortal ? 'ok' : 'missing',
         detail: hasPortal ? 'Active' : 'Not set up',
         detailRu: hasPortal ? 'Активирован' : 'Не настроен',
@@ -422,7 +422,7 @@ export function PortfolioHealthWidget() {
           <HeartPulse className={cn("h-5 w-5", scoreColor(portfolioScore))} />
           <div>
             <h3 className="font-semibold text-[15px] flex items-center gap-2">
-              {isRu ? 'Здоровье портфеля' : 'Portfolio Health'}
+              {isRu ? 'Состояние объектов' : 'Portfolio Health'}
               <span className={cn("text-lg font-bold tabular-nums", scoreColor(portfolioScore))}>
                 {portfolioScore}%
               </span>
@@ -443,7 +443,7 @@ export function PortfolioHealthWidget() {
             onClick={() => setShowOnlyProblems(!showOnlyProblems)}
           >
             <Filter className="h-3 w-3" />
-            {isRu ? 'Проблемные' : 'Issues only'}
+            {isRu ? 'С замечаниями' : 'Issues only'}
           </Button>
         )}
       </div>
@@ -462,7 +462,7 @@ export function PortfolioHealthWidget() {
         {filtered.length === 0 && (
           <div className="text-center py-6 text-sm text-muted-foreground">
             <Check className="h-8 w-8 mx-auto mb-2 text-success" />
-            {isRu ? 'Все объекты в порядке!' : 'All properties are in good shape!'}
+            {isRu ? 'Замечаний по объектам нет.' : 'All properties are in good shape!'}
           </div>
         )}
       </div>

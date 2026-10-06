@@ -19,31 +19,31 @@ interface QuickAction {
 const ROLE_ACTIONS: Record<BusinessRole, QuickAction[]> = {
   property_manager: [
     { id: 'task', icon: ListTodo, labelEn: 'New Task', labelRu: '+ Задача', path: '__quick_task__' },
-    { id: 'sync', icon: Download, labelEn: 'Import OTA', labelRu: 'Импорт OTA', path: '/mc/channels' },
+    { id: 'sync', icon: Download, labelEn: 'Import OTA', labelRu: 'Загрузить бронирования с площадок', path: '/mc/channels' },
     { id: 'expense', icon: Receipt, labelEn: 'Add Expense', labelRu: 'Расход', path: '/mc/quick-expense' },
     { id: 'cleaning', icon: Sparkles, labelEn: 'Cleaning', labelRu: 'Уборка', path: '/mc/service-request?type=cleaning' },
     { id: 'calendar', icon: Calendar, labelEn: 'Calendar', labelRu: 'Календарь', path: '/mc/calendar' },
     { id: 'property', icon: Plus, labelEn: 'Add Property', labelRu: 'Объект', path: APP_ROUTES.MC_PROPERTY_NEW },
-    { id: 'complex', icon: Plus, labelEn: 'Complexes', labelRu: 'Комплексы', path: APP_ROUTES.MC_COMPLEXES },
+    { id: 'complex', icon: Plus, labelEn: 'Complexes', labelRu: 'Жилые комплексы', path: APP_ROUTES.MC_COMPLEXES },
   ],
   sales_agent: [
     { id: 'deal', icon: Target, labelEn: 'New Deal', labelRu: 'Новая сделка', path: APP_ROUTES.MC_SALES_NEW },
     { id: 'contact', icon: Users, labelEn: 'Add Contact', labelRu: 'Контакт', path: '/mc/contacts' },
     { id: 'tasks', icon: ClipboardList, labelEn: 'My Tasks', labelRu: 'Мои задачи', path: '/mc/tasks' },
-    { id: 'call', icon: Phone, labelEn: 'Call Log', labelRu: 'Звонки', path: '/mc/contacts' },
+    { id: 'call', icon: Phone, labelEn: 'Call Log', labelRu: 'Журнал звонков', path: '/mc/contacts' },
   ],
   service_provider: [
     { id: 'tasks', icon: ClipboardList, labelEn: 'My Tasks', labelRu: 'Задачи', path: '/mc/tasks' },
-    { id: 'invoice', icon: FileText, labelEn: 'New Invoice', labelRu: 'Счёт', path: '/mc/invoices' },
+    { id: 'invoice', icon: FileText, labelEn: 'New Invoice', labelRu: 'Выставить счёт', path: '/mc/invoices' },
     { id: 'calendar', icon: Calendar, labelEn: 'Schedule', labelRu: 'Расписание', path: '/mc/calendar' },
     { id: 'expense', icon: Receipt, labelEn: 'Add Expense', labelRu: 'Расход', path: '/mc/quick-expense' },
   ],
   general: [
-    { id: 'sync', icon: Download, labelEn: 'Import OTA', labelRu: 'Импорт OTA', path: '/mc/channels' },
+    { id: 'sync', icon: Download, labelEn: 'Import OTA', labelRu: 'Загрузить бронирования с площадок', path: '/mc/channels' },
     { id: 'deal', icon: Target, labelEn: 'New Deal', labelRu: 'Сделка', path: APP_ROUTES.MC_SALES_NEW },
     { id: 'expense', icon: Receipt, labelEn: 'Expense', labelRu: 'Расход', path: '/mc/quick-expense' },
     { id: 'property', icon: Plus, labelEn: 'Add Property', labelRu: 'Объект', path: APP_ROUTES.MC_PROPERTY_NEW },
-    { id: 'complex', icon: Plus, labelEn: 'Complexes', labelRu: 'Комплексы', path: APP_ROUTES.MC_COMPLEXES },
+    { id: 'complex', icon: Plus, labelEn: 'Complexes', labelRu: 'Жилые комплексы', path: APP_ROUTES.MC_COMPLEXES },
   ],
 };
 

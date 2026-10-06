@@ -70,7 +70,7 @@ function getUrgencyMeta(urgency: OverviewUrgency, isRu: boolean) {
       };
     default:
       return {
-        label: isRu ? 'Ближайшее' : 'Upcoming',
+        label: isRu ? 'Ближайшие события' : 'Upcoming',
         className: 'border-primary/30 bg-primary/10 text-primary',
       };
   }
@@ -134,7 +134,7 @@ function OverviewBlock({
       <CardContent className="space-y-4">
         <div className="space-y-1">
           <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-            {isRu ? 'Что произошло' : 'What happened'}
+            {isRu ? 'События' : 'What happened'}
           </p>
           <p className="text-sm leading-6">{summary}</p>
         </div>
@@ -301,7 +301,7 @@ export function OverviewSection() {
         return {
           id: `ops-${task.id}`,
           title: task.title,
-          subtitle: `${propertyName} · ${t('Operations', 'Операции')}`,
+          subtitle: `${propertyName} · ${t('Operations', 'Обслуживание объектов')}`,
           dueDate: due,
           href: APP_ROUTES.MC_TASKS,
           icon: Wrench,
@@ -336,7 +336,7 @@ export function OverviewSection() {
     if (!taskItems.length) {
       return t(
         'No overdue or near-term tasks are in the queue.',
-        'Нет просроченных или ближайших задач в очереди.',
+        'Просроченных и предстоящих задач нет.',
       );
     }
 
@@ -360,7 +360,7 @@ export function OverviewSection() {
           title: item.description || item.category || t('Payment item', 'Финансовая операция'),
           subtitle: item.property
             ? (isRu ? item.property.title_ru || item.property.title : item.property.title)
-            : t('Portfolio', 'Портфель'),
+            : t('Portfolio', 'Объекты'),
           urgency: (isPast(dueDate) && !isToday(dueDate) ? 'overdue' : isToday(dueDate) ? 'today' : 'upcoming') as OverviewUrgency,
           detail: `${formatDateLabel(dueDate, isRu)} · ${Number(item.amount || 0).toLocaleString()} ${item.currency || 'THB'}`,
           href: APP_ROUTES.MC_FINANCIALS,
@@ -401,11 +401,11 @@ export function OverviewSection() {
           ? `${item.meta.propertyName}${item.meta?.dueTime ? ` · ${t('Time', 'Время')}: ${item.meta.dueTime}` : ''}`
           : item.meta?.dueTime
             ? `${t('Time', 'Время')}: ${item.meta.dueTime}`
-            : t('Scheduled CRM activity', 'Запланированная CRM-активность'),
+            : t('Scheduled CRM activity', 'Запланированные действия с клиентами'),
         urgency: item.sectionOrder <= 2 ? 'today' : 'upcoming',
         detail: item.sectionOrder <= 2
-          ? t('Scheduled for today in CRM.', 'Запланировано на сегодня в CRM.')
-          : t('Upcoming follow-up from CRM schedule.', 'Ближайшее касание из CRM-расписания.'),
+          ? t('Scheduled for today in CRM.', 'Запланировано на сегодня.')
+          : t('Upcoming follow-up from CRM schedule.', 'Ближайшее запланированное действие с клиентом.'),
         href: item.href || APP_ROUTES.MC_SALES,
         icon: BriefcaseBusiness,
       }));
@@ -453,7 +453,7 @@ export function OverviewSection() {
       <div className="grid gap-4 md:grid-cols-2">
         <OverviewBlock
           title={t('Stays', 'Заезды и выезды')}
-          subtitle={t('Current and upcoming guest movements', 'Текущие и ближайшие движения гостей')}
+          subtitle={t('Current and upcoming guest movements', 'Текущие и предстоящие заезды и выезды')}
           icon={CalendarCheck2}
           items={stayItems}
           summary={staySummary}
@@ -463,13 +463,13 @@ export function OverviewSection() {
           )}
           ctaLabel={t('Open calendar', 'Открыть календарь')}
           ctaHref={APP_ROUTES.MC_CALENDAR}
-          emptyText={t('No check-ins or check-outs need attention yet.', 'Пока нет заездов или выездов, требующих внимания.')}
+          emptyText={t('No check-ins or check-outs need attention yet.', 'Заездов и выездов, требующих действий, нет.')}
           isLoading={bookingsLoading}
         />
 
         <OverviewBlock
           title={t('Tasks', 'Задачи')}
-          subtitle={t('Business and operational workload', 'Бизнес- и операционная нагрузка')}
+          subtitle={t('Business and operational workload', 'Текущие задачи и обращения')}
           icon={ListTodo}
           items={taskItems}
           summary={taskSummary}
@@ -479,13 +479,13 @@ export function OverviewSection() {
           )}
           ctaLabel={t('Open tasks', 'Открыть задачи')}
           ctaHref={APP_ROUTES.MC_TASKS}
-          emptyText={t('No urgent tasks are blocking the day.', 'Сейчас нет срочных задач, блокирующих день.')}
+          emptyText={t('No urgent tasks are blocking the day.', 'Срочных задач нет.')}
           isLoading={crmLoading || opsLoading}
         />
 
         <OverviewBlock
-          title={t('Finance', 'Финансы')}
-          subtitle={t('Overdue and upcoming cash items', 'Просроченные и ближайшие денежные позиции')}
+          title={t('Finance', 'Финансовый отчёт')}
+          subtitle={t('Overdue and upcoming cash items', 'Просроченные и предстоящие платежи')}
           icon={Wallet}
           items={financeItems}
           summary={financeSummary}
@@ -493,9 +493,9 @@ export function OverviewSection() {
             'Open Financials to clear overdue items and review expected cash movement.',
             'Откройте финансы, чтобы закрыть просрочки и проверить ожидаемое движение денег.',
           )}
-          ctaLabel={t('Open financials', 'Открыть финансы')}
+          ctaLabel={t('Open financials', 'Открыть финансовый отчёт')}
           ctaHref={APP_ROUTES.MC_FINANCIALS}
-          emptyText={t('No pending finance items need action right now.', 'Сейчас нет финансовых позиций, требующих действия.')}
+          emptyText={t('No pending finance items need action right now.', 'Платежей, требующих действий, нет.')}
           isLoading={financialsLoading}
         />
 
@@ -509,9 +509,9 @@ export function OverviewSection() {
             'Open CRM dashboard to review follow-ups, meetings and client next steps.',
             'Откройте CRM dashboard, чтобы проверить follow-up, встречи и следующие шаги по клиентам.',
           )}
-          ctaLabel={t('Open CRM', 'Открыть CRM')}
+          ctaLabel={t('Open CRM', 'Открыть список клиентов')}
           ctaHref={APP_ROUTES.MC_SALES}
-          emptyText={t('No CRM reminders are queued at the moment.', 'Сейчас нет CRM-напоминаний в очереди.')}
+          emptyText={t('No CRM reminders are queued at the moment.', 'Запланированных напоминаний нет.')}
           isLoading={briefingLoading}
         />
       </div>

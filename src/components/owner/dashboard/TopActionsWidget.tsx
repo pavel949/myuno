@@ -94,7 +94,7 @@ export function TopActionsWidget() {
       <section className="space-y-2">
         <h3 className="font-semibold text-[15px] flex items-center gap-2 px-1">
           <Zap className="h-4 w-4 text-primary" />
-          {isRu ? 'Топ действия' : 'Top Actions'}
+          {isRu ? 'Первоочередные действия' : 'Top Actions'}
         </h3>
         <Card className="border-dashed">
           <CardContent className="py-4 text-center text-muted-foreground text-sm">
@@ -116,7 +116,7 @@ export function TopActionsWidget() {
       <div className="flex items-center justify-between px-1">
         <h3 className="font-semibold text-[15px] flex items-center gap-2">
           <Zap className="h-4 w-4 text-primary" />
-          {isRu ? 'Топ-5 сейчас' : 'Top 5 Now'}
+          {isRu ? 'Пять первоочередных действий' : 'Top 5 Now'}
           {hasAISuggestions && (
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-1">AI</Badge>
           )}
