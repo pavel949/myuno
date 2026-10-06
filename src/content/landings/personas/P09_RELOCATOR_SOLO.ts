@@ -14,7 +14,7 @@ export const P09_RELOCATOR_SOLO: PersonaLanding = {
     en: 'Solo relocation: DTV, year-long rental, legalisation',
   },
   subtitle: {
-    ru: 'Уезжаете на 1–2 года без семьи: DTV или Non-B виза, кондо или квартира на год, банковский счёт, страховка и налоговый статус — собираем за 60 дней.',
+    ru: 'Вы переезжаете на 1–2 года без семьи. Поможем оформить визу DTV или Non-B, снять жильё на год, открыть банковский счёт, оформить страховку и налоговый статус за 60 дней.',
     en: 'Moving solo for 1–2 years: DTV or Non-B visa, condo or apartment for a year, bank account, insurance, tax residency — set up in 60 days.',
   },
   pains: [
