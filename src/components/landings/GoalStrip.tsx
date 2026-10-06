@@ -13,12 +13,12 @@ export function GoalStrip() {
   return (
     <div>
       <h2 className="mb-1 font-serif text-2xl text-foreground sm:text-3xl">
-        {pickLang(language, { en: 'One Phuket. One app.', ru: 'Один Пхукет. Одно приложение.', th: 'ภูเก็ตเดียว แอปเดียว' })}
+        {pickLang(language, { en: 'One Phuket. One app.', ru: 'Жизнь и отдых на Пхукете', th: 'ภูเก็ตเดียว แอปเดียว' })}
       </h2>
       <p className="mb-5 text-sm text-muted-foreground">
         {pickLang(language, {
           en: 'Start with what you need today.',
-          ru: 'Начните с того, что нужно сегодня.',
+          ru: 'Аренда жилья, переезд, покупка недвижимости и повседневные услуги.',
           th: 'เริ่มจากสิ่งที่คุณต้องการวันนี้',
         })}
       </p>
