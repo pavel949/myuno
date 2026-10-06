@@ -26,6 +26,7 @@ export interface ProviderRow {
 }
 
 export interface ServiceRow {
+  approval_status: string | null;
   id: string;
   name_en: string | null;
   name_ru: string | null;
@@ -63,7 +64,7 @@ export function normalizeOfferings(rows: ServiceRow[] | null | undefined): Norma
     const currency = (r.currency ?? SUPPORTED_CURRENCY).trim().toUpperCase();
     const price = typeof r.price === 'number' ? r.price : Number.NaN;
     const name = (r.name_ru || r.name_en || '').trim();
-    if (r.is_active !== true || currency !== SUPPORTED_CURRENCY || !Number.isFinite(price) || price <= 0 || !name) {
+    if (r.is_active !== true || r.approval_status !== 'approved' || currency !== SUPPORTED_CURRENCY || !Number.isFinite(price) || price <= 0 || !name) {
       rejectedCount += 1;
       continue;
     }

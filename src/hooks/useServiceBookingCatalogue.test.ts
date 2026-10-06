@@ -46,14 +46,14 @@ describe('useServiceBookingCatalogue', () => {
 
   it('reports empty when no valid offerings', async () => {
     responses.providers = { data: okProvider, error: null };
-    responses.services = { data: [{ id: 's', name_en: 'x', name_ru: 'x', price: 0, currency: 'THB', is_active: true }], error: null };
+    responses.services = { data: [{ id: 's', name_en: 'x', name_ru: 'x', price: 0, approval_status: 'approved', currency: 'THB', is_active: true }], error: null };
     const { result } = renderHook(() => useServiceBookingCatalogue('p1'));
     await waitFor(() => expect(result.current.status).toBe('empty'));
   });
 
   it('returns ready offerings with unmapped org when no link row exists', async () => {
     responses.providers = { data: okProvider, error: null };
-    responses.services = { data: [{ id: 's', name_en: 'Fix', name_ru: 'Ремонт', price: 900, currency: 'THB', is_active: true }], error: null };
+    responses.services = { data: [{ id: 's', name_en: 'Fix', name_ru: 'Ремонт', price: 900, approval_status: 'approved', currency: 'THB', is_active: true }], error: null };
     responses.provider_org_links = { data: [], error: null };
     const { result } = renderHook(() => useServiceBookingCatalogue('p1'));
     await waitFor(() => expect(result.current.status).toBe('ready'));
@@ -64,7 +64,7 @@ describe('useServiceBookingCatalogue', () => {
 
   it('maps the org from the trusted link table', async () => {
     responses.providers = { data: okProvider, error: null };
-    responses.services = { data: [{ id: 's', name_en: 'Fix', name_ru: 'Ремонт', price: 900, currency: 'THB', is_active: true }], error: null };
+    responses.services = { data: [{ id: 's', name_en: 'Fix', name_ru: 'Ремонт', price: 900, approval_status: 'approved', currency: 'THB', is_active: true }], error: null };
     responses.provider_org_links = { data: [{ org_id: 'org-9' }], error: null };
     const { result } = renderHook(() => useServiceBookingCatalogue('p1'));
     await waitFor(() => expect(result.current.status).toBe('ready'));

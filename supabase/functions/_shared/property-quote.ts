@@ -130,3 +130,13 @@ export function quotePropertyStay(p: PropertyPricingRow | null, input: QuoteInpu
 export function bangkokToday(now = new Date()): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(now);
 }
+
+/** Allocate Stripe line items in minor units so rounding cannot change the deposit. */
+export function splitDepositMinorUnits(deposit: number, cleaningFee: number) {
+  const total = Math.round(deposit * 100);
+  const cleaning = Math.round(cleaningFee * DEPOSIT_PERCENT);
+  if (!Number.isSafeInteger(total) || total <= 0 || !Number.isSafeInteger(cleaning) || cleaning < 0 || cleaning > total) {
+    throw new Error('Invalid deposit allocation');
+  }
+  return { rental: total - cleaning, cleaning };
+}

@@ -1,4 +1,11 @@
 import "@testing-library/jest-dom";
+import { transferableAbortController } from 'node:util';
+
+// React Router builds Node Request objects. jsdom's AbortSignal belongs to a
+// different realm and Node rejects it; keep the Request/AbortSignal pair native.
+const nativeController = transferableAbortController();
+Object.defineProperty(globalThis, 'AbortController', { configurable: true, writable: true, value: nativeController.constructor });
+Object.defineProperty(globalThis, 'AbortSignal', { configurable: true, writable: true, value: nativeController.signal.constructor });
 
 // Mock matchMedia for components using media queries
 Object.defineProperty(window, "matchMedia", {
