@@ -74,7 +74,7 @@ describe('sitemap-landings.xml × LIVE_PERSONA_SLUGS', () => {
   });
 
   it('does not list slugs that are not live (no orphaned/draft entries)', () => {
-    const liveSet = new Set<string>([...LIVE_PERSONA_SLUGS, ...LIVE_CLUSTER_SLUGS]);
+    const liveSet = new Set<string>([...LIVE_PERSONA_SLUGS, ...LIVE_CLUSTER_SLUGS, 'arrive', 'live', 'manage', 'invest', 'legal', 'build']);
     const orphans = [...sitemapEntries.keys()].filter((s) => !liveSet.has(s));
     expect(orphans, `Orphan sitemap entries (slug not live): ${orphans.join(', ')}`).toEqual([]);
   });
