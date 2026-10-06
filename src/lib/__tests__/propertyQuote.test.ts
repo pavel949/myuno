@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { quotePropertyStay, bangkokToday, type PropertyPricingRow } from '../../../supabase/functions/_shared/property-quote';
+import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow } from '../../../supabase/functions/_shared/property-quote';
 
 const prop = (o: Partial<PropertyPricingRow> = {}): PropertyPricingRow => ({
   price_per_night: 3000, price: null, price_period: 'night', cleaning_fee: 500, extra_cleaning_price: null,
@@ -45,5 +45,21 @@ describe('quotePropertyStay', () => {
   });
   it('uses the Bangkok calendar for today', () => {
     expect(bangkokToday(new Date('2026-10-06T18:30:00Z'))).toBe('2026-10-07');
+  });
+});
+
+describe('Stripe deposit allocation', () => {
+  it('preserves the exact deposit with fractional cleaning amounts', () => {
+    for (const cleaningFee of [0, 500, 505, 505.55]) {
+      const split = splitDepositMinorUnits(950, cleaningFee);
+      expect(split.rental + split.cleaning).toBe(95000);
+      expect(split.cleaning).toBe(Math.round(cleaningFee * 10));
+    }
+    expect(splitDepositMinorUnits(950, 505)).toEqual({ rental: 89950, cleaning: 5050 });
+  });
+  it('rejects invalid allocations instead of emitting negative Stripe amounts', () => {
+    expect(() => splitDepositMinorUnits(0, 500)).toThrow();
+    expect(() => splitDepositMinorUnits(10, 500)).toThrow();
+    expect(() => splitDepositMinorUnits(Number.NaN, 0)).toThrow();
   });
 });

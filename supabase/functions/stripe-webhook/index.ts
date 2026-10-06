@@ -2,6 +2,7 @@
 import { createStripeClient, Stripe } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { PAYABLE_ORDER_STATUSES, validateCheckoutPayment } from "../_shared/checkout-payment-guard.ts";
 
 
 /**
@@ -86,9 +87,17 @@ Deno.serve(async (req) => {
     // =====================================================
     // HANDLE: checkout.session.completed
     // =====================================================
-    if (event.type === "checkout.session.completed") {
+    if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
       const session = event.data.object as Stripe.Checkout.Session;
       logStep("Processing checkout.session.completed", { sessionId: redactId(session.id) });
+
+      // Delayed methods complete checkout before money arrives. The async success
+      // event will re-enter this handler after settlement.
+      if (session.payment_status === 'unpaid') {
+        return new Response(JSON.stringify({ received: true, skipped: 'awaiting_payment' }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200,
+        });
+      }
 
       // NOTE: ClearView paid-report access is provisioned inside the canonical
       // order-payment path below (keyed on checkout_type === "clearview_report"),
@@ -114,6 +123,25 @@ Deno.serve(async (req) => {
           throw new Error(`Order not found: ${orderId}`);
         }
 
+        // Resolve exactly one persisted Stripe payment for this order. Deposits
+        // must match the payment amount, not the full rental amount. Missing or
+        // ambiguous linkage is retried instead of confirming an unverified order.
+        let paymentQuery = supabaseAdmin.from('payment_intents')
+          .select('id, amount, currency, provider_ref, status')
+          .eq('order_id', orderId).eq('method', 'stripe');
+        if (paymentIntentId) paymentQuery = paymentQuery.eq('id', paymentIntentId);
+        const { data: expectedPayment, error: expectedPaymentError } = await paymentQuery.single();
+        if (expectedPaymentError || !expectedPayment) throw new Error('Payment linkage missing or ambiguous');
+        const paymentMismatch = validateCheckoutPayment(session, expectedPayment);
+        if (paymentMismatch) throw new Error(`Checkout validation failed: ${paymentMismatch}`);
+
+        if (order.status !== 'confirmed' && !PAYABLE_ORDER_STATUSES.includes(order.status)) {
+          // Never resurrect cancelled/refunded/completed orders on a late event.
+          // Funds received after cancellation require operator reconciliation.
+          logStep('Payment received for non-payable order', { orderId: redactId(orderId), status: order.status });
+          throw new Error('Paid checkout requires reconciliation: order is not payable');
+        }
+
         // ===== IDEMPOTENCY CHECK: Skip if order already confirmed =====
         if (order.status === 'confirmed') {
           logStep("IDEMPOTENCY: Order already confirmed, skipping duplicate processing", { orderId });
@@ -124,7 +152,7 @@ Deno.serve(async (req) => {
         }
 
         // Atomically claim the confirmation: conditional UPDATE that only matches
-        // rows not yet confirmed. Two concurrent duplicate deliveries race here,
+        // rows still awaiting payment. Two concurrent duplicate deliveries race here,
         // but only ONE gets a row back (`.select()` returns the affected rows) —
         // the loser sees zero rows and bails before running side-effects. This
         // closes the TOCTOU gap between the status SELECT above and this UPDATE.
@@ -132,7 +160,7 @@ Deno.serve(async (req) => {
           .from('orders')
           .update({ status: 'confirmed', paid_at: new Date().toISOString() })
           .eq('id', orderId)
-          .neq('status', 'confirmed')
+          .in('status', [...PAYABLE_ORDER_STATUSES])
           .select('id');
 
         if (orderUpdateError) {
@@ -141,7 +169,13 @@ Deno.serve(async (req) => {
         }
 
         if (!confirmedRows || confirmedRows.length === 0) {
-          // A concurrent delivery already confirmed this order — skip side-effects.
+          // The conditional update may have lost to cancellation as well as to
+          // another payment. Only the confirmed case is a duplicate success.
+          const { data: latestOrder, error: latestOrderError } = await supabaseAdmin
+            .from('orders').select('status').eq('id', orderId).single();
+          if (latestOrderError || latestOrder?.status !== 'confirmed') {
+            throw new Error('Paid checkout lost confirmation race; reconciliation required');
+          }
           logStep("IDEMPOTENCY: Order confirmed by concurrent delivery, skipping side-effects", { orderId });
           return new Response(JSON.stringify({ received: true, skipped: 'already_confirmed' }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -154,10 +188,9 @@ Deno.serve(async (req) => {
           .from('payment_intents')
           .update({ 
             status: 'succeeded',
-            provider_ref: session.payment_intent as string,
+            provider_ref: typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id,
           })
-          .eq('order_id', orderId)
-          .eq('method', 'stripe');
+          .eq('id', expectedPayment.id);
 
         if (paymentUpdateError) {
           logStep("WARN", `Failed to update payment intent: ${paymentUpdateError.message}`);
@@ -1078,7 +1111,7 @@ Deno.serve(async (req) => {
     // =====================================================
     // HANDLE: checkout.session.completed for MC subscription (set subscription_id)
     // =====================================================
-    if (event.type === "checkout.session.completed") {
+    if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.metadata?.type === "mc_subscription" && session.subscription) {
         const companyId = session.metadata.company_id;

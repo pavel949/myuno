@@ -45,9 +45,10 @@ export function useServiceBookingCatalogue(providerId: string | null | undefined
 
         const { data: rows, error: servicesError } = await supabase
           .from('services')
-          .select('id, name_en, name_ru, price, currency, is_active')
+          .select('id, name_en, name_ru, price, currency, is_active, approval_status')
           .eq('provider_id', providerId)
           .eq('is_active', true)
+          .eq('approval_status', 'approved')
           .order('created_at', { ascending: false });
         if (servicesError) throw servicesError;
         if (cancelled) return;

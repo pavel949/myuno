@@ -369,6 +369,9 @@ export function createCheckoutHandler(config: CheckoutConfig) {
         success_url: result.successUrl,
         cancel_url: result.cancelUrl,
         metadata: sessionMetadata,
+        // Charge/refund webhooks receive PaymentIntent metadata, not Session
+        // metadata. Carry the commercial order linkage into that object too.
+        ...(orderId ? { payment_intent_data: { metadata: { order_id: orderId, type: 'order_payment' } } } : {}),
       });
 
       console.info(`[${config.endpoint}] Checkout session created: ${session.id}`);

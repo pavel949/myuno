@@ -4,7 +4,7 @@ import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getAllowedOrigin } from "../_shared/cors.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
-import { quotePropertyStay, bangkokToday, type PropertyPricingRow } from "../_shared/property-quote.ts";
+import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow } from "../_shared/property-quote.ts";
 
 
 interface PropertyDepositRequest {
@@ -284,7 +284,8 @@ Deno.serve(async (req) => {
 
     // Calculate how much of the deposit covers each component
     const cleaningFeeAmount = cleaning_fee && cleaning_fee > 0 ? cleaning_fee : 0;
-    const rentalDeposit = deposit_amount - Math.round(cleaningFeeAmount * 0.1);
+    const { rental: rentalDepositMinor, cleaning: cleaningDepositMinor } =
+      splitDepositMinorUnits(deposit_amount, cleaningFeeAmount);
 
     // Main rental deposit line
     lineItems.push({
@@ -294,7 +295,7 @@ Deno.serve(async (req) => {
           name: `Deposit: ${property_title}`,
           description: `10% deposit for ${nights} nights (${check_in} – ${check_out})`,
         },
-        unit_amount: Math.round((cleaningFeeAmount > 0 ? rentalDeposit : deposit_amount) * 100),
+        unit_amount: rentalDepositMinor,
       },
       quantity: 1,
     });
@@ -308,7 +309,7 @@ Deno.serve(async (req) => {
             name: "Cleaning Fee (10% deposit)",
             description: `Cleaning fee deposit portion`,
           },
-          unit_amount: Math.round(cleaningFeeAmount * 0.1 * 100),
+          unit_amount: cleaningDepositMinor,
         },
         quantity: 1,
       });
