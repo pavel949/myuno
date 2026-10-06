@@ -64,7 +64,7 @@ export function BusinessHealthCard() {
           <div className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
             <h3 className="font-semibold text-sm">
-              {isRu ? 'Здоровье бизнеса' : 'Business Health'}
+              {isRu ? 'Показатели работы' : 'Business Health'}
             </h3>
           </div>
           <span className={cn('text-2xl font-bold tabular-nums', scoreColor)}>

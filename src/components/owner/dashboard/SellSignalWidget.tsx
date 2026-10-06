@@ -72,7 +72,7 @@ export function SellSignalWidget() {
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-semibold">
-            {isRu ? 'Сигналы продажи' : 'Sell signals'}
+            {isRu ? 'Объекты, которые можно предложить к продаже' : 'Sell signals'}
           </h3>
           {deals.length > 0 && (
             <Badge variant="secondary" className="rounded-none">

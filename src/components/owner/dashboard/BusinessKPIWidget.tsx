@@ -67,7 +67,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       href: APP_ROUTES.MC_SALES,
     },
     bookings: {
-      title: isRu ? 'Брони' : 'Bookings',
+      title: isRu ? 'Бронирования' : 'Bookings',
       value: String(ops?.upcomingBookings ?? 0),
       icon: BedDouble,
       iconColor: 'text-success',
@@ -89,7 +89,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
       badge: ops && ops.openServiceRequests > 3 ? alertBadge(ops.openServiceRequests) : undefined,
     },
     inventory: {
-      title: isRu ? 'Склад' : 'Stock',
+      title: isRu ? 'Расходные материалы' : 'Stock',
       value: ops?.lowStockItems ? `!${ops.lowStockItems}` : '✓',
       icon: PackageOpen,
       iconColor: ops?.lowStockItems ? 'text-destructive' : 'text-success',
@@ -125,7 +125,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           loading={loading}
         />
         <OwnerKPICard
-          title={isRu ? 'Маржа' : 'Margin'}
+          title={isRu ? 'Прибыль' : 'Margin'}
           value={`${data?.margin ?? 0}%`}
           icon={Percent}
           iconColor="text-primary"
@@ -134,7 +134,7 @@ export function BusinessKPIWidget({ role = 'general' }: BusinessKPIWidgetProps) 
           loading={loading}
         />
         <OwnerKPICard
-          title={isRu ? 'Загрузка' : 'Occupancy'}
+          title={isRu ? 'Заполняемость' : 'Occupancy'}
           value={`${data?.occupancyRate ?? 0}%`}
           icon={CalendarCheck}
           iconColor="text-accent-foreground"

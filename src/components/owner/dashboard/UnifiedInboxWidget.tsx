@@ -159,7 +159,7 @@ export function UnifiedInboxWidget() {
           <div className="mt-3 pt-3 border-t">
             <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
               <Sparkles className="h-3 w-3" />
-              {isRu ? 'Быстрые ответы (AI)' : 'Quick replies (AI)'}
+              {isRu ? 'Шаблоны ответов' : 'Quick replies (AI)'}
             </p>
             <div className="flex gap-1.5 overflow-x-auto pb-1">
               {(isRu ? QUICK_REPLIES.ru : QUICK_REPLIES.en).slice(0, 2).map((reply, i) => (

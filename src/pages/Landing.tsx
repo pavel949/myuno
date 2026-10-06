@@ -11,7 +11,7 @@
  * WelcomeLanding remains in repo as fallback / archive.
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -69,10 +69,10 @@ const tx = (lang: Lang, v: Bi): string => {
 /* ──────────────────────────────────────────────────────────────────── */
 
 const TRUST_SIGNALS: { icon: LucideIcon; text: Bi }[] = [
-  { icon: ShieldCheck, text: { ru: 'Мы проверяем каждого специалиста', en: 'Every specialist is checked', th: 'ผู้ให้บริการที่ตรวจสอบแล้ว' } },
-  { icon: Languages, text: { ru: 'Говорим по-русски, английски и тайски', en: 'We speak Russian, English and Thai', th: 'รองรับ RU · EN · TH' } },
-  { icon: Wallet, text: { ru: 'Ваши деньги под защитой', en: 'Your money stays protected', th: 'การชำระเงินที่ปลอดภัย' } },
-  { icon: Headphones, text: { ru: 'С вами всегда живой человек', en: 'A real person stays with you', th: 'การกำกับดูแลโดยคอนเซียร์จ' } },
+  { icon: ShieldCheck, text: { ru: 'Исполнители проходят проверку', en: 'Every specialist is checked', th: 'ผู้ให้บริการที่ตรวจสอบแล้ว' } },
+  { icon: Languages, text: { ru: 'Обслуживание на трёх языках', en: 'We speak Russian, English and Thai', th: 'รองรับ RU · EN · TH' } },
+  { icon: Wallet, text: { ru: 'Оплата исполнителю после выполнения', en: 'Your money stays protected', th: 'การชำระเงินที่ปลอดภัย' } },
+  { icon: Headphones, text: { ru: 'Закреплённый специалист поддержки', en: 'A real person stays with you', th: 'การกำกับดูแลโดยคอนเซียร์จ' } },
 ];
 
 /** Concrete asks people bring us — shown in the hero so the offer is never abstract. */
@@ -80,15 +80,15 @@ const SERVICE_EXAMPLES: Bi[] = [
   { ru: 'Снять жильё', en: 'Rent a home', th: 'เช่าที่พัก' },
   { ru: 'Продлить визу', en: 'Renew a visa', th: 'ต่อวีซ่า' },
   { ru: 'Найти врача', en: 'Find a doctor', th: 'หาแพทย์' },
-  { ru: 'Купить страховку', en: 'Get insurance', th: 'ซื้อประกัน' },
-  { ru: 'Права и машина', en: 'Licence and car', th: 'ใบขับขี่และรถ' },
-  { ru: 'Школа и садик', en: 'School and nursery', th: 'โรงเรียน' },
+  { ru: 'Оформить страховку', en: 'Get insurance', th: 'ซื้อประกัน' },
+  { ru: 'Водительское удостоверение', en: 'Licence and car', th: 'ใบขับขี่และรถ' },
+  { ru: 'Школа и детский сад', en: 'School and nursery', th: 'โรงเรียน' },
   { ru: 'Открыть компанию', en: 'Open a company', th: 'จดทะเบียนบริษัท' },
-  { ru: 'Юрист и договоры', en: 'Lawyer and contracts', th: 'ทนายและสัญญา' },
-  { ru: 'Банк и налоги', en: 'Bank and taxes', th: 'ธนาคารและภาษี' },
-  { ru: 'Уход за домом', en: 'Home upkeep', th: 'ดูแลบ้าน' },
+  { ru: 'Проверка договора', en: 'Lawyer and contracts', th: 'ทนายและสัญญา' },
+  { ru: 'Банковский счёт и налоги', en: 'Bank and taxes', th: 'ธนาคารและภาษี' },
+  { ru: 'Обслуживание дома', en: 'Home upkeep', th: 'ดูแลบ้าน' },
   { ru: 'Купить недвижимость', en: 'Buy property', th: 'ซื้ออสังหาฯ' },
-  { ru: 'Сдать в аренду', en: 'Rent your place out', th: 'ปล่อยเช่า' },
+  { ru: 'Сдать жильё в аренду', en: 'Rent your place out', th: 'ปล่อยเช่า' },
 ];
 
 const TRUST_FACTS: { icon: LucideIcon; title: Bi; body: Bi }[] = [
@@ -286,6 +286,7 @@ const AUDIENCES: { icon: LucideIcon; title: Bi; body: Bi }[] = [
 
 export default function Landing() {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
 
   const [requestOpen, setRequestOpen] = useState(false);
@@ -356,7 +357,7 @@ export default function Landing() {
         )}
       >
         <Send className="h-3.5 w-3.5" strokeWidth={2.5} />
-        <span className="hidden sm:inline">{tx(language, { ru: 'Написать нам', en: 'Tell us what you need', th: 'ส่งคำขอ' })}</span>
+        <span className="hidden sm:inline">{tx(language, { ru: 'Подать заявку', en: 'Submit a request', th: 'ส่งคำขอ' })}</span>
         <span className="sm:hidden">{tx(language, { ru: 'Написать', en: 'Ask us', th: 'คำขอ' })}</span>
       </button>
     </>
@@ -390,7 +391,7 @@ export default function Landing() {
             >
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               <span className="font-semibold text-foreground">myUNO</span>
-              <span>{tx(language, { ru: 'помощь иностранцам на Пхукете', en: 'help for foreigners in Phuket', th: 'โครงสร้างปฏิบัติการสำหรับภูเก็ต' })}</span>
+              <span>{tx(language, { ru: 'портал услуг для иностранцев на Пхукете', en: 'help for foreigners in Phuket', th: 'โครงสร้างปฏิบัติการสำหรับภูเก็ต' })}</span>
             </motion.div>
 
             <motion.h1
@@ -400,8 +401,8 @@ export default function Landing() {
               className="font-display mt-6 max-w-3xl text-h1 font-normal leading-[1.05] tracking-tight sm:text-display"
             >
               {tx(language, {
-                ru: 'Спокойная жизнь на Пхукете начинается с одного сообщения',
-                en: 'Life in Phuket gets easier with one message',
+                ru: 'Аренда, покупка жилья и повседневные услуги на Пхукете',
+                en: 'Rentals, property purchase and everyday services in Phuket',
                 th: 'โครงสร้างปฏิบัติการที่น่าเชื่อถือสำหรับภูเก็ต',
               })}
             </motion.h1>
@@ -413,8 +414,8 @@ export default function Landing() {
               className="mt-5 max-w-2xl font-sans text-body-lg font-normal leading-relaxed text-muted-foreground"
             >
               {tx(language, {
-                ru: 'Напишите, что нужно. Ваш консьерж myUNO найдёт проверенного специалиста и будет рядом до результата — по-русски, по-английски или по-тайски.',
-                en: 'Tell us what you need. Your myUNO concierge finds a verified specialist and stays with you until it is done — in Russian, English or Thai.',
+                ru: 'Выберите услугу в каталоге или подайте заявку. Специалист myUNO подберёт проверенного исполнителя, согласует цену и сроки и сопроводит заказ до выполнения. Обслуживание на русском, английском и тайском языках.',
+                en: 'Choose a service from the catalogue or submit a request. A myUNO specialist selects a verified provider, agrees the price and timing, and follows the order through to completion. Service in Russian, English and Thai.',
                 th: 'หนึ่งคำขอ คอนเซียร์จของ myUNO จะจัดหาผู้ให้บริการที่ตรวจสอบแล้ว และดูแลจนกระทั่งงานเสร็จสมบูรณ์',
               })}
             </motion.p>
@@ -428,7 +429,7 @@ export default function Landing() {
             >
               <p className="font-sans text-caption uppercase tracking-[0.14em] text-muted-foreground">
                 {tx(language, {
-                  ru: 'С чем мы помогаем каждый день',
+                  ru: 'Частые обращения',
                   en: 'What we help with every day',
                   th: 'สิ่งที่เราช่วยได้ทุกวัน',
                 })}
@@ -448,7 +449,7 @@ export default function Landing() {
               </ul>
               <p className="mt-2 font-sans text-caption text-muted-foreground">
                 {tx(language, {
-                  ru: 'Нет вашего случая? Напишите своими словами — разберёмся.',
+                  ru: 'Если нужной услуги нет в списке, опишите задачу в заявке.',
                   en: 'Not on the list? Write it in your own words — we will sort it out.',
                   th: 'ไม่มีในรายการ? เขียนมาได้เลย',
                 })}
@@ -474,11 +475,11 @@ export default function Landing() {
                 )}
               >
                 <Send className="h-4 w-4" strokeWidth={2.5} />
-                {tx(language, { ru: 'Написать нам', en: 'Tell us what you need', th: 'ส่งคำขอ' })}
+                {tx(language, { ru: 'Подать заявку', en: 'Submit a request', th: 'ส่งคำขอ' })}
               </button>
               <button
                 type="button"
-                onClick={() => scrollTo('how-it-works')}
+                onClick={() => navigate(APP_ROUTES.ECOSYSTEM)}
                 data-testid="landing-hero-secondary"
                 className={cn(
                   'inline-flex h-12 min-w-[200px] items-center justify-center gap-2 rounded-none border border-foreground px-6 font-sans text-body font-medium text-foreground',
@@ -486,18 +487,18 @@ export default function Landing() {
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                 )}
               >
-                {tx(language, { ru: 'Как мы работаем', en: 'See how we help', th: 'ดูวิธีการทำงาน' })}
+                {tx(language, { ru: 'Каталог услуг', en: 'Service catalogue', th: 'ดูวิธีการทำงาน' })}
               </button>
             </motion.div>
 
             <p className="mt-3 font-sans text-caption text-muted-foreground">
-              {tx(language, { ru: 'Аккаунт не нужен. ', en: 'No account needed. ', th: 'ไม่ต้องสมัครสมาชิก ' })}
+              {tx(language, { ru: 'Подать заявку можно без регистрации. ', en: 'No account needed. ', th: 'ไม่ต้องสมัครสมาชิก ' })}
               <Link to={APP_ROUTES.AUTH} className="underline underline-offset-4 hover:text-foreground">
                 {tx(language, { ru: 'Войти', en: 'Sign in', th: 'เข้าสู่ระบบ' })}
               </Link>
               <span className="mx-1.5 text-muted-foreground/40">·</span>
               <Link to={`${APP_ROUTES.AUTH}?mode=signup`} className="underline underline-offset-4 hover:text-foreground">
-                {tx(language, { ru: 'Создать аккаунт', en: 'Create account', th: 'สร้างบัญชี' })}
+                {tx(language, { ru: 'Зарегистрироваться', en: 'Create account', th: 'สร้างบัญชี' })}
               </Link>
             </p>
 
@@ -606,7 +607,7 @@ export default function Landing() {
               className="inline-flex h-11 items-center gap-2 rounded-none bg-primary px-5 font-sans text-body font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               <Send className="h-4 w-4" strokeWidth={2.5} />
-              {tx(language, { ru: 'Написать нам', en: 'Tell us what you need', th: 'ส่งคำขอ' })}
+              {tx(language, { ru: 'Подать заявку', en: 'Submit a request', th: 'ส่งคำขอ' })}
             </button>
           </div>
         </LandingContainer>
@@ -885,7 +886,7 @@ export default function Landing() {
               )}
             >
               <Send className="h-4 w-4" strokeWidth={2.5} />
-              {tx(language, { ru: 'Написать нам', en: 'Tell us what you need', th: 'ส่งคำขอ' })}
+              {tx(language, { ru: 'Подать заявку', en: 'Submit a request', th: 'ส่งคำขอ' })}
             </button>
             <Link
               to={APP_ROUTES.ECOSYSTEM}
@@ -937,7 +938,7 @@ export default function Landing() {
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-none bg-primary font-sans text-body font-semibold text-primary-foreground"
         >
           <Send className="h-4 w-4" strokeWidth={2.5} />
-          {tx(language, { ru: 'Написать нам', en: 'Tell us what you need', th: 'ส่งคำขอ' })}
+          {tx(language, { ru: 'Подать заявку', en: 'Submit a request', th: 'ส่งคำขอ' })}
         </button>
       </div>
 
