@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS property_bookings_external_id_key ON public.property_bookings (external_id);
