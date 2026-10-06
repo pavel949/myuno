@@ -15,6 +15,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { LIVE_CLUSTER_SLUGS } from '../clusterLandings';
 import { resolve } from 'node:path';
 import {
   PERSONA_LANDINGS,
@@ -73,7 +74,7 @@ describe('sitemap-landings.xml × LIVE_PERSONA_SLUGS', () => {
   });
 
   it('does not list slugs that are not live (no orphaned/draft entries)', () => {
-    const liveSet = new Set<string>(LIVE_PERSONA_SLUGS);
+    const liveSet = new Set<string>([...LIVE_PERSONA_SLUGS, ...LIVE_CLUSTER_SLUGS]);
     const orphans = [...sitemapEntries.keys()].filter((s) => !liveSet.has(s));
     expect(orphans, `Orphan sitemap entries (slug not live): ${orphans.join(', ')}`).toEqual([]);
   });
