@@ -10,6 +10,7 @@ export interface PropertyPricingRow {
   price: number | null;
   price_period: string | null;
   cleaning_fee: number | null;
+  extra_cleaning_price: number | null;
   currency: string | null;
   is_active: boolean | null;
   status: string | null;
@@ -104,7 +105,8 @@ export function quotePropertyStay(p: PropertyPricingRow | null, input: QuoteInpu
   if (!Number.isInteger(guests) || guests < 1) return fail('guests', 'Invalid number of guests');
   if (p.max_guests && guests > p.max_guests) return fail('guests', `Maximum ${p.max_guests} guests`);
 
-  const cleaningFee = Math.max(0, Number(p.cleaning_fee) || 0);
+  // Same precedence as the booking page: extra_cleaning_price, then cleaning_fee.
+  const cleaningFee = Math.max(0, Number(p.extra_cleaning_price) || Number(p.cleaning_fee) || 0);
   const clientCleaning = Number(input.cleaning_fee ?? 0);
   if (!Number.isFinite(clientCleaning) || Math.abs(clientCleaning - cleaningFee) > 0.01) {
     return fail('cleaning_fee', 'Cleaning fee does not match the current price');
