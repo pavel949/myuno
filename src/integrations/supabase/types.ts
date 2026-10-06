@@ -33449,6 +33449,7 @@ export type Database = {
           management_company_id: string | null
           max_guests: number | null
           price: number | null
+          price_period: string | null
           property_type: string | null
           sale_price: number | null
           title_en: string | null
@@ -33479,6 +33480,7 @@ export type Database = {
           management_company_id?: string | null
           max_guests?: number | null
           price?: number | null
+          price_period?: string | null
           property_type?: string | null
           sale_price?: number | null
           title_en?: string | null
@@ -33509,6 +33511,7 @@ export type Database = {
           management_company_id?: string | null
           max_guests?: number | null
           price?: number | null
+          price_period?: string | null
           property_type?: string | null
           sale_price?: number | null
           title_en?: string | null
