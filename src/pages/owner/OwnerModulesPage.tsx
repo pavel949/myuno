@@ -76,6 +76,7 @@ const MODULE_GROUPS: ModuleGroup[] = [
       { id: 'finance', path: '/mc/finance', icon: DollarSign, labelEn: 'Overview', labelRu: 'Обзор', tint: 'bg-success/12', textColor: 'text-success', permModule: 'finance' },
       { id: 'management-terms', path: '/mc/management-terms', icon: Shuffle, labelEn: 'Payouts', labelRu: 'Выплаты', tint: 'bg-accent-coral/12', textColor: 'text-accent-coral', permModule: 'finance' },
       { id: 'transactions', path: '/mc/financials', icon: ArrowLeftRight, labelEn: 'Transactions', labelRu: 'Транзакции', tint: 'bg-accent-amber/12', textColor: 'text-accent-amber', permModule: 'finance' },
+      { id: 'analytics', path: '/mc/analytics', icon: TrendingUp, labelEn: 'Analytics', labelRu: 'Аналитика', tint: 'bg-success/12', textColor: 'text-success', permModule: 'reports' },
       { id: 'reports', path: '/mc/reports', icon: BarChart3, labelEn: 'Reports', labelRu: 'Отчёты', tint: 'bg-primary/12', textColor: 'text-primary', permModule: 'reports' },
       { id: 'budget', path: '/mc/budget', icon: Target, labelEn: 'Budget', labelRu: 'Бюджет', tint: 'bg-accent-purple/12', textColor: 'text-accent-purple', permModule: 'finance' },
       { id: 'invoices', path: '/mc/invoices', icon: Receipt, labelEn: 'Invoices', labelRu: 'Инвойсы', tint: 'bg-accent-cyan/12', textColor: 'text-accent-cyan', permModule: 'finance' },
