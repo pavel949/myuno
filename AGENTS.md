@@ -7,3 +7,5 @@
 - `providers.id` and `orgs.id` are different entities (`orders.provider_org_id` is an FK to `orgs.id`); never pass a provider id as an org id — resolve the org only from an explicit trusted mapping, and block booking when none exists, because a wrong counterparty breaks payouts and RLS.
 - Booking pages show only database-backed active offerings in the single supported currency, because invented fallback catalogues mislead customers.
 - Money-moving SECURITY DEFINER functions must derive the actor from `auth.uid()` and validate amounts server-side, because client-supplied user ids and totals are untrusted.
+- Money RPCs (`record_ledger_entries`, `credit_cashback`, `process_payout`, `create_order_atomic`, `create_booking_with_wallet_payment`) are service_role-only; clients call checked wrappers (`create_order_checked`, `admin_process_payout`) that derive the actor from `auth.uid()`, because direct grants let any user move money.
+- The provider → org counterparty comes only from `provider_org_links` (staff-managed), because provider and org ids are different entities.
