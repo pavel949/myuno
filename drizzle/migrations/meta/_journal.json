@@ -50,6 +50,13 @@
       "when": 1791282482450,
       "tag": "0006_harden_money_functions_and_provider_org_links",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791283028338,
+      "tag": "0007_restrict_provider_org_links_read",
+      "breakpoints": true
     }
   ]
 }
