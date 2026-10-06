@@ -29,14 +29,6 @@ import { Home, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
-// Fallback services for when no provider data is available
-const fallbackServices = [
-  { id: "s1", nameEn: "Faucet installation", nameRu: "Установка смесителя", price: 1500, duration: "1 час" },
-  { id: "s2", nameEn: "Pipe replacement", nameRu: "Замена труб", price: 3000, duration: "2-4 часа" },
-  { id: "s3", nameEn: "Drain cleaning", nameRu: "Прочистка канализации", price: 2000, duration: "1-2 часа" },
-  { id: "s4", nameEn: "Toilet installation", nameRu: "Установка унитаза", price: 2500, duration: "2 часа" },
-];
-
 export default function ServiceBooking() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -45,22 +37,20 @@ export default function ServiceBooking() {
   const { getItemsByProvider, clearByProvider } = useCart();
   const { createBooking, isSubmitting } = useBooking();
 
-  // Fetch provider and services from database
+  // Fetch provider and services from database (no invented fallback catalogue)
   const { provider: dbProvider, services: dbServices, isLoading: providerLoading } = useProviderDetails(id || null);
 
-  // Use database data or fallback
-  const services = useMemo(() => {
-    if (dbServices && dbServices.length > 0) {
-      return dbServices.map(s => ({
+  const services = useMemo(
+    () =>
+      (dbServices ?? []).map(s => ({
         id: s.id,
         nameEn: s.name_en,
         nameRu: s.name_ru,
         price: s.price || 0,
         duration: '1 час',
-      }));
-    }
-    return fallbackServices;
-  }, [dbServices]);
+      })),
+    [dbServices],
+  );
 
   const providerInfo = useMemo(() => {
     if (dbProvider) {
@@ -120,6 +110,22 @@ export default function ServiceBooking() {
             <Skeleton className="h-40 w-full rounded-none" />
             <Skeleton className="h-40 w-full rounded-none" />
           </div>
+        </PageContainer>
+      </AppLayout>
+    );
+  }
+
+  // No real provider or no published services: never show invented prices
+  if (!dbProvider || services.length === 0) {
+    return (
+      <AppLayout>
+        <PageContainer className="pb-32">
+          <PageHeader title={language === 'ru' ? 'Запись к специалисту' : 'Book a specialist'} showBack />
+          <p className="mt-6 text-sm text-muted-foreground" data-testid="service-booking-empty">
+            {language === 'ru'
+              ? 'У этого исполнителя пока нет услуг, доступных для записи. Выберите другого специалиста в каталоге.'
+              : 'This provider has no services available for booking yet. Please choose another specialist in the catalogue.'}
+          </p>
         </PageContainer>
       </AppLayout>
     );
@@ -185,8 +191,11 @@ export default function ServiceBooking() {
       subtotal: serviceFee,
     });
 
+    if (!dbProvider) return;
+
     const result = await createBooking({
       booking_type: 'service',
+      provider_id: dbProvider.id,
       scheduled_at: scheduledAt,
       total_amount: totalAmount,
       currency: 'THB',
