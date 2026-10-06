@@ -106,10 +106,10 @@ export function quotePropertyStay(p: PropertyPricingRow | null, input: QuoteInpu
 
   const cleaningFee = Math.max(0, Number(p.cleaning_fee) || 0);
   const clientCleaning = Number(input.cleaning_fee ?? 0);
-  if (!Number.isFinite(clientCleaning) || Math.abs(clientCleaning - cleaningFee) > 0.01 && clientCleaning !== 0) {
-    return fail('cleaning_fee', 'Invalid cleaning fee');
+  if (!Number.isFinite(clientCleaning) || Math.abs(clientCleaning - cleaningFee) > 0.01) {
+    return fail('cleaning_fee', 'Cleaning fee does not match the current price');
   }
-  const appliedCleaning = clientCleaning === 0 ? 0 : cleaningFee;
+  const appliedCleaning = cleaningFee;
 
   const base = rate * nights;
   const discount = maxApplicableDiscount(p, nights);
