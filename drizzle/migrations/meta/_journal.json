@@ -64,6 +64,13 @@
       "when": 1791283134679,
       "tag": "0008_fix_credit_cashback_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791283180850,
+      "tag": "0009_fix_credit_cashback_wallet_type",
+      "breakpoints": true
     }
   ]
 }
