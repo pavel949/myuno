@@ -340,6 +340,10 @@ Deno.serve(async (req) => {
         order_id: order.order_id,
         order_number: order.order_number || "",
       },
+      // Propagate linkage to the charge so refunds resolve the order (F08).
+      payment_intent_data: {
+        metadata: { order_id: order.order_id, property_id, type: "property_deposit" },
+      },
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
