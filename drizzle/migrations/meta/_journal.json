@@ -29,6 +29,13 @@
       "when": 1791280108959,
       "tag": "0003_fix_reconciliation_check",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791280181699,
+      "tag": "0004_property_bookings_external_id_unique",
+      "breakpoints": true
     }
   ]
 }
