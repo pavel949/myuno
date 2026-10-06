@@ -52,8 +52,13 @@ export function useServiceBookingCatalogue(providerId: string | null | undefined
         if (servicesError) throw servicesError;
         if (cancelled) return;
 
-        // No trusted provider -> org mapping exists in the schema yet.
-        const org = resolveProviderOrg([]);
+        const { data: links, error: linkError } = await supabase
+          .from('provider_org_links')
+          .select('org_id')
+          .eq('provider_id', providerId);
+        if (linkError) throw linkError;
+        if (cancelled) return;
+        const org = resolveProviderOrg((links ?? []).map((l) => l.org_id));
         const { offerings } = normalizeOfferings(rows);
         setState(
           offerings.length === 0

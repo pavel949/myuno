@@ -6,7 +6,7 @@ const responses: Record<string, Result | (() => Promise<Result>)> = {};
 
 function chain(table: string) {
   const resolve = () => {
-    const r = responses[table];
+    const r = responses[table] ?? { data: [], error: null };
     return typeof r === 'function' ? r() : Promise.resolve(r);
   };
   const q: Record<string, unknown> = {};
@@ -51,14 +51,25 @@ describe('useServiceBookingCatalogue', () => {
     await waitFor(() => expect(result.current.status).toBe('empty'));
   });
 
-  it('returns ready offerings with unmapped org (no trusted mapping exists)', async () => {
+  it('returns ready offerings with unmapped org when no link row exists', async () => {
     responses.providers = { data: okProvider, error: null };
     responses.services = { data: [{ id: 's', name_en: 'Fix', name_ru: 'Ремонт', price: 900, currency: 'THB', is_active: true }], error: null };
+    responses.provider_org_links = { data: [], error: null };
     const { result } = renderHook(() => useServiceBookingCatalogue('p1'));
     await waitFor(() => expect(result.current.status).toBe('ready'));
     if (result.current.status !== 'ready') return;
     expect(result.current.offerings).toHaveLength(1);
     expect(result.current.org).toEqual({ status: 'unmapped' });
+  });
+
+  it('maps the org from the trusted link table', async () => {
+    responses.providers = { data: okProvider, error: null };
+    responses.services = { data: [{ id: 's', name_en: 'Fix', name_ru: 'Ремонт', price: 900, currency: 'THB', is_active: true }], error: null };
+    responses.provider_org_links = { data: [{ org_id: 'org-9' }], error: null };
+    const { result } = renderHook(() => useServiceBookingCatalogue('p1'));
+    await waitFor(() => expect(result.current.status).toBe('ready'));
+    if (result.current.status !== 'ready') return;
+    expect(result.current.org).toEqual({ status: 'mapped', orgId: 'org-9' });
   });
 
   it('resets to loading on provider change and ignores stale responses', async () => {

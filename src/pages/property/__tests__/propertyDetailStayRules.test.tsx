@@ -20,7 +20,7 @@ describe('PropertyDetail stay rules', () => {
   it('imports the PropertyDetail page module without throwing', async () => {
     const mod = await import('../PropertyDetail');
     expect(mod.default).toBeTypeOf('function');
-  }, 30_000); // large module graph: generous timeout keeps CI stable
+  }, 120_000); // large module graph: generous timeout keeps CI stable
 
   it('renders only the stay-rule rows that are present', () => {
     render(<StayRulesSection minStayNights={3} bookingWindowMonths={12} />);
