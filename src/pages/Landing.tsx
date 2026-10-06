@@ -286,6 +286,7 @@ const AUDIENCES: { icon: LucideIcon; title: Bi; body: Bi }[] = [
 
 export default function Landing() {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
 
   const [requestOpen, setRequestOpen] = useState(false);
