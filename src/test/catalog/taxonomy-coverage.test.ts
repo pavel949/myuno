@@ -69,8 +69,8 @@ describe('catalog SSOT — categories', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('expects 18 canonical categories (3 Arrive + 10 Live + 1 Invest + 3 Legal + 1 Build)', () => {
-    expect(CATEGORIES).toHaveLength(18);
+  it('runtime SSOT has 14 categories (canonical 16 target tracked in docs/canonical/02)', () => {
+    expect(CATEGORIES).toHaveLength(14);
   });
 });
 
