@@ -25,7 +25,11 @@
 - Booking is therefore BLOCKED for every provider (clear notice, real prices shown for reference). Provider id is kept as `metadata.provider_id` in the payload builder for when a mapping exists.
 - Required later (additive migration, not applied): `providers.org_id uuid NULL REFERENCES orgs(id)` (or a `provider_org_links` table with a unique provider_id), populated by an admin-verified process, then read by `useServiceBookingCatalogue` -> `resolveProviderOrg`.
 - Unresolved business constraints (not canonical config): service fee 100 THB, fixed 09:00–18:00 slots.
-- `service_orders` is not classified as legacy until we decide whether it is a request or a commercial order.
+- `service_orders` is the ACTIVE request workflow (ServiceBookingSheet + useServiceMarketplace; `validate_service_order` derives price/provider and rejects busy slots). Not legacy; untouched by this slice.
+- Commercial bridge (future, separate): a provider-accepted `service_orders` row may create an `orders` row only after the provider->org mapping exists; to be designed with its own reconciliation.
+
+## Environment correction
+- Lovable drafts share backend, database, data and settings (docs.lovable.dev/features/drafts). They are NOT staging. There is no isolated database; all DB work remains live and is out of scope for code-only slices.
 
 ## Still to re-read
 Checkout night/fee logic, webhook guards, MC commission key, participants vs guests, vendor gross labels, availability RLS/realtime.
