@@ -11,7 +11,7 @@
  * WelcomeLanding remains in repo as fallback / archive.
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -478,7 +478,7 @@ export default function Landing() {
               </button>
               <button
                 type="button"
-                onClick={() => { window.location.href = APP_ROUTES.ECOSYSTEM ?? '/ecosystem'; }}
+                onClick={() => navigate(APP_ROUTES.ECOSYSTEM)}
                 data-testid="landing-hero-secondary"
                 className={cn(
                   'inline-flex h-12 min-w-[200px] items-center justify-center gap-2 rounded-none border border-foreground px-6 font-sans text-body font-medium text-foreground',
