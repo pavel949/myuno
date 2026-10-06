@@ -19,8 +19,13 @@
 - idx_property_bookings_external_id_unique (partial, NOT NULL)
 - property_bookings_ical_unique (property_id, external_id) WHERE source='ical'
 
-## Fixed in Phase 1
-- ServiceBooking.tsx: invented fallback services removed; orders carry provider_id.
+## Service booking (Phase 1, code-only)
+- Invented fallback services removed. Page loads only eligible providers (active, approved, non-demo) and active THB offerings with finite positive prices; distinct states: missing / inactive / load error / empty / ready.
+- CORRECTION: the previous slice passed `providers.id` as `orders.provider_org_id` (FK -> `orgs.id`). Verified: `providers JOIN orgs ON o.id = p.id` = 0 rows; `orgs` has 2 rows, none with `metadata.provider_id`; no table bridges provider_id to org_id; no code helper resolves it.
+- Booking is therefore BLOCKED for every provider (clear notice, real prices shown for reference). Provider id is kept as `metadata.provider_id` in the payload builder for when a mapping exists.
+- Required later (additive migration, not applied): `providers.org_id uuid NULL REFERENCES orgs(id)` (or a `provider_org_links` table with a unique provider_id), populated by an admin-verified process, then read by `useServiceBookingCatalogue` -> `resolveProviderOrg`.
+- Unresolved business constraints (not canonical config): service fee 100 THB, fixed 09:00–18:00 slots.
+- `service_orders` is not classified as legacy until we decide whether it is a request or a commercial order.
 
 ## Still to re-read
 Checkout night/fee logic, webhook guards, MC commission key, participants vs guests, vendor gross labels, availability RLS/realtime.
