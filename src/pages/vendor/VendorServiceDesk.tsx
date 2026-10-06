@@ -84,12 +84,12 @@ export default function VendorServiceDesk() {
     <div className="p-4 space-y-4 max-w-4xl">
       <div>
         <h1 className="text-xl font-serif">{L('Кабинет исполнителя', 'Service desk', 'โต๊ะบริการ')} · {providerQ.data.name}</h1>
-        <p className="text-sm text-muted-foreground">{L('Заказы, расписание и услуги, которые клиенты видят в разделе «Услуги».', 'Orders, schedule and the services customers see in Services.', 'คำสั่งซื้อ ตารางเวลา และบริการ')}</p>
+        <p className="text-sm text-muted-foreground">{L('Заказы, график приёма и перечень услуг, которые клиенты видят в разделе «Услуги».', 'Orders, schedule and the services customers see in Services.', 'คำสั่งซื้อ ตารางเวลา และบริการ')}</p>
       </div>
       <Tabs defaultValue="orders">
         <TabsList className="rounded-none">
           <TabsTrigger value="orders">{L('Заказы', 'Orders', 'คำสั่งซื้อ')} ({openCount})</TabsTrigger>
-          <TabsTrigger value="hours">{L('Часы работы', 'Working hours', 'เวลาทำการ')}</TabsTrigger>
+          <TabsTrigger value="hours">{L('График приёма', 'Working hours', 'เวลาทำการ')}</TabsTrigger>
           <TabsTrigger value="services">{L('Услуги', 'Services', 'บริการ')}</TabsTrigger>
         </TabsList>
 
@@ -118,7 +118,7 @@ export default function VendorServiceDesk() {
         </TabsContent>
 
         <TabsContent value="hours" className="space-y-3">
-          <p className="text-xs text-muted-foreground">{L('Время по Пхукету. Без часов работы онлайн-запись закрыта.', 'Phuket time. Without working hours online booking stays closed.', 'เวลาภูเก็ต')}</p>
+          <p className="text-xs text-muted-foreground">{L('Время указывается по Пхукету. Пока график приёма не заполнен, онлайн-запись недоступна.', 'Phuket time. Without working hours online booking stays closed.', 'เวลาภูเก็ต')}</p>
           {(hoursQ.data ?? []).map((h) => (
             <div key={h.id} className="flex items-center gap-3 border border-border p-2 text-sm">
               <span className="w-10">{WD[h.weekday]}</span>
@@ -137,7 +137,7 @@ export default function VendorServiceDesk() {
         </TabsContent>
 
         <TabsContent value="services" className="space-y-2">
-          {(servicesQ.data ?? []).length === 0 && !servicesQ.isLoading && <p className="text-sm text-muted-foreground">{L('Услуг пока нет — добавляет команда myUNO при модерации.', 'No services yet — added by the myUNO team during review.', 'ยังไม่มีบริการ')}</p>}
+          {(servicesQ.data ?? []).length === 0 && !servicesQ.isLoading && <p className="text-sm text-muted-foreground">{L('Услуги пока не добавлены. Их добавляет команда myUNO после проверки.', 'No services yet — added by the myUNO team during review.', 'ยังไม่มีบริการ')}</p>}
           {(servicesQ.data ?? []).map((s) => (
             <div key={s.id} className="flex items-center gap-3 border border-border bg-card p-3 text-sm">
               <div className="flex-1 min-w-0">
@@ -145,7 +145,7 @@ export default function VendorServiceDesk() {
                 <div className="text-xs text-muted-foreground font-mono">{s.price != null ? `฿${Number(s.price).toLocaleString()}` : '—'} · {s.duration_minutes ?? 60} {L('мин', 'min', 'นาที')}</div>
               </div>
               {s.approval_status !== 'approved' && <Badge variant="outline" className="rounded-none">{L('На модерации', 'In review', 'รอตรวจ')}</Badge>}
-              <Switch checked={!!s.is_active} onCheckedChange={(v) => toggleService(s.id, v)} aria-label={L('Показывать', 'Visible', 'แสดง')} />
+              <Switch checked={!!s.is_active} onCheckedChange={(v) => toggleService(s.id, v)} aria-label={L('Показывать клиентам', 'Visible', 'แสดง')} />
             </div>
           ))}
         </TabsContent>
