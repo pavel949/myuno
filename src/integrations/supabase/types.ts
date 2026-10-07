@@ -34697,6 +34697,10 @@ export type Database = {
       }
       is_mcc_admin: { Args: never; Returns: boolean }
       is_org_owner: { Args: { check_org_id: string }; Returns: boolean }
+      is_property_bookable_active: {
+        Args: { _property_id: string }
+        Returns: boolean
+      }
       is_property_owner: {
         Args: { _property_id: string; _user_id: string }
         Returns: boolean
