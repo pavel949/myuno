@@ -24,7 +24,7 @@ describe('quotePropertyStay', () => {
     expect(quotePropertyStay(prop(), { ...base, total_amount: 20000 })).toMatchObject({ ok: false, code: 'total' });
   });
   it('allows the weekly discount only for 7+ nights', () => {
-    const week = { ...base, check_out: '2026-11-17', nights: 7, total_amount: 3000 * 7 * 0.9 + 500 };
+    const week = { ...base, check_out: '2026-11-17', nights: 7, total_amount: 3000 * 7 * 0.9 };
     expect(quotePropertyStay(prop(), week)).toMatchObject({ ok: true, total: 19400 });
   });
   it('rejects inactive properties, foreign currency, past dates, min stay, too many guests', () => {
