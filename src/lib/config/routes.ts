@@ -470,6 +470,7 @@ export const APP_ROUTES = {
   MC_FINANCE: '/mc/finance',
   MC_FINANCIALS: '/mc/financials',
   MC_STAFF: '/mc/staff',
+  MC_ANALYTICS: '/mc/analytics',
   MC_REPORTS: '/mc/reports',
   MC_BUDGET: '/mc/budget',
   MC_FINANCE_PLANNING: '/mc/finance/planning',

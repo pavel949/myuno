@@ -64,6 +64,7 @@ export const mcRoutes = (
     <Route path="message-templates" element={<LazyPage><Pages.MessageTemplates /></LazyPage>} />
     <Route path="channels" element={<LazyPage><Pages.ChannelManager /></LazyPage>} />
     <Route path="team" element={<Navigate to="/mc/staff" replace />} />
+    <Route path="analytics" element={<LazyPage><Pages.AnalyticsPage /></LazyPage>} />
     <Route path="reports" element={<LazyPage><Pages.ReportsPage /></LazyPage>} />
     <Route path="transparency/:propertyId" element={<LazyPage><Pages.OwnerTransparencyDashboard /></LazyPage>} />
     <Route path="maintenance-plan" element={<LazyPage><Pages.MaintenancePlan /></LazyPage>} />
