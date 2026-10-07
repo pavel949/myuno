@@ -172,7 +172,6 @@ Deno.serve(async (req) => {
 
     // Create order in database BEFORE Stripe checkout
     const orderItems = [{
-      product_id: property_id,
       resource_id: property_id,
       provider_org_id: provider_org_id || null,
       item_name: property_title,
