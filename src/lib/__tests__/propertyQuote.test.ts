@@ -24,7 +24,7 @@ describe('quotePropertyStay', () => {
     expect(quotePropertyStay(prop(), { ...base, total_amount: 20000 })).toMatchObject({ ok: false, code: 'total' });
   });
   it('allows the weekly discount only for 7+ nights', () => {
-    const week = { ...base, check_out: '2026-11-17', nights: 7, total_amount: 3000 * 7 * 0.9 + 500 };
+    const week = { ...base, check_out: '2026-11-17', nights: 7, total_amount: 3000 * 7 * 0.9 };
     expect(quotePropertyStay(prop(), week)).toMatchObject({ ok: true, total: 19400 });
   });
   it('rejects inactive properties, foreign currency, past dates, min stay, too many guests', () => {
@@ -59,6 +59,21 @@ describe('rate seasons', () => {
   it('ignores inactive seasons and enforces season min stay', () => {
     expect(quotePropertyStay(prop(), { ...base, seasons: [{ ...season, is_active: false }] })).toMatchObject({ ok: true });
     expect(quotePropertyStay(prop(), { ...base, seasons: [{ ...season, start_date: '2026-11-01', min_stay_nights: 5 }], total_amount: 15500 })).toMatchObject({ code: 'min_stay' });
+  });
+});
+
+describe('booking page contract', () => {
+  it('accepts stay total sent without cleaning and charges stay + cleaning', () => {
+    expect(quotePropertyStay(prop(), { ...base, total_amount: 9000 })).toMatchObject({ ok: true, total: 9500 });
+  });
+  it('accepts stacked length + timing discount', () => {
+    const p = prop({ weekly_discount: 10, early_booking_discount: 10 });
+    const week = { ...base, check_out: '2026-11-17', nights: 7, total_amount: 3000 * 7 * 0.8 };
+    expect(quotePropertyStay(p, week)).toMatchObject({ ok: true });
+  });
+  it('accepts legacy JSONB seasonal price', () => {
+    const p = prop({ seasonal_pricing: [{ startMonth: 11, startDay: 1, endMonth: 11, endDay: 30, pricePerNight: 4000, priceModifier: 100 }] });
+    expect(quotePropertyStay(p, { ...base, total_amount: 12000 })).toMatchObject({ ok: true, total: 12500 });
   });
 });
 

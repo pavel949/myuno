@@ -22,6 +22,8 @@ export interface PropertyPricingRow {
   early_booking_discount: number | null;
   last_minute_discount: number | null;
   custom_length_discounts: unknown;
+  /** Legacy JSONB month/day rules used by the booking page. */
+  seasonal_pricing?: unknown;
 }
 
 export interface RateSeasonRow {
@@ -85,6 +87,39 @@ export function maxApplicableDiscount(p: PropertyPricingRow, nights: number): nu
   return best;
 }
 
+/** Booking page stacks the best length discount with the best timing discount. */
+export function maxStackedDiscount(p: PropertyPricingRow, nights: number): number {
+  let length = 0;
+  if (nights >= 7) length = Math.max(length, pct(p.weekly_discount));
+  if (nights >= 28) length = Math.max(length, pct(p.monthly_discount));
+  if (Array.isArray(p.custom_length_discounts)) {
+    for (const tier of p.custom_length_discounts as Array<Record<string, unknown>>) {
+      const min = Number(tier?.min_nights ?? tier?.minNights ?? tier?.nights);
+      if (Number.isFinite(min) && nights >= min) length = Math.max(length, pct(tier?.discount ?? tier?.percent ?? tier?.discount_percent));
+    }
+  }
+  const timing = Math.max(pct(p.early_booking_discount), pct(p.last_minute_discount));
+  return Math.min(length + timing, 99);
+}
+
+/** Nightly rate from legacy JSONB month/day rules (same logic as pricingEngine). */
+function jsonbSeasonRate(p: PropertyPricingRow, day: number, base: number): number | null {
+  if (!Array.isArray(p.seasonal_pricing)) return null;
+  const d = new Date(day * 86_400_000);
+  const month = d.getUTCMonth() + 1;
+  const dd = d.getUTCDate();
+  for (const r of p.seasonal_pricing as Array<Record<string, number>>) {
+    const after = month > r.startMonth || (month === r.startMonth && dd >= r.startDay);
+    const before = month < r.endMonth || (month === r.endMonth && dd <= r.endDay);
+    const hit = r.startMonth <= r.endMonth ? after && before : after || before;
+    if (!hit) continue;
+    if (Number(r.pricePerNight) > 0) return Number(r.pricePerNight);
+    if (Number(r.priceModifier) > 0) return Math.round(base * (Number(r.priceModifier) / 100));
+    return null;
+  }
+  return null;
+}
+
 export function nightlyRate(p: PropertyPricingRow): number {
   const perNight = Number(p.price_per_night);
   if (Number.isFinite(perNight) && perNight > 0) return perNight;
@@ -134,27 +169,37 @@ export function quotePropertyStay(p: PropertyPricingRow | null, input: QuoteInpu
     .map((x) => ({ ...x, s: dayNumber(x.start_date), e: dayNumber(x.end_date) }))
     .filter((x) => x.s !== null && x.e !== null)
     .sort((a, b) => (b.s as number) - (a.s as number));
-  let base = 0;
-  let discount = maxApplicableDiscount(p, nights);
+  let low = 0;
+  let high = 0;
+  let discount = maxStackedDiscount(p, nights);
   for (let d = inDay; d < outDay; d++) {
     const season = seasons.find((x) => d >= (x.s as number) && d <= (x.e as number));
-    base += season ? Number(season.nightly_rate) : rate;
+    const candidates = [season ? Number(season.nightly_rate) : rate];
+    const legacy = jsonbSeasonRate(p, d, rate);
+    if (legacy !== null && legacy > 0) candidates.push(legacy);
+    low += Math.min(...candidates);
+    high += Math.max(...candidates);
     if (season) {
       if (d === inDay && season.min_stay_nights && nights < season.min_stay_nights) {
         return fail('min_stay', `Minimum stay is ${season.min_stay_nights} nights`);
       }
-      discount = Math.max(discount, maxApplicableDiscount({ ...p,
+      discount = Math.max(discount, maxStackedDiscount({ ...p,
         weekly_discount: season.weekly_discount ?? null, monthly_discount: season.monthly_discount ?? null,
         early_booking_discount: season.early_booking_discount ?? null, last_minute_discount: season.last_minute_discount ?? null,
         custom_length_discounts: null }, nights));
     }
   }
-  const minTotal = Math.floor(base * (1 - discount / 100)) + appliedCleaning;
-  const maxTotal = Math.ceil(base) + appliedCleaning;
-  const total = Number(input.total_amount);
-  if (!Number.isFinite(total) || total < minTotal - 1 || total > maxTotal + 1) {
-    return fail('total', 'Booking total does not match the current price');
-  }
+  // The booking page sends the stay total WITHOUT cleaning (fee sent separately);
+  // older callers may include it. Accept either and charge stay + cleaning.
+  const minStay = Math.floor(low * (1 - discount / 100));
+  const maxStay = Math.ceil(high);
+  const sent = Number(input.total_amount);
+  if (!Number.isFinite(sent)) return fail('total', 'Booking total does not match the current price');
+  const inRange = (v: number) => v >= minStay - 1 && v <= maxStay + 1;
+  let total: number;
+  if (inRange(sent)) total = sent + appliedCleaning;
+  else if (appliedCleaning > 0 && inRange(sent - appliedCleaning)) total = sent;
+  else return fail('total', 'Booking total does not match the current price');
   const rounded = Math.round(total);
   const deposit = Math.round((rounded * DEPOSIT_PERCENT) / 100);
   if (deposit <= 0) return fail('deposit', 'Invalid deposit');
