@@ -34602,6 +34602,14 @@ export type Database = {
         Args: { p_product_id: string; p_vertical: string }
         Returns: number
       }
+      get_property_date_prices: {
+        Args: { _from: string; _property_id: string; _to: string }
+        Returns: {
+          date: string
+          min_nights_override: number
+          price_override: number
+        }[]
+      }
       get_property_unavailable_dates: {
         Args: { p_from: string; p_property_id: string; p_to: string }
         Returns: {
@@ -34689,6 +34697,10 @@ export type Database = {
       }
       is_mcc_admin: { Args: never; Returns: boolean }
       is_org_owner: { Args: { check_org_id: string }; Returns: boolean }
+      is_property_bookable_active: {
+        Args: { _property_id: string }
+        Returns: boolean
+      }
       is_property_owner: {
         Args: { _property_id: string; _user_id: string }
         Returns: boolean

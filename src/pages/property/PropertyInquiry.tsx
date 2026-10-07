@@ -262,6 +262,26 @@ export default function PropertyInquiry() {
   // Pull rate seasons (per-property pricing overrides) for the central engine.
   const { data: rateSeasons } = usePropertyRateSeasons(id);
 
+  // Per-date price overrides from the property calendar (same source the server checks).
+  const [dateOverrides, setDateOverrides] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (!id || !checkIn || !checkOut || differenceInDays(checkOut, checkIn) <= 0) { setDateOverrides({}); return; }
+    let cancelled = false;
+    const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    (async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_property_date_prices', { _property_id: id, _from: fmt(checkIn), _to: fmt(checkOut) });
+        if (error) throw error;
+        const map: Record<string, number> = {};
+        for (const r of data ?? []) if (r.price_override != null) map[String(r.date)] = Number(r.price_override);
+        if (!cancelled) setDateOverrides(map);
+      } catch {
+        if (!cancelled) setDateOverrides({});
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id, checkIn, checkOut]);
+
   // Single source of truth for ALL pricing — same engine PropertyBookingCard uses.
   const pricing = useMemo(() => {
     const baseRules: PricingRules = rateSeasons && rateSeasons.length > 0
@@ -301,8 +321,8 @@ export default function PropertyInquiry() {
     if (!checkIn || !checkOut || nights <= 0 || !pricePerNight) {
       return calculatePricing(baseRules, new Date(), new Date()); // empty breakdown
     }
-    return calculatePricing(baseRules, checkIn, checkOut);
-  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property, listingCurrency]);
+    return calculatePricing({ ...baseRules, dateOverrides }, checkIn, checkOut);
+  }, [pricePerNight, nights, checkIn, checkOut, rentalTerms, rateSeasons, property, listingCurrency, dateOverrides]);
 
   const validationErrors = useMemo(() => {
     const errors: string[] = getStayRuleErrors(

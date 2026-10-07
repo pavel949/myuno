@@ -141,8 +141,26 @@ Deno.serve(async (req) => {
       );
     }
 
+    const { data: dateRows, error: dateErr } = await supabaseAdmin
+      .from("property_availability")
+      .select("date, price_override")
+      .eq("property_id", property_id)
+      .gte("date", check_in)
+      .lt("date", check_out)
+      .not("price_override", "is", null);
+    if (dateErr) {
+      logStep("ERROR: Date price lookup failed", { error: dateErr.message });
+      return new Response(
+        JSON.stringify({ error: "Could not verify property pricing" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+    const dateOverrides: Record<string, number> = {};
+    for (const r of dateRows ?? []) dateOverrides[String(r.date)] = Number(r.price_override);
+
     const quote = quotePropertyStay(propertyRow as PropertyPricingRow | null, {
       seasons: (seasonRows ?? []) as RateSeasonRow[],
+      dateOverrides,
       check_in, check_out, guests, nights, total_amount, cleaning_fee, today: bangkokToday(),
     });
     if (!quote.ok) {
