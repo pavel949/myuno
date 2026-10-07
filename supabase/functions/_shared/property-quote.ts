@@ -41,6 +41,8 @@ export interface RateSeasonRow {
 export interface QuoteInput {
   /** Active rate seasons for the property (end_date inclusive). */
   seasons?: RateSeasonRow[];
+  /** Per-date nightly overrides keyed by YYYY-MM-DD (highest priority). */
+  dateOverrides?: Record<string, number>;
   check_in: string;
   check_out: string;
   guests: number;
@@ -174,9 +176,12 @@ export function quotePropertyStay(p: PropertyPricingRow | null, input: QuoteInpu
   let discount = maxStackedDiscount(p, nights);
   for (let d = inDay; d < outDay; d++) {
     const season = seasons.find((x) => d >= (x.s as number) && d <= (x.e as number));
+    const key = new Date(d * 86_400_000).toISOString().slice(0, 10);
+    const override = Number(input.dateOverrides?.[key]);
     const candidates = [season ? Number(season.nightly_rate) : rate];
     const legacy = jsonbSeasonRate(p, d, rate);
     if (legacy !== null && legacy > 0) candidates.push(legacy);
+    if (Number.isFinite(override) && override > 0) candidates.splice(0, candidates.length, override);
     low += Math.min(...candidates);
     high += Math.max(...candidates);
     if (season) {
