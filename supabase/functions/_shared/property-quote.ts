@@ -24,7 +24,21 @@ export interface PropertyPricingRow {
   custom_length_discounts: unknown;
 }
 
+export interface RateSeasonRow {
+  start_date: string;
+  end_date: string;
+  nightly_rate: number | null;
+  min_stay_nights?: number | null;
+  is_active?: boolean | null;
+  weekly_discount?: number | null;
+  monthly_discount?: number | null;
+  early_booking_discount?: number | null;
+  last_minute_discount?: number | null;
+}
+
 export interface QuoteInput {
+  /** Active rate seasons for the property (end_date inclusive). */
+  seasons?: RateSeasonRow[];
   check_in: string;
   check_out: string;
   guests: number;
@@ -114,8 +128,27 @@ export function quotePropertyStay(p: PropertyPricingRow | null, input: QuoteInpu
   }
   const appliedCleaning = cleaningFee;
 
-  const base = rate * nights;
-  const discount = maxApplicableDiscount(p, nights);
+  // Per-night rate: matching active season (latest start wins), else base rate.
+  const seasons = (input.seasons ?? [])
+    .filter((x) => x.is_active !== false && Number(x.nightly_rate) > 0)
+    .map((x) => ({ ...x, s: dayNumber(x.start_date), e: dayNumber(x.end_date) }))
+    .filter((x) => x.s !== null && x.e !== null)
+    .sort((a, b) => (b.s as number) - (a.s as number));
+  let base = 0;
+  let discount = maxApplicableDiscount(p, nights);
+  for (let d = inDay; d < outDay; d++) {
+    const season = seasons.find((x) => d >= (x.s as number) && d <= (x.e as number));
+    base += season ? Number(season.nightly_rate) : rate;
+    if (season) {
+      if (d === inDay && season.min_stay_nights && nights < season.min_stay_nights) {
+        return fail('min_stay', `Minimum stay is ${season.min_stay_nights} nights`);
+      }
+      discount = Math.max(discount, maxApplicableDiscount({ ...p,
+        weekly_discount: season.weekly_discount ?? null, monthly_discount: season.monthly_discount ?? null,
+        early_booking_discount: season.early_booking_discount ?? null, last_minute_discount: season.last_minute_discount ?? null,
+        custom_length_discounts: null }, nights));
+    }
+  }
   const minTotal = Math.floor(base * (1 - discount / 100)) + appliedCleaning;
   const maxTotal = Math.ceil(base) + appliedCleaning;
   const total = Number(input.total_amount);

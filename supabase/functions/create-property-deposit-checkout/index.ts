@@ -4,7 +4,7 @@ import { createClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getAllowedOrigin } from "../_shared/cors.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
-import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow } from "../_shared/property-quote.ts";
+import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow, type RateSeasonRow } from "../_shared/property-quote.ts";
 
 
 interface PropertyDepositRequest {
@@ -126,7 +126,23 @@ Deno.serve(async (req) => {
       );
     }
 
+    const { data: seasonRows, error: seasonErr } = await supabaseAdmin
+      .from("property_rate_seasons")
+      .select("start_date, end_date, nightly_rate, min_stay_nights, is_active, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount")
+      .eq("property_id", property_id)
+      .eq("is_active", true)
+      .lte("start_date", check_out)
+      .gte("end_date", check_in);
+    if (seasonErr) {
+      logStep("ERROR: Season lookup failed", { error: seasonErr.message });
+      return new Response(
+        JSON.stringify({ error: "Could not verify property pricing" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
     const quote = quotePropertyStay(propertyRow as PropertyPricingRow | null, {
+      seasons: (seasonRows ?? []) as RateSeasonRow[],
       check_in, check_out, guests, nights, total_amount, cleaning_fee, today: bangkokToday(),
     });
     if (!quote.ok) {
