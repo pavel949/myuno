@@ -78,6 +78,13 @@
       "when": 1791283586686,
       "tag": "0010_tighten_rls_warnings",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791407355288,
+      "tag": "0011_fix_commission_percent_units",
+      "breakpoints": true
     }
   ]
 }
