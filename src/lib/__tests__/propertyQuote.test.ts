@@ -62,6 +62,21 @@ describe('rate seasons', () => {
   });
 });
 
+describe('booking page contract', () => {
+  it('accepts stay total sent without cleaning and charges stay + cleaning', () => {
+    expect(quotePropertyStay(prop(), { ...base, total_amount: 9000 })).toMatchObject({ ok: true, total: 9500 });
+  });
+  it('accepts stacked length + timing discount', () => {
+    const p = prop({ weekly_discount: 10, early_booking_discount: 10 });
+    const week = { ...base, check_out: '2026-11-17', nights: 7, total_amount: 3000 * 7 * 0.8 };
+    expect(quotePropertyStay(p, week)).toMatchObject({ ok: true });
+  });
+  it('accepts legacy JSONB seasonal price', () => {
+    const p = prop({ seasonal_pricing: [{ startMonth: 11, startDay: 1, endMonth: 11, endDay: 30, pricePerNight: 4000, priceModifier: 100 }] });
+    expect(quotePropertyStay(p, { ...base, total_amount: 12000 })).toMatchObject({ ok: true, total: 12500 });
+  });
+});
+
 describe('Stripe deposit allocation', () => {
   it('preserves the exact deposit with fractional cleaning amounts', () => {
     for (const cleaningFee of [0, 500, 505, 505.55]) {

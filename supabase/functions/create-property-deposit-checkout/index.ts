@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
     // base price, and the deposit is computed here (client value is ignored).
     const { data: propertyRow, error: propErr } = await supabaseAdmin
       .from("properties")
-      .select("price_per_night, price, price_period, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts")
+      .select("price_per_night, price, price_period, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts, seasonal_pricing")
       .eq("id", property_id)
       .maybeSingle();
 
