@@ -99,6 +99,13 @@
       "when": 1791408452675,
       "tag": "0013_get_property_date_prices",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791408563391,
+      "tag": "0014_public_read_active_rate_seasons",
+      "breakpoints": true
     }
   ]
 }
