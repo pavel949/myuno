@@ -48,6 +48,20 @@ describe('quotePropertyStay', () => {
   });
 });
 
+describe('rate seasons', () => {
+  const season = { start_date: '2026-11-11', end_date: '2026-11-30', nightly_rate: 5000, is_active: true };
+  it('charges season rate per night inside the season', () => {
+    // 10th base 3000 + 11th,12th season 5000 + cleaning 500
+    const q = quotePropertyStay(prop(), { ...base, seasons: [season], total_amount: 13500 });
+    expect(q).toMatchObject({ ok: true, total: 13500 });
+    expect(quotePropertyStay(prop(), { ...base, seasons: [season] })).toMatchObject({ code: 'total' });
+  });
+  it('ignores inactive seasons and enforces season min stay', () => {
+    expect(quotePropertyStay(prop(), { ...base, seasons: [{ ...season, is_active: false }] })).toMatchObject({ ok: true });
+    expect(quotePropertyStay(prop(), { ...base, seasons: [{ ...season, start_date: '2026-11-01', min_stay_nights: 5 }], total_amount: 15500 })).toMatchObject({ code: 'min_stay' });
+  });
+});
+
 describe('Stripe deposit allocation', () => {
   it('preserves the exact deposit with fractional cleaning amounts', () => {
     for (const cleaningFee of [0, 500, 505, 505.55]) {
