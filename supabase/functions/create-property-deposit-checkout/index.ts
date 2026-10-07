@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
     // base price, and the deposit is computed here (client value is ignored).
     const { data: propertyRow, error: propErr } = await supabaseAdmin
       .from("properties")
-      .select("price_per_night, price, price_period, cleaning_fee, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts")
+      .select("price_per_night, price, price_period, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts")
       .eq("id", property_id)
       .maybeSingle();
 
@@ -172,7 +172,6 @@ Deno.serve(async (req) => {
 
     // Create order in database BEFORE Stripe checkout
     const orderItems = [{
-      product_id: property_id,
       resource_id: property_id,
       provider_org_id: provider_org_id || null,
       item_name: property_title,
@@ -182,7 +181,7 @@ Deno.serve(async (req) => {
       amount: total_amount,
       start_at: `${check_in}T14:00:00.000Z`,
       end_at: `${check_out}T12:00:00.000Z`,
-      metadata: { guests, deposit_amount, cleaning_fee: cleaning_fee || 0 },
+      metadata: { property_id, guests, deposit_amount, cleaning_fee: cleaning_fee || 0 },
     }];
 
     const orderParticipants = [{

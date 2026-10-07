@@ -9,7 +9,8 @@ export interface PropertyPricingRow {
   price_per_night: number | null;
   price: number | null;
   price_period: string | null;
-  cleaning_fee: number | null;
+  /** Not a column on `properties`; kept optional for callers that pass it. */
+  cleaning_fee?: number | null;
   extra_cleaning_price: number | null;
   currency: string | null;
   is_active: boolean | null;
