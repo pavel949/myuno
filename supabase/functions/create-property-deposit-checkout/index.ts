@@ -181,7 +181,7 @@ Deno.serve(async (req) => {
       amount: total_amount,
       start_at: `${check_in}T14:00:00.000Z`,
       end_at: `${check_out}T12:00:00.000Z`,
-      metadata: { guests, deposit_amount, cleaning_fee: cleaning_fee || 0 },
+      metadata: { property_id, guests, deposit_amount, cleaning_fee: cleaning_fee || 0 },
     }];
 
     const orderParticipants = [{
