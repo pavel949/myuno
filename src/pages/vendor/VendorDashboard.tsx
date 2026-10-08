@@ -43,6 +43,7 @@ import { VendorVerificationBadge } from '@/components/vendor/dashboard/VendorVer
 import { YourDayFeed } from '@/components/shared/YourDayFeed';
 import { VendorModerationQueue } from '@/components/vendor/dashboard/VendorModerationQueue';
 import { VendorRevenueWidget } from '@/components/vendor/VendorRevenueWidget';
+import { ProviderReferralCard } from '@/components/vendor/ProviderReferralCard';
 import { Period, getPeriodDateRange, getComparisonPeriodRange } from '@/components/vendor/dashboard/VendorPeriodSelector';
 import { useVendorProfile } from '@/hooks/useVendor';
 import { getCurrencySymbol } from '@/lib/config/currencies';
@@ -295,7 +296,10 @@ const VendorDashboard = () => {
       />
       
       <VendorQuickActions />
-      
+
+      {/* Provider-to-provider referral (B2B growth loop) */}
+      <ProviderReferralCard />
+
       {/* Moderation Queue - P2 improvement */}
       {vendorProfile?.id && (
         <VendorModerationQueue 
