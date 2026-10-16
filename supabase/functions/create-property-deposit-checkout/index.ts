@@ -5,6 +5,7 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getAllowedOrigin } from "../_shared/cors.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow, type RateSeasonRow } from "../_shared/property-quote.ts";
+import { quoteHotelStay, type HotelCategoryRow, type HotelRatePlanRow, type HotelSeasonRow, type HotelRestrictionRow } from "../_shared/hotel-quote.ts";
 
 
 interface PropertyDepositRequest {
@@ -77,8 +78,8 @@ Deno.serve(async (req) => {
     if (rateLimitResponse) return rateLimitResponse;
 
     const body: PropertyDepositRequest = await req.json();
+    let { property_id } = body;
     const {
-      property_id,
       property_title,
       check_in,
       check_out,
@@ -215,6 +216,7 @@ Deno.serve(async (req) => {
     total_amount = quote.total;
     deposit_amount = quote.deposit;
     cleaning_fee = quote.cleaningFee;
+    }
 
     // P0 FIX: Check availability BEFORE creating the order
     const { data: isAvailable, error: availError } = await supabaseAdmin.rpc(
@@ -253,7 +255,7 @@ Deno.serve(async (req) => {
       amount: total_amount,
       start_at: `${check_in}T14:00:00.000Z`,
       end_at: `${check_out}T12:00:00.000Z`,
-      metadata: { property_id, guests, deposit_amount, cleaning_fee: cleaning_fee || 0 },
+      metadata: { property_id, guests, deposit_amount, cleaning_fee: cleaning_fee || 0, ...(categoryMeta ?? {}) },
     }];
 
     const orderParticipants = [{
