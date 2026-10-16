@@ -32,7 +32,7 @@ export default function PropertyStructurePage() {
   const { language } = useLanguage();
   const ru = language === 'ru';
   const t = (r: string, e: string) => (ru ? r : e);
-  const { allProperties, isLoading } = useMyProperties() as ReturnType<typeof useMyProperties> & { isLoading?: boolean };
+  const { allProperties, isLoading } = useMyProperties();
   const [parentId, setParentId] = useState<string>('');
   const { data, isLoading: loadingCats, error } = useRoomCategories(parentId || undefined);
   const saveCategory = useSaveCategory();
