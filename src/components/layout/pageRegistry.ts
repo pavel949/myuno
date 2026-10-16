@@ -598,6 +598,7 @@ export const NewDealPage = lazy(() => import('@/pages/owner/NewDealPage'));
 export const PipelineSettingsPage = lazy(() => import('@/pages/owner/PipelineSettingsPage'));
 export const MCSettingsPage = lazy(() => import('@/pages/mc/MCSettingsPage'));
 export const RateManagementPage = lazy(() => import('@/pages/owner/RateManagementPage'));
+export const PropertyStructurePage = lazy(() => import('@/pages/owner/PropertyStructurePage'));
 export const ReviewsManagementPage = lazy(() => import('@/pages/owner/ReviewsManagementPage'));
 export const DocumentsInsurancePage = lazy(() => import('@/pages/owner/DocumentsInsurancePage'));
 // OwnerReportsPage removed — functionality merged into ReportsPage
