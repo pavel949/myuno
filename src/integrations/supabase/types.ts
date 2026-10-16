@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
@@ -17873,6 +17873,7 @@ export type Database = {
           ownership_verification_status: string | null
           ownership_verified_at: string | null
           ownership_verified_by: string | null
+          parent_property_id: string | null
           parking_included: boolean | null
           parking_notes: string | null
           parking_spaces: number | null
@@ -17899,6 +17900,7 @@ export type Database = {
           price_per_year: number | null
           price_period: string | null
           project_id: string | null
+          property_kind: string
           property_type: string
           provider_id: string | null
           purchase_currency: string | null
@@ -17921,6 +17923,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           road_access: string | null
+          room_category_id: string | null
           rooms: Json | null
           safety_features: string[] | null
           sale_currency: string | null
@@ -18161,6 +18164,7 @@ export type Database = {
           ownership_verification_status?: string | null
           ownership_verified_at?: string | null
           ownership_verified_by?: string | null
+          parent_property_id?: string | null
           parking_included?: boolean | null
           parking_notes?: string | null
           parking_spaces?: number | null
@@ -18187,6 +18191,7 @@ export type Database = {
           price_per_year?: number | null
           price_period?: string | null
           project_id?: string | null
+          property_kind?: string
           property_type: string
           provider_id?: string | null
           purchase_currency?: string | null
@@ -18209,6 +18214,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           road_access?: string | null
+          room_category_id?: string | null
           rooms?: Json | null
           safety_features?: string[] | null
           sale_currency?: string | null
@@ -18449,6 +18455,7 @@ export type Database = {
           ownership_verification_status?: string | null
           ownership_verified_at?: string | null
           ownership_verified_by?: string | null
+          parent_property_id?: string | null
           parking_included?: boolean | null
           parking_notes?: string | null
           parking_spaces?: number | null
@@ -18475,6 +18482,7 @@ export type Database = {
           price_per_year?: number | null
           price_period?: string | null
           project_id?: string | null
+          property_kind?: string
           property_type?: string
           provider_id?: string | null
           purchase_currency?: string | null
@@ -18497,6 +18505,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           road_access?: string | null
+          room_category_id?: string | null
           rooms?: Json | null
           safety_features?: string[] | null
           sale_currency?: string | null
@@ -18606,6 +18615,41 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_parent_property_id_fkey"
+            columns: ["parent_property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "properties_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
@@ -18618,6 +18662,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
+          },
+          {
+            foreignKeyName: "properties_room_category_fk"
+            columns: ["room_category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -22024,8 +22075,74 @@ export type Database = {
           },
         ]
       }
+      property_rate_plans: {
+        Row: {
+          adjustment_type: string
+          adjustment_value: number
+          category_id: string
+          created_at: string
+          free_cancellation_days: number | null
+          id: string
+          is_active: boolean
+          is_default: boolean
+          is_refundable: boolean
+          max_stay_nights: number | null
+          meal_plan: string
+          min_advance_days: number | null
+          min_stay_nights: number | null
+          name_en: string
+          name_ru: string | null
+          updated_at: string
+        }
+        Insert: {
+          adjustment_type?: string
+          adjustment_value?: number
+          category_id: string
+          created_at?: string
+          free_cancellation_days?: number | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          is_refundable?: boolean
+          max_stay_nights?: number | null
+          meal_plan?: string
+          min_advance_days?: number | null
+          min_stay_nights?: number | null
+          name_en: string
+          name_ru?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adjustment_type?: string
+          adjustment_value?: number
+          category_id?: string
+          created_at?: string
+          free_cancellation_days?: number | null
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          is_refundable?: boolean
+          max_stay_nights?: number | null
+          meal_plan?: string
+          min_advance_days?: number | null
+          min_stay_nights?: number | null
+          name_en?: string
+          name_ru?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_rate_plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_rate_seasons: {
         Row: {
+          category_id: string | null
           created_at: string | null
           currency: string | null
           early_booking_days: number | null
@@ -22050,6 +22167,7 @@ export type Database = {
           weekly_rate: number | null
         }
         Insert: {
+          category_id?: string | null
           created_at?: string | null
           currency?: string | null
           early_booking_days?: number | null
@@ -22074,6 +22192,7 @@ export type Database = {
           weekly_rate?: number | null
         }
         Update: {
+          category_id?: string | null
           created_at?: string | null
           currency?: string | null
           early_booking_days?: number | null
@@ -22098,6 +22217,13 @@ export type Database = {
           weekly_rate?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_rate_seasons_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_rate_seasons_property_id_fkey"
             columns: ["property_id"]
@@ -22366,6 +22492,105 @@ export type Database = {
           },
         ]
       }
+      property_room_categories: {
+        Row: {
+          amenities: string[]
+          area_sqm: number | null
+          base_price_per_night: number
+          bed_config: string | null
+          bedrooms: number | null
+          created_at: string
+          description_en: string | null
+          description_ru: string | null
+          id: string
+          images: string[]
+          is_active: boolean
+          max_guests: number
+          min_stay_nights: number
+          name_en: string
+          name_ru: string | null
+          property_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          amenities?: string[]
+          area_sqm?: number | null
+          base_price_per_night: number
+          bed_config?: string | null
+          bedrooms?: number | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          max_guests?: number
+          min_stay_nights?: number
+          name_en: string
+          name_ru?: string | null
+          property_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          amenities?: string[]
+          area_sqm?: number | null
+          base_price_per_night?: number
+          bed_config?: string | null
+          bedrooms?: number | null
+          created_at?: string
+          description_en?: string | null
+          description_ru?: string | null
+          id?: string
+          images?: string[]
+          is_active?: boolean
+          max_guests?: number
+          min_stay_nights?: number
+          name_en?: string
+          name_ru?: string | null
+          property_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       property_service_requests: {
         Row: {
           assigned_at: string | null
@@ -22488,6 +22713,88 @@ export type Database = {
           },
           {
             foreignKeyName: "property_service_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_stay_restrictions: {
+        Row: {
+          category_id: string | null
+          closed_to_arrival: boolean
+          closed_to_departure: boolean
+          created_at: string
+          date: string
+          id: string
+          min_stay_nights: number | null
+          price_override: number | null
+          property_id: string
+          stop_sell: boolean
+        }
+        Insert: {
+          category_id?: string | null
+          closed_to_arrival?: boolean
+          closed_to_departure?: boolean
+          created_at?: string
+          date: string
+          id?: string
+          min_stay_nights?: number | null
+          price_override?: number | null
+          property_id: string
+          stop_sell?: boolean
+        }
+        Update: {
+          category_id?: string | null
+          closed_to_arrival?: boolean
+          closed_to_departure?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          min_stay_nights?: number | null
+          price_override?: number | null
+          property_id?: string
+          stop_sell?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_stay_restrictions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "v_properties_public"
@@ -34250,6 +34557,10 @@ export type Database = {
         Args: { p_code: string; p_referred_id: string }
         Returns: boolean
       }
+      assign_room_for_category: {
+        Args: { _category_id: string; _check_in: string; _check_out: string }
+        Returns: string
+      }
       assign_transfer_operator: { Args: never; Returns: string }
       calculate_distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
@@ -34512,6 +34823,10 @@ export type Database = {
         Returns: string[]
       }
       get_capital_crm_owner: { Args: never; Returns: string }
+      get_category_availability: {
+        Args: { _category_id: string; _check_in: string; _check_out: string }
+        Returns: number
+      }
       get_company_member_role: {
         Args: { _company_id: string; _user_id: string }
         Returns: string

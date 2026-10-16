@@ -5,6 +5,7 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getAllowedOrigin } from "../_shared/cors.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow, type RateSeasonRow } from "../_shared/property-quote.ts";
+import { quoteHotelStay, type HotelCategoryRow, type HotelRatePlanRow, type HotelSeasonRow, type HotelRestrictionRow } from "../_shared/hotel-quote.ts";
 
 
 interface PropertyDepositRequest {
@@ -77,8 +78,8 @@ Deno.serve(async (req) => {
     if (rateLimitResponse) return rateLimitResponse;
 
     const body: PropertyDepositRequest = await req.json();
+    let { property_id } = body;
     const {
-      property_id,
       property_title,
       check_in,
       check_out,
@@ -106,7 +107,45 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // ── Resort / hotel: booking by room category + rate plan ───────────────
+    const room_category_id = (body as { room_category_id?: string }).room_category_id;
+    const rate_plan_id = (body as { rate_plan_id?: string }).rate_plan_id;
+    let categoryMeta: Record<string, unknown> | null = null;
+    if (room_category_id) {
+      const [{ data: cat }, { data: plan }, { data: cSeasons }, { data: restr }] = await Promise.all([
+        supabaseAdmin.from("property_room_categories").select("id, property_id, base_price_per_night, min_stay_nights, max_guests, is_active").eq("id", room_category_id).maybeSingle(),
+        supabaseAdmin.from("property_rate_plans").select("id, category_id, adjustment_type, adjustment_value, min_stay_nights, max_stay_nights, min_advance_days, is_active").eq("id", rate_plan_id ?? "").maybeSingle(),
+        supabaseAdmin.from("property_rate_seasons").select("start_date, end_date, nightly_rate, min_stay_nights, is_active").eq("category_id", room_category_id).eq("is_active", true).lte("start_date", check_out).gte("end_date", check_in),
+        supabaseAdmin.from("property_stay_restrictions").select("date, price_override, min_stay_nights, closed_to_arrival, closed_to_departure, stop_sell").eq("category_id", room_category_id).gte("date", check_in).lte("date", check_out),
+      ]);
+      if (!cat || cat.property_id !== property_id) {
+        return new Response(JSON.stringify({ error: "Room category not found" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 });
+      }
+      const hq = quoteHotelStay({
+        category: cat as HotelCategoryRow, plan: plan as HotelRatePlanRow | null,
+        seasons: (cSeasons ?? []) as HotelSeasonRow[], restrictions: (restr ?? []) as HotelRestrictionRow[],
+        check_in, check_out, guests, today: bangkokToday(),
+      });
+      if (!hq.ok) {
+        return new Response(JSON.stringify({ error: hq.message, code: hq.code }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 });
+      }
+      if (typeof total_amount === "number" && Math.abs(total_amount - hq.total) > 1) {
+        return new Response(JSON.stringify({ error: "Booking total does not match the current price", code: "total_mismatch" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 });
+      }
+      const { data: roomId, error: assignErr } = await supabaseAdmin.rpc("assign_room_for_category", { _category_id: room_category_id, _check_in: check_in, _check_out: check_out });
+      if (assignErr || !roomId) {
+        return new Response(JSON.stringify({ error: "No rooms of this category are available for the selected dates" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 });
+      }
+      nights = hq.nights;
+      total_amount = hq.total;
+      deposit_amount = Math.round(hq.total * 0.1);
+      cleaning_fee = 0;
+      categoryMeta = { parent_property_id: property_id, room_category_id, rate_plan_id, nightly: hq.nightly };
+      property_id = roomId as string;
+    }
+
     // ── Authoritative server quote (F06) ───────────────────────────────────
+    if (!categoryMeta) {
     // Nights are derived from the dates in the Bangkok calendar, the property
     // must be active/THB, guests and minimum stay are enforced, the cleaning
     // fee must equal the stored fee, the total must lie between the base price
@@ -177,6 +216,7 @@ Deno.serve(async (req) => {
     total_amount = quote.total;
     deposit_amount = quote.deposit;
     cleaning_fee = quote.cleaningFee;
+    }
 
     // P0 FIX: Check availability BEFORE creating the order
     const { data: isAvailable, error: availError } = await supabaseAdmin.rpc(
@@ -215,7 +255,7 @@ Deno.serve(async (req) => {
       amount: total_amount,
       start_at: `${check_in}T14:00:00.000Z`,
       end_at: `${check_out}T12:00:00.000Z`,
-      metadata: { property_id, guests, deposit_amount, cleaning_fee: cleaning_fee || 0 },
+      metadata: { property_id, guests, deposit_amount, cleaning_fee: cleaning_fee || 0, ...(categoryMeta ?? {}) },
     }];
 
     const orderParticipants = [{

@@ -113,6 +113,13 @@
       "when": 1791408608551,
       "tag": "0015_rate_seasons_public_read_definer",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792189851156,
+      "tag": "0016_multi_unit_properties_categories_rate_plans",
+      "breakpoints": true
     }
   ]
 }
