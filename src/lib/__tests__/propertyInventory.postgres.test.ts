@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { beforeAll, afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, chmodSync, chownSync } from 'node:fs';
