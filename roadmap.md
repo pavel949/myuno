@@ -55,3 +55,11 @@
 - [x] Ночная сверка платежей запускается напрямую в базе (234 расхождения выявлено)
 - [x] Синхронизация календаря: не отменяет уже отменённые брони и не стирает всё при пустом ответе площадки
 - [x] Заполнить часы работы у 5 исполнителей (пн–сб 09:00–18:00)
+
+## 2026-10-17 · Tranche 2B — MC bookings-list UX simplification (done)
+- [x] Single primary action (New Booking); Export/sort secondary; compact KPIs.
+- [x] Six status filters as bounded grid — no page-level overflow (verified 375/390/430/1280).
+- [x] Checkbox selection isolated from card click (44px zone, stopPropagation, aria-labels).
+- [x] Bulk actions: selected count, clear, two-step confirm; same mutations/statuses.
+- [x] Backend/query/pricing/inventory logic untouched; build OK; commit d7dfb2719.
+- Runtime-only: checkbox-vs-card click and bulk flow untested (account has no bookings); EN locale unchecked.
