@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · Tranche 2B isolated UI regression tests
+- [x] Add synthetic RU/EN fixtures and isolated checkbox/card/bulk-confirmation tests (12/12).
+- [x] Exercise the actual page with fixtures at 375/390/430; block all external requests and real writes (6/6).
+- [x] Report tests, viewport evidence and source SHA without changing business behavior; see docs/convergence/TRANCHE2B_UI_TESTS.md.
+
 ## 2026-10-17 · Tranche 2A — documentation and architecture only
 - [x] Create canonical connected-product blueprint, layered identity model and Rent/Buy Homes IA.
 - [x] Audit current consumer Homes and PMS UX from source; distinguish proven code facts from runtime-only risks.
