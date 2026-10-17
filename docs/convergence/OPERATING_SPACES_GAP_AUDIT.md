@@ -84,6 +84,12 @@ catalog. A reviewed ID-based inventory manifest is required before backfill.
 - **PARTIAL:** live CRM SELECT/INSERT/UPDATE use `mc_can_access`; CRM DELETE
   also permits active manager roles without that module test. Live `crm_tasks`
   company policies do **not** test `is_active` or module capabilities.
+- **PARTIAL:** live `property_operational_tasks` ALL uses
+  `is_mc_member_for_property(property,user)`, which checks active company
+  membership but no module/space/property-duty restriction. Rate-season MC
+  policies join company membership without `is_active`; supplies inventory
+  remains owner-only. Property-document access mixes uploader/owner/company
+  branches. These definitions were read directly, not inferred from UI filters.
 - **PARTIAL:** assignment ALL policy includes platform `staff`; owner and own
   assignment branches coexist. Reuse only after explicit review of who may
   grant operational access, not because a role name resembles employment.
@@ -276,6 +282,20 @@ Catalog/grant outputs were inspected in temporary audit files only; no raw
 production dump is committed. No tests were added to pretend future isolation
 exists. Documentation QA checks file scope, links, required deliverables and
 whitespace; runtime build/tests are unnecessary for this documentation-only diff.
+
+### Tranche 2E checks actually performed
+
+- Relative links in both deliverable documents: no broken targets; fenced
+  blocks balanced; all 12 requested surfaces and E1–E6 covered.
+- `git diff <source baseline> --check`: passed. Changed project files limited
+  to these two documents, `AGENTS.md` (approval guardrail) and `roadmap.md`.
+  Runtime, migrations, configuration and QA tests unchanged.
+- Independent read-only design review: no blockers found against the requested
+  tenant constraints, membership reference, primary assignment, capability reuse,
+  impact map, rollout/rollback or acceptance matrix.
+- Automatic preview build log after document creation: **build OK**, entry
+  `2026-10-17T02:23:32Z`. No manual build/typecheck or business-flow tests run.
+- No screenshots: no UI changed; this is not a runtime or live RLS certification.
 
 **Рекомендую:** approve the nested scope contract and ID-based seed manifest,
 then E1 shadow schema/local RLS tests; do not start runtime filters before

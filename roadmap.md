@@ -1,9 +1,10 @@
 # Roadmap
 
 ## 2026-10-17 · Tranche 2E — Operating spaces audit/design only
-- [ ] Audit current company/property/staff scope and live read-only catalog; distinguish facts from proposals.
-- [ ] Document minimal nested operating-space design, surface impact map, E1–E6 rollout/rollback and isolation acceptance matrix.
-- [ ] Verify documentation-only diff and report evidence, maturity, blockers and source SHA; no runtime/schema/data/permission changes.
+- [x] Audit current company/property/staff scope and live read-only catalog; distinguish facts from proposals.
+- [x] Document minimal nested operating-space design, surface impact map, E1–E6 rollout/rollback and isolation acceptance matrix.
+- [x] Verify documentation-only diff, links, required surface/rollout coverage and independent design review; automatic build OK; no runtime/schema/data/permission changes.
+- Future implementation is not started: requires approved inventory/member manifest, capability/default-scope contract and closure of broad authorization/export paths; see docs/convergence/OPERATING_SPACES_GAP_AUDIT.md.
 
 ## 2026-10-17 · Tranche 2D — Today presentation only
 - [x] Reprioritize existing Today projections and contextual navigation; no hooks, writers or domain changes.
