@@ -183,6 +183,13 @@
       "when": 1792210683028,
       "tag": "0025_delegation_company_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792211431260,
+      "tag": "0026_public_catalog_projection_extension",
+      "breakpoints": true
     }
   ]
 }
