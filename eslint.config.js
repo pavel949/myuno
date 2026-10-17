@@ -4,7 +4,19 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import tseslint from "typescript-eslint";
-import { FORBIDDEN_SYNONYMS } from "./src/content/semantic/forbiddenSynonyms.ts";
+import { readFileSync } from "node:fs";
+import ts from "typescript";
+
+// Node 20 cannot import TypeScript directly. Compile the standalone canonical
+// data module with the existing compiler dependency, preserving one source of
+// truth without requiring a Node-specific experimental loader.
+const { outputText: synonymModule } = ts.transpileModule(
+  readFileSync(new URL("./src/content/semantic/forbiddenSynonyms.ts", import.meta.url), "utf8"),
+  { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 } },
+);
+const { FORBIDDEN_SYNONYMS } = await import(
+  `data:text/javascript;base64,${Buffer.from(synonymModule).toString("base64")}`
+);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // M9.7 · Canonical synonyms guard (eslint)
@@ -241,3 +253,4 @@ export default tseslint.config(
     },
   },
 );
+

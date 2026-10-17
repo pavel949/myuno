@@ -404,7 +404,7 @@ export default function PropertyIndex() {
               <p className="text-muted-foreground mb-3">
                 {isRu ? 'Не удалось загрузить объекты. Попробуйте ещё раз.' : 'Could not load listings. Please try again.'}
               </p>
-              <Button variant="outline" size="sm" onClick={() => { void refetch(); }}>
+              <Button variant="outline" size="sm" className="min-h-[44px]" onClick={() => { void refetch(); }}>
                 {isRu ? 'Повторить' : 'Retry'}
               </Button>
             </div>
@@ -419,7 +419,7 @@ export default function PropertyIndex() {
                     {isRu ? 'Все объекты' : 'All listings'}
                   </h2>
                 )}
-                <Button variant="outline" size="sm" className="gap-1.5 ml-auto" aria-pressed={showMap} onClick={toggleMap}>
+                <Button variant="outline" size="sm" className="gap-1.5 ml-auto min-h-[44px]" aria-pressed={showMap} onClick={toggleMap}>
                   {showMap ? <List className="w-4 h-4" /> : <Map className="w-4 h-4" />}
                   {showMap ? (isRu ? 'Список' : 'List') : (isRu ? 'Карта' : 'Map')}
                 </Button>
@@ -442,7 +442,6 @@ export default function PropertyIndex() {
                     property={property}
                     mode={propertyMode}
                     isSelected={selectedId === property.id}
-                    onSelect={showMap ? select : undefined}
                     isHovered={hoveredId === property.id}
                     onHover={hover}
                   />

@@ -43,7 +43,10 @@ vi.mock('@/components/property/PropertyCategoryIcons', () => ({
 vi.mock('@/components/property/PropertyListingCard', () => ({
   PropertyListingCard: ({ property, isSelected, onSelect }: {
     property: { id: string }; isSelected: boolean; onSelect?: (id: string) => void;
-  }) => <button data-testid="listing" aria-pressed={isSelected} onClick={() => onSelect?.(property.id)}>{property.id}</button>,
+  }) => {
+    const navigate = useNavigate();
+    return <button data-testid="listing" aria-pressed={isSelected} onClick={() => onSelect ? onSelect(property.id) : navigate(`/property/${property.id}`)}>{property.id}</button>;
+  },
 }));
 vi.mock('@/components/property/PropertyMapView', () => ({
   PropertyMapView: ({ properties, selectedId, onSelect, mode }: {
@@ -116,6 +119,12 @@ describe('browse map continuity', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Back in history' }));
     await waitFor(() => expect(screen.getByTestId('map')).toBeTruthy());
     expect(screen.getByTestId('listing').textContent).toBe('villa');
+  });
+
+  it('keeps card detail navigation available while showing the map', () => {
+    renderPage('?view=map&cats=pool');
+    fireEvent.click(screen.getByTestId('listing'));
+    expect(screen.getByTestId('location').textContent).toBe('/property/villa');
   });
 
   it('opens a shared map view URL directly', () => {

@@ -82,6 +82,7 @@ jobs:
           node scripts/qa/bookings-list-ui.mjs
           node scripts/qa/calendar-ui.mjs
           node scripts/qa/today-ui.mjs
+          node scripts/qa/property-browse-ui.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload validation evidence

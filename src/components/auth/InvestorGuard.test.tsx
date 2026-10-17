@@ -71,17 +71,27 @@ describe('InvestorGuard (P5)', () => {
     expect(screen.queryByTestId('capital-workspace')).not.toBeInTheDocument();
   });
 
-  it('GRANTS access on a server-resolved capital_team role', () => {
+  it.each(['admin', 'capital_team', 'investor'])('GRANTS access on a server-resolved %s role', role => {
     authMock.mockReturnValue({ user: { id: 'u2' }, isLoading: false });
-    contextMock.mockReturnValue({ context: { role: 'capital_team' }, isLoading: false, isAdminMode: false });
+    contextMock.mockReturnValue({ context: { role }, isLoading: false, isAdminMode: false });
     renderGuard();
     expect(screen.getByTestId('capital-workspace')).toBeInTheDocument();
   });
 
-  it('GRANTS access in admin mode', () => {
+  it('DENIES admin mode without a privileged server-resolved role', () => {
     authMock.mockReturnValue({ user: { id: 'u3' }, isLoading: false });
     contextMock.mockReturnValue({ context: { role: 'user' }, isLoading: false, isAdminMode: true });
     renderGuard();
-    expect(screen.getByTestId('capital-workspace')).toBeInTheDocument();
+    expect(screen.getByTestId('invest-hub')).toBeInTheDocument();
+    expect(screen.queryByTestId('capital-workspace')).not.toBeInTheDocument();
+  });
+
+  it('DENIES employment identity without a capital role', () => {
+    authMock.mockReturnValue({ user: { id: 'u4' }, isLoading: false });
+    contextMock.mockReturnValue({ context: { role: 'uno_team' }, isLoading: false, isAdminMode: false });
+    renderGuard();
+    expect(screen.getByTestId('invest-hub')).toBeInTheDocument();
+    expect(screen.queryByTestId('capital-workspace')).not.toBeInTheDocument();
   });
 });
+
