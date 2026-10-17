@@ -12,6 +12,7 @@ let passed=0;
 for(const name of ['export-mc-data','send-property-report']){
  const result=await build({entryPoints:[resolve('supabase/functions',name,'index.ts')],bundle:true,platform:'node',format:'cjs',write:false,plugins:[{
   name:'synthetic-edge-dependencies',setup(b){
+   b.onResolve({filter:/^npm:zod/},()=>({path:require.resolve('zod')}));
    b.onResolve({filter:/^npm:/},args=>({path:args.path,namespace:'synthetic'}));
    b.onLoad({filter:/.*/,namespace:'synthetic'},args=>({contents:args.path.includes('/cors')?'export const corsHeaders={"Access-Control-Allow-Origin":"*"};':args.path.includes('supabase-js')?sdk:args.path.includes('resend')?'export class Resend {emails={send:async input=>globalThis.__send(input)}}':`module.exports=require(${JSON.stringify(require.resolve('zod'))})`,loader:'js'}));
   }
