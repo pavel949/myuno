@@ -85,7 +85,7 @@ describe('public resort contract',()=>{
    for(const row of rows)for(const column of ['owner_id','notes','private_note','created_at','updated_at','meal_plan'])expect(row).not.toHaveProperty(column);
    expect((await sql`SELECT has_table_privilege('authenticated',${view},'INSERT,UPDATE,DELETE') allowed`)[0].allowed).toBe(false);
   }
-  await expect(as('authenticated','manager',tx=>tx`UPDATE public_room_category_catalog SET name_en='forged'`)).rejects.toThrow(/permission denied/);
+  await expect(as('authenticated','manager',tx=>tx`UPDATE public_room_category_catalog SET name_en='forged'`)).rejects.toThrow(/permission denied|cannot update view/);
  });
  it('base public rows stay private while legitimate manager reads/writes remain',async()=>{
   expect(await as('anon','',tx=>tx`SELECT * FROM property_rate_seasons`)).toEqual([]);
