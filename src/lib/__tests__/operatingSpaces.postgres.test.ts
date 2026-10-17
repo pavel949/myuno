@@ -79,6 +79,18 @@ beforeAll(async () => {
       ('${S.resort}','${M.resortMgr}','${CO_A}'),('${S.condo}','${M.condoMgr}','${CO_A}'),
       ('${S.resort}','${M.cross}','${CO_A}'),('${S.condo}','${M.cross}','${CO_A}'),
       ('${S.dormant}','${M.resortMgr}','${CO_A}'),('${S.resort}','${M.inactive}','${CO_A}');`);
+  await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/operating-security-base.sql', 'utf8'));
+  const security = process.env.E25_MIGRATION ?? readdirSync('drizzle/migrations').find(f => /operating_security_ceilings/.test(f));
+  if (!security) throw new Error('E2.5 migration missing');
+  await sql.unsafe(readFileSync(process.env.E25_MIGRATION ? security : join('drizzle/migrations', security), 'utf8'));
+  for (const user of [U.resortMgr,U.condoMgr,U.cross]) {
+    for (const module of ['properties','reports','finance','tasks']) {
+      await sql`INSERT INTO team_member_permissions VALUES (${CO_A},${user},${module},true,true,true)`;
+    }
+  }
+  await sql`INSERT INTO property_reports VALUES (${id(71)},${P.villa},${U.director},${U.resortMgr}),(${id(72)},${P.condo},${U.director},${U.condoMgr})`;
+  await sql`INSERT INTO property_bookings VALUES (${id(81)},${P.villa},${U.director}),(${id(82)},${P.condo},${U.director})`;
+  await sql`INSERT INTO property_operational_tasks VALUES (${id(91)},${P.villa}),(${id(92)},${P.condo})`;
 }, 30000);
 
 afterAll(async () => {
