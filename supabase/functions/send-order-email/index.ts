@@ -6,11 +6,16 @@ import {
   generateWalletTopUpEmail,
   generateOrderRequestReceivedEmail,
 } from '../_shared/email-templates.ts';
+import { authorizeOrderEmail } from '../_shared/order-email-auth.ts';
+import { AccessDenied } from '../_shared/operating-space-auth.ts';
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { z } from 'npm:zod@3';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://myuno.app',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const EmailInput = z.object({ type: z.enum(['order_confirmation','order_cancellation','wallet_topup','order_request_received']),
+  order_id: z.string().uuid().optional(), user_id: z.string().uuid().optional(),
+  amount: z.number().finite().nonnegative().optional(), currency: z.string().max(8).optional(), new_balance: z.number().finite().optional(),
+  payment_method: z.enum(['cash','wallet','stripe','bank_transfer','card','online']).optional(), language: z.enum(['en','ru']).optional(),
+  reason: z.string().max(2000).optional(), refund_amount: z.number().finite().nonnegative().optional() }).strict();
 
 interface SendOrderEmailPayload {
   type: 'order_confirmation' | 'order_cancellation' | 'wallet_topup' | 'order_request_received';
@@ -38,6 +43,11 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const parsed = EmailInput.safeParse(await req.json());
+    if (!parsed.success) return new Response(JSON.stringify({error:'Invalid email request'}), {status:400,headers:{...corsHeaders,'Content-Type':'application/json'}});
+    const payload: SendOrderEmailPayload = parsed.data;
+    const denied = await authorizeOrderEmail(req,corsHeaders,payload);
+    if (denied) return denied;
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (!resendKey) {
       logStep('ERROR', 'RESEND_API_KEY not configured');
@@ -48,7 +58,6 @@ Deno.serve(async (req) => {
     }
 
     const resend = new Resend(resendKey);
-    const payload: SendOrderEmailPayload = await req.json();
 
     logStep('Processing email request', { type: payload.type, order_id: payload.order_id });
 
@@ -261,7 +270,7 @@ Deno.serve(async (req) => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ success: false, error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: error instanceof AccessDenied ? 403 : 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

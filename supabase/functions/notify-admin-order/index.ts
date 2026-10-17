@@ -160,12 +160,7 @@ Deno.serve(async (req) => {
       console.error('[WhatsApp] Failed to send:', err)
     );
 
-    // Send WhatsApp to manager if provided and different from admin
-    if (payload.manager_phone && payload.manager_phone !== ADMIN_WHATSAPP) {
-      sendWhatsAppNotification(payload, payload.manager_phone).catch(err =>
-        console.error('[WhatsApp] Failed to send to manager:', err)
-      );
-    }
+    // Public lead input may notify configured platform contacts, never supplied third parties.
 
     // Format order type for display
     const orderTypeLabels: Record<string, string> = {
@@ -323,11 +318,8 @@ Deno.serve(async (req) => {
       </html>
     `;
 
-    // Build recipient list: admins + manager (if provided)
+    // Manager distribution requires a separately verified recipient contract; never trust body contacts.
     const recipients = [...ADMIN_EMAILS];
-    if (payload.manager_email && !recipients.includes(payload.manager_email)) {
-      recipients.push(payload.manager_email);
-    }
 
     const emailResponse = await resend.emails.send({
       from: 'UNO Orders <orders@resend.dev>',
