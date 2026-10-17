@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { addMonths, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { selectPropertyCatalogFirst } from '@/lib/publicPropertyCatalog';
 import { sanitizeStayRuleTerms } from '@/lib/property/stayRulesSchema';
 
 /** Localized message for an unavailable date range (RU/EN/TH on one page). */
@@ -110,29 +111,9 @@ export function usePropertyRentalTerms(marketplacePropertyId?: string) {
     queryFn: async () => {
       if (!marketplacePropertyId) return null;
 
-      // In unified model, the marketplace property ID IS the property ID
-      const { data, error } = await supabase
-        .from('properties')
-        .select(`
-          price_per_night,
-          min_stay_nights,
-          max_stay_nights,
-          advance_notice_hours,
-          preparation_days,
-          booking_window_months,
-
-          max_guests,
-          deposit_amount,
-          deposit_currency,
-          check_in_time,
-          check_out_time,
-          house_rules,
-          house_rules_ru,
-          cancellation_policy,
-          instant_booking
-        `)
-        .eq('id', marketplacePropertyId)
-        .maybeSingle();
+      // Public catalog first; base table only for authorized PMS preview.
+      const data = await selectPropertyCatalogFirst(marketplacePropertyId, 'price_per_night,min_stay_nights,max_stay_nights,advance_notice_hours,preparation_days,booking_window_months,max_guests,deposit_amount,deposit_currency,check_in_time,check_out_time,house_rules,house_rules_ru,cancellation_policy,instant_booking').catch(() => null);
+      const error = null;
 
       if (error || !data) {
         return null;

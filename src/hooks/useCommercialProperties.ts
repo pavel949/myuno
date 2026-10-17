@@ -4,6 +4,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { selectPropertyCatalogFirst } from '@/lib/publicPropertyCatalog';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 import { HOTEL_PROPERTY_TYPES } from '@/lib/real-estate/commercialTaxonomy';
 
@@ -132,13 +133,8 @@ export function useCommercialProperty(id: string | undefined) {
     enabled: !!id,
     queryFn: async (): Promise<CommercialProperty | null> => {
       if (!id) return null;
-      const { data, error } = await supabase
-        .from('properties')
-        .select(COMMERCIAL_COLUMNS)
-        .eq('id', id)
-        .maybeSingle();
-      if (error) throw error;
-      return (data as CommercialProperty | null) ?? null;
+      const data = await selectPropertyCatalogFirst(id, COMMERCIAL_COLUMNS);
+      return (data as unknown as CommercialProperty | null) ?? null;
     },
     staleTime: 60_000,
   });

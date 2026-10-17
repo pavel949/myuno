@@ -4,6 +4,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { selectPropertyCatalogFirst } from '@/lib/publicPropertyCatalog';
 import {
   normalizePropertyTaxonomyArrays,
   normalizeListingAmenities,
@@ -501,13 +502,7 @@ export function useProperty(id?: string) {
     queryFn: async () => {
       if (!id) return null;
 
-      const { data, error } = await supabase
-        .from('properties')
-        .select(PROPERTY_PUBLIC_DETAIL_COLUMNS)
-        .eq('id', id)
-        .maybeSingle();
-
-      if (error) throw error;
+      const data = await selectPropertyCatalogFirst(id, PROPERTY_PUBLIC_DETAIL_COLUMNS);
       if (!data) return null;
       return normalizePropertyTaxonomyArrays(data as unknown as Property) as Property;
     },
@@ -526,16 +521,7 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
       // Use the public-safe column list (not select('*')) so anonymous
       // visitors — who only have a column-level GRANT on `properties` — can
       // read the listing. select('*') fails for anon on restricted columns.
-      const { data: rawProperty, error: propError } = await supabase
-        .from('properties')
-        .select(PROPERTY_PUBLIC_DETAIL_COLUMNS)
-        .eq('id', marketplacePropertyId)
-        .maybeSingle();
-
-      if (propError) {
-        if (propError.code === 'PGRST116') return null;
-        throw propError;
-      }
+      const rawProperty = await selectPropertyCatalogFirst(marketplacePropertyId, PROPERTY_PUBLIC_DETAIL_COLUMNS);
       if (!rawProperty) return null;
 
       // Cast to the full generated Row type: the select() above returns a
