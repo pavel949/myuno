@@ -14233,6 +14233,159 @@ export type Database = {
           },
         ]
       }
+      operating_space_members: {
+        Row: {
+          company_member_id: string
+          granted_at: string
+          granted_by: string | null
+          is_active: boolean
+          management_company_id: string
+          operating_space_id: string
+        }
+        Insert: {
+          company_member_id: string
+          granted_at?: string
+          granted_by?: string | null
+          is_active?: boolean
+          management_company_id: string
+          operating_space_id: string
+        }
+        Update: {
+          company_member_id?: string
+          granted_at?: string
+          granted_by?: string | null
+          is_active?: boolean
+          management_company_id?: string
+          operating_space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operating_space_members_member_same_company_fkey"
+            columns: ["company_member_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_company_members"
+            referencedColumns: ["id", "company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_members_space_same_company_fkey"
+            columns: ["operating_space_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "operating_spaces"
+            referencedColumns: ["id", "management_company_id"]
+          },
+        ]
+      }
+      operating_space_properties: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          management_company_id: string
+          operating_space_id: string
+          property_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          management_company_id: string
+          operating_space_id: string
+          property_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          management_company_id?: string
+          operating_space_id?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operating_space_properties_property_same_company_fkey"
+            columns: ["property_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id", "management_company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_properties_property_same_company_fkey"
+            columns: ["property_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id", "management_company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_properties_property_same_company_fkey"
+            columns: ["property_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id", "management_company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_properties_property_same_company_fkey"
+            columns: ["property_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id", "management_company_id"]
+          },
+          {
+            foreignKeyName: "operating_space_properties_space_same_company_fkey"
+            columns: ["operating_space_id", "management_company_id"]
+            isOneToOne: false
+            referencedRelation: "operating_spaces"
+            referencedColumns: ["id", "management_company_id"]
+          },
+        ]
+      }
+      operating_spaces: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          key: string
+          management_company_id: string
+          name_en: string
+          name_ru: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key: string
+          management_company_id: string
+          name_en: string
+          name_ru: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key?: string
+          management_company_id?: string
+          name_en?: string
+          name_ru?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operating_spaces_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operating_spaces_management_company_id_fkey"
+            columns: ["management_company_id"]
+            isOneToOne: false
+            referencedRelation: "management_companies_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_addresses: {
         Row: {
           address_text: string
@@ -34518,6 +34671,14 @@ export type Database = {
       }
     }
     Functions: {
+      actor_can_access_operating_space: {
+        Args: { _space_id: string }
+        Returns: boolean
+      }
+      actor_is_operating_company_overseer: {
+        Args: { _company_id: string }
+        Returns: boolean
+      }
       add_team_points: {
         Args: {
           p_action_type: string

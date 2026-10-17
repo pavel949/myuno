@@ -148,6 +148,13 @@
       "when": 1792196765030,
       "tag": "0020_preserve_property_booking_lifecycle_status",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792204780205,
+      "tag": "0021_operating_spaces_shadow_foundation",
+      "breakpoints": true
     }
   ]
 }
