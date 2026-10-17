@@ -129,3 +129,24 @@ Checked onboarding module permission rebound to private helper (0031).
 Generic employment alone no longer grants reviewed private property/order/document/CRM/identity/ledger access.
 Legacy membership rights remain; unreviewed private/unpublished catalogs and shared helpers are blockers, not support grants.
 Enforced companies/spaces/assignments/members: 0/0/0/0; E3 and Order Mutation Audit not started.
+
+## E2.8 read-only continuation — current delta
+
+The [E2.8 read-only continuation](OPERATING_SPACES_E2_8_UNO_TEAM.md#read-only-continuation--2026-10-17) and [RO-01–RO-14 blocker matrix](e2_8/read-only-blockers.csv) supersede generic UNKNOWN labels; original sections remain historical.
+
+| Current boundary | Status / next action (not implemented) |
+|---|---|
+| Unpublished listings / provider service catalogs / Thai businesses | **CONFIRMED live policy authority** — employment-only broad reads/writes survive; preserve owner/public branches; establish finite protected moderation replacement. RO-01/02/08. |
+| Salons | **CONFIRMED public bypass** — unconditional public SELECT defeats approved-only policy; deleting employment branch is insufficient. Safe projection/consumer regressions before restricting base reads. RO-03. |
+| Active provider finance columns | **CONFIRMED policy + grant disclosure path** — anon can select commission/earnings/pending payout on active providers; no financial values fetched. Public-provider projection required. RO-04. |
+| Complexes / storefronts / vendor locations / legal drafts | **CONFIRMED remaining employment branches** — exact parent/company/org/owner paths differ; storefront membership lacks active check; both vendor global policies overlap. RO-05/06/09. |
+| Experience pricing/media public child rows | **UNKNOWN audience/field contract** — unconditional SELECT independent of parent status proved; sensitivity not assumed. RO-07. |
+| Property-submission notification | **CONFIRMED source-only missing ingress/object authority + global employment recipients** — one frontend caller, supplied owner contact fields emailed; deployed gateway/bundle unknown, not invoked. RO-10/14. |
+| Original shared helper transitive usage | **NARROWED finding** — old helpers still executable; no live policy directly calls original company/finance/team/property/ClearView predicates. Only actor_can_export_company still calls old mc_can_access, behind membership/overseer gates; not standalone employment access. |
+| convert_lead_to_deal | **SOURCE-ONLY latent bypass, absent live** — repository RPC uses employment helper; two live catalog searches found no function. Never deploy that source unchanged or describe it as live exploit. RO-14. |
+| Backup/export | **LEGACY entitlement gap**, not employment-only — active membership read and role export preserved; scheduled key prefix conflicts with live first-folder ceiling. Do not relax storage to repair it. RO-11. |
+| Support and granular flags | **NO explicit support contract proved** — vertical mutation flags are not private read grants; live functions do not consume sub_permissions; no immutable permission-table audit trigger proved. RO-12. |
+| CRM pipeline summary | **LEGACY entitlement gap** — company member allowlist lacks active/module check; no generic employment branch. RO-13. |
+| Production/deployment evidence | 1,250 policies / 587 ordinary functions + 4 aggregates = 591 pg_proc entries; no count drift proved. 47 remaining candidates on 30 relations; deployed bundle parity unresolved. Read-only aggregates remain enforcement/spaces/assignments/members 0/0/0/0. |
+
+**Рекомендую:** отдельно согласовать finite catalog/privacy and notification corrective tranche with safe public replacements, independent deployed manifest and isolated deny/allow tests; do not create support grants or start E3 / Order Mutation Audit. No fixes, deploys, business writes, enforcement or assignments in this continuation.
