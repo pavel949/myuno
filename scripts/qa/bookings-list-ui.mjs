@@ -15,7 +15,7 @@ const virtual = {
   '@/hooks/useCityCurrency': `export const useCityCurrency = () => ({code:'THB'});`,
   '@/hooks/usePropertyBookings': `import {bookingsListFixtures} from '${root}/src/pages/owner/__tests__/bookingsList.fixtures.ts'; export const useAllPropertyBookings = () => ({bookings:bookingsListFixtures(new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'ru'),isLoading:false});`,
   '@/hooks/useHapticFeedback': `export const triggerHaptic = () => {};`,
-  '@/hooks/useSoundEffects': `export const playSound = () => {};`,
+  '@/hooks/useSoundEffects': `export const playSound = () => {}; export const isTypingKey = () => false;`,
   '@/integrations/supabase/client': `window.fixtureCalls=[]; export const supabase={from: table => ({update: values => ({in: (key,ids) => {window.fixtureCalls.push({table,values,key,ids}); return Promise.resolve({error: new Error('Fixture-only rejection')});}})})};`,
   'sonner': `export const toast={error:()=>{window.fixtureError=true;}};`,
   '@/components/owner/BookingDetailSheet': `import React from 'react'; export function BookingDetailSheet({open,booking,onOpenChange}) {return open ? React.createElement('div',{role:'dialog','aria-label':'Fixture booking details'},booking.id,React.createElement('button',{onClick:()=>onOpenChange(false)},'Close fixture')) : null;}`,
