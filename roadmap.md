@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · E2 — Shadow operational scope resolver
+- [ ] Review and narrow E1 platform oversight through a forward migration; leave all companies unenforced and all assignments empty.
+- [ ] Add server-derived canonical scope and isolated preference/cache lifecycle; no PMS consumers.
+- [ ] Run isolated E1/E2 and retained regression tests; document API, rollback, unchanged consumers and live aggregate evidence.
+
 ## 2026-10-17 · Tranche 2E — Operating spaces audit/design only
 - [x] Audit current company/property/staff scope and live read-only catalog; distinguish facts from proposals.
 - [x] Document minimal nested operating-space design, surface impact map, E1–E6 rollout/rollback and isolation acceptance matrix.
