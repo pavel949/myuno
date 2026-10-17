@@ -46,6 +46,7 @@ definition:=replace(definition,'public.has_role(auth.uid(), ''uno_team''::app_ro
 EXECUTE definition;
 definition:=pg_get_functiondef('public.resolve_user_context(uuid,text,uuid)'::regprocedure); IF md5(definition)<>'b53cb7f4d60a182f9b58135bed365a06' THEN RAISE EXCEPTION 'E2.8 function drift: resolve_user_context'; END IF;
 definition:=replace(definition,'role IN (''admin'', ''uno_team'')','role IN (''admin'')');
+definition:=replace(definition,'role IN (''uno_team'', ''admin'')','role IN (''admin'')');
 definition:=replace(definition,'        v_role := ''uno_team'';
         v_permissions := ARRAY[''*''];
       ELSE
