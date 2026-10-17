@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { addMonths, format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { sanitizeStayRuleTerms } from '@/lib/property/stayRulesSchema';
 
@@ -63,7 +64,7 @@ export function usePropertyAvailability(
           p_check_out: checkOut,
         });
 
-      if (error) return { isAvailable: true, message: '', code: null };
+      if (error) throw error;
 
       const isAvailable = data as boolean;
       return {
@@ -86,44 +87,17 @@ export function usePropertyBlockedDates(marketplacePropertyId?: string) {
 
       const propertyId = marketplacePropertyId;
 
-      // Query unified orders table (property_bookings is legacy/deprecated)
-      const { data: orders, error: ordersError } = await supabase
-        .from('orders')
-        .select(`
-          id, start_at, end_at, status,
-          order_items!inner (resource_id, item_type)
-        `)
-        .eq('vertical', 'property')
-        .eq('order_items.item_type', 'property')
-        .eq('order_items.resource_id', propertyId)
-        .is('deleted_at', null)
-        .not('status', 'in', '("cancelled","refunded")');
-
-      if (ordersError || !orders) {
-        return [];
-      }
-
-      // Convert bookings to blocked dates array
-      const blockedDates: BlockedDate[] = [];
-      
-      orders.forEach(order => {
-        if (!order.start_at || !order.end_at) return;
-        const checkIn = new Date(order.start_at);
-        const checkOut = new Date(order.end_at);
-        
-        // Add all dates between check_in and check_out (exclusive of check_out)
-        const currentDate = new Date(checkIn);
-        while (currentDate < checkOut) {
-          blockedDates.push({
-            date: new Date(currentDate),
-            reason: 'booked',
-            bookingId: order.id,
-          });
-          currentDate.setDate(currentDate.getDate() + 1);
-        }
+      const today = new Date();
+      const { data, error } = await supabase.rpc('get_property_unavailable_dates', {
+        p_property_id: propertyId,
+        p_from: format(today, 'yyyy-MM-dd'),
+        p_to: format(addMonths(today, 12), 'yyyy-MM-dd'),
       });
-
-      return blockedDates;
+      if (error) throw error;
+      return (data ?? []).filter(row => row.kind !== 'checkout_only').map(row => ({
+        date: new Date(`${row.date}T00:00:00`),
+        reason: row.kind === 'blocked' ? 'blocked' as const : 'booked' as const,
+      }));
     },
     enabled: !!marketplacePropertyId,
   });

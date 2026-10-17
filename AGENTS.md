@@ -9,3 +9,5 @@
 - Money-moving SECURITY DEFINER functions must derive the actor from `auth.uid()` and validate amounts server-side, because client-supplied user ids and totals are untrusted.
 - Money RPCs (`record_ledger_entries`, `credit_cashback`, `process_payout`, `create_order_atomic`, `create_booking_with_wallet_payment`) are service_role-only; clients call checked wrappers (`create_order_checked`, `admin_process_payout`) that derive the actor from `auth.uid()`, because direct grants let any user move money.
 - The provider → org counterparty comes only from `provider_org_links` (staff-managed), because provider and org ids are different entities.
+- Inventory status predicates must mirror `property_bookings_no_overlap` via `property_booking_holds_inventory` and the shared propertyInventory module; order refund/expiry maps to released booking state, because monetary statuses and inventory statuses are different domains.
+- Category assignment is a separate RPC transaction, not a reservation; the exclusion constraint and verified pre-Stripe hold are final authority, because its advisory transaction lock ends before order creation.
