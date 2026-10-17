@@ -54,6 +54,7 @@ export function useMarketplaceServices() {
         .select(`${SERVICE_COLS}, provider`)
         .eq('is_active', true)
         .eq('approval_status', 'approved')
+        .not('provider', 'is', null)
         .order('created_at', { ascending: false })
         .limit(60);
       if (error) throw error;

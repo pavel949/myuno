@@ -114,7 +114,7 @@ export function useBrowseByType(type: string | null, enabled = true) {
           setIsLoading(false);
           return;
         }
-        const fields = [cfg.idField, cfg.titleEn, cfg.titleRu, cfg.image, cfg.price, cfg.locationEn, cfg.locationRu, cfg.rating].filter((f): f is string => !!f);
+        const fields = [cfg.idField, cfg.titleEn, cfg.titleRu, cfg.image, cfg.price, cfg.locationEn, cfg.locationRu, cfg.rating, type === 'services' ? 'provider_id' : null].filter((f): f is string => !!f);
         const unique = [...new Set(fields)];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let q = (supabase.from as any)(cfg.table)
@@ -136,7 +136,7 @@ export function useBrowseByType(type: string | null, enabled = true) {
           locationEn: cfg.locationEn ? item[cfg.locationEn] : null,
           locationRu: cfg.locationRu ? item[cfg.locationRu] : null,
           rating: cfg.rating ? item[cfg.rating] : null,
-          path: `${cfg.pathPrefix}${item[cfg.idField]}`,
+          path: `${cfg.pathPrefix}${type === 'services' ? item.provider_id : item[cfg.idField]}`,
         }));
         setResults(mapped);
         setIsLoading(false);

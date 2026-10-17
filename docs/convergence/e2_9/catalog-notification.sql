@@ -15,9 +15,9 @@ SELECT s.id,s.provider_id,s.category_id,s.location_id,s.name_en,s.name_ru,s.desc
  s.price,s.currency,s.duration_minutes,s.images,s.tags,s.is_active,s.created_at,s.updated_at,
  s.approval_status,s.languages,s.is_verified,s.pricing_model,s.unit,s.lead_time_hours,s.availability_mode,s.booking_flow,
  c.slug AS category_slug,jsonb_build_object('name_en',c.name_en,'name_ru',c.name_ru,'slug',c.slug) AS category,
- jsonb_build_object('id',p.id,'name',p.name,'logo_url',p.logo_url,'is_verified',p.is_verified,
- 'rating',p.rating,'is_active',p.is_active,'has_machine_translation',p.has_machine_translation) AS provider
-FROM public.services s JOIN public.public_provider_catalog p ON p.id=s.provider_id
+ CASE WHEN p.id IS NULL THEN NULL ELSE jsonb_build_object('id',p.id,'name',p.name,'logo_url',p.logo_url,'is_verified',p.is_verified,
+ 'rating',p.rating,'is_active',p.is_active,'has_machine_translation',p.has_machine_translation) END AS provider
+FROM public.services s LEFT JOIN public.public_provider_catalog p ON p.id=s.provider_id
 LEFT JOIN public.categories c ON c.id=s.category_id
 WHERE s.is_active=true AND s.approval_status='approved';
 GRANT SELECT ON public.public_service_catalog TO anon,authenticated,service_role;
