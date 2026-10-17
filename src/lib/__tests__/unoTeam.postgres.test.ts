@@ -96,10 +96,42 @@ describe('E2.8 exact live-catalog least privilege',()=>{
   expect((await as(team,tx=>tx`SELECT has_elevated_access(ARRAY['uno_team']) ok`))[0].ok).toBe(false);
   await expect(as(team,tx=>tx`SELECT admin_process_payout(${id(999)},'paid')`)).rejects.toThrow(/forbidden/);
  });
+ it('CRM request company cannot authorize foreign or mixed-company IDs',async()=>{
+  expect((await as(manager,tx=>tx`SELECT actor_can_analyze_crm(${A},${id(35)},NULL) ok`))[0].ok).toBe(true);
+  expect((await as(manager,tx=>tx`SELECT actor_can_analyze_crm(${A},${id(36)},NULL) ok`))[0].ok).toBe(false);
+  expect((await as(team,tx=>tx`SELECT actor_can_analyze_crm(${A},${id(35)},NULL) ok`))[0].ok).toBe(false);
+ });
+ it('voucher own-customer/guest and finance-scoped authority retain exact boundaries',async()=>{
+  expect((await as(guest,tx=>tx`SELECT actor_can_generate_voucher(${id(30)},NULL) ok`))[0].ok).toBe(true);
+  expect((await as(guest,tx=>tx`SELECT actor_can_generate_voucher(NULL,${id(32)}) ok`))[0].ok).toBe(true);
+  expect((await as(team,tx=>tx`SELECT actor_can_generate_voucher(${id(30)},NULL) ok`))[0].ok).toBe(false);
+  expect((await as(admin,tx=>tx`SELECT actor_can_generate_voucher(${id(30)},${id(32)}) ok`))[0].ok).toBe(false);
+ });
+ it('property analysis requires edit and finance, company billing requires concrete oversight',async()=>{
+  expect((await as(team,tx=>tx`SELECT actor_can_analyze_property(${P}) ok`))[0].ok).toBe(false);
+  expect((await as(manager,tx=>tx`SELECT actor_can_analyze_property(${P}) ok`))[0].ok).toBe(true);
+  expect((await as(propertyOwner,tx=>tx`SELECT actor_can_analyze_property(${P}) ok`))[0].ok).toBe(true);
+  expect((await as(manager,tx=>tx`SELECT actor_can_manage_company_billing(${A}) ok`))[0].ok).toBe(false);
+  expect((await as(director,tx=>tx`SELECT actor_can_manage_company_billing(${A}) ok`))[0].ok).toBe(true);
+  expect((await as(team,tx=>tx`SELECT actor_can_manage_company_billing(${A}) ok`))[0].ok).toBe(false);
+ });
+ it('public-safe policy evaluator is callable anonymously and denies private management',async()=>{
+  expect((await as(null,tx=>tx`SELECT public_policy_property_manager(${P}) ok`))[0].ok).toBe(false);
+  await expect(as(null,tx=>tx`SELECT can_manage_property_e28_private(${P})`)).rejects.toThrow(/permission denied/);
+  await sql.begin(async tx=>{
+   await tx`GRANT SELECT ON property_amenities,property_reviews,properties TO anon`;
+   await tx`INSERT INTO property_amenities(id,property_id) VALUES (${id(44)},${P})`;
+   await tx`INSERT INTO property_reviews(id,property_id,is_public) VALUES (${id(45)},${P},true),(${id(46)},${P},false)`;
+   await tx.unsafe('SET LOCAL ROLE anon');await tx`SELECT set_config('request.jwt.claim.sub','',true)`;
+   expect(await tx`SELECT id FROM property_amenities`).toEqual([{id:id(44)}]);
+   expect(await tx`SELECT id FROM property_reviews`).toEqual([{id:id(45)}]);
+   throw new Error('rollback-public');
+  }).catch(e=>{if(!(e instanceof Error)||e.message!=='rollback-public')throw e;});
+ });
  it('all 128 changed policies preserve identity and exact approved expressions',async()=>{
   const targets=JSON.parse(readFileSync('src/lib/__tests__/fixtures/uno-team-targets.json','utf8')).policies;
   for(const p of targets){const row=(await sql`SELECT cmd,roles::text,permissive,qual,with_check FROM pg_policies WHERE schemaname=${p.schemaname} AND tablename=${p.tablename} AND policyname=${p.policyname}`)[0];
-   expect(row.cmd).toBe(p.cmd);expect(row.roles).toBe(p.roles);expect(row.permissive).toBe(p.permissive);
+   expect(row.cmd).toBe(p.cmd);expect(row.roles).toBe(p.roles === '{public}' && !['property_amenities_public_read','property_reviews_public_read'].includes(p.policyname) && (String(p.replacement_qual)+String(p.replacement_with_check)).includes('_e28_private') ? '{authenticated}' : p.roles);expect(row.permissive).toBe(p.permissive);
    // PostgreSQL canonicalizes expressions; no positive literal role-only branch survives targets.
    expect(row.qual??'').not.toMatch(/has_role\(auth.uid\(\), 'uno_team'/);
   }
