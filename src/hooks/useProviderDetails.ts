@@ -96,8 +96,8 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
 
     try {
       // Fetch provider details
-      const { data: providerData, error: providerError } = await supabase
-        .from(visibility === 'public' ? 'public_provider_catalog' : 'providers')
+      const providerQuery = visibility === 'public' ? supabase.from('public_provider_catalog') : supabase.from('providers');
+      const { data: providerData, error: providerError } = await providerQuery
         .select('*')
         .eq('id', providerId)
         .maybeSingle();
@@ -117,8 +117,8 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
       setProvider(providerData as unknown as ProviderDetails);
 
       // Fetch services
-      const { data: servicesData, error: servicesError } = await supabase
-        .from(visibility === 'public' ? 'public_service_catalog' : 'services')
+      const serviceQuery = visibility === 'public' ? supabase.from('public_service_catalog') : supabase.from('services');
+      const { data: servicesData, error: servicesError } = await serviceQuery
         .select('id, name_en, name_ru, price, currency, is_active, category_id, created_at')
         .eq('provider_id', providerId)
         .order('created_at', { ascending: false });

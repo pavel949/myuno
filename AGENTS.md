@@ -20,3 +20,6 @@
 - Operational scope is derived only by the actor-bound resolve_operational_scope RPC and its shadow controller; future queries use its dedicated cache prefix and ready-state ID allowlist, because preferences, empty arrays and legacy context cannot authorize access.
 - Private operational policies use reviewed private-only helpers; privileged user handlers authorize actor/object/company/action before service-role access, while internal reports remain secret-authenticated and owner-recipient-bound, because employment identity and supplied IDs are not tenant authority.
 - Enforced-company managed property creation and space reassignment go only through checked actor-bound RPCs, and public reads move to the allowlisted catalog projection, because direct inserts cannot be authorized before the row exists and base-table reads expose private columns.
+
+- Public provider, service and salon reads use read-only owner-executed allowlisted catalog views with private base RLS; provider detail explicitly separates public and private reads, because public full rows disclose settlement and moderation fields.
+- Property-submission notifications accept only an object ID, authorize its persisted pending owner/admin relation before service access and resolve current protected admin recipients, because supplied identity/contacts and employment roles cannot authorize delivery.

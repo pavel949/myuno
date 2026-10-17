@@ -97,7 +97,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
     try {
       const { data, error: queryError } = await buildQuery(options);
       if (queryError) throw queryError;
-      setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
+      setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as unknown as Service[]);
     } catch (err) {
       console.error('Error loading services:', err);
       setError(err as Error);
@@ -116,7 +116,7 @@ export const useServices = (options: UseServicesOptions = {}) => {
         const { data, error: queryError } = await buildQuery(options);
         if (queryError) throw queryError;
         if (!isMounted) return;
-        setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as Service[]);
+        setServices((data || []).map(s => ({ ...s, rating: null, review_count: null })) as unknown as Service[]);
       } catch (err) {
         console.error('Error loading services:', err);
         if (isMounted) { setError(err as Error); setServices([]); }

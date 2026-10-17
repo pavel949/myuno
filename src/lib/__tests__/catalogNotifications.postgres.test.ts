@@ -66,9 +66,9 @@ describe('E2.9 exact isolated catalog and moderation boundaries',()=>{
  });
  it.each([null,team,provider,admin])('public projections remain identically safe for %s',async user=>{
   const p=await as(user,tx=>tx`SELECT * FROM public_provider_catalog`);expect(p).toHaveLength(1);expect(p[0].id).toBe(P);expect(p[0].phone).toBeNull();expect(p[0].email).toBeNull();
-  for(const k of ['commission_rate','pending_payout','total_earnings','stripe_account_id','user_id'])expect(Object.hasOwn(p[0],k)).toBe(false);
-  const s=await as(user,tx=>tx`SELECT * FROM public_service_catalog`);expect(s).toHaveLength(1);expect(Number(s[0].price)).toBe(100);expect(s[0].provider.name).toBe('Public provider');expect(Object.hasOwn(s[0],'commission_rate')).toBe(false);
-  const salon=await as(user,tx=>tx`SELECT * FROM public_salon_catalog`);expect(salon).toHaveLength(1);expect(Object.hasOwn(salon[0],'rejection_reason')).toBe(false);
+  for(const k of ['commission_rate','pending_payout','total_earnings','stripe_account_id','user_id'])expect(Object.prototype.hasOwnProperty.call(p[0],k)).toBe(false);
+  const s=await as(user,tx=>tx`SELECT * FROM public_service_catalog`);expect(s).toHaveLength(1);expect(Number(s[0].price)).toBe(100);expect(s[0].provider.name).toBe('Public provider');expect(Object.prototype.hasOwnProperty.call(s[0],'commission_rate')).toBe(false);
+  const salon=await as(user,tx=>tx`SELECT * FROM public_salon_catalog`);expect(salon).toHaveLength(1);expect(Object.prototype.hasOwnProperty.call(salon[0],'rejection_reason')).toBe(false);
  });
  it('public projections cannot be written to, even with authenticated ownership',async()=>{
   await expect(as(provider,tx=>tx`UPDATE public_provider_catalog SET name='forged' WHERE id=${P}`)).rejects.toThrow(/permission denied/);
