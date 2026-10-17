@@ -97,13 +97,21 @@ Deno.serve(async (req) => {
 
     const { data: order, error: fetchErr } = await sb()
       .from('orders')
-      .select('id, order_number, status, total_amount, currency, metadata, order_participants(name, email, phone, role)')
+      .select('id, order_number, order_type, status, total_amount, currency, metadata, order_participants(name, email, phone, role)')
       .eq('id', orderId)
       .single();
 
     if (fetchErr || !order) {
       return new Response(JSON.stringify({ error: 'Order not found' }), {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // A signed operational link cannot resurrect a terminal order or mutate
+    // another vertical. Unproved financial authority remains a separate blocker.
+    if (order.order_type !== 'transfer' || !['pending', 'confirmed'].includes(order.status)) {
+      return new Response(JSON.stringify({ error: 'Transfer transition not allowed' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -125,7 +133,8 @@ Deno.serve(async (req) => {
         .from('orders')
         .update({ status: 'cancelled' })
         .eq('id', orderId)
-        .not('status', 'in', '(cancelled,refunded)')
+        .in('status', ['pending', 'confirmed'])
+        .eq('order_type', 'transfer')
         .select('id');
 
       if (!rejUpd || rejUpd.length === 0) {
@@ -182,7 +191,8 @@ Deno.serve(async (req) => {
       .from('orders')
       .update({ status: 'confirmed' })
       .eq('id', orderId)
-      .neq('status', 'confirmed')
+      .eq('status', 'pending')
+      .eq('order_type', 'transfer')
       .select('id');
 
     if (updErr) {
