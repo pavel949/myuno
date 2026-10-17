@@ -11,10 +11,10 @@ const U = { owner: id(1), provider: id(2), stranger: id(3), guest: id(4), otherG
 const P = { approved: id(11), pending: id(12), deleted: id(13) };
 const B = { confirmed: id(21), cancelled: id(22) };
 
-function migrationPath(): string {
-  if (process.env.E27_MIGRATION) return process.env.E27_MIGRATION;
-  const f = readdirSync('drizzle/migrations').find((x) => /public_catalog_cutover/.test(x));
-  if (!f) throw new Error('E2.7 migration not found');
+function migrationPath(pattern: RegExp, env?: string): string {
+  if (env) return env;
+  const f = readdirSync('drizzle/migrations').find((x) => pattern.test(x));
+  if (!f) throw new Error(`migration ${pattern} not found`);
   return join('drizzle/migrations', f);
 }
 function oldViewSql(): string {
@@ -64,7 +64,11 @@ beforeAll(async () => {
   // Prove the leak exists before the cutover.
   const before = await as(U.stranger, async (tx) => tx`SELECT lock_code, actual_owner_phone FROM properties WHERE id=${P.approved}`);
   expect(before[0]?.lock_code).toBe('1234');
-  await sql.unsafe(readFileSync(migrationPath(), 'utf8'));
+  await sql.unsafe(readFileSync(migrationPath(/public_catalog_projection_extension/), 'utf8'));
+  // Projection extension alone must not change base-table visibility.
+  const mid = await as(U.stranger, async (tx) => tx`SELECT lock_code FROM properties WHERE id=${P.approved}`);
+  expect(mid.length).toBe(1);
+  await sql.unsafe(readFileSync(migrationPath(/close_authenticated_private_property_reads/, process.env.E27_CLOSE_MIGRATION), 'utf8'));
 }, 60000);
 
 afterAll(async () => {
