@@ -1,44 +1,54 @@
 name: verify
 
-# Engineering-quality gate. Before this workflow the CI pipeline ran NO
-# typecheck, lint, or unit tests — a PR that broke types or tests passed CI.
-#
-# `typecheck` is a hard, blocking gate (green as of this workflow's creation).
-# `test` and `lint` run for visibility but are non-blocking for now:
-#   - test: 6 pre-existing content/persona/IA drift failures must be triaged
-#     before this becomes required (they are unrelated to app logic).
-#   - lint: the eslint 9 + @eslint/eslintrc/ajv toolchain resolves inconsistently
-#     across the npm vs bun dependency trees (see the triple-lockfile follow-up);
-#     must be fixed before this becomes required.
-# Flip `continue-on-error` to false on each once the above are resolved.
-
+# Blocking authored-source quality gate with isolated PostgreSQL fixtures.
+# Production build, browser fixtures and timezone matrix run in connected-system-check.yml.
 on:
   pull_request:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install
-        run: npm ci
+        run: |
+          npm ci
+          if ! ls /usr/lib/postgresql/*/bin/postgres >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+          fi
+          for binary in /usr/lib/postgresql/*/bin/postgres; do
+            dirname "$binary" >> "$GITHUB_PATH"
+            break
+          done
 
-      - name: Typecheck (blocking)
+      - name: Typecheck
         run: npm run typecheck
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
 
-      - name: Unit tests (non-blocking until pre-existing failures triaged)
-        continue-on-error: true
-        run: npm test
+      - name: Unit and isolated PostgreSQL tests
+        run: npm test -- --maxWorkers=2
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
 
-      - name: Lint (non-blocking until eslint toolchain fixed)
-        continue-on-error: true
+      - name: Lint
         run: npm run lint
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs

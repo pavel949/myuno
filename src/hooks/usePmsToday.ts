@@ -94,7 +94,7 @@ export function usePmsToday(date: Date = new Date()) {
           .from('property_service_requests')
           .select('id, property_id, service_type, status, priority, guest_name, description, scheduled_at, created_at, completed_at')
           .in('property_id', ids)
-          .or(`status.in.(${OPEN_REQUEST.join(',')}),completed_at.gte.${today}`)
+          .or(`status.in.(${OPEN_REQUEST.join(',')}),completed_at.gte.${today}T00:00:00+07:00`)
           .order('created_at', { ascending: false })
           .limit(200),
         supabase
@@ -112,12 +112,16 @@ export function usePmsToday(date: Date = new Date()) {
     },
   });
 
-  const bookings = (query.data?.bookings ?? []).filter((b) => ACTIVE_BOOKING.includes(b.status ?? ''));
+  const allBookings = query.data?.bookings ?? [];
+  const bookings = allBookings.filter((b) => ACTIVE_BOOKING.includes(b.status ?? ''));
   const requests = query.data?.requests ?? [];
   const tasks = query.data?.tasks ?? [];
 
   const arrivals = bookings.filter((b) => day(b.check_in) === today);
-  const departures = bookings.filter((b) => day(b.check_out) === today);
+  // A completed checkout still creates turnover work; it must not become in-house.
+  const departures = allBookings.filter((b) =>
+    (ACTIVE_BOOKING.includes(b.status ?? '') || b.status === 'checked_out') && day(b.check_out) === today,
+  );
   const inHouse = bookings.filter((b) => day(b.check_in) <= today && day(b.check_out) > today);
 
   const openReq = requests.filter((r) => OPEN_REQUEST.includes(r.status ?? ''));
@@ -158,3 +162,4 @@ export function usePmsToday(date: Date = new Date()) {
     arrivals, departures, inHouse, guestRequests, units, titleOf,
   };
 }
+

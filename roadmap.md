@@ -1,9 +1,18 @@
 # Roadmap
 
+## 2026-10-17 · Connected-system continuation (GitHub verification)
+- [x] Reconcile actual plans and current architecture against source and SELECT-only Lovable catalog; distinguish tables from storage buckets and historical audit findings.
+- [x] Correct PMS status/date/turnover, category/plan persistence confirmation and guest cache refresh, data-entry draft lifecycle, and browse/map/filter/pagination continuity.
+- [x] Add network-denying real-page browser fixtures and isolated hook/authorization/postgres tests without changing RBAC, pricing, inventory writers or ledger models.
+- [x] Prepare fail-closed scheduled-backup retrieval and synthetic actual-entrypoint checks; code-only, NOT deployed.
+- [x] Record runtime CI evidence and remaining gate reconciliation (final blocking-CI results tracked in PR #89): see docs/qa/CONNECTED_SYSTEM_EXECUTION_2026_10_17.md and the connected-system PR.
+- [ ] Real hosted end-to-end acceptance remains BLOCKED without an isolated backend and resolved business/financial/data contracts. No automatic enforcement/seed/payment/deploy.
+- Existing service-entry UX uses Admin/Vendor forms. The removed legacy staff shell is not revived; employment does not grant catalogue/private authority.
+
 ## 2026-10-17 · Authorized isolated PMS end-to-end verification
-- [ ] Establish HEAD and read canonical/PMS QA boundaries; trace Bookings list/detail → Calendar → Today/tasks → check-in/out → owner report.
-- [ ] Re-run current isolated integration and network-denying browser fixtures; cover IDs, loading/error/empty, invalidation and Bangkok half-open dates.
-- [ ] Correct only reproduced code defects with focused regressions; record exact commands, evidence, residual blockers and SHA in docs/qa/PMS_END_TO_END_VERIFICATION_2026_10_17.md.
+- [x] Establish HEAD and read canonical/PMS QA boundaries; trace Bookings list/detail → Calendar → Today/tasks → check-in/out → owner report.
+- [x] Re-run current isolated integration and network-denying browser fixtures; cover IDs, loading/error/empty, invalidation and Bangkok half-open dates.
+- [x] Correct only reproduced code defects with focused regressions; record exact commands, evidence, residual blockers and SHA in docs/qa/PMS_END_TO_END_VERIFICATION_2026_10_17.md.
 - Boundaries: no production business reads/writes, notifications/export, migrations/edge deploy/publish, enforcement, assignments, E3 or financial P0-A/P0-B. Real E2E remains blocked without an isolated backend.
 
 ## 2026-10-17 · Resorts/hotels plan review (categories, rate plans, rules)

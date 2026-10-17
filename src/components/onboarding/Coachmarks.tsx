@@ -159,14 +159,14 @@ export const Coachmarks: React.FC = () => {
     }
   };
 
-  // Skip silently if a target is missing from the DOM (graceful degradation).
-  if (active && !rect && step < STEPS.length) {
-    // try advancing once, then bail.
-    if (step >= STEPS.length - 1) {
-      complete();
-      return null;
+  // A missing final target ends the tour after render. Keep every hook
+  // unconditional, including when a responsive layout removes that target.
+  useEffect(() => {
+    if (active && !rect && step === STEPS.length - 1) {
+      writeState({ ...readState(), completed_at: Date.now() });
+      setActive(false);
     }
-  }
+  }, [active, rect, step]);
 
   const tooltipPos = useMemo(() => {
     if (!rect) return null;
@@ -260,3 +260,4 @@ export const Coachmarks: React.FC = () => {
     </div>
   );
 };
+

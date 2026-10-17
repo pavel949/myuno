@@ -4,13 +4,15 @@
  */
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Heart, Star, ArrowRight, MapPin, SlidersHorizontal, Map } from 'lucide-react';
+import { Heart, Star, ArrowRight, MapPin, SlidersHorizontal, Map, List } from 'lucide-react';
 import { SEOHead } from '@/components/seo';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { BackButton } from '@/components/uno/BackButton';
+import { PropertyMapView } from '@/components/property/PropertyMapView';
+import { useMapListSync } from '@/hooks/useMapListSync';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { matchesCategory, type PropertyMode } from '@/components/property/PropertyCategoryIcons';
 import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
@@ -74,6 +76,16 @@ export default function PropertyIndex() {
   const navigate = useNavigate();
   const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
   const isRu = language === 'ru';
+  const showMap = searchParamsUrl.get('view') === 'map';
+  const { selectedId, hoveredId, select, hover } = useMapListSync();
+  const toggleMap = () => {
+    setSearchParamsUrl((previous) => {
+      const next = new URLSearchParams(previous);
+      if (showMap) next.delete('view');
+      else next.set('view', 'map');
+      return next;
+    });
+  };
 
   // UniversalFilter state
   const { filterConfig } = usePropertyFilterOptions();
@@ -182,6 +194,8 @@ export default function PropertyIndex() {
   const {
     data: infiniteData,
     isLoading,
+    isError,
+    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -195,7 +209,7 @@ export default function PropertyIndex() {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el || !hasNextPage || isFetchingNextPage) return;
+    if (!el || !hasNextPage || isFetchingNextPage || isError) return;
     const obs = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) fetchNextPage();
@@ -204,7 +218,7 @@ export default function PropertyIndex() {
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage, allProperties.length]);
+  }, [hasNextPage, isFetchingNextPage, isError, fetchNextPage, allProperties.length]);
 
   const { applyFilter: applyPersonaFilter } = usePersonaFilter();
 
@@ -385,6 +399,17 @@ export default function PropertyIndex() {
             </section>
           )}
 
+          {isError && (
+            <div role="alert" className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-8")}>
+              <p className="text-muted-foreground mb-3">
+                {isRu ? 'Не удалось загрузить объекты. Попробуйте ещё раз.' : 'Could not load listings. Please try again.'}
+              </p>
+              <Button variant="outline" size="sm" className="min-h-[44px]" onClick={() => { void refetch(); }}>
+                {isRu ? 'Повторить' : 'Retry'}
+              </Button>
+            </div>
+          )}
+
           {/* Main grid — Airbnb-style 2-col cards */}
           {!isLoading && filteredProperties.length > 0 && (
             <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0")}>
@@ -394,14 +419,32 @@ export default function PropertyIndex() {
                     {isRu ? 'Все объекты' : 'All listings'}
                   </h2>
                 )}
-                <Button variant="outline" size="sm" className="gap-1.5 ml-auto" onClick={() => navigate(APP_ROUTES.PROPERTY_MAP)}>
-                  <Map className="w-4 h-4" />
-                  {isRu ? 'Карта' : 'Map'}
+                <Button variant="outline" size="sm" className="gap-1.5 ml-auto min-h-[44px]" aria-pressed={showMap} onClick={toggleMap}>
+                  {showMap ? <List className="w-4 h-4" /> : <Map className="w-4 h-4" />}
+                  {showMap ? (isRu ? 'Список' : 'List') : (isRu ? 'Карта' : 'Map')}
                 </Button>
               </div>
+              {showMap && !isError && (
+                <PropertyMapView
+                  properties={filteredProperties}
+                  mode={propertyMode}
+                  selectedId={selectedId}
+                  onSelect={select}
+                  hoveredProperty={hoveredId}
+                  onHover={hover}
+                  className="mb-4"
+                />
+              )}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
                 {filteredProperties.map((property) => (
-                  <PropertyListingCard key={property.id} property={property} mode={propertyMode} />
+                  <PropertyListingCard
+                    key={property.id}
+                    property={property}
+                    mode={propertyMode}
+                    isSelected={selectedId === property.id}
+                    isHovered={hoveredId === property.id}
+                    onHover={hover}
+                  />
                 ))}
               </div>
               {/* Infinite scroll sentinel */}
@@ -411,7 +454,7 @@ export default function PropertyIndex() {
                   {isRu ? 'Загрузка...' : 'Loading...'}
                 </div>
               )}
-              {!hasNextPage && filteredProperties.length > 0 && (
+              {!isError && !hasNextPage && filteredProperties.length > 0 && (
                 <div className="mt-6 text-center text-xs text-muted-foreground">
                   {isRu ? `Всего объектов: ${filteredProperties.length}` : `Total: ${filteredProperties.length}`}
                 </div>
@@ -419,7 +462,24 @@ export default function PropertyIndex() {
             </section>
           )}
 
-          {!isLoading && filteredProperties.length === 0 && allProperties.length > 0 && (
+          {!isLoading && !isError && filteredProperties.length === 0 && hasNextPage && (
+            <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-16")}>
+              <p className="text-muted-foreground mb-3">
+                {isRu ? 'Среди загруженных объектов пока нет совпадений. Можно проверить следующие.' : 'No matches in loaded listings yet. Check the next listings.'}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="min-h-[44px]"
+                disabled={isFetchingNextPage}
+                onClick={() => { if (!isFetchingNextPage) void fetchNextPage(); }}
+              >
+                {isFetchingNextPage ? (isRu ? 'Загрузка...' : 'Loading...') : (isRu ? 'Загрузить ещё' : 'Load more')}
+              </Button>
+            </div>
+          )}
+
+          {!isLoading && !isError && !hasNextPage && filteredProperties.length === 0 && allProperties.length > 0 && (
             <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-16")}>
               <p className="text-muted-foreground mb-3">
                 {isRu ? 'Нет объектов с выбранными фильтрами' : 'No properties match selected filters'}
@@ -431,7 +491,7 @@ export default function PropertyIndex() {
           )}
 
           {/* C7 FIX: empty state when DB has no properties at all for selected filters */}
-          {!isLoading && allProperties.length === 0 && (
+          {!isLoading && !isError && !hasNextPage && allProperties.length === 0 && (
             <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-20")}>
               <p className="text-base font-medium mb-2">
                 {isRu ? 'Пока нет объектов' : 'No properties yet'}
@@ -454,3 +514,4 @@ export default function PropertyIndex() {
     </>
   );
 }
+

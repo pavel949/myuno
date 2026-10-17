@@ -74,6 +74,25 @@ describe('PMS real hooks / in-memory request adapter, NOT hosted E2E', () => {
     expect(result.current.inHouse.map(b => b.id)).toEqual(['arrive']);
     expect(fixture.trace).toContainEqual({ table: 'property_bookings', op: 'in', field: 'property_id', value: ['home-a'] });
   });
+  it.each([false, true])('checked-out departure retains turnover until cleaned (cleaned=%s)', async cleaned => {
+    fixture.rows.property_bookings = [
+      { id: 'departed', property_id: 'home-a', check_in: '2026-10-15', check_out: '2026-10-17', status: 'checked_out' },
+      ...['cancelled', 'rejected', 'expired'].map(status => ({ id: status, property_id: 'home-a', check_in: '2026-10-15', check_out: '2026-10-17', status })),
+      { id: 'old-checkout', property_id: 'home-a', check_in: '2026-10-14', check_out: '2026-10-16', status: 'checked_out' },
+    ];
+    fixture.rows.property_service_requests = cleaned ? [{ property_id: 'home-a', service_type: 'cleaning', status: 'completed', completed_at: '2026-10-16T18:00:00Z' }] : [];
+    const { result } = mount(() => usePmsToday(new Date('2026-10-16T18:00:00Z')));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.departures.map(b => b.id)).toEqual(['departed']);
+    expect(result.current.arrivals).toEqual([]);
+    expect(result.current.inHouse).toEqual([]);
+    expect(result.current.units[0].state).toBe(cleaned ? 'clean' : 'dirty');
+    // The adapter does not apply PostgREST filters: assert the emitted Bangkok bound too.
+    expect(fixture.trace).toContainEqual({
+      table: 'property_service_requests', op: 'or', field: '',
+      value: 'status.in.(pending,new,assigned,in_progress,scheduled,open),completed_at.gte.2026-10-17T00:00:00+07:00',
+    });
+  });
   it.each(['property_bookings', 'property_service_requests', 'crm_tasks'])('Today propagates %s failure instead of certifying no work', async table => {
     fixture.errors[table] = new Error(`denied:${table}`);
     const { result } = mount(() => usePmsToday());
