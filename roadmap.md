@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · E2.8 read-only continuation
+- [ ] Trace remaining private catalog, shared-helper and support access paths against source/live definitions; no writes, grants, deploys or business calls.
+- [ ] Update the bypass register and E2.8 report with exact evidence, legitimate authority, blockers and next-step recommendation.
+- Restrictions retained: enforcement off; no spaces/assignments seeded; no Order Mutation Audit or E3.
+
 ## 2026-10-17 · E2.8 — UNO_TEAM least privilege
 - [x] Source/live census and confirmed/UNKNOWN dispositions saved under docs/convergence/e2_8/.
 - [x] Proven private employment bypasses narrowed: 0028–0031, 128 policies, checked RPCs, 15 deployed handlers after isolated tests.
