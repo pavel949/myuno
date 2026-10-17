@@ -80,8 +80,6 @@ import {
   useUpdateStaffMember,
   useDeactivateStaffMember,
   useStaffPropertyAssignments,
-  useAssignStaffToProperty,
-  useRemoveStaffAssignment,
   STAFF_ROLES,
   PAY_TYPES,
   StaffMember,
@@ -463,14 +461,12 @@ export default function StaffPage() {
   const isRu = language === 'ru';
 
 
-  const { data: staff, isLoading } = useAllStaffMembers();
+  const { data: staff, isLoading, error: staffError, refetch: refetchStaff } = useAllStaffMembers();
   const createMutation = useCreateStaffMember();
   const updateMutation = useUpdateStaffMember();
   const deactivateMutation = useDeactivateStaffMember();
   const { allProperties } = useMyProperties();
-  const { activeCompany } = useActiveCompany();
-  const assignStaff = useAssignStaffToProperty();
-  const removeAssignment = useRemoveStaffAssignment();
+  const { activeCompany, isLoading: companyLoading, isError: companyError, refetch: refetchCompany } = useActiveCompany();
   const canManage = useCanManagePermissions();
 
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -612,7 +608,7 @@ export default function StaffPage() {
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
               <div>
-                <p className={`text-2xl font-bold ${color}`}>{isLoading ? '–' : value}</p>
+                <p className={`text-2xl font-bold ${color}`}>{isLoading || companyLoading || staffError || companyError ? '–' : value}</p>
                 <p className="text-xs text-muted-foreground">{label}</p>
               </div>
             </CardContent>
@@ -663,7 +659,14 @@ export default function StaffPage() {
       </div>
 
       {/* Staff grid */}
-      {isLoading ? (
+      {staffError || companyError ? (
+        <Card role="alert">
+          <CardContent className="py-10 text-center space-y-3">
+            <p className="font-medium text-destructive">{companyError ? t('Could not load company', 'Не удалось загрузить компанию') : t('Could not load staff', 'Не удалось загрузить сотрудников')}</p>
+            <Button variant="outline" onClick={() => companyError ? refetchCompany() : refetchStaff()}>{t('Retry', 'Повторить')}</Button>
+          </CardContent>
+        </Card>
+      ) : isLoading || companyLoading ? (
         <div className="grid md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-48 w-full rounded-none" />)}
         </div>
@@ -671,14 +674,17 @@ export default function StaffPage() {
         <Card>
           <CardContent className="py-16 text-center">
             <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="font-semibold text-lg mb-1">{t('No staff yet', 'Нет сотрудников')}</p>
+            <p className="font-semibold text-lg mb-1">{(staff?.length ?? 0) > 0 ? t('No matching staff', 'Сотрудники не найдены') : t('No staff yet', 'Нет сотрудников')}</p>
             <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
-              {t(
-                'Add your cleaners, maintenance staff, managers and other team members to manage assignments and contacts',
-                'Добавьте уборщиц, мастеров, управляющих и других сотрудников для управления назначениями и контактами'
-              )}
+              {(staff?.length ?? 0) > 0
+                ? t('Try a different search or clear the filters.', 'Измените поиск или сбросьте фильтры.')
+                : t('Add staff when you are ready. You can configure the workspace before inviting your team.', 'Добавьте сотрудников, когда будете готовы. Настроить рабочее пространство можно до приглашения команды.')}
             </p>
-            {canManage && (
+            {(staff?.length ?? 0) > 0 ? (
+              <Button variant="outline" onClick={() => { setSearchQuery(''); setRoleFilter('all'); setStaffFilter('all'); }}>
+                {t('Clear filters', 'Сбросить фильтры')}
+              </Button>
+            ) : canManage && (
               <Button onClick={openCreate}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 {t('Add first staff member', 'Добавить первого сотрудника')}
@@ -860,20 +866,6 @@ export default function StaffPage() {
               />
             </section>
 
-            {/* Property Assignments (edit mode only) */}
-            {editing && allProperties.length > 0 && (
-              <section className="space-y-3">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t('Property Assignments', 'Назначения на объекты')}</h4>
-                <StaffPropertyAssignments
-                  staffId={editing.id}
-                  properties={allProperties}
-                  isRu={isRu}
-                  onAssign={(propertyId) => assignStaff.mutate({ staffId: editing.id, propertyId })}
-                  onRemove={(assignmentId) => removeAssignment.mutate(assignmentId)}
-                />
-              </section>
-            )}
-
             {/* Staff Documents (edit mode only) */}
             {editing && (
               <section className="space-y-3">
@@ -947,69 +939,3 @@ export default function StaffPage() {
   );
 }
 
-/** Inline component for property assignments in the edit form */
-function StaffPropertyAssignments({
-  staffId,
-  properties,
-  isRu,
-  onAssign,
-  onRemove,
-}: {
-  staffId: string;
-  properties: { property_id: string; title: string; title_ru: string }[];
-  isRu: boolean;
-  onAssign: (propertyId: string) => void;
-  onRemove: (assignmentId: string) => void;
-}) {
-  const { data: assignments, isLoading } = useStaffPropertyAssignments(staffId);
-  const assignedIds = new Set((assignments || []).map(a => a.property_id));
-  const unassigned = properties.filter(p => !assignedIds.has(p.property_id));
-
-  return (
-    <div className="space-y-2">
-      {isLoading ? (
-        <Skeleton className="h-8 w-full" />
-      ) : (
-        <>
-          {(assignments || []).length > 0 && (
-            <div className="space-y-1.5">
-              {(assignments || []).map(a => {
-                const prop = properties.find(p => p.property_id === a.property_id);
-                return (
-                  <div key={a.id} className="flex items-center justify-between py-2 px-3 rounded-none bg-muted/50">
-                    <span className="text-sm flex items-center gap-2">
-                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                      {prop ? (isRu ? prop.title_ru || prop.title : prop.title) : a.property_id.slice(0, 8)}
-                    </span>
-                    <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => onRemove(a.id)}>
-                      {isRu ? 'Убрать' : 'Remove'}
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {unassigned.length > 0 && (
-            <Select onValueChange={onAssign}>
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder={isRu ? '+ Добавить объект' : '+ Add property'} />
-              </SelectTrigger>
-              <SelectContent>
-                {unassigned.map(p => (
-                  <SelectItem key={p.property_id} value={p.property_id}>
-                    {isRu ? p.title_ru || p.title : p.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-
-          {(assignments || []).length === 0 && unassigned.length === 0 && (
-            <p className="text-xs text-muted-foreground">{isRu ? 'Нет объектов для назначения' : 'No properties available'}</p>
-          )}
-        </>
-      )}
-    </div>
-  );
-}

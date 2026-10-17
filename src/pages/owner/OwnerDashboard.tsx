@@ -4,13 +4,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBusinessRole } from '@/hooks/useBusinessRole';
 import { useMyProperties } from '@/hooks/useMyProperties';
-import { useMcOnboarding, computeProgress } from '@/hooks/useMcOnboarding';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { type DashboardWidgetKey } from '@/lib/businessRoles';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Home, Rocket, ArrowRight } from 'lucide-react';
+import { Home } from 'lucide-react';
+import { APP_ROUTES } from '@/lib/config/routes';
 import { motion } from 'framer-motion';
 import { useIsDesktop } from '@/hooks/use-desktop';
 import { DashboardFilterProvider } from '@/contexts/DashboardFilterContext';
@@ -345,9 +345,8 @@ export default function OwnerDashboard() {
   const isDesktop = useIsDesktop();
   const { role, setRole, config, mcRole, mcRoleLabel } = useBusinessRole();
   const [quickTaskOpen, setQuickTaskOpen] = useState(false);
-  const { allProperties, isLoading: propsLoading } = useMyProperties();
-  const { activeCompany, isLoading: companyLoading } = useActiveCompany();
-  const { data: onboardingProgress } = useMcOnboarding();
+  const { allProperties, isLoading: propsLoading, error: propertiesError, refetch: reloadProperties } = useMyProperties();
+  const { activeCompany, isLoading: companyLoading, isError: companyError, refetch: reloadCompany } = useActiveCompany();
 
   const visibleWidgets = isDesktop
     ? config.widgets.filter((w) => w !== 'menu' && !OVERVIEW_SUPPRESSED_WIDGETS.has(w))
@@ -415,72 +414,50 @@ export default function OwnerDashboard() {
     );
   }
 
-  // First-time MC empty state — no properties yet → render onboarding checklist
-  // instead of skeleton-then-blank widget grid.
-  const isFirstTimeMC =
-    !propsLoading && !companyLoading && allProperties.length === 0 && !!activeCompany;
+  if (companyError || propertiesError) {
+    return <PageShell width="narrow"><div role="alert" className="space-y-3 p-4">
+      <h1 className="text-xl font-bold">{isRu ? 'Рабочий кабинет' : 'Workspace'}</h1>
+      <p>{isRu ? 'Не удалось загрузить данные кабинета. Состояние объектов пока неизвестно.' : 'Could not load workspace data. Property status is currently unknown.'}</p>
+      <Button onClick={() => { if (companyError) void reloadCompany(); if (propertiesError) void reloadProperties(); }}>
+        {isRu ? 'Повторить' : 'Retry'}
+      </Button>
+    </div></PageShell>;
+  }
 
-  if (isFirstTimeMC) {
-    const percent = onboardingProgress ? computeProgress(onboardingProgress) : 0;
-    const total = 7;
-    const completed = Math.round((percent / 100) * total);
-    return (
-      <PageShell width="narrow" className="max-w-2xl">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="text-center mb-8"
-        >
-          <div className="w-16 h-16 mx-auto rounded-none bg-primary/10 flex items-center justify-center mb-4">
-            <Rocket className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold mb-2">
-            {isRu ? 'Добро пожаловать в myUNO' : 'Welcome to myUNO'}
-          </h1>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            {isRu
-              ? 'Завершите настройку, чтобы открыть полный дашборд управления.'
-              : 'Finish setup to unlock the full management dashboard.'}
-          </p>
-        </motion.div>
+  if (propsLoading || companyLoading) {
+    return <PageShell width="narrow"><div role="status" className="space-y-3 p-4">
+      <p>{isRu ? 'Загрузка кабинета…' : 'Loading workspace…'}</p><SectionSkeleton />
+    </div></PageShell>;
+  }
 
-        <div className="rounded-none border bg-card p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">
-              {isRu ? 'Прогресс настройки' : 'Setup progress'}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {completed} / {total}
-            </span>
-          </div>
-          <div className="h-2 bg-muted overflow-hidden">
-            <div
-              className="h-full bg-primary transition-all"
-              style={{ width: `${percent}%` }}
-            />
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Button
-              onClick={() => navigate('/mc/onboarding/wizard')}
-              size="lg"
-              className="flex-1 h-12"
-            >
-              {isRu ? 'Открыть мастер настройки' : 'Open setup wizard'}
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/mc/properties/new')}
-              size="lg"
-              className="flex-1 h-12"
-            >
-              {isRu ? 'Добавить объект' : 'Add property'}
-            </Button>
-          </div>
-        </div>
-      </PageShell>
-    );
+  // An authorized empty portfolio is usable without checklist completion.
+  // Keep navigation on existing guarded routes; links do not grant capabilities.
+  if (allProperties.length === 0 && activeCompany) {
+    const links = [
+      { route: APP_ROUTES.MC_SETTINGS, en: 'Settings', ru: 'Настройки' },
+      { route: APP_ROUTES.MC_STAFF, en: 'Team', ru: 'Команда' },
+      { route: APP_ROUTES.MC_PROPERTIES, en: 'Properties', ru: 'Объекты' },
+      { route: APP_ROUTES.MC_TODAY, en: 'Today', ru: 'Сегодня' },
+      { route: APP_ROUTES.MC_CALENDAR, en: 'Calendar', ru: 'Календарь' },
+      { route: APP_ROUTES.MC_BOOKINGS_LIST, en: 'Bookings', ru: 'Бронирования' },
+    ];
+    return <PageShell width="narrow" className="max-w-2xl space-y-5">
+      <h1 className="text-2xl font-bold">{isRu ? 'Рабочий кабинет' : 'Workspace'}</h1>
+      <p className="text-muted-foreground">
+        {isRu ? 'В доступном вам списке пока нет объектов. Открывайте разделы и заполняйте их по мере готовности.' : 'Your accessible property list is empty. Open sections and configure them when you are ready.'}
+      </p>
+      <nav aria-label={isRu ? 'Разделы кабинета' : 'Workspace sections'} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {links.map(link => <Button key={link.route} variant="outline" className="min-h-[44px]" onClick={() => navigate(link.route)}>
+          {isRu ? link.ru : link.en}
+        </Button>)}
+      </nav>
+      <p className="text-sm text-muted-foreground">
+        {isRu ? 'Данные и настройки можно добавлять постепенно.' : 'Add data and settings gradually.'}
+      </p>
+      <Button variant="ghost" onClick={() => navigate('/mc/onboarding/wizard')}>
+        {isRu ? 'Открыть необязательный список настройки' : 'Open optional setup checklist'}
+      </Button>
+    </PageShell>;
   }
 
   return (
@@ -578,3 +555,4 @@ export default function OwnerDashboard() {
     </DashboardFilterProvider>
   );
 }
+
