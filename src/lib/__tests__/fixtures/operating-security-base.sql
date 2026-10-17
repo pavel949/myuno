@@ -33,3 +33,6 @@ CREATE POLICY legacy_property_grant ON properties FOR ALL TO authenticated USING
 CREATE POLICY legacy_booking_grant ON property_bookings FOR ALL TO authenticated USING(staff_can_access_property(auth.uid(),property_id));
 CREATE POLICY legacy_report_grant ON property_reports FOR ALL TO authenticated USING(staff_can_access_property(auth.uid(),property_id));
 CREATE POLICY legacy_task_grant ON property_operational_tasks FOR ALL TO authenticated USING(staff_can_access_property(auth.uid(),property_id));
+CREATE FUNCTION public.get_user_company_ids(actor uuid) RETURNS SETOF uuid LANGUAGE sql AS $$ SELECT company_id FROM management_company_members WHERE user_id=actor $$;
+CREATE FUNCTION public.auto_create_deal_from_lead() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$;
+CREATE FUNCTION public.autocreate_capital_lead_from_booking() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$;
