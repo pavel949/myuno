@@ -1,11 +1,12 @@
 # Roadmap
 
-## 2026-10-17 · E2.9 — Catalog + notification security
-- [ ] Reconcile baseline 990de18f / 4ea65f7 with live policy/field/recipient metadata; classify proven leaks vs business-authorization decisions.
-- [ ] Implement finite safe catalog projections/consumer migrations and proven recipient gates; preserve independent ownership/public rights.
-- [ ] Run exact isolated exploit/deny/allow and E1–E2.8 regression tests; save exact forward SQL and security-preserving rollback before apply/deploy.
-- [ ] Read-only post-apply verification and E2.9 report/register: zero enforcement/spaces/assignments/members; no business/outbound calls; GO/NO-GO for a later Order Mutation Audit.
-- Restrictions: no support architecture/grants, E3, Order Mutation Audit, enforcement, seed or production business writes.
+## 2026-10-17 · E2.9 — Catalog + notification security (partial NO-GO)
+- [x] Reconcile baselines and live field/policy/recipient metadata; E29-01–10 dispositions recorded.
+- [x] Apply exact tested forward 0032 for provider/service/salon privacy and named unpublished employment branches; safe public consumers, protected property-submission recipient gate, security-preserving rollback.
+- [x] Isolated focused 53/53, prior E1–E2.8 166/166; synthetic edge 15+45+10; read-only public API/page and zero enforcement/spaces/assignments/members verified.
+- [x] Update E2.9 report, E2.8 disposition and bypass register without claiming full closure.
+- [ ] Full E2.9 closure — E29-01–03 blocked by deep public JSON/field contracts and mixed editor compatibility; E29-04 child audience contract; E29-05–07 legitimate automation/guest dispatch authority; E29-08–10 metadata/support/moderation decisions. See report.
+- Restrictions: no support grants, E3, Order Mutation Audit, enforcement, seed or production business writes.
 
 ## 2026-10-17 · E2.8 read-only continuation
 - [x] Trace remaining private catalog, shared-helper and support access paths against source/live definitions; 47 residual policies / 30 relations; no writes, grants, deploys or business calls.

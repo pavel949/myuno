@@ -150,3 +150,9 @@ The [E2.8 read-only continuation](OPERATING_SPACES_E2_8_UNO_TEAM.md#read-only-co
 | Production/deployment evidence | 1,250 policies / 587 ordinary functions + 4 aggregates = 591 pg_proc entries; no count drift proved. 47 remaining candidates on 30 relations; deployed bundle parity unresolved. Read-only aggregates remain enforcement/spaces/assignments/members 0/0/0/0. |
 
 **Рекомендую:** отдельно согласовать finite catalog/privacy and notification corrective tranche with safe public replacements, independent deployed manifest and isolated deny/allow tests; do not create support grants or start E3 / Order Mutation Audit. No fixes, deploys, business writes, enforcement or assignments in this continuation.
+
+## E2.9 current disposition (partial; full NO-GO)
+
+See [E2.9 exact report](OPERATING_SPACES_E2_9_CATALOG_NOTIFICATIONS.md). Forward 0032 closes public provider settlement/service commission/salon review reads and named employment-only unpublished catalog branches; safe provider/service/salon projections and object-bound admin-only property submission notification deployed after isolated tests. No support grants or enforcement.
+
+Remaining proven/UNKNOWN boundaries are E29-01–10: projects banking/commission, complexes private contacts, listings JSON/moderation fields, child-catalog publication, booking message rules actor/object gate, CRM workflow company/entity gate, guest lead dispatch relationship, metadata-dependent recipients and legacy support/moderation entitlements. These are **not** marked fixed by 0032. Full E2.9, Order Mutation Audit and E3 remain NO-GO; exact evidence and next-step recommendation are in the report.
