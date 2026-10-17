@@ -65,8 +65,8 @@ Before adding a table/enum/hook/context/workflow, find the existing canonical im
 - Services catalogue: approved services/providers + safe public projections.
 - Service request/booking: existing `service_orders`.
 - Service availability: server-side busy-slot/availability rules where applicable.
-- Relationship: unified CRM/person.
-- Operational scope: Management Company + Operating Space + property assignment.
+- Relationship: existing CRM contacts/identity links; unified person continuity is the approved conceptual target, not a completed universal identity migration.
+- Operational scope: Management Company + Operating Space + property assignment is the approved target; actual authorization is only the deployed checked resolver/RLS/RPC contract, not this diagram.
 - AuthN: Supabase Auth. AuthZ: RLS + RBAC/module/action/property/Space.
 - Public discovery: allowlisted projections; private operations: authorized canonical records.
 
@@ -159,6 +159,10 @@ If intended operators should manage rates/photos/descriptions/inventory/publicat
 ## 16. Current P0
 **Replaceable execution pointer; update after every accepted gate.**
 
+This sequence is a target roadmap, not a reset of completed work or authorization to replay migrations, seed assignments, enable enforcement or make a live booking. Reconcile each step with current source and dated evidence before implementing it; continue already-authorized safe code work without treating the roadmap as production readiness.
+
+Existing financial NO-GO remains in force until the server-authoritative price/discount/negotiated-price, off-platform payment/deposit/reversal and atomic transition contracts are explicitly resolved and verified. Do not infer contract values, widen wallet privileges or enable automatic transfer refunds from a request to implement the plan. Preserve the checked guards in AGENTS.md.
+
 `A Final Order Mutation Security → B real Space manifest → C seed Spaces with enforcement OFF → D resolver/cache isolation → E Properties → F Calendar → G Today → H Bookings → I supervised enforcement → J Layantara E2E → K Housekeeping/Maintenance → L Identity/CRM → M Finance/P&L`.
 
 Proven money/inventory bypasses block progression; unrelated broad security research does not automatically expand P0.
@@ -188,3 +192,4 @@ Canonical docs describe approved architecture. Convergence/audit docs are eviden
 Passing tests is evidence, **not automatic approval**. Never start the next critical tranche automatically. Critical reports state files/migrations/functions, behavior changed, canonical logic unchanged, tests/counts, production evidence, blockers, rollback, SHA, GO/NO-GO.
 
 **Final rule:** when speed conflicts with canonical integrity, preserve canonical truth. When documentation conflicts with evidence, preserve evidence and update documentation.
+

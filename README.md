@@ -35,7 +35,7 @@ Rent / Buy            Structured              Exceptional /
 
 The system follows **One Operational Reality**: different surfaces project the same canonical property, booking, payment, person, service and accounting facts instead of creating parallel copies.
 
-### Current operating proof
+### Target operating acceptance
 
 The current P0 is to operate:
 
@@ -47,6 +47,8 @@ Ignatev Estate
 
 with secure team isolation, founder consolidated oversight, and one Layantara booking proven from quote through checkout and P&L.
 
+The tree and journey above are acceptance targets, not proof that spaces are populated/enforced or that live booking, payment and P&L acceptance has passed.
+
 ## Core domain boundaries
 
 | Domain | Canonical authority |
@@ -57,13 +59,15 @@ with secure team isolation, founder consolidated oversight, and one Layantara bo
 | Service request/booking | `service_orders` |
 | Payment-provider state | verified writers / `payment_intents` where applicable |
 | Accounting | `ledger_entries` |
-| Operational scope | Management Company + Operating Space |
-| Relationship | unified CRM/person model |
+| Operational scope | Deployed checked resolver/RLS/RPCs; Management Company + Operating Space is the approved target |
+| Relationship | Existing CRM contacts/identity links; unified person continuity is the conceptual target |
 | Public discovery | safe allowlisted projections |
 
 Do not merge `service_orders` into `orders` merely for neatness. Do not infer that an `orders` success means property inventory was reserved.
 
 ## Product surfaces
+
+This is the product map, not an implementation/readiness matrix. Project Portal, Agent Workspace, shared identity and reconciled financial close require the verified tranches in PROJECT.md and current evidence.
 
 - **Homes** — Rent / Buy discovery, project portal, home/unit detail, availability/terms, quote, booking/enquiry.
 - **Services Marketplace** — REQUEST / BOOK / BOOK+PAY structured services.
@@ -136,3 +140,4 @@ Production is deployed through Vercel from the repository's production branch/co
 ## Ownership
 
 Proprietary · Ignatev Group · Phuket, Thailand.
+
