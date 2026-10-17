@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · E2.6 — Cutover blockers
+- [x] Migration 0024, isolated tests, rollback, doc (docs/convergence/OPERATING_SPACES_E2_6_CUTOVER_BLOCKERS.md).
+- [ ] Migrate public consumers to public_property_catalog, then revoke base anon access (E3 blocker).
+- [ ] Wire MC property creation to create_managed_property_checked (E3 blocker).
+
 ## 2026-10-17 · E2.5 — Security cutover readiness
 - [x] Reopen bypass register against source/live catalog and cron job names; record confirmed blockers and deployment limits.
 - [x] Harden proven export/report/order-notification paths; apply forward 0023 ceilings, no seed/enforcement/PMS integration; deploy five changed edges.
