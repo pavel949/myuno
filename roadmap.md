@@ -1,9 +1,10 @@
 # Roadmap
 
 ## 2026-10-17 · E2.8 — UNO_TEAM least privilege
-- [ ] Inventory source/live authorization, classify bypasses and concrete legitimate capabilities.
-- [ ] Narrow proven private generic-employment grants; exact isolated SQL and synthetic edge regressions before live deployment.
-- [ ] Read-only verification, rollback, bypass register and E2.8 report; no enforcement, seed, Order Mutation Audit or E3.
+- [x] Source/live census and confirmed/UNKNOWN dispositions saved under docs/convergence/e2_8/.
+- [x] Proven private employment bypasses narrowed: 0028–0031, 128 policies, checked RPCs, 15 deployed handlers after isolated tests.
+- [x] Read-only aggregates, security-preserving rollback, register and E2.8 report; no enforcement, seed, Order Mutation Audit or E3.
+- [ ] Full E2.8 closure — blocked by private/unpublished catalog duties, shared legacy helper consumers and explicit support contract; no implicit grants. See OPERATING_SPACES_E2_8_UNO_TEAM.md.
 
 ## 2026-10-17 · E2.5 continuation
 - [x] 0025 delegate/placement guards, tests, rollback, register and report updated.
