@@ -232,6 +232,13 @@
       "when": 1792217219893,
       "tag": "0032_catalog_notification_private_boundaries",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792220430026,
+      "tag": "0033_restrict_unchecked_wallet_mutations",
+      "breakpoints": true
     }
   ]
 }
