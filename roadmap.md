@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-17 · Resorts/hotels plan review (categories, rate plans, rules)
+- [x] Stage status audited: schema + server quote + room assignment + MC structure page live; guest page unwired, restrictions editor missing, live categories/rate plans 0 (33 properties all `unit`).
+- [ ] Wire guest-facing category offers to property detail page (stage 4) and add stay-restrictions editor to structure page (stage 3 gap).
+- [ ] Stage 5 live validation — blocked: requires team-entered category/rate data or explicit approval for [TEST] resort rows (no production writes by agent).
+
+
 ## 2026-10-17 · Property and tariff data-entry priority
 - [x] Correct stale season drafts, selected-property default and edit-time property reassignment in existing tariff form; retain price edits after errors, prevent duplicate base-price submissions and refresh existing property views. Seasonal property controls now fit narrow screens and use non-submit buttons.
 - [x] Verify only the changed tariff workflow with synthetic browser data: edit/reopen, second season, selected property and failed-save draft retention; no production reads/writes/outbound requests. Automatic build OK. No broad test expansion, permission expansion, enforcement, assignments or E3 cutover.
