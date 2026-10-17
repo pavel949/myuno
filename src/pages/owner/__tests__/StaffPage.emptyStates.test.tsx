@@ -8,6 +8,7 @@ const fixture = vi.hoisted(() => ({
   rows: [] as StaffMember[], loading: false, error: null as Error | null,
   companyLoading: false, companyError: false, canManage: true,
   retry: vi.fn(), retryCompany: vi.fn(), assignment: vi.fn(),
+  permissionReads: vi.fn(() => ({ data: [] })), permissionEditor: vi.fn(() => null),
   properties: [] as Array<{ property_id: string; title: string; title_ru: string }>,
 }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
@@ -28,14 +29,15 @@ vi.mock('@/hooks/useStaffMembers', () => ({
   PAY_TYPES: [{ value: 'salary', labelRu: 'Оклад', labelEn: 'Salary' }],
 }));
 vi.mock('@/hooks/useTeamPermissions', () => ({
-  useMemberPermissions: () => ({ data: [] }), MODULES: [],
+  useMemberPermissions: fixture.permissionReads, MODULES: [],
   useCanManagePermissions: () => fixture.canManage,
 }));
 vi.mock('@/components/uno/PageContainer', () => ({ PageContainer: ({ children }: { children: ReactNode }) => <main>{children}</main> }));
 vi.mock('@/components/uno/PageHeader', () => ({ PageHeader: ({ title }: { title: string }) => <h1>{title}</h1> }));
 vi.mock('@/components/upload/UnifiedMediaUploader', () => ({ UnifiedMediaUploader: () => null }));
 vi.mock('@/components/owner/vendors/VendorDocumentsTab', () => ({ VendorDocumentsTab: () => null }));
-vi.mock('@/components/owner/team/MemberPermissionsSheet', () => ({ MemberPermissionsSheet: () => null }));
+vi.mock('@/components/owner/team/MemberPermissionsSheet', () => ({ MemberPermissionsSheet: fixture.permissionEditor }));
+vi.mock('@/pages/owner/TeamPage', () => ({ default: () => <div>Existing property delegation boundary</div> }));
 vi.mock('@/components/owner/team/MemberActivitySheet', () => ({ MemberActivitySheet: () => null }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {
   from: () => { throw Error('Database denied'); },
@@ -54,7 +56,7 @@ function mount() { return render(<MemoryRouter><StaffPage /></MemoryRouter>); }
 beforeEach(() => {
   fixture.rows = []; fixture.loading = false; fixture.error = null; fixture.companyLoading = false;
   fixture.companyError = false; fixture.canManage = true; fixture.retry.mockReset(); fixture.retryCompany.mockReset();
-  fixture.properties = []; fixture.assignment.mockReset();
+  fixture.properties = []; fixture.assignment.mockReset(); fixture.permissionReads.mockClear(); fixture.permissionEditor.mockClear();
   vi.stubGlobal('fetch', () => { throw new Error('Production network denied'); });
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
@@ -126,6 +128,23 @@ describe('staff setup and empty states without real employees or assignments', (
     expect(screen.queryByText('Property Assignments')).not.toBeInTheDocument();
     expect(screen.queryByText('+ Add property')).not.toBeInTheDocument();
     expect(fixture.assignment).not.toHaveBeenCalled();
+  });
+
+
+  it('opens existing property delegations instead of querying or editing permissions with a directory ID', async () => {
+    fixture.rows = [{
+      id: 'directory-row-only', owner_id: 'synthetic-owner', name: 'Directory-only employee',
+      role: 'staff', pay_type: 'salary', is_active: true,
+      created_at: '2026-10-01T00:00:00.000Z', updated_at: '2026-10-01T00:00:00.000Z',
+    }];
+    mount();
+    expect(fixture.permissionReads).not.toHaveBeenCalled();
+    expect(fixture.permissionEditor).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Open Access & Delegation' }));
+    expect(await screen.findByText('Existing property delegation boundary')).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Access & Delegation' })).toHaveAttribute('data-state', 'active');
+    expect(fixture.permissionReads).not.toHaveBeenCalled();
+    expect(fixture.permissionEditor).not.toHaveBeenCalled();
   });
 
 });

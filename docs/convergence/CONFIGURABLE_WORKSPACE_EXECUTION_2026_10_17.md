@@ -11,7 +11,7 @@ Keep existing canonical sources and authorization. Do not fabricate business rec
 - Existing settings links open their intended allowlisted section and retain other URL parameters.
 - Operations settings connect to existing mounted task and guest-message screens.
 - Membership lookup loading/failure is exposed to consumers, with retry. A failed lookup is not company creation or an empty directory.
-- Staff loading/error, true emptiness and filtered emptiness are distinguished; existing entry and permission gates remain.
+- Staff loading/error, true emptiness and filtered emptiness are distinguished; existing entry and permission gates remain. The invalid directory-ID-to-account permission editor is replaced by entry to the existing property-delegation tab, without inventing identity links.
 - Setup is an optional guide with direct workspace/settings entry at zero progress; completed marks do not certify payment or business readiness.
 - Empty-company dashboard supplies actual workspace destinations instead of requiring the first property or booking.
 - Existing onboarding progress persistence is retained; opening its hook may create its technical progress row. No new business seeding is introduced.

@@ -6,8 +6,7 @@ import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTab';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { MemberPermissionsSheet } from '@/components/owner/team/MemberPermissionsSheet';
-import { useMemberPermissions, MODULES, useCanManagePermissions } from '@/hooks/useTeamPermissions';
+import { useCanManagePermissions } from '@/hooks/useTeamPermissions';
 import { MemberActivitySheet } from '@/components/owner/team/MemberActivitySheet';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -179,71 +178,6 @@ function staffToForm(s: StaffMember): StaffFormState {
   };
 }
 
-/** Compact permission indicators for staff card */
-function StaffPermissionBadges({ userId, isRu, onClick }: { userId: string; isRu: boolean; onClick: () => void }) {
-  const { data: permissions = [] } = useMemberPermissions(userId);
-  const t = (en: string, ru: string) => isRu ? ru : en;
-  
-  if (permissions.length === 0) {
-    return (
-      <button
-        onClick={onClick}
-        className="mt-3 pt-3 border-t border-border/40 flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors w-full"
-      >
-        <ShieldCheck className="h-3.5 w-3.5" />
-        <span>{t('Set up permissions', 'Настроить права')}</span>
-      </button>
-    );
-  }
-
-  const moduleLabels: Record<string, { short: string; shortRu: string }> = {
-    properties: { short: 'Prop', shortRu: 'Объ' },
-    finance: { short: 'Fin', shortRu: 'Фин' },
-    crm: { short: 'CRM', shortRu: 'CRM' },
-    tasks: { short: 'Tasks', shortRu: 'Зад' },
-    bookings: { short: 'Book', shortRu: 'Бр' },
-    reports: { short: 'Rep', shortRu: 'Отч' },
-    staff: { short: 'Staff', shortRu: 'Ком' },
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      className="mt-3 pt-3 border-t border-border/40 w-full group"
-    >
-      <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
-        <ShieldCheck className="h-3 w-3" />
-        {t('Permissions', 'Права доступа')}
-        <Pencil className="h-3 w-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-      </p>
-      <div className="flex flex-wrap gap-1">
-        {MODULES.map(mod => {
-          const perm = permissions.find(p => p.module === mod.key);
-          const hasView = perm?.can_view ?? false;
-          const hasEdit = perm?.can_edit ?? false;
-          const label = isRu ? (moduleLabels[mod.key]?.shortRu ?? mod.key) : (moduleLabels[mod.key]?.short ?? mod.key);
-          
-          return (
-            <span
-              key={mod.key}
-              className={`text-[10px] px-1.5 py-0.5 rounded-none font-medium ${
-                hasEdit
-                  ? 'bg-primary/10 text-primary'
-                  : hasView
-                    ? 'bg-muted text-muted-foreground'
-                    : 'bg-muted/40 text-muted-foreground/40 line-through'
-              }`}
-              title={`${isRu ? mod.labelRu : mod.labelEn}: ${hasEdit ? (isRu ? 'Редактирование' : 'Edit') : hasView ? (isRu ? 'Просмотр' : 'View') : (isRu ? 'Нет доступа' : 'No access')}`}
-            >
-              {label}
-            </span>
-          );
-        })}
-      </div>
-    </button>
-  );
-}
-
 /** Rich staff card component */
 function StaffCard({
   staff,
@@ -253,7 +187,7 @@ function StaffCard({
   onReactivate,
   properties,
   onViewTasks,
-  onEditPermissions,
+  onOpenAccess,
   onViewActivity,
   canManage,
 }: {
@@ -264,7 +198,7 @@ function StaffCard({
   onReactivate: () => void;
   properties: { property_id: string; title: string; title_ru: string }[];
   onViewTasks: () => void;
-  onEditPermissions: () => void;
+  onOpenAccess: () => void;
   onViewActivity: () => void;
   canManage: boolean;
 }) {
@@ -366,8 +300,16 @@ function StaffCard({
               </p>
             )}
 
-            {/* Permission badges - clickable */}
-            <StaffPermissionBadges userId={staff.id} isRu={isRu} onClick={onEditPermissions} />
+            {/* Directory identity is not an authenticated account or a permission grant. */}
+            <button
+              type="button"
+              onClick={onOpenAccess}
+              aria-label={t('Open Access & Delegation', 'Открыть доступ и делегирование')}
+              className="mt-3 pt-3 border-t border-border/40 flex min-h-11 items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors w-full"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>{t('Access & Delegation', 'Доступ и делегирование')}</span>
+            </button>
 
             {/* Footer: hire date */}
             <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between">
@@ -423,9 +365,9 @@ function StaffCard({
                 <ClipboardList className="h-4 w-4 mr-2" />
                 {t('View Tasks', 'Задачи')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onEditPermissions}>
+              <DropdownMenuItem onClick={onOpenAccess}>
                 <ShieldCheck className="h-4 w-4 mr-2" />
-                {t('Permissions', 'Права доступа')}
+                {t('Access & Delegation', 'Доступ и делегирование')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onViewActivity}>
                 <History className="h-4 w-4 mr-2" />
@@ -478,7 +420,6 @@ export default function StaffPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<StaffRole | 'all'>('all');
   // addMemberOpen removed — unified into Sheet form
-  const [permissionsTarget, setPermissionsTarget] = useState<{ userId: string; name: string; staffId: string; customTitle?: string } | null>(null);
   const [activityTarget, setActivityTarget] = useState<{ userId: string; name: string } | null>(null);
 
   const t = (en: string, ru: string) => isRu ? ru : en;
@@ -704,7 +645,7 @@ export default function StaffPage() {
               onReactivate={() => handleReactivate(s)}
               properties={allProperties}
               onViewTasks={() => navigate(`/mc/tasks?assignee=${s.id}`)}
-              onEditPermissions={() => setPermissionsTarget({ userId: s.id, name: s.name, staffId: s.id, customTitle: s.custom_title })}
+              onOpenAccess={() => setPageTab('access')}
               onViewActivity={() => setActivityTarget({ userId: s.id, name: s.name })}
               canManage={canManage}
             />
@@ -917,16 +858,6 @@ export default function StaffPage() {
       )}
 
       {/* AddTeamMemberDialog removed — consolidated into Sheet form above */}
-
-      {/* Member Permissions Sheet */}
-      <MemberPermissionsSheet
-        open={!!permissionsTarget}
-        onOpenChange={(open) => { if (!open) setPermissionsTarget(null); }}
-        userId={permissionsTarget?.userId ?? null}
-        userName={permissionsTarget?.name ?? ''}
-        customTitle={permissionsTarget?.customTitle}
-        staffId={permissionsTarget?.staffId}
-      />
 
       {/* Member Activity Sheet */}
       <MemberActivitySheet

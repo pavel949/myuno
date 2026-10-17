@@ -20,7 +20,7 @@ import MCSettingsPage from '../MCSettingsPage';
 function Probe() {
   const location = useLocation();
   const navigate = useNavigate();
-  return <><output data-testid="location">{location.pathname + location.search}</output>
+  return <><div data-testid="location">{location.pathname + location.search}</div>
     <button onClick={() => navigate('/mc/settings?tab=crm&keep=yes')}>Open CRM destination</button></>;
 }
 function mount(entry = '/mc/settings') {
