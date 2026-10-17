@@ -49,6 +49,12 @@ beforeAll(async()=>{
  expect((await sql`SELECT total_amount,currency,status FROM orders WHERE id=${id(31)}`)[0]).toMatchObject({total_amount:'1.00',currency:'USD',status:'refunded'});
  await as(team,tx=>tx`SELECT topup_wallet_atomic(${guest},900,'refund','forged')`);
  expect((await sql`SELECT balance FROM wallets WHERE user_id=${guest}`)[0].balance).toBe('1000');
+ await sql.unsafe(readFileSync('docs/convergence/final_order_mutation/wallet-containment.sql','utf8'));
+ await expect(as(team,tx=>tx`SELECT topup_wallet_atomic(${guest},900,'refund','forged')`)).rejects.toThrow(/permission denied/);
+ await expect(sql`SELECT topup_wallet_atomic(${guest},-1,'stripe_checkout','cs_test')`).rejects.toThrow(/invalid_wallet_amount/);
+ for(const name of ['pay_from_wallet_atomic','topup_wallet_atomic']) {
+  const f=live.find(x=>x.proname===name);if(!f)throw Error(name);await sql.unsafe(f.definition);
+ }
  await sql`UPDATE orders SET total_amount=100,currency='THB',customer_user_id=${guest},metadata='{}',status='confirmed' WHERE id=${id(31)}`;
  await sql.unsafe(readFileSync('docs/convergence/final_order_mutation/restrictive-fixes.sql','utf8'));
 },60000);
