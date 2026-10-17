@@ -218,6 +218,13 @@
       "when": 1792215011902,
       "tag": "0030_preserve_juristic_platform_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1792215066320,
+      "tag": "0031_checked_onboarding_private_capability",
+      "breakpoints": true
     }
   ]
 }
