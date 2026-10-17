@@ -1,12 +1,16 @@
 name: Connected system isolated verification
 on:
   push:
-    branches: [codex/connected-system-2026-10-17]
+    # Verify the actual merged release source; PRs already verify feature branches.
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: connected-system-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -57,6 +61,7 @@ jobs:
             TZ="$zone" npx vitest run src/hooks/__tests__/pmsFlow.integration.test.tsx src/pages/owner/__tests__/MCBookingsPage.test.tsx src/hooks/__tests__/roomCategoryCache.test.tsx src/pages/property/PropertyIndex.test.tsx src/hooks/__tests__/formDraftLifecycle.test.tsx src/components/auth/InvestorGuard.test.tsx src/components/onboarding/Coachmarks.test.tsx || exit 1
           done
           node scripts/qa/scheduled-backup-integrity.mjs
+          node scripts/qa/transfer-operator-conflicts.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Production build with synthetic configuration
@@ -114,3 +119,4 @@ jobs:
         run: |
           printf 'types=%s unit=%s focused=%s build=%s browser=%s lint=%s\n' "$TYPES" "$UNIT" "$FOCUSED" "$BUILD" "$BROWSER" "$LINT" | tee -a "$GITHUB_STEP_SUMMARY"
           test "$TYPES" = success && test "$UNIT" = success && test "$FOCUSED" = success && test "$BUILD" = success && test "$BROWSER" = success && test "$LINT" = success
+

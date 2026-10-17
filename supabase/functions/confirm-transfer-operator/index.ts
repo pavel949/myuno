@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      const { data: rejUpd } = await sb()
+      const { data: rejUpd, error: rejectUpdateError } = await sb()
         .from('orders')
         .update({ status: 'cancelled' })
         .eq('id', orderId)
@@ -137,9 +137,15 @@ Deno.serve(async (req) => {
         .eq('order_type', 'transfer')
         .select('id');
 
+      if (rejectUpdateError) {
+        console.error('[reject] atomic update failed', rejectUpdateError);
+        return new Response(JSON.stringify({ error: 'Update failed' }), {
+          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       if (!rejUpd || rejUpd.length === 0) {
-        return new Response(JSON.stringify({ success: true, already_cancelled: true, order_number: order.order_number }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        return new Response(JSON.stringify({ error: 'Transfer changed; reload before retrying' }), {
+          status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
@@ -202,9 +208,9 @@ Deno.serve(async (req) => {
       });
     }
     if (!updated || updated.length === 0) {
-      // Someone else confirmed between our SELECT and UPDATE — treat as success, skip side effects.
-      return new Response(JSON.stringify({ success: true, already_confirmed: true, order_number: order.order_number }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      // A lost conditional update proves no outcome; a competing cancellation may have won.
+      return new Response(JSON.stringify({ error: 'Transfer changed; reload before retrying' }), {
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -318,3 +324,4 @@ Deno.serve(async (req) => {
     );
   }
 });
+
