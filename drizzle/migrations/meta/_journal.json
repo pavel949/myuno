@@ -120,6 +120,13 @@
       "when": 1792189851156,
       "tag": "0016_multi_unit_properties_categories_rate_plans",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792195705329,
+      "tag": "0017_fix_property_media_anon_read",
+      "breakpoints": true
     }
   ]
 }
