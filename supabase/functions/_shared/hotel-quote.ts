@@ -117,3 +117,33 @@ export function quoteHotelStay(input: HotelQuoteInput): HotelQuoteResult {
   if (nights < minStay) return fail("min_stay", `Minimum stay is ${minStay} nights`);
   return { ok: true, nights, total, nightly };
 }
+
+/**
+ * Merge property-level (resort-wide) and category-level restriction rows into
+ * one row per date. Closures (stop sell, CTA, CTD) apply if either level sets
+ * them, the longer minimum stay wins, and a category date price beats a
+ * property-wide date price.
+ */
+export function mergeRestrictions(
+  rows: (HotelRestrictionRow & { category_id?: string | null })[],
+): HotelRestrictionRow[] {
+  const out = new Map<string, HotelRestrictionRow & { _cat: boolean }>();
+  for (const r of rows) {
+    const isCat = r.category_id != null;
+    const prev = out.get(r.date);
+    if (!prev) {
+      out.set(r.date, { date: r.date, price_override: r.price_override, min_stay_nights: r.min_stay_nights,
+        closed_to_arrival: !!r.closed_to_arrival, closed_to_departure: !!r.closed_to_departure, stop_sell: !!r.stop_sell, _cat: isCat });
+      continue;
+    }
+    prev.stop_sell = prev.stop_sell || !!r.stop_sell;
+    prev.closed_to_arrival = prev.closed_to_arrival || !!r.closed_to_arrival;
+    prev.closed_to_departure = prev.closed_to_departure || !!r.closed_to_departure;
+    prev.min_stay_nights = Math.max(prev.min_stay_nights ?? 0, r.min_stay_nights ?? 0) || null;
+    if (r.price_override && r.price_override > 0 && (isCat || !prev._cat || !prev.price_override)) {
+      prev.price_override = r.price_override;
+      prev._cat = prev._cat || isCat;
+    }
+  }
+  return [...out.values()].map(({ _cat, ...r }) => r);
+}
