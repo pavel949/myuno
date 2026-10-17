@@ -1,7 +1,7 @@
 # PROJECT.md — myUNO
 ## Canonical Product & Engineering Constitution
 
-> **v3.2 · 17 Oct 2026 · production core: `myuno`**
+> **v3.2.1 · 18 Oct 2026 · production core: `myuno`**
 > Canonical context for Codex, Lovable, other AI agents, engineers, product and operations.
 
 ## 00. How to use this document
@@ -16,6 +16,8 @@ myUNO is a **destination property, services and living operating system**.
 
 It connects trusted property/service supply, local execution, distribution, customer relationships and financial truth for customers, operators, providers, owners, agents and management.
 
+**Living is an experience/surface category over canonical domains, not a separate domain model.**
+
 ## 02. What myUNO is not
 Not another OTA, classifieds site, generic marketplace, “contact us” services directory, mini-app collection, duplicate PMS/CRM/accounting stack, separate Layantara app, or AI demo inventing data. `myUNO-final` is a UX/workflow donor only. **One Operational Reality** is the product.
 
@@ -27,12 +29,16 @@ Immediate proof: run a real Layantara booking from quote through checkout and P&
 
 Priority: `correctness → security → operational completeness → usability → distribution → scale`.
 
+**Services architecture is canonical now; full Marketplace activation remains P1 and must not expand the current property P0.**
+
 ## 04. Canonical Operating Loop
 Shared: `Discover → Select → Quote/Price → Request/Reserve/Transact → Pay → Fulfil → Support/Operate → Account → CRM → Repeat`.
 
 **Generic “order/request/booking” in diagrams does not imply a DB table.** Specific entities are `orders`, `service_orders`, `property_bookings`, etc.
 
-Property rental: `Property → Availability → Rate → Quote → Hold/Reservation → orders → Payment → Booking Confirmation → Stay → Checkout → Reconciliation → P&L`. Commercial transaction ≠ inventory commitment; payment confirmation ≠ booking confirmation.
+Property rental: `Property → Availability → Rate → Quote → checked/atomic commercial + inventory commitment → Verified Payment where required → Confirmation → Stay → Checkout → Reconciliation → P&L`.
+
+Do not infer a fixed ordering between creation/mutation of `orders` and `property_bookings` from this diagram. Follow the verified canonical writer contract. Commercial transaction ≠ inventory commitment; successful `orders` state does not prove successful inventory reservation; payment confirmation ≠ booking confirmation.
 
 Property purchase: `Project/Unit → Terms → Enquiry → Qualification → Viewing/DD → Transaction → Ownership/PM`. Never force Buy into rental semantics.
 
@@ -43,7 +49,9 @@ Service modes:
 - **BOOK**: offering/availability known; payment may be later/outside myUNO.
 - **BOOK+PAY**: offering, availability and server-authoritative price known; canonical checkout exists.
 
-Creating `service_orders` does not automatically create/require `orders`. If a vertical needs platform checkout/settlement/ledger, use an explicit idempotent reconciled bridge. Never create two financial truths.
+Each service vertical must define its authoritative capacity/hold point independently of payment. **Payment must never substitute for capacity reservation.**
+
+Creating `service_orders` does not automatically create/require `orders`. If a vertical needs platform checkout/settlement/ledger, use an explicit idempotent reconciled bridge. Where bridged, persist deterministic linkage and enforce at-most-one active commercial order per service transaction unless an explicitly modelled retry/version contract requires otherwise. Never create two financial truths.
 
 **Structured request → Marketplace first. Exceptional request → Concierge.** Concierge never creates a second service-order model; if it finds a structured offering, hand back to the canonical Marketplace workflow.
 
@@ -52,6 +60,8 @@ Creating `service_orders` does not automatically create/require `orders`. If a v
 
 Homes, Services, Concierge, PMS, Agent, Owner, Finance and CRM are projections: **different views, one state**.
 
+**Immutable/auditable snapshots such as accepted quotes may preserve historical commercial state. They are evidence of the agreed state at a point in time, not competing canonical truth.**
+
 ## 06. Canonical domains / sources of truth
 Before adding a table/enum/hook/context/workflow, find the existing canonical implementation and prove it cannot represent the requirement.
 
@@ -59,7 +69,7 @@ Before adding a table/enum/hook/context/workflow, find the existing canonical im
 - Project: project domain; never auth scope by itself.
 - Rental inventory: `property_bookings` + canonical blocks/exclusion.
 - Stay dates: `[check_in, check_out)`.
-- Property commerce: `orders`.
+- Commercial order: `orders` where the canonical commercial-order contract applies. Property bookings and service requests remain separate domain entities.
 - Payment: verified canonical payment writers; `payment_intents` where provider/Stripe state applies.
 - Accounting: `ledger_entries`.
 - Services catalogue: approved services/providers + safe public projections.
@@ -79,12 +89,14 @@ One person may be guest, renter, buyer, investor, owner, referrer, agent, suppli
 
 One primary Space/property unless approved otherwise; cross-space membership explicit; empty/invalid scope never means All. **Operating Space = WHERE; RBAC/module/action = WHAT.** Space membership alone never grants Finance/Pricing/Booking/Admin capability.
 
+**Operating Space constrains employee/management operational access; it does not replace independently verified customer, owner, provider or public rights.**
+
 ## 08. Product Surfaces
 **Homes:** `Rent | Buy`; Search → Results → Project Portal → Category/Units → Unit → Terms/Availability → Quote → Booking/Enquiry.
 
 **Services Marketplace:** `Services → Category → Provider/Offering → Availability → Price → REQUEST|BOOK|BOOK+PAY → Confirmation → My Services`. Existing/partial verticals include transport, vehicles, tours, yachts, flowers, beauty/spa, cleaning, fitness, restaurants/events. Code/route existence ≠ readiness. Verify real providers, approved offerings, safe fields, price, availability, commerce mode, mapping, fulfilment, settlement where applicable, and admin editing. No fake fallback catalogue.
 
-**Concierge:** human escalation/orchestration only when structured Marketplace cannot safely fulfil.
+**Concierge:** human escalation/orchestration only when structured Marketplace cannot safely fulfil. Concierge may maintain a case/orchestration record for conversation, requirements, coordination and resolution, but that record must not become a competing booking, payment, inventory or service-order authority. When a structured service is selected, return the transaction to the canonical Marketplace/service workflow.
 
 **PMS:** Today, Calendar, Bookings, Properties, Workspace, Stay Detail, Housekeeping, Maintenance, Rates, Inventory, Finance, Owners, Staff.
 
@@ -107,6 +119,8 @@ No separate booking engine, calendar, guest DB, ledger or CRM. Differences from 
 Engines: rental/management; sales/investment; owner/asset management; agent distribution; Services Marketplace GMV/fees; monetized high-touch Concierge; separately governed investment/trust products.
 
 Property flywheel is economics, not a required state machine. Services are revenue plus high-frequency trust/retention. Every monetized flow defines payer, revenue event, fee, counterparty, recognition and accounting destination. Never invent a universal Marketplace commission.
+
+**A service request is not GMV. Marketplace GMV/revenue is recognized only from the configured, verified commercial/financial event for that vertical.**
 
 ## 11. Architectural invariants
 1. One Operational Reality.
@@ -137,6 +151,8 @@ UI `paid` is not payment truth. Manual/off-platform payment requires authorized 
 
 `ledger_entries` is accounting truth. Operating Space filters/reports finance; never a second ledger. Shared/unallocated costs stay explicit.
 
+**Operational forecasts, pending amounts and provisional accruals may exist, but must be explicitly labelled non-posted/provisional and must not be included in realized P&L as though they were posted ledger truth.**
+
 ## 13. UX Principles
 Trusted infrastructure, not noisy marketplace. Task first. One obvious primary action. Next **safe** action, not every action. Exceptions before dashboards. Progressive disclosure. Information density may be high; control density low. Mobile-first 375px. RU/EN resilient. Status not color-only. Loading/empty/error distinct. Failed data never zero/all-clear. No page-level overflow. Project Card ≠ Unit Card. Respect public/private boundaries. Admin/content tooling is production-grade. UNKNOWN remains unknown.
 
@@ -157,7 +173,7 @@ If intended operators should manage rates/photos/descriptions/inventory/publicat
 **P1:** Agent Workspace; coherent Homes Rent/Buy; real Services Marketplace + Concierge fallback; Stay 360; Owner/Map/Notifications/Admin.
 
 ## 16. Current P0
-**Replaceable execution pointer; update after every accepted gate.**
+**Replaceable execution pointer; update after every accepted gate. After a gate is accepted, replace it with the next unresolved gate; do not rerun accepted work without new contrary evidence.**
 
 `A Final Order Mutation Security → B real Space manifest → C seed Spaces with enforcement OFF → D resolver/cache isolation → E Properties → F Calendar → G Today → H Bookings → I supervised enforcement → J Layantara E2E → K Housekeeping/Maintenance → L Identity/CRM → M Finance/P&L`.
 
@@ -168,7 +184,7 @@ After P0: Agent Workspace; Homes Rent/Buy; **Services Marketplace Activation** (
 Stop for review after money, inventory, RLS, schema or enforcement changes.
 
 ## 17. Explicit Non-Priorities
-No parallel PMS/CRM/finance/property/service-commerce models; no replacement Channel Manager architecture before PMS stability (do not break required integrations); no geographic expansion before Phuket loop works; no white-label PM SaaS; no speculative AI without source data; no broad aesthetic redesign; no schema rewrite for naming purity; no public exposure of private operational data; no endless security-audit expansion after finite P0 unless a proven critical blocker exists.
+No parallel PMS/CRM/finance/property/service-commerce models; no new/replacement Channel Manager architecture before PMS stability (**do not break or remove required existing integrations**); no geographic expansion before Phuket loop works; no white-label PM SaaS; no speculative AI without source data; no broad aesthetic redesign; no schema rewrite for naming purity; no public exposure of private operational data; no endless security-audit expansion after finite P0 unless a proven critical blocker exists.
 
 ## 18. Evidence / No-Hallucination Rules
 Never invent specs, coordinates, availability, prices, payments, providers, roles, permissions, production state or tests. Missing stays missing. **Absence of evidence = UNKNOWN, not false.** Never turn UNKNOWN into a default to make UI complete. Target ≠ implemented. Migration file ≠ applied. Deploy ≠ working path. UI filter ≠ RLS. Green build ≠ business correctness. Synthetic test ≠ production transaction. Prefer current code/live read-only evidence over stale docs. Report conflicts. Use exact paths/migrations/SHAs/test counts for implementation claims.
