@@ -15,12 +15,12 @@ describe('hotel category quote', () => {
     expect(q.ok && q.total).toBe(9000);
   });
   it('non-refundable −10% plan', () => {
-    const i = base(); i.plan!.adjustment_value = -10;
+    const i = base(); if (!i.plan) throw new Error('Missing test rate plan'); i.plan.adjustment_value = -10;
     const q = quoteHotelStay(i);
     expect(q.ok && q.total).toBe(8100);
   });
   it('breakfast +500 per night', () => {
-    const i = base(); i.plan!.adjustment_type = 'fixed_per_night'; i.plan!.adjustment_value = 500;
+    const i = base(); if (!i.plan) throw new Error('Missing test rate plan'); i.plan.adjustment_type = 'fixed_per_night'; i.plan.adjustment_value = 500;
     expect((quoteHotelStay(i) as { total: number }).total).toBe(10500);
   });
   it('date price beats season beats base', () => {
@@ -40,7 +40,7 @@ describe('hotel category quote', () => {
     expect(quoteHotelStay(i)).toMatchObject({ ok: false, code: 'closed_arrival' });
   });
   it('plan min stay enforced', () => {
-    const i = base(); i.plan!.min_stay_nights = 5;
+    const i = base(); if (!i.plan) throw new Error('Missing test rate plan'); i.plan.min_stay_nights = 5;
     expect(quoteHotelStay(i)).toMatchObject({ ok: false, code: 'min_stay' });
   });
   it('too many guests rejected', () => {
@@ -48,7 +48,7 @@ describe('hotel category quote', () => {
     expect(quoteHotelStay(i)).toMatchObject({ ok: false, code: 'guests' });
   });
   it('plan of another category rejected', () => {
-    const i = base(); i.plan!.category_id = 'other';
+    const i = base(); if (!i.plan) throw new Error('Missing test rate plan'); i.plan.category_id = 'other';
     expect(quoteHotelStay(i)).toMatchObject({ ok: false, code: 'invalid_plan' });
   });
   it('client and server copies are identical', () => {

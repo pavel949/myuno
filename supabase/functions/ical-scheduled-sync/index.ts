@@ -1,5 +1,6 @@
 import { createClient } from '../_shared/supabase.ts';
 import { validateExternalUrlForSSRF } from '../_shared/ssrf-guard.ts';
+import { propertyOrderHoldsInventory } from '../_shared/property-inventory.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -221,7 +222,7 @@ async function findOverlappingOrder(
     .is('deleted_at', null);
 
   const overlapping = (orders || []).find((o: any) => {
-    if (o.status === 'cancelled') return false;
+    if (!propertyOrderHoldsInventory(o.status)) return false;
     if (excludeOrderId && o.id === excludeOrderId) return false;
     const oStart = new Date(o.start_at).getTime();
     const oEnd = new Date(o.end_at).getTime();
