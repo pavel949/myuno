@@ -1,9 +1,9 @@
 # Roadmap
 
 ## 2026-10-17 · Tranche 2D — Today presentation only
-- [ ] Reprioritize existing Today projections and contextual navigation; no hooks, writers or domain changes.
-- [ ] Verify synthetic RU/EN 375/390/430/1280, actions and loading/empty/error states; no production access.
-- [ ] Document exact data gaps, source preservation, screenshots, automatic build and source SHA; no other tranches.
+- [x] Reprioritize existing Today projections and contextual navigation; no hooks, writers or domain changes.
+- [x] Verify synthetic RU/EN 375/390/430/1280, five states each; 30/30 focused plus 58/58 date/inventory in each of three TZ; no production access.
+- [x] Document exact data gaps, source preservation, reviewed screenshots, automatic build and tested source SHA in docs/convergence/TRANCHE2D_TODAY_UX.md; no other tranches.
 
 ## 2026-10-17 · Tranche 2C.2 — Booking writer date correctness
 - [x] Correct checkout-inclusive blocked-date preflight in create and update writers; no UX changes.
