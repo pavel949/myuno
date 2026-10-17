@@ -92,7 +92,7 @@ mode/selected ID/revision. Revalidation is required; cache is never authorizatio
 ## Isolated checks and live read-only evidence
 
 - Before application: 75/75 tests against staged exact SQL, including 16 retained E1 tests.
-- After application: 90/90 against applied file: 28 PostgreSQL E1/E2, 15 controller,
+- After application and independent security review: 93/93 against applied file: 29 PostgreSQL E1/E2, 17 controller,
   16 civil-date, 16 inventory unit, 15 inventory PostgreSQL.
 - Local PostgreSQL uses synthetic companies/members/properties and actual
   authenticated non-owner RLS; no hosted writes/network. JS tests forbid fetch.
@@ -100,13 +100,17 @@ mode/selected ID/revision. Revalidation is required; cache is never authorizatio
   selection narrowing; unauthorized/foreign/inactive/missing selections; zero grants;
   legacy/personal; membership/space revocation; reassignment/revision; unassigned
   overseer only; uno_team denial and self-grant denial; anonymous RPC denial;
-  preference isolation, logout, cache eviction, late old-company response rejection.
+  preference isolation, logout, cache eviction, late old-company response rejection,
+  out-of-order refresh/selection and malformed selected-to-All response denial.
+  Explicitly granted uno_team can see its joined space, never global oversight;
+  the review's suggested blanket uno_team denial was rejected as contrary to the
+  requested explicit-membership contract. No role is banned from valid membership.
 - Executed security-preserving rollback locally inside a reverted transaction:
   reader EXECUTE denied; corrected oversight retained.
 - Production SELECT aggregates after migration: **2 companies, 0 enforced;
   0 spaces, 0 property assignments, 0 space memberships**. Corrected helper
   definition re-read. No production seed, booking/payment submission or data update.
-- `git diff --check` passed. Automatic build log newest entry `2026-10-17T03:01:50Z`
+- `git diff --check` passed. Automatic build log entry `2026-10-17T03:03:15Z`
   is `build OK`, after generated RPC types arrived. Earlier transient unknown-RPC
   type errors are superseded; no manual build/typecheck was run.
 
