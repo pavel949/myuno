@@ -115,5 +115,7 @@ so E1a is behavior-neutral.
 | Delegate acceptance rewrite | Fixed in all modes (0025) |
 | Property INSERT into foreign company | Fixed in all modes (0025); enforced companies use checked RPC (0024) |
 | Property company change by owner | Fixed in all modes (0025) |
-| Authenticated read of private columns on approved properties | **Open blocker** — consumer migration to `public_property_catalog` required |
+| Authenticated read of private columns on approved properties | **Fixed (0026, 0027)** — public consumers on `public_property_catalog`; base approved-row policies limited to anon (column-granted); see E2_7 report |
+| Active property delegates reading approved-property titles via base table | **Open, accepted** — 0 active delegates live; no delegate policy added because it would expose private columns |
+| Generic `uno_team` PMS read via `staff_can_access_property` | **Open, pre-existing** — not changed in E2.7; needs separate RBAC decision |
 | Order customer update breadth | **Open, unverified** |

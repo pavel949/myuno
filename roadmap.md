@@ -2,12 +2,13 @@
 
 ## 2026-10-17 · E2.5 continuation
 - [x] 0025 delegate/placement guards, tests, rollback, register and report updated.
-- [ ] Authenticated private-column exposure on approved properties (needs consumer migration).
+- [x] Authenticated private-column exposure on approved properties closed (0026, 0027).
 - [ ] Order customer update breadth audit.
 
 ## 2026-10-17 · E2.6 — Cutover blockers
 - [x] Migration 0024, isolated tests, rollback, doc (docs/convergence/OPERATING_SPACES_E2_6_CUTOVER_BLOCKERS.md).
-- [ ] Migrate public consumers to public_property_catalog, then revoke base anon access (E3 blocker).
+- [x] Public consumers migrated to public_property_catalog; signed-in base approved-row read closed.
+- [ ] Optional later: revoke anon column grants on base properties once no anon consumer reads it (not required for privacy: anon grants are the public contract).
 - [ ] Wire MC property creation to create_managed_property_checked (E3 blocker).
 
 ## 2026-10-17 · E2.5 — Security cutover readiness
