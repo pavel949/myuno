@@ -12,8 +12,8 @@ async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         for language in ['ru', 'en']:
-            for width in [375, 390, 430]:
-                context = await browser.new_context(viewport={'width': width, 'height': 900}, is_mobile=True, has_touch=True, service_workers='block')
+            for width in [375, 390, 430, 1280]:
+                context = await browser.new_context(viewport={'width': width, 'height': 1800}, is_mobile=width < 640, has_touch=width < 640, service_workers='block')
                 blocked, errors = [], []
                 async def isolated_route(route):
                     url = route.request.url
@@ -28,6 +28,11 @@ async def main():
                 page = await context.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 await page.goto(f'http://localhost:8080/fixture?lang={language}', wait_until='networkidle')
+                heading = page.get_by_role('heading', level=1, name='Бронирования' if language == 'ru' else 'Bookings', exact=True)
+                await expect(heading).to_be_visible()
+                heading_bounds = await heading.evaluate('e => ({width:e.clientWidth,scroll:e.scrollWidth,overflow:getComputedStyle(e).textOverflow})')
+                assert heading_bounds['scroll'] <= heading_bounds['width'] and heading_bounds['overflow'] != 'ellipsis', heading_bounds
+                await page.screenshot(path=str(OUTPUT / f'{language}-{width}-list.png'))
                 first = page.get_by_role('checkbox', name=('Выбрать бронирование: Александра' if language == 'ru' else 'Select booking: Alexandra'))
                 await expect(first).to_be_visible()
                 await first.focus()
@@ -41,6 +46,8 @@ async def main():
                 await expect(page.get_by_role('dialog')).to_contain_text('fixture-booking-01')
                 await page.get_by_role('button', name='Close fixture').click()
                 await first.click()
+                await expect(page.get_by_role('dialog')).to_have_count(0)
+                await page.screenshot(path=str(OUTPUT / f'{language}-{width}-selected.png'))
                 for action, status in [('Подтвердить' if language == 'ru' else 'Confirm', 'confirmed'), ('Отменить' if language == 'ru' else 'Cancel', 'cancelled')]:
                     before = await page.evaluate('window.fixtureCalls.length')
                     await page.get_by_role('button', name=action, exact=True).click()

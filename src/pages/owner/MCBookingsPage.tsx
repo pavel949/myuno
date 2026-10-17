@@ -239,53 +239,43 @@ export default function MCBookingsPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title={isRu ? 'Бронирования' : 'Bookings'}
-        actions={
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={exportCSV}
-              aria-label={isRu ? 'Экспортировать список в CSV' : 'Export list to CSV'}
-            >
-              <Download className="w-4 h-4 sm:mr-1" />
-              <span className="hidden sm:inline">CSV</span>
-            </Button>
-            <Button size="sm" onClick={() => navigate('/mc/calendar')}>
-              <Plus className="w-4 h-4 mr-1" />
-              {isRu ? 'Новое бронирование' : 'New Booking'}
-            </Button>
-          </div>
-        }
-      />
+      <header className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="font-display text-h3 text-foreground break-words min-w-0">
+          {isRu ? 'Бронирования' : 'Bookings'}
+        </h1>
+        <Button className="w-full sm:w-auto min-h-11" onClick={() => navigate('/mc/calendar')}>
+          <Plus className="w-4 h-4" aria-hidden="true" />
+          {isRu ? 'Новое бронирование' : 'New Booking'}
+        </Button>
+      </header>
 
       {/* Compact KPI summary — each tile also selects the matching filter */}
-      <div className="grid grid-cols-4 gap-2 mb-4" role="group" aria-label={isRu ? 'Сводка бронирований' : 'Bookings summary'}>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4" role="group" aria-label={isRu ? 'Сводка бронирований' : 'Bookings summary'}>
         {([
           { filter: 'all' as StatusFilter, value: stats.total, label: isRu ? 'Всего' : 'Total' },
           { filter: 'active' as StatusFilter, value: stats.active, label: isRu ? 'Сейчас' : 'Active' },
           { filter: 'upcoming' as StatusFilter, value: stats.upcoming, label: isRu ? 'Скоро' : 'Upcoming' },
           { filter: 'pending' as StatusFilter, value: stats.pending, label: isRu ? 'Ожидает' : 'Pending' },
         ]).map(tile => (
-          <button
+          <Button
             key={tile.filter}
-            type="button"
+            variant="ghost"
             onClick={() => setStatusFilter(tile.filter)}
             aria-pressed={statusFilter === tile.filter}
             className={cn(
-              'text-center px-1 py-1.5 rounded-none transition-colors min-h-[44px]',
+              'justify-between gap-2 text-left px-3 py-2 rounded-none transition-colors min-h-11 h-auto',
               statusFilter === tile.filter ? 'bg-primary/10 ring-1 ring-primary' : 'bg-muted/50',
             )}
           >
             <div className="text-base font-bold leading-tight">{tile.value}</div>
-            <div className="text-[11px] text-muted-foreground truncate">{tile.label}</div>
-          </button>
+            <div className="text-xs text-muted-foreground">{tile.label}</div>
+          </Button>
         ))}
       </div>
 
-      {/* Search & sort (single consolidated controls row) */}
-      <div className="flex gap-2 mb-3">
+      {/* Search, utilities and status share one bounded control area. */}
+      <section className="min-w-0 space-y-2 border-y border-border py-3 mb-4" aria-label={isRu ? 'Поиск и фильтры бронирований' : 'Booking search and filters'}>
+      <div className="flex gap-2">
         <div className="flex-1 min-w-0 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -293,12 +283,12 @@ export default function MCBookingsPage() {
             onChange={e => setSearchQuery(e.target.value)}
             placeholder={isRu ? 'Поиск по имени, email, телефону...' : 'Search by name, email, phone...'}
             aria-label={isRu ? 'Поиск бронирований' : 'Search bookings'}
-            className="pl-9"
+            className="pl-9 min-h-11"
           />
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" aria-label={isRu ? 'Сортировка' : 'Sort'}>
+            <Button variant="ghost" size="icon" title={isRu ? 'Сортировка' : 'Sort'} aria-label={isRu ? 'Сортировка' : 'Sort'}>
               <ArrowUpDown className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -310,36 +300,44 @@ export default function MCBookingsPage() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+        <Button variant="ghost" size="icon" onClick={exportCSV}
+          title={isRu ? 'Экспортировать список в CSV' : 'Export list to CSV'}
+          aria-label={isRu ? 'Экспортировать список в CSV' : 'Export list to CSV'}>
+          <Download className="w-4 h-4" aria-hidden="true" />
+        </Button>
       </div>
 
       {/* Status filters — bounded grid, no horizontal page overflow */}
       <div
-        className="grid grid-cols-3 sm:grid-cols-6 gap-1 mb-4"
+        className="grid grid-cols-2 min-[390px]:grid-cols-3 lg:grid-cols-6 gap-1"
         role="group"
         aria-label={isRu ? 'Фильтр по статусу' : 'Filter by status'}
       >
         {STATUS_FILTERS.map(f => (
-          <button
+          <Button
             key={f.value}
-            type="button"
+            variant="ghost"
             onClick={() => setStatusFilter(f.value)}
             aria-pressed={statusFilter === f.value}
             className={cn(
-              'px-1 py-2 text-xs rounded-none border transition-colors truncate min-h-[44px]',
+              'px-2 py-2 text-xs rounded-none border transition-colors whitespace-normal break-words min-h-11 h-auto focus-visible:ring-2 focus-visible:ring-ring',
               statusFilter === f.value
                 ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-background text-muted-foreground border-border hover:text-foreground',
             )}
           >
             {isRu ? f.labelRu : f.label}
-          </button>
+          </Button>
         ))}
       </div>
 
+      </section>
+
       {/* Bulk actions toolbar */}
       {selectedIds.size > 0 && (
-        <div className="flex flex-wrap items-center gap-2 mb-3 p-3 bg-primary/5 border border-primary/20 rounded-none">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-3 p-2 bg-muted border border-border rounded-none" role="group" aria-label={isRu ? 'Действия с выбранными бронированиями' : 'Selected booking actions'}>
           <Checkbox
+            className="h-11 w-11 shrink-0"
             checked={selectedIds.size === filteredBookings.length}
             onCheckedChange={toggleSelectAll}
             aria-label={isRu ? 'Выбрать все видимые бронирования' : 'Select all visible bookings'}
@@ -347,37 +345,38 @@ export default function MCBookingsPage() {
           <span className="text-sm font-medium">
             {selectedIds.size} {isRu ? 'выбрано' : 'selected'}
           </span>
-          <div className="flex flex-wrap gap-2 ml-auto">
+          <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto sm:ml-auto">
             {pendingBulkAction === null ? (
               <>
-                <Button size="sm" variant="outline" onClick={() => setPendingBulkAction('confirm')}>
+                <Button className="min-h-11 px-2" size="sm" variant="outline" onClick={() => setPendingBulkAction('confirm')}>
                   <Check className="w-3.5 h-3.5 mr-1" />
                   {isRu ? 'Подтвердить' : 'Confirm'}
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setPendingBulkAction('cancel')}>
+                <Button className="min-h-11 px-2" size="sm" variant="outline" onClick={() => setPendingBulkAction('cancel')}>
                   <X className="w-3.5 h-3.5 mr-1" />
                   {isRu ? 'Отменить' : 'Cancel'}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={clearSelection}>
+                <Button className="min-h-11 px-2" size="sm" variant="ghost" onClick={clearSelection}>
                   {isRu ? 'Снять выбор' : 'Clear'}
                 </Button>
               </>
             ) : (
               <>
-                <span className="text-xs text-muted-foreground self-center">
+                <span className="text-sm text-muted-foreground break-words flex-1 min-w-0">
                   {pendingBulkAction === 'confirm'
                     ? (isRu ? `Подтвердить ${selectedIds.size} бронирований?` : `Confirm ${selectedIds.size} bookings?`)
                     : (isRu ? `Отменить ${selectedIds.size} бронирований?` : `Cancel ${selectedIds.size} bookings?`)}
                 </span>
                 <Button
                   size="sm"
+                  className="min-h-11 min-w-11"
                   variant={pendingBulkAction === 'cancel' ? 'destructive' : 'default'}
                   disabled={bulkBusy}
                   onClick={() => executeBulkAction(pendingBulkAction)}
                 >
                   {isRu ? 'Да' : 'Yes'}
                 </Button>
-                <Button size="sm" variant="ghost" disabled={bulkBusy} onClick={() => setPendingBulkAction(null)}>
+                <Button className="min-h-11 min-w-11" size="sm" variant="ghost" disabled={bulkBusy} onClick={() => setPendingBulkAction(null)}>
                   {isRu ? 'Нет' : 'No'}
                 </Button>
               </>
@@ -414,46 +413,57 @@ export default function MCBookingsPage() {
             return (
               <Card
                 key={booking.id}
-                className="cursor-pointer hover:shadow-md transition-shadow"
+                className="cursor-pointer min-w-0 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                tabIndex={0}
+                role="group"
+                aria-label={isRu ? `Бронирование: ${guestName}` : `Booking: ${guestName}`}
+                onKeyDown={(e) => {
+                  if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    setSelectedBooking(booking);
+                  }
+                }}
                 onClick={() => setSelectedBooking(booking)}
               >
                 <CardContent className="p-3 sm:p-4">
                   {/* Top row: selection + guest + status */}
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-start gap-2 flex-1 min-w-0">
+                  <div className="flex flex-wrap items-start gap-2 mb-3">
+                    <div className="flex items-start gap-2 w-full min-w-0">
                       {/* Selection zone: fully isolated from card click, 44px touch target */}
                       <span
                         role="presentation"
-                        className="flex items-center justify-center min-w-[44px] min-h-[44px] -m-2 flex-shrink-0"
+                        className="flex items-center justify-center w-11 h-11 flex-shrink-0"
                         onClick={(e) => e.stopPropagation()}
                         onPointerDown={(e) => e.stopPropagation()}
                         onKeyDown={(e) => e.stopPropagation()}
                       >
                         <Checkbox
+                          className="w-11 h-11"
+                          onClick={(e) => e.stopPropagation()}
                           checked={selectedIds.has(booking.id)}
                           onCheckedChange={() => toggleSelectBooking(booking.id)}
                           aria-label={isRu ? `Выбрать бронирование: ${guestName}` : `Select booking: ${guestName}`}
                         />
                       </span>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm truncate">{guestName}</h3>
+                        <h3 className="font-semibold text-sm break-words" title={guestName}>{guestName}</h3>
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
                           {booking.guest_phone && (
-                            <span className="flex items-center gap-0.5 min-w-0">
+                            <span className="flex items-start gap-1 min-w-0 max-w-full">
                               <Phone className="w-3 h-3 flex-shrink-0" />
-                              <span className="truncate">{booking.guest_phone}</span>
+                              <span className="break-all" title={booking.guest_phone}>{booking.guest_phone}</span>
                             </span>
                           )}
                           {booking.guest_email && (
-                            <span className="flex items-center gap-0.5 min-w-0">
+                            <span className="flex items-start gap-1 min-w-0 max-w-full">
                               <Mail className="w-3 h-3 flex-shrink-0" />
-                              <span className="truncate">{booking.guest_email}</span>
+                              <span className="break-all" title={booking.guest_email}>{booking.guest_email}</span>
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
-                    <Badge variant={statusCfg.variant} className={cn('flex-shrink-0 max-w-[40%] truncate', statusCfg.color)}>
+                    <Badge variant={statusCfg.variant} className={cn('max-w-full whitespace-normal break-words', statusCfg.color)}>
                       {isRu ? statusCfg.labelRu : statusCfg.label}
                     </Badge>
                   </div>
@@ -480,21 +490,21 @@ export default function MCBookingsPage() {
                   </div>
 
                   {/* Bottom row: property + amount */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1 min-w-0 flex-1">
+                  <div className="flex flex-wrap items-start gap-2 border-t border-border pt-2">
+                    <span className="text-xs text-muted-foreground flex items-start gap-1 min-w-0 w-full">
                       <Building2 className="w-3 h-3 flex-shrink-0" />
-                      <span className="truncate">
+                      <span className="break-words">
                         {(booking as any).owner_properties?.title
                           || (booking as any).owner_properties?.address
                           || booking.property_id?.slice(0, 8)}
                       </span>
                     </span>
                     {booking.source && booking.source !== 'manual' && (
-                      <Badge variant="outline" className="text-xs flex-shrink-0">
+                      <Badge variant="outline" className="text-xs max-w-full whitespace-normal break-all">
                         {booking.source}
                       </Badge>
                     )}
-                    <span className="font-bold text-sm whitespace-nowrap flex-shrink-0">
+                    <span className="font-mono font-bold text-sm break-all max-w-full ml-auto">
                       {formatPrice(booking.total_amount || 0)}
                     </span>
                   </div>
