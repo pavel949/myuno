@@ -198,3 +198,17 @@ real-handler harness. No PMS pages/hooks/components touched.
 **Recommendation:** E3 may not start. First close public/private and backup
 distribution plus grant-governance blockers, then approve manifests and coordinated
 cutover. Do not enable scope based on passing resolver/entrypoint tests alone.
+## Continuation (2026-10-17) — migrations 0024 and 0025
+See `OPERATING_SPACES_E2_6_CUTOVER_BLOCKERS.md` for 0024. Migration `0025_delegation_company_guards.sql` (rollback `docs/hardening/rollback/0025_delegation_company_guards.sql`) closes legacy-mode bypasses proven against the live catalog:
+- **Delegate invite rewrite** — live policy "Users can accept invitations" checked only `invited_email` in WITH CHECK, so an invitee could change `role`, `permissions`, `property_id` or `invited_by` while accepting. Trigger `guard_property_delegate_update`: non-inviter/non-owner/non-admin may only set status pending/active/accepted/declined, bind `user_id` to self, `accepted_at`; expired invites cannot be activated. App flow (`usePropertyDelegates` accept → status `active`) preserved.
+- **Property company injection** — `owner_insert_own`/`provider_insert_own` allowed any `management_company_id`. Restrictive `company_placement_insert_ceiling`: non-null company requires active director/admin/manager there, or platform admin.
+- **Property company hijack** — `owner_update_own` had no WITH CHECK, so an owner could move a property into or out of a company. Trigger `guard_property_company_change`: changing `management_company_id` requires director/admin (or platform admin) of both old and new company.
+
+### Evidence-only findings, not changed
+- **Private fields on approved properties**: anon has column-level grants only and was denied all private columns live (REST probe, counts only). **Authenticated** users hold table-wide SELECT and `public_view_active` exposes every column of approved rows; 8 approved rows carry at least one of lock_code / actual_owner_phone / manager_phone / ical_token. Closing it requires moving 55 reading files to `public_property_catalog` before column revocation — **blocker**, not fixed to avoid an outage.
+- **Orders**: live policies are customer / vendor-org / admin only; no manager-company path, so no space bypass. Customer UPDATE breadth (`Order owners can update`, `orders_update_own`) is a separate money-integrity question — **blocker, unverified**.
+- Backups, ledger, owner finance, CRM tasks: covered by 0024 under enforcement; legacy mode intentionally unchanged.
+
+### Tests
+Isolated PostgreSQL 72/72 in `operatingSpaces.postgres.test.ts` (+4 new); with inventory and edge suites 107/107. Applied 0025 byte-identical to the tested SQL.
+Live read-only after apply: enforced 0, spaces 0, assignments 0, members 0; 2 guard triggers and 1 placement policy present.
