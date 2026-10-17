@@ -2218,3 +2218,40 @@ BEGIN
 END;
 $function$
 ;
+CREATE OR REPLACE FUNCTION public.create_managed_property_checked(p_company_id uuid, p_operating_space_id uuid, p_title_en text, p_title_ru text, p_property_type text, p_listing_type text)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE actor uuid:=auth.uid(); enforced boolean; new_id uuid;
+BEGIN
+ IF actor IS NULL THEN RAISE EXCEPTION 'authentication required' USING ERRCODE='42501'; END IF;
+ SELECT operating_spaces_enforced INTO enforced FROM public.management_companies WHERE id=p_company_id;
+ IF NOT FOUND THEN RAISE EXCEPTION 'company not found' USING ERRCODE='42501'; END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.management_company_members m WHERE m.company_id=p_company_id AND m.user_id=actor
+   AND m.is_active IS TRUE AND m.role IN ('director','admin','manager'))
+   AND NOT public.actor_is_operating_company_overseer(p_company_id) THEN
+   RAISE EXCEPTION 'company authority required' USING ERRCODE='42501'; END IF;
+ IF NOT public.mc_can_access(actor,p_company_id,'properties','edit') THEN RAISE EXCEPTION 'properties edit permission required' USING ERRCODE='42501'; END IF;
+ IF enforced IS TRUE THEN
+   -- Contract: a space is always required in enforced companies, overseers included (no unassigned onboarding).
+   IF p_operating_space_id IS NULL THEN RAISE EXCEPTION 'operating space required' USING ERRCODE='22023'; END IF;
+   IF NOT EXISTS(SELECT 1 FROM public.operating_spaces s WHERE s.id=p_operating_space_id AND s.management_company_id=p_company_id AND s.is_active)
+     OR NOT public.actor_can_access_operating_space(p_operating_space_id) THEN
+     RAISE EXCEPTION 'operating space not authorized' USING ERRCODE='42501'; END IF;
+ ELSIF p_operating_space_id IS NOT NULL THEN
+   IF NOT EXISTS(SELECT 1 FROM public.operating_spaces s WHERE s.id=p_operating_space_id AND s.management_company_id=p_company_id)
+     OR NOT public.actor_is_operating_company_overseer(p_company_id) THEN
+     RAISE EXCEPTION 'operating space not authorized' USING ERRCODE='42501'; END IF;
+ END IF;
+ INSERT INTO public.properties(title_en,title_ru,property_type,listing_type,management_company_id,is_active)
+ VALUES (p_title_en,p_title_ru,p_property_type,p_listing_type,p_company_id,false) RETURNING id INTO new_id;
+ IF p_operating_space_id IS NOT NULL THEN
+   PERFORM set_config('myuno.assignment_reason','onboarding',true);
+   INSERT INTO public.operating_space_properties(operating_space_id,property_id,management_company_id)
+   VALUES (p_operating_space_id,new_id,p_company_id);
+ END IF;
+ RETURN new_id;
+END $function$
+;

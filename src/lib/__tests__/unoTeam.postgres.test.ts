@@ -50,8 +50,9 @@ beforeAll(async()=>{
  expect(await as(team,tx=>tx`SELECT id FROM orders`)).toHaveLength(2);
  await sql.unsafe(readFileSync(process.env.E28_HELPERS??'drizzle/migrations/0028_uno_team_private_helpers.sql','utf8'));
  await sql.unsafe(readFileSync(process.env.E28_POLICIES??'drizzle/migrations/0029_uno_team_private_policies.sql','utf8'));
- await sql.unsafe(readFileSync('/tmp/e28/juristic.sql','utf8'));
+ await sql.unsafe(readFileSync('drizzle/migrations/0030_preserve_juristic_platform_admin.sql','utf8'));
  await sql`INSERT INTO juristic_contacts(id) VALUES (${id(60)})`;
+ await sql.unsafe(readFileSync('/tmp/e28/onboarding.sql','utf8'));
 },60000);
 afterAll(async()=>{if(sql)await sql.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
 describe('E2.8 exact live-catalog least privilege',()=>{
@@ -158,6 +159,13 @@ describe('E2.8 exact live-catalog least privilege',()=>{
   }).catch(e=>{if(!(e instanceof Error)||e.message!=='rollback-security')throw e;});
  });
  it('protected admin retains juristic contacts; generic team does not',async()=>{expect(await as(admin,tx=>tx`SELECT id FROM juristic_contacts`)).toHaveLength(1);expect(await as(team,tx=>tx`SELECT id FROM juristic_contacts`)).toHaveLength(0);});
+ it('team company manager without properties edit cannot use checked onboarding',async()=>{
+  await sql.begin(async tx=>{
+   await tx`INSERT INTO management_company_members(id,company_id,user_id,role,is_active) VALUES (${id(80)},${A},${team},'manager',true)`;
+   await tx.unsafe('SET LOCAL ROLE authenticated');await tx`SELECT set_config('request.jwt.claim.sub',${team},true)`;
+   await expect(tx`SELECT create_managed_property_checked(${A},NULL,'Blocked','Blocked','villa','rent')`).rejects.toThrow(/properties edit permission required/);
+  });
+ });
  it('all 128 changed policies preserve identity and exact approved expressions',async()=>{
   const targets=JSON.parse(readFileSync('src/lib/__tests__/fixtures/uno-team-targets.json','utf8')).policies;
   for(const p of targets){const row=(await sql`SELECT cmd,roles::text,permissive,qual,with_check FROM pg_policies WHERE schemaname=${p.schemaname} AND tablename=${p.tablename} AND policyname=${p.policyname}`)[0];
