@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · E2.5 — Security cutover readiness
+- [ ] Reopen bypass register against source and live catalog; distinguish callable paths and deployment uncertainty.
+- [ ] Harden proven exports/reports/object-ID paths with legacy-compatible, enforced-only scope ceilings; no seed, enforcement activation or PMS integration.
+- [ ] Verify isolated PostgreSQL/edge tests and automatic build; document rollback, deployment evidence and E3 blockers.
+
 ## 2026-10-17 · E2 — Shadow operational scope resolver
 - [x] Review and narrow E1 platform oversight through forward 0022; production aggregates: 2 companies, 0 enforced; spaces/assignments/memberships 0.
 - [x] Add server-derived canonical scope and isolated preference/cache lifecycle; no PMS consumers.
