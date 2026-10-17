@@ -1,4 +1,6 @@
 -- Synthetic stand-ins for E2.6 sibling tables; isolated tests only, never production.
+ALTER TABLE public.properties ALTER COLUMN id SET DEFAULT gen_random_uuid();
+GRANT SELECT ON public.management_company_members TO authenticated;
 ALTER TABLE public.properties ADD COLUMN title_en text, ADD COLUMN title_ru text, ADD COLUMN property_type text,
  ADD COLUMN listing_type text, ADD COLUMN is_active boolean DEFAULT true, ADD COLUMN approval_status text DEFAULT 'approved',
  ADD COLUMN deleted_at timestamptz, ADD COLUMN lock_code text, ADD COLUMN actual_owner_phone text, ADD COLUMN notes text;
