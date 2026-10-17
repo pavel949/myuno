@@ -1,3 +1,4 @@
+import { parseCivilDate, bangkokTodayDate, bangkokTodayISO, civilDateKey, stayHasDayEvent, civilStaySpan } from '@/lib/hotelDates';
 import { useState, useMemo, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyBookings, PropertyBooking } from '@/hooks/usePropertyBookings';
@@ -11,7 +12,7 @@ import { CreateServiceTaskDialog } from './CreateServiceTaskDialog';
 import { AddBookingFromCalendarDialog } from './AddBookingFromCalendarDialog';
 import { BlockDatesDialog } from './BlockDatesDialog';
 import { Button } from '@/components/ui/button';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isToday, isSameDay } from 'date-fns';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Sparkles, Wrench, Lock, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -36,7 +37,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
   const isRu = language === 'ru';
   const locale = isRu ? ru : enUS;
 
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(() => bangkokTodayDate());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showEventsSheet, setShowEventsSheet] = useState(false);
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
@@ -115,28 +116,15 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
     weeks.forEach((week, weekIdx) => {
       const spans: BookingSpan[] = [];
       const weekStart = week[0];
-      const weekEnd = week[6];
-
       bookings.forEach(booking => {
-        const bStart = new Date(booking.check_in);
-        const bEnd = new Date(booking.check_out);
-        // check_out is exclusive (guest leaves that day)
-        const bEndInclusive = addDays(bEnd, -1);
-
-        // Does booking overlap this week?
-        if (bStart > weekEnd || bEndInclusive < weekStart) return;
-
-        const startCol = bStart < weekStart ? 0 : week.findIndex(d => isSameDay(d, bStart));
-        const endCol = bEndInclusive > weekEnd ? 6 : week.findIndex(d => isSameDay(d, bEndInclusive));
-        
-        if (startCol === -1 || endCol === -1) return;
-
+        const span = civilStaySpan(booking, weekStart, 7);
+        if (!span) return;
         spans.push({
           booking,
-          startCol: Math.max(0, startCol),
-          spanCols: Math.max(1, endCol - Math.max(0, startCol) + 1),
-          isStart: bStart >= weekStart && bStart <= weekEnd,
-          isEnd: bEndInclusive >= weekStart && bEndInclusive <= weekEnd,
+          startCol: span.startOffset,
+          spanCols: span.endOffset - span.startOffset,
+          isStart: span.isStart,
+          isEnd: span.isEnd,
         });
       });
 
@@ -159,7 +147,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
     const dayBookings: PropertyBooking[] = [];
     bookings?.forEach(b => {
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
-      if (dateStr >= b.check_in && dateStr <= b.check_out) {
+      if (stayHasDayEvent(b, dateStr)) {
         dayBookings.push(b);
       }
     });
@@ -223,7 +211,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                   {week.map((day, dayIdx) => {
                     const dateKey = format(day, 'yyyy-MM-dd');
                     const inMonth = isSameMonth(day, currentMonth);
-                    const today = isToday(day);
+                    const today = civilDateKey(day) === bangkokTodayISO();
                     const avail = availabilityMap.get(dateKey);
                     const isBlocked = avail?.status === 'blocked';
                     const priceOverride = avail?.priceOverride;
@@ -342,12 +330,12 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault(); e.stopPropagation();
-                                setSelectedDate(new Date(span.booking.check_in)); setShowEventsSheet(true);
+                                setSelectedDate(parseCivilDate(span.booking.check_in)); setShowEventsSheet(true);
                               }
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
-                              const checkInDate = new Date(span.booking.check_in);
+                              const checkInDate = parseCivilDate(span.booking.check_in);
                               setSelectedDate(checkInDate);
                               setShowEventsSheet(true);
                             }}
@@ -367,9 +355,9 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                             {span.booking.guest_name || (isRu ? 'Гость' : 'Guest')}
                           </div>
                           <div className="text-muted-foreground">
-                            {format(new Date(span.booking.check_in), 'd MMM', { locale })}
+                            {format(parseCivilDate(span.booking.check_in), 'd MMM', { locale })}
                             {' → '}
-                            {format(new Date(span.booking.check_out), 'd MMM', { locale })}
+                            {format(parseCivilDate(span.booking.check_out), 'd MMM', { locale })}
                           </div>
                           <div className="flex items-center justify-between gap-3">
                             <span className="text-muted-foreground">{isRu ? 'Канал:' : 'Channel:'}</span>
@@ -437,7 +425,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
         onOpenChange={setShowCreateTaskDialog}
         properties={properties}
         defaultPropertyId={propertyId}
-        defaultDate={selectedDate || new Date()}
+        defaultDate={selectedDate || bangkokTodayDate()}
       />
 
       {propertyId && (
@@ -446,14 +434,14 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
             open={showAddBookingDialog}
             onOpenChange={setShowAddBookingDialog}
             propertyId={propertyId}
-            initialDate={selectedDate || new Date()}
+            initialDate={selectedDate || bangkokTodayDate()}
             onSuccess={() => setShowAddBookingDialog(false)}
           />
           <BlockDatesDialog
             open={showBlockDatesDialog}
             onOpenChange={setShowBlockDatesDialog}
             propertyId={propertyId}
-            initialDate={selectedDate || new Date()}
+            initialDate={selectedDate || bangkokTodayDate()}
             mode={blockDialogMode}
             onSuccess={() => setShowBlockDatesDialog(false)}
           />

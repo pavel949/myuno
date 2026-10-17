@@ -1,3 +1,4 @@
+import { parseCivilDate, stayOccupiesDate, civilDateKey } from '@/lib/hotelDates';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyBooking } from '@/hooks/usePropertyBookings';
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { format, differenceInDays } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { 
@@ -50,7 +51,7 @@ export function CalendarDayEventsSheet({
 
   const hasEvents = bookings.length > 0 || tasks.length > 0;
   const isBlocked = availability?.status === 'blocked';
-  const hasBookingOnDate = bookings.length > 0;
+  const hasBookingOnDate = bookings.some(b => stayOccupiesDate(b, civilDateKey(date)));
 
   const actionButtons = (
     <div className="grid grid-cols-3 gap-2 w-full">
@@ -120,9 +121,9 @@ export function CalendarDayEventsSheet({
                 </h4>
                 <div className="space-y-2">
                   {bookings.map((booking) => {
-                    const nights = differenceInDays(new Date(booking.check_out), new Date(booking.check_in));
-                    const isCheckIn = format(new Date(booking.check_in), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
-                    const isCheckOut = format(new Date(booking.check_out), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
+                    const nights = differenceInCalendarDays(parseCivilDate(booking.check_out), parseCivilDate(booking.check_in));
+                    const isCheckIn = format(parseCivilDate(booking.check_in), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
+                    const isCheckOut = format(parseCivilDate(booking.check_out), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
                     return (
                       <Card key={booking.id} className="cursor-pointer hover:bg-muted/50 transition-colors"
                         onClick={() => setSelectedBooking(booking)}>

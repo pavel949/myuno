@@ -1,3 +1,4 @@
+import { bangkokTodayISO } from '@/lib/hotelDates';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -149,10 +150,7 @@ export function useOperationalTasks(options?: {
   // For real-time updates on specific pages (like Operations), use a separate subscription there.
 
   // Today's tasks helper
-  const todayTasks = tasks.filter(task => {
-    const taskDate = new Date(task.scheduled_date);
-    return isToday(taskDate);
-  });
+  const todayTasks = tasks.filter(task => task.scheduled_date === bangkokTodayISO());
 
   // Tasks by type
   const tasksByType = {

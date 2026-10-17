@@ -1,3 +1,4 @@
+import { bangkokTodayDate } from '@/lib/hotelDates';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOperationalTasks, OperationalTask } from '@/hooks/useOperationalTasks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +17,7 @@ export function CalendarTodayTasks({ propertyId }: CalendarTodayTasksProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   
-  const today = useMemo(() => new Date(), []);
+  const today = useMemo(() => bangkokTodayDate(), []);
   const { tasks, completeTask, isLoading } = useOperationalTasks({
     propertyId,
     date: today,
