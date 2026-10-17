@@ -503,7 +503,7 @@ describe('E2.5 continuation: delegation and company placement guards (legacy mod
     await expect(as(invitee, tx => tx`UPDATE property_delegates SET property_id=${P.villa} WHERE id=${D}`)).rejects.toThrow(/only accept or decline|row-level/);
     await sql.begin(async tx => {
       await tx.unsafe('SET LOCAL ROLE authenticated'); await tx`SELECT set_config('request.jwt.claim.sub',${invitee},true)`;
-      expect(await tx`UPDATE property_delegates SET status='accepted' WHERE id=${D} RETURNING id`).toHaveLength(1);
+      expect(await tx`UPDATE property_delegates SET status='active', user_id=${invitee}, accepted_at=now() WHERE id=${D} RETURNING id`).toHaveLength(1);
       throw new Error('accept-ok');
     }).catch(e => { if (!(e instanceof Error) || e.message !== 'accept-ok') throw e; });
   });
