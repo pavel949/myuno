@@ -160,11 +160,11 @@ describe('E2.8 exact live-catalog least privilege',()=>{
  });
  it('protected admin retains juristic contacts; generic team does not',async()=>{expect(await as(admin,tx=>tx`SELECT id FROM juristic_contacts`)).toHaveLength(1);expect(await as(team,tx=>tx`SELECT id FROM juristic_contacts`)).toHaveLength(0);});
  it('team company manager without properties edit cannot use checked onboarding',async()=>{
-  await sql.begin(async tx=>{
+  await expect(sql.begin(async tx=>{
    await tx`INSERT INTO management_company_members(id,company_id,user_id,role,is_active) VALUES (${id(80)},${A},${team},'manager',true)`;
    await tx.unsafe('SET LOCAL ROLE authenticated');await tx`SELECT set_config('request.jwt.claim.sub',${team},true)`;
-   await expect(tx`SELECT create_managed_property_checked(${A},NULL,'Blocked','Blocked','villa','rent')`).rejects.toThrow(/properties edit permission required/);
-  });
+   await tx`SELECT create_managed_property_checked(${A},NULL,'Blocked','Blocked','villa','rent')`; 
+  })).rejects.toThrow(/properties edit permission required/);
  });
  it('all 128 changed policies preserve identity and exact approved expressions',async()=>{
   const targets=JSON.parse(readFileSync('src/lib/__tests__/fixtures/uno-team-targets.json','utf8')).policies;
