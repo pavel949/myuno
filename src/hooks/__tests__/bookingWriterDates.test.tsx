@@ -1,0 +1,110 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { renderHook } from '@testing-library/react';
+import { usePropertyBookings } from '@/hooks/usePropertyBookings';
+import { civilStaysOverlap, occupiedCivilDates, stayOccupiesDate, type CivilStay } from '@/lib/hotelDates';
+
+const state = vi.hoisted(() => ({
+  blocked: [] as string[],
+  existing: [] as { id: string; check_in: string; check_out: string }[],
+  boundary: [] as string[],
+}));
+vi.mock('@tanstack/react-query', () => ({
+  useQuery: () => ({ data: [], isLoading: false }),
+  useMutation: ({ mutationFn }: { mutationFn: (input: unknown) => Promise<unknown> }) => ({ mutateAsync: mutationFn }),
+  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+}));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-user' } }) }));
+vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: null }) }));
+vi.mock('@/contexts/StorefrontContext', () => ({ useStorefront: () => ({ storefront: null }) }));
+vi.mock('@/lib/getAccessiblePropertyIds', () => ({ getAccessiblePropertyIds: () => { throw Error('Forbidden query'); } }));
+vi.mock('@/integrations/supabase/client', () => {
+  function from(table: string) {
+    const filters: { method: string; field: string; value: unknown }[] = [];
+    const chain = {
+      select: () => chain,
+      eq: (field: string, value: unknown) => add('eq', field, value),
+      is: (field: string, value: unknown) => add('is', field, value),
+      not: (field: string, _operator: string, value: unknown) => add('not', field, value),
+      neq: (field: string, value: unknown) => add('neq', field, value),
+      in: (field: string, value: unknown) => add('in', field, value),
+      gte: (field: string, value: unknown) => add('gte', field, value),
+      gt: (field: string, value: unknown) => add('gt', field, value),
+      lte: (field: string, value: unknown) => add('lte', field, value),
+      lt: (field: string, value: unknown) => add('lt', field, value),
+      single: async () => ({ data: { start_at: '2026-10-10T14:00:00Z', end_at: '2026-10-13T12:00:00Z', order_items: [{ resource_id: 'synthetic-home' }] }, error: null }),
+      insert: () => stop('insert'),
+      update: () => stop('update'),
+      then: (resolve: (result: { data: unknown[]; error: null }) => unknown) => {
+        const passes = (field: string, value: string) => filters.filter(f => f.field === field).every(f => {
+          const right = String(f.value);
+          switch (f.method) {
+            case 'gte': return value >= right;
+            case 'gt': return value > right;
+            case 'lte': return value <= right;
+            case 'lt': return value < right;
+            case 'neq': return value !== right;
+            default: return true;
+          }
+        });
+        const data = table === 'property_availability'
+          ? state.blocked.filter(date => passes('date', date)).map(date => ({ date }))
+          : table === 'orders'
+            ? state.existing.filter(b => passes('start_at', `${b.check_in}T14:00:00Z`) && passes('end_at', `${b.check_out}T12:00:00Z`) && passes('id', b.id)).map(b => ({ id: b.id }))
+            : table === 'order_items' ? [{ order_id: 'synthetic-existing' }] : [];
+        return Promise.resolve(resolve({ data, error: null }));
+      },
+    };
+    function add(method: string, field: string, value: unknown) { filters.push({ method, field, value }); return chain; }
+    function stop(operation: string): never {
+      state.boundary.push(`${table}.${operation}`);
+      throw Error('SYNTHETIC_WRITE_BOUNDARY');
+    }
+    return chain;
+  }
+  return { supabase: { from, functions: { invoke: () => { throw Error('Forbidden function'); } } } };
+});
+
+const cases: { label: string; stay: CivilStay; blocked: string[]; existing?: CivilStay; allowed: boolean }[] = [
+  { label: '10→13 allows subsequent 13→15', stay: { check_in: '2026-10-13', check_out: '2026-10-15' }, blocked: [], existing: { check_in: '2026-10-10', check_out: '2026-10-13' }, allowed: true },
+  { label: 'checkout block 13 permits 10→13', stay: { check_in: '2026-10-10', check_out: '2026-10-13' }, blocked: ['2026-10-13'], allowed: true },
+  { label: 'occupied block 12 rejects 10→13', stay: { check_in: '2026-10-10', check_out: '2026-10-13' }, blocked: ['2026-10-12'], allowed: false },
+  { label: 'one night checks 10, not 11', stay: { check_in: '2026-10-10', check_out: '2026-10-11' }, blocked: ['2026-10-11'], allowed: true },
+  { label: 'one night rejects block 10', stay: { check_in: '2026-10-10', check_out: '2026-10-11' }, blocked: ['2026-10-10'], allowed: false },
+  { label: 'month boundary checkout free', stay: { check_in: '2026-01-31', check_out: '2026-02-01' }, blocked: ['2026-02-01'], allowed: true },
+  { label: 'year boundary occupied block', stay: { check_in: '2026-12-31', check_out: '2027-01-02' }, blocked: ['2027-01-01'], allowed: false },
+  { label: 'leap-day checkout free', stay: { check_in: '2028-02-28', check_out: '2028-02-29' }, blocked: ['2028-02-29'], allowed: true },
+  { label: 'leap night blocked', stay: { check_in: '2028-02-29', check_out: '2028-03-01' }, blocked: ['2028-02-29'], allowed: false },
+  { label: 'occupied overlap rejected', stay: { check_in: '2026-10-12', check_out: '2026-10-15' }, blocked: [], existing: { check_in: '2026-10-10', check_out: '2026-10-13' }, allowed: false },
+];
+
+beforeEach(() => { state.blocked = []; state.existing = []; state.boundary = []; });
+describe.each(['create', 'update'] as const)('%s real booking writer preflight — synthetic only', mode => {
+  it.each(cases)('$label', async ({ stay, blocked, existing, allowed }) => {
+    state.blocked = blocked;
+    state.existing = existing ? [{ ...existing, id: 'synthetic-existing' }] : [];
+    const uiAllowed = !blocked.some(day => stayOccupiesDate(stay, day)) && !(existing && civilStaysOverlap(existing, stay));
+    expect(uiAllowed).toBe(allowed);
+    expect(blocked.some(day => occupiedCivilDates(stay).includes(day))).toBe(blocked.some(day => stayOccupiesDate(stay, day)));
+    const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
+    const attempt = mode === 'create'
+      ? result.current.createBooking({ property_id: 'synthetic-home', ...stay })
+      : result.current.updateBooking({ id: 'synthetic-current', ...stay });
+    await expect(attempt).rejects.toThrow(allowed ? 'SYNTHETIC_WRITE_BOUNDARY' : existing ? 'пересекаются' : 'заблокированы');
+    expect(state.boundary).toEqual(allowed ? [`orders.${mode === 'create' ? 'insert' : 'update'}`] : []);
+  });
+});
+
+describe('timestamp contract ambiguity — evidence, not a new conversion', () => {
+  const dateIn = (instant: string, timeZone: string) => new Intl.DateTimeFormat('en-CA', { timeZone }).format(new Date(instant));
+  it('true Bangkok midnight has a previous UTC date', () => {
+    expect(dateIn('2026-10-13T00:00:00+07:00', 'UTC')).toBe('2026-10-12');
+    expect(dateIn('2026-10-13T00:00:00+07:00', 'Asia/Bangkok')).toBe('2026-10-13');
+  });
+  it('the same instant with Z has the same Bangkok date', () => {
+    expect(dateIn('2026-10-12T17:00:00Z', 'Asia/Bangkok')).toBe('2026-10-13');
+  });
+  it('a local 23:00 clock mislabeled Z changes the Bangkok civil day', () => {
+    expect(dateIn('2026-10-13T23:00:00Z', 'Asia/Bangkok')).toBe('2026-10-14');
+    expect(dateIn('2026-10-13T23:00:00+07:00', 'Asia/Bangkok')).toBe('2026-10-13');
+  });
+});

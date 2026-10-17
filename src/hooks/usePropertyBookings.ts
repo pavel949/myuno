@@ -202,7 +202,7 @@ export function usePropertyBookings(propertyId?: string) {
           .eq('property_id', input.property_id)
           .eq('status', 'blocked')
           .gte('date', input.check_in)
-          .lte('date', input.check_out),
+          .lt('date', input.check_out),
       ]);
 
       const orderIds = (ordersInRange || []).map((o: { id: string }) => o.id);
@@ -399,7 +399,7 @@ export function usePropertyBookings(propertyId?: string) {
             .eq('property_id', propertyId)
             .eq('status', 'blocked')
             .gte('date', checkIn)
-            .lte('date', checkOut);
+            .lt('date', checkOut);
           if ((blockedDates || []).length > 0) {
             throw new Error('Выбранные даты заблокированы в календаре');
           }
