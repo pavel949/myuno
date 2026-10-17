@@ -28,8 +28,9 @@ export function useSaveStayRestriction() {
       const query = id
         ? supabase.from('property_stay_restrictions').update(values).eq('id', id).eq('property_id', row.property_id)
         : supabase.from('property_stay_restrictions').insert(values);
-      const { error } = await query.select('id').single();
+      const { data, error } = await query.select('id').single();
       if (error) throw error;
+      return data.id;
     },
     onSuccess: async (_, row) => {
       await Promise.all([

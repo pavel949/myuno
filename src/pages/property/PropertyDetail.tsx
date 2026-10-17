@@ -66,6 +66,8 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { PropertySleepingArrangements } from '@/components/property/PropertySleepingArrangements';
 import { PropertyReviewRatings } from '@/components/property/PropertyReviewRatings';
 import { StayRulesSection } from '@/components/property/StayRulesSection';
+import { RoomCategoryOffers } from '@/components/property/RoomCategoryOffers';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 const viewTypeLabels: Record<string, { en: string; ru: string }> = {
   sea: { en: 'Sea View', ru: 'Вид на море' },
@@ -91,6 +93,7 @@ export default function PropertyDetail() {
   const { formatPrice } = useCurrency();
   const { currentCity } = useLocationCity();
   const isRu = language === 'ru';
+  const multiUnitEnabled = useFeatureFlag('multi_unit_properties');
 
 
   const [showAllPhotos, setShowAllPhotos] = useState(false);
@@ -395,6 +398,11 @@ export default function PropertyDetail() {
               })()}
 
               <Separator />
+
+              {multiUnitEnabled && !isSaleListing && id && (
+                <RoomCategoryOffers propertyId={id} dateRange={dateRange} guests={guestCount}
+                  onDateRangeChange={setDateRange} onGuestsChange={setGuestCount} />
+              )}
 
               <PropertyDetailHighlights
                 propertyType={property.property_type}

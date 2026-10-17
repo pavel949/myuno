@@ -72,16 +72,15 @@ function RestrictionForm({ row, propertyId, categoryId, date }: {
       return;
     }
     try {
-      await save.mutateAsync({ id: savedId, property_id: propertyId, category_id: categoryId, date,
+      const id = await save.mutateAsync({ id: savedId, property_id: propertyId, category_id: categoryId, date,
         price_override: priceValue, min_stay_nights: stayValue,
         closed_to_arrival: arrival, closed_to_departure: departure, stop_sell: stopSell });
+      setSavedId(id);
       toast.success(t('Правила сохранены', 'Rules saved'));
     } catch {
       toast.error(t('Не удалось сохранить правила. Введённые значения сохранены в форме.', 'Could not save rules. Your entries remain in the form.'));
     }
   };
-  // After an insert/refetch retain the row identity without replacing the user's draft.
-  if (row?.id && row.id !== savedId) setSavedId(row.id);
   return (
     <form onSubmit={submit} className="space-y-4">
       <fieldset disabled={save.isPending} className="space-y-4">
