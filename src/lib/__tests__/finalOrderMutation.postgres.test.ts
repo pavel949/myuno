@@ -56,7 +56,7 @@ beforeAll(async()=>{
   const f=live.find(x=>x.proname===name);if(!f)throw Error(name);await sql.unsafe(f.definition);
  }
  await sql`UPDATE orders SET total_amount=100,currency='THB',customer_user_id=${guest},metadata='{}',status='confirmed' WHERE id=${id(31)}`;
- await sql.unsafe(readFileSync('docs/convergence/final_order_mutation/restrictive-fixes.sql','utf8'));
+ await sql.unsafe(readFileSync('drizzle/migrations/0035_final_order_mutation_containment.sql','utf8'));
 },60000);
 afterAll(async()=>{if(sql)await sql.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
 const changedFields = [
@@ -66,6 +66,7 @@ const changedFields = [
  ['source_company_id',`'${B}'`],['subtotal','99'],['discount_amount','99'],['tax_amount','99'],['concierge_fee_amount','99'],
 ] as const;
 describe('FINAL live-defined order mutation containment',()=>{
+ it('browser cannot raw-insert commercial orders',async()=>{for(const actor of [guest,team,admin]) await expect(as(actor,tx=>tx`INSERT INTO orders(id,customer_user_id,status,total_amount,currency) VALUES (${id(90)},${actor},'pending',1,'THB')`)).rejects.toThrow(/permission denied/);});
  it.each(changedFields)('customer cannot forge %s',async(field,value)=>{await expect(as(guest,tx=>tx.unsafe(`UPDATE orders SET ${field}=${value} WHERE id='${id(30)}'`))).rejects.toThrow(/order_fields_immutable/);});
  it.each(changedFields)('provider cannot forge %s',async(field,value)=>{await expect(as(propertyOwner,tx=>tx.unsafe(`UPDATE orders SET ${field}=${value} WHERE id='${id(31)}'`))).rejects.toThrow(/order_fields_immutable/);});
  it.each(['confirmed','refunded','expired','completed','checked_in'])('customer cannot set %s',async status=>{await expect(as(guest,tx=>tx`UPDATE orders SET status=${status}::order_status WHERE id=${id(30)}`)).rejects.toThrow(/customer_cancel/);});
