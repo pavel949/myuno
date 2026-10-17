@@ -31,7 +31,7 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
     fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Обновить' : 'Refresh' }));
     expect(mocks.refetch).toHaveBeenCalledOnce();
     for (const [name, path] of [[language === 'ru' ? 'Календарь' : 'Calendar', APP_ROUTES.MC_CALENDAR], [language === 'ru' ? 'Задачи' : 'Tasks', APP_ROUTES.MC_TASKS]]) {
-      fireEvent.click(screen.getByRole('link', { name, exact: true }));
+      fireEvent.click(screen.getByRole('link', { name }));
       expect(screen.getByTestId('route-boundary')).toHaveTextContent(path);
     }
   });
