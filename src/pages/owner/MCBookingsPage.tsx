@@ -3,17 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { format, differenceInDays, isPast, isFuture, isToday } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
-  Search, Filter, ChevronDown, MoreHorizontal, Calendar, Users,
-  Phone, Mail, MessageCircle, CheckCircle2, XCircle, LogIn, LogOut,
-  Plus, Download, Building2, Clock, ArrowUpDown, Eye, Check, X,
+  Search, Calendar, Users, Phone, Mail,
+  Plus, Download, Building2, ArrowUpDown, Check, X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
-
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { useAllPropertyBookings, type PropertyBooking } from '@/hooks/usePropertyBookings';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingDetailSheet } from '@/components/owner/BookingDetailSheet';
@@ -23,19 +20,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
 type StatusFilter = 'all' | 'upcoming' | 'active' | 'pending' | 'completed' | 'cancelled';
 type SortKey = 'check_in' | 'created_at' | 'total_amount' | 'guest_name';
+type BulkAction = 'confirm' | 'cancel';
 
 const STATUS_CONFIG: Record<string, { label: string; labelRu: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color?: string }> = {
   confirmed: { label: 'Confirmed', labelRu: 'Подтверждено', variant: 'default' },
@@ -44,6 +40,22 @@ const STATUS_CONFIG: Record<string, { label: string; labelRu: string; variant: '
   completed: { label: 'Completed', labelRu: 'Завершено', variant: 'outline' },
   checked_in: { label: 'Checked In', labelRu: 'Заселён', variant: 'default', color: 'bg-success hover:bg-success/90 text-success-foreground' },
 };
+
+const STATUS_FILTERS: { value: StatusFilter; label: string; labelRu: string }[] = [
+  { value: 'all', label: 'All', labelRu: 'Все' },
+  { value: 'active', label: 'Active', labelRu: 'Активные' },
+  { value: 'upcoming', label: 'Upcoming', labelRu: 'Предстоящие' },
+  { value: 'pending', label: 'Pending', labelRu: 'Ожидающие' },
+  { value: 'completed', label: 'Completed', labelRu: 'Завершённые' },
+  { value: 'cancelled', label: 'Cancelled', labelRu: 'Отменённые' },
+];
+
+const SORT_OPTIONS: { key: SortKey; label: string; labelRu: string }[] = [
+  { key: 'check_in', label: 'By check-in date', labelRu: 'По дате заезда' },
+  { key: 'created_at', label: 'By created date', labelRu: 'По дате создания' },
+  { key: 'total_amount', label: 'By amount', labelRu: 'По сумме' },
+  { key: 'guest_name', label: 'By guest name', labelRu: 'По имени гостя' },
+];
 
 function getBookingTimeStatus(booking: PropertyBooking): 'upcoming' | 'active' | 'past' {
   const now = new Date();
@@ -59,8 +71,6 @@ export default function MCBookingsPage() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { code: cityCurrencyCode } = useCityCurrency();
-
-  const { user } = useAuth();
   const isRu = language === 'ru';
 
   const { bookings, isLoading } = useAllPropertyBookings();
@@ -71,6 +81,8 @@ export default function MCBookingsPage() {
   const [sortAsc, setSortAsc] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<PropertyBooking | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [pendingBulkAction, setPendingBulkAction] = useState<BulkAction | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
@@ -166,6 +178,28 @@ export default function MCBookingsPage() {
     }
   };
 
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+    setPendingBulkAction(null);
+  };
+
+  const executeBulkAction = (action: BulkAction) => {
+    const ids = Array.from(selectedIds);
+    const status = action === 'confirm' ? 'confirmed' : 'cancelled';
+    setBulkBusy(true);
+    supabase.from('orders').update({ status }).in('id', ids).then(({ error }) => {
+      setBulkBusy(false);
+      if (error) {
+        toast.error(action === 'confirm'
+          ? (isRu ? 'Не удалось подтвердить брони' : 'Failed to confirm bookings')
+          : (isRu ? 'Не удалось отменить брони' : 'Failed to cancel bookings'));
+        return;
+      }
+      clearSelection();
+      window.location.reload();
+    });
+  };
+
   const exportCSV = () => {
     const rows = filteredBookings.map(b => ({
       guest: b.guest_name || '',
@@ -208,59 +242,57 @@ export default function MCBookingsPage() {
       <PageHeader
         title={isRu ? 'Бронирования' : 'Bookings'}
         actions={
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={exportCSV}>
-              <Download className="w-4 h-4 mr-1" />
-              CSV
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={exportCSV}
+              aria-label={isRu ? 'Экспортировать список в CSV' : 'Export list to CSV'}
+            >
+              <Download className="w-4 h-4 sm:mr-1" />
+              <span className="hidden sm:inline">CSV</span>
             </Button>
             <Button size="sm" onClick={() => navigate('/mc/calendar')}>
               <Plus className="w-4 h-4 mr-1" />
-              {isRu ? 'Новое' : 'New'}
+              {isRu ? 'Новое бронирование' : 'New Booking'}
             </Button>
           </div>
         }
       />
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-4 gap-2 mb-4">
-        <button
-          onClick={() => setStatusFilter('all')}
-          className={cn('text-center p-2 rounded-none transition-colors', statusFilter === 'all' ? 'bg-primary/10 ring-1 ring-primary' : 'bg-muted/50')}
-        >
-          <div className="text-lg font-bold">{stats.total}</div>
-          <div className="text-xs text-muted-foreground">{isRu ? 'Всего' : 'Total'}</div>
-        </button>
-        <button
-          onClick={() => setStatusFilter('active')}
-          className={cn('text-center p-2 rounded-none transition-colors', statusFilter === 'active' ? 'bg-success/10 ring-1 ring-success' : 'bg-muted/50')}
-        >
-          <div className="text-lg font-bold text-success">{stats.active}</div>
-          <div className="text-xs text-muted-foreground">{isRu ? 'Сейчас' : 'Active'}</div>
-        </button>
-        <button
-          onClick={() => setStatusFilter('upcoming')}
-          className={cn('text-center p-2 rounded-none transition-colors', statusFilter === 'upcoming' ? 'bg-primary/10 ring-1 ring-primary' : 'bg-muted/50')}
-        >
-          <div className="text-lg font-bold">{stats.upcoming}</div>
-          <div className="text-xs text-muted-foreground">{isRu ? 'Скоро' : 'Upcoming'}</div>
-        </button>
-        <button
-          onClick={() => setStatusFilter('pending')}
-          className={cn('text-center p-2 rounded-none transition-colors', statusFilter === 'pending' ? 'bg-warning/10 ring-1 ring-warning' : 'bg-muted/50')}
-        >
-          <div className="text-lg font-bold text-warning">{stats.pending}</div>
-          <div className="text-xs text-muted-foreground">{isRu ? 'Ожидает' : 'Pending'}</div>
-        </button>
+      {/* Compact KPI summary — each tile also selects the matching filter */}
+      <div className="grid grid-cols-4 gap-2 mb-4" role="group" aria-label={isRu ? 'Сводка бронирований' : 'Bookings summary'}>
+        {([
+          { filter: 'all' as StatusFilter, value: stats.total, label: isRu ? 'Всего' : 'Total' },
+          { filter: 'active' as StatusFilter, value: stats.active, label: isRu ? 'Сейчас' : 'Active' },
+          { filter: 'upcoming' as StatusFilter, value: stats.upcoming, label: isRu ? 'Скоро' : 'Upcoming' },
+          { filter: 'pending' as StatusFilter, value: stats.pending, label: isRu ? 'Ожидает' : 'Pending' },
+        ]).map(tile => (
+          <button
+            key={tile.filter}
+            type="button"
+            onClick={() => setStatusFilter(tile.filter)}
+            aria-pressed={statusFilter === tile.filter}
+            className={cn(
+              'text-center px-1 py-1.5 rounded-none transition-colors min-h-[44px]',
+              statusFilter === tile.filter ? 'bg-primary/10 ring-1 ring-primary' : 'bg-muted/50',
+            )}
+          >
+            <div className="text-base font-bold leading-tight">{tile.value}</div>
+            <div className="text-[11px] text-muted-foreground truncate">{tile.label}</div>
+          </button>
+        ))}
       </div>
 
-      {/* Search & Sort */}
-      <div className="flex gap-2 mb-4">
-        <div className="flex-1 relative">
+      {/* Search & sort (single consolidated controls row) */}
+      <div className="flex gap-2 mb-3">
+        <div className="flex-1 min-w-0 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder={isRu ? 'Поиск по имени, email, телефону...' : 'Search by name, email, phone...'}
+            aria-label={isRu ? 'Поиск бронирований' : 'Search bookings'}
             className="pl-9"
           />
         </div>
@@ -271,87 +303,90 @@ export default function MCBookingsPage() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => toggleSort('check_in')}>
-              {isRu ? 'По дате заезда' : 'By check-in date'} {sortKey === 'check_in' && (sortAsc ? '↑' : '↓')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => toggleSort('created_at')}>
-              {isRu ? 'По дате создания' : 'By created date'} {sortKey === 'created_at' && (sortAsc ? '↑' : '↓')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => toggleSort('total_amount')}>
-              {isRu ? 'По сумме' : 'By amount'} {sortKey === 'total_amount' && (sortAsc ? '↑' : '↓')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => toggleSort('guest_name')}>
-              {isRu ? 'По имени гостя' : 'By guest name'} {sortKey === 'guest_name' && (sortAsc ? '↑' : '↓')}
-            </DropdownMenuItem>
+            {SORT_OPTIONS.map(opt => (
+              <DropdownMenuItem key={opt.key} onClick={() => toggleSort(opt.key)}>
+                {isRu ? opt.labelRu : opt.label} {sortKey === opt.key && (sortAsc ? '↑' : '↓')}
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      {/* Status Tabs */}
-      <Tabs value={statusFilter} onValueChange={v => setStatusFilter(v as StatusFilter)} className="mb-4">
-        <TabsList className="w-full overflow-x-auto">
-          <TabsTrigger value="all" className="text-xs">{isRu ? 'Все' : 'All'}</TabsTrigger>
-          <TabsTrigger value="active" className="text-xs">{isRu ? 'Активные' : 'Active'}</TabsTrigger>
-          <TabsTrigger value="upcoming" className="text-xs">{isRu ? 'Предстоящие' : 'Upcoming'}</TabsTrigger>
-          <TabsTrigger value="pending" className="text-xs">{isRu ? 'Ожидающие' : 'Pending'}</TabsTrigger>
-          <TabsTrigger value="completed" className="text-xs">{isRu ? 'Завершённые' : 'Completed'}</TabsTrigger>
-          <TabsTrigger value="cancelled" className="text-xs">{isRu ? 'Отменённые' : 'Cancelled'}</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      {/* Status filters — bounded grid, no horizontal page overflow */}
+      <div
+        className="grid grid-cols-3 sm:grid-cols-6 gap-1 mb-4"
+        role="group"
+        aria-label={isRu ? 'Фильтр по статусу' : 'Filter by status'}
+      >
+        {STATUS_FILTERS.map(f => (
+          <button
+            key={f.value}
+            type="button"
+            onClick={() => setStatusFilter(f.value)}
+            aria-pressed={statusFilter === f.value}
+            className={cn(
+              'px-1 py-2 text-xs rounded-none border transition-colors truncate min-h-[44px]',
+              statusFilter === f.value
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-background text-muted-foreground border-border hover:text-foreground',
+            )}
+          >
+            {isRu ? f.labelRu : f.label}
+          </button>
+        ))}
+      </div>
 
-      {/* Bulk Actions Toolbar */}
+      {/* Bulk actions toolbar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center gap-2 mb-3 p-3 bg-primary/5 border border-primary/20 rounded-none">
+        <div className="flex flex-wrap items-center gap-2 mb-3 p-3 bg-primary/5 border border-primary/20 rounded-none">
           <Checkbox
             checked={selectedIds.size === filteredBookings.length}
             onCheckedChange={toggleSelectAll}
+            aria-label={isRu ? 'Выбрать все видимые бронирования' : 'Select all visible bookings'}
           />
           <span className="text-sm font-medium">
             {selectedIds.size} {isRu ? 'выбрано' : 'selected'}
           </span>
-          <div className="flex gap-2 ml-auto">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                // Mark confirmed
-                const ids = Array.from(selectedIds);
-                supabase.from('orders').update({ status: 'confirmed' }).in('id', ids).then(({ error }) => {
-                  if (error) {
-                    toast.error(isRu ? 'Не удалось подтвердить брони' : 'Failed to confirm bookings');
-                    return;
-                  }
-                  setSelectedIds(new Set());
-                  window.location.reload();
-                });
-              }}
-            >
-              <Check className="w-3.5 h-3.5 mr-1" />
-              {isRu ? 'Подтвердить' : 'Confirm'}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                const ids = Array.from(selectedIds);
-                supabase.from('orders').update({ status: 'cancelled' }).in('id', ids).then(({ error }) => {
-                  if (error) {
-                    toast.error(isRu ? 'Не удалось отменить брони' : 'Failed to cancel bookings');
-                    return;
-                  }
-                  setSelectedIds(new Set());
-                  window.location.reload();
-                });
-              }}
-            >
-              <X className="w-3.5 h-3.5 mr-1" />
-              {isRu ? 'Отменить' : 'Cancel'}
-            </Button>
+          <div className="flex flex-wrap gap-2 ml-auto">
+            {pendingBulkAction === null ? (
+              <>
+                <Button size="sm" variant="outline" onClick={() => setPendingBulkAction('confirm')}>
+                  <Check className="w-3.5 h-3.5 mr-1" />
+                  {isRu ? 'Подтвердить' : 'Confirm'}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setPendingBulkAction('cancel')}>
+                  <X className="w-3.5 h-3.5 mr-1" />
+                  {isRu ? 'Отменить' : 'Cancel'}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={clearSelection}>
+                  {isRu ? 'Снять выбор' : 'Clear'}
+                </Button>
+              </>
+            ) : (
+              <>
+                <span className="text-xs text-muted-foreground self-center">
+                  {pendingBulkAction === 'confirm'
+                    ? (isRu ? `Подтвердить ${selectedIds.size} бронирований?` : `Confirm ${selectedIds.size} bookings?`)
+                    : (isRu ? `Отменить ${selectedIds.size} бронирований?` : `Cancel ${selectedIds.size} bookings?`)}
+                </span>
+                <Button
+                  size="sm"
+                  variant={pendingBulkAction === 'cancel' ? 'destructive' : 'default'}
+                  disabled={bulkBusy}
+                  onClick={() => executeBulkAction(pendingBulkAction)}
+                >
+                  {isRu ? 'Да' : 'Yes'}
+                </Button>
+                <Button size="sm" variant="ghost" disabled={bulkBusy} onClick={() => setPendingBulkAction(null)}>
+                  {isRu ? 'Нет' : 'No'}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
 
-      {/* Bookings List */}
+      {/* Bookings list */}
       {filteredBookings.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
@@ -373,8 +408,8 @@ export default function MCBookingsPage() {
             const checkIn = new Date(booking.check_in);
             const checkOut = new Date(booking.check_out);
             const nights = differenceInDays(checkOut, checkIn);
-            const timeStatus = getBookingTimeStatus(booking);
             const statusCfg = STATUS_CONFIG[booking.status || 'pending'] || STATUS_CONFIG.pending;
+            const guestName = booking.guest_name || (isRu ? 'Гость' : 'Guest');
 
             return (
               <Card
@@ -382,55 +417,61 @@ export default function MCBookingsPage() {
                 className="cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => setSelectedBooking(booking)}
               >
-                <CardContent className="p-4">
-                  {/* Top row: Guest + Status */}
-                  <div className="flex items-start justify-between mb-2">
+                <CardContent className="p-3 sm:p-4">
+                  {/* Top row: selection + guest + status */}
+                  <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-start gap-2 flex-1 min-w-0">
-                      <Checkbox
-                        checked={selectedIds.has(booking.id)}
-                        onCheckedChange={() => toggleSelectBooking(booking.id)}
+                      {/* Selection zone: fully isolated from card click, 44px touch target */}
+                      <span
+                        role="presentation"
+                        className="flex items-center justify-center min-w-[44px] min-h-[44px] -m-2 flex-shrink-0"
                         onClick={(e) => e.stopPropagation()}
-                        className="flex-shrink-0 mt-0.5"
-                      />
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                      >
+                        <Checkbox
+                          checked={selectedIds.has(booking.id)}
+                          onCheckedChange={() => toggleSelectBooking(booking.id)}
+                          aria-label={isRu ? `Выбрать бронирование: ${guestName}` : `Select booking: ${guestName}`}
+                        />
+                      </span>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm truncate">
-                          {booking.guest_name || (isRu ? 'Гость' : 'Guest')}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                        {booking.guest_phone && (
-                          <span className="flex items-center gap-0.5">
-                            <Phone className="w-3 h-3" />
-                            {booking.guest_phone}
-                          </span>
-                        )}
-                        {booking.guest_email && (
-                          <span className="flex items-center gap-0.5 truncate">
-                            <Mail className="w-3 h-3" />
-                            {booking.guest_email}
-                          </span>
-                        )}
+                        <h3 className="font-semibold text-sm truncate">{guestName}</h3>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
+                          {booking.guest_phone && (
+                            <span className="flex items-center gap-0.5 min-w-0">
+                              <Phone className="w-3 h-3 flex-shrink-0" />
+                              <span className="truncate">{booking.guest_phone}</span>
+                            </span>
+                          )}
+                          {booking.guest_email && (
+                            <span className="flex items-center gap-0.5 min-w-0">
+                              <Mail className="w-3 h-3 flex-shrink-0" />
+                              <span className="truncate">{booking.guest_email}</span>
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
-                    <Badge variant={statusCfg.variant} className={cn('ml-2 flex-shrink-0', statusCfg.color)}>
+                    <Badge variant={statusCfg.variant} className={cn('flex-shrink-0 max-w-[40%] truncate', statusCfg.color)}>
                       {isRu ? statusCfg.labelRu : statusCfg.label}
                     </Badge>
                   </div>
 
-                  {/* Dates row */}
-                  <div className="flex items-center gap-3 text-sm mb-2">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                      <span>{format(checkIn, 'dd MMM', { locale: isRu ? ru : undefined })}</span>
+                  {/* Dates row — wraps on narrow screens */}
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm mb-2">
+                    <div className="flex items-center gap-1 min-w-0">
+                      <Calendar className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                      <span className="whitespace-nowrap">{format(checkIn, 'dd MMM', { locale: isRu ? ru : undefined })}</span>
                       <span className="text-muted-foreground">→</span>
-                      <span>{format(checkOut, 'dd MMM', { locale: isRu ? ru : undefined })}</span>
+                      <span className="whitespace-nowrap">{format(checkOut, 'dd MMM', { locale: isRu ? ru : undefined })}</span>
                     </div>
-                    <span className="text-muted-foreground">·</span>
-                    <span>{nights} {isRu ? 'н.' : 'n.'}</span>
+                    <span className="text-muted-foreground hidden sm:inline">·</span>
+                    <span className="whitespace-nowrap">{nights} {isRu ? 'н.' : 'n.'}</span>
                     {booking.guests_count && (
                       <>
-                        <span className="text-muted-foreground">·</span>
-                        <span className="flex items-center gap-0.5">
+                        <span className="text-muted-foreground hidden sm:inline">·</span>
+                        <span className="flex items-center gap-0.5 whitespace-nowrap">
                           <Users className="w-3.5 h-3.5 text-muted-foreground" />
                           {booking.guests_count}
                         </span>
@@ -438,20 +479,22 @@ export default function MCBookingsPage() {
                     )}
                   </div>
 
-                  {/* Bottom row: Property + Amount */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1 truncate flex-1 mr-2">
+                  {/* Bottom row: property + amount */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1 min-w-0 flex-1">
                       <Building2 className="w-3 h-3 flex-shrink-0" />
-                      {(booking as any).owner_properties?.title
-                        || (booking as any).owner_properties?.address
-                        || booking.property_id?.slice(0, 8)}
+                      <span className="truncate">
+                        {(booking as any).owner_properties?.title
+                          || (booking as any).owner_properties?.address
+                          || booking.property_id?.slice(0, 8)}
+                      </span>
                     </span>
                     {booking.source && booking.source !== 'manual' && (
-                      <Badge variant="outline" className="text-xs mr-2">
+                      <Badge variant="outline" className="text-xs flex-shrink-0">
                         {booking.source}
                       </Badge>
                     )}
-                    <span className="font-bold text-sm">
+                    <span className="font-bold text-sm whitespace-nowrap flex-shrink-0">
                       {formatPrice(booking.total_amount || 0)}
                     </span>
                   </div>
