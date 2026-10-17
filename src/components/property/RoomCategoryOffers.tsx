@@ -11,10 +11,15 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { quoteHotelStay, type HotelCategoryRow, type HotelRatePlanRow, type HotelRestrictionRow, type HotelSeasonRow } from '@/lib/hotelQuote';
-import { bangkokTodayISO } from '@/lib/hotelDates';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { quoteHotelStay, mergeRestrictions, type HotelCategoryRow, type HotelRatePlanRow, type HotelSeasonRow } from '@/lib/hotelQuote';
+import { bangkokTodayISO, parseCivilDate } from '@/lib/hotelDates';
 
-export function RoomCategoryOffers({ propertyId, dateRange, guests = 1 }: { propertyId: string; dateRange?: DateRange; guests?: number }) {
+export function RoomCategoryOffers({ propertyId, dateRange, guests = 1, onDateRangeChange, onGuestsChange }: {
+  propertyId: string; dateRange?: DateRange; guests?: number;
+  onDateRangeChange?: (range: DateRange | undefined) => void; onGuestsChange?: (guests: number) => void;
+}) {
   const { language } = useLanguage();
   const ru = language === 'ru';
   const t = (r: string, e: string) => (ru ? r : e);
@@ -22,17 +27,18 @@ export function RoomCategoryOffers({ propertyId, dateRange, guests = 1 }: { prop
   const co = dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : null;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['room-category-offers', propertyId, ci, co],
+    queryKey: ['room-category-offers', propertyId, ci, co, guests],
     queryFn: async () => {
       const { data: cats, error: e1 } = await supabase.from('property_room_categories')
-        .select('*').eq('property_id', propertyId).eq('is_active', true).order('sort_order');
+        .select('id, name_en, name_ru, base_price_per_night, min_stay_nights, max_guests, is_active').eq('property_id', propertyId).eq('is_active', true).order('sort_order');
       if (e1) throw e1;
       if (!cats?.length) return [];
       const ids = cats.map((c) => c.id);
       const [plans, seasons, restr] = await Promise.all([
-        supabase.from('property_rate_plans').select('*').in('category_id', ids).eq('is_active', true),
+        supabase.from('property_rate_plans').select('id, category_id, name_en, name_ru, adjustment_type, adjustment_value, meal_plan, is_refundable, free_cancellation_days, min_stay_nights, max_stay_nights, min_advance_days, is_active').in('category_id', ids).eq('is_active', true),
         supabase.from('property_rate_seasons').select('category_id, start_date, end_date, nightly_rate, min_stay_nights, is_active').in('category_id', ids).eq('is_active', true),
-        ci && co ? supabase.from('property_stay_restrictions').select('*').in('category_id', ids).gte('date', ci).lte('date', co) : Promise.resolve({ data: [], error: null }),
+        ci && co ? supabase.from('property_stay_restrictions').select('category_id, date, price_override, min_stay_nights, closed_to_arrival, closed_to_departure, stop_sell')
+          .eq('property_id', propertyId).gte('date', ci).lte('date', co) : Promise.resolve({ data: [], error: null }),
       ]);
       if (plans.error) throw plans.error;
       if (seasons.error) throw seasons.error;
@@ -40,6 +46,8 @@ export function RoomCategoryOffers({ propertyId, dateRange, guests = 1 }: { prop
       const avail = ci && co
         ? await Promise.all(ids.map((id) => supabase.rpc('get_category_availability', { _category_id: id, _check_in: ci, _check_out: co })))
         : null;
+      const availabilityError = avail?.find(result => result.error)?.error;
+      if (availabilityError) throw availabilityError;
       return cats.map((c, i) => ({
         category: c,
         free: avail ? (avail[i].data as number | null) ?? 0 : null,
@@ -48,7 +56,7 @@ export function RoomCategoryOffers({ propertyId, dateRange, guests = 1 }: { prop
           quote: ci && co ? quoteHotelStay({
             category: c as HotelCategoryRow, plan: p as HotelRatePlanRow,
             seasons: (seasons.data ?? []).filter((s) => s.category_id === c.id) as HotelSeasonRow[],
-            restrictions: ((restr.data ?? []) as (HotelRestrictionRow & { category_id: string })[]).filter((r) => r.category_id === c.id),
+            restrictions: mergeRestrictions((restr.data ?? []).filter(r => r.category_id === null || r.category_id === c.id)),
             check_in: ci, check_out: co, guests, today: bangkokTodayISO(),
           }) : null,
         })),
@@ -63,6 +71,23 @@ export function RoomCategoryOffers({ propertyId, dateRange, guests = 1 }: { prop
   return (
     <section className="space-y-3">
       <h2 className="font-serif text-xl text-foreground">{t('Категории номеров', 'Room categories')}</h2>
+      {onDateRangeChange && <div className="grid gap-3 sm:grid-cols-3">
+        <div className="min-w-0 space-y-2">
+          <Label htmlFor="category-checkin">{t('Заезд', 'Check-in')}</Label>
+          <Input id="category-checkin" type="date" min={bangkokTodayISO()} value={ci ?? ''}
+            onChange={e => onDateRangeChange(e.target.value ? { from: parseCivilDate(e.target.value), to: dateRange?.to } : undefined)} />
+        </div>
+        <div className="min-w-0 space-y-2">
+          <Label htmlFor="category-checkout">{t('Выезд', 'Check-out')}</Label>
+          <Input id="category-checkout" type="date" min={ci ?? bangkokTodayISO()} value={co ?? ''}
+            onChange={e => onDateRangeChange({ from: dateRange?.from, to: e.target.value ? parseCivilDate(e.target.value) : undefined })} />
+        </div>
+        <div className="min-w-0 space-y-2">
+          <Label htmlFor="category-guests">{t('Гости', 'Guests')}</Label>
+          <Input id="category-guests" type="number" min={1} step={1} value={guests}
+            onChange={e => { const count = Number(e.target.value); if (Number.isInteger(count) && count > 0) onGuestsChange?.(count); }} />
+        </div>
+      </div>}
       {!ci || !co ? <p className="text-sm text-muted-foreground">{t('Выберите даты, чтобы увидеть цену и наличие.', 'Choose dates to see price and availability.')}</p> : null}
       {data.map(({ category: c, free, plans }) => (
         <Card key={c.id}><CardContent className="space-y-2 p-4">
@@ -75,6 +100,7 @@ export function RoomCategoryOffers({ propertyId, dateRange, guests = 1 }: { prop
           {free !== null && (
             <p className="text-sm text-muted-foreground">{free > 0 ? t(`Свободно номеров: ${free}`, `Rooms available: ${free}`) : t('На эти даты свободных номеров нет', 'No rooms available for these dates')}</p>
           )}
+          {plans.length === 0 && <p className="text-sm text-muted-foreground">{t('Нет доступных тарифов', 'No available rate plans')}</p>}
           {plans.map(({ plan: p, quote }) => (
             <div key={p.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-2 text-sm">
               <div className="flex flex-wrap items-center gap-2">
