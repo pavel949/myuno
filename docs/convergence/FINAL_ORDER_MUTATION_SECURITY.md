@@ -85,6 +85,7 @@ Raw live functions/ACLs/policies/triggers/columns are committed in JSON. [source
 - `scripts/qa/final-order-handlers.mjs`: **19/19** actual signed ingress/terminal/type/conditional-state cases, no financial RPC/mail/refund/network. Success-side effects deliberately stop at stub boundary, not end-to-end fulfillment.
 - Retained actual handler suites: booking-message **21/21**, operating-security **10/10**. No real webhook/payment/order/cancel/refund was invoked.
 - Automatic build log OK. No manual build/typecheck. Full canonical finance atomicity, duplicate Stripe settlement/refund, wallet concurrent replay, foreign-space parent mutation and legitimate legacy wallet checkout remain **unverified/blocking**.
+- Retained civil-date/inventory suite: **58/58 each** in UTC, Asia/Bangkok and America/Los_Angeles (174 executions, not additional unique tests).
 
 ## Production read-only evidence
 
@@ -109,3 +110,5 @@ All compared aggregates identical. Read-only ACL query confirms both wallet RPCs
 **Recommendation:** close canonical creation/quote + finance settlement/refund transaction contracts and migrate existing manual/wallet writers before applying broader restrictions. This is required to preserve legitimate workflows without granting invented finance authority. Then run the full actor/space/idempotency/inventory matrix against exact live definitions; E3 remains a separate decision.
 
 Observed commit SHA and final evidence manifest: [verification.json](final_order_mutation/verification.json). The observed SHA is a tool-managed repository checkpoint, not a claim of a manually created final commit.
+
+Observed completed-code checkpoint: `20b47ac85ea55266da5f6d205f6d9ac47195b8e8`; final documentation checkpoint may advance automatically after this observation.

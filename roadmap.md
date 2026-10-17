@@ -1,10 +1,11 @@
 # Roadmap
 
 ## 2026-10-17 · FINAL PRE-E3 order mutation security
-- [ ] Trace canonical database/RPC/Edge/frontend writers and field/state authority matrix at baseline `1f40588db94e8d0e1e83cd024bf5556034bafcb0`.
-- [ ] Reproduce proven bypasses locally; implement only restrictive forward fixes with fail-closed rollback and isolated regression tests.
-- [ ] Apply/deploy only tested required changes; read-only verify zero enforcement/spaces/assignments/members and unchanged business aggregates.
-- [ ] Publish FINAL_ORDER_MUTATION_SECURITY.md with exhaustive dispositions, evidence, observed SHA and E3 GO/NO-GO.
+- [x] Capture live catalog and source census (65 source writers/15 direct SQL writers), required field/state matrix at baseline `1f40588db94e8d0e1e83cd024bf5556034bafcb0`; no blanket certification.
+- [x] Reproduce wallet/provider bypass locally; apply exact 0033 wallet containment and deploy terminal/type transfer protection after isolated tests.
+- [x] Verify 296/296 selected regressions, 19/19 operator cases, 58 date tests in each of 3 timezones; read-only aggregates and zero enforcement/spaces/assignments/members unchanged.
+- [x] Publish FINAL_ORDER_MUTATION_SECURITY.md with dispositions, evidence, observed SHA and E3 NO-GO.
+- [ ] Full financial closure — blocked by missing authoritative quote/creation, checked manual/wallet settlement/refund contracts and unverified legacy compatibility; direct order/payment/booking bypasses and webhook recovery gaps remain. Broader SQL candidate is UNAPPLIED, not production-safe certification.
 - Restrictions: no real business mutations/outbound calls, catalog/support cleanup, enforcement, spaces/assignments or E3.
 
 ## 2026-10-17 · E2.9 continuation — 14 blocker closure
