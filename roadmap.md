@@ -1,9 +1,16 @@
 # Roadmap
 
+## 2026-10-17 · Tranche 2A — documentation and architecture only
+- [x] Create canonical connected-product blueprint, layered identity model and Rent/Buy Homes IA.
+- [x] Audit current consumer Homes and PMS UX from source; distinguish proven code facts from runtime-only risks.
+- [x] Cross-link PROJECT.md and convergence mapping without duplicating the blueprint.
+- [x] Report exact files, evidence, SHA and smallest-blast-radius first UX implementation tranche.
+- [x] No feature implementation, identity tables, CRM migration or inventory-contract reopening.
+
 ## 2026-10-17 · Remaining Tranche 1 verification (no Tranche 2)
-- [ ] Obtain an independently reported typecheck result through permitted remote CI.
-- [ ] Verify the full Stripe test booking journey only with isolated test inventory and no guest-booking changes; otherwise record the exact blocker.
-- [ ] Report verification evidence and source SHA without changing payment mode or starting Tranche 2.
+- [ ] Obtain an independently reported typecheck result through permitted remote CI — blocked: no accessible GitHub connection/token or identified Actions repository.
+- [ ] Verify the full Stripe test booking journey — blocked: no positively identified isolated test inventory or contained webhook side effects in the shared production database.
+- [x] Report verification evidence and tested source SHA; see docs/convergence/TRANCHE1_REMAINING_CHECKS.md. Payment mode unchanged; Tranche 2 not started.
 
 ## 2026-10-17 · Tranche 1 correction pass (no Tranche 2)
 - [x] Verify and align inventory status predicates, writers and availability; add regression coverage.

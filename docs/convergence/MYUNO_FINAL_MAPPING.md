@@ -2,6 +2,10 @@
 
 Status: Tranche 1 (foundation). Last verified against live code/schema: 2026-10-17.
 
+Tranche 2A execution authority: [Connected Product Blueprint](../canonical/MYUNO_CONNECTED_PRODUCT_BLUEPRINT.md).
+Current UX evidence: [UX foundation audit](UX_FOUNDATION_AUDIT.md). The mapping below
+records existing owners; it does not authorize duplicate identity, inventory or CRM models.
+
 ## 1. Principles
 
 - **myuno (this repo, production DB) is the only canonical production core.**
@@ -17,7 +21,7 @@ Status: Tranche 1 (foundation). Last verified against live code/schema: 2026-10-
 | Domain | Owner (current myuno) | Notes |
 |---|---|---|
 | Identity / auth | `auth.users` + `profiles` | Roles only in `user_roles` (`app_role`), checked via `has_role` |
-| Contact / CRM person | `crm_contacts` (+ `contact_identities`, `contact_identity_links`) | Leads attach here; no second contact table |
+| Contact / CRM records | Existing `crm_contacts`, `capital_contacts`, `vendor_prospects`; `contact_identities` / `contact_identity_links` / unified-view adapter | Scoped domain records and links, not proof of a fully reconciled universal PERSON registry; no new contact store |
 | Project / property (top level) | `properties` (`property_kind` = unit / resort / hotel) | Off-plan projects: `investment_projects` / developer tables |
 | Room category | `property_room_categories` | Belongs to parent `properties` row |
 | Physical unit / room / villa | `properties` row with `parent_property_id` + `room_category_id` | Keeps calendar, iCal, cleaning, PMS unchanged |
