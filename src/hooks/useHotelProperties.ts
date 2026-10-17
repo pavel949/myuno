@@ -58,8 +58,14 @@ export function useHotelProperties(filters: HotelFilters = {}) {
       // Mode → maps to listing_type / management_status
       if (filters.mode === 'buy') query = query.eq('listing_type', 'sale');
       if (filters.mode === 'lease') query = query.eq('listing_type', 'rent');
-      if (filters.mode === 'management') {
-        query = query.eq('hotel_management_status', 'seeking_operator');
+      // Management status and occupancy are private operating fields, not part of
+      // the public catalog contract: such filters cannot be answered publicly.
+      if (
+        filters.mode === 'management' ||
+        (filters.managementStatus && filters.managementStatus !== 'all') ||
+        filters.minOccupancy !== undefined
+      ) {
+        return [];
       }
 
       if (filters.propertyType && filters.propertyType !== 'all') {
@@ -73,12 +79,6 @@ export function useHotelProperties(filters: HotelFilters = {}) {
       if (filters.minStars !== undefined) query = query.gte('hotel_star_rating', filters.minStars);
       if (filters.licenseType && filters.licenseType !== 'all') {
         query = query.eq('hotel_license_type', filters.licenseType);
-      }
-      if (filters.managementStatus && filters.managementStatus !== 'all' && filters.mode !== 'management') {
-        query = query.eq('hotel_management_status', filters.managementStatus);
-      }
-      if (filters.minOccupancy !== undefined) {
-        query = query.gte('hotel_occupancy_pct', filters.minOccupancy);
       }
 
       const { data, error } = await query;
