@@ -248,3 +248,66 @@ describe('E2 server shadow scope', () => {
     expect((await resolve(U.platform)).status).toBe('ready');
   });
 });
+
+describe('E2.5 enforced scope ceilings and privileged authorization', () => {
+  it('legacy manager retains original company export and property permission before enforcement', async () => {
+    await sql`UPDATE management_companies SET operating_spaces_enforced=false WHERE id=${CO_A}`;
+    expect(await as(U.resortMgr, async tx => (await tx`SELECT actor_can_export_company(${CO_A}) ok`)[0].ok)).toBe(true);
+    expect(await as(U.resortMgr, async tx => (await tx`SELECT actor_can_operate_property(${P.condo},${CO_A},'reports','edit') ok`)[0].ok)).toBe(true);
+    expect((await as(U.resortMgr, tx => tx`SELECT id FROM property_bookings`)).length).toBe(2);
+    await sql`UPDATE management_companies SET operating_spaces_enforced=true WHERE id=${CO_A}`;
+  });
+  it('private direct property/booking/report/task IDs outside own space cannot read or update', async () => {
+    for (const [actor, own, foreign] of [[U.resortMgr,P.villa,P.condo],[U.condoMgr,P.condo,P.villa]]) {
+      expect((await as(actor, tx => tx`SELECT id FROM properties WHERE id=${own}`)).length).toBe(1);
+      expect((await as(actor, tx => tx`SELECT id FROM properties WHERE id=${foreign}`)).length).toBe(0);
+      for (const table of ['property_bookings','property_reports','property_operational_tasks']) {
+        const rows = await as(actor, tx => tx.unsafe(`SELECT id FROM ${table} WHERE property_id='${foreign}'`));
+        expect(rows).toHaveLength(0);
+        expect(await as(actor, tx => tx.unsafe(`UPDATE ${table} SET property_id=property_id WHERE property_id='${foreign}' RETURNING id`))).toHaveLength(0);
+      }
+    }
+  });
+  it('forged company/property/report IDs denied; unassigned ordinary member denied', async () => {
+    for (const [property,company] of [[P.condo,CO_A],[P.villa,CO_B],[P.otherCo,CO_A],[P.unassigned,CO_A],[id(999),CO_A]]) {
+      expect(await as(U.resortMgr, async tx => (await tx`SELECT actor_can_operate_property(${property},${company},'reports','edit') ok`)[0].ok)).toBe(false);
+    }
+    expect(await as(U.resortMgr, async tx => (await tx`SELECT actor_can_send_property_report(${id(71)}) ok`)[0].ok)).toBe(true);
+    for (const report of [id(72),id(999)]) expect(await as(U.resortMgr, async tx => (await tx`SELECT actor_can_send_property_report(${report}) ok`)[0].ok)).toBe(false);
+  });
+  it('cross-space membership works only with report/edit AND finance/view capability', async () => {
+    expect(await as(U.cross, async tx => (await tx`SELECT actor_can_send_property_report(${id(72)}) ok`)[0].ok)).toBe(true);
+    await sql`UPDATE team_member_permissions SET can_edit=false WHERE user_id=${U.cross} AND module='reports'`;
+    expect(await as(U.cross, async tx => (await tx`SELECT actor_can_send_property_report(${id(72)}) ok`)[0].ok)).toBe(false);
+    await sql`UPDATE team_member_permissions SET can_edit=true WHERE user_id=${U.cross} AND module='reports'`;
+    await sql`UPDATE team_member_permissions SET can_view=false WHERE user_id=${U.cross} AND module='finance'`;
+    expect(await as(U.cross, async tx => (await tx`SELECT actor_can_send_property_report(${id(72)}) ok`)[0].ok)).toBe(false);
+    await sql`UPDATE team_member_permissions SET can_view=true WHERE user_id=${U.cross} AND module='finance'`;
+  });
+  it('enforced ordinary managers cannot full-export even with cross-grants; overseers can', async () => {
+    for (const user of [U.resortMgr,U.condoMgr,U.cross,U.team]) expect(await as(user, async tx => (await tx`SELECT actor_can_export_company(${CO_A}) ok`)[0].ok)).toBe(false);
+    for (const user of [U.director,U.admin,U.platform]) {
+      expect(await as(user, async tx => (await tx`SELECT actor_can_export_company(${CO_A}) ok`)[0].ok)).toBe(true);
+      expect(await as(user, async tx => (await tx`SELECT actor_can_send_property_report(${id(72)}) ok`)[0].ok)).toBe(true);
+    }
+  });
+  it('ordinary uno_team cannot bypass direct object or property module authority', async () => {
+    expect(await as(U.team, tx => tx`SELECT id FROM property_reports`)).toHaveLength(0);
+    expect(await as(U.team, async tx => (await tx`SELECT actor_can_operate_property(${P.villa},${CO_A},'reports','edit') ok`)[0].ok)).toBe(false);
+  });
+  it('anonymous cannot call privileged primitives', async () => {
+    await expect(as(null, tx => tx`SELECT actor_can_send_property_report(${id(71)})`)).rejects.toThrow(/permission denied/);
+    await expect(as(null, tx => tx`SELECT actor_can_export_company(${CO_A})`)).rejects.toThrow(/permission denied/);
+  });
+  it('authenticated director cannot toggle supervised enforcement field', async () => {
+    await expect(as(U.director, tx => tx`UPDATE management_companies SET operating_spaces_enforced=false WHERE id=${CO_A}`)).rejects.toThrow(/supervised service authority/);
+  });
+  it('security rollback is executable and revokes exports/report send without opening RLS', async () => {
+    await sql.begin(async tx => {
+      await tx.unsafe(readFileSync('docs/hardening/rollback/0023_operating_security_ceilings.sql','utf8'));
+      expect((await tx`SELECT has_function_privilege('authenticated','public.actor_can_export_company(uuid)','EXECUTE') ok`)[0].ok).toBe(false);
+      expect((await tx`SELECT count(*) n FROM pg_policies WHERE policyname='operating_space_booking_ceiling'`)[0].n).toBe('1');
+      throw new Error('security-rollback-test');
+    }).catch(error => { if (!(error instanceof Error) || error.message !== 'security-rollback-test') throw error; });
+  });
+});
