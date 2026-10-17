@@ -1,9 +1,9 @@
 # Roadmap
 
 ## 2026-10-17 · Tranche 2C — Calendar presentation only
-- [ ] Simplify modes/scope/actions/date navigation without changing date or business contracts.
-- [ ] Verify real calendar projections with synthetic fixtures at RU/EN 375/390/430/1280; no writes.
-- [ ] Review screenshots and report results, date risks and SHA; do not start Today.
+- [x] Simplify modes/scope/actions/date navigation without changing date or business contracts.
+- [x] Verify real calendar projections with synthetic fixtures at RU/EN 375/390/430/1280; no writes (8/8).
+- [x] Review screenshots and report results, date risks and SHA; see docs/convergence/TRANCHE2C_CALENDAR_UX.md; Today not started.
 
 ## 2026-10-17 · Tranche 2B correction — runtime presentation
 - [x] Change MCBookingsPage header/KPIs/controls/cards/bulk bar without changing business logic.

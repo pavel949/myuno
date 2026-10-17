@@ -156,6 +156,14 @@ export default function OwnerCalendar() {
               </Select>
             </div>
           )}
+          {selectedGroupId !== 'all' && (
+            <p className="text-sm text-muted-foreground break-words" aria-live="polite">
+              {isRu ? 'Фильтр: ' : 'Filter: '}
+              {selectedGroupId === 'no-group'
+                ? (isRu ? 'Без проекта' : 'No project')
+                : groupOptions.find(g => g.id === selectedGroupId)?.label}
+            </p>
+          )}
           <MultiPropertyTimeline
             properties={filteredProperties}
             isLoading={propertiesLoading}
