@@ -1,15 +1,16 @@
 # Roadmap
 
 ## 2026-10-17 · E2.8 read-only continuation
-- [ ] Trace remaining private catalog, shared-helper and support access paths against source/live definitions; no writes, grants, deploys or business calls.
-- [ ] Update the bypass register and E2.8 report with exact evidence, legitimate authority, blockers and next-step recommendation.
+- [x] Trace remaining private catalog, shared-helper and support access paths against source/live definitions; 47 residual policies / 30 relations; no writes, grants, deploys or business calls.
+- [x] Update the bypass register and E2.8 report with RO-01–RO-14 evidence, legitimate authority, blockers and next-step recommendation; equal before/after aggregates and catalog sanity verified.
+- Next corrective work is not started: needs separate approval, safe public-provider/salon replacements, exact isolated tests and independent applied/deployed manifest; full E2.8 closure remains NO-GO.
 - Restrictions retained: enforcement off; no spaces/assignments seeded; no Order Mutation Audit or E3.
 
 ## 2026-10-17 · E2.8 — UNO_TEAM least privilege
 - [x] Source/live census and confirmed/UNKNOWN dispositions saved under docs/convergence/e2_8/.
 - [x] Proven private employment bypasses narrowed: 0028–0031, 128 policies, checked RPCs, 15 deployed handlers after isolated tests.
 - [x] Read-only aggregates, security-preserving rollback, register and E2.8 report; no enforcement, seed, Order Mutation Audit or E3.
-- [ ] Full E2.8 closure — blocked by private/unpublished catalog duties, shared legacy helper consumers and explicit support contract; no implicit grants. See OPERATING_SPACES_E2_8_UNO_TEAM.md.
+- [ ] Full E2.8 closure — blocked by RO-01–RO-14: proved private/public catalog paths, source-only notification recipient/ingress defect, legacy backup/export/CRM entitlements, support contract and deployment parity; no implicit grants. See OPERATING_SPACES_E2_8_UNO_TEAM.md.
 
 ## 2026-10-17 · E2.5 continuation
 - [x] 0025 delegate/placement guards, tests, rollback, register and report updated.
