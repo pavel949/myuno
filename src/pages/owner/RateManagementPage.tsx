@@ -8,7 +8,7 @@ import { CURRENCIES } from '@/lib/config/currencies';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useMyProperties } from '@/hooks/useMyProperties';
+import { useMyProperties, type UnifiedProperty } from '@/hooks/useMyProperties';
 import {
   useOwnerRateSeasons,
   useSaveRateSeason,
@@ -411,14 +411,15 @@ export default function RateManagementPage() {
         </CollapsibleContent>
       </Collapsible>
 
-      <RateSeasonSheet
+      {sheetOpen && <RateSeasonSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         editingRate={editingRate}
         properties={allProperties}
+        initialPropertyId={selectedProperty}
         ownerId={user?.id || ''}
         onSaved={() => queryClient.invalidateQueries({ queryKey: ['pricing-activity-logs'] })}
-      />
+      />}
     </div>
   );
 }
@@ -490,6 +491,7 @@ function PropertyPriceRow({
 }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(String(pricePerNight));
+  const [saving, setSaving] = useState(false);
   const queryClient = useQueryClient();
   // Derive symbol from passed currency code; fallback to currency code itself.
   const propSym = (CURRENCIES as Record<string, { symbol: string }>)[
@@ -498,15 +500,16 @@ function PropertyPriceRow({
 
 
   const save = async () => {
+    if (saving) return;
     const num = Number(value);
-    if (!num || num <= 0) return;
+    if (!Number.isFinite(num) || num <= 0) return;
+    setSaving(true);
+    try {
     const { error } = await supabase
       .from('properties')
-      .update({ price_per_night: num } as any)
+      .update({ price_per_night: num })
       .eq('id', propertyId);
-    if (error) {
-      toast.error(isRu ? 'Ошибка сохранения' : 'Save failed');
-    } else {
+    if (error) throw error;
       toast.success(isRu ? 'Цена обновлена' : 'Price updated');
 
       // Log base price change
@@ -519,21 +522,29 @@ function PropertyPriceRow({
             action: 'base_price_changed',
             entity_type: 'property',
             entity_id: propertyId,
-            details: { old_value: pricePerNight, new_value: num } as any,
+            details: { old_value: pricePerNight, new_value: num },
           });
         } catch { /* ignored */ }
       }
 
       queryClient.invalidateQueries({ queryKey: ['company-properties'] });
       queryClient.invalidateQueries({ queryKey: ['owner-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['assigned-properties'] });
+      queryClient.invalidateQueries({ queryKey: ['owner-property', propertyId] });
+      queryClient.invalidateQueries({ queryKey: ['property', propertyId] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['pricing-activity-logs'] });
+      setEditing(false);
+    } catch {
+      toast.error(isRu ? 'Ошибка сохранения' : 'Save failed');
+    } finally {
+      setSaving(false);
     }
-    setEditing(false);
   };
 
   return (
     <Card>
-      <CardContent className="p-3 flex items-center gap-3">
+      <CardContent className="p-3 flex flex-wrap items-center gap-3">
         <div className="flex-1 min-w-0">
           <p className="font-medium text-sm truncate">{title}</p>
           <div className="flex items-center gap-2 mt-0.5">
@@ -549,15 +560,16 @@ function PropertyPriceRow({
             <>
               <Input
                 type="number"
+                disabled={saving}
                 value={value}
                 onChange={e => setValue(e.target.value)}
                 className="w-28 h-8 text-right"
                 autoFocus
-                onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false); }}
+                onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape' && !saving) setEditing(false); }}
               />
               <span className="text-xs text-muted-foreground">{currency}</span>
-              <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Сохранить' : 'Save'} onClick={save}><Check className="h-3.5 w-3.5" /></Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Отмена' : 'Cancel'} onClick={() => setEditing(false)}><X className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" disabled={saving} className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Сохранить' : 'Save'} onClick={save}><Check className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" disabled={saving} className="h-7 w-7 min-h-[44px] min-w-[44px]" aria-label={isRu ? 'Отмена' : 'Cancel'} onClick={() => setEditing(false)}><X className="h-3.5 w-3.5" /></Button>
             </>
           ) : (
             <>
@@ -576,12 +588,13 @@ function PropertyPriceRow({
 
 /* ─── Season create/edit sheet ─── */
 function RateSeasonSheet({
-  open, onOpenChange, editingRate, properties, ownerId, onSaved,
+  open, onOpenChange, editingRate, properties, initialPropertyId, ownerId, onSaved,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editingRate: RateSeasonRecord | null;
-  properties: any[];
+  properties: UnifiedProperty[];
+  initialPropertyId: string;
   ownerId: string;
   onSaved?: () => void;
 }) {
@@ -592,16 +605,8 @@ function RateSeasonSheet({
   const saveMutation = useSaveRateSeason();
 
 
-  const [form, setForm] = useState(getDefaultForm(editingRate, properties));
-
-  const handleOpenChange = (v: boolean) => {
-    if (v) setForm(getDefaultForm(editingRate, properties));
-    onOpenChange(v);
-  };
-
-  useState(() => {
-    setForm(getDefaultForm(editingRate, properties));
-  });
+  // The parent mounts a fresh draft for each opening, never overwriting edits on refetch.
+  const [form, setForm] = useState(() => getDefaultForm(editingRate, properties, initialPropertyId));
 
   const selectedProp = properties.find(p => p.property_id === form.property_id);
   const basePrice = selectedProp?.price_per_night || 0;
@@ -642,7 +647,7 @@ function RateSeasonSheet({
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>
@@ -653,7 +658,7 @@ function RateSeasonSheet({
           {/* Property selector */}
           <div>
             <Label>{t('Property', 'Объект')}</Label>
-            <Select value={form.property_id} onValueChange={v => setForm(f => ({ ...f, property_id: v }))}>
+            <Select disabled={!!editingRate || saveMutation.isPending} value={form.property_id} onValueChange={v => setForm(f => ({ ...f, property_id: v }))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {properties.map(p => (
@@ -761,7 +766,7 @@ function RateSeasonSheet({
             onClick={handleSave}
             disabled={!form.name_en || !form.start_date || !form.end_date || !form.nightly_rate || saveMutation.isPending}
           >
-            {t('Save', 'Сохранить')}
+            {saveMutation.isPending ? t('Saving…', 'Сохранение…') : t('Save', 'Сохранить')}
           </Button>
         </div>
       </SheetContent>
@@ -769,7 +774,7 @@ function RateSeasonSheet({
   );
 }
 
-function getDefaultForm(editingRate: RateSeasonRecord | null, properties: any[]) {
+function getDefaultForm(editingRate: RateSeasonRecord | null, properties: UnifiedProperty[], initialPropertyId: string) {
   if (editingRate) {
     return {
       property_id: editingRate.property_id,
@@ -790,7 +795,7 @@ function getDefaultForm(editingRate: RateSeasonRecord | null, properties: any[])
     };
   }
   return {
-    property_id: properties[0]?.property_id || '',
+    property_id: properties.find(p => p.property_id === initialPropertyId)?.property_id || properties[0]?.property_id || '',
     name_en: '', name_ru: '', start_date: '', end_date: '',
     nightly_rate: '', weekly_rate: '', monthly_rate: '', min_stay_nights: '1',
     weekly_discount: '', monthly_discount: '',

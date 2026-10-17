@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-17 · Property and tariff data-entry priority
+- [x] Correct stale season drafts, selected-property default and edit-time property reassignment in existing tariff form; retain price edits after errors, prevent duplicate base-price submissions and refresh existing property views. Seasonal property controls now fit narrow screens and use non-submit buttons.
+- [x] Verify only the changed tariff workflow with synthetic browser data: edit/reopen, second season, selected property and failed-save draft retention; no production reads/writes/outbound requests. Automatic build OK. No broad test expansion, permission expansion, enforcement, assignments or E3 cutover.
+- Live persisted tariff/property save remains unverified: no authorized production business writes were performed; financial/source/settlement blockers below remain open.
+- Financial settlement and mutation blockers remain NO-GO; this priority does not authorize bypassing financial safeguards.
+
 ## 2026-10-17 · Revised P0/P1 executable master task
 - [x] Read the uploaded master task and verify starting HEAD `c839a53568b8e14ee277f5739e85c3f1b56f6262`; preserve accepted UX/security work.
 - [ ] P0-A: close remaining proven order/payment/inventory mutation blockers; exact isolated tests and security-preserving rollback before any apply/deploy; report GO-A/NO-GO and stop.
