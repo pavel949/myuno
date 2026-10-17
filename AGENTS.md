@@ -15,3 +15,4 @@
 - Bookings-list UI regression tests replace data hooks, the detail boundary and the database client with synthetic fixtures/stubs and deny browser network access, because preview shares production and tests must never write guest bookings.
 - Calendar UI regression tests render the real projections with synthetic data hooks, forbidden writer stubs and intercepted local assets, because calendar layout verification must not change canonical bookings or tasks.
 - Calendar civil-date parsing, half-open stay spans and Bangkok today use the shared hotelDates helpers, because UTC instant conversions and millisecond day offsets shift occupied nights across timezones.
+- Today UI QA replaces usePmsToday and feedback hooks, rejects database access and intercepts all browser assets locally; route destinations are tested as boundaries rather than booting production-connected pages, because presentation QA must not read or write guest records.
