@@ -106,7 +106,8 @@ export function usePmsToday(date: Date = new Date()) {
       ]);
       if (bk.error) throw bk.error;
       if (req.error) throw req.error;
-      // crm_tasks is company-scoped by RLS; treat access errors as "no tasks".
+      // A failed task source cannot prove that a property has no open work.
+      if (tasks.error) throw tasks.error;
       return { bookings: (bk.data ?? []) as TodayBooking[], requests: req.data ?? [], tasks: tasks.data ?? [] };
     },
   });

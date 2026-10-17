@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, differenceInDays, isPast, isFuture, isToday } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
+import { bangkokTodayISO, parseCivilDate } from '@/lib/hotelDates';
 import { ru } from 'date-fns/locale';
 import {
   Search, Calendar, Users, Phone, Mail,
@@ -58,11 +59,9 @@ const SORT_OPTIONS: { key: SortKey; label: string; labelRu: string }[] = [
 ];
 
 function getBookingTimeStatus(booking: PropertyBooking): 'upcoming' | 'active' | 'past' {
-  const now = new Date();
-  const checkIn = new Date(booking.check_in);
-  const checkOut = new Date(booking.check_out);
-  if (isPast(checkOut)) return 'past';
-  if (isToday(checkIn) || (isPast(checkIn) && isFuture(checkOut))) return 'active';
+  const today = bangkokTodayISO();
+  if (booking.check_out <= today) return 'past';
+  if (booking.check_in <= today && today < booking.check_out) return 'active';
   return 'upcoming';
 }
 
@@ -73,7 +72,7 @@ export default function MCBookingsPage() {
   const { code: cityCurrencyCode } = useCityCurrency();
   const isRu = language === 'ru';
 
-  const { bookings, isLoading } = useAllPropertyBookings();
+  const { bookings, isLoading, error, refetch } = useAllPropertyBookings();
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,7 +94,7 @@ export default function MCBookingsPage() {
         const timeStatus = getBookingTimeStatus(b);
         switch (statusFilter) {
           case 'upcoming': return timeStatus === 'upcoming' && b.status !== 'cancelled';
-          case 'active': return timeStatus === 'active' || b.status === 'checked_in';
+          case 'active': return timeStatus === 'active' && b.status !== 'cancelled' && b.status !== 'completed' && b.status !== 'checked_out';
           case 'pending': return b.status === 'pending';
           case 'completed': return b.status === 'completed' || (timeStatus === 'past' && b.status !== 'cancelled');
           case 'cancelled': return b.status === 'cancelled';
@@ -148,7 +147,7 @@ export default function MCBookingsPage() {
     return {
       total: bookings.length,
       upcoming: bookings.filter(b => getBookingTimeStatus(b) === 'upcoming' && b.status !== 'cancelled').length,
-      active: bookings.filter(b => getBookingTimeStatus(b) === 'active' || b.status === 'checked_in').length,
+      active: bookings.filter(b => getBookingTimeStatus(b) === 'active' && b.status !== 'cancelled' && b.status !== 'completed' && b.status !== 'checked_out').length,
       pending: bookings.filter(b => b.status === 'pending').length,
     };
   }, [bookings]);
@@ -207,7 +206,7 @@ export default function MCBookingsPage() {
       phone: b.guest_phone || '',
       check_in: b.check_in,
       check_out: b.check_out,
-      nights: differenceInDays(new Date(b.check_out), new Date(b.check_in)),
+      nights: differenceInCalendarDays(parseCivilDate(b.check_out), parseCivilDate(b.check_in)),
       guests: b.guests_count || '',
       amount: b.total_amount || 0,
       currency: b.currency || cityCurrencyCode,
@@ -225,6 +224,16 @@ export default function MCBookingsPage() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  if (error) {
+    return <PageContainer>
+      <PageHeader title={isRu ? 'Бронирования' : 'Bookings'} />
+      <div role="alert" className="space-y-3 text-sm text-destructive">
+        <p>{isRu ? 'Не удалось загрузить бронирования' : 'Could not load bookings'}</p>
+        <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+      </div>
+    </PageContainer>;
+  }
 
   if (isLoading) {
     return (
@@ -404,9 +413,9 @@ export default function MCBookingsPage() {
       ) : (
         <div className="space-y-3">
           {filteredBookings.map(booking => {
-            const checkIn = new Date(booking.check_in);
-            const checkOut = new Date(booking.check_out);
-            const nights = differenceInDays(checkOut, checkIn);
+            const checkIn = parseCivilDate(booking.check_in);
+            const checkOut = parseCivilDate(booking.check_out);
+            const nights = differenceInCalendarDays(checkOut, checkIn);
             const statusCfg = STATUS_CONFIG[booking.status || 'pending'] || STATUS_CONFIG.pending;
             const guestName = booking.guest_name || (isRu ? 'Гость' : 'Guest');
 
