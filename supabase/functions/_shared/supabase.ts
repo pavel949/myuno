@@ -1,4 +1,3 @@
-/// <reference path="./deno.d.ts" />
 /**
  * Shared Supabase client for Edge Functions
  * Use this module to ensure consistent versioning across all functions.
@@ -27,3 +26,4 @@ export function createAnonClient() {
   const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
   return createClient(supabaseUrl, supabaseAnonKey);
 }
+

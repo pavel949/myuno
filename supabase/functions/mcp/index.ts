@@ -9,7 +9,7 @@ import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.20.1";
 import { createClient } from "npm:@supabase/supabase-js@^2.106.2";
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.1";
 import { z } from "npm:zod@^4.4.3";
-var search_properties_default = defineTool({
+const search_properties_default = defineTool({
   name: "search_properties",
   title: "Search properties",
   description: "Search myUNO property listings on Phuket. Filter by city, min/max price (USD/THB stored as numeric) and bedrooms. Returns up to `limit` rows.",
@@ -49,7 +49,7 @@ var search_properties_default = defineTool({
 import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.106.2";
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.1";
 import { z as z2 } from "npm:zod@^4.4.3";
-var list_services_default = defineTool2({
+const list_services_default = defineTool2({
   name: "list_services",
   title: "List services",
   description: "List services from the myUNO catalog. Optionally filter by category slug and free-text query.",
@@ -81,7 +81,7 @@ var list_services_default = defineTool2({
 
 // src/lib/mcp/tools/whoami.ts
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.1";
-var whoami_default = defineTool3({
+const whoami_default = defineTool3({
   name: "whoami",
   title: "Who am I",
   description: "Returns the signed-in myUNO user's id and email.",
@@ -100,8 +100,8 @@ var whoami_default = defineTool3({
 });
 
 // src/lib/mcp/index.ts
-var projectRef = "kakkwibljrjsawxgnupk";
-var mcp_default = defineMcp({
+const projectRef = "kakkwibljrjsawxgnupk";
+const mcp_default = defineMcp({
   name: "myuno-mcp",
   title: "myUNO",
   version: "0.1.0",
@@ -116,3 +116,4 @@ var mcp_default = defineMcp({
 // lovable-mcp-supabase-entry.ts
 import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.1/stacks/supabase";
 Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));
+

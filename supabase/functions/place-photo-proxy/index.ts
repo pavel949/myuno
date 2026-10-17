@@ -12,7 +12,7 @@ const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_maps";
 // Places API (New) photo resource names look like `places/{place_id}/photos/{photo_id}`.
 // Legacy opaque references are still accepted for cached records, but may require rehydrating
 // details through Places API (New) before photo streaming works.
-const PHOTO_REF_RE = /^(places\/[A-Za-z0-9_\-]+\/photos\/[A-Za-z0-9_\-]+|[A-Za-z0-9_\-]{40,500})$/;
+const PHOTO_REF_RE = /^(places\/[A-Za-z0-9_-]+\/photos\/[A-Za-z0-9_-]+|[A-Za-z0-9_-]{40,500})$/;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -47,3 +47,4 @@ Deno.serve(async (req) => {
   headers.set("Cache-Control", "public, max-age=604800, immutable");
   return new Response(res.body, { status: 200, headers });
 });
+

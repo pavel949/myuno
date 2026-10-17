@@ -46,7 +46,7 @@ jobs:
       - name: Full unit and isolated PostgreSQL suite
         id: unit
         continue-on-error: true
-        run: npm test -- --reporter=default --reporter=json --outputFile=unit-results.json
+        run: npm test -- --maxWorkers=2 --reporter=default --reporter=json --outputFile=unit-results.json
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Focused connected workflows in three timezones
@@ -54,8 +54,9 @@ jobs:
         continue-on-error: true
         run: |
           for zone in UTC Asia/Bangkok America/Los_Angeles; do
-            TZ="$zone" npx vitest run src/hooks/__tests__/pmsFlow.integration.test.tsx src/pages/owner/__tests__/MCBookingsPage.test.tsx src/hooks/__tests__/roomCategoryCache.test.tsx src/pages/property/PropertyIndex.test.tsx src/hooks/__tests__/formDraftLifecycle.test.tsx src/components/auth/InvestorGuard.test.tsx || exit 1
+            TZ="$zone" npx vitest run src/hooks/__tests__/pmsFlow.integration.test.tsx src/pages/owner/__tests__/MCBookingsPage.test.tsx src/hooks/__tests__/roomCategoryCache.test.tsx src/pages/property/PropertyIndex.test.tsx src/hooks/__tests__/formDraftLifecycle.test.tsx src/components/auth/InvestorGuard.test.tsx src/components/onboarding/Coachmarks.test.tsx || exit 1
           done
+          node scripts/qa/scheduled-backup-integrity.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Production build with synthetic configuration
@@ -64,6 +65,8 @@ jobs:
         run: npm run build
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Architecture diagnostic (source/type census, not a live-schema certificate)
+        run: node scripts/architecture-scan.mjs --json > architecture-results.json
       - name: Lint diagnostic
         id: lint
         continue-on-error: true
@@ -95,6 +98,7 @@ jobs:
           name: connected-system-evidence
           path: |
             unit-results.json
+            architecture-results.json
             /tmp/browser/
             /tmp/isolated-vite.log
           retention-days: 14
