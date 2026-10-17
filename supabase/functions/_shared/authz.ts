@@ -11,12 +11,13 @@
 import { createServiceClient, type SupabaseClient } from "./supabase.ts";
 import { requireAuth } from "./auth-guard.ts";
 import { requireInternalSecret } from "./internal-secret.ts";
+import { createActorClient } from "./operating-space-auth.ts";
 
 /** Canonical platform staff roles (full set). */
-export const STAFF_ROLES = ["admin", "uno_team", "staff"] as const;
+export const STAFF_ROLES = ["admin"] as const;
 
 /** Platform admin roles — used for IDOR/admin bypass on scoped endpoints. */
-export const PLATFORM_ADMIN_ROLES = ["admin", "uno_team"] as const;
+export const PLATFORM_ADMIN_ROLES = ["admin"] as const;
 
 /** Return a 403 Forbidden JSON response. */
 export function forbidden(corsHeaders: Record<string, string>): Response {
@@ -79,9 +80,24 @@ export async function requireInternalOrStaff(
   const result = await requireInternalOrUser(req, corsHeaders);
   if (result instanceof Response || result.mode === "internal") return result;
 
-  const roles = await fetchUserRoles(createServiceClient(), result.userId);
+  const roles = await fetchUserRoles(createActorClient(req), result.userId);
   if (!hasAnyRole(roles, allowedRoles)) return forbidden(corsHeaders);
   return result;
+}
+
+/** Checked actor-bound authorization must finish before privileged client creation. */
+export async function requireActorRpc(
+  req: Request,
+  corsHeaders: Record<string, string>,
+  name: string,
+  args: Record<string, unknown> = {},
+): Promise<Response | null> {
+  try {
+    const { data, error } = await createActorClient(req).rpc(name, args);
+    return !error && data === true ? null : forbidden(corsHeaders);
+  } catch {
+    return forbidden(corsHeaders);
+  }
 }
 
 /**
