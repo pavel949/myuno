@@ -72,7 +72,7 @@ describe('E2.8 exact live-catalog least privilege',()=>{
    await tx`INSERT INTO team_member_permissions(company_id,user_id,module,can_view,can_edit) VALUES (${A},${team},'crm',true,false)`;
    await tx.unsafe('SET LOCAL ROLE authenticated');await tx`SELECT set_config('request.jwt.claim.sub',${team},true)`;
    expect(await tx`SELECT id FROM crm_contacts`).toEqual([{id:id(35)}]);
-   expect(await tx`UPDATE crm_contacts SET full_name='forbidden' WHERE id=${id(35)} RETURNING id`).toHaveLength(0);
+   expect(await tx`UPDATE crm_contacts SET first_name='forbidden' WHERE id=${id(35)} RETURNING id`).toHaveLength(0);
    throw new Error('rollback-member');
   }).catch(e=>{if(!(e instanceof Error)||e.message!=='rollback-member')throw e;});
  });

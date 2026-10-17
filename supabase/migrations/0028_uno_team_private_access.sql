@@ -1381,3 +1381,83 @@ ALTER POLICY "segments_write" ON "public"."user_segments" USING (is_admin_or_uno
 ALTER POLICY "sessions_select" ON "public"."user_sessions" USING (((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()));
 
 ALTER POLICY "Admins can manage commission rules" ON "public"."vertical_commission_rules" USING ((has_role(auth.uid(), 'admin'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
+-- Checked actor-bound edge authorization; no business writes or grant activation.
+CREATE FUNCTION public.actor_has_platform_admin() RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
+ SELECT EXISTS(SELECT 1 FROM public.user_roles WHERE user_id=auth.uid() AND role='admin')
+$$;
+CREATE FUNCTION public.actor_can_analyze_crm(p_company_id uuid,p_contact_id uuid DEFAULT NULL,p_deal_id uuid DEFAULT NULL)
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
+DECLARE company uuid; object_company uuid;
+BEGIN
+ IF auth.uid() IS NULL OR (p_contact_id IS NULL AND p_deal_id IS NULL AND p_company_id IS NULL) THEN RETURN false; END IF;
+ company:=p_company_id;
+ IF p_contact_id IS NOT NULL THEN
+  SELECT company_id INTO object_company FROM public.crm_contacts WHERE id=p_contact_id;
+  IF NOT FOUND OR object_company IS NULL OR (company IS NOT NULL AND company<>object_company) THEN RETURN false; END IF;
+  company:=object_company;
+ END IF;
+ IF p_deal_id IS NOT NULL THEN
+  SELECT company_id INTO object_company FROM public.agent_deals WHERE id=p_deal_id;
+  IF NOT FOUND OR object_company IS NULL OR (company IS NOT NULL AND company<>object_company) THEN RETURN false; END IF;
+  company:=object_company;
+ END IF;
+ RETURN company IS NOT NULL AND public.mc_can_access_e28_private(auth.uid(),company,'crm','view')
+ AND NOT public.actor_is_space_limited(company);
+END $$;
+CREATE FUNCTION public.actor_can_analyze_property(p_property_id uuid)
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
+DECLARE p public.properties;
+BEGIN
+ IF auth.uid() IS NULL THEN RETURN false; END IF;
+ SELECT * INTO p FROM public.properties WHERE id=p_property_id;
+ IF NOT FOUND THEN RETURN false; END IF;
+ IF public.actor_has_platform_admin() OR p.owner_id=auth.uid() THEN RETURN true; END IF;
+ RETURN public.actor_can_operate_property(p.id,p.management_company_id,'properties','edit')
+ AND public.actor_can_operate_property(p.id,p.management_company_id,'finance','view');
+END $$;
+CREATE FUNCTION public.actor_can_analyze_booking(p_booking_id uuid)
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
+DECLARE b public.property_bookings; p public.properties;
+BEGIN
+ IF auth.uid() IS NULL THEN RETURN false; END IF;
+ SELECT * INTO b FROM public.property_bookings WHERE id=p_booking_id;
+ IF NOT FOUND THEN RETURN false; END IF;
+ SELECT * INTO p FROM public.properties WHERE id=b.property_id;
+ IF NOT FOUND THEN RETURN false; END IF;
+ IF public.actor_has_platform_admin() OR b.guest_id=auth.uid() OR p.owner_id=auth.uid() THEN RETURN true; END IF;
+ RETURN public.actor_can_operate_property(p.id,p.management_company_id,'bookings','view');
+END $$;
+CREATE FUNCTION public.actor_can_generate_voucher(p_order_id uuid DEFAULT NULL,p_booking_id uuid DEFAULT NULL)
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
+DECLARE b public.property_bookings; company uuid;
+BEGIN
+ IF auth.uid() IS NULL OR (p_order_id IS NULL)=(p_booking_id IS NULL) THEN RETURN false; END IF;
+ IF p_order_id IS NOT NULL THEN
+  -- Only protected admin or the real order customer: org/provider metadata is not voucher authority.
+  RETURN EXISTS(SELECT 1 FROM public.orders o WHERE o.id=p_order_id AND (o.customer_user_id=auth.uid() OR public.actor_has_platform_admin()));
+ END IF;
+ SELECT * INTO b FROM public.property_bookings WHERE id=p_booking_id;
+ IF NOT FOUND THEN RETURN false; END IF;
+ IF public.actor_has_platform_admin() OR b.guest_id=auth.uid() OR (b.guest_id IS NULL AND b.owner_id=auth.uid()) THEN RETURN true; END IF;
+ SELECT management_company_id INTO company FROM public.properties WHERE id=b.property_id;
+ RETURN public.actor_can_operate_property(b.property_id,company,'bookings','view')
+ AND public.actor_can_operate_property(b.property_id,company,'finance','view');
+END $$;
+CREATE FUNCTION public.actor_can_manage_company_billing(p_company_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
+ SELECT auth.uid() IS NOT NULL AND EXISTS(SELECT 1 FROM public.management_companies WHERE id=p_company_id)
+ AND (public.actor_has_platform_admin() OR EXISTS(SELECT 1 FROM public.management_company_members m
+ WHERE m.company_id=p_company_id AND m.user_id=auth.uid() AND m.is_active IS TRUE AND m.role IN ('director','admin','owner','billing')))
+$$;
+CREATE FUNCTION public.actor_can_import_project(p_project_id uuid,p_source_id uuid DEFAULT NULL,p_connector boolean DEFAULT false)
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
+BEGIN
+ IF auth.uid() IS NULL OR NOT EXISTS(SELECT 1 FROM public.property_projects WHERE id=p_project_id) THEN RETURN false; END IF;
+ IF p_source_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM public.project_drive_sources WHERE id=p_source_id AND project_id=p_project_id) THEN RETURN false; END IF;
+ IF public.actor_has_platform_admin() THEN RETURN true; END IF;
+ -- Shared connector credentials have no proven delegated integration grant.
+ IF p_connector THEN RETURN false; END IF;
+ RETURN EXISTS(SELECT 1 FROM public.property_projects p JOIN public.developers d ON d.id=p.developer_id WHERE p.id=p_project_id AND d.user_id=auth.uid());
+END $$;
+REVOKE ALL ON FUNCTION public.actor_has_platform_admin(),public.actor_can_analyze_crm(uuid,uuid,uuid),public.actor_can_analyze_property(uuid),public.actor_can_analyze_booking(uuid),public.actor_can_generate_voucher(uuid,uuid),public.actor_can_manage_company_billing(uuid),public.actor_can_import_project(uuid,uuid,boolean) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.actor_has_platform_admin(),public.actor_can_analyze_crm(uuid,uuid,uuid),public.actor_can_analyze_property(uuid),public.actor_can_analyze_booking(uuid),public.actor_can_generate_voucher(uuid,uuid),public.actor_can_manage_company_billing(uuid),public.actor_can_import_project(uuid,uuid,boolean) TO authenticated,service_role;
