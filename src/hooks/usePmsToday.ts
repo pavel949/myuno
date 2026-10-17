@@ -94,7 +94,7 @@ export function usePmsToday(date: Date = new Date()) {
           .from('property_service_requests')
           .select('id, property_id, service_type, status, priority, guest_name, description, scheduled_at, created_at, completed_at')
           .in('property_id', ids)
-          .or(`status.in.(${OPEN_REQUEST.join(',')}),completed_at.gte.${today}`)
+          .or(`status.in.(${OPEN_REQUEST.join(',')}),completed_at.gte.${today}T00:00:00+07:00`)
           .order('created_at', { ascending: false })
           .limit(200),
         supabase

@@ -74,6 +74,8 @@ beforeEach(() => {
   localStorage.clear();
   state.query.isError = false;
   state.query.isLoading = false;
+  state.query.hasNextPage = false;
+  state.query.isFetchingNextPage = false;
   state.query.data = { pages: [{ properties: [
     { id: 'villa', title_en: 'Villa', amenities: ['pool'] },
     { id: 'condo', title_en: 'Condo', amenities: [] },
@@ -119,6 +121,45 @@ describe('browse map continuity', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Back in history' }));
     await waitFor(() => expect(screen.getByTestId('map')).toBeTruthy());
     expect(screen.getByTestId('listing').textContent).toBe('villa');
+  });
+
+  it('can load a later page when the loaded page has no category matches', () => {
+    state.query.data = { pages: [{ properties: [{ id: 'condo', title_en: 'Condo', amenities: [] }] }] };
+    state.query.hasNextPage = true;
+    const view = renderPage('?cats=pool&view=map');
+    expect(screen.queryByTestId('listing')).toBeNull();
+    expect(screen.getByText('No matches in loaded listings yet. Check the next listings.')).toBeTruthy();
+    expect(screen.queryByText('No properties match selected filters')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Load more' }));
+    expect(state.query.fetchNextPage).toHaveBeenCalledOnce();
+    state.query.data = { pages: [...state.query.data.pages, { properties: [{ id: 'villa', title_en: 'Villa', amenities: ['pool'] }] }] };
+    state.query.hasNextPage = false;
+    view.rerender(<MemoryRouter initialEntries={['/property/browse?cats=pool&view=map']}>
+      <PropertyIndex /><LocationProbe />
+    </MemoryRouter>);
+    expect(screen.getByTestId('listing').textContent).toBe('villa');
+    expect(screen.getByTestId('marker').textContent).toBe('villa');
+    expect(screen.queryByRole('button', { name: 'Load more' })).toBeNull();
+  });
+
+  it('does not request another page while pagination is busy', () => {
+    state.query.data = { pages: [{ properties: [{ id: 'condo', title_en: 'Condo', amenities: [] }] }] };
+    state.query.hasNextPage = true;
+    state.query.isFetchingNextPage = true;
+    renderPage('?cats=pool');
+    const button = screen.getByRole('button', { name: 'Loading...' });
+    expect(button.hasAttribute('disabled')).toBe(true);
+    fireEvent.click(button);
+    fireEvent.click(button);
+    expect(state.query.fetchNextPage).not.toHaveBeenCalled();
+  });
+
+  it('shows an exhausted no-match state only when there are no further pages', () => {
+    state.query.data = { pages: [{ properties: [{ id: 'condo', title_en: 'Condo', amenities: [] }] }] };
+    renderPage('?cats=pool');
+    expect(screen.getByText('No properties match selected filters')).toBeTruthy();
+    expect(screen.queryByText('No matches in loaded listings yet. Check the next listings.')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Load more' })).toBeNull();
   });
 
   it('keeps card detail navigation available while showing the map', () => {

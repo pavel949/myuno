@@ -104,6 +104,25 @@ describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => 
     } finally { vi.useRealTimers(); }
   });
 
+  it('completed includes early checkout but excludes released orders from inferred past stays', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date('2026-10-16T18:00:00Z'));
+    try {
+      const base = bookingsListFixtures(language)[0];
+      mocks.customBookings = [
+        { ...base, id: 'early-checkout', guest_name: 'Early checkout fixture', status: 'checked_out', check_in: '2026-10-16', check_out: '2026-10-20' },
+        { ...base, id: 'completed', guest_name: 'Completed fixture', status: 'completed', check_in: '2026-10-16', check_out: '2026-10-20' },
+        { ...base, id: 'past', guest_name: 'Past stay fixture', status: 'confirmed', check_in: '2026-10-14', check_out: '2026-10-16' },
+        ...['cancelled', 'refunded', 'expired'].map(status => ({ ...base, id: status, guest_name: `Released history ${status}`, status, check_in: '2026-10-14', check_out: '2026-10-16' })),
+      ];
+      mount(language);
+      fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Завершённые' : 'Completed' }));
+      expect(screen.getAllByRole('checkbox')).toHaveLength(3);
+      for (const name of ['Early checkout fixture', 'Completed fixture', 'Past stay fixture']) expect(screen.getByText(name)).toBeInTheDocument();
+      for (const status of ['cancelled', 'refunded', 'expired']) expect(screen.queryByText(`Released history ${status}`)).not.toBeInTheDocument();
+      expect(mocks.from).not.toHaveBeenCalled();
+    } finally { vi.useRealTimers(); }
+  });
+
   it('checkbox selects and deselects without opening details or contacting the client', () => {
     mount(language); selectFirst(language);
     const checkbox = screen.getAllByRole('checkbox').find(el => el.getAttribute('aria-label')?.endsWith(bookingsListFixtures(language)[0].guest_name ?? ''));

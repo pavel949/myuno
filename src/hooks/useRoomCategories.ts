@@ -47,10 +47,15 @@ export function useSaveCategory() {
   return useMutation({
     mutationFn: async (row: CategoryInsert & { id?: string }) => {
       const { id, ...rest } = row;
-      const { error } = id
-        ? await supabase.from('property_room_categories').update(rest).eq('id', id)
-        : await supabase.from('property_room_categories').insert(rest);
+      const query = id
+        ? supabase.from('property_room_categories').update(rest).eq('id', id)
+        : supabase.from('property_room_categories').insert(rest);
+      const { data, error } = await query.select('id').single();
       if (error) throw error;
+      if (!data || typeof data.id !== 'string' || !data.id.trim() || (id && data.id !== id)) {
+        throw new Error('Could not confirm saved category');
+      }
+      return data.id;
     },
     onSuccess: inv,
   });
@@ -61,10 +66,15 @@ export function useSavePlan() {
   return useMutation({
     mutationFn: async (row: PlanInsert & { id?: string }) => {
       const { id, ...rest } = row;
-      const { error } = id
-        ? await supabase.from('property_rate_plans').update(rest).eq('id', id)
-        : await supabase.from('property_rate_plans').insert(rest);
+      const query = id
+        ? supabase.from('property_rate_plans').update(rest).eq('id', id)
+        : supabase.from('property_rate_plans').insert(rest);
+      const { data, error } = await query.select('id').single();
       if (error) throw error;
+      if (!data || typeof data.id !== 'string' || !data.id.trim() || (id && data.id !== id)) {
+        throw new Error('Could not confirm saved rate plan');
+      }
+      return data.id;
     },
     onSuccess: inv,
   });
@@ -74,10 +84,12 @@ export function useAssignRoomCategory() {
   const inv = useInvalidate();
   return useMutation({
     mutationFn: async (p: { roomId: string; parentId: string; categoryId: string | null }) => {
-      const { error } = await supabase.from('properties')
+      const { data, error } = await supabase.from('properties')
         .update({ parent_property_id: p.categoryId ? p.parentId : null, room_category_id: p.categoryId })
-        .eq('id', p.roomId);
+        .eq('id', p.roomId).select('id').single();
       if (error) throw error;
+      if (!data || data.id !== p.roomId) throw new Error('Could not confirm room assignment');
+      return data.id;
     },
     onSuccess: inv,
   });
@@ -87,8 +99,11 @@ export function useSetPropertyKind() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (p: { id: string; kind: 'unit' | 'resort' | 'hotel' }) => {
-      const { error } = await supabase.from('properties').update({ property_kind: p.kind }).eq('id', p.id);
+      const { data, error } = await supabase.from('properties').update({ property_kind: p.kind })
+        .eq('id', p.id).select('id').single();
       if (error) throw error;
+      if (!data || data.id !== p.id) throw new Error('Could not confirm property kind');
+      return data.id;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['structure-properties'] }),
   });

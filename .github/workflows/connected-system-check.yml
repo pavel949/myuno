@@ -2,6 +2,8 @@ name: Connected system isolated verification
 on:
   push:
     branches: [codex/connected-system-2026-10-17]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -52,7 +54,7 @@ jobs:
         continue-on-error: true
         run: |
           for zone in UTC Asia/Bangkok America/Los_Angeles; do
-            TZ="$zone" npx vitest run src/hooks/__tests__/pmsFlow.integration.test.tsx src/pages/owner/__tests__/MCBookingsPage.test.tsx src/hooks/__tests__/roomCategoryCache.test.tsx src/pages/property/PropertyIndex.test.tsx || exit 1
+            TZ="$zone" npx vitest run src/hooks/__tests__/pmsFlow.integration.test.tsx src/pages/owner/__tests__/MCBookingsPage.test.tsx src/hooks/__tests__/roomCategoryCache.test.tsx src/pages/property/PropertyIndex.test.tsx src/hooks/__tests__/formDraftLifecycle.test.tsx src/components/auth/InvestorGuard.test.tsx || exit 1
           done
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
@@ -69,6 +71,7 @@ jobs:
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Network-denying PMS browser fixtures
+        timeout-minutes: 12
         id: browser
         continue-on-error: true
         run: |
@@ -79,10 +82,10 @@ jobs:
             curl --fail --silent http://localhost:8080/src/index.css?direct >/dev/null && break
             sleep 1
           done
-          node scripts/qa/bookings-list-ui.mjs
-          node scripts/qa/calendar-ui.mjs
-          node scripts/qa/today-ui.mjs
-          node scripts/qa/property-browse-ui.mjs
+          timeout 180s node scripts/qa/bookings-list-ui.mjs
+          timeout 180s node scripts/qa/calendar-ui.mjs
+          timeout 180s node scripts/qa/today-ui.mjs
+          timeout 180s node scripts/qa/property-browse-ui.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload validation evidence

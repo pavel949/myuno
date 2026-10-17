@@ -16,6 +16,7 @@ export function useFormDraft<T extends object>({
   debounceMs = 1000,
 }: UseFormDraftOptions<T>) {
   const storageKey = `vendor_draft_${key}`;
+  const initialSnapshot = JSON.stringify(initialData);
   
   // Load saved draft or use initial data
   const loadDraft = useCallback((): T => {
@@ -42,6 +43,9 @@ export function useFormDraft<T extends object>({
       clearTimeout(timeoutRef.current);
     }
 
+    // Mounting or resetting an empty form must not create a restorable draft.
+    if (JSON.stringify(formData) === initialSnapshot) return;
+
     timeoutRef.current = setTimeout(() => {
       try {
         localStorage.setItem(storageKey, JSON.stringify(formData));
@@ -57,10 +61,15 @@ export function useFormDraft<T extends object>({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [formData, storageKey, debounceMs]);
+  }, [formData, initialSnapshot, storageKey, debounceMs]);
 
   // Clear draft
   const clearDraft = useCallback(() => {
+    // Discard/success must also cancel edits waiting in the debounce queue.
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     localStorage.removeItem(storageKey);
     setHasDraft(false);
     setLastSaved(null);
@@ -99,3 +108,4 @@ export function useFormDraft<T extends object>({
     restoreDraft,
   };
 }
+

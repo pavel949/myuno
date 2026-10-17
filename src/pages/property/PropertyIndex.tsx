@@ -462,7 +462,24 @@ export default function PropertyIndex() {
             </section>
           )}
 
-          {!isLoading && !isError && filteredProperties.length === 0 && allProperties.length > 0 && (
+          {!isLoading && !isError && filteredProperties.length === 0 && hasNextPage && (
+            <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-16")}>
+              <p className="text-muted-foreground mb-3">
+                {isRu ? 'Среди загруженных объектов пока нет совпадений. Можно проверить следующие.' : 'No matches in loaded listings yet. Check the next listings.'}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="min-h-[44px]"
+                disabled={isFetchingNextPage}
+                onClick={() => { if (!isFetchingNextPage) void fetchNextPage(); }}
+              >
+                {isFetchingNextPage ? (isRu ? 'Загрузка...' : 'Loading...') : (isRu ? 'Загрузить ещё' : 'Load more')}
+              </Button>
+            </div>
+          )}
+
+          {!isLoading && !isError && !hasNextPage && filteredProperties.length === 0 && allProperties.length > 0 && (
             <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-16")}>
               <p className="text-muted-foreground mb-3">
                 {isRu ? 'Нет объектов с выбранными фильтрами' : 'No properties match selected filters'}
@@ -474,7 +491,7 @@ export default function PropertyIndex() {
           )}
 
           {/* C7 FIX: empty state when DB has no properties at all for selected filters */}
-          {!isLoading && !isError && allProperties.length === 0 && (
+          {!isLoading && !isError && !hasNextPage && allProperties.length === 0 && (
             <div className={cn(ECOSYSTEM_PAGE_CONTAINER, "text-center py-20")}>
               <p className="text-base font-medium mb-2">
                 {isRu ? 'Пока нет объектов' : 'No properties yet'}
