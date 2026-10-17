@@ -1,9 +1,9 @@
 # Roadmap
 
 ## 2026-10-17 · Tranche 2B correction — runtime presentation
-- [ ] Change MCBookingsPage header/KPIs/controls/cards/bulk bar without changing business logic.
-- [ ] Verify RU/EN heading, overflow and isolated interactions at 375/390/430 and desktop.
-- [ ] Report exact runtime files, reviewed screenshots, automatic build and SHA.
+- [x] Change MCBookingsPage header/KPIs/controls/cards/bulk bar without changing business logic.
+- [x] Verify RU/EN heading, overflow and isolated interactions at 375/390/430 and desktop (8/8 browser, 12/12 component tests).
+- [x] Report exact runtime files, reviewed screenshots, automatic build and SHA; see docs/convergence/TRANCHE2B_UI_TESTS.md.
 
 ## 2026-10-17 · Tranche 2B isolated UI regression tests
 - [x] Add synthetic RU/EN fixtures and isolated checkbox/card/bulk-confirmation tests (12/12).
@@ -72,4 +72,4 @@
 - [x] Checkbox selection isolated from card click (44px zone, stopPropagation, aria-labels).
 - [x] Bulk actions: selected count, clear, two-step confirm; same mutations/statuses.
 - [x] Backend/query/pricing/inventory logic untouched; build OK; commit d7dfb2719.
-- Runtime-only: checkbox-vs-card click and bulk flow untested (account has no bookings); EN locale unchecked.
+- Isolated correction checks now cover checkbox/card and stub-only bulk interactions in RU/EN; live order mutations remain deliberately untested.

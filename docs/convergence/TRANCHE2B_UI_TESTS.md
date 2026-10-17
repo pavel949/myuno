@@ -1,10 +1,21 @@
 # Tranche 2B — isolated bookings-list UI regressions
 
-Scope: test-only additions. `MCBookingsPage.tsx`, its runtime components,
-queries, mutations, status/pricing/payment/permission/inventory contracts and
-schema are unchanged. No production records or booking mutations were used.
+Scope: original isolated tests plus the Tranche 2B runtime correction.
+`MCBookingsPage.tsx` presentation is now changed; queries, mutations,
+status/pricing/payment/permission/inventory contracts and schema are unchanged.
+No production records or booking mutations were used.
 
 ## Files
+
+- `src/pages/owner/MCBookingsPage.tsx`: the only runtime file changed in the
+  correction. Full untruncated title above a single primary New Booking action
+  on phones; export/sort moved into a secondary control area; mobile 2×2 KPIs;
+  six bounded status choices (2 columns at 375, 3 at 390/430, 6 on desktop).
+  Guest/contact/property text wraps instead of colliding with status/amount;
+  guest/contact titles retain full labels. Cards are keyboard-focusable and
+  Enter/Space opens detail; checkbox pointer/key/click propagation is isolated.
+  Bulk count/actions intentionally wrap with 44px controls and existing gated
+  confirmation. Shared components were not changed.
 
 - `src/pages/owner/__tests__/bookingsList.fixtures.ts`: two synthetic bookings
   with long RU/EN names, property titles, email, phone and formatted amounts.
@@ -37,18 +48,21 @@ Generated JS/CSS/HTML, JSON results and screenshots stay under
   selected card opens/closes the detail boundary, both bulk actions require
   confirmation, No never submits, Yes passes the exact selected ID/status to
   an in-memory stub, select-all/clear, loading/empty fixtures.
-- Browser matrix: **6/6**, RU/EN × 375/390/430. Keyboard Space and checkbox
+- Browser matrix: **8/8**, RU/EN × 375/390/430/1280. Keyboard Space and checkbox
   tap select without opening details; card opens the correct fixture;
   confirmation backout/submission use stubs only.
-- Document scroll width equals viewport width in all six cases. Visible
+- Full H1 visibility and absence of ellipsis/element clipping asserted in all
+  eight cases, including RU 375. List and selected-bar screenshots also saved.
+- Document scroll width equals viewport width in all eight cases. Visible
   controls remain within horizontal bounds. No runtime errors or external
   requests observed. Each case records exactly two in-memory stub submissions.
 - Latest automatic application build: **build OK**. No manual build or
   standalone typecheck was run. Diff whitespace check passes.
-- Screenshot review: RU 375 confirmation and EN 430 cancellation reviewed.
-  The RU heading is truncated at 375 ("Бро…"); long card fields also truncate
-  according to existing presentation. No presentation fix or claim of full
-  text visibility is made in this test-only tranche.
+- Correction screenshots reviewed: `ru-375-selected.png`, `en-430-list.png`,
+  `ru-1280-list.png`. Full heading, wrapped guest/property/contact fields,
+  amounts/statuses and bounded controls are visible. Original test-only
+  screenshots had exposed RU heading truncation; the runtime correction
+  replaces that presentation, rather than merely documenting it.
 
 ## Verification limits
 
