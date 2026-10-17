@@ -70,6 +70,84 @@ properties (resort) -> property_room_categories -> property_rate_plans
 - Accepted price is stored on the order item (`nightly`, `quoted_total`, `quoted_at`, `rate_plan_id`) and on the order total; later rate edits do not change it.
 - The booking page may display a quote from the same shared module but is never the authority.
 
+### Tranche 1 correction evidence (2026-10-17)
+
+**Inventory status contract.** Live `property_bookings.status` is nullable TEXT, not
+an enum; no status CHECK is present. Live constraint inspection found exactly one
+exclusion constraint, `property_bookings_no_overlap`, with `[check_in, check_out)`
+and `status NOT IN ('cancelled','rejected','expired')`. The historical
+`property_bookings_no_overlap_active` closed-range constraint is **not live**.
+Migration 0018 therefore matches the live constraint; reverting it would restore
+a defect, not fix one.
+
+- `property_booking_holds_inventory(status)` is the shared SQL predicate;
+  `src/lib/propertyInventory.ts` and `_shared/property-inventory.ts` mirror it.
+- All non-null statuses except cancelled/rejected/expired hold their stored date
+  range, including pending, completed, checked_out and **no_show**. No-show alone
+  does not release a future room: staff must explicitly cancel/release the booking.
+  A past date range cannot overlap a future stay regardless of status.
+- NULL evaluates to SQL NULL and does not participate in the exclusion constraint;
+  live inspection found zero NULL status rows. Cancellation aliases and unknown
+  non-null statuses remain conservative holds; no automatic data normalization.
+- Money statuses are a separate domain: orders cancelled/refunded/expired or
+  soft-deleted map to booking cancelled. Check-in/out/no-show labels are now
+  preserved rather than silently mapped back to pending. Expired is allowed as
+  booking TEXT but the Stripe expiry writer writes order expired → booking cancelled.
+- Unit admission and date-list RPCs now include owner stays and all inventory rows,
+  not just commercial orders or channel-linked bookings. Category count and
+  assignment use the same predicate. Calendars, owner-stay checks, iCal export,
+  overlap diagnostics and pricing occupancy readers follow the contract.
+- `property_availability` has available/blocked/booked states. Category assignment
+  additionally honours booked calendar rows; unit checks/date lists preserve their
+  existing manual-block plus booking/order hold semantics. The old inclusive
+  item-lock writer is not bound to a live trigger, so checkout-day locks are not
+  currently produced by that writer. No inactive historical migration is rewritten.
+
+**Concurrency — compensation, not atomic allocation.**
+`assign_room_for_category` uses `pg_advisory_xact_lock`; PostgREST commits that RPC
+and releases the lock before the separate availability and `create_order_atomic`
+RPCs. Two assignments can return the same room. Order creation and its item→order
+touch→inventory trigger execute in one transaction, but the trigger catches
+`exclusion_violation`, records an alert and permits a losing commercial order.
+The post-order hold lookup is a compensation guard: only a held order proceeds
+to Stripe; a losing order must be cancelled, and cancellation errors/missing rows
+now return `inventory_compensation_failed` (500), never a payment session.
+No retry/atomic-assignment redesign is introduced in this correction pass.
+
+An isolated PostgreSQL regression uses the repository's real assignment functions,
+order RPC body and inventory sync trigger with a minimal temporary schema and
+the verified live exclusion constraint. Two committed assignments select one
+room, concurrent orders produce one hold and one overlap alert, and the real
+pre-payment gate admits one payment **stub** and cancels the loser. This is not
+a production race or a real Stripe payment test. Temporary data never reaches
+production.
+
+**Drizzle snapshot convention.** `drizzle/schema.ts` is deliberately blank and
+`drizzle.config.ts` points to it. All snapshots 0000–0018 are v7 PostgreSQL with
+empty tables/enums/schemas; 0018 has the correct 0017 predecessor. These are
+tool-generated custom-SQL migration markers, **not production schema dumps**.
+Do not hand-edit them or attempt to regenerate a full ORM schema. New migration
+metadata is maintained exclusively by the managed migration tool.
+
+**Rollback.** `.sql` rollback files are executable SQL under existing 0017 and
+0013–0015 precedents. The 0018 rollback now contains exact pre-0018 function
+bodies, with an explicit warning that restoring them restores the mismatch.
+Use `0019_0020_inventory_correction.sql` to revert this pass's SQL functions only;
+do not revert the unrelated good Tranche 1 checkout/pricing fixes.
+
+**Parity.** The existing hotel-quote parity assertion remains authoritative and
+both copies remain byte-identical; a second parity assertion covers inventory
+helpers. No pricing engine was added or replaced.
+
+**Unverified / outside this correction.** No production booking/payment or full
+guest→Stripe→ledger journey was executed. Stripe failure/abandoned pre-session
+hold cleanup, production race load and managed CI typecheck results require
+separate evidence. No new UX, inventory model or Tranche 2 work was started.
+
+Quality-gate policy in this workspace forbids manually invoking builds/typechecks;
+the harness performs them automatically. Report its actual build log separately,
+never label it as a locally run `npm run typecheck` or assign an invented exit code.
+
 ## 5. Definition of Done (all tranches)
 
 A change is done only when an actual business transition was executed end-to-end (for example: booking created → room held → payment recorded → ledger entry → visible to owner/ops) and its downstream effects were verified. Schema, API or UI alone is not done.

@@ -1,5 +1,12 @@
 # Roadmap
 
+## 2026-10-17 · Tranche 1 correction pass (no Tranche 2)
+- [x] Verify and align inventory status predicates, writers and availability; add regression coverage.
+- [x] Verify Drizzle snapshot convention and replace instruction-only rollback with exact SQL.
+- [x] Document transaction boundaries and exercise the assignment/hold race without production writes.
+- [x] Verify quote parity and focused tests plus semantic checks; report harness build evidence.
+- [ ] Standalone typecheck result — blocked by workspace policy: manual typechecks/builds are prohibited; harness supplies build log only.
+
 ## Done (2026-08-28 · architecture pass)
 - [x] Security: anon доступ к `management_companies` закрыт, публичные данные через вью `management_companies_public`
 - [x] 8 отсутствовавших таблиц созданы (платежи/ваучеры/лиды/CRM/трансферы)

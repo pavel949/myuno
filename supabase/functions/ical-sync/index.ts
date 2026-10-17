@@ -5,6 +5,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { validateExternalUrlForSSRF } from "../_shared/ssrf-guard.ts";
+import { propertyBookingHoldsInventory } from "../_shared/property-inventory.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -285,7 +286,7 @@ Deno.serve(async (req) => {
 
         // Cancel bookings that disappeared from the feed — only ones not already
         // cancelled, and never wipe everything when the feed came back empty.
-        const active = (existingBookings || []).filter((b: { status: string | null }) => b.status !== 'cancelled');
+        const active = (existingBookings || []).filter((b: { status: string | null }) => propertyBookingHoldsInventory(b.status));
         const toCancel = events.length === 0 && active.length > 0
           ? []
           : active.filter((b: { external_id: string | null }) => b.external_id && !newEventIds.has(b.external_id));

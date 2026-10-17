@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireInternalOrUser, fetchUserRoles, hasAnyRole, forbidden, STAFF_ROLES } from "../_shared/authz.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { PROPERTY_BOOKING_RELEASE_FILTER } from "../_shared/property-inventory.ts";
 
 
 serve(async (req) => {
@@ -54,7 +55,7 @@ serve(async (req) => {
       .select("check_in, check_out, total_amount, status")
       .eq("property_id", property_id)
       .gte("check_in", d90ago.toISOString().split("T")[0])
-      .not("status", "eq", "cancelled");
+      .not("status", "in", PROPERTY_BOOKING_RELEASE_FILTER);
 
     // Calculate occupancy
     const totalDays = 90;

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { PROPERTY_ORDER_RELEASE_FILTER, propertyOrderHoldsInventory } from '@/lib/propertyInventory';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useStorefront } from '@/contexts/StorefrontContext';
@@ -191,7 +192,7 @@ export function usePropertyBookings(propertyId?: string) {
           .select('id')
           .eq('vertical', 'property')
           .is('deleted_at', null)
-          .not('status', 'eq', 'cancelled')
+          .not('status', 'in', PROPERTY_ORDER_RELEASE_FILTER)
           .gt('end_at', newStart)
           .lt('start_at', newEnd),
         supabase
@@ -373,7 +374,7 @@ export function usePropertyBookings(propertyId?: string) {
             .select('id')
             .eq('vertical', 'property')
             .is('deleted_at', null)
-            .not('status', 'eq', 'cancelled')
+            .not('status', 'in', PROPERTY_ORDER_RELEASE_FILTER)
             .neq('id', id)
             .gt('end_at', newStart)
             .lt('start_at', newEnd);
@@ -639,13 +640,13 @@ export function useAllPropertyBookings() {
 
   // Upcoming bookings
   const upcomingBookings = bookings?.filter(b => 
-    new Date(b.check_in) >= new Date() && b.status !== 'cancelled'
+    new Date(b.check_in) >= new Date() && propertyOrderHoldsInventory(b.status)
   ) || [];
 
   // Active bookings (currently checked in)
   const activeBookings = bookings?.filter(b => {
     const today = new Date().toISOString().split('T')[0];
-    return b.check_in <= today && b.check_out > today && b.status !== 'cancelled';
+    return b.check_in <= today && b.check_out > today && propertyOrderHoldsInventory(b.status);
   }) || [];
 
   return {
@@ -728,13 +729,13 @@ export function useGuestPropertyBookings() {
 
   // Upcoming bookings
   const upcomingBookings = bookings?.filter(b => 
-    new Date(b.check_in) >= new Date() && b.status !== 'cancelled'
+    new Date(b.check_in) >= new Date() && propertyOrderHoldsInventory(b.status)
   ) || [];
 
   // Active bookings (currently checked in)
   const activeBookings = bookings?.filter(b => {
     const today = new Date().toISOString().split('T')[0];
-    return b.check_in <= today && b.check_out > today && b.status !== 'cancelled';
+    return b.check_in <= today && b.check_out > today && propertyOrderHoldsInventory(b.status);
   }) || [];
 
   // Past bookings

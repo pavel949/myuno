@@ -6,6 +6,8 @@ import { getAllowedOrigin } from "../_shared/cors.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow, type RateSeasonRow } from "../_shared/property-quote.ts";
 import { quoteHotelStay, mergeRestrictions, type HotelCategoryRow, type HotelRatePlanRow, type HotelSeasonRow, type HotelRestrictionRow } from "../_shared/hotel-quote.ts";
+import { PROPERTY_BOOKING_RELEASE_FILTER } from "../_shared/property-inventory.ts";
+import { verifyInventoryHold } from "../_shared/inventory-hold.ts";
 
 
 interface PropertyDepositRequest {
@@ -323,16 +325,34 @@ Deno.serve(async (req) => {
     // protected by the no-overlap exclusion constraint. If a concurrent request
     // took the same unit, that insert is rejected (and only an alert is logged),
     // so no live booking exists for this order. Cancel it before taking money.
+    const holdResult = await verifyInventoryHold(async () => {
     const { data: heldBooking, error: holdErr } = await supabaseAdmin
       .from("property_bookings")
       .select("id")
       .eq("external_id", order.order_id)
       .eq("property_id", property_id)
-      .not("status", "in", "(cancelled,rejected,expired)")
+      .not("status", "in", PROPERTY_BOOKING_RELEASE_FILTER)
       .maybeSingle();
     if (holdErr || !heldBooking) {
       logStep("Inventory hold failed; cancelling order", { orderId: order.order_id, error: holdErr?.message });
-      await supabaseAdmin.from("orders").update({ status: "cancelled", notes: "Auto-cancelled: dates taken by a concurrent booking" }).eq("id", order.order_id);
+    }
+    return !holdErr && !!heldBooking;
+    }, async () => {
+      const { data: cancelledOrder, error: cancelError } = await supabaseAdmin.from("orders")
+        .update({ status: "cancelled", notes: "Auto-cancelled: dates taken by a concurrent booking" })
+        .eq("id", order.order_id).select("id").maybeSingle();
+      if (cancelError || !cancelledOrder) {
+        logStep("ERROR: Inventory conflict compensation failed", { orderId: order.order_id, error: cancelError?.message });
+      }
+      return !cancelError && !!cancelledOrder;
+    });
+    if (holdResult === 'compensation_failed') {
+      return new Response(
+        JSON.stringify({ error: "Could not cancel the conflicting booking; payment was not started", code: "inventory_compensation_failed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+    if (holdResult === 'conflict') {
       return new Response(
         JSON.stringify({ error: "Selected dates are no longer available", code: "inventory_conflict" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 }

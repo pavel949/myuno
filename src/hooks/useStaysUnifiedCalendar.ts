@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO, eachDayOfInterval, subDays } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { propertyBookingHoldsInventory, propertyOrderHoldsInventory } from '@/lib/propertyInventory';
 import {
   getStaysChannelColor,
   normalizeStaysChannelKey,
@@ -54,8 +55,7 @@ function buildUnifiedDayMeta(
   >();
 
   for (const b of bookings) {
-    const st = (b.status || '').toLowerCase();
-    if (st === 'cancelled' || st === 'canceled' || st === 'refunded' || st === 'expired') continue;
+    if (!propertyBookingHoldsInventory(b.status)) continue;
 
     const nights = nightsInterval(b.check_in, b.check_out);
     const ch = resolveChannelKey(b, calendarChannelById);
@@ -90,9 +90,8 @@ function buildUnifiedDayMeta(
 }
 
 /**
- * Unified calendar hook — reads SSOT (orders vertical='property') + iCal-imported
- * legacy property_bookings (only those carrying source_calendar_id, since those
- * are still produced by the iCal importer until full migration to orders).
+ * Unified calendar hook — commercial orders plus inventory bookings, including
+ * owner stays and iCal imports. Order-backed rows are deduplicated by external_id.
  */
 export function useStaysUnifiedCalendar(propertyId: string | undefined) {
   const queryClient = useQueryClient();
@@ -136,7 +135,7 @@ export function useStaysUnifiedCalendar(propertyId: string | undefined) {
         return { unifiedDayMeta: new Map(), bookings: [] };
       }
 
-      const [ordersRes, icalBookingsRes, calsRes] = await Promise.all([
+      const [ordersRes, inventoryBookingsRes, calsRes] = await Promise.all([
         // SSOT: orders table (vertical='property')
         supabase
           .from('orders')
@@ -148,14 +147,13 @@ export function useStaysUnifiedCalendar(propertyId: string | undefined) {
           .eq('order_items.item_type', 'property')
           .eq('order_items.resource_id', propertyId)
           .is('deleted_at', null),
-        // iCal-imported bookings (legacy table, still source for external channels)
+        // Canonical inventory includes owner stays as well as channel imports.
         supabase
           .from('property_bookings')
           .select(
-            'id, check_in, check_out, source, source_calendar_id, conflict_with_booking_id, status',
+            'id, external_id, check_in, check_out, source, source_calendar_id, conflict_with_booking_id, status',
           )
-          .eq('property_id', propertyId)
-          .not('source_calendar_id', 'is', null),
+          .eq('property_id', propertyId),
         supabase
           .from('property_external_calendars')
           .select('id, channel_type')
@@ -163,11 +161,11 @@ export function useStaysUnifiedCalendar(propertyId: string | undefined) {
       ]);
 
       if (ordersRes.error) throw ordersRes.error;
-      if (icalBookingsRes.error) throw icalBookingsRes.error;
+      if (inventoryBookingsRes.error) throw inventoryBookingsRes.error;
       if (calsRes.error) throw calsRes.error;
 
       // Normalize orders → PropertyBookingRow shape
-      const orderBookings: PropertyBookingRow[] = (ordersRes.data ?? []).map((o) => {
+      const orderBookings: PropertyBookingRow[] = (ordersRes.data ?? []).filter(o => propertyOrderHoldsInventory(o.status)).map((o) => {
         const meta = (o.metadata && typeof o.metadata === 'object' ? o.metadata : {}) as Record<string, unknown>;
         return {
           id: o.id,
@@ -176,12 +174,13 @@ export function useStaysUnifiedCalendar(propertyId: string | undefined) {
           source: (meta.source as string) || 'manual',
           source_calendar_id: null,
           conflict_with_booking_id: null,
-          status: o.status,
+          status: o.status === 'refunded' ? 'cancelled' : o.status,
         };
       }).filter((b) => b.check_in && b.check_out);
 
-      const icalBookings = (icalBookingsRes.data ?? []) as PropertyBookingRow[];
-      const bookings = [...orderBookings, ...icalBookings];
+      const orderIds = new Set(orderBookings.map(b => b.id));
+      const inventoryBookings = (inventoryBookingsRes.data ?? []).filter(b => !b.external_id || !orderIds.has(b.external_id));
+      const bookings = [...orderBookings, ...inventoryBookings];
 
       const calendarChannelById = new Map<string, string | null>();
       for (const c of calsRes.data ?? []) {

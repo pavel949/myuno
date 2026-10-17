@@ -134,6 +134,20 @@
       "when": 1792195845754,
       "tag": "0018_align_room_assignment_statuses",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792196665836,
+      "tag": "0019_canonical_inventory_status_predicate",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792196765030,
+      "tag": "0020_preserve_property_booking_lifecycle_status",
+      "breakpoints": true
     }
   ]
 }
