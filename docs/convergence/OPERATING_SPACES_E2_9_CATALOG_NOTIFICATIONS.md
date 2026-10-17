@@ -12,7 +12,7 @@ Baseline implementation: `990de18f0e948f83e07b91e102e1b43a81246d63`; documentati
 - Deployed edge: `notify-admin-property-submission`, source SHA-256 `b843988cb51df06094f0530cdabe15c89fb6261a9b1b89151bf02497417b5c28`. Deployment succeeded; no live invocation or delivery attempted. Deployment bundle parity independently unverified.
 - `mcp` generated source was updated from public service-tool source by the harness; no explicit MCP deployment requested/performed in this turn. Hosted parity is not proven.
 
-### Exact policy changes (29)
+### Exact policy changes (27)
 
 `providers`: Anyone can view active providers (false).
 
