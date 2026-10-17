@@ -87,21 +87,23 @@ export default function GuestTripDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('property_bookings')
-        .select(`
-          *,
-          properties!property_id (
-            id, title, title_ru, address, district, images,
-            check_in_time, check_out_time, check_in_instructions, check_in_instructions_ru,
-            wifi_network, wifi_password, key_handover,
-            manager_name, manager_phone, emergency_contact_name, emergency_contact_phone,
-            house_rules, house_rules_ru
-          )
-        `)
+        .select('*')
         .eq('id', id)
         .single();
 
       if (error) throw error;
-      return data as unknown as PropertyBooking;
+      // Stay instructions only for the signed-in guest's own confirmed booking.
+      const { data: stay } = await supabase.rpc('guest_stay_property_details', { p_booking_id: id! });
+      let properties = stay as Record<string, unknown> | null;
+      if (!properties) {
+        const { data: pub } = await supabase
+          .from('public_property_catalog')
+          .select('id, title, title_ru, address, district, images, check_in_time, check_out_time, house_rules, house_rules_ru')
+          .eq('id', data.property_id)
+          .maybeSingle();
+        properties = (pub as Record<string, unknown> | null) ?? null;
+      }
+      return { ...data, properties } as unknown as PropertyBooking;
     },
     enabled: !!id && !!user,
   });
