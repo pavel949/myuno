@@ -1,9 +1,9 @@
 # Roadmap
 
 ## 2026-10-17 · Tranche 2C.1 — Calendar date correctness only
-- [ ] Audit projection dependencies, half-open occupancy and civil-date conversion; no production writes.
-- [ ] Correct proven date defects without UX, inventory-status, pricing or backend changes.
-- [ ] Run synthetic regression/TZ matrix and automatic build; document evidence and remaining risks.
+- [x] Audit projection dependencies, half-open occupancy and civil-date conversion; live catalog read-only, no production writes.
+- [x] Correct proven projection/form-date defects without UX, inventory-status, pricing rules or backend/writer changes.
+- [x] Run synthetic regression/TZ matrix (66 date executions, 24 browser variants, 28 retained regressions) and automatic build; see docs/convergence/CALENDAR_DATE_CORRECTNESS.md for timestamp/writer risks outside scope.
 
 ## 2026-10-17 · Tranche 2C — Calendar presentation only
 - [x] Simplify modes/scope/actions/date navigation without changing date or business contracts.
