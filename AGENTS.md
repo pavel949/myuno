@@ -11,3 +11,4 @@
 - The provider → org counterparty comes only from `provider_org_links` (staff-managed), because provider and org ids are different entities.
 - Inventory status predicates must mirror `property_bookings_no_overlap` via `property_booking_holds_inventory` and the shared propertyInventory module; order refund/expiry maps to released booking state, because monetary statuses and inventory statuses are different domains.
 - Category assignment is a separate RPC transaction, not a reservation; the exclusion constraint and verified pre-Stripe hold are final authority, because its advisory transaction lock ends before order creation.
+- Convergence execution follows docs/canonical/MYUNO_CONNECTED_PRODUCT_BLUEPRINT.md with current UX evidence in docs/convergence/UX_FOUNDATION_AUDIT.md, because conceptual identity and target IA must not be mistaken for permission to build duplicate models or migrate CRM.

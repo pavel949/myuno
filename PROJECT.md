@@ -19,6 +19,7 @@
 - Reuse and reconcile existing entities before creating new ones.
 - Runtime, code and schema evidence outranks stale prose, including this document.
 - A new UI never creates a new source of truth.
+- Canonical convergence execution, layered identity foundation and target RENT | BUY Homes IA: [Connected Product Blueprint](docs/canonical/MYUNO_CONNECTED_PRODUCT_BLUEPRINT.md). Tranche 2A is documentation/audit only; no identity or CRM migration.
 
 ---
 

@@ -2,6 +2,10 @@
 
 Status: Tranche 1 (foundation). Last verified against live code/schema: 2026-10-17.
 
+Tranche 2A execution authority: [Connected Product Blueprint](../canonical/MYUNO_CONNECTED_PRODUCT_BLUEPRINT.md).
+Current UX evidence: [UX foundation audit](UX_FOUNDATION_AUDIT.md). The mapping below
+records existing owners; it does not authorize duplicate identity, inventory or CRM models.
+
 ## 1. Principles
 
 - **myuno (this repo, production DB) is the only canonical production core.**
