@@ -1,8 +1,8 @@
 # Roadmap
 
 ## 2026-10-17 · E2.9 continuation — 14 blocker closure
-- [ ] Establish legitimate remaining notification/object authority; restrict only proven gates after synthetic tests.
-- [ ] Reconcile all RO-01–RO-14 with applied 0032 and continuation, preserve ambiguous contracts as blockers; verify production read-only zero enforcement/assignments and observed commit SHA.
+- [x] Establish operator booking-edit property duty versus unproved customer/CRM automation rights; deploy restricted booking-message gate after 21 synthetic cases.
+- [x] Reconcile all RO-01–RO-14 in e2_9/blockers-14.csv; report proven fixes versus named ambiguous blockers; verify production read-only zero enforcement/assignments and observed SHA.
 - Restrictions: no business DML, support grants, enforcement, assignments, E3 or Order Mutation Audit.
 
 ## 2026-10-17 · E2.9 — Catalog + notification security (partial NO-GO)
