@@ -197,6 +197,34 @@
       "when": 1792211595774,
       "tag": "0027_close_authenticated_private_property_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792214826129,
+      "tag": "0028_uno_team_private_helpers",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792214876680,
+      "tag": "0029_uno_team_private_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1792215011902,
+      "tag": "0030_preserve_juristic_platform_admin",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1792215066320,
+      "tag": "0031_checked_onboarding_private_capability",
+      "breakpoints": true
     }
   ]
 }

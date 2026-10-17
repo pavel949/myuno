@@ -117,5 +117,15 @@ so E1a is behavior-neutral.
 | Property company change by owner | Fixed in all modes (0025) |
 | Authenticated read of private columns on approved properties | **Fixed (0026, 0027)** — public consumers on `public_property_catalog`; base approved-row policies limited to anon (column-granted); see E2_7 report |
 | Active property delegates reading approved-property titles via base table | **Open, accepted** — 0 active delegates live; no delegate policy added because it would expose private columns |
-| Generic `uno_team` PMS read via `staff_can_access_property` | **Open, pre-existing** — not changed in E2.7; needs separate RBAC decision |
+| Generic `uno_team` PMS read via `staff_can_access_property` | **Fixed on reviewed private policies (0028, 0029)** — private helper has no employment shortcut; shared unreviewed content consumers remain UNKNOWN. See E2.8 report. |
 | Order customer update breadth | **Open, unverified** |
+
+## E2.8 disposition
+
+See [OPERATING_SPACES_E2_8_UNO_TEAM.md](OPERATING_SPACES_E2_8_UNO_TEAM.md) and `e2_8/` exact policy/source/function census.
+128 policies narrowed; protected admin retained, including juristic contacts (0030).
+Checked onboarding module permission rebound to private helper (0031).
+15 handlers deployed after 45 synthetic boundary cases; internal-secret schedulers unchanged.
+Generic employment alone no longer grants reviewed private property/order/document/CRM/identity/ledger access.
+Legacy membership rights remain; unreviewed private/unpublished catalogs and shared helpers are blockers, not support grants.
+Enforced companies/spaces/assignments/members: 0/0/0/0; E3 and Order Mutation Audit not started.

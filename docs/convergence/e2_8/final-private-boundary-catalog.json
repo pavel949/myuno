@@ -1,0 +1,1301 @@
+{
+  "policies": [
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "audit_logs_admin_only",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "admin_audit_logs",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_notes_admin_delete",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "admin_notes",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_notes_admin_insert",
+      "qual": null,
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "admin_notes",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_notes_admin_read",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "admin_notes",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "admin_notes_admin_update",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "admin_notes",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can insert deals",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "agent_deals",
+      "with_check": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)"
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can update deals",
+      "qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "agent_deals",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can view deals",
+      "qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "agent_deals",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company owner/admin can delete deals",
+      "qual": "(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = agent_deals.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (management_company_members.is_active = true)))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "agent_deals",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage all knowledge",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "ai_agent_knowledge",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all logs",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "ai_agent_logs",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage all agents",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "ai_agents",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "UNO team can view AI artifacts",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND false)))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "ai_artifacts",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins manage intake sessions",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "ai_intake_sessions",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can update own airport bookings",
+      "qual": "((auth.uid() = user_id) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "airport_bookings",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can view own airport bookings",
+      "qual": "((auth.uid() = user_id) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "airport_bookings",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins manage airport passengers",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "airport_passengers",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)"
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage airport suppliers",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "airport_suppliers",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "MC members can view booking notifications",
+      "qual": "(is_admin_or_uno_team_e28_private() OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM ((property_bookings pb\n     JOIN properties p ON ((p.id = pb.property_id)))\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((pb.id = booking_notifications_log.booking_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true))))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "booking_notifications_log",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins manage booking payments",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "booking_payments",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)"
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins manage vouchers",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "booking_vouchers",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)"
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "hygiene_log_admin_insert",
+      "qual": null,
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "catalog_hygiene_log",
+      "with_check": "((auth.uid() IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM user_roles ur\n  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role]))))))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "hygiene_log_read",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "catalog_hygiene_log",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "uno_team_update_leads",
+      "qual": "(false OR has_role(auth.uid(), 'admin'::app_role))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "consultation_requests",
+      "with_check": "(false OR has_role(auth.uid(), 'admin'::app_role))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "uno_team_view_leads",
+      "qual": "(false OR has_role(auth.uid(), 'admin'::app_role) OR (user_id = auth.uid()))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "consultation_requests",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff read all identities",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "contact_identities",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff read all identity links",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "contact_identity_links",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "crm_companies_delete",
+      "qual": "(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = crm_companies.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_companies",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "crm_companies_insert",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_companies",
+      "with_check": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "crm_companies_select",
+      "qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_companies",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "crm_companies_update",
+      "qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_companies",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can insert contact notes",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contact_notes",
+      "with_check": "((auth.uid() = user_id) AND (EXISTS ( SELECT 1\n   FROM crm_contacts c\n  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access_e28_private(auth.uid(), c.company_id, 'crm'::text, 'edit'::text)))))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can view contact notes",
+      "qual": "(EXISTS ( SELECT 1\n   FROM crm_contacts c\n  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access_e28_private(auth.uid(), c.company_id, 'crm'::text, 'view'::text))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contact_notes",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company admins can delete contacts",
+      "qual": "(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.company_id = crm_contacts.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contacts",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can insert contacts",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contacts",
+      "with_check": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)"
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can update contacts",
+      "qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contacts",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company members can view contacts",
+      "qual": "mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_contacts",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins manage nurture queue",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_nurture_queue",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins view form submissions",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "crm_web_form_submissions",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Paid users can read published DD reports",
+      "qual": "((is_published = true) AND (auth.uid() IS NOT NULL) AND user_has_clearview_access_e28_private(project_id))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "due_diligence_reports",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff can read all DD reports",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "due_diligence_reports",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff can update help requests",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "help_requests",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false)"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff can view all help requests",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "help_requests",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage interests",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "investment_interests",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage juristic contacts",
+      "qual": "has_role(auth.uid(), 'admin'::app_role)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "juristic_contacts",
+      "with_check": "has_role(auth.uid(), 'admin'::app_role)"
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Users can update their own draft requests",
+      "qual": "(((submitted_by = auth.uid()) AND (status = 'draft'::text)) OR false)",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "juristic_requests",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "team_create_activity_logs",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "lead_activity_log",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "team_view_activity_logs",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "lead_activity_log",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Account owners view own ledger entries",
+      "qual": "((EXISTS ( SELECT 1\n   FROM ledger_accounts la\n  WHERE (((la.id = ledger_entries.debit_account_id) OR (la.id = ledger_entries.credit_account_id)) AND (la.owner_user_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role]))))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "ledger_entries",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can read all acceptances",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "legal_acceptances",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage companies",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "management_companies",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Members and admins can view their companies",
+      "qual": "((is_active = true) AND ((EXISTS ( SELECT 1\n   FROM management_company_members m\n  WHERE ((m.company_id = management_companies.id) AND (m.user_id = auth.uid()) AND (m.is_active = true)))) OR has_role(auth.uid(), 'admin'::app_role) OR false))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "management_companies",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage all memberships",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "management_company_members",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Company admins can manage members",
+      "qual": "is_company_admin_e28_private(company_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "management_company_members",
+      "with_check": "is_company_admin_e28_private(company_id)"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Members can view their company colleagues",
+      "qual": "((is_active = true) AND ((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private() OR (company_id IN ( SELECT get_user_company_ids() AS get_user_company_ids))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "management_company_members",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Directors can insert terms activity",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "management_terms_activity",
+      "with_check": "((user_id = auth.uid()) AND (is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM management_company_members\n  WHERE ((management_company_members.user_id = auth.uid()) AND (management_company_members.role = 'director'::text) AND (management_company_members.is_active = true))))))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins read offer history",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "offer_history",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "UNO team can manage all flower order details",
+      "qual": "false",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "order_item_flower_details",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "orders_admin_select_all",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "orders",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "orders_admin_update",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "orders",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all OTA connections",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "ota_listing_connections",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all sync logs",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "ota_sync_logs",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all synced listings",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "ota_synced_listings",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "pageviews_select",
+      "qual": "((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "page_views",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "UNO team can view all profiles",
+      "qual": "false",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "profiles",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can update properties",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "properties",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "mc_member_select_company_properties_v2",
+      "qual": "staff_can_access_property_e28_private(auth.uid(), id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "properties",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "mc_member_update_company_properties_v2",
+      "qual": "staff_can_access_property_e28_private(auth.uid(), id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "properties",
+      "with_check": "staff_can_access_property_e28_private(auth.uid(), id)"
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "property_amenities_manage",
+      "qual": "can_manage_property_e28_private(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_amenities",
+      "with_check": "can_manage_property_e28_private(property_id)"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "property_amenities_public_read",
+      "qual": "(property_is_public(property_id) OR public_policy_property_manager(property_id))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "property_amenities",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can insert analytics",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_analytics",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can update analytics",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_analytics",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Chat: participant scoped insert",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_chat_messages",
+      "with_check": "((sender_id = auth.uid()) AND (is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_chat_messages.property_id) AND ((p.owner_id = auth.uid()) OR (p.managed_by = auth.uid()) OR (p.provider_id IN ( SELECT pr.id\n           FROM providers pr\n          WHERE (pr.user_id = auth.uid()))))))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM property_bookings b\n  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid())))))))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Chat: participant scoped read",
+      "qual": "((sender_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_chat_messages.property_id) AND (p.owner_id = auth.uid())))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM property_bookings b\n  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid()))))) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_chat_messages",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Authorized users can view documents",
+      "qual": "(is_admin_or_uno_team_e28_private() OR (uploaded_by = auth.uid()) OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_documents",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "MC admins and owners can delete documents",
+      "qual": "(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM (properties p\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (mcm.is_active = true)))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_documents",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "MC admins and owners can update documents",
+      "qual": "(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM (properties p\n     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))\n  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (mcm.is_active = true)))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_documents",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "MC members and owners can insert documents",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_documents",
+      "with_check": "(is_admin_or_uno_team_e28_private() OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))"
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage listing scores",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_listing_scores",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Managers read own listing scores",
+      "qual": "can_manage_property_e28_private(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_listing_scores",
+      "with_check": null
+    },
+    {
+      "cmd": "DELETE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can delete terms",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_management_terms",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Directors and owners can view terms",
+      "qual": "(is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM properties p\n  WHERE ((p.id = property_management_terms.property_id) AND (p.owner_id = auth.uid())))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_management_terms",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Directors can insert terms",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_management_terms",
+      "with_check": "(is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid()))"
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Directors can update terms",
+      "qual": "(is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid()))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_management_terms",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage all assignments",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "property_manager_assignments",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "property_media_manage",
+      "qual": "can_manage_property_e28_private(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_media",
+      "with_check": "can_manage_property_e28_private(property_id)"
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Managers manage rate plans",
+      "qual": "(EXISTS ( SELECT 1\n   FROM property_room_categories c\n  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property_e28_private(c.property_id))))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_rate_plans",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM property_room_categories c\n  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property_e28_private(c.property_id))))"
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "property_reviews_host_manage",
+      "qual": "can_manage_property_e28_private(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_reviews",
+      "with_check": "can_manage_property_e28_private(property_id)"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "property_reviews_public_read",
+      "qual": "(((is_public = true) AND property_is_public(property_id)) OR public_policy_property_manager(property_id) OR (reviewer_id = auth.uid()))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "property_reviews",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Managers read categories",
+      "qual": "can_manage_property_e28_private(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_room_categories",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Managers write categories",
+      "qual": "can_manage_property_e28_private(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_room_categories",
+      "with_check": "can_manage_property_e28_private(property_id)"
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Managers manage restrictions",
+      "qual": "can_manage_property_e28_private(property_id)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "property_stay_restrictions",
+      "with_check": "can_manage_property_e28_private(property_id)"
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage contracts",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "provider_contracts",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all contracts",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "provider_contracts",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "input_rules_admin_write",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "provider_input_rules",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Staff manage provider org links",
+      "qual": "is_finance_staff_e28_private(auth.uid())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "provider_org_links",
+      "with_check": "is_finance_staff_e28_private(auth.uid())"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view installs",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles\n  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "pwa_installs",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view realtime stats",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "realtime_stats",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Only admins can update realtime stats",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "realtime_stats",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins view all tokens",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "signature_request_signer_tokens",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "MC members view request signers",
+      "qual": "((EXISTS ( SELECT 1\n   FROM (signature_requests sr\n     JOIN management_company_members mcm ON ((mcm.company_id = sr.company_id)))\n  WHERE ((sr.id = signature_request_signers.request_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true)))) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "signature_request_signers",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage simulation runs",
+      "qual": "(EXISTS ( SELECT 1\n   FROM user_roles ur\n  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role])))))",
+      "roles": "{public}",
+      "schemaname": "public",
+      "tablename": "simulation_runs",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage intake configs",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "sys_intake_configs",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage lead configs",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "sys_lead_configs",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "system_settings_admin_read",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "system_settings",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "system_settings_admin_write",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "system_settings",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Author or admin can view task comments",
+      "qual": "((author_id = auth.uid()) OR has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "task_comments",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team members can insert own activity",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "team_activity_log",
+      "with_check": "((auth.uid() = user_id) AND is_team_member_e28_private(auth.uid()))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team members can view channels",
+      "qual": "is_team_member_e28_private(auth.uid())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "team_channels",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team members can view all team members",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role) OR (user_id = auth.uid()))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "team_members",
+      "with_check": null
+    },
+    {
+      "cmd": "INSERT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team members can send messages",
+      "qual": null,
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "team_messages",
+      "with_check": "((auth.uid() = sender_id) AND is_team_member_e28_private(auth.uid()))"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team members can view messages",
+      "qual": "(is_team_member_e28_private(auth.uid()) AND (is_deleted = false))",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "team_messages",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Team can view all user achievements",
+      "qual": "is_team_member_e28_private(auth.uid())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "team_user_achievements",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "thai_bookings_select",
+      "qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "thai_bookings",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "thai_bookings_update",
+      "qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "thai_bookings",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "thai_chat_messages_select",
+      "qual": "((EXISTS ( SELECT 1\n   FROM (thai_chats c\n     JOIN thai_businesses b ON ((b.id = c.business_id)))\n  WHERE ((c.id = thai_chat_messages.chat_id) AND ((c.customer_id = auth.uid()) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "thai_chat_messages",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "thai_chats_select",
+      "qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "thai_chats",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "thai_chats_update",
+      "qual": "((customer_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM thai_businesses b\n  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "thai_chats",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins read partner leads",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "thai_partner_leads",
+      "with_check": null
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins update partner leads",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "thai_partner_leads",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)"
+    },
+    {
+      "cmd": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can update documents for verification",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_documents",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can view all documents for verification",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_documents",
+      "with_check": null
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "events_select",
+      "qual": "((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_events",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "analytics_admin_only",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_segments",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "segments_select",
+      "qual": "((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_segments",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "segments_write",
+      "qual": "is_admin_or_uno_team_e28_private()",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_segments",
+      "with_check": "is_admin_or_uno_team_e28_private()"
+    },
+    {
+      "cmd": "SELECT",
+      "permissive": "PERMISSIVE",
+      "policyname": "sessions_select",
+      "qual": "((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private())",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "user_sessions",
+      "with_check": null
+    },
+    {
+      "cmd": "ALL",
+      "permissive": "PERMISSIVE",
+      "policyname": "Admins can manage commission rules",
+      "qual": "(has_role(auth.uid(), 'admin'::app_role) OR false)",
+      "roles": "{authenticated}",
+      "schemaname": "public",
+      "tablename": "vertical_commission_rules",
+      "with_check": "(has_role(auth.uid(), 'admin'::app_role) OR false)"
+    }
+  ],
+  "function_signatures": [
+    "actor_can_analyze_booking(p_booking_id uuid)",
+    "actor_can_analyze_crm(p_company_id uuid, p_contact_id uuid, p_deal_id uuid)",
+    "actor_can_analyze_property(p_property_id uuid)",
+    "actor_can_generate_voucher(p_order_id uuid, p_booking_id uuid)",
+    "actor_can_import_project(p_project_id uuid, p_source_id uuid, p_connector boolean)",
+    "actor_can_manage_company_billing(p_company_id uuid)",
+    "actor_has_platform_admin()",
+    "can_manage_property_e28_private(_property_id uuid)",
+    "is_admin_or_uno_team_e28_private()",
+    "is_company_admin_e28_private(p_company_id uuid)",
+    "is_finance_staff_e28_private(_uid uuid)",
+    "is_team_member_e28_private(check_user_id uuid)",
+    "mc_can_access_e28_private(_user_id uuid, _company_id uuid, _module text, _action text)",
+    "staff_can_access_property_e28_private(p_user_id uuid, p_property_id uuid)",
+    "user_has_clearview_access_e28_private(_project_id uuid)"
+  ]
+}

@@ -35687,12 +35687,44 @@ export type Database = {
         Args: { _space_id: string }
         Returns: boolean
       }
+      actor_can_analyze_booking: {
+        Args: { p_booking_id: string }
+        Returns: boolean
+      }
+      actor_can_analyze_crm: {
+        Args: {
+          p_company_id: string
+          p_contact_id?: string
+          p_deal_id?: string
+        }
+        Returns: boolean
+      }
+      actor_can_analyze_property: {
+        Args: { p_property_id: string }
+        Returns: boolean
+      }
       actor_can_export_company: {
         Args: { p_company_id: string }
         Returns: boolean
       }
+      actor_can_generate_voucher: {
+        Args: { p_booking_id?: string; p_order_id?: string }
+        Returns: boolean
+      }
       actor_can_govern_property_access: {
         Args: { p_property_id: string }
+        Returns: boolean
+      }
+      actor_can_import_project: {
+        Args: {
+          p_connector?: boolean
+          p_project_id: string
+          p_source_id?: string
+        }
+        Returns: boolean
+      }
+      actor_can_manage_company_billing: {
+        Args: { p_company_id: string }
         Returns: boolean
       }
       actor_can_operate_property: {
@@ -35720,6 +35752,7 @@ export type Database = {
         Args: { p_company_id: string; p_property_id: string }
         Returns: boolean
       }
+      actor_has_platform_admin: { Args: never; Returns: boolean }
       actor_is_operating_company_overseer: {
         Args: { _company_id: string }
         Returns: boolean
@@ -35811,6 +35844,10 @@ export type Database = {
         Returns: string
       }
       can_manage_property: { Args: { _property_id: string }; Returns: boolean }
+      can_manage_property_e28_private: {
+        Args: { _property_id: string }
+        Returns: boolean
+      }
       canonical_provider_category: {
         Args: { input_slug: string }
         Returns: string
@@ -36223,6 +36260,7 @@ export type Database = {
         Returns: undefined
       }
       is_admin_or_uno_team: { Args: never; Returns: boolean }
+      is_admin_or_uno_team_e28_private: { Args: never; Returns: boolean }
       is_assigned_manager: {
         Args: { _property_id: string; _user_id: string }
         Returns: boolean
@@ -36232,11 +36270,16 @@ export type Database = {
         Returns: boolean
       }
       is_company_admin: { Args: { p_company_id: string }; Returns: boolean }
+      is_company_admin_e28_private: {
+        Args: { p_company_id: string }
+        Returns: boolean
+      }
       is_company_member: {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
       }
       is_finance_staff: { Args: { _uid: string }; Returns: boolean }
+      is_finance_staff_e28_private: { Args: { _uid: string }; Returns: boolean }
       is_mc_admin: {
         Args: { _company_id: string; _user_id: string }
         Returns: boolean
@@ -36258,6 +36301,10 @@ export type Database = {
         Returns: boolean
       }
       is_team_member: { Args: { check_user_id: string }; Returns: boolean }
+      is_team_member_e28_private: {
+        Args: { check_user_id: string }
+        Returns: boolean
+      }
       is_verified_purchase: {
         Args: { p_item_id: string; p_item_type: string; p_user_id: string }
         Returns: boolean
@@ -36284,6 +36331,15 @@ export type Database = {
         }[]
       }
       mc_can_access: {
+        Args: {
+          _action?: string
+          _company_id: string
+          _module: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      mc_can_access_e28_private: {
         Args: {
           _action?: string
           _company_id: string
@@ -36355,6 +36411,10 @@ export type Database = {
         Returns: boolean
       }
       property_is_public: { Args: { _property_id: string }; Returns: boolean }
+      public_policy_property_manager: {
+        Args: { p_property_id: string }
+        Returns: boolean
+      }
       publish_property_to_marketplace: {
         Args: { p_owner_property_id: string }
         Returns: string
@@ -36443,6 +36503,10 @@ export type Database = {
         Args: { p_property_id: string; p_user_id: string }
         Returns: boolean
       }
+      staff_can_access_property_e28_private: {
+        Args: { p_property_id: string; p_user_id: string }
+        Returns: boolean
+      }
       submit_consultation_request: { Args: { payload: Json }; Returns: string }
       sync_properties_clearview_for_project: {
         Args: { _project_id: string }
@@ -36462,6 +36526,10 @@ export type Database = {
         Returns: undefined
       }
       user_has_clearview_access: {
+        Args: { _project_id: string }
+        Returns: boolean
+      }
+      user_has_clearview_access_e28_private: {
         Args: { _project_id: string }
         Returns: boolean
       }

@@ -38,15 +38,25 @@ beforeAll(async()=>{
  await sql`INSERT INTO property_bookings(id,property_id,guest_id,owner_id,status) VALUES (${id(32)},${P},${guest},${propertyOwner},'confirmed')`;
  await sql`INSERT INTO property_documents(id,property_id,uploaded_by) VALUES (${id(33)},${P},${propertyOwner}),(${id(34)},${Q},${propertyOwner})`;
  await sql`INSERT INTO crm_contacts(id,company_id) VALUES (${id(35)},${A}),(${id(36)},${B})`;
+ await sql`INSERT INTO property_financials(id,property_id,owner_id) VALUES (${id(70)},${Q},${propertyOwner})`;
+ await sql`INSERT INTO property_owners(id,property_id,company_id) VALUES (${id(71)},${Q},${B})`;
+ await sql`INSERT INTO staff_members(id,owner_id,company_id) VALUES (${id(72)},${propertyOwner},${B})`;
+ await sql`INSERT INTO property_reports(id,property_id,owner_id,generated_by) VALUES (${id(73)},${Q},${propertyOwner},${propertyOwner})`;
+ await sql`INSERT INTO crm_tasks(id,company_id,property_id) VALUES (${id(74)},${B},${Q})`;
+ await sql`INSERT INTO ledger_accounts(id,owner_user_id,management_company_id) VALUES (${id(75)},${propertyOwner},${B})`;
+ await sql`INSERT INTO ledger_entries(id,debit_account_id,credit_account_id) VALUES (${id(76)},${id(75)},${id(75)})`;
  // Proven live-definition bypass, not a synthetic true policy.
  expect(await as(team,tx=>tx`SELECT lock_code FROM properties`)).toHaveLength(2);
  expect(await as(team,tx=>tx`SELECT id FROM orders`)).toHaveLength(2);
- await sql.unsafe(readFileSync(process.env.E28_HELPERS??'supabase/migrations/0028_uno_team_private_helpers.sql','utf8'));
- await sql.unsafe(readFileSync(process.env.E28_POLICIES??'supabase/migrations/0029_uno_team_private_policies.sql','utf8'));
+ await sql.unsafe(readFileSync(process.env.E28_HELPERS??'drizzle/migrations/0028_uno_team_private_helpers.sql','utf8'));
+ await sql.unsafe(readFileSync(process.env.E28_POLICIES??'drizzle/migrations/0029_uno_team_private_policies.sql','utf8'));
+ await sql.unsafe(readFileSync('drizzle/migrations/0030_preserve_juristic_platform_admin.sql','utf8'));
+ await sql`INSERT INTO juristic_contacts(id) VALUES (${id(60)})`;
+ await sql.unsafe(readFileSync('drizzle/migrations/0031_checked_onboarding_private_capability.sql','utf8'));
 },60000);
 afterAll(async()=>{if(sql)await sql.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
 describe('E2.8 exact live-catalog least privilege',()=>{
- it.each(['properties','orders','property_documents','crm_contacts'])('generic uno_team alone cannot read %s in legacy mode',async table=>{expect(await as(team,tx=>tx.unsafe(`SELECT id FROM ${table}`))).toHaveLength(0);});
+ it.each(['properties','orders','property_documents','crm_contacts','property_bookings','property_financials','property_owners','staff_members','property_reports','crm_tasks','ledger_entries'])('generic uno_team alone cannot read %s in legacy mode',async table=>{expect(await as(team,tx=>tx.unsafe(`SELECT id FROM ${table}`))).toHaveLength(0);});
  it('legacy manager retains company property and CRM module rights, never another company',async()=>{
   expect(await as(manager,tx=>tx`SELECT id FROM properties ORDER BY id`)).toEqual([{id:P}]);
   expect(await as(manager,tx=>tx`SELECT id FROM crm_contacts ORDER BY id`)).toEqual([{id:id(35)}]);
@@ -148,10 +158,18 @@ describe('E2.8 exact live-catalog least privilege',()=>{
    throw new Error('rollback-security');
   }).catch(e=>{if(!(e instanceof Error)||e.message!=='rollback-security')throw e;});
  });
+ it('protected admin retains juristic contacts; generic team does not',async()=>{expect(await as(admin,tx=>tx`SELECT id FROM juristic_contacts`)).toHaveLength(1);expect(await as(team,tx=>tx`SELECT id FROM juristic_contacts`)).toHaveLength(0);});
+ it('team company manager without properties edit cannot use checked onboarding',async()=>{
+  await expect(sql.begin(async tx=>{
+   await tx`INSERT INTO management_company_members(id,company_id,user_id,role,is_active) VALUES (${id(80)},${A},${team},'manager',true)`;
+   await tx.unsafe('SET LOCAL ROLE authenticated');await tx`SELECT set_config('request.jwt.claim.sub',${team},true)`;
+   await tx`SELECT create_managed_property_checked(${A},NULL,'Blocked','Blocked','villa','rent')`; 
+  })).rejects.toThrow(/properties edit permission required/);
+ });
  it('all 128 changed policies preserve identity and exact approved expressions',async()=>{
   const targets=JSON.parse(readFileSync('src/lib/__tests__/fixtures/uno-team-targets.json','utf8')).policies;
   for(const p of targets){const row=(await sql`SELECT cmd,roles::text,permissive,qual,with_check FROM pg_policies WHERE schemaname=${p.schemaname} AND tablename=${p.tablename} AND policyname=${p.policyname}`)[0];
-   expect(row.cmd).toBe(p.cmd);expect(row.roles).toBe(p.roles === '{public}' && !['property_amenities_public_read','property_reviews_public_read'].includes(p.policyname) && (String(p.replacement_qual)+String(p.replacement_with_check)).includes('_e28_private') ? '{authenticated}' : p.roles);expect(row.permissive).toBe(p.permissive);
+   expect(row.cmd).toBe(p.cmd);expect(row.roles).toBe((p.tablename==='juristic_contacts' || p.roles === '{public}' && !['property_amenities_public_read','property_reviews_public_read'].includes(p.policyname) && (String(p.replacement_qual)+String(p.replacement_with_check)).includes('_e28_private')) ? '{authenticated}' : p.roles);expect(row.permissive).toBe(p.permissive);
    // PostgreSQL canonicalizes expressions; no positive literal role-only branch survives targets.
    expect(row.qual??'').not.toMatch(/has_role\(auth.uid\(\), 'uno_team'/);
   }
