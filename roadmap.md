@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-17 · Authorized isolated PMS end-to-end verification
+- [ ] Establish HEAD and read canonical/PMS QA boundaries; trace Bookings list/detail → Calendar → Today/tasks → check-in/out → owner report.
+- [ ] Re-run current isolated integration and network-denying browser fixtures; cover IDs, loading/error/empty, invalidation and Bangkok half-open dates.
+- [ ] Correct only reproduced code defects with focused regressions; record exact commands, evidence, residual blockers and SHA in docs/qa/PMS_END_TO_END_VERIFICATION_2026_10_17.md.
+- Boundaries: no production business reads/writes, notifications/export, migrations/edge deploy/publish, enforcement, assignments, E3 or financial P0-A/P0-B. Real E2E remains blocked without an isolated backend.
+
 ## 2026-10-17 · Resorts/hotels plan review (categories, rate plans, rules)
 - [x] Approved public projection applied as 0034: four read-only allowlisted catalogs + public-category-bound aggregate availability; guest UI switched. Private policy hash unchanged, data counts unchanged, enforcement 0. Effective ACL check corrected earlier missing-grant diagnosis.
 - [x] Stage status audited: schema + server quote + room assignment + MC structure page live; guest page unwired, restrictions editor missing, live categories/rate plans 0 (33 properties all `unit`).

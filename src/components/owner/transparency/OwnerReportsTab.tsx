@@ -24,7 +24,7 @@ export function OwnerReportsTab({ propertyId }: Props) {
   const [viewReport, setViewReport] = useState<PropertyReport | null>(null);
   const generatePdf = useGeneratePdf();
 
-  const { data: reports, isLoading } = useQuery({
+  const { data: reports, isLoading, error, refetch } = useQuery({
     queryKey: ['owner-transparency-reports', propertyId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -64,6 +64,13 @@ export function OwnerReportsTab({ propertyId }: Props) {
 
   if (isLoading) {
     return <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-none" />)}</div>;
+  }
+
+  if (error) {
+    return <div role="alert" className="space-y-3 py-4 text-sm text-destructive">
+      <p>{isRu ? 'Не удалось загрузить отчёты' : 'Could not load reports'}</p>
+      <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+    </div>;
   }
 
   if (!reports?.length) {

@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   language: 'ru' as 'ru' | 'en',
   loading: false,
   empty: false,
+  queryError: null as Error | null, refetch: vi.fn(),
+  customBookings: null as ReturnType<typeof bookingsListFixtures> | null,
   from: vi.fn(), update: vi.fn(), in: vi.fn(), error: vi.fn(),
 }));
 
@@ -14,7 +16,7 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: m
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (n: number) => `${n} THB` }) }));
 vi.mock('@/hooks/useCityCurrency', () => ({ useCityCurrency: () => ({ code: 'THB' }) }));
 vi.mock('@/hooks/usePropertyBookings', () => ({
-  useAllPropertyBookings: () => ({ bookings: mocks.empty ? [] : bookingsListFixtures(mocks.language), isLoading: mocks.loading }),
+  useAllPropertyBookings: () => ({ bookings: mocks.empty ? [] : mocks.customBookings ?? bookingsListFixtures(mocks.language), isLoading: mocks.loading, error: mocks.queryError, refetch: mocks.refetch }),
 }));
 // The real client and detail queries never load. An in-memory rejected response
 // exercises submission without a write, success notification or window reload.
@@ -44,6 +46,7 @@ function selectFirst(language: FixtureLanguage) {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.loading = false; mocks.empty = false;
+  mocks.queryError = null; mocks.customBookings = null;
   mocks.from.mockReturnValue({ update: mocks.update });
   mocks.update.mockReturnValue({ in: mocks.in });
   mocks.in.mockResolvedValue({ error: new Error('Isolated fixture rejection') });
@@ -51,6 +54,31 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => {
+  it('failed query hides stale selectable bookings and permits retry', () => {
+    mocks.queryError = new Error('denied'); mount(language);
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Повторить' : 'Retry' }));
+    expect(mocks.refetch).toHaveBeenCalledOnce();
+  });
+
+  it('Bangkok arrival is active before UTC midnight, excluding cancelled and checkout stays', () => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date('2026-10-16T18:00:00Z'));
+    try {
+      const base = bookingsListFixtures(language)[0];
+      mocks.customBookings = [
+        { ...base, id: 'arrival', guest_name: 'Arrival fixture', status: 'confirmed', check_in: '2026-10-17', check_out: '2026-10-18' },
+        { ...base, id: 'departed', guest_name: 'Departure fixture', status: 'checked_in', check_in: '2026-10-16', check_out: '2026-10-17' },
+        { ...base, id: 'cancelled', guest_name: 'Cancelled fixture', status: 'cancelled', check_in: '2026-10-17', check_out: '2026-10-18' },
+      ];
+      mount(language);
+      fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Активные' : 'Active', exact: true }));
+      expect(screen.getByText('Arrival fixture')).toBeInTheDocument();
+      expect(screen.queryByText('Departure fixture')).not.toBeInTheDocument();
+      expect(screen.queryByText('Cancelled fixture')).not.toBeInTheDocument();
+    } finally { vi.useRealTimers(); }
+  });
+
   it('checkbox selects and deselects without opening details or contacting the client', () => {
     mount(language); selectFirst(language);
     const checkbox = screen.getAllByRole('checkbox').find(el => el.getAttribute('aria-label')?.endsWith(bookingsListFixtures(language)[0].guest_name ?? ''));
