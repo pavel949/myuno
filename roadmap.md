@@ -1,5 +1,12 @@
 # Roadmap
 
+## 2026-10-17 · FINAL PRE-E3 order mutation security
+- [ ] Trace canonical database/RPC/Edge/frontend writers and field/state authority matrix at baseline `1f40588db94e8d0e1e83cd024bf5556034bafcb0`.
+- [ ] Reproduce proven bypasses locally; implement only restrictive forward fixes with fail-closed rollback and isolated regression tests.
+- [ ] Apply/deploy only tested required changes; read-only verify zero enforcement/spaces/assignments/members and unchanged business aggregates.
+- [ ] Publish FINAL_ORDER_MUTATION_SECURITY.md with exhaustive dispositions, evidence, observed SHA and E3 GO/NO-GO.
+- Restrictions: no real business mutations/outbound calls, catalog/support cleanup, enforcement, spaces/assignments or E3.
+
 ## 2026-10-17 · E2.9 continuation — 14 blocker closure
 - [x] Establish operator booking-edit property duty versus unproved customer/CRM automation rights; deploy restricted booking-message gate after 21 synthetic cases.
 - [x] Reconcile all RO-01–RO-14 in e2_9/blockers-14.csv; report proven fixes versus named ambiguous blockers; verify production read-only zero enforcement/assignments and observed SHA.
