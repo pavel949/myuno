@@ -112,3 +112,29 @@ All compared aggregates identical. Read-only ACL query confirms both wallet RPCs
 Observed commit SHA and final evidence manifest: [verification.json](final_order_mutation/verification.json). The observed SHA is a tool-managed repository checkpoint, not a claim of a manually created final commit.
 
 Observed completed-code checkpoint: `20b47ac85ea55266da5f6d205f6d9ac47195b8e8`; final documentation checkpoint may advance automatically after this observation.
+
+## 2026-10-17 · Revised master task P0-A continuation
+
+Starting HEAD `c839a53568b8e14ee277f5739e85c3f1b56f6262`. Approved execution starts at P0-A only. Previous evidence above remains historical; no GO-A or cutover authorization is inferred.
+
+### Proven refund defect and bounded containment
+
+The previous `refund-transfer-order` queried nonexistent `payment_intents.stripe_payment_intent_id`, ignored the SDK error, then wrote `metadata.refunded_at/refund_method=manual` and returned success when no payment was resolved. Live read-only schema at `2026-10-17 08:27:06.304502+00` confirms `provider_ref/provider_session_id`, not that column. It also treated metadata as completed refund proof and moved Stripe money without an approved reversal ledger contract.
+
+`supabase/functions/refund-transfer-order/index.ts` now keeps internal-secret ingress, validates UUID-only order identity plus bounded reason, rejects additional fields and non-transfer objects, uses the existing payment columns, and **performs no Stripe call or business mutation**. Lookup errors return 503; missing/ambiguous payments and all unproved refund reconciliation return 409. It never returns refund success based on metadata or status. Automated refunds are intentionally unavailable until canonical reversal is approved; this is containment, not a working replacement refund process.
+
+Changed files: refund entrypoint; `scripts/qa/refund-containment.mjs`; `docs/hardening/rollback/p0a_refund_containment.md`; this report; `roadmap.md`; root `AGENTS.md`. No schema, grants, RLS, prices, deposit rules, inventory semantics or commercial model changed. Deployment status and source checkpoint are recorded separately in `final_order_mutation/p0a-continuation.json`.
+
+Tests: actual entrypoint RED reproduced missing validation before containment; GREEN **16/16** refund cases (unauthorized/forged payload, order/payment errors, foreign vertical, missing/pending/manual/settled/ambiguous payment, forged refund metadata, status-only proof and retry), with all writes/Stripe/outbound forbidden. Retained operator **19/19** is only the old ingress/terminal/type suite, not certification of successful confirmation/rejection. Selected PostgreSQL/date/inventory/payment regressions **129/129** (75 + 15 + 16 + 16 + 7). No real handler invoked; automatic preview build OK.
+
+Read-only baseline: enforcement/spaces/assignments/members **0/0/0/0**; orders **416 / 7,558,520.00**; payment intents **7**; ledger entries **136**; property bookings **82**. Current live function MD5: create_order_checked `62f26cda6ac8eda0b835be281fa879c5`; guard_customer_order_update `124a15c2f1df3a63cf56e0655b857773`; record_ledger_entries `abb8bf8e00cbe002302aba2e69fe0ac5`; create_property_booking_from_order `7b8d680ebce7c742f069f15ffff4bd52`. These were read, not modified or fully recertified.
+
+### Blocking contracts, not implicit permissions
+
+- `quotePropertyStay` accepts a client-selected price range with overlapping legacy/season rates and maximum length/timing discounts; it is not one authoritative quote. Exact timing eligibility, stacking, negotiated-price/agent-markup authority are not established.
+- PMS/manual writers currently create confirmed/paid truth directly. An approved staff-on-behalf, negotiated-price and deposit-versus-full-payment contract is necessary before safely replacing these writers and revoking every direct path.
+- Manual RUB settlement needs an established conversion/tolerance/accounting contract; a generic staff/finance role cannot substitute for object authorization.
+- Transfer signed confirmation still records ledger for unpaid orders; rejection still cancels before refund and may return success after a refund error. This caller is **PROVEN BYPASS / NOT FIXED**, not covered by the refund-only containment.
+- Atomic settlement/reversal allocation, webhook recovery/replay, inventory adoption/overlap rollback and foreign-space parent mutations remain blocking. Broad `restrictive-fixes.sql` stays UNAPPLIED.
+
+**GO-A NO-GO; P0-B and E3 not started.** Recommendation: establish exact property pricing/override and manual settlement/reversal contracts, then migrate checked writers and close direct paths in one tested compatibility gate; do not invent these business rules to claim closure.
