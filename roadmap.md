@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · Property and tariff data-entry priority
+- [ ] Remove proven blockers in existing property and tariff forms; retain editable team-owned pricing configuration.
+- [ ] Verify only the changed workflow; no broad audit/test expansion, production business writes, permission expansion, enforcement, assignments or E3 cutover.
+- Financial settlement and mutation blockers remain NO-GO; this priority does not authorize bypassing financial safeguards.
+
 ## 2026-10-17 · Revised P0/P1 executable master task
 - [x] Read the uploaded master task and verify starting HEAD `c839a53568b8e14ee277f5739e85c3f1b56f6262`; preserve accepted UX/security work.
 - [ ] P0-A: close remaining proven order/payment/inventory mutation blockers; exact isolated tests and security-preserving rollback before any apply/deploy; report GO-A/NO-GO and stop.
