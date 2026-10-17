@@ -272,7 +272,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                       </div>
                     )}
                     <div
-                      className="h-14 border-b last:border-b-0 flex items-center gap-2 px-2 cursor-pointer hover:bg-muted/50 transition-colors group/label"
+                      className="h-20 sm:h-14 border-b last:border-b-0 flex items-center gap-2 px-2 cursor-pointer hover:bg-muted/50 transition-colors group/label"
                       onClick={() => navigate(`/mc/properties/${property.property_id}`)}
                       title={isRu ? 'Открыть объект' : 'View property'}
                     >
@@ -337,7 +337,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                       {group && group.complexName && (
                         <div className="h-7 border-b bg-muted/50" />
                       )}
-                      <div className="h-14 border-b last:border-b-0 flex relative">
+                      <div className="h-20 sm:h-14 border-b last:border-b-0 flex relative">
                       {/* Day cells */}
                       {days.map((day, dayIdx) => {
                         const dateKey = format(day, 'yyyy-MM-dd');
