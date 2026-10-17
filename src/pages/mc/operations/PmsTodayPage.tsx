@@ -143,7 +143,7 @@ export default function PmsTodayPage() {
       <section aria-labelledby="today-attention" className="min-w-0 border-l-2 border-accent pl-4">
         <h2 id="today-attention" className="flex items-start gap-2 font-display text-h3"><AlertTriangle aria-hidden className="mt-1 size-5 shrink-0 text-accent" />{attentionTitle}</h2>
         <div className="mt-4 grid min-w-0 gap-6 lg:grid-cols-3">
-          <Flow icon={MessageSquare} title={t({ en: 'Urgent guest requests', ru: 'Приоритетные обращения', th: 'คำขอเร่งด่วนของแขก' })} count={urgentRequests.length}>
+          <Flow icon={MessageSquare} title={t({ en: 'Priority guest requests', ru: 'Приоритетные обращения', th: 'คำขอเร่งด่วนของแขก' })} count={urgentRequests.length}>
             {urgentRequests.length ? <ul>{urgentRequests.map(r => <RequestRow key={r.id} r={r} />)}</ul> : <Empty text={t({ en: 'No high-priority requests recorded', ru: 'Приоритетных обращений не отмечено', th: 'ไม่มีคำขอเร่งด่วนที่บันทึกไว้' })} />}
           </Flow>
           <Flow icon={AlertTriangle} title={t({ en: 'Maintenance', ru: 'Техническое обслуживание', th: 'ซ่อมบำรุง' })} count={maintenanceUnits.length}>

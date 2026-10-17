@@ -41,6 +41,8 @@ async def main():
                 assert await stays.locator('li').count() == 3
                 assert '2026-10-17' in await stays.inner_text() and '2026-10-18' in await stays.inner_text()
                 await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-populated.png'))
+                await routine.screenshot(path=str(OUTPUT/f'{lang}-{width}-requests.png'))
+                await page.get_by_role('region', name='Объекты' if lang=='ru' else 'Properties', exact=True).screenshot(path=str(OUTPUT/f'{lang}-{width}-units.png'))
                 link = attention.get_by_role('link').first
                 await link.focus()
                 assert await link.evaluate('(e)=>e===document.activeElement && getComputedStyle(e).boxShadow!=="none"')
