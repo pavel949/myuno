@@ -5,8 +5,8 @@
  * Matches rules by trigger_event + timing, sends via channel, logs to booking_notifications_log.
  */
 import { createServiceClient } from "../_shared/supabase.ts";
-import { requireInternalSecret } from "../_shared/internal-secret.ts";
-import { requireAuth } from "../_shared/auth-guard.ts";
+import { authorizeBookingMessages } from './access.ts';
+import { AccessDenied } from '../_shared/operating-space-auth.ts';
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
@@ -17,17 +17,10 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
-    const immediateOrderId = body.immediate_order_id as string | undefined;
-
-    const secretGuard = requireInternalSecret(req, corsHeaders);
-    const hasInternalSecret = !secretGuard;
-
-    if (!hasInternalSecret) {
-      if (!immediateOrderId) return secretGuard!;
-      const authResult = await requireAuth(req, corsHeaders);
-      if (authResult instanceof Response) return authResult;
-    }
+    const body = req.method === "POST" ? await req.json() : {};
+    const access = await authorizeBookingMessages(req, corsHeaders, body);
+    if (access instanceof Response) return access;
+    const { immediateOrderId } = access;
 
     const supabase = createServiceClient();
     const now = new Date();
@@ -107,6 +100,8 @@ Deno.serve(async (req) => {
 
     return json({ processed, errors });
   } catch (error) {
+    if (error instanceof AccessDenied) return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (error instanceof SyntaxError) return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     console.error("[execute-booking-message-rules]", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
       status: 500,
