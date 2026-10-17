@@ -1,6 +1,7 @@
 import { createStripeClient } from "../_shared/stripe.ts";
-import { createClient } from "../_shared/supabase.ts";
-import { requireCompanyMember } from "../_shared/authz.ts";
+import { createServiceClient } from "../_shared/supabase.ts";
+import { requireActorRpc } from "../_shared/authz.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
@@ -15,27 +16,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header");
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !userData.user) throw new Error("Not authenticated");
-
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
     const { company_id } = await req.json();
-    if (!company_id) throw new Error("company_id is required");
+    if (!company_id) throw new Error('company_id is required');
+    const denied = await requireActorRpc(req, corsHeaders, 'actor_can_manage_company_billing', { p_company_id: company_id });
+    if (denied) return denied;
+    const supabase = createServiceClient();
 
-    // IDOR guard: only members of the company (or platform staff) can read
-    // subscription/slot state.
-    const guard = await requireCompanyMember(supabase, userData.user.id, company_id, corsHeaders);
-    if (guard) return guard;
-
-    // Get company data
     const { data: company } = await supabase
       .from("management_companies")
       .select("paid_slots, free_slots, stripe_subscription_id, stripe_customer_id")

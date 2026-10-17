@@ -21,6 +21,7 @@
 // Reuses the same admin-guard pattern as admin-manage-user.
 
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireActorRpc } from "../_shared/authz.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
@@ -56,19 +57,10 @@ Deno.serve(async (req) => {
     if (authResult instanceof Response) return authResult;
     const callerId = authResult.user.id;
 
+    const guard = await requireActorRpc(req, corsHeaders, "actor_has_platform_admin");
+    if (guard) return guard;
     const admin = createServiceClient();
-
-    // Caller must be admin or uno_team.
-    const [{ data: isAdmin }, { data: isTeam }] = await Promise.all([
-      admin.rpc("has_role", { _user_id: callerId, _role: "admin" }),
-      admin.rpc("has_role", { _user_id: callerId, _role: "uno_team" }),
-    ]);
-    if (!isAdmin && !isTeam) {
-      return new Response(
-        JSON.stringify({ error: "Forbidden", message: "Admin or uno_team role required" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    const isAdmin = true;
 
     const body = await req.json().catch(() => ({}));
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";

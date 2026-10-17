@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
-import { requireInternalOrUser, fetchUserRoles, hasAnyRole, forbidden, STAFF_ROLES } from "../_shared/authz.ts";
+import { requireInternalOrUser, requireActorRpc } from "../_shared/authz.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
@@ -21,6 +21,10 @@ serve(async (req) => {
       });
     }
 
+    if (authedUserId) {
+      const denied = await requireActorRpc(req, corsHeaders, "actor_can_analyze_booking", { p_booking_id: booking_id });
+      if (denied) return denied;
+    }
     const supabase = createServiceClient();
 
     // Fetch booking details
@@ -34,19 +38,6 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Booking not found" }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-
-    // Ownership check for user-mode calls: caller must be the booking guest,
-    // the owning property's owner, or a platform staff role.
-    if (authedUserId) {
-      const [{ data: prop }, roles] = await Promise.all([
-        supabase.from("properties").select("owner_id").eq("id", booking.property_id).single(),
-        fetchUserRoles(supabase, authedUserId),
-      ]);
-      const isStaff = hasAnyRole(roles, STAFF_ROLES);
-      const isOwner = prop?.owner_id === authedUserId;
-      const isGuest = booking.guest_id === authedUserId;
-      if (!isStaff && !isOwner && !isGuest) return forbidden(corsHeaders);
     }
 
 

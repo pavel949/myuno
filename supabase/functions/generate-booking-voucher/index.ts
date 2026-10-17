@@ -1,7 +1,7 @@
 // Deno.serve used (native edge runtime)
 import { createClient, createServiceClient } from "../_shared/supabase.ts";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
-import { requireInternalOrUser, forbidden, fetchUserRoles, hasAnyRole, STAFF_ROLES } from '../_shared/authz.ts';
+import { requireInternalOrUser, requireActorRpc } from '../_shared/authz.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -40,9 +40,12 @@ Deno.serve(async (req) => {
       throw new Error('orderId or bookingId is required');
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    if ((orderId && bookingId) || (!orderId && !bookingId)) return new Response(JSON.stringify({error:'Exactly one booking or order required'}),{status:400,headers:corsHeaders});
+    if (callerUserId) {
+      const denied = await requireActorRpc(req, corsHeaders, 'actor_can_generate_voucher', { p_order_id: orderId ?? null, p_booking_id: bookingId ?? null });
+      if (denied) return denied;
+    }
+    const supabase = createServiceClient();
 
     const isRu = language === 'ru';
     let voucherData: any = null;
@@ -153,18 +156,7 @@ Deno.serve(async (req) => {
       throw new Error('Order or booking not found');
     }
 
-    // Ownership enforcement for user-mode callers (internal callers are trusted).
-    // The caller must own the order/booking or hold a staff role — otherwise this
-    // would leak another customer's PII, amount, and check-in QR.
-    if (callerUserId) {
-      const isOwner = ownerUserId !== null && ownerUserId === callerUserId;
-      if (!isOwner) {
-        const roles = await fetchUserRoles(createServiceClient(), callerUserId);
-        if (!hasAnyRole(roles, STAFF_ROLES)) {
-          return forbidden(corsHeaders);
-        }
-      }
-    }
+
 
     // Generate QR code data - contains verification URL
     const qrCodeData = JSON.stringify({

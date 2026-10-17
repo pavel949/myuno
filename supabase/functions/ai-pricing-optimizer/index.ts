@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
-import { requireInternalOrUser, fetchUserRoles, hasAnyRole, forbidden, STAFF_ROLES } from "../_shared/authz.ts";
+import { requireInternalOrUser, requireActorRpc } from "../_shared/authz.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { PROPERTY_BOOKING_RELEASE_FILTER } from "../_shared/property-inventory.ts";
 
@@ -22,6 +22,10 @@ serve(async (req) => {
       });
     }
 
+    if (authedUserId) {
+      const denied = await requireActorRpc(req, corsHeaders, "actor_can_analyze_property", { p_property_id: property_id });
+      if (denied) return denied;
+    }
     const supabase = createServiceClient();
 
     // Fetch property
@@ -35,14 +39,6 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Property not found" }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-
-    // Ownership check for user-mode calls
-    if (authedUserId) {
-      const roles = await fetchUserRoles(supabase, authedUserId);
-      const isStaff = hasAnyRole(roles, [...STAFF_ROLES, "property_manager"]);
-      const isOwner = (property as any).owner_id === authedUserId;
-      if (!isStaff && !isOwner) return forbidden(corsHeaders);
     }
 
     // Fetch bookings last 90 days for occupancy analysis

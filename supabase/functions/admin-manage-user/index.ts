@@ -1,4 +1,5 @@
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireActorRpc } from "../_shared/authz.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
@@ -16,17 +17,10 @@ Deno.serve(async (req) => {
     const callerId = authResult.user.id;
 
     // Admin check via service client
+    const guard = await requireActorRpc(req, corsHeaders, "actor_has_platform_admin");
+    if (guard) return guard;
     const admin = createServiceClient();
-    const { data: isAdmin } = await admin.rpc("has_role", {
-      _user_id: callerId,
-      _role: "admin",
-    });
-    if (!isAdmin) {
-      return new Response(
-        JSON.stringify({ error: "Forbidden", message: "Admin role required" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const isAdmin = true;
 
     const { action, user_id, role, hard_delete } = await req.json();
 
