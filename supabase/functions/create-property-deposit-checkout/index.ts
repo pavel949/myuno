@@ -5,7 +5,7 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getAllowedOrigin } from "../_shared/cors.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow, type RateSeasonRow } from "../_shared/property-quote.ts";
-import { quoteHotelStay, type HotelCategoryRow, type HotelRatePlanRow, type HotelSeasonRow, type HotelRestrictionRow } from "../_shared/hotel-quote.ts";
+import { quoteHotelStay, mergeRestrictions, type HotelCategoryRow, type HotelRatePlanRow, type HotelSeasonRow, type HotelRestrictionRow } from "../_shared/hotel-quote.ts";
 
 
 interface PropertyDepositRequest {
@@ -116,14 +116,16 @@ Deno.serve(async (req) => {
         supabaseAdmin.from("property_room_categories").select("id, property_id, base_price_per_night, min_stay_nights, max_guests, is_active").eq("id", room_category_id).maybeSingle(),
         supabaseAdmin.from("property_rate_plans").select("id, category_id, adjustment_type, adjustment_value, min_stay_nights, max_stay_nights, min_advance_days, is_active").eq("id", rate_plan_id ?? "").maybeSingle(),
         supabaseAdmin.from("property_rate_seasons").select("start_date, end_date, nightly_rate, min_stay_nights, is_active").eq("category_id", room_category_id).eq("is_active", true).lte("start_date", check_out).gte("end_date", check_in),
-        supabaseAdmin.from("property_stay_restrictions").select("date, price_override, min_stay_nights, closed_to_arrival, closed_to_departure, stop_sell").eq("category_id", room_category_id).gte("date", check_in).lte("date", check_out),
+        // Category rows and resort-wide rows (property_id = parent) both apply.
+        supabaseAdmin.from("property_stay_restrictions").select("category_id, date, price_override, min_stay_nights, closed_to_arrival, closed_to_departure, stop_sell").or(`category_id.eq.${room_category_id},property_id.eq.${property_id}`).gte("date", check_in).lte("date", check_out),
       ]);
       if (!cat || cat.property_id !== property_id) {
         return new Response(JSON.stringify({ error: "Room category not found" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 });
       }
       const hq = quoteHotelStay({
         category: cat as HotelCategoryRow, plan: plan as HotelRatePlanRow | null,
-        seasons: (cSeasons ?? []) as HotelSeasonRow[], restrictions: (restr ?? []) as HotelRestrictionRow[],
+        seasons: (cSeasons ?? []) as HotelSeasonRow[],
+        restrictions: mergeRestrictions((restr ?? []) as (HotelRestrictionRow & { category_id: string | null })[]),
         check_in, check_out, guests, today: bangkokToday(),
       });
       if (!hq.ok) {
@@ -140,7 +142,7 @@ Deno.serve(async (req) => {
       total_amount = hq.total;
       deposit_amount = Math.round(hq.total * 0.1);
       cleaning_fee = 0;
-      categoryMeta = { parent_property_id: property_id, room_category_id, rate_plan_id, nightly: hq.nightly };
+      categoryMeta = { parent_property_id: property_id, room_category_id, rate_plan_id, nightly: hq.nightly, quoted_total: hq.total, quoted_at: new Date().toISOString() };
       property_id = roomId as string;
     }
 
