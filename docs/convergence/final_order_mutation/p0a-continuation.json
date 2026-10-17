@@ -1,0 +1,28 @@
+{
+  "baseline_head": "c839a53568b8e14ee277f5739e85c3f1b56f6262",
+  "status": "P0_A_PARTIAL_CONTAINMENT_NO_GO",
+  "schema_changes": [],
+  "deployed_edge": "refund-transfer-order",
+  "entry_sha256": "ad4d4a7128c09c9f093c90ee5065db06d164beb1758d91d4b53dcf8749785bfd",
+  "submitted_bundle_sha256": "456ba90f604c813780d892f62e6ce2c3b7ca702943ad6b827c3c60020ff031e9",
+  "deployment_acknowledged": true,
+  "live_business_handler_invoked": false,
+  "refund_entrypoint_tests": 16,
+  "selected_regressions": 129,
+  "retained_operator_boundary_cases": 19,
+  "independent_refund_only_review": "GO; caller financial bypass remains HIGH and uncertified",
+  "before_at": "2026-10-17 08:27:06.304502+00",
+  "after_at": "2026-10-17 08:28:50.536478+00",
+  "before_equals_after": {
+    "enforcement_spaces_assignments_members": [0, 0, 0, 0],
+    "orders": 416,
+    "order_total": "7558520.00",
+    "payment_intents": 7,
+    "ledger_entries": 136,
+    "property_bookings": 82
+  },
+  "production_business_writes_or_outbound_test_calls": false,
+  "central_money_flow_verified": false,
+  "rollback": "docs/hardening/rollback/p0a_refund_containment.md",
+  "blocking_remaining": ["exact_quote_and_override_contract", "direct_order_child_payment_writers", "manual_settlement_accounting_contract", "signed_operator_financial_bypass", "atomic_settlement_refund_recovery", "inventory_race_and_foreign_scope", "legacy_compatibility"]
+}
