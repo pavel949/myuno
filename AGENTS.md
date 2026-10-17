@@ -23,3 +23,4 @@
 
 - Public provider, service and salon reads use read-only owner-executed allowlisted catalog views with private base RLS; provider detail explicitly separates public and private reads, because public full rows disclose settlement and moderation fields.
 - Property-submission notifications accept only an object ID, authorize its persisted pending owner/admin relation before service access and resolve current protected admin recipients, because supplied identity/contacts and employment roles cannot authorize delivery.
+- Interactive booking-rule dispatch checks a readable confirmed order and all stored property/company booking-edit duties before service access; scheduler secrets remain separate, because manual order customer identity is not guest-recipient authority.
