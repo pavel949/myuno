@@ -1,0 +1,1126 @@
+{
+  "rows": [
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "debit_account_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "credit_account_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "amount",
+          "notnull": true,
+          "type": "numeric(12,2)"
+        },
+        {
+          "default": "'THB'::text",
+          "name": "currency",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "order_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "payment_intent_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "entry_type",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "description",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "ledger_entries"
+    },
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "order_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "property_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "user_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "manager_user_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": "'rub_manual'::text",
+          "name": "channel",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "amount_listing",
+          "notnull": true,
+          "type": "numeric"
+        },
+        {
+          "default": null,
+          "name": "currency_listing",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "amount_rub_estimate",
+          "notnull": false,
+          "type": "numeric"
+        },
+        {
+          "default": null,
+          "name": "fx_rate_used",
+          "notnull": false,
+          "type": "numeric"
+        },
+        {
+          "default": null,
+          "name": "guest_name",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "guest_phone",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "guest_email",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": "'awaiting_admin'::text",
+          "name": "status",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": "(now() + '24:00:00'::interval)",
+          "name": "hold_expires_at",
+          "notnull": true,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "contacted_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "contacted_by",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "confirmed_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "confirmed_by",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "rejected_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "rejected_by",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "rejected_reason",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "proof_file_path",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "amount_rub_actual",
+          "notnull": false,
+          "type": "numeric"
+        },
+        {
+          "default": null,
+          "name": "payment_method_actual",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": "'{}'::jsonb",
+          "name": "metadata",
+          "notnull": false,
+          "type": "jsonb"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": true,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": "now()",
+          "name": "updated_at",
+          "notnull": true,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "rub_sber_phone",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "myuno_advance_approved_by",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "myuno_advance_limit_thb",
+          "notnull": false,
+          "type": "integer"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "manual_payment_requests"
+    },
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "order_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "address_type",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "address_text",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "lat",
+          "notnull": false,
+          "type": "numeric(10,7)"
+        },
+        {
+          "default": null,
+          "name": "lng",
+          "notnull": false,
+          "type": "numeric(10,7)"
+        },
+        {
+          "default": null,
+          "name": "notes",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "order_addresses"
+    },
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "order_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "product_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "resource_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "provider_org_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "item_name",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "item_type",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": "1",
+          "name": "qty",
+          "notnull": false,
+          "type": "integer"
+        },
+        {
+          "default": null,
+          "name": "unit_price",
+          "notnull": true,
+          "type": "numeric(12,2)"
+        },
+        {
+          "default": null,
+          "name": "amount",
+          "notnull": true,
+          "type": "numeric(12,2)"
+        },
+        {
+          "default": "'pending'::order_item_status",
+          "name": "status",
+          "notnull": false,
+          "type": "order_item_status"
+        },
+        {
+          "default": null,
+          "name": "start_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "end_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": "'{}'::jsonb",
+          "name": "metadata",
+          "notnull": false,
+          "type": "jsonb"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "order_items"
+    },
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "order_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "role",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "name",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "phone",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "email",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": "'{}'::jsonb",
+          "name": "metadata",
+          "notnull": false,
+          "type": "jsonb"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "order_participants"
+    },
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "order_number",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "order_type",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "customer_user_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "provider_org_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": "'pending'::order_status",
+          "name": "status",
+          "notnull": false,
+          "type": "order_status"
+        },
+        {
+          "default": null,
+          "name": "start_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "end_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": "0",
+          "name": "subtotal",
+          "notnull": false,
+          "type": "numeric(12,2)"
+        },
+        {
+          "default": "0",
+          "name": "discount_amount",
+          "notnull": false,
+          "type": "numeric(12,2)"
+        },
+        {
+          "default": "0",
+          "name": "tax_amount",
+          "notnull": false,
+          "type": "numeric(12,2)"
+        },
+        {
+          "default": null,
+          "name": "total_amount",
+          "notnull": true,
+          "type": "numeric(12,2)"
+        },
+        {
+          "default": "'THB'::text",
+          "name": "currency",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "notes",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": "'{}'::jsonb",
+          "name": "metadata",
+          "notnull": false,
+          "type": "jsonb"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": "now()",
+          "name": "updated_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": "0",
+          "name": "platform_fee_amount",
+          "notnull": false,
+          "type": "numeric(12,2)"
+        },
+        {
+          "default": "0",
+          "name": "vendor_payout_amount",
+          "notnull": false,
+          "type": "numeric(12,2)"
+        },
+        {
+          "default": null,
+          "name": "commission_rate_applied",
+          "notnull": false,
+          "type": "numeric(5,2)"
+        },
+        {
+          "default": null,
+          "name": "vertical",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "deleted_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "deleted_by",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "original_order_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": "false",
+          "name": "is_reorder",
+          "notnull": false,
+          "type": "boolean"
+        },
+        {
+          "default": "0",
+          "name": "concierge_fee_amount",
+          "notnull": false,
+          "type": "numeric(10,2)"
+        },
+        {
+          "default": null,
+          "name": "paid_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "source_storefront_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "source_company_id",
+          "notnull": false,
+          "type": "uuid"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "orders"
+    },
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "org_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "user_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "role",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": "true",
+          "name": "is_active",
+          "notnull": false,
+          "type": "boolean"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "org_members"
+    },
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "order_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "amount",
+          "notnull": true,
+          "type": "numeric(12,2)"
+        },
+        {
+          "default": "'THB'::text",
+          "name": "currency",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "method",
+          "notnull": true,
+          "type": "payment_method"
+        },
+        {
+          "default": "'pending'::intent_status",
+          "name": "status",
+          "notnull": false,
+          "type": "intent_status"
+        },
+        {
+          "default": null,
+          "name": "provider_ref",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "provider_session_id",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": "'{}'::jsonb",
+          "name": "metadata",
+          "notnull": false,
+          "type": "jsonb"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": "now()",
+          "name": "updated_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "payment_intents"
+    },
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "property_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "owner_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "guest_name",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "guest_phone",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "guest_email",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "check_in",
+          "notnull": true,
+          "type": "date"
+        },
+        {
+          "default": null,
+          "name": "check_out",
+          "notnull": true,
+          "type": "date"
+        },
+        {
+          "default": "1",
+          "name": "guests_count",
+          "notnull": false,
+          "type": "integer"
+        },
+        {
+          "default": null,
+          "name": "total_amount",
+          "notnull": false,
+          "type": "numeric"
+        },
+        {
+          "default": "'THB'::text",
+          "name": "currency",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": "'manual'::text",
+          "name": "source",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "external_id",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": "'confirmed'::text",
+          "name": "status",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "notes",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": true,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": "now()",
+          "name": "updated_at",
+          "notnull": true,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "marketplace_booking_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "source_calendar_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "guest_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "deposit_amount",
+          "notnull": false,
+          "type": "numeric"
+        },
+        {
+          "default": null,
+          "name": "deposit_paid_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "deposit_payment_method",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "deposit_stripe_session_id",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "cancellation_policy",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "cancelled_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "cancelled_by",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "cancellation_reason",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "refund_amount",
+          "notnull": false,
+          "type": "numeric"
+        },
+        {
+          "default": null,
+          "name": "refund_status",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "refund_processed_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "service_fee",
+          "notnull": false,
+          "type": "numeric"
+        },
+        {
+          "default": null,
+          "name": "cleaning_fee",
+          "notnull": false,
+          "type": "numeric"
+        },
+        {
+          "default": null,
+          "name": "platform_commission",
+          "notnull": false,
+          "type": "numeric"
+        },
+        {
+          "default": null,
+          "name": "confirmed_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "confirmed_by",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": "0",
+          "name": "sync_priority",
+          "notnull": false,
+          "type": "integer"
+        },
+        {
+          "default": null,
+          "name": "conflict_detected_at",
+          "notnull": false,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": null,
+          "name": "conflict_with_booking_id",
+          "notnull": false,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "order_id",
+          "notnull": false,
+          "type": "uuid"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "property_bookings"
+    },
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "wallet_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "user_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "type",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "amount",
+          "notnull": true,
+          "type": "numeric"
+        },
+        {
+          "default": "'RUB'::text",
+          "name": "currency",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "description",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "description_ru",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "reference_type",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "reference_id",
+          "notnull": false,
+          "type": "text"
+        },
+        {
+          "default": "'completed'::text",
+          "name": "status",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": true,
+          "type": "timestamp with time zone"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "wallet_transactions"
+    },
+    {
+      "columns": [
+        {
+          "default": "gen_random_uuid()",
+          "name": "id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": null,
+          "name": "user_id",
+          "notnull": true,
+          "type": "uuid"
+        },
+        {
+          "default": "0",
+          "name": "balance",
+          "notnull": true,
+          "type": "numeric"
+        },
+        {
+          "default": "'RUB'::text",
+          "name": "currency",
+          "notnull": true,
+          "type": "text"
+        },
+        {
+          "default": "now()",
+          "name": "created_at",
+          "notnull": true,
+          "type": "timestamp with time zone"
+        },
+        {
+          "default": "now()",
+          "name": "updated_at",
+          "notnull": true,
+          "type": "timestamp with time zone"
+        }
+      ],
+      "relacl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres,sandbox_exec_kakkwibljrjsawxgnupk=ar/postgres,sandbox_exec=ar/postgres}",
+      "relname": "wallets"
+    }
+  ]
+}
