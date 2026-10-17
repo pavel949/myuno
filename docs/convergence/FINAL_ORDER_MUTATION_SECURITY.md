@@ -138,3 +138,5 @@ Read-only baseline: enforcement/spaces/assignments/members **0/0/0/0**; orders *
 - Atomic settlement/reversal allocation, webhook recovery/replay, inventory adoption/overlap rollback and foreign-space parent mutations remain blocking. Broad `restrictive-fixes.sql` stays UNAPPLIED.
 
 **GO-A NO-GO; P0-B and E3 not started.** Recommendation: establish exact property pricing/override and manual settlement/reversal contracts, then migrate checked writers and close direct paths in one tested compatibility gate; do not invent these business rules to claim closure.
+
+Refund-only deployment acknowledged, submitted bundle SHA-256 `456ba90f604c813780d892f62e6ce2c3b7ca702943ad6b827c3c60020ff031e9`; entry SHA-256 `ad4d4a7128c09c9f093c90ee5065db06d164beb1758d91d4b53dcf8749785bfd`. No live business invocation. Independent review: refund-only GO; caller remains HIGH. Read-only after `2026-10-17 08:28:50.536478+00` equals the stated baseline aggregates. Observed completed-code checkpoint `3c2c184adb96d8695e6f33eb1aaaafcc643fbbd1`; documentation may advance automatically afterward.

@@ -1,5 +1,6 @@
 {
   "baseline_head": "c839a53568b8e14ee277f5739e85c3f1b56f6262",
+  "observed_completed_code_checkpoint": "3c2c184adb96d8695e6f33eb1aaaafcc643fbbd1",
   "status": "P0_A_PARTIAL_CONTAINMENT_NO_GO",
   "schema_changes": [],
   "deployed_edge": "refund-transfer-order",
