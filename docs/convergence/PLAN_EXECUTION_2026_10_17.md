@@ -67,3 +67,9 @@ Live public read at https://myuno.app/version.json redirected to https://www.myu
 Local actual-entrypoint conflict harness: 5/5 passed on Node24. Final branch SHA, CI results and artifact links belong in the companion PR. Authored tests or prior PR #89 results must not be substituted for this candidate's CI outcome.
 
 No production business writes, payments/refunds, notifications, migration, edge deploy, publish, seed, assignments or enforcement were used. User business decisions remain pending where recorded; elapsed time or plan authorization does not supply missing contract values.
+
+## Isolated PostgreSQL timing stability
+
+The first expanded run at d3c3fcde9b66c29ade32642175bef4b19b5da4bb failed two existing 5-second unoTeam permission cases; the separate blocking verify at the identical code passed all 1,739 tests. The expanded run passed types, 109 focused cases in each timezone, backup15, transfer5, build/provenance, lint and browser. This failure is not recorded as a green full gate.
+
+Only the disposable unoTeam PostgreSQL fixture now disables JIT and verifies SHOW jit. The tiny-data fixture executes a large nested captured RLS catalog; JIT compilation overhead is a timing hypothesis, not a production benchmark diagnosis. Existing 5-second limits, SQL policies and permission assertions are unchanged. CI runs this file twice in addition to the full suite. No production database setting or permission is altered; final results are recorded in the PR.
