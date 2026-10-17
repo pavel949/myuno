@@ -40,7 +40,7 @@ vi.mock('@/components/owner/dashboard/OverviewSection', () => ({ OverviewSection
 vi.mock('@/components/owner/dashboard/WidgetErrorBoundary', () => ({ WidgetErrorBoundary: ({ children }: { children: ReactNode }) => <>{children}</> }));
 
 function Destination() { return <output>{useLocation().pathname}</output>; }
-function mount(path = APP_ROUTES.MC) {
+function mount(path: string = APP_ROUTES.MC) {
   return render(<MemoryRouter initialEntries={[path]}><Routes>
     <Route path={APP_ROUTES.MC} element={<OwnerDashboard />} />
     <Route path="/mc/onboarding/wizard" element={<McOnboardingWizardPage />} />
