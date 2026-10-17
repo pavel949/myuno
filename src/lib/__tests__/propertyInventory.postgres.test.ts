@@ -101,8 +101,8 @@ describe('actual PostgreSQL inventory contract', () => {
       p_items := ${items}::jsonb) AS result`));
     const payments: string[] = [];
     const outcomes = await Promise.all(orders.map(async rows => {
-      const order = rows[0].result as { success: boolean; order_id: string };
-      expect(order.success).toBe(true); // trigger catches exclusion violation
+      const order = rows[0].result as { success: boolean; order_id: string; error?: string };
+      expect(order.success, order.error).toBe(true); // trigger catches exclusion violation
       const outcome = await verifyInventoryHold(async () => {
         const holds = await sql`SELECT id FROM property_bookings WHERE external_id = ${order.order_id} AND property_booking_holds_inventory(status)`;
         return holds.length === 1;
