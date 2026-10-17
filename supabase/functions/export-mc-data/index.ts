@@ -1,10 +1,10 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { z } from 'npm:zod@3';
+import { AccessDenied, authorizeRpc, authorizedService, createActorClient } from '../_shared/operating-space-auth.ts';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://myuno.app',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-};
+const ExportInput = z.object({ company_id: z.string().uuid(), export_type: z.enum(['all','properties','crm','finance','reports']), format: z.enum(['json','csv']).default('json') }).strict();
 
 /** Convert array of objects to CSV string */
 function toCsv(rows: Record<string, unknown>[]): string {
@@ -31,34 +31,18 @@ Deno.serve(async (req) => {
   try {
     const authResult = await requireAuth(req, corsHeaders);
     if (authResult instanceof Response) return authResult;
-    const userId = authResult.user.id;
-
-    const { company_id, export_type, format = 'json' } = await req.json();
-
-    if (!company_id || !export_type) {
+    const parsed = ExportInput.safeParse(await req.json());
+    if (!parsed.success) {
       return new Response(JSON.stringify({ error: 'Missing company_id or export_type' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const sb = createServiceClient();
-
-    // Verify membership with director/admin role
-    const { data: membership } = await sb
-      .from('management_company_members')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('company_id', company_id)
-      .eq('is_active', true)
-      .single();
-
-    if (!membership || !['director', 'admin', 'manager'].includes(membership.role)) {
-      return new Response(JSON.stringify({ error: 'Forbidden: director, admin or manager role required' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    const { company_id, export_type, format } = parsed.data;
+    const actorClient = createActorClient(req);
+    const sb = await authorizedService(
+      () => authorizeRpc(actorClient, 'actor_can_export_company', { p_company_id: company_id }), createServiceClient);
 
     const result: Record<string, unknown> = {
       exported_at: new Date().toISOString(),
@@ -138,8 +122,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500,
+    return new Response(JSON.stringify({ error: err instanceof AccessDenied ? 'Forbidden' : 'Export unavailable' }), {
+      status: err instanceof AccessDenied ? 403 : 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

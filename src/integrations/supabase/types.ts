@@ -34678,8 +34678,33 @@ export type Database = {
         Args: { _space_id: string }
         Returns: boolean
       }
+      actor_can_export_company: {
+        Args: { p_company_id: string }
+        Returns: boolean
+      }
+      actor_can_operate_property: {
+        Args: {
+          p_action?: string
+          p_company_id: string
+          p_module: string
+          p_property_id: string
+        }
+        Returns: boolean
+      }
+      actor_can_send_property_report: {
+        Args: { p_report_id: string }
+        Returns: boolean
+      }
       actor_is_operating_company_overseer: {
         Args: { _company_id: string }
+        Returns: boolean
+      }
+      actor_private_property_ceiling: {
+        Args: { p_property_id: string }
+        Returns: boolean
+      }
+      actor_property_scope_ceiling: {
+        Args: { p_company_id?: string; p_property_id: string }
         Returns: boolean
       }
       add_team_points: {
