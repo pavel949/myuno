@@ -4,6 +4,7 @@ import { build } from 'esbuild';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 
 const root = process.cwd();
 const output = '/tmp/browser/bookings-list-isolated';
@@ -25,7 +26,12 @@ await build({
   plugins:[{name:'isolate-all-data-boundaries',setup(b) {
     b.onResolve({filter:/.*/},args => {
       if (Object.hasOwn(virtual,args.path)) return {path:args.path,namespace:'fixture'};
-      if (args.path.startsWith('@/')) return {path:path.join(root,'src',args.path.slice(2)) + (args.path.endsWith('/utils') ? '.ts' : '')};
+      if (args.path.startsWith('@/')) {
+        const base = path.join(root,'src',args.path.slice(2));
+        const resolved = [base,base+'.ts',base+'.tsx',path.join(base,'index.ts'),path.join(base,'index.tsx')].find(p=>existsSync(p));
+        if (!resolved) throw new Error('Unresolved test import: '+args.path);
+        return {path:resolved};
+      }
     });
     b.onLoad({filter:/.*/,namespace:'fixture'},args => ({contents:virtual[args.path],loader:'js',resolveDir:root}));
   }}],
