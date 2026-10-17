@@ -52,7 +52,7 @@ beforeAll(async()=>{
  await sql.unsafe(readFileSync(process.env.E28_POLICIES??'drizzle/migrations/0029_uno_team_private_policies.sql','utf8'));
  await sql.unsafe(readFileSync('drizzle/migrations/0030_preserve_juristic_platform_admin.sql','utf8'));
  await sql`INSERT INTO juristic_contacts(id) VALUES (${id(60)})`;
- await sql.unsafe(readFileSync('/tmp/e28/onboarding.sql','utf8'));
+ await sql.unsafe(readFileSync('drizzle/migrations/0031_checked_onboarding_private_capability.sql','utf8'));
 },60000);
 afterAll(async()=>{if(sql)await sql.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
 describe('E2.8 exact live-catalog least privilege',()=>{
