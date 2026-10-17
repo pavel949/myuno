@@ -6,6 +6,15 @@ seeds, permission changes or data writes were made.
 
 Status legend: CONFIRMED (seen in live catalog/source) · ASSUMED (needs runtime proof).
 
+## Current E2.5 disposition
+
+This E0 register is historical evidence, not deployed scope semantics. See
+[OPERATING_SPACES_E2_5_SECURITY.md](OPERATING_SPACES_E2_5_SECURITY.md) for every
+section's current source/catalog disposition, new 0023 restrictive ceilings,
+export/report handler hardening and unresolved E3 blockers. Generic uno_team
+is **not** global operating-space oversight (0022); the old §8 proposal below
+is superseded. No companies enforced and no assignments seeded.
+
 ## 1. Root cause (CONFIRMED)
 
 Every company-level predicate grants an active company member access to *all*
