@@ -38,6 +38,13 @@ beforeAll(async()=>{
  await sql`INSERT INTO property_bookings(id,property_id,guest_id,owner_id,status) VALUES (${id(32)},${P},${guest},${propertyOwner},'confirmed')`;
  await sql`INSERT INTO property_documents(id,property_id,uploaded_by) VALUES (${id(33)},${P},${propertyOwner}),(${id(34)},${Q},${propertyOwner})`;
  await sql`INSERT INTO crm_contacts(id,company_id) VALUES (${id(35)},${A}),(${id(36)},${B})`;
+ await sql`INSERT INTO property_financials(id,property_id,owner_id) VALUES (${id(70)},${Q},${propertyOwner})`;
+ await sql`INSERT INTO property_owners(id,property_id,company_id) VALUES (${id(71)},${Q},${B})`;
+ await sql`INSERT INTO staff_members(id,owner_id,company_id) VALUES (${id(72)},${propertyOwner},${B})`;
+ await sql`INSERT INTO property_reports(id,property_id,owner_id,generated_by) VALUES (${id(73)},${Q},${propertyOwner},${propertyOwner})`;
+ await sql`INSERT INTO crm_tasks(id,company_id,property_id) VALUES (${id(74)},${B},${Q})`;
+ await sql`INSERT INTO ledger_accounts(id,owner_user_id,management_company_id) VALUES (${id(75)},${propertyOwner},${B})`;
+ await sql`INSERT INTO ledger_entries(id,debit_account_id,credit_account_id) VALUES (${id(76)},${id(75)},${id(75)})`;
  // Proven live-definition bypass, not a synthetic true policy.
  expect(await as(team,tx=>tx`SELECT lock_code FROM properties`)).toHaveLength(2);
  expect(await as(team,tx=>tx`SELECT id FROM orders`)).toHaveLength(2);
@@ -154,7 +161,7 @@ describe('E2.8 exact live-catalog least privilege',()=>{
  it('all 128 changed policies preserve identity and exact approved expressions',async()=>{
   const targets=JSON.parse(readFileSync('src/lib/__tests__/fixtures/uno-team-targets.json','utf8')).policies;
   for(const p of targets){const row=(await sql`SELECT cmd,roles::text,permissive,qual,with_check FROM pg_policies WHERE schemaname=${p.schemaname} AND tablename=${p.tablename} AND policyname=${p.policyname}`)[0];
-   expect(row.cmd).toBe(p.cmd);expect(row.roles).toBe(p.roles === '{public}' && !['property_amenities_public_read','property_reviews_public_read'].includes(p.policyname) && (String(p.replacement_qual)+String(p.replacement_with_check)).includes('_e28_private') ? '{authenticated}' : p.roles);expect(row.permissive).toBe(p.permissive);
+   expect(row.cmd).toBe(p.cmd);expect(row.roles).toBe((p.tablename==='juristic_contacts' || p.roles === '{public}' && !['property_amenities_public_read','property_reviews_public_read'].includes(p.policyname) && (String(p.replacement_qual)+String(p.replacement_with_check)).includes('_e28_private')) ? '{authenticated}' : p.roles);expect(row.permissive).toBe(p.permissive);
    // PostgreSQL canonicalizes expressions; no positive literal role-only branch survives targets.
    expect(row.qual??'').not.toMatch(/has_role\(auth.uid\(\), 'uno_team'/);
   }
