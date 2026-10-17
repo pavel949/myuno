@@ -66,3 +66,7 @@ These are proposals only, not defaults silently implemented. Registry IDs link t
 5. **PC-05 merchant/commission:** Рекомендую: derive org through protected existing links and snapshot approved commission agreements/management terms; block unmapped/mixed-merchant transactions. Decide common precedence and commission units before replacing divergent helpers.
 
 Approval does not itself authorize deploy, direct-path revocation or GO-A. Next implementation needs exact isolated price/actor/receipt/replay/inventory compatibility tests and reviewed restrictive forward changes. No P0-B/E3 advancement.
+
+### Approval response — bounded interpretation
+
+The project team will configure tariffs, seasons and related pricing settings themselves. No values will be invented or seeded by the assistant. This resolves ownership of configuration, **not** discount/overlap precedence, override authority, FX/tolerance, installment accounting or reversal approval. Other answers did not establish usable financial contracts; PC-01–PC-05 remain pending for those specific decisions. No additional runtime changes are authorized; existing containment and GO-A NO-GO remain.
