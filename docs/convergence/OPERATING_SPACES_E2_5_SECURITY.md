@@ -133,7 +133,7 @@ No company flag toggled by migration or tests against production.
 ## Validation / rollback / deployment
 
 - Pre-apply: 67/67 (38 PostgreSQL E1/E2/security, 17 E2 controller, 12 edge auth unit).
-- Applied migration + retained regressions: 114/114 across six files, including
+- Applied migration + retained regressions: 116/116 across six files (40 PostgreSQL security/E1/E2), including
   16 civil-date + 16 inventory unit + 15 inventory PostgreSQL. No threshold lowering.
 - Real entrypoint synthetic harness `scripts/qa/operating-security-handlers.mjs`:
   10/10 anonymous/invalid JWT/denied/authorized export and report, trusted scheduler,
@@ -149,7 +149,25 @@ No company flag toggled by migration or tests against production.
 - Automatic build OK; no manual application build/typecheck. Edge entrypoints
   separately bundled and exercised for export/report; deploy results below.
 
-Production post-apply aggregates / deployed function checks: pending final verification.
+Production post-apply SELECT aggregates: **2 companies, 0 enforced; 0 spaces,
+0 property assignments, 0 space memberships**. New primitives anon EXECUTE=false;
+`get_user_company_ids` anon=false; both trigger functions authenticated=false.
+Deployment tool succeeded for all five changed edges; final export/report sources
+were redeployed after error-handling improvements. This proves submitted deployment,
+not independently downloaded live-byte parity or an actual email/export journey.
+No production handler invocation occurred; all handler calls were local SDK/mail stubs.
+Newest observed automatic build `2026-10-17T03:58:17Z`: build OK.
+
+Independent review flagged ignored export errors: corrected across all queries;
+failed retrieval is no longer a successful empty export. Report delivery/status
+failures are handled. Its proposed INSERT lookup policy would deny valid new rows
+because the property does not exist yet; not applied. INSERT remains an explicit
+E3 blocker requiring row-company-aware supervised inventory onboarding, not an
+untested lookup policy. Internal secret intentionally grants company-wide scheduled
+report distribution; ordinary users cannot supply it, and owner-only recipient
+pinning protects distribution. No speculative internal space identity was invented.
+Added concrete owner-financial ACL, staff-duty and uno_team module tests; the
+review's assertion of absent tests was contradicted by the actual fixture/harness.
 
 ## Exact changes
 
@@ -168,8 +186,9 @@ real-handler harness. No PMS pages/hooks/components touched.
 1. Confirm physical property/team manifests and existing module/action grants.
 2. Public/private property projections and backup storage distribution closure.
 3. Legacy delegation and permission assignment grants: live `Property owners can
-   manage delegates` trusts invited_by/user_id; `is_mc_admin` used for permission
-   management must be reviewed for generic uno_team elevation; assignment ALL
+   manage delegates` trusts invited_by/user_id. Live `is_mc_admin` was read and
+   permits only active company director/admin, no generic uno_team branch;
+   permission management's existing gate is retained. Assignment ALL
    allows platform staff/uno_team. New scope ceiling does not repair grant governance.
 4. Uncovered financial/owner/task/order siblings, provider-org order access,
    module duties and effective historical finance attribution need coordinated RLS.

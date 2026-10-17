@@ -55,13 +55,15 @@ Deno.serve(async (req) => {
     for (const t of types) {
       switch (t) {
         case 'properties': {
-          const { data } = await sb.from('properties').select('*').eq('management_company_id', company_id);
+          const { data, error } = await sb.from('properties').select('*').eq('management_company_id', company_id);
+          if (error) throw error;
           result.properties = data || [];
           break;
         }
         case 'crm': {
-          const { data: contacts } = await sb.from('crm_contacts').select('*').eq('company_id', company_id);
-          const { data: deals } = await sb.from('agent_deals').select('*').eq('company_id', company_id);
+          const { data: contacts, error: contactError } = await sb.from('crm_contacts').select('*').eq('company_id', company_id);
+          const { data: deals, error: dealError } = await sb.from('agent_deals').select('*').eq('company_id', company_id);
+          if (contactError || dealError) throw new Error('CRM export unavailable');
           result.crm_contacts = contacts || [];
           result.crm_deals = deals || [];
           break;
@@ -69,17 +71,19 @@ Deno.serve(async (req) => {
         case 'finance': {
           // Source: property_financials filtered via properties.management_company_id
           // (mc_finance_transactions does not exist — financial data lives per-property).
-          const { data: companyProps } = await sb
+          const { data: companyProps, error: propertyError } = await sb
             .from('properties')
             .select('id')
             .eq('management_company_id', company_id);
+          if (propertyError) throw propertyError;
           const propertyIds = (companyProps || []).map((p: { id: string }) => p.id);
           if (propertyIds.length > 0) {
-            const { data: transactions } = await sb
+            const { data: transactions, error: financeError } = await sb
               .from('property_financials')
               .select('*')
               .in('property_id', propertyIds)
               .order('transaction_date', { ascending: false });
+            if (financeError) throw financeError;
             result.finance_transactions = transactions || [];
           } else {
             result.finance_transactions = [];
@@ -87,7 +91,8 @@ Deno.serve(async (req) => {
           break;
         }
         case 'reports': {
-          const { data: reports } = await sb.from('owner_reports').select('*').eq('company_id', company_id);
+          const { data: reports, error: reportError } = await sb.from('owner_reports').select('*').eq('company_id', company_id);
+          if (reportError) throw reportError;
           result.reports = reports || [];
           break;
         }

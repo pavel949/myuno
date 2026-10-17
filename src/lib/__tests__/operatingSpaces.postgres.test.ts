@@ -299,6 +299,36 @@ describe('E2.5 enforced scope ceilings and privileged authorization', () => {
     await expect(as(null, tx => tx`SELECT actor_can_send_property_report(${id(71)})`)).rejects.toThrow(/permission denied/);
     await expect(as(null, tx => tx`SELECT actor_can_export_company(${CO_A})`)).rejects.toThrow(/permission denied/);
   });
+  it('explicit staff space requires existing property duty; uno_team space does not imply module grant', async () => {
+    await sql.begin(async tx => {
+      await tx`INSERT INTO management_company_members VALUES (${id(95)},${CO_A},${U.team},'staff',true)`;
+      await tx`INSERT INTO operating_space_members (operating_space_id,company_member_id,management_company_id) VALUES (${S.resort},${id(95)},${CO_A})`;
+      await tx`INSERT INTO team_member_permissions VALUES (${CO_A},${U.team},'reports',true,true,true)`;
+      await tx.unsafe('SET LOCAL ROLE authenticated');
+      await tx`SELECT set_config('request.jwt.claim.sub',${U.team},true)`;
+      expect((await tx`SELECT actor_can_operate_property(${P.villa},${CO_A},'reports','edit') ok`)[0].ok).toBe(false);
+      await tx.unsafe('RESET ROLE');
+      await tx`INSERT INTO property_manager_assignments VALUES (${P.villa},${U.team},true)`;
+      await tx.unsafe('SET LOCAL ROLE authenticated');
+      expect((await tx`SELECT actor_can_operate_property(${P.villa},${CO_A},'reports','edit') ok`)[0].ok).toBe(true);
+      expect((await tx`SELECT actor_can_operate_property(${P.villa},${CO_A},'finance','view') ok`)[0].ok).toBe(false);
+      expect((await tx`SELECT actor_can_operate_property(${P.condo},${CO_A},'reports','edit') ok`)[0].ok).toBe(false);
+      throw new Error('staff-duty-test');
+    }).catch(error=>{if(!(error instanceof Error)||error.message!=='staff-duty-test')throw error;});
+  });
+  it('legacy personal owner send requires verified property financial authority, not claimed report ownership', async () => {
+    await sql.begin(async tx => {
+      await tx`INSERT INTO property_reports VALUES (${id(96)},${P.otherCo},${U.zero},${U.zero})`;
+      await tx.unsafe('SET LOCAL ROLE authenticated');
+      await tx`SELECT set_config('request.jwt.claim.sub',${U.zero},true)`;
+      expect((await tx`SELECT actor_can_send_property_report(${id(96)}) ok`)[0].ok).toBe(false);
+      await tx.unsafe('RESET ROLE');
+      await tx`UPDATE properties SET owner_id=${U.zero} WHERE id=${P.otherCo}`;
+      await tx.unsafe('SET LOCAL ROLE authenticated');
+      expect((await tx`SELECT actor_can_send_property_report(${id(96)}) ok`)[0].ok).toBe(true);
+      throw new Error('owner-permission-test');
+    }).catch(error=>{if(!(error instanceof Error)||error.message!=='owner-permission-test')throw error;});
+  });
   it('authenticated director cannot toggle supervised enforcement field', async () => {
     await expect(as(U.director, tx => tx`UPDATE management_companies SET operating_spaces_enforced=false WHERE id=${CO_A}`)).rejects.toThrow(/supervised service authority/);
   });

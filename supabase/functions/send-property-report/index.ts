@@ -90,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (emailResponse.error) throw new Error('Report delivery failed');
 
     // Update report status
-    await supabase
+    const { error: updateError } = await supabase
       .from("property_reports")
       .update({
         status: "sent",
@@ -98,6 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
         sent_to: recipientEmails,
       })
       .eq("id", reportId);
+    if (updateError) throw new Error('Report delivery status unavailable');
 
     return new Response(
       JSON.stringify({ success: true, emailId: emailResponse.data?.id }),
