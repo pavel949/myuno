@@ -7,6 +7,17 @@ import postgres from 'postgres';
 const id=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 const team=id(1), admin=id(2), provider=id(3), foreign=id(4), companyMember=id(5), P=id(10), Q=id(11);
 let directory: string; let sql: ReturnType<typeof postgres>; let started=false;
+const asRoot = process.getuid?.() === 0;
+const owner = asRoot ? 'nobody' : process.env.USER ?? '';
+const pgRoot = dirname(dirname(realpathSync(execFileSync('which', ['postgres'], { encoding: 'utf8' }).trim())));
+const libPath = existsSync(join(pgRoot, 'lib', 'dict_snowball.so')) ? join(pgRoot, 'lib') : null;
+function run(bin: string, args: string[]) {
+ const exe = existsSync(join(pgRoot, 'bin', bin)) ? join(pgRoot, 'bin', bin) : bin;
+ return asRoot ? execFileSync('runuser', ['-u', owner, '--', exe, ...args], { encoding: 'utf8' }) : execFileSync(exe, args, { encoding: 'utf8' });
+}
+async function as<T>(user: string | null, fn: (tx: postgres.TransactionSql) => Promise<T>): Promise<T> {
+ return sql.begin(async tx=>{await tx.unsafe(`SET LOCAL ROLE ${user ? 'authenticated' : 'anon'}`);await tx`SELECT set_config('request.jwt.claim.sub',${user??''},true)`;return fn(tx);}) as Promise<T>;
+}
 beforeAll(async()=>{
  directory=mkdtempSync(join(tmpdir(),'myuno-e29-'));chmodSync(directory,0o700);if(asRoot)chownSync(directory,65534,65534);
  run('initdb',['-D',join(directory,'data'),'-A','trust','--no-locale',...(libPath?['-c',`dynamic_library_path=${libPath}`]:[])]);
