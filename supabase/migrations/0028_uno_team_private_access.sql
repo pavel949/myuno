@@ -601,349 +601,176 @@ END;
 $function$
 ;
 
-ALTER POLICY "audit_logs_admin_only" ON "public"."admin_audit_logs" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "admin_notes_admin_delete" ON "public"."admin_notes" USING ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "admin_notes_admin_insert" ON "public"."admin_notes" WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role)));
-
-ALTER POLICY "admin_notes_admin_read" ON "public"."admin_notes" USING ((has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role)));
-
-ALTER POLICY "admin_notes_admin_update" ON "public"."admin_notes" USING ((has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role)));
-
-ALTER POLICY "Company members can insert deals" ON "public"."agent_deals" WITH CHECK (mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text));
-
-ALTER POLICY "Company members can update deals" ON "public"."agent_deals" USING (mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text));
-
-ALTER POLICY "Company members can view deals" ON "public"."agent_deals" USING (mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text));
-
-ALTER POLICY "Company owner/admin can delete deals" ON "public"."agent_deals" USING ((is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
-   FROM management_company_members
-  WHERE ((management_company_members.company_id = agent_deals.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (management_company_members.is_active = true))))));
-
-ALTER POLICY "Admins can manage all knowledge" ON "public"."ai_agent_knowledge" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Admins can view all logs" ON "public"."ai_agent_logs" USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Admins can manage all agents" ON "public"."ai_agents" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "UNO team can view AI artifacts" ON "public"."ai_artifacts" USING ((EXISTS ( SELECT 1
-   FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (false)))));
-
-ALTER POLICY "Admins manage intake sessions" ON "public"."ai_intake_sessions" USING ((EXISTS ( SELECT 1
-   FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role]))))));
-
-ALTER POLICY "Users can update own airport bookings" ON "public"."airport_bookings" USING (((auth.uid() = user_id) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "Users can view own airport bookings" ON "public"."airport_bookings" USING (((auth.uid() = user_id) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "Admins manage airport passengers" ON "public"."airport_passengers" USING ((has_role(auth.uid(), 'admin'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "Admins can manage airport suppliers" ON "public"."airport_suppliers" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "MC members can view booking notifications" ON "public"."booking_notifications_log" USING ((is_admin_or_uno_team_e28_private() OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1
-   FROM ((property_bookings pb
-     JOIN properties p ON ((p.id = pb.property_id)))
-     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))
-  WHERE ((pb.id = booking_notifications_log.booking_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true)))))));
-
-ALTER POLICY "Admins manage booking payments" ON "public"."booking_payments" USING ((has_role(auth.uid(), 'admin'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "Admins manage vouchers" ON "public"."booking_vouchers" USING ((has_role(auth.uid(), 'admin'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "hygiene_log_admin_insert" ON "public"."catalog_hygiene_log" WITH CHECK (((auth.uid() IS NOT NULL) AND (EXISTS ( SELECT 1
-   FROM user_roles ur
-  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role])))))));
-
-ALTER POLICY "hygiene_log_read" ON "public"."catalog_hygiene_log" USING ((EXISTS ( SELECT 1
-   FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role]))))));
-
-ALTER POLICY "uno_team_update_leads" ON "public"."consultation_requests" USING ((false OR has_role(auth.uid(), 'admin'::app_role))) WITH CHECK ((false OR has_role(auth.uid(), 'admin'::app_role)));
-
-ALTER POLICY "uno_team_view_leads" ON "public"."consultation_requests" USING ((false OR has_role(auth.uid(), 'admin'::app_role) OR (user_id = auth.uid())));
-
-ALTER POLICY "Staff read all identities" ON "public"."contact_identities" USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Staff read all identity links" ON "public"."contact_identity_links" USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "crm_companies_delete" ON "public"."crm_companies" USING ((is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
-   FROM management_company_members
-  WHERE ((management_company_members.company_id = crm_companies.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'manager'::text])) AND (management_company_members.is_active = true))))));
-
-ALTER POLICY "crm_companies_insert" ON "public"."crm_companies" WITH CHECK (mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text));
-
-ALTER POLICY "crm_companies_select" ON "public"."crm_companies" USING (mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text));
-
-ALTER POLICY "crm_companies_update" ON "public"."crm_companies" USING (mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text));
-
-ALTER POLICY "Company members can insert contact notes" ON "public"."crm_contact_notes" WITH CHECK (((auth.uid() = user_id) AND (EXISTS ( SELECT 1
-   FROM crm_contacts c
-  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access_e28_private(auth.uid(), c.company_id, 'crm'::text, 'edit'::text))))));
-
-ALTER POLICY "Company members can view contact notes" ON "public"."crm_contact_notes" USING ((EXISTS ( SELECT 1
-   FROM crm_contacts c
-  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access_e28_private(auth.uid(), c.company_id, 'crm'::text, 'view'::text)))));
-
-ALTER POLICY "Company admins can delete contacts" ON "public"."crm_contacts" USING ((is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
-   FROM management_company_members
-  WHERE ((management_company_members.company_id = crm_contacts.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (management_company_members.is_active = true))))));
-
-ALTER POLICY "Company members can insert contacts" ON "public"."crm_contacts" WITH CHECK (mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text));
-
-ALTER POLICY "Company members can update contacts" ON "public"."crm_contacts" USING (mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text));
-
-ALTER POLICY "Company members can view contacts" ON "public"."crm_contacts" USING (mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text));
-
-ALTER POLICY "Admins manage nurture queue" ON "public"."crm_nurture_queue" USING ((has_role(auth.uid(), 'admin'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "Admins view form submissions" ON "public"."crm_web_form_submissions" USING ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "Paid users can read published DD reports" ON "public"."due_diligence_reports" USING (((is_published = true) AND (auth.uid() IS NOT NULL) AND user_has_clearview_access_e28_private(project_id)));
-
-ALTER POLICY "Staff can read all DD reports" ON "public"."due_diligence_reports" USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Staff can update help requests" ON "public"."help_requests" USING ((has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false));
-
-ALTER POLICY "Staff can view all help requests" ON "public"."help_requests" USING ((has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false));
-
-ALTER POLICY "Admins can manage interests" ON "public"."investment_interests" USING ((EXISTS ( SELECT 1
-   FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role]))))));
-
-ALTER POLICY "Admins can manage juristic contacts" ON "public"."juristic_contacts" USING ((false));
-
-ALTER POLICY "Users can update their own draft requests" ON "public"."juristic_requests" USING ((((submitted_by = auth.uid()) AND (status = 'draft'::text)) OR (false)));
-
-ALTER POLICY "team_create_activity_logs" ON "public"."lead_activity_log" WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "team_view_activity_logs" ON "public"."lead_activity_log" USING ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "Account owners view own ledger entries" ON "public"."ledger_entries" USING (((EXISTS ( SELECT 1
-   FROM ledger_accounts la
-  WHERE (((la.id = ledger_entries.debit_account_id) OR (la.id = ledger_entries.credit_account_id)) AND (la.owner_user_id = auth.uid())))) OR (EXISTS ( SELECT 1
-   FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))));
-
-ALTER POLICY "Admins can read all acceptances" ON "public"."legal_acceptances" USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Admins can manage companies" ON "public"."management_companies" USING ((EXISTS ( SELECT 1
-   FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role]))))));
-
-ALTER POLICY "Members and admins can view their companies" ON "public"."management_companies" USING (((is_active = true) AND ((EXISTS ( SELECT 1
-   FROM management_company_members m
-  WHERE ((m.company_id = management_companies.id) AND (m.user_id = auth.uid()) AND (m.is_active = true)))) OR has_role(auth.uid(), 'admin'::app_role) OR false)));
-
-ALTER POLICY "Admins can manage all memberships" ON "public"."management_company_members" USING ((EXISTS ( SELECT 1
-   FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role]))))));
-
-ALTER POLICY "Company admins can manage members" ON "public"."management_company_members" TO authenticated USING (is_company_admin_e28_private(company_id)) WITH CHECK (is_company_admin_e28_private(company_id));
-
-ALTER POLICY "Members can view their company colleagues" ON "public"."management_company_members" TO authenticated USING (((is_active = true) AND ((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private() OR (company_id IN ( SELECT get_user_company_ids() AS get_user_company_ids)))));
-
-ALTER POLICY "Directors can insert terms activity" ON "public"."management_terms_activity" WITH CHECK (((user_id = auth.uid()) AND (is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
-   FROM management_company_members
-  WHERE ((management_company_members.user_id = auth.uid()) AND (management_company_members.role = 'director'::text) AND (management_company_members.is_active = true)))))));
-
-ALTER POLICY "Admins read offer history" ON "public"."offer_history" USING ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "UNO team can manage all flower order details" ON "public"."order_item_flower_details" USING (false);
-
-ALTER POLICY "orders_admin_select_all" ON "public"."orders" USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "orders_admin_update" ON "public"."orders" USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Admins can view all OTA connections" ON "public"."ota_listing_connections" TO authenticated USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Admins can view all sync logs" ON "public"."ota_sync_logs" TO authenticated USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Admins can view all synced listings" ON "public"."ota_synced_listings" TO authenticated USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "pageviews_select" ON "public"."page_views" USING (((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "UNO team can view all profiles" ON "public"."profiles" USING (false);
-
-ALTER POLICY "Admins can update properties" ON "public"."properties" USING ((has_role(auth.uid(), 'admin'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "mc_member_select_company_properties_v2" ON "public"."properties" USING (staff_can_access_property_e28_private(auth.uid(), id));
-
-ALTER POLICY "mc_member_update_company_properties_v2" ON "public"."properties" USING (staff_can_access_property_e28_private(auth.uid(), id)) WITH CHECK (staff_can_access_property_e28_private(auth.uid(), id));
-
-ALTER POLICY "property_amenities_manage" ON "public"."property_amenities" USING (can_manage_property_e28_private(property_id)) WITH CHECK (can_manage_property_e28_private(property_id));
-
-ALTER POLICY "property_amenities_public_read" ON "public"."property_amenities" USING ((property_is_public(property_id) OR public_policy_property_manager(property_id)));
-
-ALTER POLICY "Admins can insert analytics" ON "public"."property_analytics" TO authenticated WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Admins can update analytics" ON "public"."property_analytics" TO authenticated USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Chat: participant scoped insert" ON "public"."property_chat_messages" WITH CHECK (((sender_id = auth.uid()) AND (is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
-   FROM properties p
-  WHERE ((p.id = property_chat_messages.property_id) AND ((p.owner_id = auth.uid()) OR (p.managed_by = auth.uid()) OR (p.provider_id IN ( SELECT pr.id
-           FROM providers pr
-          WHERE (pr.user_id = auth.uid()))))))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1
-   FROM property_bookings b
-  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid()))))))));
-
-ALTER POLICY "Chat: participant scoped read" ON "public"."property_chat_messages" USING (((sender_id = auth.uid()) OR (EXISTS ( SELECT 1
-   FROM properties p
-  WHERE ((p.id = property_chat_messages.property_id) AND (p.owner_id = auth.uid())))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1
-   FROM property_bookings b
-  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid()))))) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "Authorized users can view documents" ON "public"."property_documents" USING ((is_admin_or_uno_team_e28_private() OR (uploaded_by = auth.uid()) OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1
-   FROM properties p
-  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid()))))));
-
-ALTER POLICY "MC admins and owners can delete documents" ON "public"."property_documents" USING ((is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
-   FROM properties p
-  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1
-   FROM (properties p
-     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))
-  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (mcm.is_active = true))))));
-
-ALTER POLICY "MC admins and owners can update documents" ON "public"."property_documents" USING ((is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
-   FROM properties p
-  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1
-   FROM (properties p
-     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))
-  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (mcm.is_active = true))))));
-
-ALTER POLICY "MC members and owners can insert documents" ON "public"."property_documents" WITH CHECK ((is_admin_or_uno_team_e28_private() OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1
-   FROM properties p
-  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid()))))));
-
-ALTER POLICY "Admins can manage listing scores" ON "public"."property_listing_scores" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Managers read own listing scores" ON "public"."property_listing_scores" USING (can_manage_property_e28_private(property_id));
-
-ALTER POLICY "Admins can delete terms" ON "public"."property_management_terms" USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Directors and owners can view terms" ON "public"."property_management_terms" USING ((is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid()) OR (EXISTS ( SELECT 1
-   FROM properties p
-  WHERE ((p.id = property_management_terms.property_id) AND (p.owner_id = auth.uid()))))));
-
-ALTER POLICY "Directors can insert terms" ON "public"."property_management_terms" WITH CHECK ((is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid())));
-
-ALTER POLICY "Directors can update terms" ON "public"."property_management_terms" USING ((is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid())));
-
-ALTER POLICY "Admins can manage all assignments" ON "public"."property_manager_assignments" USING ((EXISTS ( SELECT 1
-   FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role]))))));
-
-ALTER POLICY "property_media_manage" ON "public"."property_media" USING (can_manage_property_e28_private(property_id)) WITH CHECK (can_manage_property_e28_private(property_id));
-
-ALTER POLICY "Managers manage rate plans" ON "public"."property_rate_plans" USING ((EXISTS ( SELECT 1
-   FROM property_room_categories c
-  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property_e28_private(c.property_id))))) WITH CHECK ((EXISTS ( SELECT 1
-   FROM property_room_categories c
-  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property_e28_private(c.property_id)))));
-
-ALTER POLICY "property_reviews_host_manage" ON "public"."property_reviews" USING (can_manage_property_e28_private(property_id)) WITH CHECK (can_manage_property_e28_private(property_id));
-
-ALTER POLICY "property_reviews_public_read" ON "public"."property_reviews" USING ((((is_public = true) AND property_is_public(property_id)) OR public_policy_property_manager(property_id) OR (reviewer_id = auth.uid())));
-
-ALTER POLICY "Managers read categories" ON "public"."property_room_categories" USING (can_manage_property_e28_private(property_id));
-
-ALTER POLICY "Managers write categories" ON "public"."property_room_categories" USING (can_manage_property_e28_private(property_id)) WITH CHECK (can_manage_property_e28_private(property_id));
-
-ALTER POLICY "Managers manage restrictions" ON "public"."property_stay_restrictions" USING (can_manage_property_e28_private(property_id)) WITH CHECK (can_manage_property_e28_private(property_id));
-
-ALTER POLICY "Admins can manage contracts" ON "public"."provider_contracts" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Admins can view all contracts" ON "public"."provider_contracts" USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "input_rules_admin_write" ON "public"."provider_input_rules" USING ((EXISTS ( SELECT 1
-   FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role]))))));
-
-ALTER POLICY "Staff manage provider org links" ON "public"."provider_org_links" USING (is_finance_staff_e28_private(auth.uid())) WITH CHECK (is_finance_staff_e28_private(auth.uid()));
-
-ALTER POLICY "Admins can view installs" ON "public"."pwa_installs" USING ((EXISTS ( SELECT 1
-   FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role]))))));
-
-ALTER POLICY "Admins can view realtime stats" ON "public"."realtime_stats" USING ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "Only admins can update realtime stats" ON "public"."realtime_stats" USING ((has_role(auth.uid(), 'admin'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "Admins view all tokens" ON "public"."signature_request_signer_tokens" USING ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "MC members view request signers" ON "public"."signature_request_signers" USING (((EXISTS ( SELECT 1
-   FROM (signature_requests sr
-     JOIN management_company_members mcm ON ((mcm.company_id = sr.company_id)))
-  WHERE ((sr.id = signature_request_signers.request_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true)))) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "Admins can manage simulation runs" ON "public"."simulation_runs" USING ((EXISTS ( SELECT 1
-   FROM user_roles ur
-  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role]))))));
-
-ALTER POLICY "Admins can manage intake configs" ON "public"."sys_intake_configs" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Admins can manage lead configs" ON "public"."sys_lead_configs" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "system_settings_admin_read" ON "public"."system_settings" USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "system_settings_admin_write" ON "public"."system_settings" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Author or admin can view task comments" ON "public"."task_comments" USING (((author_id = auth.uid()) OR has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "Team members can insert own activity" ON "public"."team_activity_log" TO authenticated WITH CHECK (((auth.uid() = user_id) AND is_team_member_e28_private(auth.uid())));
-
-ALTER POLICY "Team members can view channels" ON "public"."team_channels" TO authenticated USING (is_team_member_e28_private(auth.uid()));
-
-ALTER POLICY "Team members can view all team members" ON "public"."team_members" USING ((has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role) OR (user_id = auth.uid())));
-
-ALTER POLICY "Team members can send messages" ON "public"."team_messages" TO authenticated WITH CHECK (((auth.uid() = sender_id) AND is_team_member_e28_private(auth.uid())));
-
-ALTER POLICY "Team members can view messages" ON "public"."team_messages" TO authenticated USING ((is_team_member_e28_private(auth.uid()) AND (is_deleted = false)));
-
-ALTER POLICY "Team can view all user achievements" ON "public"."team_user_achievements" TO authenticated USING (is_team_member_e28_private(auth.uid()));
-
-ALTER POLICY "thai_bookings_select" ON "public"."thai_bookings" TO authenticated USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
-   FROM thai_businesses b
-  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "thai_bookings_update" ON "public"."thai_bookings" TO authenticated USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
-   FROM thai_businesses b
-  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "thai_chat_messages_select" ON "public"."thai_chat_messages" TO authenticated USING (((EXISTS ( SELECT 1
-   FROM (thai_chats c
-     JOIN thai_businesses b ON ((b.id = c.business_id)))
-  WHERE ((c.id = thai_chat_messages.chat_id) AND ((c.customer_id = auth.uid()) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "thai_chats_select" ON "public"."thai_chats" TO authenticated USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
-   FROM thai_businesses b
-  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "thai_chats_update" ON "public"."thai_chats" TO authenticated USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
-   FROM thai_businesses b
-  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "Admins read partner leads" ON "public"."thai_partner_leads" USING ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "Admins update partner leads" ON "public"."thai_partner_leads" USING ((has_role(auth.uid(), 'admin'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
-
-ALTER POLICY "Admins can update documents for verification" ON "public"."user_documents" TO authenticated USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "Admins can view all documents for verification" ON "public"."user_documents" TO authenticated USING (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "events_select" ON "public"."user_events" USING (((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "analytics_admin_only" ON "public"."user_segments" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "segments_select" ON "public"."user_segments" USING (((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "segments_write" ON "public"."user_segments" USING (is_admin_or_uno_team_e28_private()) WITH CHECK (is_admin_or_uno_team_e28_private());
-
-ALTER POLICY "sessions_select" ON "public"."user_sessions" USING (((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()));
-
-ALTER POLICY "Admins can manage commission rules" ON "public"."vertical_commission_rules" USING ((has_role(auth.uid(), 'admin'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
+DO $policies$ DECLARE p record; expression text; check_expression text; statement text; BEGIN
+ FOR p IN SELECT * FROM pg_policies WHERE (schemaname,tablename,policyname) IN (SELECT v.schema_name,v.table_name,v.policy_name FROM (VALUES
+('public','admin_audit_logs','audit_logs_admin_only'),
+('public','admin_notes','admin_notes_admin_delete'),
+('public','admin_notes','admin_notes_admin_insert'),
+('public','admin_notes','admin_notes_admin_read'),
+('public','admin_notes','admin_notes_admin_update'),
+('public','agent_deals','Company members can insert deals'),
+('public','agent_deals','Company members can update deals'),
+('public','agent_deals','Company members can view deals'),
+('public','agent_deals','Company owner/admin can delete deals'),
+('public','ai_agent_knowledge','Admins can manage all knowledge'),
+('public','ai_agent_logs','Admins can view all logs'),
+('public','ai_agents','Admins can manage all agents'),
+('public','ai_artifacts','UNO team can view AI artifacts'),
+('public','ai_intake_sessions','Admins manage intake sessions'),
+('public','airport_bookings','Users can update own airport bookings'),
+('public','airport_bookings','Users can view own airport bookings'),
+('public','airport_passengers','Admins manage airport passengers'),
+('public','airport_suppliers','Admins can manage airport suppliers'),
+('public','booking_notifications_log','MC members can view booking notifications'),
+('public','booking_payments','Admins manage booking payments'),
+('public','booking_vouchers','Admins manage vouchers'),
+('public','catalog_hygiene_log','hygiene_log_admin_insert'),
+('public','catalog_hygiene_log','hygiene_log_read'),
+('public','consultation_requests','uno_team_update_leads'),
+('public','consultation_requests','uno_team_view_leads'),
+('public','contact_identities','Staff read all identities'),
+('public','contact_identity_links','Staff read all identity links'),
+('public','crm_companies','crm_companies_delete'),
+('public','crm_companies','crm_companies_insert'),
+('public','crm_companies','crm_companies_select'),
+('public','crm_companies','crm_companies_update'),
+('public','crm_contact_notes','Company members can insert contact notes'),
+('public','crm_contact_notes','Company members can view contact notes'),
+('public','crm_contacts','Company admins can delete contacts'),
+('public','crm_contacts','Company members can insert contacts'),
+('public','crm_contacts','Company members can update contacts'),
+('public','crm_contacts','Company members can view contacts'),
+('public','crm_nurture_queue','Admins manage nurture queue'),
+('public','crm_web_form_submissions','Admins view form submissions'),
+('public','due_diligence_reports','Paid users can read published DD reports'),
+('public','due_diligence_reports','Staff can read all DD reports'),
+('public','help_requests','Staff can update help requests'),
+('public','help_requests','Staff can view all help requests'),
+('public','investment_interests','Admins can manage interests'),
+('public','juristic_contacts','Admins can manage juristic contacts'),
+('public','juristic_requests','Users can update their own draft requests'),
+('public','lead_activity_log','team_create_activity_logs'),
+('public','lead_activity_log','team_view_activity_logs'),
+('public','ledger_entries','Account owners view own ledger entries'),
+('public','legal_acceptances','Admins can read all acceptances'),
+('public','management_companies','Admins can manage companies'),
+('public','management_companies','Members and admins can view their companies'),
+('public','management_company_members','Admins can manage all memberships'),
+('public','management_company_members','Company admins can manage members'),
+('public','management_company_members','Members can view their company colleagues'),
+('public','management_terms_activity','Directors can insert terms activity'),
+('public','offer_history','Admins read offer history'),
+('public','order_item_flower_details','UNO team can manage all flower order details'),
+('public','orders','orders_admin_select_all'),
+('public','orders','orders_admin_update'),
+('public','ota_listing_connections','Admins can view all OTA connections'),
+('public','ota_sync_logs','Admins can view all sync logs'),
+('public','ota_synced_listings','Admins can view all synced listings'),
+('public','page_views','pageviews_select'),
+('public','profiles','UNO team can view all profiles'),
+('public','properties','Admins can update properties'),
+('public','properties','mc_member_select_company_properties_v2'),
+('public','properties','mc_member_update_company_properties_v2'),
+('public','property_amenities','property_amenities_manage'),
+('public','property_amenities','property_amenities_public_read'),
+('public','property_analytics','Admins can insert analytics'),
+('public','property_analytics','Admins can update analytics'),
+('public','property_chat_messages','Chat: participant scoped insert'),
+('public','property_chat_messages','Chat: participant scoped read'),
+('public','property_documents','Authorized users can view documents'),
+('public','property_documents','MC admins and owners can delete documents'),
+('public','property_documents','MC admins and owners can update documents'),
+('public','property_documents','MC members and owners can insert documents'),
+('public','property_listing_scores','Admins can manage listing scores'),
+('public','property_listing_scores','Managers read own listing scores'),
+('public','property_management_terms','Admins can delete terms'),
+('public','property_management_terms','Directors and owners can view terms'),
+('public','property_management_terms','Directors can insert terms'),
+('public','property_management_terms','Directors can update terms'),
+('public','property_manager_assignments','Admins can manage all assignments'),
+('public','property_media','property_media_manage'),
+('public','property_rate_plans','Managers manage rate plans'),
+('public','property_reviews','property_reviews_host_manage'),
+('public','property_reviews','property_reviews_public_read'),
+('public','property_room_categories','Managers read categories'),
+('public','property_room_categories','Managers write categories'),
+('public','property_stay_restrictions','Managers manage restrictions'),
+('public','provider_contracts','Admins can manage contracts'),
+('public','provider_contracts','Admins can view all contracts'),
+('public','provider_input_rules','input_rules_admin_write'),
+('public','provider_org_links','Staff manage provider org links'),
+('public','pwa_installs','Admins can view installs'),
+('public','realtime_stats','Admins can view realtime stats'),
+('public','realtime_stats','Only admins can update realtime stats'),
+('public','signature_request_signer_tokens','Admins view all tokens'),
+('public','signature_request_signers','MC members view request signers'),
+('public','simulation_runs','Admins can manage simulation runs'),
+('public','sys_intake_configs','Admins can manage intake configs'),
+('public','sys_lead_configs','Admins can manage lead configs'),
+('public','system_settings','system_settings_admin_read'),
+('public','system_settings','system_settings_admin_write'),
+('public','task_comments','Author or admin can view task comments'),
+('public','team_activity_log','Team members can insert own activity'),
+('public','team_channels','Team members can view channels'),
+('public','team_members','Team members can view all team members'),
+('public','team_messages','Team members can send messages'),
+('public','team_messages','Team members can view messages'),
+('public','team_user_achievements','Team can view all user achievements'),
+('public','thai_bookings','thai_bookings_select'),
+('public','thai_bookings','thai_bookings_update'),
+('public','thai_chat_messages','thai_chat_messages_select'),
+('public','thai_chats','thai_chats_select'),
+('public','thai_chats','thai_chats_update'),
+('public','thai_partner_leads','Admins read partner leads'),
+('public','thai_partner_leads','Admins update partner leads'),
+('public','user_documents','Admins can update documents for verification'),
+('public','user_documents','Admins can view all documents for verification'),
+('public','user_events','events_select'),
+('public','user_segments','analytics_admin_only'),
+('public','user_segments','segments_select'),
+('public','user_segments','segments_write'),
+('public','user_sessions','sessions_select'),
+('public','vertical_commission_rules','Admins can manage commission rules') ) AS v(schema_name,table_name,policy_name)) LOOP
+ expression:=p.qual; check_expression:=p.with_check;
+ expression:=replace(expression,'is_admin_or_uno_team(', 'is_admin_or_uno_team_e28_private(');
+ check_expression:=replace(check_expression,'is_admin_or_uno_team(', 'is_admin_or_uno_team_e28_private(');
+ expression:=replace(expression,'is_company_admin(', 'is_company_admin_e28_private(');
+ check_expression:=replace(check_expression,'is_company_admin(', 'is_company_admin_e28_private(');
+ expression:=replace(expression,'is_finance_staff(', 'is_finance_staff_e28_private(');
+ check_expression:=replace(check_expression,'is_finance_staff(', 'is_finance_staff_e28_private(');
+ expression:=replace(expression,'is_team_member(', 'is_team_member_e28_private(');
+ check_expression:=replace(check_expression,'is_team_member(', 'is_team_member_e28_private(');
+ expression:=replace(expression,'mc_can_access(', 'mc_can_access_e28_private(');
+ check_expression:=replace(check_expression,'mc_can_access(', 'mc_can_access_e28_private(');
+ expression:=replace(expression,'staff_can_access_property(', 'staff_can_access_property_e28_private(');
+ check_expression:=replace(check_expression,'staff_can_access_property(', 'staff_can_access_property_e28_private(');
+ expression:=replace(expression,'can_manage_property(', 'can_manage_property_e28_private(');
+ check_expression:=replace(check_expression,'can_manage_property(', 'can_manage_property_e28_private(');
+ expression:=replace(expression,'user_has_clearview_access(', 'user_has_clearview_access_e28_private(');
+ check_expression:=replace(check_expression,'user_has_clearview_access(', 'user_has_clearview_access_e28_private(');
+ expression:=regexp_replace(expression, '(public\.)?has_role\(auth.uid\(\), ''uno_team''(::app_role)?\)', 'false','g');
+ expression:=regexp_replace(expression, '''uno_team''::(app_role|text), ?', '', 'g');
+ expression:=regexp_replace(expression, ', ?''uno_team''::(app_role|text)', '', 'g');
+ expression:=replace(expression, '(user_roles.role = ''uno_team''::app_role)', '(false)');
+ IF p.tablename IN ('juristic_contacts','juristic_requests') THEN expression:=replace(expression, '(EXISTS ( SELECT 1
+   FROM uno_team_permissions
+  WHERE (uno_team_permissions.user_id = auth.uid())))', '(false)'); END IF;
+ IF p.policyname IN ('property_amenities_public_read','property_reviews_public_read') THEN expression:=replace(expression,'can_manage_property_e28_private(property_id)','public_policy_property_manager(property_id)'); END IF;
+ check_expression:=regexp_replace(check_expression, '(public\.)?has_role\(auth.uid\(\), ''uno_team''(::app_role)?\)', 'false','g');
+ check_expression:=regexp_replace(check_expression, '''uno_team''::(app_role|text), ?', '', 'g');
+ check_expression:=regexp_replace(check_expression, ', ?''uno_team''::(app_role|text)', '', 'g');
+ check_expression:=replace(check_expression, '(user_roles.role = ''uno_team''::app_role)', '(false)');
+ IF p.tablename IN ('juristic_contacts','juristic_requests') THEN check_expression:=replace(check_expression, '(EXISTS ( SELECT 1
+   FROM uno_team_permissions
+  WHERE (uno_team_permissions.user_id = auth.uid())))', '(false)'); END IF;
+ IF p.policyname IN ('property_amenities_public_read','property_reviews_public_read') THEN check_expression:=replace(check_expression,'can_manage_property_e28_private(property_id)','public_policy_property_manager(property_id)'); END IF;
+ statement:=format('ALTER POLICY %I ON %I.%I',p.policyname,p.schemaname,p.tablename);
+ IF p.roles::text='{public}' AND p.policyname NOT IN ('property_amenities_public_read','property_reviews_public_read') AND (coalesce(expression,'')||coalesce(check_expression,'')) LIKE '%_e28_private%' THEN statement:=statement||' TO authenticated'; END IF;
+ IF expression IS NOT NULL THEN statement:=statement||' USING ('||expression||')'; END IF;
+ IF check_expression IS NOT NULL THEN statement:=statement||' WITH CHECK ('||check_expression||')'; END IF;
+ EXECUTE statement;
+ END LOOP;
+END $policies$;
 -- Checked actor-bound edge authorization; no business writes or grant activation.
 CREATE FUNCTION public.actor_has_platform_admin() RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
  SELECT EXISTS(SELECT 1 FROM public.user_roles WHERE user_id=auth.uid() AND role='admin')
