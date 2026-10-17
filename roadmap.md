@@ -5,7 +5,7 @@
 - [x] Correct PMS status/date/turnover, category/plan persistence confirmation and guest cache refresh, data-entry draft lifecycle, and browse/map/filter/pagination continuity.
 - [x] Add network-denying real-page browser fixtures and isolated hook/authorization/postgres tests without changing RBAC, pricing, inventory writers or ledger models.
 - [x] Prepare fail-closed scheduled-backup retrieval and synthetic actual-entrypoint checks; code-only, NOT deployed.
-- [x] Record runtime CI evidence and remaining gate reconciliation (final lint follow-up tracked in PR #89): see docs/qa/CONNECTED_SYSTEM_EXECUTION_2026_10_17.md and the connected-system PR.
+- [x] Record runtime CI evidence and remaining gate reconciliation (final blocking-CI results tracked in PR #89): see docs/qa/CONNECTED_SYSTEM_EXECUTION_2026_10_17.md and the connected-system PR.
 - [ ] Real hosted end-to-end acceptance remains BLOCKED without an isolated backend and resolved business/financial/data contracts. No automatic enforcement/seed/payment/deploy.
 - Existing service-entry UX uses Admin/Vendor forms. The removed legacy staff shell is not revived; employment does not grant catalogue/private authority.
 
