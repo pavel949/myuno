@@ -14,3 +14,13 @@ WITH cases(label, check_in, check_out, blocked, existing_in, existing_out, expec
   FROM cases
 )
 SELECT label, actual, expected, actual = expected AS passed FROM evaluated ORDER BY label;
+
+-- No timestamp contract is changed. These fixtures demonstrate divergent dates.
+SELECT label, (instant AT TIME ZONE 'UTC')::date AS utc_date,
+  (instant AT TIME ZONE 'Asia/Bangkok')::date AS bangkok_date
+FROM (VALUES
+  ('local_midnight', TIMESTAMPTZ '2026-10-13 00:00:00+07'),
+  ('same_instant_z', TIMESTAMPTZ '2026-10-12 17:00:00Z'),
+  ('late_clock_mislabeled_z', TIMESTAMPTZ '2026-10-13 23:00:00Z'),
+  ('late_clock_offset', TIMESTAMPTZ '2026-10-13 23:00:00+07')
+) AS fixture(label, instant);
