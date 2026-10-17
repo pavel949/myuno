@@ -233,3 +233,15 @@ resolve normalized grant design before schema, rather than adding JSON later.
 members and reusing company RBAC; it adds the missing boundary without duplicating
 the company, property, employment, task or finance models. Implementation awaits
 explicit approval and the audit's inventory/security prerequisites.
+## 7. E0 addendum — preparation separated from enforcement
+
+Bypass inventory: [MANAGER_SCOPE_BYPASS_REGISTER.md](../convergence/MANAGER_SCOPE_BYPASS_REGISTER.md).
+
+| Step | Content | Gate | Rollback |
+|---|---|---|---|
+| E1a | Tables + `can_access_property_in_scope` in compatibility mode (flag off = current access); revoke anon on `get_user_company_ids` | design approval | drop new objects; regrant |
+| E1b | Seed spaces, property assignments, members | written confirmation of property and team lists (B1, B2) | delete seeded rows |
+| E1c | Replace register §3 policies, harden export/report paths, enable `feature_flag:operating_spaces` | isolation matrix green in isolated harness | set flag off (no schema change) |
+
+Isolation matrix: `scripts/qa/operating-spaces-isolation-matrix.sql`
+(synthetic, isolated PostgreSQL only; never run against production).
