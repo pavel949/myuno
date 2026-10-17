@@ -141,6 +141,13 @@
       "when": 1792196665836,
       "tag": "0019_canonical_inventory_status_predicate",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792196765030,
+      "tag": "0020_preserve_property_booking_lifecycle_status",
+      "breakpoints": true
     }
   ]
 }
