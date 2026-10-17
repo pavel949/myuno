@@ -1,3 +1,4 @@
+import { bangkokTodayDate } from '@/lib/hotelDates';
 import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -246,7 +247,7 @@ export default function OwnerCalendar() {
         onOpenChange={setShowCreateTaskDialog}
         properties={propertyRefs}
         defaultPropertyId={selectedPropertyId}
-        defaultDate={new Date()}
+        defaultDate={bangkokTodayDate()}
       />
 
       {selectedPropertyId && (
@@ -254,7 +255,7 @@ export default function OwnerCalendar() {
           open={showAddBookingDialog}
           onOpenChange={setShowAddBookingDialog}
           propertyId={selectedPropertyId}
-          initialDate={new Date()}
+          initialDate={bangkokTodayDate()}
           onSuccess={() => setShowAddBookingDialog(false)}
         />
       )}

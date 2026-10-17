@@ -1,3 +1,4 @@
+import { parseCivilDate, civilDateKey, civilStaysOverlap, stayOccupiesDate, bangkokTodayISO } from '@/lib/hotelDates';
 import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyBookings } from '@/hooks/usePropertyBookings';
@@ -12,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { format, differenceInDays, addDays, eachDayOfInterval } from 'date-fns';
+import { format, differenceInCalendarDays, addDays, eachDayOfInterval } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { 
   CalendarIcon, User, Phone, Mail, Users, Banknote, AlertTriangle, 
@@ -112,11 +113,9 @@ const isRu = language === 'ru';
     if (!checkIn || !checkOut || !bookings) return [];
     
     return bookings.filter(booking => {
-      const bookingStart = new Date(booking.check_in);
-      const bookingEnd = new Date(booking.check_out);
-      
-      // Check if booking overlaps with selected range
-      return bookingStart < checkOut && bookingEnd > checkIn;
+      return civilStaysOverlap(booking, {
+        check_in: civilDateKey(checkIn), check_out: civilDateKey(checkOut),
+      });
     });
   }, [checkIn, checkOut, bookings]);
   
@@ -134,7 +133,7 @@ const isRu = language === 'ru';
   }, [checkIn, checkOut, availability]);
   
   const hasConflicts = conflictingBookings.length > 0 || blockedDatesInRange.length > 0;
-  const nights = checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
+  const nights = checkIn && checkOut ? differenceInCalendarDays(checkOut, checkIn) : 0;
   
   // Calculate price per night
   const pricePerNight = useMemo(() => {
@@ -151,8 +150,8 @@ const isRu = language === 'ru';
     
     // Add booked dates
     bookings?.forEach(booking => {
-      const start = new Date(booking.check_in);
-      const end = new Date(booking.check_out);
+      const start = parseCivilDate(booking.check_in);
+      const end = parseCivilDate(booking.check_out);
       let current = start;
       while (current < end) {
         disabled.push(new Date(current));
@@ -362,7 +361,7 @@ const isRu = language === 'ru';
                     }}
                     disabled={(date) => {
                       // Disable past dates
-                      if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
+                      if (civilDateKey(date) < bangkokTodayISO()) return true;
                       // Disable already booked dates
                       return disabledDates.some(d => 
                         format(d, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
@@ -404,12 +403,12 @@ const isRu = language === 'ru';
                       setShowCheckOutPicker(false);
                     }}
                     disabled={(date) => {
-                      // Disable dates before check-in
-                      if (checkIn && date <= checkIn) return true;
-                      // Disable already booked dates
-                      return disabledDates.some(d => 
-                        format(d, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-                      );
+                      // Departure is not an occupied night; inspect only the stay nights.
+                      if (!checkIn) return false;
+                      if (civilDateKey(date) <= civilDateKey(checkIn)) return true;
+                      const requested = { check_in: civilDateKey(checkIn), check_out: civilDateKey(date) };
+                      return bookings?.some(b => civilStaysOverlap(b, requested)) ||
+                        disabledDates.some(d => stayOccupiesDate(requested, civilDateKey(d)));
                     }}
                     locale={isRu ? ru : undefined}
                     initialFocus

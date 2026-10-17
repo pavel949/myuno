@@ -1,3 +1,4 @@
+import { bangkokTodayDate, bangkokTodayISO, civilDateKey, civilStaySpan, stayHasDayEvent } from '@/lib/hotelDates';
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,7 +16,7 @@ import { type PropertyComplex } from '@/hooks/usePropertyComplexes';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format, addDays, subDays, isToday, startOfWeek } from 'date-fns';
+import { format, addDays, subDays, startOfWeek } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Sparkles, Wrench, FileText, DollarSign, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -81,7 +82,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
     return groups;
   }, [sortedProperties, groupNameMap, getGroupKey]);
 
-  const [startDate, setStartDate] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [startDate, setStartDate] = useState(() => startOfWeek(bangkokTodayDate(), { weekStartsOn: 1 }));
 
   // Day events sheet state
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -175,9 +176,9 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
 
   const goBack = () => setStartDate(d => subDays(d, 7));
   const goForward = () => setStartDate(d => addDays(d, 7));
-  const goToday = () => setStartDate(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const goToday = () => setStartDate(startOfWeek(bangkokTodayDate(), { weekStartsOn: 1 }));
 
-  const todayIndex = days.findIndex(d => isToday(d));
+  const todayIndex = days.findIndex(d => civilDateKey(d) === bangkokTodayISO());
 
   const handleCellClick = useCallback((day: Date, propertyId: string) => {
     setSelectedDate(day);
@@ -199,7 +200,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
     if (!selectedDate || !selectedPropertyId) return { bookings: [], tasks: [] };
     const dateKey = format(selectedDate, 'yyyy-MM-dd');
     const propertyBookings = bookingsByProperty.get(selectedPropertyId) || [];
-    const dayBookings = propertyBookings.filter(b => dateKey >= b.check_in && dateKey < b.check_out);
+    const dayBookings = propertyBookings.filter(b => stayHasDayEvent(b, dateKey));
     const dayTasks = taskMap.get(`${selectedPropertyId}_${dateKey}`) || [];
     return { bookings: dayBookings, tasks: dayTasks };
   }, [selectedDate, selectedPropertyId, bookingsByProperty, taskMap]);
@@ -298,7 +299,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                 {/* Day headers */}
                 <div className="h-10 border-b flex relative">
                   {days.map((day, i) => {
-                    const today = isToday(day);
+                    const today = civilDateKey(day) === bangkokTodayISO();
                     const isWeekend = day.getDay() === 0 || day.getDay() === 6;
                     return (
                       <div
@@ -342,7 +343,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                       {days.map((day, dayIdx) => {
                         const dateKey = format(day, 'yyyy-MM-dd');
                         const isWeekend = day.getDay() === 0 || day.getDay() === 6;
-                        const today = isToday(day);
+                        const today = civilDateKey(day) === bangkokTodayISO();
                         const dayTasks = taskMap.get(`${property.property_id}_${dateKey}`) || [];
                         const hasCleaning = dayTasks.some(t => t.task_type === 'cleaning');
                         const hasMaintenance = dayTasks.some(t => t.task_type === 'maintenance');
@@ -426,17 +427,12 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
 
                       {/* Booking bars overlay */}
                       {propertyBookings.map((booking) => {
-                        const checkIn = new Date(booking.check_in);
-                        const checkOut = new Date(booking.check_out);
-                        const startOffset = Math.max(0, Math.floor((checkIn.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
-                        const endOffset = Math.min(DAYS_TO_SHOW, Math.ceil((checkOut.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
-                        
-                        if (startOffset >= DAYS_TO_SHOW || endOffset <= 0) return null;
+                        const span = civilStaySpan(booking, startDate, DAYS_TO_SHOW);
+                        if (!span) return null;
+                        const { startOffset, endOffset, isStart, isEnd } = span;
 
                         const left = startOffset * CELL_WIDTH;
                         const width = (endOffset - startOffset) * CELL_WIDTH;
-                        const isStart = checkIn >= startDate;
-                        const isEnd = checkOut <= addDays(startDate, DAYS_TO_SHOW);
                         
                         const guestName = booking.guest_name || '?';
                         const statusColor = booking.status === 'confirmed' 

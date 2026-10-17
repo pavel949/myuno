@@ -1,3 +1,4 @@
+import { civilDateKey, civilStaysOverlap, stayOccupiesDate } from '@/lib/hotelDates';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PROPERTY_ORDER_RELEASE_FILTER, propertyOrderHoldsInventory } from '@/lib/propertyInventory';
@@ -507,25 +508,22 @@ export function usePropertyBookings(propertyId?: string) {
   const getBookingsForMonth = (year: number, month: number): PropertyBooking[] => {
     if (!bookings) return [];
     
-    const startOfMonth = new Date(year, month, 1);
-    const endOfMonth = new Date(year, month + 1, 0);
-    
-    return bookings.filter(booking => {
-      const checkIn = new Date(booking.check_in);
-      const checkOut = new Date(booking.check_out);
-      return checkIn <= endOfMonth && checkOut >= startOfMonth;
-    });
+    const monthWindow = {
+      check_in: civilDateKey(new Date(year, month, 1)),
+      check_out: civilDateKey(new Date(year, month + 1, 1)),
+    };
+    return bookings.filter(booking => civilStaysOverlap(booking, monthWindow));
   };
 
   // Check if a date is booked
   const isDateBooked = (date: Date, excludeId?: string): boolean => {
     if (!bookings) return false;
     
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = civilDateKey(date);
     
     return bookings.some(booking => {
       if (excludeId && booking.id === excludeId) return false;
-      return dateStr >= booking.check_in && dateStr < booking.check_out;
+      return stayOccupiesDate(booking, dateStr);
     });
   };
 
@@ -533,10 +531,10 @@ export function usePropertyBookings(propertyId?: string) {
   const getBookingForDate = (date: Date): PropertyBooking | undefined => {
     if (!bookings) return undefined;
     
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = civilDateKey(date);
     
     return bookings.find(booking => 
-      dateStr >= booking.check_in && dateStr < booking.check_out
+      stayOccupiesDate(booking, dateStr)
     );
   };
 

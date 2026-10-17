@@ -1,3 +1,4 @@
+import { bangkokTodayDate, bangkokTodayISO, civilDateKey } from '@/lib/hotelDates';
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOperationalTasks, CreateTaskInput } from '@/hooks/useOperationalTasks';
@@ -53,7 +54,7 @@ export function CreateServiceTaskDialog({
   onOpenChange,
   properties,
   defaultPropertyId,
-  defaultDate = new Date(),
+  defaultDate = bangkokTodayDate(),
 }: CreateServiceTaskDialogProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -81,7 +82,7 @@ export function CreateServiceTaskDialog({
       setFormData(f => ({
         ...f,
         property_id: defaultPropertyId || f.property_id || '',
-        scheduled_date: defaultDate || new Date(),
+        scheduled_date: defaultDate || bangkokTodayDate(),
       }));
     }
   }, [open, defaultPropertyId, defaultDate]);
@@ -123,7 +124,7 @@ export function CreateServiceTaskDialog({
         title: '',
         title_ru: '',
         description: '',
-        scheduled_date: new Date(),
+        scheduled_date: bangkokTodayDate(),
         scheduled_time: '',
         priority: 'normal',
         assigned_to: '',
@@ -223,7 +224,7 @@ export function CreateServiceTaskDialog({
                         setDatePickerOpen(false);
                       }
                     }}
-                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    disabled={(date) => civilDateKey(date) < bangkokTodayISO()}
                     initialFocus
                   />
                 </PopoverContent>
@@ -296,7 +297,7 @@ export function CreateServiceTaskDialog({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setFormData(f => ({ ...f, scheduled_date: new Date() }))}
+              onClick={() => setFormData(f => ({ ...f, scheduled_date: bangkokTodayDate() }))}
             >
               {isRu ? 'Сегодня' : 'Today'}
             </Button>
@@ -304,7 +305,7 @@ export function CreateServiceTaskDialog({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setFormData(f => ({ ...f, scheduled_date: addDays(new Date(), 1) }))}
+              onClick={() => setFormData(f => ({ ...f, scheduled_date: addDays(bangkokTodayDate(), 1) }))}
             >
               {isRu ? 'Завтра' : 'Tomorrow'}
             </Button>
@@ -312,7 +313,7 @@ export function CreateServiceTaskDialog({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setFormData(f => ({ ...f, scheduled_date: addDays(new Date(), 7) }))}
+              onClick={() => setFormData(f => ({ ...f, scheduled_date: addDays(bangkokTodayDate(), 7) }))}
             >
               {isRu ? 'Через неделю' : 'In a week'}
             </Button>

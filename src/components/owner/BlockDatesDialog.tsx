@@ -1,3 +1,4 @@
+import { civilStaysOverlap, civilDateKey } from '@/lib/hotelDates';
 import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
@@ -64,11 +65,11 @@ const isRu = language === 'ru';
     const endDate = dateRange.to || dateRange.from;
     
     return bookings.filter(booking => {
-      const bookingStart = new Date(booking.check_in);
-      const bookingEnd = new Date(booking.check_out);
-      
-      // Check if booking overlaps with selected range
-      return bookingStart < addDays(endDate, 1) && bookingEnd > dateRange.from;
+      // The block picker selects inclusive dates, converted to a half-open window.
+      return civilStaysOverlap(booking, {
+        check_in: civilDateKey(dateRange.from),
+        check_out: civilDateKey(addDays(endDate, 1)),
+      });
     });
   }, [dateRange, bookings]);
   

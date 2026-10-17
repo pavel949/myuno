@@ -1,8 +1,9 @@
+import { parseCivilDate } from '@/lib/hotelDates';
 import { PropertyBooking } from '@/hooks/usePropertyBookings';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { format, differenceInDays } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { User, CalendarDays, Phone, Mail, CreditCard, Hash, StickyNote, Clock, History } from 'lucide-react';
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
@@ -40,7 +41,7 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle 
 
   if (!booking) return null;
 
-  const nights = differenceInDays(new Date(booking.check_out), new Date(booking.check_in));
+  const nights = differenceInCalendarDays(parseCivilDate(booking.check_out), parseCivilDate(booking.check_in));
   const status = statusMap[booking.status || ''] || statusMap.pending;
 
   return (
@@ -64,7 +65,7 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle 
             <span className="text-xs font-medium text-success">{isRu ? 'Заезд' : 'Check-in'}</span>
           </div>
           <p className="text-sm font-semibold">
-            {format(new Date(booking.check_in), 'd MMM yyyy', { locale: isRu ? ru : undefined })}
+            {format(parseCivilDate(booking.check_in), 'd MMM yyyy', { locale: isRu ? ru : undefined })}
           </p>
         </div>
         <div className="p-3 rounded-none bg-warning/10 border border-warning/20">
@@ -73,7 +74,7 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle 
             <span className="text-xs font-medium text-warning">{isRu ? 'Выезд' : 'Check-out'}</span>
           </div>
           <p className="text-sm font-semibold">
-            {format(new Date(booking.check_out), 'd MMM yyyy', { locale: isRu ? ru : undefined })}
+            {format(parseCivilDate(booking.check_out), 'd MMM yyyy', { locale: isRu ? ru : undefined })}
           </p>
         </div>
       </div>
