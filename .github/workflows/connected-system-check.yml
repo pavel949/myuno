@@ -1,0 +1,108 @@
+name: Connected system isolated verification
+on:
+  push:
+    branches: [codex/connected-system-2026-10-17]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: isolated-verification-placeholder
+      VITE_SUPABASE_PROJECT_ID: isolated-verification
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install locked dependencies and isolated test tools
+        run: |
+          npm ci
+          pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+          if ! ls /usr/lib/postgresql/*/bin/postgres >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql
+          fi
+          for binary in /usr/lib/postgresql/*/bin/postgres; do
+            dirname "$binary" >> "$GITHUB_PATH"
+            break
+          done
+      - name: Typecheck
+        id: types
+        continue-on-error: true
+        run: npm run typecheck
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Full unit and isolated PostgreSQL suite
+        id: unit
+        continue-on-error: true
+        run: npm test -- --reporter=default --reporter=json --outputFile=unit-results.json
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Focused connected workflows in three timezones
+        id: focused
+        continue-on-error: true
+        run: |
+          for zone in UTC Asia/Bangkok America/Los_Angeles; do
+            TZ="$zone" npx vitest run src/hooks/__tests__/pmsFlow.integration.test.tsx src/pages/owner/__tests__/MCBookingsPage.test.tsx src/hooks/__tests__/roomCategoryCache.test.tsx src/pages/property/PropertyIndex.test.tsx || exit 1
+          done
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Production build with synthetic configuration
+        id: build
+        continue-on-error: true
+        run: npm run build
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Lint diagnostic
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Network-denying PMS browser fixtures
+        id: browser
+        continue-on-error: true
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 8080 > /tmp/isolated-vite.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            curl --fail --silent http://localhost:8080/src/index.css?direct >/dev/null && break
+            sleep 1
+          done
+          node scripts/qa/bookings-list-ui.mjs
+          node scripts/qa/calendar-ui.mjs
+          node scripts/qa/today-ui.mjs
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Upload validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: connected-system-evidence
+          path: |
+            unit-results.json
+            /tmp/browser/
+            /tmp/isolated-vite.log
+          retention-days: 14
+      - name: Enforce verification outcomes
+        if: always()
+        env:
+          TYPES: ${{ steps.types.outcome }}
+          UNIT: ${{ steps.unit.outcome }}
+          FOCUSED: ${{ steps.focused.outcome }}
+          BUILD: ${{ steps.build.outcome }}
+          BROWSER: ${{ steps.browser.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+        run: |
+          printf 'types=%s unit=%s focused=%s build=%s browser=%s lint=%s\n' "$TYPES" "$UNIT" "$FOCUSED" "$BUILD" "$BROWSER" "$LINT" | tee -a "$GITHUB_STEP_SUMMARY"
+          test "$TYPES" = success && test "$UNIT" = success && test "$FOCUSED" = success && test "$BUILD" = success && test "$BROWSER" = success && test "$LINT" = success

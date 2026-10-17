@@ -33,7 +33,13 @@ export function useRoomCategories(propertyId?: string) {
 
 function useInvalidate() {
   const qc = useQueryClient();
-  return () => qc.invalidateQueries({ queryKey: ['room-categories'] });
+  return async () => {
+    // Category prices, plans and room assignments also feed guest quotes and availability.
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ['room-categories'] }),
+      qc.invalidateQueries({ queryKey: ['room-category-offers'] }),
+    ]);
+  };
 }
 
 export function useSaveCategory() {
@@ -87,3 +93,4 @@ export function useSetPropertyKind() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['structure-properties'] }),
   });
 }
+

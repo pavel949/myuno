@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, differenceInCalendarDays } from 'date-fns';
 import { bangkokTodayISO, parseCivilDate } from '@/lib/hotelDates';
+import { propertyOrderHoldsInventory } from '@/lib/propertyInventory';
 import { ru } from 'date-fns/locale';
 import {
   Search, Calendar, Users, Phone, Mail,
@@ -58,6 +59,13 @@ const SORT_OPTIONS: { key: SortKey; label: string; labelRu: string }[] = [
   { key: 'guest_name', label: 'By guest name', labelRu: 'По имени гостя' },
 ];
 
+// These rows are order projections. Financial releases use order semantics;
+// completed/checked-out stays remain historical even before their scheduled end.
+function isCurrentStay(booking: PropertyBooking): boolean {
+  return propertyOrderHoldsInventory(booking.status)
+    && booking.status !== 'completed' && booking.status !== 'checked_out';
+}
+
 function getBookingTimeStatus(booking: PropertyBooking): 'upcoming' | 'active' | 'past' {
   const today = bangkokTodayISO();
   if (booking.check_out <= today) return 'past';
@@ -93,8 +101,8 @@ export default function MCBookingsPage() {
       filtered = filtered.filter(b => {
         const timeStatus = getBookingTimeStatus(b);
         switch (statusFilter) {
-          case 'upcoming': return timeStatus === 'upcoming' && b.status !== 'cancelled';
-          case 'active': return timeStatus === 'active' && b.status !== 'cancelled' && b.status !== 'completed' && b.status !== 'checked_out';
+          case 'upcoming': return timeStatus === 'upcoming' && isCurrentStay(b);
+          case 'active': return timeStatus === 'active' && isCurrentStay(b);
           case 'pending': return b.status === 'pending';
           case 'completed': return b.status === 'completed' || (timeStatus === 'past' && b.status !== 'cancelled');
           case 'cancelled': return b.status === 'cancelled';
@@ -146,8 +154,8 @@ export default function MCBookingsPage() {
     if (!bookings) return { total: 0, upcoming: 0, active: 0, pending: 0 };
     return {
       total: bookings.length,
-      upcoming: bookings.filter(b => getBookingTimeStatus(b) === 'upcoming' && b.status !== 'cancelled').length,
-      active: bookings.filter(b => getBookingTimeStatus(b) === 'active' && b.status !== 'cancelled' && b.status !== 'completed' && b.status !== 'checked_out').length,
+      upcoming: bookings.filter(b => getBookingTimeStatus(b) === 'upcoming' && isCurrentStay(b)).length,
+      active: bookings.filter(b => getBookingTimeStatus(b) === 'active' && isCurrentStay(b)).length,
       pending: bookings.filter(b => b.status === 'pending').length,
     };
   }, [bookings]);
@@ -534,3 +542,4 @@ export default function MCBookingsPage() {
     </PageContainer>
   );
 }
+

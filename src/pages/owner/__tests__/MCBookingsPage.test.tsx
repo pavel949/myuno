@@ -79,6 +79,31 @@ describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => 
     } finally { vi.useRealTimers(); }
   });
 
+  it.each(['active', 'upcoming'] as const)('%s list and KPI omit released and finished orders, retaining pending and unknown holds', filter => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date('2026-10-16T18:00:00Z'));
+    try {
+      const base = bookingsListFixtures(language)[0];
+      const statuses = ['confirmed', 'pending', 'no_show', 'future_hold', 'cancelled', 'refunded', 'expired', 'completed', 'checked_out'];
+      mocks.customBookings = statuses.map(status => ({
+        ...base, id: status, guest_name: `Status fixture ${status}`, status,
+        check_in: filter === 'active' ? '2026-10-17' : '2026-10-18', check_out: '2026-10-20',
+      }));
+      mount(language);
+      const label = filter === 'active' ? (language === 'ru' ? 'Активные' : 'Active') : (language === 'ru' ? 'Предстоящие' : 'Upcoming');
+      const tileLabel = filter === 'active' ? (language === 'ru' ? 'Сейчас' : 'Active') : (language === 'ru' ? 'Скоро' : 'Upcoming');
+      const tile = screen.getByRole('button', { name: new RegExp(`^4 ${tileLabel}$`) });
+      fireEvent.click(tile);
+      expect(screen.getAllByRole('checkbox')).toHaveLength(4);
+      for (const status of statuses.slice(0, 4)) expect(screen.getByText(`Status fixture ${status}`)).toBeInTheDocument();
+      for (const status of statuses.slice(4)) expect(screen.queryByText(`Status fixture ${status}`)).not.toBeInTheDocument();
+      // The matching filter button and summary tile must agree; history remains accessible.
+      expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');
+      fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Все' : 'All' }));
+      expect(screen.getAllByRole('checkbox')).toHaveLength(statuses.length);
+      expect(mocks.from).not.toHaveBeenCalled();
+    } finally { vi.useRealTimers(); }
+  });
+
   it('checkbox selects and deselects without opening details or contacting the client', () => {
     mount(language); selectFirst(language);
     const checkbox = screen.getAllByRole('checkbox').find(el => el.getAttribute('aria-label')?.endsWith(bookingsListFixtures(language)[0].guest_name ?? ''));
