@@ -55,3 +55,5 @@ ALTER TABLE public.property_delegates ADD COLUMN user_id uuid, ADD COLUMN role t
 CREATE FUNCTION public.has_role(actor uuid, r text) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS
  $$ SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id=actor AND role=r) $$;
 GRANT EXECUTE ON FUNCTION public.has_role(uuid,text) TO authenticated;
+CREATE POLICY owner_update_own ON public.properties FOR UPDATE TO authenticated USING (owner_id=auth.uid());
+CREATE POLICY owner_select_own ON public.properties FOR SELECT TO authenticated USING (owner_id=auth.uid());
