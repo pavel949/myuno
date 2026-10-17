@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · Remaining Tranche 1 verification (no Tranche 2)
+- [ ] Obtain an independently reported typecheck result through permitted remote CI.
+- [ ] Verify the full Stripe test booking journey only with isolated test inventory and no guest-booking changes; otherwise record the exact blocker.
+- [ ] Report verification evidence and source SHA without changing payment mode or starting Tranche 2.
+
 ## 2026-10-17 · Tranche 1 correction pass (no Tranche 2)
 - [x] Verify and align inventory status predicates, writers and availability; add regression coverage.
 - [x] Verify Drizzle snapshot convention and replace instruction-only rollback with exact SQL.
