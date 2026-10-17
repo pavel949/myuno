@@ -20,7 +20,7 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   beforeEach(() => { mocks.language = language; });
   it('dispatches booking, request and unit links to the existing property boundary', () => {
     mount();
-    for (const element of [screen.getByText(todayFixtures(language).arrivals[0].guest_name ?? '', { selector: 'p' }), screen.getByText('synthetic urgent request'), screen.getAllByText(todayFixtures(language).units[0].title)[0]]) {
+    for (const element of [screen.getAllByText(todayFixtures(language).arrivals[0].guest_name ?? '', { selector: 'p' })[0], screen.getByText('synthetic urgent request'), screen.getAllByText(todayFixtures(language).units[0].title)[0]]) {
       fireEvent.click(element);
       expect(screen.getByTestId('route-boundary')).toHaveTextContent(APP_ROUTES.MC_PROPERTY_DETAIL('synthetic-property'));
     }
