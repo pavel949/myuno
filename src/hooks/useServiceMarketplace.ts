@@ -50,11 +50,11 @@ export function useMarketplaceServices() {
     queryKey: ['marketplace-services'],
     queryFn: async (): Promise<MarketplaceService[]> => {
       const { data, error } = await supabase
-        .from('services')
-        .select(`${SERVICE_COLS}, provider:providers!inner(id,name,is_verified,rating,logo_url,is_active)`)
+        .from('public_service_catalog')
+        .select(`${SERVICE_COLS}, provider`)
         .eq('is_active', true)
         .eq('approval_status', 'approved')
-        .eq('providers.is_active', true)
+        .not('provider', 'is', null)
         .order('created_at', { ascending: false })
         .limit(60);
       if (error) throw error;

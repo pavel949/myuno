@@ -187,7 +187,7 @@ export function usePrefetchRoute() {
           queryKey: ['salons', {}],
           queryFn: async () => {
             const { data } = await supabase
-              .from('salons')
+              .from('public_salon_catalog')
               .select('*')
               .eq('is_active', true)
               .order('rating', { ascending: false })

@@ -47,7 +47,7 @@ export function useSalons(salonType?: string) {
   }, [salonType]);
 
   const { data, isLoading } = useSupabaseQuery<Salon>({
-    table: 'salons',
+    table: 'public_salon_catalog',
     filters,
     orderBy: { column: 'is_featured', ascending: false },
   });
@@ -59,7 +59,7 @@ export function useSalon(id: string) {
   const transform = useCallback((data: unknown) => data as Salon, []);
 
   const { data, isLoading } = useSupabaseSingle<Salon>({
-    table: 'salons',
+    table: 'public_salon_catalog',
     id,
     transform,
   });
