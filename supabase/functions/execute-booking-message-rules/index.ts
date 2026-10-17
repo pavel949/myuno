@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
 
     if (rulesErr) throw rulesErr;
     if (!rules || rules.length === 0) {
-      return json({ processed: 0, message: "No active rules" });
+      return json({ processed: 0, message: "No active rules" }, corsHeaders);
     }
 
     let processed = 0;
@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    return json({ processed, errors });
+    return json({ processed, errors }, corsHeaders);
   } catch (error) {
     if (error instanceof AccessDenied) return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     if (error instanceof SyntaxError) return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -203,7 +203,7 @@ async function alreadySentFor(supabase: any, orderId: string, ruleId: string): P
   return (data?.length ?? 0) > 0;
 }
 
-function json(obj: object) {
+function json(obj: object, corsHeaders: Record<string, string>) {
   return new Response(JSON.stringify(obj), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
