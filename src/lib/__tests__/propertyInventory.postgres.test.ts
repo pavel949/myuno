@@ -1,8 +1,8 @@
 import { beforeAll, afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, chmodSync, chownSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, chmodSync, chownSync, realpathSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import postgres from 'postgres';
 import { verifyInventoryHold } from '../../../supabase/functions/_shared/inventory-hold';
 
@@ -14,6 +14,10 @@ let sql: ReturnType<typeof postgres>;
 let started = false;
 const asRoot = process.getuid?.() === 0;
 const owner = asRoot ? 'nobody' : process.env.USER ?? '';
+const postgresBinary = execFileSync('which', ['postgres'], { encoding: 'utf8' }).trim();
+const postgresRoot = dirname(dirname(realpathSync(postgresBinary)));
+// Nix relocates binaries without pg_config; explicitly resolve its module path.
+const libraryPath = existsSync(join(postgresRoot, 'lib', 'dict_snowball.so')) ? join(postgresRoot, 'lib') : null;
 function run(binary: string, args: string[]) {
   return asRoot ? execFileSync('runuser', ['-u', owner, '--', binary, ...args], { encoding: 'utf8' })
     : execFileSync(binary, args, { encoding: 'utf8' });
@@ -23,8 +27,8 @@ beforeAll(async () => {
   directory = mkdtempSync(join(tmpdir(), 'myuno-inventory-'));
   chmodSync(directory, 0o700);
   if (asRoot) chownSync(directory, 65534, 65534);
-  run('initdb', ['-D', join(directory, 'data'), '-A', 'trust', '--no-locale']);
-  run('pg_ctl', ['-D', join(directory, 'data'), '-l', join(directory, 'postgres.log'), '-o', `-k ${directory} -p 55439 -c listen_addresses=''`, '-w', 'start']);
+  run('initdb', ['-D', join(directory, 'data'), '-A', 'trust', '--no-locale', ...(libraryPath ? ['-c', `dynamic_library_path=${libraryPath}`] : [])]);
+  run('pg_ctl', ['-D', join(directory, 'data'), '-l', join(directory, 'postgres.log'), '-o', `-k ${directory} -p 55439 -c listen_addresses=''${libraryPath ? ` -c dynamic_library_path=${libraryPath}` : ''}`, '-w', 'start']);
   started = true;
   // Explicit socket path/user/database: no inherited production credentials.
   sql = postgres({ host: directory, port: 55439, database: 'postgres', username: owner, password: '', max: 4 });
