@@ -44,7 +44,17 @@ export function useFormDraft<T extends object>({
     }
 
     // Mounting or resetting an empty form must not create a restorable draft.
-    if (JSON.stringify(formData) === initialSnapshot) return;
+    if (JSON.stringify(formData) === initialSnapshot) {
+      try {
+        // Manual edits back to the baseline must also discard older saved input.
+        localStorage.removeItem(storageKey);
+        setHasDraft(false);
+        setLastSaved(null);
+      } catch {
+        // Silent fail for draft clearing
+      }
+      return;
+    }
 
     timeoutRef.current = setTimeout(() => {
       try {

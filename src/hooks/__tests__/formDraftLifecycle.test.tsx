@@ -41,6 +41,33 @@ describe('data-entry draft lifecycle', () => {
     expect(result.current.hasDraft).toBe(false);
   });
 
+  it('manual edits back to initial values remove older saved input', () => {
+    const first = mount();
+    act(() => { first.result.current.updateField('name', 'Erased service'); });
+    act(() => { vi.advanceTimersByTime(101); });
+    expect(JSON.parse(localStorage.getItem(storageKey)!).name).toBe('Erased service');
+
+    act(() => { first.result.current.updateField('name', ''); });
+    act(() => { vi.advanceTimersByTime(101); });
+    expect(localStorage.getItem(storageKey)).toBeNull();
+    expect(first.result.current.hasDraft).toBe(false);
+    expect(first.result.current.lastSaved).toBeNull();
+    first.unmount();
+
+    const second = mount();
+    expect(second.result.current.formData).toEqual(initialData);
+  });
+
+  it('preserves an existing meaningful draft on initial mount', () => {
+    const saved = { ...initialData, name: 'Existing service' };
+    localStorage.setItem(storageKey, JSON.stringify(saved));
+    const { result } = mount();
+    expect(result.current.formData).toEqual(saved);
+    expect(result.current.hasDraft).toBe(true);
+    act(() => { vi.advanceTimersByTime(101); });
+    expect(JSON.parse(localStorage.getItem(storageKey)!)).toEqual(saved);
+  });
+
   it('successful reset clears persisted input without recreating an empty draft', () => {
     const { result } = mount();
     act(() => { result.current.updateField('name', 'Saved input'); });
