@@ -12005,6 +12005,7 @@ export type Database = {
           min_contract_months: number | null
           name_en: string
           name_ru: string
+          operating_spaces_enforced: boolean
           paid_slots: number
           phone: string | null
           properties_count: number | null
@@ -12061,6 +12062,7 @@ export type Database = {
           min_contract_months?: number | null
           name_en: string
           name_ru: string
+          operating_spaces_enforced?: boolean
           paid_slots?: number
           phone?: string | null
           properties_count?: number | null
@@ -12117,6 +12119,7 @@ export type Database = {
           min_contract_months?: number | null
           name_en?: string
           name_ru?: string
+          operating_spaces_enforced?: boolean
           paid_slots?: number
           phone?: string | null
           properties_count?: number | null
@@ -35337,6 +35340,10 @@ export type Database = {
           trust_level: string
           weight: number
         }[]
+      }
+      resolve_operational_scope: {
+        Args: { p_company_id?: string; p_requested_space_id?: string }
+        Returns: Json
       }
       resolve_user_context: {
         Args: { p_entity_id?: string; p_mode?: string; p_user_id: string }

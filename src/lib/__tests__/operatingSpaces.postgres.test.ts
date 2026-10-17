@@ -8,10 +8,10 @@ import postgres from 'postgres';
 // Isolated synthetic PostgreSQL only; never connects to the shared backend.
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const CO_A = id(1), CO_B = id(2);
-const U = { founder: id(10), director: id(11), resortMgr: id(12), condoMgr: id(13), cross: id(14), inactive: id(15), otherCo: id(16), platform: id(17) };
+const U = { founder: id(10), director: id(11), resortMgr: id(12), condoMgr: id(13), cross: id(14), inactive: id(15), otherCo: id(16), platform: id(17), team: id(18), admin: id(19), zero: id(20) };
 const M = { director: id(21), resortMgr: id(22), condoMgr: id(23), cross: id(24), inactive: id(25), otherCo: id(26) };
 const S = { resort: id(31), condo: id(32), otherCo: id(33), dormant: id(34) };
-const P = { villa: id(41), condo: id(42), otherCo: id(43) };
+const P = { villa: id(41), condo: id(42), otherCo: id(43), unassigned: id(44) };
 
 function migrationPath(): string {
   if (process.env.E1_MIGRATION) return process.env.E1_MIGRATION;
@@ -40,6 +40,8 @@ async function as<T>(user: string | null, fn: (tx: postgres.TransactionSql) => P
 }
 const visibleSpaces = (u: string | null) => as(u, async (tx) => (await tx`SELECT id FROM operating_spaces ORDER BY id`).map((r) => r.id));
 const canAccess = (u: string, s: string) => as(u, async (tx) => (await tx`SELECT actor_can_access_operating_space(${s}) ok`)[0].ok);
+const resolve = (user: string, company: string | null = CO_A, requested: string | null = null) =>
+  as(user, async (tx) => (await tx`SELECT resolve_operational_scope(${company}::uuid, ${requested}::uuid) scope`)[0].scope);
 
 beforeAll(async () => {
   directory = mkdtempSync(join(tmpdir(), 'myuno-spaces-'));
@@ -50,17 +52,22 @@ beforeAll(async () => {
   sql = postgres({ host: directory, port: 55441, database: 'postgres', username: owner, password: '', max: 2, onnotice: () => {} });
   await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/operating-spaces-base.sql', 'utf8'));
   await sql.unsafe(readFileSync(migrationPath(), 'utf8'));
+  const e2 = process.env.E2_MIGRATION ?? readdirSync('drizzle/migrations').find(f => /operating_scope_resolver/.test(f));
+  if (!e2) throw new Error('E2 migration missing');
+  await sql.unsafe(readFileSync(process.env.E2_MIGRATION ? e2 : join('drizzle/migrations', e2), 'utf8'));
   await sql.unsafe(`
-    INSERT INTO management_companies VALUES ('${CO_A}'),('${CO_B}');
-    INSERT INTO user_roles VALUES ('${U.platform}','admin');
+    INSERT INTO management_companies (id) VALUES ('${CO_A}'),('${CO_B}');
+    INSERT INTO user_roles VALUES ('${U.platform}','admin'),('${U.team}','uno_team');
     INSERT INTO management_company_members VALUES
       ('${M.director}','${CO_A}','${U.director}','director',true),
       ('${M.resortMgr}','${CO_A}','${U.resortMgr}','manager',true),
       ('${M.condoMgr}','${CO_A}','${U.condoMgr}','manager',true),
       ('${M.cross}','${CO_A}','${U.cross}','manager',true),
       ('${M.inactive}','${CO_A}','${U.inactive}','manager',false),
-      ('${M.otherCo}','${CO_B}','${U.otherCo}','director',true);
-    INSERT INTO properties VALUES ('${P.villa}','${CO_A}'),('${P.condo}','${CO_A}'),('${P.otherCo}','${CO_B}');
+      ('${M.otherCo}','${CO_B}','${U.otherCo}','director',true),
+      ('${id(27)}','${CO_A}','${U.admin}','admin',true),
+      ('${id(28)}','${CO_A}','${U.zero}','manager',true);
+    INSERT INTO properties VALUES ('${P.villa}','${CO_A}'),('${P.condo}','${CO_A}'),('${P.otherCo}','${CO_B}'),('${P.unassigned}','${CO_A}');
     INSERT INTO operating_spaces (id, management_company_id, key, name_en, name_ru, is_active) VALUES
       ('${S.resort}','${CO_A}','resort','Resort','Резорт',true),
       ('${S.condo}','${CO_A}','condos','Condominiums','Кондоминиумы',true),
@@ -144,5 +151,88 @@ describe('operating spaces access', () => {
   it('anonymous is denied', async () => {
     await expect(visibleSpaces(null)).rejects.toThrow(/permission denied/);
     await expect(as(null, (tx) => tx`SELECT actor_can_access_operating_space(${S.resort})`)).rejects.toThrow(/permission denied/);
+  });
+});
+
+describe('E2 server shadow scope', () => {
+  beforeAll(async () => { await sql`UPDATE management_companies SET operating_spaces_enforced = true WHERE id = ${CO_A}`; });
+  it('director/admin get active spaces plus explicit unassigned; platform admin retained', async () => {
+    for (const user of [U.director, U.admin, U.platform]) {
+      const result = await resolve(user);
+      expect(result.status).toBe('ready'); expect(result.isCompanyOverseer).toBe(true);
+      expect(result.authorizedSpaceIds).toEqual([S.resort, S.condo]);
+      expect(result.authorizedPropertyIds).toEqual([P.villa, P.condo, P.unassigned]);
+      expect(result.unassignedPropertyIds).toEqual([P.unassigned]);
+    }
+  });
+  it('single resort/condo members default to only own space, never unassigned', async () => {
+    for (const [user, space, property] of [[U.resortMgr, S.resort, P.villa], [U.condoMgr, S.condo, P.condo]]) {
+      const result = await resolve(user);
+      expect(result.mode).toBe('space'); expect(result.activeSpaceId).toBe(space);
+      expect(result.authorizedPropertyIds).toEqual([property]); expect(result.unassignedPropertyIds).toEqual([]);
+    }
+  });
+  it('cross-granted union narrows to authorized selected space', async () => {
+    expect((await resolve(U.cross)).authorizedPropertyIds).toEqual([P.villa, P.condo]);
+    expect((await resolve(U.cross, CO_A, S.condo)).authorizedPropertyIds).toEqual([P.condo]);
+    expect((await resolve(U.director, CO_A, S.resort)).authorizedPropertyIds).toEqual([P.villa]);
+  });
+  it.each([S.condo, S.otherCo, S.dormant, id(999)])('invalid requested space %s denies without fallback', async requested => {
+    const result = await resolve(U.resortMgr, CO_A, requested);
+    expect(result.status).toBe('no_access'); expect(result.reason).toBe('requested_space_unavailable');
+    expect(result.authorizedPropertyIds).toEqual([]); expect(result.authorizedSpaceIds).toEqual([]);
+  });
+  it('zero-space enforced member denied; legacy explicitly not enforced; personal untouched', async () => {
+    expect((await resolve(U.zero)).status).toBe('no_access');
+    const legacy = await resolve(U.otherCo, CO_B);
+    expect(legacy.status).toBe('legacy'); expect(legacy.enforcement).toBe('not_enforced');
+    expect(legacy.authorizedPropertyIds).toEqual([]);
+    expect((await resolve(U.resortMgr, null)).status).toBe('not_applicable');
+    expect((await resolve(U.resortMgr, CO_B)).status).toBe('no_access');
+  });
+  it('uno_team has no global oversight or self-grant; admin preserves oversight', async () => {
+    expect(await visibleSpaces(U.team)).toEqual([]);
+    expect((await resolve(U.team)).status).toBe('no_access');
+    expect((await resolve(U.platform)).isCompanyOverseer).toBe(true);
+    await expect(as(U.team, tx => tx`INSERT INTO operating_space_members (operating_space_id, company_member_id, management_company_id) VALUES (${S.condo}, ${M.resortMgr}, ${CO_A})`)).rejects.toThrow(/row-level security/);
+  });
+  it('uno_team explicit membership grants only joined space, not global oversight', async () => {
+    await sql.begin(async tx => {
+      await tx`INSERT INTO management_company_members VALUES (${id(29)}, ${CO_A}, ${U.team}, 'manager', true)`;
+      await tx`INSERT INTO operating_space_members (operating_space_id, company_member_id, management_company_id) VALUES (${S.resort}, ${id(29)}, ${CO_A})`;
+      await tx.unsafe('SET LOCAL ROLE authenticated');
+      await tx`SELECT set_config('request.jwt.claim.sub', ${U.team}, true)`;
+      const result = (await tx`SELECT resolve_operational_scope(${CO_A}::uuid, NULL::uuid) scope`)[0].scope;
+      expect(result.isCompanyOverseer).toBe(false);
+      expect(result.authorizedSpaceIds).toEqual([S.resort]);
+      expect(result.authorizedPropertyIds).toEqual([P.villa]);
+      throw new Error('explicit-grant-test');
+    }).catch(error => { if (!(error instanceof Error) || error.message !== 'explicit-grant-test') throw error; });
+  });
+  it('revoked company/space membership and reassigned properties change scope revision', async () => {
+    const before = await resolve(U.resortMgr);
+    await sql`UPDATE operating_space_members SET is_active = false WHERE company_member_id = ${M.resortMgr}`;
+    expect((await resolve(U.resortMgr)).status).toBe('no_access');
+    await sql`UPDATE operating_space_members SET is_active = true WHERE company_member_id = ${M.resortMgr}`;
+    await sql`UPDATE management_company_members SET is_active = false WHERE id = ${M.resortMgr}`;
+    expect((await resolve(U.resortMgr)).reason).toBe('company_membership_required');
+    await sql`UPDATE management_company_members SET is_active = true WHERE id = ${M.resortMgr}`;
+    await sql`UPDATE operating_space_properties SET operating_space_id = ${S.condo} WHERE property_id = ${P.villa}`;
+    const after = await resolve(U.resortMgr);
+    expect(after.authorizedPropertyIds).toEqual([]); expect(after.revision).not.toBe(before.revision);
+    expect((await resolve(U.condoMgr)).authorizedPropertyIds).toEqual([P.villa, P.condo]);
+    await sql`UPDATE operating_space_properties SET operating_space_id = ${S.resort} WHERE property_id = ${P.villa}`;
+  });
+  it('anonymous cannot execute resolver', async () => {
+    await expect(as(null, tx => tx`SELECT resolve_operational_scope(${CO_A}::uuid, NULL::uuid)`)).rejects.toThrow(/permission denied/);
+  });
+  it('security-preserving rollback disables reader while retaining corrected oversight', async () => {
+    await sql.begin(async tx => {
+      await tx.unsafe(readFileSync('docs/hardening/rollback/0022_operating_scope_resolver.sql', 'utf8'));
+      expect((await tx`SELECT has_function_privilege('authenticated', 'public.resolve_operational_scope(uuid,uuid)', 'EXECUTE') ok`)[0].ok).toBe(false);
+      // Deliberately roll back this local-only rollback test.
+      throw new Error('rollback-test');
+    }).catch(error => { if (!(error instanceof Error) || error.message !== 'rollback-test') throw error; });
+    expect((await resolve(U.platform)).status).toBe('ready');
   });
 });
