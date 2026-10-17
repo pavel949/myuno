@@ -211,6 +211,13 @@
       "when": 1792214876680,
       "tag": "0029_uno_team_private_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1792215011902,
+      "tag": "0030_preserve_juristic_platform_admin",
+      "breakpoints": true
     }
   ]
 }
