@@ -63,13 +63,14 @@ function useGuestCheckIn(marketplaceBookingId?: string) {
   const notifyOwnerOfCheckIn = async (propertyId: string, checkInRecord: { id: string; full_name?: string | null }) => {
     try {
       // Get owner_id from the property
-      const { data: property } = await supabase
-        .from('properties')
-        .select('owner_id, title_en')
-        .eq('id', propertyId)
-        .single();
+      // Owner comes from the guest's own booking; the property title from the public catalog.
+      const [{ data: booking }, { data: catalogRow }] = await Promise.all([
+        supabase.from('property_bookings').select('owner_id').eq('id', propertyBookingId ?? '').maybeSingle(),
+        supabase.from('public_property_catalog').select('title_en').eq('id', propertyId).maybeSingle(),
+      ]);
+      const property = { owner_id: booking?.owner_id ?? null, title_en: catalogRow?.title_en ?? '' };
 
-      if (property?.owner_id) {
+      if (property.owner_id) {
         await supabase.from('notifications').insert({
           user_id: property.owner_id,
           title: language === 'ru' ? 'Новая онлайн-регистрация' : 'New Guest Check-in',
@@ -97,20 +98,18 @@ function useGuestCheckIn(marketplaceBookingId?: string) {
 
       const { data, error } = await supabase
         .from('property_bookings')
-        .select(`
-          *,
-          properties (
-            house_rules,
-            house_rules_ru,
-            check_in_time,
-            check_out_time
-          )
-        `)
+        .select('*')
         .eq('marketplace_booking_id', marketplaceBookingId)
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      if (!data) return data;
+      const { data: rules } = await supabase
+        .from('public_property_catalog')
+        .select('house_rules, house_rules_ru, check_in_time, check_out_time')
+        .eq('id', data.property_id)
+        .maybeSingle();
+      return { ...data, properties: rules ?? null };
     },
     enabled: !!marketplaceBookingId,
   });

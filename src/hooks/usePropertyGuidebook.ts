@@ -272,30 +272,22 @@ export function usePublicGuidebook(shareToken?: string) {
 
       const { data, error } = await supabase
         .from('property_guidebook')
-        .select(`
-          *,
-          properties!property_id (
-            title,
-            title_ru,
-            address,
-            cover_image,
-            images,
-            check_in_time,
-            check_out_time,
-            house_rules,
-            house_rules_ru
-          )
-        `)
+        .select('*')
         .eq('share_token', shareToken)
         .eq('is_public', true)
         .maybeSingle();
 
       if (error) throw error;
       if (!data) return null;
+      const { data: catalogProperty } = await supabase
+        .from('public_property_catalog')
+        .select('title, title_ru, address, cover_image, images, check_in_time, check_out_time, house_rules, house_rules_ru')
+        .eq('id', (data as { property_id: string }).property_id)
+        .maybeSingle();
 
       return {
         guidebook: parseGuidebook(data as Record<string, unknown>),
-        property: (data as Record<string, unknown>).properties as {
+        property: catalogProperty as {
           title: string;
           title_ru: string | null;
           address: string | null;

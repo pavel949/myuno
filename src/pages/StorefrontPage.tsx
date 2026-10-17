@@ -77,7 +77,7 @@ export default function StorefrontPage() {
 
       // Fetch properties for this MC
       let query = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select('id, title_en, title_ru, cover_image, address, district, bedrooms, bathrooms, price_per_night, currency, property_type, rating, review_count, is_active')
         .eq('is_active', true)
         .order('is_featured', { ascending: false })

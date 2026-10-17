@@ -35,7 +35,7 @@ export function SimilarProperties({
     queryKey: ['similar-properties', propertyId, district],
     queryFn: async () => {
       let q = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select('id, title_en, title_ru, district, cover_image, bedrooms, price_per_night, property_type, rating, review_count')
         .eq('is_active', true)
         .eq('approval_status', 'approved')
