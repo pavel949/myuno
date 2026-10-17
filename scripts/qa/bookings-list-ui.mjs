@@ -4,7 +4,7 @@ import { build } from 'esbuild';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 
 const root = process.cwd();
 const output = '/tmp/browser/bookings-list-isolated';
@@ -22,13 +22,13 @@ const virtual = {
 await build({
   stdin: { contents: `import React from 'react'; import {createRoot} from 'react-dom/client'; import {MemoryRouter} from 'react-router-dom'; import Page from '${root}/src/pages/owner/MCBookingsPage.tsx'; createRoot(document.getElementById('root')).render(<MemoryRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Page/></MemoryRouter>);`, loader:'tsx', resolveDir:root },
   bundle:true, outfile:path.join(output,'fixture.js'), jsx:'automatic',
-  define:{'process.env.NODE_ENV':'"production"'},
+  define:{'process.env.NODE_ENV':'"production"', 'import.meta.env.DEV':'false'},
   plugins:[{name:'isolate-all-data-boundaries',setup(b) {
     b.onResolve({filter:/.*/},args => {
       if (Object.hasOwn(virtual,args.path)) return {path:args.path,namespace:'fixture'};
       if (args.path.startsWith('@/')) {
         const base = path.join(root,'src',args.path.slice(2));
-        const resolved = [base,base+'.ts',base+'.tsx',path.join(base,'index.ts'),path.join(base,'index.tsx')].find(p=>existsSync(p));
+        const resolved = [base,base+'.ts',base+'.tsx',path.join(base,'index.ts'),path.join(base,'index.tsx')].find(p=>existsSync(p) && statSync(p).isFile());
         if (!resolved) throw new Error('Unresolved test import: '+args.path);
         return {path:resolved};
       }
