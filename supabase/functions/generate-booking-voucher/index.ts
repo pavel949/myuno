@@ -46,6 +46,8 @@ Deno.serve(async (req) => {
       if (denied) return denied;
     }
     const supabase = createServiceClient();
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    if (!supabaseUrl) throw new Error('Service configuration unavailable');
 
     const isRu = language === 'ru';
     let voucherData: any = null;
