@@ -1,5 +1,11 @@
 # Roadmap
 
+## 2026-10-17 · Tranche 2C.2 — Booking writer date correctness
+- [x] Correct checkout-inclusive blocked-date preflight in create and update writers; no UX changes.
+- [ ] Trace timestamp producers/readers and live SQL with read-only evidence; change no ambiguous data semantics.
+- [ ] Exercise real writer preflights with synthetic fixtures across three timezones; retain calendar/inventory tests.
+- [ ] Document exact evidence, unresolved timestamp risks, checks and SHA; no production writes or Today work.
+
 ## 2026-10-17 · Tranche 2C.1 — Calendar date correctness only
 - [x] Audit projection dependencies, half-open occupancy and civil-date conversion; live catalog read-only, no production writes.
 - [x] Correct proven projection/form-date defects without UX, inventory-status, pricing rules or backend/writer changes.
