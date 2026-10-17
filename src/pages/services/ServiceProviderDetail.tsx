@@ -50,7 +50,7 @@ const ServiceProviderDetail = () => {
   const [booking, setBooking] = useState<BookableService | null>(null);
 
   // Real DB data
-  const { provider, services, isLoading } = useProviderDetails(id || null);
+  const { provider, services, isLoading } = useProviderDetails(id || null, 'public');
   const { reviews, stats, isLoading: reviewsLoading } = useReviews({
     itemType: "provider",
     itemId: id || "",

@@ -6,7 +6,8 @@ const responses: Record<string, Result | (() => Promise<Result>)> = {};
 
 function chain(table: string) {
   const resolve = () => {
-    const r = responses[table] ?? { data: [], error: null };
+    const key = table === 'public_provider_catalog' ? 'providers' : table === 'public_service_catalog' ? 'services' : table;
+    const r = responses[key] ?? { data: [], error: null };
     return typeof r === 'function' ? r() : Promise.resolve(r);
   };
   const q: Record<string, unknown> = {};

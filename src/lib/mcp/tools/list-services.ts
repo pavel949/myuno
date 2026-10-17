@@ -24,7 +24,7 @@ export default defineTool({
     );
 
     let q = supabase.from("public_service_catalog").select("*").limit(limit);
-    if (query) q = q.or(`name.ilike.%${query}%,description.ilike.%${query}%`);
+    if (query) q = q.or(`name_en.ilike.%${query.replace(/[,%()]/g, ' ')}%,name_ru.ilike.%${query.replace(/[,%()]/g, ' ')}%`);
     if (category) q = q.eq("category_slug", category);
 
     const { data, error } = await q;
