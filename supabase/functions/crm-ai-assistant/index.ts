@@ -1,7 +1,7 @@
 import { createServiceClient } from "../_shared/supabase.ts";
 import { requireAuth } from "../_shared/auth-guard.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
-import { fetchUserRoles, hasAnyRole, forbidden, STAFF_ROLES } from "../_shared/authz.ts";
+import { requireActorRpc } from "../_shared/authz.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://myuno.app',
@@ -30,11 +30,11 @@ Deno.serve(async (req) => {
       });
     }
 
+    const denied = await requireActorRpc(req, corsHeaders, 'actor_can_analyze_crm', {
+      p_company_id: company_id ?? null, p_contact_id: contact_id ?? null, p_deal_id: deal_id ?? null,
+    });
+    if (denied) return denied;
     const supabase = createServiceClient();
-
-    // Authorization: caller must be admin/uno_team OR active MC member of the contact/deal owner company.
-    const roles = await fetchUserRoles(supabase, auth.user.id);
-    const isStaff = hasAnyRole(roles, STAFF_ROLES);
 
     let contactData: any = null;
     let dealData: any = null;
@@ -56,18 +56,6 @@ Deno.serve(async (req) => {
       const { data } = await supabase.from('agent_deals').select('*').eq('id', deal_id).single();
       dealData = data;
       ownerCompanyId = ownerCompanyId || data?.company_id || null;
-    }
-
-    if (!isStaff) {
-      if (!ownerCompanyId) return forbidden(corsHeaders);
-      const { data: mcMember } = await supabase
-        .from('management_company_members')
-        .select('user_id')
-        .eq('company_id', ownerCompanyId)
-        .eq('user_id', auth.user.id)
-        .eq('is_active', true)
-        .maybeSingle();
-      if (!mcMember) return forbidden(corsHeaders);
     }
 
     const prompts: Record<string, string> = {

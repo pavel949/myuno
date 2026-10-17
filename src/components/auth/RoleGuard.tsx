@@ -63,7 +63,7 @@ export function RoleGuard({
   }
 
   // Server-resolved admin always passes
-  if (context?.role === 'admin' || context?.role === 'uno_team') {
+  if (context?.role === 'admin') {
     return <>{children}</>;
   }
 
@@ -74,7 +74,7 @@ export function RoleGuard({
   const serverRole = context?.role;
   const hasAllowedRole = allowedRoles.some(role =>
     role === serverRole ||
-    permissions.includes('*') ||
+    (serverRole !== 'uno_team' && permissions.includes('*')) ||
     permissions.includes(role)
   );
 
@@ -117,7 +117,7 @@ export function withRoleGuard<P extends object>(
  */
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   return (
-    <RoleGuard allowedRoles={['admin', 'uno_team']} fallbackPath="/">
+    <RoleGuard allowedRoles={['admin']} fallbackPath="/">
       {children}
     </RoleGuard>
   );
@@ -128,7 +128,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
  */
 export function StaffGuard({ children }: { children: React.ReactNode }) {
   return (
-    <RoleGuard allowedRoles={['staff', 'admin', 'uno_team']} fallbackPath="/">
+    <RoleGuard allowedRoles={['staff', 'admin']} fallbackPath="/">
       {children}
     </RoleGuard>
   );

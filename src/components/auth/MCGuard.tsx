@@ -14,7 +14,7 @@ import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 export function MCGuard({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
-  const { context, isLoading: contextLoading, isAdminMode } = useResolvedContext();
+  const { context, isLoading: contextLoading } = useResolvedContext();
   const { companies, activeCompany, isLoading: companiesLoading } = useActiveCompany();
 
   if (authLoading || contextLoading || companiesLoading) {
@@ -30,7 +30,7 @@ export function MCGuard({ children }: { children: React.ReactNode }) {
   }
 
   // Server-resolved admin access
-  if (isAdminMode || context?.role === 'admin' || context?.role === 'uno_team') {
+  if (context?.role === 'admin') {
     return <>{children}</>;
   }
 

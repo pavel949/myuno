@@ -25,7 +25,7 @@ import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 export function InvestorGuard({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
-  const { context, isLoading: contextLoading, isAdminMode } = useResolvedContext();
+  const { context, isLoading: contextLoading } = useResolvedContext();
 
   if (authLoading || contextLoading) {
     return (
@@ -41,9 +41,7 @@ export function InvestorGuard({ children }: { children: React.ReactNode }) {
 
   const serverRole = context?.role ?? null;
   const isPrivileged =
-    isAdminMode ||
     serverRole === 'admin' ||
-    serverRole === 'uno_team' ||
     serverRole === 'capital_team' ||
     serverRole === 'investor';
 

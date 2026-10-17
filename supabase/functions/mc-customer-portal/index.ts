@@ -1,6 +1,7 @@
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
-import { requireCompanyMember } from "../_shared/authz.ts";
+import { requireActorRpc } from "../_shared/authz.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
 
@@ -11,24 +12,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabase = createServiceClient();
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header");
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !userData.user) throw new Error("Not authenticated");
-
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
     const { company_id } = await req.json();
-    if (!company_id) throw new Error("company_id is required");
-
-    // IDOR guard: caller must be an active member of the requested MC
-    // (or a platform admin).
-    const guard = await requireCompanyMember(supabase, userData.user.id, company_id, corsHeaders, {
-      memberRoles: ["owner", "admin", "billing"],
-    });
-    if (guard) return guard;
+    if (!company_id) throw new Error('company_id is required');
+    const denied = await requireActorRpc(req, corsHeaders, 'actor_can_manage_company_billing', { p_company_id: company_id });
+    if (denied) return denied;
+    const supabase = createServiceClient();
 
     const { data: company } = await supabase
       .from("management_companies")

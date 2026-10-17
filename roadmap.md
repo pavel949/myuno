@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · E2.8 — UNO_TEAM least privilege
+- [ ] Inventory source/live authorization, classify bypasses and concrete legitimate capabilities.
+- [ ] Narrow proven private generic-employment grants; exact isolated SQL and synthetic edge regressions before live deployment.
+- [ ] Read-only verification, rollback, bypass register and E2.8 report; no enforcement, seed, Order Mutation Audit or E3.
+
 ## 2026-10-17 · E2.5 continuation
 - [x] 0025 delegate/placement guards, tests, rollback, register and report updated.
 - [x] Authenticated private-column exposure on approved properties closed (0026, 0027).
