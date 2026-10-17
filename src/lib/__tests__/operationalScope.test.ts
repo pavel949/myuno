@@ -111,4 +111,30 @@ describe('shadow operational scope lifecycle (no production network)', () => {
     expect(operationalScopeQueryKey(id(1), ready())).not.toEqual(operationalScopeQueryKey(id(9), ready()));
     expect(operationalScopeQueryKey(id(1), ready())).not.toEqual(operationalScopeQueryKey(id(1), ready({ activeCompanyId: id(7) })));
   });
+  it('echoed preference cannot turn selected scope into broader All', async () => {
+    const read = vi.fn().mockResolvedValueOnce(ready()).mockResolvedValueOnce(ready({
+      requestedSpaceId: id(3), mode: 'all_authorized', activeSpaceId: null,
+      authorizedSpaceIds: [id(3), id(5)], authorizedPropertyIds: [id(4), id(6)],
+    }));
+    const resolver = new OperationalScopeResolver({ read, cache });
+    await resolver.setContext(context);
+    const result = await resolver.selectSpace(id(3));
+    expect(result.status).toBe('error'); expect(result.authorizedPropertyIds).toEqual([]);
+  });
+  it('out-of-order refresh/selection cannot restore scope or overwrite preference', async () => {
+    let finish: ((value: unknown) => void) | undefined;
+    const read = vi.fn().mockResolvedValueOnce(ready())
+      .mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }))
+      .mockResolvedValueOnce(ready({ requestedSpaceId: id(5), activeSpaceId: id(5),
+        authorizedSpaceIds: [id(3), id(5)], authorizedPropertyIds: [id(6)], revision: 'new' }));
+    const resolver = new OperationalScopeResolver({ read, cache, storage: localStorage });
+    await resolver.setContext(context);
+    const old = resolver.refresh();
+    await vi.waitFor(() => expect(read).toHaveBeenCalledTimes(2));
+    await resolver.selectSpace(id(5));
+    finish?.(ready({ revision: 'old' })); await old;
+    expect(resolver.snapshot.revision).toBe('new');
+    expect(resolver.snapshot.authorizedPropertyIds).toEqual([id(6)]);
+    expect(localStorage.getItem(`operational-scope-v1:preference:${id(1)}:${id(2)}`)).toBe(id(5));
+  });
 });

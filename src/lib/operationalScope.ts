@@ -118,6 +118,9 @@ export class OperationalScopeResolver {
         throw new Error('Non-ready scope contains access');
       if (result.status === 'ready' && (result.enforcement !== 'enforced'
         || (result.mode === 'space' && (!result.activeSpaceId || !result.authorizedSpaceIds.includes(result.activeSpaceId)))
+        || (requested !== null && (result.mode !== 'space' || result.activeSpaceId !== requested))
+        || (result.mode === 'all_authorized' && result.activeSpaceId !== null)
+        || (result.mode === 'space' && result.unassignedPropertyIds.length > 0)
         || (!result.isCompanyOverseer && result.unassignedPropertyIds.length)))
         throw new Error('Invalid scope contract');
       if (previousRevision !== result.revision) await this.evict();

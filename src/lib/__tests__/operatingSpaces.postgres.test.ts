@@ -196,6 +196,19 @@ describe('E2 server shadow scope', () => {
     expect((await resolve(U.platform)).isCompanyOverseer).toBe(true);
     await expect(as(U.team, tx => tx`INSERT INTO operating_space_members (operating_space_id, company_member_id, management_company_id) VALUES (${S.condo}, ${M.resortMgr}, ${CO_A})`)).rejects.toThrow(/row-level security/);
   });
+  it('uno_team explicit membership grants only joined space, not global oversight', async () => {
+    await sql.begin(async tx => {
+      await tx`INSERT INTO management_company_members VALUES (${id(29)}, ${CO_A}, ${U.team}, 'manager', true)`;
+      await tx`INSERT INTO operating_space_members (operating_space_id, company_member_id, management_company_id) VALUES (${S.resort}, ${id(29)}, ${CO_A})`;
+      await tx.unsafe('SET LOCAL ROLE authenticated');
+      await tx`SELECT set_config('request.jwt.claim.sub', ${U.team}, true)`;
+      const result = (await tx`SELECT resolve_operational_scope(${CO_A}::uuid, NULL::uuid) scope`)[0].scope;
+      expect(result.isCompanyOverseer).toBe(false);
+      expect(result.authorizedSpaceIds).toEqual([S.resort]);
+      expect(result.authorizedPropertyIds).toEqual([P.villa]);
+      throw new Error('explicit-grant-test');
+    }).catch(error => { if (!(error instanceof Error) || error.message !== 'explicit-grant-test') throw error; });
+  });
   it('revoked company/space membership and reassigned properties change scope revision', async () => {
     const before = await resolve(U.resortMgr);
     await sql`UPDATE operating_space_members SET is_active = false WHERE company_member_id = ${M.resortMgr}`;
