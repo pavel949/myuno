@@ -488,3 +488,49 @@ describe('E2.6 cutover-blocker ceilings', () => {
     }).catch(e => { if (!(e instanceof Error) || e.message !== 'rb-ok') throw e; });
   });
 });
+
+describe('E2.5 continuation: delegation and company placement guards (legacy mode)', () => {
+  const D = id(131); const invitee = id(132);
+  beforeAll(async () => {
+    const path = process.env.E27_MIGRATION ?? join('drizzle/migrations', readdirSync('drizzle/migrations').find(f => /delegation_company_guards/.test(f)) ?? 'missing');
+    await sql.unsafe(readFileSync(path, 'utf8'));
+    await sql`UPDATE properties SET owner_id=${U.zero} WHERE id=${P.otherCo}`;
+    await sql`INSERT INTO property_delegates(id,property_id,invited_by,user_id,role,permissions,status) VALUES (${D},${P.otherCo},${U.zero},${invitee},'viewer','{"financials":false}','pending')`;
+  });
+  it('invitee can accept but cannot rewrite role, permissions or property', async () => {
+    await expect(as(invitee, tx => tx`UPDATE property_delegates SET status='accepted', permissions='{"financials":true}' WHERE id=${D}`)).rejects.toThrow(/only accept or decline/);
+    await expect(as(invitee, tx => tx`UPDATE property_delegates SET role='manager' WHERE id=${D}`)).rejects.toThrow(/only accept or decline/);
+    await expect(as(invitee, tx => tx`UPDATE property_delegates SET property_id=${P.villa} WHERE id=${D}`)).rejects.toThrow(/only accept or decline|row-level/);
+    await sql.begin(async tx => {
+      await tx.unsafe('SET LOCAL ROLE authenticated'); await tx`SELECT set_config('request.jwt.claim.sub',${invitee},true)`;
+      expect(await tx`UPDATE property_delegates SET status='accepted' WHERE id=${D} RETURNING id`).toHaveLength(1);
+      throw new Error('accept-ok');
+    }).catch(e => { if (!(e instanceof Error) || e.message !== 'accept-ok') throw e; });
+  });
+  it('owner/inviter can still change permissions', async () => {
+    await sql.begin(async tx => {
+      await tx.unsafe('SET LOCAL ROLE authenticated'); await tx`SELECT set_config('request.jwt.claim.sub',${U.zero},true)`;
+      expect(await tx`UPDATE property_delegates SET permissions='{"financials":true}' WHERE id=${D} RETURNING id`).toHaveLength(1);
+      throw new Error('owner-ok');
+    }).catch(e => { if (!(e instanceof Error) || e.message !== 'owner-ok') throw e; });
+  });
+  it('non-member cannot insert a property into a company; member manager and personal insert allowed', async () => {
+    await expect(as(U.zero, tx => tx`INSERT INTO properties(management_company_id) VALUES (${CO_B})`)).rejects.toThrow(/row-level security/);
+    await expect(as(U.team, tx => tx`INSERT INTO properties(management_company_id) VALUES (${CO_B})`)).rejects.toThrow(/row-level security/);
+    await sql.begin(async tx => {
+      await tx.unsafe('SET LOCAL ROLE authenticated'); await tx`SELECT set_config('request.jwt.claim.sub',${U.otherCo},true)`;
+      await tx`INSERT INTO properties(management_company_id) VALUES (${CO_B})`;
+      await tx`INSERT INTO properties(management_company_id) VALUES (NULL)`;
+      throw new Error('place-ok');
+    }).catch(e => { if (!(e instanceof Error) || e.message !== 'place-ok') throw e; });
+  });
+  it('owner/manager cannot move a property between companies; overseer of both can', async () => {
+    await expect(as(U.zero, tx => tx`UPDATE properties SET management_company_id=${CO_A} WHERE id=${P.otherCo}`)).rejects.toThrow(/company reassignment|row-level/);
+    await expect(as(U.resortMgr, tx => tx`UPDATE properties SET management_company_id=NULL WHERE id=${P.villa}`)).rejects.toThrow(/company reassignment|row-level|foreign key/);
+    await sql.begin(async tx => {
+      await tx.unsafe('SET LOCAL ROLE authenticated'); await tx`SELECT set_config('request.jwt.claim.sub',${U.otherCo},true)`;
+      await tx`UPDATE properties SET management_company_id=NULL WHERE id=${P.otherCo}`;
+      throw new Error('move-ok');
+    }).catch(e => { if (!(e instanceof Error) || e.message !== 'move-ok') throw e; });
+  });
+});

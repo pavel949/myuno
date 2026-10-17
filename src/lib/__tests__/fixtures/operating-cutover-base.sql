@@ -49,3 +49,9 @@ ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 CREATE POLICY member_read ON storage.objects FOR SELECT TO authenticated USING (bucket_id='mc-backups' AND (storage.foldername(name))[1] IN
  (SELECT company_id::text FROM public.management_company_members WHERE user_id=auth.uid() AND is_active));
 CREATE POLICY other_read ON storage.objects FOR SELECT TO authenticated USING (bucket_id<>'mc-backups');
+-- E2.5 continuation stand-ins.
+ALTER TABLE public.property_delegates ADD COLUMN user_id uuid, ADD COLUMN role text, ADD COLUMN permissions jsonb,
+ ADD COLUMN invited_email text, ADD COLUMN status text DEFAULT 'pending', ADD COLUMN expires_at timestamptz, ADD COLUMN accepted_at timestamptz;
+CREATE FUNCTION public.has_role(actor uuid, r text) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS
+ $$ SELECT EXISTS(SELECT 1 FROM user_roles WHERE user_id=actor AND role=r) $$;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid,text) TO authenticated;
