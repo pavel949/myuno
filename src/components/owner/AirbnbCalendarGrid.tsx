@@ -1,4 +1,4 @@
-import { parseCivilDate, bangkokTodayDate, bangkokTodayISO, civilDateKey, stayHasDayEvent } from '@/lib/hotelDates';
+import { parseCivilDate, bangkokTodayDate, bangkokTodayISO, civilDateKey, stayHasDayEvent, civilStaySpan } from '@/lib/hotelDates';
 import { useState, useMemo, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyBookings, PropertyBooking } from '@/hooks/usePropertyBookings';
@@ -116,28 +116,15 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
     weeks.forEach((week, weekIdx) => {
       const spans: BookingSpan[] = [];
       const weekStart = week[0];
-      const weekEnd = week[6];
-
       bookings.forEach(booking => {
-        const bStart = parseCivilDate(booking.check_in);
-        const bEnd = parseCivilDate(booking.check_out);
-        // check_out is exclusive (guest leaves that day)
-        const bEndInclusive = addDays(bEnd, -1);
-
-        // Does booking overlap this week?
-        if (bStart > weekEnd || bEndInclusive < weekStart) return;
-
-        const startCol = bStart < weekStart ? 0 : week.findIndex(d => isSameDay(d, bStart));
-        const endCol = bEndInclusive > weekEnd ? 6 : week.findIndex(d => isSameDay(d, bEndInclusive));
-        
-        if (startCol === -1 || endCol === -1) return;
-
+        const span = civilStaySpan(booking, weekStart, 7);
+        if (!span) return;
         spans.push({
           booking,
-          startCol: Math.max(0, startCol),
-          spanCols: Math.max(1, endCol - Math.max(0, startCol) + 1),
-          isStart: bStart >= weekStart && bStart <= weekEnd,
-          isEnd: bEndInclusive >= weekStart && bEndInclusive <= weekEnd,
+          startCol: span.startOffset,
+          spanCols: span.endOffset - span.startOffset,
+          isStart: span.isStart,
+          isEnd: span.isEnd,
         });
       });
 
