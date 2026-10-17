@@ -324,6 +324,15 @@ $function$
 
 REVOKE ALL ON FUNCTION public.can_manage_property_e28_private(uuid) FROM PUBLIC,anon; GRANT EXECUTE ON FUNCTION public.can_manage_property_e28_private(uuid) TO authenticated,service_role;
 
+-- Safe policy evaluator returns false before any private helper for anonymous callers.
+CREATE FUNCTION public.public_policy_property_manager(p_property_id uuid) RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=public AS $$
+BEGIN
+ IF auth.uid() IS NULL THEN RETURN false; END IF;
+ RETURN public.can_manage_property_e28_private(p_property_id);
+END $$;
+REVOKE ALL ON FUNCTION public.public_policy_property_manager(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.public_policy_property_manager(uuid) TO anon,authenticated,service_role;
+
 CREATE OR REPLACE FUNCTION public.user_has_clearview_access_e28_private(_project_id uuid)
  RETURNS boolean
  LANGUAGE sql
@@ -732,9 +741,9 @@ ALTER POLICY "Admins can manage all memberships" ON "public"."management_company
    FROM user_roles
   WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role]))))));
 
-ALTER POLICY "Company admins can manage members" ON "public"."management_company_members" USING (is_company_admin_e28_private(company_id)) WITH CHECK (is_company_admin_e28_private(company_id));
+ALTER POLICY "Company admins can manage members" ON "public"."management_company_members" TO authenticated USING (is_company_admin_e28_private(company_id)) WITH CHECK (is_company_admin_e28_private(company_id));
 
-ALTER POLICY "Members can view their company colleagues" ON "public"."management_company_members" USING (((is_active = true) AND ((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private() OR (company_id IN ( SELECT get_user_company_ids() AS get_user_company_ids)))));
+ALTER POLICY "Members can view their company colleagues" ON "public"."management_company_members" TO authenticated USING (((is_active = true) AND ((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private() OR (company_id IN ( SELECT get_user_company_ids() AS get_user_company_ids)))));
 
 ALTER POLICY "Directors can insert terms activity" ON "public"."management_terms_activity" WITH CHECK (((user_id = auth.uid()) AND (is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
    FROM management_company_members
@@ -748,11 +757,11 @@ ALTER POLICY "orders_admin_select_all" ON "public"."orders" USING (is_admin_or_u
 
 ALTER POLICY "orders_admin_update" ON "public"."orders" USING (is_admin_or_uno_team_e28_private());
 
-ALTER POLICY "Admins can view all OTA connections" ON "public"."ota_listing_connections" USING (is_admin_or_uno_team_e28_private());
+ALTER POLICY "Admins can view all OTA connections" ON "public"."ota_listing_connections" TO authenticated USING (is_admin_or_uno_team_e28_private());
 
-ALTER POLICY "Admins can view all sync logs" ON "public"."ota_sync_logs" USING (is_admin_or_uno_team_e28_private());
+ALTER POLICY "Admins can view all sync logs" ON "public"."ota_sync_logs" TO authenticated USING (is_admin_or_uno_team_e28_private());
 
-ALTER POLICY "Admins can view all synced listings" ON "public"."ota_synced_listings" USING (is_admin_or_uno_team_e28_private());
+ALTER POLICY "Admins can view all synced listings" ON "public"."ota_synced_listings" TO authenticated USING (is_admin_or_uno_team_e28_private());
 
 ALTER POLICY "pageviews_select" ON "public"."page_views" USING (((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()));
 
@@ -766,11 +775,11 @@ ALTER POLICY "mc_member_update_company_properties_v2" ON "public"."properties" U
 
 ALTER POLICY "property_amenities_manage" ON "public"."property_amenities" USING (can_manage_property_e28_private(property_id)) WITH CHECK (can_manage_property_e28_private(property_id));
 
-ALTER POLICY "property_amenities_public_read" ON "public"."property_amenities" USING ((property_is_public(property_id) OR can_manage_property_e28_private(property_id)));
+ALTER POLICY "property_amenities_public_read" ON "public"."property_amenities" USING ((property_is_public(property_id) OR public_policy_property_manager(property_id)));
 
-ALTER POLICY "Admins can insert analytics" ON "public"."property_analytics" WITH CHECK (is_admin_or_uno_team_e28_private());
+ALTER POLICY "Admins can insert analytics" ON "public"."property_analytics" TO authenticated WITH CHECK (is_admin_or_uno_team_e28_private());
 
-ALTER POLICY "Admins can update analytics" ON "public"."property_analytics" USING (is_admin_or_uno_team_e28_private());
+ALTER POLICY "Admins can update analytics" ON "public"."property_analytics" TO authenticated USING (is_admin_or_uno_team_e28_private());
 
 ALTER POLICY "Chat: participant scoped insert" ON "public"."property_chat_messages" WITH CHECK (((sender_id = auth.uid()) AND (is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
    FROM properties p
@@ -836,7 +845,7 @@ ALTER POLICY "Managers manage rate plans" ON "public"."property_rate_plans" USIN
 
 ALTER POLICY "property_reviews_host_manage" ON "public"."property_reviews" USING (can_manage_property_e28_private(property_id)) WITH CHECK (can_manage_property_e28_private(property_id));
 
-ALTER POLICY "property_reviews_public_read" ON "public"."property_reviews" USING ((((is_public = true) AND property_is_public(property_id)) OR can_manage_property_e28_private(property_id) OR (reviewer_id = auth.uid())));
+ALTER POLICY "property_reviews_public_read" ON "public"."property_reviews" USING ((((is_public = true) AND property_is_public(property_id)) OR public_policy_property_manager(property_id) OR (reviewer_id = auth.uid())));
 
 ALTER POLICY "Managers read categories" ON "public"."property_room_categories" USING (can_manage_property_e28_private(property_id));
 
@@ -883,36 +892,36 @@ ALTER POLICY "system_settings_admin_write" ON "public"."system_settings" USING (
 
 ALTER POLICY "Author or admin can view task comments" ON "public"."task_comments" USING (((author_id = auth.uid()) OR has_role(auth.uid(), 'admin'::app_role) OR false));
 
-ALTER POLICY "Team members can insert own activity" ON "public"."team_activity_log" WITH CHECK (((auth.uid() = user_id) AND is_team_member_e28_private(auth.uid())));
+ALTER POLICY "Team members can insert own activity" ON "public"."team_activity_log" TO authenticated WITH CHECK (((auth.uid() = user_id) AND is_team_member_e28_private(auth.uid())));
 
-ALTER POLICY "Team members can view channels" ON "public"."team_channels" USING (is_team_member_e28_private(auth.uid()));
+ALTER POLICY "Team members can view channels" ON "public"."team_channels" TO authenticated USING (is_team_member_e28_private(auth.uid()));
 
 ALTER POLICY "Team members can view all team members" ON "public"."team_members" USING ((has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role) OR (user_id = auth.uid())));
 
-ALTER POLICY "Team members can send messages" ON "public"."team_messages" WITH CHECK (((auth.uid() = sender_id) AND is_team_member_e28_private(auth.uid())));
+ALTER POLICY "Team members can send messages" ON "public"."team_messages" TO authenticated WITH CHECK (((auth.uid() = sender_id) AND is_team_member_e28_private(auth.uid())));
 
-ALTER POLICY "Team members can view messages" ON "public"."team_messages" USING ((is_team_member_e28_private(auth.uid()) AND (is_deleted = false)));
+ALTER POLICY "Team members can view messages" ON "public"."team_messages" TO authenticated USING ((is_team_member_e28_private(auth.uid()) AND (is_deleted = false)));
 
-ALTER POLICY "Team can view all user achievements" ON "public"."team_user_achievements" USING (is_team_member_e28_private(auth.uid()));
+ALTER POLICY "Team can view all user achievements" ON "public"."team_user_achievements" TO authenticated USING (is_team_member_e28_private(auth.uid()));
 
-ALTER POLICY "thai_bookings_select" ON "public"."thai_bookings" USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+ALTER POLICY "thai_bookings_select" ON "public"."thai_bookings" TO authenticated USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
    FROM thai_businesses b
   WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private()));
 
-ALTER POLICY "thai_bookings_update" ON "public"."thai_bookings" USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+ALTER POLICY "thai_bookings_update" ON "public"."thai_bookings" TO authenticated USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
    FROM thai_businesses b
   WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private()));
 
-ALTER POLICY "thai_chat_messages_select" ON "public"."thai_chat_messages" USING (((EXISTS ( SELECT 1
+ALTER POLICY "thai_chat_messages_select" ON "public"."thai_chat_messages" TO authenticated USING (((EXISTS ( SELECT 1
    FROM (thai_chats c
      JOIN thai_businesses b ON ((b.id = c.business_id)))
   WHERE ((c.id = thai_chat_messages.chat_id) AND ((c.customer_id = auth.uid()) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team_e28_private()));
 
-ALTER POLICY "thai_chats_select" ON "public"."thai_chats" USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+ALTER POLICY "thai_chats_select" ON "public"."thai_chats" TO authenticated USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
    FROM thai_businesses b
   WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private()));
 
-ALTER POLICY "thai_chats_update" ON "public"."thai_chats" USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+ALTER POLICY "thai_chats_update" ON "public"."thai_chats" TO authenticated USING (((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
    FROM thai_businesses b
   WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private()));
 
@@ -920,9 +929,9 @@ ALTER POLICY "Admins read partner leads" ON "public"."thai_partner_leads" USING 
 
 ALTER POLICY "Admins update partner leads" ON "public"."thai_partner_leads" USING ((has_role(auth.uid(), 'admin'::app_role) OR false)) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR false));
 
-ALTER POLICY "Admins can update documents for verification" ON "public"."user_documents" USING (is_admin_or_uno_team_e28_private());
+ALTER POLICY "Admins can update documents for verification" ON "public"."user_documents" TO authenticated USING (is_admin_or_uno_team_e28_private());
 
-ALTER POLICY "Admins can view all documents for verification" ON "public"."user_documents" USING (is_admin_or_uno_team_e28_private());
+ALTER POLICY "Admins can view all documents for verification" ON "public"."user_documents" TO authenticated USING (is_admin_or_uno_team_e28_private());
 
 ALTER POLICY "events_select" ON "public"."user_events" USING (((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()));
 
