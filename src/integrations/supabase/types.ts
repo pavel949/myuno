@@ -1971,8 +1971,22 @@ export type Database = {
             foreignKeyName: "bookings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
+          },
+          {
+            foreignKeyName: "bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_service_catalog"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "bookings_service_id_fkey"
@@ -3739,6 +3753,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cleaning_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -8084,6 +8105,13 @@ export type Database = {
             foreignKeyName: "education_providers_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "education_providers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -8382,6 +8410,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -8750,6 +8785,13 @@ export type Database = {
             foreignKeyName: "flower_shops_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flower_shops_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -9111,6 +9153,13 @@ export type Database = {
             foreignKeyName: "gyms_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gyms_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -9411,6 +9460,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_providers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -11112,6 +11168,13 @@ export type Database = {
             foreignKeyName: "legal_services_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -11771,6 +11834,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -12218,6 +12288,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: true
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "management_companies_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -16722,6 +16799,13 @@ export type Database = {
             foreignKeyName: "pharmacies_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pharmacies_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -18983,6 +19067,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -23592,6 +23683,13 @@ export type Database = {
             foreignKeyName: "provider_availability_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_availability_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -23638,6 +23736,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_badges_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -23831,6 +23936,13 @@ export type Database = {
             foreignKeyName: "provider_org_links_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: true
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_org_links_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -23882,6 +23994,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_payout_methods_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -25377,6 +25496,13 @@ export type Database = {
             foreignKeyName: "salon_services_salon_id_fkey"
             columns: ["salon_id"]
             isOneToOne: false
+            referencedRelation: "public_salon_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salon_services_salon_id_fkey"
+            columns: ["salon_id"]
+            isOneToOne: false
             referencedRelation: "salons"
             referencedColumns: ["id"]
           },
@@ -25450,6 +25576,13 @@ export type Database = {
           working_hours?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "salon_staff_salon_id_fkey"
+            columns: ["salon_id"]
+            isOneToOne: false
+            referencedRelation: "public_salon_catalog"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "salon_staff_salon_id_fkey"
             columns: ["salon_id"]
@@ -25587,6 +25720,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salons_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -25777,8 +25917,22 @@ export type Database = {
             foreignKeyName: "service_orders_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_orders_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
+          },
+          {
+            foreignKeyName: "service_orders_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "public_service_catalog"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "service_orders_service_id_fkey"
@@ -25973,6 +26127,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -26510,6 +26671,13 @@ export type Database = {
             foreignKeyName: "stores_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stores_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -26676,6 +26844,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -27898,6 +28073,13 @@ export type Database = {
             foreignKeyName: "thai_businesses_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "thai_businesses_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -28431,6 +28613,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -29702,6 +29891,13 @@ export type Database = {
             foreignKeyName: "vendor_bookings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_bookings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -30070,6 +30266,13 @@ export type Database = {
             foreignKeyName: "vendor_payouts_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_payouts_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -30277,6 +30480,13 @@ export type Database = {
             foreignKeyName: "vendor_prospects_converted_provider_id_fkey"
             columns: ["converted_provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_prospects_converted_provider_id_fkey"
+            columns: ["converted_provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -30340,6 +30550,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -30410,6 +30627,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: true
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_subscriptions_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: true
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -30668,6 +30892,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "veterinary_clinics_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -31082,6 +31313,13 @@ export type Database = {
             foreignKeyName: "water_activities_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "water_activities_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -31488,6 +31726,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -31599,6 +31844,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -31701,6 +31953,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -31830,6 +32089,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -32052,6 +32318,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -32184,6 +32457,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -32892,6 +33172,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -33465,6 +33752,332 @@ export type Database = {
             foreignKeyName: "properties_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
+          },
+        ]
+      }
+      public_provider_catalog: {
+        Row: {
+          address: string | null
+          approval_status: string | null
+          booking_flow: string | null
+          business_category: string | null
+          city_id: string | null
+          cover_image: string | null
+          coverage_areas: string[] | null
+          created_at: string | null
+          description_en: string | null
+          description_ru: string | null
+          email: string | null
+          has_guarantee: boolean | null
+          has_insurance: boolean | null
+          has_machine_translation: boolean | null
+          id: string | null
+          is_active: boolean | null
+          is_demo: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          logo_url: string | null
+          name: string | null
+          phone: string | null
+          provider_type: string | null
+          rating: number | null
+          response_time_minutes: number | null
+          review_count: number | null
+          service_domains: string[] | null
+          trust_score: number | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          approval_status?: string | null
+          booking_flow?: string | null
+          business_category?: string | null
+          city_id?: string | null
+          cover_image?: string | null
+          coverage_areas?: string[] | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: never
+          has_guarantee?: boolean | null
+          has_insurance?: boolean | null
+          has_machine_translation?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          is_demo?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          logo_url?: string | null
+          name?: string | null
+          phone?: never
+          provider_type?: string | null
+          rating?: number | null
+          response_time_minutes?: number | null
+          review_count?: number | null
+          service_domains?: string[] | null
+          trust_score?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          approval_status?: string | null
+          booking_flow?: string | null
+          business_category?: string | null
+          city_id?: string | null
+          cover_image?: string | null
+          coverage_areas?: string[] | null
+          created_at?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          email?: never
+          has_guarantee?: boolean | null
+          has_insurance?: boolean | null
+          has_machine_translation?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          is_demo?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          logo_url?: string | null
+          name?: string | null
+          phone?: never
+          provider_type?: string | null
+          rating?: number | null
+          response_time_minutes?: number | null
+          review_count?: number | null
+          service_domains?: string[] | null
+          trust_score?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "providers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_salon_catalog: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          approval_status: string | null
+          city_id: string | null
+          cover_image: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          district: string | null
+          email: string | null
+          id: string | null
+          images: string[] | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lat: number | null
+          lng: number | null
+          name_en: string | null
+          name_ru: string | null
+          phone: string | null
+          price_from: number | null
+          provider_id: string | null
+          rating: number | null
+          review_count: number | null
+          salon_type: string | null
+          services: string[] | null
+          updated_at: string | null
+          website: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          approval_status?: string | null
+          city_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: never
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: never
+          price_from?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          salon_type?: string | null
+          services?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          approval_status?: string | null
+          city_id?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description_en?: string | null
+          description_ru?: string | null
+          district?: string | null
+          email?: never
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          lat?: number | null
+          lng?: number | null
+          name_en?: string | null
+          name_ru?: string | null
+          phone?: never
+          price_from?: number | null
+          provider_id?: string | null
+          rating?: number | null
+          review_count?: number | null
+          salon_type?: string | null
+          services?: string[] | null
+          updated_at?: string | null
+          website?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salons_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salons_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salons_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salons_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["provider_id"]
+          },
+        ]
+      }
+      public_service_catalog: {
+        Row: {
+          approval_status: string | null
+          availability_mode: string | null
+          booking_flow: string | null
+          category: Json | null
+          category_id: string | null
+          category_slug: string | null
+          created_at: string | null
+          currency: string | null
+          description_en: string | null
+          description_ru: string | null
+          duration_minutes: number | null
+          id: string | null
+          images: string[] | null
+          is_active: boolean | null
+          is_verified: boolean | null
+          languages: string[] | null
+          lead_time_hours: number | null
+          location_id: string | null
+          name_en: string | null
+          name_ru: string | null
+          price: number | null
+          pricing_model: string | null
+          provider: Json | null
+          provider_id: string | null
+          tags: string[] | null
+          unit: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "v_provider_catalog_match"
+            referencedColumns: ["category_id"]
+          },
+          {
+            foreignKeyName: "services_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -33654,6 +34267,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -33786,6 +34406,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -34137,6 +34764,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "public_provider_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -34848,6 +35482,13 @@ export type Database = {
             foreignKeyName: "properties_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -35354,6 +35995,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -35672,6 +36320,13 @@ export type Database = {
             foreignKeyName: "listings_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
+            referencedRelation: "public_provider_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
             referencedRelation: "v_provider_catalog_match"
             referencedColumns: ["provider_id"]
           },
@@ -35725,6 +36380,10 @@ export type Database = {
       }
       actor_can_manage_company_billing: {
         Args: { p_company_id: string }
+        Returns: boolean
+      }
+      actor_can_notify_property_submission: {
+        Args: { p_property_id: string }
         Returns: boolean
       }
       actor_can_operate_property: {
