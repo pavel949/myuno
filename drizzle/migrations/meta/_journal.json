@@ -197,6 +197,13 @@
       "when": 1792211595774,
       "tag": "0027_close_authenticated_private_property_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792214826129,
+      "tag": "0028_uno_team_private_helpers",
+      "breakpoints": true
     }
   ]
 }
