@@ -10,11 +10,14 @@ const root = process.cwd();
 const output = '/tmp/browser/calendar-isolated';
 await mkdir(output, { recursive: true });
 const fixture = `import {format, startOfWeek, addDays} from 'date-fns';
+import {ru,enUS} from 'date-fns/locale';
+import {bangkokTodayDate} from '${root}/src/lib/hotelDates.ts';
 export const properties=[{property_id:'fixture-home-1',title:'Spacious family apartment with panoramic sea view',title_ru:'Просторные семейные апартаменты с панорамным видом на море',project_id:'fixture-project',complex_id:null},{property_id:'fixture-home-2',title:'Second synthetic apartment',title_ru:'Вторые тестовые апартаменты',project_id:null,complex_id:null}];
-const today=new Date(); const start=startOfWeek(today,{weekStartsOn:1});
+const today=bangkokTodayDate(); const start=startOfWeek(today,{weekStartsOn:1});
 export const booking={id:'fixture-booking',property_id:'fixture-home-1',guest_name:'Alexandra / Александра — synthetic booking',status:'confirmed',check_in:format(start,'yyyy-MM-dd'),check_out:format(addDays(start,7),'yyyy-MM-dd'),total_amount:12345,currency:'THB'};
-export const task={id:'fixture-task',property_id:'fixture-home-1',task_type:'cleaning',status:'pending',scheduled_date:format(today,'yyyy-MM-dd')};`;
-const dialog = name => `import React from 'react'; export function ${name}({open,onOpenChange,booking,task,bookings}) {return open ? React.createElement('div',{role:'dialog','aria-label':'${name}'},booking?.id||task?.id||bookings?.[0]?.id||'fixture',React.createElement('button',{onClick:()=>onOpenChange(false)},'Close fixture')) : null;}`;
+export const task={id:'fixture-task',property_id:'fixture-home-1',task_type:'cleaning',status:'pending',scheduled_date:format(today,'yyyy-MM-dd')};
+window.fixtureCheckoutLabel=format(addDays(start,7),'d MMM yyyy',{locale:new URLSearchParams(location.search).get('lang')==='en'?enUS:ru});`;
+const dialog = name => `import React from 'react'; import {civilDateKey,stayOccupiesDate} from '${root}/src/lib/hotelDates.ts'; export function ${name}({open,onOpenChange,booking,task,bookings,date}) {return open ? React.createElement('div',{role:'dialog','aria-label':'${name}','data-occupied':date&&bookings?String(bookings.some(b=>stayOccupiesDate(b,civilDateKey(date)))):undefined},booking?.id||task?.id||bookings?.[0]?.id||'fixture',React.createElement('button',{onClick:()=>onOpenChange(false)},'Close fixture')) : null;}`;
 const virtual = {
   'fixture-data': fixture,
   '@/contexts/LanguageContext': `export const useLanguage = () => ({language:new URLSearchParams(location.search).get('lang')==='en'?'en':'ru'});`,

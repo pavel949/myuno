@@ -7,9 +7,8 @@ async def main():
     results=[]
     async with async_playwright() as p:
         browser=await p.chromium.launch(headless=True)
-        for lang in ['ru','en']:
-            for width in [375,390,430,1280]:
-                context=await browser.new_context(viewport={'width':width,'height':1800},has_touch=width<640,service_workers='block')
+        for tz,lang,width in [(tz,lang,width) for tz in ['UTC','Asia/Bangkok','America/New_York'] for lang in ['ru','en'] for width in [375,390,430,1280]]:
+                context=await browser.new_context(viewport={'width':width,'height':1800},has_touch=width<640,service_workers='block',timezone_id=tz)
                 blocked=[]; errors=[]
                 async def route(r):
                     url=r.request.url
@@ -48,6 +47,12 @@ async def main():
                 await page.get_by_role('button',name='Alexandra / Александра — synthetic booking:').first.click()
                 await expect(page.get_by_role('dialog',name='CalendarDayEventsSheet')).to_contain_text('fixture-booking')
                 await page.get_by_role('button',name='Close fixture').click()
+                checkout_label=await page.evaluate('window.fixtureCheckoutLabel')
+                await page.get_by_role('button',name=checkout_label,exact=True).click()
+                events=page.get_by_role('dialog',name='CalendarDayEventsSheet')
+                await expect(events).to_contain_text('fixture-booking')
+                await expect(events).to_have_attribute('data-occupied','false')
+                await page.get_by_role('button',name='Close fixture').click()
                 await bounds('single'); await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-single.png'))
                 await portfolio.click(); await expect(portfolio).to_have_attribute('aria-pressed','true')
                 await page.get_by_role('combobox').click()
@@ -66,10 +71,15 @@ async def main():
                 await page.get_by_role('button',name='Уборка' if lang=='ru' else 'Cleaning',exact=True).click()
                 await expect(page.get_by_role('dialog',name='TaskDetailSheet')).to_contain_text('fixture-task')
                 await page.get_by_role('button',name='Close fixture').click()
+                cell=page.get_by_role('button',name=('Просторные семейные апартаменты с панорамным видом на море' if lang=='ru' else 'Spacious family apartment with panoramic sea view')+': '+checkout_label,exact=True)
+                await cell.press('Enter')
+                await expect(page.get_by_role('dialog',name='CalendarDayEventsSheet')).to_contain_text('fixture-booking')
+                await expect(page.get_by_role('dialog',name='CalendarDayEventsSheet')).to_have_attribute('data-occupied','false')
+                await page.get_by_role('button',name='Close fixture').click()
                 await bounds('portfolio'); await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-portfolio.png'))
                 assert not errors,errors
                 assert not blocked,blocked
-                results.append({'language':lang,'width':width,'modes':'pass','scope':'pass','navigation':'pass','bookingTaskBoundaries':'pass','overflow':'none','runtimeErrors':errors,'externalRequests':len(blocked)})
+                results.append({'timezone':tz,'language':lang,'width':width,'checkoutEventNotOccupied':'pass','modes':'pass','scope':'pass','navigation':'pass','bookingTaskBoundaries':'pass','overflow':'none','runtimeErrors':errors,'externalRequests':len(blocked)})
                 await context.close()
         await browser.close()
     (OUTPUT/'results.json').write_text(json.dumps(results,ensure_ascii=False,indent=2)); print(json.dumps(results,ensure_ascii=False,indent=2))
