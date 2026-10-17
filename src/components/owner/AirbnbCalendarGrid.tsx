@@ -192,11 +192,11 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
     <>
       <div className="space-y-2 w-full min-w-0">
         {/* Month navigation */}
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between gap-1 min-w-0" role="group" aria-label={isRu ? 'Месяц календаря' : 'Calendar month'}>
           <Button variant="ghost" size="icon" aria-label={isRu ? 'Предыдущий месяц' : 'Previous month'} onClick={() => setCurrentMonth(m => subMonths(m, 1))}>
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <h2 className="text-lg font-semibold capitalize">
+          <h2 className="text-base font-semibold capitalize text-center min-w-0 break-words" aria-live="polite">
             {format(currentMonth, 'LLLL yyyy', { locale })}
           </h2>
           <Button variant="ghost" size="icon" aria-label={isRu ? 'Следующий месяц' : 'Next month'} onClick={() => setCurrentMonth(m => addMonths(m, 1))}>
@@ -238,10 +238,11 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                     return (
                       <button
                         key={dayIdx}
+                        aria-label={format(day, 'd MMM yyyy', { locale })}
                         onClick={() => handleDayClick(day)}
                         className={cn(
                           "h-16 sm:h-20 p-0.5 sm:p-1 flex flex-col items-start text-left transition-colors relative",
-                          "hover:bg-muted/50 active:bg-muted",
+                          "hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           !inMonth && "opacity-30",
                           isBlocked && "bg-destructive/5",
                         )}
@@ -324,7 +325,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                           <div
                             className={cn(
                               "absolute h-5 flex items-center px-1.5 text-[10px] font-medium cursor-pointer z-10",
-                              "bg-primary/80 text-primary-foreground hover:bg-primary/90 transition-colors",
+                              "bg-primary/80 text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring transition-colors",
                               span.isStart && "rounded-none ml-0.5",
                               span.isEnd && "rounded-none mr-0.5",
                               !span.isStart && !span.isEnd && "",
@@ -333,6 +334,16 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                               left: `${leftPercent}%`,
                               width: `calc(${widthPercent}% - ${(span.isStart ? 2 : 0) + (span.isEnd ? 2 : 0)}px)`,
                               top: '28px', // below date number
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`${span.booking.guest_name || guestInitials}: ${span.booking.status}, ${span.booking.check_in} — ${span.booking.check_out}`}
+                            title={`${span.booking.guest_name || guestInitials}: ${span.booking.status}`}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault(); e.stopPropagation();
+                                setSelectedDate(new Date(span.booking.check_in)); setShowEventsSheet(true);
+                              }
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
