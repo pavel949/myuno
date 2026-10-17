@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { bookingsListFixtures, type FixtureLanguage } from './bookingsList.fixtures';
 
@@ -20,6 +20,7 @@ vi.mock('@/hooks/usePropertyBookings', () => ({
 // exercises submission without a write, success notification or window reload.
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mocks.from } }));
 vi.mock('sonner', () => ({ toast: { error: mocks.error } }));
+vi.mock('@/hooks/useHaptic', () => ({ useHaptic: () => ({ trigger: vi.fn() }) }));
 vi.mock('@/components/owner/BookingDetailSheet', () => ({
   BookingDetailSheet: ({ open, booking, onOpenChange }: {
     open: boolean; booking: { id: string } | null; onOpenChange: (open: boolean) => void;
@@ -32,7 +33,7 @@ import MCBookingsPage from '../MCBookingsPage';
 
 function mount(language: FixtureLanguage) {
   mocks.language = language;
-  render(<MemoryRouter><MCBookingsPage /></MemoryRouter>);
+  render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><MCBookingsPage /></MemoryRouter>);
 }
 function selectFirst(language: FixtureLanguage) {
   const name = bookingsListFixtures(language)[0].guest_name;
@@ -76,7 +77,9 @@ describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => 
     fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Нет' : 'No', exact: true }));
     expect(mocks.from).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: actionLabel, exact: true }));
-    fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Да' : 'Yes', exact: true }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Да' : 'Yes', exact: true }));
+    });
     expect(mocks.from).toHaveBeenCalledExactlyOnceWith('orders');
     expect(mocks.update).toHaveBeenCalledExactlyOnceWith({ status: action === 'confirm' ? 'confirmed' : 'cancelled' });
     expect(mocks.in).toHaveBeenCalledExactlyOnceWith('id', ['fixture-booking-01']);
