@@ -1,11 +1,11 @@
 # Roadmap
 
 ## 2026-10-17 · Tranche 2A — documentation and architecture only
-- [ ] Create canonical connected-product blueprint, layered identity model and Rent/Buy Homes IA.
-- [ ] Audit current consumer Homes and PMS UX from source; distinguish proven code facts from runtime-only risks.
-- [ ] Cross-link PROJECT.md and convergence mapping without duplicating the blueprint.
-- [ ] Report exact files, evidence, SHA and smallest-blast-radius first UX implementation tranche.
-- [ ] No feature implementation, identity tables, CRM migration or inventory-contract reopening.
+- [x] Create canonical connected-product blueprint, layered identity model and Rent/Buy Homes IA.
+- [x] Audit current consumer Homes and PMS UX from source; distinguish proven code facts from runtime-only risks.
+- [x] Cross-link PROJECT.md and convergence mapping without duplicating the blueprint.
+- [x] Report exact files, evidence, SHA and smallest-blast-radius first UX implementation tranche.
+- [x] No feature implementation, identity tables, CRM migration or inventory-contract reopening.
 
 ## 2026-10-17 · Remaining Tranche 1 verification (no Tranche 2)
 - [ ] Obtain an independently reported typecheck result through permitted remote CI — blocked: no accessible GitHub connection/token or identified Actions repository.
