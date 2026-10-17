@@ -19,8 +19,9 @@ const postgresRoot = dirname(dirname(realpathSync(postgresBinary)));
 // Nix relocates binaries without pg_config; explicitly resolve its module path.
 const libraryPath = existsSync(join(postgresRoot, 'lib', 'dict_snowball.so')) ? join(postgresRoot, 'lib') : null;
 function run(binary: string, args: string[]) {
-  return asRoot ? execFileSync('runuser', ['-u', owner, '--', binary, ...args], { encoding: 'utf8' })
-    : execFileSync(binary, args, { encoding: 'utf8' });
+  const executable = existsSync(join(postgresRoot, 'bin', binary)) ? join(postgresRoot, 'bin', binary) : binary;
+  return asRoot ? execFileSync('runuser', ['-u', owner, '--', executable, ...args], { encoding: 'utf8' })
+    : execFileSync(executable, args, { encoding: 'utf8' });
 }
 
 beforeAll(async () => {
