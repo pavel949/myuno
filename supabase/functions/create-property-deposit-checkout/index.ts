@@ -5,7 +5,7 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
 import { getAllowedOrigin } from "../_shared/cors.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow, type RateSeasonRow } from "../_shared/property-quote.ts";
-import { quoteHotelStay, type HotelCategoryRow, type HotelRatePlanRow, type HotelSeasonRow, type HotelRestrictionRow } from "../_shared/hotel-quote.ts";
+import { quoteHotelStay, mergeRestrictions, type HotelCategoryRow, type HotelRatePlanRow, type HotelSeasonRow, type HotelRestrictionRow } from "../_shared/hotel-quote.ts";
 
 
 interface PropertyDepositRequest {
@@ -116,14 +116,16 @@ Deno.serve(async (req) => {
         supabaseAdmin.from("property_room_categories").select("id, property_id, base_price_per_night, min_stay_nights, max_guests, is_active").eq("id", room_category_id).maybeSingle(),
         supabaseAdmin.from("property_rate_plans").select("id, category_id, adjustment_type, adjustment_value, min_stay_nights, max_stay_nights, min_advance_days, is_active").eq("id", rate_plan_id ?? "").maybeSingle(),
         supabaseAdmin.from("property_rate_seasons").select("start_date, end_date, nightly_rate, min_stay_nights, is_active").eq("category_id", room_category_id).eq("is_active", true).lte("start_date", check_out).gte("end_date", check_in),
-        supabaseAdmin.from("property_stay_restrictions").select("date, price_override, min_stay_nights, closed_to_arrival, closed_to_departure, stop_sell").eq("category_id", room_category_id).gte("date", check_in).lte("date", check_out),
+        // Category rows and resort-wide rows (property_id = parent) both apply.
+        supabaseAdmin.from("property_stay_restrictions").select("category_id, date, price_override, min_stay_nights, closed_to_arrival, closed_to_departure, stop_sell").or(`category_id.eq.${room_category_id},property_id.eq.${property_id}`).gte("date", check_in).lte("date", check_out),
       ]);
       if (!cat || cat.property_id !== property_id) {
         return new Response(JSON.stringify({ error: "Room category not found" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 });
       }
       const hq = quoteHotelStay({
         category: cat as HotelCategoryRow, plan: plan as HotelRatePlanRow | null,
-        seasons: (cSeasons ?? []) as HotelSeasonRow[], restrictions: (restr ?? []) as HotelRestrictionRow[],
+        seasons: (cSeasons ?? []) as HotelSeasonRow[],
+        restrictions: mergeRestrictions((restr ?? []) as (HotelRestrictionRow & { category_id: string | null })[]),
         check_in, check_out, guests, today: bangkokToday(),
       });
       if (!hq.ok) {
@@ -140,7 +142,7 @@ Deno.serve(async (req) => {
       total_amount = hq.total;
       deposit_amount = Math.round(hq.total * 0.1);
       cleaning_fee = 0;
-      categoryMeta = { parent_property_id: property_id, room_category_id, rate_plan_id, nightly: hq.nightly };
+      categoryMeta = { parent_property_id: property_id, room_category_id, rate_plan_id, nightly: hq.nightly, quoted_total: hq.total, quoted_at: new Date().toISOString() };
       property_id = roomId as string;
     }
 
@@ -153,7 +155,7 @@ Deno.serve(async (req) => {
     // base price, and the deposit is computed here (client value is ignored).
     const { data: propertyRow, error: propErr } = await supabaseAdmin
       .from("properties")
-      .select("price_per_night, price, price_period, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts, seasonal_pricing")
+      .select("price_per_night, price, price_period, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts, seasonal_pricing, property_kind, room_category_id")
       .eq("id", property_id)
       .maybeSingle();
 
@@ -164,6 +166,16 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
+    // Resorts/hotels and their categorised rooms are priced only by category
+    // and rate plan; booking them as a plain unit would bypass that price.
+    const kindRow = propertyRow as { property_kind?: string | null; room_category_id?: string | null } | null;
+    if (kindRow && ((kindRow.property_kind && kindRow.property_kind !== "unit") || kindRow.room_category_id)) {
+      return new Response(
+        JSON.stringify({ error: "Choose a room category and rate to book this property", code: "category_required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
 
     const { data: seasonRows, error: seasonErr } = await supabaseAdmin
       .from("property_rate_seasons")
@@ -307,6 +319,26 @@ Deno.serve(async (req) => {
 
     logStep("Order created in database", { orderId: order.order_id, orderNumber: order.order_number });
 
+    // Inventory guard: the order trigger writes a property_bookings row that is
+    // protected by the no-overlap exclusion constraint. If a concurrent request
+    // took the same unit, that insert is rejected (and only an alert is logged),
+    // so no live booking exists for this order. Cancel it before taking money.
+    const { data: heldBooking, error: holdErr } = await supabaseAdmin
+      .from("property_bookings")
+      .select("id")
+      .eq("external_id", order.order_id)
+      .eq("property_id", property_id)
+      .not("status", "in", "(cancelled,rejected,expired)")
+      .maybeSingle();
+    if (holdErr || !heldBooking) {
+      logStep("Inventory hold failed; cancelling order", { orderId: order.order_id, error: holdErr?.message });
+      await supabaseAdmin.from("orders").update({ status: "cancelled", notes: "Auto-cancelled: dates taken by a concurrent booking" }).eq("id", order.order_id);
+      return new Response(
+        JSON.stringify({ error: "Selected dates are no longer available", code: "inventory_conflict" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 }
+      );
+    }
+
     // Initialize Stripe
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) {
@@ -395,7 +427,7 @@ Deno.serve(async (req) => {
       line_items: lineItems,
       mode: "payment",
       success_url: `${origin}/property/deposit-success?session_id={CHECKOUT_SESSION_ID}&property_id=${property_id}&order_id=${order.order_id}`,
-      cancel_url: `${origin}/property/${property_id}/inquiry?canceled=true`,
+      cancel_url: `${origin}/property/${categoryMeta ? String(categoryMeta.parent_property_id) : property_id}/inquiry?canceled=true`,
       metadata: {
         type: "property_deposit",
         user_id: user.id,

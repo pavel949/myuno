@@ -1,0 +1,6 @@
+-- Rollback for 0018: previous status lists in room assignment / availability.
+-- Only difference: occupying statuses were NOT IN ('cancelled','rejected','no_show').
+-- Re-run the bodies from drizzle/migrations/0018_align_room_assignment_statuses.sql
+-- replacing ('cancelled','rejected','expired') with ('cancelled','rejected','no_show').
+-- Edge rollback: redeploy create-property-deposit-checkout from the previous commit
+-- (removes resort-wide restrictions merge, category_required guard and inventory hold check).

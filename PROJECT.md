@@ -11,6 +11,17 @@
 
 ---
 
+## CURRENT EXECUTION / ENGINEERING (2026-10)
+
+- myuno (this repo and its production database) is the canonical live core. myUNO-final is a UX/workflow donor only — see `docs/convergence/MYUNO_FINAL_MAPPING.md`.
+- Current priority: close existing operational loops (booking → payment → ledger → operations) before adding breadth.
+- Layantara is the first reference implementation of the resort model, configured through data — not a fork, flag or hardcoded name.
+- Reuse and reconcile existing entities before creating new ones.
+- Runtime, code and schema evidence outranks stale prose, including this document.
+- A new UI never creates a new source of truth.
+
+---
+
 ## 0. Инструкция для AI-ассистента
 
 Прочитай этот документ целиком до начала любой задачи. Он описывает, чем является платформа, как устроена монетизация, кто является аудиторией, каковы дизайн-стандарты и какие решения уже приняты. При любом соблазне предложить новую функцию — сначала пропусти идею через пять тестов из Раздела 15.
