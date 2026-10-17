@@ -1,0 +1,37 @@
+{
+  "observed_head": "1e4f5efba8b66cc1e4306a53c8671751c87da39c",
+  "migration": "0032_catalog_notification_private_boundaries.sql",
+  "sql_sha256": "73a71313bb9736f5cf7e41befad577bee250217576467409952ebe4cd0d92d33",
+  "focused_tests": 53,
+  "prior_regressions": 166,
+  "synthetic_handler_cases": [
+    15,
+    45,
+    10
+  ],
+  "read_only_snapshot_utc": "2026-10-17T06:08:09.502802Z",
+  "enforced": 0,
+  "spaces": 0,
+  "assignments": 0,
+  "members": 0,
+  "public_catalog_counts": [
+    23,
+    26,
+    33,
+    1
+  ],
+  "business_counts": {
+    "properties": 33,
+    "property_bookings": 82,
+    "orders": 416,
+    "ledger_entries": 136,
+    "crm_contacts": 384,
+    "company_members": 4
+  },
+  "full_e29": "NO-GO",
+  "e3_started": false,
+  "order_mutation_audit_started": false,
+  "production_business_writes": false,
+  "live_notifications_sent": false,
+  "authenticated_hosted_e2e": "not run; synthetic only"
+}
