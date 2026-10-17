@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · Tranche 2D — Today presentation only
+- [ ] Reprioritize existing Today projections and contextual navigation; no hooks, writers or domain changes.
+- [ ] Verify synthetic RU/EN 375/390/430/1280, actions and loading/empty/error states; no production access.
+- [ ] Document exact data gaps, source preservation, screenshots, automatic build and source SHA; no other tranches.
+
 ## 2026-10-17 · Tranche 2C.2 — Booking writer date correctness
 - [x] Correct checkout-inclusive blocked-date preflight in create and update writers; no UX changes.
 - [x] Trace timestamp producers/readers and live SQL with read-only evidence; mixed contract, no timestamp/SQL changes.
