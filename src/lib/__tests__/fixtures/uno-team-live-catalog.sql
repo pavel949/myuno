@@ -2112,3 +2112,109 @@ ALTER TABLE "public"."user_sessions" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "sessions_select" ON "public"."user_sessions" AS PERMISSIVE FOR SELECT TO "authenticated" USING (((user_id = auth.uid()) OR is_admin_or_uno_team()));
 ALTER TABLE "public"."vertical_commission_rules" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admins can manage commission rules" ON "public"."vertical_commission_rules" AS PERMISSIVE FOR ALL TO "authenticated" USING ((has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))) WITH CHECK ((has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)));
+
+CREATE OR REPLACE FUNCTION public.notify_admins_on_new_airport_booking()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_dir text;
+BEGIN
+  v_dir := CASE NEW.direction
+    WHEN 'arrival'   THEN '✈️ Прилёт'
+    WHEN 'departure' THEN '🛫 Вылет'
+    ELSE NEW.direction
+  END;
+
+  INSERT INTO public.notifications (user_id, title, body, type, data)
+  SELECT
+    ur.user_id,
+    '✈️ Fast Track: ' || v_dir,
+    'Рейс ' || NEW.flight_number || ' · ' || NEW.flight_date || ' · ' || NEW.currency || ' ' || NEW.total_price::text,
+    'airport_booking',
+    jsonb_build_object(
+      'booking_id',     NEW.id,
+      'direction',      NEW.direction,
+      'flight_number',  NEW.flight_number,
+      'flight_date',    NEW.flight_date,
+      'total_price',    NEW.total_price,
+      'status',         NEW.status
+    )
+  FROM public.user_roles ur
+  WHERE ur.role IN ('admin', 'uno_team');
+
+  RETURN NEW;
+END;
+$function$
+;
+CREATE OR REPLACE FUNCTION public.notify_admins_on_new_lead()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_vertical text;
+  v_type_label text;
+  v_budget text;
+BEGIN
+  -- Build readable type label
+  v_vertical := COALESCE(NEW.vertical_id, NEW.request_type, 'general');
+  
+  v_type_label := CASE NEW.request_type
+    WHEN 'vacation_rental'        THEN '🏠 Аренда жилья'
+    WHEN 'property_consultation'  THEN '🏠 Консультация по недвижимости'
+    WHEN 'property_tour'          THEN '🏠 Просмотр объекта'
+    WHEN 'investment_advice'      THEN '💰 Инвестиционная консультация'
+    WHEN 'full_management'        THEN '🔑 Полное управление'
+    WHEN 'channel_management'     THEN '📡 Управление каналами'
+    WHEN 'long_term_rental'       THEN '📋 Долгосрочная аренда'
+    WHEN 'property_purchase'      THEN '🏡 Покупка недвижимости'
+    WHEN 'yacht_charter'          THEN '🛥️ Аренда яхты'
+    WHEN 'car_rental'             THEN '🚗 Аренда авто'
+    WHEN 'airport_transfer'       THEN '✈️ Трансфер'
+    WHEN 'visa_consultation'      THEN '📄 Визовая консультация'
+    WHEN 'doctor_appointment'     THEN '🏥 Запись к врачу'
+    WHEN 'babysitter_hourly'      THEN '👶 Няня (почасово)'
+    WHEN 'babysitter_daily'       THEN '👶 Няня (на день)'
+    WHEN 'spa_booking'            THEN '💆 Спа'
+    WHEN 'gym_daypass'            THEN '💪 Зал (день)'
+    WHEN 'gym_membership'         THEN '💪 Абонемент в зал'
+    WHEN 'table_booking'          THEN '🍽️ Бронь стола'
+    ELSE COALESCE(NEW.request_type, 'general_inquiry')
+  END;
+
+  -- Build budget string
+  IF NEW.budget_min IS NOT NULL OR NEW.budget_max IS NOT NULL THEN
+    v_budget := ' · ' || COALESCE(NEW.currency, 'THB') || ' ' ||
+                COALESCE(NEW.budget_min::text, '?') || '–' ||
+                COALESCE(NEW.budget_max::text, '?');
+  ELSE
+    v_budget := '';
+  END IF;
+
+  -- Insert notification for all admins
+  INSERT INTO public.notifications (user_id, title, body, type, data)
+  SELECT
+    ur.user_id,
+    '📩 Новая заявка: ' || v_type_label,
+    NEW.name || ' · ' || NEW.phone || v_budget,
+    'lead',
+    jsonb_build_object(
+      'lead_id',      NEW.id,
+      'request_type', NEW.request_type,
+      'vertical_id',  v_vertical,
+      'name',         NEW.name,
+      'phone',        NEW.phone,
+      'status',       NEW.status,
+      'priority',     NEW.priority
+    )
+  FROM public.user_roles ur
+  WHERE ur.role IN ('admin', 'uno_team');
+
+  RETURN NEW;
+END;
+$function$
+;
