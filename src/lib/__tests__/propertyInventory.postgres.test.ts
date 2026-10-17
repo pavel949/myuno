@@ -14,7 +14,11 @@ let sql: ReturnType<typeof postgres>;
 let started = false;
 const asRoot = process.getuid?.() === 0;
 const owner = asRoot ? 'nobody' : process.env.USER ?? '';
-const postgresBinary = execFileSync('which', ['postgres'], { encoding: 'utf8' }).trim();
+function resolvePostgresBinary(): string {
+  try { return execFileSync('which', ['postgres'], { encoding: 'utf8', stdio: ['ignore','pipe','ignore'] }).trim(); }
+  catch { return join(execFileSync('pg_config', ['--bindir'], { encoding: 'utf8' }).trim(), 'postgres'); }
+}
+const postgresBinary = resolvePostgresBinary();
 const postgresRoot = dirname(dirname(realpathSync(postgresBinary)));
 // Nix relocates binaries without pg_config; explicitly resolve its module path.
 const libraryPath = existsSync(join(postgresRoot, 'lib', 'dict_snowball.so')) ? join(postgresRoot, 'lib') : null;
@@ -127,5 +131,16 @@ describe('actual PostgreSQL inventory contract', () => {
     const [{ count }] = await sql`SELECT get_category_availability(${category},'2026-11-10','2026-11-13') AS count`;
     expect(count).toBe(1); // exact old bug, not an endorsed fix
     await sql.unsafe(readFileSync('drizzle/migrations/0019_canonical_inventory_status_predicate.sql','utf8'));
+  });
+
+  it('correction rollback executes and restores old status-label mapping', async () => {
+    await sql.unsafe(readFileSync('docs/hardening/rollback/0019_0020_inventory_correction.sql','utf8'));
+    const [order] = await sql`INSERT INTO orders(status,start_at,end_at) VALUES ('pending','2026-11-10','2026-11-13') RETURNING id`;
+    await sql`INSERT INTO order_items(order_id,item_type,resource_id) VALUES (${order.id},'property',${room})`;
+    await sql`UPDATE orders SET status = 'no_show' WHERE id = ${order.id}`;
+    const [booking] = await sql`SELECT status FROM property_bookings WHERE external_id = ${order.id}`;
+    expect(booking.status).toBe('pending');
+    await sql.unsafe(readFileSync('drizzle/migrations/0019_canonical_inventory_status_predicate.sql','utf8'));
+    await sql.unsafe(readFileSync('drizzle/migrations/0020_preserve_property_booking_lifecycle_status.sql','utf8'));
   });
 });

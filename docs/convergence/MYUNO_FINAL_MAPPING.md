@@ -144,6 +144,10 @@ guest→Stripe→ledger journey was executed. Stripe failure/abandoned pre-sessi
 hold cleanup, production race load and managed CI typecheck results require
 separate evidence. No new UX, inventory model or Tranche 2 work was started.
 
+Quality-gate policy in this workspace forbids manually invoking builds/typechecks;
+the harness performs them automatically. Report its actual build log separately,
+never label it as a locally run `npm run typecheck` or assign an invented exit code.
+
 ## 5. Definition of Done (all tranches)
 
 A change is done only when an actual business transition was executed end-to-end (for example: booking created → room held → payment recorded → ledger entry → visible to owner/ops) and its downstream effects were verified. Schema, API or UI alone is not done.
