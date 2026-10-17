@@ -20,7 +20,7 @@ vi.mock('@/hooks/usePropertyBookings', () => ({
 // exercises submission without a write, success notification or window reload.
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mocks.from } }));
 vi.mock('sonner', () => ({ toast: { error: mocks.error } }));
-vi.mock('@/hooks/useHaptic', () => ({ useHaptic: () => ({ trigger: vi.fn() }) }));
+vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/components/owner/BookingDetailSheet', () => ({
   BookingDetailSheet: ({ open, booking, onOpenChange }: {
     open: boolean; booking: { id: string } | null; onOpenChange: (open: boolean) => void;
@@ -72,13 +72,13 @@ describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => 
   it.each(['confirm', 'cancel'] as const)('%s requires explicit confirmation; No never submits; Yes only calls the stub', async action => {
     mount(language); selectFirst(language);
     const actionLabel = action === 'confirm' ? (language === 'ru' ? 'Подтвердить' : 'Confirm') : (language === 'ru' ? 'Отменить' : 'Cancel');
-    fireEvent.click(screen.getByRole('button', { name: actionLabel, exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: actionLabel }));
     expect(mocks.from).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Нет' : 'No', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Нет' : 'No' }));
     expect(mocks.from).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: actionLabel, exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: actionLabel }));
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Да' : 'Yes', exact: true }));
+      fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Да' : 'Yes' }));
     });
     expect(mocks.from).toHaveBeenCalledExactlyOnceWith('orders');
     expect(mocks.update).toHaveBeenCalledExactlyOnceWith({ status: action === 'confirm' ? 'confirmed' : 'cancelled' });
@@ -90,7 +90,7 @@ describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => 
     mount(language); selectFirst(language);
     fireEvent.click(screen.getByRole('checkbox', { name: language === 'ru' ? 'Выбрать все видимые бронирования' : 'Select all visible bookings' }));
     expect(screen.getAllByRole('checkbox').every(el => el.getAttribute('aria-checked') === 'true')).toBe(true);
-    fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Снять выбор' : 'Clear', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Снять выбор' : 'Clear' }));
     expect(screen.getAllByRole('checkbox').every(el => el.getAttribute('aria-checked') === 'false')).toBe(true);
     expect(mocks.from).not.toHaveBeenCalled();
   });
