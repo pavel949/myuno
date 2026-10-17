@@ -56,7 +56,7 @@ function buildQuery(options: UseServicesOptions) {
     .select(`
       *,
       provider,
-      category:categories(name_en, name_ru, slug)
+      category
     `)
     .eq('is_active', true);
 

@@ -85,3 +85,6 @@ CREATE POLICY "thai_businesses_update" ON public.thai_businesses FOR UPDATE USIN
 CREATE POLICY "thai_businesses_delete" ON public.thai_businesses FOR DELETE USING (owner_id=auth.uid() OR is_admin_or_uno_team());
 CREATE POLICY "thai_services_select" ON public.thai_business_services FOR SELECT USING (EXISTS(SELECT 1 FROM thai_businesses b WHERE b.id=business_id AND (b.is_active=true OR b.owner_id=auth.uid())) OR is_admin_or_uno_team());
 CREATE POLICY "thai_services_write" ON public.thai_business_services FOR ALL USING (EXISTS(SELECT 1 FROM thai_businesses b WHERE b.id=business_id AND b.owner_id=auth.uid()) OR is_admin_or_uno_team()) WITH CHECK (EXISTS(SELECT 1 FROM thai_businesses b WHERE b.id=business_id AND b.owner_id=auth.uid()) OR is_admin_or_uno_team());
+
+CREATE TABLE public.categories(id uuid,name_en text,name_ru text,slug text);
+GRANT SELECT ON public.categories TO anon,authenticated,service_role;
