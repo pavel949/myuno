@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · E2.9 continuation — 14 blocker closure
+- [ ] Establish legitimate remaining notification/object authority; restrict only proven gates after synthetic tests.
+- [ ] Reconcile all RO-01–RO-14 with applied 0032 and continuation, preserve ambiguous contracts as blockers; verify production read-only zero enforcement/assignments and observed commit SHA.
+- Restrictions: no business DML, support grants, enforcement, assignments, E3 or Order Mutation Audit.
+
 ## 2026-10-17 · E2.9 — Catalog + notification security (partial NO-GO)
 - [x] Reconcile baselines and live field/policy/recipient metadata; E29-01–10 dispositions recorded.
 - [x] Apply exact tested forward 0032 for provider/service/salon privacy and named unpublished employment branches; safe public consumers, protected property-submission recipient gate, security-preserving rollback.
