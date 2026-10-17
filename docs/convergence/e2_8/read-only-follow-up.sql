@@ -2,7 +2,9 @@
 -- business payloads, handler calls, writes, migrations or setting changes.
 -- pg_get_functiondef requires prokind='f' (aggregates must be excluded).
 SELECT count(*) AS policies FROM pg_policies;
-SELECT count(*) AS public_functions FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public';
+SELECT count(*) FILTER (WHERE p.prokind='f') AS ordinary_public_functions,
+count(*) AS all_public_pg_proc_entries FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public';
+SELECT p.proname,p.prokind FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.prokind<>'f' ORDER BY p.proname;
 
 SELECT schemaname,tablename,policyname,roles,cmd,qual,with_check
 FROM pg_policies WHERE schemaname IN ('public','storage')

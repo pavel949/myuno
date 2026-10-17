@@ -147,6 +147,6 @@ The [E2.8 read-only continuation](OPERATING_SPACES_E2_8_UNO_TEAM.md#read-only-co
 | Backup/export | **LEGACY entitlement gap**, not employment-only — active membership read and role export preserved; scheduled key prefix conflicts with live first-folder ceiling. Do not relax storage to repair it. RO-11. |
 | Support and granular flags | **NO explicit support contract proved** — vertical mutation flags are not private read grants; live functions do not consume sub_permissions; no immutable permission-table audit trigger proved. RO-12. |
 | CRM pipeline summary | **LEGACY entitlement gap** — company member allowlist lacks active/module check; no generic employment branch. RO-13. |
-| Production/deployment evidence | 1,250 policies / 591 functions; 47 remaining candidates on 30 relations; function-count drift and deployed bundle parity unresolved. Read-only aggregates remain enforcement/spaces/assignments/members 0/0/0/0. |
+| Production/deployment evidence | 1,250 policies / 587 ordinary functions + 4 aggregates = 591 pg_proc entries; no count drift proved. 47 remaining candidates on 30 relations; deployed bundle parity unresolved. Read-only aggregates remain enforcement/spaces/assignments/members 0/0/0/0. |
 
 **Рекомендую:** отдельно согласовать finite catalog/privacy and notification corrective tranche with safe public replacements, independent deployed manifest and isolated deny/allow tests; do not create support grants or start E3 / Order Mutation Audit. No fixes, deploys, business writes, enforcement or assignments in this continuation.

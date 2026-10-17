@@ -38,7 +38,10 @@
   },
   "live_census": {
     "policies": 1250,
-    "public_functions": 591,
+    "public_functions": 587,
+    "public_pg_proc_entries": 591,
+    "public_aggregate_entries": 4,
+    "count_difference_disposition": "587 ordinary functions plus avg x2 and sum x2 aggregates; counting-method mismatch, not demonstrated drift",
     "prior_report_public_functions": 587,
     "residual_candidate_policies": 47,
     "residual_candidate_relations": 30,
@@ -62,7 +65,6 @@
   ],
   "unverified": [
     "independent deployed source/bundle parity",
-    "explanation of 587 -> 591 function count drift",
     "all allowed end-to-end flows",
     "granular sub-permission enforcement outside inspected public functions",
     "immutable external audit mechanism"
