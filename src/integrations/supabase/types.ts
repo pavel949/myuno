@@ -35113,6 +35113,10 @@ export type Database = {
         }
         Returns: Json
       }
+      property_booking_holds_inventory: {
+        Args: { _status: string }
+        Returns: boolean
+      }
       property_is_public: { Args: { _property_id: string }; Returns: boolean }
       publish_property_to_marketplace: {
         Args: { p_owner_property_id: string }
