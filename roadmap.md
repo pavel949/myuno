@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · Tranche 2B correction — runtime presentation
+- [ ] Change MCBookingsPage header/KPIs/controls/cards/bulk bar without changing business logic.
+- [ ] Verify RU/EN heading, overflow and isolated interactions at 375/390/430 and desktop.
+- [ ] Report exact runtime files, reviewed screenshots, automatic build and SHA.
+
 ## 2026-10-17 · Tranche 2B isolated UI regression tests
 - [x] Add synthetic RU/EN fixtures and isolated checkbox/card/bulk-confirmation tests (12/12).
 - [x] Exercise the actual page with fixtures at 375/390/430; block all external requests and real writes (6/6).
