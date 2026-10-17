@@ -1,6 +1,7 @@
 # Roadmap
 
 ## 2026-10-17 · Resorts/hotels plan review (categories, rate plans, rules)
+- [ ] Current approved task: establish guest field contract and apply read-only allowlisted resort projections; preserve private rights/business data/enforcement OFF/E3 NO-GO. Verify effective ACLs rather than role_table_grants alone.
 - [x] Stage status audited: schema + server quote + room assignment + MC structure page live; guest page unwired, restrictions editor missing, live categories/rate plans 0 (33 properties all `unit`).
 - [x] Wire category offers into property detail with dates/guests and existing multi-unit flag; add property/category date-rule editor with row-ID insert/update, retained failed drafts and offer invalidation. No live data writes or permission changes.
 - [x] Narrow verification: 21 existing quote/page tests pass; real editor/hooks/offers driven with isolated browser fixtures (insert, update, reopen, failed draft, shared date price, stop sell, guest changes), widths 375/390/430/1280, zero browser errors; automatic build OK.
