@@ -72,7 +72,7 @@ describe.each(['ru', 'en'] as const)('isolated bookings list (%s)', language => 
         { ...base, id: 'cancelled', guest_name: 'Cancelled fixture', status: 'cancelled', check_in: '2026-10-17', check_out: '2026-10-18' },
       ];
       mount(language);
-      fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Активные' : 'Active', exact: true }));
+      fireEvent.click(screen.getByRole('button', { name: language === 'ru' ? 'Активные' : 'Active' }));
       expect(screen.getByText('Arrival fixture')).toBeInTheDocument();
       expect(screen.queryByText('Departure fixture')).not.toBeInTheDocument();
       expect(screen.queryByText('Cancelled fixture')).not.toBeInTheDocument();
