@@ -29,37 +29,40 @@ export function RoomCategoryOffers({ propertyId, dateRange, guests = 1, onDateRa
   const { data, isLoading, error } = useQuery({
     queryKey: ['room-category-offers', propertyId, ci, co, guests],
     queryFn: async () => {
-      const { data: cats, error: e1 } = await supabase.from('property_room_categories')
+      const { data: cats, error: e1 } = await supabase.from('public_room_category_catalog')
         .select('id, name_en, name_ru, base_price_per_night, min_stay_nights, max_guests, is_active').eq('property_id', propertyId).eq('is_active', true).order('sort_order');
-      // Missing public grants must not turn every ordinary listing into an error.
-      // Do not fall back to privileged reads or disclose manager-only categories.
-      if (e1?.code === '42501') return [];
       if (e1) throw e1;
       if (!cats?.length) return [];
-      const ids = cats.map((c) => c.id);
+      // Generated view types are nullable; fail closed on malformed category identity.
+      const categories = cats.filter((c): c is typeof c & { id: string } => typeof c.id === 'string');
+      const ids = categories.map(c => c.id);
+      if (!ids.length) return [];
       const [plans, seasons, restr] = await Promise.all([
-        supabase.from('property_rate_plans').select('id, category_id, name_en, name_ru, adjustment_type, adjustment_value, meal_plan, is_refundable, free_cancellation_days, min_stay_nights, max_stay_nights, min_advance_days, is_active').in('category_id', ids).eq('is_active', true),
-        supabase.from('property_rate_seasons').select('category_id, start_date, end_date, nightly_rate, min_stay_nights, is_active').in('category_id', ids).eq('is_active', true),
-        ci && co ? supabase.from('property_stay_restrictions').select('category_id, date, price_override, min_stay_nights, closed_to_arrival, closed_to_departure, stop_sell')
+        supabase.from('public_room_rate_plan_catalog').select('id, category_id, name_en, name_ru, adjustment_type, adjustment_value, is_refundable, free_cancellation_days, min_stay_nights, max_stay_nights, min_advance_days, is_active').in('category_id', ids).eq('is_active', true),
+        supabase.from('public_room_rate_season_catalog').select('category_id, start_date, end_date, nightly_rate, min_stay_nights, is_active').in('category_id', ids).eq('is_active', true),
+        ci && co ? supabase.from('public_room_stay_rule_catalog').select('category_id, date, price_override, min_stay_nights, closed_to_arrival, closed_to_departure, stop_sell')
           .eq('property_id', propertyId).gte('date', ci).lte('date', co) : Promise.resolve({ data: [], error: null }),
       ]);
       if (plans.error) throw plans.error;
       if (seasons.error) throw seasons.error;
       if (restr.error) throw restr.error;
       const avail = ci && co
-        ? await Promise.all(ids.map((id) => supabase.rpc('get_category_availability', { _category_id: id, _check_in: ci, _check_out: co })))
+        ? await Promise.all(ids.map((id) => supabase.rpc('get_public_room_category_availability', { _category_id: id, _check_in: ci, _check_out: co })))
         : null;
       const availabilityError = avail?.find(result => result.error)?.error;
       if (availabilityError) throw availabilityError;
-      return cats.map((c, i) => ({
+      return categories.map((c, i) => ({
         category: c,
-        free: avail ? (avail[i].data as number | null) ?? 0 : null,
+        free: avail ? avail[i].data ?? null : null,
         plans: (plans.data ?? []).filter((p) => p.category_id === c.id).map((p) => ({
           plan: p,
           quote: ci && co ? quoteHotelStay({
             category: c as HotelCategoryRow, plan: p as HotelRatePlanRow,
             seasons: (seasons.data ?? []).filter((s) => s.category_id === c.id) as HotelSeasonRow[],
-            restrictions: mergeRestrictions((restr.data ?? []).filter(r => r.category_id === null || r.category_id === c.id)),
+            restrictions: mergeRestrictions((restr.data ?? []).filter((r): r is typeof r & {
+              date: string; closed_to_arrival: boolean; closed_to_departure: boolean; stop_sell: boolean;
+            } => (r.category_id === null || r.category_id === c.id) && typeof r.date === 'string'
+              && typeof r.closed_to_arrival === 'boolean' && typeof r.closed_to_departure === 'boolean' && typeof r.stop_sell === 'boolean')),
             check_in: ci, check_out: co, guests, today: bangkokTodayISO(),
           }) : null,
         })),

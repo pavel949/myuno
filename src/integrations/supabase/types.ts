@@ -19090,6 +19090,13 @@ export type Database = {
             referencedRelation: "property_room_categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "properties_room_category_fk"
+            columns: ["room_category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
         ]
       }
       property_accounting_policies: {
@@ -22754,6 +22761,13 @@ export type Database = {
             referencedRelation: "property_room_categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "property_rate_plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
         ]
       }
       property_rate_seasons: {
@@ -22838,6 +22852,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_rate_seasons_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -23414,6 +23435,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
             referencedColumns: ["id"]
           },
           {
@@ -33877,6 +33905,191 @@ export type Database = {
           },
         ]
       }
+      public_room_category_catalog: {
+        Row: {
+          base_price_per_night: number | null
+          id: string | null
+          is_active: boolean | null
+          max_guests: number | null
+          min_stay_nights: number | null
+          name_en: string | null
+          name_ru: string | null
+          property_id: string | null
+          sort_order: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_room_categories_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_room_rate_plan_catalog: {
+        Row: {
+          adjustment_type: string | null
+          adjustment_value: number | null
+          category_id: string | null
+          free_cancellation_days: number | null
+          id: string | null
+          is_active: boolean | null
+          is_refundable: boolean | null
+          max_stay_nights: number | null
+          min_advance_days: number | null
+          min_stay_nights: number | null
+          name_en: string | null
+          name_ru: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_rate_plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_rate_plans_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_room_rate_season_catalog: {
+        Row: {
+          category_id: string | null
+          end_date: string | null
+          is_active: boolean | null
+          min_stay_nights: number | null
+          nightly_rate: number | null
+          start_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_rate_seasons_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_rate_seasons_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_room_stay_rule_catalog: {
+        Row: {
+          category_id: string | null
+          closed_to_arrival: boolean | null
+          closed_to_departure: boolean | null
+          date: string | null
+          min_stay_nights: number | null
+          price_override: number | null
+          property_id: string | null
+          stop_sell: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_stay_restrictions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "property_room_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "public_room_category_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_owner_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_stay_restrictions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "v_properties_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_salon_catalog: {
         Row: {
           address: string | null
@@ -36871,6 +37084,10 @@ export type Database = {
           ends_at: string
           starts_at: string
         }[]
+      }
+      get_public_room_category_availability: {
+        Args: { _category_id: string; _check_in: string; _check_out: string }
+        Returns: number
       }
       get_subscription_revenue: {
         Args: { p_days?: number }

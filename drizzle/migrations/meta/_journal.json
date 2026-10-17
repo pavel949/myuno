@@ -239,6 +239,13 @@
       "when": 1792220430026,
       "tag": "0033_restrict_unchecked_wallet_mutations",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1792230265662,
+      "tag": "0034_public_resort_catalog_projection",
+      "breakpoints": true
     }
   ]
 }
