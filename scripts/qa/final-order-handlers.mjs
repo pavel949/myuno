@@ -1,7 +1,7 @@
 import { build } from 'esbuild';
 import { createRequire } from 'node:module';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { createHmac, webcrypto } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 import assert from 'node:assert/strict';
 const require = createRequire(import.meta.url);
 await mkdir('/tmp/order-audit/handlers', { recursive: true });
@@ -14,14 +14,13 @@ const result = await build({ entryPoints: ['supabase/functions/confirm-transfer-
  }}] });
 const file = '/tmp/order-audit/handlers/operator.cjs';
 await writeFile(file, result.outputFiles[0].text);
-globalThis.crypto = webcrypto;
 globalThis.fetch = () => { throw Error('Outbound forbidden'); };
 globalThis.Deno = { env: { get: () => 'synthetic' }, serve: fn => globalThis.__handler = fn };
 const id = '00000000-0000-4000-8000-000000000001';
 const secret = 'synthetic-test-secret-not-production';
 const exp = Math.floor(Date.now() / 1000) + 60;
 const token = `${exp}.${createHmac('sha256', secret).update(`${id}.${exp}`).digest('hex')}`;
-let status = 'pending', orderType = 'transfer', updates = [], race = false, writes = 0;
+let status = 'pending', orderType = 'transfer', updates = [], writes = 0;
 globalThis.__sdk = () => ({ from(table) {
  const q = { filters: [], select() { return this; }, eq(k,v) { this.filters.push([k,v]); return this; }, in(k,v) { this.filters.push([k,v]); return this; }, update(v) { this.patch=v; return this; },
   async single() { return table==='system_settings' ? {data:{value:secret},error:null} : {data:{id,order_type:orderType,status,order_number:'TEST',metadata:{},order_participants:[]},error:null}; },
