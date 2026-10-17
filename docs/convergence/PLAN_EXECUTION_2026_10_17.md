@@ -35,6 +35,16 @@ GitHub commit statuses for main `770b2cb` reported successful Vercel deployments
 
 All seven workflow sources were reviewed. None deploy `scheduled-mc-backup`; the package deploy script names two unrelated partner functions. Vite's MCP generation is not backup deployment evidence. External Lovable deployment behavior is not inferred from repository files. Backup source/deployed parity and restore acceptance remain unverified.
 
+## Client deployment detection and build provenance
+
+The existing watcher compared only APP_VERSION, so distinct deployments at the same semantic version did not notify. The actual prompt also rejected same-version events and stored dismissal by version. The candidate now shares validated commit/build-time comparison, injects the build commit, carries an optional deployment key to the real prompt, and dismisses only that deployment. Version-only event compatibility is retained. A newly available commit can notify without changing the public-facing version label; SHA values are not displayed in the prompt.
+
+A hidden-tab fallback now requires the current poll to confirm availability; an old notification, failed HTTP response, malformed metadata or offline state cannot alone trigger navigation. The existing ten-minute threshold remains. Actual Watcher/Prompt and isolated navigation-boundary tests cover these paths without clearing business drafts.
+
+CI validates dist/version.json against the package version and CI source commit and uploads the metadata as evidence. This cannot prove what a custom production domain currently serves.
+
+Live public read at https://myuno.app/version.json redirected to https://www.myuno.app/version.json and returned version 3.55.5, buildTime 2026-10-17T09:52:24.922Z, with no commit field. Thus domain-to-main parity is UNKNOWN despite successful Vercel statuses; this observation does not identify the hosting/cache root cause or prove which frontend bundle executes. No DNS, project, deployment or cache configuration was changed.
+
 ## Ordered remaining gates
 
 | Stage | Current disposition / required next result |

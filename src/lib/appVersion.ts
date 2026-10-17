@@ -12,14 +12,55 @@ export const BUILD_TIMESTAMP: string =
     ? __BUILD_TIMESTAMP__
     : new Date().toISOString(); // fallback for dev / tests
 
+declare const __BUILD_COMMIT__: string;
+export const BUILD_COMMIT = typeof __BUILD_COMMIT__ !== 'undefined' ? __BUILD_COMMIT__ : '';
+
+export interface DeploymentMetadata {
+  version: string;
+  commit?: string;
+  buildTime?: string;
+}
+
+function validCommit(value: unknown): string | null {
+  return typeof value === 'string' && /^[a-f0-9]{40}(?:[a-f0-9]{24})?$/i.test(value)
+    ? value.toLowerCase() : null;
+}
+
+function validBuildTime(value: unknown): number | null {
+  if (typeof value !== 'string') return null;
+  const time = Date.parse(value);
+  return Number.isFinite(time) && new Date(time).toISOString() === value ? time : null;
+}
+
+/** A deployment identity, not a hosting-parity or release acceptance certificate. */
+export function getAvailableDeployment(
+  remote: unknown,
+  local: DeploymentMetadata = { version: APP_VERSION, commit: BUILD_COMMIT, buildTime: BUILD_TIMESTAMP },
+): { version: string; key: string } | null {
+  if (!remote || typeof remote !== 'object') return null;
+  const data = remote as Record<string, unknown>;
+  if (typeof data.version !== 'string' ||
+      !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(data.version)) return null;
+  const remoteCommit = validCommit(data.commit);
+  const localCommit = validCommit(local.commit);
+  const remoteTime = validBuildTime(data.buildTime);
+  const localTime = validBuildTime(local.buildTime);
+  const identity = remoteCommit ?? (remoteTime !== null ? String(remoteTime) : 'version');
+  const available = data.version !== local.version ||
+    (remoteCommit && localCommit
+      ? remoteCommit !== localCommit
+      : remoteTime !== null && localTime !== null && remoteTime > localTime);
+  return available ? { version: data.version, key: `${data.version}:${identity}` } : null;
+}
+
 // Check for updates via network (bypasses cache)
 export async function checkForUpdates(): Promise<boolean> {
   try {
     const response = await fetch('/version.json?_=' + Date.now(), { 
       cache: 'no-store' 
     });
-    const data = await response.json();
-    return data.version !== APP_VERSION;
+    if (!response.ok) return false;
+    return getAvailableDeployment(await response.json()) !== null;
   } catch {
     return false;
   }
@@ -71,3 +112,4 @@ if (typeof window !== 'undefined') {
 
   localStorage.setItem('app_version', APP_VERSION);
 }
+

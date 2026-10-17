@@ -16,6 +16,7 @@ import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
   const buildTimestamp = new Date().toISOString();
+  const buildCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.COMMIT_REF || process.env.GITHUB_SHA || '';
 
   // Public Supabase config — safe to ship in client bundle (anon key + URL).
   // Hardcoded fallback ensures the app boots on every host (myuno.app,
@@ -65,6 +66,7 @@ export default defineConfig(({ mode, command }) => {
     },
     define: {
       __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),
+      __BUILD_COMMIT__: JSON.stringify(buildCommit),
       "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
       "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabaseKey),
       "import.meta.env.VITE_SUPABASE_PROJECT_ID": JSON.stringify(supabaseProjectId),
@@ -446,3 +448,4 @@ export default defineConfig(({ mode, command }) => {
     },
   };
 });
+

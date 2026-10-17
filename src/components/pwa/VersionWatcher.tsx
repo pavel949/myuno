@@ -1,18 +1,18 @@
 import { useEffect, useRef } from 'react';
-import { APP_VERSION } from '@/lib/appVersion';
+import { APP_VERSION, getAvailableDeployment } from '@/lib/appVersion';
 import { logger } from '@/lib/logger';
 
 /**
  * Event dispatched on `window` when a new deploy is detected.
  * `PWAUpdatePrompt` listens for it and shows a non-blocking notification.
  *
- * detail: { version: string }   — the new remote version from /version.json
+ * detail: { version: string; deploymentKey?: string }   — the new remote version from /version.json
  */
 export const UPDATE_AVAILABLE_EVENT = 'myuno:update-available';
 
 /**
- * Polls /version.json periodically. When the deployed version differs from the
- * bundled APP_VERSION, dispatches `myuno:update-available` so the user gets a
+ * Polls /version.json periodically. When validated version/commit metadata or
+ * a newer fallback build time identifies a different deployment, dispatches `myuno:update-available` so the user gets a
  * toast / prompt instead of being yanked mid-action. The user controls when
  * to reload via {@link PWAUpdatePrompt}.
  *
@@ -23,7 +23,7 @@ export const UPDATE_AVAILABLE_EVENT = 'myuno:update-available';
  * Skipped inside iframes / Lovable preview hosts to avoid editor reload loops.
  */
 export function VersionWatcher() {
-  const notifiedVersionRef = useRef<string | null>(null);
+  const notifiedDeploymentKeyRef = useRef<string | null>(null);
   const hiddenSinceRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -43,14 +43,14 @@ export function VersionWatcher() {
     const POLL_INTERVAL_MS = 60_000;
     const IDLE_AUTO_RELOAD_MS = 10 * 60_000; // 10 min hidden → silent reload OK
 
-    const notifyUpdate = (remoteVersion: string) => {
-      if (notifiedVersionRef.current === remoteVersion) return;
-      notifiedVersionRef.current = remoteVersion;
+    const notifyUpdate = (remoteVersion: string, deploymentKey: string) => {
+      if (notifiedDeploymentKeyRef.current === deploymentKey) return;
+      notifiedDeploymentKeyRef.current = deploymentKey;
       logger.log(
         `[VersionWatcher] New version ${remoteVersion} available (current ${APP_VERSION})`,
       );
       window.dispatchEvent(
-        new CustomEvent(UPDATE_AVAILABLE_EVENT, { detail: { version: remoteVersion } }),
+        new CustomEvent(UPDATE_AVAILABLE_EVENT, { detail: { version: remoteVersion, deploymentKey } }),
       );
     };
 
@@ -62,10 +62,9 @@ export function VersionWatcher() {
           credentials: 'omit',
         });
         if (!res.ok) return;
-        const data = (await res.json()) as { version?: string };
-        if (data?.version && data.version !== APP_VERSION) {
-          notifyUpdate(data.version);
-        }
+        const deployment = getAvailableDeployment(await res.json());
+        if (deployment) notifyUpdate(deployment.version, deployment.key);
+        return deployment;
       } catch {
         /* network errors are fine — retry on next tick */
       }
@@ -83,14 +82,14 @@ export function VersionWatcher() {
       const hiddenSince = hiddenSinceRef.current;
       hiddenSinceRef.current = null;
 
-      void checkVersion().then(() => {
+      void checkVersion().then((deployment) => {
         if (
-          notifiedVersionRef.current &&
+          deployment &&
           hiddenSince &&
           Date.now() - hiddenSince > IDLE_AUTO_RELOAD_MS
         ) {
           const url = new URL(window.location.href);
-          url.searchParams.set('_v', notifiedVersionRef.current);
+          url.searchParams.set('_v', deployment.version);
           window.location.replace(url.toString());
         }
       });
@@ -113,3 +112,4 @@ export function VersionWatcher() {
 
   return null;
 }
+

@@ -14,23 +14,33 @@ import { logger } from '@/lib/logger';
  * UX:
  *  - Bottom-right toast card on desktop, bottom strip on mobile.
  *  - "Update now" → unregister SW + clear caches + cache-busting reload.
- *  - "Later" → hidden for the current session (per new version key).
+ *  - "Later" → hidden for the current session (per deployment key).
  */
 export function PWAUpdatePrompt() {
   const { language } = useLanguage();
-  const [pendingVersion, setPendingVersion] = React.useState<string | null>(null);
+  const [pendingDeployment, setPendingDeployment] = React.useState<{ version: string; dismissKey: string } | null>(null);
   const [reloading, setReloading] = React.useState(false);
 
   React.useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent<{ version?: string }>).detail;
+      const detail = (e as CustomEvent<{ version?: unknown; deploymentKey?: unknown }>).detail;
       const v = detail?.version;
-      if (!v || v === APP_VERSION) return;
+      if (typeof v !== 'string' || !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(v)) return;
 
-      const dismissKey = `pwa_update_dismissed_v${v}`;
+      const key = detail?.deploymentKey;
+      let dismissKey = `pwa_update_dismissed_v${v}`;
+      if (key !== undefined) {
+        if (typeof key !== 'string' || !key.startsWith(`${v}:`)) return;
+        const identity = key.slice(v.length + 1);
+        const isCommit = /^[a-f0-9]{40}(?:[a-f0-9]{24})?$/i.test(identity);
+        const time = Number(identity);
+        const isBuildTime = /^\d+$/.test(identity) && Number.isSafeInteger(time) && time > 0 && time <= 8640000000000000;
+        if (!isCommit && !isBuildTime && !(identity === 'version' && v !== APP_VERSION)) return;
+        dismissKey = `pwa_update_dismissed_deployment_${key}`;
+      } else if (v === APP_VERSION) return;
       if (sessionStorage.getItem(dismissKey) === 'true') return;
 
-      setPendingVersion(v);
+      setPendingDeployment({ version: v, dismissKey });
     };
 
     window.addEventListener(UPDATE_AVAILABLE_EVENT, handler as EventListener);
@@ -38,7 +48,7 @@ export function PWAUpdatePrompt() {
   }, []);
 
   const handleUpdate = async () => {
-    if (!pendingVersion || reloading) return;
+    if (!pendingDeployment || reloading) return;
     setReloading(true);
     try {
       await forceCleanAllCaches();
@@ -46,14 +56,14 @@ export function PWAUpdatePrompt() {
       logger.warn('[PWAUpdatePrompt] cache cleanup failed', err);
     }
     const url = new URL(window.location.href);
-    url.searchParams.set('_v', pendingVersion);
+    url.searchParams.set('_v', pendingDeployment.version);
     window.location.replace(url.toString());
   };
 
   const handleDismiss = () => {
-    if (!pendingVersion) return;
-    sessionStorage.setItem(`pwa_update_dismissed_v${pendingVersion}`, 'true');
-    setPendingVersion(null);
+    if (!pendingDeployment) return;
+    sessionStorage.setItem(pendingDeployment.dismissKey, 'true');
+    setPendingDeployment(null);
   };
 
   const texts = {
@@ -74,7 +84,7 @@ export function PWAUpdatePrompt() {
   } as const;
 
   const t = texts[language] ?? texts.en;
-  const visible = !!pendingVersion;
+  const visible = !!pendingDeployment;
 
   return (
     <AnimatePresence>
@@ -134,3 +144,4 @@ export function PWAUpdatePrompt() {
     </AnimatePresence>
   );
 }
+
