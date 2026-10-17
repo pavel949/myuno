@@ -1,5 +1,12 @@
 # Roadmap
 
+## 2026-10-17 · E2.9 — Catalog + notification security
+- [ ] Reconcile baseline 990de18f / 4ea65f7 with live policy/field/recipient metadata; classify proven leaks vs business-authorization decisions.
+- [ ] Implement finite safe catalog projections/consumer migrations and proven recipient gates; preserve independent ownership/public rights.
+- [ ] Run exact isolated exploit/deny/allow and E1–E2.8 regression tests; save exact forward SQL and security-preserving rollback before apply/deploy.
+- [ ] Read-only post-apply verification and E2.9 report/register: zero enforcement/spaces/assignments/members; no business/outbound calls; GO/NO-GO for a later Order Mutation Audit.
+- Restrictions: no support architecture/grants, E3, Order Mutation Audit, enforcement, seed or production business writes.
+
 ## 2026-10-17 · E2.8 read-only continuation
 - [x] Trace remaining private catalog, shared-helper and support access paths against source/live definitions; 47 residual policies / 30 relations; no writes, grants, deploys or business calls.
 - [x] Update the bypass register and E2.8 report with RO-01–RO-14 evidence, legitimate authority, blockers and next-step recommendation; equal before/after aggregates and catalog sanity verified.
