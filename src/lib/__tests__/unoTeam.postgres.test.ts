@@ -129,6 +129,25 @@ describe('E2.8 exact live-catalog least privilege',()=>{
    throw new Error('rollback-public');
   }).catch(e=>{if(!(e instanceof Error)||e.message!=='rollback-public')throw e;});
  });
+ it('sensitive-company RPC denies employment-only, director and platform admin retain access',async()=>{
+  await expect(as(team,tx=>tx`SELECT * FROM get_management_company_sensitive(${A})`)).rejects.toThrow(/Access denied/);
+  expect(await as(director,tx=>tx`SELECT id FROM get_management_company_sensitive(${A})`)).toEqual([{id:A}]);
+  expect(await as(admin,tx=>tx`SELECT id FROM get_management_company_sensitive(${B})`)).toEqual([{id:B}]);
+ });
+ it('team workspace retains identity without wildcard; cannot switch itself to admin',async()=>{
+  const own=(await as(team,tx=>tx`SELECT resolve_user_context(${team},'team',NULL) c`))[0].c;
+  expect(own.role).toBe('uno_team');expect(own.permissions).toEqual([]);
+  expect((await as(team,tx=>tx`SELECT resolve_user_context(${team},'admin',NULL) c`))[0].c.role).toBe('user');
+ });
+ it('security-preserving rollback disables new RPCs without reopening private rows',async()=>{
+  await sql.begin(async tx=>{
+   await tx.unsafe(readFileSync('docs/hardening/rollback/0028_0029_uno_team_private_access.sql','utf8'));
+   expect((await tx`SELECT has_function_privilege('authenticated','actor_can_generate_voucher(uuid,uuid)','EXECUTE') ok`)[0].ok).toBe(false);
+   await tx.unsafe('SET LOCAL ROLE authenticated');await tx`SELECT set_config('request.jwt.claim.sub',${team},true)`;
+   expect(await tx`SELECT id FROM properties`).toHaveLength(0);
+   throw new Error('rollback-security');
+  }).catch(e=>{if(!(e instanceof Error)||e.message!=='rollback-security')throw e;});
+ });
  it('all 128 changed policies preserve identity and exact approved expressions',async()=>{
   const targets=JSON.parse(readFileSync('src/lib/__tests__/fixtures/uno-team-targets.json','utf8')).policies;
   for(const p of targets){const row=(await sql`SELECT cmd,roles::text,permissive,qual,with_check FROM pg_policies WHERE schemaname=${p.schemaname} AND tablename=${p.tablename} AND policyname=${p.policyname}`)[0];
