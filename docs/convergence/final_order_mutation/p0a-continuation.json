@@ -25,5 +25,19 @@
   "production_business_writes_or_outbound_test_calls": false,
   "central_money_flow_verified": false,
   "rollback": "docs/hardening/rollback/p0a_refund_containment.md",
-  "blocking_remaining": ["exact_quote_and_override_contract", "direct_order_child_payment_writers", "manual_settlement_accounting_contract", "signed_operator_financial_bypass", "atomic_settlement_refund_recovery", "inventory_race_and_foreign_scope", "legacy_compatibility"]
+  "blocking_remaining": ["exact_quote_and_override_contract", "direct_order_child_payment_writers", "manual_settlement_accounting_contract", "signed_operator_financial_bypass", "atomic_settlement_refund_recovery", "inventory_race_and_foreign_scope", "legacy_compatibility"],
+  "contract_audit": {
+    "starting_head": "e8cf6bae9b0b104d6c986753a768a77815c55a8c",
+    "scope": "READ_ONLY_AUDIT_AND_DOCUMENTATION",
+    "matrix": "docs/convergence/final_order_mutation/P0A_PRICE_SETTLEMENT_CONTRACTS.md",
+    "blocker_register": "docs/convergence/final_order_mutation/p0a-contract-blockers.csv",
+    "approval_required": ["PC-01", "PC-02", "PC-03", "PC-04", "PC-05"],
+    "retained_tests": { "vitest": 161, "refund_containment": 16, "operator_boundary_only": 19 },
+    "before_at": "2026-10-17 08:35:30.635527+00",
+    "before": { "enforced_spaces_assignments_members": [0, 0, 0, 0], "orders": 416, "order_total": "7558520.00", "payment_intents": 7, "ledger_entries": 136, "property_bookings": 82 },
+    "new_runtime_schema_permission_deploy_changes": false,
+    "production_business_writes_or_outbound_calls": false,
+    "remaining_dangerous_writers_closed": false,
+    "decision": "GO_A_NO_GO_P0_B_AND_E3_NOT_STARTED"
+  }
 }
