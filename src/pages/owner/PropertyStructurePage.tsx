@@ -18,6 +18,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { StayRestrictionsEditor } from '@/components/property/StayRestrictionsEditor';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 
 const MEALS = ['room_only', 'breakfast', 'half_board', 'full_board', 'all_inclusive'] as const;
 const MEAL_LABEL: Record<string, { ru: string; en: string }> = {
@@ -31,6 +33,7 @@ const MEAL_LABEL: Record<string, { ru: string; en: string }> = {
 export default function PropertyStructurePage() {
   const { language } = useLanguage();
   const ru = language === 'ru';
+  const multiUnitEnabled = useFeatureFlag('multi_unit_properties');
   const t = (r: string, e: string) => (ru ? r : e);
   const { allProperties, isLoading } = useMyProperties();
   const [parentId, setParentId] = useState<string>('');
@@ -86,7 +89,7 @@ export default function PropertyStructurePage() {
         )}
       </div>
 
-      {parentId && (
+      {parentId && multiUnitEnabled && (
         <>
           {error && <p className="text-sm text-destructive">{t('Не удалось загрузить категории', 'Could not load categories')}</p>}
           {loadingCats ? <Skeleton className="h-40 w-full" /> : (
@@ -99,6 +102,10 @@ export default function PropertyStructurePage() {
                   plans={data.plans.filter((p) => p.category_id === c.id)}
                   rooms={data.rooms.filter((r) => r.room_category_id === c.id)} />
               ))}
+
+              {data && data.categories.length > 0 && (
+                <StayRestrictionsEditor key={parentId} propertyId={parentId} categories={data.categories} />
+              )}
 
               <Card><CardContent className="space-y-3 p-4">
                 <h2 className="font-medium text-foreground">{t('Новая категория', 'New category')}</h2>
