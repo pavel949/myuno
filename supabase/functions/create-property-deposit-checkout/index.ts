@@ -155,7 +155,7 @@ Deno.serve(async (req) => {
     // base price, and the deposit is computed here (client value is ignored).
     const { data: propertyRow, error: propErr } = await supabaseAdmin
       .from("properties")
-      .select("price_per_night, price, price_period, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts, seasonal_pricing")
+      .select("price_per_night, price, price_period, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts, seasonal_pricing, property_kind, room_category_id")
       .eq("id", property_id)
       .maybeSingle();
 
@@ -166,6 +166,16 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
       );
     }
+    // Resorts/hotels and their categorised rooms are priced only by category
+    // and rate plan; booking them as a plain unit would bypass that price.
+    const kindRow = propertyRow as { property_kind?: string | null; room_category_id?: string | null } | null;
+    if (kindRow && ((kindRow.property_kind && kindRow.property_kind !== "unit") || kindRow.room_category_id)) {
+      return new Response(
+        JSON.stringify({ error: "Choose a room category and rate to book this property", code: "category_required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
 
     const { data: seasonRows, error: seasonErr } = await supabaseAdmin
       .from("property_rate_seasons")
@@ -309,6 +319,26 @@ Deno.serve(async (req) => {
 
     logStep("Order created in database", { orderId: order.order_id, orderNumber: order.order_number });
 
+    // Inventory guard: the order trigger writes a property_bookings row that is
+    // protected by the no-overlap exclusion constraint. If a concurrent request
+    // took the same unit, that insert is rejected (and only an alert is logged),
+    // so no live booking exists for this order. Cancel it before taking money.
+    const { data: heldBooking, error: holdErr } = await supabaseAdmin
+      .from("property_bookings")
+      .select("id")
+      .eq("external_id", order.order_id)
+      .eq("property_id", property_id)
+      .not("status", "in", "(cancelled,rejected,expired)")
+      .maybeSingle();
+    if (holdErr || !heldBooking) {
+      logStep("Inventory hold failed; cancelling order", { orderId: order.order_id, error: holdErr?.message });
+      await supabaseAdmin.from("orders").update({ status: "cancelled", notes: "Auto-cancelled: dates taken by a concurrent booking" }).eq("id", order.order_id);
+      return new Response(
+        JSON.stringify({ error: "Selected dates are no longer available", code: "inventory_conflict" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 }
+      );
+    }
+
     // Initialize Stripe
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) {
@@ -397,7 +427,7 @@ Deno.serve(async (req) => {
       line_items: lineItems,
       mode: "payment",
       success_url: `${origin}/property/deposit-success?session_id={CHECKOUT_SESSION_ID}&property_id=${property_id}&order_id=${order.order_id}`,
-      cancel_url: `${origin}/property/${property_id}/inquiry?canceled=true`,
+      cancel_url: `${origin}/property/${categoryMeta ? String(categoryMeta.parent_property_id) : property_id}/inquiry?canceled=true`,
       metadata: {
         type: "property_deposit",
         user_id: user.id,
