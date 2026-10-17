@@ -50,3 +50,11 @@ Candidate workflow results and exact final SHA are recorded in the PR/CI links w
 - Populated real resort/category/rate data must be entered by the authorized team before live acceptance. Synthetic tests do not certify production data quality.
 
 Rollback for code-only changes: revert this branch's commits; no schema/data rollback is needed. Do not restore incomplete-backup success reporting or weaken authorization to make tests pass.
+
+## Observed runtime verification
+
+Code candidate `7384dd921072f9bd5ae6590e3ceae0156dd3bae1`: [isolated run 39032019280](https://github.com/pavel949/myuno/actions/runs/39032019280). Types PASS; full suite **1,716/1,716 (90 files)**; focused **86/86 × 3 timezones**; backup **15/15**; production build PASS; Bookings/Calendar/Today/Browse browser fixtures PASS. [Artifacts](https://github.com/pavel949/myuno/actions/runs/39032019280/artifacts/12100872414) contain fixture screenshots and assertions; screenshots were not manually visually reviewed in this execution.
+
+That candidate correctly FAILED the final gate: build/dev regenerated the Vite-owned MCP bundle with five `var` declarations, so lint still failed. The generated bundle is restored to baseline and excluded from authored-source lint; all `src/lib/mcp/**` inputs retain the same rules. This is not generator ownership transfer or a manual generated-code patch. The 2,505 existing warnings remain backlog, not zero-debt certification. Final lint result and PR checks are linked in [PR #89](https://github.com/pavel949/myuno/pull/89); do not infer final success from continue-on-error step conclusions.
+
+Backup pagination is not a transactional snapshot: equal-count concurrent changes may escape detection. Returned SDK errors are handled per company; thrown/rejected queries reach the outer error handler and can halt subsequent companies. No complete restore or production backup certification is claimed.
