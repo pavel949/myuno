@@ -162,6 +162,13 @@
       "when": 1792206089550,
       "tag": "0022_operating_scope_resolver",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792207383639,
+      "tag": "0023_operating_security_ceilings",
+      "breakpoints": true
     }
   ]
 }
