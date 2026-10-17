@@ -160,7 +160,7 @@ export function SeasonalPricing({
 
   return (
     <Card className={cn("", className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <CardHeader className="flex flex-row flex-wrap gap-3 items-center justify-between space-y-0 pb-4">
         <div>
           <CardTitle className="text-lg">
             {isRu ? 'Сезонные цены' : 'Seasonal Pricing'}
@@ -169,7 +169,7 @@ export function SeasonalPricing({
             {isRu ? 'Базовая:' : 'Base:'} {basePrice.toLocaleString()} {currency}/{isRu ? 'ночь' : 'night'}
           </p>
         </div>
-        <Button onClick={() => addSeason()} size="sm" variant="outline">
+        <Button type="button" onClick={() => addSeason()} size="sm" variant="outline">
           <Plus className="h-4 w-4 mr-1" />
           {isRu ? 'Добавить' : 'Add'}
         </Button>
@@ -185,6 +185,7 @@ export function SeasonalPricing({
               {presetSeasons.map((preset, index) => (
                 <Button
                   key={index}
+                  type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => addSeason(preset)}
@@ -209,7 +210,7 @@ export function SeasonalPricing({
                 <div className={cn("p-2 bg-muted rounded-none mt-1", getSeasonColor(season.type))}>
                   <SeasonIcon className="h-4 w-4" />
                 </div>
-                <div className="flex-1 grid grid-cols-2 gap-2">
+                <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
                     <Label className="text-xs text-muted-foreground">{isRu ? 'Название' : 'Name'}</Label>
                     <Input
@@ -236,6 +237,7 @@ export function SeasonalPricing({
                   </div>
                 </div>
                 <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
                   onClick={() => removeSeason(season.id)}
@@ -247,7 +249,7 @@ export function SeasonalPricing({
               </div>
 
               {/* Row 2: Date range — From / To */}
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div>
                   <Label className="text-xs text-muted-foreground">{isRu ? 'С: месяц' : 'From: month'}</Label>
                   <Select
@@ -304,7 +306,7 @@ export function SeasonalPricing({
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label className="text-xs text-muted-foreground">
-                    {isRu ? 'Цена за ночь (THB)' : 'Price per night (THB)'}
+                    {isRu ? `Цена за ночь (${currency})` : `Price per night (${currency})`}
                   </Label>
                   <Input
                     type="number"
@@ -330,7 +332,7 @@ export function SeasonalPricing({
               </div>
 
               {/* Summary */}
-              <div className="flex items-center justify-between text-sm bg-muted/50 rounded-none px-3 py-2">
+              <div className="flex flex-wrap gap-2 items-center justify-between text-sm bg-muted/50 rounded-none px-3 py-2">
                 <span className="text-muted-foreground">{formatDateRange(season)}</span>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">
