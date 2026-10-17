@@ -210,10 +210,6 @@ export function useCreateOwnerProperty() {
         supabase.functions.invoke('notify-admin-property-submission', {
           body: {
             property_id: result.id,
-            property_title: result.title || result.title_en || result.title_ru || 'Без названия',
-            owner_id: user.id,
-            owner_name: profile?.full_name || undefined,
-            owner_email: profile?.email || user.email || undefined,
           },
         }).catch(err => errorLog.silent(err, 'notify_admin'));
       }

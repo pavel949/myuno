@@ -34,7 +34,7 @@ export function useExploreLayers() {
     queryFn: async (): Promise<ExploreItem[]> => {
       const [props, projects, providers] = await Promise.all([
         supabase
-          .from('v_properties_public')
+          .from('public_property_catalog')
           .select('id, title_en, title_ru, lat, lng, district, listing_type, price, price_period, sale_price, cover_image')
           .limit(1000),
         supabase
@@ -43,7 +43,7 @@ export function useExploreLayers() {
           .eq('is_approved', true)
           .limit(1000),
         supabase
-          .from('providers')
+          .from('public_provider_catalog')
           .select('id, name, lat, lng, rating, cover_image, logo_url, business_category')
           .eq('is_active', true)
           .not('lat', 'is', null)

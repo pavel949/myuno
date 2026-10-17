@@ -32,7 +32,7 @@ export function useServiceBookingCatalogue(providerId: string | null | undefined
     (async () => {
       try {
         const { data: provider, error: providerError } = await supabase
-          .from('providers')
+          .from('public_provider_catalog')
           .select('id, name, logo_url, business_category, is_active, approval_status, is_demo')
           .eq('id', providerId)
           .maybeSingle();
@@ -44,7 +44,7 @@ export function useServiceBookingCatalogue(providerId: string | null | undefined
         if (eligibility === 'inactive') { setState({ status: 'inactive', provider: provider as ProviderRow }); return; }
 
         const { data: rows, error: servicesError } = await supabase
-          .from('services')
+          .from('public_service_catalog')
           .select('id, name_en, name_ru, price, currency, is_active, approval_status')
           .eq('provider_id', providerId)
           .eq('is_active', true)

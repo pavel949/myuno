@@ -48,10 +48,11 @@ const EventDetail = () => {
     queryKey: ['event-organizer', event?.provider_id],
     enabled: !!event?.provider_id,
     queryFn: async () => {
+      if (!event?.provider_id) return null;
       const { data, error } = await supabase
-        .from('providers')
+        .from('public_provider_catalog')
         .select('id, name, email, phone, logo_url')
-        .eq('id', event!.provider_id!)
+        .eq('id', event.provider_id)
         .maybeSingle();
       if (error) throw error;
       return data;

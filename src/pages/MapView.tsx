@@ -167,7 +167,7 @@ export default function MapView() {
     queryKey: ['salons-map'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('salons')
+        .from('public_salon_catalog')
         .select('id, name_en, name_ru, lat, lng, rating, price_from, cover_image')
         .eq('is_active', true)
         .not('lat', 'is', null)

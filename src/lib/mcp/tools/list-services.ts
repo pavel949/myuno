@@ -23,7 +23,7 @@ export default defineTool({
       { auth: { persistSession: false, autoRefreshToken: false } },
     );
 
-    let q = supabase.from("services").select("*").limit(limit);
+    let q = supabase.from("public_service_catalog").select("*").limit(limit);
     if (query) q = q.or(`name.ilike.%${query}%,description.ilike.%${query}%`);
     if (category) q = q.eq("category_slug", category);
 

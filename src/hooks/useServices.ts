@@ -52,10 +52,10 @@ interface UseServicesOptions {
 
 function buildQuery(options: UseServicesOptions) {
   let query = supabase
-    .from('services')
+    .from('public_service_catalog')
     .select(`
       *,
-      provider:providers(name, logo_url, is_verified, has_machine_translation),
+      provider,
       category:categories(name_en, name_ru, slug)
     `)
     .eq('is_active', true);
@@ -142,7 +142,7 @@ export const useCategories = () => {
     const loadCategories = async () => {
       try {
         const { data: serviceCategories } = await supabase
-          .from('services')
+          .from('public_service_catalog')
           .select('category_id')
           .eq('is_active', true);
         
