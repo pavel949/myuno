@@ -1,5 +1,15 @@
 # Roadmap
 
+## 2026-10-17 · Revised P0/P1 executable master task
+- [x] Read the uploaded master task and verify starting HEAD `c839a53568b8e14ee277f5739e85c3f1b56f6262`; preserve accepted UX/security work.
+- [ ] P0-A: close remaining proven order/payment/inventory mutation blockers; exact isolated tests and security-preserving rollback before any apply/deploy; report GO-A/NO-GO and stop.
+- [ ] P0-B: real manifest, separately supervised seed with enforcement OFF, existing resolver and cache isolation — blocked until GO-A and explicit cutover-stage approval.
+- [ ] P0-C: Properties → Calendar → Today → Bookings, one consumer at a time — blocked until preceding gates.
+- [ ] P0-D: supervised reversible enforcement — blocked until C1–C4 isolation/revocation/deep-link gates pass.
+- [ ] P0-E: controlled Layantara closed-loop acceptance — blocked until GO-D and approval of the real operation; never a production QA transaction.
+- [ ] P0-F/G/H, then P1 Agent → Homes Rent/Buy → Stay 360 → Owner/Map/Notifications/Admin — blocked until preceding gates; reuse canonical truth.
+- Restrictions: no automatic next gated tranche; no production business test writes/outbound calls, enforcement or assignments during P0-A; no broad UX/catalog/support redesign.
+
 ## 2026-10-17 · FINAL PRE-E3 order mutation security
 - [x] Capture live catalog and source census (65 source writers/15 direct SQL writers), required field/state matrix at baseline `1f40588db94e8d0e1e83cd024bf5556034bafcb0`; no blanket certification.
 - [x] Reproduce wallet/provider bypass locally; apply exact 0033 wallet containment and deploy terminal/type transfer protection after isolated tests.
