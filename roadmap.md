@@ -2,7 +2,9 @@
 
 ## 2026-10-17 · Resorts/hotels plan review (categories, rate plans, rules)
 - [x] Stage status audited: schema + server quote + room assignment + MC structure page live; guest page unwired, restrictions editor missing, live categories/rate plans 0 (33 properties all `unit`).
-- [ ] Approved implementation: wire guest-facing category offers to property detail page (stage 4) and add stay-restrictions editor to structure page (stage 3 gap); preserve existing feature flag and pricing contracts, no live data writes.
+- [x] Wire category offers into property detail with dates/guests and existing multi-unit flag; add property/category date-rule editor with row-ID insert/update, retained failed drafts and offer invalidation. No live data writes or permission changes.
+- [x] Narrow verification: 21 existing quote/page tests pass; real editor/hooks/offers driven with isolated browser fixtures (insert, update, reopen, failed draft, shared date price, stop sell, guest changes), widths 375/390/430/1280, zero browser errors; automatic build OK.
+- [ ] Public guest availability — blocked: read-only hosted metadata confirms public RLS policies exist but anon table/column grants are absent for categories/plans/restrictions/seasons; missing grants are not bypassed. Requires separately reviewed public allowlist contract, not blanket SELECT. Current empty live category data cannot certify the guest flow.
 - [ ] Stage 5 live validation — blocked: requires team-entered category/rate data or explicit approval for [TEST] resort rows (no production writes by agent).
 
 

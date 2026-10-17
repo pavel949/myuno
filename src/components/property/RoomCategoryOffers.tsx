@@ -31,6 +31,9 @@ export function RoomCategoryOffers({ propertyId, dateRange, guests = 1, onDateRa
     queryFn: async () => {
       const { data: cats, error: e1 } = await supabase.from('property_room_categories')
         .select('id, name_en, name_ru, base_price_per_night, min_stay_nights, max_guests, is_active').eq('property_id', propertyId).eq('is_active', true).order('sort_order');
+      // Missing public grants must not turn every ordinary listing into an error.
+      // Do not fall back to privileged reads or disclose manager-only categories.
+      if (e1?.code === '42501') return [];
       if (e1) throw e1;
       if (!cats?.length) return [];
       const ids = cats.map((c) => c.id);
