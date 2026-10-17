@@ -14,7 +14,9 @@ myUNO is a **destination property, services and living operating system**.
 
 `Discover → Decide → Quote/Price → Request/Reserve/Transact → Pay where applicable → Stay/Receive Service → Operate/Support → Account → Retain → Repeat/Refer/Own/Invest`.
 
-It connects trusted property/service supply, local execution, distribution, customer relationships and financial truth for customers, operators, providers, owners, agents and management.\n\n**Living is an experience/surface category over canonical domains, not a separate domain model.**
+It connects trusted property/service supply, local execution, distribution, customer relationships and financial truth for customers, operators, providers, owners, agents and management.
+
+**Living is an experience/surface category over canonical domains, not a separate domain model.**
 
 ## 02. What myUNO is not
 Not another OTA, classifieds site, generic marketplace, “contact us” services directory, mini-app collection, duplicate PMS/CRM/accounting stack, separate Layantara app, or AI demo inventing data. `myUNO-final` is a UX/workflow donor only. **One Operational Reality** is the product.
@@ -25,14 +27,18 @@ Production operational convergence:
 
 Immediate proof: run a real Layantara booking from quote through checkout and P&L using canonical systems, isolate Layantara/Condo teams, preserve founder consolidated oversight, and keep the architecture reusable.
 
-Priority: `correctness → security → operational completeness → usability → distribution → scale`.\n\n**Services architecture is canonical now; full Marketplace activation remains P1 and must not expand the current property P0.**
+Priority: `correctness → security → operational completeness → usability → distribution → scale`.
+
+**Services architecture is canonical now; full Marketplace activation remains P1 and must not expand the current property P0.**
 
 ## 04. Canonical Operating Loop
 Shared: `Discover → Select → Quote/Price → Request/Reserve/Transact → Pay → Fulfil → Support/Operate → Account → CRM → Repeat`.
 
 **Generic “order/request/booking” in diagrams does not imply a DB table.** Specific entities are `orders`, `service_orders`, `property_bookings`, etc.
 
-Property rental: `Property → Availability → Rate → Quote → checked/atomic commercial + inventory commitment → Verified Payment where required → Confirmation → Stay → Checkout → Reconciliation → P&L`.\n\nDo not infer a fixed ordering between creation/mutation of `orders` and `property_bookings` from this diagram. Follow the verified canonical writer contract. Commercial transaction ≠ inventory commitment; successful `orders` state does not prove successful inventory reservation; payment confirmation ≠ booking confirmation.
+Property rental: `Property → Availability → Rate → Quote → checked/atomic commercial + inventory commitment → Verified Payment where required → Confirmation → Stay → Checkout → Reconciliation → P&L`.
+
+Do not infer a fixed ordering between creation/mutation of `orders` and `property_bookings` from this diagram. Follow the verified canonical writer contract. Commercial transaction ≠ inventory commitment; successful `orders` state does not prove successful inventory reservation; payment confirmation ≠ booking confirmation.
 
 Property purchase: `Project/Unit → Terms → Enquiry → Qualification → Viewing/DD → Transaction → Ownership/PM`. Never force Buy into rental semantics.
 
@@ -41,7 +47,9 @@ Services: `Discovery → Provider/Offering → Availability/Slot where applicabl
 Service modes:
 - **REQUEST**: provider/human confirmation required.
 - **BOOK**: offering/availability known; payment may be later/outside myUNO.
-- **BOOK+PAY**: offering, availability and server-authoritative price known; canonical checkout exists.\n\nEach service vertical must define its authoritative capacity/hold point independently of payment. **Payment must never substitute for capacity reservation.**
+- **BOOK+PAY**: offering, availability and server-authoritative price known; canonical checkout exists.
+
+Each service vertical must define its authoritative capacity/hold point independently of payment. **Payment must never substitute for capacity reservation.**
 
 Creating `service_orders` does not automatically create/require `orders`. If a vertical needs platform checkout/settlement/ledger, use an explicit idempotent reconciled bridge. Where bridged, persist deterministic linkage and enforce at-most-one active commercial order per service transaction unless an explicitly modelled retry/version contract requires otherwise. Never create two financial truths.
 
@@ -50,7 +58,9 @@ Creating `service_orders` does not automatically create/require `orders`. If a v
 ## 05. One Operational Reality
 `Project ≠ Property`; `Property ≠ Operating Space`; `orders ≠ property_bookings`; `service_orders ≠ orders`; `Payment ≠ Ledger`; `Person ≠ Role`; `Provider ≠ Organization`; `UI state ≠ Domain state`; `CRM event ≠ Domain authority`.
 
-Homes, Services, Concierge, PMS, Agent, Owner, Finance and CRM are projections: **different views, one state**.\n\n**Immutable/auditable snapshots such as accepted quotes may preserve historical commercial state. They are evidence of the agreed state at a point in time, not competing canonical truth.**
+Homes, Services, Concierge, PMS, Agent, Owner, Finance and CRM are projections: **different views, one state**.
+
+**Immutable/auditable snapshots such as accepted quotes may preserve historical commercial state. They are evidence of the agreed state at a point in time, not competing canonical truth.**
 
 ## 06. Canonical domains / sources of truth
 Before adding a table/enum/hook/context/workflow, find the existing canonical implementation and prove it cannot represent the requirement.
@@ -77,7 +87,9 @@ One person may be guest, renter, buyer, investor, owner, referrer, agent, suppli
 
 `Management Company → Operating Space → Properties + Members`. Target: `Ignatev Estate → Layantara | Condominiums`.
 
-One primary Space/property unless approved otherwise; cross-space membership explicit; empty/invalid scope never means All. **Operating Space = WHERE; RBAC/module/action = WHAT.** Space membership alone never grants Finance/Pricing/Booking/Admin capability.\n\n**Operating Space constrains employee/management operational access; it does not replace independently verified customer, owner, provider or public rights.**
+One primary Space/property unless approved otherwise; cross-space membership explicit; empty/invalid scope never means All. **Operating Space = WHERE; RBAC/module/action = WHAT.** Space membership alone never grants Finance/Pricing/Booking/Admin capability.
+
+**Operating Space constrains employee/management operational access; it does not replace independently verified customer, owner, provider or public rights.**
 
 ## 08. Product Surfaces
 **Homes:** `Rent | Buy`; Search → Results → Project Portal → Category/Units → Unit → Terms/Availability → Quote → Booking/Enquiry.
@@ -106,7 +118,9 @@ No separate booking engine, calendar, guest DB, ledger or CRM. Differences from 
 ## 10. Business model
 Engines: rental/management; sales/investment; owner/asset management; agent distribution; Services Marketplace GMV/fees; monetized high-touch Concierge; separately governed investment/trust products.
 
-Property flywheel is economics, not a required state machine. Services are revenue plus high-frequency trust/retention. Every monetized flow defines payer, revenue event, fee, counterparty, recognition and accounting destination. Never invent a universal Marketplace commission.\n\n**A service request is not GMV. Marketplace GMV/revenue is recognized only from the configured, verified commercial/financial event for that vertical.**
+Property flywheel is economics, not a required state machine. Services are revenue plus high-frequency trust/retention. Every monetized flow defines payer, revenue event, fee, counterparty, recognition and accounting destination. Never invent a universal Marketplace commission.
+
+**A service request is not GMV. Marketplace GMV/revenue is recognized only from the configured, verified commercial/financial event for that vertical.**
 
 ## 11. Architectural invariants
 1. One Operational Reality.
@@ -135,7 +149,9 @@ Property flywheel is economics, not a required state machine. Services are reven
 
 UI `paid` is not payment truth. Manual/off-platform payment requires authorized actor, trusted order/amount context, canonical reconciliation and accounting consequence. Stripe/webhooks require verified evidence/idempotency.
 
-`ledger_entries` is accounting truth. Operating Space filters/reports finance; never a second ledger. Shared/unallocated costs stay explicit.\n\n**Operational forecasts, pending amounts and provisional accruals may exist, but must be explicitly labelled non-posted/provisional and must not be included in realized P&L as though they were posted ledger truth.**
+`ledger_entries` is accounting truth. Operating Space filters/reports finance; never a second ledger. Shared/unallocated costs stay explicit.
+
+**Operational forecasts, pending amounts and provisional accruals may exist, but must be explicitly labelled non-posted/provisional and must not be included in realized P&L as though they were posted ledger truth.**
 
 ## 13. UX Principles
 Trusted infrastructure, not noisy marketplace. Task first. One obvious primary action. Next **safe** action, not every action. Exceptions before dashboards. Progressive disclosure. Information density may be high; control density low. Mobile-first 375px. RU/EN resilient. Status not color-only. Loading/empty/error distinct. Failed data never zero/all-clear. No page-level overflow. Project Card ≠ Unit Card. Respect public/private boundaries. Admin/content tooling is production-grade. UNKNOWN remains unknown.
