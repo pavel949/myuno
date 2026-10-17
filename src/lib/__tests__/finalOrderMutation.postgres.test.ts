@@ -18,6 +18,7 @@ function run(bin: string, args: string[]) {
 async function as<T>(user: string | null, fn: (tx: postgres.TransactionSql) => Promise<T>): Promise<T> {
   return sql.begin(async (tx) => {
     await tx.unsafe(`SET LOCAL ROLE ${user ? 'authenticated' : 'anon'}`);
+    await tx`SELECT set_config('request.jwt.claim.role', ${user ? 'authenticated' : 'anon'}, true)`;
     await tx`SELECT set_config('request.jwt.claim.sub', ${user ?? ''}, true)`;
     return fn(tx);
   }) as Promise<T>;
@@ -28,7 +29,8 @@ beforeAll(async()=>{
  directory=mkdtempSync(join(tmpdir(),'myuno-final-orders-'));chmodSync(directory,0o700);if(asRoot)chownSync(directory,65534,65534);
  run('initdb',['-D',join(directory,'data'),'-A','trust','--no-locale',...(libPath?['-c',`dynamic_library_path=${libPath}`]:[])]);
  run('pg_ctl',['-D',join(directory,'data'),'-l',join(directory,'pg.log'),'-o',`-k ${directory} -p 55446 -c listen_addresses=''${libPath?` -c dynamic_library_path=${libPath}`:''}`,'-w','start']);started=true;
- sql=postgres({host:directory,port:55446,database:'postgres',username:owner,password:'',max:4,onnotice:()=>{}});
+ sql=postgres({host:directory,port:55446,database:'postgres',username:owner,password:'',max:1,onnotice:()=>{}});
+ await sql`SELECT set_config('request.jwt.claim.role','service_role',false)`;
  await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/uno-team-live-catalog.sql','utf8'));
  await sql.unsafe(readFileSync('drizzle/migrations/0028_uno_team_private_helpers.sql','utf8'));
  await sql.unsafe(readFileSync('drizzle/migrations/0029_uno_team_private_policies.sql','utf8'));
