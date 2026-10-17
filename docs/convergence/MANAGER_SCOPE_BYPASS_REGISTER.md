@@ -105,3 +105,15 @@ so E1a is behavior-neutral.
 - B2 Confirmed team members per portfolio and their company roles.
 - B3 Product decision: CRM/owners stay company-wide or become space-scoped.
 - B4 Decision on `send-property-report` hardening (can ship independently, auth-only).
+
+## Status update 2026-10-17 (0024, 0025)
+| Path | Status |
+|---|---|
+| mc-backups member read | Fixed under enforcement (0024) |
+| Sibling property tables (16+2), owner finance, CRM tasks, ledger | Ceilinged under enforcement (0024); null-property/ledger fail closed |
+| Assignments / permissions / delegate insert-delete governance | Overseer-only under enforcement (0024) |
+| Delegate acceptance rewrite | Fixed in all modes (0025) |
+| Property INSERT into foreign company | Fixed in all modes (0025); enforced companies use checked RPC (0024) |
+| Property company change by owner | Fixed in all modes (0025) |
+| Authenticated read of private columns on approved properties | **Open blocker** — consumer migration to `public_property_catalog` required |
+| Order customer update breadth | **Open, unverified** |

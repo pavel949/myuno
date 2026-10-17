@@ -1,5 +1,10 @@
 # Roadmap
 
+## 2026-10-17 · E2.5 continuation
+- [x] 0025 delegate/placement guards, tests, rollback, register and report updated.
+- [ ] Authenticated private-column exposure on approved properties (needs consumer migration).
+- [ ] Order customer update breadth audit.
+
 ## 2026-10-17 · E2.6 — Cutover blockers
 - [x] Migration 0024, isolated tests, rollback, doc (docs/convergence/OPERATING_SPACES_E2_6_CUTOVER_BLOCKERS.md).
 - [ ] Migrate public consumers to public_property_catalog, then revoke base anon access (E3 blocker).
