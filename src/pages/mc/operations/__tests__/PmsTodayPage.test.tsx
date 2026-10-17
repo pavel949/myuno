@@ -37,7 +37,7 @@ describe.each(['ru', 'en'] as const)('isolated Today (%s)', language => {
   });
   it('loading exposes no booking/request actions', () => {
     mocks.scenario = 'loading'; mount();
-    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByRole('status', { name: language === 'ru' ? 'Загрузка сведений на сегодня' : 'Loading today’s data' })).toBeInTheDocument();
     expect(screen.queryAllByRole('link', { name: /Открыть объект|Open property/ })).toHaveLength(0);
   });
   it('query failure suppresses stale projections and all-clear data', () => {
