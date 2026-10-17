@@ -341,3 +341,150 @@ describe('E2.5 enforced scope ceilings and privileged authorization', () => {
     }).catch(error => { if (!(error instanceof Error) || error.message !== 'security-rollback-test') throw error; });
   });
 });
+
+describe('E2.6 cutover-blocker ceilings', () => {
+  const B = { villa: id(101), condo: id(102) };
+  const LA = { a: id(111), b: id(112) };
+  const PROPERTY_TABLES = ['property_financials','property_payout_rules','property_accounting_policies','property_rate_seasons',
+    'property_price_offers','property_documents','property_owners','property_activity_log','property_inquiries',
+    'owner_portal_settings','owner_statement_approvals','inventory_listings','property_delegates'];
+  const COMPANY_TABLES = ['owner_invoices','owner_payouts','crm_tasks'];
+  const BOOKING_TABLES = ['property_booking_status_history','booking_notifications_log'];
+  const ids = (actor: string, sqlText: string) => as(actor, async tx => (await tx.unsafe(sqlText)).map(r => r.id));
+  beforeAll(async () => {
+    const path = process.env.E26_MIGRATION ?? join('drizzle/migrations', readdirSync('drizzle/migrations').find(f => /operating_cutover_blockers/.test(f)) ?? 'missing');
+    const migration = readFileSync(path, 'utf8');
+    await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/operating-cutover-base.sql', 'utf8'));
+    const select = migration.split('CREATE VIEW public.public_property_catalog')[1].split('FROM public.properties')[0].split('SELECT')[1];
+    for (const col of select.split(',').map(c => c.trim()).filter(Boolean)) {
+      await sql.unsafe(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS ${col} text`);
+    }
+    await sql.unsafe(migration);
+    await sql`UPDATE management_companies SET operating_spaces_enforced=true WHERE id=${CO_A}`;
+    await sql`UPDATE properties SET lock_code='SECRET-1234', actual_owner_phone='+66-000', title_en='Villa' WHERE id IN (${P.villa},${P.condo})`;
+    for (const t of PROPERTY_TABLES) await sql.unsafe(`INSERT INTO ${t}(property_id) VALUES ('${P.villa}'),('${P.condo}')`);
+    for (const t of COMPANY_TABLES) await sql.unsafe(`INSERT INTO ${t}(company_id,property_id) VALUES ('${CO_A}','${P.villa}'),('${CO_A}','${P.condo}'),('${CO_A}',NULL)`);
+    await sql`INSERT INTO property_bookings VALUES (${B.villa},${P.villa},${U.director}),(${B.condo},${P.condo},${U.director})`;
+    for (const t of BOOKING_TABLES) await sql.unsafe(`INSERT INTO ${t}(booking_id) VALUES ('${B.villa}'),('${B.condo}')`);
+    await sql`INSERT INTO ledger_accounts VALUES (${LA.a},${CO_A}),(${LA.b},${CO_B})`;
+    await sql`INSERT INTO ledger_entries(debit_account_id,credit_account_id) VALUES (${LA.a},${LA.a}),(${LA.b},${LA.b})`;
+    await sql`INSERT INTO storage.objects(bucket_id,name) VALUES ('mc-backups',${CO_A + '/2026-10-01.json'}),('mc-backups',${CO_B + '/x.json'}),('avatars','a.png')`;
+  });
+
+  it.each(PROPERTY_TABLES)('%s: resort/condo members cannot read or update the other space by direct ID', async t => {
+    for (const [actor, own, foreign] of [[U.resortMgr,P.villa,P.condo],[U.condoMgr,P.condo,P.villa]]) {
+      expect(await as(actor, tx => tx.unsafe(`SELECT id FROM ${t} WHERE property_id='${own}'`))).toHaveLength(1);
+      expect(await as(actor, tx => tx.unsafe(`SELECT id FROM ${t} WHERE property_id='${foreign}'`))).toHaveLength(0);
+      expect(await as(actor, tx => tx.unsafe(`UPDATE ${t} SET owner_id=owner_id WHERE property_id='${foreign}' RETURNING id`))).toHaveLength(0);
+      await expect(as(actor, tx => tx.unsafe(`INSERT INTO ${t}(property_id) VALUES ('${foreign}')`))).rejects.toThrow(/row-level security/);
+    }
+    expect(await ids(U.director, `SELECT id FROM ${t}`)).toHaveLength(2);
+    expect(await ids(U.team, `SELECT id FROM ${t}`)).toHaveLength(0);
+  });
+  it.each(COMPANY_TABLES)('%s: property rows ceilinged, null-property rows fail closed for space-limited users', async t => {
+    expect(await ids(U.resortMgr, `SELECT id FROM ${t}`)).toHaveLength(1);
+    expect(await ids(U.director, `SELECT id FROM ${t}`)).toHaveLength(3);
+    await expect(as(U.resortMgr, tx => tx.unsafe(`INSERT INTO ${t}(company_id,property_id) VALUES ('${CO_A}',NULL)`))).rejects.toThrow(/row-level security/);
+    await expect(as(U.resortMgr, tx => tx.unsafe(`INSERT INTO ${t}(company_id,property_id) VALUES ('${CO_B}','${P.villa}')`))).rejects.toThrow(/row-level security/);
+  });
+  it.each(BOOKING_TABLES)('%s: booking-linked rows follow the booking property', async t => {
+    expect(await ids(U.resortMgr, `SELECT booking_id id FROM ${t}`)).toEqual([B.villa]);
+    expect(await ids(U.condoMgr, `SELECT booking_id id FROM ${t}`)).toEqual([B.condo]);
+  });
+  it('ledger is company-level: space-limited members denied, overseers and other legacy company retained', async () => {
+    expect(await ids(U.resortMgr, 'SELECT id FROM ledger_accounts')).toEqual([LA.b]);
+    expect(await ids(U.resortMgr, 'SELECT id FROM ledger_entries')).toHaveLength(1);
+    expect(await ids(U.director, 'SELECT id FROM ledger_accounts')).toHaveLength(2);
+    expect(await ids(U.otherCo, 'SELECT id FROM ledger_entries')).toHaveLength(2);
+  });
+  it('templates readable; writes only by overseers under enforcement', async () => {
+    await expect(as(U.resortMgr, tx => tx`INSERT INTO property_checklist_templates(company_id) VALUES (${CO_A})`)).rejects.toThrow(/row-level security/);
+    await as(U.director, tx => tx`INSERT INTO property_checklist_templates(company_id) VALUES (${CO_A})`);
+    expect(await ids(U.resortMgr, 'SELECT id FROM property_checklist_templates')).toHaveLength(1);
+  });
+  it('governance: members and uno_team cannot grant assignments/permissions; director can', async () => {
+    for (const actor of [U.resortMgr, U.team]) {
+      await expect(as(actor, tx => tx`INSERT INTO property_manager_assignments VALUES (${P.villa},${actor},true)`)).rejects.toThrow(/row-level security/);
+      await expect(as(actor, tx => tx`INSERT INTO team_member_permissions VALUES (${CO_A},${actor},'finance',true,true,true)`)).rejects.toThrow(/row-level security/);
+      await expect(as(actor, tx => tx`INSERT INTO property_delegates(property_id,invited_by) VALUES (${P.villa},${actor})`)).rejects.toThrow(/row-level security/);
+    }
+    await sql.begin(async tx => {
+      await tx.unsafe('SET LOCAL ROLE authenticated'); await tx`SELECT set_config('request.jwt.claim.sub',${U.director},true)`;
+      await tx`INSERT INTO property_manager_assignments VALUES (${P.villa},${U.resortMgr},true)`;
+      await tx`INSERT INTO team_member_permissions VALUES (${CO_A},${U.zero},'tasks',true,false,false)`;
+      throw new Error('gov-test');
+    }).catch(e => { if (!(e instanceof Error) || e.message !== 'gov-test') throw e; });
+    // legacy company director unaffected
+    await sql.begin(async tx => {
+      await tx.unsafe('SET LOCAL ROLE authenticated'); await tx`SELECT set_config('request.jwt.claim.sub',${U.otherCo},true)`;
+      await tx`INSERT INTO property_manager_assignments VALUES (${P.otherCo},${U.otherCo},true)`;
+      throw new Error('gov-legacy');
+    }).catch(e => { if (!(e instanceof Error) || e.message !== 'gov-legacy') throw e; });
+  });
+  it('direct managed INSERT into enforced company is denied; legacy and personal inserts allowed', async () => {
+    await expect(as(U.director, tx => tx`INSERT INTO properties(id,management_company_id) VALUES (${id(120)},${CO_A})`)).rejects.toThrow(/row-level security/);
+    await sql.begin(async tx => {
+      await tx.unsafe('SET LOCAL ROLE authenticated'); await tx`SELECT set_config('request.jwt.claim.sub',${U.otherCo},true)`;
+      await tx`INSERT INTO properties(id,management_company_id) VALUES (${id(121)},${CO_B})`;
+      await tx`INSERT INTO properties(id,management_company_id) VALUES (${id(122)},NULL)`;
+      throw new Error('ins-legacy');
+    }).catch(e => { if (!(e instanceof Error) || e.message !== 'ins-legacy') throw e; });
+  });
+  it('checked create assigns the authorized space atomically; forged/foreign/missing space denied', async () => {
+    await sql.begin(async tx => {
+      await tx.unsafe('SET LOCAL ROLE authenticated'); await tx`SELECT set_config('request.jwt.claim.sub',${U.resortMgr},true)`;
+      const created = (await tx`SELECT create_managed_property_checked(${CO_A},${S.resort},'A','А','villa','rent') id`)[0].id;
+      await tx.unsafe('RESET ROLE');
+      expect((await tx`SELECT operating_space_id FROM operating_space_properties WHERE property_id=${created}`)[0].operating_space_id).toBe(S.resort);
+      expect((await tx`SELECT count(*) n FROM operating_space_assignment_audit WHERE property_id=${created} AND reason='onboarding'`)[0].n).toBe('1');
+      throw new Error('create-ok');
+    }).catch(e => { if (!(e instanceof Error) || e.message !== 'create-ok') throw e; });
+    for (const [actor, space] of [[U.resortMgr,S.condo],[U.resortMgr,S.otherCo],[U.resortMgr,null],[U.director,null],[U.resortMgr,S.dormant],[U.team,S.resort]]) {
+      await expect(as(actor, tx => tx`SELECT create_managed_property_checked(${CO_A},${space}::uuid,'A','А','villa','rent')`)).rejects.toThrow(/operating space|authority|permission/);
+    }
+    expect((await sql`SELECT count(*) n FROM properties WHERE title_en='A'`)[0].n).toBe('0');
+  });
+  it('reassignment is overseer-only, same-company, reasoned and audited', async () => {
+    await expect(as(U.cross, tx => tx`SELECT reassign_property_operating_space(${P.villa},${S.condo},'move')`)).rejects.toThrow(/overseer/);
+    await expect(as(U.director, tx => tx`SELECT reassign_property_operating_space(${P.villa},${S.otherCo},'move')`)).rejects.toThrow(/not in company/);
+    await expect(as(U.director, tx => tx`SELECT reassign_property_operating_space(${P.villa},${S.condo},'')`)).rejects.toThrow(/reason/);
+    await sql.begin(async tx => {
+      await tx.unsafe('SET LOCAL ROLE authenticated'); await tx`SELECT set_config('request.jwt.claim.sub',${U.director},true)`;
+      await tx`SELECT reassign_property_operating_space(${P.villa},${S.condo},'portfolio move')`;
+      await tx.unsafe('RESET ROLE');
+      const audit = await tx`SELECT from_space_id,to_space_id,actor_id FROM operating_space_assignment_audit WHERE property_id=${P.villa} AND reason='portfolio move'`;
+      expect(audit[0]).toEqual({ from_space_id: S.resort, to_space_id: S.condo, actor_id: U.director });
+      throw new Error('reassign-ok');
+    }).catch(e => { if (!(e instanceof Error) || e.message !== 'reassign-ok') throw e; });
+  });
+  it('backups: enforced ordinary member denied, overseer allowed, legacy company and other buckets unchanged', async () => {
+    expect(await as(U.resortMgr, tx => tx`SELECT name FROM storage.objects WHERE bucket_id='mc-backups'`)).toHaveLength(0);
+    expect(await as(U.resortMgr, tx => tx`SELECT name FROM storage.objects WHERE bucket_id='avatars'`)).toHaveLength(1);
+    expect(await as(U.director, tx => tx`SELECT name FROM storage.objects WHERE bucket_id='mc-backups'`)).toHaveLength(1);
+    expect(await as(U.otherCo, tx => tx`SELECT name FROM storage.objects WHERE bucket_id='mc-backups'`)).toHaveLength(1);
+  });
+  it('public projection exposes allowlisted marketing fields only', async () => {
+    const cols = (await sql`SELECT column_name FROM information_schema.columns WHERE table_name='public_property_catalog'`).map(r => r.column_name);
+    for (const secret of ['lock_code','actual_owner_phone','notes','owner_id','management_company_id']) expect(cols).not.toContain(secret);
+    const rows = await as(null, tx => tx`SELECT * FROM public_property_catalog WHERE id=${P.villa}`);
+    expect(rows).toHaveLength(1); expect(JSON.stringify(rows)).not.toContain('SECRET-1234');
+    await sql`UPDATE properties SET approval_status='pending' WHERE id=${P.villa}`;
+    expect(await as(null, tx => tx`SELECT id FROM public_property_catalog WHERE id=${P.villa}`)).toHaveLength(0);
+    await sql`UPDATE properties SET approval_status='approved' WHERE id=${P.villa}`;
+  });
+  it('legacy mode: every new ceiling is transparent', async () => {
+    await sql`UPDATE management_companies SET operating_spaces_enforced=false WHERE id=${CO_A}`;
+    for (const t of PROPERTY_TABLES) expect(await ids(U.resortMgr, `SELECT id FROM ${t}`)).toHaveLength(2);
+    for (const t of COMPANY_TABLES) expect(await ids(U.resortMgr, `SELECT id FROM ${t}`)).toHaveLength(3);
+    expect(await as(U.resortMgr, tx => tx`SELECT name FROM storage.objects WHERE bucket_id='mc-backups'`)).toHaveLength(1);
+    await sql`UPDATE management_companies SET operating_spaces_enforced=true WHERE id=${CO_A}`;
+  });
+  it('security-preserving rollback disables new RPCs without dropping ceilings', async () => {
+    await sql.begin(async tx => {
+      await tx.unsafe(readFileSync('docs/hardening/rollback/0024_operating_cutover_blockers.sql','utf8'));
+      expect((await tx`SELECT has_function_privilege('authenticated','public.create_managed_property_checked(uuid,uuid,text,text,text,text)','EXECUTE') ok`)[0].ok).toBe(false);
+      expect((await tx`SELECT count(*) n FROM pg_policies WHERE policyname='operating_space_backup_ceiling'`)[0].n).toBe('1');
+      throw new Error('rb-ok');
+    }).catch(e => { if (!(e instanceof Error) || e.message !== 'rb-ok') throw e; });
+  });
+});
