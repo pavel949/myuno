@@ -66,18 +66,16 @@ const COMMERCIAL_COLUMNS = `
   id, title_en, title_ru, description_en, description_ru,
   property_type, listing_type, asset_class,
   district, address, cover_image, images,
-  price, sale_price, monthly_rent_thb, currency,
+  price, sale_price, currency,
   floor_area_sqm, land_size_sqm, land_size_rai,
   frontage_m, road_access, zoning, title_deed_type,
   electricity_load_kw, water_supply,
-  current_lease_term_months, lease_remaining_months,
-  noi_annual_thb, cap_rate_pct, yield_pct,
-  existing_tenant_anonymized, permitted_uses, building_condition,
+  cap_rate_pct, yield_pct,
+  permitted_uses, building_condition,
   floor, parking_type,
   is_featured, is_verified, created_at,
   hotel_keys, hotel_star_rating, hotel_brand, hotel_license_type,
-  hotel_adr_thb, hotel_revpar_thb, hotel_occupancy_pct, hotel_gop_margin_pct,
-  hotel_management_status, hotel_operator_name, hotel_year_renovated
+  hotel_year_renovated
 `;
 
 export interface CommercialFilters {
@@ -97,7 +95,7 @@ export function useCommercialProperties(filters: CommercialFilters = {}) {
     queryKey: ['commercial-properties', filters],
     queryFn: async (): Promise<CommercialProperty[]> => {
       let query = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select(COMMERCIAL_COLUMNS)
         .eq('asset_class', 'commercial')
         .eq('is_active', true)
@@ -151,7 +149,7 @@ export function useLandPlots(filters: CommercialFilters = {}) {
     queryKey: ['land-plots', filters],
     queryFn: async (): Promise<CommercialProperty[]> => {
       let query = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select(COMMERCIAL_COLUMNS)
         .eq('asset_class', 'land')
         .eq('is_active', true)

@@ -444,7 +444,7 @@ export function usePropertiesInfinite(filters: PropertyFilters = {}) {
     gcTime: 10 * 60 * 1000,     // 10 min cache
     queryFn: async ({ pageParam = 0 }) => {
       let query = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
@@ -476,7 +476,7 @@ export function useProperties(filters: PropertyFilters = {}, limit = 50) {
     gcTime: 10 * 60 * 1000,
     queryFn: async () => {
       let query = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('approval_status', PUBLIC_CATALOG_APPROVAL_STATUS)
@@ -616,7 +616,7 @@ export function useFeaturedProperties(limit = 6) {
     gcTime: 10 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('is_featured', true)
@@ -636,7 +636,7 @@ export function useInstantBookingProperties(limit = 10) {
     queryKey: ['instant-booking-properties', limit],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select(PROPERTY_LIST_COLUMNS)
         .eq('is_active', true)
         .eq('instant_booking', true)
@@ -657,7 +657,7 @@ export function usePropertiesCount(filters: PropertyFilters = {}) {
     queryKey: ['properties-count', filters],
     queryFn: async () => {
       let query = supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select('id', { count: 'exact', head: true })
         .eq('is_active', true);
 

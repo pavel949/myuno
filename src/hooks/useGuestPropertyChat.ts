@@ -249,7 +249,7 @@ export function useGuestChatList() {
 
       // Fetch property details
       const { data: properties } = await supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select('id, title_en, title_ru, cover_image')
         .in('id', propertyIds as string[]);
 
