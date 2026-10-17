@@ -4,6 +4,7 @@
 - [x] Read the uploaded master task and verify starting HEAD `c839a53568b8e14ee277f5739e85c3f1b56f6262`; preserve accepted UX/security work.
 - [ ] P0-A: close remaining proven order/payment/inventory mutation blockers; exact isolated tests and security-preserving rollback before any apply/deploy; report GO-A/NO-GO and stop.
 - [x] P0-A bounded refund containment: deploy read-only refund rejection after 16/16 entrypoint cases, 129/129 selected regressions and independent review; 19/19 retained operator boundary cases; no Stripe/DML; unchanged read-only 0/0/0/0 and business counts.
+- [x] P0-A contract audit continuation: code/live-backed amount, finance-duty and atomic-transition matrices plus PC-01–PC-10 register; retained tests 161/161 + refund 16/16 + operator boundaries 19/19; documentation only, no permission/runtime changes. PC-01–PC-05 await bounded business approval; existing unsafe writers remain explicitly unclosed.
 - [ ] P0-A pricing/settlement contract — blocked on exact discount/negotiated-price authority and off-platform conversion/deposit/reversal accounting; direct writers, signed operator financial bypass and webhook/inventory atomicity remain NO-GO.
 - [ ] P0-B: real manifest, separately supervised seed with enforcement OFF, existing resolver and cache isolation — blocked until GO-A and explicit cutover-stage approval.
 - [ ] P0-C: Properties → Calendar → Today → Bookings, one consumer at a time — blocked until preceding gates.
