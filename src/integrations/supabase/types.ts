@@ -35357,6 +35357,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      actor_can_place_property_in_company: {
+        Args: { p_company_id: string }
+        Returns: boolean
+      }
       actor_can_read_company_backup: {
         Args: { p_folder: string }
         Returns: boolean
