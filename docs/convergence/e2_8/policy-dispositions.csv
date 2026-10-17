@@ -1,307 +1,433 @@
-schema,table,policy,classification,disposition,command,roles,before_using,before_check
-public,admin_audit_logs,audit_logs_admin_only,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,admin_notes,admin_notes_admin_delete,LEGACY BROAD BYPASS,Narrowed by 0029,DELETE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,admin_notes,admin_notes_admin_insert,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{public},,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))"
-public,admin_notes,admin_notes_admin_read,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",
-public,admin_notes,admin_notes_admin_update,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",
-public,agent_deals,Company members can update deals,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
-public,agent_deals,Company members can view deals,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",
-public,agent_deals,Company owner/admin can delete deals,LEGACY BROAD BYPASS,Narrowed by 0029,DELETE,{authenticated},"(is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+schema,table,policy,classification,disposition,command,roles,before_using,before_check,final_using,final_check
+public,admin_audit_logs,audit_logs_admin_only,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,admin_notes,admin_notes_admin_delete,LEGACY BROAD BYPASS,Applied 0029,DELETE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false)",
+public,admin_notes,admin_notes_admin_insert,LEGACY BROAD BYPASS,Applied 0029,INSERT,{public},,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role))"
+public,admin_notes,admin_notes_admin_read,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role))",
+public,admin_notes,admin_notes_admin_update,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role))",
+public,agent_deals,Company members can update deals,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",,"mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+public,agent_deals,Company members can view deals,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",,"mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+public,agent_deals,Company owner/admin can delete deals,LEGACY BROAD BYPASS,Applied 0029,DELETE,{authenticated},"(is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+   FROM management_company_members
+  WHERE ((management_company_members.company_id = agent_deals.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (management_company_members.is_active = true)))))",,"(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
    FROM management_company_members
   WHERE ((management_company_members.company_id = agent_deals.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (management_company_members.is_active = true)))))",
-public,ai_agent_knowledge,Admins can manage all knowledge,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,ai_agent_logs,Admins can view all logs,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},is_admin_or_uno_team(),
-public,ai_agents,Admins can manage all agents,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,ai_artifacts,UNO team can view AI artifacts,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},"(EXISTS ( SELECT 1
+public,ai_agent_knowledge,Admins can manage all knowledge,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,ai_agent_logs,Admins can view all logs,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,ai_agents,Admins can manage all agents,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,ai_artifacts,UNO team can view AI artifacts,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},"(EXISTS ( SELECT 1
    FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = 'uno_team'::app_role))))",
-public,ai_intake_sessions,Admins manage intake sessions,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{public},"(EXISTS ( SELECT 1
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = 'uno_team'::app_role))))",,"(EXISTS ( SELECT 1
    FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
-public,airport_bookings,Users can update own airport bookings,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},((auth.uid() = user_id) OR is_admin_or_uno_team()),
-public,airport_bookings,Users can view own airport bookings,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},((auth.uid() = user_id) OR is_admin_or_uno_team()),
-public,airport_passengers,Admins manage airport passengers,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,airport_suppliers,Admins can manage airport suppliers,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,booking_notifications_log,MC members can view booking notifications,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(is_admin_or_uno_team() OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1
+  WHERE ((user_roles.user_id = auth.uid()) AND false)))",
+public,ai_intake_sessions,Admins manage intake sessions,LEGACY BROAD BYPASS,Applied 0029,ALL,{public},"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+public,airport_bookings,Users can update own airport bookings,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},((auth.uid() = user_id) OR is_admin_or_uno_team()),,((auth.uid() = user_id) OR is_admin_or_uno_team_e28_private()),
+public,airport_bookings,Users can view own airport bookings,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},((auth.uid() = user_id) OR is_admin_or_uno_team()),,((auth.uid() = user_id) OR is_admin_or_uno_team_e28_private()),
+public,airport_passengers,Admins manage airport passengers,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR false)","(has_role(auth.uid(), 'admin'::app_role) OR false)"
+public,airport_suppliers,Admins can manage airport suppliers,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,booking_notifications_log,MC members can view booking notifications,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(is_admin_or_uno_team() OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM ((property_bookings pb
+     JOIN properties p ON ((p.id = pb.property_id)))
+     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))
+  WHERE ((pb.id = booking_notifications_log.booking_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true))))))",,"(is_admin_or_uno_team_e28_private() OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1
    FROM ((property_bookings pb
      JOIN properties p ON ((p.id = pb.property_id)))
      JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))
   WHERE ((pb.id = booking_notifications_log.booking_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true))))))",
-public,booking_payments,Admins manage booking payments,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,booking_vouchers,Admins manage vouchers,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,booking_payments,Admins manage booking payments,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR false)","(has_role(auth.uid(), 'admin'::app_role) OR false)"
+public,booking_vouchers,Admins manage vouchers,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR false)","(has_role(auth.uid(), 'admin'::app_role) OR false)"
 public,catalog_facet_definitions,facet_definitions_admin_write,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"(EXISTS ( SELECT 1
    FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
-public,catalog_hygiene_log,hygiene_log_admin_insert,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{public},,"((auth.uid() IS NOT NULL) AND (EXISTS ( SELECT 1
-   FROM user_roles ur
-  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))"
-public,catalog_hygiene_log,hygiene_log_read,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},"(EXISTS ( SELECT 1
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
    FROM user_roles
   WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
-public,cleaning_services,Admins can update cleaning_services,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,cleaning_services,Admins can view all cleaning_services,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,company_storefronts,Admins can manage all storefronts,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,consultation_requests,uno_team_update_leads,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},"(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role))","(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role))"
-public,consultation_requests,uno_team_view_leads,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role) OR (user_id = auth.uid()))",
-public,contact_identities,Staff read all identities,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},is_admin_or_uno_team(),
-public,contact_identity_links,Staff read all identity links,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},is_admin_or_uno_team(),
-public,crm_companies,crm_companies_delete,LEGACY BROAD BYPASS,Narrowed by 0029,DELETE,{authenticated},"(is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+public,catalog_hygiene_log,hygiene_log_admin_insert,LEGACY BROAD BYPASS,Applied 0029,INSERT,{public},,"((auth.uid() IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM user_roles ur
+  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))",,"((auth.uid() IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM user_roles ur
+  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role]))))))"
+public,catalog_hygiene_log,hygiene_log_read,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+public,cleaning_services,Admins can update cleaning_services,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,cleaning_services,Admins can view all cleaning_services,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+public,company_storefronts,Admins can manage all storefronts,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team()
+public,consultation_requests,uno_team_update_leads,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},"(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role))","(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role))","(false OR has_role(auth.uid(), 'admin'::app_role))","(false OR has_role(auth.uid(), 'admin'::app_role))"
+public,consultation_requests,uno_team_view_leads,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'admin'::app_role) OR (user_id = auth.uid()))",,"(false OR has_role(auth.uid(), 'admin'::app_role) OR (user_id = auth.uid()))",
+public,contact_identities,Staff read all identities,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,contact_identity_links,Staff read all identity links,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,crm_companies,crm_companies_delete,LEGACY BROAD BYPASS,Applied 0029,DELETE,{authenticated},"(is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+   FROM management_company_members
+  WHERE ((management_company_members.company_id = crm_companies.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",,"(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
    FROM management_company_members
   WHERE ((management_company_members.company_id = crm_companies.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",
-public,crm_companies,crm_companies_select,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",
-public,crm_companies,crm_companies_update,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
-public,crm_contact_notes,Company members can insert contact notes,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{authenticated},,"((auth.uid() = user_id) AND (EXISTS ( SELECT 1
+public,crm_companies,crm_companies_select,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",,"mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+public,crm_companies,crm_companies_update,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",,"mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+public,crm_contact_notes,Company members can insert contact notes,LEGACY BROAD BYPASS,Applied 0029,INSERT,{authenticated},,"((auth.uid() = user_id) AND (EXISTS ( SELECT 1
    FROM crm_contacts c
-  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access(auth.uid(), c.company_id, 'crm'::text, 'edit'::text)))))"
-public,crm_contact_notes,Company members can view contact notes,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(EXISTS ( SELECT 1
+  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access(auth.uid(), c.company_id, 'crm'::text, 'edit'::text)))))",,"((auth.uid() = user_id) AND (EXISTS ( SELECT 1
    FROM crm_contacts c
-  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access(auth.uid(), c.company_id, 'crm'::text, 'view'::text))))",
-public,crm_contacts,Company admins can delete contacts,LEGACY BROAD BYPASS,Narrowed by 0029,DELETE,{authenticated},"(is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access_e28_private(auth.uid(), c.company_id, 'crm'::text, 'edit'::text)))))"
+public,crm_contact_notes,Company members can view contact notes,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(EXISTS ( SELECT 1
+   FROM crm_contacts c
+  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access(auth.uid(), c.company_id, 'crm'::text, 'view'::text))))",,"(EXISTS ( SELECT 1
+   FROM crm_contacts c
+  WHERE ((c.id = crm_contact_notes.contact_id) AND mc_can_access_e28_private(auth.uid(), c.company_id, 'crm'::text, 'view'::text))))",
+public,crm_contacts,Company admins can delete contacts,LEGACY BROAD BYPASS,Applied 0029,DELETE,{authenticated},"(is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+   FROM management_company_members
+  WHERE ((management_company_members.company_id = crm_contacts.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",,"(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
    FROM management_company_members
   WHERE ((management_company_members.company_id = crm_contacts.company_id) AND (management_company_members.user_id = auth.uid()) AND (management_company_members.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (management_company_members.is_active = true)))))",
-public,crm_contacts,Company members can update contacts,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
-public,crm_contacts,Company members can view contacts,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",
-public,crm_nurture_queue,Admins manage nurture queue,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,crm_web_form_submissions,Admins view form submissions,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,currency_rates,currency_rates_admin_write,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,due_diligence_reports,Paid users can read published DD reports,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},((is_published = true) AND (auth.uid() IS NOT NULL) AND user_has_clearview_access(project_id)),
-public,due_diligence_reports,Staff can read all DD reports,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},is_admin_or_uno_team(),
-public,education_providers,Admins can update education_providers,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,education_providers,Admins can view all education_providers,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,events,Admins can update events,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,events,Admins can view all events,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,experience_media,Admins can manage experience media,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,experience_pricing,Admins can manage experience pricing,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,flower_shops,Admins can update flower_shops,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,gyms,Admins can update gyms,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,gyms,Admins can view all gyms,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,help_requests,Staff can update help requests,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,help_requests,Staff can view all help requests,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,insurance_providers,Admins can update insurance_providers,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,investment_interests,Admins can manage interests,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{public},"(EXISTS ( SELECT 1
+public,crm_contacts,Company members can update contacts,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'edit'::text)",,"mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'edit'::text)",
+public,crm_contacts,Company members can view contacts,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"mc_can_access(auth.uid(), company_id, 'crm'::text, 'view'::text)",,"mc_can_access_e28_private(auth.uid(), company_id, 'crm'::text, 'view'::text)",
+public,crm_nurture_queue,Admins manage nurture queue,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR false)","(has_role(auth.uid(), 'admin'::app_role) OR false)"
+public,crm_web_form_submissions,Admins view form submissions,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false)",
+public,currency_rates,currency_rates_admin_write,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team()
+public,due_diligence_reports,Paid users can read published DD reports,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},((is_published = true) AND (auth.uid() IS NOT NULL) AND user_has_clearview_access(project_id)),,((is_published = true) AND (auth.uid() IS NOT NULL) AND user_has_clearview_access_e28_private(project_id)),
+public,due_diligence_reports,Staff can read all DD reports,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,education_providers,Admins can update education_providers,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,education_providers,Admins can view all education_providers,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+public,events,Admins can update events,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,events,Admins can view all events,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+public,experience_media,Admins can manage experience media,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team()
+public,experience_pricing,Admins can manage experience pricing,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team()
+public,flower_shops,Admins can update flower_shops,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,gyms,Admins can update gyms,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,gyms,Admins can view all gyms,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+public,help_requests,Staff can update help requests,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false)","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false)"
+public,help_requests,Staff can view all help requests,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'support'::app_role) OR false)",
+public,insurance_providers,Admins can update insurance_providers,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,investment_interests,Admins can manage interests,LEGACY BROAD BYPASS,Applied 0029,ALL,{public},"(EXISTS ( SELECT 1
    FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role, 'uno_team'::app_role])))))",
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role])))))",
 public,investment_projects,Admins can manage investment projects,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"(EXISTS ( SELECT 1
    FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
   WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role, 'uno_team'::app_role])))))",
-public,juristic_contacts,Admins can manage juristic contacts,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{public},"(EXISTS ( SELECT 1
+public,juristic_contacts,Admins can manage juristic contacts,LEGACY BROAD BYPASS,Applied 0029 + 0030 protected admin retained,ALL,{public},"(EXISTS ( SELECT 1
    FROM uno_team_permissions
-  WHERE (uno_team_permissions.user_id = auth.uid())))",
-public,juristic_requests,Users can update their own draft requests,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{public},"(((submitted_by = auth.uid()) AND (status = 'draft'::text)) OR (EXISTS ( SELECT 1
+  WHERE (uno_team_permissions.user_id = auth.uid())))",,"has_role(auth.uid(), 'admin'::app_role)","has_role(auth.uid(), 'admin'::app_role)"
+public,juristic_requests,Users can update their own draft requests,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{public},"(((submitted_by = auth.uid()) AND (status = 'draft'::text)) OR (EXISTS ( SELECT 1
    FROM uno_team_permissions
-  WHERE (uno_team_permissions.user_id = auth.uid()))))",
-public,lead_activity_log,team_create_activity_logs,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{authenticated},,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,lead_activity_log,team_view_activity_logs,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,ledger_entries,Account owners view own ledger entries,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},"((EXISTS ( SELECT 1
+  WHERE (uno_team_permissions.user_id = auth.uid()))))",,(((submitted_by = auth.uid()) AND (status = 'draft'::text)) OR false),
+public,lead_activity_log,team_create_activity_logs,LEGACY BROAD BYPASS,Applied 0029,INSERT,{authenticated},,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false)"
+public,lead_activity_log,team_view_activity_logs,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false)",
+public,ledger_entries,Account owners view own ledger entries,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},"((EXISTS ( SELECT 1
    FROM ledger_accounts la
   WHERE (((la.id = ledger_entries.debit_account_id) OR (la.id = ledger_entries.credit_account_id)) AND (la.owner_user_id = auth.uid())))) OR (EXISTS ( SELECT 1
    FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))",
-public,legal_acceptances,Admins can read all acceptances,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},is_admin_or_uno_team(),
-public,legal_documents,Admins can manage legal documents,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,legal_services,Admins can update legal_services,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,lifecycle_templates,Admins can manage lifecycle_templates,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},is_admin_or_uno_team(),
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))",,"((EXISTS ( SELECT 1
+   FROM ledger_accounts la
+  WHERE (((la.id = ledger_entries.debit_account_id) OR (la.id = ledger_entries.credit_account_id)) AND (la.owner_user_id = auth.uid())))) OR (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role]))))))",
+public,legal_acceptances,Admins can read all acceptances,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,legal_documents,Admins can manage legal documents,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team()
+public,legal_services,Admins can update legal_services,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,lifecycle_templates,Admins can manage lifecycle_templates,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},is_admin_or_uno_team(),,is_admin_or_uno_team(),
 public,listings,listings_admin_full,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{authenticated},"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))","(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))","(EXISTS ( SELECT 1
    FROM user_roles
   WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))","(EXISTS ( SELECT 1
    FROM user_roles
   WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))"
 public,location_knowledge,Admins can manage knowledge content,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"(EXISTS ( SELECT 1
    FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role, 'staff'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
   WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role, 'staff'::app_role])))))",
-public,management_companies,Admins can manage companies,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},"(EXISTS ( SELECT 1
+public,management_companies,Admins can manage companies,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},"(EXISTS ( SELECT 1
    FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
-public,management_companies,Members and admins can view their companies,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"((is_active = true) AND ((EXISTS ( SELECT 1
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+public,management_companies,Members and admins can view their companies,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"((is_active = true) AND ((EXISTS ( SELECT 1
    FROM management_company_members m
-  WHERE ((m.company_id = management_companies.id) AND (m.user_id = auth.uid()) AND (m.is_active = true)))) OR has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",
-public,management_company_members,Admins can manage all memberships,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},"(EXISTS ( SELECT 1
+  WHERE ((m.company_id = management_companies.id) AND (m.user_id = auth.uid()) AND (m.is_active = true)))) OR has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",,"((is_active = true) AND ((EXISTS ( SELECT 1
+   FROM management_company_members m
+  WHERE ((m.company_id = management_companies.id) AND (m.user_id = auth.uid()) AND (m.is_active = true)))) OR has_role(auth.uid(), 'admin'::app_role) OR false))",
+public,management_company_members,Admins can manage all memberships,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},"(EXISTS ( SELECT 1
    FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
-public,management_company_members,Company admins can manage members,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{public},is_company_admin(company_id),is_company_admin(company_id)
-public,management_company_members,Members can view their company colleagues,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},((is_active = true) AND ((user_id = auth.uid()) OR is_admin_or_uno_team() OR (company_id IN ( SELECT get_user_company_ids() AS get_user_company_ids)))),
-public,management_terms_activity,Directors can insert terms activity,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{authenticated},,"((user_id = auth.uid()) AND (is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+public,management_company_members,Company admins can manage members,LEGACY BROAD BYPASS,Applied 0029,ALL,{public},is_company_admin(company_id),is_company_admin(company_id),is_company_admin_e28_private(company_id),is_company_admin_e28_private(company_id)
+public,management_company_members,Members can view their company colleagues,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},((is_active = true) AND ((user_id = auth.uid()) OR is_admin_or_uno_team() OR (company_id IN ( SELECT get_user_company_ids() AS get_user_company_ids)))),,((is_active = true) AND ((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private() OR (company_id IN ( SELECT get_user_company_ids() AS get_user_company_ids)))),
+public,management_terms_activity,Directors can insert terms activity,LEGACY BROAD BYPASS,Applied 0029,INSERT,{authenticated},,"((user_id = auth.uid()) AND (is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+   FROM management_company_members
+  WHERE ((management_company_members.user_id = auth.uid()) AND (management_company_members.role = 'director'::text) AND (management_company_members.is_active = true))))))",,"((user_id = auth.uid()) AND (is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
    FROM management_company_members
   WHERE ((management_company_members.user_id = auth.uid()) AND (management_company_members.role = 'director'::text) AND (management_company_members.is_active = true))))))"
 public,marketplace_categories,UNO Team can manage marketplace categories,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"(EXISTS ( SELECT 1
    FROM uno_team_permissions
+  WHERE ((uno_team_permissions.user_id = auth.uid()) AND (uno_team_permissions.vertical = 'marketplace'::text))))",,"(EXISTS ( SELECT 1
+   FROM uno_team_permissions
   WHERE ((uno_team_permissions.user_id = auth.uid()) AND (uno_team_permissions.vertical = 'marketplace'::text))))",
 public,marketplace_delivery_settings,UNO Team can manage delivery settings,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"(EXISTS ( SELECT 1
+   FROM uno_team_permissions
+  WHERE ((uno_team_permissions.user_id = auth.uid()) AND (uno_team_permissions.vertical = 'marketplace'::text))))",,"(EXISTS ( SELECT 1
    FROM uno_team_permissions
   WHERE ((uno_team_permissions.user_id = auth.uid()) AND (uno_team_permissions.vertical = 'marketplace'::text))))",
 public,marketplace_products,UNO Team can manage marketplace products,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"(EXISTS ( SELECT 1
    FROM uno_team_permissions
+  WHERE ((uno_team_permissions.user_id = auth.uid()) AND (uno_team_permissions.vertical = 'marketplace'::text))))",,"(EXISTS ( SELECT 1
+   FROM uno_team_permissions
   WHERE ((uno_team_permissions.user_id = auth.uid()) AND (uno_team_permissions.vertical = 'marketplace'::text))))",
 public,marketplace_subcategories,UNO Team can manage subcategories,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"(EXISTS ( SELECT 1
    FROM uno_team_permissions
+  WHERE ((uno_team_permissions.user_id = auth.uid()) AND (marketplace_subcategories.is_active = true))))",,"(EXISTS ( SELECT 1
+   FROM uno_team_permissions
   WHERE ((uno_team_permissions.user_id = auth.uid()) AND (marketplace_subcategories.is_active = true))))",
-public,offer_history,Admins read offer history,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,order_item_flower_details,UNO team can manage all flower order details,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{public},"has_role(auth.uid(), 'uno_team'::app_role)",
-public,orders,orders_admin_select_all,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},is_admin_or_uno_team(),
-public,orders,orders_admin_update,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},is_admin_or_uno_team(),
-public,ota_listing_connections,Admins can view all OTA connections,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},is_admin_or_uno_team(),
-public,ota_sync_logs,Admins can view all sync logs,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},is_admin_or_uno_team(),
-public,ota_synced_listings,Admins can view all synced listings,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},is_admin_or_uno_team(),
-public,page_views,pageviews_select,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},((user_id = auth.uid()) OR is_admin_or_uno_team()),
-public,pharmacies,Admins can update pharmacies,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,profiles,UNO team can view all profiles,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"has_role(auth.uid(), 'uno_team'::app_role)",
-public,properties,Admins can update properties,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,properties,mc_member_select_company_properties_v2,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"staff_can_access_property(auth.uid(), id)",
-public,properties,mc_member_update_company_properties_v2,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},"staff_can_access_property(auth.uid(), id)","staff_can_access_property(auth.uid(), id)"
-public,property_amenities,property_amenities_manage,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},can_manage_property(property_id),can_manage_property(property_id)
-public,property_amenities,property_amenities_public_read,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},(property_is_public(property_id) OR can_manage_property(property_id)),
-public,property_analytics,Admins can insert analytics,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{public},,is_admin_or_uno_team()
-public,property_analytics,Admins can update analytics,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{public},is_admin_or_uno_team(),
-public,property_chat_messages,Chat: participant scoped insert,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{authenticated},,"((sender_id = auth.uid()) AND (is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+public,offer_history,Admins read offer history,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false)",
+public,order_item_flower_details,UNO team can manage all flower order details,LEGACY BROAD BYPASS,Applied 0029,ALL,{public},"has_role(auth.uid(), 'uno_team'::app_role)",,false,
+public,orders,orders_admin_select_all,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,orders,orders_admin_update,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,ota_listing_connections,Admins can view all OTA connections,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,ota_sync_logs,Admins can view all sync logs,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,ota_synced_listings,Admins can view all synced listings,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,page_views,pageviews_select,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},((user_id = auth.uid()) OR is_admin_or_uno_team()),,((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()),
+public,pharmacies,Admins can update pharmacies,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,profiles,UNO team can view all profiles,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"has_role(auth.uid(), 'uno_team'::app_role)",,false,
+public,properties,Admins can update properties,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR false)","(has_role(auth.uid(), 'admin'::app_role) OR false)"
+public,properties,mc_member_select_company_properties_v2,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"staff_can_access_property(auth.uid(), id)",,"staff_can_access_property_e28_private(auth.uid(), id)",
+public,properties,mc_member_update_company_properties_v2,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},"staff_can_access_property(auth.uid(), id)","staff_can_access_property(auth.uid(), id)","staff_can_access_property_e28_private(auth.uid(), id)","staff_can_access_property_e28_private(auth.uid(), id)"
+public,property_amenities,property_amenities_manage,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},can_manage_property(property_id),can_manage_property(property_id),can_manage_property_e28_private(property_id),can_manage_property_e28_private(property_id)
+public,property_amenities,property_amenities_public_read,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},(property_is_public(property_id) OR can_manage_property(property_id)),,(property_is_public(property_id) OR public_policy_property_manager(property_id)),
+public,property_analytics,Admins can insert analytics,LEGACY BROAD BYPASS,Applied 0029,INSERT,{public},,is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private()
+public,property_analytics,Admins can update analytics,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{public},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,property_chat_messages,Chat: participant scoped insert,LEGACY BROAD BYPASS,Applied 0029,INSERT,{authenticated},,"((sender_id = auth.uid()) AND (is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+   FROM properties p
+  WHERE ((p.id = property_chat_messages.property_id) AND ((p.owner_id = auth.uid()) OR (p.managed_by = auth.uid()) OR (p.provider_id IN ( SELECT pr.id
+           FROM providers pr
+          WHERE (pr.user_id = auth.uid()))))))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM property_bookings b
+  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid())))))))",,"((sender_id = auth.uid()) AND (is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
    FROM properties p
   WHERE ((p.id = property_chat_messages.property_id) AND ((p.owner_id = auth.uid()) OR (p.managed_by = auth.uid()) OR (p.provider_id IN ( SELECT pr.id
            FROM providers pr
           WHERE (pr.user_id = auth.uid()))))))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1
    FROM property_bookings b
   WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid())))))))"
-public,property_chat_messages,Chat: participant scoped read,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"((sender_id = auth.uid()) OR (EXISTS ( SELECT 1
+public,property_chat_messages,Chat: participant scoped read,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"((sender_id = auth.uid()) OR (EXISTS ( SELECT 1
    FROM properties p
   WHERE ((p.id = property_chat_messages.property_id) AND (p.owner_id = auth.uid())))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1
    FROM property_bookings b
-  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid()))))) OR is_admin_or_uno_team())",
-public,property_complexes,Admins manage all complexes,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,property_documents,Authorized users can view documents,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(is_admin_or_uno_team() OR (uploaded_by = auth.uid()) OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1
+  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid()))))) OR is_admin_or_uno_team())",,"((sender_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM properties p
+  WHERE ((p.id = property_chat_messages.property_id) AND (p.owner_id = auth.uid())))) OR ((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM property_bookings b
+  WHERE ((b.id = property_chat_messages.booking_id) AND (b.guest_id = auth.uid()))))) OR is_admin_or_uno_team_e28_private())",
+public,property_complexes,Admins manage all complexes,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team()
+public,property_documents,Authorized users can view documents,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(is_admin_or_uno_team() OR (uploaded_by = auth.uid()) OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1
+   FROM properties p
+  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))",,"(is_admin_or_uno_team_e28_private() OR (uploaded_by = auth.uid()) OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1
    FROM properties p
   WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))",
-public,property_documents,MC admins and owners can delete documents,LEGACY BROAD BYPASS,Narrowed by 0029,DELETE,{authenticated},"(is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+public,property_documents,MC admins and owners can delete documents,LEGACY BROAD BYPASS,Applied 0029,DELETE,{authenticated},"(is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+   FROM properties p
+  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1
+   FROM (properties p
+     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))
+  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (mcm.is_active = true)))))",,"(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
    FROM properties p
   WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1
    FROM (properties p
      JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))
   WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text])) AND (mcm.is_active = true)))))",
-public,property_documents,MC admins and owners can update documents,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},"(is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+public,property_documents,MC admins and owners can update documents,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},"(is_admin_or_uno_team() OR (EXISTS ( SELECT 1
+   FROM properties p
+  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1
+   FROM (properties p
+     JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))
+  WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (mcm.is_active = true)))))",,"(is_admin_or_uno_team_e28_private() OR (EXISTS ( SELECT 1
    FROM properties p
   WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))) OR (EXISTS ( SELECT 1
    FROM (properties p
      JOIN management_company_members mcm ON ((mcm.company_id = p.management_company_id)))
   WHERE ((p.id = property_documents.property_id) AND (mcm.user_id = auth.uid()) AND (mcm.role = ANY (ARRAY['director'::text, 'admin'::text, 'manager'::text])) AND (mcm.is_active = true)))))",
-public,property_documents,MC members and owners can insert documents,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{authenticated},,"(is_admin_or_uno_team() OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1
+public,property_documents,MC members and owners can insert documents,LEGACY BROAD BYPASS,Applied 0029,INSERT,{authenticated},,"(is_admin_or_uno_team() OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1
+   FROM properties p
+  WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))",,"(is_admin_or_uno_team_e28_private() OR is_mc_member_for_property(property_id, auth.uid()) OR (EXISTS ( SELECT 1
    FROM properties p
   WHERE ((p.id = property_documents.property_id) AND (p.owner_id = auth.uid())))))"
-public,property_listing_scores,Admins can manage listing scores,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,property_listing_scores,Managers read own listing scores,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},can_manage_property(property_id),
-public,property_management_terms,Admins can delete terms,LEGACY BROAD BYPASS,Narrowed by 0029,DELETE,{authenticated},is_admin_or_uno_team(),
-public,property_management_terms,Directors and owners can view terms,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(is_admin_or_uno_team() OR (manager_user_id = auth.uid()) OR (EXISTS ( SELECT 1
+public,property_listing_scores,Admins can manage listing scores,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,property_listing_scores,Managers read own listing scores,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},can_manage_property(property_id),,can_manage_property_e28_private(property_id),
+public,property_management_terms,Admins can delete terms,LEGACY BROAD BYPASS,Applied 0029,DELETE,{authenticated},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,property_management_terms,Directors and owners can view terms,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(is_admin_or_uno_team() OR (manager_user_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM properties p
+  WHERE ((p.id = property_management_terms.property_id) AND (p.owner_id = auth.uid())))))",,"(is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid()) OR (EXISTS ( SELECT 1
    FROM properties p
   WHERE ((p.id = property_management_terms.property_id) AND (p.owner_id = auth.uid())))))",
-public,property_management_terms,Directors can insert terms,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{authenticated},,(is_admin_or_uno_team() OR (manager_user_id = auth.uid()))
-public,property_management_terms,Directors can update terms,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},(is_admin_or_uno_team() OR (manager_user_id = auth.uid())),
-public,property_manager_assignments,Admins can manage all assignments,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{public},"(EXISTS ( SELECT 1
+public,property_management_terms,Directors can insert terms,LEGACY BROAD BYPASS,Applied 0029,INSERT,{authenticated},,(is_admin_or_uno_team() OR (manager_user_id = auth.uid())),,(is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid()))
+public,property_management_terms,Directors can update terms,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},(is_admin_or_uno_team() OR (manager_user_id = auth.uid())),,(is_admin_or_uno_team_e28_private() OR (manager_user_id = auth.uid())),
+public,property_manager_assignments,Admins can manage all assignments,LEGACY BROAD BYPASS,Applied 0029,ALL,{public},"(EXISTS ( SELECT 1
    FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role, 'staff'::app_role])))))",
-public,property_media,property_media_manage,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},can_manage_property(property_id),can_manage_property(property_id)
-public,property_rate_plans,Managers manage rate plans,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},"(EXISTS ( SELECT 1
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role, 'staff'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'staff'::app_role])))))",
+public,property_media,property_media_manage,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},can_manage_property(property_id),can_manage_property(property_id),can_manage_property_e28_private(property_id),can_manage_property_e28_private(property_id)
+public,property_rate_plans,Managers manage rate plans,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},"(EXISTS ( SELECT 1
    FROM property_room_categories c
   WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property(c.property_id))))","(EXISTS ( SELECT 1
    FROM property_room_categories c
-  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property(c.property_id))))"
-public,property_reviews,property_reviews_host_manage,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},can_manage_property(property_id),can_manage_property(property_id)
-public,property_reviews,property_reviews_public_read,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},(((is_public = true) AND property_is_public(property_id)) OR can_manage_property(property_id) OR (reviewer_id = auth.uid())),
-public,property_room_categories,Managers read categories,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},can_manage_property(property_id),
-public,property_room_categories,Managers write categories,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},can_manage_property(property_id),can_manage_property(property_id)
-public,property_stay_restrictions,Managers manage restrictions,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},can_manage_property(property_id),can_manage_property(property_id)
-public,provider_contracts,Admins can manage contracts,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,provider_contracts,Admins can view all contracts,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},is_admin_or_uno_team(),
-public,provider_input_rules,input_rules_admin_write,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{public},"(EXISTS ( SELECT 1
+  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property(c.property_id))))","(EXISTS ( SELECT 1
+   FROM property_room_categories c
+  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property_e28_private(c.property_id))))","(EXISTS ( SELECT 1
+   FROM property_room_categories c
+  WHERE ((c.id = property_rate_plans.category_id) AND can_manage_property_e28_private(c.property_id))))"
+public,property_reviews,property_reviews_host_manage,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},can_manage_property(property_id),can_manage_property(property_id),can_manage_property_e28_private(property_id),can_manage_property_e28_private(property_id)
+public,property_reviews,property_reviews_public_read,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},(((is_public = true) AND property_is_public(property_id)) OR can_manage_property(property_id) OR (reviewer_id = auth.uid())),,(((is_public = true) AND property_is_public(property_id)) OR public_policy_property_manager(property_id) OR (reviewer_id = auth.uid())),
+public,property_room_categories,Managers read categories,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},can_manage_property(property_id),,can_manage_property_e28_private(property_id),
+public,property_room_categories,Managers write categories,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},can_manage_property(property_id),can_manage_property(property_id),can_manage_property_e28_private(property_id),can_manage_property_e28_private(property_id)
+public,property_stay_restrictions,Managers manage restrictions,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},can_manage_property(property_id),can_manage_property(property_id),can_manage_property_e28_private(property_id),can_manage_property_e28_private(property_id)
+public,provider_contracts,Admins can manage contracts,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,provider_contracts,Admins can view all contracts,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,provider_input_rules,input_rules_admin_write,LEGACY BROAD BYPASS,Applied 0029,ALL,{public},"(EXISTS ( SELECT 1
    FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
-public,provider_org_links,Staff manage provider org links,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_finance_staff(auth.uid()),is_finance_staff(auth.uid())
-public,pwa_installs,Admins can view installs,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},"(EXISTS ( SELECT 1
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
    FROM user_roles
-  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
-public,realtime_stats,Admins can view realtime stats,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,realtime_stats,Only admins can update realtime stats,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+public,provider_org_links,Staff manage provider org links,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_finance_staff(auth.uid()),is_finance_staff(auth.uid()),is_finance_staff_e28_private(auth.uid()),is_finance_staff_e28_private(auth.uid())
+public,pwa_installs,Admins can view installs,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role])))))",
+public,realtime_stats,Admins can view realtime stats,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false)",
+public,realtime_stats,Only admins can update realtime stats,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR false)","(has_role(auth.uid(), 'admin'::app_role) OR false)"
 public,relocation_articles,Admins manage relocation articles,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"(EXISTS ( SELECT 1
    FROM user_roles ur
   WHERE ((ur.user_id = auth.uid()) AND ((ur.role)::text = ANY (ARRAY['admin'::text, 'uno_team'::text, 'staff'::text])))))","(EXISTS ( SELECT 1
    FROM user_roles ur
+  WHERE ((ur.user_id = auth.uid()) AND ((ur.role)::text = ANY (ARRAY['admin'::text, 'uno_team'::text, 'staff'::text])))))","(EXISTS ( SELECT 1
+   FROM user_roles ur
+  WHERE ((ur.user_id = auth.uid()) AND ((ur.role)::text = ANY (ARRAY['admin'::text, 'uno_team'::text, 'staff'::text])))))","(EXISTS ( SELECT 1
+   FROM user_roles ur
   WHERE ((ur.user_id = auth.uid()) AND ((ur.role)::text = ANY (ARRAY['admin'::text, 'uno_team'::text, 'staff'::text])))))"
-public,salons,Admins can update salons,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,salons,Admins can view all salons,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,signature_request_signer_tokens,Admins view all tokens,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,signature_request_signers,MC members view request signers,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"((EXISTS ( SELECT 1
+public,salons,Admins can update salons,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,salons,Admins can view all salons,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+public,signature_request_signer_tokens,Admins view all tokens,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false)",
+public,signature_request_signers,MC members view request signers,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"((EXISTS ( SELECT 1
    FROM (signature_requests sr
      JOIN management_company_members mcm ON ((mcm.company_id = sr.company_id)))
-  WHERE ((sr.id = signature_request_signers.request_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true)))) OR is_admin_or_uno_team())",
-public,simulation_runs,Admins can manage simulation runs,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{public},"(EXISTS ( SELECT 1
+  WHERE ((sr.id = signature_request_signers.request_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true)))) OR is_admin_or_uno_team())",,"((EXISTS ( SELECT 1
+   FROM (signature_requests sr
+     JOIN management_company_members mcm ON ((mcm.company_id = sr.company_id)))
+  WHERE ((sr.id = signature_request_signers.request_id) AND (mcm.user_id = auth.uid()) AND (mcm.is_active = true)))) OR is_admin_or_uno_team_e28_private())",
+public,simulation_runs,Admins can manage simulation runs,LEGACY BROAD BYPASS,Applied 0029,ALL,{public},"(EXISTS ( SELECT 1
    FROM user_roles ur
-  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
-public,stores,Admins can update stores,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,sys_intake_configs,Admins can manage intake configs,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,sys_lead_configs,Admins can manage lead configs,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,system_settings,system_settings_admin_read,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},is_admin_or_uno_team(),
-public,system_settings,system_settings_admin_write,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,task_comments,Author or admin can view task comments,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"((author_id = auth.uid()) OR has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles ur
+  WHERE ((ur.user_id = auth.uid()) AND (ur.role = ANY (ARRAY['admin'::app_role])))))",
+public,stores,Admins can update stores,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,sys_intake_configs,Admins can manage intake configs,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,sys_lead_configs,Admins can manage lead configs,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,system_settings,system_settings_admin_read,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,system_settings,system_settings_admin_write,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,task_comments,Author or admin can view task comments,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"((author_id = auth.uid()) OR has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"((author_id = auth.uid()) OR has_role(auth.uid(), 'admin'::app_role) OR false)",
 public,taxonomy_normalization,taxonomy_normalization_admin_write,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"(EXISTS ( SELECT 1
    FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
   WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
-public,team_activity_log,Team members can insert own activity,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{public},,((auth.uid() = user_id) AND is_team_member(auth.uid()))
-public,team_channels,Team members can view channels,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},is_team_member(auth.uid()),
-public,team_members,Team members can view all team members,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR (user_id = auth.uid()))",
-public,team_messages,Team members can send messages,LEGACY BROAD BYPASS,Narrowed by 0029,INSERT,{public},,((auth.uid() = sender_id) AND is_team_member(auth.uid()))
-public,team_messages,Team members can view messages,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},(is_team_member(auth.uid()) AND (is_deleted = false)),
-public,team_user_achievements,Team can view all user achievements,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},is_team_member(auth.uid()),
-public,thai_bookings,thai_bookings_select,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+public,team_activity_log,Team members can insert own activity,LEGACY BROAD BYPASS,Applied 0029,INSERT,{public},,((auth.uid() = user_id) AND is_team_member(auth.uid())),,((auth.uid() = user_id) AND is_team_member_e28_private(auth.uid()))
+public,team_channels,Team members can view channels,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},is_team_member(auth.uid()),,is_team_member_e28_private(auth.uid()),
+public,team_members,Team members can view all team members,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR (user_id = auth.uid()))",,"(has_role(auth.uid(), 'admin'::app_role) OR false OR has_role(auth.uid(), 'staff'::app_role) OR (user_id = auth.uid()))",
+public,team_messages,Team members can send messages,LEGACY BROAD BYPASS,Applied 0029,INSERT,{public},,((auth.uid() = sender_id) AND is_team_member(auth.uid())),,((auth.uid() = sender_id) AND is_team_member_e28_private(auth.uid()))
+public,team_messages,Team members can view messages,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},(is_team_member(auth.uid()) AND (is_deleted = false)),,(is_team_member_e28_private(auth.uid()) AND (is_deleted = false)),
+public,team_user_achievements,Team can view all user achievements,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},is_team_member(auth.uid()),,is_team_member_e28_private(auth.uid()),
+public,thai_bookings,thai_bookings_select,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
    FROM thai_businesses b
-  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
-public,thai_bookings,thai_bookings_update,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{public},"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",,"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
    FROM thai_businesses b
-  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
+  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+public,thai_bookings,thai_bookings_update,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{public},"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM thai_businesses b
+  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",,"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM thai_businesses b
+  WHERE ((b.id = thai_bookings.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
 public,thai_business_services,thai_services_select,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"((EXISTS ( SELECT 1
+   FROM thai_businesses b
+  WHERE ((b.id = thai_business_services.business_id) AND ((b.is_active = true) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team())",,"((EXISTS ( SELECT 1
    FROM thai_businesses b
   WHERE ((b.id = thai_business_services.business_id) AND ((b.is_active = true) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team())",
 public,thai_business_services,thai_services_write,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"((EXISTS ( SELECT 1
    FROM thai_businesses b
   WHERE ((b.id = thai_business_services.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())","((EXISTS ( SELECT 1
    FROM thai_businesses b
+  WHERE ((b.id = thai_business_services.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())","((EXISTS ( SELECT 1
+   FROM thai_businesses b
+  WHERE ((b.id = thai_business_services.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())","((EXISTS ( SELECT 1
+   FROM thai_businesses b
   WHERE ((b.id = thai_business_services.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())"
-public,thai_businesses,thai_businesses_delete,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,DELETE,{public},((owner_id = auth.uid()) OR is_admin_or_uno_team()),
-public,thai_businesses,thai_businesses_select,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},((is_active = true) OR (owner_id = auth.uid()) OR is_admin_or_uno_team()),
-public,thai_businesses,thai_businesses_update,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},((owner_id = auth.uid()) OR is_admin_or_uno_team()),((owner_id = auth.uid()) OR is_admin_or_uno_team())
-public,thai_chat_messages,thai_chat_messages_select,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},"((EXISTS ( SELECT 1
+public,thai_businesses,thai_businesses_delete,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,DELETE,{public},((owner_id = auth.uid()) OR is_admin_or_uno_team()),,((owner_id = auth.uid()) OR is_admin_or_uno_team()),
+public,thai_businesses,thai_businesses_select,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},((is_active = true) OR (owner_id = auth.uid()) OR is_admin_or_uno_team()),,((is_active = true) OR (owner_id = auth.uid()) OR is_admin_or_uno_team()),
+public,thai_businesses,thai_businesses_update,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},((owner_id = auth.uid()) OR is_admin_or_uno_team()),((owner_id = auth.uid()) OR is_admin_or_uno_team()),((owner_id = auth.uid()) OR is_admin_or_uno_team()),((owner_id = auth.uid()) OR is_admin_or_uno_team())
+public,thai_chat_messages,thai_chat_messages_select,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},"((EXISTS ( SELECT 1
    FROM (thai_chats c
      JOIN thai_businesses b ON ((b.id = c.business_id)))
-  WHERE ((c.id = thai_chat_messages.chat_id) AND ((c.customer_id = auth.uid()) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team())",
-public,thai_chats,thai_chats_select,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+  WHERE ((c.id = thai_chat_messages.chat_id) AND ((c.customer_id = auth.uid()) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team())",,"((EXISTS ( SELECT 1
+   FROM (thai_chats c
+     JOIN thai_businesses b ON ((b.id = c.business_id)))
+  WHERE ((c.id = thai_chat_messages.chat_id) AND ((c.customer_id = auth.uid()) OR (b.owner_id = auth.uid()))))) OR is_admin_or_uno_team_e28_private())",
+public,thai_chats,thai_chats_select,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
    FROM thai_businesses b
-  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
-public,thai_chats,thai_chats_update,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{public},"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",,"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
    FROM thai_businesses b
-  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",
-public,thai_partner_leads,Admins read partner leads,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-public,thai_partner_leads,Admins update partner leads,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,translations,Admins can delete translations,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,DELETE,{public},is_admin_or_uno_team(),
-public,translations,Admins can insert translations,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,INSERT,{public},,is_admin_or_uno_team()
-public,translations,Admins can update translations,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},is_admin_or_uno_team(),
-public,uno_team_permissions,uno_team_view_own_permissions,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{authenticated},"((user_id = auth.uid()) AND has_role(auth.uid(), 'uno_team'::app_role))",
-public,user_documents,Admins can update documents for verification,LEGACY BROAD BYPASS,Narrowed by 0029,UPDATE,{public},is_admin_or_uno_team(),
-public,user_documents,Admins can view all documents for verification,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{public},is_admin_or_uno_team(),
-public,user_events,events_select,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},((user_id = auth.uid()) OR is_admin_or_uno_team()),
-public,user_segments,analytics_admin_only,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,user_segments,segments_select,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},((user_id = auth.uid()) OR is_admin_or_uno_team()),
-public,user_segments,segments_write,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team()
-public,user_sessions,sessions_select,LEGACY BROAD BYPASS,Narrowed by 0029,SELECT,{authenticated},((user_id = auth.uid()) OR is_admin_or_uno_team()),
-public,vendor_locations,Admins can update vendor_locations,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+public,thai_chats,thai_chats_update,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{public},"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM thai_businesses b
+  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team())",,"((customer_id = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM thai_businesses b
+  WHERE ((b.id = thai_chats.business_id) AND (b.owner_id = auth.uid())))) OR is_admin_or_uno_team_e28_private())",
+public,thai_partner_leads,Admins read partner leads,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR false)",
+public,thai_partner_leads,Admins update partner leads,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR false)","(has_role(auth.uid(), 'admin'::app_role) OR false)"
+public,translations,Admins can delete translations,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,DELETE,{public},is_admin_or_uno_team(),,is_admin_or_uno_team(),
+public,translations,Admins can insert translations,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,INSERT,{public},,is_admin_or_uno_team(),,is_admin_or_uno_team()
+public,translations,Admins can update translations,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},is_admin_or_uno_team(),,is_admin_or_uno_team(),
+public,uno_team_permissions,uno_team_view_own_permissions,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{authenticated},"((user_id = auth.uid()) AND has_role(auth.uid(), 'uno_team'::app_role))",,"((user_id = auth.uid()) AND has_role(auth.uid(), 'uno_team'::app_role))",
+public,user_documents,Admins can update documents for verification,LEGACY BROAD BYPASS,Applied 0029,UPDATE,{public},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,user_documents,Admins can view all documents for verification,LEGACY BROAD BYPASS,Applied 0029,SELECT,{public},is_admin_or_uno_team(),,is_admin_or_uno_team_e28_private(),
+public,user_events,events_select,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},((user_id = auth.uid()) OR is_admin_or_uno_team()),,((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()),
+public,user_segments,analytics_admin_only,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,user_segments,segments_select,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},((user_id = auth.uid()) OR is_admin_or_uno_team()),,((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()),
+public,user_segments,segments_write,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},is_admin_or_uno_team(),is_admin_or_uno_team(),is_admin_or_uno_team_e28_private(),is_admin_or_uno_team_e28_private()
+public,user_sessions,sessions_select,LEGACY BROAD BYPASS,Applied 0029,SELECT,{authenticated},((user_id = auth.uid()) OR is_admin_or_uno_team()),,((user_id = auth.uid()) OR is_admin_or_uno_team_e28_private()),
+public,vendor_locations,Admins can update vendor_locations,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
 public,vendor_locations,Admins have full access to vendor locations,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,ALL,{public},"(EXISTS ( SELECT 1
    FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",,"(EXISTS ( SELECT 1
+   FROM user_roles
   WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role])))))",
-public,vertical_commission_rules,Admins can manage commission rules,LEGACY BROAD BYPASS,Narrowed by 0029,ALL,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,water_activities,Admins can update water_activities,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
-public,water_activities,Admins can view all water_activities,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
-storage,objects,Admins can upload bouquet images,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,INSERT,{public},,"((bucket_id = 'bouquet-images'::text) AND (EXISTS ( SELECT 1
+public,vertical_commission_rules,Admins can manage commission rules,LEGACY BROAD BYPASS,Applied 0029,ALL,{authenticated},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR false)","(has_role(auth.uid(), 'admin'::app_role) OR false)"
+public,water_activities,Admins can update water_activities,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))","(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))"
+public,water_activities,Admins can view all water_activities,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,SELECT,{public},"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",,"(has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role))",
+storage,objects,Admins can upload bouquet images,UNKNOWN,Media writes: no proven private-operation duty; unchanged pending concrete capability,INSERT,{public},,"((bucket_id = 'bouquet-images'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))",,"((bucket_id = 'bouquet-images'::text) AND (EXISTS ( SELECT 1
    FROM user_roles
   WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))"
-storage,objects,Admins can upload project images,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,INSERT,{public},,"((bucket_id = 'project-images'::text) AND (EXISTS ( SELECT 1
+storage,objects,Admins can upload project images,UNKNOWN,Media writes: no proven private-operation duty; unchanged pending concrete capability,INSERT,{public},,"((bucket_id = 'project-images'::text) AND (EXISTS ( SELECT 1
+   FROM user_roles
+  WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))",,"((bucket_id = 'project-images'::text) AND (EXISTS ( SELECT 1
    FROM user_roles
   WHERE ((user_roles.user_id = auth.uid()) AND (user_roles.role = ANY (ARRAY['admin'::app_role, 'uno_team'::app_role]))))))"
-storage,objects,Admins can upload tour media,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,INSERT,{public},,"((bucket_id = 'tour-media'::text) AND (EXISTS ( SELECT 1
+storage,objects,Admins can upload tour media,UNKNOWN,Media writes: no proven private-operation duty; unchanged pending concrete capability,INSERT,{public},,"((bucket_id = 'tour-media'::text) AND (EXISTS ( SELECT 1
+   FROM profiles
+  WHERE ((profiles.id = auth.uid()) AND (profiles.user_type = ANY (ARRAY['admin'::user_type, 'uno_team'::user_type]))))))",,"((bucket_id = 'tour-media'::text) AND (EXISTS ( SELECT 1
    FROM profiles
   WHERE ((profiles.id = auth.uid()) AND (profiles.user_type = ANY (ARRAY['admin'::user_type, 'uno_team'::user_type]))))))"
-storage,objects,complex_media_admin_delete,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,DELETE,{authenticated},"((bucket_id = 'complex-media'::text) AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",
-storage,objects,complex_media_admin_insert,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,INSERT,{authenticated},,"((bucket_id = 'complex-media'::text) AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))"
-storage,objects,complex_media_admin_update,UNKNOWN,Unchanged: needs concrete private-field/consumer and duty proof,UPDATE,{authenticated},"((bucket_id = 'complex-media'::text) AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",
+storage,objects,complex_media_admin_delete,UNKNOWN,Media writes: no proven private-operation duty; unchanged pending concrete capability,DELETE,{authenticated},"((bucket_id = 'complex-media'::text) AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",,"((bucket_id = 'complex-media'::text) AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",
+storage,objects,complex_media_admin_insert,UNKNOWN,Media writes: no proven private-operation duty; unchanged pending concrete capability,INSERT,{authenticated},,"((bucket_id = 'complex-media'::text) AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",,"((bucket_id = 'complex-media'::text) AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))"
+storage,objects,complex_media_admin_update,UNKNOWN,Media writes: no proven private-operation duty; unchanged pending concrete capability,UPDATE,{authenticated},"((bucket_id = 'complex-media'::text) AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",,"((bucket_id = 'complex-media'::text) AND (has_role(auth.uid(), 'admin'::app_role) OR has_role(auth.uid(), 'staff'::app_role) OR has_role(auth.uid(), 'uno_team'::app_role)))",

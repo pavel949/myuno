@@ -1,19 +1,18 @@
 function,arguments,classification,disposition
-actor_can_export_company,p_company_id uuid,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-actor_can_operate_property,"p_property_id uuid, p_company_id uuid, p_module text, p_action text",UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-actor_is_space_limited,p_company_id uuid,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-actor_private_property_ceiling,p_property_id uuid,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-can_manage_property,_property_id uuid,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-create_managed_property_checked,"p_company_id uuid, p_operating_space_id uuid, p_title_en text, p_title_ru text, p_property_type text, p_listing_type text",UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-has_elevated_access,p_required_roles text[],UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-is_admin_or_uno_team,,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-is_admin_or_uno_team_e28_private,,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-is_company_admin,p_company_id uuid,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-is_finance_staff,_uid uuid,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-is_mcc_admin,,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-is_team_member,check_user_id uuid,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-mc_can_access,"_user_id uuid, _company_id uuid, _module text, _action text",UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-resolve_user_context,"p_user_id uuid, p_mode text, p_entity_id uuid",UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-staff_can_access_property,"p_user_id uuid, p_property_id uuid",UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-user_has_clearview_access,_project_id uuid,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
-user_has_clearview_access_e28_private,_project_id uuid,UNKNOWN,Unchanged shared helper or indirect path; not blanket-authorized support
+actor_can_export_company,p_company_id uuid,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+actor_can_operate_property,"p_property_id uuid, p_company_id uuid, p_module text, p_action text",UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+actor_is_space_limited,p_company_id uuid,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+actor_private_property_ceiling,p_property_id uuid,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+can_manage_property,_property_id uuid,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+has_elevated_access,p_required_roles text[],UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+is_admin_or_uno_team,,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+is_admin_or_uno_team_e28_private,,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+is_company_admin,p_company_id uuid,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+is_finance_staff,_uid uuid,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+is_mcc_admin,,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+is_team_member,check_user_id uuid,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+mc_can_access,"_user_id uuid, _company_id uuid, _module text, _action text",UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+resolve_user_context,"p_user_id uuid, p_mode text, p_entity_id uuid",UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+staff_can_access_property,"p_user_id uuid, p_property_id uuid",UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+user_has_clearview_access,_project_id uuid,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
+user_has_clearview_access_e28_private,_project_id uuid,UNKNOWN,Shared legacy/content dependency unchanged; not approved cross-company support
