@@ -1,0 +1,28 @@
+{
+  "before": {
+    "assignments": 0,
+    "bookings": 82,
+    "catalog": 23,
+    "company_members": 4,
+    "contacts": 384,
+    "enforced": 0,
+    "ledger": 136,
+    "members": 0,
+    "orders": 416,
+    "properties": 33,
+    "spaces": 0
+  },
+  "after": {
+    "assignments": 0,
+    "bookings": 82,
+    "catalog": 23,
+    "company_members": 4,
+    "contacts": 384,
+    "enforced": 0,
+    "ledger": 136,
+    "members": 0,
+    "orders": 416,
+    "properties": 33,
+    "spaces": 0
+  }
+}

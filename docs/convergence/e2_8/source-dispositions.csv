@@ -1,0 +1,117 @@
+file,line,classification,disposition,source
+supabase/functions/_shared/authz.ts,17,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"export const STAFF_ROLES = [""admin""] as const;"
+supabase/functions/_shared/authz.ts,20,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"export const PLATFORM_ADMIN_ROLES = [""admin""] as const;"
+supabase/functions/_shared/authz.ts,78,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,allowedRoles: readonly string[] = STAFF_ROLES
+supabase/functions/_shared/authz.ts,116,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"if (hasAnyRole(roles, opts?.adminRoles ?? PLATFORM_ADMIN_ROLES)) return null;"
+supabase/functions/admin-invite-user/index.ts,6,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,//   2. Function verifies the caller has app_role='admin' or 'uno_team'.
+supabase/functions/admin-invite-user/index.ts,32,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// `uno_team` requires the caller to be `admin` (verified below).
+supabase/functions/admin-invite-user/index.ts,43,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"""uno_team"","
+supabase/functions/admin-invite-user/index.ts,46,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// Roles that require the caller to be `admin` (not just `uno_team`).
+supabase/functions/admin-invite-user/index.ts,47,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"const ADMIN_ONLY_ROLES = new Set([""uno_team""]);"
+supabase/functions/admin-manage-user/index.ts,175,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"if ([""admin"", ""uno_team""].includes(role)) {"
+supabase/functions/ai-content-planner/index.ts,2,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"import { requireInternalOrStaff, PLATFORM_ADMIN_ROLES } from ""../_shared/authz.ts"";"
+supabase/functions/ai-content-planner/index.ts,12,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// Dual-mode: internal secret (cron) OR authenticated admin/uno_team staff
+supabase/functions/ai-content-planner/index.ts,13,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"const gate = await requireInternalOrStaff(req, corsHeaders, PLATFORM_ADMIN_ROLES);"
+supabase/functions/ai-owner-nurture/index.ts,2,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"import { requireInternalOrStaff, PLATFORM_ADMIN_ROLES } from ""../_shared/authz.ts"";"
+supabase/functions/ai-owner-nurture/index.ts,12,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// Dual-mode: internal secret (cron) OR authenticated admin/uno_team staff
+supabase/functions/ai-owner-nurture/index.ts,13,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"const gate = await requireInternalOrStaff(req, corsHeaders, PLATFORM_ADMIN_ROLES);"
+supabase/functions/ai-platform-intelligence/index.ts,2,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"import { requireInternalOrStaff, PLATFORM_ADMIN_ROLES } from ""../_shared/authz.ts"";"
+supabase/functions/ai-platform-intelligence/index.ts,12,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// Dual-mode: internal secret (cron) OR authenticated admin/uno_team staff
+supabase/functions/ai-platform-intelligence/index.ts,13,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"const gate = await requireInternalOrStaff(req, corsHeaders, PLATFORM_ADMIN_ROLES);"
+supabase/functions/bulk-import/index.ts,92,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// Check if user has admin/staff/uno_team role via user_roles table
+supabase/functions/bulk-import/index.ts,152,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,base.created_by_uno_team = true;
+supabase/functions/bulk-import/index.ts,153,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,base.uno_team_creator_id = user.id;
+supabase/functions/notify-admin-property-submission/index.ts,18,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,".in(""role"", [""admin"", ""uno_team""]);"
+supabase/functions/transfer-smoke-test/index.ts,20,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// Caller must be admin or uno_team.
+src/hooks/useAdmin.ts,68,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"created_by_uno_team: true,"
+src/hooks/useAdmin.ts,149,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"created_by_uno_team: true,"
+src/hooks/useAdminContentCreation.ts,10,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,* - created_by_role: 'admin' | 'uno_team'
+src/hooks/useAdminContentCreation.ts,24,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,adminRole: 'admin' | 'uno_team';
+src/hooks/useAdminContentCreation.ts,28,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,created_by_uno_team: boolean;
+src/hooks/useAdminContentCreation.ts,29,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,uno_team_creator_id: string | null;
+src/hooks/useAdminContentCreation.ts,49,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"adminRole: isAdmin ? 'admin' : 'uno_team',"
+src/hooks/useAdminContentCreation.ts,70,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"created_by_uno_team: true,"
+src/hooks/useAdminContentCreation.ts,71,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"uno_team_creator_id: user?.id || null,"
+src/hooks/useAdminContentCreation.ts,165,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"result = result.eq('created_by_uno_team', filters.createdByAdmin);"
+src/hooks/useAdminDashboardStats.ts,88,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"supabase.from('user_roles').select('id', countOptions).eq('role', 'uno_team').limit(1),"
+src/hooks/useCanonicalSubmit.ts,177,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,submissionData.created_by_uno_team = true;
+src/hooks/useCanonicalSubmit.ts,178,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,submissionData.uno_team_creator_id = user?.id;
+src/hooks/useDayBriefing.ts,4,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"* Supports: owner/PM, vendor, staff/uno_team, investor, tourist, resident."
+src/hooks/useDayBriefing.ts,128,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,const isStaff = role === 'staff' || role === 'uno_team';
+src/hooks/useProfile.ts,8,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,export type UserType = 'tourist' | 'resident' | 'owner' | 'vendor' | 'admin' | 'uno_team';
+src/hooks/useStaffMembers.ts,169,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,export const STAFF_ROLES: { value: StaffRole; labelRu: string; labelEn: string }[] = [
+src/hooks/useSupabaseCRUD.ts,168,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,insertData.created_by_uno_team = true;
+src/hooks/useSupabaseCRUD.ts,169,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,insertData.uno_team_creator_id = user?.id;
+src/hooks/useUnoTeamPermissions.ts,74,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// Get all users with uno_team role
+src/hooks/useUnoTeamPermissions.ts,78,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,".eq('role', 'uno_team');"
+src/hooks/useUnoTeamPermissions.ts,95,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,.from('uno_team_permissions')
+src/hooks/useUnoTeamPermissions.ts,125,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,.from('uno_team_permissions')
+src/hooks/useUnoTeamPermissions.ts,150,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,.from('uno_team_permissions')
+src/hooks/useUnoTeamPermissions.ts,179,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,.from('uno_team_permissions')
+src/hooks/useUnoTeamPermissions.ts,210,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,.from('uno_team_permissions')
+src/hooks/useUserContext.ts,51,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"* 1. user_roles table (platform roles: admin, uno_team, staff, etc.)"
+src/hooks/useUserContext.ts,169,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"admin: 'admin', uno_team: 'team', vendor: 'vendor',"
+src/hooks/useUserContext.ts,211,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"admin: 'admin', uno_team: 'team', vendor: 'vendor',"
+src/hooks/useUserContext.ts,292,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,if (normalizedRoles.includes('uno_team')) {
+src/hooks/useUserContext.ts,293,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,roles.push('uno_team');
+src/lib/featureFlags.ts,40,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"allowedRoles: ['admin', 'uno_team'],"
+src/lib/navConfig.ts,34,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,| 'team'         // uno_team
+src/lib/navConfig.ts,164,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,if (activeRole === 'uno_team' || activeRole === 'staff') return 'team';
+src/pages/Index.tsx,178,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// signed-in admins / uno_team members. Everyone else keeps the legacy 5-zone Home.
+src/types/auth.ts,17,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,* - staff/uno_team: Platform operators
+src/types/auth.ts,37,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,| 'uno_team'
+src/types/auth.ts,51,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"export const OPERATOR_ROLES: AppRole[] = ['staff', 'uno_team', 'admin', 'ombudsman'];"
+src/types/auth.ts,57,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"export const ADMIN_ONLY_ROLES: AppRole[] = ['admin', 'ombudsman', 'staff', 'uno_team', 'finance', 'support', 'sales'];"
+src/types/auth.ts,67,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"'uno_team',"
+src/types/auth.ts,173,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,uno_team: {
+src/pages/admin/AdminDashboard.tsx,25,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,if (!isAdmin && safeRoles.some(r => r.role === 'staff' || r.role === 'uno_team')) {
+src/pages/admin/AdminPoiClaims.tsx,150,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"created_by_uno_team: true,"
+src/pages/admin/AdminPoiClaims.tsx,151,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"uno_team_creator_id: user.id,"
+src/pages/admin/AdminTransferOperators.tsx,453,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"<p className=""text-muted-foreground text-sm"">{isRu ? 'Нужна роль admin или uno_team.' : 'admin or uno_team role required.'}</p>"
+src/pages/admin/AdminUnoTeam.tsx,40,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"//      uno_team role (cheap, no email sent)."
+src/pages/admin/AdminUnoTeam.tsx,43,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,//      grants the uno_team role at insert time. The new member then
+src/pages/admin/AdminUnoTeam.tsx,73,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,".eq('role', 'uno_team')"
+src/pages/admin/AdminUnoTeam.tsx,85,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,".insert({ user_id: profile.id, role: 'uno_team' });"
+src/pages/admin/AdminUnoTeam.tsx,94,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// Path 2 — invite a net-new user with uno_team role.
+src/pages/admin/AdminUnoTeam.tsx,99,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"role: 'uno_team',"
+src/pages/admin/AdminUnoTeam.tsx,137,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,".eq('role', 'uno_team');"
+src/pages/admin/AdminUnoTeam.tsx,143,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,.from('uno_team_permissions')
+src/pages/admin/AdminUnoTeam.tsx,226,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,? 'Если у сотрудника уже есть аккаунт — он получит роль uno_team. Если нет — система отправит ему приглашение по email на установку пароля.'
+src/pages/admin/AdminUnoTeam.tsx,227,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,": 'If the person already has an account, they get the uno_team role. If not, the system sends them an email invite to set a password.'}"
+src/pages/admin/AdminVendorContentCreator.tsx,184,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"created_by_uno_team: true,"
+src/pages/admin/AdminVendorContentCreator.tsx,185,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"uno_team_creator_id: user?.id,"
+src/pages/operate/VerticalOnboardingPage.tsx,43,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// provider_id) OR as admin/uno_team (any row). Attach the caller's
+src/pages/operate/VerticalOnboardingPage.tsx,45,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// admin/uno_team callers pass without it.
+src/pages/owner/StaffPage.tsx,85,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"STAFF_ROLES,"
+src/pages/owner/StaffPage.tsx,275,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,const roleLabel = STAFF_ROLES.find(r => r.value === staff.role)?.[isRu ? 'labelRu' : 'labelEn'] ?? staff.role;
+src/pages/owner/StaffPage.tsx,638,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,{STAFF_ROLES.map(r => (
+src/pages/owner/StaffPage.tsx,762,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,{STAFF_ROLES.map(r => (
+src/pages/team/TeamContentHub.tsx,122,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,onClick={() => hasAccess && route && navigate(`${route}?uno_team=true`)}
+src/pages/admin/thaiBusiness/ThaiLeadsPanel.tsx,3,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,* landing. Read + status-triage only (RLS scopes this to admin/uno_team).
+src/lib/nav/navigationModel.ts,77,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"//                  (uno_team — content & moderation; SideRail N/A, see TeamLayout)"
+src/components/account/AccountProfileCard.tsx,18,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"uno_team: { en: 'myUNO team', ru: 'Команда myUNO', color: 'bg-success/15 text-success' },"
+src/components/admin/AdminNotesWidget.tsx,8,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,* anyone outside admin/uno_team/staff.
+src/components/admin/ProviderSelector.tsx,128,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"created_by_uno_team: true,"
+src/components/admin/ProviderSelector.tsx,166,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"created_by_uno_team: true,"
+src/components/auth/AccessDenied.tsx,76,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,case 'uno_team':
+src/components/auth/InvestorGuard.tsx,12,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,*   admin / uno_team / capital_team / investor (from `useResolvedContext`).
+src/components/auth/RoleGuard.tsx,77,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,(serverRole !== 'uno_team' && permissions.includes('*')) ||
+src/components/auth/RoleGuard.tsx,116,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,* Admin route guard - requires admin or uno_team role (platform-level access)
+src/components/auth/RoleGuard.tsx,127,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"* Staff route guard - requires staff, admin, or uno_team role (MC employees)"
+src/components/auth/RoleGuard.tsx,160,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,* UNO Team route guard - requires uno_team or admin role
+src/components/auth/RoleGuard.tsx,164,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"<RoleGuard allowedRoles={['uno_team', 'admin']} fallbackPath=""/"">"
+src/components/command/CommandPaletteMount.tsx,21,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,// signed-in admins / uno_team. Drop the `isAdmin` guard at GA.
+src/components/home/WorkspaceHomeBanner.tsx,18,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,r === 'uno_team' ||
+src/components/layout/UserAvatarMenu.tsx,76,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,uno_team: {
+src/components/layout/UserAvatarMenu.tsx,112,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"const PLATFORM_ROLE_ORDER: AppRole[] = ['admin', 'uno_team', 'staff', 'investor'];"
+src/components/layout/UserAvatarMenu.tsx,158,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"const QUICK_OPERATE_PRIORITY: AppRole[] = ['admin', 'property_manager', 'owner', 'vendor', 'investor', 'uno_team', 'staff'];"
+src/components/maintenance/LaunchSwitch.tsx,48,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,".in('role', ['admin', 'uno_team'])"
+src/components/maintenance/MaintenanceToggle.tsx,29,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,".in('role', ['admin', 'uno_team'])"
+src/components/maintenance/UnderConstruction.tsx,30,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,".in('role', ['admin', 'uno_team'])"
+src/components/profile/ActiveRoleBadge.tsx,123,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,uno_team: {
+src/components/admin/catalog/UnifiedCatalogTable.tsx,49,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,".select('id, name_en, name_ru, price, currency, is_active, provider_id, category_id, created_at, images, created_by_uno_team, providers(name)')"
+src/components/admin/catalog/UnifiedCatalogTable.tsx,57,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"servicesQuery = servicesQuery.eq('created_by_uno_team', filters.createdByAdmin);"
+src/components/admin/control/ControlRolesTab.tsx,12,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"{ key: 'uno_team', label: 'myUNO Team', labelRu: 'Команда myUNO', icon: Headphones, color: 'bg-success' },"
+src/components/admin/control/ControlUsersTab.tsx,33,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"uno_team: 'bg-primary/15 text-primary border-primary/30',"
+src/components/admin/control/ControlUsersTab.tsx,42,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"const ALL_ROLES = ['admin', 'uno_team', 'vendor', 'owner', 'finance', 'support', 'sales'] as const;"
+src/components/admin/data-import/BusinessCardScanner.tsx,215,UNKNOWN,Employment mention alone is not proof of authority; inspect caller/object boundary,"created_by_uno_team: true,"

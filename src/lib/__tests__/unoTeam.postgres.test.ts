@@ -41,8 +41,8 @@ beforeAll(async()=>{
  // Proven live-definition bypass, not a synthetic true policy.
  expect(await as(team,tx=>tx`SELECT lock_code FROM properties`)).toHaveLength(2);
  expect(await as(team,tx=>tx`SELECT id FROM orders`)).toHaveLength(2);
- await sql.unsafe(readFileSync(process.env.E28_HELPERS??'supabase/migrations/0028_uno_team_private_helpers.sql','utf8'));
- await sql.unsafe(readFileSync(process.env.E28_POLICIES??'supabase/migrations/0029_uno_team_private_policies.sql','utf8'));
+ await sql.unsafe(readFileSync(process.env.E28_HELPERS??'drizzle/migrations/0028_uno_team_private_helpers.sql','utf8'));
+ await sql.unsafe(readFileSync(process.env.E28_POLICIES??'drizzle/migrations/0029_uno_team_private_policies.sql','utf8'));
 },60000);
 afterAll(async()=>{if(sql)await sql.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
 describe('E2.8 exact live-catalog least privilege',()=>{
