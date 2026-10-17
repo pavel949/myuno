@@ -87,8 +87,8 @@ describe.each(['create', 'update'] as const)('%s real booking writer preflight �
     expect(blocked.some(day => occupiedCivilDates(stay).includes(day))).toBe(blocked.some(day => stayOccupiesDate(stay, day)));
     const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
     const attempt = mode === 'create'
-      ? result.current.createBooking.mutateAsync({ property_id: 'synthetic-home', ...stay })
-      : result.current.updateBooking.mutateAsync({ id: 'synthetic-current', ...stay });
+      ? result.current.createBooking({ property_id: 'synthetic-home', ...stay })
+      : result.current.updateBooking({ id: 'synthetic-current', ...stay });
     await expect(attempt).rejects.toThrow(allowed ? 'SYNTHETIC_WRITE_BOUNDARY' : existing ? 'пересекаются' : 'заблокированы');
     expect(state.boundary).toEqual(allowed ? [`orders.${mode === 'create' ? 'insert' : 'update'}`] : []);
   });
