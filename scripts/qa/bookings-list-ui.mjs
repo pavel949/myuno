@@ -15,13 +15,14 @@ const virtual = {
   '@/hooks/useCityCurrency': `export const useCityCurrency = () => ({code:'THB'});`,
   '@/hooks/usePropertyBookings': `import {bookingsListFixtures} from '${root}/src/pages/owner/__tests__/bookingsList.fixtures.ts'; export const useAllPropertyBookings = () => ({bookings:bookingsListFixtures(new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'ru'),isLoading:false});`,
   '@/hooks/useHapticFeedback': `export const triggerHaptic = () => {};`,
+  '@/hooks/useSoundEffects': `export const playSound = () => {};`,
   '@/integrations/supabase/client': `window.fixtureCalls=[]; export const supabase={from: table => ({update: values => ({in: (key,ids) => {window.fixtureCalls.push({table,values,key,ids}); return Promise.resolve({error: new Error('Fixture-only rejection')});}})})};`,
   'sonner': `export const toast={error:()=>{window.fixtureError=true;}};`,
   '@/components/owner/BookingDetailSheet': `import React from 'react'; export function BookingDetailSheet({open,booking,onOpenChange}) {return open ? React.createElement('div',{role:'dialog','aria-label':'Fixture booking details'},booking.id,React.createElement('button',{onClick:()=>onOpenChange(false)},'Close fixture')) : null;}`,
 };
 await build({
   stdin: { contents: `import React from 'react'; import {createRoot} from 'react-dom/client'; import {MemoryRouter} from 'react-router-dom'; import Page from '${root}/src/pages/owner/MCBookingsPage.tsx'; createRoot(document.getElementById('root')).render(<MemoryRouter future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Page/></MemoryRouter>);`, loader:'tsx', resolveDir:root },
-  bundle:true, outfile:path.join(output,'fixture.js'), jsx:'automatic',
+  bundle:true, outfile:path.join(output,'fixture.js'), jsx:'automatic', format:'esm',
   define:{'process.env.NODE_ENV':'"production"', 'import.meta.env.DEV':'false'},
   plugins:[{name:'isolate-all-data-boundaries',setup(b) {
     b.onResolve({filter:/.*/},args => {
@@ -40,6 +41,6 @@ await build({
 const css = await fetch('http://localhost:8080/src/index.css?direct');
 if (!css.ok) throw new Error('Preview stylesheet unavailable');
 await writeFile(path.join(output,'fixture.css'),await css.text());
-await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script src="/fixture.js"></script></body></html>');
+await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 const result = spawnSync('python3',[path.join(root,'scripts/qa/bookings-list-ui.py'),output],{stdio:'inherit'});
 process.exitCode = result.status ?? 1;

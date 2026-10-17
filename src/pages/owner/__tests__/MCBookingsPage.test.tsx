@@ -21,6 +21,7 @@ vi.mock('@/hooks/usePropertyBookings', () => ({
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mocks.from } }));
 vi.mock('sonner', () => ({ toast: { error: mocks.error } }));
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
+vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn() }));
 vi.mock('@/components/owner/BookingDetailSheet', () => ({
   BookingDetailSheet: ({ open, booking, onOpenChange }: {
     open: boolean; booking: { id: string } | null; onOpenChange: (open: boolean) => void;
