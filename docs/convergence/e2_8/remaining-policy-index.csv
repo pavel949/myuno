@@ -1,0 +1,48 @@
+schema,relation,policy,command
+public,catalog_facet_definitions,facet_definitions_admin_write,ALL
+public,cleaning_services,Admins can update cleaning_services,UPDATE
+public,cleaning_services,Admins can view all cleaning_services,SELECT
+public,company_storefronts,Admins can manage all storefronts,ALL
+public,currency_rates,currency_rates_admin_write,ALL
+public,education_providers,Admins can update education_providers,UPDATE
+public,education_providers,Admins can view all education_providers,SELECT
+public,events,Admins can update events,UPDATE
+public,events,Admins can view all events,SELECT
+public,experience_media,Admins can manage experience media,ALL
+public,experience_pricing,Admins can manage experience pricing,ALL
+public,flower_shops,Admins can update flower_shops,UPDATE
+public,gyms,Admins can update gyms,UPDATE
+public,gyms,Admins can view all gyms,SELECT
+public,insurance_providers,Admins can update insurance_providers,UPDATE
+public,investment_projects,Admins can manage investment projects,ALL
+public,legal_documents,Admins can manage legal documents,ALL
+public,legal_services,Admins can update legal_services,UPDATE
+public,lifecycle_templates,Admins can manage lifecycle_templates,ALL
+public,listings,listings_admin_full,ALL
+public,location_knowledge,Admins can manage knowledge content,ALL
+public,pharmacies,Admins can update pharmacies,UPDATE
+public,property_complexes,Admins manage all complexes,ALL
+public,relocation_articles,Admins manage relocation articles,ALL
+public,salons,Admins can update salons,UPDATE
+public,salons,Admins can view all salons,SELECT
+public,stores,Admins can update stores,UPDATE
+public,taxonomy_normalization,taxonomy_normalization_admin_write,ALL
+public,thai_business_services,thai_services_select,SELECT
+public,thai_business_services,thai_services_write,ALL
+public,thai_businesses,thai_businesses_delete,DELETE
+public,thai_businesses,thai_businesses_select,SELECT
+public,thai_businesses,thai_businesses_update,UPDATE
+public,translations,Admins can delete translations,DELETE
+public,translations,Admins can insert translations,INSERT
+public,translations,Admins can update translations,UPDATE
+public,uno_team_permissions,uno_team_view_own_permissions,SELECT
+public,vendor_locations,Admins can update vendor_locations,UPDATE
+public,vendor_locations,Admins have full access to vendor locations,ALL
+public,water_activities,Admins can update water_activities,UPDATE
+public,water_activities,Admins can view all water_activities,SELECT
+storage,objects,Admins can upload bouquet images,INSERT
+storage,objects,Admins can upload project images,INSERT
+storage,objects,Admins can upload tour media,INSERT
+storage,objects,complex_media_admin_delete,DELETE
+storage,objects,complex_media_admin_insert,INSERT
+storage,objects,complex_media_admin_update,UPDATE

@@ -1,0 +1,84 @@
+{
+  "source_sha": "dae2f9c5cba0606675d571888775ac33d8461904",
+  "mode": "SELECT-only production metadata and aggregates; source-only investigation; documentation-only changes",
+  "before": {
+    "at_utc": "2026-10-17T05:45:24.842854Z",
+    "companies": 2,
+    "enforced": 0,
+    "spaces": 0,
+    "assignments": 0,
+    "members": 0,
+    "catalog": 23,
+    "properties": 33,
+    "bookings": 82,
+    "orders": 416,
+    "ledger": 136,
+    "contacts": 384,
+    "company_members": 4
+  },
+  "after": {
+    "at_utc": "2026-10-17T05:48:57.842480Z",
+    "companies": 2,
+    "enforced": 0,
+    "spaces": 0,
+    "assignments": 0,
+    "members": 0,
+    "catalog": 23,
+    "properties": 33,
+    "bookings": 82,
+    "orders": 416,
+    "ledger": 136,
+    "contacts": 384,
+    "company_members": 4
+  },
+  "catalog_sanity": {
+    "rows": 23,
+    "unique_ids": 23,
+    "inactive_or_non_approved": 0
+  },
+  "live_census": {
+    "policies": 1250,
+    "public_functions": 591,
+    "prior_report_public_functions": 587,
+    "residual_candidate_policies": 47,
+    "residual_candidate_relations": 30,
+    "old_non_admin_helper_direct_policy_consumers": 0,
+    "old_helper_transitive_consumer": "actor_can_export_company -> mc_can_access; membership/overseer gate first"
+  },
+  "confirmed_column_grants": {
+    "providers_anon_select": [
+      "commission_rate",
+      "total_earnings",
+      "pending_payout"
+    ],
+    "salons_anon_select": [
+      "approval_status",
+      "rejection_reason",
+      "reviewed_by"
+    ]
+  },
+  "live_absent": [
+    "convert_lead_to_deal (two name/signature searches)"
+  ],
+  "unverified": [
+    "independent deployed source/bundle parity",
+    "explanation of 587 -> 591 function count drift",
+    "all allowed end-to-end flows",
+    "granular sub-permission enforcement outside inspected public functions",
+    "immutable external audit mechanism"
+  ],
+  "tests": "No runtime tests rerun; prior 166/166 and 45/45 are historical. Documentation/evidence validation only.",
+  "no_actions": [
+    "DDL",
+    "DML",
+    "handler deployment",
+    "business handler invocation",
+    "email/export/payment calls",
+    "enforcement activation",
+    "seeds",
+    "assignments",
+    "Order Mutation Audit",
+    "E3"
+  ],
+  "limitations": "Counts are not byte-for-byte business row equality; no private values or user identities retrieved."
+}
