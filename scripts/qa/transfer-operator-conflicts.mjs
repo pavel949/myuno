@@ -14,10 +14,14 @@ const signature = await webcrypto.subtle.sign('HMAC', key, new TextEncoder().enc
 const token = `${expiry}.${Buffer.from(signature).toString('hex')}`;
 
 async function run({ action, mutation, status = 'pending', expected }) {
-  let handler, mutations = 0;
+  let handler, mutations = 0, forbiddenAttempts = 0;
+  const forbidden = (message) => {
+    forbiddenAttempts++;
+    throw new Error(message);
+  };
   const client = {
     from(table) {
-      assert.ok(['system_settings', 'orders'].includes(table), `forbidden side-effect table ${table}`);
+      if (!['system_settings', 'orders'].includes(table)) forbidden(`forbidden side-effect table ${table}`);
       let updating = false;
       const q = {
         select() { return q; }, eq() { return q; }, in() { return q; },
@@ -32,21 +36,24 @@ async function run({ action, mutation, status = 'pending', expected }) {
       };
       return q;
     },
-    rpc() { throw new Error('Ledger calls forbidden'); },
-    functions: { invoke() { throw new Error('Refund or notification calls forbidden'); } },
+    rpc() { return forbidden('Ledger calls forbidden'); },
+    functions: { invoke() { return forbidden('Refund or notification calls forbidden'); } },
   };
   vm.runInNewContext(javascript, {
     createClient: () => client, corsHeaders: {}, crypto: webcrypto, TextEncoder,
     Deno: { env: { get: () => 'synthetic' }, serve(fn) { handler = fn; } },
     Response, URL, Date,
     console: { error() {} },
-    fetch() { throw new Error('Network forbidden'); },
+    fetch() { return forbidden('Network forbidden'); },
   });
   const response = await handler(new Request('https://synthetic.invalid', {
     method: 'POST', body: JSON.stringify({ id, t: token, action }),
   }));
   const body = await response.json();
+  assert.equal(forbiddenAttempts, 0, 'no financial or notification side effects attempted');
   assert.equal(response.status, expected);
+  if (expected === 500) assert.equal(body.error, 'Update failed');
+  if (expected === 409) assert.equal(body.error, 'Transfer changed; reload before retrying');
   if (expected >= 400) {
     assert.equal(body.success, undefined);
     assert.equal(body.already_confirmed, undefined);
