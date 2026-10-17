@@ -127,6 +127,13 @@
       "when": 1792195705329,
       "tag": "0017_fix_property_media_anon_read",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792195845754,
+      "tag": "0018_align_room_assignment_statuses",
+      "breakpoints": true
     }
   ]
 }
