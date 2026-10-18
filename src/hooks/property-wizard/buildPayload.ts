@@ -78,3 +78,18 @@ export function buildPropertyPayload({
 
   return payload;
 }
+
+type PropertyPaymentFields = Pick<PropertyFormData, 'deposit_currency' | 'payment_policy' | 'prepay_percent' | 'balance_due_days'>;
+type StoredPropertyPaymentFields = {
+  [Key in keyof PropertyPaymentFields]?: PropertyPaymentFields[Key] | null;
+};
+
+/** Existing-editor payment fields: preserve recorded values, never invent a legacy currency. */
+export function pickPropertyPaymentFields(data: StoredPropertyPaymentFields) {
+  return {
+    deposit_currency: data.deposit_currency?.trim() || undefined,
+    payment_policy: data.payment_policy ?? undefined,
+    prepay_percent: data.prepay_percent ?? undefined,
+    balance_due_days: data.balance_due_days ?? undefined,
+  };
+}

@@ -89,6 +89,7 @@ jobs:
           timeout 180s node scripts/qa/calendar-ui.mjs
           timeout 180s node scripts/qa/today-ui.mjs
           timeout 180s node scripts/qa/property-browse-ui.mjs
+          timeout 180s node scripts/qa/home-search-ui.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload validation evidence

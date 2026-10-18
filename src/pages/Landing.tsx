@@ -1,10 +1,11 @@
 /** Cinematic public front door. Existing authenticated workspace stays in HomeRouter. */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Umbrella, House, Settings2, KeyRound, LifeBuoy, Pause, Play } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
+import { useReducedMotion } from '@/lib/motionConfig';
 import { ConsumerHeader } from '@/components/nav/ConsumerHeader';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
@@ -29,23 +30,67 @@ export default function Landing() {
   const t = (v: LangValues) => pickLang(language, v);
   const [requestOpen, setRequestOpen] = useState(false);
   const [motionPaused, setMotionPaused] = useState(false);
+  const [heroLoaded, setHeroLoaded] = useState(false);
+  const [motionStarted, setMotionStarted] = useState(false);
+  const heroRef = useRef<HTMLImageElement>(null);
+  const reducedMotion = useReducedMotion();
+  const motionEnabled = heroLoaded && !reducedMotion;
+
+  useEffect(() => {
+    const image = heroRef.current;
+    if (!image) return;
+
+    const handleMotionStart = (event: AnimationEvent) => {
+      if (event.animationName === 'home-drift') setMotionStarted(true);
+    };
+    const handleMotionStop = (event: AnimationEvent) => {
+      if (event.animationName === 'home-drift') setMotionStarted(false);
+    };
+    const handleLoad = () => setHeroLoaded(image.naturalWidth > 0);
+    const handleError = () => { setHeroLoaded(false); setMotionStarted(false); };
+    image.addEventListener('animationstart', handleMotionStart);
+    image.addEventListener('animationcancel', handleMotionStop);
+    image.addEventListener('animationend', handleMotionStop);
+    image.addEventListener('load', handleLoad);
+    image.addEventListener('error', handleError);
+
+    // A cached image can finish before React receives its load event.
+    if (image.complete && image.naturalWidth > 0) setHeroLoaded(true);
+
+    return () => {
+      image.removeEventListener('animationstart', handleMotionStart);
+      image.removeEventListener('animationcancel', handleMotionStop);
+      image.removeEventListener('animationend', handleMotionStop);
+      image.removeEventListener('load', handleLoad);
+      image.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion) setMotionStarted(false);
+  }, [reducedMotion]);
+
   return (
     <div className="cinematic-home" data-testid="cinematic-home">
       <SEOHead title={t({ ru: 'Пхукет. Вы дома. — жильё, отдых и услуги', en: 'Phuket. You’re home. — homes and local services', th: 'ภูเก็ต บ้านของคุณ — ที่พักและบริการ' })} description={t(copy.lead)} />
       <section className="home-hero" aria-labelledby="home-title">
-        <img className={`home-hero-image${motionPaused ? ' is-paused' : ''}`} src={hero} alt="" loading="eager" width="1920" height="1080" />
+        <img
+          ref={heroRef}
+          className={`home-hero-image${motionEnabled ? ' is-motion-enabled' : ''}${motionPaused ? ' is-paused' : ''}`}
+          src={hero} alt="" loading="eager" width="1920" height="1080"
+        />
         <div className="home-hero-shade" aria-hidden="true" />
         <ConsumerHeader overlay />
         <div className="home-hero-copy home-container">
           <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
           <p>{t(copy.lead)}</p>
         </div>
-        <div className="home-hero-bottom home-container">
+        {motionEnabled && motionStarted && <div className="home-hero-bottom home-container">
           <button type="button" aria-pressed={motionPaused} onClick={() => setMotionPaused(v => !v)} className="home-motion-control">
             {motionPaused ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
             {t({ ru: motionPaused ? 'Включить движение' : 'Остановить движение', en: motionPaused ? 'Resume motion' : 'Pause motion', th: motionPaused ? 'เปิดภาพเคลื่อนไหว' : 'หยุดภาพเคลื่อนไหว' })}
           </button>
-        </div>
+        </div>}
       </section>
       <div className="home-search-wrap home-container"><HomeDiscoverySearch /></div>
       <section className="home-plans home-container" aria-labelledby="home-plans-title">

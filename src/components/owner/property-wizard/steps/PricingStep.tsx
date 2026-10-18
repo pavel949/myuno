@@ -359,7 +359,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
       <CollapsibleSection
         icon={<DollarSign className="h-4 w-4" />}
         title={isRu ? 'Оплата и депозит' : 'Payment & Deposit'}
-        badge={formData.deposit_amount ? `${Number(formData.deposit_amount).toLocaleString()} ${formData.deposit_currency || 'THB'}` : undefined}
+        badge={formData.deposit_amount ? `${Number(formData.deposit_amount).toLocaleString()} ${formData.deposit_currency || (isRu ? 'валюта не задана' : 'currency not set')}` : undefined}
       >
         <PaymentPolicySection formData={formData} updateFormData={updateFormData} />
       </CollapsibleSection>
