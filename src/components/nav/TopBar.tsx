@@ -11,6 +11,7 @@
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
+import { ConsumerHeader } from './ConsumerHeader';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -82,6 +83,13 @@ export const TopBar = memo(function TopBar({
     if (exact) return location.pathname === path;
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
+
+  if (isConsumer) return (
+    <>
+      <ConsumerHeader onSearch={() => setSearchOpen(true)} />
+      <GlobalSearchModal open={searchOpen} onOpenChange={setSearchOpen} />
+    </>
+  );
 
   return (
     <>

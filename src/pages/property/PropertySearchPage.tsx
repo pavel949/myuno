@@ -66,6 +66,7 @@ export default function PropertySearchPage() {
   const [filterValues, setFilterValues] = useState<FilterValues>({});
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
   const { selectedId: focusedId, select: selectFocused } = useMapListSync();
+  const [searchRevision, setSearchRevision] = useState(0);
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
@@ -92,6 +93,11 @@ export default function PropertySearchPage() {
   }, []);
 
   const { filterConfig, propertyTypes } = usePropertyFilterOptions();
+  // Core criteria have one editor (the search bar). Avoid a second conflicting
+  // property type/district/party selection inside the advanced filter sheet.
+  const advancedFilterConfig = useMemo(() => ({
+    sections: filterConfig.sections.filter(section => !['propertyType', 'district', 'bedrooms', 'listingType', 'guestsAtLeast', 'instantBooking'].includes(section.id)),
+  }), [filterConfig]);
   const { data: companies = [] } = useManagementCompanies();
 
   const listingCatalogType = propertyMode === 'buy' ? 'sale' : 'rent';
@@ -126,6 +132,8 @@ export default function PropertySearchPage() {
     data: infiniteData,
     isLoading,
     isFetchingNextPage,
+    isError,
+    refetch,
     hasNextPage,
     fetchNextPage,
   } = usePropertiesInfinite(serverFilters);
@@ -194,7 +202,8 @@ export default function PropertySearchPage() {
   const handleSearchUpdate = (params: SearchParams) => {
     setSearchParams(params);
     // Sync URL
-    const qp = new URLSearchParams();
+    const qp = new URLSearchParams(searchParamsUrl);
+    for (const key of ['district', 'checkIn', 'checkOut', 'guests', 'bedrooms', 'types', 'amenities', 'instant']) qp.delete(key);
     if (params.locations.length > 0) qp.set('district', params.locations[0]);
     if (params.checkIn) qp.set('checkIn', params.checkIn.toISOString());
     if (params.checkOut) qp.set('checkOut', params.checkOut.toISOString());
@@ -212,6 +221,10 @@ export default function PropertySearchPage() {
     setQuickFilters([]);
     setCategoryFilters([]);
     setSelectedCompanyId(null);
+    setSearchRevision(revision => revision + 1);
+    const resetUrl = new URLSearchParams({ mode: propertyMode });
+    if (searchParamsUrl.has('tenancy')) resetUrl.set('tenancy', searchParamsUrl.get('tenancy')!);
+    setSearchParamsUrl(resetUrl, { replace: true });
     setSearchParams({
       locations: [],
       checkIn: undefined,
@@ -227,12 +240,12 @@ export default function PropertySearchPage() {
   return (
     <div className="min-h-screen bg-background">
         {/* Sticky header */}
-        <header className="sticky top-0 z-40 bg-background border-b">
+        <header className="sticky top-[var(--consumer-header-height,0px)] z-40 bg-background border-b">
           <div className="px-4 pt-3 pb-2">
             <div className="flex items-center gap-2">
               <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0" />
               <div className="flex-1">
-                <AirbnbSearchBar onSearch={handleSearchUpdate} initialParams={searchParams} />
+                <AirbnbSearchBar key={searchRevision} onSearch={handleSearchUpdate} initialParams={searchParams} />
               </div>
             </div>
           </div>
@@ -245,7 +258,7 @@ export default function PropertySearchPage() {
                 <Popover>
                   <PopoverTrigger asChild>
                     <button className={cn(
-                      "inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-full text-xs font-medium border transition-all shrink-0",
+                      "inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-none text-xs font-medium border transition-all shrink-0",
                       selectedCompanyId
                         ? "bg-primary text-primary-foreground border-primary"
                         : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
@@ -255,9 +268,9 @@ export default function PropertySearchPage() {
                         {selectedCompanyId
                           ? (() => {
                               const c = companies.find(c => c.id === selectedCompanyId);
-                              return c ? (isRu ? c.name_ru : c.name_en) : (isRu ? 'УК' : 'Company');
+                              return c ? (isRu ? c.name_ru : c.name_en) : (isRu ? 'Управление' : 'Managed by');
                             })()
-                          : (isRu ? 'УК' : 'Company')
+                          : (isRu ? 'Управление' : 'Managed by')
                         }
                       </span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
@@ -276,7 +289,7 @@ export default function PropertySearchPage() {
                         return (
                           <button key={c.id} onClick={() => setSelectedCompanyId(c.id === selectedCompanyId ? null : c.id)} className={cn("w-full flex items-center gap-2 px-3 py-2 rounded-none text-sm transition-colors", selectedCompanyId === c.id ? "bg-primary/10 text-primary" : "hover:bg-muted")}>
                             <span className="flex-1 text-left">{label}</span>
-                            {selectedCompanyId === c.id && <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">✓</span>}
+                            {selectedCompanyId === c.id && <span className="w-4 h-4 rounded-none bg-primary text-primary-foreground text-[10px] flex items-center justify-center">✓</span>}
                           </button>
                         );
                       })}
@@ -287,13 +300,13 @@ export default function PropertySearchPage() {
 
               {/* More filters (UniversalFilter) */}
               <UniversalFilter
-                config={filterConfig}
+                config={advancedFilterConfig}
                 values={filterValues}
                 onChange={setFilterValues}
                 activeCount={activeFilterCount}
               >
                 <button className={cn(
-                  "inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-full text-xs font-medium border transition-all shrink-0",
+                  "inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-none text-xs font-medium border transition-all shrink-0",
                   Object.keys(filterValues).length > 0
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
@@ -316,17 +329,17 @@ export default function PropertySearchPage() {
         </div>
 
         <div className="px-4 py-2">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              {properties.length} {isRu ? 'объектов найдено' : 'places found'}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground basis-full sm:basis-auto">
+              {isLoading ? (isRu ? 'Ищем жильё…' : 'Finding homes…') : isError ? (isRu ? 'Каталог недоступен' : 'Catalogue unavailable') : <>{properties.length} {isRu ? 'объектов найдено' : 'places found'}</>}
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <PropertySortSelect value={sortKey} onChange={setSortKey} />
               {/* Map toggle */}
               <Button
                 variant={showMap ? 'default' : 'outline'}
                 size="sm"
-                className="gap-1.5 h-8 rounded-full text-xs"
+                className="gap-1.5 h-8 rounded-none text-xs"
                 onClick={() => setShowMap(!showMap)}
               >
                 {showMap ? <List className="w-3.5 h-3.5" /> : <MapIcon className="w-3.5 h-3.5" />}
@@ -357,7 +370,7 @@ export default function PropertySearchPage() {
         )}
 
 
-        <main className="px-4 pb-24">
+        <section aria-label={isRu ? 'Результаты поиска жилья' : 'Home search results'} className="px-4 pb-24">
           {isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1,2,3,4,5,6,7,8].map(i => (
@@ -370,7 +383,7 @@ export default function PropertySearchPage() {
             </div>
           )}
 
-          {!isLoading && properties.length > 0 && (
+          {!isLoading && !isError && properties.length > 0 && (
             <>
               <NextStepNudge
                 message={isRu ? 'Нажмите на карточку для подробностей' : 'Tap a card for details'}
@@ -402,15 +415,20 @@ export default function PropertySearchPage() {
             </>
           )}
 
-          <div ref={loadMoreRef} className="py-8 flex justify-center">
+          <div ref={loadMoreRef} className={cn("flex justify-center", properties.length > 0 && "py-8")}>
             {isFetchingNextPage && <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />}
             {!isLoading && !hasNextPage && properties.length > 0 && (
               <p className="text-sm text-muted-foreground">{isRu ? 'Все объекты загружены' : 'All properties loaded'}</p>
             )}
           </div>
 
-          {!isLoading && properties.length === 0 && (
-            <div className="text-center py-16">
+          {isError && <div role="alert" className="py-16 text-center">
+            <h2 className="mb-3">{isRu ? 'Не удалось загрузить жильё' : 'Homes could not be loaded'}</h2>
+            <p className="mb-5 text-muted-foreground">{isRu ? 'Параметры поиска сохранены. Попробуйте ещё раз.' : 'Your search is kept. Please try again.'}</p>
+            <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : 'Try again'}</Button>
+          </div>}
+          {!isLoading && !isError && properties.length === 0 && (
+            <div className="text-center py-8">
               <Home className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
               <h3 className="text-lg font-semibold mb-2">{isRu ? 'Ничего не найдено' : 'No properties found'}</h3>
               <p className="text-muted-foreground mb-4">{isRu ? 'Попробуйте изменить фильтры' : 'Try adjusting your filters'}</p>
@@ -420,11 +438,11 @@ export default function PropertySearchPage() {
             </div>
           )}
 
-          <OffplanCTASection className="mt-8" />
-          <CrossSellSection currentVertical="property" className="mt-8 px-4" />
+          {propertyMode === 'buy' && !isError && <OffplanCTASection className="mt-8" />}
+          {properties.length > 0 && !isError && <CrossSellSection currentVertical="property" className="mt-8 px-4" />}
 
           {showStickyCTA && <VerticalCTA vertical="property" variant="sticky" context="list" />}
-        </main>
+        </section>
       </div>
   );
 }

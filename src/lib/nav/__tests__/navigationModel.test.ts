@@ -70,7 +70,7 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     expect(paths).toEqual([
       APP_ROUTES.HOME,
       APP_ROUTES.GOAL_STAY,
-      APP_ROUTES.GOAL_BUY,
+      APP_ROUTES.TRIP_PLANNER,
       APP_ROUTES.GOAL_SERVICES,
       APP_ROUTES.ACCOUNT,
     ]);
@@ -175,7 +175,7 @@ describe('isBottomBarRoute — membership check', () => {
   it('returns true for routes that belong to the role bar', () => {
     expect(isBottomBarRoute('owner', APP_ROUTES.MC_FINANCE)).toBe(true);
     expect(isBottomBarRoute('vendor', APP_ROUTES.VENDOR_PAYOUTS)).toBe(true);
-    expect(isBottomBarRoute('guest', APP_ROUTES.GOAL_BUY)).toBe(true);
+    expect(isBottomBarRoute('guest', APP_ROUTES.TRIP_PLANNER)).toBe(true);
   });
 
   it('returns false for routes that are not in the role bar', () => {
@@ -224,13 +224,13 @@ describe('isBottomBarItemActive — exact-match items', () => {
 });
 
 describe('isBottomBarItemActive — prefix items', () => {
-  const market = BOTTOM_BAR_BY_ROLE.guest[2]; // /discover/buy
+  const market = BOTTOM_BAR_BY_ROLE.guest[2]; // /trip-planner
   const property = BOTTOM_BAR_BY_ROLE.guest[3]; // /discover/services
   const ownerProps = BOTTOM_BAR_BY_ROLE.owner[1]; // /mc/properties
 
   it('matches the path itself and any nested route', () => {
-    expect(isBottomBarItemActive(market, '/discover/buy')).toBe(true);
-    expect(isBottomBarItemActive(market, '/discover/buy/x')).toBe(true);
+    expect(isBottomBarItemActive(market, '/trip-planner')).toBe(true);
+    expect(isBottomBarItemActive(market, '/trip-planner/x')).toBe(true);
     expect(isBottomBarItemActive(property, '/discover/services')).toBe(true);
     expect(isBottomBarItemActive(ownerProps, '/mc/properties/abc/edit')).toBe(true);
   });
@@ -268,7 +268,7 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
   it('guest on /discover/stay highlights Stay', () => {
     const item = getActiveBottomBarItem('guest', '/discover/stay');
     expect(item?.path).toBe('/discover/stay');
-    expect(item?.labelEn).toBe('Stay');
+    expect(item?.labelEn).toBe('Homes');
   });
 
   it('guest on / highlights Home (exact)', () => {
@@ -301,5 +301,21 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
     expect(
       getActiveBottomBarItem('investor', '/invest/dashboard/projects')?.labelEn,
     ).toBe('Invest');
+  });
+});
+
+
+describe('consumer journey ownership', () => {
+  it.each([
+    ['/property/search', '/discover/stay'],
+    ['/property/browse', '/discover/stay'],
+    ['/discover/buy', '/discover/stay'],
+    ['/trip-planner', '/trip-planner'],
+    ['/transport/airport-transfer', '/discover/services'],
+    ['/experiences', '/discover/services'],
+    ['/bookings', '/account'],
+  ])('%s has one active consumer destination', (path, destination) => {
+    expect(getActiveBottomBarItem('guest', path)?.path).toBe(destination);
+    expect(BOTTOM_BAR_BY_ROLE.guest.filter(item => isBottomBarItemActive(item, path))).toHaveLength(1);
   });
 });

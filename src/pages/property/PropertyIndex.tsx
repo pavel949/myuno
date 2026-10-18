@@ -298,7 +298,7 @@ export default function PropertyIndex() {
       />
       <div className="pb-24">
         {/* Sticky header: tabs + search + categories */}
-        <div className="sticky top-0 z-40 bg-background">
+        <div className="sticky top-[var(--consumer-header-height,0px)] z-40 bg-background">
           {/* Property type tabs (Аренда / Купить / Новостройки …) */}
           <PropertyHubTabs />
           {/* Search pill + mode toggle */}

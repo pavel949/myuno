@@ -111,7 +111,6 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
               <ActiveSituationBanner />
             </Suspense>
           )}
-          {consumerChrome && <InstallBanner />}
 
           {usePageContainer ? (
             <div className={cn(ECOSYSTEM_PAGE_CONTAINER)}>{children}</div>
@@ -119,6 +118,7 @@ export const AppLayout = forwardRef<HTMLDivElement, AppLayoutProps>(
             children
           )}
 
+          {consumerChrome && <InstallBanner />}
           {finalShowFooter && <Footer />}
           {consumerChrome && <MobileInstallSheet />}
         </div>

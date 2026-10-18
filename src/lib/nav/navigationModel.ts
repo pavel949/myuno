@@ -115,7 +115,9 @@ export function isBottomBarRoute(role: NavRoleKey, path: string): boolean {
  * tab on the guest bar).
  */
 const PATH_ALIASES: Record<string, string[]> = {
-  '/account':     ['/account', '/profile', '/me'],
+  '/account':     ['/account', '/profile', '/me', '/bookings'],
+  '/discover/stay': ['/discover/stay', '/discover/buy', '/property'],
+  '/discover/services': ['/discover/services', '/transport', '/experiences', '/insurance'],
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
