@@ -6,6 +6,7 @@ import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { useOwnerProperty, useUpdateOwnerProperty } from '@/hooks/usePropertyCare';
 import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
+import { pickPropertyPaymentFields } from '@/hooks/property-wizard/buildPayload';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
@@ -31,6 +32,7 @@ const errorLog = createErrorHandler('PropertyEditor');
  */
 function mapPropertyToInitialData(property: any) {
   return {
+    ...pickPropertyPaymentFields(property),
     title_en: property.title || property.title_en || '',
     title_ru: property.title_ru || '',
     internal_name: property.internal_name || '',
@@ -136,6 +138,7 @@ const isRu = language === 'ru';
 
     const mapped = mapPropertyToInitialData(property);
     const nextFormData = {
+      ...pickPropertyPaymentFields(mapped),
       title: mapped.title_en,
       title_ru: mapped.title_ru,
       internal_name: mapped.internal_name,
@@ -299,6 +302,7 @@ const isRu = language === 'ru';
     if (!formData) return null;
 
     return {
+      ...pickPropertyPaymentFields(formData),
       title: formData.title,
       title_en: formData.title,
       title_ru: formData.title_ru,
