@@ -13,7 +13,7 @@ describe('Analytics identifier security regression', () => {
   beforeEach(() => { sessionStorage.clear(); from.mockClear(); });
   afterEach(() => vi.unstubAllGlobals());
   it('uses cryptographic randomness for UUID v4 when randomUUID is unavailable', () => {
-    const getRandomValues = vi.fn((bytes: Uint8Array) => originalCrypto.getRandomValues(bytes));
+    const getRandomValues = vi.fn((bytes: Uint8Array<ArrayBuffer>) => originalCrypto.getRandomValues(bytes));
     vi.stubGlobal('crypto', { getRandomValues });
     const first = renderHook(() => useUserTracking());
     expect(first.result.current.sessionId).toMatch(/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/);
