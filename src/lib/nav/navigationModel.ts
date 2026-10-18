@@ -52,6 +52,12 @@ export {
 };
 export type { NavRoleKey, NavItem };
 
+/** Public header and its mobile menu; business is intentionally not a sixth bottom tab. */
+export const GUEST_TOP_NAV: NavItem[] = [
+  ...GUEST_NAV.filter(item => item.path !== APP_ROUTES.HOME && item.path !== APP_ROUTES.ACCOUNT),
+  { path: APP_ROUTES.FOR_BUSINESS, icon: Briefcase, labelEn: 'Business', labelRu: 'Бизнес', labelTh: 'ธุรกิจ' },
+];
+
 /** Primary 5-slot navigation (alias of NAV_BY_ROLE for clarity). */
 export const PRIMARY_NAV = NAV_BY_ROLE;
 
