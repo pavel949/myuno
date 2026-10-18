@@ -9,7 +9,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { propertySpec } from '@/lib/vertical-specs/property';
-import { PROPERTY_TYPES } from '@/lib/propertyTaxonomy';
+import { PROPERTY_TYPES, getHighlightLabel } from '@/lib/propertyTaxonomy';
 import { ALL_LISTING_AMENITY_UI_ITEMS } from '@/lib/propertyAttributeRegistry';
 import type { FieldSpec } from '@/lib/vertical-specs/types';
 
@@ -46,5 +46,19 @@ describe('Property taxonomy unification', () => {
   it('canonical PROPERTY_TYPES has no duplicate ids', () => {
     const ids = PROPERTY_TYPES.map((t) => t.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+
+describe('public highlight labels from existing registries', () => {
+  it.each([
+    ['walk_to_beach', 'en', 'Walk to beach'],
+    ['walk_to_beach', 'ru', 'Пешком до пляжа'],
+    ['pool', 'ru', 'Бассейн'],
+    ['wifi', 'en', 'WiFi'],
+    ['air_conditioning', 'ru', 'Кондиционер'],
+    ['Custom host description', 'en', 'Custom host description'],
+  ] as const)('labels %s in %s without changing facts', (id, language, expected) => {
+    expect(getHighlightLabel(id, language)).toBe(expected);
   });
 });

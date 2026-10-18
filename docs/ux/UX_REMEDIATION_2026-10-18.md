@@ -71,3 +71,9 @@ Sources:
 - Local production builds transformed 6908 modules but were killed during chunk rendering with both default build heap and 4096 MB. Build is NOT passed; use isolated CI to distinguish runner capacity from code regression.
 - Local Vite dev server starts at 127.0.0.1:5174, but cloud Chrome cannot connect to that executor loopback (ERR_CONNECTION_REFUSED). No post-change visual acceptance is claimed.
 - Build-generated public/version.json and generated MCP bundle changes were restored; synthetic settings are not included in the patch.
+
+### Follow-up within this PR
+
+- Property cards now display the actual listing title in addition to the district, and existing amenity/feature registries supply labels for legacy highlights such as walk_to_beach, pool and air_conditioning. Stored facts/prices remain unchanged.
+- 179 focused tests in 13 files passed, including six new label cases; TypeScript rechecked successfully.
+- First CI commit passed the isolated full suite, timezone workflows and production build. The separate verify workflow found a React Hooks naming error in the new test wrapper, corrected by naming it Wrapper; no check weakened. Final commit must be checked again.

@@ -1,3 +1,4 @@
+import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 /**
  * @module PropertyTaxonomy
  * @deprecated Import from '@/lib/taxonomies' instead of this file directly.
@@ -400,7 +401,13 @@ export function getExtraServiceLabel(id: string, lang: 'en' | 'ru' = 'en'): stri
 export function getHighlightLabel(id: string, lang: 'en' | 'ru' = 'en'): string {
   const normalized = normalizeHighlightId(id);
   const highlight = PROPERTY_HIGHLIGHTS.find(h => h.id === normalized);
-  return highlight ? (lang === 'ru' ? highlight.labelRu : highlight.labelEn) : id;
+  if (highlight) return lang === 'ru' ? highlight.labelRu : highlight.labelEn;
+  // Existing property editors also persist amenity/feature IDs in highlights.
+  // Resolve their existing labels without changing or inventing property facts.
+  const amenityLabel = getAmenityLabel(id, lang);
+  if (amenityLabel !== id) return amenityLabel;
+  const feature = PROPERTY_FEATURE_MAP.get(normalized);
+  return feature ? (lang === 'ru' ? feature.labelRu : feature.labelEn) : id;
 }
 
 export function getViewTypeLabel(id: string, lang: 'en' | 'ru' = 'en'): string {

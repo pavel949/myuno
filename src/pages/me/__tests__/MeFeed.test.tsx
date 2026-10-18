@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import MeFeed from '../MeFeed';
-const state = vi.hoisted(() => ({ user: null as null | { id: string }, authLoading: false, loading: false, error: false, failed: [] as string[], items: [] as any[], retry: vi.fn() }));
+import type { MeFeedItem } from '@/hooks/useMeFeed';
+const state = vi.hoisted(() => ({ user: null as null | { id: string }, authLoading: false, loading: false, error: false, failed: [] as string[], items: [] as MeFeedItem[], retry: vi.fn() }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: state.user, isLoading: state.authLoading }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/useMeFeed', () => ({ useMeFeed: () => ({ data: state.items, isLoading: state.loading, isError: state.error, failedSources: state.failed, refetch: state.retry }) }));
@@ -17,6 +18,6 @@ describe('personal feed truth states', () => {
  it('does not claim all clear while auth is loading', () => { state.authLoading=true; show(); expect(screen.queryByText('All caught up')).not.toBeInTheDocument(); expect(screen.queryByRole('link',{name:'Sign in'})).not.toBeInTheDocument(); });
  it('shows a verified empty result for a signed-in user', () => { state.user={id:'test'}; show(); expect(screen.getByText('All caught up')).toBeInTheDocument(); });
  it('does not turn a partial source failure into no urgent tasks', () => { state.user={id:'test'}; state.failed=['order']; show(); expect(screen.getByRole('alert')).toHaveTextContent('incomplete'); expect(screen.queryByText('All caught up')).not.toBeInTheDocument(); fireEvent.click(screen.getByRole('button',{name:'Retry'})); expect(state.retry).toHaveBeenCalledOnce(); });
- it('keeps successful items visible alongside partial failure', () => { state.user={id:'test'}; state.failed=['order']; state.items=[{id:'n1',source:'notification',priority:'medium',titleEn:'Message from manager'}]; show(); expect(screen.getByText('Message from manager')).toBeInTheDocument(); expect(screen.getByRole('alert')).toBeInTheDocument(); });
+ it('keeps successful items visible alongside partial failure', () => { state.user={id:'test'}; state.failed=['order']; state.items=[{id:'n1',source:'notification',priority:'medium',titleEn:'Message from manager',titleRu:'Сообщение',createdAt:'2026-10-18T00:00:00Z'}]; show(); expect(screen.getByText('Message from manager')).toBeInTheDocument(); expect(screen.getByRole('alert')).toBeInTheDocument(); });
  it('does not claim empty success after a query failure', () => { state.user={id:'test'}; state.error=true; show(); expect(screen.getByRole('alert')).toBeInTheDocument(); expect(screen.queryByText('All caught up')).not.toBeInTheDocument(); });
 });

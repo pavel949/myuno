@@ -212,6 +212,10 @@ function PropertyListingCardBase({
           )}
         </div>
 
+        {title && title !== districtDisplay && (
+          <p className="text-xs sm:text-sm leading-snug line-clamp-2 text-foreground">{title}</p>
+        )}
+
         {/* Row 2: Property type · bedrooms */}
         <p className="text-[11px] sm:text-sm text-muted-foreground line-clamp-1">
           {property.property_type
