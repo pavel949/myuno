@@ -7,7 +7,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
-import { GUEST_NAV, isBottomBarItemActive } from '@/lib/nav/navigationModel';
+import { GUEST_TOP_NAV, isBottomBarItemActive } from '@/lib/nav/navigationModel';
 import { MiniCart } from '@/components/market/MiniCart';
 
 /** One public navigation, shared by the homepage and consumer route shells. */
@@ -17,7 +17,7 @@ export function ConsumerHeader({ overlay = false, onSearch }: { overlay?: boolea
   const [open, setOpen] = useState(false);
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const { pathname } = useLocation();
-  const links = GUEST_NAV.filter(item => item.path !== R.HOME && item.path !== R.ACCOUNT).map(item => ({
+  const links = GUEST_TOP_NAV.map(item => ({
     to: item.path,
     label: pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh }),
     active: isBottomBarItemActive(item, pathname),

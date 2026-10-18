@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,7 +21,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { LandingChrome } from '@/components/landings';
 import { APP_ROUTES } from '@/lib/config/routes';
 import {
   Building2, Languages, Globe, CalendarCheck, ShieldCheck, Megaphone,
@@ -223,9 +222,9 @@ const BUSINESS_TYPES: Array<{ value: string; label: Tri }> = [
 // ── UI string bundles (RU / EN / TH) ───────────────────────────────────────
 const UI = {
   metaTitle: {
-    ru: 'myUNO для бизнеса Пхукета — Foreign-Ready услуги | myUNO',
-    en: 'myUNO for Phuket Business — Foreign-Ready services | myUNO',
-    th: 'myUNO สำหรับธุรกิจภูเก็ต — บริการ Foreign-Ready | myUNO',
+    ru: 'Бизнес в Таиланде: регистрация, налоги и сопровождение | myUNO',
+    en: 'Business in Thailand: company formation, tax and support | myUNO',
+    th: 'ธุรกิจในประเทศไทย: จดทะเบียน ภาษี และการดูแล | myUNO',
   },
   metaDesc: {
     ru: 'Подготовим ваш ресторан, салон, клинику или венье к работе с иностранцами: меню, сайт, бронирование, маркетинг, капитал, реструктуризация, визы и дистрибуция через myUNO.',
@@ -238,14 +237,14 @@ const UI = {
     th: 'สำหรับธุรกิจท้องถิ่นภูเก็ต',
   },
   heroTitle: {
-    ru: 'Готовим ваш бизнес к иностранному клиенту',
-    en: 'Get your business foreign-ready',
-    th: 'เตรียมธุรกิจของคุณให้พร้อมรับลูกค้าต่างชาติ',
+    ru: 'Открыть и вести бизнес в Таиланде',
+    en: 'Start and run a business in Thailand',
+    th: 'เริ่มต้นและดำเนินธุรกิจในประเทศไทย',
   },
   heroDesc: {
-    ru: 'Меню, сайты, бронирование, маркетинг, капитал, визы и дистрибуция — один партнёр на весь цикл.',
-    en: 'Menus, websites, bookings, marketing, capital, visas and distribution — one partner end-to-end.',
-    th: 'เมนู เว็บไซต์ ระบบจอง การตลาด เงินทุน วีซ่า และการจัดจำหน่าย — พาร์ทเนอร์เดียวครบวงจร',
+    ru: 'Регистрация компании, налоги, бухгалтерия и развитие бизнеса. Выберите задачу и подходящий маршрут обращения.',
+    en: 'Company formation, tax, accounting and business growth. Choose your task and the relevant consultation route.',
+    th: 'จดทะเบียนบริษัท ภาษี บัญชี และการเติบโตของธุรกิจ เลือกงานและช่องทางปรึกษาที่เหมาะสม',
   },
   ctaInquiry: { ru: 'Оставить заявку', en: 'Send inquiry', th: 'ส่งคำขอ' },
   ctaPartner: {
@@ -375,7 +374,7 @@ export default function ForBusinessPage() {
   const isRu = language === 'ru';
 
   return (
-    <AppLayout showHeader={false}>
+    <AppLayout>
       <Helmet>
         <html lang={language} />
         <title>{t(UI.metaTitle)}</title>
@@ -390,7 +389,6 @@ export default function ForBusinessPage() {
       </Helmet>
 
       <div className="min-h-screen bg-background">
-        <LandingChrome isRu={isRu} />
 
         {/* Hero */}
         <section className="relative overflow-hidden py-16 md:py-24 px-4">
@@ -422,6 +420,22 @@ export default function ForBusinessPage() {
               </div>
             </motion.div>
           </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 pb-12" aria-labelledby="business-start-title">
+          <h2 id="business-start-title" className="text-2xl font-display mb-6">{t({ru:'С чего начнём?',en:'What do you need?',th:'คุณต้องการความช่วยเหลือเรื่องใด?'})}</h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              {href:'/legal/company',title:{ru:'Регистрация компании',en:'Company formation',th:'จดทะเบียนบริษัท'},description:{ru:'Структура владения, документы и порядок регистрации.',en:'Ownership structure, documents and registration process.',th:'โครงสร้างผู้ถือหุ้น เอกสาร และขั้นตอนจดทะเบียน'}},
+              {href:'/legal/tax',title:{ru:'Налоговое сопровождение',en:'Tax support',th:'การดูแลด้านภาษี'},description:{ru:'Налоговая ситуация и отчётность; уточните задачи по бухгалтерскому сопровождению.',en:'Tax situation and reporting; discuss your accounting support requirements.',th:'สถานะภาษี การรายงาน และการดูแลต่อเนื่อง'}},
+              {href:'/legal',title:{ru:'Юридическое сопровождение',en:'Legal support',th:'บริการด้านกฎหมาย'},description:{ru:'Выберите специалиста и обсудите вашу задачу.',en:'Choose a specialist and discuss your requirements.',th:'เลือกผู้เชี่ยวชาญและปรึกษาความต้องการของคุณ'}},
+            ].map(item=><Link key={item.href} to={item.href} className="group min-w-0 border border-border bg-card p-6 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <h3 className="text-lg leading-snug mb-2">{t(item.title)}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{t(item.description)}</p>
+              <ArrowRight aria-hidden className="mt-4 h-5 w-5" />
+            </Link>)}
+          </div>
+          <p className="mt-5 text-sm text-muted-foreground">{t({ru:'Заявки на этой странице относятся к коммерческим услугам myUNO. Они не являются официальным обращением по защите прав предпринимателей.',en:'Requests on this page concern myUNO commercial services. They are not formal submissions to a business rights representative.',th:'คำขอในหน้านี้เกี่ยวกับบริการเชิงพาณิชย์ของ myUNO ไม่ใช่คำร้องอย่างเป็นทางการด้านการคุ้มครองสิทธิผู้ประกอบการ'})}</p>
         </section>
 
         {/* Services menu */}
