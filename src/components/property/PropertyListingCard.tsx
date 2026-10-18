@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Star, Zap, Building2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
@@ -17,6 +17,7 @@ import { getDistrictLabel, getPropertyTypeLabel, getHighlightLabel, getViewTypeL
 import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
 import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
 import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
@@ -66,6 +67,8 @@ function PropertyListingCardBase({
   nights,
 }: PropertyListingCardProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const detailHref = propertyDetailHref(property.id, mode, location.search);
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
@@ -110,7 +113,7 @@ function PropertyListingCardBase({
       // In split/map mode, primary action is to select on the map, not navigate.
       onSelect(property.id);
     } else {
-      navigate(surface.href);
+      navigate(detailHref);
     }
   };
 
@@ -201,7 +204,7 @@ function PropertyListingCardBase({
         {/* Listing name is the primary destination; district and rating are secondary. */}
         <div className="flex items-start justify-between gap-1">
           <h3 className="min-w-0 font-sans text-base font-semibold leading-snug text-foreground">
-            <Link to={surface.href} onClick={(event) => event.stopPropagation()} className="line-clamp-2 break-words focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <Link to={detailHref} onClick={(event) => event.stopPropagation()} className="line-clamp-2 break-words focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               {title || districtDisplay}
             </Link>
           </h3>

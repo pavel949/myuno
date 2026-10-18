@@ -1,8 +1,7 @@
  import { useState, useEffect } from 'react';
- import { useParams, useNavigate } from 'react-router-dom';
+ import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
  import { Clock, MapPin, Calendar, MessageSquare, Check, LocateFixed, Loader2 } from 'lucide-react';
  import { BackButton } from '@/components/uno/BackButton';
- import { APP_ROUTES } from '@/lib/config/routes';
  import { Button } from '@/components/ui/button';
  import { Input } from '@/components/ui/input';
  import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +11,7 @@
  import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
  import { useLanguage } from '@/contexts/LanguageContext';
 import { useServiceFunctions } from '@/hooks/useServiceFunctions';
+import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
 import { useOrders } from '@/hooks/useOrders';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGeolocation } from '@/hooks/useGeolocation';
@@ -21,6 +21,9 @@ import { toast } from 'sonner';
  export default function ServiceFunctionOrder() {
    const { functionId } = useParams<{ functionId: string }>();
    const navigate = useNavigate();
+   const [searchParams] = useSearchParams();
+   const location = useLocation();
+   const returnTo = serviceCatalogueReturnTo(searchParams.get('returnTo'));
    const { language, t } = useLanguage();
    const isRu = language === 'ru';
    
@@ -75,7 +78,7 @@ import { toast } from 'sonner';
 
     if (!user) {
       toast.error(isRu ? 'Войдите, чтобы оформить заказ' : 'Please sign in to place an order');
-      navigate('/auth?redirect=' + encodeURIComponent(`/services/order/${functionId}`));
+      navigate('/auth?redirect=' + encodeURIComponent(location.pathname + location.search));
       return;
     }
 
@@ -171,7 +174,7 @@ import { toast } from 'sonner';
        {/* Header */}
        <div className="sticky top-0 z-50 bg-background/95 border-b">
          <div className="flex items-center gap-3 px-4 py-3">
-           <BackButton fallbackPath={APP_ROUTES.SERVICES} variant="ghost" />
+           <BackButton fallbackPath={returnTo} variant="ghost" />
            <div className="flex-1">
              <h1 className="font-semibold">{isRu ? 'Заказать услугу' : 'Order Service'}</h1>
            </div>

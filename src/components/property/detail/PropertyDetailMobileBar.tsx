@@ -68,7 +68,7 @@ export function PropertyDetailMobileBar({
           <>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">{isRu ? 'Цена' : 'Price'}</p>
-              <span className="text-xl font-bold text-foreground">{formatPrice(salePrice)}</span>
+              <span className="text-xl font-bold text-foreground">{salePrice > 0 ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request')}</span>
               {ownershipLabel && (
                 <p className="text-[11px] text-muted-foreground mt-0.5">{ownershipLabel}</p>
               )}

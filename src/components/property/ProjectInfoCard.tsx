@@ -51,7 +51,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
   const amenities = project.amenities || [];
 
   const handleExploreProject = () => {
-    navigate(APP_ROUTES.PROJECT_DETAIL(project.id));
+    navigate(APP_ROUTES.COMPLEX_DETAIL(project.id));
   };
 
   return (

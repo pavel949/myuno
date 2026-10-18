@@ -9,7 +9,7 @@ import { useMarketplaceServices } from '@/hooks/useServiceMarketplace';
 import { ServiceBookingSheet, type BookableService } from './ServiceBookingSheet';
 
 /** Real, bookable services from verified providers (services + providers tables). */
-export function MarketplaceServiceGrid({ search = '' }: { search?: string }) {
+export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/services' }: { search?: string; returnTo?: string }) {
   const { language } = useLanguage();
   const L = (ru: string, en: string, th?: string) => pickLang(language, { ru, en, th });
   const { data, isLoading, isError, refetch } = useMarketplaceServices();
@@ -32,7 +32,7 @@ export function MarketplaceServiceGrid({ search = '' }: { search?: string }) {
           <Button size="sm" variant="outline" onClick={() => refetch()}>{L('Повторить', 'Retry', 'ลองใหม่')}</Button>
         </div>
       ) : list.length === 0 ? (
-        <p className="text-sm text-muted-foreground border border-border p-4">{q ? L('По вашему запросу ничего не найдено. Измените поиск.', 'No services match your search. Try another search.', 'ไม่พบบริการที่ตรงกับการค้นหา') : L('Онлайн-запись пока недоступна. Ниже можно оставить заявку на подбор специалиста.', 'Online booking is not available yet. You can request a specialist below.', 'ยังไม่มีบริการจองออนไลน์ ส่งคำขอด้านล่างได้')}</p>
+        <p className="text-sm text-muted-foreground border border-border p-4">{(data ?? []).length > 0 && q ? L('По вашему запросу ничего не найдено. Измените поиск.', 'No services match your search. Try another search.', 'ไม่พบบริการที่ตรงกับการค้นหา') : L('Онлайн-запись пока недоступна. Ниже можно оставить заявку на подбор специалиста.', 'Online booking is not available yet. You can request a specialist below.', 'ยังไม่มีบริการจองออนไลน์ ส่งคำขอด้านล่างได้')}</p>
       ) : (
         <div className="grid gap-2 sm:grid-cols-2">
           {list.map((s) => {
@@ -44,7 +44,7 @@ export function MarketplaceServiceGrid({ search = '' }: { search?: string }) {
                 <div className="flex-1 min-w-0 space-y-1">
                   <h4 className="font-medium text-sm leading-snug line-clamp-2">{name}</h4>
                   {s.provider && (
-                    <Link to={`/services/provider/${s.provider.id}`} className="text-xs text-muted-foreground hover:underline flex items-center gap-1">
+                    <Link to={`/services/provider/${s.provider.id}?returnTo=${encodeURIComponent(returnTo)}`} className="text-xs text-muted-foreground hover:underline flex items-center gap-1">
                       {s.provider.is_verified && <Shield className="h-3 w-3 text-primary" aria-label={L('Специалист проверен', 'Verified', 'ยืนยันแล้ว')} />}
                       {s.provider.name}
                     </Link>

@@ -85,11 +85,13 @@ jobs:
             curl --fail --silent http://localhost:8080/src/index.css?direct >/dev/null && break
             sleep 1
           done
+          timeout 180s node scripts/qa/services-discovery-ui.mjs
           timeout 180s node scripts/qa/bookings-list-ui.mjs
           timeout 180s node scripts/qa/calendar-ui.mjs
           timeout 180s node scripts/qa/today-ui.mjs
           timeout 180s node scripts/qa/property-browse-ui.mjs
           timeout 180s node scripts/qa/home-search-ui.mjs
+          timeout 180s node scripts/qa/guest-complex-ui.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload validation evidence

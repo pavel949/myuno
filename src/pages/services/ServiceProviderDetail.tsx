@@ -32,6 +32,8 @@ import { useProviderDetails } from "@/hooks/useProviderDetails";
 import { useReviews } from "@/hooks/useReviews";
 import { ServiceBookingSheet, type BookableService } from "@/components/services/ServiceBookingSheet";
 
+import { serviceCatalogueReturnTo } from '@/lib/services/serviceNavigation';
+
 interface CartService {
   id: string;
   name: string;
@@ -46,6 +48,7 @@ const ServiceProviderDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const returnTo = serviceCatalogueReturnTo(searchParams.get('returnTo'));
   const { showAddedToast } = useCartToast();
   const [booking, setBooking] = useState<BookableService | null>(null);
 
@@ -134,14 +137,14 @@ const ServiceProviderDetail = () => {
     return (
       <AppLayout>
         <div className="p-6 text-center space-y-3">
-          <BackButton fallbackPath="/services" />
+          <BackButton fallbackPath={returnTo} />
           <p className="text-lg font-medium">{isRu ? "Мастер не найден" : "Provider not found"}</p>
           <p className="text-sm text-muted-foreground">
             {isRu
               ? "Возможно, профиль удалён или ссылка устарела."
               : "This profile may have been removed or the link is outdated."}
           </p>
-          <Button onClick={() => navigate("/services")}>
+          <Button onClick={() => navigate(returnTo)}>
             {isRu ? "К списку мастеров" : "Browse providers"}
           </Button>
         </div>
@@ -154,7 +157,7 @@ const ServiceProviderDetail = () => {
       <div className="pb-32">
         {/* Header */}
         <div className="relative">
-          <BackButton fallbackPath="/services" variant="overlay" className="absolute top-4 left-4 z-10" />
+          <BackButton fallbackPath={returnTo} variant="overlay" className="absolute top-4 left-4 z-10" />
           <div className="h-32 bg-gradient-to-br from-primary to-primary" />
           <div className="absolute -bottom-12 left-4">
             <div className="relative">
