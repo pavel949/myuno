@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Wrench } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { MiniAppLayout } from '@/components/miniapp/MiniAppLayout';
+import { MiniAppLayout, type MiniAppLayoutProps } from '@/components/miniapp/MiniAppLayout';
+import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/uno/EmptyState';
 import { useServiceFunctions } from '@/hooks/useServiceFunctions';
 import { ServiceFunctionCard } from '@/components/services';
@@ -17,7 +18,15 @@ const CATEGORY_ALIAS: Record<string, string> = {
   'pest-control': 'pest_control', 'ac-repair': 'ac', gardening: 'garden',
 };
 
-export default function ServicesIndex() {
+function EmbeddedServicesLayout({ title, subtitle, searchValue, onSearchChange, searchPlaceholder, children }: MiniAppLayoutProps) {
+  return <div className="space-y-6">
+    <header className="space-y-2"><h1 className="text-2xl font-semibold">{title}</h1><p className="text-muted-foreground">{subtitle}</p></header>
+    <Input type="search" aria-label={searchPlaceholder} placeholder={searchPlaceholder} value={searchValue} onChange={event => onSearchChange?.(event.target.value)} />
+    {children}
+  </div>;
+}
+
+export default function ServicesIndex({ embedded = false }: { embedded?: boolean } = {}) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const location = useLocation();
@@ -30,6 +39,7 @@ export default function ServicesIndex() {
   const category = CATEGORY_ALIAS[rawCategory] ?? rawCategory;
   const unknownCategory = category !== 'all' && !SERVICE_CATEGORIES.some(c => c.id === category);
   const returnTo = location.pathname + location.search;
+  const Layout = embedded ? EmbeddedServicesLayout : MiniAppLayout;
 
   let requests = query.trim() ? search(query) : functions;
   if (category !== 'all') requests = requests.filter(fn => fn.category === category);
@@ -52,7 +62,7 @@ export default function ServicesIndex() {
   };
 
   return (
-    <MiniAppLayout
+    <Layout
       title={isRu ? 'Услуги' : 'Services'}
       subtitle={isRu ? 'Найдите услугу или выберите категорию.' : 'Find a service or choose a category.'}
       fallbackPath="/"
@@ -103,6 +113,6 @@ export default function ServicesIndex() {
           </div>
         )}
       </section>
-    </MiniAppLayout>
+    </Layout>
   );
 }

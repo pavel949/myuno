@@ -40,7 +40,7 @@ async def main():
                 await page.get_by_role('option',name=category_name,exact=True).click()
                 await expect(menu).to_have_count(0)
                 await expect(trigger).to_be_focused()
-                search=page.get_by_role('textbox')
+                search=page.get_by_role('searchbox',name='Поиск услуг…' if lang=='ru' else 'Search services…',exact=True)
                 await search.fill('Чистка' if lang=='ru' else 'Cleaning')
                 await expect(page.get_by_role('button',name='Оставить заявку' if lang=='ru' else 'Request service',exact=True)).to_have_count(1)
                 await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-filtered.png'))

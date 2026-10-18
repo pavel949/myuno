@@ -236,6 +236,7 @@ export const AnimatedRoutes: React.FC = () => {
         {["stay","live","buy","services"].map((g) => (
           <Route key={g} path={`${APP_ROUTES.DISCOVER}/${g}`} element={<LazyPage><Pages.GoalEntryPage goal={g} /></LazyPage>} />
         ))}
+        <Route path={APP_ROUTES.DISCOVER_SITUATIONS} element={<LazyPage><Pages.SituationNavigator /></LazyPage>} />
         <Route path={`${APP_ROUTES.DISCOVER}/:code`} element={<LazyPage><Pages.SituationDetail /></LazyPage>} />
         <Route path={APP_ROUTES.NAVIGATOR} element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
         <Route path="/catalog" element={<Navigate to={APP_ROUTES.DISCOVER} replace />} />
