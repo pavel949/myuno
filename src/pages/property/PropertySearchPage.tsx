@@ -361,6 +361,9 @@ export default function PropertySearchPage() {
           />
         </div>
 
+        {propertyMode === 'rent' && nights > 0 && <p role="note" aria-label={isRu ? 'Проверка занятости' : 'Availability check'} className="mx-4 my-2 border-l-2 border-primary/30 pl-3 text-sm text-muted-foreground">
+          {isRu ? 'Даты сохранены, но занятость объектов пока не проверена. Откройте объект для проверки.' : 'Your dates are saved, but availability has not been checked for these results. Open a property to check.'}
+        </p>}
         <div className="px-4 py-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 ref={resultsHeadingRef} tabIndex={-1} className="scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)] text-sm text-muted-foreground basis-full sm:basis-auto">

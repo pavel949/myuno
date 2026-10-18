@@ -21,11 +21,13 @@ import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { DateRange } from 'react-day-picker';
+import type { PropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
 import { getStayRuleErrors } from '@/lib/property/stayRulesValidation';
 
 
 interface PropertyBookingCardProps {
   propertyId: string;
+  initialGuestContext?: PropertyGuestContext;
   pricePerNight: number;
   rentalTerms?: PropertyRentalTerms | null;
   currency?: string;
@@ -45,6 +47,7 @@ interface PropertyBookingCardProps {
 
 export function PropertyBookingCard({
   propertyId,
+  initialGuestContext,
   pricePerNight,
   rentalTerms,
   currency = 'THB',
@@ -66,8 +69,14 @@ export function PropertyBookingCard({
   const { formatPrice } = useCurrency();
   const isRu = language === 'ru';
   
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [guests, setGuests] = useState(1);
+  // URL preferences may change without a remount. Only untouched fields follow them.
+  // An explicit clear is an edit too; switching properties resets these overrides.
+  const [editedDates, setEditedDates] = useState<{ propertyId: string; value?: DateRange }>();
+  const [editedGuests, setEditedGuests] = useState<{ propertyId: string; value: number }>();
+  const dateRange = editedDates?.propertyId === propertyId ? editedDates.value : initialGuestContext?.dateRange;
+  const guests = editedGuests?.propertyId === propertyId ? editedGuests.value : initialGuestContext?.guests ?? 1;
+  const setDateRange = (value: DateRange | undefined) => setEditedDates({ propertyId, value });
+  const setGuests = (value: number) => setEditedGuests({ propertyId, value });
   const [showPriceDetails, setShowPriceDetails] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const { isDesktop } = useBreakpoint();

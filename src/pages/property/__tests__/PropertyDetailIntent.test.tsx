@@ -1,7 +1,7 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import PropertyDetail from '../PropertyDetail';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
@@ -14,8 +14,8 @@ vi.mock('@/hooks/useFeatureFlag', () => ({ useFeatureFlag: () => false }));
 vi.mock('@/hooks/usePropertyUnavailableDates', () => ({ usePropertyUnavailableDates: () => ({ data: [], isSuccess: true, isError: false, refetch: vi.fn() }) }));
 vi.mock('@/hooks/usePropertyListingQuality', () => ({ usePropertyMedia: () => ({ data: [] }), mediaAlt: () => '', mediaCaption: () => '' }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null, createRealEstateListingSchema: () => ({}) }));
-vi.mock('@/components/property', () => ({ IncludedServices: () => null, ExtraServices: () => null, UtilitiesInfo: () => null, CheckInDetails: () => null, GuestAssuranceCard: () => null, HouseRules: () => null, GuestExtraFeesDisplay: () => null, PropertyBookingCard: () => <button>Book rental</button>, MessageHostButton: ({ labelEn }: { labelEn: string }) => <button>{labelEn}</button> }));
-vi.mock('@/components/property/detail', () => ({ PropertyDetailGallery: () => <div data-testid="property-gallery" />, PropertyDetailHighlights: () => null, PropertyDetailDateSheet: () => null, PropertyHeroFacts: () => null, PropertyDetailMobileBar: ({ isSaleListing }: { isSaleListing: boolean }) => <span data-testid="mobile-intent">{isSaleListing ? 'buy' : 'rent'}</span> }));
+vi.mock('@/components/property', () => ({ IncludedServices: () => null, ExtraServices: () => null, UtilitiesInfo: () => null, CheckInDetails: () => null, GuestAssuranceCard: () => null, HouseRules: () => null, GuestExtraFeesDisplay: () => null, PropertyBookingCard: ({ initialGuestContext }: { initialGuestContext: { guests: number; dateRange?: { from?: Date } } }) => <button data-guests={initialGuestContext.guests} data-check-in={initialGuestContext.dateRange?.from?.getFullYear()}>Book rental</button>, MessageHostButton: ({ labelEn }: { labelEn: string }) => <button>{labelEn}</button> }));
+vi.mock('@/components/property/detail', () => ({ PropertyDetailGallery: () => <div data-testid="property-gallery" />, PropertyDetailHighlights: () => null, PropertyDetailDateSheet: ({ guestCount, dateRange, onGuestCountChange, onDateRangeChange }: { dateRange?: { from?: Date }; guestCount: number; onGuestCountChange: (value: number) => void; onDateRangeChange: (value: undefined) => void }) => <><output data-testid="mobile-guests">{guestCount}</output><output data-testid="mobile-date">{dateRange?.from?.getDate() ?? "empty"}</output><button onClick={() => onGuestCountChange(4)}>Edit mobile party</button><button onClick={() => onDateRangeChange(undefined)}>Clear mobile dates</button></>, PropertyHeroFacts: () => null, PropertyDetailMobileBar: ({ isSaleListing }: { isSaleListing: boolean }) => <span data-testid="mobile-intent">{isSaleListing ? 'buy' : 'rent'}</span> }));
 vi.mock('@/components/property/PropertyShareSheet', () => ({PropertyShareSheet: ({ children }: { children: React.ReactNode }) => <>{children}</>}));
 vi.mock('@/components/uno/FavoriteButton', () => ({FavoriteButton: () => null}));
 vi.mock('@/components/uno/BackButton', () => ({BackButton: () => null}));
@@ -36,9 +36,49 @@ vi.mock('@/components/property/PropertyReviewRatings', () => ({PropertyReviewRat
 vi.mock('@/components/property/StayRulesSection', () => ({StayRulesSection: () => null}));
 vi.mock('@/components/property/RoomCategoryOffers', () => ({RoomCategoryOffers: () => null}));
 vi.mock('@/components/reviews/ReviewsSection', () => ({ReviewsSection: () => null}));
-afterEach(() => { cleanup(); state.property.listing_type = 'rent'; state.property.listing_modes = ['rent','sale']; state.property.is_for_sale = true; state.property.sale_price = 5000000; });
-function mount(mode: string) { render(<MemoryRouter initialEntries={[`/property/unit?mode=${mode}`]}><Routes><Route path="/property/:id" element={<CompareProvider><PropertyDetail /></CompareProvider>} /></Routes></MemoryRouter>); }
+afterEach(() => { cleanup(); localStorage.clear(); state.property.listing_type = 'rent'; state.property.listing_modes = ['rent','sale']; state.property.is_for_sale = true; state.property.sale_price = 5000000; });
+function NavigateContext() { const navigate = useNavigate(); return <button onClick={() => navigate('/property/unit?mode=rent&checkIn=2099-12-10&checkOut=2099-12-14&guests=2')}>New URL</button>; }
+function mount(mode: string) { render(<MemoryRouter initialEntries={[`/property/unit?mode=${mode}`]}><Routes><Route path="/property/:id" element={<CompareProvider><NavigateContext /><PropertyDetail /></CompareProvider>} /></Routes></MemoryRouter>); }
 describe('actual property detail purchase/rental intent', () => {
+  it('updates untouched mobile fields on same-ID URL navigation', () => {
+    mount('rent&checkIn=2099-12-01&checkOut=2099-12-04&guests=3');
+    fireEvent.click(screen.getByRole('button', { name: 'New URL' }));
+    expect(screen.getByTestId('mobile-guests')).toHaveTextContent('2');
+    expect(screen.getByTestId('mobile-date')).toHaveTextContent('10');
+  });
+  it('preserves edited mobile guests while untouched dates follow the URL', () => {
+    mount('rent&checkIn=2099-12-01&checkOut=2099-12-04&guests=3');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit mobile party' }));
+    fireEvent.click(screen.getByRole('button', { name: 'New URL' }));
+    expect(screen.getByTestId('mobile-guests')).toHaveTextContent('4');
+    expect(screen.getByTestId('mobile-date')).toHaveTextContent('10');
+  });
+  it('preserves cleared mobile dates while untouched guests follow the URL', () => {
+    mount('rent&checkIn=2099-12-01&checkOut=2099-12-04&guests=3');
+    fireEvent.click(screen.getByRole('button', { name: 'Clear mobile dates' }));
+    fireEvent.click(screen.getByRole('button', { name: 'New URL' }));
+    expect(screen.getByTestId('mobile-guests')).toHaveTextContent('2');
+    expect(screen.getByTestId('mobile-date')).toHaveTextContent('empty');
+  });
+  it('hydrates mobile and desktop from the same validated initial URL context', () => {
+    mount('rent&checkIn=2099-12-01&checkOut=2099-12-04&guests=3');
+    expect(screen.getByTestId('mobile-guests')).toHaveTextContent('3');
+    expect(screen.getByRole('button', { name: 'Book rental' })).toHaveAttribute('data-guests', '3');
+    expect(screen.getByRole('button', { name: 'Book rental' })).toHaveAttribute('data-check-in', '2099');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit mobile party' }));
+    expect(screen.getByTestId('mobile-guests')).toHaveTextContent('4');
+    fireEvent.click(screen.getByRole('button', { name: 'Clear mobile dates' }));
+    expect(screen.getByTestId('mobile-guests')).toHaveTextContent('4');
+  });
+  it('passes resolved purchase intent and actual sale price to comparison', () => {
+    mount('buy');
+    screen.getByText('More').closest('details')!.open = true;
+    fireEvent.click(screen.getByRole('button', { name: 'Compare' }));
+    const [saved] = JSON.parse(localStorage.getItem('myuno_compare_properties')!);
+    expect(saved).toMatchObject({ mode: 'buy', sale_price: 5000000, listing_type: 'rent', price: 2000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Compare (1)' }));
+    expect(screen.getByText('Purchase: 5,000,000 currency unspecified')).toBeInTheDocument();
+  });
   it('names Share and reveals labelled Compare/PDF actions at mobile breakpoints', () => {
     mount('rent');
     expect(screen.getByRole('button', { name: 'Share' })).toHaveAttribute('aria-label', 'Share');

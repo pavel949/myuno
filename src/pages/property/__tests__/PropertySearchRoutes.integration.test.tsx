@@ -40,6 +40,22 @@ beforeEach(() => { state.mobile = false; Element.prototype.scrollIntoView = vi.f
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it.each([false, true])('discloses unverified rental availability without changing selected dates (mobile=%s)', mobile => {
+    state.mobile = mobile;
+    mount('/property/search?mode=rent&checkIn=2027-11-10&checkOut=2027-11-15&guests=3');
+    expect(screen.getByRole('note', { name: 'Availability check' })).toHaveTextContent('availability has not been checked');
+    expect(screen.getByTestId('location')).toHaveTextContent('checkIn=2027-11-10&checkOut=2027-11-15&guests=3');
+  });
+  it.each([
+    '/property/search',
+    '/property/search?mode=buy&checkIn=2027-11-10&checkOut=2027-11-15',
+    '/property/search?checkIn=2027-11-10',
+    '/property/search?checkIn=2027-11-15&checkOut=2027-11-10',
+    '/property/search?checkIn=invalid&checkOut=2027-11-15',
+  ])('does not display a rental-date notice for %s', route => {
+    mount(route);
+    expect(screen.queryByRole('note', { name: 'Availability check' })).toBeNull();
+  });
   it('starts mobile with a readable summary and expands only one editor', () => {
     state.mobile = true;
     mount('/property/search?district=layan&types=villa&guests=3&tenancy=medium&checkIn=2027-11-10&checkOut=2027-11-15');

@@ -17,7 +17,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
+import { readPropertyGuestContext } from '@/lib/real-estate/propertyGuestContext';
+import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { BackButton } from '@/components/uno/BackButton';
@@ -101,8 +102,8 @@ export default function PropertyDetail() {
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [dateSheetOpen, setDateSheetOpen] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [guestCount, setGuestCount] = useState(2);
+  const [editedDates, setEditedDates] = useState<{ id?: string; value?: DateRange }>();
+  const [editedGuests, setEditedGuests] = useState<{ id?: string; value: number }>();
 
   const { data: mediaItems = [] } = usePropertyMedia(id);
   const availabilityQuery = usePropertyUnavailableDates(id);
@@ -124,6 +125,12 @@ export default function PropertyDetail() {
 
   const { data: property, isLoading } = usePropertyWithRentalTerms(id);
   const rentalTerms = property?.rentalTerms;
+  const knownCapacities = [rentalTerms?.max_guests, property?.max_guests].filter((value): value is number => typeof value === 'number' && value >= 1);
+  const initialGuestContext = readPropertyGuestContext(searchParams.toString(), knownCapacities.length ? Math.min(...knownCapacities) : undefined);
+  const dateRange = editedDates?.id === id ? editedDates.value : initialGuestContext.dateRange;
+  const guestCount = editedGuests?.id === id ? editedGuests.value : initialGuestContext.guests;
+  const setDateRange = (value: DateRange | undefined) => setEditedDates({ id, value });
+  const setGuestCount = (value: number) => setEditedGuests({ id, value });
 
   const includedServices = useMemo(() => {
     if (!rentalTerms?.included_services) return [];
@@ -331,8 +338,14 @@ export default function PropertyDetail() {
                     bathrooms: property.bathrooms,
                     area_sqm: property.area_sqm,
                     max_guests: property.max_guests || rentalTerms?.max_guests,
+                    mode: isSaleListing ? 'buy' : 'rent',
+                    guestSearch: propertyDetailHref(id || '', isSaleListing ? 'buy' : 'rent', searchParams.toString()).split('?')[1],
+                    listing_type: property.listing_type,
+                    sale_price: property.sale_price,
+                    currency: property.currency,
+                    sale_currency: (property as typeof property & { sale_currency?: string | null }).sale_currency,
                     price: property.price,
-                    price_per_night: rentalTerms?.price_per_night || property.price,
+                    price_per_night: rentalTerms?.price_per_night || property.price_per_night,
                     price_period: property.price_period,
                     rating: property.rating,
                     amenities: property.amenities,
@@ -738,6 +751,8 @@ export default function PropertyDetail() {
               ) : (
                 <div className="flex flex-col gap-3 w-full min-w-0">
                   <PropertyBookingCard
+                    key={id}
+                    initialGuestContext={initialGuestContext}
                     propertyId={id || 'prop-1'}
                     pricePerNight={pricePerNight}
                     rentalTerms={rentalTerms}

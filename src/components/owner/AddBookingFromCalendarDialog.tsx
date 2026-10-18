@@ -251,7 +251,7 @@ const isRu = language === 'ru';
     setIsSubmitting(true);
     
     try {
-      await createBooking({
+      const booking = await createBooking({
         property_id: propertyId,
         check_in: format(checkIn, 'yyyy-MM-dd'),
         check_out: format(checkOut, 'yyyy-MM-dd'),
@@ -269,12 +269,21 @@ const isRu = language === 'ru';
         documents: uploadedDocs.length > 0 ? uploadedDocs.map(d => d.url) : undefined,
       });
       
-      toast(isRu ? 'Бронирование создано' : 'Booking Created', {
-        description: guestName 
-          ? `${guestName} • ${nights} ${isRu ? 'ноч.' : 'nights'}`
-          : `${nights} ${isRu ? 'ночей' : 'nights'}`,
-      });
-      
+      if (booking.preparation?.status === 'needs_attention') {
+        toast.warning(isRu ? 'Запись о бронировании сохранена. Подготовка требует внимания' : 'Booking record saved. Preparation needs attention', {
+          description: isRu
+            ? 'Не удалось подтвердить создание всех задач подготовки. Проверьте задачи перед добавлением недостающих. Не создавайте бронирование повторно.'
+            : 'Some preparation tasks could not be confirmed. Review tasks before adding missing ones. Do not create the booking again.',
+          duration: 12000,
+        });
+      } else {
+        toast(isRu ? 'Запись о бронировании сохранена' : 'Booking record saved', {
+          description: guestName
+            ? `${guestName} • ${nights} ${isRu ? 'ноч.' : 'nights'}`
+            : `${nights} ${isRu ? 'ночей' : 'nights'}`,
+        });
+      }
+
       onSuccess?.();
       onOpenChange(false);
       resetForm();
