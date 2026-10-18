@@ -37,6 +37,8 @@ async def main():
                 guests_label = 'Количество гостей' if ru else 'Number of guests'
                 date_label = 'Даты проживания' if ru else 'Stay dates'
                 search_label = 'Найти жильё' if ru else 'Find a home'
+                edit_label = 'Изменить поиск' if ru else 'Edit search'
+                close_label = 'Закрыть поиск' if ru else 'Close search'
                 async def query():
                     text = await page.get_by_test_id('location').text_content()
                     assert text.startswith('/property/search?'), text
@@ -66,7 +68,22 @@ async def main():
                     await bounds(menu)
                     await page.get_by_role('option', name=option, exact=True).click()
                     await expect(trigger).to_be_focused()
+                async def collapsed(focused=False):
+                    if width >= 768:
+                        return
+                    await expect(page.get_by_role('form')).to_have_count(0)
+                    await expect(page.get_by_role('button',name=edit_label,exact=True)).to_have_attribute('aria-expanded','false')
+                    if focused:
+                        await expect(page.get_by_role('heading',level=1)).to_be_focused()
+                    first = page.locator('[data-catalog-kind][data-listing-id]').first
+                    await expect(first).to_be_visible()
+                    top = await first.evaluate('(el)=>el.getBoundingClientRect().top+scrollY')
+                    # Isolated page excludes global consumer header; bound concerns page content.
+                    assert top < 600, {'firstOfferDocumentTop':top,'width':width,'globalHeader':'stubbed'}
                 async def hydrated(kind, area, guests=None, mode='rent'):
+                    if width < 768 and await page.get_by_role('button',name=edit_label,exact=True).count():
+                        await page.get_by_role('button',name=edit_label,exact=True).press('Enter')
+                        await expect(page.get_by_role('button',name=close_label,exact=True)).to_have_attribute('aria-expanded','true')
                     await expect(page.get_by_role('form')).to_have_count(1)
                     await expect(page.get_by_role('combobox', name=type_label)).to_contain_text(kind)
                     await expect(page.get_by_role('combobox', name=area_label)).to_contain_text(area)
@@ -87,6 +104,16 @@ async def main():
                     initial = {'lang':lang,'mode':'rent','tenancy':'short','district':'layan','types':'villa',
                         'guests':'3','checkIn':'2026-11-10T00:00:00.000Z','checkOut':'2026-11-15T00:00:00.000Z','company':'synthetic-company','source':'fixture-bookmark'}
                     await page.goto('http://localhost:8080/fixture?'+urlencode(initial),wait_until='networkidle')
+                    await collapsed()
+                    if width < 768:
+                        summary = page.get_by_label('Текущий поиск' if ru else 'Current search')
+                        await expect(summary).to_contain_text('Вилла' if ru else 'Villa')
+                        await expect(summary).to_contain_text('Лаян' if ru else 'Layan')
+                        await expect(summary).to_contain_text('10')
+                        await expect(summary).to_contain_text('15')
+                        await expect(summary).to_contain_text('3')
+                        await expect(summary).to_contain_text('Доп. фильтров: 1' if ru else 'Additional filters: 1')
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-collapsed.png'),full_page=True)
                     await hydrated('Вилла' if ru else 'Villa','Лаян' if ru else 'Layan',3)
                     await expect(page.get_by_role('button',name=date_label)).to_contain_text('10')
                     await expect(page.get_by_role('button',name=date_label)).to_contain_text('15')
@@ -96,6 +123,11 @@ async def main():
                     await expect(page.locator('[data-catalog-kind][data-listing-id]')).to_have_count(1)
                     await bounds()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-hydrated.png'),full_page=True)
+                    if width < 768:
+                        await page.get_by_role('button',name=close_label,exact=True).press('Enter')
+                        await expect(page.get_by_role('button',name=edit_label,exact=True)).to_be_focused()
+                        await collapsed()
+                        await page.get_by_role('button',name=edit_label,exact=True).press('Enter')
                     await choose(type_label,'Кондо' if ru else 'Condo')
                     await choose(area_label,'Равай' if ru else 'Rawai')
                     await page.get_by_label(guests_label).fill('5')
@@ -116,6 +148,8 @@ async def main():
                         'company':'synthetic-company','source':'fixture-bookmark'}
                     assert all(edited.get(k)==[v] for k,v in expected.items()),edited
                     await server({'listingType':'rent','district':'rawai','propertyType':'condo','minGuests':5,'rentTenancy':'medium'})
+                    await collapsed(focused=True)
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-edited-collapsed.png'),full_page=True)
                     await hydrated('Кондо' if ru else 'Condo','Равай' if ru else 'Rawai',5)
                     await bounds()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-edited.png'),full_page=True)
@@ -174,7 +208,7 @@ async def main():
                     assert not errors,errors
                     assert not blocked,blocked
                     results.append({'language':lang,'width':width,'hydration':'pass','inPlaceEdit':'pass','history':'pass',
-                        'legacyRedirect':'pass','rentBuy':'pass','overflow':'none','externalRequests':0,'runtimeErrors':0})
+                        'mobileSummary':'pass' if width<768 else 'desktop-unchanged','firstOfferBound':'<600px without global header' if width<768 else 'not-applicable','legacyRedirect':'pass','rentBuy':'pass','overflow':'none','externalRequests':0,'runtimeErrors':0})
                 except Exception as error:
                     failure = {'language':lang,'width':width,'error':str(error),'blockedRequests':blocked,'runtimeErrors':errors}
                     try:
