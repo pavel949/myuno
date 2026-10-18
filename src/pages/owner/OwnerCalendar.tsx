@@ -1,8 +1,9 @@
 import { bangkokTodayDate } from '@/lib/hotelDates';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { accessiblePropertySelection } from '@/lib/owner/propertyNavigation';
 import { AirbnbCalendarGrid } from '@/components/owner/AirbnbCalendarGrid';
 import { MultiPropertyTimeline } from '@/components/owner/MultiPropertyTimeline';
 import { CalendarTodayTasks } from '@/components/owner/CalendarTodayTasks';
@@ -27,16 +28,25 @@ export default function OwnerCalendar() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
   
-  const [selectedPropertyId, setSelectedPropertyId] = useState('');
+  const location = useLocation();
+  const [params, setParams] = useSearchParams();
+  const requestedProperty = params.get('property');
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false);
   const [showAddBookingDialog, setShowAddBookingDialog] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string>('all');
   // Default to multi on desktop (checked via initial window width)
   const [viewMode, setViewMode] = useState<ViewMode>(() => 
-    typeof window !== 'undefined' && window.innerWidth >= 768 ? 'multi' : 'single'
+    requestedProperty !== null ? 'single' : typeof window !== 'undefined' && window.innerWidth >= 768 ? 'multi' : 'single'
   );
   
   const { allProperties, isLoading: propertiesLoading } = useMyProperties();
+  const selectedPropertyId = accessiblePropertySelection(requestedProperty, allProperties, propertiesLoading, 'first');
+  const setSelectedPropertyId = (id: string) => {
+    if (!allProperties.some(p => p.property_id === id)) return;
+    const next = new URLSearchParams(params);
+    next.set('property', id);
+    setParams(next);
+  };
   const { data: complexes } = usePropertyComplexes();
   const { data: projects } = usePropertyProjects();
 
@@ -76,12 +86,6 @@ export default function OwnerCalendar() {
     })), [allProperties]
   );
 
-  useEffect(() => {
-    if (allProperties.length && !selectedPropertyId) {
-      setSelectedPropertyId(allProperties[0].property_id);
-    }
-  }, [allProperties, selectedPropertyId]);
-
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
@@ -99,7 +103,17 @@ export default function OwnerCalendar() {
     );
   }
 
-  const isMulti = viewMode === 'multi';
+  if (requestedProperty !== null && !selectedPropertyId) {
+    return <div className="p-4 space-y-3">
+      <h1 className="font-display text-h3">{isRu ? 'Календарь бронирований' : 'Booking Calendar'}</h1>
+      <p role="status">{propertiesLoading ? (isRu ? 'Загрузка объектов…' : 'Loading properties…')
+        : (isRu ? 'Объект недоступен. Выберите объект из своего списка.' : 'This property is unavailable. Choose a property from your list.')}</p>
+      {!propertiesLoading && <Button variant="outline" onClick={() => navigate('/mc/properties')}>{isRu ? 'К объектам' : 'Browse properties'}</Button>}
+    </div>;
+  }
+
+  // A property deep link always opens that property's view, including history navigation.
+  const isMulti = requestedProperty === null && viewMode === 'multi';
 
   return (
     <div className="p-4 pb-24 space-y-4 w-full min-w-0 max-w-full overflow-x-hidden">
@@ -118,12 +132,12 @@ export default function OwnerCalendar() {
       {allProperties.length > 1 && (
         <div className="grid grid-cols-2 gap-1 border-b border-border pb-3" role="group"
           aria-label={isRu ? 'Режим календаря' : 'Calendar view'}>
-          <Button variant="ghost" aria-pressed={isMulti} onClick={() => setViewMode('multi')}
+          <Button variant="ghost" aria-pressed={isMulti} onClick={() => { const next = new URLSearchParams(params); next.delete('property'); setParams(next); setViewMode('multi'); }}
             className={cn('min-h-11 h-auto whitespace-normal text-sm px-2', isMulti ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>
             <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden="true" />
             {isRu ? 'Все объекты' : 'Portfolio'}
           </Button>
-          <Button variant="ghost" aria-pressed={!isMulti} onClick={() => setViewMode('single')}
+          <Button variant="ghost" aria-pressed={!isMulti} onClick={() => { if (selectedPropertyId) setSelectedPropertyId(selectedPropertyId); else setViewMode('single'); }}
             className={cn('min-h-11 h-auto whitespace-normal text-sm px-2', !isMulti ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>
             <List className="h-4 w-4 shrink-0" aria-hidden="true" />
             {isRu ? 'Один объект' : 'Single property'}
@@ -208,6 +222,13 @@ export default function OwnerCalendar() {
               {isRu ? 'Добавить задачу' : 'Add Task'}
             </Button>
           </section>
+
+          {selectedPropertyId && <Button variant="outline" onClick={() => {
+            const returnTo = new URLSearchParams(params);
+            returnTo.set('property', selectedPropertyId);
+            const next = new URLSearchParams({ property: selectedPropertyId, returnTo: location.pathname + '?' + returnTo.toString() });
+            navigate('/mc/rates?' + next.toString());
+          }}>{isRu ? 'Тарифы объекта' : 'Property rates'}</Button>}
 
           {/* Calendar + today’s tasks: full-width grid on large screens */}
           <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] xl:gap-6 xl:items-start">

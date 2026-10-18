@@ -33,6 +33,14 @@ export interface PropertyBooking {
   order_id?: string;
 }
 
+/** Transient outcome of the existing preparation writes, not booking/inventory authority. */
+export interface BookingPreparationOutcome {
+  status: 'complete' | 'needs_attention' | 'not_requested';
+  unconfirmedTaskTypes: string[];
+}
+
+export type CreatedPropertyBooking = PropertyBooking & { preparation: BookingPreparationOutcome };
+
 export interface CreateBookingInput {
   property_id: string;
   guest_name?: string;
@@ -178,7 +186,7 @@ export function usePropertyBookings(propertyId?: string) {
   });
 
   const createBooking = useMutation({
-    mutationFn: async (input: CreateBookingInput) => {
+    mutationFn: async (input: CreateBookingInput): Promise<CreatedPropertyBooking> => {
       if (!user?.id) throw new Error('Not authenticated');
 
       // P1: Overlap validation — check existing orders and manual blocks
@@ -310,8 +318,12 @@ export function usePropertyBookings(propertyId?: string) {
         });
       }
 
+      const preparation: BookingPreparationOutcome = { status: 'not_requested', unconfirmedTaskTypes: [] };
+      // Preparation is secondary: a failed acknowledgement must never make callers
+      // retry the already-persisted booking. Do not retry these non-idempotent inserts.
       // P1: Booking lifecycle automation — create operational tasks for check-in, check-out, cleaning
       if (input.status === 'confirmed' || !input.status) {
+        preparation.status = 'complete';
         const guestName = input.guest_name || 'Guest';
         const checkInDate = input.check_in;
         const checkOutDate = input.check_out;
@@ -329,23 +341,31 @@ export function usePropertyBookings(propertyId?: string) {
           { task_type: 'check_out', scheduled_date: checkOutDate, title: `Check-out: ${guestName}`, title_ru: `Выезд: ${guestName}` },
         ];
         for (const t of tasks) {
-          await supabase.from('property_operational_tasks').insert({
-            property_id: input.property_id,
-            task_type: t.task_type,
-            title: t.title,
-            title_ru: t.title_ru,
-            scheduled_date: t.scheduled_date,
-            priority: t.task_type === 'check_out' ? 'normal' : 'high',
-            status: 'pending',
-          });
+          try {
+            const { error } = await supabase.from('property_operational_tasks').insert({
+              property_id: input.property_id,
+              task_type: t.task_type,
+              title: t.title,
+              title_ru: t.title_ru,
+              scheduled_date: t.scheduled_date,
+              priority: t.task_type === 'check_out' ? 'normal' : 'high',
+              status: 'pending',
+            });
+            if (error) throw error;
+          } catch (error) {
+            preparation.status = 'needs_attention';
+            preparation.unconfirmedTaskTypes.push(t.task_type);
+            errorLog.silent(error, 'create_booking_preparation_task');
+          }
         }
       }
 
-      return mapOrderToBooking(order, input.property_id);
+      return { ...mapOrderToBooking(order, input.property_id), preparation };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['all-property-bookings', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['operational-tasks'] });
     },
   });
 

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { accessiblePropertySelection, propertyContextBackPath } from '@/lib/owner/propertyNavigation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
 import { CURRENCIES } from '@/lib/config/currencies';
@@ -46,15 +47,24 @@ export default function RateManagementPage() {
   const queryClient = useQueryClient();
   const isRu = language === 'ru';
   const t = (en: string, rur: string) => isRu ? rur : en;
-  const { allProperties } = useMyProperties();
-  const [selectedProperty, setSelectedProperty] = useState<string>('all');
+  const { allProperties, isLoading: propertiesLoading } = useMyProperties();
+  const [params, setParams] = useSearchParams();
+  const requestedProperty = params.get('property');
+  const selectedProperty = accessiblePropertySelection(requestedProperty, allProperties, propertiesLoading, 'all');
+  const setSelectedProperty = (id: string) => {
+    if (id !== 'all' && !allProperties.some(p => p.property_id === id)) return;
+    const next = new URLSearchParams(params);
+    if (id === 'all') next.delete('property'); else next.set('property', id);
+    setParams(next);
+  };
+  const backPath = propertyContextBackPath(params.get('returnTo'), selectedProperty);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingRate, setEditingRate] = useState<RateSeasonRecord | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const { data: rates, isLoading } = useOwnerRateSeasons(user?.id, selectedProperty);
+  const { data: rates, isLoading } = useOwnerRateSeasons(selectedProperty ? user?.id : undefined, selectedProperty || undefined);
   const deleteMutation = useDeleteRateSeason();
-  const aiPropId = selectedProperty !== 'all' ? selectedProperty : allProperties[0]?.property_id;
+  const aiPropId = !selectedProperty ? undefined : selectedProperty !== 'all' ? selectedProperty : allProperties[0]?.property_id;
   const { suggestions, generateSuggestions, acceptSuggestion, dismissSuggestion } = useAIPricingSuggestions(aiPropId);
 
   const activeRates = rates?.filter(r => r.is_active) || [];
@@ -62,7 +72,7 @@ export default function RateManagementPage() {
   // Fetch activity logs for pricing-related actions
   const propertyIds = selectedProperty === 'all'
     ? allProperties.map(p => p.property_id)
-    : [selectedProperty];
+    : selectedProperty ? [selectedProperty] : [];
 
   const { data: activityLogs = [], isLoading: logsLoading } = useQuery({
     queryKey: ['pricing-activity-logs', propertyIds.sort().join(',')],
@@ -103,11 +113,21 @@ export default function RateManagementPage() {
     );
   };
 
+  if (!selectedProperty) {
+    return <div className="p-4 space-y-3">
+      <Button variant="ghost" onClick={() => navigate(backPath)}>{t('Back', 'Назад')}</Button>
+      <h1 className="text-xl font-semibold">{t('Rate Management', 'Управление тарифами')}</h1>
+      <p role="status">{propertiesLoading ? t('Loading properties…', 'Загрузка объектов…')
+        : requestedProperty !== null ? t('This property is unavailable. Choose a property from your list.', 'Объект недоступен. Выберите объект из своего списка.')
+          : t('No accessible properties.', 'Нет доступных объектов.')}</p>
+    </div>;
+  }
+
   return (
     <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" aria-label={t('Back', 'Назад')} onClick={() => navigate('/owner')}>
+        <Button variant="ghost" size="icon" aria-label={t('Back', 'Назад')} onClick={() => navigate(backPath)}>
           <ChevronLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
@@ -125,7 +145,7 @@ export default function RateManagementPage() {
       {/* Property filter */}
       {allProperties.length > 1 && (
         <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-          <SelectTrigger className="w-full md:w-64">
+          <SelectTrigger aria-label={t('Property', 'Объект')} className="w-full md:w-64">
             <SelectValue placeholder={t('All properties', 'Все объекты')} />
           </SelectTrigger>
           <SelectContent>
