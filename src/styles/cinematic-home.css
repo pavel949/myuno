@@ -77,3 +77,6 @@
 .home-search-date-trigger:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:4px}
 /* Catalogue edits stay above the results; the same form adapts to available width. */
 @media(min-width:1101px){.property-search-editor .home-search{grid-template-columns:minmax(120px,1fr) minmax(140px,1fr) minmax(260px,1.7fr) 90px auto;gap:12px}.property-search-editor .home-search-dates{grid-column:auto;border-top:0;padding-top:0}.property-search-editor .home-search-duration{grid-row:2;grid-column:1/-1}}
+
+/* Canonical catalogue search supports both intents, unlike the stay-only journey. */
+.property-search-editor .home-search-modes{display:flex}

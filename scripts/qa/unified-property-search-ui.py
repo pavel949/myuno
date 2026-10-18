@@ -70,7 +70,12 @@ async def main():
                     await expect(page.get_by_role('form')).to_have_count(1)
                     await expect(page.get_by_role('combobox', name=type_label)).to_contain_text(kind)
                     await expect(page.get_by_role('combobox', name=area_label)).to_contain_text(area)
-                    await expect(page.get_by_role('button', name=('Аренда' if ru else 'Rent') if mode == 'rent' else ('Покупка' if ru else 'Buy'), exact=True)).to_have_attribute('aria-pressed','true')
+                    modes = page.get_by_role('group', name='Аренда или покупка' if ru else 'Rent or buy', exact=True)
+                    await expect(modes).to_be_visible()
+                    for value, label in [('rent', 'Аренда' if ru else 'Rent'), ('buy', 'Покупка' if ru else 'Buy')]:
+                        button = modes.get_by_role('button', name=label, exact=True)
+                        await expect(button).to_be_visible()
+                        await expect(button).to_have_attribute('aria-pressed', str(value == mode).lower())
                     if mode == 'rent':
                         await expect(page.get_by_label(guests_label)).to_have_value(str(guests))
                     else:
