@@ -1,7 +1,7 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import GuestComplexDetail from '../GuestComplexDetail';
 import { complexVideoSource } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -20,9 +20,31 @@ vi.mock('@/components/property/PhotoLightbox', () => ({ PhotoLightbox: () => nul
 vi.mock('@/components/seo', () => ({ SEOHead: () => null }));
 afterEach(cleanup);
 beforeEach(() => { state.project.data.images = []; state.project.data.video_url = undefined; state.project.isError = false; state.project.isLoading = false; state.rent.data = { properties: [], total: 0 }; state.sale.data = { properties: [], total: 0 }; state.rent.isError = false; state.units.mockClear(); });
-const mount = (search = '') => render(<MemoryRouter initialEntries={[`/property/complex/complex${search}`]}><Routes><Route path="/property/complex/:id" element={<GuestComplexDetail />} /></Routes></MemoryRouter>);
+function LocationProbe() { const location = useLocation(); return <output data-testid="location">{location.search}</output>; }
+const mount = (search = '') => render(<MemoryRouter initialEntries={[`/property/complex/complex${search}`]}><Routes><Route path="/property/complex/:id" element={<GuestComplexDetail />} /></Routes><LocationProbe /></MemoryRouter>);
 
 describe('informational complex detail', () => {
+  it('uses a compact no-photo hero and exposes accurate offer anchors early', () => {
+    mount('?checkIn=2026-12-01&checkOut=2026-12-04&guests=2&managementCompanyId=operator');
+    expect(screen.getByTestId('complex-hero')).toHaveClass('min-h-[280px]');
+    expect(screen.getByTestId('complex-hero')).not.toHaveClass('h-[60svh]');
+    expect(screen.getByRole('link', { name: 'Property catalog' })).toHaveAttribute('href', '/property/browse?mode=rent&checkIn=2026-12-01&checkOut=2026-12-04&guests=2&company=operator');
+    const buy = screen.getByRole('link', { name: 'Buy: 0' });
+    expect(buy).toHaveAttribute('href', '#complex-units');
+    fireEvent.click(buy);
+    expect(screen.getByRole('link', { name: 'Property catalog' })).toHaveAttribute('href', '/property/browse?mode=buy&checkIn=2026-12-01&checkOut=2026-12-04&guests=2&company=operator');
+    const params = new URLSearchParams(screen.getByTestId('location').textContent!);
+    expect(Object.fromEntries(params)).toEqual({ checkIn: '2026-12-01', checkOut: '2026-12-04', guests: '2', managementCompanyId: 'operator', mode: 'buy' });
+  });
+  it('places homes before gallery and video while retaining genuine media', () => {
+    state.project.data.images = ['https://example.com/photo.jpg'];
+    state.project.data.video_url = 'https://example.com/tour.mp4';
+    mount();
+    expect(screen.getByTestId('complex-hero')).toHaveClass('h-[60svh]');
+    const homes = screen.getByRole('heading', { name: 'Homes to rent' });
+    expect(homes.compareDocumentPosition(screen.getByRole('heading', { name: 'A closer look' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(homes.compareDocumentPosition(screen.getByRole('heading', { name: 'Get a feel for the place' })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
   it('leaves the main landmark to the owning route shell', () => {
     render(<MemoryRouter initialEntries={['/property/complex/complex']}><main aria-label="Property shell"><Routes><Route path="/property/complex/:id" element={<GuestComplexDetail />} /></Routes></main></MemoryRouter>);
     expect(screen.getAllByRole('main')).toHaveLength(1);

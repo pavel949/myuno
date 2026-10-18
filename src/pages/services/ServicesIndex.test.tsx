@@ -9,11 +9,11 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: '
 vi.mock('@/hooks/usePersonaFilter', () => ({ usePersonaFilter: () => ({ applyFilter: (rows: unknown[]) => rows }) }));
 vi.mock('@/components/miniapp/MiniAppLayout', () => ({ MiniAppLayout: ({ children, onSearchChange, searchValue }: { children: ReactNode; onSearchChange: (s: string) => void; searchValue: string }) => <><input aria-label="Search services" value={searchValue} onChange={e => onSearchChange(e.target.value)} />{children}</> }));
 vi.mock('@/components/services/MarketplaceServiceGrid', () => ({ MarketplaceServiceGrid: () => <div>Providers</div> }));
-vi.mock('@/components/services', () => ({ ServiceFunctionCard: ({ fn, onClick }: { fn: { name: string }; onClick: () => void }) => <button onClick={onClick}>{fn.name}</button> }));
+vi.mock('@/components/services', () => ({ ServiceFunctionCard: ({ fn, onClick, catalogue }: { fn: { name: string }; onClick: () => void; catalogue?: boolean }) => <button data-catalogue={catalogue} onClick={onClick}>{fn.name}</button> }));
 function Location() { const l = useLocation(); return <output data-testid="location">{l.pathname}{l.search}</output>; }
-function mount(path = '/discover/services') {
+function mount(path = '/discover/services', embedded = false) {
   return render(<MemoryRouter initialEntries={[path]}><Routes>
-    <Route path="/discover/services" element={<ServicesIndex />} />
+    <Route path="/discover/services" element={<ServicesIndex embedded={embedded} />} />
     <Route path="/services/order/:id" element={<div>Request details</div>} />
   </Routes><Location /></MemoryRouter>);
 }
@@ -25,8 +25,16 @@ describe('simplified service discovery', () => {
   it('renders each request once without gateway or repeated popular blocks', () => {
     mount();
     expect(screen.getAllByText('AC Cleaning')).toHaveLength(1);
+    expect(screen.getByText('AC Cleaning')).toHaveAttribute('data-catalogue', 'true');
     expect(screen.queryByText('Popular Services')).toBeNull();
     expect(screen.queryByText('Guided help')).toBeNull();
+  });
+  it('keeps the same catalogue and filters when embedded in My Services', () => {
+    mount('/discover/services?category=ac&q=cleaning', true);
+    expect(screen.getByRole('searchbox')).toHaveValue('cleaning');
+    expect(screen.getByRole('combobox')).toHaveTextContent('Air Conditioning');
+    expect(screen.getByText('AC Cleaning')).toHaveAttribute('data-catalogue', 'true');
+    expect(screen.getByText(/Prices are estimates/)).toBeVisible();
   });
   it('uses the themed category menu with keyboard selection and URL state', () => {
     mount();

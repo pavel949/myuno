@@ -42,6 +42,13 @@ async def main():
                     await page.wait_for_timeout(350)
                     async def bounds():
                         assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'), f'Overflow: {lang}/{width}/{empty}'
+                    hero = page.get_by_test_id('complex-hero')
+                    hero_box = await hero.bounding_box()
+                    if empty:
+                        assert hero_box['height'] < 520, f'Empty hero too tall: {hero_box}'
+                    else:
+                        assert await page.evaluate("document.querySelector('#complex-units').compareDocumentPosition(document.querySelector('[aria-labelledby=complex-gallery]')) & Node.DOCUMENT_POSITION_FOLLOWING")
+                    await expect(page.get_by_role('link', name=f'{"Аренда" if lang == "ru" else "Rent"}: {0 if empty else 1}', exact=True)).to_have_attribute('href', '#complex-units')
                     await bounds()
                     suffix = f'{lang}-{width}-{"empty" if empty else "media"}'
                     await page.screenshot(path=str(OUTPUT/f'{suffix}-rent.png'), full_page=True)

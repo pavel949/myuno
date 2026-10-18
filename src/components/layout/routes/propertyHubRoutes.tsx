@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { APP_ROUTES } from '@/lib/config/routes';
 import * as Pages from '../pageRegistry';
+import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import { PageTransition } from '../PageTransition';
 
 const LazyPage = ({ children }: { children: React.ReactNode }) => (
@@ -37,32 +38,32 @@ const PropertyHubIndex = () => {
 export const propertyHubRoutes = (
   <>
     <Route index element={<LazyPage><PropertyHubIndex /></LazyPage>} />
-    <Route path="browse" element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
+    <Route path="browse" element={<LazyPage><PropertySearchRedirect /></LazyPage>} />
     {/* Top-level aliases for persona landings (C8) */}
     <Route
       path="rent"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'rent' }} />}
     />
     <Route
       path="buy"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=buy`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'buy' }} />}
     />
     <Route
       path="rent/short-term"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'short' }} />}
     />
     <Route
       path="rent/medium-term"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=medium`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />}
     />
     <Route
       path="rent/long-term"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'long' }} />}
     />
 
     <Route
       path="quick-sale"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=buy&intent=quick_sale`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'buy', intent: 'quick_sale' }} />}
     />
     <Route path="search" element={<LazyPage><Pages.PropertySearchPage /></LazyPage>} />
     <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />

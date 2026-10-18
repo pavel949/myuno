@@ -18,6 +18,8 @@ describe('provider catalogue states', () => {
     mount('cleaning');
     expect(screen.getByText(/Online booking is not available yet/)).toBeInTheDocument();
     expect(screen.queryByText(/No services match/)).toBeNull();
+    expect(screen.getByRole('status')).toHaveTextContent('Online booking is not available yet');
+    expect(screen.queryByRole('heading', { name: 'Book a provider' })).toBeNull();
   });
   it('shows no matches only when supply exists', () => {
     data = [service]; mount('plumbing');

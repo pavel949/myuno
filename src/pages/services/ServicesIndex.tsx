@@ -107,8 +107,8 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
             <Button variant="outline" onClick={clear}>{isRu ? 'Сбросить поиск и категорию' : 'Clear search and category'}</Button>
           </div>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {requests.map(fn => <ServiceFunctionCard key={fn.id} fn={fn}
+          <div className="grid gap-x-8 md:grid-cols-2">
+            {requests.map(fn => <ServiceFunctionCard key={fn.id} fn={fn} catalogue
               onClick={() => navigate(`/services/order/${fn.id}?returnTo=${encodeURIComponent(returnTo)}`)} />)}
           </div>
         )}

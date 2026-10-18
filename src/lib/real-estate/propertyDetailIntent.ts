@@ -45,3 +45,11 @@ export function propertyDetailHref(id: string, mode: 'rent' | 'buy', search = ''
 export function complexDetailHref(id: string, mode: 'rent' | 'buy', search = ''): string {
   return withGuestContext(APP_ROUTES.COMPLEX_DETAIL(id), mode, search);
 }
+
+/** Carry guest criteria and the existing operator filter to the canonical search adapter. */
+export function propertyCatalogHref(mode: 'rent' | 'buy', search = ''): string {
+  const href = withGuestContext(APP_ROUTES.PROPERTY_BROWSE, mode, search);
+  const source = new URLSearchParams(search);
+  const company = source.get('managementCompanyId') || source.get('company');
+  return company ? `${href}&company=${encodeURIComponent(company)}` : href;
+}

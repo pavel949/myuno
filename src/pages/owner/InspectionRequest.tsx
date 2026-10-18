@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useCreateInspection } from '@/hooks/usePropertyCare';
@@ -26,6 +26,7 @@ export default function InspectionRequest() {
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isRu = language === 'ru';
 
   const { allProperties: properties, isLoading: propertiesLoading } = useMyProperties();
@@ -38,6 +39,15 @@ export default function InspectionRequest() {
     scheduled_time: '10:00',
     notes: '',
   });
+
+  const requestedPropertyId = searchParams.get('property');
+  useEffect(() => {
+    // URL context is a convenience, never a source of property access.
+    if (propertiesLoading || !requestedPropertyId ||
+        !properties.some(property => property.property_id === requestedPropertyId)) return;
+    // A refetch or URL update must not overwrite the user's selection.
+    setFormData(current => current.property_id ? current : { ...current, property_id: requestedPropertyId });
+  }, [requestedPropertyId, propertiesLoading, properties]);
 
   const inspectionTypes = [
     { 

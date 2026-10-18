@@ -139,7 +139,7 @@ export default function OwnerManagementLanding() {
               if (user) {
                 navigate(`${APP_ROUTES.AUTH_ACCOUNT_TYPE}?redirect=/mc/full-management`);
               } else {
-                navigate(`/auth?redirect=${encodeURIComponent(APP_ROUTES.AUTH_ACCOUNT_TYPE)}`);
+                navigate(`/auth?redirect=${encodeURIComponent(`${APP_ROUTES.AUTH_ACCOUNT_TYPE}?redirect=/mc/full-management`)}`);
               }
             }}
           >

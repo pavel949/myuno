@@ -74,7 +74,7 @@ jobs:
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Network-denying PMS browser fixtures
-        timeout-minutes: 12
+        timeout-minutes: 30
         id: browser
         continue-on-error: true
         run: |
@@ -85,14 +85,27 @@ jobs:
             curl --fail --silent http://localhost:8080/src/index.css?direct >/dev/null && break
             sleep 1
           done
-          timeout 180s node scripts/qa/services-discovery-ui.mjs
-          timeout 180s node scripts/qa/trip-planner-ui.mjs
-          timeout 180s node scripts/qa/bookings-list-ui.mjs
-          timeout 180s node scripts/qa/calendar-ui.mjs
-          timeout 180s node scripts/qa/today-ui.mjs
-          timeout 180s node scripts/qa/property-browse-ui.mjs
-          timeout 180s node scripts/qa/home-search-ui.mjs
-          timeout 180s node scripts/qa/guest-complex-ui.mjs
+          browser_failed=0
+          mkdir -p /tmp/browser
+          for fixture in \
+            scripts/qa/services-discovery-ui.mjs \
+            scripts/qa/trip-planner-ui.mjs \
+            scripts/qa/unified-property-search-ui.mjs \
+            scripts/qa/bookings-list-ui.mjs \
+            scripts/qa/calendar-ui.mjs \
+            scripts/qa/today-ui.mjs \
+            scripts/qa/property-browse-ui.mjs \
+            scripts/qa/home-search-ui.mjs \
+            scripts/qa/guest-complex-ui.mjs; do
+            if timeout 180s node "$fixture"; then
+              printf '%s: PASS\n' "$fixture" | tee -a /tmp/browser/fixture-status.txt
+            else
+              status=$?
+              printf '%s: FAIL (exit %s)\n' "$fixture" "$status" | tee -a /tmp/browser/fixture-status.txt
+              browser_failed=1
+            fi
+          done
+          exit "$browser_failed"
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload validation evidence

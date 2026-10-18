@@ -6,23 +6,26 @@ import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
-import { bangkokTodayISO, parseCivilDate } from '@/lib/hotelDates';
+import { bangkokTodayISO, parseCivilDate, civilDateKey } from '@/lib/hotelDates';
+import { readPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { HomeSearchDateRange } from './HomeSearchDateRange';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function HomeDiscoverySearch({ rentalOnly = false }: { rentalOnly?: boolean }) {
+export function HomeDiscoverySearch({ rentalOnly = false, initialParams, onSearch }: { rentalOnly?: boolean; initialParams?: URLSearchParams; onSearch?: (params: URLSearchParams) => void }) {
+  const initial = readPropertySearchQuery(initialParams ?? new URLSearchParams());
   const { language } = useLanguage();
   const guestsId = useId();
   const t = (v: LangValues) => pickLang(language, v);
   const { districts, isLoading } = usePropertyQuickFilters();
   const { propertyTypes, isLoading: typesLoading } = usePropertyFilterOptions();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<'rent' | 'buy'>('rent');
-  const [district, setDistrict] = useState('');
-  const [propertyType, setPropertyType] = useState('');
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
-  const [guests, setGuests] = useState('2');
+  const [mode, setMode] = useState<'rent' | 'buy'>(initial.mode);
+  const [district, setDistrict] = useState(initial.search.locations.join(','));
+  const [propertyType, setPropertyType] = useState(initial.search.propertyTypes.join(','));
+  const [checkIn, setCheckIn] = useState(initial.search.checkIn ? civilDateKey(initial.search.checkIn) : '');
+  const [checkOut, setCheckOut] = useState(initial.search.checkOut ? civilDateKey(initial.search.checkOut) : '');
+  const [guests, setGuests] = useState(String(initial.search.guests));
+  const [tenancy, setTenancy] = useState<string>(initial.tenancy);
   const today = bangkokTodayISO();
   const [dateError, setDateError] = useState(false);
 
@@ -33,18 +36,22 @@ export function HomeDiscoverySearch({ rentalOnly = false }: { rentalOnly?: boole
       return;
     }
     setDateError(false);
-    const params = new URLSearchParams({ mode });
+    const params = new URLSearchParams(initialParams);
+    for (const key of ['district', 'types', 'f.district', 'f.propertyType', 'f.listingType']) params.delete(key);
+    params.set('mode', mode);
     if (district) params.set('district', district);
     if (propertyType) params.set('types', propertyType);
     // The existing catalogue consumes Date instants. Use shared civil-date parsing,
     // then serialize local midnight, preserving dates in its existing URL contract.
     if (mode === 'rent') {
-      params.set('tenancy', 'short');
+      for (const key of ['checkIn', 'checkOut', 'guests', 'f.guestsAtLeast']) params.delete(key);
+      params.set('tenancy', tenancy);
       if (checkIn) params.set('checkIn', parseCivilDate(checkIn).toISOString());
       if (checkOut) params.set('checkOut', parseCivilDate(checkOut).toISOString());
       params.set('guests', guests);
     }
-    navigate(`${APP_ROUTES.PROPERTY_SEARCH}?${params.toString()}`);
+    if (onSearch) onSearch(params);
+    else navigate(`${APP_ROUTES.PROPERTY_SEARCH}?${params.toString()}`);
   }
 
   return (
@@ -62,6 +69,7 @@ export function HomeDiscoverySearch({ rentalOnly = false }: { rentalOnly?: boole
           <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Тип жилья', en: 'Home type', th: 'ประเภทที่พัก' })}><SelectValue /></SelectTrigger>
           <SelectContent collisionPadding={12}>
             <SelectItem className="min-h-11" value="__all">{typesLoading ? t({ ru: 'Загрузка…', en: 'Loading…', th: 'กำลังโหลด…' }) : t({ ru: 'Любой тип', en: 'Any home', th: 'ทุกประเภท' })}</SelectItem>
+            {propertyType.includes(',') && <SelectItem value={propertyType}>{t({ ru: 'Несколько типов', en: 'Multiple home types', th: 'หลายประเภท' })}</SelectItem>}
             {propertyTypes.map(type => <SelectItem className="min-h-11" key={type.id} value={type.id}>{language === 'ru' ? type.labelRu : type.labelEn}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -72,12 +80,16 @@ export function HomeDiscoverySearch({ rentalOnly = false }: { rentalOnly?: boole
             <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Выберите район', en: 'Choose an area', th: 'เลือกย่าน' })}><SelectValue /></SelectTrigger>
             <SelectContent collisionPadding={12}>
               <SelectItem className="min-h-11" value="__all">{isLoading ? t({ ru: 'Загрузка районов…', en: 'Loading areas…', th: 'กำลังโหลดย่าน…' }) : t({ ru: 'Весь Пхукет', en: 'All Phuket', th: 'ทั่วภูเก็ต' })}</SelectItem>
+              {district.includes(',') && <SelectItem value={district}>{t({ ru: 'Несколько районов', en: 'Multiple areas', th: 'หลายย่าน' })}</SelectItem>}
               {districts.map(d => <SelectItem className="min-h-11" key={d.id} value={d.valueKey}>{language === 'ru' ? d.labelRu : d.labelEn}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
       </div>
       {mode === 'rent' && <>
+        <div className="home-search-duration col-span-full flex flex-wrap gap-2" role="group" aria-label={t({ ru: 'Срок аренды', en: 'Rental duration', th: 'ระยะเวลาเช่า' })}>
+          {(['short', 'medium', 'long'] as const).map(value => <button className="min-h-11 border px-3 text-sm aria-pressed:bg-primary aria-pressed:text-primary-foreground" key={value} type="button" aria-pressed={tenancy === value} onClick={() => setTenancy(value)}>{value === 'short' ? t({ ru: 'Посуточно', en: 'Nightly', th: 'รายวัน' }) : value === 'medium' ? t({ ru: 'Помесячно', en: 'Monthly', th: 'รายเดือน' }) : t({ ru: 'На год', en: 'Yearly', th: 'รายปี' })}</button>)}
+        </div>
         <HomeSearchDateRange checkIn={checkIn} checkOut={checkOut} onChange={(start, end) => { setCheckIn(start); setCheckOut(end); setDateError(false); }} />
         <label className="home-search-guests" htmlFor={guestsId}><Users size={18} aria-hidden="true" /><span>
           <span className="home-field-label">{t({ ru: 'Гости', en: 'Guests', th: 'ผู้เข้าพัก' })}</span>

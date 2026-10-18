@@ -34,6 +34,7 @@ import ForBusinessSkeleton from '@/components/landings/ForBusinessSkeleton';
 import { NbCompareProvider } from '@/components/newbuilds/NbCompareProvider';
 import { adminRoutes } from './routes/adminRoutes';
 import { mcRoutes } from './routes/mcRoutes';
+import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import { propertyHubRoutes } from './routes/propertyHubRoutes';
 
 const NewbuildsContextOutlet = () => (
@@ -174,7 +175,7 @@ const safeImport = (loader: () => Promise<unknown>) => {
 const prefetchRoutes = () => {
   if (typeof window === 'undefined') return;
   const run = () => {
-    safeImport(() => import('@/pages/property/PropertyIndex'));
+    safeImport(() => import('@/pages/property/PropertySearchPage'));
     safeImport(() => import('@/pages/restaurants/RestaurantsIndex'));
     safeImport(() => import('@/pages/experiences/ExperiencesIndex'));
     safeImport(() => import('@/pages/beauty/BeautySpaIndex'));
@@ -342,7 +343,7 @@ export const AnimatedRoutes: React.FC = () => {
         
         <Route
           path={APP_ROUTES.STAYS_SEARCH}
-          element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`} replace />}
+          element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'short' }} />}
         />
 
         {/* ── Property Hub (child routes extracted to ./routes/propertyHubRoutes) ── */}
@@ -790,8 +791,8 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path="/owner/setup" element={<Navigate to="/mc/setup" replace />} />
         <Route path="/owner/portfolio" element={<Navigate to="/mc/portfolio" replace />} />
         <Route path="/owner/finance" element={<Navigate to="/mc/finance" replace />} />
-        <Route path="/owner/service-request" element={<Navigate to="/mc/service-request" replace />} />
-        <Route path="/owner/inspection" element={<Navigate to="/mc/inspection" replace />} />
+        <Route path="/owner/service-request" element={<Navigate to={{ pathname: "/mc/service-request", search: location.search, hash: location.hash }} replace />} />
+        <Route path="/owner/inspection" element={<Navigate to={{ pathname: "/mc/inspection", search: location.search, hash: location.hash }} replace />} />
         <Route path={APP_ROUTES.OWNER_MANAGEMENT_LANDING} element={<LazyPage><Pages.OwnerManagementLanding /></LazyPage>} />
         <Route path={APP_ROUTES.STOREFRONT_DEMO} element={<LazyPage><Pages.StorefrontDemoLanding /></LazyPage>} />
         <Route path="/owner/full-management" element={<Navigate to="/mc/full-management" replace />} />

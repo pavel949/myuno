@@ -261,40 +261,86 @@ export default function PropertyDetail() {
         })}
       />
       <div className="pb-28">
-        {/* Sticky Header */}
-        <div className="sticky top-0 z-50 flex items-center justify-between px-4 md:px-0 py-3 bg-background/95 border-b border-border/30">
+        {/* Property identity and secondary actions */}
+        <div className="flex flex-wrap items-start gap-4 px-4 md:px-0 py-5 md:py-7">
           <BackButton fallbackPath="/property" variant="default" size="md" />
-          <div className="flex items-center gap-1">
+          {/* Title */}
+          <div className="min-w-0 flex-1 basis-[calc(100%-3.5rem)] md:basis-0" data-testid="property-identity">
+            <h1 className="text-2xl md:text-3xl font-display font-medium text-foreground leading-snug break-words">
+              {propertyTitle}
+            </h1>
+            {/* Hero facts — Airbnb-style sub-title (e.g. "4 guests · 2 bedrooms · 1 bath") */}
+            <PropertyHeroFacts
+              bedrooms={property.bedrooms}
+              beds={propertyExt.beds ?? null}
+              bathrooms={property.bathrooms}
+              maxGuests={property.max_guests || rentalTerms?.max_guests}
+            />
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm lg:text-base">
+              {property.rating != null && property.rating > 0 && (
+                <>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-4 h-4 text-primary fill-primary" />
+                    <span className="font-semibold">{property.rating}</span>
+                  </div>
+                  <span className="text-muted-foreground">
+                    · {property.review_count || 0} {isRu ? 'отзывов' : 'reviews'}
+                  </span>
+                </>
+              )}
+              <GuestFavoriteBadge
+                rating={property.rating}
+                reviewsCount={property.review_count}
+                variant="inline"
+              />
+              {property.is_verified && (
+                <span className="flex items-center gap-1 text-primary">
+                  · <Shield className="w-3.5 h-3.5" />
+                  <span className="underline font-medium">{isRu ? 'Проверено' : 'Verified'}</span>
+                </span>
+              )}
+              <span className="text-muted-foreground">
+                · <MapPin className="w-3.5 h-3.5 inline" /> {property.district}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 ml-auto">
             <PropertyShareSheet
               title={isRu ? (property.title_ru || property.title_en) : property.title_en}
               image={images[0]}
               district={property.district}
             >
-              <Button variant="ghost" size="sm" className="gap-2 text-sm">
+              <Button variant="ghost" size="sm" className="gap-2 text-sm" aria-label={isRu ? 'Поделиться' : 'Share'}>
                 <Share2 className="w-4 h-4" />
                 <span className="hidden sm:inline">{isRu ? 'Поделиться' : 'Share'}</span>
               </Button>
             </PropertyShareSheet>
-            <CompareButton
-              property={{
-                id: id || '',
-                title_en: property.title_en,
-                title_ru: property.title_ru,
-                cover_image: property.cover_image,
-                property_type: property.property_type,
-                district: property.district,
-                bedrooms: property.bedrooms,
-                bathrooms: property.bathrooms,
-                area_sqm: property.area_sqm,
-                max_guests: property.max_guests || rentalTerms?.max_guests,
-                price: property.price,
-                price_per_night: rentalTerms?.price_per_night || property.price,
-                price_period: property.price_period,
-                rating: property.rating,
-                amenities: property.amenities,
-              } as CompareProperty}
-            />
-            <PropertyPdfButton property={{ ...property, price_per_night: rentalTerms?.price_per_night }} />
+            <details className="relative">
+              <summary className="cursor-pointer list-none px-3 py-2 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{isRu ? 'Ещё' : 'More'}</summary>
+              <div className="absolute right-0 top-full z-30 flex flex-col items-start gap-1 border border-border bg-background p-2 shadow-md min-w-40">
+                <CompareButton className="[&>span]:inline min-h-11"
+                  property={{
+                    id: id || '',
+                    title_en: property.title_en,
+                    title_ru: property.title_ru,
+                    cover_image: property.cover_image,
+                    property_type: property.property_type,
+                    district: property.district,
+                    bedrooms: property.bedrooms,
+                    bathrooms: property.bathrooms,
+                    area_sqm: property.area_sqm,
+                    max_guests: property.max_guests || rentalTerms?.max_guests,
+                    price: property.price,
+                    price_per_night: rentalTerms?.price_per_night || property.price,
+                    price_period: property.price_period,
+                    rating: property.rating,
+                    amenities: property.amenities,
+                  } as CompareProperty}
+                />
+                <PropertyPdfButton className="[&>span]:inline min-h-11" property={{ ...property, price_per_night: rentalTerms?.price_per_night }} />
+              </div>
+            </details>
             <FavoriteButton
               itemType="property"
               itemId={id || 'prop-1'}
@@ -321,46 +367,6 @@ export default function PropertyDetail() {
         <div className="px-4 md:px-0 py-6 lg:py-10">
           <div className="grid lg:grid-cols-[1fr,minmax(320px,420px)] xl:grid-cols-[1fr,minmax(360px,460px)] gap-8 lg:gap-10 xl:gap-12 items-start">
             <article className="space-y-6 min-w-0">
-              {/* Title */}
-              <div>
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-foreground leading-tight">
-                  {isRu ? property.title_ru : property.title_en}
-                </h1>
-                {/* Hero facts — Airbnb-style sub-title (e.g. "4 guests · 2 bedrooms · 1 bath") */}
-                <PropertyHeroFacts
-                  bedrooms={property.bedrooms}
-                  beds={propertyExt.beds ?? null}
-                  bathrooms={property.bathrooms}
-                  maxGuests={property.max_guests || rentalTerms?.max_guests}
-                />
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm lg:text-base">
-                  {property.rating && (
-                    <>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-primary fill-primary" />
-                        <span className="font-semibold">{property.rating}</span>
-                      </div>
-                      <span className="text-muted-foreground">
-                        · {property.review_count || 0} {isRu ? 'отзывов' : 'reviews'}
-                      </span>
-                    </>
-                  )}
-                  <GuestFavoriteBadge
-                    rating={property.rating}
-                    reviewsCount={property.review_count}
-                    variant="inline"
-                  />
-                  {property.is_verified && (
-                    <span className="flex items-center gap-1 text-primary">
-                      · <Shield className="w-3.5 h-3.5" />
-                      <span className="underline font-medium">{isRu ? 'Проверено' : 'Verified'}</span>
-                    </span>
-                  )}
-                  <span className="text-muted-foreground">
-                    · <MapPin className="w-3.5 h-3.5 inline" /> {property.district}
-                  </span>
-                </div>
-              </div>
 
               {isSaleListing && (
                 <>

@@ -123,11 +123,11 @@ export default function OwnerPortalPropertyView() {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="w-full flex overflow-x-auto">
+        <TabsList className="w-full h-auto min-h-11 flex justify-start overflow-x-auto">
           {tabs.map(t => (
-            <TabsTrigger key={t.key} value={t.key} className="flex items-center gap-1.5 text-xs">
+            <TabsTrigger key={t.key} value={t.key} className="flex-none shrink-0 min-h-11 items-center gap-1.5 text-xs">
               {t.icon}
-              <span className="hidden sm:inline">{t.label}</span>
+              <span>{t.label}</span>
             </TabsTrigger>
           ))}
         </TabsList>

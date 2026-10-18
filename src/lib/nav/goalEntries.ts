@@ -101,7 +101,7 @@ export const GOAL_ENTRIES: Record<GoalId, GoalEntry> = {
     leadRu: 'Готовое жильё и новостройки: сведения об объектах, рейтинги и консультации по покупке.',
     leadTh: 'บ้านมือสองและโครงการใหม่ พร้อมเรตติ้ง เอกสาร และขั้นตอนที่ชัดเจน',
     primary: [
-      L(APP_ROUTES.PROPERTY_BROWSE, Building2, 'Homes for sale', 'Продажа жилья', 'บ้านขาย',
+      L(`${APP_ROUTES.PROPERTY_BROWSE}?mode=buy`, Building2, 'Homes for sale', 'Продажа жилья', 'บ้านขาย',
         'Villas and condos', 'Виллы и квартиры', 'วิลล่าและคอนโด'),
       L(APP_ROUTES.OFFPLAN, Hammer, 'New projects', 'Новостройки', 'โครงการใหม่',
         'Off-plan with ClearView ratings', 'С рейтингами ClearView', 'พร้อมเรตติ้ง ClearView'),

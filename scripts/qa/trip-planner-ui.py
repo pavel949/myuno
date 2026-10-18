@@ -52,13 +52,26 @@ async def main():
                     assert data['card']['right'] <= data['sidebarLeft'], data
                     assert all(c['left'] >= data['card']['left'] - 1 and c['right'] <= data['card']['right'] + 1 for c in data['controls']), data
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-trip.png'), full_page=True)
-                    # Prove the fixture detects the original missing-scope regression.
-                    await page.locator('.journey-primary').evaluate("el => el.classList.remove('journey-primary')")
+                    # Mutation control: reproduce an uncontained desktop-only five-column
+                    # layout explicitly. Removing the scope class alone is no longer a
+                    # reliable mutation because shared form rows now wrap differently.
+                    await page.locator('.home-search').evaluate('''form => {
+                        form.parentElement.classList.remove('journey-primary');
+                        form.style.setProperty('display', 'grid', 'important');
+                        form.style.setProperty('grid-template-columns',
+                            'minmax(240px, 1fr) minmax(240px, 1fr) minmax(320px, 1fr) 120px 180px', 'important');
+                        form.style.setProperty('width', '100%', 'important');
+                        form.style.setProperty('max-width', '100%', 'important');
+                        for (const child of form.children) {
+                            child.style.setProperty('grid-column', 'auto', 'important');
+                            child.style.setProperty('grid-row', 'auto', 'important');
+                        }
+                    }''')
                     broken = await geometry()
                     assert broken['formScrollWidth'] > broken['formWidth'] + 1 or any(c['right'] > broken['card']['right'] + 1 for c in broken['controls']), broken
                     assert not blocked, blocked
                     assert not errors, errors
-                    results.append({'language': lang, 'width': width, 'containment': 'pass', 'negativeControl': 'detected', 'geometry': data})
+                    results.append({'language': lang, 'width': width, 'containment': 'pass', 'negativeControl': 'detected', 'geometry': data, 'negativeGeometry': broken})
                 except Exception:
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-failure.png'), full_page=True)
                     (OUTPUT/f'{lang}-{width}-failure.html').write_text(await page.content())
