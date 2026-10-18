@@ -1,78 +1,48 @@
-/**
- * TripPlannerPage - LifeOS "Trip to Phuket" Arrival Planner
- * Helps users prepare for arrival with an interactive checklist
- * and integration with myUNO services.
- */
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Button } from '@/components/ui/button';
-import { TripPositioningHero } from '@/components/trip-planner/TripPositioningHero';
 import { TripChecklist } from '@/components/trip-planner/TripChecklist';
-import { Palmtree } from 'lucide-react';
-import { BackButton } from '@/components/uno/BackButton';
-import { APP_ROUTES } from '@/lib/config/routes';
-import { motion } from 'framer-motion';
+import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
 import { WhatsAppConciergeBlock } from '@/components/life-flow/WhatsAppConciergeBlock';
+import { APP_ROUTES as R } from '@/lib/config/routes';
+import { SEOHead } from '@/components/seo/SEOHead';
+import '@/styles/cinematic-home.css';
 
 export default function TripPlannerPage() {
-  const navigate = useNavigate();
   const { language } = useLanguage();
   const isRu = language === 'ru';
-
+  const t = (ru: string, en: string) => isRu ? ru : en;
+  const title = t('Отдых начинается здесь.', 'Your holiday starts here.');
   return (
-    <AppLayout>
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <div className="border-b border-border/50">
+    <AppLayout usePageContainer={false}>
+      <SEOHead title={t('Отдых на Пхукете — жильё и подготовка к поездке', 'Phuket holiday — homes and trip planning')} description={t('Найдите жильё и подготовьтесь к поездке: личный список дел, трансфер и впечатления на Пхукете.', 'Find a home and prepare for your trip with a personal checklist, transfers and experiences in Phuket.')} />
+      <div className="journey-page">
+        <Link to={R.HOME} className="journey-back"><ArrowLeft size={16} aria-hidden="true" />{t('На главную', 'Back to home')}</Link>
+        <header className="journey-intro">
+          <p className="journey-eyebrow">myUNO · {t('Ваш отдых на Пхукете', 'Your Phuket holiday')}</p>
+          <h1>{title}</h1>
+          <p>{t('Выберите, где остановиться. Затем спокойно подготовьтесь к поездке — шаг за шагом.', 'Find your place to stay. Then get ready for your trip, one step at a time.')}</p>
+        </header>
+        <div className="journey-grid">
           <div>
-            <div className="flex items-center gap-3 p-4">
-              <BackButton fallbackPath={APP_ROUTES.HOME} variant="ghost" />
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="px-4 pb-5"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-none flex items-center justify-center shrink-0 bg-primary/8">
-                  <Palmtree className="w-7 h-7 text-primary" />
-                </div>
-                <div className="flex-1 pt-0.5">
-                  <h1 className="text-lg font-bold">
-                    {isRu ? 'Поездка на Пхукет' : 'Trip to Phuket'}
-                  </h1>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    {isRu
-                      ? 'Планировщик прибытия'
-                      : 'Arrival Planner'}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
+            <section className="journey-primary" aria-labelledby="holiday-home-title">
+              <h2 id="holiday-home-title">{t('Где будем жить?', 'Where will you stay?')}</h2>
+              <p>{t('Укажите район и даты, чтобы перейти к поиску жилья.', 'Choose an area and dates to search for a home.')}</p>
+              <HomeDiscoverySearch rentalOnly />
+            </section>
+            <TripChecklist />
           </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 space-y-6">
-          <TripPositioningHero />
-          <TripChecklist />
-
-          {/* WhatsApp concierge CTA */}
-          <WhatsAppConciergeBlock context="trip" />
-
-          {/* Footer */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="text-center text-xs text-muted-foreground/60 pt-2 pb-4"
-          >
-            {isRu
-              ? 'Мы — ваш локальный эксперт по Пхукету. Если нужна помощь — напишите нам.'
-              : "We're your local Phuket experts. Need help? Reach out anytime."}
-          </motion.p>
+          <aside className="journey-aside" aria-label={t('Для вашего отдыха', 'For your holiday')}>
+            <h2>{t('Дальше — приятное.', 'Make it your holiday.')}</h2>
+            <p>{t('Добавьте к поездке то, что нужно именно вам.', 'Explore what you would like to add to your trip.')}</p>
+            {[
+              { to: '/transport/airport-transfer', label: t('Встреча в аэропорту', 'Airport transfer') },
+              { to: R.EXPERIENCES, label: t('Впечатления на острове', 'Island experiences') },
+              { to: R.GOAL_SERVICES, label: t('Услуги во время отдыха', 'Services during your stay') },
+            ].map(l => <Link key={l.to} to={l.to}>{l.label}<ArrowUpRight size={17} aria-hidden="true" /></Link>)}
+            <div className="journey-help"><WhatsAppConciergeBlock context="trip" /></div>
+          </aside>
         </div>
       </div>
     </AppLayout>

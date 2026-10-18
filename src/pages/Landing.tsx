@@ -1,11 +1,11 @@
 /** Cinematic public front door. Existing authenticated workspace stays in HomeRouter. */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Umbrella, House, Settings2, KeyRound, Menu, X, LifeBuoy, Pause, Play } from 'lucide-react';
+import { ArrowRight, Umbrella, House, Settings2, KeyRound, LifeBuoy, Pause, Play } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
-import { LanguageSwitcher } from '@/components/uno/LanguageSwitcher';
+import { ConsumerHeader } from '@/components/nav/ConsumerHeader';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
@@ -20,43 +20,22 @@ import '@/styles/cinematic-home.css';
 const icons = { holiday: Umbrella, home: House, service: Settings2, key: KeyRound };
 const collections = [
   { image: pool, href: `${R.PROPERTY_SEARCH}?mode=rent&amenities=private_pool`, title: { ru: 'Жильё с бассейном', en: 'Homes with a private pool', th: 'ที่พักพร้อมสระว่ายน้ำส่วนตัว' } },
-  { image: housing, href: R.PROPERTY_RENT_LONG, title: { ru: 'Жильё для жизни', en: 'A place to call home', th: 'ที่พักสำหรับอยู่อาศัย' } },
+  { image: housing, href: `${R.PROPERTY_SEARCH}?mode=rent&tenancy=long`, title: { ru: 'Жильё для жизни', en: 'A place to call home', th: 'ที่พักสำหรับอยู่อาศัย' } },
   { image: islands, href: R.EXPERIENCES, title: { ru: 'Остров впечатлений', en: 'An island to discover', th: 'เกาะแห่งประสบการณ์' } },
 ];
 
 export default function Landing() {
   const { language } = useLanguage();
   const t = (v: LangValues) => pickLang(language, v);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
   const [motionPaused, setMotionPaused] = useState(false);
-  const nav = [
-    { href: R.GOAL_STAY, label: copy.housing },
-    { href: R.EXPERIENCES, label: copy.experiences },
-    { href: R.GOAL_SERVICES, label: copy.services },
-  ];
   return (
     <div className="cinematic-home" data-testid="cinematic-home">
       <SEOHead title={t({ ru: 'Пхукет. Вы дома. — жильё, отдых и услуги', en: 'Phuket. You’re home. — homes and local services', th: 'ภูเก็ต บ้านของคุณ — ที่พักและบริการ' })} description={t(copy.lead)} />
       <section className="home-hero" aria-labelledby="home-title">
         <img className={`home-hero-image${motionPaused ? ' is-paused' : ''}`} src={hero} alt="" loading="eager" width="1920" height="1080" />
         <div className="home-hero-shade" aria-hidden="true" />
-        <header className="home-header home-container">
-          <Link to={R.HOME} className="home-wordmark" aria-label="myUNO">myUNO</Link>
-          <nav className="home-desktop-nav" aria-label={t({ ru: 'Основные разделы', en: 'Main navigation', th: 'เมนูหลัก' })}>
-            {nav.map(n => <Link key={n.href} to={n.href}>{t(n.label)}</Link>)}
-          </nav>
-          <div className="home-header-actions">
-            <Link className="home-owner-link" to={R.FOR_OWNERS}>{t(copy.owners)}</Link>
-            <Link className="home-help-link" to={R.SOS}>{t(copy.help)}</Link>
-            <LanguageSwitcher size="sm" className="home-language" />
-            <Link className="home-auth-link" to={R.AUTH}>{t(copy.signIn)}</Link>
-            <button type="button" className="home-menu-toggle" aria-label={t({ ru: menuOpen ? 'Закрыть меню' : 'Открыть меню', en: menuOpen ? 'Close menu' : 'Open menu', th: menuOpen ? 'ปิดเมนู' : 'เปิดเมนู' })} aria-expanded={menuOpen} aria-controls="home-mobile-menu" onClick={() => setMenuOpen(v => !v)}>{menuOpen ? <X /> : <Menu />}</button>
-          </div>
-          {menuOpen && <nav id="home-mobile-menu" className="home-mobile-nav" aria-label={t({ ru: 'Меню', en: 'Menu', th: 'เมนู' })} onKeyDown={e => { if (e.key === 'Escape') setMenuOpen(false); }}>
-            {[...nav, { href: R.FOR_OWNERS, label: copy.owners }, { href: R.FOR_BUSINESS, label: copy.business }, { href: R.AUTH, label: copy.signIn }].map(n => <Link key={n.href} to={n.href} onClick={() => setMenuOpen(false)}>{t(n.label)}<ArrowRight size={17} aria-hidden="true" /></Link>)}
-          </nav>}
-        </header>
+        <ConsumerHeader overlay />
         <div className="home-hero-copy home-container">
           <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
           <p>{t(copy.lead)}</p>

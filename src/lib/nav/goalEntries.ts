@@ -55,9 +55,9 @@ export const GOAL_ENTRIES: Record<GoalId, GoalEntry> = {
     leadRu: 'Виллы и квартиры для посуточной и долгосрочной аренды.',
     leadTh: 'วิลล่าและอพาร์ตเมนต์สำหรับไม่กี่คืนหรือหลายเดือน ตรวจสอบโดยทีมของเรา',
     primary: [
-      L(APP_ROUTES.PROPERTY_RENT_SHORT, BedDouble, 'Short-term rentals', 'Посуточная аренда', 'เช่าระยะสั้น',
+      L(`${APP_ROUTES.PROPERTY_SEARCH}?mode=rent&tenancy=short`, BedDouble, 'Short-term rentals', 'Посуточная аренда', 'เช่าระยะสั้น',
         'Nightly and weekly stays', 'Жильё на несколько дней или недель', 'รายคืนและรายสัปดาห์'),
-      L(APP_ROUTES.PROPERTY_RENT_LONG, KeyRound, 'Monthly rentals', 'Долгосрочная аренда', 'เช่ารายเดือน',
+      L(`${APP_ROUTES.PROPERTY_SEARCH}?mode=rent&tenancy=long`, KeyRound, 'Monthly rentals', 'Долгосрочная аренда', 'เช่ารายเดือน',
         'From one month and longer', 'Жильё на срок от одного месяца', 'ตั้งแต่หนึ่งเดือนขึ้นไป'),
       L(APP_ROUTES.PROPERTY_MAP, Map, 'Map of homes', 'Жильё на карте', 'แผนที่ที่พัก',
         'Pick the area first', 'Сначала выберите район', 'เลือกพื้นที่ก่อน'),
@@ -82,7 +82,7 @@ export const GOAL_ENTRIES: Record<GoalId, GoalEntry> = {
         'A step-by-step moving plan', 'Пошаговый план переезда', 'แผนการย้ายทีละขั้น'),
       L(APP_ROUTES.LIVE_CLUSTER, Home, 'Everyday life', 'Жизнь на острове', 'ชีวิตประจำวัน',
         'Home, family, health, leisure', 'Дом, семья, здоровье, досуг', 'บ้าน ครอบครัว สุขภาพ'),
-      L(APP_ROUTES.PROPERTY_RENT_LONG, KeyRound, 'Find a home', 'Найти жильё', 'หาบ้าน',
+      L(`${APP_ROUTES.PROPERTY_SEARCH}?mode=rent&tenancy=long`, KeyRound, 'Find a home', 'Найти жильё', 'หาบ้าน',
         'Long-term rentals', 'Долгосрочная аренда', 'เช่าระยะยาว'),
     ],
     more: [

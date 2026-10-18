@@ -282,14 +282,11 @@ export default function PropertyHub() {
   /**
    * Single AppLayout/NavShell for the whole /property/* tree. Nested AppLayout
    * in child routes was rendering a second SideRail (duplicate left chrome).
-   * Immerse browse + search: custom sticky header; /property/my: no global top bar.
+   * Public browse/search keep the shared header; local search bars stick beneath it.
+   * /property/my retains its private immersive layout.
    */
-  const isBrowseImmersive =
-    p === APP_ROUTES.PROPERTY_BROWSE || p === `${APP_ROUTES.PROPERTY_BROWSE}/`;
   const hideGlobalTopBar =
-    isBrowseImmersive ||
-    p.startsWith('/property/my') ||
-    p === APP_ROUTES.PROPERTY_SEARCH;
+    p.startsWith('/property/my');
 
   let title: string | undefined;
   if (!hideGlobalTopBar) {
@@ -333,7 +330,7 @@ export default function PropertyHub() {
       showBottomNav={showBottomNav}
     >
       <CompareProvider>
-        {!hideOuterTabs && <PropertyHubTabs />}
+        {!hideOuterTabs && p !== APP_ROUTES.PROPERTY_SEARCH && <PropertyHubTabs />}
         <OffplanHubToolsStrip />
         <Outlet />
       </CompareProvider>

@@ -10,7 +10,9 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { GOAL_ENTRIES, GOAL_ORDER, isGoalId, type GoalLink } from '@/lib/nav/goalEntries';
+import { GOAL_ENTRIES, isGoalId, type GoalLink } from '@/lib/nav/goalEntries';
+import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
+import '@/styles/cinematic-home.css';
 import { cn } from '@/lib/utils';
 
 export default function GoalEntryPage({ goal }: { goal: string }) {
@@ -44,10 +46,10 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
   };
 
   return (
-    <AppLayout title={title}>
-      <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:py-12">
-        <nav aria-label={t({ en: 'Goals', ru: 'Цели', th: 'เป้าหมาย' })} className="mb-8 flex gap-1 overflow-x-auto border-b border-border">
-          {GOAL_ORDER.map((id) => {
+    <AppLayout title={title} usePageContainer={false}>
+      <div className="mx-auto w-full journey-page max-w-6xl px-4 py-8 sm:py-12">
+        {(goal === 'stay' || goal === 'buy') && <nav aria-label={t({ en: 'Goals', ru: 'Цели', th: 'เป้าหมาย' })} className="mb-8 flex gap-1 overflow-x-auto scrollbar-hide border-b border-border">
+          {(['stay', 'buy'] as const).map((id) => {
             const g = GOAL_ENTRIES[id];
             const active = id === goal;
             return (
@@ -56,7 +58,7 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
                 to={g.path}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  '-mb-px min-h-11 whitespace-nowrap border-b-2 px-3 py-2 text-sm',
+                  '-mb-px shrink-0 min-h-11 whitespace-nowrap border-b-2 px-3 py-2 text-sm',
                   active ? 'border-accent font-semibold text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
                 )}
               >
@@ -64,16 +66,17 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
               </Link>
             );
           })}
-        </nav>
+        </nav>}
 
         <header className="mb-8">
           <p className="mb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">myUNO · Phuket</p>
-          <h1 className="font-serif text-3xl text-foreground sm:text-4xl">{title}</h1>
+          <h1 className="font-serif text-4xl font-normal tracking-tight text-foreground sm:text-6xl">{title}</h1>
           <p className="mt-3 max-w-2xl text-muted-foreground">
             {t({ en: entry.leadEn, ru: entry.leadRu, th: entry.leadTh })}
           </p>
         </header>
 
+        {goal === 'stay' && <section className="journey-primary" aria-label={t({ en: 'Find a home', ru: 'Найти жильё', th: 'ค้นหาที่พัก' })}><HomeDiscoverySearch rentalOnly /></section>}
         <section className="grid gap-3 sm:grid-cols-3">
           {entry.primary.map((l) => <Tile key={l.path} link={l} large />)}
         </section>

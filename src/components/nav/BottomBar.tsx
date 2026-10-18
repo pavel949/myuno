@@ -80,7 +80,9 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
         : role === 'guest' && meHubEnabled
           ? GUEST_NAV_ME_HUB
           : PRIMARY_NAV[role];
-    const showAppsButton = shouldShowAppsLauncher(role);
+    // Standard consumer journeys keep all five destinations visible.
+    // Professional/Me flag variants retain their existing app launcher.
+    const showAppsButton = shouldShowAppsLauncher(role) && !(role === 'guest' && !meHubEnabled && !(proShellEnabled && hasProPersona));
 
     const handleNavClick = (e: React.MouseEvent<HTMLElement>) => {
       const settings = getFeedbackSettings();

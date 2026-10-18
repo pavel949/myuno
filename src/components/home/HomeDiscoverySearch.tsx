@@ -2,19 +2,22 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, MapPin, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { bangkokTodayISO, parseCivilDate } from '@/lib/hotelDates';
 import { addDays, format } from 'date-fns';
 
-export function HomeDiscoverySearch() {
+export function HomeDiscoverySearch({ rentalOnly = false }: { rentalOnly?: boolean }) {
   const { language } = useLanguage();
   const t = (v: LangValues) => pickLang(language, v);
   const { districts, isLoading } = usePropertyQuickFilters();
+  const { propertyTypes, isLoading: typesLoading } = usePropertyFilterOptions();
   const navigate = useNavigate();
   const [mode, setMode] = useState<'rent' | 'buy'>('rent');
   const [district, setDistrict] = useState('');
+  const [propertyType, setPropertyType] = useState('');
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('2');
@@ -25,6 +28,7 @@ export function HomeDiscoverySearch() {
     event.preventDefault();
     const params = new URLSearchParams({ mode });
     if (district) params.set('district', district);
+    if (propertyType) params.set('types', propertyType);
     // The existing catalogue consumes Date instants. Use shared civil-date parsing,
     // then serialize local midnight, preserving dates in its existing URL contract.
     if (mode === 'rent') {
@@ -38,13 +42,20 @@ export function HomeDiscoverySearch() {
 
   return (
     <form className="home-search" onSubmit={search} aria-label={t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
-      <div className="home-search-modes" role="group" aria-label={t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
+      {!rentalOnly && <div className="home-search-modes" role="group" aria-label={t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
         {(['rent', 'buy'] as const).map(value => (
           <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>
             {value === 'rent' ? t({ ru: 'Аренда', en: 'Rent', th: 'เช่า' }) : t({ ru: 'Покупка', en: 'Buy', th: 'ซื้อ' })}
           </button>
         ))}
-      </div>
+      </div>}
+      <label className="home-search-type">
+        <span className="home-field-label">{t({ ru: 'Тип жилья', en: 'Home type', th: 'ประเภทที่พัก' })}</span>
+        <select value={propertyType} onChange={e => setPropertyType(e.target.value)} disabled={typesLoading} aria-label={t({ ru: 'Тип жилья', en: 'Home type', th: 'ประเภทที่พัก' })}>
+          <option value="">{typesLoading ? t({ ru: 'Загрузка…', en: 'Loading…', th: 'กำลังโหลด…' }) : t({ ru: 'Любой тип', en: 'Any home', th: 'ทุกประเภท' })}</option>
+          {propertyTypes.map(type => <option key={type.id} value={type.id}>{language === 'ru' ? type.labelRu : type.labelEn}</option>)}
+        </select>
+      </label>
       <label className="home-search-location">
         <MapPin size={18} aria-hidden="true" />
         <span><span className="home-field-label">{t({ ru: 'Район', en: 'Area', th: 'ย่าน' })}</span>
