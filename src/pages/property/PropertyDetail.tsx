@@ -50,7 +50,7 @@ import {
   PropertyHeroFacts,
 } from '@/components/property/detail';
 import { GuestFavoriteBadge } from '@/components/property/GuestFavoriteBadge';
-import { usePropertyAvailabilityManagement } from '@/hooks/usePropertyAvailabilityManagement';
+import { usePropertyUnavailableDates } from '@/hooks/usePropertyUnavailableDates';
 import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { TrustStrip } from '@/components/property/TrustStrip';
 import { InstallmentTimeline } from '@/components/property/InstallmentTimeline';
@@ -103,7 +103,10 @@ export default function PropertyDetail() {
   const [guestCount, setGuestCount] = useState(2);
 
   const { data: mediaItems = [] } = usePropertyMedia(id);
-  const { availability } = usePropertyAvailabilityManagement(id);
+  const availabilityQuery = usePropertyUnavailableDates(id);
+  const availability = useMemo(() => (availabilityQuery.data ?? []).map(entry => ({
+    date: entry.date, status: entry.kind,
+  })), [availabilityQuery.data]);
   const unavailableDates = useMemo(
     () =>
       new Set(
@@ -222,6 +225,7 @@ export default function PropertyDetail() {
   };
 
   const handleDateSheetConfirm = () => {
+    if (!availabilityQuery.isSuccess || availabilityQuery.isError) return;
     setDateSheetOpen(false);
     if (dateRange?.from && dateRange?.to) {
       const params = new URLSearchParams({
@@ -798,7 +802,10 @@ export default function PropertyDetail() {
           onGuestCountChange={setGuestCount}
           maxGuests={rentalTerms?.max_guests || 10}
           minStayNights={rentalTerms?.min_stay_nights}
-          availability={availability as any}
+          availability={availability}
+          availabilityReady={availabilityQuery.isSuccess && !availabilityQuery.isError}
+          availabilityError={availabilityQuery.isError}
+          onRetryAvailability={() => { void availabilityQuery.refetch(); }}
           unavailableDates={unavailableDates}
           onConfirm={handleDateSheetConfirm}
         />

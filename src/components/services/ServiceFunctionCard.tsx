@@ -87,8 +87,8 @@
                  <span className="text-sm font-semibold text-primary">
                    {isRu ? 'от' : 'from'} {formatPrice(fn.basePrice, fn.currency)}
                  </span>
-                 <Button size="sm" variant="default" className="h-7 px-3 text-xs">
-                   {isRu ? 'Заказать' : 'Order'}
+                 <Button size="sm" variant="default" className="min-h-[44px] px-3 text-xs">
+                   {isRu ? 'Оставить заявку' : 'Request service'}
                    <ChevronRight className="h-3 w-3 ml-1" />
                  </Button>
                </div>

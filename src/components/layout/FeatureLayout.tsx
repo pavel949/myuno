@@ -21,7 +21,6 @@ import { UnifiedHeader } from '@/components/shared/UnifiedHeader';
 import { UnifiedFilterRibbon, type FilterRibbonItem } from '@/components/shared/UnifiedFilterRibbon';
 import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { BackButton } from '@/components/uno/BackButton';
-import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
@@ -226,15 +225,6 @@ function MiniappMode({
   const buildHeaderActions = () => {
     const actions: ReactNode[] = [];
 
-    actions.push(
-      <GlobalPreferencesControls
-        key="global-prefs"
-        size="sm"
-        themeVariant="dropdown"
-        className="mr-0.5 shrink-0"
-      />,
-    );
-
     if (mapToggleEnabled) {
       actions.push(
         <div key="view-toggle" className="flex items-center bg-muted shrink-0">
@@ -339,7 +329,7 @@ function MiniappMode({
   const hasStickySubHeader = stickySubHeader || hasQuickFilters || hasCategories;
 
   return (
-    <AppLayout showBottomNav={showBottomNav} showHeader={false} className="max-w-full min-w-0">
+    <AppLayout showBottomNav={showBottomNav} showHeader className="max-w-full min-w-0">
       {(seoTitle || seoDescription) && (
         <SEOHead
           title={seoTitle}
@@ -348,7 +338,7 @@ function MiniappMode({
           noindex={seoNoindex}
         />
       )}
-      <div className="sticky top-0 z-40">
+      <div className="sticky top-[var(--consumer-header-height,0px)] z-40">
         <UnifiedHeader
           title={title}
           subtitle={subtitle}

@@ -32,7 +32,7 @@ export function MarketplaceServiceGrid({ search = '' }: { search?: string }) {
           <Button size="sm" variant="outline" onClick={() => refetch()}>{L('Повторить', 'Retry', 'ลองใหม่')}</Button>
         </div>
       ) : list.length === 0 ? (
-        <p className="text-sm text-muted-foreground border border-border p-4">{L('Услуги с онлайн-записью пока не добавлены.', 'No bookable services yet.', 'ยังไม่มีบริการที่จองได้')}</p>
+        <p className="text-sm text-muted-foreground border border-border p-4">{q ? L('По вашему запросу ничего не найдено. Измените поиск.', 'No services match your search. Try another search.', 'ไม่พบบริการที่ตรงกับการค้นหา') : L('Онлайн-запись пока недоступна. Ниже можно оставить заявку на подбор специалиста.', 'Online booking is not available yet. You can request a specialist below.', 'ยังไม่มีบริการจองออนไลน์ ส่งคำขอด้านล่างได้')}</p>
       ) : (
         <div className="grid gap-2 sm:grid-cols-2">
           {list.map((s) => {

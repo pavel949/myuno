@@ -15,6 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useMeFeed, type MeFeedItem } from '@/hooks/useMeFeed';
 import { prefetchRoute } from '@/lib/prefetchRoute';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PRIORITY_STYLES = {
   high:   { ring: 'ring-2 ring-destructive/40', icon: 'text-destructive', bg: 'bg-destructive/5' },
@@ -76,7 +77,8 @@ const QUICK_ACTIONS = [
 export default function MeFeed() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { data: items, isLoading } = useMeFeed();
+  const { user, isLoading: authLoading } = useAuth();
+  const { data: items, isLoading, isError, failedSources, refetch } = useMeFeed();
 
   const high = (items ?? []).filter((i) => i.priority === 'high');
   const rest = (items ?? []).filter((i) => i.priority !== 'high');
@@ -96,6 +98,12 @@ export default function MeFeed() {
           </p>
         </section>
 
+        {authLoading ? <LoadingState /> : !user ? (
+          <section className="space-y-3 border border-border bg-card p-4">
+            <p>{isRu ? 'Войдите, чтобы увидеть ваши бронирования, заявки и документы.' : 'Sign in to see your bookings, requests and documents.'}</p>
+            <Button asChild><Link to="/auth">{isRu ? 'Войти' : 'Sign in'}</Link></Button>
+          </section>
+        ) : <>
         {/* Quick actions */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
           {QUICK_ACTIONS.map((a) => (
@@ -112,16 +120,22 @@ export default function MeFeed() {
           ))}
         </div>
 
+        {(isError || failedSources.length > 0) && (
+          <div role="alert" className="space-y-2 border border-border p-4 text-sm">
+            <p>{isRu ? 'Часть данных недоступна. Список может быть неполным.' : 'Some data is unavailable. This list may be incomplete.'}</p>
+            <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+          </div>
+        )}
         {isLoading ? (
           <LoadingState />
         ) : !items || items.length === 0 ? (
-          <EmptyState
+          !isError && failedSources.length === 0 ? <EmptyState
             icon={Sparkles}
             title={isRu ? 'Всё под контролем' : 'All caught up'}
             description={isRu
               ? 'Нет срочных задач. Загляните в Услуги или Документы.'
               : 'No urgent tasks. Browse Services or Documents.'}
-          />
+          /> : null
         ) : (
           <>
             {high.length > 0 && (
@@ -140,6 +154,7 @@ export default function MeFeed() {
             )}
           </>
         )}
+        </>}
       </div>
     </MeShellLayout>
   );
