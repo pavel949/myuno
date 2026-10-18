@@ -1,11 +1,11 @@
 /* Shared consumer chrome. All colours inherit the canonical theme, including portals. */
 .consumer-header{--consumer-header-height:80px;position:sticky;top:0;z-index:50;background:hsl(var(--background));color:hsl(var(--foreground));border-bottom:1px solid hsl(var(--border))}
-.consumer-header-inner{max-width:1440px;margin:auto;min-height:80px;padding:12px 40px;display:flex;align-items:center;gap:36px}
+.consumer-header-inner{max-width:1280px;margin:auto;min-height:80px;padding:12px 40px;display:flex;align-items:center;gap:36px}
 .consumer-wordmark{font:600 32px/1 var(--font-display);letter-spacing:-1.5px;display:inline-flex;align-items:center;min-height:44px;flex-shrink:0}
 .consumer-nav{display:flex;gap:28px;align-items:center;font-size:14px}.consumer-nav a{min-height:44px;display:flex;align-items:center;border-bottom:2px solid transparent}.consumer-nav a[aria-current=page]{border-bottom-color:hsl(var(--brand-orange));color:hsl(var(--foreground))}
 .consumer-utilities{display:flex;align-items:center;gap:12px;margin-left:auto;font-size:13px}.consumer-login{border:1px solid currentColor;min-height:44px;display:flex;align-items:center;padding:0 20px}.consumer-owner{margin-right:8px}.consumer-icon,.consumer-menu{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px}.consumer-menu{display:none}
 .consumer-mobile-menu{background:hsl(var(--background));color:hsl(var(--foreground));border-bottom:1px solid hsl(var(--border));padding:12px 24px;position:absolute;inset-inline:0;top:100%}.consumer-mobile-menu a{display:flex;align-items:center;min-height:48px;border-bottom:1px solid hsl(var(--border))}
-.consumer-header-overlay{position:relative;background:transparent;color:white;border:0}.consumer-header-overlay .consumer-header-inner{max-width:1440px;min-height:100px;padding-inline:56px}.consumer-header-overlay .consumer-utilities button{background:transparent;color:inherit}
+.consumer-header-overlay{position:relative;background:transparent;color:white;border:0}.consumer-header-overlay .consumer-header-inner{max-width:1280px;min-height:100px;padding-inline:56px}.consumer-header-overlay .consumer-utilities button{background:transparent;color:inherit}
 .consumer-header a:hover{text-decoration:underline;text-underline-offset:6px}
 /* Header height is inherited by page-owned sticky search bars. */
 [data-canvas]{--consumer-header-height:80px}

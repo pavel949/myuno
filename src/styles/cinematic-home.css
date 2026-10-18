@@ -58,7 +58,7 @@
 @media(prefers-reduced-motion:reduce){.home-hero-image.is-motion-enabled{animation:none}.home-motion-control{display:none}.home-collection img,.home-journey-icon{transition:none}.home-collection:hover img,.home-journey:hover .home-journey-icon{transform:none}}
 
 /* Homepage/search share the application theme; only the photographic hero stays white-on-image. */
-.cinematic-home,.journey-page{--home-navy:hsl(var(--primary));--home-cream:hsl(var(--background));--home-ink:hsl(var(--foreground));--home-muted:hsl(var(--muted-foreground))}
+.cinematic-home,.journey-page,.home-search{--home-navy:hsl(var(--primary));--home-cream:hsl(var(--background));--home-ink:hsl(var(--foreground));--home-muted:hsl(var(--muted-foreground))}
 .home-search-modes button[aria-pressed=true],.home-search-submit{color:hsl(var(--primary-foreground))}
 .home-search-submit:hover{background:hsl(var(--primary-hover))}
 .home-search select,.home-search input{color-scheme:inherit}

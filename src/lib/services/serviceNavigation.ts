@@ -2,5 +2,5 @@
 export function serviceCatalogueReturnTo(value: string | null): string {
   if (!value) return '/discover/services';
   const path = value.split('?')[0];
-  return path === '/services' || path === '/discover/services' ? value : '/discover/services';
+  return ['/services', '/discover/services', '/discover', '/me/services'].includes(path) ? value : '/discover/services';
 }

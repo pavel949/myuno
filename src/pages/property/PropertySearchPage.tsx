@@ -5,7 +5,6 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, Building2, ChevronDown, Map as MapIcon, List } from 'lucide-react';
-import { NextStepNudge } from '@/components/hints/NextStepNudge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -268,9 +267,9 @@ export default function PropertySearchPage() {
                         {selectedCompanyId
                           ? (() => {
                               const c = companies.find(c => c.id === selectedCompanyId);
-                              return c ? (isRu ? c.name_ru : c.name_en) : (isRu ? 'Управление' : 'Managed by');
+                              return c ? (isRu ? c.name_ru : c.name_en) : (isRu ? 'Все компании' : 'All companies');
                             })()
-                          : (isRu ? 'Управление' : 'Managed by')
+                          : (isRu ? 'Все компании' : 'All companies')
                         }
                       </span>
                       <ChevronDown className="w-3 h-3 opacity-60" />
@@ -385,14 +384,8 @@ export default function PropertySearchPage() {
 
           {!isLoading && !isError && properties.length > 0 && (
             <>
-              <NextStepNudge
-                message={isRu ? 'Нажмите на карточку для подробностей' : 'Tap a card for details'}
-                direction="down"
-                visible={true}
-                hintId="property-search-tap-card"
-                className="mb-4 w-fit mx-auto"
-              />
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {properties.map(property => {
                   const mc = (property as any).management_company_id ? companyMap.get((property as any).management_company_id) : undefined;
                   return (

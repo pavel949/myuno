@@ -123,7 +123,7 @@ export function isBottomBarRoute(role: NavRoleKey, path: string): boolean {
 const PATH_ALIASES: Record<string, string[]> = {
   '/account':     ['/account', '/profile', '/me', '/bookings'],
   '/discover/stay': ['/discover/stay', '/discover/buy', '/property'],
-  '/discover/services': ['/discover/services', '/transport', '/experiences', '/insurance'],
+  '/discover/services': ['/discover/services', '/discover/situations', '/services', '/transport', '/experiences', '/insurance', '/beauty', '/restaurants', '/fitness', '/medical', '/events', '/education', '/flowers', '/legal', '/banking', '/veterinary', '/pharmacy', '/pets', '/yachts', '/cleaning', '/babysitter', '/delivery', '/sim', '/exchange', '/school-finder'],
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
@@ -149,6 +149,7 @@ const PATH_ALIASES: Record<string, string[]> = {
  */
 export function isBottomBarItemActive(item: NavItem, pathname: string): boolean {
   if (item.exact) return pathname === item.path;
+  if (item.path === APP_ROUTES.GOAL_SERVICES && pathname === APP_ROUTES.DISCOVER) return true;
 
   const aliases = PATH_ALIASES[item.path];
   if (aliases) {

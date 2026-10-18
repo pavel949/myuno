@@ -66,7 +66,7 @@ export default function GuestComplexDetail() {
       </div>
     </section>
 
-    <main className="max-w-7xl mx-auto px-5 sm:px-8 py-12 sm:py-20 space-y-16 sm:space-y-24 pb-28">
+    <div className="max-w-7xl mx-auto px-5 sm:px-8 py-12 sm:py-20 space-y-16 sm:space-y-24 pb-28">
       <section className="grid lg:grid-cols-[1fr_2fr] gap-7 lg:gap-16">
         <div><p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">{isRu ? 'Знакомство' : 'Discover'}</p><h2 className="text-3xl sm:text-4xl tracking-tight">{isRu ? 'О комплексе' : 'Life at the complex'}</h2></div>
         <div className="space-y-8">
@@ -91,7 +91,7 @@ export default function GuestComplexDetail() {
         </div>
         {unitsQuery.isLoading ? <div role="status" className="py-12 text-muted-foreground">{isRu ? 'Загружаем предложения…' : 'Loading homes…'}</div> : unitsQuery.isError ? <div role="alert" className="border p-8 space-y-4"><p>{isRu ? 'Не удалось загрузить предложения.' : 'Could not load homes.'}</p><Button variant="outline" onClick={() => unitsQuery.refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button></div> : units.length === 0 ? <div className="border border-dashed p-8 sm:p-12 text-center space-y-4"><Building2 className="h-8 w-8 mx-auto text-muted-foreground" /><p>{isRu ? 'По выбранным условиям пока нет опубликованных предложений.' : 'No published homes match these choices yet.'}</p><Button asChild variant="outline"><Link to={catalogHref}>{isRu ? 'Посмотреть другие варианты' : 'Explore other homes'}</Link></Button></div> : <><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">{units.map(property => { const company = companies.find(c => c.id === property.management_company_id); return <div key={property.id}><PropertyListingCard property={property} mode={mode} companyName={company ? companyName(company) : undefined} companySlug={company?.slug} />{company && !company.slug && <p className="mt-2 text-sm text-muted-foreground">{isRu ? 'Управляет: ' : 'Managed by: '}{companyName(company)}</p>}</div>; })}</div>{units.length < (unitsQuery.data?.total ?? 0) && <Button variant="outline" className="mt-8" onClick={() => setLimit(limit + 24)}>{isRu ? 'Показать ещё' : 'Show more'}</Button>}</>}
       </section>
-    </main>
+    </div>
     <PhotoLightbox images={photos} initialIndex={lightbox ?? 0} open={lightbox !== null} onClose={() => setLightbox(null)} alts={photos.map(() => name)} />
   </>;
 }

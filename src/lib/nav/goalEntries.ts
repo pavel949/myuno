@@ -124,7 +124,7 @@ export const GOAL_ENTRIES: Record<GoalId, GoalEntry> = {
     leadRu: 'Услуги для дома, семьи и бизнеса. Выберите специалиста и оформите заказ.',
     leadTh: 'ผู้เชี่ยวชาญที่ผ่านการตรวจสอบ สำหรับบ้าน ครอบครัว และธุรกิจ',
     primary: [
-      L(APP_ROUTES.SERVICES, Wrench, 'All services', 'Все услуги', 'บริการทั้งหมด',
+      L(APP_ROUTES.SERVICES, Wrench, 'Home services', 'Услуги для дома', 'บริการทั้งหมด',
         'Repairs, cleaning, handymen', 'Ремонт, уборка и помощь по дому', 'ซ่อม ทำความสะอาด ช่าง'),
       L(APP_ROUTES.THAI_SERVICES, Users, 'Local Thai businesses', 'Местные компании и специалисты', 'ธุรกิจท้องถิ่น',
         'Chat with auto-translation', 'Переписка с автоматическим переводом', 'แชทพร้อมแปลอัตโนมัติ'),
@@ -136,7 +136,7 @@ export const GOAL_ENTRIES: Record<GoalId, GoalEntry> = {
         'Transfers and delivery', 'Трансферы и доставка', 'รถรับส่งและจัดส่ง'),
       L(APP_ROUTES.SERVICES_MAP, Map, 'Services on the map', 'Услуги на карте', 'บริการบนแผนที่',
         'Near you', 'Рядом с вами', 'ใกล้คุณ'),
-      L(APP_ROUTES.DISCOVER, ShieldCheck, 'Guided help', 'Подбор по ситуации', 'ช่วยเลือกตามสถานการณ์',
+      L(APP_ROUTES.DISCOVER_SITUATIONS, ShieldCheck, 'Guided help', 'Подбор по ситуации', 'ช่วยเลือกตามสถานการณ์',
         'Tell us your situation', 'Расскажите о ситуации', 'บอกสถานการณ์ของคุณ'),
     ],
   },

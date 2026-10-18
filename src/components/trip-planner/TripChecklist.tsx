@@ -171,12 +171,14 @@ export function TripChecklist() {
                 )}
               >
                 <div className="trip-checklist-row">
+                  <label className="flex size-11 shrink-0 cursor-pointer items-center justify-center">
                   <Checkbox
                     checked={isCompleted}
                     aria-label={`${isRu ? "Готово" : "Done"}: ${isRu ? item.labelRu : item.labelEn}`}
                     onCheckedChange={() => toggle(item.id)}
-                    className="shrink-0"
+                    className="!min-h-4 shrink-0"
                   />
+                  </label>
 
                   <button
                     type="button"

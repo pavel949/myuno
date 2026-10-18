@@ -23,6 +23,11 @@ beforeEach(() => { state.project.data.images = []; state.project.data.video_url 
 const mount = (search = '') => render(<MemoryRouter initialEntries={[`/property/complex/complex${search}`]}><Routes><Route path="/property/complex/:id" element={<GuestComplexDetail />} /></Routes></MemoryRouter>);
 
 describe('informational complex detail', () => {
+  it('leaves the main landmark to the owning route shell', () => {
+    render(<MemoryRouter initialEntries={['/property/complex/complex']}><main aria-label="Property shell"><Routes><Route path="/property/complex/:id" element={<GuestComplexDetail />} /></Routes></main></MemoryRouter>);
+    expect(screen.getAllByRole('main')).toHaveLength(1);
+    expect(screen.getByRole('main')).toHaveAccessibleName('Property shell');
+  });
   it('has a distinct guest route, honest empty state, and no sales-inventory substitution', () => {
     expect(APP_ROUTES.COMPLEX_DETAIL('complex')).toBe('/property/complex/complex');
     expect(APP_ROUTES.OFFPLAN_DETAIL('complex')).toBe('/property/offplan/complex');
