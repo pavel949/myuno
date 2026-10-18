@@ -14,7 +14,7 @@ function choose(label: string, option: string) {
   fireEvent.click(screen.getByRole('option', { name: option }));
 }
 function openDates() { fireEvent.click(screen.getByRole('button', { name: 'Даты проживания' })); }
-function day(value: string) { return within(screen.getByRole('dialog')).getByRole('gridcell', { name: value, exact: true }); }
+function day(value: string) { return within(screen.getByRole('dialog')).getByRole('gridcell', { name: value }); }
 
 describe('Home discovery themed controls and catalogue handoff', () => {
   beforeEach(() => {
