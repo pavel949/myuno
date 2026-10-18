@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
-import { usePropertyBlockedDates } from '@/hooks/usePropertyAvailability';
+import { AvailabilityStatus } from './AvailabilityStatus';
 import { usePropertyUnavailableDates } from '@/hooks/usePropertyUnavailableDates';
 import { PropertyRentalTerms } from '@/hooks/useProperties';
 import { calculatePricing, buildPricingRulesFromSeasons, type PricingRules } from '@/lib/pricingEngine';
@@ -73,9 +73,10 @@ export function PropertyBookingCard({
   const { isDesktop } = useBreakpoint();
   const autoCloseTimer = useRef<ReturnType<typeof setTimeout>>();
   
-  const { data: blockedDates } = usePropertyBlockedDates(propertyId);
   const { data: rateSeasons } = usePropertyRateSeasons(propertyId);
-  const { data: unavailableDates } = usePropertyUnavailableDates(propertyId);
+  const availabilityQuery = usePropertyUnavailableDates(propertyId);
+  const { data: unavailableDates } = availabilityQuery;
+  const availabilityReady = availabilityQuery.isSuccess && !availabilityQuery.isError;
 
   // Index unavailable dates by yyyy-MM-dd for O(1) lookup
   const unavailableMap = useMemo(() => {
@@ -100,12 +101,6 @@ export function PropertyBookingCard({
     if (!dateRange?.from || !dateRange?.to) return 0;
     return differenceInDays(dateRange.to, dateRange.from);
   }, [dateRange]);
-  
-  const isDateBlocked = (date: Date) => {
-    return blockedDates?.some(
-      blocked => blocked.date.toDateString() === date.toDateString()
-    ) ?? false;
-  };
   
   // Build pricing rules
   const pricing = useMemo(() => {
@@ -186,6 +181,7 @@ export function PropertyBookingCard({
 
   
   const handleReserve = () => {
+    if (!availabilityReady) return;
     const params = new URLSearchParams();
     if (dateRange?.from) params.set('checkIn', format(dateRange.from, 'yyyy-MM-dd'));
     if (dateRange?.to) params.set('checkOut', format(dateRange.to, 'yyyy-MM-dd'));
@@ -249,6 +245,7 @@ export function PropertyBookingCard({
         </div>
         
         {/* Date Selection — Airbnb-style split input */}
+        <AvailabilityStatus loading={!availabilityReady && !availabilityQuery.isError} error={availabilityQuery.isError} onRetry={() => { void availabilityQuery.refetch(); }} />
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
             <button
@@ -290,6 +287,7 @@ export function PropertyBookingCard({
                 mode="range"
                 selected={dateRange}
                 onSelect={(range) => {
+                  if (!availabilityReady) return;
                   setDateRange(range);
                   if (range?.from && range?.to) {
                     clearTimeout(autoCloseTimer.current);
@@ -298,8 +296,7 @@ export function PropertyBookingCard({
                 }}
                 numberOfMonths={isDesktop ? 2 : 1}
                 disabled={(date) => {
-                  if (isBefore(date, startOfDay(new Date()))) return true;
-                  if (isDateBlocked(date)) return true;
+                  if (!availabilityReady || isBefore(date, startOfDay(new Date()))) return true;
                   const dateKey = format(date, 'yyyy-MM-dd');
                   const kind = unavailableMap.get(dateKey);
                   // Booked / manually blocked nights are fully unavailable.
@@ -318,7 +315,7 @@ export function PropertyBookingCard({
                   return false;
                 }}
                 modifiers={{
-                  booked: blockedDates?.map((b) => b.date) || [],
+                  booked: unavailableDates?.filter(u => u.kind === 'booked' || u.kind === 'blocked').map(u => u.date) ?? [],
                   checkoutOnly: checkoutOnlyDates,
                 }}
                 modifiersClassNames={{ booked: 'bg-destructive/20 text-destructive line-through' }}
@@ -416,7 +413,7 @@ export function PropertyBookingCard({
             rentalTerms?.instant_booking && dateRange?.from && dateRange?.to && "from-accent-amber to-accent-amber/80 shadow-[0_4px_14px_-3px_hsl(38_85%_48%/0.4)]"
           )}
           onClick={handleReserve}
-          disabled={!dateRange?.from || !dateRange?.to || validationErrors.length > 0}
+          disabled={!availabilityReady || !dateRange?.from || !dateRange?.to || validationErrors.length > 0}
         >
           {!dateRange?.from || !dateRange?.to ? (
             <><CalendarIcon className="w-4 h-4 mr-2" />{isRu ? 'Проверить наличие' : 'Check availability'}</>

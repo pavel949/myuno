@@ -1,0 +1,22 @@
+import React from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import MeFeed from '../MeFeed';
+const state = vi.hoisted(() => ({ user: null as null | { id: string }, authLoading: false, loading: false, error: false, failed: [] as string[], items: [] as any[], retry: vi.fn() }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: state.user, isLoading: state.authLoading }) }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+vi.mock('@/hooks/useMeFeed', () => ({ useMeFeed: () => ({ data: state.items, isLoading: state.loading, isError: state.error, failedSources: state.failed, refetch: state.retry }) }));
+vi.mock('@/components/layout/MeShellLayout', () => ({ MeShellLayout: ({children}: React.PropsWithChildren) => <div>{children}</div> }));
+vi.mock('@/lib/prefetchRoute', () => ({ prefetchRoute: vi.fn() }));
+afterEach(cleanup);
+beforeEach(() => { Object.assign(state,{user:null,authLoading:false,loading:false,error:false,failed:[],items:[]}); state.retry.mockClear(); });
+const show = () => render(<MemoryRouter><MeFeed /></MemoryRouter>);
+describe('personal feed truth states', () => {
+ it('asks a signed-out visitor to sign in instead of claiming all clear', () => { show(); expect(screen.getByRole('link',{name:'Sign in'})).toHaveAttribute('href','/auth'); expect(screen.queryByText('All caught up')).not.toBeInTheDocument(); expect(screen.queryByText('Pay a bill')).not.toBeInTheDocument(); });
+ it('does not claim all clear while auth is loading', () => { state.authLoading=true; show(); expect(screen.queryByText('All caught up')).not.toBeInTheDocument(); expect(screen.queryByRole('link',{name:'Sign in'})).not.toBeInTheDocument(); });
+ it('shows a verified empty result for a signed-in user', () => { state.user={id:'test'}; show(); expect(screen.getByText('All caught up')).toBeInTheDocument(); });
+ it('does not turn a partial source failure into no urgent tasks', () => { state.user={id:'test'}; state.failed=['order']; show(); expect(screen.getByRole('alert')).toHaveTextContent('incomplete'); expect(screen.queryByText('All caught up')).not.toBeInTheDocument(); fireEvent.click(screen.getByRole('button',{name:'Retry'})); expect(state.retry).toHaveBeenCalledOnce(); });
+ it('keeps successful items visible alongside partial failure', () => { state.user={id:'test'}; state.failed=['order']; state.items=[{id:'n1',source:'notification',priority:'medium',titleEn:'Message from manager'}]; show(); expect(screen.getByText('Message from manager')).toBeInTheDocument(); expect(screen.getByRole('alert')).toBeInTheDocument(); });
+ it('does not claim empty success after a query failure', () => { state.user={id:'test'}; state.error=true; show(); expect(screen.getByRole('alert')).toBeInTheDocument(); expect(screen.queryByText('All caught up')).not.toBeInTheDocument(); });
+});

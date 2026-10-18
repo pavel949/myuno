@@ -10,8 +10,8 @@
  *  - orders (status=pending, customer is current user) → medium priority
  *  - concierge_journeys (latest)                       → personalised tail
  *
- * All errors are swallowed silently so a single failing source never blanks
- * the feed; missing tables are tolerated for forward compatibility.
+ * Partial results remain visible, but failed sources are reported explicitly.
+ * An unavailable source must never be presented as an all-clear state.
  */
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -46,13 +46,14 @@ function safeArray<T>(rows: T[] | null | undefined): T[] {
   return Array.isArray(rows) ? rows : [];
 }
 
-async function fetchFeed(userId: string): Promise<MeFeedItem[]> {
+async function fetchFeed(userId: string): Promise<{ items: MeFeedItem[]; failedSources: FeedSource[] }> {
   const horizon = new Date(Date.now() + 30 * DAY).toISOString().slice(0, 10);
   const items: MeFeedItem[] = [];
+  const failedSources: FeedSource[] = [];
 
   // 1) Compliance — high priority
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('compliance_filings')
       .select('id, obligation_code, due_date, status, created_at')
       .eq('user_id', userId)
@@ -60,6 +61,7 @@ async function fetchFeed(userId: string): Promise<MeFeedItem[]> {
       .lte('due_date', horizon)
       .order('due_date', { ascending: true })
       .limit(10);
+    if (error) throw error;
     for (const r of safeArray(data)) {
       const code = (r.obligation_code as string) ?? 'compliance';
       items.push({
@@ -77,17 +79,18 @@ async function fetchFeed(userId: string): Promise<MeFeedItem[]> {
         createdAt: (r.created_at as string) ?? new Date().toISOString(),
       });
     }
-  } catch { /* silent */ }
+  } catch { failedSources.push('compliance'); }
 
   // 2) Unread notifications — medium
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('notification_deliveries')
       .select('id, subject, body, channel, scheduled_for, created_at')
       .eq('user_id', userId)
       .is('read_at', null)
       .order('scheduled_for', { ascending: false })
       .limit(8);
+    if (error) throw error;
     for (const r of safeArray(data)) {
       items.push({
         id: `notif-${r.id}`,
@@ -106,17 +109,18 @@ async function fetchFeed(userId: string): Promise<MeFeedItem[]> {
           new Date().toISOString(),
       });
     }
-  } catch { /* silent */ }
+  } catch { failedSources.push('notification'); }
 
   // 3) Pending orders — medium
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('orders')
       .select('id, order_number, order_type, total_amount, currency, status, created_at')
       .eq('customer_user_id', userId)
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(6);
+    if (error) throw error;
     for (const r of safeArray(data)) {
       items.push({
         id: `order-${r.id}`,
@@ -132,16 +136,17 @@ async function fetchFeed(userId: string): Promise<MeFeedItem[]> {
         createdAt: (r.created_at as string) ?? new Date().toISOString(),
       });
     }
-  } catch { /* silent */ }
+  } catch { failedSources.push('order'); }
 
   // 4) Latest concierge journey — low (personal recommendations)
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('concierge_journeys')
       .select('id, primary_cta, reasoning, created_at, recommended_routes')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(1);
+    if (error) throw error;
     const j = safeArray(data)[0];
     if (j) {
       items.push({
@@ -158,7 +163,7 @@ async function fetchFeed(userId: string): Promise<MeFeedItem[]> {
         createdAt: (j.created_at as string) ?? new Date().toISOString(),
       });
     }
-  } catch { /* silent */ }
+  } catch { failedSources.push('journey'); }
 
   // Sort by priority then date
   const order: Record<FeedPriority, number> = { high: 0, medium: 1, low: 2 };
@@ -168,15 +173,16 @@ async function fetchFeed(userId: string): Promise<MeFeedItem[]> {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  return items;
+  return { items, failedSources };
 }
 
 export function useMeFeed() {
   const { user } = useAuth();
-  return useQuery({
+  const query = useQuery({
     queryKey: ['me-feed', user?.id ?? null],
-    queryFn: () => (user ? fetchFeed(user.id) : Promise.resolve([] as MeFeedItem[])),
+    queryFn: () => (user ? fetchFeed(user.id) : Promise.resolve({ items: [] as MeFeedItem[], failedSources: [] as FeedSource[] })),
     enabled: !!user,
     staleTime: 60_000,
   });
+  return { ...query, data: query.data?.items, failedSources: query.data?.failedSources ?? [] };
 }

@@ -282,6 +282,11 @@ export default function ServicesIndex() {
 
       <MarketplaceServiceGrid search={searchQuery} />
 
+      <section aria-label={isRu ? 'Услуги по запросу' : 'Services on request'} className="space-y-1">
+        <h2 className="font-display text-lg">{isRu ? 'Услуги по запросу' : 'Services on request'}</h2>
+        <p className="text-sm text-muted-foreground">{isRu ? 'Цены ниже ориентировочные. Исполнитель, время и итоговая стоимость подтверждаются после заявки.' : 'Prices below are estimates. The provider, time and final price are confirmed after your request.'}</p>
+      </section>
+
       {/* Popular Section */}
       {showPopularBlock && (
         <div>
