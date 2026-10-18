@@ -6,7 +6,7 @@ import { join, dirname } from 'node:path';
 import postgres from 'postgres';
 const id=(n:number)=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 const A=id(1),B=id(2), P=id(3),Q=id(4), team=id(10),admin=id(11),manager=id(12),director=id(13),guest=id(14),propertyOwner=id(15);
-let directory: string; let sql: ReturnType<typeof postgres>; let started = false;
+let directory: string; let sql: ReturnType<typeof postgres>; let started = false; let fixtureReady = false;
 const asRoot = process.getuid?.() === 0;
 const owner = asRoot ? 'nobody' : process.env.USER ?? '';
 const pgRoot = dirname(dirname(realpathSync(execFileSync('which', ['postgres'], { encoding: 'utf8' }).trim())));
@@ -26,7 +26,7 @@ async function as<T>(user: string | null, fn: (tx: postgres.TransactionSql) => P
 beforeAll(async()=>{
  directory=mkdtempSync(join(tmpdir(),'myuno-uno-team-'));chmodSync(directory,0o700);if(asRoot)chownSync(directory,65534,65534);
  run('initdb',['-D',join(directory,'data'),'-A','trust','--no-locale',...(libPath?['-c',`dynamic_library_path=${libPath}`]:[])]);
- run('pg_ctl',['-D',join(directory,'data'),'-l',join(directory,'pg.log'),'-o',`-k ${directory} -p 55443 -c listen_addresses=''${libPath?` -c dynamic_library_path=${libPath}`:''}`,'-w','start']);started=true;
+ run('pg_ctl',['-D',join(directory,'data'),'-l',join(directory,'pg.log'),'-o',`-k ${directory} -p 55443 -c listen_addresses='' -c jit=off${libPath?` -c dynamic_library_path=${libPath}`:''}`,'-w','start']);started=true;
  sql=postgres({host:directory,port:55443,database:'postgres',username:owner,password:'',max:2,onnotice:()=>{}});
  await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/uno-team-live-catalog.sql','utf8'));
  await sql`INSERT INTO user_roles(user_id,role) VALUES (${team},'uno_team'),(${admin},'admin')`;
@@ -53,8 +53,75 @@ beforeAll(async()=>{
  await sql.unsafe(readFileSync('drizzle/migrations/0030_preserve_juristic_platform_admin.sql','utf8'));
  await sql`INSERT INTO juristic_contacts(id) VALUES (${id(60)})`;
  await sql.unsafe(readFileSync('drizzle/migrations/0031_checked_onboarding_private_capability.sql','utf8'));
+ fixtureReady = true;
 },60000);
-afterAll(async()=>{if(sql)await sql.end();if(started)run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','stop']);if(directory)rmSync(directory,{recursive:true,force:true});});
+// Diagnostic only: run after every assertion, never warm up a timed security test.
+// These are the same SELECTs/actor as the legacy-mode denial cases below.
+async function profileTeamQueries() {
+ for (const table of ['property_owners', 'crm_tasks', 'ledger_entries']) {
+  const actualRows: Partial<Record<'on' | 'off', number>> = {};
+  for (const jit of ['on', 'off'] as const) {
+   const startedAt = performance.now();
+   try {
+    await as(team, async tx => {
+     await tx.unsafe("SET LOCAL statement_timeout = '10s'");
+     await tx.unsafe(`SET LOCAL jit = ${jit}`);
+     const [settings] = await tx`SELECT version() AS version, current_user AS role,
+       current_setting('request.jwt.claim.sub') AS actor,
+       current_setting('jit') AS jit, pg_jit_available() AS jit_available,
+       current_setting('jit_above_cost') AS jit_above_cost,
+       current_setting('jit_inline_above_cost') AS jit_inline_above_cost,
+       current_setting('jit_optimize_above_cost') AS jit_optimize_above_cost`;
+     const [row] = await tx.unsafe(`EXPLAIN (ANALYZE, BUFFERS, SETTINGS, FORMAT JSON) SELECT id FROM ${table}`);
+     const explain = row['QUERY PLAN'][0];
+     const plan = explain.Plan;
+     actualRows[jit] = plan['Actual Rows'];
+     console.info('[E28_JIT_PROFILE]', JSON.stringify({ table, jit, settings,
+       elapsedMs: performance.now() - startedAt,
+       planningMs: explain['Planning Time'], executionMs: explain['Execution Time'],
+       estimatedCost: plan['Total Cost'], estimatedRows: plan['Plan Rows'],
+       actualRows: plan['Actual Rows'], actualLoops: plan['Actual Loops'],
+       sharedHitBlocks: plan['Shared Hit Blocks'], sharedReadBlocks: plan['Shared Read Blocks'],
+       localHitBlocks: plan['Local Hit Blocks'], localReadBlocks: plan['Local Read Blocks'],
+       jitDetails: explain.JIT ?? null }));
+    });
+   } catch (error) {
+    // A bounded diagnostic failure is evidence, not a substitute for assertions.
+    console.warn('[E28_JIT_PROFILE]', JSON.stringify({ table, jit,
+      elapsedMs: performance.now() - startedAt,
+      error: error instanceof Error ? error.message : String(error) }));
+   }
+  }
+  const comparable = actualRows.on !== undefined && actualRows.off !== undefined;
+  console.info('[E28_JIT_PROFILE]', JSON.stringify({ table, comparison: {
+    actualRows, equivalent: comparable ? actualRows.on === actualRows.off : null,
+    deniedInBoth: comparable ? actualRows.on === 0 && actualRows.off === 0 : null,
+  } }));
+  // For this denied actor, zero root rows proves the exact SELECT returns the
+  // same empty result in both modes. A timeout leaves equivalence unproven.
+  if (comparable) {
+   expect(actualRows.on).toBe(0);
+   expect(actualRows.off).toBe(actualRows.on);
+  }
+ }
+}
+afterAll(async () => {
+ try {
+  if (fixtureReady && process.env.E28_JIT_PROFILE === '1') await profileTeamQueries();
+ } finally {
+  try {
+   if (sql) await sql.end({ timeout: 5 });
+  } finally {
+   try {
+    if (started) run('pg_ctl', ['-D', join(directory, 'data'), '-m', 'immediate', '-t', '10', 'stop']);
+   } finally {
+    if (directory) rmSync(directory, { recursive: true, force: true });
+   }
+  }
+ }
+ // Six diagnostic statements have their own 10s DB limit; this is teardown's
+ // budget only. All security tests retain Vitest's existing 5s deadline.
+}, 90000);
 describe('E2.8 exact live-catalog least privilege',()=>{
  it.each(['properties','orders','property_documents','crm_contacts','property_bookings','property_financials','property_owners','staff_members','property_reports','crm_tasks','ledger_entries'])('generic uno_team alone cannot read %s in legacy mode',async table=>{expect(await as(team,tx=>tx.unsafe(`SELECT id FROM ${table}`))).toHaveLength(0);});
  it('legacy manager retains company property and CRM module rights, never another company',async()=>{

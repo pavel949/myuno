@@ -46,6 +46,7 @@ jobs:
       - name: Unit and isolated PostgreSQL tests
         run: npm test -- --maxWorkers=2
         env:
+          E28_JIT_PROFILE: "1"
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
 
       - name: Lint
