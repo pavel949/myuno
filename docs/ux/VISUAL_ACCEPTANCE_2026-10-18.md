@@ -27,3 +27,11 @@ Scope: MyUNO (`pavel949/myuno`). This is an incremental visual review, not a cer
 4. Long Russian names and actions must remain understandable. Test wrapping, truncation disclosure, 44 px touch targets, visible focus and horizontal overflow.
 5. Preserve filters and browser back navigation, loading/error/empty states and canonical domain writers.
 6. Evidence status is separate: source changed; tests passed; visually accepted; published; live workflow accepted. Never infer the last three from CI alone.
+
+## Live follow-up and regression fixes, 14:20–14:25 UTC
+
+- Authenticated homepage loaded after publication, but a visible, empty `Coachmarks` dialog left a full-screen dimming backdrop. DOM confirmed an overlay with no tooltip content. Source only handled a missing FINAL target, leaving missing first/intermediate targets blocking the page.
+- Fix: tie each measurement to its target, remeasure when activated, skip absent targets, render/lock scrolling only with a measured target, provide Escape dismissal and dialog naming. Fixed overlay positioning uses viewport coordinates; tooltip height stays within the viewport.
+- Regression experiment: original source fails all four new missing-target/Escape cases; corrected source passes all seven coachmark tests, including the three existing cases.
+- User-reported language mix found exactly in `OwnerManagementLanding` RU title/section/SEO and neighboring owner entry surfaces. Russian management labels and check-in terminology translated; English labels, prices, commissions and destination routes preserved. Two focused locale tests pass. This is a bounded owner-route fix, not proof every platform translation is finished.
+- Lovable publication dialog confirmed “Your website was updated”; public version.json reports buildTime 2026-10-18T14:17:17.816Z. Initial browser inspection retained old card presentation. A native browser hard reload at 14:25–14:26 UTC then visibly showed actual listing titles and translated highlights (Пешком до пляжа, Бассейн, Кондиционер), confirming those PR99 changes on production. This is not acceptance of every role or workflow.

@@ -33,7 +33,7 @@ export default function OwnerManagementLanding() {
     <LandingShell
       eyebrow={{ ru: 'Для собственников', en: 'For property owners' }}
       title={{
-        ru: 'Full Management — ваша вилла или кондо в надёжных руках',
+        ru: 'Полное управление — ваша вилла или квартира в надёжных руках',
         en: 'Full Management — your villa or condo in safe hands',
       }}
       subtitle={{
@@ -66,7 +66,7 @@ export default function OwnerManagementLanding() {
           icon: Brush,
           title: { ru: 'Эксплуатация', en: 'Operations' },
           desc: {
-            ru: 'Уборка, бельё, мелкий ремонт, чек-ин 24/7, бассейн и сад — всё на нас.',
+            ru: 'Уборка, бельё, мелкий ремонт, заселение 24/7, бассейн и сад — всё на нас.',
             en: 'Cleaning, linen, minor repairs, 24/7 check-in, pool and garden — handled.',
           },
         },
@@ -74,7 +74,7 @@ export default function OwnerManagementLanding() {
           icon: Shield,
           title: { ru: 'Прозрачные финансы', en: 'Transparent finance' },
           desc: {
-            ru: 'Каждое движение — в кабинете собственника. Месячный P&L и выплаты по графику.',
+            ru: 'Каждое движение — в кабинете собственника. Ежемесячный отчёт о доходах и расходах и выплаты по графику.',
             en: 'Every entry visible in the owner portal. Monthly P&L and on-schedule payouts.',
           },
         },
@@ -109,7 +109,7 @@ export default function OwnerManagementLanding() {
         />
       }
       seoTitle={{
-        ru: 'Управление виллами и кондо на Пхукете — Full Management myUNO',
+        ru: 'Полное управление виллами и квартирами на Пхукете — myUNO',
         en: 'Villa and condo management in Phuket — myUNO Full Management',
       }}
       seoDescription={{
@@ -119,13 +119,13 @@ export default function OwnerManagementLanding() {
     >
       <div className="rounded-none border border-border bg-card p-6">
         <h2 className="text-xl font-semibold mb-4">
-          {t({ ru: 'Что входит в Full Management', en: 'What full management includes' })}
+          {t({ ru: 'Что входит в полное управление', en: 'What full management includes' })}
         </h2>
         <LandingChecklist
           items={[
             { ru: 'Поиск и проверка гостей', en: 'Guest sourcing and screening' },
             { ru: 'Каналы: Booking, Airbnb, Agoda, myUNO', en: 'Channels: Booking, Airbnb, Agoda, myUNO' },
-            { ru: 'Чек-ин / чек-аут 24/7', en: '24/7 check-in / check-out' },
+            { ru: 'Заселение и выезд круглосуточно', en: '24/7 check-in / check-out' },
             { ru: 'Уборка и смена белья', en: 'Cleaning and linen' },
             { ru: 'Мелкий ремонт и эксплуатация', en: 'Minor repairs and ops' },
             { ru: 'Динамические цены и каналы продаж', en: 'Dynamic pricing and sales channels' },

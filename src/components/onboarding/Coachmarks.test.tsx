@@ -77,3 +77,36 @@ describe('Coachmarks target lifecycle', () => {
   });
 });
 
+
+
+describe('Coachmarks missing target safety', () => {
+  it('skips a missing first target and shows an actionable next step', () => {
+    render(<><div data-coach="next-best-action">Action</div><div data-coach="all-apps">Apps</div><Coachmarks /></>);
+    act(() => { vi.advanceTimersByTime(400); });
+    expect(screen.getByRole('dialog', { name: 'What to do now' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Close tip' })).toBeTruthy();
+  });
+
+  it('skips a missing middle target without an empty overlay', () => {
+    render(<><div data-coach="why-chip">Role</div><div data-coach="all-apps">Apps</div><Coachmarks /></>);
+    openTour();
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByRole('dialog', { name: 'All apps at hand' })).toBeTruthy();
+  });
+
+  it('never blocks the page when every target is missing', () => {
+    render(<Coachmarks />);
+    act(() => { vi.advanceTimersByTime(400); });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.body.style.overflow).toBe('auto');
+  });
+
+  it('allows Escape to dismiss and restores scrolling', () => {
+    render(<Fixture />);
+    openTour();
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.body.style.overflow).toBe('auto');
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!)).toEqual({ dismissed_at: Date.now() });
+  });
+});
