@@ -20,6 +20,8 @@ import { PropertySearchSheet } from './PropertySearchSheet';
 interface AirbnbSearchBarProps {
   onSearch: (params: SearchParams) => void;
   className?: string;
+  /** Initial URL filters when arriving from public discovery. */
+  initialParams?: SearchParams;
 }
 
 export interface SearchParams {
@@ -71,7 +73,7 @@ const POPULAR_BEACHES = [
   'nai-yang', 'mai-khao', 'rawai', 'chalong'
 ];
 
-export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
+export function AirbnbSearchBar({ onSearch, className, initialParams }: AirbnbSearchBarProps) {
   const { language } = useLanguage();
   const { districts: dbDistricts } = usePropertyQuickFilters();
   const { propertyTypes } = usePropertyFilterOptions();
@@ -96,15 +98,15 @@ export function AirbnbSearchBar({ onSearch, className }: AirbnbSearchBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeField, setActiveField] = useState<string | null>(null);
   
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
-  const [checkIn, setCheckIn] = useState<Date | undefined>();
-  const [checkOut, setCheckOut] = useState<Date | undefined>();
-  const [adults, setAdults] = useState(2);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>(() => initialParams?.locations ?? []);
+  const [checkIn, setCheckIn] = useState<Date | undefined>(() => initialParams?.checkIn);
+  const [checkOut, setCheckOut] = useState<Date | undefined>(() => initialParams?.checkOut);
+  const [adults, setAdults] = useState(() => initialParams?.guests ?? 2);
   const [children, setChildren] = useState(0);
-  const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>([]);
-  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>([]);
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [instantBooking, setInstantBooking] = useState(false);
+  const [selectedBedrooms, setSelectedBedrooms] = useState<string[]>(() => initialParams?.bedrooms ?? []);
+  const [selectedPropertyTypes, setSelectedPropertyTypes] = useState<string[]>(() => initialParams?.propertyTypes ?? []);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(() => initialParams?.amenities ?? []);
+  const [instantBooking, setInstantBooking] = useState(() => initialParams?.instantBooking ?? false);
 
   const totalGuests = adults + children;
   const nights = checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;

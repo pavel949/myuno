@@ -31,6 +31,7 @@ export default defineConfig(({ mode, command }) => {
 
   return {
     server: {
+      allowedHosts: ["terminal.local"],
       // `true` is more reliable than `::` on Windows / embedded browser previews (Cursor Simple Browser).
       host: true,
       port: 8080,
