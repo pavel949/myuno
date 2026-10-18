@@ -27,6 +27,10 @@ interface ActiveCompanyContextValue {
   /** Switch to a different company — invalidates all cached data */
   setActiveCompanyId: (id: string) => void;
   isLoading: boolean;
+  /** Membership lookup failed; do not interpret this as an empty company list. */
+  isError: boolean;
+  error: Error | null;
+  refetch: () => Promise<unknown>;
 }
 
 const ActiveCompanyContext = createContext<ActiveCompanyContextValue>({
@@ -34,6 +38,9 @@ const ActiveCompanyContext = createContext<ActiveCompanyContextValue>({
   activeCompany: null,
   setActiveCompanyId: () => {},
   isLoading: true,
+  isError: false,
+  error: null,
+  refetch: async () => undefined,
 });
 
 const STORAGE_KEY = 'uno-active-company-id';
@@ -52,13 +59,13 @@ interface MCMemberRow {
 }
 
 export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(() => {
     try { return localStorage.getItem(STORAGE_KEY); } catch { /* ignored */ return null; }
   });
 
-  const { data: companies = [], isLoading } = useQuery({
+  const { data: companies = [], isLoading: membershipLoading, isError, error, refetch } = useQuery({
     queryKey: ['user-companies', user?.id],
     queryFn: async (): Promise<UserCompanyMembership[]> => {
       if (!user) return [];
@@ -78,6 +85,8 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
     },
     enabled: !!user,
   });
+
+  const isLoading = authLoading || membershipLoading;
 
   const activeCompany = useMemo(() => {
     if (companies.length === 0) return null;
@@ -113,7 +122,7 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
 
   return React.createElement(
     ActiveCompanyContext.Provider,
-    { value: { companies, activeCompany, setActiveCompanyId, isLoading } },
+    { value: { companies, activeCompany, setActiveCompanyId, isLoading, isError, error, refetch } },
     children
   );
 }
@@ -121,3 +130,4 @@ export function ActiveCompanyProvider({ children }: { children: ReactNode }) {
 export function useActiveCompany() {
   return useContext(ActiveCompanyContext);
 }
+

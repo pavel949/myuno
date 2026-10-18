@@ -56,18 +56,14 @@ function normalizeEmail(value: unknown): string {
     .toLowerCase();
 }
 
-function mapCompanyRoleToStaffRole(role: string): { staffRole: string; customTitle: string | null } {
-  switch (role) {
-    case 'director':
-      return { staffRole: 'admin', customTitle: 'Director' };
-    case 'manager':
-      return { staffRole: 'manager', customTitle: null };
-    case 'admin':
-      return { staffRole: 'admin', customTitle: null };
-    case 'accountant':
-      return { staffRole: 'staff', customTitle: 'Accountant' };
-    default:
-      return { staffRole: 'staff', customTitle: null };
+async function findUserByEmail(supabase: ReturnType<typeof createServiceClient>, email: string) {
+  for (let page = 1; ; page++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw error;
+    const users = data?.users || [];
+    const user = users.find((candidate) => candidate.email?.toLowerCase() === email);
+    if (user) return user;
+    if (users.length < 1000) return null;
   }
 }
 
@@ -98,18 +94,11 @@ Deno.serve(async (req) => {
     const callerId = callerUser.id;
 
     const body = await req.json();
-    const { company_id, full_name, email, phone, role } = body;
+    const { company_id, full_name, email, phone, role, action } = body;
     const normalizedEmail = normalizeEmail(email);
 
-    if (!company_id || !full_name || !normalizedEmail || !role) {
+    if (!company_id) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: corsHeaders });
-    }
-
-    if (!EMAIL_ASCII_REGEX.test(normalizedEmail)) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid email format. Please use a valid latin email like name@example.com' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
 
     // Check caller is director/admin
@@ -125,106 +114,104 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Insufficient permissions' }), { status: 403, headers: corsHeaders });
     }
 
-    // Generate password
-    const tempPassword = generatePassword(16);
+    // Read-only rollout probe: authenticate and authorize before advertising support.
+    // Never resolve/create an invited identity or mutate any state on this path.
+    if (action === 'capabilities') {
+      return new Response(JSON.stringify({ contract_version: 2 }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    // Create auth user (or reuse existing one)
-    let newUserId: string | null = null;
-    let isNewUser = false;
+    if (!company_id || !full_name || !normalizedEmail || !role) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: corsHeaders });
+    }
 
-    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-      email: normalizedEmail,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: { full_name },
-    });
-
-    if (authError) {
-      const message = authError.message?.toLowerCase() || '';
-      const alreadyExists = message.includes('already') || message.includes('registered');
-
-      if (!alreadyExists) {
-        return new Response(JSON.stringify({ error: authError.message }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-
-      const { data: listed, error: listError } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
-      if (listError) throw listError;
-
-      const existingUser = listed?.users?.find(
-        (u) => (u.email || '').toLowerCase() === normalizedEmail
+    if (!EMAIL_ASCII_REGEX.test(normalizedEmail)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid email format. Please use a valid latin email like name@example.com' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
 
-      if (!existingUser) {
-        return new Response(JSON.stringify({ error: 'User exists but could not be resolved by email' }), {
-          status: 409,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+    if (typeof role !== 'string' || !Object.hasOwn(ROLE_DEFAULT_PERMISSIONS, role)) {
+      return new Response(JSON.stringify({ error: 'Invalid role' }), { status: 400, headers: corsHeaders });
+    }
+
+    // Resolve only Auth identity. Directory rows are independent employment records.
+    const tempPassword = generatePassword(16);
+    let resolvedUser = await findUserByEmail(supabase, normalizedEmail);
+    let isNewUser = false;
+    if (!resolvedUser) {
+      const { data, error } = await supabase.auth.admin.createUser({
+        email: normalizedEmail,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { full_name },
+      });
+      if (error) {
+        // A concurrent invitation may have created the Auth identity.
+        if (!['email_exists', 'user_already_exists'].includes(error.code || '')) throw error;
+        resolvedUser = await findUserByEmail(supabase, normalizedEmail);
+      } else {
+        resolvedUser = data.user;
+        isNewUser = true;
       }
-
-      newUserId = existingUser.id;
-    } else {
-      newUserId = authUser.user.id;
-      isNewUser = true;
     }
+    if (!resolvedUser) throw new Error('Failed to resolve team member user id');
+    const newUserId = resolvedUser.id;
 
-    if (!newUserId) {
-      throw new Error('Failed to resolve team member user id');
+    const readMember = async () => {
+      const { data, error } = await supabase.from('management_company_members')
+        .select('id, is_active').eq('company_id', company_id).eq('user_id', newUserId).maybeSingle();
+      if (error) throw error;
+      return data;
+    };
+    let member = await readMember();
+    let createdMembership = false;
+    if (!member) {
+      const { data, error } = await supabase.from('management_company_members').insert({
+        company_id, user_id: newUserId, role, is_active: true,
+      }).select('id, is_active').single();
+      if (error) {
+        if (error.code !== '23505') throw error;
+        member = await readMember();
+      } else {
+        member = data;
+        createdMembership = true;
+      }
     }
-
-    const { error: profileError } = await supabase.from('profiles').upsert({
-      id: newUserId,
-      full_name,
-      phone: phone || null,
-    }, { onConflict: 'id' });
-    if (profileError) throw profileError;
-
-    const { error: roleError } = await supabase.from('user_roles').upsert({
-      user_id: newUserId,
-      role: 'staff',
-    }, { onConflict: 'user_id,role' });
-    if (roleError) throw roleError;
-
-    const { error: memberError } = await supabase.from('management_company_members').upsert({
-      company_id,
-      user_id: newUserId,
-      role,
-      is_active: true,
-    }, { onConflict: 'company_id,user_id' });
-    if (memberError) throw memberError;
-
-    const defaultPerms = ROLE_DEFAULT_PERMISSIONS[role] || ROLE_DEFAULT_PERMISSIONS.staff;
+    if (!member) throw new Error('Failed to persist company membership');
+    if (!member.is_active) {
+      return new Response(JSON.stringify({ error: 'Existing company membership is inactive' }), {
+        status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // Repeated invitations must not reset roles, profiles, or custom permissions.
+    if (!createdMembership) {
+      return new Response(JSON.stringify({ user_id: newUserId, company_member_id: member.id,
+        email_sent: false, created_new_user: isNewUser }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (isNewUser) {
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: newUserId, full_name, phone: phone || null,
+      }, { onConflict: 'id' });
+      if (profileError) throw profileError;
+      const { error: roleError } = await supabase.from('user_roles').upsert({
+        user_id: newUserId, role: 'staff',
+      }, { onConflict: 'user_id,role' });
+      if (roleError) throw roleError;
+    }
+    const defaultPerms = ROLE_DEFAULT_PERMISSIONS[role];
     const permModules = role === 'accountant' ? ACCOUNTANT_MODULES : MODULES;
     const permRows = permModules.map(module => ({
-      company_id,
-      user_id: newUserId,
-      module,
-      can_view: defaultPerms.can_view,
-      can_edit: defaultPerms.can_edit,
-      granted_by: callerId,
+      company_id, user_id: newUserId, module,
+      can_view: defaultPerms.can_view, can_edit: defaultPerms.can_edit, granted_by: callerId,
     }));
-
-    const { error: permissionsError } = await supabase
-      .from('team_member_permissions')
-      .upsert(permRows, { onConflict: 'company_id,user_id,module' });
+    const { error: permissionsError } = await supabase.from('team_member_permissions')
+      .upsert(permRows, { onConflict: 'company_id,user_id,module', ignoreDuplicates: true });
     if (permissionsError) throw permissionsError;
-
-    const { staffRole, customTitle } = mapCompanyRoleToStaffRole(role);
-    const { error: staffError } = await supabase.from('staff_members').upsert({
-      id: newUserId,
-      owner_id: callerId,
-      company_id,
-      name: full_name,
-      role: staffRole,
-      custom_title: customTitle,
-      phone: phone || null,
-      email: normalizedEmail,
-      is_active: true,
-      pay_type: 'salary',
-    }, { onConflict: 'id' });
-    if (staffError) throw staffError;
 
     // Get company name for email
     const { data: company } = await supabase
@@ -289,19 +276,20 @@ Deno.serve(async (req) => {
 <p><a href="https://myuno.app">Log in to myUNO</a></p>
 </body></html>`;
 
-      await resend.emails.send({
+      const { error: emailError } = await resend.emails.send({
         from: 'myUNO <noreply@myuno.app>',
         to: [normalizedEmail],
         subject,
         html: bodyHtml,
       });
+      if (emailError) throw emailError;
       emailSent = true;
     } catch (emailErr) {
       console.error('Failed to send welcome email:', emailErr);
       // Don't fail the whole operation if email fails
     }
 
-    return new Response(JSON.stringify({ user_id: newUserId, email_sent: emailSent, created_new_user: isNewUser }), {
+    return new Response(JSON.stringify({ user_id: newUserId, company_member_id: member.id, email_sent: emailSent, created_new_user: isNewUser }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });

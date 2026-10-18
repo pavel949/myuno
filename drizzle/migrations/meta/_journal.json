@@ -253,6 +253,27 @@
       "when": 1792288800000,
       "tag": "0035_final_order_mutation_containment",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792288800001,
+      "tag": "0036_operating_space_setup",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792288800002,
+      "tag": "0037_staff_company_member_link",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1792288800003,
+      "tag": "0038_management_terms_configuration",
+      "breakpoints": true
     }
   ]
 }

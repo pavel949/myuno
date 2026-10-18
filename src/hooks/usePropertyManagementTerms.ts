@@ -1,3 +1,7 @@
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+import type { AccountingPolicyDraft } from '@/lib/managementTermsConfiguration';
+import { managementTermsIssues, managementTermsIssueMessage } from '@/lib/managementTermsConfiguration';
+import type { Json } from '@/integrations/supabase/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -5,7 +9,7 @@ import { toast } from 'sonner';
 
 export type ExpenseParty = 'owner' | 'manager' | 'split';
 
-export interface ExpenseResponsibility {
+export type ExpenseResponsibility = Partial<{
   cleaning: ExpenseParty;
   electricity: ExpenseParty;
   water: ExpenseParty;
@@ -15,7 +19,7 @@ export interface ExpenseResponsibility {
   cam_fees: ExpenseParty;
   insurance: ExpenseParty;
   marketing: ExpenseParty;
-}
+}>;
 
 export interface ManagementTerms {
   id: string;
@@ -33,6 +37,8 @@ export interface ManagementTerms {
   valid_from: string | null;
   valid_until: string | null;
   notes: string | null;
+  accounting_policy?: AccountingPolicyDraft | null;
+  owner_notification_defaults?: Record<string, boolean> | null;
   status: 'draft' | 'active' | 'pending_approval' | 'archived';
   created_at: string;
   updated_at: string;
@@ -48,17 +54,7 @@ export interface ManagementTerms {
 
 export type ManagementTermsUpdate = Partial<Omit<ManagementTerms, 'id' | 'created_at' | 'updated_at' | 'property'>>;
 
-export const DEFAULT_EXPENSES: ExpenseResponsibility = {
-  cleaning: 'manager',
-  electricity: 'owner',
-  water: 'owner',
-  internet: 'owner',
-  repairs_minor: 'manager',
-  repairs_major: 'owner',
-  cam_fees: 'owner',
-  insurance: 'owner',
-  marketing: 'manager',
-};
+export const DEFAULT_EXPENSES: ExpenseResponsibility = {};
 // Type-safe: property_management_terms exists in Database schema
 const db = supabase;
 
@@ -66,7 +62,7 @@ export function usePropertyManagementTerms(propertyId?: string) {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['management-terms', propertyId],
+    queryKey: ['management-terms', propertyId, user?.id],
     enabled: !!user && !!propertyId,
     queryFn: async () => {
       const { data, error } = await db
@@ -83,18 +79,22 @@ export function usePropertyManagementTerms(propertyId?: string) {
 
 export function useAllManagementTerms() {
   const { user } = useAuth();
+  const { activeCompany, isLoading: companyLoading, isError: companyError } = useActiveCompany();
+  const companyId = activeCompany?.company_id ?? null;
 
   return useQuery({
-    queryKey: ['management-terms-all', user?.id],
-    enabled: !!user,
+    queryKey: ['management-terms-all', user?.id, companyId],
+    enabled: !!user && !companyLoading && !companyError,
     queryFn: async () => {
-      const { data, error } = await db
+      let query = db
         .from('property_management_terms')
         .select(`
           *,
-          property:properties(id, title_en, title_ru, management_type, address)
+          property:properties!inner(id, title_en, title_ru, management_type, address, management_company_id)
         `)
         .order('updated_at', { ascending: false });
+      if (companyId) query = query.eq('property.management_company_id', companyId);
+      const { data, error } = await query;
 
       if (error) throw error;
       return (data || []) as unknown as ManagementTerms[];
@@ -109,6 +109,8 @@ export function useCreateManagementTerms() {
   return useMutation({
     mutationFn: async (data: ManagementTermsUpdate & { property_id: string }) => {
       if (!user) throw new Error('Not authenticated');
+      const issues = managementTermsIssues(data);
+      if (issues.length) throw new Error(managementTermsIssueMessage(issues[0], false));
 
       const payload = {
         property_id: data.property_id,
@@ -119,12 +121,14 @@ export function useCreateManagementTerms() {
         commission_base: data.commission_base ?? 'gross',
         revenue_split_owner: data.revenue_split_owner ?? null,
         revenue_split_manager: data.revenue_split_manager ?? null,
-        expense_responsibility: (data.expense_responsibility ?? DEFAULT_EXPENSES) as unknown as Record<string, string>,
+        expense_responsibility: (data.expense_responsibility ?? {}) as unknown as Record<string, string>,
         payment_day: data.payment_day ?? null,
         payment_currency: data.payment_currency ?? 'THB',
         valid_from: data.valid_from ?? null,
         valid_until: data.valid_until ?? null,
         notes: data.notes ?? null,
+        accounting_policy: (data.accounting_policy ?? null) as Json,
+        owner_notification_defaults: (data.owner_notification_defaults ?? null) as Json,
         status: data.status ?? 'draft',
       };
 
@@ -149,6 +153,10 @@ export function useUpdateManagementTerms() {
 
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: ManagementTermsUpdate }) => {
+      // The database trigger checks the merged row on activation. Partial edits
+      // validate only provided values here, so status-only approval remains valid.
+      const issues = managementTermsIssues(updates, 'draft');
+      if (issues.length) throw new Error(managementTermsIssueMessage(issues[0], false));
       const payload: Record<string, unknown> = { ...updates };
       if (updates.expense_responsibility) {
         payload.expense_responsibility = updates.expense_responsibility as unknown as Record<string, string>;
@@ -191,3 +199,4 @@ export function useDeleteManagementTerms() {
     },
   });
 }
+

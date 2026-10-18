@@ -1,14 +1,15 @@
-import { useState, lazy, Suspense, useMemo } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
 
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { VendorDocumentsTab } from '@/components/owner/vendors/VendorDocumentsTab';
 import { PageContainer } from '@/components/uno/PageContainer';
-import { MemberPermissionsSheet } from '@/components/owner/team/MemberPermissionsSheet';
-import { useMemberPermissions, MODULES, useCanManagePermissions } from '@/hooks/useTeamPermissions';
+import { useCanManagePermissions } from '@/hooks/useTeamPermissions';
 import { MemberActivitySheet } from '@/components/owner/team/MemberActivitySheet';
+import { StaffAccountLinkSheet } from '@/components/owner/team/StaffAccountLinkSheet';
 import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -80,8 +81,6 @@ import {
   useUpdateStaffMember,
   useDeactivateStaffMember,
   useStaffPropertyAssignments,
-  useAssignStaffToProperty,
-  useRemoveStaffAssignment,
   STAFF_ROLES,
   PAY_TYPES,
   StaffMember,
@@ -181,71 +180,6 @@ function staffToForm(s: StaffMember): StaffFormState {
   };
 }
 
-/** Compact permission indicators for staff card */
-function StaffPermissionBadges({ userId, isRu, onClick }: { userId: string; isRu: boolean; onClick: () => void }) {
-  const { data: permissions = [] } = useMemberPermissions(userId);
-  const t = (en: string, ru: string) => isRu ? ru : en;
-  
-  if (permissions.length === 0) {
-    return (
-      <button
-        onClick={onClick}
-        className="mt-3 pt-3 border-t border-border/40 flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors w-full"
-      >
-        <ShieldCheck className="h-3.5 w-3.5" />
-        <span>{t('Set up permissions', 'Настроить права')}</span>
-      </button>
-    );
-  }
-
-  const moduleLabels: Record<string, { short: string; shortRu: string }> = {
-    properties: { short: 'Prop', shortRu: 'Объ' },
-    finance: { short: 'Fin', shortRu: 'Фин' },
-    crm: { short: 'CRM', shortRu: 'CRM' },
-    tasks: { short: 'Tasks', shortRu: 'Зад' },
-    bookings: { short: 'Book', shortRu: 'Бр' },
-    reports: { short: 'Rep', shortRu: 'Отч' },
-    staff: { short: 'Staff', shortRu: 'Ком' },
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      className="mt-3 pt-3 border-t border-border/40 w-full group"
-    >
-      <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
-        <ShieldCheck className="h-3 w-3" />
-        {t('Permissions', 'Права доступа')}
-        <Pencil className="h-3 w-3 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-      </p>
-      <div className="flex flex-wrap gap-1">
-        {MODULES.map(mod => {
-          const perm = permissions.find(p => p.module === mod.key);
-          const hasView = perm?.can_view ?? false;
-          const hasEdit = perm?.can_edit ?? false;
-          const label = isRu ? (moduleLabels[mod.key]?.shortRu ?? mod.key) : (moduleLabels[mod.key]?.short ?? mod.key);
-          
-          return (
-            <span
-              key={mod.key}
-              className={`text-[10px] px-1.5 py-0.5 rounded-none font-medium ${
-                hasEdit
-                  ? 'bg-primary/10 text-primary'
-                  : hasView
-                    ? 'bg-muted text-muted-foreground'
-                    : 'bg-muted/40 text-muted-foreground/40 line-through'
-              }`}
-              title={`${isRu ? mod.labelRu : mod.labelEn}: ${hasEdit ? (isRu ? 'Редактирование' : 'Edit') : hasView ? (isRu ? 'Просмотр' : 'View') : (isRu ? 'Нет доступа' : 'No access')}`}
-            >
-              {label}
-            </span>
-          );
-        })}
-      </div>
-    </button>
-  );
-}
-
 /** Rich staff card component */
 function StaffCard({
   staff,
@@ -255,7 +189,7 @@ function StaffCard({
   onReactivate,
   properties,
   onViewTasks,
-  onEditPermissions,
+  onOpenAccess,
   onViewActivity,
   canManage,
 }: {
@@ -266,7 +200,7 @@ function StaffCard({
   onReactivate: () => void;
   properties: { property_id: string; title: string; title_ru: string }[];
   onViewTasks: () => void;
-  onEditPermissions: () => void;
+  onOpenAccess: () => void;
   onViewActivity: () => void;
   canManage: boolean;
 }) {
@@ -368,8 +302,16 @@ function StaffCard({
               </p>
             )}
 
-            {/* Permission badges - clickable */}
-            <StaffPermissionBadges userId={staff.id} isRu={isRu} onClick={onEditPermissions} />
+            {/* Directory identity is not an authenticated account or a permission grant. */}
+            <button
+              type="button"
+              onClick={onOpenAccess}
+              aria-label={t('Open Access & Delegation', 'Открыть доступ и делегирование')}
+              className="mt-3 pt-3 border-t border-border/40 flex min-h-11 items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors w-full"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>{t('Access & Delegation', 'Доступ и делегирование')}</span>
+            </button>
 
             {/* Footer: hire date */}
             <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between">
@@ -425,13 +367,13 @@ function StaffCard({
                 <ClipboardList className="h-4 w-4 mr-2" />
                 {t('View Tasks', 'Задачи')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={onEditPermissions}>
+              <DropdownMenuItem onClick={onOpenAccess}>
                 <ShieldCheck className="h-4 w-4 mr-2" />
-                {t('Permissions', 'Права доступа')}
+                {t('Access & Delegation', 'Доступ и делегирование')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onViewActivity}>
                 <History className="h-4 w-4 mr-2" />
-                {t('Activity Log', 'Лог активности')}
+                {t('Account & Activity', 'Аккаунт и активность')}
               </DropdownMenuItem>
               {canManage && (
                 <>
@@ -459,18 +401,17 @@ function StaffCard({
 
 export default function StaffPage() {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const { symbol: curSym } = useCityCurrency();
   const isRu = language === 'ru';
 
 
-  const { data: staff, isLoading } = useAllStaffMembers();
+  const { data: staff, isLoading, error: staffError, refetch: refetchStaff } = useAllStaffMembers();
   const createMutation = useCreateStaffMember();
   const updateMutation = useUpdateStaffMember();
   const deactivateMutation = useDeactivateStaffMember();
   const { allProperties } = useMyProperties();
-  const { activeCompany } = useActiveCompany();
-  const assignStaff = useAssignStaffToProperty();
-  const removeAssignment = useRemoveStaffAssignment();
+  const { activeCompany, isLoading: companyLoading, isError: companyError, refetch: refetchCompany } = useActiveCompany();
   const canManage = useCanManagePermissions();
 
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -482,8 +423,26 @@ export default function StaffPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<StaffRole | 'all'>('all');
   // addMemberOpen removed — unified into Sheet form
-  const [permissionsTarget, setPermissionsTarget] = useState<{ userId: string; name: string; staffId: string; customTitle?: string } | null>(null);
   const [activityTarget, setActivityTarget] = useState<{ userId: string; name: string } | null>(null);
+  const [accountTarget, setAccountTarget] = useState<StaffMember | null>(null);
+  const [saving, setSaving] = useState(false);
+  const saveInFlight = useRef(false);
+  const saveAttempt = useRef(0);
+  const contextKey = `${user?.id ?? ''}:${activeCompany?.company_id ?? ''}`;
+  const currentContext = useRef(contextKey);
+  currentContext.current = contextKey;
+  const mounted = useRef(true);
+  const [uiContext, setUiContext] = useState(contextKey);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  useEffect(() => {
+    if (uiContext === contextKey) return;
+    saveAttempt.current += 1;
+    saveInFlight.current = false;
+    setSaving(false); setSheetOpen(false); setEditing(null); setForm(DEFAULT_FORM);
+    setStaffFilter('active'); setPageTab('staff'); setDeactivateTarget(null);
+    setSearchQuery(''); setRoleFilter('all'); setActivityTarget(null); setAccountTarget(null);
+    setUiContext(contextKey);
+  }, [contextKey, uiContext]);
 
   const t = (en: string, ru: string) => isRu ? ru : en;
   const navigate = useNavigate();
@@ -510,6 +469,12 @@ export default function StaffPage() {
   };
 
   const handleSave = async () => {
+    if (saveInFlight.current) return;
+    const requestContext = contextKey;
+    const attempt = ++saveAttempt.current;
+    const stillCurrent = () => mounted.current && currentContext.current === requestContext && saveAttempt.current === attempt;
+    saveInFlight.current = true;
+    setSaving(true);
     const payload: StaffMemberInsert = {
       name: form.name,
       role: form.role,
@@ -526,10 +491,27 @@ export default function StaffPage() {
     if (form.photo_url) (payload as any).photo_url = form.photo_url;
 
     try {
+      if (!editing && form.sendCredentials) {
+        // Old deployed invite handlers write a second directory row. Probe an
+        // authenticated read-only v2 branch BEFORE creating even the directory.
+        try {
+          if (!activeCompany?.company_id) throw new Error('No company');
+          const { data, error } = await supabase.functions.invoke('invite-team-member', {
+            body: { action: 'capabilities', company_id: activeCompany.company_id },
+          });
+          if (!stillCurrent()) return;
+          if (error || data?.contract_version !== 2) throw error || new Error('Unsupported invitation contract');
+        } catch {
+          if (stillCurrent()) toastSonner.error(isRu ? 'Приглашения пока недоступны. Введённые данные сохранены в форме.' : 'Invitations are not available yet. Your entries remain in the form.');
+          return;
+        }
+      }
+      if (!stillCurrent()) return;
       if (editing) {
         await updateMutation.mutateAsync({ id: editing.id, ...payload });
       } else {
-        await createMutation.mutateAsync(payload);
+        const created = await createMutation.mutateAsync(payload);
+        if (!stillCurrent()) return;
 
         // Send login credentials if toggle is on and email is provided
         if (form.sendCredentials && form.email && activeCompany?.company_id) {
@@ -543,14 +525,20 @@ export default function StaffPage() {
                 role: form.role === 'admin' ? 'manager' : 'staff',
               },
             });
+            if (!stillCurrent()) return;
             if (error) throw error;
             if (data?.error) throw new Error(data.error);
-            toastSonner.success(
-              isRu 
-                ? `Данные для входа отправлены на ${form.email}` 
-                : `Login credentials sent to ${form.email}`
-            );
+            if (!data?.company_member_id || !created?.id) throw new Error(isRu ? 'Аккаунт компании не подтверждён' : 'Company account was not confirmed');
+            // The invitation never creates a second directory row. Linking this
+            // record to an existing company member is a separate explicit action.
+            setAccountTarget(created);
+            if (data.email_sent === true) {
+              toastSonner.success(isRu ? 'Приглашение отправлено. Выберите аккаунт для связи.' : 'Invitation sent. Select the account to link.');
+            } else {
+              toastSonner.error(isRu ? 'Аккаунт доступен, но письмо не отправлено.' : 'Account is available, but the email was not sent.');
+            }
           } catch (inviteErr: any) {
+            if (!stillCurrent()) return;
             console.error('Failed to send credentials:', inviteErr);
             toastSonner.error(
               isRu 
@@ -560,9 +548,11 @@ export default function StaffPage() {
           }
         }
       }
-      setSheetOpen(false);
+      if (stillCurrent()) setSheetOpen(false);
     } catch {
       // errors handled by mutation
+    } finally {
+      if (stillCurrent()) { saveInFlight.current = false; setSaving(false); }
     }
   };
 
@@ -570,7 +560,7 @@ export default function StaffPage() {
     await updateMutation.mutateAsync({ id: s.id, is_active: true });
   };
 
-  const isBusy = createMutation.isPending || updateMutation.isPending;
+  const isBusy = saving || createMutation.isPending || updateMutation.isPending;
 
   const properties = allProperties.map(p => ({ ...p, id: p.property_id }));
 
@@ -612,7 +602,7 @@ export default function StaffPage() {
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
               <div>
-                <p className={`text-2xl font-bold ${color}`}>{isLoading ? '–' : value}</p>
+                <p className={`text-2xl font-bold ${color}`}>{isLoading || companyLoading || staffError || companyError ? '–' : value}</p>
                 <p className="text-xs text-muted-foreground">{label}</p>
               </div>
             </CardContent>
@@ -663,7 +653,14 @@ export default function StaffPage() {
       </div>
 
       {/* Staff grid */}
-      {isLoading ? (
+      {staffError || companyError ? (
+        <Card role="alert">
+          <CardContent className="py-10 text-center space-y-3">
+            <p className="font-medium text-destructive">{companyError ? t('Could not load company', 'Не удалось загрузить компанию') : t('Could not load staff', 'Не удалось загрузить сотрудников')}</p>
+            <Button variant="outline" onClick={() => companyError ? refetchCompany() : refetchStaff()}>{t('Retry', 'Повторить')}</Button>
+          </CardContent>
+        </Card>
+      ) : isLoading || companyLoading ? (
         <div className="grid md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-48 w-full rounded-none" />)}
         </div>
@@ -671,14 +668,17 @@ export default function StaffPage() {
         <Card>
           <CardContent className="py-16 text-center">
             <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="font-semibold text-lg mb-1">{t('No staff yet', 'Нет сотрудников')}</p>
+            <p className="font-semibold text-lg mb-1">{(staff?.length ?? 0) > 0 ? t('No matching staff', 'Сотрудники не найдены') : t('No staff yet', 'Нет сотрудников')}</p>
             <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
-              {t(
-                'Add your cleaners, maintenance staff, managers and other team members to manage assignments and contacts',
-                'Добавьте уборщиц, мастеров, управляющих и других сотрудников для управления назначениями и контактами'
-              )}
+              {(staff?.length ?? 0) > 0
+                ? t('Try a different search or clear the filters.', 'Измените поиск или сбросьте фильтры.')
+                : t('Add staff when you are ready. You can configure the workspace before inviting your team.', 'Добавьте сотрудников, когда будете готовы. Настроить рабочее пространство можно до приглашения команды.')}
             </p>
-            {canManage && (
+            {(staff?.length ?? 0) > 0 ? (
+              <Button variant="outline" onClick={() => { setSearchQuery(''); setRoleFilter('all'); setStaffFilter('all'); }}>
+                {t('Clear filters', 'Сбросить фильтры')}
+              </Button>
+            ) : canManage && (
               <Button onClick={openCreate}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 {t('Add first staff member', 'Добавить первого сотрудника')}
@@ -698,8 +698,8 @@ export default function StaffPage() {
               onReactivate={() => handleReactivate(s)}
               properties={allProperties}
               onViewTasks={() => navigate(`/mc/tasks?assignee=${s.id}`)}
-              onEditPermissions={() => setPermissionsTarget({ userId: s.id, name: s.name, staffId: s.id, customTitle: s.custom_title })}
-              onViewActivity={() => setActivityTarget({ userId: s.id, name: s.name })}
+              onOpenAccess={() => setPageTab('access')}
+              onViewActivity={() => setAccountTarget(s)}
               canManage={canManage}
             />
           ))}
@@ -707,7 +707,7 @@ export default function StaffPage() {
       )}
 
       {/* Unified Edit / Create Sheet */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      <Sheet open={uiContext === contextKey && sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader className="mb-6">
             <SheetTitle className="flex items-center gap-2">
@@ -860,20 +860,6 @@ export default function StaffPage() {
               />
             </section>
 
-            {/* Property Assignments (edit mode only) */}
-            {editing && allProperties.length > 0 && (
-              <section className="space-y-3">
-                <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t('Property Assignments', 'Назначения на объекты')}</h4>
-                <StaffPropertyAssignments
-                  staffId={editing.id}
-                  properties={allProperties}
-                  isRu={isRu}
-                  onAssign={(propertyId) => assignStaff.mutate({ staffId: editing.id, propertyId })}
-                  onRemove={(assignmentId) => removeAssignment.mutate(assignmentId)}
-                />
-              </section>
-            )}
-
             {/* Staff Documents (edit mode only) */}
             {editing && (
               <section className="space-y-3">
@@ -894,7 +880,7 @@ export default function StaffPage() {
       </Sheet>
 
       {/* Deactivation confirm dialog */}
-      <AlertDialog open={!!deactivateTarget} onOpenChange={open => { if (!open) setDeactivateTarget(null); }}>
+      <AlertDialog open={uiContext === contextKey && !!deactivateTarget} onOpenChange={open => { if (!open) setDeactivateTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('Deactivate Staff Member?', 'Деактивировать сотрудника?')}</AlertDialogTitle>
@@ -926,90 +912,19 @@ export default function StaffPage() {
 
       {/* AddTeamMemberDialog removed — consolidated into Sheet form above */}
 
-      {/* Member Permissions Sheet */}
-      <MemberPermissionsSheet
-        open={!!permissionsTarget}
-        onOpenChange={(open) => { if (!open) setPermissionsTarget(null); }}
-        userId={permissionsTarget?.userId ?? null}
-        userName={permissionsTarget?.name ?? ''}
-        customTitle={permissionsTarget?.customTitle}
-        staffId={permissionsTarget?.staffId}
-      />
+      {uiContext === contextKey && accountTarget && <StaffAccountLinkSheet open staffId={accountTarget.id} staffName={accountTarget.name}
+        onOpenChange={open => { if (!open) setAccountTarget(null); }}
+        onViewActivity={(userId, name) => setActivityTarget({ userId, name })} />}
 
-      {/* Member Activity Sheet */}
+      {/* Only a freshly verified linked Auth account reaches the activity sheet. */}
       <MemberActivitySheet
-        open={!!activityTarget}
+        open={uiContext === contextKey && !!activityTarget}
         onOpenChange={(open) => { if (!open) setActivityTarget(null); }}
-        userId={activityTarget?.userId}
-        memberName={activityTarget?.name}
+        userId={uiContext === contextKey ? activityTarget?.userId : undefined}
+        memberName={uiContext === contextKey ? activityTarget?.name : undefined}
       />
     </PageContainer>
   );
 }
 
-/** Inline component for property assignments in the edit form */
-function StaffPropertyAssignments({
-  staffId,
-  properties,
-  isRu,
-  onAssign,
-  onRemove,
-}: {
-  staffId: string;
-  properties: { property_id: string; title: string; title_ru: string }[];
-  isRu: boolean;
-  onAssign: (propertyId: string) => void;
-  onRemove: (assignmentId: string) => void;
-}) {
-  const { data: assignments, isLoading } = useStaffPropertyAssignments(staffId);
-  const assignedIds = new Set((assignments || []).map(a => a.property_id));
-  const unassigned = properties.filter(p => !assignedIds.has(p.property_id));
 
-  return (
-    <div className="space-y-2">
-      {isLoading ? (
-        <Skeleton className="h-8 w-full" />
-      ) : (
-        <>
-          {(assignments || []).length > 0 && (
-            <div className="space-y-1.5">
-              {(assignments || []).map(a => {
-                const prop = properties.find(p => p.property_id === a.property_id);
-                return (
-                  <div key={a.id} className="flex items-center justify-between py-2 px-3 rounded-none bg-muted/50">
-                    <span className="text-sm flex items-center gap-2">
-                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                      {prop ? (isRu ? prop.title_ru || prop.title : prop.title) : a.property_id.slice(0, 8)}
-                    </span>
-                    <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => onRemove(a.id)}>
-                      {isRu ? 'Убрать' : 'Remove'}
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {unassigned.length > 0 && (
-            <Select onValueChange={onAssign}>
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder={isRu ? '+ Добавить объект' : '+ Add property'} />
-              </SelectTrigger>
-              <SelectContent>
-                {unassigned.map(p => (
-                  <SelectItem key={p.property_id} value={p.property_id}>
-                    {isRu ? p.title_ru || p.title : p.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-
-          {(assignments || []).length === 0 && unassigned.length === 0 && (
-            <p className="text-xs text-muted-foreground">{isRu ? 'Нет объектов для назначения' : 'No properties available'}</p>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
