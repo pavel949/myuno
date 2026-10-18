@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { accountingPolicyIsValid, MANAGEMENT_EXPENSE_KEYS, managementTermsIssues, optionalConfigurationNumber } from '../managementTermsConfiguration';
+import { accountingPolicyIsValid, MANAGEMENT_EXPENSE_KEYS, managementTermsIssues, optionalConfigurationNumber } from './managementTermsConfiguration';
 import type { ManagementTermsUpdate } from '@/hooks/usePropertyManagementTerms';
 const expenses = Object.fromEntries(MANAGEMENT_EXPENSE_KEYS.map(key => [key, 'owner'])) as ManagementTermsUpdate['expense_responsibility'];
 describe('user-entered management configuration', () => {

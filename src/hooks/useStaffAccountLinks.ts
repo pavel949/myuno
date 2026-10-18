@@ -21,7 +21,7 @@ function parseSetup(value: unknown): StaffAccountSetup {
       || !(row.email === null || nonempty(row.email)) || members.has(row.id) || users.has(row.user_id)) {
       throw Error('Account setup unavailable');
     }
-    members.set(row.id, { id: row.id, user_id: row.user_id, name: row.name, email: row.email });
+    members.set(row.id, { id: row.id, user_id: row.user_id, name: row.name, email: row.email === null ? null : String(row.email) });
     users.add(row.user_id);
   }
   const staffIds = new Set<string>();
