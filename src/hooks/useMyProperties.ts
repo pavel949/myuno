@@ -27,6 +27,8 @@ export interface UnifiedProperty {
   bathrooms: number | null;
   price_per_night: number | null;
   currency: string;
+  /** Actual properties.currency for display; legacy currency remains unchanged. */
+  record_currency?: string | null;
   source: 'owned' | 'managed' | 'company';
   complex_id: string | null;
   project_id: string | null;
@@ -96,6 +98,7 @@ export function useMyProperties() {
         bathrooms: p.bathrooms ?? null,
         price_per_night: p.price_per_night ?? null,
         currency: p.deposit_currency || 'THB',
+        record_currency: p.currency ?? null,
         source: 'owned' as const,
         complex_id: p.complex_id || null,
         project_id: p.project_id || null,
@@ -121,6 +124,7 @@ export function useMyProperties() {
       bathrooms: p.bathrooms,
       price_per_night: p.price_per_night,
       currency: p.currency,
+      record_currency: p.record_currency ?? null,
       source: 'managed' as const,
       complex_id: p.complex_id || null,
       project_id: p.project_id || null,
@@ -147,6 +151,7 @@ export function useMyProperties() {
       bathrooms: p.bathrooms ?? null,
       price_per_night: p.price_per_night ?? null,
       currency: p.deposit_currency || p.currency || 'THB',
+      record_currency: p.currency ?? null,
       source: 'company' as const,
       complex_id: p.complex_id || null,
       project_id: p.project_id || null,
