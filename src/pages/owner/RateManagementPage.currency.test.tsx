@@ -52,9 +52,9 @@ describe('Rates use stored denomination, never city or deposit', () => {
     expect(screen.getByTestId('legacy-currency')).toHaveTextContent('THB');
   });
   it('keeps the base-price numeric update unchanged and never rewrites deposit/currency', async () => {
-    mount(); fireEvent.click(screen.getByRole('button', { name: 'Edit', exact: true }));
+    mount(); fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
     expect(screen.getByRole('spinbutton')).toHaveValue(7000);
-    fireEvent.click(screen.getByRole('button', { name: 'Save', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(state.update).toHaveBeenCalledWith({ price_per_night: 7000 }));
     expect(state.insert).not.toHaveBeenCalled();
     expect(state.property.deposit_currency).toBe('USD');
@@ -70,18 +70,18 @@ describe('Rates use stored denomination, never city or deposit', () => {
   });
   it('uses the saved season currency in the editor without altering its numeric payload', () => {
     state.rates = [season('USD')]; mount();
-    fireEvent.click(screen.getAllByRole('button', { name: 'Edit', exact: true })[1]);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit' })[1]);
     expect(screen.getByText('Nightly Rate (USD)')).toBeVisible();
     expect(screen.getByDisplayValue('8000')).toBeVisible();
     expect(screen.queryByText(/% vs base/)).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Save', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     const payload = state.save.mock.calls[0][0];
     expect(payload.season.nightly_rate).toBe(8000);
     expect(payload.season).not.toHaveProperty('currency');
     expect(payload.basePricePerNight).toBe(7000);
   });
   it('does not invent a currency for the new-season writer which omits it', () => {
-    mount(); fireEvent.click(screen.getByRole('button', { name: 'Season', exact: true }));
+    mount(); fireEvent.click(screen.getByRole('button', { name: 'Season' }));
     expect(screen.getByText('Nightly Rate (currency not specified)')).toBeVisible();
     expect(screen.getByText('Base price: 7,000 THB/night')).toBeVisible();
     expect(state.save).not.toHaveBeenCalled();
