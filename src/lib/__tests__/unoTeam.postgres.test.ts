@@ -99,10 +99,8 @@ async function profileTeamQueries() {
   } }));
   // For this denied actor, zero root rows proves the exact SELECT returns the
   // same empty result in both modes. A timeout leaves equivalence unproven.
-  if (comparable) {
-   expect(actualRows.on).toBe(0);
-   expect(actualRows.off).toBe(actualRows.on);
-  }
+  for (const rows of Object.values(actualRows)) expect(rows).toBe(0);
+  if (comparable) expect(actualRows.off).toBe(actualRows.on);
  }
 }
 afterAll(async () => {
