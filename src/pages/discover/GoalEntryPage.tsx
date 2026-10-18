@@ -11,7 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { GOAL_ENTRIES, isGoalId, type GoalLink } from '@/lib/nav/goalEntries';
-import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
+import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import '@/styles/cinematic-home.css';
 import { cn } from '@/lib/utils';
 import ServicesIndex from '@/pages/services/ServicesIndex';
@@ -20,6 +20,7 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
   const { language } = useLanguage();
 
   if (goal === 'services') return <ServicesIndex />;
+  if (goal === 'stay') return <PropertySearchRedirect defaults={{ mode: 'rent' }} />;
 
   if (!isGoalId(goal)) return <Navigate to={APP_ROUTES.DISCOVER} replace />;
   const entry = GOAL_ENTRIES[goal];
@@ -51,7 +52,7 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
   return (
     <AppLayout title={title} usePageContainer={false}>
       <div className="mx-auto w-full journey-page max-w-6xl px-4 py-8 sm:py-12">
-        {(goal === 'stay' || goal === 'buy') && <nav aria-label={t({ en: 'Goals', ru: 'Цели', th: 'เป้าหมาย' })} className="mb-8 flex gap-1 overflow-x-auto scrollbar-hide border-b border-border">
+        {goal === 'buy' && <nav aria-label={t({ en: 'Goals', ru: 'Цели', th: 'เป้าหมาย' })} className="mb-8 flex gap-1 overflow-x-auto scrollbar-hide border-b border-border">
           {(['stay', 'buy'] as const).map((id) => {
             const g = GOAL_ENTRIES[id];
             const active = id === goal;
@@ -79,7 +80,6 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
           </p>
         </header>
 
-        {goal === 'stay' && <section className="journey-primary" aria-label={t({ en: 'Find a home', ru: 'Найти жильё', th: 'ค้นหาที่พัก' })}><HomeDiscoverySearch rentalOnly /></section>}
         <section className="grid gap-3 sm:grid-cols-3">
           {entry.primary.map((l) => <Tile key={l.path} link={l} large />)}
         </section>

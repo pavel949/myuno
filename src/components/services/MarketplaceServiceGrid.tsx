@@ -18,6 +18,16 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
   const q = search.trim().toLowerCase();
   const list = (data ?? []).filter((s) => !q || `${s.name_en} ${s.name_ru ?? ''} ${s.provider?.name ?? ''}`.toLowerCase().includes(q));
 
+  // Confirmed absence is context, not the primary task. Keep failures/loading
+  // separate so unavailable supply is never inferred from a failed read.
+  if (!isLoading && !isError && data?.length === 0) {
+    return <p role="status" className="text-sm text-muted-foreground">
+      {L('Онлайн-запись пока недоступна. Можно оставить заявку ниже.',
+        'Online booking is not available yet. You can request a service below.',
+        'ยังไม่มีบริการจองออนไลน์ ส่งคำขอด้านล่างได้')}
+    </p>;
+  }
+
   return (
     <section aria-labelledby="bookable-services">
       <div className="flex items-center gap-2 mb-3">

@@ -80,8 +80,6 @@ import {
   useUpdateStaffMember,
   useDeactivateStaffMember,
   useStaffPropertyAssignments,
-  useAssignStaffToProperty,
-  useRemoveStaffAssignment,
   STAFF_ROLES,
   PAY_TYPES,
   StaffMember,
@@ -469,8 +467,6 @@ export default function StaffPage() {
   const deactivateMutation = useDeactivateStaffMember();
   const { allProperties } = useMyProperties();
   const { activeCompany } = useActiveCompany();
-  const assignStaff = useAssignStaffToProperty();
-  const removeAssignment = useRemoveStaffAssignment();
   const canManage = useCanManagePermissions();
 
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -674,8 +670,8 @@ export default function StaffPage() {
             <p className="font-semibold text-lg mb-1">{t('No staff yet', 'Нет сотрудников')}</p>
             <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
               {t(
-                'Add your cleaners, maintenance staff, managers and other team members to manage assignments and contacts',
-                'Добавьте уборщиц, мастеров, управляющих и других сотрудников для управления назначениями и контактами'
+                'Add your cleaners, maintenance staff, managers and other team members to manage their contacts',
+                'Добавьте уборщиц, мастеров, управляющих и других сотрудников для управления контактами'
               )}
             </p>
             {canManage && (
@@ -860,17 +856,16 @@ export default function StaffPage() {
               />
             </section>
 
-            {/* Property Assignments (edit mode only) */}
-            {editing && allProperties.length > 0 && (
+            {/* Assignment persistence is unavailable; do not offer no-op controls. */}
+            {editing && (
               <section className="space-y-3">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">{t('Property Assignments', 'Назначения на объекты')}</h4>
-                <StaffPropertyAssignments
-                  staffId={editing.id}
-                  properties={allProperties}
-                  isRu={isRu}
-                  onAssign={(propertyId) => assignStaff.mutate({ staffId: editing.id, propertyId })}
-                  onRemove={(assignmentId) => removeAssignment.mutate(assignmentId)}
-                />
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    'Assigning employees to properties is currently unavailable. Assignments cannot be saved here.',
+                    'Назначение сотрудников на объекты сейчас недоступно. Сохранить назначения здесь нельзя.'
+                  )}
+                </p>
               </section>
             )}
 
@@ -944,72 +939,5 @@ export default function StaffPage() {
         memberName={activityTarget?.name}
       />
     </PageContainer>
-  );
-}
-
-/** Inline component for property assignments in the edit form */
-function StaffPropertyAssignments({
-  staffId,
-  properties,
-  isRu,
-  onAssign,
-  onRemove,
-}: {
-  staffId: string;
-  properties: { property_id: string; title: string; title_ru: string }[];
-  isRu: boolean;
-  onAssign: (propertyId: string) => void;
-  onRemove: (assignmentId: string) => void;
-}) {
-  const { data: assignments, isLoading } = useStaffPropertyAssignments(staffId);
-  const assignedIds = new Set((assignments || []).map(a => a.property_id));
-  const unassigned = properties.filter(p => !assignedIds.has(p.property_id));
-
-  return (
-    <div className="space-y-2">
-      {isLoading ? (
-        <Skeleton className="h-8 w-full" />
-      ) : (
-        <>
-          {(assignments || []).length > 0 && (
-            <div className="space-y-1.5">
-              {(assignments || []).map(a => {
-                const prop = properties.find(p => p.property_id === a.property_id);
-                return (
-                  <div key={a.id} className="flex items-center justify-between py-2 px-3 rounded-none bg-muted/50">
-                    <span className="text-sm flex items-center gap-2">
-                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                      {prop ? (isRu ? prop.title_ru || prop.title : prop.title) : a.property_id.slice(0, 8)}
-                    </span>
-                    <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => onRemove(a.id)}>
-                      {isRu ? 'Убрать' : 'Remove'}
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {unassigned.length > 0 && (
-            <Select onValueChange={onAssign}>
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder={isRu ? '+ Добавить объект' : '+ Add property'} />
-              </SelectTrigger>
-              <SelectContent>
-                {unassigned.map(p => (
-                  <SelectItem key={p.property_id} value={p.property_id}>
-                    {isRu ? p.title_ru || p.title : p.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-
-          {(assignments || []).length === 0 && unassigned.length === 0 && (
-            <p className="text-xs text-muted-foreground">{isRu ? 'Нет объектов для назначения' : 'No properties available'}</p>
-          )}
-        </>
-      )}
-    </div>
   );
 }

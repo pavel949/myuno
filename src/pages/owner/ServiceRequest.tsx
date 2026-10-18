@@ -48,6 +48,15 @@ export default function ServiceRequest() {
     special_instructions: '',
   });
 
+  const requestedPropertyId = searchParams.get('property');
+  useEffect(() => {
+    // URL context is a convenience, never a source of property access.
+    if (propertiesLoading || !requestedPropertyId ||
+        !allProperties.some(property => property.property_id === requestedPropertyId)) return;
+    // A refetch or URL update must not overwrite the user's selection.
+    setFormData(current => current.property_id ? current : { ...current, property_id: requestedPropertyId });
+  }, [requestedPropertyId, propertiesLoading, allProperties]);
+
   const serviceTypes = [
     { value: 'check_in', labelEn: 'Check-in', labelRu: 'Check-in', icon: Key, color: 'text-success' },
     { value: 'check_out', labelEn: 'Check-out', labelRu: 'Check-out', icon: Key, color: 'text-warning' },

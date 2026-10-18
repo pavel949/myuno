@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { propertySearchHref } from '@/lib/propertySearchQuery';
 import { useNavigate, useLocation, Outlet, Link } from 'react-router-dom';
 import {
   CalendarClock,
@@ -236,7 +237,17 @@ export function PropertyHubTabs() {
           <button
             key={tab.id}
             type="button"
-            onClick={() => navigate(tab.path)}
+            onClick={() => {
+              if (tab.path.startsWith(`${APP_ROUTES.PROPERTY_BROWSE}?`)) {
+                const target = new URLSearchParams(tab.path.split('?')[1]);
+                const params = new URLSearchParams(location.search);
+                // Explicit tab choice replaces mode/intent, but keeps the user's criteria.
+                params.delete('intent');
+                params.delete('quick');
+                target.forEach((value, key) => params.set(key, value));
+                navigate(propertySearchHref(params.toString()));
+              } else navigate(tab.path);
+            }}
             className={cn(
               'shrink-0 snap-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] sm:text-sm font-medium whitespace-nowrap transition-all leading-none',
               isActive

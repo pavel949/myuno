@@ -1,8 +1,8 @@
 /**
  * PropertySearchPage — Full catalog grid with filters
- * All primary filters live inside AirbnbSearchBar; this page reads them from URL.
+ * One shared app-style editor; all criteria are hydrated from the catalogue URL.
  */
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, Building2, ChevronDown, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -14,9 +14,13 @@ import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
 import { useManagementCompanies } from '@/hooks/useManagementCompanies';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BackButton } from '@/components/uno/BackButton';
-import { AirbnbSearchBar, SearchParams } from '@/components/property/AirbnbSearchBar';
+import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
+import { readPropertySearchQuery } from '@/lib/propertySearchQuery';
+import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
+import { serializeFilters } from '@/lib/propertyBrowseFilters';
+import '@/styles/cinematic-home.css';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
-import { PropertyCategoryIcons, matchesCategory, type PropertyMode } from '@/components/property/PropertyCategoryIcons';
+import { PropertyCategoryIcons, matchesCategory } from '@/components/property/PropertyCategoryIcons';
 import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues } from '@/lib/propertyCatalogServerFilters';
@@ -29,7 +33,6 @@ import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { OffplanCTASection } from '@/components/property/OffplanCTASection';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { differenceInDays } from 'date-fns';
-import { useCurrency } from '@/contexts/CurrencyContext';
 
 export default function PropertySearchPage() {
   const { language } = useLanguage();
@@ -37,43 +40,41 @@ export default function PropertySearchPage() {
   const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
   const isRu = language === 'ru';
 
-  const [propertyMode, setPropertyMode] = useState<PropertyMode>(
-    (searchParamsUrl.get('mode') as PropertyMode) || 'rent'
-  );
-
-  // Parse all search params from URL (set by AirbnbSearchBar)
-  const [searchParams, setSearchParams] = useState<SearchParams>(() => {
-    const checkInStr = searchParamsUrl.get('checkIn');
-    const checkOutStr = searchParamsUrl.get('checkOut');
-    const guestsStr = searchParamsUrl.get('guests');
-    const bedroomsStr = searchParamsUrl.get('bedrooms');
-    const typesStr = searchParamsUrl.get('types');
-    const amenitiesStr = searchParamsUrl.get('amenities');
-    const instantStr = searchParamsUrl.get('instant');
-    return {
-      locations: searchParamsUrl.get('district') ? [searchParamsUrl.get('district')!] : [],
-      checkIn: checkInStr ? new Date(checkInStr) : undefined,
-      checkOut: checkOutStr ? new Date(checkOutStr) : undefined,
-      guests: guestsStr ? parseInt(guestsStr, 10) : 2,
-      bedrooms: bedroomsStr ? bedroomsStr.split(',') : [],
-      propertyTypes: typesStr ? typesStr.split(',') : [],
-      amenities: amenitiesStr ? amenitiesStr.split(',') : [],
-      instantBooking: instantStr === '1',
-    };
-  });
-
-  const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const queryKey = searchParamsUrl.toString();
+  const state = useMemo(() => readPropertySearchQuery(new URLSearchParams(queryKey)), [queryKey]);
+  const { mode: propertyMode, search: searchParams, filterValues, categories: categoryFilters } = state;
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
   const { selectedId: focusedId, select: selectFocused } = useMapListSync();
-  const [searchRevision, setSearchRevision] = useState(0);
   const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
-  const [showMap, setShowMap] = useState(false);
-  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
-    searchParamsUrl.get('company') || null
-  );
+  const showMap = searchParamsUrl.get('view') === 'map';
+  const selectedCompanyId = searchParamsUrl.get('company');
+  const setSelectedCompanyId = (id: string | null) => {
+    const params = new URLSearchParams(searchParamsUrl);
+    if (id) params.set('company', id); else params.delete('company');
+    setSearchParamsUrl(params);
+  };
+  const setShowMap = (show: boolean) => {
+    const params = new URLSearchParams(searchParamsUrl);
+    if (show) params.set('view', 'map'); else params.delete('view');
+    setSearchParamsUrl(params);
+  };
+  const updateFilters = (values: FilterValues, categories = categoryFilters) => {
+    const params = new URLSearchParams(searchParamsUrl);
+    // Preserve legacy core values until explicitly edited in the primary form.
+    const editableKeys = new Set(Object.keys(filterValues).map(key => `f.${key}`));
+    [...params.keys()].filter(key => key === 'cats' || editableKeys.has(key)).forEach(key => params.delete(key));
+    params.delete('bedrooms');
+    params.delete('instant');
+    params.delete('f.bedrooms');
+    params.delete('f.instantBooking');
+    params.delete('amenities');
+    Object.entries(serializeFilters(values, categories)).forEach(([key, value]) => params.set(key, value));
+    setSearchParamsUrl(params);
+  };
+  const setFilterValues = (values: FilterValues) => updateFilters(values);
+  const setCategoryFilters = (categories: string[]) => updateFilters(filterValues, categories);
 
   // Calculate nights from selected dates
   const nights = useMemo(() => {
@@ -95,12 +96,12 @@ export default function PropertySearchPage() {
   // Core criteria have one editor (the search bar). Avoid a second conflicting
   // property type/district/party selection inside the advanced filter sheet.
   const advancedFilterConfig = useMemo(() => ({
-    sections: filterConfig.sections.filter(section => !['propertyType', 'district', 'bedrooms', 'listingType', 'guestsAtLeast', 'instantBooking'].includes(section.id)),
-  }), [filterConfig]);
+    sections: filterConfig.sections.filter(section => !['propertyType', 'district', 'listingType', 'guestsAtLeast', ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)),
+  }), [filterConfig, propertyMode]);
   const { data: companies = [] } = useManagementCompanies();
 
   const listingCatalogType = propertyMode === 'buy' ? 'sale' : 'rent';
-  const rentTenancy = searchParamsUrl.get('tenancy') === 'long' ? 'long' : 'short';
+  const rentTenancy = state.tenancy;
 
   const mergedFilterValues = useMemo(
     () => mergeSearchBarIntoFilterValues(filterValues, searchParams),
@@ -108,10 +109,14 @@ export default function PropertySearchPage() {
   );
 
   const serverFilters = useMemo((): PropertyFilters => {
-    const base = filterValuesToPropertyFilters(mergedFilterValues, {
+    const eligibleValues = { ...mergedFilterValues };
+    if (listingCatalogType === 'sale') delete eligibleValues.instantBooking;
+    const base = filterValuesToPropertyFilters(eligibleValues, {
       listingType: listingCatalogType,
-      minGuestsFromSearch: searchParams.guests,
-      instantBookingFromSearch: searchParams.instantBooking,
+      minGuestsFromSearch: listingCatalogType === 'rent' && state.hasGuestFilter ? searchParams.guests : undefined,
+      instantBookingFromSearch: listingCatalogType === 'rent' && searchParams.instantBooking,
+      saleIntent: state.saleIntent,
+      isQuickSale: listingCatalogType === 'sale' && state.isQuickSale,
       rentTenancy: listingCatalogType === 'rent' ? rentTenancy : undefined,
     });
     return {
@@ -125,6 +130,9 @@ export default function PropertySearchPage() {
     searchParams.instantBooking,
     selectedCompanyId,
     rentTenancy,
+    state.hasGuestFilter,
+    state.saleIntent,
+    state.isQuickSale,
   ]);
 
   const {
@@ -166,11 +174,6 @@ export default function PropertySearchPage() {
         if (!categoryFilters.every((cat) => matchesCategory(prop, cat))) return false;
       }
 
-      // Search-bar detail chips — taxonomy/category matching (not always DB amenity keys)
-      if (searchParams.amenities.length > 0) {
-        if (!searchParams.amenities.every((cat) => matchesCategory(prop, cat))) return false;
-      }
-
       return true;
     }) as unknown as Property[];
 
@@ -181,7 +184,7 @@ export default function PropertySearchPage() {
     sorted.sort((a, b) => comparePropertiesForSort(a, b, sortKey, sortMode));
 
     return sorted;
-  }, [infiniteData, searchParams, quickFilters, sortKey, categoryFilters, propertyMode]);
+  }, [infiniteData, quickFilters, sortKey, categoryFilters, propertyMode]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -191,60 +194,29 @@ export default function PropertySearchPage() {
     });
     count += searchParams.bedrooms.length;
     count += searchParams.propertyTypes.length;
-    count += searchParams.amenities.length;
+    count += categoryFilters.length;
     count += searchParams.locations.length;
     if (searchParams.instantBooking) count++;
     count += quickFilters.length;
     return count;
-  }, [filterValues, quickFilters, searchParams]);
-
-  const handleSearchUpdate = (params: SearchParams) => {
-    setSearchParams(params);
-    // Sync URL
-    const qp = new URLSearchParams(searchParamsUrl);
-    for (const key of ['district', 'checkIn', 'checkOut', 'guests', 'bedrooms', 'types', 'amenities', 'instant']) qp.delete(key);
-    if (params.locations.length > 0) qp.set('district', params.locations[0]);
-    if (params.checkIn) qp.set('checkIn', params.checkIn.toISOString());
-    if (params.checkOut) qp.set('checkOut', params.checkOut.toISOString());
-    if (params.guests) qp.set('guests', String(params.guests));
-    if (params.bedrooms.length > 0) qp.set('bedrooms', params.bedrooms.join(','));
-    if (params.propertyTypes.length > 0) qp.set('types', params.propertyTypes.join(','));
-    if (params.amenities.length > 0) qp.set('amenities', params.amenities.join(','));
-    if (params.instantBooking) qp.set('instant', '1');
-    qp.set('mode', propertyMode);
-    setSearchParamsUrl(qp, { replace: true });
-  };
+  }, [filterValues, quickFilters, searchParams, categoryFilters]);
 
   const clearAllFilters = () => {
-    setFilterValues({});
     setQuickFilters([]);
-    setCategoryFilters([]);
-    setSelectedCompanyId(null);
-    setSearchRevision(revision => revision + 1);
     const resetUrl = new URLSearchParams({ mode: propertyMode });
-    if (searchParamsUrl.has('tenancy')) resetUrl.set('tenancy', searchParamsUrl.get('tenancy')!);
-    setSearchParamsUrl(resetUrl, { replace: true });
-    setSearchParams({
-      locations: [],
-      checkIn: undefined,
-      checkOut: undefined,
-      guests: 2,
-      bedrooms: [],
-      propertyTypes: [],
-      amenities: [],
-      instantBooking: false,
-    });
+    if (propertyMode === 'rent') resetUrl.set('tenancy', rentTenancy);
+    setSearchParamsUrl(resetUrl);
   };
 
   return (
     <div className="min-h-screen bg-background">
         {/* Sticky header */}
-        <header className="sticky top-[var(--consumer-header-height,0px)] z-40 bg-background border-b">
+        <header className="bg-background border-b">
           <div className="px-4 pt-3 pb-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-start gap-2">
               <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0" />
-              <div className="flex-1">
-                <AirbnbSearchBar key={searchRevision} onSearch={handleSearchUpdate} initialParams={searchParams} />
+              <div className="flex-1 min-w-0 journey-primary property-search-editor">
+                <HomeDiscoverySearch key={queryKey} initialParams={searchParamsUrl} onSearch={params => setSearchParamsUrl(params)} />
               </div>
             </div>
           </div>
@@ -319,7 +291,14 @@ export default function PropertySearchPage() {
           </div>
         </header>
 
-        {/* Airbnb-style Category Ribbon */}
+        {categoryFilters.length > 0 && <div className="flex flex-wrap gap-2 px-4 py-2" aria-label={isRu ? 'Выбранные особенности' : 'Selected features'}>
+          {categoryFilters.map(id => {
+            const feature = PROPERTY_FEATURE_MAP.get(id);
+            const label = feature ? (isRu ? feature.labelRu : feature.labelEn) : id;
+            return <button type="button" key={id} className="min-h-11 border px-3 text-sm" aria-label={`${isRu ? 'Убрать' : 'Remove'} ${label}`} onClick={() => setCategoryFilters(categoryFilters.filter(value => value !== id))}>{label} ×</button>;
+          })}
+        </div>}
+        {/* Canonical feature controls, including legacy amenities bookmarks. */}
         <div className="border-b">
           <PropertyCategoryIcons
             selected={categoryFilters}

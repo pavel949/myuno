@@ -11,9 +11,10 @@
    fn: LocalizedServiceFunction;
    onClick?: () => void;
    compact?: boolean;
+   catalogue?: boolean;
  }
  
- export function ServiceFunctionCard({ fn, onClick, compact = false }: ServiceFunctionCardProps) {
+ export function ServiceFunctionCard({ fn, onClick, compact = false, catalogue = false }: ServiceFunctionCardProps) {
    const { language } = useLanguage();
    const isRu = language === 'ru';
  
@@ -21,6 +22,37 @@
      return `${getCurrencySymbol(currency)}${price.toLocaleString()}`;
    };
  
+   // Discovery uses one quiet, keyboard-accessible row action. Other placements
+   // retain their existing compact/default presentation.
+   if (catalogue) {
+     const titleId = `service-${fn.id}-title`;
+     const actionId = `service-${fn.id}-action`;
+     const descriptionId = `service-${fn.id}-description`;
+     const termsId = `service-${fn.id}-terms`;
+     return (
+       <article className="min-w-0 border-b border-border/60">
+         <button type="button" onClick={onClick} data-testid="service-request-card"
+           aria-labelledby={`${titleId} ${actionId}`} aria-describedby={`${descriptionId} ${termsId}`}
+           className="group w-full min-w-0 px-1 py-4 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary">
+           <span id={titleId} className="block font-medium text-base leading-snug text-foreground">{fn.name}</span>
+           <span id={descriptionId} className="mt-1 block text-sm leading-relaxed text-muted-foreground line-clamp-2">
+             {fn.includes.slice(0, 3).join(' · ')}
+           </span>
+           <span className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+             <span id={termsId} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+               <span className="font-medium text-primary">{isRu ? 'от' : 'from'} {formatPrice(fn.basePrice, fn.currency)}</span>{' '}
+               <span className="text-muted-foreground">{fn.estimatedTime}</span>{' '}
+               {fn.isUrgent && <span className="text-muted-foreground">{isRu ? 'Срочная заявка' : 'Urgent request'}</span>}
+             </span>
+             <span id={actionId} className="inline-flex min-h-6 items-center gap-1 text-sm font-medium text-primary group-hover:underline underline-offset-4">
+               {isRu ? 'Оставить заявку' : 'Request service'}<ChevronRight className="h-4 w-4" aria-hidden="true" />
+             </span>
+           </span>
+         </button>
+       </article>
+     );
+   }
+
    if (compact) {
      return (
        <Card 

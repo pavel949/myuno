@@ -87,6 +87,7 @@ jobs:
           done
           timeout 180s node scripts/qa/services-discovery-ui.mjs
           timeout 180s node scripts/qa/trip-planner-ui.mjs
+          timeout 180s node scripts/qa/unified-property-search-ui.mjs
           timeout 180s node scripts/qa/bookings-list-ui.mjs
           timeout 180s node scripts/qa/calendar-ui.mjs
           timeout 180s node scripts/qa/today-ui.mjs

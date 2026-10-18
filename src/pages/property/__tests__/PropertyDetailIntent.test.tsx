@@ -3,8 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import PropertyDetail from '../PropertyDetail';
+import { CompareProvider } from '@/components/property/PropertyCompare';
 import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
-const state = vi.hoisted(() => ({ property: { id: 'unit', project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', images: [], amenities: [], rentalTerms: { price_per_night: 2000, included_services: [], extra_services: [] } } }));
+const state = vi.hoisted(() => ({ property: { id: 'unit', rating: 0, project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', images: [], amenities: [], rentalTerms: { price_per_night: 2000, included_services: [], extra_services: [] } } }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: () => ({ data: state.property, isLoading: false }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (v: number) => String(v) }) }));
@@ -14,10 +15,8 @@ vi.mock('@/hooks/usePropertyUnavailableDates', () => ({ usePropertyUnavailableDa
 vi.mock('@/hooks/usePropertyListingQuality', () => ({ usePropertyMedia: () => ({ data: [] }), mediaAlt: () => '', mediaCaption: () => '' }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null, createRealEstateListingSchema: () => ({}) }));
 vi.mock('@/components/property', () => ({ IncludedServices: () => null, ExtraServices: () => null, UtilitiesInfo: () => null, CheckInDetails: () => null, GuestAssuranceCard: () => null, HouseRules: () => null, GuestExtraFeesDisplay: () => null, PropertyBookingCard: () => <button>Book rental</button>, MessageHostButton: ({ labelEn }: { labelEn: string }) => <button>{labelEn}</button> }));
-vi.mock('@/components/property/detail', () => ({ PropertyDetailGallery: () => null, PropertyDetailHighlights: () => null, PropertyDetailDateSheet: () => null, PropertyHeroFacts: () => null, PropertyDetailMobileBar: ({ isSaleListing }: { isSaleListing: boolean }) => <span data-testid="mobile-intent">{isSaleListing ? 'buy' : 'rent'}</span> }));
-vi.mock('@/components/property/PropertyShareSheet', () => ({PropertyShareSheet: () => null}));
-vi.mock('@/components/property/PropertyCompare', () => ({CompareButton: () => null}));
-vi.mock('@/components/property/PropertyPdfBrochure', () => ({PropertyPdfButton: () => null}));
+vi.mock('@/components/property/detail', () => ({ PropertyDetailGallery: () => <div data-testid="property-gallery" />, PropertyDetailHighlights: () => null, PropertyDetailDateSheet: () => null, PropertyHeroFacts: () => null, PropertyDetailMobileBar: ({ isSaleListing }: { isSaleListing: boolean }) => <span data-testid="mobile-intent">{isSaleListing ? 'buy' : 'rent'}</span> }));
+vi.mock('@/components/property/PropertyShareSheet', () => ({PropertyShareSheet: ({ children }: { children: React.ReactNode }) => <>{children}</>}));
 vi.mock('@/components/uno/FavoriteButton', () => ({FavoriteButton: () => null}));
 vi.mock('@/components/uno/BackButton', () => ({BackButton: () => null}));
 vi.mock('@/components/property/ProjectInfoCard', () => ({ProjectInfoCard: ({ mode }: { mode: string }) => <span data-testid="complex-mode">{mode}</span>}));
@@ -38,8 +37,27 @@ vi.mock('@/components/property/StayRulesSection', () => ({StayRulesSection: () =
 vi.mock('@/components/property/RoomCategoryOffers', () => ({RoomCategoryOffers: () => null}));
 vi.mock('@/components/reviews/ReviewsSection', () => ({ReviewsSection: () => null}));
 afterEach(() => { cleanup(); state.property.listing_type = 'rent'; state.property.listing_modes = ['rent','sale']; state.property.is_for_sale = true; state.property.sale_price = 5000000; });
-function mount(mode: string) { render(<MemoryRouter initialEntries={[`/property/unit?mode=${mode}`]}><Routes><Route path="/property/:id" element={<PropertyDetail />} /></Routes></MemoryRouter>); }
+function mount(mode: string) { render(<MemoryRouter initialEntries={[`/property/unit?mode=${mode}`]}><Routes><Route path="/property/:id" element={<CompareProvider><PropertyDetail /></CompareProvider>} /></Routes></MemoryRouter>); }
 describe('actual property detail purchase/rental intent', () => {
+  it('names Share and reveals labelled Compare/PDF actions at mobile breakpoints', () => {
+    mount('rent');
+    expect(screen.getByRole('button', { name: 'Share' })).toHaveAttribute('aria-label', 'Share');
+    screen.getByText('More').closest('details')!.open = true;
+    for (const name of ['Compare', 'PDF']) {
+      const action = screen.getByRole('button', { name });
+      expect(action).toHaveClass('[&>span]:inline', 'min-h-11');
+      expect(action.closest('details')).toHaveAttribute('open');
+    }
+  });
+  it('puts the full identity before the gallery without rendering a zero rating', () => {
+    mount('rent');
+    const identity = screen.getByTestId('property-identity');
+    expect(identity.compareDocumentPosition(screen.getByTestId('property-gallery')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Dual home');
+    expect(identity).not.toHaveTextContent('0');
+    expect(screen.getByText('More').closest('details')).not.toHaveAttribute('open');
+    expect(screen.getByRole('button', { name: 'Book rental' })).toBeInTheDocument();
+  });
   it('keeps a dual-listed unit in the rental CTA from Rent', () => { mount('rent'); expect(screen.getByRole('button', { name: 'Book rental' })).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Request consultation' })).not.toBeInTheDocument(); expect(screen.getByTestId('mobile-intent')).toHaveTextContent('rent'); expect(screen.getByTestId('complex-mode')).toHaveTextContent('rent'); });
   it('shows its sale CTA from Buy', () => { mount('buy'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Book rental' })).not.toBeInTheDocument(); expect(screen.getByTestId('mobile-intent')).toHaveTextContent('buy'); expect(screen.getByTestId('complex-mode')).toHaveTextContent('buy'); });
   it('rejects a rental URL intent on a sale-only unit', () => { state.property.listing_type = 'sale'; state.property.listing_modes = ['sale']; mount('rent'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); });
