@@ -48,7 +48,7 @@ const IndexV2: React.FC = () => {
   const isRu = language === 'ru';
 
   return (
-    <AppLayout showHeader={false} showFooter={false}>
+    <AppLayout showHeader={false} showFooter>
       <div className="pb-24">
         {/* 1 — Hero: greeting, persona chip, AI concierge search */}
         <HeroGreeting

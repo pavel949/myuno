@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { APP_ROUTES } from '@/lib/config/routes';
+import { complexDetailHref } from '@/lib/real-estate/propertyDetailIntent';
 import {
   getProjectFacilityLabel,
   normalizeProjectFacilityId,
@@ -21,6 +21,7 @@ import { PropertyAttributeChip } from '@/components/property/PropertyAttributeCh
 
 interface ProjectInfoCardProps {
   project: PropertyProject;
+  mode?: 'rent' | 'buy';
   className?: string;
 }
 
@@ -40,8 +41,9 @@ const projectFacilityIcons: Record<string, React.ReactNode> = {
   shuttle: <Bus className="h-4 w-4" />,
 };
 
-export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
+export function ProjectInfoCard({ project, className, mode = 'rent' }: ProjectInfoCardProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [expanded, setExpanded] = useState(false);
@@ -51,7 +53,7 @@ export function ProjectInfoCard({ project, className }: ProjectInfoCardProps) {
   const amenities = project.amenities || [];
 
   const handleExploreProject = () => {
-    navigate(APP_ROUTES.PROJECT_DETAIL(project.id));
+    navigate(complexDetailHref(project.id, mode, location.search));
   };
 
   return (

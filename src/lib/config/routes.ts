@@ -103,6 +103,7 @@ export const APP_ROUTES = {
   PROPERTY_MAP: '/property/map',
   PROPERTY_CONSULTATION: '/property/consultation',
   PROPERTY_DEPOSIT_SUCCESS: '/property/deposit-success',
+  COMPLEX_DETAIL: (id: string) => `/property/complex/${id}`,
   PROJECT_DETAIL: (id: string) => `/property/project/${id}`,
   COMPLEXES: '/property/projects',
   MANAGEMENT_COMPANY: (slug: string) => `/company/${slug}`,

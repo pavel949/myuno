@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   MapPin, Star, BedDouble, Bath, Users, Maximize,
   Share2, Loader2, Home, Sofa, Building2, Shield,
@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { FavoriteButton } from '@/components/uno/FavoriteButton';
 import { BackButton } from '@/components/uno/BackButton';
@@ -89,6 +90,7 @@ const OWNERSHIP_LABELS: Record<string, { en: string; ru: string }> = {
 export default function PropertyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { formatPrice } = useCurrency();
   const { currentCity } = useLocationCity();
@@ -189,8 +191,9 @@ export default function PropertyDetail() {
   // City-aware currency: prefer listing-level currency, else current city default, else USD.
   const listingCurrency =
     ((property as { currency?: string | null }).currency || currentCity?.default_currency || 'USD').toUpperCase();
-  const isSaleListing = property.listing_type === 'sale' || Boolean(property.is_for_sale);
-  const salePrice = property.sale_price ?? (isSaleListing ? property.price : undefined) ?? 0;
+  const isSaleListing = propertyDetailMode(property, searchParams.get('mode')) === 'buy';
+  const salePrice = propertySaleAskingPrice(property);
+  const salePriceLabel = salePrice != null ? formatPrice(salePrice) : (isRu ? 'Цена по запросу' : 'Price on request');
 
   // 6-tracks: detect short/medium/long rental support. When tenancy_modes is
   // explicitly set, respect it; otherwise fall back to legacy nightly-price
@@ -364,7 +367,7 @@ export default function PropertyDetail() {
                   <Separator />
                   <div className="rounded-none border border-border/60 bg-muted/30 p-4 space-y-2">
                     <h2 className="text-lg font-semibold">{isRu ? 'Продажа' : 'For sale'}</h2>
-                    <p className="text-2xl font-bold tracking-tight">{formatPrice(salePrice)}</p>
+                    <p className="text-2xl font-bold tracking-tight">{salePriceLabel}</p>
                     {ownershipLabel && (
                       <p className="text-sm text-muted-foreground">{ownershipLabel}</p>
                     )}
@@ -484,7 +487,7 @@ export default function PropertyDetail() {
               {property.project && (
                 <>
                   <Separator />
-                  <ProjectInfoCard project={property.project} />
+                  <ProjectInfoCard project={property.project} mode={isSaleListing ? 'buy' : 'rent'} />
                 </>
               )}
 
@@ -616,7 +619,7 @@ export default function PropertyDetail() {
                       end: rentalTerms.quiet_hours_end,
                     }}
                     children={{
-                      friendly: rentalTerms.children_friendly || false,
+                      friendly: rentalTerms.children_friendly,
                       hasCrib: rentalTerms.has_crib,
                       hasHighChair: rentalTerms.has_high_chair,
                     }}
@@ -674,7 +677,7 @@ export default function PropertyDetail() {
                     {isSaleListing ? (
                       <>
                         <p className="text-sm text-muted-foreground">{isRu ? 'Цена' : 'Asking price'}</p>
-                        <p className="text-2xl font-bold">{formatPrice(salePrice)}</p>
+                        <p className="text-2xl font-bold">{salePriceLabel}</p>
                       </>
                     ) : (
                       <>
@@ -780,7 +783,7 @@ export default function PropertyDetail() {
         <PropertyDetailMobileBar
           propertyId={id || 'prop-1'}
           isSaleListing={isSaleListing}
-          salePrice={salePrice}
+          salePrice={salePrice ?? 0}
           pricePerNight={pricePerNight}
           ownershipLabel={ownershipLabel}
           titleEn={property.title_en}

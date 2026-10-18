@@ -2,6 +2,7 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import type { SalonMarker } from '@/components/map/SalonMap';
 import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
+import { PUBLIC_RENT_ELIGIBILITY, PUBLIC_SALE_ELIGIBILITY, PUBLIC_SALE_PRICE_ELIGIBILITY } from '@/lib/real-estate/propertyDetailIntent';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { selectPropertyCatalogFirst } from '@/lib/publicPropertyCatalog';
@@ -19,6 +20,7 @@ export interface Property {
   description_ru?: string;
   property_type: string;
   listing_type: string;
+  listing_modes?: string[] | null;
   price?: number;
   /** Sale / total asking when listing is for purchase */
   sale_price?: number;
@@ -47,6 +49,7 @@ export interface Property {
   updated_at: string;
   // Unit-specific fields
   project_id?: string;
+  management_company_id?: string | null;
   floor?: number;
   unit_number?: string;
   view_type?: string | null;
@@ -181,9 +184,9 @@ export interface PropertyRentalTerms {
   max_party_guests?: number;
   quiet_hours_start?: string;
   quiet_hours_end?: string;
-  children_friendly?: boolean;
-  has_crib?: boolean;
-  has_high_chair?: boolean;
+  children_friendly?: boolean | null;
+  has_crib?: boolean | null;
+  has_high_chair?: boolean | null;
   smoking_penalty?: number;
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
@@ -327,7 +330,11 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
     query = query.in('property_type', types);
   }
 
-  if (filters.listingType && filters.listingType !== 'all') {
+  if (filters.listingType === 'sale') {
+    query = query.or(PUBLIC_SALE_ELIGIBILITY).or(PUBLIC_SALE_PRICE_ELIGIBILITY);
+  } else if (filters.listingType === 'rent') {
+    query = query.or(PUBLIC_RENT_ELIGIBILITY);
+  } else if (filters.listingType && filters.listingType !== 'all') {
     query = query.eq('listing_type', filters.listingType);
   }
 
@@ -556,6 +563,10 @@ export function usePropertyWithRentalTerms(marketplacePropertyId?: string) {
         deposit_type: property.deposit_type,
         check_in_time: property.check_in_time,
         check_out_time: property.check_out_time,
+        // Preserve public structured child policy, including unknown legacy values.
+        children_friendly: property.children_friendly,
+        has_crib: property.has_crib,
+        has_high_chair: property.has_high_chair,
         house_rules: property.house_rules,
         house_rules_ru: property.house_rules_ru,
         cancellation_policy: property.cancellation_policy,
@@ -647,12 +658,7 @@ export function usePropertiesCount(filters: PropertyFilters = {}) {
         .select('id', { count: 'exact', head: true })
         .eq('is_active', true);
 
-      if (filters.propertyType && filters.propertyType !== 'all') {
-        query = query.eq('property_type', filters.propertyType);
-      }
-      if (filters.listingType && filters.listingType !== 'all') {
-        query = query.eq('listing_type', filters.listingType);
-      }
+      query = applyPropertyFiltersToQuery(query, filters);
 
       const { count, error } = await query;
       if (error) throw error;
@@ -662,24 +668,32 @@ export function usePropertiesCount(filters: PropertyFilters = {}) {
 }
 
 // Fetch properties by project ID
-export function usePropertiesByProject(projectId?: string, limit = 20) {
+export function usePropertiesByProject(
+  projectId?: string,
+  limit = 20,
+  options: { mode?: 'rent' | 'buy'; managementCompanyId?: string } = {},
+) {
   return useQuery({
-    queryKey: ['properties-by-project', projectId, limit],
+    queryKey: ['properties-by-project', projectId, limit, options.mode, options.managementCompanyId],
     queryFn: async () => {
-      if (!projectId) return [];
+      if (!projectId) return { properties: [] as Property[], total: 0 };
 
-      const { data, error } = await supabase
-        .from('properties')
-        .select(PROPERTY_LIST_COLUMNS)
-        .eq('project_id', projectId)
-        .eq('is_active', true)
+      // Public projection enforces active, approved, non-deleted inventory.
+      // A project is not an operator: management scope must be explicitly supplied.
+      let query = supabase.from('public_property_catalog')
+        .select(PROPERTY_LIST_COLUMNS, { count: 'exact' })
+        .eq('project_id', projectId);
+      if (options.mode === 'rent') query = query.or(PUBLIC_RENT_ELIGIBILITY);
+      if (options.mode === 'buy') query = query.or(PUBLIC_SALE_ELIGIBILITY).or(PUBLIC_SALE_PRICE_ELIGIBILITY);
+      if (options.managementCompanyId) query = query.eq('management_company_id', options.managementCompanyId);
+      const { data, error, count } = await query
         .order('is_featured', { ascending: false })
-        .order('sale_price', { ascending: true })
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
       const rows = (data || []) as unknown as Property[];
-      return rows.map((p) => normalizePropertyTaxonomyArrays(p));
+      return { properties: rows.map((p) => normalizePropertyTaxonomyArrays(p)), total: count ?? 0 };
     },
     enabled: !!projectId,
   });

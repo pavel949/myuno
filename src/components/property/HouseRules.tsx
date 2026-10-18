@@ -24,9 +24,9 @@ interface HouseRulesProps {
     end?: string;
   };
   children?: {
-    friendly: boolean;
-    hasCrib?: boolean;
-    hasHighChair?: boolean;
+    friendly?: boolean | null;
+    hasCrib?: boolean | null;
+    hasHighChair?: boolean | null;
   };
   smoking?: {
     allowed: boolean;
@@ -116,9 +116,11 @@ export function HouseRules({
               className="gap-1"
             >
               <Baby className="w-3 h-3" />
-              {children.friendly 
-                ? (isRu ? 'Дети welcome' : 'Child-friendly')
-                : (isRu ? 'Не для детей' : 'Not child-friendly')}
+              {children.friendly == null
+                ? (isRu ? 'Условия размещения детей не указаны' : 'Child policy not specified')
+                : children.friendly
+                  ? (isRu ? 'Дети welcome' : 'Child-friendly')
+                  : (isRu ? 'Не для детей' : 'Not child-friendly')}
             </Badge>
           )}
         </div>

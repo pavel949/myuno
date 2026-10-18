@@ -108,20 +108,24 @@ export function useAdminPropertyProjects() {
   });
 }
 
-export function usePropertyProject(id?: string) {
+// Guest pages request only descriptive, public project facts; no investment or private fields.
+export const GUEST_PROJECT_COLUMNS = 'id,name_en,name_ru,description_en,description_ru,address,district,lat,lng,cover_image,images,video_url,amenities,infrastructure,is_active';
+
+export function usePropertyProject(id?: string, publicOnly = false) {
   return useQuery({
-    queryKey: ['property-project', id],
+    queryKey: ['property-project', id, publicOnly],
     queryFn: async () => {
       if (!id) return null;
       
-      const { data, error } = await supabase
-        .from('property_projects')
-        .select('*')
-        .eq('id', id)
-        .single();
+      let query = supabase.from('property_projects')
+        .select(publicOnly ? GUEST_PROJECT_COLUMNS : '*')
+        .eq('id', id);
+      if (publicOnly) query = query.eq('is_active', true);
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
-      return withNormalizedProjectAmenities(data as PropertyProject);
+      if (!data) return null;
+      return withNormalizedProjectAmenities(data as unknown as PropertyProject);
     },
     enabled: !!id,
   });

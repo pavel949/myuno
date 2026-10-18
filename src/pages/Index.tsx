@@ -57,7 +57,7 @@ const IndexLegacy: React.FC = () => {
   const visibleClusters = ROLE_VISIBLE_CLUSTERS[role] ?? ['live', 'arrive', 'legal'];
 
   return (
-    <AppLayout showHeader={false} showFooter={false}>
+    <AppLayout showHeader={false} showFooter>
       <div className="pb-24">
         {/* 1. Hero — navy gradient, greeting, persona chip, AI search */}
         <HeroGreeting

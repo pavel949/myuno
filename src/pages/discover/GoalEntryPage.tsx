@@ -14,9 +14,12 @@ import { GOAL_ENTRIES, isGoalId, type GoalLink } from '@/lib/nav/goalEntries';
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
 import '@/styles/cinematic-home.css';
 import { cn } from '@/lib/utils';
+import ServicesIndex from '@/pages/services/ServicesIndex';
 
 export default function GoalEntryPage({ goal }: { goal: string }) {
   const { language } = useLanguage();
+
+  if (goal === 'services') return <ServicesIndex />;
 
   if (!isGoalId(goal)) return <Navigate to={APP_ROUTES.DISCOVER} replace />;
   const entry = GOAL_ENTRIES[goal];
