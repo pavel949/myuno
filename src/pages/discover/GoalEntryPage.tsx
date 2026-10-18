@@ -4,6 +4,7 @@
  * Pure navigation surface over existing verticals (see `goalEntries.ts`).
  * No fake metrics, no dead buttons: every tile links to a mounted route.
  */
+import ServiceDiscovery from '@/components/navigation/ServiceDiscovery';
 import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -19,6 +20,7 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
   const { language } = useLanguage();
 
   if (!isGoalId(goal)) return <Navigate to={APP_ROUTES.DISCOVER} replace />;
+  if (goal === 'services') return <ServiceDiscovery />;
   const entry = GOAL_ENTRIES[goal];
   const t = (v: { en: string; ru: string; th: string }) => pickLang(language, v);
   const title = t({ en: entry.en, ru: entry.ru, th: entry.th });

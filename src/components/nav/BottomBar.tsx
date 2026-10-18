@@ -21,10 +21,6 @@ import { getFeedbackSettings } from '@/hooks/useFeedbackSettings';
 import { usePrefetchRoute } from '@/hooks/usePrefetch';
 import { prefetchRoute as prefetchRouteChunk } from '@/lib/prefetchRoute';
 import { AllAppsDrawer } from '@/components/layout/AllAppsDrawer';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
-import { useUserPersonas } from '@/hooks/useUserPersonas';
-import { GUEST_NAV_ME_HUB } from '@/lib/navConfig';
-import { GUEST_NAV_PRO_SHELL } from '@/lib/navConfig';
 import {
   PRIMARY_NAV,
   shouldShowAppsLauncher,
@@ -60,29 +56,12 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       return () => window.removeEventListener('navigator:open-apps-drawer', handler);
     }, []);
 
-    // Phase A5: feature-flagged swap of guest nav to Gosuslugi-style /me hub.
-    const meHubEnabled = useFeatureFlag('me_shell_v1', false);
-    // Wave 13 (M13.A): pro-shell tabbar (Home · Operate · Wallet · Me) for
-    // guest users with at least one professional persona active.
-    const proShellEnabled = useFeatureFlag('pro_shell_tabbar_v1', false);
-    const { personas } = useUserPersonas();
-    
     if (FULLSCREEN_PREFIXES.some((p) => location.pathname.startsWith(p))) return null;
 
-    const PRO_PERSONAS = new Set([
-      'property_owner', 'investor', 'real_estate_developer',
-      'local_services_provider',
-    ]);
-    const hasProPersona = personas.some(p => PRO_PERSONAS.has(p));
-    const navItems: NavItem[] =
-      role === 'guest' && proShellEnabled && hasProPersona
-        ? GUEST_NAV_PRO_SHELL
-        : role === 'guest' && meHubEnabled
-          ? GUEST_NAV_ME_HUB
-          : PRIMARY_NAV[role];
-    // Standard consumer journeys keep all five destinations visible.
-    // Professional/Me flag variants retain their existing app launcher.
-    const showAppsButton = shouldShowAppsLauncher(role) && !(role === 'guest' && !meHubEnabled && !(proShellEnabled && hasProPersona));
+    // Browsing has one stable navigation, regardless of saved personas or
+    // optional hub experiments. Operational routes retain their role-specific bar.
+    const navItems: NavItem[] = PRIMARY_NAV[role];
+    const showAppsButton = shouldShowAppsLauncher(role) && role !== 'guest';
 
     const handleNavClick = (e: React.MouseEvent<HTMLElement>) => {
       const settings = getFeedbackSettings();

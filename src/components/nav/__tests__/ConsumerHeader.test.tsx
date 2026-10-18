@@ -1,0 +1,22 @@
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { afterEach, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
+import { ConsumerHeader } from '../ConsumerHeader';
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: null }) }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'ru' }) }));
+vi.mock('@/components/uno/GlobalPreferencesControls', () => ({ GlobalPreferencesControls: () => null }));
+vi.mock('@/components/market/MiniCart', () => ({ MiniCart: () => null }));
+vi.mock('@/components/layout/UserAvatarMenu', () => ({ UserAvatarMenu: () => null }));
+vi.mock('@/hooks/useFeedbackSettings', () => ({ getFeedbackSettings: () => ({}) }));
+afterEach(cleanup);
+it('provides a named modal menu with direct destinations, sign-in and Escape handling', async () => {
+ render(<MemoryRouter><ConsumerHeader /></MemoryRouter>);
+ const trigger = screen.getByRole('button', { name: 'Открыть меню' });
+ fireEvent.click(trigger);
+ const dialog = screen.getByRole('dialog', { name: 'myUNO' });
+ expect(within(dialog).getByRole('link', { name: 'Услуги' })).toHaveAttribute('href', '/discover/services');
+ expect(within(dialog).getByRole('link', { name: 'Войти' })).toHaveAttribute('href', '/auth');
+ expect(within(dialog).getByRole('button', { name: 'Закрыть меню' })).toBeInTheDocument();
+ fireEvent.keyDown(dialog, { key: 'Escape' });
+ await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+});

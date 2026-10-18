@@ -137,7 +137,7 @@ function MiniappMode({
   heroGradientFrom = 'from-primary/20',
   heroGradientVia = 'via-primary/10',
   heroGradientTo = 'to-background',
-  showHero = true,
+  showHero = false,
   searchValue = '',
   onSearchChange,
   searchPlaceholder,
@@ -168,7 +168,7 @@ function MiniappMode({
   quickActions,
   stickySubHeader,
   showQuickFiltersInSubHeader = true,
-  showEcosystemHint = true,
+  showEcosystemHint = false,
   seoTitle,
   seoDescription,
   seoImage,
@@ -329,7 +329,7 @@ function MiniappMode({
   const hasStickySubHeader = stickySubHeader || hasQuickFilters || hasCategories;
 
   return (
-    <AppLayout showBottomNav={showBottomNav} showHeader className="max-w-full min-w-0">
+    <AppLayout usePageContainer={false} showBottomNav={showBottomNav} showHeader className="max-w-full min-w-0">
       {(seoTitle || seoDescription) && (
         <SEOHead
           title={seoTitle}

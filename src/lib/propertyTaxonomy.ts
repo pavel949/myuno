@@ -128,6 +128,7 @@ export const PROPERTY_HIGHLIGHTS = HIGHLIGHT_UI_ITEMS;
 
 // ============= VIEW TYPES =============
 export const VIEW_TYPES = [
+  { id: 'panoramic', labelEn: 'Panoramic view', labelRu: 'Панорамный вид', icon: '🌅' },
   { id: 'sea', labelEn: 'Sea View', labelRu: 'Вид на море', icon: '🌊' },
   { id: 'ocean', labelEn: 'Ocean View', labelRu: 'Вид на океан', icon: '🌅' },
   { id: 'pool', labelEn: 'Pool View', labelRu: 'Вид на бассейн', icon: '🏊' },

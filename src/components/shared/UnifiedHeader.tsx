@@ -71,9 +71,11 @@ export const UnifiedHeader = memo(function UnifiedHeader({
         </div>
         
         {/* Search row */}
-        <div className="relative">
+        {(isSearchInteractive || isSearchClickable) && <div className="relative">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground pointer-events-none" />
           <Input
+            aria-label={searchPlaceholder}
+            type="search"
             placeholder={searchPlaceholder}
             value={shouldBindSearchValue ? (searchValue ?? '') : undefined}
             onChange={isSearchInteractive ? (e) => onSearchChange(e.target.value) : undefined}
@@ -91,7 +93,7 @@ export const UnifiedHeader = memo(function UnifiedHeader({
               {searchResults}
             </div>
           )}
-        </div>
+        </div>}
       </div>
     </div>
   );
