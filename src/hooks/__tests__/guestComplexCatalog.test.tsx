@@ -34,7 +34,7 @@ describe('guest complex catalog boundaries', () => {
     const { result } = renderHook(() => usePropertiesByProject('project', 24, { mode: 'buy' }), { wrapper: Wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mock.or).toHaveBeenCalledWith('is_for_sale.eq.true,listing_type.eq.sale,listing_modes.cs.{sale}');
-    expect(mock.gt).toHaveBeenCalledWith('sale_price', 0);
+    expect(mock.or).toHaveBeenCalledWith('sale_price.gt.0,and(listing_type.eq.sale,sale_price.is.null,price.gt.0)');
     expect(mock.eq).not.toHaveBeenCalledWith('management_company_id', expect.anything());
     expect(result.current.data?.properties[0].id).toBe('dual-listing');
     expect(result.current.data?.total).toBe(31);

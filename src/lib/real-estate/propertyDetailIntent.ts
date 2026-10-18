@@ -2,6 +2,8 @@ import { APP_ROUTES } from '@/lib/config/routes';
 
 export const PUBLIC_RENT_ELIGIBILITY = 'listing_type.eq.rent,listing_modes.cs.{rent}';
 export const PUBLIC_SALE_ELIGIBILITY = 'is_for_sale.eq.true,listing_type.eq.sale,listing_modes.cs.{sale}';
+// Legacy price belongs to the sale only when this is explicitly a sale listing.
+export const PUBLIC_SALE_PRICE_ELIGIBILITY = 'sale_price.gt.0,and(listing_type.eq.sale,sale_price.is.null,price.gt.0)';
 
 export interface PropertyIntentFields {
   listing_type?: string | null;
@@ -20,18 +22,26 @@ export function propertyDetailMode(property: PropertyIntentFields, requested?: s
 }
 
 /** Carry only relevant guest context; leave router history/back behavior intact. */
-export function propertyDetailHref(id: string, mode: 'rent' | 'buy', search = ''): string {
+function withGuestContext(href: string, mode: 'rent' | 'buy', search = ''): string {
   const source = new URLSearchParams(search);
   const params = new URLSearchParams({ mode });
   for (const key of ['checkIn', 'checkOut', 'guests']) {
     const value = source.get(key);
     if (value) params.set(key, value);
   }
-  return `${APP_ROUTES.PROPERTY_DETAIL(id)}?${params.toString()}`;
+  return `${href}?${params.toString()}`;
 }
 
 /** A rental amount is never a sale-price fallback for a dual-listed unit. */
 export function propertySaleAskingPrice(property: PropertyIntentFields & { sale_price?: number | null; price?: number | null }): number | null {
   const amount = property.sale_price ?? (property.listing_type === 'sale' ? property.price : null);
   return typeof amount === 'number' && Number.isFinite(amount) && amount > 0 ? amount : null;
+}
+
+export function propertyDetailHref(id: string, mode: 'rent' | 'buy', search = ''): string {
+  return withGuestContext(APP_ROUTES.PROPERTY_DETAIL(id), mode, search);
+}
+
+export function complexDetailHref(id: string, mode: 'rent' | 'buy', search = ''): string {
+  return withGuestContext(APP_ROUTES.COMPLEX_DETAIL(id), mode, search);
 }

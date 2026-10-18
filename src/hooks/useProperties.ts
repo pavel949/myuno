@@ -2,7 +2,7 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import type { SalonMarker } from '@/components/map/SalonMap';
 import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
-import { PUBLIC_RENT_ELIGIBILITY, PUBLIC_SALE_ELIGIBILITY } from '@/lib/real-estate/propertyDetailIntent';
+import { PUBLIC_RENT_ELIGIBILITY, PUBLIC_SALE_ELIGIBILITY, PUBLIC_SALE_PRICE_ELIGIBILITY } from '@/lib/real-estate/propertyDetailIntent';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { selectPropertyCatalogFirst } from '@/lib/publicPropertyCatalog';
@@ -331,7 +331,7 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
   }
 
   if (filters.listingType === 'sale') {
-    query = query.or(PUBLIC_SALE_ELIGIBILITY).gt('sale_price', 0);
+    query = query.or(PUBLIC_SALE_ELIGIBILITY).or(PUBLIC_SALE_PRICE_ELIGIBILITY);
   } else if (filters.listingType === 'rent') {
     query = query.or(PUBLIC_RENT_ELIGIBILITY);
   } else if (filters.listingType && filters.listingType !== 'all') {
@@ -684,7 +684,7 @@ export function usePropertiesByProject(
         .select(PROPERTY_LIST_COLUMNS, { count: 'exact' })
         .eq('project_id', projectId);
       if (options.mode === 'rent') query = query.or(PUBLIC_RENT_ELIGIBILITY);
-      if (options.mode === 'buy') query = query.or(PUBLIC_SALE_ELIGIBILITY).gt('sale_price', 0);
+      if (options.mode === 'buy') query = query.or(PUBLIC_SALE_ELIGIBILITY).or(PUBLIC_SALE_PRICE_ELIGIBILITY);
       if (options.managementCompanyId) query = query.eq('management_company_id', options.managementCompanyId);
       const { data, error, count } = await query
         .order('is_featured', { ascending: false })

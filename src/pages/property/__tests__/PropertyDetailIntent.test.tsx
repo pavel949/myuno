@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import PropertyDetail from '../PropertyDetail';
-import { propertyDetailHref, propertyDetailMode } from '@/lib/real-estate/propertyDetailIntent';
-const state = vi.hoisted(() => ({ property: { id: 'unit', title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', images: [], amenities: [], rentalTerms: { price_per_night: 2000, included_services: [], extra_services: [] } } }));
+import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
+const state = vi.hoisted(() => ({ property: { id: 'unit', project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', images: [], amenities: [], rentalTerms: { price_per_night: 2000, included_services: [], extra_services: [] } } }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: () => ({ data: state.property, isLoading: false }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (v: number) => String(v) }) }));
@@ -20,7 +20,7 @@ vi.mock('@/components/property/PropertyCompare', () => ({CompareButton: () => nu
 vi.mock('@/components/property/PropertyPdfBrochure', () => ({PropertyPdfButton: () => null}));
 vi.mock('@/components/uno/FavoriteButton', () => ({FavoriteButton: () => null}));
 vi.mock('@/components/uno/BackButton', () => ({BackButton: () => null}));
-vi.mock('@/components/property/ProjectInfoCard', () => ({ProjectInfoCard: () => null}));
+vi.mock('@/components/property/ProjectInfoCard', () => ({ProjectInfoCard: ({ mode }: { mode: string }) => <span data-testid="complex-mode">{mode}</span>}));
 vi.mock('@/components/crosssell', () => ({RelatedServicesSection: () => null}));
 vi.mock('@/components/property/UnitSpecs', () => ({UnitSpecs: () => null}));
 vi.mock('@/components/leads/ExitIntentModal', () => ({ExitIntentModal: () => null}));
@@ -40,11 +40,17 @@ vi.mock('@/components/reviews/ReviewsSection', () => ({ReviewsSection: () => nul
 afterEach(() => { cleanup(); state.property.listing_type = 'rent'; state.property.listing_modes = ['rent','sale']; state.property.is_for_sale = true; state.property.sale_price = 5000000; });
 function mount(mode: string) { render(<MemoryRouter initialEntries={[`/property/unit?mode=${mode}`]}><Routes><Route path="/property/:id" element={<PropertyDetail />} /></Routes></MemoryRouter>); }
 describe('actual property detail purchase/rental intent', () => {
-  it('keeps a dual-listed unit in the rental CTA from Rent', () => { mount('rent'); expect(screen.getByRole('button', { name: 'Book rental' })).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Request consultation' })).not.toBeInTheDocument(); expect(screen.getByTestId('mobile-intent')).toHaveTextContent('rent'); });
-  it('shows its sale CTA from Buy', () => { mount('buy'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Book rental' })).not.toBeInTheDocument(); expect(screen.getByTestId('mobile-intent')).toHaveTextContent('buy'); });
+  it('keeps a dual-listed unit in the rental CTA from Rent', () => { mount('rent'); expect(screen.getByRole('button', { name: 'Book rental' })).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Request consultation' })).not.toBeInTheDocument(); expect(screen.getByTestId('mobile-intent')).toHaveTextContent('rent'); expect(screen.getByTestId('complex-mode')).toHaveTextContent('rent'); });
+  it('shows its sale CTA from Buy', () => { mount('buy'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Book rental' })).not.toBeInTheDocument(); expect(screen.getByTestId('mobile-intent')).toHaveTextContent('buy'); expect(screen.getByTestId('complex-mode')).toHaveTextContent('buy'); });
   it('rejects a rental URL intent on a sale-only unit', () => { state.property.listing_type = 'sale'; state.property.listing_modes = ['sale']; mount('rent'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); });
   it('rejects a purchase intent on a rental-only unit', () => { state.property.is_for_sale = false; state.property.listing_modes = ['rent']; mount('buy'); expect(screen.getByRole('button', { name: 'Book rental' })).toBeInTheDocument(); });
   it('keeps inquiry for an eligible legacy sale without displaying the rental amount as its asking price', () => { state.property.sale_price = null; mount('buy'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); expect(screen.getAllByText('Price on request')).toHaveLength(2); });
+  it('uses legacy price only for a pure sale listing with absent sale_price', () => {
+    expect(propertySaleAskingPrice({ listing_type: 'sale', sale_price: null, price: 7500000 })).toBe(7500000);
+    expect(propertySaleAskingPrice({ listing_type: 'rent', is_for_sale: true, sale_price: null, price: 2000 })).toBeNull();
+    expect(propertySaleAskingPrice({ listing_type: 'sale', sale_price: 0, price: 7500000 })).toBeNull();
+    expect(propertySaleAskingPrice({ listing_type: 'sale', sale_price: null, price: null })).toBeNull();
+  });
   it('preserves existing default and guest date context without copying operator scope', () => {
     expect(propertyDetailMode(state.property)).toBe('buy');
     const link = propertyDetailHref('unit','rent','?checkIn=2026-12-01&checkOut=2026-12-04&guests=2&managementCompanyId=operator');

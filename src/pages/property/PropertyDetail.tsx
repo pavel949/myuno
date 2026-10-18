@@ -487,7 +487,7 @@ export default function PropertyDetail() {
               {property.project && (
                 <>
                   <Separator />
-                  <ProjectInfoCard project={property.project} />
+                  <ProjectInfoCard project={property.project} mode={isSaleListing ? 'buy' : 'rent'} />
                 </>
               )}
 
