@@ -44,7 +44,7 @@ final result: passed
 
 ## Limits and follow-up
 
-- Main booking/payment flows, inventory correctness and downstream service readiness are outside this presentation change. No production business records were written for QA.
+- Main booking/payment flows, inventory correctness and downstream service readiness are outside this presentation change. No production business records were written for QA. The analytics fallback has three isolated security regression checks: cryptographic UUID v4 generation, existing-session reuse and no anonymous tracking writes.
 - The filtered catalogue displayed an empty result; no claim of available stock is made.
 - Hero is a gently animated still, not video. Replace with an approved real resort film in a separate content change if desired.
 - Managed-project cards, verified team statistics/reviews and public-function content remain separate future content work; none were invented for this page.

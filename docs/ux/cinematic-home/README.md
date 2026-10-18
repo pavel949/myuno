@@ -8,6 +8,6 @@ Content lives in `src/content/home/cinematicHome.ts` and uses the existing `pick
 
 Search preserves the existing PropertySearchPage URL contract and shared civil-date helpers. Buying omits rental dates, guests and tenancy. Dates are requested together. The receiving search bar now initializes visible controls from the parsed URL, avoiding a misleading reset after arriving from the homepage.
 
-Validation: `npm run typecheck` (Node heap 6144MB), three isolated HomeDiscoverySearch tests, full production build, cloud-browser checks. See the repository-root `design-qa.md` for evidence, comparison history and limitations. No production business writes were used for QA.
+Validation: `npm run typecheck` (Node heap 6144MB), six isolated tests (search handoff and analytics identifier security), full production build, cloud-browser checks. See the repository-root `design-qa.md` for evidence, comparison history and limitations. No production business writes were used for QA.
 
 Rollback: revert this UI commit. No migration or data rollback is required. Public catalogue availability and downstream transaction correctness remain governed by existing canonical systems.
