@@ -39,6 +39,14 @@ async def main():
                     await expect(cards).to_have_count(1)
                     await expect(cards.first).to_have_attribute('data-listing-id', 'synthetic-villa')
                     await bounds()
+                    title_link = cards.first.get_by_role('link', name='Тестовая вилла с бассейном' if lang == 'ru' else 'Synthetic pool villa', exact=True)
+                    await expect(title_link).to_have_attribute('href', '/property/synthetic-villa')
+                    await title_link.focus()
+                    await expect(title_link).to_be_focused()
+                    if width < 640:
+                        box = await cards.first.bounding_box()
+                        assert box and box['width'] >= width - 40, box
+                        assert box['x'] >= 16, box
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{mode}-list.png'))
                     toggle = page.get_by_role('button', name='Карта' if lang == 'ru' else 'Map', exact=True)
                     await toggle.focus()

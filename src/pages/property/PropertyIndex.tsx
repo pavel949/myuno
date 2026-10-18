@@ -372,7 +372,7 @@ export default function PropertyIndex() {
           </div>
           {/* Recently Viewed — only when no category filters */}
           {recentItems.length > 0 && selectedCategories.length === 0 && (
-            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "mb-6 px-0")}>
+            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "mb-6")}>
               <h2 className="text-base font-bold mb-3">
                 {isRu ? 'Вы недавно смотрели' : 'Recently viewed'}
               </h2>
@@ -385,11 +385,11 @@ export default function PropertyIndex() {
           )}
 
           {isLoading && (
-            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0")}>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-10">
+            <section className={ECOSYSTEM_PAGE_CONTAINER}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-8">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="space-y-2">
-                    <div className="aspect-[4/5] sm:aspect-square rounded-none sm:rounded-none bg-muted animate-pulse" />
+                    <div className="aspect-[4/3] sm:aspect-square rounded-none sm:rounded-none bg-muted animate-pulse" />
                     <div className="h-3 bg-muted rounded-none animate-pulse w-2/3" />
                     <div className="h-3 bg-muted rounded-none animate-pulse w-1/2" />
                     <div className="h-3 bg-muted rounded-none animate-pulse w-1/3" />
@@ -410,9 +410,9 @@ export default function PropertyIndex() {
             </div>
           )}
 
-          {/* Main grid — Airbnb-style 2-col cards */}
+          {/* Main grid — readable full-width cards on narrow phones */}
           {!isLoading && filteredProperties.length > 0 && (
-            <section className={cn(ECOSYSTEM_PAGE_CONTAINER, "px-0")}>
+            <section className={ECOSYSTEM_PAGE_CONTAINER}>
               <div className="flex items-center justify-between mb-3">
                 {selectedCategories.length === 0 && (
                   <h2 className="text-base font-bold">
@@ -435,7 +435,7 @@ export default function PropertyIndex() {
                   className="mb-4"
                 />
               )}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-8">
                 {filteredProperties.map((property) => (
                   <PropertyListingCard
                     key={property.id}

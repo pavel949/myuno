@@ -24,7 +24,7 @@ import {
 const FEATURES = [
   { icon: BarChart3,    ru: 'Отчёты собственнику', en: 'Owner reports', descRu: 'PDF и онлайн P&L каждый месяц.',         descEn: 'Monthly P&L, PDF + online.' },
   { icon: Users,        ru: 'Гости и заявки',      en: 'Guests & inbox', descRu: 'Чат, заявки, отзывы — в одном окне.', descEn: 'Chat, leads, reviews in one inbox.' },
-  { icon: Sparkles,     ru: 'Уборка и check-in',   en: 'Cleaning & check-in', descRu: 'Задачи команде, чек-листы.',  descEn: 'Team tasks, checklists.' },
+  { icon: Sparkles,     ru: 'Уборка и заселение',   en: 'Cleaning & check-in', descRu: 'Задачи команде, чек-листы.',  descEn: 'Team tasks, checklists.' },
   { icon: Wallet,       ru: 'Финансы',             en: 'Finance', descRu: 'Доходы, расходы, выплаты собственнику.', descEn: 'Income, expenses, owner payouts.' },
   { icon: CalendarRange,ru: 'Каналы и iCal',       en: 'Channels & iCal', descRu: 'Airbnb, Booking, VRBO — синхрон.',descEn: 'Airbnb, Booking, VRBO sync.' },
   { icon: FileText,     ru: 'Договоры и документы',en: 'Contracts & docs', descRu: 'Хранилище, подписи, налоги.', descEn: 'Vault, e-sign, tax filings.' },
@@ -81,13 +81,13 @@ const FAQ = [
   {
     qRu: 'Сколько стоит и как работает оплата?',
     qEn: 'How much does it cost and how is it billed?',
-    aRu: 'Self-Service: фиксированная подписка $199–399/мес, оплата картой раз в месяц. Full Management: 30% от выручки, удерживается из выплат, ежемесячный отчёт без скрытых комиссий.',
+    aRu: 'Самостоятельное управление: фиксированная подписка $199–399/мес, оплата картой раз в месяц. Полное управление: 30% от выручки, удерживается из выплат, ежемесячный отчёт без скрытых комиссий.',
     aEn: 'Self-Service: flat $199–399/mo subscription, monthly card billing. Full Management: 30% of revenue netted from payouts, monthly statement, no hidden fees.',
   },
   {
     qRu: 'Что если у меня 1–2 объекта?',
     qEn: 'What if I only have 1–2 properties?',
-    aRu: 'Подойдёт Self-Service Starter ($199) или Full Management. У УК с 5+ объектами условия лучше — см. отдельную страницу.',
+    aRu: 'Подойдёт самостоятельное управление по тарифу Starter ($199) или полное управление. У УК с 5+ объектами условия лучше — см. отдельную страницу.',
     aEn: 'Self-Service Starter ($199) or Full Management both fit. Companies with 5+ properties get better terms on the dedicated MC page.',
   },
   {
@@ -171,7 +171,7 @@ const ForOwnersPage: React.FC = () => {
                 {isRu ? 'Передать нам' : 'Hand over'}
               </p>
               <h3 className="text-[20px] font-serif font-semibold text-foreground leading-tight">
-                {isRu ? 'Full Management · 70 / 30' : 'Full Management · 70 / 30'}
+                {isRu ? 'Полное управление · 70 / 30' : 'Full Management · 70 / 30'}
               </h3>
               <p className="mt-2 text-[13.5px] text-muted-foreground leading-relaxed">
                 {isRu
@@ -247,7 +247,7 @@ const ForOwnersPage: React.FC = () => {
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-[15px] font-semibold text-foreground">{p.name}</span>
+                    <span className="text-[15px] font-semibold text-foreground">{isRu && p.kind === 'full' ? 'Полное управление' : p.name}</span>
                     {p.primary && (
                       <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
                         {isRu ? 'рекомендуем' : 'recommended'}

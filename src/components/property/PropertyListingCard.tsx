@@ -121,7 +121,7 @@ function PropertyListingCardBase({
       data-listing-id={surface.id}
       aria-selected={isSelected}
       className={cn(
-        "group cursor-pointer transition-shadow",
+        "group min-w-0 cursor-pointer transition-shadow",
         isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background rounded-sm",
         className,
       )}
@@ -135,6 +135,7 @@ function PropertyListingCardBase({
           images={images}
           alt={title}
           isHovered={isHovered}
+          aspectClass="aspect-[4/3] sm:aspect-square"
         />
 
 
@@ -196,16 +197,18 @@ function PropertyListingCardBase({
       </div>
 
       {/* Content — Airbnb compact style */}
-      <div className="mt-1.5 sm:mt-2.5 space-y-0">
-        {/* Row 1: District + Rating */}
+      <div className="mt-3 space-y-1.5">
+        {/* Listing name is the primary destination; district and rating are secondary. */}
         <div className="flex items-start justify-between gap-1">
-          <h3 className="font-semibold text-xs sm:text-[15px] leading-tight line-clamp-1 text-foreground">
-            {districtDisplay}
+          <h3 className="min-w-0 font-sans text-base font-semibold leading-snug text-foreground">
+            <Link to={surface.href} onClick={(event) => event.stopPropagation()} className="line-clamp-2 break-words focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+              {title || districtDisplay}
+            </Link>
           </h3>
           {property.rating != null && property.rating > 0 && (
             <div className="flex items-center gap-0.5 shrink-0">
               <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-foreground text-foreground" />
-              <span className="text-[11px] sm:text-sm text-foreground">
+              <span className="text-sm text-foreground">
                 {property.rating.toFixed(1)}
               </span>
             </div>
@@ -213,11 +216,11 @@ function PropertyListingCardBase({
         </div>
 
         {title && title !== districtDisplay && (
-          <p className="text-xs sm:text-sm leading-snug line-clamp-2 text-foreground">{title}</p>
+          <p className="text-sm leading-snug text-muted-foreground break-words">{districtDisplay}</p>
         )}
 
         {/* Row 2: Property type · bedrooms */}
-        <p className="text-[11px] sm:text-sm text-muted-foreground line-clamp-1">
+        <p className="text-sm leading-relaxed text-muted-foreground line-clamp-2">
           {property.property_type
             ? getPropertyTypeLabel(property.property_type, isRu ? 'ru' : 'en')
             : title}
@@ -240,7 +243,7 @@ function PropertyListingCardBase({
             {highlightChips.map((h) => (
               <span
                 key={h.id}
-                className="text-[10px] sm:text-[11px] px-1.5 py-0.5 rounded-none bg-muted/80 text-muted-foreground line-clamp-1 max-w-full"
+                className="text-xs px-2 py-1 rounded-none bg-muted/80 text-muted-foreground line-clamp-1 max-w-full"
               >
                 {h.label}
               </span>
@@ -264,7 +267,7 @@ function PropertyListingCardBase({
 
         {/* Row 3: Price */}
         <div className="pt-0.5 sm:pt-1">
-          <p className="text-xs sm:text-[15px] text-foreground">
+          <p className="text-base leading-snug text-foreground">
             {mode === 'buy' ? (
               <span className="font-semibold">
                 {formatPrice(property.sale_price ?? property.price ?? 0)}
@@ -279,7 +282,7 @@ function PropertyListingCardBase({
             )}
           </p>
           {totalPrice && nights && mode !== 'buy' && (
-            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 underline decoration-muted-foreground/50">
+            <p className="text-sm text-muted-foreground mt-1 underline decoration-muted-foreground/50">
               {formatPrice(totalPrice)} {isRu ? 'итого' : 'total'}
             </p>
           )}
