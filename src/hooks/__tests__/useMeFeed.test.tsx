@@ -6,7 +6,7 @@ import { useMeFeed } from '../useMeFeed';
 const fixture = vi.hoisted(() => ({ user: {id:'test-user'} as {id:string}|null, failed:'' }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({user:fixture.user}) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {from: (table:string) => {
- type Chain = {select:()=>Chain;eq:()=>Chain;in:()=>Chain;lte:()=>Chain;order:()=>Chain;is:()=>Chain;limit:()=>Promise<{data:never[]|null;error:{message:string}|null}>};
+ type Chain = {select:()=>Chain;eq:()=>Chain;in:()=>Chain;lte:()=>Chain;order:()=>Chain;is:()=>Chain;limit:()=>Promise<{data:unknown[]|null;error:{message:string}|null}>};
  const chain:Chain={select:()=>chain,eq:()=>chain,in:()=>chain,lte:()=>chain,order:()=>chain,is:()=>chain,limit:()=>Promise.resolve(table===fixture.failed?{data:null,error:{message:'denied'}}:{data:[],error:null})};return chain;
 }} }));
 afterEach(cleanup); beforeEach(()=>{fixture.user={id:'test-user'};fixture.failed='';});

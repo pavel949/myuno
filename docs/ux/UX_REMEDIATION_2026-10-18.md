@@ -77,3 +77,4 @@ Sources:
 - Property cards now display the actual listing title in addition to the district, and existing amenity/feature registries supply labels for legacy highlights such as walk_to_beach, pool and air_conditioning. Stored facts/prices remain unchanged.
 - 179 focused tests in 13 files passed, including six new label cases; TypeScript rechecked successfully.
 - First CI commit passed the isolated full suite, timezone workflows and production build. The separate verify workflow found a React Hooks naming error in the new test wrapper, corrected by naming it Wrapper; no check weakened. Final commit must be checked again.
+- Subsequent CI caught an overly narrow `never[]` type in the test-only query fixture. Corrected it to `unknown[]`; the final local typecheck and the five source-failure tests pass. No production logic or assertion was changed for this correction. Final remote CI remains the publication gate.
