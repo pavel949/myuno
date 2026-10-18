@@ -1,6 +1,6 @@
 import { useId, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, MapPin, Users } from 'lucide-react';
+import { ArrowRight, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
@@ -67,7 +67,6 @@ export function HomeDiscoverySearch({ rentalOnly = false }: { rentalOnly?: boole
         </Select>
       </div>
       <div className="home-search-location">
-        <MapPin size={18} aria-hidden="true" />
         <div className="min-w-0 flex-1"><span className="home-field-label">{t({ ru: 'Район', en: 'Area', th: 'ย่าน' })}</span>
           <Select value={district || '__all'} onValueChange={value => setDistrict(value === '__all' ? '' : value)} disabled={isLoading}>
             <SelectTrigger className="home-search-select" aria-label={t({ ru: 'Выберите район', en: 'Choose an area', th: 'เลือกย่าน' })}><SelectValue /></SelectTrigger>
