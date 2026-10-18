@@ -2,7 +2,7 @@
  * PropertySearchPage — Full catalog grid with filters
  * One shared app-style editor; all criteria are hydrated from the catalogue URL.
  */
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useId } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, Building2, ChevronDown, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -21,7 +21,7 @@ import { serializeFilters } from '@/lib/propertyBrowseFilters';
 import '@/styles/cinematic-home.css';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PropertyCategoryIcons, matchesCategory } from '@/components/property/PropertyCategoryIcons';
-import { applyQuickFilters } from '@/hooks/usePropertyQuickFilters';
+import { applyQuickFilters, usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues } from '@/lib/propertyCatalogServerFilters';
 import { comparePropertiesForSort } from '@/lib/propertySortPrice';
@@ -32,6 +32,7 @@ import { PropertySortSelect, PropertySortKey } from '@/components/property/Prope
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { OffplanCTASection } from '@/components/property/OffplanCTASection';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { differenceInDays } from 'date-fns';
 
 export default function PropertySearchPage() {
@@ -39,6 +40,25 @@ export default function PropertySearchPage() {
   const navigate = useNavigate();
   const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
   const isRu = language === 'ru';
+  const isMobile = useIsMobile();
+  const editorId = useId();
+  const [editorOpen, setEditorOpen] = useState(false);
+  const wasMobile = useRef(isMobile);
+  // Keep an in-progress desktop editor mounted when the viewport becomes mobile.
+  const editorVisible = !isMobile || editorOpen || !wasMobile.current;
+  useEffect(() => {
+    if (isMobile && !wasMobile.current) setEditorOpen(true);
+    wasMobile.current = isMobile;
+  }, [isMobile]);
+  const [focusResults, setFocusResults] = useState(false);
+  const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
+  const { districts } = usePropertyQuickFilters();
+  useEffect(() => {
+    if (!focusResults) return;
+    resultsHeadingRef.current?.focus({ preventScroll: true });
+    resultsHeadingRef.current?.scrollIntoView({ block: 'start', behavior: 'auto' });
+    setFocusResults(false);
+  }, [focusResults]);
 
   const queryKey = searchParamsUrl.toString();
   const state = useMemo(() => readPropertySearchQuery(new URLSearchParams(queryKey)), [queryKey]);
@@ -208,6 +228,28 @@ export default function PropertySearchPage() {
     setSearchParamsUrl(resetUrl);
   };
 
+  const submitSearch = (params: URLSearchParams) => {
+    setSearchParamsUrl(params);
+    if (isMobile) {
+      setEditorOpen(false);
+      setFocusResults(true);
+    }
+  };
+  const summaryTypes = searchParams.propertyTypes.map(id => {
+    const type = propertyTypes.find(item => item.id === id);
+    return type ? (isRu ? type.labelRu : type.labelEn) : id;
+  }).join(', ') || (isRu ? 'Любое жильё' : 'Any home');
+  const summaryAreas = searchParams.locations.map(id => {
+    const district = districts.find(item => item.valueKey === id);
+    return district ? (isRu ? district.labelRu : district.labelEn) : id;
+  }).join(', ') || (isRu ? 'Весь Пхукет' : 'All Phuket');
+  const dateLabel = (date: Date) => new Intl.DateTimeFormat(isRu ? 'ru' : language === 'th' ? 'th' : 'en', { day: 'numeric', month: 'short' }).format(date);
+  const summaryDates = searchParams.checkIn && searchParams.checkOut
+    ? `${dateLabel(searchParams.checkIn)} – ${dateLabel(searchParams.checkOut)}`
+    : (isRu ? 'Без дат' : 'Any dates');
+  const summaryExtraFilters = Object.keys(filterValues).filter(key => propertyMode !== 'buy' || key !== 'instantBooking').length + categoryFilters.length + (selectedCompanyId ? 1 : 0);
+  const summaryDuration = rentTenancy === 'medium' ? (isRu ? 'Помесячно' : 'Monthly') : rentTenancy === 'long' ? (isRu ? 'На год' : 'Yearly') : (isRu ? 'Посуточно' : 'Nightly');
+
   return (
     <div className="min-h-screen bg-background">
         {/* Sticky header */}
@@ -216,7 +258,20 @@ export default function PropertySearchPage() {
             <div className="flex items-start gap-2">
               <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0" />
               <div className="flex-1 min-w-0 journey-primary property-search-editor">
-                <HomeDiscoverySearch key={queryKey} initialParams={searchParamsUrl} onSearch={params => setSearchParamsUrl(params)} />
+                {isMobile && <div className="space-y-2 py-1" aria-label={isRu ? 'Текущий поиск' : 'Current search'}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-primary">{propertyMode === 'buy' ? (isRu ? 'Покупка' : 'Buy') : (isRu ? 'Аренда' : 'Rent')}</span>
+                    <button type="button" className="min-h-11 shrink-0 px-2 text-sm font-medium underline underline-offset-4" aria-expanded={editorVisible} aria-controls={editorId} onClick={() => setEditorOpen(open => !open)}>
+                      {editorVisible ? (isRu ? 'Закрыть поиск' : 'Close search') : (isRu ? 'Изменить поиск' : 'Edit search')}
+                    </button>
+                  </div>
+                  <p className="font-medium leading-snug">{summaryTypes} · {summaryAreas}</p>
+                  {propertyMode === 'rent' && <p className="text-sm text-muted-foreground leading-relaxed">{summaryDuration} · {summaryDates} · {state.hasGuestFilter ? `${isRu ? 'Гостей' : 'Guests'}: ${searchParams.guests}` : (isRu ? 'Гости не указаны' : 'Guests not specified')}</p>}
+                  {summaryExtraFilters > 0 && <p className="text-xs text-muted-foreground">{isRu ? 'Доп. фильтров' : 'Additional filters'}: {summaryExtraFilters}</p>}
+                </div>}
+                <div id={editorId} hidden={!editorVisible}>
+                  {editorVisible && <HomeDiscoverySearch key={queryKey} initialParams={searchParamsUrl} onSearch={submitSearch} />}
+                </div>
               </div>
             </div>
           </div>
@@ -308,9 +363,9 @@ export default function PropertySearchPage() {
 
         <div className="px-4 py-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground basis-full sm:basis-auto">
+            <h1 ref={resultsHeadingRef} tabIndex={-1} className="scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)] text-sm text-muted-foreground basis-full sm:basis-auto">
               {isLoading ? (isRu ? 'Ищем жильё…' : 'Finding homes…') : isError ? (isRu ? 'Каталог недоступен' : 'Catalogue unavailable') : <>{properties.length} {isRu ? 'объектов найдено' : 'places found'}</>}
-            </p>
+            </h1>
             <div className="flex flex-wrap items-center gap-2">
               <PropertySortSelect value={sortKey} onChange={setSortKey} />
               {/* Map toggle */}

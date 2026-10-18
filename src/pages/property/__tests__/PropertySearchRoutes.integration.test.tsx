@@ -1,12 +1,13 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 import PropertySearchPage from '../PropertySearchPage';
 import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import GoalEntryPage from '@/pages/discover/GoalEntryPage';
 
-const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown> }));
+const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false }));
+vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: [] }] }, isLoading: false, isError: false }; } }));
 vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => ({ data: [] }) }));
@@ -35,9 +36,78 @@ function mount(entry: string) {
     <Route path="/property/rent/medium-term" element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />} />
   </Routes></MemoryRouter>);
 }
+beforeEach(() => { state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it('starts mobile with a readable summary and expands only one editor', () => {
+    state.mobile = true;
+    mount('/property/search?district=layan&types=villa&guests=3&tenancy=medium&checkIn=2027-11-10&checkOut=2027-11-15');
+    expect(screen.queryByRole('form')).toBeNull();
+    expect(screen.getByText('Villa · Layan')).toBeVisible();
+    expect(screen.getByText(/Monthly ·.*Guests: 3/)).toBeVisible();
+    const edit = screen.getByRole('button', { name: 'Edit search' });
+    expect(edit).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(edit);
+    expect(screen.getAllByRole('form')).toHaveLength(1);
+    expect(screen.getByRole('spinbutton')).toHaveValue(3);
+    const close = screen.getByRole('button', { name: 'Close search' });
+    close.focus();
+    fireEvent.click(close);
+    expect(screen.queryByRole('form')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Edit search' })).toHaveFocus();
+  });
+  it('shows no implied guest restriction for legacy unfiltered browsing', () => {
+    state.mobile = true;
+    mount('/property/browse');
+    expect(screen.getByText(/Guests not specified/)).toBeVisible();
+    expect(screen.queryByText(/Guests: 2/)).toBeNull();
+  });
+  it('retains an edited desktop draft and focus when resized to mobile', () => {
+    const view = mount('/property/search?guests=3');
+    const guests = screen.getByRole('spinbutton');
+    guests.focus();
+    fireEvent.change(guests, { target: { value: '5' } });
+    state.mobile = true;
+    view.rerender(<MemoryRouter initialEntries={['/property/search?guests=3']}><Location /><Routes><Route path="/property/search" element={<PropertySearchPage />} /></Routes></MemoryRouter>);
+    expect(screen.getByRole('spinbutton')).toHaveValue(5);
+    expect(screen.getByRole('spinbutton')).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Close search' })).toHaveAttribute('aria-expanded', 'true');
+  });
+  it('does not invent dates and hides retained rental context in the purchase summary', () => {
+    state.mobile = true;
+    const view = mount('/property/search?guests=3');
+    expect(screen.getByText(/Any dates/)).toBeVisible();
+    view.unmount();
+    mount('/property/search?mode=buy&checkIn=2027-11-10&checkOut=2027-11-15&guests=3');
+    expect(screen.getByText('Buy')).toBeVisible();
+    expect(screen.queryByText(/Guests:/)).toBeNull();
+    expect(screen.queryByText(/Nov/)).toBeNull();
+  });
+  it('collapses submitted mobile edits and focuses results, but history does not steal focus', () => {
+    state.mobile = true;
+    mount('/property/search?guests=3');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '5' } });
+    fireEvent.submit(screen.getByRole('form'));
+    expect(screen.queryByRole('form')).toBeNull();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveFocus();
+    expect(screen.getByText(/Guests: 5/)).toBeVisible();
+    const back = screen.getByRole('button', { name: 'History back' });
+    back.focus();
+    fireEvent.click(back);
+    expect(screen.getByText(/Guests: 3/)).toBeVisible();
+    expect(back).toHaveFocus();
+    expect(screen.queryByRole('form')).toBeNull();
+  });
+  it('keeps desktop editor visible without scrolling or focusing results on submit', () => {
+    mount('/property/search?guests=3');
+    expect(screen.queryByRole('button', { name: 'Edit search' })).toBeNull();
+    fireEvent.submit(screen.getByRole('form'));
+    expect(screen.getByRole('form')).toBeVisible();
+    expect(screen.getByRole('heading', { level: 1 })).not.toHaveFocus();
+    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+  });
   it.each(['/property/browse', '/discover/stay', '/property/rent/medium-term'])('adapts %s with filters and hash intact', route => {
     mount(`${route}?district=layan&types=villa&guests=4&tenancy=medium&f.priceLevel=2&company=operator&source=bookmark#results`);
     expect(screen.getByTestId('location').textContent).toContain('/property/search?');
