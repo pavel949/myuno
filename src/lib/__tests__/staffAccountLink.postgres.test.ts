@@ -26,6 +26,12 @@ async function as<T>(user: string | null, fn: (tx: postgres.TransactionSql) => P
 }
 
 
+async function applyMigration(path: string) {
+ const connection = await sql.reserve();
+ try { await connection.unsafe(readFileSync(path, 'utf8')); }
+ finally { connection.release(); }
+}
+
 beforeAll(async()=>{
  directory=mkdtempSync(join(tmpdir(),'myuno-staff-account-'));chmodSync(directory,0o700);if(asRoot)chownSync(directory,65534,65534);
  run('initdb',['-D',join(directory,'data'),'-A','trust','--no-locale',...(libPath?['-c',`dynamic_library_path=${libPath}`]:[])]);
@@ -41,7 +47,7 @@ beforeAll(async()=>{
  CREATE TABLE user_roles(user_id uuid,role text);
  CREATE FUNCTION actor_is_operating_company_overseer(p_company_id uuid) RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
  SELECT auth.uid() IS NOT NULL AND (EXISTS(SELECT 1 FROM public.user_roles WHERE user_id=auth.uid() AND role='admin') OR EXISTS(SELECT 1 FROM public.management_company_members WHERE company_id=p_company_id AND user_id=auth.uid() AND is_active IS TRUE AND role IN ('director','admin'))) $$;`);
- await sql.unsafe(readFileSync('drizzle/migrations/0037_staff_company_member_link.sql','utf8'));
+ await applyMigration('drizzle/migrations/0037_staff_company_member_link.sql');
  await sql`INSERT INTO management_companies VALUES (${A}),(${B})`;
  for(const u of [team,admin,manager,director,inactive,otherDirector,member,companyAdmin,outsider,id(19)])await sql`INSERT INTO auth.users VALUES (${u})`;
  await sql`INSERT INTO user_roles VALUES (${team},'uno_team'),(${admin},'admin')`;
@@ -133,7 +139,7 @@ describe('staff directory association on actual disposable PostgreSQL',()=>{
   expect(rows).toHaveLength(1);expect(rows[0]).toMatchObject({staff_member_id:S,company_member_id:M,linked_by:admin});
  });
  it('rollback revokes APIs while retaining association and invalidation triggers',async()=>{
-  await link(director);await sql.unsafe(readFileSync('docs/hardening/rollback/0037_staff_company_member_link.sql','utf8'));
+  await link(director);await applyMigration('docs/hardening/rollback/0037_staff_company_member_link.sql');
   await expect(snapshot(director)).rejects.toThrow(/permission denied/);await expect(link(director)).rejects.toThrow(/permission denied/);
   expect(await sql`SELECT * FROM staff_company_member_links`).toHaveLength(1);
   await sql`UPDATE staff_members SET is_active=false WHERE id=${S}`;expect(await sql`SELECT * FROM staff_company_member_links`).toHaveLength(0);
