@@ -124,10 +124,9 @@ BEGIN
       RAISE EXCEPTION 'property_dates_blocked' USING ERRCODE='23P01';
     END IF;
     -- No payment intent, wallet, paid state, commission policy or ledger mutation.
-    INSERT INTO public.orders(id,order_type,vertical,customer_user_id,status,start_at,end_at,total_amount,currency,notes,metadata,
-      source_company_id)
+    INSERT INTO public.orders(id,order_type,vertical,customer_user_id,status,start_at,end_at,total_amount,currency,notes,metadata)
     VALUES(p_request_id,'property','property',actor,requested_status::public.order_status,starts,ends,quote_amount,denomination,
-      p_input->>'notes',metadata,prop.management_company_id) RETURNING * INTO saved;
+      p_input->>'notes',metadata) RETURNING * INTO saved;
     INSERT INTO public.order_participants(order_id,role,name,phone,email)
     VALUES(saved.id,'guest',guest_name,guest_phone,guest_email);
     INSERT INTO public.order_items(order_id,item_type,item_name,resource_id,qty,unit_price,amount,start_at,end_at,metadata)

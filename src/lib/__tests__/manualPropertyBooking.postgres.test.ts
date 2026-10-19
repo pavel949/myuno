@@ -76,7 +76,7 @@ beforeEach(async()=>{
   await sql`INSERT INTO properties(id,owner_id,is_active,management_company_id) VALUES (${room},${actor},true,${company}),(${otherRoom},${actor},true,${company})`;
   await script(forward);
 });
-type ManualResult = {success: boolean;replayed: boolean;order:{id:string;status:string;total_amount:number;start_at:string;end_at:string;source_company_id:string};order_participants:{name:string}[]};
+type ManualResult = {success: boolean;replayed: boolean;order:{id:string;status:string;total_amount:number;start_at:string;end_at:string;source_company_id:string|null};order_participants:{name:string}[]};
 async function create(input: Record<string,unknown>={},actorId: string|null=actor,id=request,property=room,timezone='UTC'):Promise<ManualResult> {
   return sql.begin(async tx=>{
     await tx`SELECT set_config('request.jwt.claim.sub',${actorId??''},true),set_config('TimeZone',${timezone},true)`;
@@ -91,9 +91,9 @@ async function counts(){const [r]=await sql`SELECT (SELECT count(*)::int FROM or
   (SELECT count(*)::int FROM payment_intents) intents`;return r;}
 
 describe('checked manual unpaid property booking / real PostgreSQL',()=>{
-  it('commits a zero-quote confirmed stay and guest atomically with actual company attribution',async()=>{
+  it('commits a zero-quote stay and guest without inventing commercial company attribution',async()=>{
     const result=await create();
-    expect(result).toMatchObject({success:true,replayed:false,order:{id:request,status:'confirmed',total_amount:0,source_company_id:company},order_participants:[{name:'Synthetic Guest'}]});
+    expect(result).toMatchObject({success:true,replayed:false,order:{id:request,status:'confirmed',total_amount:0,source_company_id:null},order_participants:[{name:'Synthetic Guest'}]});
     expect(await counts()).toEqual({orders:1,bookings:1,items:1,guests:1,receipts:1,alerts:0,intents:0});
     const [history]=await sql`SELECT actor_user_id,to_status FROM order_status_history`;
     expect(history).toEqual({actor_user_id:actor,to_status:'confirmed'});
