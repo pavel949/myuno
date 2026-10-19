@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useVisaServices } from '@/hooks/useVisaServices';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { BackButton } from '@/components/uno/BackButton';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -404,27 +405,20 @@ export default function VisaImmigrationPage() {
   return (
     <AppLayout>
       <div className="pb-24">
-        {/* Hero */}
-        <div className="relative bg-gradient-to-br from-primary via-primary to-primary p-6 pt-16 pb-8">
-          <BackButton fallbackPath="/legal" variant="overlay" className="absolute top-4 left-4" />
-          
-          <div className="text-white text-center">
-            <div className="w-16 h-16 bg-white/20 rounded-none flex items-center justify-center mx-auto mb-4">
-              <Plane className="w-8 h-8" />
-            </div>
-            <h1 className="text-2xl font-bold mb-2">
-              {language === 'ru' ? 'Визы и Иммиграция' : 'Visa & Immigration'}
+        <header className="px-4 py-4 border-b border-border space-y-3">
+          <BackButton fallbackPath="/legal" />
+          <div>
+            <h1 className="text-xl font-bold mb-1">
+              {pickLang(language, { ru: 'Визы и пребывание', en: 'Visas and stays', th: 'วีซ่าและการพำนัก' })}
             </h1>
-            <p className="text-white/80 text-sm max-w-md mx-auto">
-              {language === 'ru' 
-                ? 'Полная информация о типах виз, требованиях и процедурах для пребывания в Таиланде'
-                : 'Complete guide to visa types, requirements and procedures for staying in Thailand'}
+            <p className="text-muted-foreground text-sm max-w-prose">
+              {pickLang(language, { ru: 'Справочная информация о визах и пребывании в Таиланде.', en: 'Reference information about visas and staying in Thailand.', th: 'ข้อมูลอ้างอิงเกี่ยวกับวีซ่าและการพำนักในประเทศไทย' })}
             </p>
           </div>
-        </div>
+        </header>
 
         {/* Important Notice */}
-        <div className="px-4 -mt-4">
+        <div className="px-4 pt-4">
           <Card className="border-warning/30 bg-warning/5">
             <CardContent className="p-4 flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />

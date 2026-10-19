@@ -1,23 +1,13 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CalmClusterHero } from '@/components/uno/CalmClusterHero';
-import { ClusterAppCard } from '@/components/uno/ClusterAppCard';
+import { GroupedServiceDestinations, type ServiceDestination } from '@/components/services/GroupedServiceDestinations';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { getServiceCatalogStatus, getServiceIcon, type ServiceStatus } from '@/lib/catalog';
-import { Scale, Plane, Calculator, FileSearch, Shield, FileText, type LucideIcon } from 'lucide-react';
+import { Scale, Plane, Calculator, FileSearch, Shield, FileText } from 'lucide-react';
 import { ClusterBreadcrumb } from '@/components/navigation/ClusterBreadcrumb';
 import { ExploreMoreRail } from '@/components/navigation/ExploreMoreRail';
 
-interface ClusterApp {
-  serviceId: string;
-  label: string;
-  labelRu: string;
-  desc: string;
-  descRu: string;
-  path: string;
-  fallbackIcon: LucideIcon;
-  statusOverride?: ServiceStatus;
-}
+type ClusterApp = ServiceDestination;
 
 const APPS: ClusterApp[] = [
   {
@@ -67,10 +57,6 @@ const APPS: ClusterApp[] = [
   },
 ];
 
-function resolveStatus(app: ClusterApp): ServiceStatus {
-  return app.statusOverride ?? getServiceCatalogStatus(app.serviceId) ?? 'available';
-}
-
 export default function LegalClusterPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
@@ -89,22 +75,7 @@ export default function LegalClusterPage() {
         <div className="px-4 py-3">
           <ClusterBreadcrumb clusterId="legal" serviceLabelRu="Все сервисы" serviceLabelEn="All services" />
         </div>
-        <div className="grid grid-cols-1 gap-3 px-4 md:grid-cols-2 xl:grid-cols-3">
-          {APPS.map((app) => {
-            const Icon = getServiceIcon(app.serviceId, app.fallbackIcon);
-            return (
-              <ClusterAppCard
-                key={app.path}
-                clusterId="legal"
-                icon={Icon}
-                title={t ? app.labelRu : app.label}
-                description={t ? app.descRu : app.desc}
-                path={app.path}
-                status={resolveStatus(app)}
-              />
-            );
-          })}
-        </div>
+        <div className="px-4"><GroupedServiceDestinations apps={APPS} clusterId="legal" idPrefix="legal-services" /></div>
 
         <div className="mt-6 px-4">
           <ExploreMoreRail clusterId="legal" />
