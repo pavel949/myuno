@@ -96,6 +96,7 @@ jobs:
           browser_failed=0
           mkdir -p /tmp/browser
           for fixture in \
+            scripts/qa/home-preferences-ui.mjs \
             scripts/qa/property-editor-ui.mjs \
             scripts/qa/ui-backlog-salvage.mjs \
             scripts/qa/pms-dashboard-ui.mjs \
@@ -111,7 +112,6 @@ jobs:
             scripts/qa/today-ui.mjs \
             scripts/qa/property-browse-ui.mjs \
             scripts/qa/home-search-ui.mjs \
-            scripts/qa/home-preferences-ui.mjs \
             scripts/qa/guest-complex-ui.mjs; do
             if timeout 180s node "$fixture"; then
               printf '%s: PASS\n' "$fixture" | tee -a /tmp/browser/fixture-status.txt
