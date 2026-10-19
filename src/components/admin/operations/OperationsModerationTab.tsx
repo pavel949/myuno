@@ -1,6 +1,7 @@
 import { pickLang } from '@/lib/i18n/pickLang';
-import React, { useRef } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { ManagedComplexReviewQueue } from '@/components/admin/operations/ManagedComplexReviewQueue';
+import React, { useLayoutEffect, useRef } from 'react';
+import { useLocation, useNavigate, useNavigationType, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,22 +36,41 @@ export function OperationsModerationTab() {
   const queryClient = useQueryClient();
   const location = useLocation();
   const [params, setParams] = useSearchParams();
-  const activeTab = params.get('queue') === 'inactive' ? 'inactive' : 'pending';
+  const navigationType = useNavigationType();
+  const pendingFilters = useRef(new URLSearchParams(params));
+  const pendingFilterTargets = useRef<string[]>([]);
+  useLayoutEffect(() => {
+    const target = `${location.pathname}?${params.toString()}`;
+    const ownCommit = navigationType === 'REPLACE' ? pendingFilterTargets.current.lastIndexOf(target) : -1;
+    if (ownCommit >= 0) {
+      // An intermediate transition must not replace a newer synchronous filter edit.
+      pendingFilterTargets.current = pendingFilterTargets.current.slice(ownCommit + 1);
+      if (pendingFilterTargets.current.length) return;
+    } else {
+      // Back/forward and navigation from elsewhere become the new editing baseline.
+      pendingFilterTargets.current = [];
+    }
+    pendingFilters.current = new URLSearchParams(params);
+  }, [location.key, location.pathname, navigationType, params]);
+  const activeTab = params.get('queue') === 'complexes' ? 'complexes' : params.get('queue') === 'inactive' ? 'inactive' : 'pending';
   const search = params.get('q') || '';
   const type = params.get('type') || 'all';
   const category = params.get('category') || 'all';
-  const setFilters = (updates: Record<string, string>) => setParams(previous => {
-    const next = new URLSearchParams(previous);
+  const setFilters = (updates: Record<string, string>) => {
+    // Router search-param callbacks are not queued like React state updates.
+    const next = new URLSearchParams(pendingFilters.current);
     next.set('tab', 'moderation');
     Object.entries(updates).forEach(([key, value]) => {
       if (!value || (key !== 'q' && value === 'all') || (key === 'queue' && value === 'pending')) next.delete(key);
       else next.set(key, value);
     });
-    return next;
-  }, { replace: true });
+    pendingFilters.current = next;
+    pendingFilterTargets.current.push(`${location.pathname}?${next.toString()}`);
+    setParams(next, { replace: true });
+  };
   const actionInFlight = useRef(false);
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: ['moderation-queue', user?.id], queryFn: fetchModerationQueue, enabled: !!user,
+    queryKey: ['moderation-queue', user?.id], queryFn: fetchModerationQueue, enabled: !!user && activeTab !== 'complexes',
   });
   const label = (values: [string, string, string]) => pickLang(language, { en: values[0], ru: values[1], th: values[2] });
   const categoryLabel = (value: string) => categoryLabels[value] ? label(categoryLabels[value]) : value;
@@ -109,10 +129,12 @@ export function OperationsModerationTab() {
       </CardHeader>
       <CardContent className="space-y-4 min-w-0">
         <Tabs value={activeTab} onValueChange={value => setFilters({ queue: value, q: '', type: 'all', category: 'all' })}>
-          <TabsList className="grid h-auto w-full grid-cols-2">
+          <TabsList className="grid h-auto w-full grid-cols-3">
             <TabsTrigger value="pending" className="min-h-11 whitespace-normal">{label(["Pending review", "На проверке", "รอตรวจสอบ"])}</TabsTrigger>
             <TabsTrigger value="inactive" className="min-h-11 whitespace-normal">{label(["Inactive catalog", "Неактивный каталог", "รายการที่ไม่ใช้งาน"])}</TabsTrigger>
+            <TabsTrigger value="complexes" className="min-h-11 whitespace-normal">{label(["Complexes", "Комплексы", "โครงการที่พัก"])}</TabsTrigger>
           </TabsList>
+          <TabsContent value="complexes"><ManagedComplexReviewQueue /></TabsContent>
           {['pending', 'inactive'].map(tab => (
             <TabsContent value={tab} key={tab} className="space-y-4 min-w-0">
               <div data-testid="moderation-summary" className="rounded-none border bg-muted/30 p-3 space-y-1">

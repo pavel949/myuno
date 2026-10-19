@@ -97,6 +97,7 @@ jobs:
           mkdir -p /tmp/browser
           for fixture in \
             scripts/qa/employee-invite-ui.mjs \
+            scripts/qa/complex-authoring-ui.mjs \
             scripts/qa/home-preferences-ui.mjs \
             scripts/qa/property-editor-ui.mjs \
             scripts/qa/admin-review-queues.mjs \

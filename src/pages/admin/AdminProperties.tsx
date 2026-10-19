@@ -1,3 +1,4 @@
+import { PublishedPropertyRevisionQueue } from '@/components/admin/PublishedPropertyRevisionQueue';
 import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -459,6 +460,8 @@ export default function AdminProperties() {
           <RealEstateDomainHealthPanel />
           <PropertyProjectBulkLinkPanel />
         </div>
+
+        <PublishedPropertyRevisionQueue />
 
         {/* Search & Add */}
 

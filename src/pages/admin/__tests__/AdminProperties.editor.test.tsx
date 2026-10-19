@@ -6,6 +6,7 @@ import AdminProperties from '../AdminProperties';
 import { CanonicalPropertyForm } from '@/components/property/canonical-form/CanonicalPropertyForm';
 import { CloudStoragePicker } from '@/components/upload/CloudStoragePicker';
 
+vi.mock('@/components/admin/PublishedPropertyRevisionQueue', () => ({ PublishedPropertyRevisionQueue: () => null }));
 vi.mock('@tanstack/react-query', async importOriginal => ({ ...await importOriginal<typeof import('@tanstack/react-query')>(), useQueryClient: () => ({ invalidateQueries: vi.fn() }) }));
 
 const mocks = vi.hoisted(() => ({

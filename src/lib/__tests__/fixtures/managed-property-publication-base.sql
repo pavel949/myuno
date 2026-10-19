@@ -24,6 +24,9 @@ CREATE TABLE public.properties(
  complex_id uuid,project_id uuid,instant_booking boolean DEFAULT false,
  title_en text NOT NULL DEFAULT '',title_ru text NOT NULL DEFAULT '',title text,description_en text,
  property_type text NOT NULL DEFAULT 'villa',listing_type text NOT NULL DEFAULT 'rent',images text[],price_per_night numeric,
+ -- Publisher target exists on canonical properties (2026-10-19 live metadata: _text),
+ -- but the exact canonical owner_properties view does not project this column.
+ amenities text[],
  is_active boolean DEFAULT true,approval_status text DEFAULT 'pending',deleted_at timestamptz,
  approved_at timestamptz,approved_by uuid,reviewed_at timestamptz,reviewed_by uuid,rejection_reason text,
  lock_code text,ical_token text,owner_contact_id uuid,purchase_price numeric,ownership_verification_status text,

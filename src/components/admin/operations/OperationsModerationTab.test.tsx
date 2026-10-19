@@ -1,9 +1,9 @@
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-admin' } }) }));
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, useLocation } from 'react-router-dom';
+import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { OperationsModerationTab } from './OperationsModerationTab';
 import type { ModerationItem, ModerationQueue } from '@/lib/adminModeration';
 
@@ -42,11 +42,18 @@ const rows = [
 ];
 let data: ModerationQueue;
 const clients: QueryClient[] = [];
-function LocationProbe() { const location = useLocation(); return <output data-testid="route">{location.pathname}{location.search}</output>; }
-function mount(route = '/admin/operations?tab=moderation') {
+function LocationProbe({ navigation = false }: { navigation?: boolean }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  return <><output data-testid="route">{location.pathname}{location.search}</output>{navigation && <>
+    <button onClick={() => navigate('/admin/operations?tab=moderation&queue=inactive&q=Inactive&type=product&category=supplies')}>External queue</button>
+    <button onClick={() => navigate(-1)}>Back fixture</button>
+  </>}</>;
+}
+function mount(route = '/admin/operations?tab=moderation', transitions = false, navigation = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   clients.push(client);
-  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[route]}><OperationsModerationTab /><LocationProbe /></MemoryRouter></QueryClientProvider>);
+  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[route]} future={transitions ? { v7_startTransition: true, v7_relativeSplatPath: true } : undefined}><OperationsModerationTab /><LocationProbe navigation={navigation} /></MemoryRouter></QueryClientProvider>);
 }
 beforeEach(() => {
   state.language = 'en'; state.writes.length = 0; state.fetch.mockReset(); state.success.mockReset(); state.error.mockReset(); state.response = null; state.pending = null; state.filters.length = 0;
@@ -231,4 +238,45 @@ it('does not confirm approval when the pending property was moved to trash after
   expect(state.filters).toContainEqual(['approval_status', 'pending']);
   expect(state.filters).toContainEqual(['updated_at', '2026-10-19T04:00:00Z']);
   expect(state.success).not.toHaveBeenCalled();
+});
+
+
+it('keeps rapid clear, type and category changes composed before a router transition commits', async () => {
+  state.language = 'ru';
+  data = { ...data, items: [
+    item('service', 'transfer', { name_en: 'Transfer service', name_ru: 'Услуга трансфера', approval_status: 'approved' }),
+    item('product', 'coffee', { name_en: 'Local coffee', name_ru: 'Местный кофе', approval_status: 'draft', category: 'groceries' }),
+  ] };
+  mount('/admin/operations?tab=moderation&queue=inactive&q=' + encodeURIComponent('Услуга трансфера'), true);
+  await screen.findByText('Услуга трансфера');
+  const clear = screen.getByRole('button', { name: 'Сбросить фильтры' });
+  const type = screen.getByRole('combobox', { name: 'Тип контента' });
+  const category = screen.getByRole('combobox', { name: 'Категория' });
+  act(() => {
+    fireEvent.click(clear);
+    fireEvent.change(type, { target: { value: 'product' } });
+    fireEvent.change(category, { target: { value: 'groceries' } });
+  });
+  await waitFor(() => expect(screen.getByTestId('route')).toHaveTextContent('/admin/operations?tab=moderation&queue=inactive&type=product&category=groceries'));
+  expect(screen.getByTestId('route').textContent).not.toContain('q=');
+  expect(screen.getByRole('textbox', { name: 'Поиск в очереди' })).toHaveValue('');
+  expect(screen.getByText('Местный кофе')).toBeInTheDocument();
+  expect(screen.getAllByTestId('moderation-row')).toHaveLength(1);
+  expect(state.writes).toEqual([]);
+});
+
+
+it('resynchronizes the filter snapshot after external navigation and history back', async () => {
+  mount('/admin/operations?tab=moderation&q=Ownerless&type=property&category=villa', true, true);
+  await screen.findByText('Ownerless villa');
+  fireEvent.click(screen.getByRole('button', { name: 'External queue' }));
+  await screen.findByText('Inactive rejected product');
+  fireEvent.change(screen.getByRole('textbox', { name: 'Search queue' }), { target: { value: '' } });
+  await waitFor(() => expect(screen.getByTestId('route').textContent).toBe('/admin/operations?tab=moderation&queue=inactive&type=product&category=supplies'));
+  fireEvent.click(screen.getByRole('button', { name: 'Back fixture' }));
+  await screen.findByText('Ownerless villa');
+  fireEvent.change(screen.getByRole('textbox', { name: 'Search queue' }), { target: { value: 'villa' } });
+  await waitFor(() => expect(screen.getByTestId('route').textContent).toBe('/admin/operations?tab=moderation&q=villa&type=property&category=villa'));
+  expect(screen.getAllByTestId('moderation-row')).toHaveLength(1);
+  expect(state.writes).toEqual([]);
 });

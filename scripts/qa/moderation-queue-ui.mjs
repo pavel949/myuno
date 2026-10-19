@@ -16,6 +16,8 @@ const output = '/tmp/browser/moderation-queue-isolated';
 await mkdir(output, { recursive: true });
 
 const virtual = {
+  // New complex queue has its own real-form, synthetic-write fixture.
+  '@/components/admin/operations/ManagedComplexReviewQueue': `export const ManagedComplexReviewQueue=()=>null;`,
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en'});`,
   '@/contexts/AuthContext': `export const useAuth=()=>({user:{id:'synthetic-admin'},isLoading:false});`,
   '@/hooks/useAdmin': `export const useAdminCheck=()=>({isAdmin:true,isLoading:false});`,

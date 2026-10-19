@@ -17,6 +17,7 @@ describe('vendor moderation row-shape source contract', () => {
   it('keeps a transaction-wrapped forward replacement outside active migration journals', () => {
     expect(candidate).toContain('BEGIN;');
     expect(candidate.trim()).toMatch(/COMMIT;$/);
+    expect(candidate).toMatch(/\$function\$;\s*COMMIT;/);
     expect(candidate).toContain("to_regprocedure('public.notify_vendor_on_content_status_change()') IS NULL");
     expect(candidate).toContain('CREATE OR REPLACE FUNCTION public.notify_vendor_on_content_status_change()');
   });

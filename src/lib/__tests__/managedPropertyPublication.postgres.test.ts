@@ -75,6 +75,8 @@ function sourcePolicy(path:string,name:string) {
 async function installLegacyConsumers() {
  // Reuse the actual updatable canonical owner view. Add only its missing fixture
  // columns from generated canonical types; this is not a full migration replay.
+ // Publisher write targets outside the view must exist in the base fixture too;
+ // the static source contract checks the union without widening the owner view.
  const source=readFileSync('supabase/migrations/20260228013925_c84e0fbe-3bce-42ae-85be-05cfdf40ad3d.sql','utf8');
  const view=source.slice(source.indexOf('CREATE OR REPLACE VIEW public.owner_properties'),source.indexOf('-- Step 3:'));
  const names=view.slice(view.indexOf('SELECT')+6,view.indexOf('FROM properties')).split(',').map(field=>field.trim().split(/\s+AS\s+/i)[0]);
@@ -195,10 +197,21 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   // Actual surviving source policy formerly permitted forged state-machine logs.
   await as(U.editor,tx=>tx`INSERT INTO property_activity_log(property_id,actor_id,action) VALUES(${vulnerable},${U.admin},'managed_property_publication_changed')`);
 
+  // The unchecked legacy function is callable, but its current canonical view
+  // omits op.amenities. Preserve that real source/live-shape failure rather than
+  // fabricate a wider view to demonstrate a successful clone escape.
+  expect((await sql`SELECT has_function_privilege('authenticated','public.publish_property_to_marketplace(uuid)','EXECUTE') AS allowed`)[0].allowed).toBe(true);
   const legacy=await property({title:'Legacy draft'});
-  const [escape]=await as(U.outsider,tx=>tx`SELECT publish_property_to_marketplace(${legacy}) AS id`);
-  expect(escape.id).not.toBe(legacy);
-  expect((await sql`SELECT approval_status,is_active FROM properties WHERE id=${escape.id}`)[0]).toEqual({approval_status:'approved',is_active:true});
+  const linked=await property({title:'Existing marketplace row'});
+  const beforeLegacy=(await sql`SELECT count(*)::int AS count FROM properties`)[0].count;
+  for(const marketplaceId of [null,linked]) {
+   await sql`UPDATE properties SET marketplace_property_id=${marketplaceId} WHERE id=${legacy}`;
+   await expect(as(U.outsider,tx=>tx`SELECT publish_property_to_marketplace(${legacy})`)).rejects.toThrow(/record "op" has no field "amenities"/);
+  }
+  expect((await sql`SELECT count(*)::int AS count FROM properties`)[0].count).toBe(beforeLegacy);
+  expect(await sql`SELECT approval_status,is_active FROM properties WHERE id IN (${legacy},${linked})`).toEqual([
+   {approval_status:'draft',is_active:false},{approval_status:'draft',is_active:false},
+  ]);
   await sql.unsafe(readFileSync('docs/convergence/employee-property-publication/checked-publication.candidate.sql','utf8'));
   const permissions='supabase/migrations/20260226072628_e0c74d35-4281-4aad-b700-f89f10dc00ca.sql';
   await sql.unsafe(sourceFunction(permissions,'is_mc_admin'));
@@ -217,6 +230,12 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   // Match the surviving source schema before applying the complete candidate.
   expect((await sql`SELECT to_regclass('public.property_meters') AS table_name`)[0].table_name).toBeNull();
   await sql.unsafe(readFileSync('docs/convergence/employee-property-publication/employee-operational-membership.candidate.sql','utf8'));
+  const normalizeSource=readFileSync('supabase/migrations/20260225144021_bfb9f5d1-f20a-4f47-a6d4-70971cc08d8f.sql','utf8');
+  await sql.unsafe(normalizeSource.match(/CREATE OR REPLACE FUNCTION normalize_district\(\)[\s\S]*?\$\$ LANGUAGE plpgsql;/)![0]);
+  await sql.unsafe('CREATE TRIGGER trg_normalize_district_properties BEFORE INSERT OR UPDATE ON properties FOR EACH ROW EXECUTE FUNCTION normalize_district();');
+  await sql.unsafe(sourcePolicy('supabase/migrations/20260205111048_c571471b-a01c-4107-86f6-048ff7cb33e3.sql','public_view_active'));
+  await sql.unsafe("ALTER POLICY public_view_active ON public.properties TO anon; GRANT SELECT(id,title_en,is_active,approval_status) ON public.properties TO anon;");
+  await sql.unsafe(readFileSync('docs/convergence/employee-property-revisions/published-revisions.candidate.sql','utf8'));
 
 
 
@@ -363,7 +382,7 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   await sql`INSERT INTO property_manager_assignments(property_id,manager_user_id,is_active) VALUES(${assigned},${U.unassignedStaff},true)`;
   expect(await as(U.unassignedStaff,tx=>tx`INSERT INTO property_media(property_id) VALUES(${assigned}) RETURNING id`)).toHaveLength(1);
  });
- it('blocks the old unchecked publisher for authenticated and anonymous callers after demonstrating its canonical-view clone escape', async () => {
+ it('revokes the broken unchecked publisher entrypoint rather than relying on its missing view field', async () => {
   const key=await create(U.staff); const before=(await sql`SELECT count(*)::int AS count FROM properties`)[0].count;
   for(const actor of [U.staff,U.outsider,U.admin,null]) await expect(as(actor,tx=>tx`SELECT publish_property_to_marketplace(${key})`)).rejects.toThrow(/permission denied/);
   expect((await sql`SELECT count(*)::int AS count FROM properties`)[0].count).toBe(before);
@@ -623,6 +642,200 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   await as(U.editor,tx=>tx`INSERT INTO property_activity_log(property_id,actor_id,action) VALUES(${key},${U.editor},'legacy_note')`);
   expect(await sql`SELECT action FROM property_activity_log WHERE property_id=${key} AND action='legacy_note'`).toHaveLength(1);
  });
+ describe('published property revision proposals', () => {
+  async function published(patch: Record<string, unknown> = {}) {
+   return property({content_author_user_id:U.staff,approval_status:'approved',is_active:true,...patch});
+  }
+  async function revisionRead(actor:string,key:string) {
+   return as(actor,async tx=>(await tx`SELECT read_managed_property_revision_checked(${key}) AS state`)[0].state);
+  }
+  async function revisionSave(actor:string,key:string,patch:Record<string,postgres.JSONValue>,submit=false,expected?:{property:{updated_at:string};revision:{version:string}|null},restart=false) {
+   const state=expected??await revisionRead(actor,key);
+   return as(actor,async tx=>(await tx`SELECT save_managed_property_revision_checked(${key},${state.property.updated_at}::timestamptz,${state.revision?.version??null}::uuid,${tx.json(patch)},${submit},${restart}) AS state`)[0].state);
+  }
+  async function revisionReview(key:string,decision='approve',expected?:{property:{updated_at:string};revision:{version:string}},reason:string|null=null,actor=U.admin) {
+   const state=expected??await revisionRead(actor,key);
+   return as(actor,async tx=>(await tx`SELECT review_managed_property_revision_checked(${key},${state.property.updated_at}::timestamptz,${state.revision?.version??null}::uuid,${decision},${reason}) AS state`)[0].state);
+  }
+  it('saves and submits proposals without changing public canonical data or assignment authority',async()=>{
+   const key=await published({title_en:'Published title',price_per_night:100,lock_code:'private'});
+   const original=(await sql`SELECT to_jsonb(p)-ARRAY['publication_revision','updated_at'] AS row FROM properties p WHERE id=${key}`)[0].row;
+   const draft=await revisionSave(U.staff,key,{title_en:'New title'});
+   expect(draft.revision).toMatchObject({status:'draft',patch:{title_en:'New title'}});
+   const pending=await revisionSave(U.staff,key,{},true);
+   expect(pending).toMatchObject({property:{title_en:'Published title',is_active:true,approval_status:'approved'},revision:{status:'pending'},conflict:false});
+   expect((await sql`SELECT to_jsonb(p)-ARRAY['publication_revision','updated_at'] AS row FROM properties p WHERE id=${key}`)[0].row).toEqual(original);
+   expect((await as(null,tx=>tx`SELECT title_en FROM public_property_catalog WHERE id=${key}`))[0].title_en).toBe('Published title');
+   expect(await as(U.staff,tx=>tx`SELECT id FROM properties WHERE id=${key}`)).toHaveLength(0);
+   expect(await sql`SELECT property_id FROM property_manager_assignments WHERE property_id=${key}`).toHaveLength(0);
+   expect(pending.revision).not.toHaveProperty('base_fingerprint');
+   expect(pending.property).not.toHaveProperty('lock_code');
+   expect(pending.revision.base).not.toHaveProperty('lock_code');
+   expect(pending.revision).not.toHaveProperty('author_id');
+   // Approved/active rows remain publicly readable through explicit safe columns,
+   // but neither anonymous nor unrelated signed-in users can read the proposal.
+   expect((await as(null,tx=>tx`SELECT title_en FROM properties WHERE id=${key}`))[0].title_en).toBe('Published title');
+   await expect(as(null,tx=>tx`SELECT publication_revision FROM properties WHERE id=${key}`)).rejects.toThrow(/permission denied/);
+   await expect(as(null,tx=>tx`SELECT * FROM properties WHERE id=${key}`)).rejects.toThrow(/permission denied/);
+   expect(await as(U.outsider,tx=>tx`SELECT publication_revision FROM properties WHERE id=${key}`)).toHaveLength(0);
+   expect((await as(null,tx=>tx`SELECT to_jsonb(c) AS row FROM public_property_catalog c WHERE id=${key}`))[0].row).not.toHaveProperty('publication_revision');
+  });
+  it('atomically approves exactly the reviewed content and preserves publication, ownership and company',async()=>{
+   const key=await published({owner_id:U.owner,provider_id:id(90),title_en:'Old title'});
+   const pending=await revisionSave(U.staff,key,{title_en:'Reviewed title',description_en:'Reviewed text'},true);
+   const accepted=await revisionReview(key,'approve',pending);
+   expect(accepted).toMatchObject({property:{title_en:'Reviewed title',description_en:'Reviewed text',approval_status:'approved',is_active:true},revision:{status:'approved'},conflict:false});
+   expect((await sql`SELECT owner_id,provider_id,management_company_id FROM properties WHERE id=${key}`)[0]).toEqual({owner_id:U.owner,provider_id:id(90),management_company_id:C});
+   expect((await as(null,tx=>tx`SELECT title_en FROM public_property_catalog WHERE id=${key}`))[0].title_en).toBe('Reviewed title');
+   const audit=(await sql`SELECT details,actor_id FROM property_activity_log WHERE property_id=${key} AND action='managed_property_revision_changed' ORDER BY created_at DESC LIMIT 1`)[0];
+   expect(audit.actor_id).toBe(U.admin);expect(audit.details.from_version).toBe(pending.revision.version);
+   expect(audit.details.revision.patch).toEqual({title_en:'Reviewed title',description_en:'Reviewed text'});
+   expect(audit.details.revision).not.toHaveProperty('base_fingerprint');
+   await expect(revisionReview(key,'approve',pending)).rejects.toThrow(/changed/);
+  });
+  it('requires a return reason, keeps published content and supports correction/resubmission',async()=>{
+   const key=await published({title_en:'Public'});
+   const pending=await revisionSave(U.staff,key,{title_en:'First proposal'},true);
+   await expect(revisionReview(key,'reject',pending)).rejects.toThrow(/reason/);
+   const rejected=await revisionReview(key,'reject',pending,'Please fix the title');
+   expect(rejected).toMatchObject({property:{title_en:'Public',is_active:true},revision:{status:'rejected',reason:'Please fix the title'}});
+   const corrected=await revisionSave(U.staff,key,{title_en:'Corrected'},true);
+   expect(corrected.revision).toMatchObject({status:'pending',patch:{title_en:'Corrected'}});
+   expect(corrected.revision).not.toHaveProperty('reason');
+  });
+  it('freezes a pending proposal even when a restart is requested',async()=>{
+   const key=await published();const pending=await revisionSave(U.staff,key,{title_en:'Pending'},true);
+   await expect(revisionSave(U.staff,key,{title_en:'Different'},false,pending)).rejects.toThrow(/locked/);
+   await expect(revisionSave(U.staff,key,{},false,pending,true)).rejects.toThrow(/locked/);
+  });
+  it('requires current row and proposal CAS independently and permits only one concurrent save',async()=>{
+   const key=await published();const initial=await revisionRead(U.staff,key);
+   const outcomes=await Promise.allSettled([revisionSave(U.staff,key,{title_en:'A'},false,initial),revisionSave(U.staff,key,{title_en:'B'},false,initial)]);
+   expect(outcomes.filter(r=>r.status==='fulfilled')).toHaveLength(1);
+   expect(outcomes.filter(r=>r.status==='rejected')).toHaveLength(1);
+   const current=await revisionRead(U.staff,key);
+   await expect(revisionSave(U.staff,key,{title_en:'Forged version'},false,{...current,revision:{version:id(999)}})).rejects.toThrow(/changed/);
+   await expect(revisionSave(U.staff,key,{title_en:'Stale row'},false,{...current,property:initial.property})).rejects.toThrow(/changed/);
+  });
+  it('permits at most one concurrent exact-version review',async()=>{
+   const key=await published();const pending=await revisionSave(U.staff,key,{title_en:'New title'},true);
+   const outcomes=await Promise.allSettled([revisionReview(key,'approve',pending),revisionReview(key,'reject',pending,'Needs changes')]);
+   expect(outcomes.filter(r=>r.status==='fulfilled')).toHaveLength(1);expect(outcomes.filter(r=>r.status==='rejected')).toHaveLength(1);
+   expect(await sql`SELECT actor_id FROM property_activity_log WHERE property_id=${key} AND action='managed_property_revision_changed' AND actor_id=${U.admin}`).toHaveLength(1);
+  });
+  it('detects independent live changes even after reloading the current row timestamp',async()=>{
+   const key=await published({owner_id:U.owner,title_en:'Before'});
+   await revisionSave(U.staff,key,{title_en:'Employee proposal'},true);
+   await as(U.owner,tx=>tx`UPDATE properties SET title_en='Owner changed live title' WHERE id=${key}`);
+   const current=await revisionRead(U.admin,key);expect(current.conflict).toBe(true);
+   await expect(revisionReview(key,'approve',current)).rejects.toThrow(/published property changed/);
+   expect((await sql`SELECT title_en FROM properties WHERE id=${key}`)[0].title_en).toBe('Owner changed live title');
+   await revisionReview(key,'reject',current,'Please review the current public title');
+   await expect(revisionSave(U.staff,key,{description_en:'New detail'})).rejects.toThrow(/explicitly restart/);
+   const restarted=await revisionSave(U.staff,key,{},false,undefined,true);
+   expect(restarted).toMatchObject({revision:{status:'draft',patch:{},base:{title_en:'Owner changed live title'}},conflict:false});
+  });
+  it('does not confuse proposal-only updates with canonical changes and fingerprints are timezone stable',async()=>{
+   const key=await published();const draft=await revisionSave(U.staff,key,{title_en:'First'});
+   const timezoneRead=await as(U.staff,async tx=>{
+    await tx.unsafe("SET LOCAL TimeZone='Asia/Bangkok'");
+    return (await tx`SELECT read_managed_property_revision_checked(${key}) AS state`)[0].state;
+   });
+   expect(timezoneRead.conflict).toBe(false);
+   const pending=await revisionSave(U.staff,key,{description_en:'Second'},true,draft);
+   const accepted=await as(U.admin,async tx=>{
+    await tx.unsafe("SET LOCAL TimeZone='America/Los_Angeles'");
+    return (await tx`SELECT review_managed_property_revision_checked(${key},${pending.property.updated_at}::timestamptz,${pending.revision.version}::uuid,'approve',NULL) AS state`)[0].state;
+   });
+   expect(accepted.property.title_en).toBe('First');expect(accepted.property.description_en).toBe('Second');
+  });
+  it('normalizes district before displaying the exact proposal and retains post-trigger equality',async()=>{
+   const key=await published({district:'Patong'});
+   const pending=await revisionSave(U.staff,key,{district:' bang-tao '},true);
+   expect(pending.revision.patch.district).toBe('Bang Tao');
+   expect((await revisionReview(key,'approve',pending)).property.district).toBe('Bang Tao');
+  });
+  it('preserves separate pricing and bookings permissions in proposed content',async()=>{
+   const key=await published({price_per_night:100,instant_booking:false});
+   await expect(revisionSave(U.staff,key,{price_per_night:200})).rejects.toThrow(/pricing edit/);
+   await expect(revisionSave(U.staff,key,{instant_booking:true})).rejects.toThrow(/bookings edit/);
+   await sql`INSERT INTO team_member_permissions(company_id,user_id,module,can_view,can_edit,can_export) VALUES(${C},${U.staff},'pricing',true,true,false)`;
+   try {
+    expect((await revisionSave(U.staff,key,{price_per_night:200})).revision.patch.price_per_night).toBe(200);
+    await expect(revisionSave(U.staff,key,{instant_booking:true})).rejects.toThrow(/bookings edit/);
+    await sql`UPDATE team_member_permissions SET can_edit=false WHERE user_id=${U.staff} AND module='pricing'`;
+    await expect(revisionSave(U.staff,key,{title_en:'Otherwise harmless'})).rejects.toThrow(/pricing edit/);
+   } finally {await sql`DELETE FROM team_member_permissions WHERE user_id=${U.staff} AND module='pricing'`;}
+  });
+  it.each([U.viewer,U.team,U.outsider,U.unassignedStaff,U.inactive])('denies unauthorized revision actor %s',async actor=>{
+   const key=await published();const initial=await revisionRead(U.staff,key);
+   await expect(revisionSave(actor,key,{title_en:'Unauthorized'},false,initial)).rejects.toThrow(/permission|unavailable/);
+   await expect(revisionReview(key,'approve',{...initial,revision:{version:id(999)}},null,actor)).rejects.toThrow(/platform admin/);
+  });
+  it('rechecks active company and Space membership rather than trusting creator identity',async()=>{
+   const key=await published();const initial=await revisionRead(U.staff,key);
+   await sql`UPDATE operating_space_members SET is_active=false WHERE company_member_id IN (SELECT id FROM management_company_members WHERE user_id=${U.staff})`;
+   try {
+    await expect(revisionRead(U.staff,key)).rejects.toThrow(/unavailable/);
+    await expect(revisionSave(U.staff,key,{title_en:'After revocation'},false,initial)).rejects.toThrow(/unavailable/);
+   } finally {await sql`UPDATE operating_space_members SET is_active=true WHERE company_member_id IN (SELECT id FROM management_company_members WHERE user_id=${U.staff})`;}
+   await sql`UPDATE operating_space_properties SET operating_space_id=${UNAUTHORIZED_SPACE} WHERE property_id=${key}`;
+   await expect(revisionRead(U.staff,key)).rejects.toThrow(/unavailable/);
+  });
+  it.each(['owner_id','provider_id','management_company_id','approval_status','is_active','publication_revision','lock_code'])('rejects protected revision field %s',async field=>{
+   const key=await published();await expect(revisionSave(U.staff,key,{[field]:'forged'})).rejects.toThrow(/unsupported/);
+  });
+  it('blocks direct envelope forgery by independent owner/provider/admin without removing their canonical rights',async()=>{
+   const key=await published({owner_id:U.owner,provider_id:id(90)});
+   for(const actor of [U.owner,U.provider,U.admin]) {
+    await expect(as(actor,tx=>tx`UPDATE properties SET publication_revision='{"status":"approved"}' WHERE id=${key}`)).rejects.toThrow(/checked workflow/);
+    expect(await as(actor,tx=>tx`UPDATE properties SET title_en='Existing independent writer' WHERE id=${key} RETURNING id`)).toHaveLength(1);
+   }
+  });
+  it('blocks empty submission, unpublished properties and anonymous calls',async()=>{
+   const key=await published();await expect(revisionSave(U.staff,key,{},true)).rejects.toThrow(/changed content/);
+   await as(U.admin,tx=>tx`UPDATE properties SET is_active=false WHERE id=${key}`);
+   await expect(revisionRead(U.staff,key)).rejects.toThrow(/published/);
+   await expect(as(null,tx=>tx`SELECT read_managed_property_revision_checked(${key})`)).rejects.toThrow(/permission denied/);
+   await expect(as(null,tx=>tx`SELECT list_managed_property_revisions_checked()`)).rejects.toThrow(/permission denied/);
+  });
+  it('limits the pending queue to authenticated platform admins with bounded pagination',async()=>{
+   const key=await published();await revisionSave(U.staff,key,{title_en:'Queue proposal'},true);
+   const rows=await as(U.admin,tx=>tx`SELECT list_managed_property_revisions_checked(100,0) AS row`);
+   expect(rows.some(r=>r.row.property.id===key)).toBe(true);
+   await expect(as(U.staff,tx=>tx`SELECT list_managed_property_revisions_checked()`)).rejects.toThrow(/platform admin/);
+   await expect(as(U.admin,tx=>tx`SELECT list_managed_property_revisions_checked(101,0)`)).rejects.toThrow(/bounded/);
+  });
+  it('rolls back proposal and approval when audit append fails',async()=>{
+   const key=await published();let before=await version(key);
+   await sql.unsafe("ALTER TABLE property_activity_log ADD CONSTRAINT test_revision_audit_failure CHECK(action<>'managed_property_revision_changed') NOT VALID");
+   try {
+    await expect(revisionSave(U.staff,key,{title_en:'Cannot save'})).rejects.toThrow(/test_revision_audit_failure/);
+    expect(await version(key)).toBe(before);expect((await revisionRead(U.staff,key)).revision).toBeNull();
+   } finally {await sql.unsafe('ALTER TABLE property_activity_log DROP CONSTRAINT test_revision_audit_failure');}
+   const pending=await revisionSave(U.staff,key,{title_en:'Cannot approve'},true);before=await version(key);
+   await sql.unsafe("ALTER TABLE property_activity_log ADD CONSTRAINT test_revision_audit_failure CHECK(action<>'managed_property_revision_changed') NOT VALID");
+   try {
+    await expect(revisionReview(key,'approve',pending)).rejects.toThrow(/test_revision_audit_failure/);
+    expect(await version(key)).toBe(before);expect((await revisionRead(U.staff,key)).revision.status).toBe('pending');
+    expect((await sql`SELECT title_en FROM properties WHERE id=${key}`)[0].title_en).toBe('Synthetic villa');
+   } finally {await sql.unsafe('ALTER TABLE property_activity_log DROP CONSTRAINT test_revision_audit_failure');}
+  });
+  it('rejects a persisted envelope changed by an unexpected BEFORE trigger',async()=>{
+   const key=await published();const before=await version(key);
+   await sql.unsafe(`CREATE FUNCTION public.test_drop_revision() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN NEW.publication_revision:=NULL; RETURN NEW; END $$;
+    CREATE TRIGGER zzzz_test_drop_revision BEFORE UPDATE ON properties FOR EACH ROW EXECUTE FUNCTION test_drop_revision();`);
+   try {
+    await expect(revisionSave(U.staff,key,{title_en:'Drop must not succeed'})).rejects.toThrow(/revision save changed/);
+    expect(await version(key)).toBe(before);expect((await revisionRead(U.staff,key)).revision).toBeNull();
+   } finally {await sql.unsafe('DROP TRIGGER zzzz_test_drop_revision ON properties; DROP FUNCTION test_drop_revision();');}
+  });
+  it('reserves audit actions against client forgery',async()=>{
+   const key=await published();
+   await expect(as(U.staff,tx=>tx`INSERT INTO property_activity_log(property_id,actor_id,action) VALUES(${key},${U.admin},'managed_property_revision_changed')`)).rejects.toThrow(/row-level/);
+  });
+ });
+
  it('preserves the narrower deployed admin-only inspection policy without restoring historical member grants', async () => {
   for(const name of ['MC members can view inspections','MC members can insert inspections','MC members can update inspections','MC admins can delete inspections']) {
    await sql.unsafe(`DROP POLICY "${name}" ON public.inventory_inspections`);

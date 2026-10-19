@@ -9,6 +9,8 @@ import PropertyEditor from '../PropertyEditor';
 const mocks = vi.hoisted(() => ({
   property: {} as Record<string, unknown>,
   provider: vi.fn(),
+  revisionRead: vi.fn(),
+  revisionSave: vi.fn(),
   canAccess: vi.fn(),
   mutateAsync: vi.fn(),
   mutate: vi.fn(),
@@ -18,6 +20,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/propertyAuthoring', async importOriginal => ({ ...(await importOriginal<typeof import('@/lib/propertyAuthoring')>()), isIndependentPropertyProvider: mocks.provider }));
+vi.mock('@/lib/propertyRevisions', async importOriginal => ({ ...(await importOriginal<typeof import('@/lib/propertyRevisions')>()), readPropertyRevision: mocks.revisionRead, savePropertyRevision: mocks.revisionSave }));
 const renderEditor = () => render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}><PropertyEditor /></QueryClientProvider>);
 
 vi.mock('react-router-dom', () => ({
@@ -202,5 +205,81 @@ describe('independent provider authoring', () => {
     renderEditor();
     await screen.findByText('Read-only property');
     expect(screen.queryByRole('button', { name: 'Save property' })).not.toBeInTheDocument();
+  });
+});
+
+
+describe('published employee revision editor', () => {
+  const stamp = '2026-10-19T06:00:00.123456Z';
+  const version = '00000000-0000-4000-8000-000000000001';
+  const state = (status: 'draft' | 'pending' | 'rejected' | null = null) => ({
+    property: { ...mocks.property }, conflict: false,
+    revision: status ? { version, status, base: { title: 'Live title', title_en: 'Live title' }, patch: { title: 'Proposed title', title_en: 'Proposed title' }, created_at: stamp, updated_at: stamp, reason: status === 'rejected' ? 'Please fix the title' : null } : null,
+  });
+  beforeEach(() => {
+    vi.clearAllMocks(); mocks.canAccess.mockReturnValue(true); mocks.provider.mockResolvedValue(false);
+    mocks.property = { id: 'synthetic-property', owner_id: null, management_company_id: 'synthetic-company', title: 'Live title', title_en: 'Live title', updated_at: stamp, approval_status: 'approved', is_active: true };
+    mocks.revisionRead.mockResolvedValue(state());
+    mocks.revisionSave.mockImplementation(async args => ({ property: { ...mocks.property, updated_at: '2026-10-19T06:01:00.123457Z' }, conflict: false,
+      revision: { version: '00000000-0000-4000-8000-000000000002', status: args.submit ? 'pending' : 'draft', base: { title: 'Live title', title_en: 'Live title' }, patch: args.patch, created_at: stamp, updated_at: '2026-10-19T06:01:00.123457Z' } }));
+  });
+  afterEach(cleanup);
+  it('reuses the employee form but saves published edits only as proposals', async () => {
+    renderEditor(); await screen.findByLabelText('Title');
+    expect(screen.getByText('Proposed changes to a published listing')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Unpublish' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Employee proposal' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save property' }));
+    await waitFor(() => expect(mocks.revisionSave).toHaveBeenCalledTimes(1));
+    expect(mocks.revisionSave.mock.calls[0][0]).toMatchObject({ propertyId: 'synthetic-property', expectedUpdatedAt: stamp, expectedRevision: null, patch: { title: 'Employee proposal', title_en: 'Employee proposal' }, submit: false });
+    expect(mocks.mutateAsync).not.toHaveBeenCalled(); expect(mocks.syncAvailability).not.toHaveBeenCalled();
+    expect(mocks.property.title).toBe('Live title');
+  });
+  it('submits the exact proposal token without unpublishing the approved property', async () => {
+    mocks.revisionRead.mockResolvedValue(state('draft'));
+    renderEditor(); await screen.findByDisplayValue('Proposed title');
+    fireEvent.click(screen.getByRole('button', { name: 'Submit for review' }));
+    await waitFor(() => expect(mocks.revisionSave).toHaveBeenCalledTimes(1));
+    expect(mocks.revisionSave.mock.calls[0][0]).toMatchObject({ expectedRevision: version, expectedUpdatedAt: stamp, submit: true });
+    expect(mocks.revisionSave.mock.calls[0][0].patch).not.toHaveProperty('is_active');
+    expect(mocks.revisionSave.mock.calls[0][0].patch).not.toHaveProperty('approval_status');
+    expect(mocks.mutateAsync).not.toHaveBeenCalled();
+  });
+  it('freezes pending changes and explains that the original remains public', async () => {
+    mocks.revisionRead.mockResolvedValue(state('pending'));
+    renderEditor(); await screen.findByText('Read-only property');
+    expect(screen.getByText(/The approved listing stays published/)).toBeInTheDocument();
+    expect(screen.queryByLabelText('Title')).not.toBeInTheDocument();
+    expect(mocks.revisionSave).not.toHaveBeenCalled();
+  });
+  it('restores returned proposal content and its reason', async () => {
+    mocks.revisionRead.mockResolvedValue(state('rejected'));
+    renderEditor(); await screen.findByDisplayValue('Proposed title');
+    expect(screen.getByText(/Please fix the title/)).toBeInTheDocument();
+  });
+  it('requires explicit discard/restart after canonical content changes', async () => {
+    mocks.revisionRead.mockResolvedValue({ ...state('rejected'), conflict: true });
+    renderEditor(); const restart = await screen.findByRole('button', { name: 'Discard proposal and restart from published version' });
+    expect(screen.queryByLabelText('Title')).not.toBeInTheDocument();
+    expect(mocks.revisionSave).not.toHaveBeenCalled();
+    fireEvent.click(restart);
+    await waitFor(() => expect(mocks.revisionSave).toHaveBeenCalledTimes(1));
+    expect(mocks.revisionSave.mock.calls[0][0]).toMatchObject({ restart: true, patch: {}, expectedRevision: version });
+  });
+  it('keeps entered values and blocks repeated saves after an unconfirmed write', async () => {
+    mocks.revisionSave.mockRejectedValue(new Error('revision changed; reload before saving'));
+    renderEditor(); await screen.findByLabelText('Title');
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Keep my work visible' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save property' }));
+    await screen.findByRole('button', { name: 'Reload and discard unsaved changes' });
+    expect(screen.getByDisplayValue('Keep my work visible')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Save property' }));
+    expect(mocks.revisionSave).toHaveBeenCalledTimes(1); expect(mocks.navigate).not.toHaveBeenCalled();
+  });
+  it('fails closed if the checked revision reader is unavailable', async () => {
+    mocks.revisionRead.mockRejectedValue(new Error('Missing checked revision RPC'));
+    renderEditor(); await screen.findByRole('alert');
+    expect(screen.queryByLabelText('Title')).not.toBeInTheDocument();
+    expect(mocks.mutateAsync).not.toHaveBeenCalled();
   });
 });

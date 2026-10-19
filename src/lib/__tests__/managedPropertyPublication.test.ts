@@ -66,6 +66,29 @@ describe('managed publication source contract (not database execution)', () => {
       expect(sql).not.toMatch(/\bproperty_meters\b/i);
     }
   });
+  it('models every legacy publisher target without inventing missing canonical owner-view fields', () => {
+    const source=readFileSync('supabase/migrations/20260122090230_e71787be-8a4c-4a8c-aba1-52358bf0803a.sql','utf8');
+    const publisher=source.slice(0,source.indexOf('-- Function to handle auto-publish'));
+    const viewSource=readFileSync('supabase/migrations/20260228013925_c84e0fbe-3bce-42ae-85be-05cfdf40ad3d.sql','utf8');
+    const fields=viewSource.match(/SELECT([\s\S]*?)FROM properties;/)![1].split(',').map(field=>field.trim().split(/\s+AS\s+/i));
+    const base=readFileSync('src/lib/__tests__/fixtures/managed-property-publication-base.sql','utf8').replace(/^\s*--.*$/gm,'');
+    const baseFields=base.match(/CREATE TABLE public\.properties\(([\s\S]*?)\n\);/)![1].split(',').map(field=>field.trim().match(/^\w+/)![0]);
+    const fixtureColumns=new Set([...baseFields,...fields.map(([column])=>column)]);
+    const inserts=publisher.match(/INSERT INTO properties\s*\(([\s\S]*?)\) VALUES/)![1].split(',').map(field=>field.trim());
+    const update=publisher.match(/UPDATE properties SET([\s\S]*?)WHERE id = existing_property_id/)![1];
+    const updates=[...update.matchAll(/^\s*(\w+)\s*=/gm)].map(match=>match[1]);
+    const canonical=readFileSync('src/integrations/supabase/types.ts','utf8').split('      properties: {')[1].split('        Insert: {')[0];
+    for(const column of new Set([...inserts,...updates])) {
+      expect(fixtureColumns.has(column),`Missing publisher fixture target: ${column}`).toBe(true);
+      expect(canonical).toMatch(new RegExp(`\\n          ${column}:`));
+    }
+    // The read-only 2026-10-19 metadata confirms properties.amenities is text[],
+    // while the exact source/live owner view omits it. Do not manufacture a bypass.
+    expect(base).toMatch(/\bamenities text\[\]/);
+    const viewFields=new Set(fields.map(parts=>parts.at(-1)!));
+    const referenced=[...new Set([...publisher.matchAll(/\bop\.(\w+)/g)].map(match=>match[1]))];
+    expect(referenced.filter(column=>!viewFields.has(column))).toEqual(['amenities']);
+  });
   it('reserves only the new audit action names and requires cutover for the new platform-admin delegation path', () => {
     expect(candidate()).toContain("action NOT IN ('managed_property_draft_created','managed_property_publication_changed')");
     const sql=readFileSync('docs/convergence/employee-property-publication/platform-admin-authoring-delegation.candidate.sql','utf8');

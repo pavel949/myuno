@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   properties: [] as Record<string, unknown>[], projects: [] as Record<string, unknown>[],
   retry: vi.fn(), write: vi.fn(() => { throw Error('Business writes forbidden'); }),
 }));
+vi.mock('@/components/admin/PublishedPropertyRevisionQueue', () => ({ PublishedPropertyRevisionQueue: () => null }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-admin' }, isLoading: false }) }));
 vi.mock('@/hooks/useAdmin', () => ({ useAdminCheck: () => ({ isAdmin: true, isLoading: false }) }));

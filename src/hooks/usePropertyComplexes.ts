@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { typedFrom } from '@/lib/untypedTables';
 
 export interface PropertyComplex {
   id: string;
-  owner_id: string;
+  owner_id?: string | null;
   name: string;
   name_ru?: string;
   description?: string;
@@ -40,25 +41,32 @@ export interface PropertyComplex {
   juristic_email?: string;
   // Status
   is_active?: boolean;
+  authoring_space_id?: string;
+  approval_status?: 'draft' | 'pending' | 'approved' | 'rejected';
+  rejection_reason?: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export type ComplexFormData = Omit<PropertyComplex, 'id' | 'owner_id' | 'created_at' | 'updated_at'>;
+export type ComplexFormData = Omit<PropertyComplex, 'id' | 'owner_id' | 'created_at' | 'updated_at' | 'authoring_space_id' | 'approval_status' | 'rejection_reason'>;
 
 const db = supabase;
 
-export function usePropertyComplexes() {
+export function usePropertyComplexes(editableScope?: { companyId?: string; includeCompany: boolean; platformAdmin?: boolean }) {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['property-complexes', user?.id],
+    queryKey: ['property-complexes', user?.id, editableScope?.companyId, editableScope?.includeCompany, editableScope?.platformAdmin],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await db
-        .from('property_complexes')
-        .select('*')
-        .order('name');
+      let query = db.from('property_complexes').select('*');
+      if (editableScope && !editableScope.platformAdmin) {
+        // A company role is only an affordance; stored RLS remains authority.
+        query = editableScope.includeCompany && editableScope.companyId
+          ? query.or(`owner_id.eq.${user!.id},management_company_id.eq.${editableScope.companyId}`)
+          : query.eq('owner_id', user!.id);
+      }
+      const { data, error } = await query.order('name');
       if (error) throw error;
       return (data || []) as PropertyComplex[];
     },
@@ -150,8 +158,7 @@ export function useComplexAmenities(complexId: string | null | undefined) {
     queryKey: ['complex-amenities', complexId],
     enabled: !!complexId,
     queryFn: async () => {
-      const { data, error } = await db
-        .from('property_complexes')
+      const { data, error } = await typedFrom('public_complex_catalog')
         .select('amenities, services, security_features, infrastructure, name, name_ru')
         .eq('id', complexId!)
         .single();
@@ -160,4 +167,22 @@ export function useComplexAmenities(complexId: string | null | undefined) {
     },
     staleTime: 10 * 60 * 1000,
   });
+}
+
+
+/** Safe names used for grouping. Public catalogue + independently authorized
+ * private names are projections of the same canonical complexes, never authority. */
+export async function readPropertyComplexNames(ids?: string[]) {
+  let publicQuery = typedFrom('public_complex_catalog').select('id,name,name_ru');
+  let privateQuery = db.from('property_complexes').select('id,name,name_ru');
+  if (ids) {
+    if (!ids.length) return [];
+    publicQuery = publicQuery.in('id', ids);
+    privateQuery = privateQuery.in('id', ids);
+  }
+  const [catalogue, independent] = await Promise.all([publicQuery.order('name'), privateQuery.order('name')]);
+  if (catalogue.error) throw catalogue.error;
+  if (independent.error) throw independent.error;
+  const rows = [...(catalogue.data || []), ...(independent.data || [])] as Array<{ id: string; name: string; name_ru: string | null }>;
+  return [...new Map(rows.map(row => [row.id, row])).values()].sort((a, b) => a.name.localeCompare(b.name));
 }

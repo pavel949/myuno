@@ -1,4 +1,6 @@
 import { ManagedPropertyDrafts } from '@/components/owner/ManagedPropertyDrafts';
+import { readPropertyComplexNames } from '@/hooks/usePropertyComplexes';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -47,14 +49,13 @@ function localizePropertyType(raw: string, isRu: boolean): string {
 }
 /** Fetch complex & project names for filter labels */
 function usePropertyLookups(complexIds: string[], projectIds: string[]) {
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
   const complexQuery = useQuery({
-    queryKey: ['property-complexes-lookup', complexIds],
+    queryKey: ['property-complexes-lookup', user?.id, activeCompany?.company_id, complexIds],
     queryFn: async () => {
       if (!complexIds.length) return {};
-      const { data } = await supabase
-        .from('property_complexes')
-        .select('id, name, name_ru')
-        .in('id', complexIds);
+      const data = await readPropertyComplexNames(complexIds);
       const map: Record<string, { name: string; name_ru: string | null }> = {};
       (data || []).forEach(c => { map[c.id] = { name: c.name, name_ru: c.name_ru }; });
       return map;
@@ -85,14 +86,12 @@ function usePropertyLookups(complexIds: string[], projectIds: string[]) {
 
 /** Fetch all complexes and projects for reassignment */
 function useAllComplexesAndProjects() {
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
   const complexes = useQuery({
-    queryKey: ['all-complexes-for-bulk'],
+    queryKey: ['all-complexes-for-bulk', user?.id, activeCompany?.company_id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('property_complexes')
-        .select('id, name, name_ru')
-        .order('name');
-      return data || [];
+      return readPropertyComplexNames();
     },
   });
 

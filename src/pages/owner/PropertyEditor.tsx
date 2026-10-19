@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { buildPropertyPayload } from '@/hooks/property-wizard/buildPayload';
 import { initialOwnershipData, mapPropertyToFormData } from '@/hooks/property-wizard/initialData';
+import { propertyRevisionEditingRow, readPropertyRevision, savePropertyRevision } from '@/lib/propertyRevisions';
 import { propertyAuthoringDelta, editablePropertyAuthoringPatch, isIndependentPropertyProvider } from '@/lib/propertyAuthoring';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -189,22 +190,42 @@ export default function PropertyEditor() {
   const navigate = useNavigate();
   const isRu = language === 'ru';
 
-  const { data: property, isLoading, error: propertyError, refetch: refetchProperty } = useOwnerProperty(id, { authoring: true });
+  const queryClient = useQueryClient();
+  const { data: liveProperty, isLoading, error: propertyError, refetch: refetchProperty } = useOwnerProperty(id, { authoring: true });
   const providerAuthority = useQuery({
-    queryKey: ['property-authoring-provider', user?.id, property?.id, property?.provider_id],
-    enabled: !!user && !!property?.provider_id && property.owner_id !== user.id && !isAdmin,
-    queryFn: () => isIndependentPropertyProvider(property?.provider_id, user!.id),
+    queryKey: ['property-authoring-provider', user?.id, liveProperty?.id, liveProperty?.provider_id],
+    enabled: !!user && !!liveProperty?.provider_id && liveProperty.owner_id !== user.id && !isAdmin,
+    queryFn: () => isIndependentPropertyProvider(liveProperty?.provider_id, user!.id),
   });
-  const independentProvider = property?.provider_id === user?.id || providerAuthority.data === true;
-  const managedEmployee = !!property?.management_company_id && property.owner_id !== user?.id && !isAdmin && !independentProvider;
-  const canEdit = !!property && !!user && !adminLoading && !providerAuthority.isLoading && !providerAuthority.error && (!managedEmployee || (!permissionsLoading && canAccess('properties', 'edit') && ['draft', 'rejected'].includes(property?.approval_status || '')));
+  const independentProvider = liveProperty?.provider_id === user?.id || providerAuthority.data === true;
+  const managedEmployee = !!liveProperty?.management_company_id && liveProperty.owner_id !== user?.id && !isAdmin && !independentProvider;
+  const publishedRevision = managedEmployee && liveProperty?.approval_status === 'approved' && liveProperty.is_active === true;
+  const revisionKey = ['managed-property-revision', user?.id, liveProperty?.management_company_id, id];
+  const revisionQuery = useQuery({
+    queryKey: revisionKey,
+    enabled: !!publishedRevision && !!id && !adminLoading && !providerAuthority.isLoading,
+    queryFn: () => readPropertyRevision(id!, liveProperty?.management_company_id || undefined),
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const property = useMemo(() => publishedRevision && revisionQuery.data
+    ? propertyRevisionEditingRow(revisionQuery.data) : liveProperty, [publishedRevision, revisionQuery.data, liveProperty]);
+  const revisionPending = revisionQuery.data?.revision?.status === 'pending';
+  const revisionConflict = revisionQuery.data?.conflict === true;
+  const [revisionSaving, setRevisionSaving] = useState(false);
+  const [revisionSaveBlocked, setRevisionSaveBlocked] = useState(false);
+  const revisionVersionRef = useRef<string | null>(null);
+  const canEdit = !!property && !!user && !adminLoading && !providerAuthority.isLoading && !providerAuthority.error
+    && (!managedEmployee || (!permissionsLoading && canAccess('properties', 'edit')
+      && (publishedRevision ? !!revisionQuery.data && !revisionQuery.error && !revisionPending && !revisionConflict
+        : ['draft', 'rejected'].includes(property.approval_status || ''))));
   const savingRef = useRef(false);
   const actorScope = `${user?.id || ''}:${id || ''}`;
   const actorScopeRef = useRef(actorScope);
   actorScopeRef.current = actorScope;
   const mountedRef = useRef(true);
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
-  useEffect(() => { savingRef.current = false; }, [actorScope]);
+  useEffect(() => { savingRef.current = false; setRevisionSaveBlocked(false); setRevisionSaving(false); }, [actorScope]);
   const savedVersionRef = useRef<string>();
   const updateProperty = useUpdateOwnerProperty();
   const autosaveProperty = useUpdateOwnerProperty();
@@ -235,6 +256,7 @@ export default function PropertyEditor() {
     if (hydratedIdRef.current === `${user?.id}:${property.id}` && latestSnapshotRef.current !== lastSavedSnapshotRef.current) return;
     hydratedIdRef.current = `${user?.id}:${property.id}`;
     savedVersionRef.current = property.updated_at;
+    revisionVersionRef.current = publishedRevision ? revisionQuery.data?.revision?.version || null : null;
     const mapped = mapPropertyToInitialData(property);
     const nextFormData = {
       ...mapPropertyToFormData(property),
@@ -333,7 +355,7 @@ export default function PropertyEditor() {
     setUtilitiesData(nextUtilitiesData);
     setServicesData(nextServicesData);
     setRooms(nextRooms);
-  }, [property, user?.id]);
+  }, [property, user?.id, publishedRevision, revisionQuery.data, revisionSaveBlocked]);
 
   // Sync availability
   useEffect(() => {
@@ -410,8 +432,45 @@ export default function PropertyEditor() {
     return editablePropertyAuthoringPatch(propertyAuthoringDelta(payload, baseline), { pricing: canAccess('pricing', 'edit'), bookings: canAccess('bookings', 'edit') });
   }, [formData, rooms, servicesData, utilitiesData, managedEmployee, canAccess]);
 
+  const persistRevision = useCallback(async (payload: Record<string, unknown>, submit = false) => {
+    if (!id || !liveProperty?.management_company_id || !savedVersionRef.current) throw new Error('Reload the property revision before saving');
+    setRevisionSaving(true);
+    try {
+      const saved = await savePropertyRevision({
+        propertyId: id, companyId: liveProperty.management_company_id,
+        expectedUpdatedAt: savedVersionRef.current, expectedRevision: revisionVersionRef.current,
+        patch: payload, submit,
+      });
+      if (mountedRef.current && actorScopeRef.current === actorScope) {
+        revisionVersionRef.current = saved.revision!.version;
+        queryClient.setQueryData(['managed-property-revision', user?.id, liveProperty.management_company_id, id], saved);
+      }
+      return saved.property;
+    } catch (error) {
+      if (mountedRef.current && actorScopeRef.current === actorScope) setRevisionSaveBlocked(true);
+      throw error;
+    } finally { if (mountedRef.current && actorScopeRef.current === actorScope) setRevisionSaving(false); }
+  }, [id, liveProperty?.management_company_id, actorScope, queryClient, user?.id]);
+
+  const restartRevision = async () => {
+    const current = revisionQuery.data;
+    if (!current || savingRef.current || revisionSaving || !canAccess('properties', 'edit') || revisionPending) return;
+    savingRef.current = true;
+    setRevisionSaving(true);
+    try {
+      const saved = await savePropertyRevision({ propertyId: current.property.id, companyId: current.property.management_company_id!,
+        expectedUpdatedAt: current.property.updated_at, expectedRevision: current.revision?.version || null, patch: {}, restart: true });
+      if (!mountedRef.current || actorScopeRef.current !== actorScope) return;
+      hydratedIdRef.current = undefined;
+      queryClient.setQueryData(revisionKey, saved);
+    } catch (error) {
+      if (!mountedRef.current || actorScopeRef.current !== actorScope) return;
+      toast.error(error instanceof Error ? error.message : pickLang(language, { en: 'Could not restart revision', ru: 'Не удалось начать изменения заново', th: 'เริ่มฉบับแก้ไขใหม่ไม่สำเร็จ' }));
+    } finally { if (actorScopeRef.current === actorScope) { savingRef.current = false; if (mountedRef.current) setRevisionSaving(false); } }
+  };
+
   const persistEditorDraft = useCallback(async () => {
-    if (!id || !formData || !hasUnsavedChanges || !canEdit || savingRef.current || hydratedIdRef.current !== actorScope) return;
+    if (!id || !formData || !hasUnsavedChanges || !canEdit || (publishedRevision && revisionSaveBlocked) || savingRef.current || hydratedIdRef.current !== actorScope) return;
     const savingScope = actorScope;
 
     const payload = buildEditorPayload();
@@ -420,7 +479,7 @@ export default function PropertyEditor() {
     setSaveState('saving');
     savingRef.current = true;
     try {
-      const saved = await autosaveProperty.mutateAsync({
+      const saved = publishedRevision ? await persistRevision(payload) : await autosaveProperty.mutateAsync({
         id,
         ...payload,
         _authoring: true,
@@ -438,7 +497,7 @@ export default function PropertyEditor() {
       setSaveState('error');
       errorLog.silent(error, 'persist_editor_draft');
     } finally { if (actorScopeRef.current === savingScope) savingRef.current = false; }
-  }, [actorScope, autosaveProperty, buildEditorPayload, canEdit, formData, hasUnsavedChanges, id, rooms, servicesData, utilitiesData]);
+  }, [actorScope, autosaveProperty, buildEditorPayload, canEdit, formData, hasUnsavedChanges, id, rooms, servicesData, utilitiesData, publishedRevision, persistRevision, revisionSaveBlocked]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
@@ -474,11 +533,11 @@ export default function PropertyEditor() {
   }, [hasUnsavedChanges, persistEditorDraft]);
 
   const handleSubmit = async (submitForReview = false) => {
-    if (!id || !formData || !canEdit || savingRef.current || hydratedIdRef.current !== actorScope) return;
+    if (!id || !formData || !canEdit || (publishedRevision && revisionSaveBlocked) || savingRef.current || hydratedIdRef.current !== actorScope) return;
     const savingScope = actorScope;
     savingRef.current = true;
     try {
-      const saved = await updateProperty.mutateAsync({ id, ...(buildEditorPayload() || {}), _authoring: true, _expectedUpdatedAt: savedVersionRef.current, _submitForReview: submitForReview, ...(submitForReview ? { approval_status: 'pending', is_active: false } : {}) } as never);
+      const saved = publishedRevision ? await persistRevision(buildEditorPayload() || {}, submitForReview) : await updateProperty.mutateAsync({ id, ...(buildEditorPayload() || {}), _authoring: true, _expectedUpdatedAt: savedVersionRef.current, _submitForReview: submitForReview, ...(submitForReview ? { approval_status: 'pending', is_active: false } : {}) } as never);
       if (!mountedRef.current || actorScopeRef.current !== savingScope) return;
       savedVersionRef.current = saved.updated_at;
 
@@ -493,8 +552,10 @@ export default function PropertyEditor() {
         return;
       }
 
-      toast(isRu ? 'Сохранено' : 'Saved', {
-        description: isRu ? 'Изменения успешно сохранены' : 'Changes saved successfully',
+      toast(publishedRevision ? pickLang(language, submitForReview
+        ? { en: 'Changes submitted for review', ru: 'Изменения отправлены на проверку', th: 'ส่งการแก้ไขเพื่อตรวจสอบแล้ว' }
+        : { en: 'Proposed changes saved', ru: 'Предлагаемые изменения сохранены', th: 'บันทึกข้อเสนอแก้ไขแล้ว' }) : (isRu ? 'Сохранено' : 'Saved'), {
+        description: publishedRevision ? pickLang(language, { en: 'The published listing keeps its current content until approval.', ru: 'Опубликованное объявление сохраняет прежние данные до одобрения.', th: 'ประกาศยังคงแสดงข้อมูลเดิมจนกว่าจะอนุมัติ' }) : (isRu ? 'Изменения успешно сохранены' : 'Changes saved successfully'),
       });
       navigate(managedEmployee ? '/mc/properties' : `/mc/properties/${id}`);
     } catch (error) {
@@ -538,7 +599,7 @@ export default function PropertyEditor() {
   ], [rooms, localAvailability, formData?.price_per_night, id, cityCurrencyCode]);
 
   // Loading state
-  if (isLoading || adminLoading || providerAuthority.isLoading || (managedEmployee && permissionsLoading)) {
+  if (isLoading || adminLoading || providerAuthority.isLoading || (managedEmployee && permissionsLoading) || (publishedRevision && revisionQuery.isLoading)) {
     return (
       <PageContainer>
         <PageHeader title={isRu ? 'Редактирование' : 'Edit Property'} showBack fallbackPath="/mc/properties" />
@@ -551,9 +612,9 @@ export default function PropertyEditor() {
     );
   }
 
-  if (propertyError) return <PageContainer>
+  if (propertyError || (publishedRevision && revisionQuery.error)) return <PageContainer>
     <p role="alert">{pickLang(language, { en: 'Could not load this property. Access or the checked workflow may be unavailable.', ru: 'Не удалось загрузить объект. Проверьте доступ и доступность защищённого процесса.', th: 'โหลดอสังหาริมทรัพย์ไม่สำเร็จ อาจไม่มีสิทธิ์หรือขั้นตอนที่ตรวจสอบสิทธิ์ยังไม่พร้อม' })}</p>
-    <Button onClick={() => void refetchProperty()}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+    <Button onClick={() => void (publishedRevision ? revisionQuery.refetch() : refetchProperty())}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
   </PageContainer>;
 
   if (!property) {
@@ -569,22 +630,38 @@ export default function PropertyEditor() {
       <PageHeader title={property.title || property.title_en || ''} showBack fallbackPath="/mc/properties" />
       <Card><CardContent className="p-6 space-y-3">
         <p className="font-medium">{pickLang(language, { en: 'Read-only property', ru: 'Объект доступен для просмотра', th: 'ดูอสังหาริมทรัพย์ได้อย่างเดียว' })}</p>
-        <p className="text-sm text-muted-foreground">{pickLang(language, {
-          en: 'Only authorized draft or returned listings can be edited here. Pending listings are locked for review. Approved listings need a reviewed revision workflow; contact your administrator for changes.',
-          ru: 'Здесь редактируются только доступные вам черновики и возвращённые объекты. На проверке редактирование заблокировано. Для изменений одобренного объявления обратитесь к администратору.',
-          th: 'แก้ไขได้เฉพาะฉบับร่างหรือรายการที่ส่งคืนและได้รับสิทธิ์ รายการที่รอตรวจสอบจะถูกล็อก โปรดติดต่อผู้ดูแลเพื่อแก้ไขรายการที่อนุมัติแล้ว',
+        <p className="text-sm text-muted-foreground">{pickLang(language, publishedRevision ? (revisionConflict ? {
+          en: 'Published content changed after this proposal started. The published listing is unchanged by this proposal. Return pending changes for correction, or start again from the current published version.',
+          ru: 'Опубликованный объект изменился после создания предложения. Предложение не меняет объявление. Верните ожидающие изменения на доработку или начните заново с текущей опубликованной версии.',
+          th: 'ข้อมูลที่เผยแพร่เปลี่ยนไปหลังเริ่มข้อเสนอนี้ ข้อเสนอยังไม่เปลี่ยนประกาศ โปรดส่งข้อเสนอที่รอตรวจกลับเพื่อแก้ไข หรือเริ่มใหม่จากข้อมูลที่เผยแพร่ล่าสุด',
+        } : revisionPending ? {
+          en: 'Your proposed changes are locked for review. The approved listing stays published with its current content until an administrator approves this exact revision.',
+          ru: 'Предложенные изменения заблокированы на время проверки. Объявление остаётся опубликованным с прежними данными до одобрения этой версии администратором.',
+          th: 'ข้อเสนอแก้ไขถูกล็อกระหว่างตรวจสอบ ประกาศยังเผยแพร่ข้อมูลเดิมจนกว่าผู้ดูแลจะอนุมัติฉบับแก้ไขนี้',
+        } : {
+          en: 'You do not currently have permission to edit this property. Published content remains unchanged.',
+          ru: 'Сейчас у вас нет прав на редактирование объекта. Опубликованные данные не изменены.',
+          th: 'ขณะนี้คุณไม่มีสิทธิ์แก้ไขที่พักนี้ ข้อมูลที่เผยแพร่ยังไม่เปลี่ยนแปลง',
+        }) : {
+          en: 'Only authorized draft or returned listings can be edited here. Pending listings are locked for review.',
+          ru: 'Здесь редактируются только доступные вам черновики и возвращённые объекты. На проверке редактирование заблокировано.',
+          th: 'แก้ไขได้เฉพาะฉบับร่างหรือรายการที่ส่งคืนและได้รับสิทธิ์ รายการที่รอตรวจสอบจะถูกล็อก',
         })}</p>
+        {publishedRevision && revisionConflict && !revisionPending && canAccess('properties', 'edit') && <Button disabled={revisionSaving} onClick={() => void restartRevision()}>
+          {pickLang(language, { en: 'Discard proposal and restart from published version', ru: 'Отбросить предложение и начать с опубликованной версии', th: 'ละทิ้งข้อเสนอและเริ่มใหม่จากฉบับที่เผยแพร่' })}
+        </Button>}
+        {publishedRevision && <Button variant="outline" onClick={() => void revisionQuery.refetch()}>{pickLang(language, { en: 'Reload review status', ru: 'Обновить статус проверки', th: 'โหลดสถานะการตรวจสอบใหม่' })}</Button>}
         <Button variant="outline" onClick={() => navigate('/mc/properties')}>{pickLang(language, { en: 'Back to properties', ru: 'К списку объектов', th: 'กลับสู่รายการอสังหาริมทรัพย์' })}</Button>
       </CardContent></Card>
     </PageContainer>;
   }
 
-  const isSubmitting = updateProperty.isPending || autosaveProperty.isPending || isSavingAvailability;
+  const isSubmitting = updateProperty.isPending || autosaveProperty.isPending || isSavingAvailability || revisionSaving || (publishedRevision && revisionSaveBlocked);
 
   return (
     <PageContainer>
       <PageHeader
-        title={isRu ? 'Редактировать объект' : 'Edit Property'}
+        title={publishedRevision ? pickLang(language, { en: 'Edit proposed changes', ru: 'Редактировать предлагаемые изменения', th: 'แก้ไขข้อเสนอการเปลี่ยนแปลง' }) : (isRu ? 'Редактировать объект' : 'Edit Property')}
         showBack
         fallbackPath={`/mc/properties/${id}`}
         subtitle={
@@ -625,6 +702,22 @@ export default function PropertyEditor() {
           </div>
         }
       />
+
+      {publishedRevision && <div role="status" className="mb-4 space-y-2 border p-3 text-sm">
+        <p className="font-medium">{pickLang(language, { en: 'Proposed changes to a published listing', ru: 'Предлагаемые изменения опубликованного объявления', th: 'ข้อเสนอแก้ไขประกาศที่เผยแพร่แล้ว' })}</p>
+        <p>{pickLang(language, { en: 'Saving creates a proposal. The published listing keeps its current content until these changes are reviewed and approved.', ru: 'Сохранение создаёт предложение. Опубликованное объявление сохраняет прежние данные, пока изменения не проверят и не одобрят.', th: 'การบันทึกจะสร้างข้อเสนอ ประกาศยังคงแสดงข้อมูลเดิมจนกว่าการแก้ไขจะผ่านการตรวจสอบและอนุมัติ' })}</p>
+        {revisionSaveBlocked && <div role="alert" className="space-y-2 text-destructive">
+          <p>{pickLang(language, { en: 'Save was not confirmed. Reload the current proposal before trying again.', ru: 'Сохранение не подтверждено. Загрузите текущее предложение перед повторной попыткой.', th: 'ยังยืนยันการบันทึกไม่ได้ โปรดโหลดข้อเสนอปัจจุบันก่อนลองอีกครั้ง' })}</p>
+          <Button variant="outline" onClick={async () => {
+            const result = await revisionQuery.refetch();
+            if (result.error || !mountedRef.current || actorScopeRef.current !== actorScope) return;
+            hydratedIdRef.current = undefined;
+            lastSavedSnapshotRef.current = latestSnapshotRef.current;
+            setRevisionSaveBlocked(false);
+          }}>{pickLang(language, { en: 'Reload and discard unsaved changes', ru: 'Обновить и отбросить несохранённые изменения', th: 'โหลดใหม่และละทิ้งการแก้ไขที่ยังไม่บันทึก' })}</Button>
+        </div>}
+        {revisionQuery.data?.revision?.reason && <p>{pickLang(language, { en: 'Returned for correction:', ru: 'Возвращено на доработку:', th: 'ส่งกลับเพื่อแก้ไข:' })} {revisionQuery.data.revision.reason}</p>}
+      </div>}
 
       {/* Autosave status bar */}
       {saveState !== 'idle' && (
