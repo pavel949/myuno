@@ -92,6 +92,7 @@ jobs:
             scripts/qa/trip-planner-ui.mjs \
             scripts/qa/unified-property-search-ui.mjs \
             scripts/qa/bookings-list-ui.mjs \
+            scripts/qa/pms-detail-ui.mjs \
             scripts/qa/calendar-ui.mjs \
             scripts/qa/today-ui.mjs \
             scripts/qa/property-browse-ui.mjs \

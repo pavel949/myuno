@@ -1,3 +1,4 @@
+import { propertyOrderHoldsInventory } from '@/lib/propertyInventory';
 import { parseCivilDate, civilDateKey, civilStaysOverlap, stayOccupiesDate, bangkokTodayISO } from '@/lib/hotelDates';
 import { useState, useMemo, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -113,7 +114,7 @@ const isRu = language === 'ru';
     if (!checkIn || !checkOut || !bookings) return [];
     
     return bookings.filter(booking => {
-      return civilStaysOverlap(booking, {
+      return propertyOrderHoldsInventory(booking.status) && civilStaysOverlap(booking, {
         check_in: civilDateKey(checkIn), check_out: civilDateKey(checkOut),
       });
     });
@@ -150,6 +151,7 @@ const isRu = language === 'ru';
     
     // Add booked dates
     bookings?.forEach(booking => {
+      if (!propertyOrderHoldsInventory(booking.status)) return;
       const start = parseCivilDate(booking.check_in);
       const end = parseCivilDate(booking.check_out);
       let current = start;
@@ -272,8 +274,12 @@ const isRu = language === 'ru';
       if (booking.preparation?.status === 'needs_attention') {
         toast.warning(isRu ? 'Запись о бронировании сохранена. Подготовка требует внимания' : 'Booking record saved. Preparation needs attention', {
           description: isRu
-            ? 'Не удалось подтвердить создание всех задач подготовки. Проверьте задачи перед добавлением недостающих. Не создавайте бронирование повторно.'
-            : 'Some preparation tasks could not be confirmed. Review tasks before adding missing ones. Do not create the booking again.',
+            ? booking.preparation.guestDetailsUnconfirmed
+              ? 'Данные гостя не удалось подтвердить. Проверьте карточку и задачи. Не создавайте бронирование повторно.'
+              : 'Не удалось подтвердить создание всех задач подготовки. Проверьте задачи перед добавлением недостающих. Не создавайте бронирование повторно.'
+            : booking.preparation.guestDetailsUnconfirmed
+              ? 'Guest details could not be confirmed. Review the booking and tasks. Do not create the booking again.'
+              : 'Some preparation tasks could not be confirmed. Review tasks before adding missing ones. Do not create the booking again.',
           duration: 12000,
         });
       } else {

@@ -146,3 +146,16 @@ describe('PMS real hooks / in-memory request adapter, NOT hosted E2E', () => {
     expect(fixture.trace).toContainEqual({ table: 'property_reports', op: 'eq', field: 'property_id', value: 'foreign-home' });
   });
 });
+
+it('operational read failure remains visible through the real task hook', async () => {
+  fixture.errors.property_operational_tasks = new Error('tasks unavailable');
+  const { result } = mount(() => useOperationalTasks());
+  await waitFor(() => expect(result.current.error?.message).toBe('tasks unavailable'));
+});
+it('zero-row task completion cannot report success or invalidate as a successful write', async () => {
+  const { result, client } = mount(() => useOperationalTasks());
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  const invalidate = vi.spyOn(client, 'invalidateQueries');
+  await act(async () => { await expect(result.current.completeTask.mutateAsync('missing-task')).rejects.toThrow('Task not saved or access denied'); });
+  expect(invalidate).not.toHaveBeenCalled();
+});
