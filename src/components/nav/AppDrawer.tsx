@@ -33,6 +33,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickTriplet } from '@/lib/ecosystemGlossary';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';
 import {
   resolveNavRole, getWorkspaceDrawerGroups, type NavRoleKey,
@@ -293,7 +294,7 @@ export function AppDrawer({
                 </h3>
                 <div className="space-y-1">
                   {workspaceGroups.flatMap((group) =>
-                    group.items.slice(0, 4).map((item) => {
+                    (role === 'owner' ? group.items : group.items.slice(0, 4)).map((item) => {
                       const ItemIcon = item.icon;
                       return (
                         <button
@@ -303,7 +304,7 @@ export function AppDrawer({
                         >
                           <ItemIcon className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
                           <span className="text-[13px] text-foreground truncate">
-                            {isRu ? item.labelRu : item.labelEn}
+                            {pickLang(language, { en: item.labelEn, ru: item.labelRu, th: item.labelTh })}
                           </span>
                         </button>
                       );

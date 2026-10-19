@@ -190,6 +190,7 @@ export interface SidebarNavItem {
   path: string;
   labelEn: string;
   labelRu: string;
+  labelTh?: string;
   icon: React.ComponentType<{ className?: string }>;
   badgeKey?: 'tasks' | 'messages' | 'pendingContent' | 'pendingProviders';
 }
@@ -197,6 +198,7 @@ export interface SidebarNavItem {
 export interface SidebarNavGroup {
   labelEn: string;
   labelRu: string;
+  labelTh?: string;
   defaultOpen?: boolean;
   items: SidebarNavItem[];
 }
@@ -211,65 +213,80 @@ export interface SidebarNavGroup {
  *  • Developer hidden from main nav — accessible via Settings → Developer.
  *  • Insights collapsed into Properties → Performance.
  */
-const OWNER_SIDEBAR: SidebarNavGroup[] = [
+const OWNER_SIDEBAR_SOURCE: SidebarNavGroup[] = [
   {
     labelEn: 'Control Tower', labelRu: 'Центр управления', defaultOpen: true,
     items: [
-      { path: APP_ROUTES.MC,               labelEn: 'Dashboard',  labelRu: 'Обзор',          icon: LayoutDashboard },
-      { path: APP_ROUTES.MC_TODAY,         labelEn: 'Today',      labelRu: 'Сегодня',        icon: Sun },
-      { path: APP_ROUTES.MC_BOOKINGS_LIST, labelEn: 'Bookings',   labelRu: 'Бронирования',   icon: CalendarCheck },
-      { path: APP_ROUTES.MC_CALENDAR,      labelEn: 'Calendar',   labelRu: 'Календарь',      icon: CalendarDays },
-      { path: APP_ROUTES.MC_TASKS,         labelEn: 'Tasks',      labelRu: 'Задачи',         icon: ClipboardList, badgeKey: 'tasks' },
-      { path: APP_ROUTES.MC_MESSAGES,      labelEn: 'Messages',   labelRu: 'Сообщения',      icon: MessageSquare, badgeKey: 'messages' },
+      { path: APP_ROUTES.MC,               labelTh: 'ภาพรวม', labelEn: 'Dashboard',  labelRu: 'Обзор',          icon: LayoutDashboard },
+      { path: APP_ROUTES.MC_TODAY,         labelTh: 'วันนี้', labelEn: 'Today',      labelRu: 'Сегодня',        icon: Sun },
+      { path: APP_ROUTES.MC_BOOKINGS_LIST, labelTh: 'การจอง', labelEn: 'Bookings',   labelRu: 'Бронирования',   icon: CalendarCheck },
+      { path: APP_ROUTES.MC_CALENDAR,      labelTh: 'ปฏิทิน', labelEn: 'Calendar',   labelRu: 'Календарь',      icon: CalendarDays },
+      { path: APP_ROUTES.MC_TASKS,         labelTh: 'งาน', labelEn: 'Tasks',      labelRu: 'Задачи',         icon: ClipboardList, badgeKey: 'tasks' },
+      { path: APP_ROUTES.MC_MESSAGES,      labelTh: 'ข้อความ', labelEn: 'Messages',   labelRu: 'Сообщения',      icon: MessageSquare, badgeKey: 'messages' },
     ],
   },
   {
     labelEn: 'Properties', labelRu: 'Объекты', defaultOpen: true,
     items: [
-      { path: APP_ROUTES.MC_PROPERTIES,  labelEn: 'Properties',  labelRu: 'Объекты',     icon: Building2 },
-      { path: APP_ROUTES.MC_PERFORMANCE, labelEn: 'Performance', labelRu: 'Показатели',  icon: BarChart3 },
-      { path: APP_ROUTES.MC_REVIEWS,     labelEn: 'Reviews',     labelRu: 'Отзывы',      icon: Star },
+      { path: APP_ROUTES.MC_PROPERTIES,  labelTh: 'ที่พัก', labelEn: 'Properties',  labelRu: 'Объекты',     icon: Building2 },
+      { path: APP_ROUTES.MC_PERFORMANCE, labelTh: 'ผลการดำเนินงาน', labelEn: 'Performance', labelRu: 'Показатели',  icon: BarChart3 },
+      { path: APP_ROUTES.MC_REVIEWS,     labelTh: 'รีวิว', labelEn: 'Reviews',     labelRu: 'Отзывы',      icon: Star },
     ],
   },
   {
     labelEn: 'Operations', labelRu: 'Операции',
     items: [
-      { path: APP_ROUTES.MC_RATES,      labelEn: 'Rates & Channels', labelRu: 'Тарифы и каналы',       icon: Tag },
-      { path: APP_ROUTES.MC_INVENTORY,  labelEn: 'Inventory',        labelRu: 'Инвентарь',             icon: PackageOpen },
-      { path: APP_ROUTES.MC_INSURANCE,  labelEn: 'Insurance & Docs', labelRu: 'Страховки и документы', icon: ShieldCheck },
-      { path: APP_ROUTES.MC_DOCUMENTS,  labelEn: 'Templates',        labelRu: 'Шаблоны',               icon: FileText },
+      { path: APP_ROUTES.MC_RATES,      labelTh: 'ราคา', labelEn: 'Rates', labelRu: 'Тарифы',       icon: Tag },
+      { path: APP_ROUTES.MC_INVENTORY,  labelTh: 'วัสดุและอุปกรณ์', labelEn: 'Stock & inspections', labelRu: 'Запасы и проверки',             icon: PackageOpen },
+      { path: APP_ROUTES.MC_INSURANCE,  labelTh: 'ประกันและเอกสาร', labelEn: 'Insurance & Docs', labelRu: 'Страховки и документы', icon: ShieldCheck },
+      { path: APP_ROUTES.MC_DOCUMENTS,  labelTh: 'แม่แบบเอกสาร', labelEn: 'Templates',        labelRu: 'Шаблоны',               icon: FileText },
     ],
   },
   {
     labelEn: 'Finance', labelRu: 'Финансы',
     items: [
-      { path: APP_ROUTES.MC_FINANCE,          labelEn: 'Finance Hub',      labelRu: 'Финансы',                 icon: DollarSign },
-      { path: APP_ROUTES.MC_INVOICES,         labelEn: 'Invoices & AR',    labelRu: 'Инвойсы и дебиторка',     icon: Receipt },
+      { path: APP_ROUTES.MC_FINANCE,          labelTh: 'การเงิน', labelEn: 'Finance Hub',      labelRu: 'Финансы',                 icon: DollarSign },
+      { path: APP_ROUTES.MC_INVOICES,         labelTh: 'ใบแจ้งหนี้และลูกหนี้', labelEn: 'Invoices & AR',    labelRu: 'Инвойсы и дебиторка',     icon: Receipt },
       // Owner Payouts hidden until first owner_payouts row exists. Direct URL still works.
       // { path: APP_ROUTES.MC_OWNER_PAYOUTS, labelEn: 'Owner Payouts',    labelRu: 'Выплаты собственникам',   icon: Shuffle },
-      { path: APP_ROUTES.MC_MANAGEMENT_TERMS, labelEn: 'Management Terms', labelRu: 'Условия управления',      icon: Layers },
+      { path: APP_ROUTES.MC_MANAGEMENT_TERMS, labelTh: 'เงื่อนไขการบริหาร', labelEn: 'Management Terms', labelRu: 'Условия управления',      icon: Layers },
     ],
   },
   {
     labelEn: 'CRM & Sales', labelRu: 'CRM и продажи',
     items: [
-      { path: APP_ROUTES.MC_CRM_DASHBOARD,      labelEn: 'CRM Dashboard',      labelRu: 'CRM Обзор',           icon: BarChart3 },
-      { path: APP_ROUTES.MC_CONTACTS,           labelEn: 'Contacts',           labelRu: 'Контакты',            icon: ContactRound },
-      { path: APP_ROUTES.MC_OWNERS,             labelEn: 'Owners',             labelRu: 'Собственники',        icon: Crown },
-      { path: APP_ROUTES.MC_VENDOR_ACQUISITION, labelEn: 'Vendor Acquisition', labelRu: 'Привлечение вендоров',icon: Target },
+      { path: APP_ROUTES.MC_CRM_DASHBOARD,      labelTh: 'ภาพรวม CRM', labelEn: 'CRM Dashboard',      labelRu: 'CRM Обзор',           icon: BarChart3 },
+      { path: APP_ROUTES.MC_CONTACTS,           labelTh: 'ผู้ติดต่อ', labelEn: 'Contacts',           labelRu: 'Контакты',            icon: ContactRound },
+      { path: APP_ROUTES.MC_OWNERS,             labelTh: 'เจ้าของที่พัก', labelEn: 'Owners',             labelRu: 'Собственники',        icon: Crown },
+      { path: APP_ROUTES.MC_VENDOR_ACQUISITION, labelTh: 'การหาผู้ให้บริการ', labelEn: 'Vendor Acquisition', labelRu: 'Привлечение вендоров',icon: Target },
     ],
   },
   {
     labelEn: 'Team & Settings', labelRu: 'Команда и настройки',
     items: [
-      { path: APP_ROUTES.MC_STAFF,        labelEn: 'Staff & Access', labelRu: 'Сотрудники',       icon: Users },
+      { path: APP_ROUTES.MC_STAFF,        labelTh: 'ทีมงานและสิทธิ์', labelEn: 'Staff & Access', labelRu: 'Сотрудники',       icon: Users },
       // Approvals hidden until first approval_request row exists. Direct URL still works.
       // { path: APP_ROUTES.MC_APPROVALS,    labelEn: 'Approvals',      labelRu: 'Согласования',     icon: ShieldCheck },
-      { path: APP_ROUTES.MC_SETTINGS,     labelEn: 'Settings',       labelRu: 'Настройки',        icon: Settings },
-      { path: APP_ROUTES.MC_HELP,         labelEn: 'Help Center',    labelRu: 'Справочник',       icon: BookOpen },
+      { path: APP_ROUTES.MC_SETTINGS,     labelTh: 'การตั้งค่า', labelEn: 'Settings',       labelRu: 'Настройки',        icon: Settings },
+      { path: APP_ROUTES.MC_HELP,         labelTh: 'ศูนย์ช่วยเหลือ', labelEn: 'Help Center',    labelRu: 'Справочник',       icon: BookOpen },
     ],
   },
 ];
+
+/** Regroup only after legacy persona filtering; destination visibility is preserved. */
+function groupOwnerSidebar(groups: SidebarNavGroup[]): SidebarNavGroup[] {
+  const areas = [
+    { labelEn: 'Daily work', labelRu: 'Ежедневная работа', labelTh: 'งานประจำวัน', sources: ['Control Tower'], defaultOpen: true },
+    { labelEn: 'Properties & rates', labelRu: 'Объекты и тарифы', labelTh: 'ที่พักและราคา', sources: ['Properties', 'Operations'] },
+    { labelEn: 'Finance & sales', labelRu: 'Финансы и продажи', labelTh: 'การเงินและการขาย', sources: ['Finance', 'CRM & Sales'] },
+    { labelEn: 'Team & settings', labelRu: 'Команда и настройки', labelTh: 'ทีมงานและการตั้งค่า', sources: ['Team & Settings'] },
+  ];
+  return areas.map(({ sources, ...area }) => ({
+    ...area,
+    items: groups.filter(group => sources.includes(group.labelEn)).flatMap(group => group.items),
+  })).filter(group => group.items.length > 0);
+}
+const OWNER_SIDEBAR = groupOwnerSidebar(OWNER_SIDEBAR_SOURCE);
 
 /**
  * Persona-aware filter for the owner sidebar.
@@ -292,7 +309,7 @@ export function getOwnerSidebarForRole(
     service_provider: new Set(['CRM & Sales', 'Finance']),
   };
 
-  return OWNER_SIDEBAR
+  return groupOwnerSidebar(OWNER_SIDEBAR_SOURCE
     .map((group) => {
       if (isSingleOwner) {
         if (group.labelEn === 'CRM & Sales') return null;
@@ -316,7 +333,7 @@ export function getOwnerSidebarForRole(
       if (businessRole && HIDE_GROUPS[businessRole]?.has(group.labelEn)) return null;
       return group;
     })
-    .filter((g): g is SidebarNavGroup => g !== null);
+    .filter((g): g is SidebarNavGroup => g !== null));
 }
 
 /**
@@ -528,9 +545,9 @@ export interface FabAction {
 }
 
 const OWNER_FAB: FabAction[] = [
-  { id: 'expense', path: `${APP_ROUTES.MC_FINANCE}?action=create`,  labelEn: 'Expense', labelRu: 'Расход',   icon: ReceiptIcon,  tone: 'bg-destructive/15 text-destructive' },
+  { id: 'expense', path: '/mc/expenses/quick',  labelEn: 'Expense', labelRu: 'Расход',   icon: ReceiptIcon,  tone: 'bg-destructive/15 text-destructive' },
   { id: 'task',    path: `${APP_ROUTES.MC_TASKS}?action=create`,    labelEn: 'Task',    labelRu: 'Задача',   icon: ListTodo,     tone: 'bg-primary/15 text-primary' },
-  { id: 'meeting', path: `${APP_ROUTES.MC_CALENDAR}?action=create`, labelEn: 'Meeting', labelRu: 'Встреча',  icon: CalendarPlus, tone: 'bg-accent/15 text-accent-foreground' },
+  { id: 'meeting', path: '/mc/meetings?action=create', labelEn: 'Meeting', labelRu: 'Встреча',  icon: CalendarPlus, tone: 'bg-accent/15 text-accent-foreground' },
   { id: 'apps',    path: APP_ROUTES.HOME,                            labelEn: 'myUNO',   labelRu: 'myUNO',    icon: ShoppingBag,  tone: 'bg-success/15 text-success' },
 ];
 

@@ -7,6 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Superseded commits of the same PR do not consume duplicate runners.
+# Manual runs and different PRs remain independent; no verification is skipped.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 permissions:
   contents: read
 
