@@ -206,7 +206,9 @@ export default function AdminUnoTeam() {
           <div className="flex items-center gap-4">
             <Badge variant="secondary" className="gap-1 px-3 py-1">
               <Users className="h-4 w-4" />
-              {members?.length || 0} {isRu ? 'сотрудников' : 'members'}
+              {searchQuery
+                ? (isRu ? `Найдено: ${filteredMembers?.length || 0} из ${members?.length || 0}` : `${filteredMembers?.length || 0} of ${members?.length || 0} members`)
+                : `${members?.length || 0} ${isRu ? 'сотрудников' : 'members'}`}
             </Badge>
           </div>
           
@@ -302,6 +304,19 @@ export default function AdminUnoTeam() {
               <Button onClick={() => setShowAddDialog(true)} variant="outline" className="gap-2">
                 <UserPlus className="h-4 w-4" />
                 {isRu ? 'Добавить сотрудника' : 'Add Member'}
+              </Button>
+            </CardContent>
+          </Card>
+        ) : filteredMembers?.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground" role="status">
+              <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="font-medium">{isRu ? 'Сотрудники не найдены' : 'No matching members'}</p>
+              <p className="text-sm mt-2 mb-4">
+                {isRu ? 'Попробуйте другое имя или email' : 'Try another name or email'}
+              </p>
+              <Button variant="outline" onClick={() => setSearchQuery('')}>
+                {isRu ? 'Сбросить поиск' : 'Clear search'}
               </Button>
             </CardContent>
           </Card>

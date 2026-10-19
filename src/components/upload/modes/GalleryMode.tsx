@@ -40,6 +40,7 @@ import { ImagePickerFromUrl, ExternalImageResult } from '../ImagePickerFromUrl';
 import { ImageEditor } from '../ImageEditor';
 import { CloudStoragePicker } from '../CloudStoragePicker';
 import { ImageQualityTips } from '../ImageQualityTips';
+import type { MediaModalLayer } from '../shared/mediaModalLayer';
 import type { CompressionConfig } from '../shared/ImageCompressor';
 
 interface UploadingImage {
@@ -63,6 +64,7 @@ interface GalleryModeProps {
   enableEditing?: boolean;
   enableQualityTips?: boolean;
   compressionConfig?: Partial<CompressionConfig>;
+  modalLayer?: MediaModalLayer;
   className?: string;
   disabled?: boolean;
 }
@@ -76,6 +78,8 @@ function SortableImageItem({
   isFirst,
   isDragging,
   coverLabel,
+  editLabel,
+  removeLabel,
 }: { 
   url: string; 
   index: number;
@@ -84,6 +88,8 @@ function SortableImageItem({
   isFirst: boolean;
   isDragging?: boolean;
   coverLabel?: string;
+  editLabel: string;
+  removeLabel: string;
 }) {
   const {
     attributes,
@@ -138,9 +144,10 @@ function SortableImageItem({
         <GripVertical className="h-4 w-4 text-white" />
       </div>
       
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+      <div className="absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity z-20">
         <button
           type="button"
+          aria-label={editLabel}
           onClick={(e) => { e.stopPropagation(); onEdit(); }}
           className="p-1.5 bg-black/60 hover:bg-primary rounded-none transition-colors"
         >
@@ -148,6 +155,7 @@ function SortableImageItem({
         </button>
         <button
           type="button"
+          aria-label={removeLabel}
           onClick={(e) => { e.stopPropagation(); onRemove(); }}
           className="p-1.5 bg-black/60 hover:bg-destructive rounded-none transition-colors"
         >
@@ -220,6 +228,7 @@ export function GalleryMode({
   enableQualityTips = true,
   compressionConfig = {},
   className = '',
+  modalLayer,
   disabled = false,
 }: GalleryModeProps) {
   const { language } = useLanguage();
@@ -517,11 +526,11 @@ export function GalleryMode({
             {value.length} {isRu ? 'из' : 'of'} {maxItems} • {isRu ? 'Перетащите для изменения порядка' : 'Drag to reorder'}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {enableCloudImport && (
             <Button type="button" variant="outline" size="sm" onClick={() => setShowCloudPicker(true)} disabled={disabled || remainingSlots <= 0}>
               <Cloud className="h-4 w-4 mr-2" />
-              {isRu ? 'Облако' : 'Cloud'}
+              {isRu ? 'Облачная ссылка' : 'Cloud link'}
             </Button>
           )}
           {enableUrlImport && (
@@ -571,6 +580,8 @@ export function GalleryMode({
                   onEdit={() => enableEditing && handleEdit(url, index)}
                   isDragging={!!activeId}
                   coverLabel={isRu ? 'Обложка' : 'Cover'}
+                  editLabel={isRu ? `Редактировать фото ${index + 1}` : `Edit photo ${index + 1}`}
+                  removeLabel={isRu ? `Удалить фото ${index + 1}` : `Remove photo ${index + 1}`}
                 />
               ))}
 
@@ -640,6 +651,7 @@ export function GalleryMode({
 
       {enableUrlImport && (
         <ImagePickerFromUrl
+          modalLayer={modalLayer}
           open={showUrlPicker}
           onOpenChange={setShowUrlPicker}
           onSelect={handleExternalImages}
@@ -650,23 +662,19 @@ export function GalleryMode({
 
       {enableCloudImport && (
         <CloudStoragePicker
+          modalLayer={modalLayer}
+          onUseLink={enableUrlImport ? () => {
+            setShowCloudPicker(false);
+            setShowUrlPicker(true);
+          } : undefined}
           open={showCloudPicker}
           onOpenChange={setShowCloudPicker}
-          onSelect={(urls) => {
-            const images: ExternalImageResult[] = urls.map(url => ({
-              originalUrl: url,
-              previewUrl: url,
-              name: 'cloud-image.jpg',
-              isYandexDisk: false
-            }));
-            handleExternalImages(images);
-          }}
-          maxImages={maxItems}
         />
       )}
 
       {enableEditing && editingImage && (
         <ImageEditor
+          modalLayer={modalLayer}
           open={!!editingImage}
           onOpenChange={(open) => !open && setEditingImage(null)}
           imageUrl={editingImage.url}
