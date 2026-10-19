@@ -27,11 +27,12 @@ interface UtilitiesData {
 }
 
 interface UtilitiesStepProps {
+  canEditPricing?: boolean;
   data: UtilitiesData;
   onChange: (updates: Partial<UtilitiesData>) => void;
 }
 
-export const UtilitiesStep = memo(function UtilitiesStep({ data, onChange }: UtilitiesStepProps) {
+export const UtilitiesStep = memo(function UtilitiesStep({ data, onChange, canEditPricing = true }: UtilitiesStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -49,6 +50,7 @@ export const UtilitiesStep = memo(function UtilitiesStep({ data, onChange }: Uti
           <div className="flex items-center justify-between">
             <Label>{isRu ? 'Включено в стоимость' : 'Included in price'}</Label>
             <Switch
+              disabled={!canEditPricing}
               checked={data.electricity_included ?? false}
               onCheckedChange={v => onChange({ electricity_included: v })}
             />
@@ -60,7 +62,8 @@ export const UtilitiesStep = memo(function UtilitiesStep({ data, onChange }: Uti
                 <Input
                   type="number"
                   step="0.1"
-                  value={data.electricity_unit_price ?? ''}
+                  disabled={!canEditPricing}
+              value={data.electricity_unit_price ?? ''}
                   onChange={e => onChange({ electricity_unit_price: e.target.value ? Number(e.target.value) : undefined })}
                 />
               </div>
@@ -109,6 +112,7 @@ export const UtilitiesStep = memo(function UtilitiesStep({ data, onChange }: Uti
           <div className="flex items-center justify-between">
             <Label>{isRu ? 'Включено в стоимость' : 'Included in price'}</Label>
             <Switch
+              disabled={!canEditPricing}
               checked={data.water_included ?? false}
               onCheckedChange={v => onChange({ water_included: v })}
             />
@@ -119,7 +123,8 @@ export const UtilitiesStep = memo(function UtilitiesStep({ data, onChange }: Uti
               <Input
                 type="number"
                 step="0.1"
-                value={data.water_unit_price ?? ''}
+                disabled={!canEditPricing}
+              value={data.water_unit_price ?? ''}
                 onChange={e => onChange({ water_unit_price: e.target.value ? Number(e.target.value) : undefined })}
               />
             </div>

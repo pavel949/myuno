@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { buildAuthPath } from '@/lib/auth/redirectToAuth';
 import { useAuth } from '@/contexts/AuthContext';
 import { type AppRole } from '@/hooks/useUserContext';
 import { useResolvedContext } from '@/hooks/useResolvedContext';
@@ -59,7 +60,7 @@ export function RoleGuard({
 
   // Redirect to auth if not logged in
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />;
   }
 
   // Server-resolved admin always passes
@@ -183,7 +184,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to={buildAuthPath({ from: `${location.pathname}${location.search}${location.hash}` })} state={{ from: `${location.pathname}${location.search}${location.hash}` }} replace />;
   }
 
   return <>{children}</>;

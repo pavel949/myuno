@@ -1,3 +1,4 @@
+import { readAdminInvitationResult } from '@/lib/teamInvitation';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUnoTeamMembers, VERTICALS, VERTICAL_LABELS, type Vertical, type UnoTeamMember } from '@/hooks/useUnoTeamPermissions';
@@ -99,12 +100,7 @@ export default function AdminUnoTeam() {
             role: 'uno_team',
           },
         });
-        if (error) throw error;
-        const inviteError = (data as { error?: string; message?: string } | null)?.error;
-        if (inviteError) {
-          const msg = (data as { message?: string } | null)?.message || inviteError;
-          throw new Error(msg);
-        }
+        await readAdminInvitationResult(data, error);
         toast.success(isRu ? 'Приглашение отправлено' : 'Invite sent', {
           description: isRu
             ? `Письмо отправлено на ${email}. После установки пароля сотрудник появится в списке.`

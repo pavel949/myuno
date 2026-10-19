@@ -2,7 +2,7 @@
 
 ## Scope and source contract
 
-Initial base: `dec344de5`, in the isolated `fix/compact-personal-home-20261019` branch. Current `origin/main` at `36fee777b` was merged without conflicts in local merge commit `d3cebfd9b`; no employee-workflow branch was merged. This change does not belong to the employee-workflow release. No backend migration, permission change, deployment, or production data write.
+Initial base: `dec344de5`, in the isolated `fix/compact-personal-home-20261019` branch. Main updates were merged without conflicts at `36fee777b` (local merge `d3cebfd9b`) and, after PR124 merged, `cb3e02c7f` (local merge `3ce63725e`). No unmerged feature branch was applied. This remains a separate home change; the employee release now arrives only through normal main ancestry. No new backend migration, permission change, deployment, or production data write is part of the home diff.
 
 Both authenticated home variants now use a compact identity header, explicit personal/work navigation, one search entry, four stable personal shortcuts, account reminders, and topic-scoped updates. Interests and recommendations follow those actions; weather is lower. The guest router and consumer-shell contract are unchanged. The `home_v2` admin/feature-flag gate remains unchanged.
 
@@ -30,17 +30,18 @@ Exposure was the authenticated Home V2 composition, reached when `home_v2` was e
 ## Verification
 
 - After merging current main, 98 focused tests passed across 9 files: all home component tests, `useRoleSignals`, and the consumer-shell regression suite.
+- After the PR124 main update, all 11 lightweight browser-runner contract tests passed without launching a browser. A structural workflow comparison confirmed that all 13 existing pre-enforcement steps, including the two-worker runner, remain unchanged.
 - Focused ESLint: passed with no errors or warnings on changed source/tests.
 - `git diff --check`: passed.
 - New synthetic fixture JS and production CSS compiled at `/tmp/browser/compact-personal-home-isolated`; JS/Python syntax checked. It bundles actual Index/IndexV2 and the changed first-screen components, stubs account reads/lower ancillary modules, and rejects production data modules.
 - The prepared fixture covers RU/EN/TH, 375/430/1280, personal/work audiences, remembered/revoked/cross-account destinations, loading/empty/error/live states, preference close/reopen, and action routing. Browser execution and screenshot/overflow checks have **not** been run because local browser/socket execution is blocked in this environment. Bundle compilation is not visual verification. Direct guest/V2 renders exercise component resilience, not the application's guest router or rollout authorization.
 - Full TypeScript is **CI-pending**: the initial default-heap attempt exhausted memory; the increased-heap attempt was killed by the environment (137), with no diagnostic output. A full Vite build was cancelled (130); its generated MCP file was restored. No full-check pass is claimed.
 
-Required before release: full CI typecheck/build and browser execution of the isolated fixture, then normal code review. Branch-only publication of the exact checked tree is authorized separately; PR creation waits for the employee release. No remote merge or deployment is included in this task.
+Required before release: full CI typecheck/build and browser execution of the isolated fixture, then normal code review. A separate Draft PR is authorized after PR124 merged into main. No remote merge or deployment is included in this task.
 
 ## CI registration and runtime budget
 
-`connected-system-check.yml` adds an independent `home_browser` gate with the existing network guard and `timeout 180s node scripts/qa/compact-personal-home-ui.mjs --run-browser`. All existing typecheck, unit, timezone, build, lint and browser steps remain unchanged. The final enforcement requires this additional step to succeed; `continue-on-error` allows evidence collection, not a passing gate. Existing artifact upload includes the fixture's `/tmp/browser/compact-personal-home-isolated` evidence.
+`connected-system-check.yml` adds an independent `home_browser` gate with the existing network guard and `timeout 180s node scripts/qa/compact-personal-home-ui.mjs --run-browser`. All existing typecheck, unit, timezone, build, lint and browser steps remain unchanged, including main's two-worker browser runner and its own tests. The final enforcement requires this additional step to succeed; `continue-on-error` allows evidence collection, not a passing gate. Existing artifact upload includes the fixture's `/tmp/browser/compact-personal-home-isolated` evidence.
 
 The original exhaustive render matrix alone called `networkidle` 432 times, implying at least 216 seconds of idle waits before interactions. The default CI run must therefore use the representative smoke suite rather than that full cross-product. The smoke runner uses DOM/query readiness instead of a fixed network-idle delay, and a fail-closed 150-second browser budget leaves headroom for bundle/CSS compilation within the 180-second fixture cap. No successful wall-clock browser runtime is claimed until CI measures it.
 

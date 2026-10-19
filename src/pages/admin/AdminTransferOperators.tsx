@@ -1,3 +1,4 @@
+import { readAdminInvitationResult } from '@/lib/teamInvitation';
 /**
  * AdminTransferOperators — CRUD for `transfer_operators` rows.
  *
@@ -402,9 +403,7 @@ export default function AdminTransferOperators() {
             },
           },
         );
-        if (inviteErr) throw inviteErr;
-        const inviteError = (inviteData as { error?: string } | null)?.error;
-        if (inviteError) throw new Error(inviteError);
+        await readAdminInvitationResult(inviteData, inviteErr, true);
         toast.success(isRu ? 'Приглашение отправлено' : 'Invite sent', {
           description: email,
         });

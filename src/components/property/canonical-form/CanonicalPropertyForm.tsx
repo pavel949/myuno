@@ -104,6 +104,9 @@ interface CanonicalPropertyFormProps {
   onCancel?: () => void;
   isSubmitting?: boolean;
   mode: 'admin' | 'vendor' | 'owner';
+  authoringOnly?: boolean;
+  canEditPricing?: boolean;
+  canEditBookingTerms?: boolean;
   showOwnership?: boolean;
   showProviderSelector?: boolean;
   providerSelector?: React.ReactNode;
@@ -273,6 +276,9 @@ export function CanonicalPropertyForm({
   onCancel,
   isSubmitting = false,
   mode,
+  authoringOnly = false,
+  canEditPricing = true,
+  canEditBookingTerms = true,
   showOwnership = false,
   providerSelector,
   extraTabs = [],
@@ -543,6 +549,7 @@ export function CanonicalPropertyForm({
         <div className="w-full">
           <TabsContent value="basic" className="mt-0">
             <BasicInfoStep
+              catalogueOnly={authoringOnly}
               formData={formData}
               updateFormData={updateFormData}
               selectedProject={selectedProject}
@@ -554,6 +561,7 @@ export function CanonicalPropertyForm({
 
           <TabsContent value="location" className="mt-0">
             <LocationStep
+              catalogueOnly={authoringOnly}
               formData={formData}
               updateFormData={updateFormData}
             />
@@ -569,6 +577,9 @@ export function CanonicalPropertyForm({
 
           <TabsContent value="pricing" className="mt-0">
             <PricingStep
+              authoringOnly={authoringOnly}
+              canEditPricing={canEditPricing}
+              canEditBookingTerms={canEditBookingTerms}
               formData={formData}
               updateFormData={updateFormData}
               selectedProject={selectedProject}
@@ -578,11 +589,11 @@ export function CanonicalPropertyForm({
           {(isAdmin || isOwner) && (
             <>
               <TabsContent value="utilities" className="mt-0">
-                <UtilitiesStep data={utilitiesData} onChange={updateUtilities} />
+                <UtilitiesStep canEditPricing={canEditPricing} data={utilitiesData} onChange={updateUtilities} />
               </TabsContent>
 
               <TabsContent value="services" className="mt-0">
-                <ServicesStep data={servicesData} onChange={updateServices} />
+                <ServicesStep canEditPricing={canEditPricing} data={servicesData} onChange={updateServices} />
               </TabsContent>
             </>
           )}
@@ -596,8 +607,8 @@ export function CanonicalPropertyForm({
           {isOwner && (
             <TabsContent value="rules" className="mt-0">
               <div className="space-y-4">
-                <HouseRulesSection formData={formData} updateFormData={updateFormData} />
-                <CancellationPolicySection formData={formData} updateFormData={updateFormData} />
+                <HouseRulesSection canEditPricing={canEditPricing} formData={formData} updateFormData={updateFormData} />
+                <fieldset disabled={!canEditBookingTerms}><CancellationPolicySection formData={formData} updateFormData={updateFormData} /></fieldset>
               </div>
             </TabsContent>
           )}

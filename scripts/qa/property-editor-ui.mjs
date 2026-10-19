@@ -39,11 +39,11 @@ const virtual = {
     export const LocationStep=()=>null; export const PricingStep=()=>null; export const UtilitiesStep=()=>null; export const ServicesStep=()=>null; export const AdminSettingsStep=()=>null; export const HouseRulesSection=()=>null; export const CancellationPolicySection=()=>null;`,
 };
 await build({
-  stdin: { contents: `import React from 'react'; import {createRoot} from 'react-dom/client'; import {MemoryRouter,useLocation} from 'react-router-dom'; import Page from '${root}/src/pages/admin/AdminProperties.tsx';
+  stdin: { contents: `import React from 'react'; import {createRoot} from 'react-dom/client'; import {MemoryRouter,useLocation} from 'react-router-dom'; import {QueryClient,QueryClientProvider} from '@tanstack/react-query'; import Page from '${root}/src/pages/admin/AdminProperties.tsx';
     window.fixtureWrites=0;window.fixtureDataCalls=0;
     // Read the committed router tree, not a global mutated during a transition render.
     function Probe(){const location=useLocation();return <output data-testid="fixture-route" className="sr-only">{location.pathname}{location.search}</output>;}
-    createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider&status=pending&edit=synthetic-property']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Page/><Probe/></MemoryRouter>);`, loader:'tsx', resolveDir:root },
+    createRoot(document.getElementById('root')).render(<QueryClientProvider client={new QueryClient()}><MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider&status=pending&edit=synthetic-property']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Page/><Probe/></MemoryRouter></QueryClientProvider>);`, loader:'tsx', resolveDir:root },
   bundle:true, outfile:path.join(output,'fixture.js'), jsx:'automatic', format:'esm',
   define:{'process.env.NODE_ENV':'"production"', 'import.meta.env.DEV':'false', 'import.meta.env.VITE_SUPABASE_URL':'"http://127.0.0.1:54321"'},
   plugins:[{name:'isolate-all-data-boundaries',setup(b) {

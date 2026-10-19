@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -201,8 +202,8 @@ export default function TeamDashboard() {
                     <p>{isRu ? 'Провайдеров' : 'Providers'}</p>
                   </div>
                   <div className="text-center">
-                    <p className="font-medium text-foreground">{platformStats.pendingContent}</p>
-                    <p>{isRu ? 'На модерации' : 'Pending'}</p>
+                    <p className="font-medium text-foreground">{platformStats.pendingContent ?? (pickLang(language, { en: "Unknown", ru: "Неизвестно", th: "ไม่ทราบ" }))}</p>
+                    <p>{pickLang(language, { en: "Pending", ru: "На модерации", th: "รออนุมัติ" })}</p>
                   </div>
                 </div>
               )}
