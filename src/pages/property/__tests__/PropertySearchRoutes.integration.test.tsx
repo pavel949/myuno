@@ -203,7 +203,8 @@ describe('one residential results surface', () => {
     let dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(dialog.getByRole('button', { name: 'WiFi' }));
-    fireEvent.click(dialog.getByRole('button', { name: /Apply/ }));
+    expect(dialog.getByRole('button', { name: 'Apply (3)' })).toBeVisible();
+    fireEvent.click(dialog.getByRole('button', { name: 'Apply (3)' }));
     let url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
     expect(url.searchParams.get('cats')).toBe('private_pool,wifi');
     expect(url.searchParams.get('f.priceLevel')).toBe('2');

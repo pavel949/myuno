@@ -243,7 +243,7 @@ export function UniversalFilter({
   const localActiveCount = useMemo(() => {
     let count = 0;
     Object.entries(localValues).forEach(([, val]) => {
-      if (Array.isArray(val) && val.length > 0) count++;
+      if (Array.isArray(val)) count += val.length;
       else if (val && typeof val === 'string') count++;
     });
     return count;
@@ -263,7 +263,7 @@ export function UniversalFilter({
 
   return (
     <>
-      <div onClick={() => handleOpenChange(true)} className="cursor-pointer">
+      <div onClick={() => handleOpenChange(true)} className="cursor-pointer shrink-0">
         {trigger}
       </div>
       <ResponsiveModal

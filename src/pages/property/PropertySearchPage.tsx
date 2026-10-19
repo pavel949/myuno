@@ -293,7 +293,7 @@ export default function PropertySearchPage() {
         <div className="px-4 py-4 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 ref={resultsHeadingRef} tabIndex={-1} className="scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)] text-h3 font-display basis-full sm:basis-auto">
-              {isLoading ? (isRu ? 'Ищем жильё…' : 'Finding homes…') : isError ? (isRu ? 'Каталог недоступен' : 'Catalogue unavailable') : <>{properties.length} {isRu ? 'объектов найдено' : 'places found'}</>}
+              {isLoading ? (isRu ? 'Ищем жильё…' : 'Finding homes…') : isError ? (isRu ? 'Каталог недоступен' : 'Catalogue unavailable') : <>{isRu ? 'Найдено объектов:' : 'Places found:'} {properties.length}</>}
             </h2>
             <div className="property-discovery-result-actions flex flex-wrap items-center gap-2">
               <PropertySortSelect value={sortKey} onChange={setSortKey} />

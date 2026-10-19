@@ -73,6 +73,9 @@ async def main():
                     await expect(page.get_by_role('button',name=edit_label,exact=True)).to_have_attribute('aria-expanded','false')
                     if focused:
                         await expect(page.get_by_role('heading',level=2)).to_be_focused()
+                    filter_box = await page.locator('.property-discovery-filter').bounding_box()
+                    feature_box = await page.locator('.property-discovery-features').bounding_box()
+                    assert filter_box and feature_box and feature_box['x'] >= filter_box['x'] + filter_box['width'] + 4, {'filter':filter_box,'features':feature_box}
                     first = page.locator('[data-catalog-kind][data-listing-id]').first
                     await expect(first).to_be_visible()
                     top = await first.evaluate('(el)=>el.getBoundingClientRect().top+scrollY')
@@ -226,7 +229,7 @@ async def main():
                     await expect(filters.get_by_role('button',name='Джакузи' if ru else 'Jacuzzi / Hot tub',exact=True)).to_be_visible()
                     await filters.get_by_role('button',name='WiFi',exact=True).click()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-filters.png'),full_page=True)
-                    await filters.get_by_role('button',name='Применить (1)' if ru else 'Apply (1)',exact=True).click()
+                    await filters.get_by_role('button',name='Применить (2)' if ru else 'Apply (2)',exact=True).click()
                     await expect(filters).to_have_count(0)
                     features = await query()
                     assert features['cats']==['private_pool,wifi'],features
