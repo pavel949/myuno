@@ -278,10 +278,17 @@ describe('actual PostgreSQL inventory contract', () => {
     const assignments = await Promise.all([1,2].map(() => sql`SELECT assign_room_for_category(${category},'2026-11-10','2026-11-13') AS room`));
     expect(assignments.map(r => r[0].room)).toEqual([room, room]);
     const items = [{ resource_id: room, item_type: 'property', metadata: { property_id: room } }];
-    const orders = await Promise.all([1,2].map(() => sql`SELECT create_order_atomic(
-      p_order_type := 'property', p_customer_user_id := ${actor},
-      p_start_at := '2026-11-10', p_end_at := '2026-11-13', p_total_amount := 9000,
-      p_items := ${sql.json(items)}) AS result`));
+    // Both assignments above already observed the same available room. Commit
+    // their stale requests in a deterministic order to reproduce the old
+    // swallowed-overlap defect without depending on exclusion-index deadlocks.
+    // The candidate's separate test exercises truly concurrent creation.
+    const orders = [];
+    for (const _request of [1, 2]) {
+      orders.push(await sql`SELECT create_order_atomic(
+        p_order_type := 'property', p_customer_user_id := ${actor},
+        p_start_at := '2026-11-10', p_end_at := '2026-11-13', p_total_amount := 9000,
+        p_items := ${sql.json(items)}) AS result`);
+    }
     const payments: string[] = [];
     const outcomes = await Promise.all(orders.map(async rows => {
       const order = rows[0].result as { success: boolean; order_id: string; error?: string };
