@@ -86,7 +86,7 @@ export default function NavigatorPageV3() {
   const isRu = language === 'ru';
   const { data: situations, isLoading, isError, refetch } = useLifeSituations();
   const { data: counts, isError: countsError } = useSituationServiceCounts();
-  const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
+  const { personas, effectivePersonas, togglePersona, setPersonas, isLoading: personasLoading, isToggling, isSetting, error: personasError } = useUserPersonas();
   const role = useLifeOSRole();
   // Shared UI state (search query + selected situation) lives in the URL —
   // browser back/forward restores it without re-applying the filter.
@@ -389,6 +389,8 @@ export default function NavigatorPageV3() {
         onClose={() => setRoleSheetOpen(false)}
         onToggle={togglePersona}
         onReorder={setPersonas}
+        isBusy={personasLoading || isToggling || isSetting}
+        hasError={!!personasError}
       />
     </AppLayout>
   );

@@ -1,162 +1,100 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { Link } from 'react-router-dom';
+import { ArrowRight, RefreshCw } from 'lucide-react';
+import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import type { UserPersona } from '@/hooks/useUserPersonas';
-import { ROLE_META, SIGNAL_ROUTE, personaColor } from '@/lib/roleBlend';
+import { ROLE_META, SIGNAL_ROUTE } from '@/lib/roleBlend';
 import { useRoleSignals, type RoleSignal } from '@/hooks/useRoleSignals';
+import { pickLang } from '@/lib/i18n/pickLang';
+
+const PERSONA_LABEL_TH: Record<UserPersona, string> = {
+  tourist: 'ท่องเที่ยวภูเก็ต',
+  resident: 'อาศัยในภูเก็ต',
+  property_owner: 'เจ้าของอสังหาริมทรัพย์',
+  investor: 'นักลงทุน',
+  real_estate_developer: 'ผู้พัฒนาอสังหาริมทรัพย์',
+  local_services_provider: 'ธุรกิจท้องถิ่น',
+  family: 'ครอบครัว',
+  couple: 'คู่รัก',
+  nightlife: 'เที่ยวกลางคืน',
+  active: 'กีฬาและกิจกรรม',
+  business: 'ธุรกิจ',
+  nomad: 'ทำงานพร้อมเดินทาง',
+  pet_owner: 'สัตว์เลี้ยง',
+  relocation: 'ย้ายถิ่นฐาน',
+};
 
 interface SignalStackProps {
   personas: UserPersona[];
   onRoleSheetOpen: () => void;
 }
 
-export function SignalStack({ personas, onRoleSheetOpen }: SignalStackProps) {
+/** Account facts only. Interest choices never manufacture appointments or status. */
+export function SignalStack({ personas }: SignalStackProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
-  const { signals } = useRoleSignals(personas);
-  const primary = personas[0];
-  const secondaries = personas.slice(1, 4);
-
-  if (!primary) return null;
-  const primarySig = signals[primary];
+  const { signals, isLoading, hasError, retry, unavailablePersonas = [] } = useRoleSignals(personas);
+  const rows = personas.flatMap(persona => {
+    const signal = signals[persona];
+    return signal?.isLive ? [{ persona, signal }] : [];
+  }).slice(0, 4);
 
   return (
-    <div className="px-4 pb-5">
-      {primarySig && <SignalHero persona={primary} sig={primarySig} isRu={isRu} />}
-      {secondaries.length > 0 && (
-        <div className="mt-2 flex flex-col gap-1.5">
-          {secondaries.map(p => {
-            const s = signals[p];
-            return s ? <SignalSlim key={p} persona={p} sig={s} isRu={isRu} /> : null;
-          })}
+    <section className="px-4 pb-5" aria-label={pickLang(language, { ru: 'Актуальное', en: 'Current updates', th: 'อัปเดตล่าสุด' })}>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-base font-semibold text-foreground">{pickLang(language, { ru: 'Актуальное', en: 'Current updates', th: 'อัปเดตล่าสุด' })}</h2>
+      </div>
+      {isLoading && rows.length === 0 && (
+        <div role="status" className="border border-border bg-card p-4 text-sm text-muted-foreground">
+          {pickLang(language, { ru: 'Загружаем ваши события…', en: 'Loading your updates…', th: 'กำลังโหลดอัปเดตของคุณ…' })}
         </div>
       )}
-      <button
-        onClick={onRoleSheetOpen}
-        className="mt-2.5 w-full flex items-center justify-between px-3 py-2.5 rounded-none border border-dashed border-border text-left hover:border-border-strong transition-colors"
-      >
-        <span className="text-[11.5px] text-muted-foreground">{isRu ? 'Категории и порядок отображения' : 'Categories and display order'}</span>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/>
-        </svg>
-      </button>
-    </div>
+      {hasError && (
+        <div role="status" className="mb-2 border border-border bg-card p-4">
+          <p className="text-sm text-foreground">{pickLang(language, { ru: 'Часть событий не удалось загрузить.', en: 'Some updates could not be loaded.', th: 'ไม่สามารถโหลดอัปเดตบางรายการได้' })}</p>
+          <button type="button" onClick={retry} className="mt-1 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+            <RefreshCw className="h-4 w-4" aria-hidden />{pickLang(language, { ru: 'Повторить', en: 'Retry', th: 'ลองอีกครั้ง' })}
+          </button>
+        </div>
+      )}
+      {unavailablePersonas.includes('local_services_provider') && (
+        <div className="mb-2 border border-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">{pickLang(language, { ru: 'Сводка бизнеса здесь пока недоступна.', en: 'The business summary is not available here yet.', th: 'ยังไม่สามารถแสดงสรุปธุรกิจในหน้านี้ได้' })}</p>
+          <Link to="/vendor" className="mt-1 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+            {pickLang(language, { ru: 'Открыть рабочий кабинет', en: 'Open business workspace', th: 'เปิดพื้นที่ทำงานธุรกิจ' })}<ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </div>
+      )}
+      {!isLoading && !hasError && unavailablePersonas.length === 0 && rows.length === 0 && (
+        <div className="border border-border bg-card p-4">
+          <p className="text-sm font-medium text-foreground">{pickLang(language, { ru: 'Нет актуальных событий по выбранным интересам', en: 'No current updates for these interests', th: 'ยังไม่มีอัปเดตสำหรับความสนใจที่เลือก' })}</p>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{pickLang(language, { ru: 'Проверить свои бронирования и заявки можно в разделе «Моё».', en: 'You can review your bookings and requests in My account.', th: 'ดูการจองและคำขอของคุณได้ในบัญชีของฉัน' })}</p>
+          <Link to="/me" className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+            {pickLang(language, { ru: 'Открыть «Моё»', en: 'Open My account', th: 'เปิดบัญชีของฉัน' })}<ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </div>
+      )}
+      <div className="space-y-2">
+        {rows.map(({ persona, signal }) => <SignalCard key={persona} persona={persona} signal={signal} language={language} />)}
+      </div>
+    </section>
   );
 }
 
-function SignalHero({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSignal; isRu: boolean }) {
-  const navigate = useNavigate();
+function SignalCard({ persona, signal, language }: { persona: UserPersona; signal: RoleSignal; language: Language }) {
   const meta = ROLE_META[persona];
   if (!meta) return null;
-  const stateLabel = {
-    live: isRu ? 'В работе' : 'In progress',
-    warn: isRu ? 'Требуется внимание' : 'Attention required',
-    active: isRu ? 'В норме' : 'Normal',
-  }[sig.state];
-
   return (
-    <button
-      onClick={() => navigate(SIGNAL_ROUTE[persona])}
-      className="w-full text-left relative overflow-hidden rounded-none bg-card border border-border p-[18px] transition-transform"
-    >
-      {/* 2px left spine */}
-      <div className="absolute top-4 bottom-4 left-0 w-0.5 rounded-none" style={{ background: personaColor(persona) }} />
-
-      <div className="flex items-center justify-between gap-2 mb-1.5 min-w-0">
-        <div className="flex items-center gap-2 min-w-0">
-          <RoleChip persona={persona} meta={meta} />
-          <span className="text-[11px] tracking-[0.1em] uppercase text-muted-foreground/50 font-semibold truncate">
-            {isRu ? sig.leadRu : sig.lead}
-          </span>
-          {!sig.isLive && <DemoBadge isRu={isRu} />}
-        </div>
-        <StateChip label={stateLabel} persona={persona} />
+    <Link to={SIGNAL_ROUTE[persona]} className="block min-w-0 border border-border bg-card p-4 text-left transition-colors hover:border-primary/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span>{pickLang(language, { ru: meta.labelRu, en: meta.label, th: PERSONA_LABEL_TH[persona] })}</span>
+        <span className="break-words">{pickLang(language, { ru: signal.leadRu, en: signal.lead, th: signal.leadTh ?? signal.lead })}</span>
+        {signal.state === 'warn' && <span className="font-medium text-foreground">{pickLang(language, { ru: 'Требует внимания', en: 'Needs attention', th: 'ต้องตรวจสอบ' })}</span>}
       </div>
-      <div className="font-display text-2xl font-bold text-foreground mb-1 leading-tight tracking-[-0.02em]">
-        {sig.value}
+      <div className="mt-2 flex items-start justify-between gap-3">
+        <p className="min-w-0 break-words font-display text-2xl font-semibold leading-tight text-foreground">{pickLang(language, { ru: signal.valueRu ?? signal.value, en: signal.value, th: signal.valueTh ?? signal.value })}</p>
+        <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
       </div>
-      <div className="text-[13px] text-muted-foreground leading-snug">
-        {isRu ? sig.tailRu : sig.tail}
-      </div>
-    </button>
-  );
-}
-
-function SignalSlim({ persona, sig, isRu }: { persona: UserPersona; sig: RoleSignal; isRu: boolean }) {
-  const navigate = useNavigate();
-  const meta = ROLE_META[persona];
-  if (!meta) return null;
-
-  return (
-    <button
-      onClick={() => navigate(SIGNAL_ROUTE[persona])}
-      className="w-full text-left relative overflow-hidden rounded-none bg-card/60 border border-border grid grid-cols-[auto_1fr_auto] gap-2.5 items-center px-3.5 py-2.5 transition-transform"
-    >
-      <div className="absolute top-2.5 bottom-2.5 left-0 w-0.5 rounded-none" style={{ background: personaColor(persona) }} />
-      <RoleChip persona={persona} meta={meta} compact />
-      <div className="overflow-hidden">
-        <div className="text-[12.5px] font-medium text-foreground whitespace-nowrap overflow-hidden text-ellipsis">
-          <span className="text-muted-foreground">{isRu ? sig.leadRu : sig.lead} · </span>{sig.value}
-          {!sig.isLive && <span className="ml-1.5 text-[9px] text-muted-foreground/60 uppercase tracking-wider">demo</span>}
-        </div>
-        <div className="text-[11px] text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis mt-0.5">
-          {isRu ? sig.tailRu : sig.tail}
-        </div>
-      </div>
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="opacity-30">
-        <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    </button>
-  );
-}
-
-function DemoBadge({ isRu }: { isRu: boolean }) {
-  return (
-    <span className="text-[9px] font-semibold tracking-[0.1em] uppercase text-muted-foreground/60 px-1.5 py-0.5 rounded-none border border-border/60">
-      {isRu ? 'демо' : 'demo'}
-    </span>
-  );
-}
-
-function RoleChip({ persona, meta }: {
-  persona: UserPersona;
-  meta: typeof ROLE_META[UserPersona];
-  compact?: boolean;
-}) {
-  const tint = personaColor(persona);
-  return (
-    <div
-      className="inline-flex items-center gap-1.5 h-[22px] px-1 pr-[7px] rounded-full flex-shrink-0 whitespace-nowrap"
-      style={{ background: personaColor(persona, 0.09), border: `1px solid ${personaColor(persona, 0.2)}` }}
-    >
-      <div
-        className="w-3.5 h-3.5 rounded-full flex items-center justify-center font-display text-[9px] font-bold text-background"
-        style={{ background: tint }}
-      >
-        {meta.glyph}
-      </div>
-      <span className="text-[10px] font-semibold tracking-[0.04em] uppercase" style={{ color: tint }}>
-        {meta.short}
-      </span>
-    </div>
-  );
-}
-
-// `boxShadow: 0 0 8px <hue>` glow removed per DS 2.1 §Aesthetic ("No glow").
-function StateChip({ label, persona }: { label: string; persona: UserPersona }) {
-  const tint = personaColor(persona);
-  return (
-    <div
-      className="inline-flex items-center gap-1.5 px-[9px] py-1 rounded-full flex-shrink-0 whitespace-nowrap"
-      style={{ background: personaColor(persona, 0.09), border: `1px solid ${personaColor(persona, 0.2)}` }}
-    >
-      <span
-        className="w-1.5 h-1.5 rounded-full"
-        style={{ background: tint }}
-      />
-      <span className="text-[10.5px] font-semibold tracking-[0.04em] uppercase" style={{ color: tint }}>
-        {label}
-      </span>
-    </div>
+      <p className="mt-1 break-words text-sm leading-relaxed text-muted-foreground">{pickLang(language, { ru: signal.tailRu, en: signal.tail, th: signal.tailTh ?? signal.tail })}</p>
+    </Link>
   );
 }

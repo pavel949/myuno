@@ -37,7 +37,7 @@ const TOTAL_CLUSTERS = CLUSTERS.length;
 const TOTAL_SERVICES = FLAT_SERVICES.length;
 
 const IndexV2: React.FC = () => {
-  const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
+  const { personas, effectivePersonas, togglePersona, setPersonas, isLoading, isToggling, isSetting, error } = useUserPersonas();
   const { language } = useLanguage();
   const { user } = useAuth();
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
@@ -52,7 +52,7 @@ const IndexV2: React.FC = () => {
       <div className="pb-24">
         {/* 1 — Hero: greeting, persona chip, AI concierge search */}
         <HeroGreeting
-          personas={activePersonas}
+          personas={personas}
           onRoleSheetOpen={() => setRoleSheetOpen(true)}
           onAppDrawerOpen={() => setAppDrawerOpen(true)}
         />
@@ -70,7 +70,7 @@ const IndexV2: React.FC = () => {
         <HomeConcierge />
 
         {/* 6 — Cross-role activity feed */}
-        <HomeActivityFeed personas={activePersonas} />
+        <HomeActivityFeed />
 
         {/* 7 — Persona-ranked cluster grid */}
         <ClusterGridCards personas={activePersonas} />
@@ -99,16 +99,6 @@ const IndexV2: React.FC = () => {
           </button>
         </div>
 
-        {/* Change role */}
-        <div className="px-4 mt-3 text-center">
-          <button
-            type="button"
-            onClick={() => setRoleSheetOpen(true)}
-            className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {isRu ? 'Изменить роль' : 'Change role'}
-          </button>
-        </div>
       </div>
 
       {/* Onboarding tour — self-gates via localStorage; signed-in users only */}
@@ -120,6 +110,8 @@ const IndexV2: React.FC = () => {
         onClose={() => setRoleSheetOpen(false)}
         onToggle={togglePersona}
         onReorder={setPersonas}
+        isBusy={isLoading || isToggling || isSetting}
+        hasError={!!error}
       />
 
       <AppDrawer

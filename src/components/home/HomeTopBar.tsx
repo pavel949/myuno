@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { cn } from '@/lib/utils';
+import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface HomeTopBarProps {
   personas: UserPersona[];
@@ -49,7 +51,6 @@ export function HomeTopBar({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const initials = user?.user_metadata?.full_name
     ? (user.user_metadata.full_name as string).split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
     : 'U';
@@ -68,8 +69,8 @@ export function HomeTopBar({
     ? 'text-primary-foreground/65'
     : 'text-muted-foreground/60';
 
-  // Suppress unused-personas-prop warning while keeping the API stable for
-  // callers — PersonaHalo now owns the role-stack affordance.
+  // Keep the existing caller API; home preferences are opened by the
+  // explicit Customize home controls in the hero and app drawer.
   void personas;
   void onRoleSheetOpen;
 
@@ -81,13 +82,13 @@ export function HomeTopBar({
           <button
             type="button"
             onClick={onAppDrawerOpen}
-            aria-label={isRu ? 'Открыть меню' : 'Open menu'}
+            aria-label={pickLang(language, { ru: 'Открыть меню', en: 'Open menu', th: 'เปิดเมนู' })}
             className={cn(
               'w-11 h-11 -ml-2 rounded-full flex items-center justify-center transition-colors',
               iconButtonCls,
             )}
           >
-            <Menu className="w-[19px] h-[19px]" />
+            <Menu className="w-[19px] h-[19px]" aria-hidden="true" />
           </button>
         )}
         <div className="flex flex-col leading-none">
@@ -101,22 +102,22 @@ export function HomeTopBar({
               subtitleCls,
             )}
           >
-            {isRu ? 'Инфраструктура для жизни на Пхукете' : 'Infrastructure for life in Phuket'}
+            {pickLang(language, { ru: 'Инфраструктура для жизни на Пхукете', en: 'Infrastructure for life in Phuket', th: 'โครงสร้างพื้นฐานสำหรับชีวิตในภูเก็ต' })}
           </span>
         </div>
       </div>
 
-      {/* Right cluster — compact: bell + avatar. Role switching now lives
-          inside PersonaHalo (tap on identity tile). */}
+      {/* Right cluster — notifications and account. */}
       <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
 
         {/* Bell — 44px tap target, badge only when there's something pending */}
         <button
-          onClick={() => navigate('/account?tab=notifications')}
+          type="button"
+          onClick={() => navigate(APP_ROUTES.NOTIFICATIONS)}
           aria-label={
             hasUnread
-              ? (isRu ? 'Уведомления — есть непрочитанные' : 'Notifications — unread items')
-              : (isRu ? 'Уведомления' : 'Notifications')
+              ? pickLang(language, { ru: 'Уведомления — есть непрочитанные', en: 'Notifications — unread items', th: 'การแจ้งเตือน มีรายการที่ยังไม่ได้อ่าน' })
+              : pickLang(language, { ru: 'Уведомления', en: 'Notifications', th: 'การแจ้งเตือน' })
           }
           className={cn(
             'relative w-11 h-11 rounded-full flex items-center justify-center transition-colors',
@@ -139,8 +140,9 @@ export function HomeTopBar({
 
         {/* Avatar — 44px tap target */}
         <button
-          onClick={() => navigate('/account')}
-          aria-label="Account"
+          type="button"
+          onClick={() => navigate(APP_ROUTES.ME_PROFILE)}
+          aria-label={pickLang(language, { ru: 'Профиль', en: 'Profile', th: 'โปรไฟล์' })}
           className={cn(
             'w-11 h-11 rounded-full flex items-center justify-center text-[12px] font-semibold font-sans shadow-inner',
             isOnNavy
