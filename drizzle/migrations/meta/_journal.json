@@ -246,6 +246,13 @@
       "when": 1792230265662,
       "tag": "0034_public_resort_catalog_projection",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792402098320,
+      "tag": "0035_restore_anon_execute_public_read_rpcs",
+      "breakpoints": true
     }
   ]
 }
