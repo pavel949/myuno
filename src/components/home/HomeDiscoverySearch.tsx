@@ -11,7 +11,7 @@ import { readPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { HomeSearchDateRange } from './HomeSearchDateRange';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function HomeDiscoverySearch({ rentalOnly = false, initialParams, onSearch }: { rentalOnly?: boolean; initialParams?: URLSearchParams; onSearch?: (params: URLSearchParams) => void }) {
+export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false, initialParams, onSearch }: { rentalOnly?: boolean; hideModeSwitch?: boolean; initialParams?: URLSearchParams; onSearch?: (params: URLSearchParams) => void }) {
   const initial = readPropertySearchQuery(initialParams ?? new URLSearchParams());
   const { language } = useLanguage();
   const guestsId = useId();
@@ -56,7 +56,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, initialParams, onSearc
 
   return (
     <form className="home-search" onSubmit={search} aria-label={t({ ru: 'Поиск жилья', en: 'Find a home', th: 'ค้นหาที่พัก' })}>
-      {!rentalOnly && <div className="home-search-modes" role="group" aria-label={t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
+      {!rentalOnly && !hideModeSwitch && <div className="home-search-modes" role="group" aria-label={t({ ru: 'Аренда или покупка', en: 'Rent or buy', th: 'เช่าหรือซื้อ' })}>
         {(['rent', 'buy'] as const).map(value => (
           <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>
             {value === 'rent' ? t({ ru: 'Аренда', en: 'Rent', th: 'เช่า' }) : t({ ru: 'Покупка', en: 'Buy', th: 'ซื้อ' })}

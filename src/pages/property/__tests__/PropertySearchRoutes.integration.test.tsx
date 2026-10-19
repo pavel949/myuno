@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
@@ -10,13 +10,12 @@ const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: [] }] }, isLoading: false, isError: false }; } }));
-vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => ({ data: [] }) }));
+vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => { throw new Error('Guest discovery must not fetch management companies'); } }));
 vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ districts: [{ id: 'layan', valueKey: 'layan', labelEn: 'Layan', labelRu: 'Лаян' }], isLoading: false }), applyQuickFilters: (items: unknown) => items }));
 vi.mock('@/hooks/usePropertyFilterOptions', () => ({ usePropertyFilterOptions: () => ({ propertyTypes: [{ id: 'villa', labelEn: 'Villa', labelRu: 'Вилла' }], filterConfig: { sections: [] }, isLoading: false }) }));
 vi.mock('@/hooks/useMapListSync', () => ({ useMapListSync: () => ({ selectedId: null, select: vi.fn() }) }));
 vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: () => null }));
 vi.mock('@/components/property/PropertyMapView', () => ({ PropertyMapView: () => null }));
-vi.mock('@/components/property/PropertyCategoryIcons', () => ({ PropertyCategoryIcons: () => null, matchesCategory: () => true }));
 vi.mock('@/components/crosssell', () => ({ CrossSellSection: () => null }));
 vi.mock('@/components/leads/VerticalCTA', () => ({ VerticalCTA: () => null }));
 vi.mock('@/components/property/OffplanCTASection', () => ({ OffplanCTASection: () => null }));
@@ -56,8 +55,8 @@ describe('one residential results surface', () => {
     mount(route);
     expect(screen.queryByRole('note', { name: 'Availability check' })).toBeNull();
   });
-  it('starts mobile with a readable summary and expands only one editor', () => {
-    state.mobile = true;
+  it.each([false, true])('starts with a readable summary and expands only one editor (mobile=%s)', mobile => {
+    state.mobile = mobile;
     mount('/property/search?district=layan&types=villa&guests=3&tenancy=medium&checkIn=2027-11-10&checkOut=2027-11-15');
     expect(screen.queryByRole('form')).toBeNull();
     expect(screen.getByText('Villa · Layan')).toBeVisible();
@@ -81,6 +80,7 @@ describe('one residential results surface', () => {
   });
   it('retains an edited desktop draft and focus when resized to mobile', () => {
     const view = mount('/property/search?guests=3');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
     const guests = screen.getByRole('spinbutton');
     guests.focus();
     fireEvent.change(guests, { target: { value: '5' } });
@@ -107,7 +107,7 @@ describe('one residential results surface', () => {
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '5' } });
     fireEvent.submit(screen.getByRole('form'));
     expect(screen.queryByRole('form')).toBeNull();
-    expect(screen.getByRole('heading', { level: 1 })).toHaveFocus();
+    expect(screen.getByRole('heading', { level: 2 })).toHaveFocus();
     expect(screen.getByText(/Guests: 5/)).toBeVisible();
     const back = screen.getByRole('button', { name: 'History back' });
     back.focus();
@@ -116,13 +116,14 @@ describe('one residential results surface', () => {
     expect(back).toHaveFocus();
     expect(screen.queryByRole('form')).toBeNull();
   });
-  it('keeps desktop editor visible without scrolling or focusing results on submit', () => {
+  it('starts desktop compact and collapses submitted edits to the results', () => {
     mount('/property/search?guests=3');
-    expect(screen.queryByRole('button', { name: 'Edit search' })).toBeNull();
+    expect(screen.queryByRole('form')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
     fireEvent.submit(screen.getByRole('form'));
-    expect(screen.getByRole('form')).toBeVisible();
-    expect(screen.getByRole('heading', { level: 1 })).not.toHaveFocus();
-    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+    expect(screen.queryByRole('form')).toBeNull();
+    expect(screen.getByRole('heading', { level: 2 })).toHaveFocus();
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
   });
   it.each(['/property/browse', '/discover/stay', '/property/rent/medium-term'])('adapts %s with filters and hash intact', route => {
     mount(`${route}?district=layan&types=villa&guests=4&tenancy=medium&f.priceLevel=2&company=operator&source=bookmark#results`);
@@ -130,6 +131,7 @@ describe('one residential results surface', () => {
     const url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
     expect(url.searchParams.get('source')).toBe('bookmark');
     expect(url.hash).toBe('#results');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
     expect(screen.getAllByRole('form')).toHaveLength(1);
     expect(screen.getByRole('combobox', { name: 'Home type' })).toHaveTextContent('Villa');
     expect(screen.getByRole('combobox', { name: 'Choose an area' })).toHaveTextContent('Layan');
@@ -137,11 +139,13 @@ describe('one residential results surface', () => {
   });
   it('edits the URL in place and rehydrates on Back and Forward', () => {
     mount('/property/search?district=layan&types=villa&guests=3&tenancy=short&source=bookmark');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Number of guests' }), { target: { value: '5' } });
     fireEvent.click(screen.getByRole('button', { name: 'Monthly' }));
     fireEvent.submit(screen.getByRole('form'));
     expect(state.filters).toMatchObject({ minGuests: 5, rentTenancy: 'medium' });
     expect(screen.getByTestId('location').textContent).toContain('source=bookmark');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
     fireEvent.click(screen.getByRole('button', { name: 'History back' }));
     expect(screen.getByRole('spinbutton')).toHaveValue(3);
     expect(state.filters.rentTenancy).toBe('short');
@@ -180,4 +184,65 @@ describe('one residential results surface', () => {
     expect(url.searchParams.get('f.priceLevel')).toBe('2');
     expect(url.searchParams.get('source')).toBe('bookmark');
   });
+  it('offers only three quick features, with every former ribbon feature inside Filters', () => {
+    mount('/property/search');
+    const quick = within(screen.getByRole('group', { name: 'Popular features' }));
+    expect(quick.getAllByRole('button')).toHaveLength(3);
+    expect(screen.queryByRole('button', { name: 'All companies' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Filters', exact: true }));
+    const dialog = within(screen.getByRole('dialog'));
+    for (const label of ['Beachfront', 'Walk to beach', 'Sea view', 'Private pool', 'Shared pool', 'Washing machine', 'Pet-friendly', 'Kid-friendly', 'Parking', 'WiFi', 'Luxury', 'Air conditioning', 'Gym', 'Jacuzzi / Hot tub']) {
+      expect(dialog.getByRole('button', { name: label, exact: true })).toBeVisible();
+    }
+  });
+  it('keeps quick features and the advanced sheet synchronized without leaking editor state into the URL', () => {
+    mount('/property/search?f.priceLevel=2&source=bookmark');
+    fireEvent.click(screen.getByRole('button', { name: 'Private pool', exact: true }));
+    expect(screen.getByRole('button', { name: 'Private pool', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
+    let dialog = within(screen.getByRole('dialog'));
+    expect(dialog.getByRole('button', { name: 'Private pool', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(dialog.getByRole('button', { name: 'WiFi', exact: true }));
+    fireEvent.click(dialog.getByRole('button', { name: /Apply/ }));
+    let url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
+    expect(url.searchParams.get('cats')).toBe('private_pool,wifi');
+    expect(url.searchParams.get('f.priceLevel')).toBe('2');
+    expect(url.searchParams.get('source')).toBe('bookmark');
+    expect(url.searchParams.has('f.guestFeatures')).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Private pool', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
+    dialog = within(screen.getByRole('dialog'));
+    expect(dialog.getByRole('button', { name: 'Private pool', exact: true })).toHaveAttribute('aria-pressed', 'false');
+    expect(dialog.getByRole('button', { name: 'WiFi', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(dialog.getByRole('button', { name: /Apply/ }));
+    url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
+    expect(url.searchParams.get('cats')).toBe('wifi');
+  });
+  it('switches rental and purchase intent immediately while preserving the rental context and unrelated query state', () => {
+    mount('/property/search?mode=rent&guests=4&tenancy=medium&checkIn=2027-11-10&checkOut=2027-11-15&district=layan&types=villa&f.priceLevel=2&source=bookmark');
+    fireEvent.click(screen.getByRole('button', { name: 'Buy', exact: true }));
+    expect(state.filters).toMatchObject({ listingType: 'sale', minPrice: 5000000, maxPrice: 15000000, district: 'layan', propertyType: 'villa' });
+    expect(state.filters.minGuests).toBeUndefined();
+    expect(state.filters.rentTenancy).toBeUndefined();
+    expect(screen.queryByText(/Guests:/)).toBeNull();
+    const url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
+    expect(url.searchParams.get('guests')).toBe('4');
+    expect(url.searchParams.get('checkIn')).toBe('2027-11-10');
+    expect(url.searchParams.get('source')).toBe('bookmark');
+    fireEvent.click(screen.getByRole('button', { name: 'Rent', exact: true }));
+    expect(state.filters).toMatchObject({ listingType: 'rent', minGuests: 4, rentTenancy: 'medium', minPrice: 3000 });
+    expect(screen.getByText(/Monthly ·.*Guests: 4/)).toBeVisible();
+  });
+
+  it('does not count a retained rental-only filter in the purchase sheet', () => {
+    mount('/property/search?mode=buy&instant=1');
+    fireEvent.click(screen.getByRole('button', { name: 'Filters', exact: true }));
+    const dialog = within(screen.getByRole('dialog'));
+    expect(dialog.getByRole('button', { name: 'Apply', exact: true })).toBeVisible();
+    fireEvent.click(dialog.getByRole('button', { name: 'Apply', exact: true }));
+    expect(state.filters.instantBooking).toBeUndefined();
+    fireEvent.click(screen.getByRole('button', { name: 'Rent', exact: true }));
+    expect(state.filters.instantBooking).toBe(true);
+  });
+
 });
