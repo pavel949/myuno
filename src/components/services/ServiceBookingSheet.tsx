@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,9 @@ import { pickLang } from '@/lib/i18n/pickLang';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 import { computeSlots, formatPhuketTime, phuketToday, addDays } from '@/lib/services/slots';
 import { useProviderHours, useBusySlots, useCreateServiceOrder, orderErrorCode } from '@/hooks/useServiceMarketplace';
+import { formatServicePrice } from '@/lib/services/formatServicePrice';
+import { Link } from 'react-router-dom';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export interface BookableService {
   id: string;
@@ -23,11 +26,17 @@ export interface BookableService {
   leadTimeHours?: number | null;
 }
 
-export function ServiceBookingSheet({ service, open, onOpenChange }: {
+interface ServiceBookingSheetProps {
   service: BookableService | null;
   open: boolean;
   onOpenChange: (o: boolean) => void;
-}) {
+}
+
+export function ServiceBookingSheet(props: ServiceBookingSheetProps) {
+  return <ServiceBookingForm key={`${props.service?.id ?? 'none'}:${props.open}`} {...props} />;
+}
+
+function ServiceBookingForm({ service, open, onOpenChange }: ServiceBookingSheetProps) {
   const { language } = useLanguage();
   const L = (ru: string, en: string, th?: string) => pickLang(language, { ru, en, th });
   const { user } = useAuth();
@@ -41,6 +50,8 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [doneId, setDoneId] = useState<string | null>(null);
+  const submitting = useRef(false);
+  const fieldId = useId();
 
   const hoursQ = useProviderHours(service?.providerId);
   const busyQ = useBusySlots(service?.providerId, date);
@@ -55,18 +66,25 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
   }), [date, hoursQ.data, busyQ.data, service]);
 
   const noHours = hoursQ.isSuccess && (hoursQ.data?.length ?? 0) === 0;
+  const scheduleReady = open && hoursQ.isSuccess && busyQ.isSuccess && !hoursQ.isError && !busyQ.isError
+    && !hoursQ.isFetching && !busyQ.isFetching;
+  const slotValid = scheduleReady && slot != null && slots.some(s => s.getTime() === slot.getTime());
+  const contactValid = name.trim().length > 0 && phone.trim().length > 0;
   const locale = language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB';
 
   const reset = () => { setSlot(null); setError(null); setDoneId(null); setNotes(''); };
 
   const submit = async () => {
-    if (!service || !slot) return;
+    if (!service || !slot || !slotValid || submitting.current
+      || slot.getTime() < Date.now() + (service.leadTimeHours ?? 2) * 3600_000) return;
     if (!user) { redirectToAuth(navigate); return; }
+    if (!contactValid) return;
+    submitting.current = true;
     setError(null);
     try {
       const r = await create.mutateAsync({
         serviceId: service.id, providerId: service.providerId, scheduledAt: slot,
-        guestId: user.id, guestName: name, guestPhone: phone, notes,
+        guestId: user.id, guestName: name.trim(), guestPhone: phone.trim(), notes: notes.trim(),
       });
       setDoneId(r.id);
     } catch (e) {
@@ -79,7 +97,7 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
             ? L('Услуга сейчас недоступна.', 'This service is not available right now.', 'บริการนี้ไม่พร้อมใช้งาน')
             : L('Не удалось отправить заявку. Повторите попытку.', 'Could not send the order. Please try again.', 'ส่งคำสั่งซื้อไม่สำเร็จ ลองอีกครั้ง'));
       setSlot(null);
-    }
+    } finally { submitting.current = false; }
   };
 
   return (
@@ -88,7 +106,7 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
         <SheetHeader>
           <SheetTitle>{service?.name}</SheetTitle>
           <SheetDescription>
-            {service?.price != null ? `฿${Number(service.price).toLocaleString()}` : L('Цена по запросу', 'Price on request', 'ราคาตามคำขอ')}
+            {formatServicePrice(service?.price, service?.currency, language)}
             {service?.durationMinutes ? ` · ${service.durationMinutes} ${L('мин', 'min', 'นาที')}` : ''}
           </SheetDescription>
         </SheetHeader>
@@ -98,10 +116,11 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
             <CheckCircle2 className="h-10 w-10 text-primary mx-auto" />
             <p className="font-medium">{L('Заявка отправлена', 'Order sent', 'ส่งคำสั่งซื้อแล้ว')}</p>
             <p className="text-sm text-muted-foreground">
-              {slot ? '' : ''}{L('Специалист подтвердит время приёма. Статус заявки отображается в разделе «Мои заказы».', 'The provider will confirm the time. Track it in My orders.', 'ผู้ให้บริการจะยืนยันเวลา ติดตามได้ใน คำสั่งซื้อของฉัน')}
+              {L('Специалист подтвердит время приёма. Статус заявки отображается в разделе «Мои услуги».', 'The provider will confirm the time. Track it in My services.', 'ผู้ให้บริการจะยืนยันเวลา ติดตามได้ในบริการของฉัน')}
             </p>
             <p className="text-xs font-mono text-muted-foreground">ID {doneId.slice(0, 8)}</p>
             <Button onClick={() => onOpenChange(false)} className="min-h-[44px]">{L('Готово', 'Done', 'เสร็จ')}</Button>
+            <Button variant="outline" asChild><Link to={APP_ROUTES.ME_SERVICES} onClick={() => onOpenChange(false)}>{L('Мои услуги', 'My services', 'บริการของฉัน')}</Link></Button>
           </div>
         ) : (
           <div className="space-y-5 py-4">
@@ -126,7 +145,10 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
               {hoursQ.isLoading || busyQ.isLoading ? (
                 <div className="grid grid-cols-4 gap-2">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-11" />)}</div>
               ) : hoursQ.isError || busyQ.isError ? (
-                <p className="text-sm text-destructive">{L('Не удалось загрузить график приёма.', 'Could not load the schedule.', 'โหลดตารางเวลาไม่สำเร็จ')}</p>
+                <div role="alert" className="space-y-2 text-sm text-destructive">
+                  <p>{L('Не удалось загрузить график приёма.', 'Could not load the schedule.', 'โหลดตารางเวลาไม่สำเร็จ')}</p>
+                  <Button variant="outline" onClick={() => { void hoursQ.refetch(); void busyQ.refetch(); }}>{L('Повторить', 'Retry', 'ลองใหม่')}</Button>
+                </div>
               ) : noHours ? (
                 <div className="flex items-start gap-2 text-sm text-muted-foreground border border-border p-3">
                   <CalendarX className="h-4 w-4 mt-0.5 shrink-0" />
@@ -150,15 +172,18 @@ export function ServiceBookingSheet({ service, open, onOpenChange }: {
 
             {slot && (
               <div className="space-y-2">
-                <Input placeholder={L('Ваше имя', 'Your name', 'ชื่อของคุณ')} value={name} onChange={(e) => setName(e.target.value)} maxLength={100} />
-                <Input placeholder={L('Телефон / WhatsApp', 'Phone / WhatsApp', 'โทรศัพท์ / WhatsApp')} value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={30} />
-                <Textarea placeholder={L('Адрес и детали', 'Address and details', 'ที่อยู่และรายละเอียด')} value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} />
+                <label htmlFor={`${fieldId}-name`} className="text-sm">{L('Ваше имя', 'Your name', 'ชื่อของคุณ')}</label>
+                <Input id={`${fieldId}-name`} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={100} required />
+                <label htmlFor={`${fieldId}-phone`} className="text-sm">{L('Телефон / WhatsApp', 'Phone / WhatsApp', 'โทรศัพท์ / WhatsApp')}</label>
+                <Input id={`${fieldId}-phone`} type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={30} required />
+                <label htmlFor={`${fieldId}-notes`} className="text-sm">{L('Адрес и детали', 'Address and details', 'ที่อยู่และรายละเอียด')}</label>
+                <Textarea id={`${fieldId}-notes`} value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} />
               </div>
             )}
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
-            <Button className="w-full min-h-[44px]" disabled={!slot || create.isPending} onClick={submit}>
+            <Button className="w-full min-h-[44px]" disabled={!slotValid || create.isPending || (!!user && !contactValid)} onClick={submit}>
               {create.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {!user
                 ? L('Войти и записаться', 'Sign in to book', 'เข้าสู่ระบบเพื่อจอง')

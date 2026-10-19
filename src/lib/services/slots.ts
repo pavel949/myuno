@@ -16,6 +16,7 @@ export interface BusyRange {
 const PHUKET_OFFSET_MIN = 7 * 60;
 
 function toMinutes(t: string): number {
+  if (!/^(?:[01]?\d|2[0-3]):[0-5]\d(?::00)?$/.test(t) && !/^24:00(?::00)?$/.test(t)) return Number.NaN;
   const [h, m] = t.split(':').map(Number);
   return h * 60 + (m || 0);
 }
@@ -43,22 +44,31 @@ export function computeSlots(opts: {
   const { date, hours, busy, durationMinutes } = opts;
   const step = opts.stepMinutes ?? 30;
   const now = opts.now ?? new Date();
-  const earliest = now.getTime() + (opts.leadTimeHours ?? 0) * 3600_000;
+  const lead = opts.leadTimeHours ?? 0;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(new Date(`${date}T00:00:00Z`).getTime())
+    || new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date
+    || !Number.isFinite(now.getTime()) || !Number.isInteger(step) || step <= 0
+    || !Number.isInteger(durationMinutes) || durationMinutes <= 0 || durationMinutes > 1440
+    || !Number.isFinite(lead) || lead < 0) return [];
+  const earliest = now.getTime() + lead * 3600_000;
   const wd = phuketWeekday(date);
-  const dur = Math.max(15, durationMinutes || 60);
+  const dur = durationMinutes;
   const busyMs = busy.map((b) => [new Date(b.starts_at).getTime(), new Date(b.ends_at).getTime()]);
-  const out: Date[] = [];
+  if (busyMs.some(([s, e]) => !Number.isFinite(s) || !Number.isFinite(e) || e <= s)) return [];
+  const out = new Map<number, Date>();
   for (const h of hours.filter((x) => x.weekday === wd)) {
     const end = toMinutes(h.end_time);
-    for (let m = toMinutes(h.start_time); m + dur <= end; m += step) {
+    const start = toMinutes(h.start_time);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) continue;
+    for (let m = start; m + dur <= end; m += step) {
       const s = phuketDateTime(date, m).getTime();
       const e = s + dur * 60_000;
       if (s < earliest) continue;
       if (busyMs.some(([bs, be]) => s < be && e > bs)) continue;
-      out.push(new Date(s));
+      out.set(s, new Date(s));
     }
   }
-  return out.sort((a, b) => a.getTime() - b.getTime());
+  return [...out.values()].sort((a, b) => a.getTime() - b.getTime());
 }
 
 export function formatPhuketTime(d: Date): string {

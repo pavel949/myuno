@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { useMarketplaceServices } from '@/hooks/useServiceMarketplace';
 import { ServiceBookingSheet, type BookableService } from './ServiceBookingSheet';
+import { formatServicePrice } from '@/lib/services/formatServicePrice';
 
 /** Real, bookable services from verified providers (services + providers tables). */
 export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/services' }: { search?: string; returnTo?: string }) {
@@ -61,7 +62,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
                   )}
                   <div className="mt-auto flex flex-col gap-3 border-t border-border pt-3">
                     <span className="text-sm font-mono">
-                      {s.price != null ? `฿${Number(s.price).toLocaleString()}` : L('По запросу', 'On request', 'ตามคำขอ')}
+                      {formatServicePrice(s.price, s.currency, language)}
                       {s.duration_minutes ? <span className="text-xs text-muted-foreground ml-1 inline-flex items-center gap-0.5"><Clock className="h-3 w-3" />{s.duration_minutes}′</span> : null}
                     </span>
                     <Button size="sm" className="min-h-11 w-full" onClick={() => setSelected({

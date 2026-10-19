@@ -33,6 +33,7 @@ export default function VendorServiceDesk() {
   const hoursQ = useProviderHours(pid);
   const ordersQ = useProviderOrders(pid);
   const [newHours, setNewHours] = useState({ weekday: 1, start: '09:00', end: '18:00' });
+  const [saving, setSaving] = useState(false);
 
   const STATUS: Record<string, string> = {
     pending: L('Поступил', 'New', 'ใหม่'), confirmed: L('Подтверждён', 'Confirmed', 'ยืนยันแล้ว'),
@@ -42,18 +43,26 @@ export default function VendorServiceDesk() {
   const WD = language === 'ru' ? ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'] : language === 'th' ? ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const fail = () => toast.error(L('Не удалось сохранить изменения', 'Could not save', 'บันทึกไม่สำเร็จ'));
 
-  const setStatus = async (id: string, status: string) => {
+  const setStatus = async (id: string, previousStatus: string, status: string) => {
+    if (!pid || saving || !NEXT[previousStatus]?.includes(status)) return;
+    setSaving(true);
     const patch: { status: string; started_at?: string; completed_at?: string } = { status };
     if (status === 'in_progress') patch.started_at = new Date().toISOString();
     if (status === 'completed') patch.completed_at = new Date().toISOString();
-    const { error } = await supabase.from('service_orders').update(patch).eq('id', id);
-    if (error) return fail();
-    qc.invalidateQueries({ queryKey: ['provider-service-orders', pid] });
+    try {
+      const { data, error } = await supabase.from('service_orders').update(patch).eq('id', id).eq('provider_id', pid).eq('status', previousStatus).select('id').single();
+      if (error || !data) return fail();
+      qc.invalidateQueries({ queryKey: ['provider-service-orders', pid] });
+      qc.invalidateQueries({ queryKey: ['guest-service-orders'] });
+      qc.invalidateQueries({ queryKey: ['provider-busy', pid] });
+    } catch { fail(); } finally { setSaving(false); }
   };
   const toggleService = async (id: string, is_active: boolean) => {
-    const { error } = await supabase.from('services').update({ is_active }).eq('id', id);
-    if (error) return fail();
+    if (!pid || saving) return;
+    const { data, error } = await supabase.from('services').update({ is_active }).eq('id', id).eq('provider_id', pid).select('id').single();
+    if (error || !data) return fail();
     qc.invalidateQueries({ queryKey: ['provider-services-admin', pid] });
+    qc.invalidateQueries({ queryKey: ['marketplace-services'] });
   };
   const addHours = async () => {
     if (!pid || newHours.end <= newHours.start) return fail();
@@ -62,8 +71,9 @@ export default function VendorServiceDesk() {
     qc.invalidateQueries({ queryKey: ['provider-hours', pid] });
   };
   const removeHours = async (id: string) => {
-    const { error } = await supabase.from('provider_availability').delete().eq('id', id);
-    if (error) return fail();
+    if (!pid) return;
+    const { data, error } = await supabase.from('provider_availability').delete().eq('id', id).eq('provider_id', pid).select('id').single();
+    if (error || !data) return fail();
     qc.invalidateQueries({ queryKey: ['provider-hours', pid] });
   };
 
@@ -110,7 +120,7 @@ export default function VendorServiceDesk() {
                   <Badge variant="outline" className="rounded-none">{STATUS[o.status ?? 'pending'] ?? o.status}</Badge>
                   {o.guest_phone && <Button size="sm" variant="outline" asChild><a href={`tel:${o.guest_phone}`} aria-label="Call"><Phone className="h-4 w-4" /></a></Button>}
                   {(NEXT[o.status ?? ''] ?? []).map((s) => (
-                    <Button key={s} size="sm" variant={s === 'cancelled' ? 'outline' : 'default'} onClick={() => setStatus(o.id, s)}>{STATUS[s]}</Button>
+                    <Button key={s} size="sm" disabled={saving} variant={s === 'cancelled' ? 'outline' : 'default'} onClick={() => setStatus(o.id, o.status ?? '', s)}>{STATUS[s]}</Button>
                   ))}
                 </div>
               </div>
@@ -118,6 +128,7 @@ export default function VendorServiceDesk() {
         </TabsContent>
 
         <TabsContent value="hours" className="space-y-3">
+          {hoursQ.isError && <p role="alert" className="text-destructive">{L('Не удалось загрузить график.', 'Could not load working hours.', 'โหลดเวลาทำการไม่สำเร็จ')} <Button variant="outline" onClick={() => void hoursQ.refetch()}>{L('Повторить', 'Retry', 'ลองใหม่')}</Button></p>}
           <p className="text-xs text-muted-foreground">{L('Время указывается по Пхукету. Пока график приёма не заполнен, онлайн-запись недоступна.', 'Phuket time. Without working hours online booking stays closed.', 'เวลาภูเก็ต')}</p>
           {(hoursQ.data ?? []).map((h) => (
             <div key={h.id} className="flex items-center gap-3 border border-border p-2 text-sm">
@@ -137,7 +148,8 @@ export default function VendorServiceDesk() {
         </TabsContent>
 
         <TabsContent value="services" className="space-y-2">
-          {(servicesQ.data ?? []).length === 0 && !servicesQ.isLoading && <p className="text-sm text-muted-foreground">{L('Услуги пока не добавлены. Их добавляет команда myUNO после проверки.', 'No services yet — added by the myUNO team during review.', 'ยังไม่มีบริการ')}</p>}
+          {servicesQ.isError && <p role="alert" className="text-destructive">{L('Не удалось загрузить услуги.', 'Could not load services.', 'โหลดบริการไม่สำเร็จ')} <Button variant="outline" onClick={() => void servicesQ.refetch()}>{L('Повторить', 'Retry', 'ลองใหม่')}</Button></p>}
+          {(servicesQ.data ?? []).length === 0 && !servicesQ.isLoading && !servicesQ.isError && <p className="text-sm text-muted-foreground">{L('Услуги пока не добавлены. Их добавляет команда myUNO после проверки.', 'No services yet — added by the myUNO team during review.', 'ยังไม่มีบริการ')}</p>}
           {(servicesQ.data ?? []).map((s) => (
             <div key={s.id} className="flex items-center gap-3 border border-border bg-card p-3 text-sm">
               <div className="flex-1 min-w-0">

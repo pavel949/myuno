@@ -10,6 +10,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { createErrorHandler } from '@/lib/errorHandler';
 import type { Database } from '@/integrations/supabase/types';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Re-export the canonical admin check hook
 export { useIsAdmin as useAdminCheck } from '@/hooks/useIsAdmin';
@@ -36,10 +37,12 @@ const QUERY_KEYS = {
 
 // ============= useAdminProviders =============
 export function useAdminProviders() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: providers = [], isLoading, isFetching, error } = useQuery({
-    queryKey: QUERY_KEYS.providers,
+    queryKey: [...QUERY_KEYS.providers, user?.id],
+    enabled: !!user?.id,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('providers')
@@ -56,6 +59,7 @@ export function useAdminProviders() {
 
   const invalidate = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.providers });
+    queryClient.invalidateQueries({ queryKey: ['marketplace-services'] });
   }, [queryClient]);
 
   const createProvider = useCallback(async (providerData: Partial<ProviderInsert>) => {
@@ -63,8 +67,8 @@ export function useAdminProviders() {
       name: providerData.name ?? '',
       ...providerData,
       is_active: providerData.is_active ?? true,
-      is_verified: true,
-      approval_status: 'approved',
+      is_verified: providerData.is_verified ?? true,
+      approval_status: providerData.approval_status ?? 'approved',
       created_by_uno_team: true,
       rating: 0,
       review_count: 0,
@@ -108,10 +112,12 @@ export function useAdminProviders() {
 
 // ============= useAdminServices =============
 export function useAdminServices(providerId?: string) {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: services = [], isLoading } = useQuery({
-    queryKey: QUERY_KEYS.services(providerId),
+  const { data: services = [], isLoading, error } = useQuery({
+    queryKey: [...QUERY_KEYS.services(providerId), user?.id],
+    enabled: !!user?.id,
     queryFn: async () => {
       let query = supabase
         .from('services')
@@ -133,7 +139,9 @@ export function useAdminServices(providerId?: string) {
   });
 
   const invalidate = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.services(providerId) });
+    queryClient.invalidateQueries({ queryKey: ['admin', 'services'] });
+    queryClient.invalidateQueries({ queryKey: ['marketplace-services'] });
+    queryClient.invalidateQueries({ queryKey: ['provider-services-admin'] });
   }, [queryClient, providerId]);
 
   const createService = useCallback(async (serviceData: Partial<ServiceInsert>) => {
@@ -145,7 +153,7 @@ export function useAdminServices(providerId?: string) {
       currency: serviceData.currency || 'THB',
       is_active: serviceData.is_active ?? true,
       is_verified: true,
-      approval_status: 'approved',
+      approval_status: serviceData.approval_status ?? 'approved',
       created_by_uno_team: true,
     };
 
@@ -181,7 +189,7 @@ export function useAdminServices(providerId?: string) {
     return { error };
   }, [invalidate]);
 
-  return { services, isLoading, createService, updateService, deleteService, refetch: invalidate };
+  return { services, isLoading, error, createService, updateService, deleteService, refetch: invalidate };
 }
 
 // ============= useAdminCategories =============
