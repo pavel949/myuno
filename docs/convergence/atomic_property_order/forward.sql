@@ -53,7 +53,8 @@ $explicit_link$);
   IF p_order_type = 'property' THEN
     v_check_in := (p_start_at AT TIME ZONE 'Asia/Bangkok')::date;
     v_check_out := (p_end_at AT TIME ZONE 'Asia/Bangkok')::date;
-    IF v_check_in IS NULL OR v_check_out IS NULL OR v_check_out <= v_check_in THEN
+    IF v_check_in IS NULL OR v_check_out IS NULL OR NOT isfinite(p_start_at)
+      OR NOT isfinite(p_end_at) OR v_check_out <= v_check_in THEN
       RAISE EXCEPTION 'invalid_property_stay_dates' USING ERRCODE = '22023';
     END IF;
     IF jsonb_typeof(p_items) IS DISTINCT FROM 'array' THEN

@@ -156,6 +156,8 @@ describe('atomic property-order review candidate', () => {
 
   it.each([
     { start: null, error: 'invalid_property_stay_dates' },
+    { start: '-infinity', error: 'invalid_property_stay_dates' },
+    { end: 'infinity', error: 'invalid_property_stay_dates' },
     { end: start, error: 'invalid_property_stay_dates' },
     { end: '2026-11-09T12:00:00Z', error: 'invalid_property_stay_dates' },
     { items: [], error: 'one_property_item_required' },
