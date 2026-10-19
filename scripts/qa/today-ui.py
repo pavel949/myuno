@@ -104,7 +104,8 @@ async def main():
                 await bounds()
                 tasks = page.locator('section[aria-labelledby="today-tasks"]')
                 attention = page.get_by_role('region', name=labels['attention'], exact=True)
-                routine = page.get_by_role('region', name=labels['requests'], exact=True)
+                # Its accessible name includes the live count from the heading.
+                routine = page.locator('section[aria-labelledby="today-requests"]')
                 stays = page.get_by_role('region', name=labels['stays'], exact=True)
                 headings = await page.get_by_role('heading', level=2).all_text_contents()
                 assert headings[0].startswith(labels['tasks']), headings
