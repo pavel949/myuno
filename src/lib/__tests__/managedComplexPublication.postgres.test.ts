@@ -4,6 +4,7 @@ import { chmodSync, chownSync, existsSync, mkdtempSync, readFileSync, realpathSy
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import postgres from 'postgres';
+import { applyTransactionScript } from '../../test/applyTransactionScript';
 import { MANAGED_COMPLEX_DRAFT_FIELDS } from '../managedComplexDraftFields';
 
 // Owned Unix-socket-only cluster; never reads DATABASE_URL/hosted credentials.
@@ -105,7 +106,7 @@ suite('governed complex publication on real isolated PostgreSQL',()=>{
   // Prove the existing FOR ALL escape as content-only staff with no assignment.
   const before=await as(U.editor,tx=>tx`UPDATE property_complexes SET name='Pre-candidate bypass' WHERE id=${LEGACY} RETURNING id`);
   preCandidateBypass=before.length===1;
-  await sql.unsafe(readFileSync(candidate,'utf8'));
+  await applyTransactionScript(sql,readFileSync(candidate,'utf8'));
  },30000);
  afterAll(async()=>{
   try {if(sql) await sql.end({timeout:2});} finally {if(started) run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','-w','stop']); if(directory) rmSync(directory,{recursive:true,force:true});}
@@ -374,19 +375,18 @@ suite('governed complex publication on real isolated PostgreSQL',()=>{
   await expect(as(U.admin,tx=>tx`UPDATE property_complexes SET authoring_space_id=${UNASSIGNED_SPACE} WHERE id=${row.id}`)).rejects.toThrow(/immutable/);
   await expect(as(U.admin,tx=>tx`DELETE FROM property_complexes WHERE id=${row.id}`)).rejects.toThrow(/controlled deletion/);
  });
+ // Keep last: execute the exact fail-closed rollback, including its own transaction.
  it('rollback freezes RPCs without restoring raw public/MC bypasses or deleting drafts',async()=>{
   const row=await create();
-  await sql.begin(async tx=>{
-   await tx.unsafe(readFileSync('docs/hardening/rollback/employee_complex_publication.candidate.sql','utf8').replace(/^BEGIN;|^COMMIT;/gm,''));
-   expect((await tx`SELECT count(*)::int n FROM property_complexes WHERE id=${row.id}`)[0].n).toBe(1);
-   await tx.unsafe('SET LOCAL ROLE authenticated');await tx`SELECT set_config('request.jwt.claim.sub',${U.editor},true)`;
+  await applyTransactionScript(sql,readFileSync('docs/hardening/rollback/employee_complex_publication.candidate.sql','utf8'));
+  expect((await sql`SELECT count(*)::int n FROM property_complexes WHERE id=${row.id}`)[0].n).toBe(1);
+  await as(U.editor,async tx=>{
    expect(await tx`SELECT id FROM property_complexes WHERE id=${row.id}`).toEqual([]);
    for(const signature of ['create_managed_complex_checked(uuid,uuid,jsonb,boolean)','save_managed_complex_draft_checked(uuid,timestamptz,jsonb,boolean)',
     'read_managed_complex_draft_checked(uuid)','list_managed_complex_drafts_checked(uuid,integer,integer)',
     'list_managed_complex_submissions_checked(uuid,integer,integer)','review_managed_complex_submission_checked(uuid,timestamptz,text,text)']) {
     expect((await tx`SELECT has_function_privilege(current_user,${signature},'EXECUTE') allowed`)[0].allowed).toBe(false);
    }
-   throw new Error('rollback fixture');
-  }).catch(error=>{if(!(error instanceof Error)||error.message!=='rollback fixture') throw error;});
+  });
  });
 });

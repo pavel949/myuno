@@ -4,6 +4,7 @@ import { chmodSync, chownSync, existsSync, mkdtempSync, readFileSync, realpathSy
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import postgres from 'postgres';
+import { applyTransactionScript } from '../../test/applyTransactionScript';
 
 const originalSource = readFileSync('supabase/migrations/20260121010005_982a783a-0ff3-49fc-bd4a-230f9365dbd8.sql', 'utf8');
 const originalStart = originalSource.indexOf('CREATE OR REPLACE FUNCTION notify_vendor_on_content_status_change()');
@@ -76,7 +77,7 @@ suite('vendor moderation on real isolated PostgreSQL', () => {
         FOR EACH ROW EXECUTE FUNCTION public.notify_vendor_on_content_status_change();`);
     const [before] = await sql`SELECT proacl::text AS acl FROM pg_proc WHERE oid='public.notify_vendor_on_content_status_change()'::regprocedure`;
     originalAcl = before.acl;
-    await sql.unsafe(candidate);
+    await applyTransactionScript(sql, candidate);
   }, 60000);
 
   afterAll(async () => {

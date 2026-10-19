@@ -1,0 +1,58 @@
+{
+  "sourceCommit": "34f5ec9e1140efa8b0edfb9fbf398f981d5374dd",
+  "activation": [
+    {
+      "id": "task-ceiling",
+      "path": "docs/convergence/employee-property-publication/employee-task-capability.candidate.sql",
+      "sha256": "2e005fdd07c533ca9db6a91b53458d7a9ac102dcd863fcf473e73a21f4b4bd8a"
+    },
+    {
+      "id": "operational-ceiling",
+      "path": "docs/convergence/employee-property-publication/employee-operational-membership.candidate.sql",
+      "sha256": "18db7d665b3d43acc54a56bfb3f0e6a5f12f170b1411866775441b5aa3a9274a"
+    },
+    {
+      "id": "vendor-row-shape",
+      "path": "docs/convergence/employee-property-publication/vendor-notification-row-shape.candidate.sql",
+      "sha256": "e465a6bdd2de0ae6b477664e67b3f231d62c5f25a8b3add2798825d0ca4b0c85"
+    },
+    {
+      "id": "property-publication",
+      "path": "docs/convergence/employee-property-publication/checked-publication.candidate.sql",
+      "sha256": "97471957b6cbee06a06776d71dec00d1ada39412f8ecd0095f58b8c50eff2106"
+    },
+    {
+      "id": "complex-publication",
+      "path": "docs/convergence/employee-complex-publication/checked-complex-publication.candidate.sql",
+      "sha256": "ba94c6beb85c4adcdb15894f3747a7fdab52d2b0108cbc059ec514308c91d526"
+    },
+    {
+      "id": "property-revisions",
+      "path": "docs/convergence/employee-property-revisions/published-revisions.candidate.sql",
+      "sha256": "0ee3833013905c2a840893b5316065f3d0e1727a01d092d1788832d00ffda584"
+    },
+    {
+      "id": "optional-admin-delegation",
+      "path": "docs/convergence/employee-property-publication/platform-admin-authoring-delegation.candidate.sql",
+      "sha256": "91a1acd63761a615d8d9b2017e4711b5c2b81815355f2b447f19174f6c4cc2e3",
+      "optional": true
+    }
+  ],
+  "rollback": [
+    {
+      "id": "freeze-property-revisions",
+      "path": "docs/hardening/rollback/employee_property_revisions.candidate.sql",
+      "sha256": "fa4a22616ae8263d9a76f7a808e6308b037113a62aab4fec0664e85af7226a11"
+    },
+    {
+      "id": "freeze-complex-publication",
+      "path": "docs/hardening/rollback/employee_complex_publication.candidate.sql",
+      "sha256": "3640710550ea7abddb958f77b2b0bc72ff541cfc66d681f8d8b3908d0fe58b88"
+    },
+    {
+      "id": "freeze-property-publication",
+      "path": "docs/hardening/rollback/employee_property_publication.candidate.sql",
+      "sha256": "2e83b8746d39e5cab0bc7015febf3009f4fc1a8f9d1e4e9f801a43302be0ec56"
+    }
+  ]
+}

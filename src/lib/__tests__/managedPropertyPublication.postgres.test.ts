@@ -4,6 +4,7 @@ import { chmodSync, chownSync, existsSync, mkdtempSync, readFileSync, realpathSy
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import postgres from 'postgres';
+import { applyTransactionScript } from '../../test/applyTransactionScript';
 import { MANAGED_PROPERTY_DRAFT_FIELDS } from '../managedPropertyDraftFields';
 
 // Never accepts a DATABASE_URL or hosted credentials. Own Unix-socket-only cluster.
@@ -212,7 +213,7 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   expect(await sql`SELECT approval_status,is_active FROM properties WHERE id IN (${legacy},${linked})`).toEqual([
    {approval_status:'draft',is_active:false},{approval_status:'draft',is_active:false},
   ]);
-  await sql.unsafe(readFileSync('docs/convergence/employee-property-publication/checked-publication.candidate.sql','utf8'));
+  await applyTransactionScript(sql,readFileSync('docs/convergence/employee-property-publication/checked-publication.candidate.sql','utf8'));
   const permissions='supabase/migrations/20260226072628_e0c74d35-4281-4aad-b700-f89f10dc00ca.sql';
   await sql.unsafe(sourceFunction(permissions,'is_mc_admin'));
   await sql.unsafe('ALTER TABLE team_member_permissions ENABLE ROW LEVEL SECURITY; GRANT SELECT,INSERT,UPDATE,DELETE ON team_member_permissions TO authenticated;');
@@ -220,22 +221,22 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   await sql.unsafe(sourcePolicy(permissions,'Members can read own permissions'));
   await sql.unsafe(sourceFunction('drizzle/migrations/0024_operating_cutover_blockers.sql','actor_is_space_limited'));
   for(const name of ['operating_space_permission_write','operating_space_permission_update','operating_space_permission_delete']) await sql.unsafe(sourcePolicy('drizzle/migrations/0024_operating_cutover_blockers.sql',name));
-  await sql.unsafe(readFileSync('docs/convergence/employee-property-publication/platform-admin-authoring-delegation.candidate.sql','utf8'));
+  await applyTransactionScript(sql,readFileSync('docs/convergence/employee-property-publication/platform-admin-authoring-delegation.candidate.sql','utf8'));
   // Prove the independent pre-existing membership-only task grant, then intersect it.
   const taskProperty=await create(U.staff);
   expect(await as(U.staff,tx=>tx`INSERT INTO property_operational_tasks(property_id,payload) VALUES(${taskProperty},'membership bypass') RETURNING id`)).toHaveLength(1);
-  await sql.unsafe(readFileSync('docs/convergence/employee-property-publication/employee-task-capability.candidate.sql','utf8'));
+  await applyTransactionScript(sql,readFileSync('docs/convergence/employee-property-publication/employee-task-capability.candidate.sql','utf8'));
   await sql`INSERT INTO property_documents(property_id,uploaded_by,payload) VALUES(${taskProperty},${U.owner},'private door code')`;
   expect(await as(U.staff,tx=>tx`SELECT id FROM property_documents WHERE property_id=${taskProperty}`)).toHaveLength(1);
   // Match the surviving source schema before applying the complete candidate.
   expect((await sql`SELECT to_regclass('public.property_meters') AS table_name`)[0].table_name).toBeNull();
-  await sql.unsafe(readFileSync('docs/convergence/employee-property-publication/employee-operational-membership.candidate.sql','utf8'));
+  await applyTransactionScript(sql,readFileSync('docs/convergence/employee-property-publication/employee-operational-membership.candidate.sql','utf8'));
   const normalizeSource=readFileSync('supabase/migrations/20260225144021_bfb9f5d1-f20a-4f47-a6d4-70971cc08d8f.sql','utf8');
   await sql.unsafe(normalizeSource.match(/CREATE OR REPLACE FUNCTION normalize_district\(\)[\s\S]*?\$\$ LANGUAGE plpgsql;/)![0]);
   await sql.unsafe('CREATE TRIGGER trg_normalize_district_properties BEFORE INSERT OR UPDATE ON properties FOR EACH ROW EXECUTE FUNCTION normalize_district();');
   await sql.unsafe(sourcePolicy('supabase/migrations/20260205111048_c571471b-a01c-4107-86f6-048ff7cb33e3.sql','public_view_active'));
   await sql.unsafe("ALTER POLICY public_view_active ON public.properties TO anon; GRANT SELECT(id,title_en,is_active,approval_status) ON public.properties TO anon;");
-  await sql.unsafe(readFileSync('docs/convergence/employee-property-revisions/published-revisions.candidate.sql','utf8'));
+  await applyTransactionScript(sql,readFileSync('docs/convergence/employee-property-revisions/published-revisions.candidate.sql','utf8'));
 
 
 
@@ -863,7 +864,7 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   const before=await sql`SELECT tablename,policyname,permissive,cmd,qual,with_check FROM pg_policies
    WHERE schemaname='public' AND policyname LIKE 'employee_%_ceiling' ORDER BY tablename,policyname`;
   expect(before).toHaveLength(20); // Four commands on four surviving tables plus tasks.
-  await sql.unsafe(readFileSync('docs/hardening/rollback/employee_property_publication.candidate.sql','utf8'));
+  await applyTransactionScript(sql,readFileSync('docs/hardening/rollback/employee_property_publication.candidate.sql','utf8'));
   expect((await sql`SELECT to_regclass('public.property_meters') AS table_name`)[0].table_name).toBeNull();
   expect(await sql`SELECT tablename,policyname,permissive,cmd,qual,with_check FROM pg_policies
    WHERE schemaname='public' AND policyname LIKE 'employee_%_ceiling' ORDER BY tablename,policyname`).toEqual(before);
