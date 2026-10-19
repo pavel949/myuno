@@ -1,3 +1,4 @@
+import { propertyBookingStatus } from '@/lib/propertyBookingPresentation';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format, differenceInCalendarDays } from 'date-fns';
@@ -12,7 +13,6 @@ import { toast } from 'sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
-import { useCurrency } from '@/contexts/CurrencyContext';
 import { useAllPropertyBookings, type PropertyBooking } from '@/hooks/usePropertyBookings';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingDetailSheet } from '@/components/owner/BookingDetailSheet';
@@ -34,14 +34,6 @@ import { cn } from '@/lib/utils';
 type StatusFilter = 'all' | 'upcoming' | 'active' | 'pending' | 'completed' | 'cancelled';
 type SortKey = 'check_in' | 'created_at' | 'total_amount' | 'guest_name';
 type BulkAction = 'confirm' | 'cancel';
-
-const STATUS_CONFIG: Record<string, { label: string; labelRu: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color?: string }> = {
-  confirmed: { label: 'Confirmed', labelRu: 'Подтверждено', variant: 'default' },
-  pending: { label: 'Pending', labelRu: 'Ожидает', variant: 'secondary' },
-  cancelled: { label: 'Cancelled', labelRu: 'Отменено', variant: 'destructive' },
-  completed: { label: 'Completed', labelRu: 'Завершено', variant: 'outline' },
-  checked_in: { label: 'Checked In', labelRu: 'Заселён', variant: 'default', color: 'bg-success hover:bg-success/90 text-success-foreground' },
-};
 
 const STATUS_FILTERS: { value: StatusFilter; label: string; labelRu: string }[] = [
   { value: 'all', label: 'All', labelRu: 'Все' },
@@ -76,7 +68,6 @@ function getBookingTimeStatus(booking: PropertyBooking): 'upcoming' | 'active' |
 export default function MCBookingsPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { formatPrice } = useCurrency();
   const { code: cityCurrencyCode } = useCityCurrency();
   const isRu = language === 'ru';
 
@@ -424,7 +415,7 @@ export default function MCBookingsPage() {
             const checkIn = parseCivilDate(booking.check_in);
             const checkOut = parseCivilDate(booking.check_out);
             const nights = differenceInCalendarDays(checkOut, checkIn);
-            const statusCfg = STATUS_CONFIG[booking.status || 'pending'] || STATUS_CONFIG.pending;
+            const statusCfg = propertyBookingStatus(booking.status);
             const guestName = booking.guest_name || (isRu ? 'Гость' : 'Guest');
 
             return (
@@ -480,7 +471,7 @@ export default function MCBookingsPage() {
                         </div>
                       </div>
                     </div>
-                    <Badge variant={statusCfg.variant} className={cn('max-w-full whitespace-normal break-words', statusCfg.color)}>
+                    <Badge variant={statusCfg.variant} className={cn('max-w-full whitespace-normal break-words')}>
                       {isRu ? statusCfg.labelRu : statusCfg.label}
                     </Badge>
                   </div>
@@ -522,7 +513,9 @@ export default function MCBookingsPage() {
                       </Badge>
                     )}
                     <span className="font-mono font-bold text-sm break-all max-w-full ml-auto">
-                      {formatPrice(booking.total_amount || 0)}
+                      {typeof booking.total_amount === 'number' && Number.isFinite(booking.total_amount)
+                        ? `${booking.total_amount.toLocaleString(isRu ? 'ru-RU' : 'en-US')} ${booking.currency || (isRu ? '(валюта неизвестна)' : '(currency unavailable)')}`
+                        : (isRu ? 'Стоимость неизвестна' : 'Total unavailable')}
                     </span>
                   </div>
                 </CardContent>

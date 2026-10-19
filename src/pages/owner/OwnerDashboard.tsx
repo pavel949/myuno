@@ -8,7 +8,6 @@ import { useMcOnboarding, computeProgress } from '@/hooks/useMcOnboarding';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { type DashboardWidgetKey } from '@/lib/businessRoles';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Home, Rocket, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -18,6 +17,7 @@ import { PageShell } from '@/components/page/PageShell';
 
 // Eager — render in the initial sections (Greeting, header chrome).
 import { BusinessRoleSwitcher } from '@/components/owner/dashboard/BusinessRoleSwitcher';
+import { DashboardDestinations } from '@/components/owner/dashboard/DashboardDestinations';
 import { DashboardGreeting } from '@/components/owner/dashboard/DashboardGreeting';
 import { RoleQuickActions } from '@/components/owner/dashboard/RoleQuickActions';
 import { DashboardPropertyFilter } from '@/components/owner/dashboard/DashboardPropertyFilter';
@@ -486,7 +486,7 @@ export default function OwnerDashboard() {
   return (
     <DashboardFilterProvider>
       <PageShell width="full" className="max-w-[1536px] space-y-5 overflow-x-hidden">
-        {/* Header: Greeting + Role Switcher */}
+        {/* Greeting followed by real workspace destinations, on every viewport. */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -494,7 +494,7 @@ export default function OwnerDashboard() {
           className="space-y-4"
         >
           <DashboardGreeting roleConfig={config} mcRole={mcRole} mcRoleLabel={mcRoleLabel} />
-          <BusinessRoleSwitcher activeRole={role} onRoleChange={setRole} />
+          <DashboardDestinations businessRole={role} propertyCount={allProperties.length} />
         </motion.div>
 
         {/* Quick Actions — desktop only (mobile uses + button in bottom nav) */}
@@ -509,8 +509,6 @@ export default function OwnerDashboard() {
         )}
 
         <QuickTaskDialog open={quickTaskOpen} onOpenChange={setQuickTaskOpen} />
-
-        <Separator />
 
         {/* Global Property Filter */}
         <motion.div
@@ -528,6 +526,8 @@ export default function OwnerDashboard() {
         >
           <OverviewSection />
         </motion.div>
+
+        <BusinessRoleSwitcher activeRole={role} onRoleChange={setRole} />
 
         {sections.map((section, sectionIdx) => (
           <section key={section.titleEn} className="space-y-3">

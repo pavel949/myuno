@@ -701,11 +701,33 @@ LEAD_VERTICALS.push({
 });
 
 // Helper functions
-import { resolveVendorAlias } from '@/lib/verticals/vendorEntries';
+import { getVendorEntry, resolveVendorAlias } from '@/lib/verticals/vendorEntries';
 
 export function getLeadVerticalById(id: string): LeadVerticalConfig | undefined {
   const canonical = resolveVendorAlias(id) ?? id;
   return LEAD_VERTICALS.find(v => v.id === canonical || v.id === id);
+}
+
+/** Read-side aliases only: existing stored consultation values are not rewritten. */
+export function getLeadVerticalFilterValues(id: string): string[] {
+  const entry = getVendorEntry(id);
+  return entry ? [entry.id, ...entry.aliases] : [id];
+}
+
+export function getLeadSourceFilterValues(source: string): string[] {
+  return [...new Set([source.toLowerCase(), source.toUpperCase()])];
+}
+
+// Admin filters also cover legacy categories without enabling new lead forms.
+export const CONSULTATION_VERTICALS = [
+  ...LEAD_VERTICALS,
+  ...INTAKE_VERTICALS.filter(vertical => ['education_providers', 'insurance_providers'].includes(vertical.id)),
+  { id: 'concierge', icon: '💬', nameEn: 'Concierge', nameRu: 'Консьерж' },
+];
+
+export function getConsultationVerticalById(id: string) {
+  const canonical = resolveVendorAlias(id) ?? id;
+  return CONSULTATION_VERTICALS.find(vertical => vertical.id === canonical);
 }
 
 export function getLeadVerticalsSorted(): LeadVerticalConfig[] {

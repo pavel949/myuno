@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
 const fixture = vi.hoisted(() => ({
-  properties: ['home-a'], accessible: ['home-a'], user: 'actor-a',
+  propertyError: null as Error | null, properties: ['home-a'], accessible: ['home-a'], user: 'actor-a',
   rows: {} as Record<string, unknown[]>, errors: {} as Record<string, Error>,
   trace: [] as { table: string; op: string; field?: string; value?: unknown }[],
 }));
@@ -40,7 +40,7 @@ vi.mock('@/contexts/StorefrontContext', () => ({ useStorefront: () => ({ storefr
 vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: null }) }));
 vi.mock('@/hooks/useMyProperties', () => ({ useMyProperties: () => ({
   activeProperties: fixture.properties.map(id => ({ property_id: id, id, title: id })),
-  allProperties: fixture.properties.map(id => ({ property_id: id, id, title: id })), isLoading: false,
+  allProperties: fixture.properties.map(id => ({ property_id: id, id, title: id })), isLoading: false, error: fixture.propertyError,
 }) }));
 vi.mock('@/lib/getAccessiblePropertyIds', () => ({ getAccessiblePropertyIds: async () => ({ allIds: fixture.accessible }) }));
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn(), success: vi.fn() }) }));
@@ -56,7 +56,7 @@ function mount<T>(hook: () => T) {
   return { ...renderHook(hook, { wrapper }), client };
 }
 beforeEach(() => {
-  cleanup(); fixture.properties = ['home-a']; fixture.accessible = ['home-a']; fixture.user = 'actor-a';
+  cleanup(); fixture.propertyError = null; fixture.properties = ['home-a']; fixture.accessible = ['home-a']; fixture.user = 'actor-a';
   fixture.rows = {}; fixture.errors = {}; fixture.trace = [];
   vi.stubGlobal('fetch', () => { throw Error('Production network denied'); });
 });
@@ -145,4 +145,29 @@ describe('PMS real hooks / in-memory request adapter, NOT hosted E2E', () => {
     await waitFor(() => expect(result.current.error?.message).toBe('report denied'));
     expect(fixture.trace).toContainEqual({ table: 'property_reports', op: 'eq', field: 'property_id', value: 'foreign-home' });
   });
+});
+
+it('operational read failure remains visible through the real task hook', async () => {
+  fixture.errors.property_operational_tasks = new Error('tasks unavailable');
+  const { result } = mount(() => useOperationalTasks());
+  await waitFor(() => expect(result.current.error?.message).toBe('tasks unavailable'));
+});
+it('zero-row task completion cannot report success or invalidate as a successful write', async () => {
+  const { result, client } = mount(() => useOperationalTasks());
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  const invalidate = vi.spyOn(client, 'invalidateQueries');
+  await act(async () => { await expect(result.current.completeTask.mutateAsync('missing-task')).rejects.toThrow('Task not saved or access denied'); });
+  expect(invalidate).not.toHaveBeenCalled();
+});
+
+it('Today preserves a failed property source rather than claiming an empty successful portfolio', () => {
+  fixture.properties = []; fixture.propertyError = new Error('property source denied');
+  const { result } = mount(() => usePmsToday());
+  expect(result.current.error?.message).toBe('property source denied');
+  expect(fixture.trace).toEqual([]);
+});
+it('Today does not read cached operational data for a signed-out actor', () => {
+  fixture.user = '';
+  mount(() => usePmsToday());
+  expect(fixture.trace).toEqual([]);
 });
