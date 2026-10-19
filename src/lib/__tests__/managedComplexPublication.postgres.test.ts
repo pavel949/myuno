@@ -278,9 +278,15 @@ suite('governed complex publication on real isolated PostgreSQL',()=>{
   await withRollback(async()=>{
    await sql.begin(async tx=>{
     await tx`SELECT id FROM property_complexes WHERE id=${row.id} FOR UPDATE`;
+    // Deliberately cache the pre-review activity snapshot: this ordering used to
+    // make every later poll retain a nonmatching backend query until timeout.
+    expect((await tx`SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE 'SELECT review_managed_complex_submission_checked%') found`)[0].found).toBe(false);
     attempt=review(U.admin,row.id,'approve',null,revision).then(()=>({ok:true,error:null}),error=>({ok:false,error}));
     let blocked=false;
     for(let n=0;n<500;n++) {
+     // pg_stat_activity query text is cached within this lock-holder transaction.
+     // Refresh separately before observing the concurrently blocked reviewer.
+     await tx`SELECT pg_stat_clear_snapshot()`;
      blocked=(await tx`SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE wait_event_type='Lock' AND query LIKE 'SELECT review_managed_complex_submission_checked%') found`)[0].found;
      if(blocked) break;
      await new Promise(resolve=>setTimeout(resolve,10));

@@ -128,7 +128,9 @@ async def exercise_queue(page, language, width):
     await expect(rows).to_have_count(1)
     await expect(rows.first).to_contain_text(labels['harbor'])
     await kind.select_option('property')
+    await expect(kind).to_have_value('property')
     await category.select_option('villa')
+    await expect(category).to_have_value('villa')
     await expect(rows).to_have_count(1)
     await screenshot(page, prefix + '-combined-filters', width)
     await clear.click()
@@ -163,6 +165,7 @@ async def exercise_queue(page, language, width):
 
     await tab(page, labels['inactive']).click()
     await expect_committed_route(page, INITIAL_ROUTE + '&queue=inactive', prefix + '-inactive-tab')
+    await expect(tab(page, labels['inactive'])).to_have_attribute('aria-selected', 'true')
     # Both tabs contain four rows: row/count assertions can pass against the
     # previous committed tree while React is still switching the route.
     await expect(kind.locator('option')).to_have_count(3)
@@ -190,6 +193,7 @@ async def exercise_queue(page, language, width):
 
     await tab(page, labels['pending']).click()
     await expect_committed_route(page, INITIAL_ROUTE, prefix + '-pending-tab')
+    await expect(tab(page, labels['pending'])).to_have_attribute('aria-selected', 'true')
     await expect(kind.locator('option').nth(1)).to_have_attribute('value', 'listing')
     await expect(kind.locator('option').nth(2)).to_have_attribute('value', 'property')
     await expect(rows).to_have_count(4)
@@ -230,6 +234,8 @@ async def exercise_states(page, language, width):
     await expect(page.get_by_text(labels['empty'], exact=True)).to_be_visible()
     await screenshot(page, prefix + '-empty-pending', width)
     await tab(page, labels['inactive']).click()
+    await expect_committed_route(page, INITIAL_ROUTE + '&queue=inactive', prefix + '-empty-inactive-queue')
+    await expect(tab(page, labels['inactive'])).to_have_attribute('aria-selected', 'true')
     await expect(page.get_by_text(labels['inactive_empty'], exact=True)).to_be_visible()
     await screenshot(page, prefix + '-empty-inactive', width)
     results.append({'case': 'empty', **await assert_isolated(page)})

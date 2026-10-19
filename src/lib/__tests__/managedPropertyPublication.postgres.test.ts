@@ -150,7 +150,9 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   directory = mkdtempSync(join(tmpdir(), 'myuno-publication-'));
   chmodSync(directory, 0o700); if (root) chownSync(directory, 65534, 65534);
   run('initdb', ['-D',join(directory,'data'),'-A','trust','--no-locale',...(libPath ? ['-c',`dynamic_library_path=${libPath}`] : [])]);
-  run('pg_ctl', ['-D',join(directory,'data'),'-l',join(directory,'pg.log'),'-o',`-k ${directory} -p 55447 -c listen_addresses=''${libPath ? ` -c dynamic_library_path=${libPath}` : ''}`,'-w','start']);
+  // This tiny disposable RLS fixture checks authorization, not JIT compilation.
+  // Apply to every pooled connection without changing policies or test deadlines.
+  run('pg_ctl', ['-D',join(directory,'data'),'-l',join(directory,'pg.log'),'-o',`-k ${directory} -p 55447 -c listen_addresses='' -c jit=off${libPath ? ` -c dynamic_library_path=${libPath}` : ''}`,'-w','start']);
   started = true;
   sql = postgres({ host: directory, port: 55447, database: 'postgres', username: owner, password: '', max: 4, onnotice: () => {} });
   await sql.unsafe(readFileSync('src/lib/__tests__/fixtures/managed-property-publication-base.sql','utf8'));

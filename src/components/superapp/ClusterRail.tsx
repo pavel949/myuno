@@ -13,6 +13,7 @@ import { useLifeOSRole } from '@/hooks/useLifeOS';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { rankServices } from '@/lib/superapp/rankServices';
 import { IconGrid } from './IconGrid';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 export interface ClusterRailProps {
   clusterId: ClusterId;
@@ -23,7 +24,6 @@ export const ClusterRail: React.FC<ClusterRailProps> = ({ clusterId, limit = 8 }
   const { effectivePersonas } = useUserPersonas();
   const role = useLifeOSRole();
   const { language } = useLanguage();
-  const isRu = language === 'ru';
 
   const cluster = getClusterById(clusterId);
 
@@ -36,7 +36,7 @@ export const ClusterRail: React.FC<ClusterRailProps> = ({ clusterId, limit = 8 }
 
   return (
     <IconGrid
-      title={isRu ? cluster.labelRu : cluster.labelEn}
+      title={pickLang(language, { ru: cluster.labelRu, en: cluster.labelEn, th: cluster.labelTh ?? cluster.labelEn })}
       count={AVAILABLE_SERVICES.filter((s) => s.clusterId === clusterId).length}
       seeAllHref={cluster.homeRoute}
       services={services}
