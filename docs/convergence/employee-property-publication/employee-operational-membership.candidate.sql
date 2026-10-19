@@ -3,6 +3,9 @@
 -- operational assignment and cannot satisfy actor_can_operate_property merely
 -- through content_author_user_id. Existing permissive policies are untouched,
 -- including the reversed legacy portal helper arguments (never fixed into grants).
+-- property_meters is intentionally absent after migration
+-- 20260419023055_eaf755ab-bdb3-4aea-a340-19543b31a835.sql; do not recreate it.
+-- Required surviving tables remain unconditional so schema drift fails closed.
 BEGIN;
 CREATE FUNCTION public.actor_employee_property_capability_ceiling(p_property_id uuid,p_action text)
 RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path='' AS $$
@@ -39,14 +42,6 @@ CREATE POLICY employee_insert_capability_ceiling ON public.inventory_inspections
 CREATE POLICY employee_update_capability_ceiling ON public.inventory_inspections AS RESTRICTIVE FOR UPDATE TO authenticated
  USING(public.actor_employee_property_capability_ceiling(property_id,'edit')) WITH CHECK(public.actor_employee_property_capability_ceiling(property_id,'edit'));
 CREATE POLICY employee_delete_capability_ceiling ON public.inventory_inspections AS RESTRICTIVE FOR DELETE TO authenticated
- USING(public.actor_employee_property_capability_ceiling(property_id,'edit'));
-CREATE POLICY employee_select_capability_ceiling ON public.property_meters AS RESTRICTIVE FOR SELECT TO authenticated
- USING(public.actor_employee_property_capability_ceiling(property_id,'view'));
-CREATE POLICY employee_insert_capability_ceiling ON public.property_meters AS RESTRICTIVE FOR INSERT TO authenticated
- WITH CHECK(public.actor_employee_property_capability_ceiling(property_id,'edit'));
-CREATE POLICY employee_update_capability_ceiling ON public.property_meters AS RESTRICTIVE FOR UPDATE TO authenticated
- USING(public.actor_employee_property_capability_ceiling(property_id,'edit')) WITH CHECK(public.actor_employee_property_capability_ceiling(property_id,'edit'));
-CREATE POLICY employee_delete_capability_ceiling ON public.property_meters AS RESTRICTIVE FOR DELETE TO authenticated
  USING(public.actor_employee_property_capability_ceiling(property_id,'edit'));
 CREATE POLICY employee_select_capability_ceiling ON public.owner_portal_settings AS RESTRICTIVE FOR SELECT TO authenticated
  USING(public.actor_employee_property_capability_ceiling(property_id,'view'));

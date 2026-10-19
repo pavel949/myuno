@@ -47,9 +47,24 @@ describe('managed publication source contract (not database execution)', () => {
   });
   it('contains the finite operational tables with restrictive action checks and no new permissive policy', () => {
     const sql=readFileSync('docs/convergence/employee-property-publication/employee-operational-membership.candidate.sql','utf8');
-    expect(sql.match(/AS RESTRICTIVE FOR/g)).toHaveLength(20);
+    expect(sql.match(/AS RESTRICTIVE FOR/g)).toHaveLength(16);
     expect(sql).not.toMatch(/AS PERMISSIVE|FOR ALL|actor_can_author_managed_property/);
     expect(sql).toContain("company,'properties',p_action");
+  });
+  it('targets exactly the surviving tables and never restores the source-dropped meters domain', () => {
+    const dropped=readFileSync('supabase/migrations/20260419023055_eaf755ab-bdb3-4aea-a340-19543b31a835.sql','utf8');
+    expect(dropped).toMatch(/DROP TABLE IF EXISTS public\.property_meters\s+CASCADE;/);
+    const forward=readFileSync('docs/convergence/employee-property-publication/employee-operational-membership.candidate.sql','utf8');
+    const targets=[...forward.matchAll(/CREATE POLICY \w+ ON public\.(\w+)/g)].map(match=>match[1]);
+    expect(targets.sort()).toEqual(['inventory_inspections','owner_portal_settings','portal_messages','property_documents'].flatMap(table=>Array(4).fill(table)));
+    for(const path of [
+      'docs/convergence/employee-property-publication/employee-operational-membership.candidate.sql',
+      'docs/hardening/rollback/employee_property_publication.candidate.sql',
+      'src/lib/__tests__/fixtures/managed-property-publication-base.sql',
+    ]) {
+      const sql=readFileSync(path,'utf8').replace(/^--.*$/gm,'');
+      expect(sql).not.toMatch(/\bproperty_meters\b/i);
+    }
   });
   it('reserves only the new audit action names and requires cutover for the new platform-admin delegation path', () => {
     expect(candidate()).toContain("action NOT IN ('managed_property_draft_created','managed_property_publication_changed')");

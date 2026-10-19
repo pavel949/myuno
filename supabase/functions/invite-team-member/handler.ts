@@ -1,4 +1,4 @@
-import type { SupabaseClient } from '../_shared/supabase.ts';
+import type { SupabaseClient, User } from '../_shared/supabase.ts';
 
 const ROLES = new Set(['manager', 'accountant', 'staff']);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -55,8 +55,11 @@ export async function handleTeamInvitation(req: Request, headers: Record<string,
       if (page > 100) return json({ error: 'Account lookup incomplete; no invitation sent', code: 'account_lookup_incomplete' }, 503);
       const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
       if (error) return json({ error: 'Account lookup unavailable; no invitation sent', code: 'account_lookup_failed' }, 503);
-      account = data.users.find(user => user.email?.toLowerCase() === email);
-      if (account || data.users.length < perPage) break;
+      // Normalize the SDK's User[] | [] result without a cast. With the app's
+      // non-strict null setting, find on that union can infer a never callback.
+      const users: User[] = data.users;
+      account = users.find(user => user.email?.toLowerCase() === email);
+      if (account || users.length < perPage) break;
     }
     if (account) {
       userId = account.id;

@@ -21,7 +21,10 @@ DROP POLICY IF EXISTS platform_admin_read_authoring_permissions ON public.team_m
 DROP POLICY IF EXISTS platform_admin_insert_authoring_permissions ON public.team_member_permissions;
 DROP POLICY IF EXISTS platform_admin_update_authoring_permissions ON public.team_member_permissions;
 -- Keep content_author_user_id, all draft rows, logs and pre-existing permissions.
--- Retain restrictive task and operational membership ceilings as well.
+-- Retain restrictive task and operational membership ceilings on the four surviving
+-- tables: property_documents, inventory_inspections, owner_portal_settings, portal_messages.
+-- property_meters was dropped by 20260419023055_eaf755ab-bdb3-4aea-a340-19543b31a835;
+-- neither forward activation nor rollback recreates or targets that obsolete table.
 -- No manager assignments were created. Do not restore legacy publisher EXECUTE,
 -- drop restrictive guards, or infer authority to delete/alter user data.
 COMMIT;

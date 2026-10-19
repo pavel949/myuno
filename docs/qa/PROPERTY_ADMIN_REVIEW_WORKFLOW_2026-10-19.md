@@ -43,3 +43,11 @@ Revert this frontend tranche to remove the changed presentation/CAS behavior. No
 The review queue, matching pending dashboard count and admin property review list now apply that same non-deleted predicate. Queue approval/rejection and admin editor saves additionally require the property still be non-deleted at mutation time, alongside their existing revision/pending-state guards. Moving a property to trash after its editor/queue loads cannot produce a successful approval through these UI paths. Listings/services/products are unchanged; activating a service or product remains an `is_active` update, not service approval workflow acceptance.
 
 Follow-up verification: 55 focused tests passed in four files, including explicit property-only non-deleted read/count/write predicates and a deletion-after-load failure case. Changed-file ESLint and `git diff --check` passed. No migration or production mutation was performed.
+
+## Follow-up: CI TypeScript inference
+
+PR #124's four TS2589 errors were reproduced with a file-scoped TypeScript check. They originated at the listing/property `pendingModeration` calls: inferring a generic return type by structurally matching the full recursive Supabase query builder exceeded TypeScript's instantiation depth.
+
+The shared predicate now accepts a callback typed to exactly `approval_status` and `pending`. Supabase still infers each actual select projection and response; no cast, `any`, suppression, schema relaxation or error/count behavior change was introduced. The queue and dashboard keep the same filters, selected columns, limits and exact counts. Tests assert every queue projection and the helper's precise return type.
+
+Verification: the scoped TypeScript check for `adminModeration.ts`, `useAdminDashboardStats.ts`, `adminModeration.test.tsx` and their dependencies passes; 47 focused moderation/dashboard tests pass; changed-file ESLint and `git diff --check` pass. Full repository typecheck remains a CI gate rather than a local resource-heavy run.

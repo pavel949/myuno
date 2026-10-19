@@ -17,8 +17,10 @@ export type ModerationItem = {
 
 // Dashboard and queue must count the same explicit moderation state. Inactive
 // services/products are a separate catalog view, never inferred to be pending.
-export function pendingModeration<T>(query: { eq(column: 'approval_status', value: 'pending'): T }): T {
-  return query.eq('approval_status', 'pending');
+// Infer the result from a narrow callback, not by structurally matching Supabase's
+// recursive query builder. The selected fields and response stay fully inferred.
+export function pendingModeration<T>(apply: (column: 'approval_status', value: 'pending') => T): T {
+  return apply('approval_status', 'pending');
 }
 
 export type ModerationQueue = {
@@ -29,11 +31,13 @@ export type ModerationQueue = {
 
 export async function fetchModerationQueue(): Promise<ModerationQueue> {
   const [listings, properties, services, products] = await Promise.all([
-    pendingModeration(supabase.from('listings')
-      .select('id,name_en,name_ru,created_at,approval_status,vertical,category,provider_id,providers:provider_id(name)', { count: 'exact' }))
+    pendingModeration((column, value) => supabase.from('listings')
+      .select('id,name_en,name_ru,created_at,approval_status,vertical,category,provider_id,providers:provider_id(name)', { count: 'exact' })
+      .eq(column, value))
       .order('created_at', { ascending: false }).limit(500),
-    pendingModeration(supabase.from('properties')
-      .select('id,title_en,title_ru,created_at,updated_at,approval_status,property_type', { count: 'exact' }))
+    pendingModeration((column, value) => supabase.from('properties')
+      .select('id,title_en,title_ru,created_at,updated_at,approval_status,property_type', { count: 'exact' })
+      .eq(column, value))
       .is('deleted_at', null).order('created_at', { ascending: false }).limit(500),
     supabase.from('services')
       .select('id,name_en,name_ru,created_at,approval_status,provider_id,providers:provider_id(name)', { count: 'exact' })

@@ -61,14 +61,16 @@ async function create(actor: string, company = C, space: string | null = SPACE) 
  return as(actor, async tx => (await tx`SELECT create_managed_property_checked(${company},${space},'New villa','Новая вилла','villa','rent') AS id`)[0].id as string);
 }
 
-const sensitiveTables=['property_documents','inventory_inspections','property_meters','owner_portal_settings','portal_messages'];
+// Source-canonical surviving tables. The April 19 cleanup dropped property_meters;
+// recreating it here would hide a production compatibility failure.
+const sensitiveTables=['property_documents','inventory_inspections','owner_portal_settings','portal_messages'];
 const childTables = ['property_media','property_amenities','property_reviews','property_room_categories','property_rate_plans','property_stay_restrictions','property_key_assignments','property_utility_schedules','property_payout_rules','property_rate_seasons','property_price_offers','property_financials'];
 function sourcePolicy(path:string,name:string) {
  const source=readFileSync(path,'utf8');
  let start=source.indexOf(`CREATE POLICY "${name}"`);
  if(start<0) start=source.indexOf(`CREATE POLICY ${name} `);
  if(start<0) throw new Error(`Missing source policy ${name}`);
- return source.slice(start,source.indexOf(';',start)+1).replaceAll('public.can_manage_property(', 'public.can_manage_property_e28_private(').replaceAll('is_admin_or_uno_team()', 'is_admin_or_uno_team_e28_private()');
+ return source.slice(start,source.indexOf(';',start)+1).split('public.can_manage_property(').join('public.can_manage_property_e28_private(').split('is_admin_or_uno_team()').join('is_admin_or_uno_team_e28_private()');
 }
 async function installLegacyConsumers() {
  // Reuse the actual updatable canonical owner view. Add only its missing fixture
@@ -94,9 +96,9 @@ async function installLegacyConsumers() {
  const catalog='supabase/migrations/20260820004935_8cdbaa30-5b89-4a52-a6bf-d96737ab1fc4.sql';
  await sql.unsafe(sourceFunction(catalog,'property_is_public'));
  await sql.unsafe(sourceFunction(catalog,'can_manage_property')
-  .replaceAll('public.can_manage_property(', 'public.can_manage_property_e28_private(')
-  .replaceAll('public.staff_can_access_property(', 'public.staff_can_access_property_e28_private(')
-  .replaceAll("public.has_role(auth.uid(), 'uno_team'::app_role)",'false'));
+  .split('public.can_manage_property(').join('public.can_manage_property_e28_private(')
+  .split('public.staff_can_access_property(').join('public.staff_can_access_property_e28_private(')
+  .split("public.has_role(auth.uid(), 'uno_team'::app_role)").join('false'));
  await sql.unsafe(sourceFunction('supabase/migrations/20260228003243_22bd8cd0-c874-465c-9032-65ef34ed77fd.sql','is_mc_member_for_property'));
  for(const table of childTables) {
   await sql.unsafe(`CREATE TABLE public.${table}(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),property_id uuid,category_id uuid,payload text,owner_id uuid,reviewer_id uuid,is_public boolean DEFAULT false,is_active boolean DEFAULT true);
@@ -119,16 +121,18 @@ async function installLegacyConsumers() {
  await sql.unsafe(sourcePolicy('supabase/migrations/20260228002512_594b444c-014b-4f71-8a43-cb7f257f34f3.sql','owners_and_mc_manage_operational_tasks'));
  await sql.unsafe(sourcePolicy('drizzle/migrations/0023_operating_security_ceilings.sql','operating_space_task_ceiling'));
 
- await sql.unsafe(sourceFunction('supabase/migrations/20260122131140_1d3722d7-58fb-43f6-a0f9-78e4ac1627b5.sql','is_admin_or_uno_team').replaceAll('public.is_admin_or_uno_team(', 'public.is_admin_or_uno_team_e28_private(').replaceAll("'admin', 'uno_team'","'admin'"));
+ await sql.unsafe(sourceFunction('supabase/migrations/20260122131140_1d3722d7-58fb-43f6-a0f9-78e4ac1627b5.sql','is_admin_or_uno_team').split('public.is_admin_or_uno_team(').join('public.is_admin_or_uno_team_e28_private(').split("'admin', 'uno_team'").join("'admin'"));
  for(const table of sensitiveTables) {
   await sql.unsafe(`CREATE TABLE public.${table}(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),property_id uuid,payload text,owner_user_id uuid,sender_id uuid,sender_role text,inspector_id uuid,uploaded_by uuid);
    ALTER TABLE public.${table} ENABLE ROW LEVEL SECURITY;
    GRANT SELECT,INSERT,UPDATE,DELETE ON public.${table} TO authenticated;`);
  }
+ // Historical wider inspection grants deliberately reproduce the old bypass.
+ // They are not deployed-equivalence evidence: the final alternate-shape case
+ // replaces them with the surviving April source admin-only inspection policy.
  const sensitive='supabase/migrations/20260301035956_cac50c66-e53c-4eea-a6c9-41663a5b5536.sql';
  for(const name of ['MC members can view inspections','MC members can insert inspections','MC members can update inspections','MC admins can delete inspections',
-  'Authorized users can view documents','MC members and owners can insert documents','MC admins and owners can update documents','MC admins and owners can delete documents',
-  'MC members can view meters','MC members can insert meters','MC members can update meters','MC admins can delete meters']) await sql.unsafe(sourcePolicy(sensitive,name));
+  'Authorized users can view documents','MC members and owners can insert documents','MC admins and owners can update documents','MC admins and owners can delete documents']) await sql.unsafe(sourcePolicy(sensitive,name));
  const settings='supabase/migrations/20260301022612_dd4a7458-6f18-483f-87fd-7cc15a53e59d.sql';
  for(const name of ['MC members manage portal settings','Owners read own portal settings']) await sql.unsafe(sourcePolicy(settings,name));
  const portal='supabase/migrations/20260301023952_afedc09d-b32a-4f1c-b4b9-27bf613ebf07.sql';
@@ -152,15 +156,15 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   // and object assignment checks. Apply the same private-helper transformations.
   await sql.unsafe(sourceFunction('drizzle/migrations/0022_operating_scope_resolver.sql','actor_is_operating_company_overseer'));
   await sql.unsafe(sourceFunction('drizzle/migrations/0021_operating_spaces_shadow_foundation.sql','actor_can_access_operating_space'));
-  await sql.unsafe(sourceFunction('supabase/migrations/20260301040030_79529c97-8b40-4188-99e4-11c6a78752db.sql','mc_can_access').replaceAll('public.mc_can_access(', 'public.mc_can_access_e28_private(').replaceAll("'admin', 'uno_team'", "'admin'"));
-  await sql.unsafe(sourceFunction('supabase/migrations/20260302100907_b2105b6d-9cd1-40d9-9f89-86a99c749d5b.sql','staff_can_access_property').replaceAll('public.staff_can_access_property(', 'public.staff_can_access_property_e28_private(').replaceAll("'admin', 'uno_team'", "'admin'"));
+  await sql.unsafe(sourceFunction('supabase/migrations/20260301040030_79529c97-8b40-4188-99e4-11c6a78752db.sql','mc_can_access').split('public.mc_can_access(').join('public.mc_can_access_e28_private(').split("'admin', 'uno_team'").join("'admin'"));
+  await sql.unsafe(sourceFunction('supabase/migrations/20260302100907_b2105b6d-9cd1-40d9-9f89-86a99c749d5b.sql','staff_can_access_property').split('public.staff_can_access_property(').join('public.staff_can_access_property_e28_private(').split("'admin', 'uno_team'").join("'admin'"));
   for (const name of ['actor_property_scope_ceiling','actor_can_operate_property','actor_private_property_ceiling']) {
-   await sql.unsafe(sourceFunction('drizzle/migrations/0023_operating_security_ceilings.sql',name).replaceAll('public.mc_can_access(', 'public.mc_can_access_e28_private(').replaceAll('public.staff_can_access_property(', 'public.staff_can_access_property_e28_private('));
+   await sql.unsafe(sourceFunction('drizzle/migrations/0023_operating_security_ceilings.sql',name).split('public.mc_can_access(').join('public.mc_can_access_e28_private(').split('public.staff_can_access_property(').join('public.staff_can_access_property_e28_private('));
   }
   await sql.unsafe(sourceFunction('drizzle/migrations/0028_uno_team_private_helpers.sql','actor_has_platform_admin'));
   await installLegacyConsumers();
   await sql.unsafe(sourceFunction('drizzle/migrations/0032_catalog_notification_private_boundaries.sql','actor_can_notify_property_submission'));
-  await sql.unsafe(sourceFunction('drizzle/migrations/0024_operating_cutover_blockers.sql','create_managed_property_checked').replaceAll('public.mc_can_access(', 'public.mc_can_access_e28_private('));
+  await sql.unsafe(sourceFunction('drizzle/migrations/0024_operating_cutover_blockers.sql','create_managed_property_checked').split('public.mc_can_access(').join('public.mc_can_access_e28_private('));
   await sql.unsafe(`
    REVOKE ALL ON FUNCTION create_managed_property_checked(uuid,uuid,text,text,text,text) FROM PUBLIC,anon;
    GRANT EXECUTE ON FUNCTION create_managed_property_checked(uuid,uuid,text,text,text,text) TO authenticated;
@@ -210,6 +214,8 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   await sql.unsafe(readFileSync('docs/convergence/employee-property-publication/employee-task-capability.candidate.sql','utf8'));
   await sql`INSERT INTO property_documents(property_id,uploaded_by,payload) VALUES(${taskProperty},${U.owner},'private door code')`;
   expect(await as(U.staff,tx=>tx`SELECT id FROM property_documents WHERE property_id=${taskProperty}`)).toHaveLength(1);
+  // Match the surviving source schema before applying the complete candidate.
+  expect((await sql`SELECT to_regclass('public.property_meters') AS table_name`)[0].table_name).toBeNull();
   await sql.unsafe(readFileSync('docs/convergence/employee-property-publication/employee-operational-membership.candidate.sql','utf8'));
 
 
@@ -221,6 +227,14 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   if (directory) rmSync(directory,{recursive:true,force:true});
  });
 
+ it('installs every surviving operational ceiling with the source-dropped meters table absent', async () => {
+  expect((await sql`SELECT to_regclass('public.property_meters') AS table_name`)[0].table_name).toBeNull();
+  const policies=await sql`SELECT tablename,cmd,permissive FROM pg_policies
+   WHERE schemaname='public' AND policyname LIKE 'employee_%_capability_ceiling'
+   ORDER BY tablename,cmd`;
+  expect(policies).toEqual([...sensitiveTables].sort().flatMap(tablename=>
+   ['DELETE','INSERT','SELECT','UPDATE'].map(cmd=>({tablename,cmd,permissive:'RESTRICTIVE'}))));
+ });
  it('creates an inactive canonical draft without claiming the employee is owner/provider', async () => {
   const key = await create(U.editor);
   const [p] = await sql`SELECT approval_status,is_active,owner_id,provider_id,management_company_id,instant_booking FROM properties WHERE id=${key}`;
@@ -525,14 +539,14 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
  it('preserves existing operational manager checks, rejects reparenting and does not repair reversed portal grants', async () => {
   const key=await property();const outside=await property();
   await sql`UPDATE operating_space_properties SET operating_space_id=${UNAUTHORIZED_SPACE} WHERE property_id=${outside}`;
-  for(const table of ['property_documents','inventory_inspections','property_meters']) {
+  for(const table of ['property_documents','inventory_inspections']) {
    expect(await as(U.editor,tx=>tx`INSERT INTO ${tx(table)}(property_id) VALUES(${key}) RETURNING id`)).toHaveLength(1);
    await expect(as(U.editor,tx=>tx`UPDATE ${tx(table)} SET property_id=${outside} WHERE property_id=${key}`)).rejects.toThrow(/row-level/);
   }
   await expect(as(U.editor,tx=>tx`INSERT INTO owner_portal_settings(property_id,owner_user_id) VALUES(${key},${U.owner})`)).rejects.toThrow(/row-level/);
   await expect(as(U.editor,tx=>tx`INSERT INTO portal_messages(property_id,sender_id,sender_role) VALUES(${key},${U.editor},'mc')`)).rejects.toThrow(/row-level/);
  });
- it.each(['property_documents','inventory_inspections','property_meters'])('requires live operational module and membership for assigned staff on %s', async table => {
+ it.each(['property_documents','inventory_inspections'])('requires live operational module and membership for assigned staff on %s', async table => {
   const key=await create(U.staff);
   await sql`INSERT INTO property_manager_assignments(property_id,manager_user_id,is_active) VALUES(${key},${U.staff},true)`;
   try {
@@ -608,5 +622,41 @@ suite('checked managed property publication on isolated PostgreSQL', () => {
   }
   await as(U.editor,tx=>tx`INSERT INTO property_activity_log(property_id,actor_id,action) VALUES(${key},${U.editor},'legacy_note')`);
   expect(await sql`SELECT action FROM property_activity_log WHERE property_id=${key} AND action='legacy_note'`).toHaveLength(1);
+ });
+ it('preserves the narrower deployed admin-only inspection policy without restoring historical member grants', async () => {
+  for(const name of ['MC members can view inspections','MC members can insert inspections','MC members can update inspections','MC admins can delete inspections']) {
+   await sql.unsafe(`DROP POLICY "${name}" ON public.inventory_inspections`);
+  }
+  await sql.unsafe(sourcePolicy('supabase/migrations/20260419023631_9bc7abe6-d740-480a-bfa8-179629f4dff7.sql','Admins manage inspections'));
+  const policies=await sql`SELECT policyname,permissive FROM pg_policies
+   WHERE schemaname='public' AND tablename='inventory_inspections' ORDER BY policyname`;
+  expect(policies.filter(policy=>policy.permissive==='PERMISSIVE')).toEqual([
+   {policyname:'Admins manage inspections',permissive:'PERMISSIVE'},
+  ]);
+  expect(policies.filter(policy=>policy.permissive==='RESTRICTIVE')).toHaveLength(4);
+  const key=await property();
+  expect(await as(U.admin,tx=>tx`INSERT INTO inventory_inspections(property_id,inspector_id) VALUES(${key},${U.outsider}) RETURNING id`)).toHaveLength(1);
+  for(const actor of [U.editor,U.staff,U.team,U.outsider]) {
+   expect(await as(actor,tx=>tx`SELECT id FROM inventory_inspections WHERE property_id=${key}`)).toHaveLength(0);
+   await expect(as(actor,tx=>tx`INSERT INTO inventory_inspections(property_id,inspector_id) VALUES(${key},${actor})`)).rejects.toThrow(/row-level/);
+   expect(await as(actor,tx=>tx`UPDATE inventory_inspections SET payload='forged' WHERE property_id=${key} RETURNING id`)).toHaveLength(0);
+   expect(await as(actor,tx=>tx`DELETE FROM inventory_inspections WHERE property_id=${key} RETURNING id`)).toHaveLength(0);
+  }
+ });
+ // Keep last: the fail-closed rollback intentionally revokes checked workflow RPCs.
+ it('rolls back with meters absent while retaining all surviving operational ceilings', async () => {
+  const key=await create(U.staff);
+  await sql`INSERT INTO property_documents(property_id,uploaded_by) VALUES(${key},${U.staff})`;
+  const before=await sql`SELECT tablename,policyname,permissive,cmd,qual,with_check FROM pg_policies
+   WHERE schemaname='public' AND policyname LIKE 'employee_%_ceiling' ORDER BY tablename,policyname`;
+  expect(before).toHaveLength(20); // Four commands on four surviving tables plus tasks.
+  await sql.unsafe(readFileSync('docs/hardening/rollback/employee_property_publication.candidate.sql','utf8'));
+  expect((await sql`SELECT to_regclass('public.property_meters') AS table_name`)[0].table_name).toBeNull();
+  expect(await sql`SELECT tablename,policyname,permissive,cmd,qual,with_check FROM pg_policies
+   WHERE schemaname='public' AND policyname LIKE 'employee_%_ceiling' ORDER BY tablename,policyname`).toEqual(before);
+  expect(await as(U.staff,tx=>tx`SELECT id FROM property_documents WHERE property_id=${key}`)).toHaveLength(0);
+  await expect(as(U.staff,tx=>tx`INSERT INTO property_documents(property_id,uploaded_by) VALUES(${key},${U.staff})`)).rejects.toThrow(/row-level/);
+  await expect(read(U.staff,key)).rejects.toThrow(/permission denied/);
+  await expect(save(U.staff,key,{title_en:'Blocked by rollback'})).rejects.toThrow(/permission denied/);
  });
 });

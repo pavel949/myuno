@@ -112,8 +112,8 @@ export function useAdminDashboardStats() {
         pendingManualPaymentsRes,
         unpaidOrdersRes,
       ] = await Promise.all([
-        pendingModeration(supabase.from('properties').select('id', { count: 'exact', head: true })).is('deleted_at', null),
-        pendingModeration(supabase.from('listings').select('id', { count: 'exact', head: true })),
+        pendingModeration((column, value) => supabase.from('properties').select('id', { count: 'exact', head: true }).eq(column, value)).is('deleted_at', null),
+        pendingModeration((column, value) => supabase.from('listings').select('id', { count: 'exact', head: true }).eq(column, value)),
         supabase.from('support_tickets').select('id', countOptions).in('status', ['open', 'in_progress']).limit(1),
         supabase.from('disputes').select('id', countOptions).eq('status', 'open').limit(1),
         supabase.from('partner_applications').select('id', countOptions).eq('status', 'pending').limit(1),
