@@ -7,9 +7,11 @@ import PropertySearchRedirect from '@/components/property/PropertySearchRedirect
 import GoalEntryPage from '@/pages/discover/GoalEntryPage';
 
 const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false }));
+const calendar = vi.hoisted(() => ({ pending: false, failed: false, hasNextPage: false }));
+vi.mock('@/hooks/useSearchPropertyAvailability', () => ({ useSearchPropertyAvailability: (_ids: string[], start?: string, end?: string) => ({ enabled: !!start && !!end, availableIds: new Set(), pending: calendar.pending, failed: calendar.failed, retry: vi.fn() }) }));
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
-vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: [] }] }, isLoading: false, isError: false }; } }));
+vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: [] }] }, isLoading: false, isError: false, hasNextPage: calendar.hasNextPage, fetchNextPage: vi.fn() }; } }));
 vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => { throw new Error('Guest discovery must not fetch management companies'); } }));
 vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ districts: [{ id: 'layan', valueKey: 'layan', labelEn: 'Layan', labelRu: 'Лаян' }], isLoading: false }), applyQuickFilters: (items: unknown) => items }));
 vi.mock('@/hooks/usePropertyFilterOptions', () => ({ usePropertyFilterOptions: () => ({ propertyTypes: [{ id: 'villa', labelEn: 'Villa', labelRu: 'Вилла' }], filterConfig: { sections: [] }, isLoading: false }) }));
@@ -35,14 +37,14 @@ function mount(entry: string) {
     <Route path="/property/rent/medium-term" element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />} />
   </Routes></MemoryRouter>);
 }
-beforeEach(() => { state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
+beforeEach(() => { calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
-  it.each([false, true])('discloses unverified rental availability without changing selected dates (mobile=%s)', mobile => {
+  it.each([false, true])('discloses checked-night filtering without changing selected dates (mobile=%s)', mobile => {
     state.mobile = mobile;
     mount('/property/search?mode=rent&checkIn=2027-11-10&checkOut=2027-11-15&guests=3');
-    expect(screen.getByRole('note', { name: 'Availability check' })).toHaveTextContent('availability has not been checked');
+    expect(screen.getByRole('status', { name: 'Availability check' })).toHaveTextContent('Only homes without blocked calendar nights');
     expect(screen.getByTestId('location')).toHaveTextContent('checkIn=2027-11-10&checkOut=2027-11-15&guests=3');
   });
   it.each([
@@ -53,7 +55,16 @@ describe('one residential results surface', () => {
     '/property/search?checkIn=invalid&checkOut=2027-11-15',
   ])('does not display a rental-date notice for %s', route => {
     mount(route);
-    expect(screen.queryByRole('note', { name: 'Availability check' })).toBeNull();
+    expect(screen.queryByText(/Only homes without blocked calendar nights/)).toBeNull();
+  });
+  it.each(['pending', 'failed', 'hasNextPage'] as const)('does not claim empty results while availability is %s', status => {
+    calendar[status] = true;
+    mount('/property/search?mode=rent&checkIn=2027-11-10&checkOut=2027-11-15');
+    expect(screen.queryByText('No properties found')).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Checked date matches: 0' })).toBeVisible();
+    if (status === 'pending') expect(screen.getByRole('status', { name: 'Availability check' })).toHaveTextContent('Checking availability');
+    if (status === 'failed') expect(screen.getByRole('alert')).toHaveTextContent('could not be checked');
+    if (status === 'hasNextPage') expect(screen.getByRole('button', { name: 'Load more' })).toBeVisible();
   });
   it.each([false, true])('shows one editable form immediately (mobile=%s)', mobile => {
     state.mobile = mobile;

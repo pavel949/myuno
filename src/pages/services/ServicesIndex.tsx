@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { lazy, Suspense, useState } from 'react';
 import { Wrench, Car, Users, LayoutGrid, Snowflake, Brush, Droplets, ClipboardList, ArrowRight } from 'lucide-react';
@@ -23,7 +24,7 @@ const CATEGORY_ALIAS: Record<string, string> = {
 };
 
 function EmbeddedServicesLayout({ title, subtitle, searchValue, onSearchChange, searchPlaceholder, children }: MiniAppLayoutProps) {
-  return <div className="space-y-6">
+  return <div className="public-commerce public-commerce--services space-y-6">
     <header className="space-y-2"><h1 className="text-2xl font-semibold">{title}</h1><p className="text-muted-foreground">{subtitle}</p></header>
     <Input type="search" aria-label={searchPlaceholder} placeholder={searchPlaceholder} value={searchValue} onChange={event => onSearchChange?.(event.target.value)} />
     {children}
@@ -84,6 +85,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
 
   return (
     <Layout
+      contentClassName="public-commerce public-commerce--services"
       title={isRu ? 'Услуги на Пхукете' : 'Services in Phuket'}
       subtitle={isRu ? 'Для дома, поездок и повседневных дел.' : 'For your home, travel and everyday life.'}
       fallbackPath="/"

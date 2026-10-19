@@ -20,7 +20,6 @@ import { APP_ROUTES } from '@/lib/config/routes';
 import { propertyDetailHref, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
 import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
-import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { TrustStrip } from './TrustStrip';
 import { StayRulesInline } from './StayRulesInline';
 
@@ -41,7 +40,6 @@ interface PropertyListingCardProps {
 }
 
 
-const FALLBACK_IMAGE = PLACEHOLDER_IMAGES.property;
 
 const formatPriceLabel = (period: string, lang: string) => {
   const labels: Record<string, { en: string; ru: string; th: string }> = {
@@ -76,7 +74,7 @@ function PropertyListingCardBase({
 
   const surface = useMemo(() => surfaceFromProperty(property, mode), [property, mode]);
   const title = isRu ? surface.titleRu : surface.titleEn;
-  const images = property.images?.length ? property.images : [property.cover_image || FALLBACK_IMAGE];
+  const images = [...(property.images || []), ...(property.cover_image ? [property.cover_image] : [])];
 
   const viewIds = useMemo(() => normalizeViewTypes(property.view_type), [property.view_type]);
   const primaryViewLabel =
@@ -140,6 +138,7 @@ function PropertyListingCardBase({
       {/* Image Carousel — Airbnb style */}
       <div className="relative">
         <PropertyImageCarousel
+          key={property.id}
           images={images}
           alt={title}
           isHovered={isHovered}

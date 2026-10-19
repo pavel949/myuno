@@ -88,8 +88,8 @@ export default function AboutPage() {
   ];
 
   return (
-    <AppLayout>
-      <PageContainer>
+    <AppLayout usePageContainer={false}>
+      <PageContainer className="max-w-5xl">
         <PageHeader
           title={t('О myUNO', 'About myUNO')}
           subtitle={t(

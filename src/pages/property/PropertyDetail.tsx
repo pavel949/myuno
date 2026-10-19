@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
@@ -267,13 +268,13 @@ export default function PropertyDetail() {
           address: property.district || undefined,
         })}
       />
-      <div className="pb-28">
+      <div className="public-commerce public-commerce--property pb-28">
         {/* Property identity and secondary actions */}
         <div className="flex flex-wrap items-start gap-4 px-4 md:px-0 py-5 md:py-7">
           <BackButton fallbackPath="/property" variant="default" size="md" />
           {/* Title */}
           <div className="min-w-0 flex-1 basis-[calc(100%-3.5rem)] md:basis-0" data-testid="property-identity">
-            <h1 className="text-2xl md:text-3xl font-display font-medium text-foreground leading-snug break-words">
+            <h1 className="public-commerce-title text-foreground break-words">
               {propertyTitle}
             </h1>
             {/* Hero facts — Airbnb-style sub-title (e.g. "4 guests · 2 bedrooms · 1 bath") */}

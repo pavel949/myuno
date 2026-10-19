@@ -175,8 +175,8 @@ export default function PrivacyPage() {
   ];
 
   return (
-    <AppLayout>
-      <PageContainer>
+    <AppLayout usePageContainer={false}>
+      <PageContainer className="max-w-4xl">
         <PageHeader 
           title={isRu ? 'Политика конфиденциальности' : 'Privacy Policy'} 
           showBack 

@@ -1,3 +1,5 @@
+import '@/styles/public-commerce.css';
+import { getServiceRequestConfirmationNote } from '@/lib/services/serviceRequestCopy';
  import { useState, useEffect } from 'react';
  import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
  import { Clock, MapPin, Calendar, MessageSquare, Check, LocateFixed, Loader2 } from 'lucide-react';
@@ -170,9 +172,9 @@ import { toast } from 'sonner';
    ];
  
    return (
-     <div className="min-h-screen bg-background pb-24">
+     <div className="public-commerce public-commerce--request min-h-screen bg-background pb-24">
        {/* Header */}
-       <div className="sticky top-0 z-50 bg-background/95 border-b">
+       <div className="public-commerce-form-header bg-background border-b">
          <div className="flex items-center gap-3 px-4 py-3">
            <BackButton fallbackPath={returnTo} variant="ghost" />
            <div className="flex-1">
@@ -181,9 +183,9 @@ import { toast } from 'sonner';
          </div>
        </div>
  
-       <form onSubmit={handleSubmit} className="p-4 space-y-4">
+       <form onSubmit={handleSubmit} className="public-commerce-form p-4 space-y-6">
          {/* Service Info Card */}
-         <Card className="border-primary/20 bg-primary/5">
+         <Card className="border-border bg-card">
            <CardContent className="p-4">
              <div className="flex gap-4">
                <div className="w-14 h-14 rounded-none bg-primary/20 flex items-center justify-center text-2xl shrink-0">
@@ -318,7 +320,7 @@ import { toast } from 'sonner';
  
          {/* Contact Info */}
          <Card>
-           <CardContent className="p-4 space-y-4">
+           <CardContent className="p-4 space-y-6">
              <h3 className="font-medium">{isRu ? 'Контактные данные' : 'Contact Information'}</h3>
              
              <div className="space-y-2">
@@ -379,9 +381,7 @@ import { toast } from 'sonner';
              {isRu ? 'Отправить заявку' : 'Submit Request'}
            </Button>
            <p className="text-xs text-center text-muted-foreground mt-2">
-             {isRu 
-               ? 'Мы свяжемся с вами в течение 30 минут' 
-               : 'We will contact you within 30 minutes'}
+             {getServiceRequestConfirmationNote(language)}
            </p>
          </div>
        </form>

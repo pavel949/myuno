@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 /**
  * PropertySearchPage — Full catalog grid with filters
  * One shared app-style editor; all criteria are hydrated from the catalogue URL.
@@ -30,7 +31,8 @@ import { PropertySortSelect, PropertySortKey } from '@/components/property/Prope
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { OffplanCTASection } from '@/components/property/OffplanCTASection';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, format } from 'date-fns';
+import { useSearchPropertyAvailability } from '@/hooks/useSearchPropertyAvailability';
 import '@/styles/property-search.css';
 
 const QUICK_FEATURE_IDS = ['walk_to_beach', 'private_pool', 'sea_view'];
@@ -189,7 +191,7 @@ export default function PropertySearchPage() {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const properties = useMemo(() => {
+  const candidateProperties = useMemo(() => {
     const allItems = infiniteData?.pages.flatMap((p) => p.properties) || [];
 
     const filtered = allItems.filter((prop) => {
@@ -206,6 +208,16 @@ export default function PropertySearchPage() {
 
     return sorted;
   }, [infiniteData, sortKey, categoryFilters, propertyMode]);
+
+  const availability = useSearchPropertyAvailability(
+    candidateProperties.map(property => property.id),
+    propertyMode === 'rent' && nights > 0 ? format(searchParams.checkIn!, 'yyyy-MM-dd') : undefined,
+    propertyMode === 'rent' && nights > 0 ? format(searchParams.checkOut!, 'yyyy-MM-dd') : undefined,
+  );
+  const properties = availability.enabled
+    ? candidateProperties.filter(property => availability.availableIds.has(property.id))
+    : candidateProperties;
+  const availabilityText = (ru: string, en: string, th: string) => isRu ? ru : language === 'th' ? th : en;
 
   const advancedFilterCount = Object.entries(filterValues).reduce((count, [key, value]) => {
     if (propertyMode === 'buy' && key === 'instantBooking') return count;
@@ -239,7 +251,7 @@ export default function PropertySearchPage() {
   const summaryDuration = rentTenancy === 'medium' ? (isRu ? 'Помесячно' : 'Monthly') : rentTenancy === 'long' ? (isRu ? 'На год' : 'Yearly') : (isRu ? 'Посуточно' : 'Nightly');
 
   return (
-    <div className="property-discovery min-h-screen bg-background">
+    <div className="public-commerce public-commerce--search property-discovery min-h-screen bg-background">
         <header className="property-discovery-header border-b">
           <h1 className="property-discovery-title">{isRu ? 'Найдите ваш дом на Пхукете' : 'Find your home in Phuket'}</h1>
           <p className="text-body-sm text-muted-foreground">{isRu ? 'Введите название объекта или выберите параметры ниже и нажмите «Найти жильё».' : 'Enter a property name or choose your criteria below, then select “Find a home”.'}</p>
@@ -291,13 +303,19 @@ export default function PropertySearchPage() {
           </div>}
         </header>
 
-        {propertyMode === 'rent' && nights > 0 && <p role="note" aria-label={isRu ? 'Проверка занятости' : 'Availability check'} className="mx-4 my-2 border-l-2 border-primary/30 pl-3 text-sm text-muted-foreground">
-          {isRu ? 'Даты сохранены, но занятость объектов пока не проверена. Откройте объект для проверки.' : 'Your dates are saved, but availability has not been checked for these results. Open a property to check.'}
-        </p>}
+        {availability.enabled && <div role="status" aria-label={availabilityText('Проверка занятости', 'Availability check', 'ตรวจสอบห้องว่าง')} className="mx-4 my-2 border-l-2 border-primary/30 pl-3 text-sm text-muted-foreground">
+          {availability.pending
+            ? availabilityText('Проверяем занятость на выбранные даты…', 'Checking availability for your dates…', 'กำลังตรวจสอบห้องว่างสำหรับวันที่เลือก…')
+            : availabilityText('Показаны объекты без занятых ночей по календарю на выбранные даты. Условия и доступность повторно проверяются при бронировании.', 'Only homes without blocked calendar nights for your dates are shown. Stay rules and availability are checked again when booking.', 'แสดงเฉพาะที่พักที่ไม่มีคืนที่ถูกจองในวันที่เลือก เงื่อนไขและห้องว่างสุดท้ายจะตรวจสอบเมื่อจอง')}
+          {availability.failed && <div role="alert" className="mt-2">
+            {availabilityText('Часть объектов не удалось проверить и они скрыты. Повторите проверку.', 'Some homes could not be checked and are hidden. Retry the check.', 'ตรวจสอบที่พักบางแห่งไม่สำเร็จและถูกซ่อนไว้ กรุณาลองอีกครั้ง')}
+            <Button variant="outline" size="sm" className="ml-2" onClick={() => availability.retry()}>{availabilityText('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button>
+          </div>}
+        </div>}
         <div className="px-4 py-4 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 ref={resultsHeadingRef} tabIndex={-1} className="scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)] text-h3 font-display basis-full sm:basis-auto">
-              {isLoading ? (isRu ? 'Ищем жильё…' : 'Finding homes…') : isError ? (isRu ? 'Каталог недоступен' : 'Catalogue unavailable') : <>{isRu ? (hasNextPage ? 'Загружено объектов:' : 'Найдено объектов:') : (hasNextPage ? 'Homes loaded:' : 'Places found:')} {properties.length}</>}
+              {isLoading ? (isRu ? 'Ищем жильё…' : 'Finding homes…') : isError ? (isRu ? 'Каталог недоступен' : 'Catalogue unavailable') : <>{availability.enabled ? availabilityText('Проверено, подходит по датам:', 'Checked date matches:', 'ที่พักที่ตรวจสอบแล้วตรงกับวันที่:') : isRu ? (hasNextPage ? 'Загружено объектов:' : 'Найдено объектов:') : (hasNextPage ? 'Homes loaded:' : 'Places found:')} {properties.length}</>}
             </h2>
             <div className="property-discovery-result-actions flex flex-wrap items-center gap-2">
               <PropertySortSelect value={sortKey} onChange={setSortKey} />
@@ -374,8 +392,9 @@ export default function PropertySearchPage() {
           )}
 
           <div ref={loadMoreRef} className={cn("flex justify-center", properties.length > 0 && "py-8")}>
+            {hasNextPage && !isFetchingNextPage && <Button variant="outline" onClick={() => fetchNextPage()}>{availabilityText('Загрузить ещё', 'Load more', 'โหลดเพิ่มเติม')}</Button>}
             {isFetchingNextPage && <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />}
-            {!isLoading && !hasNextPage && properties.length > 0 && (
+            {!isLoading && !hasNextPage && !availability.pending && !availability.failed && properties.length > 0 && (
               <p className="text-sm text-muted-foreground">{isRu ? 'Все объекты загружены' : 'All properties loaded'}</p>
             )}
           </div>
@@ -385,7 +404,7 @@ export default function PropertySearchPage() {
             <p className="mb-5 text-muted-foreground">{isRu ? 'Параметры поиска сохранены. Попробуйте ещё раз.' : 'Your search is kept. Please try again.'}</p>
             <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : 'Try again'}</Button>
           </div>}
-          {!isLoading && !isError && properties.length === 0 && (
+          {!isLoading && !isError && !availability.pending && !availability.failed && !hasNextPage && properties.length === 0 && (
             <div className="text-center py-8">
               <Home className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
               <h3 className="text-lg font-semibold mb-2">{isRu ? 'Ничего не найдено' : 'No properties found'}</h3>

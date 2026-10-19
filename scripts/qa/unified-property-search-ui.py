@@ -237,10 +237,31 @@ async def main():
                     await expect(page.get_by_test_id('synthetic-map')).to_have_count(0)
                     assert 'view' not in await query()
                     await bounds()
+                    # Real availability hook, strictly synthetic public-calendar contract.
+                    calendar = {'lang':lang, 'mode':'rent', 'fixtureCalendar':'matrix',
+                        'checkIn':'2026-11-20', 'checkOut':'2026-11-25'}
+                    await page.goto('http://localhost:8080/fixture?'+urlencode(calendar),wait_until='networkidle')
+                    cards = page.locator('[data-catalog-kind][data-listing-id]')
+                    await expect(cards).to_have_count(2)
+                    await expect(page.locator('[data-listing-id="synthetic-free"]')).to_be_visible()
+                    await expect(page.locator('[data-listing-id="synthetic-checkout"]')).to_be_visible()
+                    await expect(page.locator('[data-listing-id="synthetic-blocked"]')).to_have_count(0)
+                    await expect(page.get_by_role('status',name='Проверка занятости' if ru else 'Availability check')).to_contain_text('по календарю' if ru else 'blocked calendar nights')
+                    calls = await page.evaluate('window.fixtureCalendarCalls')
+                    assert {call['p_property_id'] for call in calls} == {'synthetic-free','synthetic-blocked','synthetic-checkout'},calls
+                    assert all(call['name']=='get_property_unavailable_dates' and call['p_from']=='2026-11-20' and call['p_to']=='2026-11-25' for call in calls),calls
+                    await bounds()
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-calendar-filter.png'),full_page=True)
+                    await page.get_by_role('button',name='Сбросить всё' if ru else 'Clear all',exact=True).click()
+                    await expect(cards).to_have_count(3)
+                    reset_calendar = await query()
+                    assert not any(key in reset_calendar for key in ['checkIn','checkOut'])
+                    assert len(await page.evaluate('window.fixtureCalendarCalls')) == len(calls)
+                    await bounds()
                     assert not errors,errors
                     assert not blocked,blocked
                     results.append({'language':lang,'width':width,'hydration':'pass','inPlaceEdit':'pass','history':'pass',
-                        'visibleSearch':'pass','featureSheetSync':'pass','mapToggle':'pass','legacyRedirect':'pass','rentBuy':'pass','overflow':'none','externalRequests':0,'runtimeErrors':0})
+                        'calendarBlockedExcluded':'pass','calendarCheckoutAllowed':'pass','calendarReset':'pass','visibleSearch':'pass','featureSheetSync':'pass','mapToggle':'pass','legacyRedirect':'pass','rentBuy':'pass','overflow':'none','externalRequests':0,'runtimeErrors':0})
                 except Exception as error:
                     failure = {'language':lang,'width':width,'error':str(error),'blockedRequests':blocked,'runtimeErrors':errors}
                     try:
