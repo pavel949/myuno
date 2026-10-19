@@ -4,6 +4,8 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface Props {
   images: string[];
@@ -14,6 +16,7 @@ interface Props {
 
 export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Props) {
   const [index, setIndex] = useState(initialIndex);
+  const { language } = useLanguage();
 
   const goNext = useCallback(() => setIndex(i => (i + 1) % images.length), [images.length]);
   const goPrev = useCallback(() => setIndex(i => (i - 1 + images.length) % images.length), [images.length]);
@@ -56,7 +59,9 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
     >
       {/* Close button */}
       <button
-        onClick={onClose}
+        type="button"
+        aria-label={pickLang(language, { ru: 'Закрыть', en: 'Close', th: 'ปิด' })}
+        onClick={e => { e.stopPropagation(); onClose(); }}
         className="absolute top-4 right-4 z-10 p-2 rounded-full transition-colors"
         style={{ background: 'hsl(var(--nb-gold) / 0.2)', color: 'hsl(var(--nb-gold))' }}
       >
@@ -71,6 +76,7 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
       {/* Download */}
       {images[index] && (
         <a
+          aria-label={pickLang(language, { ru: 'Открыть фото', en: 'Open image', th: 'เปิดรูปภาพ' })}
           href={images[index]}
           target="_blank"
           rel="noopener noreferrer"
@@ -108,6 +114,8 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
       {images.length > 1 && (
         <>
           <button
+            type="button"
+            aria-label={pickLang(language, { ru: 'Предыдущее фото', en: 'Previous image', th: 'รูปภาพก่อนหน้า' })}
             onClick={e => { e.stopPropagation(); goPrev(); }}
             className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all "
             style={{ background: 'hsl(var(--nb-gold) / 0.2)', color: 'hsl(var(--nb-gold))' }}
@@ -115,6 +123,8 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
             <ChevronLeft className="w-6 h-6" />
           </button>
           <button
+            type="button"
+            aria-label={pickLang(language, { ru: 'Следующее фото', en: 'Next image', th: 'รูปภาพถัดไป' })}
             onClick={e => { e.stopPropagation(); goNext(); }}
             className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full transition-all "
             style={{ background: 'hsl(var(--nb-gold) / 0.2)', color: 'hsl(var(--nb-gold))' }}
@@ -130,6 +140,9 @@ export function NbLightbox({ images, initialIndex = 0, onClose, captions }: Prop
           {images.map((url, i) => (
             <button
               key={i}
+              type="button"
+              aria-label={pickLang(language, { ru: `Фото ${i + 1}`, en: `Image ${i + 1}`, th: `รูปภาพ ${i + 1}` })}
+              aria-current={i === index ? 'true' : undefined}
               onClick={e => { e.stopPropagation(); setIndex(i); }}
               className="flex-shrink-0 w-12 h-9 rounded-none overflow-hidden transition-all"
               style={{

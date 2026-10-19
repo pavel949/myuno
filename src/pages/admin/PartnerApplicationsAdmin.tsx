@@ -107,6 +107,7 @@ const statusConfig = {
 };
 
 const categoryLabels: Record<string, { ru: string; en: string }> = {
+  other: { ru: 'Другой бизнес', en: 'Other business' },
   services: { ru: 'Услуги', en: 'Services' },
   food: { ru: 'Еда и напитки', en: 'Food & Drinks' },
   beauty: { ru: 'Красота и спа', en: 'Beauty & Spa' },
