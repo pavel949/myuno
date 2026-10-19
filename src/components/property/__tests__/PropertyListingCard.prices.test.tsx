@@ -46,6 +46,11 @@ describe('public listing amount and billing period', () => {
     expect(screen.getByText('Price on request')).toBeVisible();
     expect(screen.queryByText('฿3000')).toBeNull();
   });
+  it('does not promote nightly rent to asking price for contradictory legacy sale-type rows', () => {
+    mount({ listing_type: 'sale', listing_modes: ['platform', 'rent', 'short'], sale_price: null, price: 14000, price_per_night: 14000 }, 'buy');
+    expect(screen.getByText('Price on request')).toBeVisible();
+    expect(screen.queryByText('฿14000')).toBeNull();
+  });
   it('preserves the legacy amount of an explicitly sale-only listing', () => {
     mount({ listing_type: 'sale', sale_price: null, price: 5000000 }, 'buy');
     expect(screen.getByText('฿5000000')).toBeVisible();

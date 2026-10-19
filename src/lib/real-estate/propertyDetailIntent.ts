@@ -34,7 +34,8 @@ function withGuestContext(href: string, mode: 'rent' | 'buy', search = ''): stri
 
 /** A rental amount is never a sale-price fallback for a dual-listed unit. */
 export function propertySaleAskingPrice(property: PropertyIntentFields & { sale_price?: number | null; price?: number | null }): number | null {
-  const amount = property.sale_price ?? (property.listing_type === 'sale' ? property.price : null);
+  const legacySaleOnly = property.listing_type === 'sale' && !property.listing_modes?.includes('rent');
+  const amount = property.sale_price ?? (legacySaleOnly ? property.price : null);
   return typeof amount === 'number' && Number.isFinite(amount) && amount > 0 ? amount : null;
 }
 

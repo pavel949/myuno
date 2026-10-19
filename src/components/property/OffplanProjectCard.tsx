@@ -232,6 +232,7 @@ export function OffplanProjectCard({
           
           <DeveloperBadge
             developerId={project.developerId}
+            showLink={project.developerProfileAvailable === true}
             developerName={project.developerName}
             developerLogo={project.developerLogo}
             isVerified={project.developerVerified}
