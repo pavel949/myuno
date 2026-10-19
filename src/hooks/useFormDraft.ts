@@ -1,5 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+const pendingFormFlushers = new Set<() => boolean>();
+
+/** Flush this canonical hook's pending local drafts without submitting anything. */
+export function flushPendingFormDrafts(): boolean {
+  let saved = true;
+  for (const flush of pendingFormFlushers) {
+    if (!flush()) saved = false;
+  }
+  return saved;
+}
+
 interface UseFormDraftOptions<T> {
   key: string;
   initialData: T;
@@ -33,45 +44,63 @@ export function useFormDraft<T extends object>({
   }, [storageKey, initialData]);
 
   const [formData, setFormData] = useState<T>(loadDraft);
-  const [hasDraft, setHasDraft] = useState(() => !!localStorage.getItem(storageKey));
+  const [hasDraft, setHasDraft] = useState(() => {
+    try { return !!localStorage.getItem(storageKey); } catch { return false; }
+  });
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Debounced save to localStorage
+  const latestDataRef = useRef(formData);
+  const initialSnapshotRef = useRef(initialSnapshot);
+  const pendingRef = useRef(false);
+  const mountedRef = useRef(false);
+  const clearedSnapshotRef = useRef<string | null>(null);
+  latestDataRef.current = formData;
+  initialSnapshotRef.current = initialSnapshot;
+
+  const flush = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (!pendingRef.current) return true;
+    try {
+      const snapshot = JSON.stringify(latestDataRef.current);
+      const isEmpty = snapshot === initialSnapshotRef.current;
+      if (isEmpty) localStorage.removeItem(storageKey);
+      else localStorage.setItem(storageKey, snapshot);
+      pendingRef.current = false;
+      if (mountedRef.current) {
+        setHasDraft(!isEmpty);
+        setLastSaved(isEmpty ? null : new Date());
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }, [storageKey]);
+
   useEffect(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // Mounting or resetting an empty form must not create a restorable draft.
-    if (JSON.stringify(formData) === initialSnapshot) {
-      try {
-        // Manual edits back to the baseline must also discard older saved input.
-        localStorage.removeItem(storageKey);
-        setHasDraft(false);
-        setLastSaved(null);
-      } catch {
-        // Silent fail for draft clearing
-      }
-      return;
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(formData));
-        setHasDraft(true);
-        setLastSaved(new Date());
-      } catch {
-        // Silent fail for draft saving
-      }
-    }, debounceMs);
-
+    mountedRef.current = true;
+    pendingFormFlushers.add(flush);
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      mountedRef.current = false;
+      flush();
+      pendingFormFlushers.delete(flush);
     };
-  }, [formData, initialSnapshot, storageKey, debounceMs]);
+  }, [flush]);
+
+  // Debounced save; explicit recovery can synchronously flush the latest input.
+  useEffect(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    const snapshot = JSON.stringify(formData);
+    if (snapshot === clearedSnapshotRef.current) return;
+    clearedSnapshotRef.current = null;
+    pendingRef.current = true;
+    if (snapshot === initialSnapshot) {
+      flush(); // Reset/empty forms must not create a restorable draft.
+    } else {
+      timeoutRef.current = setTimeout(flush, debounceMs);
+    }
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+  }, [formData, initialSnapshot, debounceMs, flush]);
 
   // Clear draft
   const clearDraft = useCallback(() => {
@@ -80,6 +109,8 @@ export function useFormDraft<T extends object>({
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    pendingRef.current = false;
+    clearedSnapshotRef.current = JSON.stringify(latestDataRef.current);
     localStorage.removeItem(storageKey);
     setHasDraft(false);
     setLastSaved(null);
