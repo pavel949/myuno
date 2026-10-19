@@ -57,7 +57,7 @@ describe('one residential results surface', () => {
   it('applies minimum bedrooms and restores the primary selector through history and reset', () => {
     mount('/property/search?f.bedrooms=studio&source=bookmark');
     fireEvent.keyDown(screen.getByRole('combobox', { name: 'Bedrooms' }), { key: 'Enter' });
-    fireEvent.click(screen.getByRole('option', { name: '2+', exact: true }));
+    fireEvent.click(screen.getByRole('option', { name: '2+' }));
     fireEvent.submit(screen.getByRole('form'));
     expect(state.filters.minBedrooms).toBe(2);
     expect(state.filters.bedrooms).toBeUndefined();
