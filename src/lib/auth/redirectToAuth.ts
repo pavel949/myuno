@@ -21,17 +21,25 @@ export function currentAppPath(): string {
   return `${pathname}${search}${hash}` || APP_ROUTES.HOME;
 }
 
-/** Same-origin sanitising: never hand an external URL to the auth page. */
-function sanitize(from: string | undefined): string {
-  const raw = from ?? currentAppPath();
+/** Normalize legacy router Location state as well as URL/string return paths. */
+export function sanitizeAuthReturnPath(from: unknown, origin = window.location.origin): string {
+  let raw: string;
+  if (typeof from === 'string') raw = from;
+  else if (from && typeof from === 'object' && 'pathname' in from && typeof from.pathname === 'string') {
+    const location = from as { pathname: string; search?: unknown; hash?: unknown };
+    raw = `${location.pathname}${typeof location.search === 'string' ? location.search : ''}${typeof location.hash === 'string' ? location.hash : ''}`;
+  } else return APP_ROUTES.HOME;
+
   try {
-    const parsed = new URL(raw, window.location.origin);
-    if (parsed.origin !== window.location.origin) return APP_ROUTES.HOME;
+    const parsed = new URL(raw, origin);
+    if (parsed.origin !== origin || parsed.pathname === '/auth' || parsed.pathname.startsWith('/auth/')) return APP_ROUTES.HOME;
     return `${parsed.pathname}${parsed.search}${parsed.hash}` || APP_ROUTES.HOME;
   } catch {
-    return raw.startsWith('/') ? raw : APP_ROUTES.HOME;
+    return APP_ROUTES.HOME;
   }
 }
+
+const sanitize = (from: string | undefined): string => sanitizeAuthReturnPath(from ?? currentAppPath());
 
 /** Build the `/auth` URL carrying the return path in `?redirect=`. */
 export function buildAuthPath(options: RedirectToAuthOptions = {}): string {

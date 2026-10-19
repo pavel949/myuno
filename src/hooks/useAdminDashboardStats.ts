@@ -1,6 +1,8 @@
+import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
+import { pendingModeration } from '@/lib/adminModeration';
 
 export interface DashboardStats {
   providers: number;
@@ -33,8 +35,8 @@ export interface DashboardStats {
   totalBookings: number;
   pendingBookings: number;
   // Moderation
-  pendingProperties: number;
-  pendingContent: number;
+  pendingProperties: number | null;
+  pendingContent: number | null;
   // Support
   openTickets: number;
   // Inbox sources (commit 3 — Action Inbox)
@@ -45,8 +47,10 @@ export interface DashboardStats {
 }
 
 export function useAdminDashboardStats() {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: ['admin-dashboard-stats'],
+    enabled: !!user,
+    queryKey: ['admin-dashboard-stats', user?.id],
     queryFn: async (): Promise<DashboardStats> => {
       const countOptions = { count: 'exact' as const, head: false };
       
@@ -108,8 +112,8 @@ export function useAdminDashboardStats() {
         pendingManualPaymentsRes,
         unpaidOrdersRes,
       ] = await Promise.all([
-        supabase.from('properties').select('id', countOptions).eq('approval_status', 'pending').limit(1),
-        supabase.from('listings').select('id', countOptions).eq('approval_status', 'pending').limit(1),
+        pendingModeration((column, value) => supabase.from('properties').select('id', { count: 'exact', head: true }).eq(column, value)).is('deleted_at', null),
+        pendingModeration((column, value) => supabase.from('listings').select('id', { count: 'exact', head: true }).eq(column, value)),
         supabase.from('support_tickets').select('id', countOptions).in('status', ['open', 'in_progress']).limit(1),
         supabase.from('disputes').select('id', countOptions).eq('status', 'open').limit(1),
         supabase.from('partner_applications').select('id', countOptions).eq('status', 'pending').limit(1),
@@ -124,9 +128,10 @@ export function useAdminDashboardStats() {
         supabase.from('bookings').select('id', countOptions).eq('status', 'submitted').limit(1),
       ]);
 
-      const pendingProperties = pendingPropertiesRes.count || 0;
-      const pendingListings = pendingListingsRes.count || 0;
-      const totalPendingContent = pendingProperties + pendingListings;
+      const pendingProperties = pendingPropertiesRes.error ? null : pendingPropertiesRes.count;
+      const pendingListings = pendingListingsRes.error ? null : pendingListingsRes.count;
+      const totalPendingContent = pendingProperties !== null && pendingListings !== null
+        ? pendingProperties + pendingListings : null;
 
       return {
         providers: providersRes.count || 0,

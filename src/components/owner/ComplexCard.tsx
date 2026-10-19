@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { COMPLEX_TYPES } from '@/lib/complexConstants';
+import { pickLang } from '@/lib/i18n/pickLang';
 import type { PropertyComplex } from '@/hooks/usePropertyComplexes';
 
 interface ComplexCardProps {
@@ -13,6 +14,7 @@ interface ComplexCardProps {
 export function ComplexCard({ complex, onClick }: ComplexCardProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const text = (en: string, ru: string, th: string) => pickLang(language, { en, ru, th });
   
   const typeLabel = COMPLEX_TYPES.find(t => t.value === complex.complex_type);
   const amenityCount = (complex.amenities?.length || 0) + (complex.services?.length || 0);
@@ -22,6 +24,10 @@ export function ComplexCard({ complex, onClick }: ComplexCardProps) {
     <Card 
       className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden border-border/50 hover:border-primary/30"
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-label={isRu ? complex.name_ru || complex.name : complex.name}
+      onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onClick(); } }}
     >
       {/* Cover Image */}
       <div className="relative h-40 bg-muted overflow-hidden">
@@ -38,7 +44,7 @@ export function ComplexCard({ complex, onClick }: ComplexCardProps) {
         )}
         {typeLabel && (
           <Badge variant="secondary" className="absolute top-3 left-3 bg-background/90 text-xs">
-            {isRu ? typeLabel.labelRu : typeLabel.labelEn}
+            {pickLang(language, { en: typeLabel.labelEn, ru: typeLabel.labelRu, th: typeLabel.labelTh })}
           </Badge>
         )}
       </div>
@@ -68,13 +74,13 @@ export function ComplexCard({ complex, onClick }: ComplexCardProps) {
           {complex.total_units && (
             <span className="flex items-center gap-1">
               <Home className="h-3.5 w-3.5" />
-              {complex.total_units} {isRu ? 'юнитов' : 'units'}
+              {complex.total_units} {text('units', 'юнитов', 'ยูนิต')}
             </span>
           )}
           {complex.total_buildings && (
             <span className="flex items-center gap-1">
               <Layers className="h-3.5 w-3.5" />
-              {complex.total_buildings} {isRu ? 'корп.' : 'bldg'}
+              {complex.total_buildings} {text('bldg', 'корп.', 'อาคาร')}
             </span>
           )}
           {complex.year_built && (
@@ -90,13 +96,13 @@ export function ComplexCard({ complex, onClick }: ComplexCardProps) {
           {amenityCount > 0 && (
             <Badge variant="outline" className="text-xs gap-1 font-normal">
               <Sparkles className="h-3 w-3" />
-              {amenityCount} {isRu ? 'удобств' : 'amenities'}
+              {amenityCount} {text('amenities', 'удобств', 'สิ่งอำนวยความสะดวก')}
             </Badge>
           )}
           {securityCount > 0 && (
             <Badge variant="outline" className="text-xs gap-1 font-normal">
               <Shield className="h-3 w-3" />
-              {securityCount} {isRu ? 'безоп.' : 'security'}
+              {securityCount} {text('security', 'безоп.', 'ระบบความปลอดภัย')}
             </Badge>
           )}
         </div>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { sanitizeAuthReturnPath } from '@/lib/auth/redirectToAuth';
+import { postAuthDestination } from '@/lib/auth/postAuthDestination';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Gift, Phone, ChevronLeft } from 'lucide-react';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
@@ -67,6 +69,8 @@ export default function Auth() {
     redirectToLoginOnClose: boolean;
   }>({ open: false, userId: null, expectedPhone: null, report: null, error: null, emailConfirmationRequired: false, redirectToLoginOnClose: false });
   const SHOW_FORGOT_AFTER = 3;
+  const [routingError, setRoutingError] = useState(false);
+  const [routingAttempt, setRoutingAttempt] = useState(0);
 
   const { user, signIn, signUp, isLoading: authLoading } = useAuth();
   const { t, language } = useLanguage();
@@ -74,7 +78,7 @@ export default function Auth() {
   const location = useLocation();
   const isRu = language === 'ru';
   const isTh = language === 'th';
-  const { activeRole } = useUserContext();
+  const { activeRole, availableRoles, hasMCMembership, switchContext, isLoading: userContextLoading } = useUserContext();
   const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
 
   // Bible-v2 audit B3: parse sessionStorage payload `{ path, ts }` and ignore
@@ -99,21 +103,12 @@ export default function Auth() {
     }
   }, []);
 
-  const rawRedirect = (location.state as { from?: string })?.from ||
+  const rawRedirect = (location.state as { from?: unknown })?.from ||
     searchParams.get('redirect') ||
     storedOAuthRedirect ||
     APP_ROUTES.HOME;
 
-  const redirectPath = React.useMemo(() => {
-    if (!rawRedirect) return APP_ROUTES.HOME;
-    try {
-      const parsed = new URL(rawRedirect, window.location.origin);
-      if (parsed.origin !== window.location.origin) return APP_ROUTES.HOME;
-      return `${parsed.pathname}${parsed.search}${parsed.hash}` || APP_ROUTES.HOME;
-    } catch {
-      return rawRedirect.startsWith('/') ? rawRedirect : APP_ROUTES.HOME;
-    }
-  }, [rawRedirect]);
+  const redirectPath = React.useMemo(() => sanitizeAuthReturnPath(rawRedirect), [rawRedirect]);
 
   const oauthRedirectUrl = React.useMemo(
     () => new URL(redirectPath, window.location.origin).toString(),
@@ -121,8 +116,9 @@ export default function Auth() {
   );
 
   useEffect(() => {
-    if (!user || authLoading) return;
+    if (!user || authLoading || userContextLoading || ownerTypeLoading) return;
     let cancelled = false;
+    setRoutingError(false);
 
     (async () => {
       // Mandatory account-type step: a user without `primary_role` has never
@@ -131,14 +127,16 @@ export default function Auth() {
       // /auth/account-type first and carry the intended destination along.
       let needsAccountType = false;
       try {
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('primary_role')
           .eq('id', user.id)
           .maybeSingle();
+        if (error) throw error;
         needsAccountType = !profile?.primary_role;
       } catch {
-        needsAccountType = false;
+        if (!cancelled) setRoutingError(true);
+        return;
       }
       if (cancelled) return;
 
@@ -146,31 +144,22 @@ export default function Auth() {
         window.sessionStorage.removeItem('myuno_post_auth_redirect');
       }
 
-      if (needsAccountType) {
-        const target = redirectPath !== APP_ROUTES.HOME
-          ? `${APP_ROUTES.AUTH_ACCOUNT_TYPE}?redirect=${encodeURIComponent(redirectPath)}`
-          : APP_ROUTES.AUTH_ACCOUNT_TYPE;
-        navigate(target, { replace: true });
-        return;
+      const destination = postAuthDestination({ redirectPath, activeRole, availableRoles, hasMCMembership, needsAccountType, isMCPortal });
+      if (destination.activateRole) {
+        try {
+          // Existing, server-validated context selection; this grants no role or
+          // membership. Never derive employee authority from invite metadata.
+          await switchContext({ role: destination.activateRole });
+        } catch {
+          if (!cancelled) setRoutingError(true);
+          return;
+        }
       }
-
-      if (redirectPath !== APP_ROUTES.HOME) {
-        navigate(redirectPath, { replace: true });
-        return;
-      }
-      if (ownerTypeLoading) return;
-      const dest =
-        activeRole === 'vendor' ? '/vendor'
-        : activeRole === 'investor' ? '/invest'
-        : (activeRole === 'owner' || activeRole === 'property_manager')
-          ? (isMCPortal ? '/my-property' : '/mc')
-        : isMCPortal ? '/my-property'
-        : '/';
-      navigate(dest, { replace: true });
+      if (!cancelled) navigate(destination.path, { replace: true });
     })();
 
     return () => { cancelled = true; };
-  }, [user, authLoading, ownerTypeLoading, navigate, redirectPath, activeRole, isMCPortal]);
+  }, [user, authLoading, userContextLoading, ownerTypeLoading, navigate, redirectPath, activeRole, availableRoles, hasMCMembership, switchContext, isMCPortal, routingAttempt]);
 
   // OAuth callback error surfacing — `/auth/callback` renders this same page and
   // relies on Supabase auto session-detection. When the provider returns an
@@ -465,6 +454,12 @@ export default function Auth() {
   // already authenticated (the redirect effect will fire on the next tick).
   // Previously this was `authLoading && user` which never both held true at
   // the same time, briefly flashing the form to logged-in users.
+  if (user && routingError) {
+    return <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center" role="alert">
+      <p>{isTh ? 'ตรวจสอบบัญชีหรือเปิดพื้นที่ทำงานไม่สำเร็จ กรุณาลองอีกครั้ง' : isRu ? 'Не удалось проверить аккаунт или открыть рабочий кабинет. Повторите попытку.' : 'Could not check your account or open your workspace. Please try again.'}</p>
+      <PremiumButton onClick={() => setRoutingAttempt(value => value + 1)}>{isTh ? 'ลองอีกครั้ง' : isRu ? 'Повторить' : 'Retry'}</PremiumButton>
+    </div>;
+  }
   if (authLoading || user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
