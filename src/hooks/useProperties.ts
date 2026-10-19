@@ -242,7 +242,7 @@ const PAGE_SIZE = 20;
  * Using explicit columns instead of select('*') reduces payload ~60%.
  */
 const PROPERTY_LIST_COLUMNS = `
-  id, title_en, title_ru, property_type, listing_type,
+  id, title_en, title_ru, property_type, listing_type, listing_modes,
   price, price_per_night, price_period, currency, bedrooms, bathrooms, area_sqm,
   max_guests, amenities, equipment, images, cover_image, address, district,
   lat, lng, is_active, is_featured, is_verified, instant_booking,
