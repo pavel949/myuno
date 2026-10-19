@@ -66,8 +66,8 @@ describe('atomic property-order review candidate', () => {
   async function create(input: { type?: string; start?: string | null; end?: string | null; items?: unknown } = {}): Promise<Result> {
     const [row] = await sql`SELECT create_order_atomic(
       p_order_type := ${input.type ?? 'property'}, p_customer_user_id := ${actor},
-      p_start_at := ${input.start === undefined ? start : input.start},
-      p_end_at := ${input.end === undefined ? end : input.end}, p_total_amount := 9000,
+      p_start_at := ${input.start === undefined ? start : input.start}::text::timestamptz,
+      p_end_at := ${input.end === undefined ? end : input.end}::text::timestamptz, p_total_amount := 9000,
       p_items := ${sql.json((input.items === undefined ? items : input.items) as postgres.JSONValue)},
       p_participants := '[{"role":"guest","name":"Synthetic Guest"}]'::jsonb,
       p_payment_method := 'stripe', p_payment_amount := 900) AS result`;
