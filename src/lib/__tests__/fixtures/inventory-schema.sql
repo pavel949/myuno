@@ -9,7 +9,7 @@ CREATE TABLE property_bookings (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(), property_id uuid, owner_id uuid,
   guest_name text, guest_phone text, guest_email text, guests_count int,
   check_in date, check_out date, total_amount numeric, currency text, source text,
-  external_id text UNIQUE, status text, notes text, deposit_amount numeric,
+  external_id text UNIQUE, order_id uuid, status text, notes text, deposit_amount numeric,
   created_at timestamptz, updated_at timestamptz
 );
 -- Exact predicate and half-open range verified on live production 2026-10-17.
