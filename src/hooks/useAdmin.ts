@@ -38,7 +38,7 @@ const QUERY_KEYS = {
 export function useAdminProviders() {
   const queryClient = useQueryClient();
 
-  const { data: providers = [], isLoading } = useQuery({
+  const { data: providers = [], isLoading, isFetching, error } = useQuery({
     queryKey: QUERY_KEYS.providers,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -103,7 +103,7 @@ export function useAdminProviders() {
     return { error };
   }, [invalidate]);
 
-  return { providers, isLoading, createProvider, updateProvider, deleteProvider, refetch: invalidate };
+  return { providers, isLoading, isFetching, error, createProvider, updateProvider, deleteProvider, refetch: invalidate };
 }
 
 // ============= useAdminServices =============

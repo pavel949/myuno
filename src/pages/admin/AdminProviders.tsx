@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -90,7 +90,7 @@ export default function AdminProviders() {
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { isAdmin, isLoading: adminLoading } = useAdminCheck();
-  const { providers, isLoading: providersLoading, createProvider, updateProvider, deleteProvider } = useAdminProviders();
+  const { providers, isLoading: providersLoading, isFetching: providersFetching, error: providersError, createProvider, updateProvider, deleteProvider } = useAdminProviders();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
@@ -99,8 +99,7 @@ export default function AdminProviders() {
 
   // URL-persisted filter + search so navigating away (provider detail
   // page) and back keeps the admin's view intact. Same search-params
-  // hook also drives the legacy `?action=new` open-on-load behaviour
-  // wired in the useEffect below.
+  // hook also drives one-shot `?action=new` and `?edit=id` dialog commands.
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
   const filter = (searchParams.get('filter') as 'all' | 'active' | 'verified' | 'inactive') || 'all';
@@ -149,13 +148,6 @@ export default function AdminProviders() {
 
   const isRussian = language === 'ru';
 
-  // Open dialog if action=new in URL
-  useEffect(() => {
-    if (searchParams.get('action') === 'new') {
-      setIsDialogOpen(true);
-    }
-  }, [searchParams]);
-
   useEffect(() => {
     if (!authLoading && !user) {
       navigate(APP_ROUTES.AUTH);
@@ -168,7 +160,7 @@ export default function AdminProviders() {
     }
   }, [isAdmin, adminLoading, user, navigate]);
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData({
       name: '',
       description_en: '',
@@ -188,9 +180,9 @@ export default function AdminProviders() {
       service_domains: [],
     });
     setEditingProvider(null);
-  };
+  }, []);
 
-  const openEditDialog = (provider: Provider) => {
+  const openEditDialog = useCallback((provider: Provider) => {
     setEditingProvider(provider);
     setFormData({
       name: provider.name || '',
@@ -212,7 +204,35 @@ export default function AdminProviders() {
       service_domains: (provider as any).service_domains || [],
     });
     setIsDialogOpen(true);
-  };
+  }, []);
+
+  // Consume one-shot dialog commands only after the existing admin gate and
+  // provider collection are ready. A URL ID never fetches or authorizes a row.
+  useEffect(() => {
+    if (authLoading || adminLoading || !user || !isAdmin || providersLoading) return;
+    const editId = searchParams.get('edit');
+    const createNew = searchParams.get('action') === 'new';
+    if (editId === null && !createNew) return;
+
+    if (editId !== null) {
+      // Cached rows are not the completed result of an in-flight refresh.
+      if (providersFetching) return;
+      const provider = providers.find(item => item.id === editId);
+      if (providersError) toast.error(isRussian ? 'Не удалось загрузить провайдеров. Попробуйте ещё раз.' : 'Could not load providers. Please try again.');
+      else if (provider) openEditDialog(provider);
+      else toast.error(isRussian ? 'Провайдер не найден или недоступен' : 'Provider not found or unavailable');
+    } else {
+      resetForm();
+      setIsDialogOpen(true);
+    }
+
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      next.delete('edit');
+      if (createNew) next.delete('action');
+      return next;
+    }, { replace: true });
+  }, [authLoading, adminLoading, user, isAdmin, providersLoading, providersFetching, providersError, providers, searchParams, isRussian, openEditDialog, resetForm, setSearchParams]);
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.business_category) {

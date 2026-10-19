@@ -25,7 +25,7 @@ interface AdminOrderDetailSheetProps {
 type OrderParticipant = { id: string; name: string | null; phone: string | null; email: string | null; role: string };
 type OrderAddress = { id: string; address_type: string; address_text: string; notes: string | null };
 type OrderItem = { id: string; item_name: string; item_type: string | null; qty: number | null; unit_price: number | null; amount: number; metadata: unknown };
-type OrderMetadata = { payment_method?: string } | null;
+type OrderMetadata = { payment_method?: unknown } | null;
 
 const ORDER_TYPE_EMOJI: Record<string, string> = {
   restaurant: '🍽️', flowers: '💐', yacht: '🛥️', tour: '🗺️',
@@ -129,14 +129,12 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
     const dropoff = order.order_addresses?.find((a: OrderAddress) => a.address_type === 'dropoff');
     const serviceAddr = order.order_addresses?.find((a: OrderAddress) => a.address_type === 'service');
     const emoji = ORDER_TYPE_EMOJI[order.order_type] || '📦';
-    const paymentMethod = (order.metadata as OrderMetadata)?.payment_method || 'cash';
-    const paymentLabel = t(`admin.orders.detail.payment.${paymentMethod}`);
 
     const lines = [
       `${emoji} ${t('admin.orders.detail.order').toUpperCase()} #${order.order_number || order.id.slice(0, 8)}`,
       `${t('admin.orders.col.type')}: ${order.order_type}`,
       `${t('admin.orders.col.amount')}: ${order.total_amount} ${order.currency || 'THB'}`,
-      `${t('admin.orders.detail.payment')}: ${paymentLabel}`,
+      `${t('admin.orders.detail.paymentMethod')}: ${paymentLabel}`,
       '',
       `👤 ${t('admin.orders.detail.customer')}:`,
       primary?.name || order._profile?.full_name || t('admin.orders.detail.guest'),
@@ -170,7 +168,12 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
   const status = (order?.status || 'pending') as OrderStatus;
   const statusCfg = ORDER_STATUS_CONFIG[status] || ORDER_STATUS_CONFIG.pending;
   const primary = order?.order_participants?.find((p: OrderParticipant) => p.role === 'primary');
-  const paymentMethod = (order?.metadata as OrderMetadata)?.payment_method || 'cash';
+  const paymentMethod = (order?.metadata as OrderMetadata)?.payment_method;
+  const paymentLabel = typeof paymentMethod === 'string' && paymentMethod.trim()
+    ? (['cash', 'wallet', 'stripe', 'bank_transfer', 'concierge_advance'].includes(paymentMethod)
+      ? t(`admin.orders.detail.payment.${paymentMethod}`)
+      : paymentMethod)
+    : t('admin.orders.detail.payment.unknown');
 
   const statusActions: StatusAction[] = [];
   if (status === 'pending') {
@@ -278,7 +281,7 @@ export function AdminOrderDetailSheet({ orderId, onClose, onStatusChanged }: Adm
                   <span>{order.total_amount} {order.currency || 'THB'}</span>
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {t('admin.orders.detail.payment')}: {t(`admin.orders.detail.payment.${paymentMethod}`)}
+                  {t('admin.orders.detail.paymentMethod')}: {paymentLabel}
                 </div>
               </div>
             </div>

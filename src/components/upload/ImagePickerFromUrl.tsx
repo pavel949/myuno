@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2, Search, Check, ExternalLink, Globe, CheckCircle2, Circle } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { mediaModalClasses, type MediaModalLayer } from './shared/mediaModalLayer';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ImageItem {
@@ -29,6 +30,7 @@ interface ImagePickerFromUrlProps {
   onSelect: (images: ExternalImageResult[]) => void;
   maxImages?: number;
   currentCount?: number;
+  modalLayer?: MediaModalLayer;
 }
 
 // Generate proxy URL for Yandex Disk previews
@@ -41,7 +43,8 @@ export function ImagePickerFromUrl({
   onOpenChange,
   onSelect,
   maxImages = 20,
-  currentCount = 0
+  currentCount = 0,
+  modalLayer,
 }: ImagePickerFromUrlProps) {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -349,7 +352,8 @@ export function ImagePickerFromUrl({
     </div>
   );
 
-  if (isMobile) {
+  // A nested sheet uses the same Radix dialog stack on every viewport.
+  if (isMobile && modalLayer !== 'above-sheet') {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[90vh]">
@@ -372,8 +376,11 @@ export function ImagePickerFromUrl({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[95vw] h-[85vh] max-h-[900px] flex flex-col p-6">
-        <DialogHeader>
+      <DialogContent
+        overlayClassName={mediaModalClasses(modalLayer).overlayClassName}
+        className={cn("max-w-4xl w-[95vw] h-[85dvh] max-h-[900px] flex flex-col p-4 sm:p-6 [&>button]:z-20", mediaModalClasses(modalLayer).className)}
+      >
+        <DialogHeader className="shrink-0 pr-6">
           <DialogTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5" />
             Загрузить фото с сайта
