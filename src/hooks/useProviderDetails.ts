@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ProviderDetails {
@@ -76,6 +77,10 @@ export interface ProviderBooking {
 }
 
 export function useProviderDetails(providerId: string | null, visibility: 'private' | 'public' = 'private') {
+  const { user } = useAuth();
+  const actor = visibility === 'private' ? user?.id : null;
+  const scope = `${visibility}:${providerId ?? ''}:${actor ?? ''}`;
+  const [resultScope, setResultScope] = useState<string | null>(null);
   const [provider, setProvider] = useState<ProviderDetails | null>(null);
   const [services, setServices] = useState<ProviderService[]>([]);
   const [products, setProducts] = useState<ProviderProduct[]>([]);
@@ -87,6 +92,7 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
   const generation = useRef(0);
   const fetchProviderDetails = useCallback(async () => {
     const request = ++generation.current;
+    setResultScope(scope);
     const current = () => request === generation.current;
     setProvider(null);
     setServices([]);
@@ -94,7 +100,7 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
     setContracts([]);
     setBookings([]);
     setError(null);
-    if (!providerId) {
+    if (!providerId || (visibility === 'private' && !actor)) {
       setProvider(null);
       setServices([]);
       setProducts([]);
@@ -198,7 +204,7 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
     } finally {
       if (current()) setIsLoading(false);
     }
-  }, [providerId, visibility]);
+  }, [providerId, visibility, actor, scope]);
 
   useEffect(() => {
     void fetchProviderDetails();
@@ -206,13 +212,13 @@ export function useProviderDetails(providerId: string | null, visibility: 'priva
   }, [fetchProviderDetails]);
 
   return {
-    provider,
-    services,
-    products,
-    contracts,
-    bookings,
-    isLoading,
-    error,
+    provider: resultScope === scope ? provider : null,
+    services: resultScope === scope ? services : [],
+    products: resultScope === scope ? products : [],
+    contracts: resultScope === scope ? contracts : [],
+    bookings: resultScope === scope ? bookings : [],
+    isLoading: resultScope === scope ? isLoading : !!providerId && (visibility === 'public' || !!actor),
+    error: resultScope === scope ? error : null,
     refetch: fetchProviderDetails,
   };
 }

@@ -2,7 +2,8 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useProviderDetails } from './useProviderDetails';
 
-const fixture = vi.hoisted(() => ({ read: vi.fn(), selects: [] as string[] }));
+const fixture = vi.hoisted(() => ({ read: vi.fn(), actor: 'admin' as string | null, selects: [] as string[] }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: fixture.actor ? { id: fixture.actor } : null }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: string) => {
   let id = '';
   const q = {
@@ -17,6 +18,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: (table: str
 const provider = (id: string) => ({ data: { id, name: id }, error: null });
 const service = { id: 'offering', name_en: 'Synthetic service', price: null, currency: 'EUR', duration_minutes: 90, lead_time_hours: 6, booking_flow: 'in_app_request' };
 beforeEach(() => {
+  fixture.actor = 'admin';
   fixture.selects.length = 0;
   fixture.read.mockReset().mockImplementation((table: string, id: string) => table.includes('provider_catalog') || table === 'providers'
     ? provider(id) : { data: table.includes('service_catalog') ? [service] : [], error: null });
@@ -57,4 +59,16 @@ describe('provider framework read contract', () => {
     expect(result.current.bookings[0]).toMatchObject({ id: 'canonical-request', status: 'confirmed', total_amount: 0, currency: 'USD' });
     expect(fixture.selects.some(s => s.startsWith('bookings:'))).toBe(false);
   });
+  it('immediately clears private state on sign-out and does not fetch unauthenticated private data', async () => {
+    const { result, rerender } = renderHook(() => useProviderDetails('supplier'));
+    await waitFor(() => expect(result.current.provider?.id).toBe('supplier'));
+    fixture.actor = null;
+    fixture.read.mockClear();
+    rerender();
+    expect(result.current.provider).toBeNull();
+    expect(result.current.bookings).toEqual([]);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(fixture.read).not.toHaveBeenCalled();
+  });
+
 });
