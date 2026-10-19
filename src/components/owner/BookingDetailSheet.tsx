@@ -56,7 +56,7 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle 
       size="md"
     >
       <div className="flex items-center gap-2">
-        <Badge variant={status.variant}>{isRu ? status.labelRu : status.label}</Badge>
+        <Badge role="status" aria-label={isRu ? 'Статус бронирования' : 'Booking status'} variant={status.variant}>{isRu ? status.labelRu : status.label}</Badge>
       </div>
 
       {/* Dates */}

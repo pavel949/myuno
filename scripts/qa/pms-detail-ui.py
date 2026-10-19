@@ -34,7 +34,9 @@ async def main():
                     options = await page.evaluate('window.historyOptions')
                     assert options == {'table': 'order_status_history', 'bookingId': 'synthetic-order', 'enabled': True}, options
                     label = ('Неизвестный статус: future_status' if language == 'ru' else 'Unknown status: future_status') if state == 'error' else ('Выехал' if language == 'ru' else 'Checked out')
-                    await expect(dialog.get_by_text(label, exact=True)).to_be_visible()
+                    status = dialog.get_by_role('status', name='Статус бронирования' if language == 'ru' else 'Booking status', exact=True)
+                    await expect(status).to_have_text(label)
+                    await expect(status).to_be_visible()
                     await expect(dialog.get_by_text('0 (валюта неизвестна)' if language == 'ru' else '0 (currency unavailable)', exact=True)).to_be_visible()
                     if state == 'error':
                         await expect(dialog.get_by_role('alert')).to_be_visible()
