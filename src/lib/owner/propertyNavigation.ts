@@ -32,3 +32,14 @@ export function propertyContextBackPath(returnTo: string | null, propertyId: str
     return fallback;
   }
 }
+
+/** Request forms return only to a property still in the selectable collection.
+ * No URL-provided destination can change the fixed management route. */
+export function propertyRequestReturnPath(
+  propertyId: string,
+  properties: readonly { property_id: string }[],
+  loading: boolean,
+): string {
+  const selected = accessiblePropertySelection(propertyId, properties, loading, 'first');
+  return selected ? `/mc/properties/${encodeURIComponent(selected)}` : '/mc';
+}

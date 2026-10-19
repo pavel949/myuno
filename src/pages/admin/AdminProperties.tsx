@@ -46,7 +46,7 @@ function useIsManagementCompanyId(id: string) {
 
 export default function AdminProperties() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const { code: cityCurrencyCode } = useCityCurrency();
@@ -128,9 +128,13 @@ export default function AdminProperties() {
     setEditingProperty(null);
     // Don't reset selectedProviderId — it'll be set fresh on next open
     if (searchParams.has('edit')) {
-      navigate('/admin/properties', { replace: true });
+      setSearchParams(previous => {
+        const next = new URLSearchParams(previous);
+        next.delete('edit');
+        return next;
+      }, { replace: true });
     }
-  }, [navigate, searchParams, selectedProviderId]);
+  }, [searchParams, setSearchParams, selectedProviderId]);
 
   // Convert VendorProperty to CanonicalPropertyFormData for editing
   const getInitialFormData = useCallback((): CanonicalPropertyFormData => {
@@ -569,9 +573,12 @@ export default function AdminProperties() {
         )}
 
         {/* Canonical Property Form Sheet */}
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetContent className="w-full sm:max-w-2xl overflow-y-auto max-h-screen flex flex-col">
-            <SheetHeader>
+        <Sheet open={isSheetOpen} onOpenChange={open => { if (!open) closeSheet(); }}>
+          <SheetContent
+            className="flex h-dvh max-h-dvh w-full flex-col overflow-hidden p-4 sm:max-w-2xl sm:p-6 [&>button]:z-30"
+            closeLabel={isRussian ? 'Закрыть редактор' : 'Close editor'}
+          >
+            <SheetHeader className="relative z-20 shrink-0 bg-background pr-10">
               <SheetTitle>
                 {editingProperty 
                   ? (isRussian ? 'Редактировать объект' : 'Edit Property')
@@ -579,7 +586,7 @@ export default function AdminProperties() {
               </SheetTitle>
             </SheetHeader>
             
-            <div className="mt-6 flex-1 overflow-y-auto min-h-0">
+            <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
               <CanonicalPropertyForm
                 key={editingProperty?.id || 'new'}
                 initialData={getInitialFormData()}
@@ -587,6 +594,8 @@ export default function AdminProperties() {
                 onCancel={closeSheet}
                 isSubmitting={isSubmitting}
                 mode="admin"
+                layout="contained"
+                mediaModalLayer="above-sheet"
                 propertyId={editingProperty?.id}
                 extraTabs={editingProperty?.id ? [{
                   id: 'stay-rules',

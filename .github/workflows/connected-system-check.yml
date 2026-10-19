@@ -88,6 +88,8 @@ jobs:
           browser_failed=0
           mkdir -p /tmp/browser
           for fixture in \
+            scripts/qa/property-editor-ui.mjs \
+            scripts/qa/pms-dashboard-ui.mjs \
             scripts/qa/services-discovery-ui.mjs \
             scripts/qa/trip-planner-ui.mjs \
             scripts/qa/unified-property-search-ui.mjs \

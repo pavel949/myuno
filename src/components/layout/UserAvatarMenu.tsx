@@ -120,7 +120,7 @@ function orderSwitchable(roles: AppRole[], order: AppRole[]): AppRole[] {
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export function UserAvatarMenu() {
+export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { user, signOut } = useAuth();
@@ -285,14 +285,16 @@ export function UserAvatarMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
+          aria-label={isRu ? 'Меню аккаунта' : 'Account menu'}
           className={cn(
             "flex items-center gap-2 h-10 pl-3 pr-1.5 rounded-full",
+            compact && "h-11 w-11 justify-center p-0 md:w-auto md:pl-3 md:pr-1.5",
             "border border-border/60 bg-background hover:shadow-md",
             "transition-all duration-200 cursor-pointer",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           )}
         >
-          <Menu className="w-4 h-4 text-foreground/70" />
+          <Menu className={cn("w-4 h-4 text-foreground/70", compact && "hidden md:block")} />
           <div className="relative">
             <Avatar className="h-7 w-7">
               <AvatarImage src={avatarUrl} alt={userName} />

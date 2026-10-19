@@ -3,16 +3,18 @@ import { Badge } from '@/components/ui/badge';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 import { useLanguage } from '@/contexts/LanguageContext';
+import type { MediaModalLayer } from '@/components/upload/shared/mediaModalLayer';
 import { Camera, Star } from 'lucide-react';
 
 interface PhotosStepProps {
+  modalLayer?: MediaModalLayer;
   formData: PropertyFormData;
   updateFormData: (updates: Partial<PropertyFormData>) => void;
 }
 
 const RECOMMENDED_COUNT = 5;
 
-export function PhotosStep({ formData, updateFormData }: PhotosStepProps) {
+export function PhotosStep({ formData, updateFormData, modalLayer }: PhotosStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -100,6 +102,7 @@ export function PhotosStep({ formData, updateFormData }: PhotosStepProps) {
         <CardContent className="pt-6">
           <UnifiedMediaUploader
             mode="gallery"
+            modalLayer={modalLayer}
             value={allImages}
             onChange={handleImagesChange}
             folder="property-care"
