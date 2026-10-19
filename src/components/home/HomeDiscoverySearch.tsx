@@ -15,6 +15,8 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
   const initial = readPropertySearchQuery(initialParams ?? new URLSearchParams());
   const { language } = useLanguage();
   const guestsId = useId();
+  const queryId = useId();
+  const [query, setQuery] = useState(initialParams?.get('q') || '');
   const t = (v: LangValues) => pickLang(language, v);
   const { districts, isLoading } = usePropertyQuickFilters();
   const { propertyTypes, isLoading: typesLoading } = usePropertyFilterOptions();
@@ -39,6 +41,8 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
     const params = new URLSearchParams(initialParams);
     for (const key of ['district', 'types', 'f.district', 'f.propertyType', 'f.listingType']) params.delete(key);
     params.set('mode', mode);
+    params.delete('q');
+    if (query.trim()) params.set('q', query.trim());
     if (district) params.set('district', district);
     if (propertyType) params.set('types', propertyType);
     // The existing catalogue consumes Date instants. Use shared civil-date parsing,
@@ -63,6 +67,10 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
           </button>
         ))}
       </div>}
+      <label className="home-search-query" htmlFor={queryId}>
+        <span className="home-field-label">{t({ ru: 'Название объекта', en: 'Property name', th: 'ชื่อที่พัก' })}</span>
+        <input id={queryId} aria-label={t({ ru: 'Название объекта', en: 'Property name', th: 'ชื่อที่พัก' })} type="search" value={query} maxLength={120} onChange={event => setQuery(event.target.value)} placeholder={t({ ru: 'Введите название виллы или квартиры', en: 'Type a villa or apartment name', th: 'พิมพ์ชื่อวิลล่าหรืออพาร์ตเมนต์' })} />
+      </label>
       <div className="home-search-type">
         <span className="home-field-label">{t({ ru: 'Тип жилья', en: 'Home type', th: 'ประเภทที่พัก' })}</span>
         <Select value={propertyType || '__all'} onValueChange={value => setPropertyType(value === '__all' ? '' : value)} disabled={typesLoading}>

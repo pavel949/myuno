@@ -80,3 +80,7 @@
 
 /* Canonical catalogue search supports both intents, unlike the stay-only journey. */
 .property-search-editor .home-search-modes{display:flex}
+
+/* Shared property-name input on home and catalogue search. */
+.home-search-query{grid-column:1/-1;display:block;min-width:0}
+.home-search .home-search-query input{min-height:44px;padding:8px 12px;border:1px solid hsl(var(--border));background:hsl(var(--background));color:hsl(var(--foreground));font-size:16px}
