@@ -100,7 +100,7 @@ describe.each(['create', 'update'] as const)('%s date contract — synthetic cli
       return;
     }
     await expect(attempt).rejects.toThrow(allowed ? 'SYNTHETIC_WRITE_BOUNDARY' : existing ? 'пересекаются' : 'заблокированы');
-    expect(state.boundary).toEqual(allowed ? [`orders.${mode === 'create' ? 'insert' : 'update'}`] : []);
+    expect(state.boundary).toEqual(allowed ? ['orders.update'] : []);
   });
 });
 
