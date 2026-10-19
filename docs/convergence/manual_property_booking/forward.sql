@@ -119,6 +119,12 @@ BEGIN
     END IF;
     replayed := true;
   ELSE
+    -- A caller-selected retry UUID cannot claim an existing imported/orphaned
+    -- inventory row merely because it already uses that external/order ID.
+    IF EXISTS(SELECT 1 FROM public.property_bookings
+      WHERE external_id=p_request_id::text OR order_id=p_request_id) THEN
+      RAISE EXCEPTION 'manual_booking_inventory_identity_conflict' USING ERRCODE='22023';
+    END IF;
     IF EXISTS(SELECT 1 FROM public.property_availability WHERE property_id=p_property_id
       AND status='blocked' AND date>=arrival AND date<departure) THEN
       RAISE EXCEPTION 'property_dates_blocked' USING ERRCODE='23P01';

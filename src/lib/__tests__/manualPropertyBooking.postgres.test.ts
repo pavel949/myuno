@@ -191,6 +191,14 @@ describe('checked manual unpaid property booking / real PostgreSQL',()=>{
     await sql`INSERT INTO orders(id,order_type,status,customer_user_id) VALUES (${request},'property','confirmed',${actor})`;
     await expect(create()).rejects.toThrow('duplicate key');expect((await counts()).receipts).toBe(0);
   });
+  it('does not adopt an imported inventory row through a caller-selected retry UUID',async()=>{
+    await sql`INSERT INTO property_bookings(property_id,check_in,check_out,status,guest_name,external_id)
+      VALUES (${room},'2026-11-10','2026-11-13','confirmed','Original imported guest',${request})`;
+    await expect(create()).rejects.toThrow('manual_booking_inventory_identity_conflict');
+    const [original]=await sql`SELECT guest_name,external_id FROM property_bookings`;
+    expect(original).toEqual({guest_name:'Original imported guest',external_id:request});
+    expect(await counts()).toEqual({orders:0,bookings:1,items:0,guests:0,receipts:0,alerts:0,intents:0});
+  });
   it.each([{total_amount:-1},{total_amount:'NaN'},{total_amount:'Infinity'},{deposit_amount:'NaN'},
     {check_in:'2026-02-30'},{check_out:'2026-11-10'},{check_in:'infinity'},{check_in_time:'24:00'},
     {guests_count:0},{guests_count:1.5},{currency:''},{status:'paid'},{payment_status:'paid'},
