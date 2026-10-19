@@ -742,7 +742,7 @@ export default function AdminServices() {
                         <SelectTrigger id="service-flow"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="in_app_request">{isRussian ? 'Заявка с подтверждением исполнителя' : 'Request confirmed by provider'}</SelectItem>
-                          <SelectItem value="instant">{isRussian ? 'Мгновенная запись по свободному времени' : 'Instant booking in available time'}</SelectItem>
+                          <SelectItem value="instant" disabled>{isRussian ? 'Мгновенная запись — пока недоступна' : 'Instant booking — not available yet'}</SelectItem>
                           {!['in_app_request', 'instant'].includes(formData.booking_flow) && <SelectItem value={formData.booking_flow}>{isRussian ? 'Ранее настроенный способ' : 'Previously configured mode'}</SelectItem>}
                         </SelectContent>
                       </Select>

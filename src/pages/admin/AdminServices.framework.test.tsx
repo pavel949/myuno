@@ -24,7 +24,7 @@ describe('supplier service configuration', () => {
   mount();
   fireEvent.change(screen.getByLabelText('Name (EN) *'), { target: { value: 'Synthetic repair' } });
   fireEvent.change(screen.getByLabelText('Currency'), { target: { value: 'USD' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Save', exact: true }));
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }));
   await waitFor(() => expect(f.success).toHaveBeenCalledWith('Service created'));
   expect(f.create).toHaveBeenCalledOnce();
   expect(f.create.mock.calls[0][0]).toMatchObject({ provider_id: 'supplier', name_en: 'Synthetic repair', price: null, currency: 'USD', duration_minutes: null, approval_status: 'approved', booking_flow: 'in_app_request' });
@@ -36,14 +36,14 @@ describe('supplier service configuration', () => {
   fireEvent.change(screen.getByLabelText('Name (EN) *'), { target: { value: 'Synthetic inspection' } });
   fireEvent.change(screen.getByLabelText('Price (blank for a quote)'), { target: { value: '0' } });
   fireEvent.change(screen.getByLabelText('Duration (min)'), { target: { value: '90' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Save', exact: true }));
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }));
   await waitFor(() => expect(f.create).toHaveBeenCalledOnce());
   expect(f.create.mock.calls[0][0]).toMatchObject({ price: 0, duration_minutes: 90 });
  });
  it('keeps the editor and entered values when the server refuses a save', async () => {
   f.create.mockResolvedValue({ error: new Error('Denied') }); mount();
   fireEvent.change(screen.getByLabelText('Name (EN) *'), { target: { value: 'Synthetic retained' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Save', exact: true }));
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }));
   await waitFor(() => expect(f.error).toHaveBeenCalledWith('Error saving service'));
   expect(screen.getByLabelText('Name (EN) *')).toHaveValue('Synthetic retained');
   expect(f.success).not.toHaveBeenCalled();
@@ -52,7 +52,7 @@ describe('supplier service configuration', () => {
   let resolve!: (v: unknown) => void;
   f.create.mockImplementation(() => new Promise(r => { resolve = r; })); mount();
   fireEvent.change(screen.getByLabelText('Name (EN) *'), { target: { value: 'Synthetic once' } });
-  const save = screen.getByRole('button', { name: 'Save', exact: true });
+  const save = screen.getByRole('button', { name: 'Save' });
   fireEvent.click(save); fireEvent.click(save);
   expect(f.create).toHaveBeenCalledOnce();
   await act(async () => resolve({ data: { id: 'new-service' }, error: null }));
