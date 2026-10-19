@@ -63,7 +63,7 @@ describe('app-shell cleanup boundary', () => {
     vi.stubGlobal('navigator', { onLine: true, serviceWorker: { getRegistrations: async () => [ours, other, otherScope, foreign] } });
     const precache = `workbox-precache-v2-${location.origin}/`;
     const keys = [precache, 'myuno-assets', 'myuno-images', 'google-fonts', 'business-outbox', `workbox-precache-v2-${location.origin}/other/`];
-    const deleteCache = vi.fn(async () => true);
+    const deleteCache = vi.fn<CacheStorage['delete']>().mockResolvedValue(true);
     vi.stubGlobal('caches', { keys: async () => keys, delete: deleteCache });
     sessionStorage.setItem('booking_draft:synthetic', 'keep draft');
     sessionStorage.setItem('auth_flow', 'keep session context');
