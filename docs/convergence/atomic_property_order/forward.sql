@@ -31,8 +31,12 @@ BEGIN
   END IF;
   -- Equal property/dates do not prove that a legacy or imported booking belongs
   -- to this order. Existing explicit links still upsert through external_id.
-  bridge_definition := replace(bridge_definition, adoption,
-    '  -- Never adopt an unlinked stay by matching dates alone.' || chr(10));
+  bridge_definition := replace(bridge_definition, adoption, $explicit_link$  -- Preserve an existing explicit legacy order link; equal dates alone never
+  -- authorize adoption. Ambiguous links fail rather than choosing a record.
+  UPDATE public.property_bookings SET external_id = NEW.id::text
+  WHERE order_id = NEW.id AND property_id = v_property_id AND external_id IS NULL
+    AND NOT EXISTS (SELECT 1 FROM public.property_bookings pb2 WHERE pb2.external_id = NEW.id::text);
+$explicit_link$);
   bridge_definition := replace(bridge_definition, '(NEW.start_at::timestamptz)::date',
     '(NEW.start_at AT TIME ZONE ''Asia/Bangkok'')::date');
   bridge_definition := replace(bridge_definition, '(NEW.end_at::timestamptz)::date',

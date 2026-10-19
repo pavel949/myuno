@@ -115,6 +115,19 @@ describe('atomic property-order review candidate', () => {
     expect(await counts()).toEqual({ orders: 0, items: 0, guests: 0, intents: 0, history: 0, bookings: 1, alerts: 0 });
   });
 
+  it('preserves an explicit legacy order_id link without duplicating or adopting by dates', async () => {
+    const [order] = await sql`INSERT INTO orders(order_type,status,start_at,end_at,total_amount,currency,metadata)
+      VALUES ('property','confirmed',${start},${end},9000,'THB','{}') RETURNING id`;
+    await sql`INSERT INTO order_participants(order_id,role,name) VALUES (${order.id},'guest','Original Guest')`;
+    const [legacy] = await sql`INSERT INTO property_bookings(property_id,check_in,check_out,status,guest_name,order_id)
+      VALUES (${room},'2026-11-10','2026-11-13','confirmed','Original Guest',${order.id}) RETURNING id`;
+    await sql`INSERT INTO order_items(order_id,item_type,resource_id) VALUES (${order.id},'property',${room})`;
+    const [booking] = await sql`SELECT id,order_id,external_id,guest_name,status FROM property_bookings`;
+    expect(booking).toEqual({ id: legacy.id, order_id: order.id, external_id: order.id, guest_name: 'Original Guest', status: 'confirmed' });
+    expect((await create()).success).toBe(false);
+    expect((await counts()).bookings).toBe(1);
+  });
+
   it('allows the next arrival on checkout day', async () => {
     expect((await create()).success).toBe(true);
     expect((await create({ start: end, end: '2026-11-15T12:00:00Z' })).success).toBe(true);
@@ -201,7 +214,8 @@ describe('atomic property-order review candidate', () => {
     expect((await create({ type: 'service', items: [], start: null, end: null })).success).toBe(true);
     expect((await counts()).bookings).toBe(0);
     const [bridge] = await sql`SELECT pg_get_functiondef('trg_sync_order_to_property_booking()'::regprocedure) AS definition`;
-    expect(bridge.definition).not.toContain('UPDATE property_bookings SET external_id');
+    expect(bridge.definition).toContain('WHERE order_id = NEW.id');
+    expect(bridge.definition).not.toContain('WHERE external_id IS NULL AND property_id');
   });
 });
 

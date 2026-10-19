@@ -34,6 +34,8 @@ commercial order with one explicitly linked active inventory hold, or return
 - Reject already stored manual blocks over `[check_in, check_out)`.
 - Never adopt an unlinked/imported stay merely because its dates match. A
   conflicting legacy row stays intact and requires explicit reconciliation.
+- Preserve existing explicit legacy `order_id` links to the same order/property;
+  never infer a link from a calendar label or a supposed guest identity.
 - Use explicit `Asia/Bangkok` dates in the existing bridge, independent of the
   SQL session timezone. Preserve lifecycle status mapping and explicit links.
 - Re-run that bridge after participants exist, then verify the exact order,
@@ -62,6 +64,14 @@ to test the predecessor and canonical inventory rules separately.
 Command: `npm test -- --run src/lib/__tests__/propertyInventory.postgres.test.ts`.
 Exact commit, results and CI links belong in the PR description; test source
 alone is not a passing result or production acceptance.
+
+Read-only provenance follow-up: of 61 active holds lacking `external_id`, 60
+already have explicit legacy `order_id` links and come from the active Airbnb
+iCal calendar. They are imported date blocks; paid/real-guest status is not
+established by that source. The remaining direct record has the explicit
+`TEST_BOOKABLE_LOOP` / AI smoke-test marker. None was changed or deleted. This
+distinction requires preserving legacy links, not treating all 61 as unlinked
+or automatically classifying every imported block as a real reservation.
 
 ## Activation blockers and bounded acceptance
 
