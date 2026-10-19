@@ -168,7 +168,7 @@ INIT = """(() => {
 async def main():
     if not ARGS.run_browser:
         raise SystemExit('Browser gate not executed. Pass --run-browser only in an authorized environment.')
-    from playwright.async_api import async_playwright, expect
+    from playwright.async_api import async_playwright, expect, TimeoutError as PlaywrightTimeoutError
 
     results = RUN_RESULTS
     started = monotonic()
@@ -282,12 +282,34 @@ async def main():
                         await page.keyboard.press('Tab')
                         await page.keyboard.press('Shift+Tab')
                         await expect(control).to_be_focused()
-                        style = await control.evaluate(r'''el => {
+                        style_reader = r'''el => {
                             const s=getComputedStyle(el);
                             const ring=s.boxShadow.split(/,(?![^(]*\))/).some(shadow =>
                                 !/rgba\([^)]*,\s*0\)/.test(shadow) && /(?:[1-9]\d*|0\.[1-9]\d*)px/.test(shadow));
                             return {visible:el.matches(':focus-visible'), outline:s.outlineStyle,width:parseFloat(s.outlineWidth),color:s.outlineColor,shadow:s.boxShadow,ring};
-                        }''')
+                        }'''
+                        indicator_ready = r'''style => {
+                            const outline=!['none','hidden'].includes(style.outline) && style.width>=1 &&
+                                !['transparent','rgba(0, 0, 0, 0)'].includes(style.color);
+                            return style.visible && (outline || style.ring);
+                        }'''
+                        # Global button transitions can expose a zero-width/transparent
+                        # first frame even with reduced motion. Wait for the SAME
+                        # visible-indicator predicate, never an arbitrary delay.
+                        handle = await control.element_handle()
+                        assert handle is not None, 'Focus target detached before indicator readiness'
+                        try:
+                            await page.wait_for_function(
+                                f'el => document.activeElement===el && ({indicator_ready})(({style_reader})(el))',
+                                arg=handle, polling='raf', timeout=1000,
+                            )
+                        except PlaywrightTimeoutError as error:
+                            style = await control.evaluate(style_reader)
+                            raise AssertionError({'message': 'Visible keyboard focus indicator was not ready within 1000ms', 'case': case, 'style': style}) from error
+                        finally:
+                            await handle.dispose()
+                        await expect(control).to_be_focused()
+                        style = await control.evaluate(style_reader)
                         outline = style['outline'] not in ['none', 'hidden'] and style['width'] >= 1 and style['color'] not in ['transparent', 'rgba(0, 0, 0, 0)']
                         assert style['visible'] and (outline or style['ring']), style
 

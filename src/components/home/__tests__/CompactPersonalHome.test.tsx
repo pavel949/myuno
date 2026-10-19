@@ -60,6 +60,12 @@ describe('compact personal identity and actions', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Настроить главную' }));
     expect(open).toHaveBeenCalledOnce();
   });
+  it('keeps the preference focus ring immediate instead of animating all properties', () => {
+    render(<HomePreferencesEntry onOpen={vi.fn()} />, { wrapper });
+    const button = screen.getByRole('button', { name: 'Настроить главную' });
+    expect(button).toHaveClass('transition-colors', 'focus-visible:ring-2', 'focus-visible:ring-ring');
+    expect(button).not.toHaveClass('transition-all');
+  });
 });
 
 describe('personal and verified work navigation', () => {

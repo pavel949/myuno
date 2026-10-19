@@ -29,13 +29,13 @@ Exposure was the authenticated Home V2 composition, reached when `home_v2` was e
 
 ## Verification
 
-- After merging current main, 98 focused tests passed across 9 files: all home component tests, `useRoleSignals`, and the consumer-shell regression suite.
+- After merging current main and adding the immediate-focus regression, 99 focused tests passed across 9 files: all home component tests, `useRoleSignals`, and the consumer-shell regression suite.
 - After the PR124 main update, all 11 lightweight browser-runner contract tests passed without launching a browser. A structural workflow comparison confirmed that all 13 existing pre-enforcement steps, including the two-worker runner, remain unchanged.
 - Focused ESLint: passed with no errors or warnings on changed source/tests.
 - `git diff --check`: passed.
 - New synthetic fixture JS and production CSS compiled at `/tmp/browser/compact-personal-home-isolated`; JS/Python syntax checked. It bundles actual Index/IndexV2 and the changed first-screen components, stubs account reads/lower ancillary modules, and rejects production data modules.
-- The prepared fixture covers RU/EN/TH, 375/430/1280, personal/work audiences, remembered/revoked/cross-account destinations, loading/empty/error/live states, preference close/reopen, and action routing. Browser execution and screenshot/overflow checks have **not** been run because local browser/socket execution is blocked in this environment. Bundle compilation is not visual verification. Direct guest/V2 renders exercise component resilience, not the application's guest router or rollout authorization.
-- Full TypeScript is **CI-pending**: the initial default-heap attempt exhausted memory; the increased-heap attempt was killed by the environment (137), with no diagnostic output. A full Vite build was cancelled (130); its generated MCP file was restored. No full-check pass is claimed.
+- The prepared fixture covers RU/EN/TH, 375/430/1280, personal/work audiences, remembered/revoked/cross-account destinations, loading/empty/error/live states, preference close/reopen, and action routing. Local browser/socket execution remains blocked and was not retried; browser execution now runs in PR CI. Bundle compilation is not visual verification. Direct guest/V2 renders exercise component resilience, not the application's guest router or rollout authorization.
+- Initial local full TypeScript attempts exhausted memory or were killed (137); a full Vite attempt was cancelled (130), and its generated MCP file was restored. Full TypeScript, production build, all 3,340 tests and existing browser fixtures subsequently passed in the first PR126 CI run at `6a3c1f7`; the new home smoke did not pass in that run (see below). The amended head requires a fresh complete CI result.
 
 Required before release: full CI typecheck/build and browser execution of the isolated fixture, then normal code review. A separate Draft PR is authorized after PR124 merged into main. No remote merge or deployment is included in this task.
 
@@ -55,4 +55,10 @@ Default smoke plan: **36 render cases + 8 preference exercises + 12 access-bound
 - `node scripts/qa/compact-personal-home-ui.mjs --build-only` compiles only. An authorized browser run uses `--run-browser`; append `--exhaustive` for the optional full plan with a separate 1,200-second browser budget, outside the default CI fixture cap.
 - Successful reports require exact equality between executed and planned case IDs and include actual counts and elapsed time. Timeout/incomplete runs fail; they cannot silently shorten coverage. Build-only reports keep `browserValidation: not-run`.
 
-The no-browser smoke/exhaustive manifests and JavaScript/Python syntax checks passed locally. The final bundle/CSS compilation passed with zero production data modules. Browser assertions, screenshots and runtime remain unrun locally; full typecheck/build remain CI-pending.
+The no-browser smoke/exhaustive manifests and JavaScript/Python syntax checks passed locally. Bundle/CSS compilation passed with zero production data modules. Browser assertions, screenshots and runtime remain unrun locally; complete verification of each amended head remains a CI gate.
+
+## First CI focus correction
+
+The [first PR126 run](https://github.com/pavel949/myuno/actions/runs/39226982072) correctly failed final enforcement with `HOME_BROWSER=failure`; the step's post-`continue-on-error` conclusion must not be treated as its raw outcome. The smoke completed two render cases and then sampled a focused preference button before its computed ring was painted (1.433 seconds into the browser phase, not a runtime-cap failure). The [preserved evidence](https://github.com/pavel949/myuno/actions/runs/39226982072/artifacts/12176697150) includes the computed-style failure and a subsequently captured screenshot with a visible navy focus ring.
+
+The preference control now limits transitions to colors so its focus ring is immediate, matching the neighboring personal actions. The fixture waits for the computed visible-focus predicate within a bounded deadline and still requires `:focus-visible` plus a visible outline or ring. It does not skip a scenario, relax the predicate, accept a missing indicator or bypass enforcement. A fresh CI run and actual screenshot review are required before this correction is accepted.
