@@ -3,7 +3,7 @@
  * One shared app-style editor; all criteria are hydrated from the catalogue URL.
  */
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { Home, SlidersHorizontal, Loader2, Check, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,8 @@ const QUICK_FEATURE_IDS = ['walk_to_beach', 'private_pool', 'sea_view'];
 export default function PropertySearchPage() {
   const { language } = useLanguage();
   const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
   const [focusResults, setFocusResults] = useState(false);
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -52,6 +54,13 @@ export default function PropertySearchPage() {
   const queryKey = searchParamsUrl.toString();
   const state = useMemo(() => readPropertySearchQuery(new URLSearchParams(queryKey)), [queryKey]);
   const { mode: propertyMode, search: searchParams, filterValues, categories: categoryFilters } = state;
+  const priceBandUnavailable = propertyMode === 'rent' && state.tenancy !== 'short';
+  useEffect(() => {
+    if (!priceBandUnavailable || !searchParamsUrl.has('f.priceLevel')) return;
+    const params = new URLSearchParams(searchParamsUrl);
+    params.delete('f.priceLevel');
+    navigate({ search: params.toString(), hash: location.hash }, { replace: true });
+  }, [priceBandUnavailable, searchParamsUrl, navigate, location.hash]);
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
   const { selectedId: focusedId, select: selectFocused } = useMapListSync();
   const [showStickyCTA, setShowStickyCTA] = useState(false);
@@ -107,7 +116,7 @@ export default function PropertySearchPage() {
   // property type/district/party selection inside the advanced filter sheet.
   const advancedFilterConfig = useMemo<FilterConfig>(() => ({
     sections: [
-      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'listingType', 'guestsAtLeast', ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)),
+      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'listingType', 'guestsAtLeast', ...(priceBandUnavailable ? ['priceLevel'] : []), ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)),
       {
         id: 'guestFeatures', titleEn: 'Popular features', titleRu: 'Популярные удобства', type: 'multi',
         options: PROPERTY_DISCOVERY_FEATURE_IDS.flatMap(id => {
@@ -116,7 +125,7 @@ export default function PropertySearchPage() {
         }),
       },
     ],
-  }), [filterConfig, propertyMode]);
+  }), [filterConfig, propertyMode, priceBandUnavailable]);
   const advancedValues: FilterValues = { ...filterValues, guestFeatures: categoryFilters };
   if (propertyMode === 'buy') delete advancedValues.instantBooking;
 
@@ -257,7 +266,7 @@ export default function PropertySearchPage() {
             <UniversalFilter config={advancedFilterConfig} values={advancedValues} onChange={setAdvancedFilters} activeCount={advancedFilterCount}>
               <button type="button" className={cn('property-discovery-filter', advancedFilterCount > 0 && 'border-primary text-primary')}>
                 <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-                <span>{isRu ? 'Цена, спальни и удобства' : 'Price, bedrooms & amenities'}</span>
+                <span>{priceBandUnavailable ? (isRu ? 'Спальни и удобства' : language === 'th' ? 'ห้องนอนและสิ่งอำนวยความสะดวก' : 'Bedrooms & amenities') : (isRu ? 'Цена, спальни и удобства' : 'Price, bedrooms & amenities')}</span>
                 {advancedFilterCount > 0 && <span className="font-mono">({advancedFilterCount})</span>}
               </button>
             </UniversalFilter>
@@ -272,6 +281,7 @@ export default function PropertySearchPage() {
               })}
             </div>
           </div>
+          {priceBandUnavailable && <p role="note" className="text-body-sm text-muted-foreground">{isRu ? 'Цена уточняется для выбранного срока. Фильтр по цене недоступен; в карточках указан базовый тариф за соответствующий период.' : language === 'th' ? 'สอบถามราคาสำหรับระยะเวลาที่เลือก ตัวกรองราคายังไม่พร้อมใช้งาน การ์ดแสดงราคาเริ่มต้นตามช่วงเวลาที่ระบุ' : 'Confirm pricing for your chosen duration. Price filtering is unavailable; cards show the base rate for the labelled period.'}</p>}
           {categoryFilters.filter(id => !QUICK_FEATURE_IDS.includes(id)).length > 0 && <div className="flex flex-wrap gap-2" aria-label={isRu ? 'Выбранные особенности' : 'Selected features'}>
             {categoryFilters.filter(id => !QUICK_FEATURE_IDS.includes(id)).map(id => {
               const feature = PROPERTY_FEATURE_MAP.get(id);

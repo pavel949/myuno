@@ -6,7 +6,7 @@ import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
-import { bangkokTodayISO, parseCivilDate, civilDateKey } from '@/lib/hotelDates';
+import { bangkokTodayISO, civilDateKey } from '@/lib/hotelDates';
 import { readPropertySearchQuery } from '@/lib/propertySearchQuery';
 import { HomeSearchDateRange } from './HomeSearchDateRange';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,12 +21,12 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
   const { districts, isLoading } = usePropertyQuickFilters();
   const { propertyTypes, isLoading: typesLoading } = usePropertyFilterOptions();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<'rent' | 'buy'>(initial.mode);
+  const [mode, setMode] = useState<'rent' | 'buy'>(rentalOnly ? 'rent' : initial.mode);
   const [district, setDistrict] = useState(initial.search.locations.join(','));
   const [propertyType, setPropertyType] = useState(initial.search.propertyTypes.join(','));
   const [checkIn, setCheckIn] = useState(initial.search.checkIn ? civilDateKey(initial.search.checkIn) : '');
   const [checkOut, setCheckOut] = useState(initial.search.checkOut ? civilDateKey(initial.search.checkOut) : '');
-  const [guests, setGuests] = useState(String(initial.search.guests));
+  const [guests, setGuests] = useState(initial.hasGuestFilter ? String(initial.search.guests) : '');
   const [tenancy, setTenancy] = useState<string>(initial.tenancy);
   const today = bangkokTodayISO();
   const [dateError, setDateError] = useState(false);
@@ -45,14 +45,15 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
     if (query.trim()) params.set('q', query.trim());
     if (district) params.set('district', district);
     if (propertyType) params.set('types', propertyType);
-    // The existing catalogue consumes Date instants. Use shared civil-date parsing,
-    // then serialize local midnight, preserving dates in its existing URL contract.
+    // Stay dates are civil dates, not instants. Shared/bookmarked URLs must keep
+    // the selected calendar days when opened in a different time zone.
     if (mode === 'rent') {
       for (const key of ['checkIn', 'checkOut', 'guests', 'f.guestsAtLeast']) params.delete(key);
       params.set('tenancy', tenancy);
-      if (checkIn) params.set('checkIn', parseCivilDate(checkIn).toISOString());
-      if (checkOut) params.set('checkOut', parseCivilDate(checkOut).toISOString());
-      params.set('guests', guests);
+      if (tenancy !== 'short') params.delete('f.priceLevel');
+      if (checkIn) params.set('checkIn', checkIn);
+      if (checkOut) params.set('checkOut', checkOut);
+      if (guests) params.set('guests', guests);
     }
     if (onSearch) onSearch(params);
     else navigate(`${APP_ROUTES.PROPERTY_SEARCH}?${params.toString()}`);
@@ -101,7 +102,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
         <HomeSearchDateRange checkIn={checkIn} checkOut={checkOut} onChange={(start, end) => { setCheckIn(start); setCheckOut(end); setDateError(false); }} />
         <label className="home-search-guests" htmlFor={guestsId}><Users size={18} aria-hidden="true" /><span>
           <span className="home-field-label">{t({ ru: 'Гости', en: 'Guests', th: 'ผู้เข้าพัก' })}</span>
-          <input id={guestsId} type="number" min="1" max="50" required value={guests} onChange={e => setGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
+          <input id={guestsId} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Не указано', en: 'Any number', th: 'ไม่ระบุ' })} value={guests} onChange={e => setGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
         </span></label>
       </>}
       {mode === 'rent' && dateError && <p role="alert" className="col-span-full text-sm text-destructive">{t({ ru: 'Выберите даты заезда и выезда. Выезд должен быть позже заезда.', en: 'Choose check-in and check-out dates. Check-out must be after check-in.', th: 'เลือกวันเช็กอินและเช็กเอาต์ โดยวันเช็กเอาต์ต้องอยู่หลังวันเช็กอิน' })}</p>}

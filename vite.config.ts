@@ -4,6 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 import { deploymentMetadataPlugin } from "./scripts/vite-deployment-metadata";
+import { assetCacheWillUpdate } from "./scripts/asset-cache-response-guard";
 import { version } from "./package.json";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
@@ -219,6 +220,7 @@ export default defineConfig(({ mode, command }) => {
               handler: 'StaleWhileRevalidate',
               options: {
                 cacheName: 'myuno-assets',
+                plugins: [{ cacheWillUpdate: assetCacheWillUpdate }],
                 expiration: { maxEntries: 250, maxAgeSeconds: 60 * 60 * 24 * 30 },
               },
             },

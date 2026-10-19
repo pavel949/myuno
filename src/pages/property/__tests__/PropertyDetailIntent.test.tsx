@@ -103,6 +103,14 @@ describe('actual property detail purchase/rental intent', () => {
   it('rejects a rental URL intent on a sale-only unit', () => { state.property.listing_type = 'sale'; state.property.listing_modes = ['sale']; mount('rent'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); });
   it('rejects a purchase intent on a rental-only unit', () => { state.property.is_for_sale = false; state.property.listing_modes = ['rent']; mount('buy'); expect(screen.getByRole('button', { name: 'Book rental' })).toBeInTheDocument(); });
   it('keeps inquiry for an eligible legacy sale without displaying the rental amount as its asking price', () => { state.property.sale_price = null; mount('buy'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); expect(screen.getAllByText('Price on request')).toHaveLength(2); });
+  it('does not promote a nightly amount to sale price when legacy sale type conflicts with explicit rent modes', () => {
+    state.property.listing_type = 'sale';
+    state.property.listing_modes = ['platform', 'rent', 'short'];
+    state.property.sale_price = null;
+    mount('buy');
+    expect(screen.getAllByText('Price on request')).toHaveLength(2);
+    expect(screen.queryByText('2000')).toBeNull();
+  });
   it('uses legacy price only for a pure sale listing with absent sale_price', () => {
     expect(propertySaleAskingPrice({ listing_type: 'sale', sale_price: null, price: 7500000 })).toBe(7500000);
     expect(propertySaleAskingPrice({ listing_type: 'rent', is_for_sale: true, sale_price: null, price: 2000 })).toBeNull();

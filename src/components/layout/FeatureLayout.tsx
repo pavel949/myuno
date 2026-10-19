@@ -338,7 +338,8 @@ function MiniappMode({
           noindex={seoNoindex}
         />
       )}
-      <div className="sticky top-[var(--consumer-header-height,0px)] z-40">
+      {/* Keep catalog controls in normal flow: the shared consumer header owns sticky navigation. */}
+      <div className="relative">
         <UnifiedHeader
           title={title}
           subtitle={subtitle}

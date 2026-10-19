@@ -1,3 +1,4 @@
+import { propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
 import type { Property } from '@/hooks/useProperties';
 
 export type PropertySortKey =
@@ -13,12 +14,10 @@ export type PropertySortKey =
 export function getEffectivePropertySortPrice(
   property: Property,
   mode: 'rent' | 'buy'
-): number {
-  const isSale = mode === 'buy' || property.listing_type === 'sale';
-  if (isSale) {
-    return property.sale_price ?? property.price ?? 0;
-  }
-  return property.price_per_night ?? property.price ?? 0;
+): number | null {
+  if (mode === 'buy') return propertySaleAskingPrice(property);
+  const positive = (value: number | null | undefined) => typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+  return positive(property.price_per_night) ?? positive(property.price);
 }
 
 /** Stable comparison for property grids — rent uses nightly rate, buy uses asking price. */
@@ -30,9 +29,14 @@ export function comparePropertiesForSort(
 ): number {
   switch (sortKey) {
     case 'price_asc':
-      return getEffectivePropertySortPrice(a, mode) - getEffectivePropertySortPrice(b, mode);
-    case 'price_desc':
-      return getEffectivePropertySortPrice(b, mode) - getEffectivePropertySortPrice(a, mode);
+    case 'price_desc': {
+      const aPrice = getEffectivePropertySortPrice(a, mode);
+      const bPrice = getEffectivePropertySortPrice(b, mode);
+      // Unknown is not a free home: keep request-only prices after known amounts.
+      if (aPrice === null) return bPrice === null ? 0 : 1;
+      if (bPrice === null) return -1;
+      return sortKey === 'price_asc' ? aPrice - bPrice : bPrice - aPrice;
+    }
     case 'rating':
       return (b.rating || 0) - (a.rating || 0);
     case 'newest':

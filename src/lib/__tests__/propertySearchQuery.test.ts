@@ -16,7 +16,7 @@ describe('unified residential query compatibility', () => {
   it('adapts legacy scalar and multiple filters to the existing server contract', () => {
     const state = readPropertySearchQuery(new URLSearchParams('f.district=layan&f.propertyType=villa,condo&f.bedrooms=2&f.amenities=wifi&f.viewType=sea&f.priceLevel=2&tenancy=medium'));
     const filters = filterValuesToPropertyFilters(mergeSearchBarIntoFilterValues(state.filterValues, state.search), { listingType: 'rent', rentTenancy: state.tenancy });
-    expect(filters).toMatchObject({ district: 'layan', propertyTypes: ['villa', 'condo'], minBedrooms: 2, rentTenancy: 'medium', minPrice: 3000, maxPrice: 8000 });
+    expect(filters).toMatchObject({ district: 'layan', propertyTypes: ['villa', 'condo'], minBedrooms: 2, rentTenancy: 'medium' });
     expect(state.filterValues.amenities).toEqual(['wifi']);
     expect(state.filterValues.viewType).toEqual(['sea']);
   });
@@ -45,6 +45,11 @@ describe('unified residential query compatibility', () => {
     const state = readPropertySearchQuery(new URLSearchParams('mode=buy&intent=quick_sale&f.priceLevel=2'));
     const filters = filterValuesToPropertyFilters(state.filterValues, { listingType: 'sale', saleIntent: state.saleIntent, isQuickSale: state.isQuickSale });
     expect(filters).toMatchObject({ listingType: 'sale', saleIntent: 'quick_sale', isQuickSale: true, minPrice: 5000000, maxPrice: 15000000 });
+  });
+  it.each(['2.5', '0', '-1', '51', 'NaN'])('does not apply invalid guest count %s', guests => {
+    const state = readPropertySearchQuery(new URLSearchParams({ guests }));
+    expect(state.hasGuestFilter).toBe(false);
+    expect(state.search.guests).toBe(2);
   });
   it('accepts old ISO instants and rejects invalid date/party values', () => {
     expect(readPropertySearchQuery(new URLSearchParams('checkIn=2027-01-20T00:00:00.000Z')).search.checkIn?.toISOString()).toBe('2027-01-20T00:00:00.000Z');

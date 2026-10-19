@@ -17,12 +17,12 @@ export function readPropertySearchQuery(params: URLSearchParams) {
   };
   const rawGuests = params.get('guests') ?? legacy.filterValues.guestsAtLeast;
   const guests = Number(rawGuests ?? 2);
-  const hasGuestFilter = rawGuests != null && Number.isFinite(guests) && guests >= 1 && guests <= 50;
+  const hasGuestFilter = rawGuests != null && Number.isSafeInteger(guests) && guests >= 1 && guests <= 50;
   const search: SearchParams = {
     locations: pick('district', 'district'), propertyTypes: pick('types', 'propertyType'),
     bedrooms: pick('bedrooms', 'bedrooms'), amenities: list(params.get('amenities')),
     checkIn: date('checkIn'), checkOut: date('checkOut'),
-    guests: Number.isFinite(guests) && guests >= 1 && guests <= 50 ? guests : 2,
+    guests: Number.isSafeInteger(guests) && guests >= 1 && guests <= 50 ? guests : 2,
     instantBooking: params.has('instant') ? params.get('instant') === '1' : legacy.filterValues.instantBooking === 'yes',
   };
   // Core criteria have one owner/editor; legacy keys remain in URL until edited.

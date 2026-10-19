@@ -87,7 +87,8 @@ async def main():
                     selected = await page.get_by_test_id('location').text_content()
                     params = parse_qs(selected.split('?', 1)[1])
                     assert params['mode'] == ['rent'] and params['district'] == ['layan'] and params['types'] == ['villa'], params
-                    assert params['checkIn'] == ['2026-10-20T00:00:00.000Z'] and params['checkOut'] == ['2026-10-25T00:00:00.000Z'], params
+                    assert params['checkIn'] == ['2026-10-20'] and params['checkOut'] == ['2026-10-25'], params
+                    assert 'guests' not in params, params
                     await page.get_by_role('button', name='Покупка' if ru else 'Buy', exact=True).click()
                     await expect(trigger).to_have_count(0)
                     await page.get_by_role('button', name='Найти жильё' if ru else 'Find a home', exact=True).click()
