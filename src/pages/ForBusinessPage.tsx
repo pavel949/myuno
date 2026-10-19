@@ -374,7 +374,7 @@ export default function ForBusinessPage() {
   const isRu = language === 'ru';
 
   return (
-    <AppLayout>
+    <AppLayout usePageContainer={false}>
       <Helmet>
         <html lang={language} />
         <title>{t(UI.metaTitle)}</title>
@@ -391,8 +391,8 @@ export default function ForBusinessPage() {
       <div className="min-h-screen bg-background">
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-16 md:py-24 px-4">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+        <section className="relative overflow-hidden py-10 md:py-16 px-4">
+
           <div className="relative max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -403,7 +403,7 @@ export default function ForBusinessPage() {
                 <Building2 className="w-3.5 h-3.5" />
                 {t(UI.heroBadge)}
               </Badge>
-              <h1 className="text-3xl md:text-5xl font-bold font-display tracking-tight mb-4">
+              <h1 className="text-3xl md:text-5xl font-display font-semibold tracking-tight mb-4">
                 {t(UI.heroTitle)}
               </h1>
               <p className="text-muted-foreground text-base md:text-lg mb-8">
@@ -446,7 +446,7 @@ export default function ForBusinessPage() {
           <p className="text-center text-muted-foreground mb-8 text-sm">
             {t(UI.servicesHint)}
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {SERVICES.map((s, i) => {
               const isOn = selected.has(s.key);
               const title = t(s.title);

@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 /**
  * OffplanDetail - Detailed view of an off-plan project
  * Shows gallery, developer info, myUNO scoring, investment metrics
@@ -150,7 +151,7 @@ export default function OffplanDetail() {
   };
 
   return (
-    <>
+    <div className="public-commerce public-commerce--project">
       <SEOHead
         title={seoTitle}
         description={seoDescription}
@@ -195,7 +196,7 @@ export default function OffplanDetail() {
             <StatusIcon className="w-3 h-3" />
             {isRu ? status.label.ru : status.label.en}
           </Badge>
-          <h1 className="text-2xl font-bold text-white mb-1">{name}</h1>
+          <h1 className="public-commerce-title text-white mb-1">{name}</h1>
           {project.district && (
             <div className="flex items-center gap-1 text-white/80 text-sm">
               <MapPin className="w-4 h-4" />
@@ -205,7 +206,7 @@ export default function OffplanDetail() {
         </div>
       </div>
 
-      <div className="px-4 py-4 pb-32 space-y-6">
+      <div className="px-4 py-6 pb-32 space-y-8 sm:px-6">
         {/* Published report is the sole public assessment source. */}
         <div id="clearview-report" className="scroll-mt-24">
           <ClearViewReport projectId={project.id} publicView />
@@ -460,6 +461,6 @@ export default function OffplanDetail() {
           onSuccess={() => setShowLeadForm(false)}
         />
       </ResponsiveModal>
-    </>
+    </div>
   );
 }

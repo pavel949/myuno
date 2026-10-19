@@ -220,8 +220,8 @@ export default function TermsPage() {
   ];
 
   return (
-    <AppLayout>
-      <PageContainer>
+    <AppLayout usePageContainer={false}>
+      <PageContainer className="max-w-4xl">
         <PageHeader 
           title={isRu ? 'Условия использования' : 'Terms of Use'} 
           showBack 

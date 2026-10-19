@@ -121,7 +121,7 @@ const ForOwnersPage: React.FC = () => {
     : 'Manage your Phuket property yourself with myUNO PMS or hand it over to us. Reports, guests, cleaning, finance — one workspace.';
 
   return (
-    <AppLayout>
+    <AppLayout usePageContainer={false}>
       <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />
@@ -134,7 +134,7 @@ const ForOwnersPage: React.FC = () => {
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
             {isRu ? 'Для собственников и УК' : 'For owners & MCs'}
           </p>
-          <h1 className="text-[32px] sm:text-[42px] font-serif font-semibold leading-[1.05] tracking-[-0.02em] text-foreground">
+          <h1 className="text-[32px] sm:text-[42px] font-display font-semibold leading-[1.05] tracking-[-0.02em] text-foreground">
             {isRu ? 'Ваша недвижимость — под контролем.' : 'Your property — under control.'}
           </h1>
           <p className="mt-4 text-[15px] sm:text-[16px] text-muted-foreground leading-[1.55] max-w-2xl">
@@ -162,7 +162,7 @@ const ForOwnersPage: React.FC = () => {
 
         {/* TWO PATHS */}
         <section id="paths" className="mb-14 scroll-mt-24">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3 mb-6 border-b border-border">
+          <h2 className="font-display text-xl text-foreground pb-3 mb-6 border-b border-border">
             {isRu ? 'Два пути' : 'Two paths'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -170,7 +170,7 @@ const ForOwnersPage: React.FC = () => {
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-2">
                 {isRu ? 'Передать нам' : 'Hand over'}
               </p>
-              <h3 className="text-[20px] font-serif font-semibold text-foreground leading-tight">
+              <h3 className="text-[20px] font-display font-semibold text-foreground leading-tight">
                 {isRu ? 'Полное управление · 70 / 30' : 'Full Management · 70 / 30'}
               </h3>
               <p className="mt-2 text-[13.5px] text-muted-foreground leading-relaxed">
@@ -191,7 +191,7 @@ const ForOwnersPage: React.FC = () => {
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-2">
                 {isRu ? 'Управлять самому' : 'Self-manage'}
               </p>
-              <h3 className="text-[20px] font-serif font-semibold text-foreground leading-tight">
+              <h3 className="text-[20px] font-display font-semibold text-foreground leading-tight">
                 {isRu ? 'myUNO PMS · от $25 / объект' : 'myUNO PMS · from $25 / property'}
               </h3>
               <p className="mt-2 text-[13.5px] text-muted-foreground leading-relaxed">
@@ -212,7 +212,7 @@ const ForOwnersPage: React.FC = () => {
 
         {/* WHAT YOU GET */}
         <section className="mb-14">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3 mb-6 border-b border-border">
+          <h2 className="font-display text-xl text-foreground pb-3 mb-6 border-b border-border">
             {isRu ? 'Что вы получаете' : 'What you get'}
           </h2>
           <ul className="divide-y divide-border">
@@ -233,7 +233,7 @@ const ForOwnersPage: React.FC = () => {
 
         {/* PRICING */}
         <section className="mb-14">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3 mb-6 border-b border-border">
+          <h2 className="font-display text-xl text-foreground pb-3 mb-6 border-b border-border">
             {isRu ? 'Тарифы' : 'Pricing'}
           </h2>
           <div className="space-y-3">
@@ -280,7 +280,7 @@ const ForOwnersPage: React.FC = () => {
 
         {/* REFERRAL */}
         <section className="mb-14">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3 mb-6 border-b border-border">
+          <h2 className="font-display text-xl text-foreground pb-3 mb-6 border-b border-border">
             {isRu ? 'Пригласить' : 'Invite'}
           </h2>
           <OwnerReferralCard />

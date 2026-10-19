@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, ArrowRight, Home } from 'lucide-react';
@@ -36,11 +37,11 @@ export const MarketComingSoonOverlay: React.FC = () => {
   if (MARKET_ENABLED) return null;
 
   return (
-    <section aria-labelledby="market-unavailable-title" className="mx-auto flex min-h-[55vh] w-full max-w-lg flex-col items-center justify-center px-4 py-12 text-center sm:px-6">
+    <section aria-labelledby="market-unavailable-title" className="public-commerce public-commerce--market mx-auto flex min-h-[55vh] w-full max-w-lg flex-col items-center justify-center px-4 py-12 text-center sm:px-6">
       <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-none bg-primary/10">
         <ShoppingBag className="h-10 w-10 text-primary" aria-hidden="true" />
       </div>
-      <h1 id="market-unavailable-title" className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+      <h1 id="market-unavailable-title" className="public-commerce-title text-foreground">
         {text.title}
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">{text.description}</p>
