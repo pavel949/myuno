@@ -7,8 +7,18 @@ const block = (extra: Record<string, unknown> = {}) => ({
 });
 function client(rows: unknown[] | null = [], error: unknown = null, count: number | null = rows?.length ?? 0) {
   const trace: { op: string; args: unknown[] }[] = [];
-  const q = Object.fromEntries(['select', 'eq', 'in', 'is', 'order', 'lt', 'gt'].map(op => [op, (...args: unknown[]) => { trace.push({ op, args }); return q; }]));
-  q.then = (resolve: (result: unknown) => void) => Promise.resolve(resolve({ data: rows, error, count }));
+  type QueryMethod = 'select' | 'eq' | 'in' | 'is' | 'order' | 'lt' | 'gt';
+  type QueryResult = { data: unknown[] | null; error: unknown; count: number | null };
+  type QueryMock = Record<QueryMethod, (...args: unknown[]) => QueryMock> & PromiseLike<QueryResult>;
+  const method = (op: QueryMethod) => (...args: unknown[]): QueryMock => {
+    trace.push({ op, args });
+    return q;
+  };
+  const q: QueryMock = {
+    select: method('select'), eq: method('eq'), in: method('in'), is: method('is'),
+    order: method('order'), lt: method('lt'), gt: method('gt'),
+    then: (resolve, reject) => Promise.resolve({ data: rows, error, count }).then(resolve, reject),
+  };
   const from = vi.fn(() => q);
   return { sb: { from } as never, trace, from };
 }

@@ -13,16 +13,16 @@ export function DashboardDestinations({ businessRole, propertyCount }: { busines
   const items = getOwnerSidebarForRole(businessRole, { propertyCount }).flatMap(group => group.items);
 
   return (
-    <nav aria-label={language === 'ru' ? 'Рабочие разделы' : 'Workspace shortcuts'} className="grid grid-cols-3 gap-2 sm:flex">
+    <nav aria-label={language === 'ru' ? 'Рабочие разделы' : 'Workspace shortcuts'} className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 sm:flex">
       {DESTINATIONS.map((path, index) => {
         const item = items.find(candidate => candidate.path === path);
         if (!item) return null;
         const Icon = item.icon;
         return (
-          <Button key={path} asChild variant={index === 0 ? 'default' : 'secondary'} className="h-auto min-h-11 min-w-0 gap-1.5 px-2 py-3 text-body-sm sm:px-4">
+          <Button key={path} asChild variant={index === 0 ? 'default' : 'secondary'} size="sm" className="h-11 min-w-0 gap-1 px-2 sm:px-4">
             <Link to={path}>
               <Icon className="h-4 w-4" aria-hidden />
-              <span className="min-w-0 whitespace-normal break-words">{language === 'ru' ? item.labelRu : item.labelEn}</span>
+              <span className="whitespace-nowrap">{language === 'ru' ? item.labelRu : item.labelEn}</span>
             </Link>
           </Button>
         );
