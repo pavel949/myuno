@@ -12,6 +12,10 @@ COPY = {
     'th': {'open': 'ปรับแต่งหน้าหลัก', 'done': 'เสร็จสิ้น', 'retry': 'ลองอีกครั้ง', 'empty': 'ยังไม่มีอัปเดตสำหรับความสนใจที่เลือก', 'loading': 'กำลังโหลดอัปเดตของคุณ…', 'error': 'ไม่สามารถโหลดอัปเดตบางรายการได้', 'business': 'เปิดพื้นที่ทำงานธุรกิจ', 'account': 'การจองและคำขอของฉัน', 'lifestyle': 'ความสนใจและไลฟ์สไตล์'},
 }
 
+def assert_no_demo_text(text, state):
+    assert not any(value in text for value in ['Fri 15:00', 'Term 2', 'Tonight', 'Демо']), state
+
+
 async def main():
     results = []
     async with async_playwright() as p:
@@ -98,7 +102,8 @@ async def main():
                     for state in states:
                         await navigate(state)
                         await expect(page.get_by_role('dialog')).to_have_count(0)
-                        assert not any(value in await page.locator('body').inner_text() for value in ['Fri 15:00', 'Term 2', 'Tonight', 'Демо']), state
+                        body_text = await page.locator('body').inner_text()
+                        assert_no_demo_text(body_text, state)
                         if state in ['empty', 'loading', 'error']:
                             await expect(page.get_by_text(copy[state], exact=True)).to_be_visible()
                         if state == 'error':
