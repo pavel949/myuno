@@ -292,8 +292,8 @@ export default function AdminServices() {
 
   // Form progress tracking
   const { progress, filled, total } = useFormProgress(formData, 
-    ['provider_id', 'name_en', 'price'],
-    ['name_ru', 'description_en', 'description_ru', 'duration_minutes']
+    ['provider_id', 'name_en', 'currency'],
+    ['name_ru', 'description_en', 'description_ru', 'duration_minutes', 'price']
   );
 
   // Hotkeys
@@ -496,8 +496,8 @@ export default function AdminServices() {
 
         {/* Add/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-h-[90vh] p-0">
-            <DialogHeader className="p-6 pb-0">
+          <DialogContent className="flex h-[90dvh] max-h-[56rem] flex-col gap-0 overflow-hidden p-0">
+            <DialogHeader className="shrink-0 p-6 pb-0">
               <DialogTitle>
                 {editingService 
                   ? (isRussian ? 'Редактировать услугу' : 'Edit Service')
@@ -505,11 +505,11 @@ export default function AdminServices() {
               </DialogTitle>
             </DialogHeader>
 
-            <div className="px-6 pt-2">
+            <div className="shrink-0 px-6 pt-2">
               <ServiceBilingualHint isRu={isRussian} />
             </div>
 
-            <div className="px-6 pt-4">
+            <div className="shrink-0 px-6 pt-4">
               <AdminFormToolbar
                 progress={progress}
                 filled={filled}
@@ -521,7 +521,7 @@ export default function AdminServices() {
               />
             </div>
 
-            <ScrollArea className="max-h-[calc(90vh-240px)] px-6">
+            <ScrollArea className="min-h-0 flex-1 px-6">
               <div className="space-y-6 pb-4">
                 
                 {/* === Provider & Category === */}
@@ -770,11 +770,11 @@ export default function AdminServices() {
               </div>
             </ScrollArea>
 
-            <DialogFooter className="p-6 pt-0">
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <DialogFooter className="shrink-0 flex-row gap-2 border-t border-border p-4 sm:p-6">
+              <Button className="min-h-11 flex-1 sm:flex-none" variant="outline" onClick={() => setIsDialogOpen(false)}>
                 {isRussian ? 'Отмена' : 'Cancel'}
               </Button>
-              <Button onClick={handleSubmit} disabled={isSubmitting}>
+              <Button className="min-h-11 flex-1 sm:flex-none" onClick={handleSubmit} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {isRussian ? 'Сохранить' : 'Save'}
               </Button>

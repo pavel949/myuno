@@ -37,7 +37,7 @@ async def main():
                             await page.get_by_role('button', name='09:00', exact=True).click()
                             await page.get_by_label('Ваше имя' if ru else 'Your name').fill('Synthetic Guest')
                             await page.get_by_label('Телефон / WhatsApp' if ru else 'Phone / WhatsApp').fill('+000')
-                            await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-booking-ready.png'))
+                            await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-booking-form.png'))
                             await page.get_by_role('button', name='Записаться на 09:00' if ru else 'Book 09:00', exact=True).click()
                             await expect(page.get_by_text('Заявка отправлена' if ru else 'Order sent', exact=True)).to_be_visible()
                             await expect(page.get_by_role('link', name='Мои услуги' if ru else 'My services', exact=True)).to_have_attribute('href', '/me/services')
@@ -51,6 +51,12 @@ async def main():
                         await expect(dialog).to_be_visible()
                         await page.get_by_label('Название (EN) *' if ru else 'Name (EN) *', exact=True).fill('Synthetic offering')
                         await page.get_by_label('Валюта' if ru else 'Currency', exact=True).fill('USD')
+                        # Save must remain visible after the form body scrolls.
+                        save = page.get_by_role('button', name='Сохранить' if ru else 'Save', exact=True)
+                        save_box = await save.bounding_box()
+                        assert save_box and save_box['y'] >= 0 and save_box['y'] + save_box['height'] <= 1000, save_box
+                        assert save_box['height'] >= 44, save_box
+                        await expect(dialog.get_by_role('heading', name='Новая услуга' if ru else 'New Service', exact=True)).to_be_visible()
                         await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-admin-editor.png'))
                         bounds = await dialog.evaluate('e=>({width:e.clientWidth,scroll:e.scrollWidth})')
                         await page.get_by_role('button', name='Сохранить' if ru else 'Save', exact=True).click()
