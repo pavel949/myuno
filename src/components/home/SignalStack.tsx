@@ -37,38 +37,41 @@ export function SignalStack({ personas }: SignalStackProps) {
     const signal = signals[persona];
     return signal?.isLive ? [{ persona, signal }] : [];
   }).slice(0, 4);
+  if (personas.length === 0) return null;
+
+  const actionClassName = 'inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary';
 
   return (
-    <section className="px-4 pb-5" aria-label={pickLang(language, { ru: 'Актуальное', en: 'Current updates', th: 'อัปเดตล่าสุด' })}>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <section className="px-4 pb-4" aria-label={pickLang(language, { ru: 'Актуальное', en: 'Current updates', th: 'อัปเดตล่าสุด' })}>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-base font-semibold text-foreground">{pickLang(language, { ru: 'Актуальное', en: 'Current updates', th: 'อัปเดตล่าสุด' })}</h2>
+        <span className="text-xs text-muted-foreground">{pickLang(language, { ru: 'По выбранным темам', en: 'For selected topics', th: 'สำหรับหัวข้อที่เลือก' })}</span>
       </div>
-      {isLoading && rows.length === 0 && (
-        <div role="status" className="border border-border bg-card p-4 text-sm text-muted-foreground">
-          {pickLang(language, { ru: 'Загружаем ваши события…', en: 'Loading your updates…', th: 'กำลังโหลดอัปเดตของคุณ…' })}
-        </div>
+      {isLoading && rows.length === 0 && unavailablePersonas.length < personas.length && (
+        <p role="status" className="py-2 text-sm text-muted-foreground">
+          {pickLang(language, { ru: 'Загружаем обновления по выбранным темам…', en: 'Loading updates for selected topics…', th: 'กำลังโหลดอัปเดตสำหรับหัวข้อที่เลือก…' })}
+        </p>
       )}
       {hasError && (
-        <div role="status" className="mb-2 border border-border bg-card p-4">
-          <p className="text-sm text-foreground">{pickLang(language, { ru: 'Часть событий не удалось загрузить.', en: 'Some updates could not be loaded.', th: 'ไม่สามารถโหลดอัปเดตบางรายการได้' })}</p>
-          <button type="button" onClick={retry} className="mt-1 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+        <div role="status" className="mb-2 flex flex-wrap items-center gap-x-3">
+          <p className="text-sm text-muted-foreground">{pickLang(language, { ru: 'Часть обновлений по выбранным темам не удалось загрузить.', en: 'Some updates for selected topics could not be loaded.', th: 'ไม่สามารถโหลดอัปเดตบางรายการสำหรับหัวข้อที่เลือกได้' })}</p>
+          <button type="button" onClick={retry} className={actionClassName}>
             <RefreshCw className="h-4 w-4" aria-hidden />{pickLang(language, { ru: 'Повторить', en: 'Retry', th: 'ลองอีกครั้ง' })}
           </button>
         </div>
       )}
       {unavailablePersonas.includes('local_services_provider') && (
-        <div className="mb-2 border border-border bg-card p-4">
+        <div role="status" className="mb-2 flex flex-wrap items-center gap-x-3">
           <p className="text-sm text-muted-foreground">{pickLang(language, { ru: 'Сводка бизнеса здесь пока недоступна.', en: 'The business summary is not available here yet.', th: 'ยังไม่สามารถแสดงสรุปธุรกิจในหน้านี้ได้' })}</p>
-          <Link to="/vendor" className="mt-1 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+          <Link to="/vendor" className={actionClassName}>
             {pickLang(language, { ru: 'Открыть рабочий кабинет', en: 'Open business workspace', th: 'เปิดพื้นที่ทำงานธุรกิจ' })}<ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </div>
       )}
       {!isLoading && !hasError && unavailablePersonas.length === 0 && rows.length === 0 && (
-        <div className="border border-border bg-card p-4">
-          <p className="text-sm font-medium text-foreground">{pickLang(language, { ru: 'Нет актуальных событий по выбранным интересам', en: 'No current updates for these interests', th: 'ยังไม่มีอัปเดตสำหรับความสนใจที่เลือก' })}</p>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{pickLang(language, { ru: 'Проверить свои бронирования и заявки можно в разделе «Моё».', en: 'You can review your bookings and requests in My account.', th: 'ดูการจองและคำขอของคุณได้ในบัญชีของฉัน' })}</p>
-          <Link to="/me" className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+        <div className="flex flex-wrap items-center gap-x-3">
+          <p className="text-sm text-muted-foreground">{pickLang(language, { ru: 'По выбранным темам пока нет обновлений.', en: 'No updates for selected topics yet.', th: 'ยังไม่มีอัปเดตสำหรับหัวข้อที่เลือก' })}</p>
+          <Link to="/me" className={actionClassName}>
             {pickLang(language, { ru: 'Открыть «Моё»', en: 'Open My account', th: 'เปิดบัญชีของฉัน' })}<ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </div>
@@ -84,14 +87,14 @@ function SignalCard({ persona, signal, language }: { persona: UserPersona; signa
   const meta = ROLE_META[persona];
   if (!meta) return null;
   return (
-    <Link to={SIGNAL_ROUTE[persona]} className="block min-w-0 border border-border bg-card p-4 text-left transition-colors hover:border-primary/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+    <Link to={signal.href ?? SIGNAL_ROUTE[persona]} className="block min-w-0 border border-border bg-card p-3 text-left transition-colors hover:border-primary/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
         <span>{pickLang(language, { ru: meta.labelRu, en: meta.label, th: PERSONA_LABEL_TH[persona] })}</span>
         <span className="break-words">{pickLang(language, { ru: signal.leadRu, en: signal.lead, th: signal.leadTh ?? signal.lead })}</span>
         {signal.state === 'warn' && <span className="font-medium text-foreground">{pickLang(language, { ru: 'Требует внимания', en: 'Needs attention', th: 'ต้องตรวจสอบ' })}</span>}
       </div>
       <div className="mt-2 flex items-start justify-between gap-3">
-        <p className="min-w-0 break-words font-display text-2xl font-semibold leading-tight text-foreground">{pickLang(language, { ru: signal.valueRu ?? signal.value, en: signal.value, th: signal.valueTh ?? signal.value })}</p>
+        <p className="min-w-0 break-words font-display text-xl font-semibold leading-tight text-foreground">{pickLang(language, { ru: signal.valueRu ?? signal.value, en: signal.value, th: signal.valueTh ?? signal.value })}</p>
         <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
       </div>
       <p className="mt-1 break-words text-sm leading-relaxed text-muted-foreground">{pickLang(language, { ru: signal.tailRu, en: signal.tail, th: signal.tailTh ?? signal.tail })}</p>

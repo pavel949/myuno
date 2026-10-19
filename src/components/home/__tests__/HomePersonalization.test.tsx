@@ -23,7 +23,7 @@ describe('home account facts', () => {
   it('renders an honest empty state instead of seed appointments', () => {
     state.signals = { pet_owner: fakeSeed };
     render(<SignalStack personas={['pet_owner']} onRoleSheetOpen={vi.fn()} />, { wrapper });
-    expect(screen.getByText('Нет актуальных событий по выбранным интересам')).toBeInTheDocument();
+    expect(screen.getByText('По выбранным темам пока нет обновлений.')).toBeInTheDocument();
     expect(screen.queryByText('Fri 15:00')).not.toBeInTheDocument();
     expect(screen.queryByText('В норме')).not.toBeInTheDocument();
   });
@@ -31,11 +31,11 @@ describe('home account facts', () => {
     state.isLoading = true;
     const { rerender } = render(<SignalStack personas={['pet_owner']} onRoleSheetOpen={vi.fn()} />, { wrapper });
     expect(screen.getByRole('status')).toHaveTextContent('Загружаем');
-    expect(screen.queryByText(/Нет актуальных/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/По выбранным темам пока нет/)).not.toBeInTheDocument();
     state.isLoading = false; state.hasError = true;
     rerender(<SignalStack personas={['pet_owner']} onRoleSheetOpen={vi.fn()} />);
     expect(screen.getByRole('status')).toHaveTextContent('не удалось');
-    expect(screen.queryByText(/Нет актуальных/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/По выбранным темам пока нет/)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Повторить' }));
     expect(state.retry).toHaveBeenCalledOnce();
   });
@@ -115,7 +115,7 @@ it('distinguishes unavailable business summaries from an empty business account'
   render(<SignalStack personas={['local_services_provider']} onRoleSheetOpen={vi.fn()} />, { wrapper });
   expect(screen.getByText('Сводка бизнеса здесь пока недоступна.')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Открыть рабочий кабинет' })).toHaveAttribute('href', '/vendor');
-  expect(screen.queryByText(/Нет актуальных/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/По выбранным темам пока нет/)).not.toBeInTheDocument();
 });
 
 
@@ -129,17 +129,17 @@ it('localizes preference controls and source states in Thai', () => {
   expect(screen.getByText(/สิทธิ์เข้าถึงบัญชีและพื้นที่ทำงานจะไม่เปลี่ยนแปลง/)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'เสร็จสิ้น' })).toBeEnabled();
   rerender(<><SignalStack personas={['pet_owner']} onRoleSheetOpen={vi.fn()} /><HomeActivityFeed /></>);
-  expect(screen.getByText('ยังไม่มีอัปเดตสำหรับความสนใจที่เลือก')).toBeInTheDocument();
+  expect(screen.getByText('ยังไม่มีอัปเดตสำหรับหัวข้อที่เลือก')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /การจองและคำขอของฉัน/ })).toHaveAttribute('href', '/me');
   state.isLoading = true;
   rerender(<SignalStack personas={['pet_owner']} onRoleSheetOpen={vi.fn()} />);
-  expect(screen.getByRole('status')).toHaveTextContent('กำลังโหลดอัปเดตของคุณ…');
+  expect(screen.getByRole('status')).toHaveTextContent('กำลังโหลดอัปเดตสำหรับหัวข้อที่เลือก…');
   state.isLoading = false; state.hasError = true;
   state.signals = { pet_owner: { ...realSignal, leadTh: 'รถรับส่ง 19 ต.ค.', valueTh: '13:20', tailTh: 'โรงแรม → HKT' } };
   rerender(<SignalStack personas={['pet_owner']} onRoleSheetOpen={vi.fn()} />);
   expect(screen.getByText('รถรับส่ง 19 ต.ค.')).toBeInTheDocument();
   expect(screen.getByText('โรงแรม → HKT')).toBeInTheDocument();
-  expect(screen.getByRole('status')).toHaveTextContent('ไม่สามารถโหลดอัปเดตบางรายการได้');
+  expect(screen.getByRole('status')).toHaveTextContent('ไม่สามารถโหลดอัปเดตบางรายการสำหรับหัวข้อที่เลือกได้');
   fireEvent.click(screen.getByRole('button', { name: 'ลองอีกครั้ง' }));
   expect(state.retry).toHaveBeenCalledOnce();
 });

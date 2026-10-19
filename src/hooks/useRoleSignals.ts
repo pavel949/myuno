@@ -18,6 +18,7 @@ import { bangkokTodayISO, bangkokTodayDate, parseCivilDate } from '@/lib/hotelDa
 import { differenceInCalendarDays } from 'date-fns';
 import { PROPERTY_BOOKING_RELEASE_FILTER, propertyBookingHoldsInventory } from '@/lib/propertyInventory';
 import { logger } from '@/lib/logger';
+import { APP_ROUTES } from '@/lib/config/routes';
 
 export interface RoleSignal {
   lead: string;
@@ -32,6 +33,8 @@ export interface RoleSignal {
   state: 'live' | 'warn' | 'active';
   /** Signals are always backed by a successfully read account record. */
   isLive: boolean;
+  /** An existing detail route, only when the source supplies the record ID. */
+  href?: string;
 }
 
 type SignalMap = Partial<Record<UserPersona, RoleSignal>>;
@@ -260,9 +263,22 @@ async function resolveNextOrder(userId: string, vertical?: string[]): Promise<Ro
     tail: `${formatSignalDate(o.start_at, 'en')} · ${o.status}`,
     tailRu: `${formatSignalDate(o.start_at, 'ru')} · ${o.status}`,
     tailTh: `${formatSignalDate(o.start_at, 'th')} · ${o.status}`,
+    href: APP_ROUTES.ORDER_TRACKING(o.id),
     state: 'live',
     isLive: true,
   };
+}
+
+async function resolvePetOrder(userId: string): Promise<RoleSignal | null> {
+  // Pet services use their own vertical, including veterinary care. Human
+  // medical orders are not pet updates. This is not a service_orders summary.
+  const signal = await resolveNextOrder(userId, ['pet_service']);
+  return signal ? {
+    ...signal,
+    lead: 'Pet-service order',
+    leadRu: 'Заказ для питомца',
+    leadTh: 'คำสั่งซื้อบริการสัตว์เลี้ยง',
+  } : null;
 }
 
 // Resolver dispatch table
@@ -279,7 +295,7 @@ const RESOLVERS: Partial<Record<UserPersona, (uid: string) => Promise<RoleSignal
   active: (uid) => resolveNextOrder(uid),
   business: (uid) => resolveNextOrder(uid, ['legal', 'medical']),
   nomad: (uid) => resolveNextOrder(uid),
-  pet_owner: (uid) => resolveNextOrder(uid, ['pet_service', 'medical']),
+  pet_owner: resolvePetOrder,
 };
 
 /** Read real signals without conflating empty, failed and loading sources. */
@@ -292,7 +308,7 @@ export function useRoleSignals(personas: UserPersona[]) {
   const unavailablePersonas = personas.filter(p => p === 'local_services_provider');
 
   const query = useQuery({
-    queryKey: ['role-signals', 'real-only-v2', userId, personaKey],
+    queryKey: ['role-signals', 'real-only-v3', userId, personaKey],
     queryFn: async () => {
       const signals: SignalMap = {};
       const failedPersonas: UserPersona[] = [];

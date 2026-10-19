@@ -7,9 +7,9 @@ from playwright.async_api import async_playwright, expect
 
 OUTPUT = Path(sys.argv[1])
 COPY = {
-    'en': {'open': 'Customize home', 'done': 'Done', 'retry': 'Retry', 'empty': 'No current updates for these interests', 'loading': 'Loading your updates…', 'error': 'Some updates could not be loaded.', 'business': 'Open business workspace', 'account': 'My bookings and requests', 'lifestyle': 'Lifestyle interests'},
-    'ru': {'open': 'Настроить главную', 'done': 'Готово', 'retry': 'Повторить', 'empty': 'Нет актуальных событий по выбранным интересам', 'loading': 'Загружаем ваши события…', 'error': 'Часть событий не удалось загрузить.', 'business': 'Открыть рабочий кабинет', 'account': 'Мои бронирования и заявки', 'lifestyle': 'Интересы и образ жизни'},
-    'th': {'open': 'ปรับแต่งหน้าหลัก', 'done': 'เสร็จสิ้น', 'retry': 'ลองอีกครั้ง', 'empty': 'ยังไม่มีอัปเดตสำหรับความสนใจที่เลือก', 'loading': 'กำลังโหลดอัปเดตของคุณ…', 'error': 'ไม่สามารถโหลดอัปเดตบางรายการได้', 'business': 'เปิดพื้นที่ทำงานธุรกิจ', 'account': 'การจองและคำขอของฉัน', 'lifestyle': 'ความสนใจและไลฟ์สไตล์'},
+    'en': {'open': 'Customize home', 'done': 'Done', 'retry': 'Retry', 'empty': 'No updates for selected topics yet.', 'loading': 'Loading updates for selected topics…', 'error': 'Some updates for selected topics could not be loaded.', 'business': 'Open business workspace', 'account': 'My bookings and requests', 'lifestyle': 'Lifestyle interests'},
+    'ru': {'open': 'Настроить главную', 'done': 'Готово', 'retry': 'Повторить', 'empty': 'По выбранным темам пока нет обновлений.', 'loading': 'Загружаем обновления по выбранным темам…', 'error': 'Часть обновлений по выбранным темам не удалось загрузить.', 'business': 'Открыть рабочий кабинет', 'account': 'Мои бронирования и заявки', 'lifestyle': 'Интересы и образ жизни'},
+    'th': {'open': 'ปรับแต่งหน้าหลัก', 'done': 'เสร็จสิ้น', 'retry': 'ลองอีกครั้ง', 'empty': 'ยังไม่มีอัปเดตสำหรับหัวข้อที่เลือก', 'loading': 'กำลังโหลดอัปเดตสำหรับหัวข้อที่เลือก…', 'error': 'ไม่สามารถโหลดอัปเดตบางรายการสำหรับหัวข้อที่เลือกได้', 'business': 'เปิดพื้นที่ทำงานธุรกิจ', 'account': 'การจองและคำขอของฉัน', 'lifestyle': 'ความสนใจและไลฟ์สไตล์'},
 }
 
 def assert_no_demo_text(text, state):

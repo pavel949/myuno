@@ -5,7 +5,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import type { FlatService } from '@/lib/catalog/taxonomy';
+import { getCategoryById, type FlatService } from '@/lib/catalog/taxonomy';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppTile } from './AppTile';
 
@@ -28,7 +29,6 @@ export const IconGrid: React.FC<IconGridProps> = ({
   showCategoryCaption,
 }) => {
   const { language, t } = useLanguage();
-  const isRu = language === 'ru';
 
 
   if (services.length === 0) return null;
@@ -67,8 +67,8 @@ export const IconGrid: React.FC<IconGridProps> = ({
             key={svc.id}
             to={svc.path}
             icon={svc.icon}
-            label={isRu ? svc.labelRu : svc.labelEn}
-            caption={showCategoryCaption ? (isRu ? svc.categoryLabelRu : svc.categoryLabelEn) : undefined}
+            label={pickLang(language, { ru: svc.labelRu, en: svc.labelEn, th: svc.labelTh ?? svc.labelEn })}
+            caption={showCategoryCaption ? pickLang(language, { ru: svc.categoryLabelRu, en: svc.categoryLabelEn, th: getCategoryById(svc.categoryId)?.labelTh ?? svc.categoryLabelEn }) : undefined}
             status={svc.status}
           />
         ))}
