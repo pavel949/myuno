@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -78,7 +78,7 @@ export function UnifiedTaskHub() {
   const isRu = language === 'ru';
   const t = (en: string, ru: string) => isRu ? ru : en;
   const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const assigneeParam = searchParams.get('assignee');
 
   const [activeTab, setActiveTab] = useState('all');
@@ -100,6 +100,13 @@ export function UnifiedTaskHub() {
 
   const { data: company } = useMyCompanyId();
   const companyId = company?.company_id;
+  useEffect(() => {
+    if (searchParams.get('action') !== 'create' || !companyId || !user) return;
+    setSheetOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('action');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, companyId, user]);
   const { data: crmTasks = [], isLoading: crmLoading } = useCrmTasks();
   const { tasks: opsTasks, isLoading: opsLoading } = useOperationalTasks();
   const { data: members = [] } = useCompanyMembers(companyId);

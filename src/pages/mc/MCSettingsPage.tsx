@@ -5,6 +5,7 @@ import { CompanyProfileSettings } from '@/components/mc/settings/CompanyProfileS
 import { DataBackupSettings } from '@/components/mc/settings/DataBackupSettings';
 import { Settings, DollarSign, Target, Wrench, Building2, HardDrive } from 'lucide-react';
 import React, { Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 
 const PipelineSettingsContent = React.lazy(() => import('@/pages/owner/PipelineSettingsPage'));
@@ -12,6 +13,15 @@ const PipelineSettingsContent = React.lazy(() => import('@/pages/owner/PipelineS
 export default function MCSettingsPage() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const [searchParams, setSearchParams] = useSearchParams();
+  const allowedSections = ['profile', 'finance', 'crm', 'operations', 'data'];
+  const openSections = searchParams.getAll('tab').filter(id => allowedSections.includes(id));
+  const setOpenSections = (ids: string[]) => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('tab');
+    ids.filter(id => allowedSections.includes(id)).forEach(id => next.append('tab', id));
+    setSearchParams(next);
+  };
 
   const sections = [
     {
@@ -62,7 +72,7 @@ export default function MCSettingsPage() {
         </div>
       </div>
 
-      <Accordion type="multiple" className="space-y-3">
+      <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="space-y-3">
         {sections.map(({ id, icon: Icon, title, desc }) => (
           <AccordionItem
             key={id}

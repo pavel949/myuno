@@ -26,8 +26,8 @@ const SETTINGS_ITEMS: SettingsItem[] = [
   { icon: Globe, labelEn: 'Translation', labelRu: 'Перевод', path: '/profile/settings', section: 'main' },
   { icon: Briefcase, labelEn: 'Business trips', labelRu: 'Деловые поездки', path: '/mc/settings', section: 'main' },
   { icon: Accessibility, labelEn: 'Accessibility', labelRu: 'Доступная среда', path: '/profile/settings', section: 'main' },
-  { icon: Building2, labelEn: 'Company information', labelRu: 'Сведения о компании', path: '/mc/settings', section: 'business' },
-  { icon: Receipt, labelEn: 'Taxes', labelRu: 'Налоги', path: '/mc/finance', section: 'business' },
+  { icon: Building2, labelEn: 'Company information', labelRu: 'Сведения о компании', path: '/mc/settings?tab=profile', section: 'business' },
+  { icon: Receipt, labelEn: 'Taxes', labelRu: 'Налоги', path: '/mc/finance/tax-center', section: 'business' },
   { icon: Award, labelEn: 'Path to Superhost', labelRu: 'Путь к статусу «Суперхозяин»', path: '/mc/superhost', section: 'business' },
 ];
 

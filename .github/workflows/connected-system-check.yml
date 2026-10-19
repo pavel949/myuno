@@ -91,6 +91,7 @@ jobs:
             scripts/qa/property-editor-ui.mjs \
             scripts/qa/ui-backlog-salvage.mjs \
             scripts/qa/pms-dashboard-ui.mjs \
+            scripts/qa/mc-workspace-ui.mjs \
             scripts/qa/services-discovery-ui.mjs \
             scripts/qa/trip-planner-ui.mjs \
             scripts/qa/unified-property-search-ui.mjs \

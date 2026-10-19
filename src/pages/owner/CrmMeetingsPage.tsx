@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
@@ -24,6 +25,14 @@ export default function CrmMeetingsPage() {
   const createMeeting = useCreateMeeting();
   const deleteMeeting = useDeleteMeeting();
   const [open, setOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get('action') !== 'create' || !companyId || !user || meetingsError) return;
+    setOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('action');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, companyId, user, meetingsError]);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: '', scheduled_at: '', duration_minutes: '30', location: '' });
 
