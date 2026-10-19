@@ -51,6 +51,187 @@ afterAll(async () => {
   if (directory) rmSync(directory, { recursive: true, force: true });
 });
 
+// Unapplied critical-stage candidate, tested against dated live predecessors.
+// Every test uses the disposable Unix-socket database above, never Supabase.
+describe('atomic property-order review candidate', () => {
+  const signature = 'public.create_order_atomic(text,uuid,uuid,timestamptz,timestamptz,numeric,text,text,jsonb,jsonb,jsonb,jsonb,text,numeric)';
+  const predecessor = JSON.parse(readFileSync('docs/convergence/atomic_property_order/predecessors.json', 'utf8')) as {
+    rows: { proname: string; definition: string; hash: string }[];
+  };
+  const forward = readFileSync('docs/convergence/atomic_property_order/forward.sql', 'utf8');
+  const rollback = readFileSync('docs/convergence/atomic_property_order/rollback.sql', 'utf8');
+  const start = '2026-11-10T14:00:00Z', end = '2026-11-13T12:00:00Z';
+  const items = [{ resource_id: room, item_type: 'property', metadata: { property_id: room } }];
+  type Result = { success: boolean; order_id?: string; error?: string };
+  async function create(input: { type?: string; start?: string | null; end?: string | null; items?: unknown } = {}): Promise<Result> {
+    const [row] = await sql`SELECT create_order_atomic(
+      p_order_type := ${input.type ?? 'property'}, p_customer_user_id := ${actor},
+      p_start_at := ${input.start === undefined ? start : input.start}::text::timestamptz,
+      p_end_at := ${input.end === undefined ? end : input.end}::text::timestamptz, p_total_amount := 9000,
+      p_items := ${sql.json((input.items === undefined ? items : input.items) as postgres.JSONValue)},
+      p_participants := '[{"role":"guest","name":"Synthetic Guest"}]'::jsonb,
+      p_payment_method := 'stripe', p_payment_amount := 900) AS result`;
+    return row.result as Result;
+  }
+  async function restorePredecessors() {
+    for (const row of predecessor.rows) await sql.unsafe(row.definition);
+    await sql.unsafe(`REVOKE ALL ON FUNCTION ${signature} FROM PUBLIC, anon, authenticated;
+      GRANT EXECUTE ON FUNCTION ${signature} TO service_role`);
+  }
+  async function applyScript(script: string) {
+    // The script includes BEGIN/COMMIT. Pin both commands and error recovery
+    // to one connection while retaining the pool for actual race tests.
+    const connection = await sql.reserve();
+    try {
+      await connection.unsafe(script);
+    } catch (error) {
+      await connection.unsafe('ROLLBACK');
+      throw error;
+    } finally { connection.release(); }
+  }
+  async function counts() {
+    const [row] = await sql`SELECT (SELECT count(*)::int FROM orders) orders,
+      (SELECT count(*)::int FROM order_items) items,
+      (SELECT count(*)::int FROM order_participants) guests,
+      (SELECT count(*)::int FROM payment_intents) intents,
+      (SELECT count(*)::int FROM order_status_history) history,
+      (SELECT count(*)::int FROM property_bookings) bookings,
+      (SELECT count(*)::int FROM reconciliation_alerts) alerts`;
+    return row;
+  }
+  beforeEach(async () => { await restorePredecessors(); await applyScript(forward); });
+  afterAll(restorePredecessors);
+
+  it('persists exactly one linked hold, guest, intent and history in one transaction', async () => {
+    const result = await create();
+    expect(result.success, result.error).toBe(true);
+    expect(await counts()).toEqual({ orders: 1, items: 1, guests: 1, intents: 1, history: 1, bookings: 1, alerts: 0 });
+    const [booking] = await sql`SELECT external_id, guest_name, status FROM property_bookings`;
+    expect(booking).toMatchObject({ external_id: result.order_id, guest_name: 'Synthetic Guest', status: 'pending' });
+  });
+
+  it('two concurrent reservations produce one order and one hold, without an orphan or alert', async () => {
+    const results = await Promise.all([create(), create()]);
+    expect(results.filter(r => r.success)).toHaveLength(1);
+    expect(results.find(r => !r.success)?.error).toBe('property_inventory_not_committed');
+    expect(await counts()).toEqual({ orders: 1, items: 1, guests: 1, intents: 1, history: 1, bookings: 1, alerts: 0 });
+  });
+
+  it('does not steal an unlinked imported stay with identical dates', async () => {
+    const [legacy] = await sql`INSERT INTO property_bookings(property_id,check_in,check_out,status,guest_name)
+      VALUES (${room},'2026-11-10','2026-11-13','confirmed','Original Guest') RETURNING id`;
+    expect(await create()).toMatchObject({ success: false, error: 'property_inventory_not_committed' });
+    const [booking] = await sql`SELECT id,external_id,guest_name FROM property_bookings`;
+    expect(booking).toEqual({ id: legacy.id, external_id: null, guest_name: 'Original Guest' });
+    expect(await counts()).toEqual({ orders: 0, items: 0, guests: 0, intents: 0, history: 0, bookings: 1, alerts: 0 });
+  });
+
+  it('preserves an explicit legacy order_id link without duplicating or adopting by dates', async () => {
+    const [order] = await sql`INSERT INTO orders(order_type,status,start_at,end_at,total_amount,currency,metadata)
+      VALUES ('property','confirmed',${start},${end},9000,'THB','{}') RETURNING id`;
+    await sql`INSERT INTO order_participants(order_id,role,name) VALUES (${order.id},'guest','Original Guest')`;
+    const [legacy] = await sql`INSERT INTO property_bookings(property_id,check_in,check_out,status,guest_name,order_id)
+      VALUES (${room},'2026-11-10','2026-11-13','confirmed','Original Guest',${order.id}) RETURNING id`;
+    await sql`INSERT INTO order_items(order_id,item_type,resource_id) VALUES (${order.id},'property',${room})`;
+    const [booking] = await sql`SELECT id,order_id,external_id,guest_name,status FROM property_bookings`;
+    expect(booking).toEqual({ id: legacy.id, order_id: order.id, external_id: order.id, guest_name: 'Original Guest', status: 'confirmed' });
+    expect((await create()).success).toBe(false);
+    expect((await counts()).bookings).toBe(1);
+  });
+
+  it('allows the next arrival on checkout day', async () => {
+    expect((await create()).success).toBe(true);
+    expect((await create({ start: end, end: '2026-11-15T12:00:00Z' })).success).toBe(true);
+    expect((await counts()).bookings).toBe(2);
+  });
+
+  it('rejects an already persisted manual block but excludes the checkout date', async () => {
+    await sql`INSERT INTO property_availability VALUES (${room},'2026-11-13','blocked')`;
+    expect((await create()).success).toBe(true);
+    await sql.unsafe('TRUNCATE orders, order_items, order_participants, property_bookings, payment_intents, order_status_history');
+    await sql`INSERT INTO property_availability VALUES (${room},'2026-11-11','blocked')`;
+    expect(await create()).toMatchObject({ success: false, error: 'property_dates_blocked' });
+    expect((await counts()).orders).toBe(0);
+  });
+
+  it.each([
+    { start: null, error: 'invalid_property_stay_dates' },
+    { start: '-infinity', error: 'invalid_property_stay_dates' },
+    { end: 'infinity', error: 'invalid_property_stay_dates' },
+    { end: start, error: 'invalid_property_stay_dates' },
+    { end: '2026-11-09T12:00:00Z', error: 'invalid_property_stay_dates' },
+    { items: [], error: 'one_property_item_required' },
+    { items: null, error: 'one_property_item_required' },
+    { items: [...items, ...items], error: 'one_property_item_required' },
+    { items: [{ item_type: 'property' }], error: 'invalid_property_item_link' },
+    { items: [{ ...items[0], metadata: { property_id: category } }], error: 'invalid_property_item_link' },
+    { items: [{ ...items[0], resource_id: category, metadata: {} }], error: 'property_not_found' },
+    { items: [{ ...items[0], start_at: '2026-11-11T14:00:00Z' }], error: 'property_item_dates_mismatch' },
+  ])('rejects malformed inventory input before leaving any rows: $error', async ({ error, ...input }) => {
+    expect(await create(input)).toMatchObject({ success: false, error });
+    expect(await counts()).toEqual({ orders: 0, items: 0, guests: 0, intents: 0, history: 0, bookings: 0, alerts: 0 });
+  });
+
+  it.each(['UTC', 'Asia/Bangkok', 'America/Los_Angeles'])('uses Bangkok civil dates with database timezone %s', async zone => {
+    // Pin this assertion to one connection: session settings must not leak
+    // between pooled connections. The RPC itself is timezone independent.
+    await sql.begin(async tx => {
+      await tx`SELECT set_config('TimeZone', ${zone}, true)`;
+      const [result] = await tx`SELECT create_order_atomic('property',${actor},NULL,
+        '2026-11-10T18:00:00Z','2026-11-13T18:00:00Z',9000,'THB',NULL,'{}',${tx.json(items)}) AS result`;
+      expect(result.result.success, result.result.error).toBe(true);
+      const [booking] = await tx`SELECT check_in::text,check_out::text FROM property_bookings`;
+      expect(booking).toEqual({ check_in: '2026-11-11', check_out: '2026-11-14' });
+    });
+  });
+
+  it('a late history failure rolls back the inventory, payment intent and all order children', async () => {
+    await sql.unsafe(`CREATE FUNCTION fail_atomic_history_fixture() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN RAISE EXCEPTION 'synthetic_history_failure'; END $$;
+      CREATE TRIGGER fail_atomic_history_fixture BEFORE INSERT ON order_status_history
+        FOR EACH ROW EXECUTE FUNCTION fail_atomic_history_fixture()`);
+    try {
+      expect(await create()).toMatchObject({ success: false, error: 'synthetic_history_failure' });
+      expect(await counts()).toEqual({ orders: 0, items: 0, guests: 0, intents: 0, history: 0, bookings: 0, alerts: 0 });
+    } finally {
+      await sql.unsafe('DROP TRIGGER fail_atomic_history_fixture ON order_status_history; DROP FUNCTION fail_atomic_history_fixture()');
+    }
+  });
+
+  it('preserves service-only primitive access and denies direct customer/anonymous invocation', async () => {
+    for (const role of ['anon', 'authenticated']) {
+      await expect(sql.begin(async tx => {
+        await tx.unsafe(`SET LOCAL ROLE ${role}`);
+        return tx`SELECT create_order_atomic('property',${actor})`;
+      })).rejects.toThrow(/permission denied/);
+    }
+    const [privileges] = await sql`SELECT has_function_privilege('service_role',${signature},'EXECUTE') AS service`;
+    expect(privileges.service).toBe(true);
+  });
+
+  it('rejects predecessor drift atomically, without silently overwriting newer functions', async () => {
+    const [before] = await sql`SELECT pg_get_functiondef('trg_sync_order_to_property_booking()'::regprocedure) AS definition`;
+    const connection = await sql.reserve();
+    try {
+      await expect(connection.unsafe(forward)).rejects.toThrow(/predecessor_drift/);
+      // Roll back the same connection after the intentionally rejected script.
+      await connection.unsafe('ROLLBACK');
+    } finally { connection.release(); }
+    const [after] = await sql`SELECT pg_get_functiondef('trg_sync_order_to_property_booking()'::regprocedure) AS definition`;
+    expect(after.definition).toBe(before.definition);
+  });
+
+  it('rollback disables property creation without restoring unlinked adoption or affecting service orders', async () => {
+    await applyScript(rollback);
+    expect(await create()).toMatchObject({ success: false, error: 'property_order_writer_disabled' });
+    expect((await create({ type: 'service', items: [], start: null, end: null })).success).toBe(true);
+    expect((await counts()).bookings).toBe(0);
+    const [bridge] = await sql`SELECT pg_get_functiondef('trg_sync_order_to_property_booking()'::regprocedure) AS definition`;
+    expect(bridge.definition).toContain('WHERE order_id = NEW.id');
+    expect(bridge.definition).not.toContain('WHERE external_id IS NULL AND property_id');
+  });
+});
+
 beforeEach(async () => {
   await sql.unsafe('TRUNCATE property_bookings, property_availability, orders, order_items, order_participants, order_addresses, order_status_history, payment_intents, reconciliation_alerts');
 });
