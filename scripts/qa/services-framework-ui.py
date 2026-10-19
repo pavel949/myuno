@@ -11,7 +11,7 @@ async def main():
         browser = await p.chromium.launch(headless=True)
         for lang in ['ru', 'en']:
             for width in [375, 390, 430, 1280]:
-                for view, state in [('booking', 'ready'), ('booking', 'error'), ('account', 'ready'), ('account', 'error'), ('provider', 'ready'), ('admin', 'ready'), ('detail', 'ready')]:
+                for view, state in [('booking', 'ready'), ('booking', 'error'), ('account', 'ready'), ('account', 'error'), ('provider', 'ready'), ('admin', 'ready'), ('detail', 'ready'), ('operator', 'ready')]:
                     context = await browser.new_context(viewport={'width': width, 'height': 1000}, service_workers='block')
                     errors, blocked = [], []
                     async def route_handler(route):

@@ -44,6 +44,11 @@ Code under review and unapplied SQL are never counted as deployed behavior.
   timestamp. Request without a configured timetable and authoritative instant
   confirmation are NOT implemented by this UI tranche. The editor therefore
   disables selecting instant mode; existing stored configuration is preserved.
+- Manually entered suppliers can be operated from the admin provider's
+  Requests and hours tab without a linked supplier login. This reuses the
+  provider desk and existing protected-admin RLS; no new grant/policy is added.
+  Read-only pg_policies evidence confirms the existing admin write paths for
+  service_orders and provider_availability. Staff authority is not inferred.
 - Account and provider/admin detail read canonical `service_orders`; no separate
   order model, commercial payment bridge or synthetic production seed is added.
 - Real supplier data and live payments are deliberately not acceptance criteria.

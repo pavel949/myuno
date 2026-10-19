@@ -27,9 +27,26 @@ export default function VendorServiceDesk() {
   const { user } = useAuth();
   const { language } = useLanguage();
   const L = (ru: string, en: string, th?: string) => pickLang(language, { ru, en, th });
-  const qc = useQueryClient();
   const providerQ = useMyProvider(user?.id);
-  const pid = providerQ.data?.id;
+  if (providerQ.isLoading) return <div className="p-4 space-y-2"><Skeleton className="h-8 w-48" /><Skeleton className="h-40" /></div>;
+  if (providerQ.isError) return <p className="p-4 text-destructive">{L('Не удалось загрузить данные', 'Failed to load', 'โหลดไม่สำเร็จ')}</p>;
+  if (!providerQ.data) return (
+    <div className="p-6 max-w-md space-y-3">
+      <h1 className="text-xl font-serif">{L('Кабинет исполнителя', 'Service desk', 'โต๊ะบริการ')}</h1>
+      <p className="text-sm text-muted-foreground">{L('К вашей учётной записи не привязан профиль исполнителя.', 'No provider profile is linked to your account.', 'ไม่มีโปรไฟล์ผู้ให้บริการในบัญชีของคุณ')}</p>
+      <Button asChild><Link to="/become-partner">{L('Подать заявку на подключение', 'Become a partner', 'เป็นพาร์ทเนอร์')}</Link></Button>
+    </div>
+  );
+
+  return <ProviderServiceDesk key={`${user?.id}:${providerQ.data.id}`} provider={providerQ.data} />;
+}
+
+/** Shared canonical service desk; its queries and writes retain database RLS. */
+export function ProviderServiceDesk({ provider }: { provider: { id: string; name: string } }) {
+  const { language } = useLanguage();
+  const L = (ru: string, en: string, th?: string) => pickLang(language, { ru, en, th });
+  const qc = useQueryClient();
+  const pid = provider.id;
   const servicesQ = useProviderServicesAdmin(pid);
   const hoursQ = useProviderHours(pid);
   const ordersQ = useProviderOrders(pid);
@@ -83,23 +100,13 @@ export default function VendorServiceDesk() {
     () => supabase.from('provider_availability').delete().eq('id', id).eq('provider_id', pid!).select('id').single(), ['provider-hours'],
   );
 
-  if (providerQ.isLoading) return <div className="p-4 space-y-2"><Skeleton className="h-8 w-48" /><Skeleton className="h-40" /></div>;
-  if (providerQ.isError) return <p className="p-4 text-destructive">{L('Не удалось загрузить данные', 'Failed to load', 'โหลดไม่สำเร็จ')}</p>;
-  if (!providerQ.data) return (
-    <div className="p-6 max-w-md space-y-3">
-      <h1 className="text-xl font-serif">{L('Кабинет исполнителя', 'Service desk', 'โต๊ะบริการ')}</h1>
-      <p className="text-sm text-muted-foreground">{L('К вашей учётной записи не привязан профиль исполнителя.', 'No provider profile is linked to your account.', 'ไม่มีโปรไฟล์ผู้ให้บริการในบัญชีของคุณ')}</p>
-      <Button asChild><Link to="/become-partner">{L('Подать заявку на подключение', 'Become a partner', 'เป็นพาร์ทเนอร์')}</Link></Button>
-    </div>
-  );
-
   const orders = ordersQ.data ?? [];
   const openCount = orders.filter((o) => ['pending', 'confirmed', 'in_progress'].includes(o.status ?? '')).length;
 
   return (
     <div className="p-4 space-y-4 max-w-4xl">
       <div>
-        <h1 className="text-xl font-serif">{L('Кабинет исполнителя', 'Service desk', 'โต๊ะบริการ')} · {providerQ.data.name}</h1>
+        <h1 className="text-xl font-serif">{L('Кабинет исполнителя', 'Service desk', 'โต๊ะบริการ')} · {provider.name}</h1>
         <p className="text-sm text-muted-foreground">{L('Заказы, график приёма и перечень услуг, которые клиенты видят в разделе «Услуги».', 'Orders, schedule and the services customers see in Services.', 'คำสั่งซื้อ ตารางเวลา และบริการ')}</p>
       </div>
       <Tabs defaultValue="orders">
