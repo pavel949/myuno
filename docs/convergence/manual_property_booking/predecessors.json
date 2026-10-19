@@ -14,6 +14,11 @@
       "definition": "CREATE OR REPLACE FUNCTION public.guard_customer_order_update()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE v_uid uuid := auth.uid();\nBEGIN\n  IF v_uid IS NULL OR public.is_finance_staff_e28_private(v_uid) THEN RETURN NEW; END IF;\n  IF EXISTS (SELECT 1 FROM public.org_members WHERE org_id = OLD.provider_org_id AND user_id = v_uid) THEN RETURN NEW; END IF;\n  IF OLD.customer_user_id = v_uid THEN\n    IF (to_jsonb(NEW) - 'status' - 'updated_at') IS DISTINCT FROM (to_jsonb(OLD) - 'status' - 'updated_at')\n       OR (NEW.status IS DISTINCT FROM OLD.status AND NEW.status::text <> 'cancelled') THEN\n      RAISE EXCEPTION 'customers can only cancel orders' USING ERRCODE = '42501';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $function$\n",
       "hash": "124a15c2f1df3a63cf56e0655b857773",
       "proname": "guard_customer_order_update"
+    },
+    {
+      "definition": "CREATE OR REPLACE FUNCTION public.trg_sync_order_item_to_property_booking()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nDECLARE\n  v_order orders;\nBEGIN\n  IF NEW.item_type <> 'property' THEN\n    RETURN NEW;\n  END IF;\n  SELECT * INTO v_order FROM orders WHERE id = NEW.order_id;\n  IF v_order.id IS NULL OR v_order.vertical <> 'property' THEN\n    RETURN NEW;\n  END IF;\n  -- Reuse the order-level sync by performing a no-op update touch\n  UPDATE orders SET updated_at = now() WHERE id = NEW.order_id;\n  RETURN NEW;\nEND;\n$function$\n",
+      "hash": "619fdedb524ceb6f763a4660f7ec8a93",
+      "proname": "trg_sync_order_item_to_property_booking"
     }
   ]
 }

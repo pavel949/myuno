@@ -6,6 +6,7 @@ BEGIN
   IF md5(pg_get_functiondef('public.actor_can_operate_property(uuid,uuid,text,text)'::regprocedure)) <> '781d38004497ca05e31bcc486451a1b8'
     OR md5(pg_get_functiondef('public.actor_has_platform_admin()'::regprocedure)) <> '459831d60535d4e9fcb5c86b2ff52042'
     OR md5(pg_get_functiondef('public.trg_sync_order_to_property_booking()'::regprocedure)) <> '40bd0e79a1e210cfd64443ad10891c23'
+    OR md5(pg_get_functiondef('public.trg_sync_order_item_to_property_booking()'::regprocedure)) <> '619fdedb524ceb6f763a4660f7ec8a93'
     OR NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.property_bookings'::regclass
       AND conname='property_bookings_no_overlap' AND contype='x' AND convalidated) THEN
     RAISE EXCEPTION 'manual_booking_predecessor_drift';
