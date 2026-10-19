@@ -96,7 +96,11 @@ export default function PropertySearchPage() {
   // another editor for that same state, never a second amenities filter.
   const setAdvancedFilters = ({ guestFeatures, ...values }: FilterValues) =>
     updateFilters(
-      propertyMode === 'buy' && filterValues.instantBooking ? { ...values, instantBooking: filterValues.instantBooking } : values,
+      {
+        ...values,
+        ...(filterValues.bedrooms ? { bedrooms: filterValues.bedrooms } : {}),
+        ...(propertyMode === 'buy' && filterValues.instantBooking ? { instantBooking: filterValues.instantBooking } : {}),
+      },
       Array.isArray(guestFeatures) ? guestFeatures : [],
     );
   const setCategoryFilters = (categories: string[]) => updateFilters(filterValues, categories);
@@ -119,10 +123,10 @@ export default function PropertySearchPage() {
 
   const { filterConfig, propertyTypes } = usePropertyFilterOptions();
   // Core criteria have one editor (the search bar). Avoid a second conflicting
-  // property type/district/party selection inside the advanced filter sheet.
+  // property type/district/bedroom/party selection inside the advanced filter sheet.
   const advancedFilterConfig = useMemo<FilterConfig>(() => ({
     sections: [
-      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'listingType', 'guestsAtLeast', ...(priceBandUnavailable ? ['priceLevel'] : []), ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)).map(section => ({ ...section, titleTh: FILTER_TITLES_TH[section.id] })),
+      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'bedrooms', 'listingType', 'guestsAtLeast', ...(priceBandUnavailable ? ['priceLevel'] : []), ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)).map(section => ({ ...section, titleTh: FILTER_TITLES_TH[section.id] })),
       {
         id: 'guestFeatures', titleEn: 'Popular features', titleRu: 'Популярные удобства', titleTh: 'สิ่งอำนวยความสะดวกยอดนิยม', type: 'multi',
         options: PROPERTY_DISCOVERY_FEATURE_IDS.flatMap(id => {
@@ -133,6 +137,7 @@ export default function PropertySearchPage() {
     ],
   }), [filterConfig, propertyMode, priceBandUnavailable]);
   const advancedValues: FilterValues = { ...filterValues, guestFeatures: categoryFilters };
+  delete advancedValues.bedrooms;
   if (propertyMode === 'buy') delete advancedValues.instantBooking;
 
   const listingCatalogType = propertyMode === 'buy' ? 'sale' : 'rent';
@@ -224,10 +229,11 @@ export default function PropertySearchPage() {
   const availabilityText = (ru: string, en: string, th: string) => isRu ? ru : language === 'th' ? th : en;
 
   const advancedFilterCount = Object.entries(filterValues).reduce((count, [key, value]) => {
+    if (key === 'bedrooms') return count;
     if (propertyMode === 'buy' && key === 'instantBooking') return count;
     return count + (Array.isArray(value) ? value.length : value ? 1 : 0);
   }, categoryFilters.length);
-  const activeFilterCount = advancedFilterCount + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0) + (searchText ? 1 : 0) + (state.hasGuestFilter || nights > 0 ? 1 : 0);
+  const activeFilterCount = advancedFilterCount + searchParams.bedrooms.length + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0) + (searchText ? 1 : 0) + (state.hasGuestFilter || nights > 0 ? 1 : 0);
 
   const clearAllFilters = () => {
     const resetUrl = new URLSearchParams({ mode: propertyMode });
@@ -274,7 +280,7 @@ export default function PropertySearchPage() {
             <HomeDiscoverySearch key={queryKey} hideModeSwitch initialParams={searchParamsUrl} onSearch={submitSearch} />
           </div>
           <div className="text-body-sm text-muted-foreground" aria-label={text('Текущий поиск', 'Current search', 'การค้นหาปัจจุบัน')}>
-            <p>{summaryTypes} · {summaryAreas}{searchText ? ` · «${searchText}»` : ''}</p>
+            <p>{summaryTypes} · {summaryAreas}{searchParams.bedrooms.length > 0 ? ` · ${text('Спальни', 'Bedrooms', 'ห้องนอน')}: ${searchParams.bedrooms.join(', ')}` : ''}{searchText ? ` · «${searchText}»` : ''}</p>
             {propertyMode === 'rent' && <p>{summaryDuration} · {summaryDates} · {state.hasGuestFilter ? `${text('Гостей', 'Guests', 'ผู้เข้าพัก')}: ${searchParams.guests}` : (text('Гости не указаны', 'Guests not specified', 'ไม่ระบุจำนวนผู้เข้าพัก'))}</p>}
             {summaryExtraFilters > 0 && <p>{text('Дополнительных фильтров', 'Additional filters', 'ตัวกรองเพิ่มเติม')}: {summaryExtraFilters}</p>}
           </div>
@@ -282,7 +288,7 @@ export default function PropertySearchPage() {
             <UniversalFilter config={advancedFilterConfig} values={advancedValues} onChange={setAdvancedFilters} activeCount={advancedFilterCount}>
               <button type="button" className={cn('property-discovery-filter', advancedFilterCount > 0 && 'border-primary text-primary')}>
                 <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-                <span>{priceBandUnavailable ? (isRu ? 'Спальни и удобства' : language === 'th' ? 'ห้องนอนและสิ่งอำนวยความสะดวก' : 'Bedrooms & amenities') : (text('Цена, спальни и удобства', 'Price, bedrooms & amenities', 'ราคา ห้องนอน และสิ่งอำนวยความสะดวก'))}</span>
+                <span>{priceBandUnavailable ? text('Удобства', 'Amenities', 'สิ่งอำนวยความสะดวก') : text('Цена и удобства', 'Price & amenities', 'ราคาและสิ่งอำนวยความสะดวก')}</span>
                 {advancedFilterCount > 0 && <span className="font-mono">({advancedFilterCount})</span>}
               </button>
             </UniversalFilter>

@@ -87,3 +87,18 @@
 
 /* Optional guest text must use the field width, not the legacy 50px value slot. */
 .home-search .home-search-guests>svg{flex-shrink:0}
+
+/* Primary dates, type, area and minimum bedrooms; optional criteria disclose separately. */
+.home-search.home-search{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.home-search.home-search>.home-search-duration,.home-search.home-search>.home-search-dates,.home-search.home-search>.home-search-secondary,.home-search.home-search>.home-search-submit{grid-column:1/-1}
+.home-search.home-search>.home-search-duration{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-row:auto;gap:4px}
+.home-search-duration button{min-width:0;white-space:nowrap;padding-inline:6px}
+.home-search.home-search>.home-search-dates{border:0;padding:0}
+.home-search.home-search>.home-search-type,.home-search.home-search>.home-search-location,.home-search.home-search>.home-search-bedrooms{grid-column:auto;min-width:0}
+.home-search-secondary{min-width:0}
+.home-search-secondary summary{cursor:pointer;min-height:44px;align-content:center;font-size:14px}
+.home-search-secondary summary:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:2px}
+.home-search-secondary-fields{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding-top:8px}
+.home-search.home-search .home-search-guests{width:100%;min-width:0;padding:0}
+.home-search.home-search .home-search-query input{min-width:0}
+@media(max-width:640px){.home-search.home-search{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px}.home-search.home-search>.home-search-bedrooms{grid-column:1/-1}.home-search-date-trigger{gap:8px}.home-search-select{min-width:0}}

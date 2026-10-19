@@ -30,20 +30,52 @@ function Location() {
   return <><output data-testid="location">{location.pathname}{location.search}{location.hash}</output><button onClick={() => navigate(-1)}>History back</button><button onClick={() => navigate(1)}>History forward</button></>;
 }
 function mount(entry: string) {
-  return render(<MemoryRouter initialEntries={[entry]}><Location /><Routes>
+  const result = render(<MemoryRouter initialEntries={[entry]}><Location /><Routes>
     <Route path="/property/search" element={<PropertySearchPage />} />
     <Route path="/property/browse" element={<PropertySearchRedirect />} />
     <Route path="/discover/stay" element={<GoalEntryPage goal="stay" />} />
     <Route path="/property/rent/medium-term" element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />} />
   </Routes></MemoryRouter>);
+  fireEvent.click(result.container.querySelector('summary')!);
+  return result;
 }
 beforeEach(() => { state.language = 'en'; calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it.each([1, 2, 3, 4])('maps the %s+ bookmark to a minimum and preserves it when secondary filters reset', minimum => {
+    mount(`/property/search?bedrooms=${minimum}%2B&cats=pool`);
+    expect(state.filters.minBedrooms).toBe(minimum);
+    fireEvent.click(screen.getByRole('button', { name: /Price & amenities/ }));
+    const dialog = within(screen.getByRole('dialog'));
+    expect(dialog.queryByText('Bedrooms', { exact: true })).toBeNull();
+    fireEvent.click(dialog.getByRole('button', { name: 'Reset' }));
+    fireEvent.click(dialog.getByRole('button', { name: /Apply/ }));
+    expect(state.filters.minBedrooms).toBe(minimum);
+    expect(screen.getByRole('combobox', { name: 'Bedrooms' })).toHaveTextContent(`${minimum}+`);
+  });
+  it('applies minimum bedrooms and restores the primary selector through history and reset', () => {
+    mount('/property/search?f.bedrooms=studio&source=bookmark');
+    fireEvent.keyDown(screen.getByRole('combobox', { name: 'Bedrooms' }), { key: 'Enter' });
+    fireEvent.click(screen.getByRole('option', { name: '2+', exact: true }));
+    fireEvent.submit(screen.getByRole('form'));
+    expect(state.filters.minBedrooms).toBe(2);
+    expect(state.filters.bedrooms).toBeUndefined();
+    expect(screen.getByTestId('location')).toHaveTextContent('bedrooms=2%2B');
+    expect(screen.getByTestId('location')).toHaveTextContent('source=bookmark');
+    fireEvent.click(screen.getByRole('button', { name: 'History back' }));
+    expect(screen.getByRole('combobox', { name: 'Bedrooms' })).toHaveTextContent('Studio');
+    expect(state.filters.bedrooms).toBe('studio');
+    fireEvent.click(screen.getByRole('button', { name: 'History forward' }));
+    expect(screen.getByRole('combobox', { name: 'Bedrooms' })).toHaveTextContent('2+');
+    expect(state.filters.minBedrooms).toBe(2);
+    fireEvent.click(screen.getByRole('button', { name: 'Clear all' }));
+    expect(state.filters.minBedrooms).toBeUndefined();
+    expect(screen.getByRole('combobox', { name: 'Bedrooms' })).toHaveTextContent('Any');
+  });
   it.each([
-    ['th', 'ค้นหาที่พักในภูเก็ต', 'เช่า', 'ซื้อ', 'ราคา ห้องนอน และสิ่งอำนวยความสะดวก', 'เรียงลำดับที่พัก', 'ตัวกรอง', 'ใช้ตัวกรอง', 'สระว่ายน้ำส่วนตัว'],
-    ['ru', 'Найдите ваш дом на Пхукете', 'Аренда', 'Покупка', 'Цена, спальни и удобства', 'Сортировка', 'Фильтры', 'Применить', 'Свой бассейн'],
+    ['th', 'ค้นหาที่พักในภูเก็ต', 'เช่า', 'ซื้อ', 'ราคาและสิ่งอำนวยความสะดวก', 'เรียงลำดับที่พัก', 'ตัวกรอง', 'ใช้ตัวกรอง', 'สระว่ายน้ำส่วนตัว'],
+    ['ru', 'Найдите ваш дом на Пхукете', 'Аренда', 'Покупка', 'Цена и удобства', 'Сортировка', 'Фильтры', 'Применить', 'Свой бассейн'],
   ])('renders search and filter controls in %s without changing the query', (language, heading, rent, buy, filters, sort, sheet, apply, pool) => {
     state.language = language;
     mount('/property/search?mode=rent&q=Title');
@@ -89,22 +121,22 @@ describe('one residential results surface', () => {
     mount('/property/search?district=layan&types=villa&guests=3&tenancy=medium');
     expect(screen.getAllByRole('form')).toHaveLength(1);
     expect(screen.getByRole('searchbox', { name: 'Property name' })).toBeVisible();
-    expect(screen.getByRole('spinbutton')).toHaveValue(3);
+    expect(screen.getByRole('spinbutton', { hidden: true })).toHaveValue(3);
     expect(screen.getByText('Villa · Layan')).toBeVisible();
   });
   it('submits a property name to server filters, preserves it through history and clears it', () => {
     mount('/property/search?district=layan&source=bookmark');
-    fireEvent.change(screen.getByRole('searchbox'), { target: { value: '  Layantara  ' } });
+    fireEvent.change(screen.getByRole('searchbox', { hidden: true }), { target: { value: '  Layantara  ' } });
     fireEvent.submit(screen.getByRole('form'));
     expect(state.filters).toMatchObject({ search: 'Layantara', district: 'layan' });
     expect(screen.getByTestId('location')).toHaveTextContent('q=Layantara');
     fireEvent.click(screen.getByRole('button', { name: 'History back' }));
-    expect(screen.getByRole('searchbox')).toHaveValue('');
+    expect(screen.getByRole('searchbox', { hidden: true })).toHaveValue('');
     fireEvent.click(screen.getByRole('button', { name: 'History forward' }));
-    expect(screen.getByRole('searchbox')).toHaveValue('Layantara');
+    expect(screen.getByRole('searchbox', { hidden: true })).toHaveValue('Layantara');
     fireEvent.click(screen.getByRole('button', { name: 'Clear all' }));
     expect(state.filters.search).toBeUndefined();
-    expect(screen.getByRole('searchbox')).toHaveValue('');
+    expect(screen.getByRole('searchbox', { hidden: true })).toHaveValue('');
   });
   it('shows no implied guest restriction for legacy unfiltered browsing', () => {
     state.mobile = true;
@@ -114,13 +146,13 @@ describe('one residential results surface', () => {
   });
   it('retains an edited desktop draft and focus when resized to mobile', () => {
     const view = mount('/property/search?guests=3');
-    const guests = screen.getByRole('spinbutton');
+    const guests = screen.getByRole('spinbutton', { hidden: true });
     guests.focus();
     fireEvent.change(guests, { target: { value: '5' } });
     state.mobile = true;
     view.rerender(<MemoryRouter initialEntries={['/property/search?guests=3']}><Location /><Routes><Route path="/property/search" element={<PropertySearchPage />} /></Routes></MemoryRouter>);
-    expect(screen.getByRole('spinbutton')).toHaveValue(5);
-    expect(screen.getByRole('spinbutton')).toHaveFocus();
+    expect(screen.getByRole('spinbutton', { hidden: true })).toHaveValue(5);
+    expect(screen.getByRole('spinbutton', { hidden: true })).toHaveFocus();
     expect(screen.getAllByRole('form')).toHaveLength(1);
   });
   it('does not invent dates and hides retained rental context in the purchase summary', () => {
@@ -136,7 +168,7 @@ describe('one residential results surface', () => {
   it('keeps submitted mobile edits visible and focuses results, but history does not steal focus', () => {
     state.mobile = true;
     mount('/property/search?guests=3');
-    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '5' } });
+    fireEvent.change(screen.getByRole('spinbutton', { hidden: true }), { target: { value: '5' } });
     fireEvent.submit(screen.getByRole('form'));
     expect(screen.getByRole('form')).toBeVisible();
     expect(screen.getByRole('heading', { level: 2 })).toHaveFocus();
@@ -175,10 +207,10 @@ describe('one residential results surface', () => {
     expect(state.filters).toMatchObject({ minGuests: 5, rentTenancy: 'medium' });
     expect(screen.getByTestId('location').textContent).toContain('source=bookmark');
     fireEvent.click(screen.getByRole('button', { name: 'History back' }));
-    expect(screen.getByRole('spinbutton')).toHaveValue(3);
+    expect(screen.getByRole('spinbutton', { hidden: true })).toHaveValue(3);
     expect(state.filters.rentTenancy).toBe('short');
     fireEvent.click(screen.getByRole('button', { name: 'History forward' }));
-    expect(screen.getByRole('spinbutton')).toHaveValue(5);
+    expect(screen.getByRole('spinbutton', { hidden: true })).toHaveValue(5);
     expect(state.filters.rentTenancy).toBe('medium');
   });
   it('does not add an implicit guest restriction to an unfiltered legacy catalogue', () => {
@@ -217,7 +249,7 @@ describe('one residential results surface', () => {
     const quick = within(screen.getByRole('group', { name: 'Popular features' }));
     expect(quick.getAllByRole('button')).toHaveLength(3);
     expect(screen.queryByRole('button', { name: 'All companies' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Price, bedrooms & amenities' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Price & amenities' }));
     const dialog = within(screen.getByRole('dialog'));
     for (const label of ['Beachfront', 'Walk to beach', 'Sea view', 'Private pool', 'Shared pool', 'Washing machine', 'Pet-friendly', 'Kid-friendly', 'Parking', 'WiFi', 'Luxury', 'Air conditioning', 'Gym', 'Jacuzzi / Hot tub']) {
       expect(dialog.getByRole('button', { name: label })).toBeVisible();
@@ -227,7 +259,7 @@ describe('one residential results surface', () => {
     mount('/property/search?f.priceLevel=2&source=bookmark');
     fireEvent.click(screen.getByRole('button', { name: 'Private pool' }));
     expect(screen.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(screen.getByRole('button', { name: /Price, bedrooms/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Price & amenities/ }));
     let dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(dialog.getByRole('button', { name: 'WiFi' }));
@@ -239,7 +271,7 @@ describe('one residential results surface', () => {
     expect(url.searchParams.get('source')).toBe('bookmark');
     expect(url.searchParams.has('f.guestFeatures')).toBe(false);
     fireEvent.click(screen.getByRole('button', { name: 'Private pool' }));
-    fireEvent.click(screen.getByRole('button', { name: /Price, bedrooms/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Price & amenities/ }));
     dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'false');
     expect(dialog.getByRole('button', { name: 'WiFi' })).toHaveAttribute('aria-pressed', 'true');
@@ -273,7 +305,7 @@ describe('one residential results surface', () => {
     expect(url.searchParams.get('cats')).toBe('wifi');
     expect(url.searchParams.get('guests')).toBe('4');
     expect(screen.getByText(/Confirm pricing for your chosen duration/)).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: /Bedrooms & amenities/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Amenities/ }));
     expect(within(screen.getByRole('dialog')).queryByText('Price Level')).toBeNull();
   });
   it('drops a nightly price band when submitting a monthly search', () => {
@@ -289,7 +321,7 @@ describe('one residential results surface', () => {
 
   it('does not count a retained rental-only filter in the purchase sheet', () => {
     mount('/property/search?mode=buy&instant=1');
-    fireEvent.click(screen.getByRole('button', { name: 'Price, bedrooms & amenities' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Price & amenities' }));
     const dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByRole('button', { name: 'Apply' })).toBeVisible();
     fireEvent.click(dialog.getByRole('button', { name: 'Apply' }));
