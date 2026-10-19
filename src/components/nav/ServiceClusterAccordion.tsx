@@ -81,8 +81,13 @@ export function ServiceClusterAccordion({
             {groups.map(group => <div key={group.id} className="mb-3">
               <h4 className="text-xs font-semibold text-muted-foreground">{pickLang(language, { ru: group.labelRu, en: group.labelEn, th: CATEGORIES.find(category => category.id === group.id)?.labelTh ?? (group.id === 'other' ? 'บริการอื่น ๆ' : undefined) })}</h4>
               {group.links.map(link => <button key={`${link.id}:${link.path}`} type="button" onClick={() => onNavigate(link.path)}
-                className="block min-h-11 py-2 text-left text-sm">
+                className="flex items-center justify-between gap-2 w-full min-h-11 py-2 text-left text-sm">
                 {link.id === 'contract-ai' ? pickLang(language, { ru: 'Проверка договора с ИИ', en: 'Review a contract with AI', th: 'ตรวจสอบสัญญาด้วย AI' }) : getClusterServiceLocalizedLabel(link, language)}
+                {link.status === 'pro' && <span
+                  aria-label={pickLang(language, { ru: 'Профессиональный сервис', en: 'Professional service', th: 'บริการสำหรับผู้เชี่ยวชาญ' })}
+                  className="text-[8px] font-bold px-1.5 py-px rounded-full bg-accent/15 text-accent">
+                  PRO
+                </span>}
               </button>)}
             </div>)}
           </details>

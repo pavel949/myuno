@@ -1,10 +1,33 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ServiceClusterAccordion } from './ServiceClusterAccordion';
-import { CLUSTER_CATALOG } from '@/lib/nav/clusterCatalog';
+import { CLUSTER_CATALOG, isClusterVisibleToUser, type ClusterCatalogEntry } from '@/lib/nav/clusterCatalog';
 
 afterEach(cleanup);
 describe('compact task navigation', () => {
+  it.each([
+    ['en', 'Professional service'], ['ru', 'Профессиональный сервис'], ['th', 'บริการสำหรับผู้เชี่ยวชาญ'],
+  ] as const)('preserves localized %s professional status, role visibility and soon exclusion', (language, statusLabel) => {
+    const base = CLUSTER_CATALOG[0];
+    const service = base.services[0];
+    const cluster: ClusterCatalogEntry = { ...base, audience: 'workspace', personas: [], roles: ['owner'], sectionCategories: [], services: [
+      { ...service, id: 'fixture-pro', path: '/fixture-pro', labelEn: 'Pro tool', labelRu: 'Pro tool', labelTh: 'Pro tool', status: 'pro' },
+      { ...service, id: 'fixture-info', path: '/fixture-info', labelEn: 'Info tool', labelRu: 'Info tool', labelTh: 'Info tool', status: 'info' },
+      { ...service, id: 'fixture-soon', path: '/fixture-soon', labelEn: 'Future tool', labelRu: 'Future tool', labelTh: 'Future tool', status: 'soon' },
+    ] };
+    const onNavigate = vi.fn();
+    const props = { compact: true, language, onNavigate, sectionTitle: 'Services' };
+    const { container, rerender } = render(<ServiceClusterAccordion {...props} clusters={[cluster].filter(item => isClusterVisibleToUser(item, { role: 'guest' }))} />);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    rerender(<ServiceClusterAccordion {...props} clusters={[cluster].filter(item => isClusterVisibleToUser(item, { role: 'owner' }))} />);
+    container.querySelector('details')!.open = true;
+    expect(screen.getByLabelText(statusLabel)).toHaveTextContent('PRO');
+    expect(screen.getAllByText('PRO')).toHaveLength(1);
+    expect(screen.queryByText('Future tool')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Pro tool/ }));
+    expect(onNavigate).toHaveBeenCalledWith('/fixture-pro');
+    expect(cluster.services.map(item => item.status)).toEqual(['pro', 'info', 'soon']);
+  });
   it.each([
     ['en', 'Arrive and settle in'], ['ru', 'Приехать и обустроиться'], ['th', 'เดินทางและตั้งถิ่นฐาน'],
   ] as const)('uses plain %s task labels and the existing landing route', (language, label) => {
