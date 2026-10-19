@@ -38,6 +38,7 @@ FIXTURE_SPECS = (
     ('property-browse-ui', 'property-browse-isolated'),
     ('home-search-ui', 'home-search-isolated'),
     ('guest-complex-ui', 'guest-complex-isolated'),
+    ('shared-surfaces-ui', 'shared-surfaces-isolated'),
 )
 
 

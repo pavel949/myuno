@@ -66,7 +66,7 @@ export function ResponsiveModal({
   children,
   footer,
   className,
-  mobileHeight = 'max-h-[85vh]',
+  mobileHeight = 'max-h-[85dvh]',
 }: ResponsiveModalProps) {
   const isDesktop = useIsDesktop();
 
@@ -77,12 +77,12 @@ export function ResponsiveModal({
           className={cn(
             SIZE_CLASSES[size],
             'p-0 gap-0 overflow-hidden rounded-none border-border/60',
-            'max-h-[90vh] flex flex-col',
+            'max-h-[90dvh] flex flex-col',
             className,
           )}
         >
           {/* Header */}
-          <div className="px-6 pt-6 pb-4 border-b border-border/40">
+          <div className="shrink-0 px-6 pt-6 pb-4 border-b border-border/40">
             <DialogHeader className="space-y-1">
               <DialogTitle className="flex items-center gap-3 text-xl font-display font-bold tracking-tight">
                 {icon && (
@@ -109,7 +109,7 @@ export function ResponsiveModal({
 
           {/* Footer */}
           {footer && (
-            <div className="px-6 py-4 border-t border-border/40 bg-muted/30">
+            <div className="shrink-0 px-6 py-4 border-t border-border/40 bg-muted/30">
               <DialogFooter className="sm:justify-end gap-2">
                 {footer}
               </DialogFooter>
@@ -132,7 +132,7 @@ export function ResponsiveModal({
         )}
       >
         {/* Header */}
-        <div className="px-4 pt-4 pb-3 border-b border-border/40">
+        <div className="shrink-0 px-4 pt-4 pb-3 border-b border-border/40">
           <SheetHeader className="text-left space-y-1">
             <SheetTitle className="flex items-center gap-2.5 text-lg font-display font-bold">
               {icon && (
@@ -159,7 +159,7 @@ export function ResponsiveModal({
 
         {/* Footer */}
         {footer && (
-          <div className="sticky bottom-0 px-4 py-3 border-t border-border/40 bg-background pb-safe">
+          <div className="shrink-0 sticky bottom-0 px-4 py-3 border-t border-border/40 bg-background pb-safe">
             <SheetFooter className="gap-2">
               {footer}
             </SheetFooter>

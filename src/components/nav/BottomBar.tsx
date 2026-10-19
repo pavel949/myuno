@@ -98,6 +98,8 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
         <NavLink
           key={path}
           to={path}
+          end={exact}
+          aria-current={active ? 'page' : false}
           onClick={handleNavClick}
           onPointerDown={() => handlePrefetch(path)}
           onMouseEnter={() => handlePrefetch(path)}
@@ -122,8 +124,8 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           </div>
           <span
             className={cn(
-              'text-[10px] leading-none',
-              active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/80',
+              'max-w-full px-0.5 text-center text-[11px] leading-tight',
+              active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground',
             )}
           >
             {label}
