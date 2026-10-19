@@ -3,6 +3,7 @@
  * embedded Property Hub detail and legacy newbuilds-themed views.
  */
 import React, { useState } from 'react';
+import { projectFeatureLabel } from '@/lib/offplan/presentation';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadge';
@@ -189,7 +190,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
                           border: '1px solid hsl(var(--nb-gold) / 0.15)',
                         }}
                       >
-                        {a}
+                        {projectFeatureLabel(a, language)}
                       </span>
                     ))}
                   </div>

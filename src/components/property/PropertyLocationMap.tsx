@@ -52,10 +52,15 @@ export function PropertyLocationMap({
     const container = containerRef.current;
     if (!container || !hasKey || !isLoaded || loadError || renderError) return;
     const checkError = () => {
-      if (container.querySelector('.gm-err-container, .gm-err-message')) setRenderError(true);
+      // Observed production Google warning is an unclassed span inside this
+      // map container. Match its exact provider text, never arbitrary page copy.
+      const providerWarning = [...container.querySelectorAll('span')].some(span =>
+        span.textContent?.replace(/’/g, "'").replace(/\s+/g, ' ').trim() === "This page can't load Google Maps correctly."
+      );
+      if (container.querySelector('.gm-err-container, .gm-err-message') || providerWarning) setRenderError(true);
     };
     const observer = new MutationObserver(checkError);
-    observer.observe(container, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    observer.observe(container, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
     checkError();
     return () => observer.disconnect();
   }, [hasKey, isLoaded, loadError, renderError]);

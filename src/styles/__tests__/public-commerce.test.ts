@@ -34,6 +34,21 @@ describe('public commerce visual scope', () => {
     expect(css).toContain('.home-search > :is(.home-search-type, .home-search-location)');
     expect(css).not.toContain('.home-search > .home-search-select');
   });
+  it('keeps request radios round inside their padded clickable labels', () => {
+    const css = read('styles/public-commerce.css');
+    const radioRule = css.match(/\.public-commerce-form \[role="radio"\] \{([^}]+)\}/)?.[1];
+    expect(radioRule).toBeDefined();
+    for (const declaration of ['width: 1rem', 'height: 1rem', 'min-height: 1rem', 'flex: 0 0 1rem']) {
+      expect(radioRule).toContain(declaration);
+    }
+    const request = read('pages/services/ServiceFunctionOrder.tsx');
+    expect(request).toContain('htmlFor={`time-${slot.value}`}');
+    expect(request).toContain('flex items-center gap-2 p-3');
+    expect(request).toContain('<RadioGroupItem value={slot.value} id={`time-${slot.value}`} />');
+    const primitive = read('components/ui/radio-group.tsx');
+    expect(primitive).toContain('RadioGroupPrimitive.Item');
+    expect(primitive).toContain('focus-visible:ring-2');
+  });
   it('removes dark transport hero without changing submit behavior', () => {
     const hero = read('components/transport/TransportHeroSearch.tsx');
     expect(hero).toContain('public-transport-search relative border-b border-border bg-background text-foreground');
