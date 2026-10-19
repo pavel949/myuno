@@ -565,7 +565,7 @@ export function usePropertyBookings(propertyId?: string) {
     
     return bookings.some(booking => {
       if (excludeId && booking.id === excludeId) return false;
-      return stayOccupiesDate(booking, dateStr);
+      return propertyOrderHoldsInventory(booking.status) && stayOccupiesDate(booking, dateStr);
     });
   };
 
@@ -576,7 +576,7 @@ export function usePropertyBookings(propertyId?: string) {
     const dateStr = civilDateKey(date);
     
     return bookings.find(booking => 
-      stayOccupiesDate(booking, dateStr)
+      propertyOrderHoldsInventory(booking.status) && stayOccupiesDate(booking, dateStr)
     );
   };
 
