@@ -30,7 +30,7 @@ The platform `admin-invite-user` handler also distinguishes role/link failures a
 
 ## Activation prerequisites
 
-Both `TEAM_MEMBER_INVITES_ENABLED=true` (Edge) and `VITE_TEAM_MEMBER_ACCESS_ENABLED=true` (frontend build) are intentionally absent by default. Source publication or a function deploy alone is not approval to enable them.
+On 19 October 2026 the owner explicitly approved controlled activation after successful browser verification: production database protections, one Ignatev Estate Space/enforcement setup preserving founder authority, and deployment/activation through the Lovable project agent. No employee invitation or personal grant is included. The tracked `.env.production` now contains only the approved public `VITE_TEAM_MEMBER_ACCESS_ENABLED=true` build flag; it contains no credentials. The separate `TEAM_MEMBER_INVITES_ENABLED=true` runtime flag still requires controlled activation after deploying the reviewed handler and validating the database prerequisites. An enabled frontend alone cannot bypass the server or company enforcement gates. This source configuration is not evidence that production has been deployed or activated.
 
 Before controlled activation, verify:
 

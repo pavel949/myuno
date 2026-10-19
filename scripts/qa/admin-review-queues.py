@@ -28,6 +28,8 @@ async def main():
                 is_ru = lang == 'ru'
                 async def load(view, query='', state='populated'):
                     await page.goto('http://localhost:8080/fixture?' + urlencode({'lang': lang, 'page': view, 'route': query, 'state': state}), wait_until='networkidle')
+                    if view == 'properties':
+                        await expect(page.get_by_role('status').filter(has_text=re.compile('^' + re.escape('На этой странице нет предложений на проверке.' if is_ru else 'No pending proposals on this page.' if lang != 'th' else 'ไม่มีข้อเสนอที่รอตรวจสอบในหน้านี้') + '$'))).to_be_visible()
                 async def bounds():
                     data = await page.evaluate('''()=>({width:document.documentElement.scrollWidth,controls:[...document.querySelectorAll('button,input,[role="combobox"]')].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect();return {label:e.textContent,left:r.left,right:r.right}}),filters:[...document.querySelectorAll('fieldset button')].map(e=>({label:e.textContent,height:e.getBoundingClientRect().height,scroll:e.scrollWidth,width:e.clientWidth}))})''')
                     assert data['width'] <= width, data
@@ -110,20 +112,26 @@ async def main():
                 await no_writes()
 
                 for view in ['properties', 'projects']:
+                    load_error_text = ({'ru': 'Не удалось загрузить объекты. Статусы и количество недоступны.', 'en': 'Could not load properties. Statuses and counts are unavailable.', 'th': 'โหลดที่พักไม่ได้ จึงไม่ทราบสถานะและจำนวน'} if view == 'properties' else {'ru': 'Не удалось загрузить проекты. Статусы и количество недоступны.', 'en': 'Could not load projects. Statuses and counts are unavailable.', 'th': 'โหลดโครงการไม่ได้ จึงไม่ทราบสถานะและจำนวน'})[lang]
+                    load_error = page.get_by_role('alert').filter(has_text=load_error_text)
+                    loading_text = ({'ru': 'Загрузка объектов…', 'en': 'Loading properties…', 'th': 'กำลังโหลดที่พัก…'} if view == 'properties' else {'ru': 'Загрузка проектов…', 'en': 'Loading projects…', 'th': 'กำลังโหลดโครงการ…'})[lang]
+                    count_unavailable = 'Количество недоступно' if is_ru else 'Count unavailable' if lang != 'th' else 'ไม่ทราบจำนวน'
+                    empty_count = 'Показано: 0 из 0' if is_ru else 'Showing 0 of 0' if lang != 'th' else 'แสดง 0 จาก 0 รายการ'
                     for state in ['loading', 'error', 'empty']:
                         await load(view, state=state)
                         if state == 'loading':
-                            await expect(page.get_by_role('status')).to_contain_text(('Загрузка' if is_ru else 'Loading' if lang != 'th' else 'กำลังโหลด'))
+                            await expect(page.get_by_role('status').filter(has_text=re.compile('^' + re.escape(loading_text) + '$'))).to_be_visible()
                             await expect(page.get_by_role('button', name=re.compile(r'^' + (('Все' if is_ru else 'All' if lang != 'th' else 'ทั้งหมด')) + r'\s+—$'))).to_be_visible()
                         elif state == 'error':
-                            await expect(page.get_by_role('alert')).to_be_visible()
-                            await expect(page.get_by_role('status')).to_have_text(('Количество недоступно' if is_ru else 'Count unavailable' if lang != 'th' else 'ไม่ทราบจำนวน'))
+                            await expect(load_error).to_be_visible()
+                            await expect(page.get_by_role('status').filter(has_text=re.compile('^' + re.escape(count_unavailable) + '$'))).to_be_visible()
                         else:
-                            await expect(page.get_by_role('status')).to_contain_text('0')
+                            await expect(page.get_by_role('status').filter(has_text=re.compile('^' + re.escape(empty_count) + '$'))).to_be_visible()
                             await expect(page.get_by_role('alert')).to_have_count(0)
                         await capture(view + '-' + state)
                         if state == 'error':
-                            await page.get_by_role('button', name=('Повторить' if is_ru else 'Retry' if lang != 'th' else 'ลองอีกครั้ง'), exact=True).click()
+                            await load_error.get_by_role('button', name=('Повторить' if is_ru else 'Retry' if lang != 'th' else 'ลองอีกครั้ง'), exact=True).click()
+                            await expect(load_error).to_have_count(0)
                             await expect(page.get_by_role('alert')).to_have_count(0)
                             assert await page.evaluate('window.fixtureRetries') == 1
                         await no_writes()

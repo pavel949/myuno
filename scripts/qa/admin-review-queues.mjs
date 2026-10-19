@@ -18,6 +18,9 @@ const virtual = {
   '@/hooks/useCityCurrency': `export const useCityCurrency=()=>({code:'THB'});`,
   '@/hooks/useAdminContent': `import {useSyncExternalStore} from 'react';export function useAdminProperties(provider){useSyncExternalStore(window.fixtureSubscribe,()=>window.fixtureState);return{properties:window.fixtureState==='empty'?[]:window.fixtureProperties.filter(p=>!provider||p.provider_id===provider),isLoading:window.fixtureState==='loading',error:window.fixtureState==='error'?new Error('Synthetic read error'):null,refetch:window.fixtureRetry,createProperty:window.fixtureForbid,updateProperty:window.fixtureForbid,deleteProperty:window.fixtureForbid};}`,
   '@/hooks/usePropertyProjects': `import {useSyncExternalStore} from 'react';export function useAdminPropertyProjects(){useSyncExternalStore(window.fixtureSubscribe,()=>window.fixtureState);return{data:window.fixtureState==='empty'?[]:window.fixtureProjects,isLoading:window.fixtureState==='loading',error:window.fixtureState==='error'?new Error('Synthetic read error'):null,refetch:window.fixtureRetry};}export const useCreatePropertyProject=()=>({mutateAsync:window.fixtureForbid});export const useUpdatePropertyProject=()=>({mutateAsync:window.fixtureForbid});`,
+  // Keep the actual revision queue mounted, with an independent read-only empty list.
+  // Its review/mutation behavior remains covered by the dedicated revision UI tests.
+  '@/lib/propertyRevisions': `export const listPendingPropertyRevisions=async()=>[];export const readPropertyRevision=(...args)=>window.fixtureForbid(...args);export const reviewPropertyRevision=(...args)=>window.fixtureForbid(...args);`,
   '@/integrations/supabase/client': `export const supabase={from:(...args)=>window.fixtureForbid(...args),functions:{invoke:(...args)=>window.fixtureForbid(...args)},storage:{from:(...args)=>window.fixtureForbid(...args)}};`,
   '@/components/admin/RealEstateDomainHealthPanel': `export const RealEstateDomainHealthPanel=()=>null;`,
   '@/components/admin/PropertyProjectBulkLinkPanel': `export const PropertyProjectBulkLinkPanel=()=>null;`,
@@ -71,7 +74,7 @@ createRoot(document.getElementById('root')).render(<QueryClientProvider client={
     b.onLoad({filter:/.*/,namespace:'fixture'},args=>({contents:virtual[args.path],loader:'tsx',resolveDir:root}));
   }}],
 });
-if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/(useAdminContent|usePropertyProjects|useAdminDevelopers|useManagementCompanies)\.ts$/.test(p)))throw Error('Production data module included');
+if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|lib\/propertyRevisions\.ts$|hooks\/(useAdminContent|usePropertyProjects|useAdminDevelopers|useManagementCompanies)\.ts$/.test(p)))throw Error('Production data module included');
 if(process.argv.includes('--bundle-only'))process.exit(0);
 const response=await fetch('http://localhost:8080/src/index.css?direct');
 if(!response.ok)throw Error('Preview CSS unavailable');
