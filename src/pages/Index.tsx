@@ -44,7 +44,7 @@ const ROLE_VISIBLE_CLUSTERS: Record<LifeOSRole, ClusterId[]> = {
 };
 
 const IndexLegacy: React.FC = () => {
-  const { personas, effectivePersonas, togglePersona, setPersonas } = useUserPersonas();
+  const { personas, effectivePersonas, togglePersona, setPersonas, isLoading, isToggling, isSetting, error } = useUserPersonas();
   const { language } = useLanguage();
   const [roleSheetOpen, setRoleSheetOpen] = useState(false);
   const [appDrawerOpen, setAppDrawerOpen] = useState(false);
@@ -61,7 +61,7 @@ const IndexLegacy: React.FC = () => {
       <div className="pb-24">
         {/* 1. Hero — navy gradient, greeting, persona chip, AI search */}
         <HeroGreeting
-          personas={[...activePersonas]}
+          personas={personas}
           onRoleSheetOpen={() => setRoleSheetOpen(true)}
           onAppDrawerOpen={() => setAppDrawerOpen(true)}
         />
@@ -141,16 +141,6 @@ const IndexLegacy: React.FC = () => {
           </button>
         </div>
 
-        {/* Tiny link to switch role — keeps progressive disclosure */}
-        <div className="px-4 mt-3 text-center">
-          <button
-            type="button"
-            onClick={() => setRoleSheetOpen(true)}
-            className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {isRu ? 'Изменить роль' : 'Change role'}
-          </button>
-        </div>
       </div>
 
       <RoleSheet
@@ -159,6 +149,8 @@ const IndexLegacy: React.FC = () => {
         onClose={() => setRoleSheetOpen(false)}
         onToggle={togglePersona}
         onReorder={setPersonas}
+        isBusy={isLoading || isToggling || isSetting}
+        hasError={!!error}
       />
 
       <AppDrawer

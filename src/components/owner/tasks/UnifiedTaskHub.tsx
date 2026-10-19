@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyCompanyId, useCompanyMembers } from '@/hooks/useAgentDeals';
@@ -8,7 +8,7 @@ import { useOperationalTasks, OperationalTask } from '@/hooks/useOperationalTask
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { PageContainer } from '@/components/uno/PageContainer';
 import { PageHeader } from '@/components/uno/PageHeader';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ResponsiveModal } from '@/components/ui/responsive-modal';
 import { Plus, CheckCircle2, Clock, AlertTriangle, Wrench, Briefcase, ClipboardPlus } from 'lucide-react';
 import { toast } from 'sonner';
-import { format, isToday, isPast, isTomorrow } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { getCrmTaskConfig, CRM_TASK_TYPE_ORDER } from '@/config/crmTaskTypes';
 import { getTaskConfig } from '@/config/taskColors';
@@ -31,6 +31,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTaskNotifications } from '@/hooks/useTaskNotifications';
 import { isTaskClosedStatus, isTaskCompletedStatus } from '@/lib/tasks/taskStatus';
+import { bangkokTodayISO, civilDateKey, parseCivilDate, toBangkokDateKey } from '@/lib/hotelDates';
+import { getTodayReturnPath } from '@/lib/tasks/taskNavigation';
 
 const PRIORITY_ICONS: Record<string, React.ReactNode> = {
   high: <AlertTriangle className="h-3 w-3 text-destructive" />,
@@ -76,16 +78,37 @@ export function UnifiedTaskHub() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isRu = language === 'ru';
-  const t = (en: string, ru: string) => isRu ? ru : en;
+  const t = (en: string, ru: string, th?: string) => isRu ? ru : language === 'th' ? (th || en) : en;
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const setSearchParams = useCallback((next: URLSearchParams, options?: { replace?: boolean }) => {
+    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, options);
+  }, [navigate, location.pathname, location.hash]);
   const assigneeParam = searchParams.get('assignee');
-
-  const [activeTab, setActiveTab] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('active');
+  const tabParam = searchParams.get('tab');
+  const statusParam = searchParams.get('status');
+  const activeTab = tabParam === 'business' || tabParam === 'operations' ? tabParam : 'all';
+  const statusFilter = statusParam === 'all' || statusParam === 'completed' ? statusParam : 'active';
+  const detailId = searchParams.get('id');
+  const detailSource = searchParams.get('source');
+  const detailCompany = searchParams.get('company');
+  const detailRequested = searchParams.has('id') || searchParams.has('source');
+  const validDetail = !!detailId && (detailSource === 'crm' || detailSource === 'ops');
+  const returnTo = getTodayReturnPath(searchParams.get('returnTo'));
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [detailTask, setDetailTask] = useState<UnifiedTask | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
+  const updateFilter = (key: 'tab' | 'status', value: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set(key, value);
+    setSearchParams(next);
+  };
+  const closeDetail = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('id');
+    next.delete('source');
+    setSearchParams(next);
+  };
 
   // Form state
   const [title, setTitle] = useState('');
@@ -98,28 +121,95 @@ export function UnifiedTaskHub() {
   const [assignedTo, setAssignedTo] = useState<string>('self');
   const [propertyId, setPropertyId] = useState<string>('none');
 
-  const { data: company } = useMyCompanyId();
+  const { data: company, isLoading: companyLoading, error: companyError, refetch: refetchCompany } = useMyCompanyId();
   const companyId = company?.company_id;
-  const { data: crmTasks = [], isLoading: crmLoading } = useCrmTasks();
-  const { tasks: opsTasks, isLoading: opsLoading } = useOperationalTasks();
+  useEffect(() => {
+    if (searchParams.get('action') !== 'create' || !companyId || !user) return;
+    setSheetOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('action');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, companyId, user]);
+  const { data: crmTasks = [], isLoading: crmLoading, error: crmError, refetch: refetchCrm } = useCrmTasks();
+  const { tasks: opsTasks, isLoading: opsLoading, error: opsError, refetch: refetchOps } = useOperationalTasks();
   const { data: members = [] } = useCompanyMembers(companyId);
-  const { activeProperties } = useMyProperties();
+  const { activeProperties, isLoading: propertiesLoading, error: propertiesError, refetch: refetchProperties } = useMyProperties();
   const allProperties = activeProperties || [];
   const createCrmTask = useCreateCrmTask();
   const updateCrmTask = useUpdateCrmTask();
   const deleteCrmTask = useDeleteCrmTask();
   const { notifyAssignment } = useTaskNotifications();
 
-  // Normalize all tasks
-  const allUnified = useMemo(() => {
-    const crm = (crmTasks || []).map(normalizeCrmTask);
-    const ops = (opsTasks || []).map(normalizeOpsTask);
-    return [...crm, ...ops].sort((a, b) => {
-      if (!a.due_date) return 1;
-      if (!b.due_date) return -1;
-      return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-    });
-  }, [crmTasks, opsTasks]);
+  const propertyIds = useMemo(() => new Set((activeProperties || []).map(p => p.property_id)), [activeProperties]);
+  const propertyScopeKey = JSON.stringify([...propertyIds].sort());
+  const selectionKey = JSON.stringify([detailSource, detailId, detailCompany]);
+  const propertiesReady = !companyLoading && !!companyId && !propertiesLoading && !propertiesError;
+  // A URL selection is bound to the context in which it was opened. Do not let
+  // stale reader arrays re-resolve that selection after an actor/company/scope switch.
+  const currentScope = {
+    selectionKey,
+    actorId: user?.id || null,
+    companyId: companyId || null,
+    propertyScopeKey: propertiesReady ? propertyScopeKey : null,
+    invalidated: false,
+  };
+  const [selectionScope, setSelectionScope] = useState(currentScope);
+  let boundScope = selectionScope.selectionKey === selectionKey ? selectionScope : currentScope;
+  const scopeChanged = !!(
+    (boundScope.actorId && boundScope.actorId !== user?.id) ||
+    (boundScope.companyId && boundScope.companyId !== companyId) ||
+    (boundScope.propertyScopeKey !== null && propertiesReady && boundScope.propertyScopeKey !== propertyScopeKey)
+  );
+  if (boundScope !== selectionScope || (detailRequested && (
+    (!boundScope.actorId && currentScope.actorId) ||
+    (!boundScope.companyId && currentScope.companyId) ||
+    (boundScope.propertyScopeKey === null && currentScope.propertyScopeKey !== null) ||
+    (scopeChanged && !boundScope.invalidated)
+  ))) {
+    boundScope = {
+      ...boundScope,
+      actorId: boundScope.actorId || currentScope.actorId,
+      companyId: boundScope.companyId || currentScope.companyId,
+      propertyScopeKey: boundScope.propertyScopeKey ?? currentScope.propertyScopeKey,
+      invalidated: boundScope.invalidated || scopeChanged,
+    };
+    setSelectionScope(boundScope);
+  }
+
+  const contextReady = !!user && !!companyId && !companyLoading && !companyError && propertiesReady;
+  const scopedCrmTasks = useMemo(() => contextReady && !crmLoading && !crmError
+    ? (crmTasks || []).filter(task => task.company_id === companyId && (!task.property_id || propertyIds.has(task.property_id)))
+    : [], [contextReady, crmLoading, crmError, crmTasks, companyId, propertyIds]);
+  const scopedOpsTasks = useMemo(() => contextReady && !opsLoading && !opsError
+    ? (opsTasks || []).filter(task => propertyIds.has(task.property_id))
+    : [], [contextReady, opsLoading, opsError, opsTasks, propertyIds]);
+
+  // Resolve by source AND ID from the current loaded scope only; never query a
+  // supplied ID or fall back to the other source when it is missing.
+  const allUnified = useMemo(() => [...scopedCrmTasks.map(normalizeCrmTask), ...scopedOpsTasks.map(normalizeOpsTask)]
+    .sort((a, b) => (toBangkokDateKey(a.due_date) || '9999').localeCompare(toBangkokDateKey(b.due_date) || '9999')),
+  [scopedCrmTasks, scopedOpsTasks]);
+  const detailError = companyError || propertiesError || (detailSource === 'crm' ? crmError : opsError);
+  const detailLoading = companyLoading || propertiesLoading || (detailSource === 'crm' ? crmLoading : opsLoading);
+  const detailScopeValid = validDetail && !boundScope.invalidated && !scopeChanged && !!user &&
+    (!detailCompany || !companyId || detailCompany === companyId);
+  const detailTask = detailScopeValid && contextReady && !detailLoading && !detailError
+    ? allUnified.find(task => task.source === detailSource && task.id === detailId) || null
+    : null;
+  const detailState = !detailScopeValid ? 'unavailable' : detailError ? 'error' : detailLoading ? 'loading' : 'unavailable';
+  const openDetail = (task: UnifiedTask) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('source', task.source);
+    next.set('id', task.id);
+    if (companyId) next.set('company', companyId);
+    setSearchParams(next);
+  };
+  const retryTasks = () => {
+    if (companyError) void refetchCompany?.();
+    if (propertiesError) void refetchProperties?.();
+    void refetchCrm?.();
+    void refetchOps?.();
+  };
 
   // Filter
   const filtered = useMemo(() => {
@@ -135,15 +225,18 @@ export function UnifiedTaskHub() {
     return items;
   }, [allUnified, activeTab, statusFilter, assigneeParam]);
 
-  const isLoading = crmLoading || opsLoading;
+  const isLoading = companyLoading || propertiesLoading || crmLoading || opsLoading;
+  const loadError = companyError || propertiesError || crmError || opsError;
+  const todayKey = bangkokTodayISO();
+  const tomorrowKey = civilDateKey(addDays(parseCivilDate(todayKey), 1));
 
   const getDueDateLabel = (date: string | null) => {
-    if (!date) return null;
-    const d = new Date(date);
-    if (isToday(d)) return t('Today', 'Сегодня');
-    if (isTomorrow(d)) return t('Tomorrow', 'Завтра');
-    if (isPast(d)) return t('Overdue', 'Просрочено');
-    return format(d, 'dd.MM');
+    const day = toBangkokDateKey(date);
+    if (!day) return null;
+    if (day === todayKey) return t('Today', 'Сегодня', 'วันนี้');
+    if (day === tomorrowKey) return t('Tomorrow', 'Завтра', 'พรุ่งนี้');
+    if (day < todayKey) return t('Overdue', 'Просрочено', 'เกินกำหนด');
+    return `${day.slice(8, 10)}.${day.slice(5, 7)}`;
   };
 
   const logActivity = async (action: string, entityType: string, entityId?: string, meta?: Record<string, unknown>) => {
@@ -261,32 +354,38 @@ export function UnifiedTaskHub() {
   return (
     <PageContainer>
       <PageHeader
-        title={t('Tasks', 'Задачи')}
-        subtitle={t('Business and operational tasks in one place', 'Бизнес и операционные задачи в одном месте')}
+        title={t('Tasks', 'Задачи', 'งาน')}
+        subtitle={t('Business and operational tasks in one place', 'Бизнес и операционные задачи в одном месте', 'รวมงานธุรกิจและงานปฏิบัติการไว้ในที่เดียว')}
         showBack
-        fallbackPath="/owner"
+        fallbackPath={returnTo || (location.pathname.startsWith('/mc/') ? '/mc/today' : '/owner')}
       />
 
-      <TaskSummaryKPIs crmTasks={crmTasks || []} opsTasks={opsTasks || []} />
+      {returnTo && (
+        <Button asChild variant="outline" size="sm" className="mb-4">
+          <Link to={returnTo}>{t('Back to Today', 'Вернуться к обзору дня', 'กลับไปวันนี้')}</Link>
+        </Button>
+      )}
 
-      <div className="flex items-center justify-between mt-6 mb-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+      {!isLoading && !loadError && <TaskSummaryKPIs crmTasks={scopedCrmTasks} opsTasks={scopedOpsTasks} />}
+
+      <div className="flex flex-wrap items-center justify-between gap-2 mt-6 mb-4">
+        <Tabs value={activeTab} onValueChange={value => updateFilter('tab', value)}>
           <TabsList>
-            <TabsTrigger value="all">{t('All', 'Все')}</TabsTrigger>
+            <TabsTrigger value="all">{t('All', 'Все', 'ทั้งหมด')}</TabsTrigger>
             <TabsTrigger value="business">
               <Briefcase className="h-3.5 w-3.5 mr-1" />
-              {t('Business', 'Бизнес')}
+              {t('Business', 'Бизнес', 'ธุรกิจ')}
             </TabsTrigger>
             <TabsTrigger value="operations">
               <Wrench className="h-3.5 w-3.5 mr-1" />
-              {t('Operations', 'Операции')}
+              {t('Operations', 'Операции', 'ปฏิบัติการ')}
             </TabsTrigger>
           </TabsList>
         </Tabs>
 
         <Button size="sm" onClick={() => setSheetOpen(true)}>
           <Plus className="h-4 w-4 mr-1" />
-          {t('New', 'Новая')}
+          {t('New', 'Новая', 'ใหม่')}
         </Button>
 
         <ResponsiveModal
@@ -312,7 +411,7 @@ export function UnifiedTaskHub() {
                 >
                   <span className="flex items-center gap-1.5">
                     <Briefcase className="h-4 w-4" />
-                    {t('Business', 'Бизнес')}
+                    {t('Business', 'Бизнес', 'ธุรกิจ')}
                   </span>
                   <span className="text-[10px] text-muted-foreground font-normal">
                     {t('Clients, deals, calls', 'Клиенты, сделки, звонки')}
@@ -326,7 +425,7 @@ export function UnifiedTaskHub() {
                 >
                   <span className="flex items-center gap-1.5">
                     <Wrench className="h-4 w-4" />
-                    {t('Operations', 'Операции')}
+                    {t('Operations', 'Операции', 'ปฏิบัติการ')}
                   </span>
                   <span className="text-[10px] text-muted-foreground font-normal">
                     {t('Cleaning, repairs, check-ins', 'Уборка, ремонт, заезды')}
@@ -445,27 +544,33 @@ export function UnifiedTaskHub() {
       {/* Status filter */}
       <div className="flex gap-2 mb-4">
         {['active', 'completed', 'all'].map(s => (
-          <Button key={s} variant={statusFilter === s ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(s)}>
-            {s === 'active' ? t('Active', 'Активные') : s === 'completed' ? t('Done', 'Выполненные') : t('All', 'Все')}
+          <Button key={s} variant={statusFilter === s ? 'default' : 'outline'} size="sm" onClick={() => updateFilter('status', s)}>
+            {s === 'active' ? t('Active', 'Активные', 'กำลังดำเนินการ') : s === 'completed' ? t('Done', 'Выполненные', 'เสร็จแล้ว') : t('All', 'Все', 'ทั้งหมด')}
           </Button>
         ))}
       </div>
 
       {/* Task list */}
-      {isLoading ? (
+      {loadError ? (
+        <Card className="p-6 space-y-3" role="alert">
+          <p>{t('Could not load tasks. Please try again.', 'Не удалось загрузить задачи. Повторите попытку.', 'โหลดงานไม่สำเร็จ โปรดลองอีกครั้ง')}</p>
+          <Button variant="outline" onClick={retryTasks}>{t('Retry', 'Повторить', 'ลองอีกครั้ง')}</Button>
+        </Card>
+      ) : isLoading ? (
         <div className="space-y-3">
           {[1,2,3].map(i => <Skeleton key={i} className="h-20 w-full rounded-none" />)}
         </div>
       ) : !filtered.length ? (
         <Card className="p-8 text-center">
           <CheckCircle2 className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-          <p className="text-muted-foreground">{t('No tasks', 'Нет задач')}</p>
+          <p className="text-muted-foreground">{t('No tasks', 'Нет задач', 'ไม่มีงาน')}</p>
         </Card>
       ) : (
         <div className="space-y-2">
           {filtered.map(task => {
             const dueLabel = getDueDateLabel(task.due_date);
-            const isOverdue = task.due_date && isPast(new Date(task.due_date)) && !isToday(new Date(task.due_date)) && !isTaskCompletedStatus(task.status);
+            const dueDay = toBangkokDateKey(task.due_date);
+            const isOverdue = dueDay && dueDay < todayKey && !isTaskClosedStatus(task.status);
             const isCrm = task.source === 'crm';
             const config = isCrm ? getCrmTaskConfig(task.task_type) : getTaskConfig(task.task_type);
             const TypeIcon = config.icon;
@@ -482,7 +587,7 @@ export function UnifiedTaskHub() {
                   isOverdue && 'border-destructive/40',
                   isTaskCompletedStatus(task.status) && 'opacity-60'
                 )}
-                onClick={() => { setDetailTask(task); setDetailOpen(true); }}
+                onClick={() => openDetail(task)}
               >
                 <Checkbox
                   checked={isTaskCompletedStatus(task.status)}
@@ -503,7 +608,7 @@ export function UnifiedTaskHub() {
                     {PRIORITY_ICONS[task.priority]}
                     <span className="text-xs text-muted-foreground">{typeLabel}</span>
                     <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                      {task.source === 'crm' ? t('CRM', 'CRM') : t('Ops', 'Опер')}
+                      {task.source === 'crm' ? t('CRM', 'CRM') : t('Ops', 'Опер', 'ปฏิบัติการ')}
                     </Badge>
                     {dueLabel && (
                       <Badge variant={isOverdue ? 'destructive' : 'secondary'} className="text-[10px] px-1.5 py-0">
@@ -521,15 +626,35 @@ export function UnifiedTaskHub() {
         </div>
       )}
 
-      <TaskDetailSheet
-        task={detailTask}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-        members={members}
-        properties={propertiesList}
-        onUpdate={handleUpdate}
-        onDelete={handleDelete}
-      />
+      {detailRequested && detailTask ? (
+        <TaskDetailSheet
+          key={`${boundScope.actorId}:${boundScope.companyId}:${propertyScopeKey}:${detailTask.source}:${detailTask.id}`}
+          task={detailTask}
+          open
+          onOpenChange={open => { if (!open) closeDetail(); }}
+          members={members}
+          properties={propertiesList}
+          onUpdate={handleUpdate}
+          onDelete={handleDelete}
+        />
+      ) : detailRequested ? (
+        <ResponsiveModal
+          open
+          onOpenChange={open => { if (!open) closeDetail(); }}
+          title={t('Task details', 'Детали задачи', 'รายละเอียดงาน')}
+          size="sm"
+          footer={<Button variant="outline" onClick={closeDetail}>{t('Back to tasks', 'К списку задач', 'กลับไปที่รายการงาน')}</Button>}
+        >
+          <p role={detailState === 'error' ? 'alert' : 'status'}>
+            {detailState === 'loading'
+              ? t('Loading task…', 'Загрузка задачи…', 'กำลังโหลดงาน…')
+              : detailState === 'error'
+                ? t('Could not load this task. Please try again.', 'Не удалось загрузить задачу. Повторите попытку.', 'โหลดงานนี้ไม่สำเร็จ โปรดลองอีกครั้ง')
+                : t('This task is unavailable in the current company or property scope.', 'Эта задача недоступна в текущей компании или выбранных объектах.', 'งานนี้ไม่พร้อมใช้งานในบริษัทหรือขอบเขตอสังหาริมทรัพย์ปัจจุบัน')}
+          </p>
+          {detailState === 'error' && <Button variant="outline" onClick={retryTasks}>{t('Retry', 'Повторить', 'ลองอีกครั้ง')}</Button>}
+        </ResponsiveModal>
+      ) : null}
     </PageContainer>
   );
 }

@@ -1,0 +1,11 @@
+import React from 'react';
+import { afterEach,expect,it,vi } from 'vitest';
+import { cleanup,render,screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { Breadcrumbs } from '@/components/nav/Breadcrumbs';
+import { getRouteCrumbs,getSegmentLabel } from '@/lib/config/routeMeta';
+const state=vi.hoisted(()=>({language:'ru'}));
+vi.mock('@/contexts/LanguageContext',()=>({useLanguage:()=>({language:state.language})}));
+afterEach(cleanup);
+it.each([['ru','Главная','Управляющая компания','Все инструменты'],['en','Home','Management','All tools'],['th','หน้าแรก','บริษัทบริหารจัดการ','เครื่องมือทั้งหมด']])('keeps %s breadcrumbs in the selected language', (lang,home,company,tools)=>{state.language=lang;render(<MemoryRouter initialEntries={['/mc/modules']}><Breadcrumbs/></MemoryRouter>);expect(screen.getByRole('link',{name:home})).toHaveAttribute('href','/');expect(screen.getByRole('link',{name:company})).toHaveAttribute('href','/mc');expect(screen.getByText(tools)).toHaveAttribute('aria-current','page')});
+it.each(['today','rates','tasks','meetings','bookings-list','account-settings'])('includes Thai label for %s at the leaf',segment=>{const crumbs=getRouteCrumbs('/mc/'+segment);expect(crumbs.at(-1)?.labelTh).toMatch(/[ก-๙]/);expect(crumbs.at(-1)?.href).toBeUndefined();expect(getSegmentLabel(segment,'th')).toMatch(/[ก-๙]/)});

@@ -15,12 +15,13 @@
  */
 
 export type RouteSurface = 'customer' | 'workspace';
-export type LangCode = 'ru' | 'en';
+export type LangCode = 'ru' | 'en' | 'th';
 
 export interface SegmentMeta {
   /** Bilingual label shown in the breadcrumb. */
   labelRu: string;
   labelEn: string;
+  labelTh?: string;
   /**
    * Optional anchor — when present, the crumb is a clickable link to this path.
    * When omitted, the crumb is a non-clickable label (current page or virtual section).
@@ -33,6 +34,7 @@ export interface SegmentMeta {
 export interface BreadcrumbCrumb {
   labelRu: string;
   labelEn: string;
+  labelTh?: string;
   href?: string;
 }
 
@@ -75,10 +77,10 @@ export const SEGMENT_META: Record<string, SegmentMeta> = {
   me: { labelRu: 'Мой кабинет', labelEn: 'My Hub', href: '/me' },
   account: { labelRu: 'Аккаунт', labelEn: 'Account', href: '/account' },
   profile: { labelRu: 'Профиль', labelEn: 'Profile', href: '/profile' },
-  bookings: { labelRu: 'Бронирования', labelEn: 'Bookings', href: '/bookings' },
+  bookings: { labelTh: 'การจอง', labelRu: 'Бронирования', labelEn: 'Bookings', href: '/bookings' },
   favorites: { labelRu: 'Избранное', labelEn: 'Favorites', href: '/favorites' },
   notifications: { labelRu: 'Уведомления', labelEn: 'Notifications', href: '/notifications' },
-  messages: { labelRu: 'Сообщения', labelEn: 'Messages', href: '/messages' },
+  messages: { labelTh: 'ข้อความ', labelRu: 'Сообщения', labelEn: 'Messages', href: '/messages' },
   wallet: { labelRu: 'Кошелёк', labelEn: 'Wallet', href: '/wallet' },
   cart: { labelRu: 'Корзина', labelEn: 'Cart', href: '/cart' },
   history: { labelRu: 'История', labelEn: 'History', href: '/history' },
@@ -114,33 +116,39 @@ export const SEGMENT_META: Record<string, SegmentMeta> = {
   yacht: { labelRu: 'Яхты', labelEn: 'Yachts', href: '/yacht' },
 
   // ── Workspaces ──
-  mc: { labelRu: 'Управляющая компания', labelEn: 'Management', href: '/mc' },
+  mc: { labelTh: 'บริษัทบริหารจัดการ', labelRu: 'Управляющая компания', labelEn: 'Management', href: '/mc' },
   owner: { labelRu: 'Кабинет собственника', labelEn: 'Owner Portal', href: '/owner' },
   vendor: { labelRu: 'Партнёр', labelEn: 'Partner', href: '/vendor' },
   admin: { labelRu: 'Администрирование', labelEn: 'Admin', href: '/admin' },
   team: { labelRu: 'Команда', labelEn: 'Team', href: '/team' },
-  staff: { labelRu: 'Персонал', labelEn: 'Staff', href: '/staff' },
+  staff: { labelTh: 'ทีมงาน', labelRu: 'Персонал', labelEn: 'Staff', href: '/staff' },
   'developer-portal': { labelRu: 'Девелоперский портал', labelEn: 'Developer Portal', href: '/developer-portal' },
 
+  modules: { labelRu: 'Все инструменты', labelEn: 'All tools', labelTh: 'เครื่องมือทั้งหมด' },
+  today: { labelRu: 'Сегодня', labelEn: 'Today', labelTh: 'วันนี้' },
+  rates: { labelRu: 'Тарифы', labelEn: 'Rates', labelTh: 'ราคา' },
+  meetings: { labelRu: 'Встречи', labelEn: 'Meetings', labelTh: 'การนัดหมาย' },
+  'bookings-list': { labelRu: 'Бронирования', labelEn: 'Bookings', labelTh: 'การจอง' },
+  'account-settings': { labelRu: 'Настройки аккаунта', labelEn: 'Account settings', labelTh: 'การตั้งค่าบัญชี' },
   // ── Nested entity groups (no anchor — virtual section). Acts as a label only. ──
-  properties: { labelRu: 'Объекты', labelEn: 'Properties' },
+  properties: { labelTh: 'ที่พัก', labelRu: 'Объекты', labelEn: 'Properties' },
   services: { labelRu: 'Услуги', labelEn: 'Services' },
-  tasks: { labelRu: 'Задачи', labelEn: 'Tasks' },
-  calendar: { labelRu: 'Календарь', labelEn: 'Calendar' },
-  finance: { labelRu: 'Финансы', labelEn: 'Finance' },
-  reports: { labelRu: 'Отчёты', labelEn: 'Reports' },
+  tasks: { labelTh: 'งาน', labelRu: 'Задачи', labelEn: 'Tasks' },
+  calendar: { labelTh: 'ปฏิทิน', labelRu: 'Календарь', labelEn: 'Calendar' },
+  finance: { labelTh: 'การเงิน', labelRu: 'Финансы', labelEn: 'Finance' },
+  reports: { labelTh: 'รายงาน', labelRu: 'Отчёты', labelEn: 'Reports' },
   team_members: { labelRu: 'Сотрудники', labelEn: 'Team' },
-  contacts: { labelRu: 'Контакты', labelEn: 'Contacts' },
+  contacts: { labelTh: 'ผู้ติดต่อ', labelRu: 'Контакты', labelEn: 'Contacts' },
   deals: { labelRu: 'Сделки', labelEn: 'Deals' },
   leads: { labelRu: 'Лиды', labelEn: 'Leads' },
   orders: { labelRu: 'Заказы', labelEn: 'Orders' },
   payouts: { labelRu: 'Выплаты', labelEn: 'Payouts' },
   bookings_workspace: { labelRu: 'Бронирования', labelEn: 'Bookings' },
-  documents: { labelRu: 'Документы', labelEn: 'Documents' },
-  settings: { labelRu: 'Настройки', labelEn: 'Settings' },
-  edit: { labelRu: 'Редактирование', labelEn: 'Edit' },
-  new: { labelRu: 'Создание', labelEn: 'New' },
-  detail: { labelRu: 'Карточка', labelEn: 'Details' },
+  documents: { labelTh: 'เอกสาร', labelRu: 'Документы', labelEn: 'Documents' },
+  settings: { labelTh: 'การตั้งค่า', labelRu: 'Настройки', labelEn: 'Settings' },
+  edit: { labelTh: 'แก้ไข', labelRu: 'Редактирование', labelEn: 'Edit' },
+  new: { labelTh: 'สร้าง', labelRu: 'Создание', labelEn: 'New' },
+  detail: { labelTh: 'รายละเอียด', labelRu: 'Карточка', labelEn: 'Details' },
 };
 
 // ── Surface (header chooser) ───────────────────────────────────────────────
@@ -197,7 +205,7 @@ export function getRouteCrumbs(pathname: string): BreadcrumbCrumb[] {
 
   const segments = pathname.split('/').filter(Boolean);
   const crumbs: BreadcrumbCrumb[] = [
-    { labelRu: 'Главная', labelEn: 'Home', href: '/' },
+    { labelRu: 'Главная', labelEn: 'Home', labelTh: 'หน้าแรก', href: '/' },
   ];
 
   let acc = '';
@@ -216,6 +224,7 @@ export function getRouteCrumbs(pathname: string): BreadcrumbCrumb[] {
     crumbs.push({
       labelRu: meta?.labelRu ?? titleizeSlug(seg),
       labelEn: meta?.labelEn ?? titleizeSlug(seg),
+      labelTh: meta?.labelTh,
       href: acc,
     });
   });
@@ -223,14 +232,14 @@ export function getRouteCrumbs(pathname: string): BreadcrumbCrumb[] {
   // Strip href from the last crumb (current page).
   if (crumbs.length > 0) {
     const last = crumbs[crumbs.length - 1];
-    crumbs[crumbs.length - 1] = { labelRu: last.labelRu, labelEn: last.labelEn };
+    crumbs[crumbs.length - 1] = { labelRu: last.labelRu, labelEn: last.labelEn, labelTh: last.labelTh };
   }
 
   // Collapse middle when over 4: [Home, …, parent, current]
   if (crumbs.length > 4) {
     const head = crumbs[0];
     const tail = crumbs.slice(-2);
-    return [head, { labelRu: '…', labelEn: '…' }, ...tail];
+    return [head, { labelRu: '…', labelEn: '…', labelTh: '…' }, ...tail];
   }
 
   return crumbs;
@@ -240,5 +249,5 @@ export function getRouteCrumbs(pathname: string): BreadcrumbCrumb[] {
 export function getSegmentLabel(seg: string, lang: LangCode): string {
   const meta = SEGMENT_META[seg];
   if (!meta) return titleizeSlug(seg);
-  return lang === 'ru' ? meta.labelRu : meta.labelEn;
+  return lang === 'ru' ? meta.labelRu : lang === 'th' ? meta.labelTh ?? meta.labelEn : meta.labelEn;
 }

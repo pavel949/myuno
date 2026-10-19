@@ -1,3 +1,5 @@
+import { pickLang } from '@/lib/i18n/pickLang';
+import { dashboardBusinessRoleLabel } from './dashboardRoleLabels';
 import { useId } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,16 +15,15 @@ export function BusinessRoleSwitcher({ activeRole, onRoleChange }: BusinessRoleS
   const { language } = useLanguage();
   const queryClient = useQueryClient();
   const id = useId();
-  const isRu = language === 'ru';
 
   return (
     <label htmlFor={id} className="flex min-w-0 flex-col gap-2 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
       <span>
         <span id={`${id}-label`} className="block text-body-sm font-medium">
-          {isRu ? 'Дополнительные блоки' : 'More dashboard sections'}
+          {pickLang(language, { en: 'More dashboard sections', ru: 'Дополнительные блоки', th: 'ส่วนเพิ่มเติมในแดชบอร์ด' })}
         </span>
         <span id={`${id}-hint`} className="block text-caption text-muted-foreground">
-          {isRu ? 'Выберите, какие блоки показывать ниже' : 'Choose which sections appear below'}
+          {pickLang(language, { en: 'Choose which sections appear below', ru: 'Выберите, какие блоки показывать ниже', th: 'เลือกส่วนที่ต้องการแสดงด้านล่าง' })}
         </span>
       </span>
       <select
@@ -39,7 +40,7 @@ export function BusinessRoleSwitcher({ activeRole, onRoleChange }: BusinessRoleS
         className="h-11 w-full min-w-0 border border-input bg-background px-3 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:max-w-xs"
       >
         {BUSINESS_ROLE_LIST.map(role => (
-          <option key={role.id} value={role.id}>{isRu ? role.labelRu : role.labelEn}</option>
+          <option key={role.id} value={role.id}>{dashboardBusinessRoleLabel(language, role)}</option>
         ))}
       </select>
     </label>

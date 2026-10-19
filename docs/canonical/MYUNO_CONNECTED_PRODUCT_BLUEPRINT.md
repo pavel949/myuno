@@ -165,6 +165,15 @@ PMS rules for later implementation:
   or failed data is never rendered as available stock or a zero financial total.
 - Reuse current design tokens and controls. Do not change pricing, inventory,
   booking transitions, permissions, payment or ledger behavior merely to redesign.
+- Today projects recorded work from existing `crm_tasks` and
+  `property_operational_tasks`, including booking preparation. Task identity is
+  `(source, id)`; a CRM ID never substitutes for an operational-task ID. Task
+  navigation resolves only currently authorized loaded records, revalidates
+  actor/company/property context and preserves filters/return navigation.
+- A bounded Today snapshot must disclose incomplete sources and withhold
+  all-clear counts/readiness conclusions after loading failure or truncation.
+  Task dates use the Bangkok civil calendar; no task view certifies a booking
+  lifecycle transition, verified readiness, or financial reconciliation.
 
 ## 6. Donor patterns — adapt later, not build now
 

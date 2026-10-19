@@ -1,3 +1,5 @@
+import { categoryClassLabel, categoryGroupLabel, categoryAllocationLabel, STANDARD_CATEGORY_THAI } from './settingsLabelTranslations';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/hooks/usePropertyFinancials';
 import { useCompanyCategorySettings, useToggleCategorySetting, useInitCategorySettings, useUpdateCategoryOverrides, useBulkToggleCategorySettings } from '@/hooks/useCompanyCategorySettings';
@@ -13,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Loader2, Plus, Check, X, ChevronDown, ChevronRight, Settings2, Pencil } from 'lucide-react';
 import { useState, useMemo, useCallback, memo } from 'react';
 import { cn } from '@/lib/utils';
@@ -31,6 +33,7 @@ const CategoryRow = memo(function CategoryRow({
   overrides: CategorySetting | undefined;
   onOverride: (code: string, field: string, value: unknown) => void;
 }) {
+  const { language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [editNameEn, setEditNameEn] = useState('');
@@ -68,37 +71,37 @@ const CategoryRow = memo(function CategoryRow({
         open && 'border-border bg-muted/30',
         !isEnabled && 'opacity-40',
       )}>
-        <div className="flex items-center gap-2 py-1.5 px-2.5 hover:bg-muted/50 rounded-none">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 py-1.5 px-2.5 hover:bg-muted/50 rounded-none">
           <CollapsibleTrigger asChild>
-            <button type="button" className="shrink-0 p-0.5 text-muted-foreground hover:text-foreground transition-colors">
+            <button type="button" aria-label={pickLang(language, { en: `Configure ${displayEn}`, ru: `Настроить ${displayRu}`, th: `ตั้งค่า ${overrides?.custom_name_en || overrides?.custom_name_ru || STANDARD_CATEGORY_THAI[code] || displayEn}` })} className="col-start-1 row-start-1 shrink-0 p-0.5 text-muted-foreground hover:text-foreground transition-colors">
               {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
             </button>
           </CollapsibleTrigger>
 
           {editingName ? (
-            <div className="flex items-center gap-1.5 flex-1 mr-1" onClick={e => e.stopPropagation()}>
+            <div className="col-start-2 row-start-1 flex min-w-0 items-center gap-1.5" onClick={e => e.stopPropagation()}>
               <Input
                 value={isRu ? editNameRu : editNameEn}
                 onChange={e => isRu ? setEditNameRu(e.target.value) : setEditNameEn(e.target.value)}
-                className="h-7 text-sm px-2 flex-1"
+                className="h-7 min-w-0 text-sm px-2 flex-1"
                 autoFocus
                 onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditingName(false); }}
               />
-              <button type="button" onClick={saveName} className="p-0.5 text-primary hover:text-primary/80">
+              <button type="button" aria-label={pickLang(language, { en: 'Save', ru: 'Сохранить', th: 'บันทึก' })} onClick={saveName} className="p-0.5 text-primary hover:text-primary/80">
                 <Check className="h-3.5 w-3.5" />
               </button>
-              <button type="button" onClick={() => setEditingName(false)} className="p-0.5 text-muted-foreground hover:text-foreground">
+              <button type="button" aria-label={pickLang(language, { en: 'Cancel', ru: 'Отмена', th: 'ยกเลิก' })} onClick={() => setEditingName(false)} className="p-0.5 text-muted-foreground hover:text-foreground">
                 <X className="h-3.5 w-3.5" />
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-1 flex-1 mr-1 group/name">
-              <span className="text-sm text-foreground truncate">
-                {isRu ? displayRu : displayEn}
+            <div className="col-start-2 row-start-1 flex min-w-0 items-center gap-1 group/name">
+              <span className="text-sm text-foreground break-words min-w-0">
+                {pickLang(language, { en: displayEn, ru: displayRu, th: overrides?.custom_name_en || overrides?.custom_name_ru || STANDARD_CATEGORY_THAI[code] || displayEn })}
               </span>
               <button
                 type="button"
-                onClick={startEditName}
+                aria-label={pickLang(language, { en: 'Edit name', ru: 'Изменить название', th: 'แก้ไขชื่อ' })} onClick={startEditName}
                 className="p-0.5 opacity-0 group-hover/name:opacity-100 text-muted-foreground hover:text-foreground transition-opacity shrink-0"
               >
                 <Pencil className="h-3 w-3" />
@@ -106,18 +109,20 @@ const CategoryRow = memo(function CategoryRow({
             </div>
           )}
 
-          <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 font-normal border', CLASS_COLORS[effectiveClass as CategoryClass] || '')}>
-            {isRu ? CLASS_LABELS[effectiveClass as CategoryClass]?.ru : CLASS_LABELS[effectiveClass as CategoryClass]?.en}
-          </Badge>
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 font-normal text-muted-foreground">
-            {isRu ? GROUP_LABELS[effectiveGroup as CategoryGroup]?.ru : GROUP_LABELS[effectiveGroup as CategoryGroup]?.en}
-          </Badge>
+          <div className="col-span-2 col-start-2 row-start-2 flex min-w-0 flex-wrap gap-1.5">
+            <Badge variant="outline" className={cn('max-w-full text-[10px] px-1.5 py-0 min-h-5 whitespace-normal font-normal border', CLASS_COLORS[effectiveClass as CategoryClass] || '')}>
+              {categoryClassLabel(language, effectiveClass)}
+            </Badge>
+            <Badge variant="outline" className="max-w-full text-[10px] px-1.5 py-0 min-h-5 whitespace-normal font-normal text-muted-foreground">
+              {categoryGroupLabel(language, effectiveGroup)}
+            </Badge>
+          </div>
 
           <Switch
             checked={isEnabled}
             onCheckedChange={onToggle}
             disabled={isPending}
-            className="shrink-0"
+            className="col-start-3 row-start-1 shrink-0"
           />
         </div>
 
@@ -126,17 +131,17 @@ const CategoryRow = memo(function CategoryRow({
             {/* Inline name edit for both languages */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-[11px] text-muted-foreground">Name (EN)</Label>
+                <Label className="text-[11px] text-muted-foreground">{pickLang(language, { en: 'Name (EN)', ru: 'Название (EN)', th: 'ชื่อ (ภาษาอังกฤษ)' })}</Label>
                 <Input
-                  value={overrides?.custom_name_en || labelEn}
+                  aria-label={pickLang(language, { en: 'Name (EN)', ru: 'Название (EN)', th: 'ชื่อ (ภาษาอังกฤษ)' })} value={overrides?.custom_name_en || labelEn}
                   onChange={e => onOverride(code, 'custom_name_en', e.target.value === labelEn ? null : e.target.value)}
                   className="h-8 text-xs mt-1"
                 />
               </div>
               <div>
-                <Label className="text-[11px] text-muted-foreground">Название (RU)</Label>
+                <Label className="text-[11px] text-muted-foreground">{pickLang(language, { en: 'Name (RU)', ru: 'Название (RU)', th: 'ชื่อ (ภาษารัสเซีย)' })}</Label>
                 <Input
-                  value={overrides?.custom_name_ru || labelRu}
+                  aria-label={pickLang(language, { en: 'Name (RU)', ru: 'Название (RU)', th: 'ชื่อ (ภาษารัสเซีย)' })} value={overrides?.custom_name_ru || labelRu}
                   onChange={e => onOverride(code, 'custom_name_ru', e.target.value === labelRu ? null : e.target.value)}
                   className="h-8 text-xs mt-1"
                 />
@@ -145,36 +150,36 @@ const CategoryRow = memo(function CategoryRow({
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Тип затрат' : 'Cost type'}</Label>
+                <Label className="text-[11px] text-muted-foreground">{pickLang(language, {"en": "Cost type", "ru": "Тип затрат", "th": "ประเภทต้นทุน"})}</Label>
                 <Select value={effectiveClass} onValueChange={v => onOverride(code, 'category_class', v)}>
                   <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(Object.keys(CLASS_LABELS) as CategoryClass[]).map(k => (
-                      <SelectItem key={k} value={k} className="text-xs">{isRu ? CLASS_LABELS[k].ru : CLASS_LABELS[k].en}</SelectItem>
+                      <SelectItem key={k} value={k} className="text-xs">{categoryClassLabel(language, k)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Группа' : 'Group'}</Label>
+                <Label className="text-[11px] text-muted-foreground">{pickLang(language, {"en": "Group", "ru": "Группа", "th": "กลุ่ม"})}</Label>
                 <Select value={effectiveGroup} onValueChange={v => onOverride(code, 'category_group', v)}>
                   <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {GROUP_ORDER.map(k => (
-                      <SelectItem key={k} value={k} className="text-xs">{isRu ? GROUP_LABELS[k].ru : GROUP_LABELS[k].en}</SelectItem>
+                      <SelectItem key={k} value={k} className="text-xs">{categoryGroupLabel(language, k)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label className="text-[11px] text-muted-foreground">{isRu ? 'Распределение' : 'Allocation'}</Label>
+                <Label className="text-[11px] text-muted-foreground">{pickLang(language, {"en": "Allocation", "ru": "Распределение", "th": "วิธีจัดสรร"})}</Label>
                 <Select value={effectiveAlloc} onValueChange={v => onOverride(code, 'allocation_method', v)}>
                   <SelectTrigger className="h-8 text-xs mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(Object.keys(ALLOCATION_LABELS) as AllocationMethod[]).map(k => (
-                      <SelectItem key={k} value={k} className="text-xs">{isRu ? ALLOCATION_LABELS[k].ru : ALLOCATION_LABELS[k].en}</SelectItem>
+                      <SelectItem key={k} value={k} className="text-xs">{categoryAllocationLabel(language, k)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -182,11 +187,11 @@ const CategoryRow = memo(function CategoryRow({
 
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[11px] text-muted-foreground">{isRu ? 'Влияет на P&L' : 'Affects P&L'}</Label>
+                  <Label className="text-[11px] text-muted-foreground">{pickLang(language, {"en": "Affects P&L", "ru": "Влияет на P&L", "th": "มีผลต่อกำไรขาดทุน"})}</Label>
                   <Switch checked={effectiveProfit} onCheckedChange={v => onOverride(code, 'affects_net_profit', v)} className="scale-75" />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label className="text-[11px] text-muted-foreground">{isRu ? 'Налоговый вычет' : 'Tax deductible'}</Label>
+                  <Label className="text-[11px] text-muted-foreground">{pickLang(language, {"en": "Tax deductible", "ru": "Налоговый вычет", "th": "หักลดหย่อนภาษีได้"})}</Label>
                   <Switch checked={effectiveTax} onCheckedChange={v => onOverride(code, 'is_tax_deductible', v)} className="scale-75" />
                 </div>
               </div>
@@ -206,21 +211,22 @@ const CustomCategoryRow = memo(function CustomCategoryRow({
   isRu: boolean;
   onEdit: (cat: { code: string; name_en: string; name_ru: string }) => void;
 }) {
+  const { language } = useLanguage();
   return (
     <div className="flex items-center justify-between py-1.5 px-2.5 rounded-none hover:bg-muted/50 group/custom">
       <div className="flex items-center gap-1 flex-1 truncate">
-        <span className="text-sm text-foreground truncate">{isRu ? cat.name_ru : cat.name_en}</span>
+        <span className="text-sm text-foreground break-words min-w-0">{isRu ? cat.name_ru : cat.name_en}</span>
         <button
           type="button"
-          onClick={() => onEdit(cat)}
+          aria-label={pickLang(language, { en: 'Edit category', ru: 'Редактировать категорию', th: 'แก้ไขหมวดหมู่' })} onClick={() => onEdit(cat)}
           className="p-0.5 opacity-0 group-hover/custom:opacity-100 text-muted-foreground hover:text-foreground transition-opacity shrink-0"
         >
           <Pencil className="h-3 w-3" />
         </button>
       </div>
       <div className="flex items-center gap-1.5">
-        <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-5 font-normal border', CLASS_COLORS[cat.category_class as CategoryClass] || '')}>
-          {isRu ? CLASS_LABELS[cat.category_class as CategoryClass]?.ru : CLASS_LABELS[cat.category_class as CategoryClass]?.en}
+        <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 min-h-5 whitespace-normal font-normal border', CLASS_COLORS[cat.category_class as CategoryClass] || '')}>
+          {categoryClassLabel(language, cat.category_class)}
         </Badge>
         <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
       </div>
@@ -243,6 +249,7 @@ const GroupSection = memo(function GroupSection({
   onBulkToggle: (codes: string[], enable: boolean) => void;
   onOverride: (code: string, field: string, value: unknown) => void;
 }) {
+  const { language } = useLanguage();
   const enabledInGroup = cats.filter(c => enabledCodes ? enabledCodes.has(c.value) : true).length;
 
   return (
@@ -250,18 +257,18 @@ const GroupSection = memo(function GroupSection({
       <div className="flex items-center justify-between py-1.5 px-1">
         <div className="flex items-center gap-2">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            {isRu ? GROUP_LABELS[group].ru : GROUP_LABELS[group].en}
+            {categoryGroupLabel(language, group)}
           </h4>
           <span className="text-[10px] text-muted-foreground/60">{enabledInGroup}/{cats.length}</span>
         </div>
         <div className="flex gap-1">
           <Button variant="ghost" size="sm" className="h-6 text-[10px] px-1.5 text-muted-foreground"
             onClick={() => onBulkToggle(cats.map(c => c.value), true)} disabled={isPending}>
-            <Check className="h-2.5 w-2.5 mr-0.5" />{isRu ? 'Все' : 'All'}
+            <Check className="h-2.5 w-2.5 mr-0.5" />{pickLang(language, {"en": "All", "ru": "Все", "th": "ทั้งหมด"})}
           </Button>
           <Button variant="ghost" size="sm" className="h-6 text-[10px] px-1.5 text-muted-foreground"
             onClick={() => onBulkToggle(cats.map(c => c.value), false)} disabled={isPending}>
-            <X className="h-2.5 w-2.5 mr-0.5" />{isRu ? 'Нет' : 'None'}
+            <X className="h-2.5 w-2.5 mr-0.5" />{pickLang(language, {"en": "None", "ru": "Нет", "th": "ไม่เลือก"})}
           </Button>
         </div>
       </div>
@@ -401,7 +408,7 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
   }, [standardCategories, enabledCodes, type]);
 
   if (isLoading) {
-    return <div className="flex items-center gap-2 py-4 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> {isRu ? 'Загрузка...' : 'Loading...'}</div>;
+    return <div className="flex items-center gap-2 py-4 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> {pickLang(language, {"en": "Loading...", "ru": "Загрузка...", "th": "กำลังโหลด..."})}</div>;
   }
 
   const isMutating = toggleMutation.isPending || bulkToggleMutation.isPending;
@@ -413,19 +420,19 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
             <Settings2 className="h-4 w-4 text-muted-foreground" />
             {type === 'expense'
-              ? (isRu ? 'Статьи расходов' : 'Expense Categories')
-              : (isRu ? 'Статьи доходов' : 'Income Categories')
+              ? (pickLang(language, {"en": "Expense Categories", "ru": "Статьи расходов", "th": "หมวดหมู่รายจ่าย"}))
+              : (pickLang(language, {"en": "Income Categories", "ru": "Статьи доходов", "th": "หมวดหมู่รายรับ"}))
             }
           </h3>
           {hasSettings && (
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className="text-xs text-muted-foreground">
-                {isRu ? `${enabledCount} из ${standardCategories.length} активных` : `${enabledCount} of ${standardCategories.length} active`}
+                {pickLang(language, { en: `${enabledCount} of ${standardCategories.length} active`, ru: `${enabledCount} из ${standardCategories.length} активных`, th: `เปิดใช้งาน ${enabledCount} จาก ${standardCategories.length}` })}
               </span>
               <span className="text-muted-foreground/30">•</span>
               {Object.entries(classCount).map(([cls, count]) => (
                 <Badge key={cls} variant="outline" className={cn('text-[10px] px-1.5 py-0 h-4 font-normal border', CLASS_COLORS[cls as CategoryClass] || '')}>
-                  {count} {isRu ? CLASS_LABELS[cls as CategoryClass]?.ru?.toLowerCase() : CLASS_LABELS[cls as CategoryClass]?.en?.toLowerCase()}
+                  {count} {categoryClassLabel(language, cls).toLowerCase()}
                 </Badge>
               ))}
             </div>
@@ -433,16 +440,14 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
         </div>
         {!hasSettings && (
           <Button variant="outline" size="sm" onClick={handleInit} disabled={initMutation.isPending}>
-            {initMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : (isRu ? 'Настроить' : 'Configure')}
+            {initMutation.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : (pickLang(language, {"en": "Configure", "ru": "Настроить", "th": "ตั้งค่า"}))}
           </Button>
         )}
       </div>
 
       {!hasSettings && (
         <p className="text-xs text-muted-foreground">
-          {isRu
-            ? 'Все категории активны по умолчанию. Нажмите "Настроить", чтобы выбрать нужные и настроить классификацию.'
-            : 'All categories are active by default. Click "Configure" to customize selection and classification.'}
+          {pickLang(language, {"en": "All categories are active by default. Click \"Configure\" to customize selection and classification.", "ru": "Все категории активны по умолчанию. Нажмите \"Настроить\", чтобы выбрать нужные и настроить классификацию.", "th": "หมวดหมู่ทั้งหมดเปิดใช้งานตามค่าเริ่มต้น กด “ตั้งค่า” เพื่อเลือกและจัดประเภทหมวดหมู่"})}
         </p>
       )}
 
@@ -469,7 +474,7 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
       {customCats.length > 0 && (
         <div className="pt-2 border-t border-border">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
-            {isRu ? 'Кастомные категории' : 'Custom Categories'}
+            {pickLang(language, {"en": "Custom Categories", "ru": "Кастомные категории", "th": "หมวดหมู่ที่กำหนดเอง"})}
           </h4>
           <div className="space-y-0.5">
             {customCats.map(cat => (
@@ -486,67 +491,66 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
 
       <Button variant="outline" size="sm" onClick={() => setShowAdd(true)} className="gap-1.5 h-8">
         <Plus className="h-3.5 w-3.5" />
-        {isRu ? 'Добавить свою' : 'Add custom'}
+        {pickLang(language, {"en": "Add custom", "ru": "Добавить свою", "th": "เพิ่มหมวดหมู่เอง"})}
       </Button>
 
       {/* Add custom category dialog */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
-        <DialogContent className="sm:max-w-[420px]">
-          <DialogHeader>
+        <DialogContent hideCloseButton className="sm:max-w-[420px]">
+          <DialogClose className="absolute right-4 top-4 p-2" aria-label={pickLang(language, { en: 'Close', ru: 'Закрыть', th: 'ปิด' })}><X className="h-4 w-4" aria-hidden /></DialogClose>
+          <DialogHeader className="pr-8">
             <DialogTitle>
-              {isRu
-                ? type === 'expense' ? 'Новая статья расхода' : 'Новая статья дохода'
-                : type === 'expense' ? 'New expense category' : 'New income category'}
+              {pickLang(language, { en: type === 'expense' ? 'New expense category' : 'New income category', ru: type === 'expense' ? 'Новая статья расхода' : 'Новая статья дохода', th: type === 'expense' ? 'หมวดหมู่รายจ่ายใหม่' : 'หมวดหมู่รายรับใหม่' })}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">{isRu ? 'Название (EN)' : 'Name (EN)'}</Label>
-                <Input value={newNameEn} onChange={e => setNewNameEn(e.target.value)} placeholder="e.g. Pool Maintenance" className="h-9 mt-1" />
+                <Label className="text-xs">{pickLang(language, {"en": "Name (EN)", "ru": "Название (EN)", "th": "ชื่อ (ภาษาอังกฤษ)"})}</Label>
+                <Input aria-label={pickLang(language, { en: 'Name (EN)', ru: 'Название (EN)', th: 'ชื่อ (ภาษาอังกฤษ)' })} value={newNameEn} onChange={e => setNewNameEn(e.target.value)} placeholder={pickLang(language, { en: 'e.g. Pool Maintenance', ru: 'Например: Pool Maintenance', th: 'ตัวอย่าง: Pool Maintenance' })} className="h-9 mt-1 min-w-0" />
               </div>
               <div>
-                <Label className="text-xs">{isRu ? 'Название (RU)' : 'Name (RU)'}</Label>
-                <Input value={newNameRu} onChange={e => setNewNameRu(e.target.value)} placeholder="напр. Обслуживание бассейна" className="h-9 mt-1" />
+                <Label className="text-xs">{pickLang(language, {"en": "Name (RU)", "ru": "Название (RU)", "th": "ชื่อ (ภาษารัสเซีย)"})}</Label>
+                <Input aria-label={pickLang(language, { en: 'Name (RU)', ru: 'Название (RU)', th: 'ชื่อ (ภาษารัสเซีย)' })} value={newNameRu} onChange={e => setNewNameRu(e.target.value)} placeholder={pickLang(language, { en: 'e.g. Обслуживание бассейна', ru: 'напр. Обслуживание бассейна', th: 'ตัวอย่าง: Обслуживание бассейна' })} className="h-9 mt-1 min-w-0" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs">{isRu ? 'Тип затрат' : 'Cost type'}</Label>
+                <Label className="text-xs">{pickLang(language, {"en": "Cost type", "ru": "Тип затрат", "th": "ประเภทต้นทุน"})}</Label>
                 <Select value={newClass} onValueChange={v => setNewClass(v as CategoryClass)}>
                   <SelectTrigger className="h-9 text-xs mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {(Object.keys(CLASS_LABELS) as CategoryClass[]).map(k => (
-                      <SelectItem key={k} value={k} className="text-xs">{isRu ? CLASS_LABELS[k].ru : CLASS_LABELS[k].en}</SelectItem>
+                      <SelectItem key={k} value={k} className="text-xs">{categoryClassLabel(language, k)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="text-xs">{isRu ? 'Группа' : 'Group'}</Label>
+                <Label className="text-xs">{pickLang(language, {"en": "Group", "ru": "Группа", "th": "กลุ่ม"})}</Label>
                 <Select value={newGroup} onValueChange={v => setNewGroup(v as CategoryGroup)}>
                   <SelectTrigger className="h-9 text-xs mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {GROUP_ORDER.map(k => (
-                      <SelectItem key={k} value={k} className="text-xs">{isRu ? GROUP_LABELS[k].ru : GROUP_LABELS[k].en}</SelectItem>
+                      <SelectItem key={k} value={k} className="text-xs">{categoryGroupLabel(language, k)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div className="flex items-center justify-between py-1">
-              <Label className="text-xs">{isRu ? 'Влияет на P&L' : 'Affects P&L'}</Label>
+              <Label className="text-xs">{pickLang(language, {"en": "Affects P&L", "ru": "Влияет на P&L", "th": "มีผลต่อกำไรขาดทุน"})}</Label>
               <Switch checked={newAffectsProfit} onCheckedChange={setNewAffectsProfit} />
             </div>
             <div className="flex items-center justify-between py-1">
-              <Label className="text-xs">{isRu ? 'Налоговый вычет' : 'Tax deductible'}</Label>
+              <Label className="text-xs">{pickLang(language, {"en": "Tax deductible", "ru": "Налоговый вычет", "th": "หักลดหย่อนภาษีได้"})}</Label>
               <Switch checked={newTaxDeductible} onCheckedChange={setNewTaxDeductible} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" size="sm" onClick={() => setShowAdd(false)}>{isRu ? 'Отмена' : 'Cancel'}</Button>
+            <Button variant="outline" size="sm" onClick={() => setShowAdd(false)}>{pickLang(language, {"en": "Cancel", "ru": "Отмена", "th": "ยกเลิก"})}</Button>
             <Button size="sm" disabled={!newNameEn.trim() || createCategory.isPending} onClick={handleAddCustom}>
-              {createCategory.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (isRu ? 'Добавить' : 'Add')}
+              {createCategory.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (pickLang(language, {"en": "Add", "ru": "Добавить", "th": "เพิ่ม"}))}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -554,24 +558,25 @@ function CategorySection({ type }: { type: 'expense' | 'income' }) {
 
       {/* Edit custom category dialog */}
       <Dialog open={!!editCustom} onOpenChange={open => !open && setEditCustom(null)}>
-        <DialogContent className="sm:max-w-[380px]">
-          <DialogHeader>
-            <DialogTitle>{isRu ? 'Редактировать категорию' : 'Edit category'}</DialogTitle>
+        <DialogContent hideCloseButton className="sm:max-w-[380px]">
+          <DialogClose className="absolute right-4 top-4 p-2" aria-label={pickLang(language, { en: 'Close', ru: 'Закрыть', th: 'ปิด' })}><X className="h-4 w-4" aria-hidden /></DialogClose>
+          <DialogHeader className="pr-8">
+            <DialogTitle>{pickLang(language, {"en": "Edit category", "ru": "Редактировать категорию", "th": "แก้ไขหมวดหมู่"})}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div>
-              <Label className="text-xs">Name (EN)</Label>
-              <Input value={editCustomNameEn} onChange={e => setEditCustomNameEn(e.target.value)} className="h-9 mt-1" />
+              <Label className="text-xs">{pickLang(language, { en: 'Name (EN)', ru: 'Название (EN)', th: 'ชื่อ (ภาษาอังกฤษ)' })}</Label>
+              <Input aria-label={pickLang(language, { en: 'Name (EN)', ru: 'Название (EN)', th: 'ชื่อ (ภาษาอังกฤษ)' })} value={editCustomNameEn} onChange={e => setEditCustomNameEn(e.target.value)} className="h-9 mt-1 min-w-0" />
             </div>
             <div>
-              <Label className="text-xs">Название (RU)</Label>
-              <Input value={editCustomNameRu} onChange={e => setEditCustomNameRu(e.target.value)} className="h-9 mt-1" />
+              <Label className="text-xs">{pickLang(language, { en: 'Name (RU)', ru: 'Название (RU)', th: 'ชื่อ (ภาษารัสเซีย)' })}</Label>
+              <Input aria-label={pickLang(language, { en: 'Name (RU)', ru: 'Название (RU)', th: 'ชื่อ (ภาษารัสเซีย)' })} value={editCustomNameRu} onChange={e => setEditCustomNameRu(e.target.value)} className="h-9 mt-1 min-w-0" />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" size="sm" onClick={() => setEditCustom(null)}>{isRu ? 'Отмена' : 'Cancel'}</Button>
+            <Button variant="outline" size="sm" onClick={() => setEditCustom(null)}>{pickLang(language, {"en": "Cancel", "ru": "Отмена", "th": "ยกเลิก"})}</Button>
             <Button size="sm" disabled={!editCustomNameEn.trim()} onClick={handleSaveCustomEdit}>
-              {isRu ? 'Сохранить' : 'Save'}
+              {pickLang(language, {"en": "Save", "ru": "Сохранить", "th": "บันทึก"})}
             </Button>
           </DialogFooter>
         </DialogContent>

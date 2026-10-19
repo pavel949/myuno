@@ -2,7 +2,7 @@
 
 Status: **IMPLEMENTED CANDIDATE, NOT APPLIED; production NO-GO**.
 
-Repository: `pavel949/myuno`. Source baseline: `f868e276a`.
+Repository: `pavel949/myuno`. Source baseline: `99bec56c2`, preserving the concurrent-writer and late-rollback regressions merged through #117.
 The SQL is deliberately outside both migration journals. Neither merge nor a
 frontend deployment must apply it implicitly. PROJECT.md §§14, 16 and 20 require
 critical-stage review before activation or the next critical tranche.
@@ -62,8 +62,17 @@ primitive invocation, drift and the stop switch. The preexisting cases continue
 to test the predecessor and canonical inventory rules separately.
 
 Command: `npm test -- --run src/lib/__tests__/propertyInventory.postgres.test.ts`.
-Exact commit, results and CI links belong in the PR description; test source
-alone is not a passing result or production acceptance.
+On candidate `73286c2`, CI verify and connected-system verification both passed:
+38 PostgreSQL cases; 2,337 aggregate tests in 153 files. After integrating main's
+additional concurrency regressions, all checks must pass again on the new head.
+Test source alone is not a passing result or production acceptance.
+
+Source review on 19 October: the bounded guard preserves function signatures,
+ACLs, financial formulas and explicit legacy links. The rollback stops the
+property primitive and keeps the safer bridge. Review decision: suitable for
+review as an isolated inventory correction; **NO-GO for activation** while the
+canonical migration registration, manual writer and read-only activation checks
+remain open. This decision does not approve another critical tranche.
 
 Read-only provenance follow-up: of 61 active holds lacking `external_id`, 60
 already have explicit legacy `order_id` links and come from the active Airbnb
