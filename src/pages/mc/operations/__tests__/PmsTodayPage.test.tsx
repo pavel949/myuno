@@ -12,7 +12,7 @@ vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn() }));
 import PmsTodayPage from '../PmsTodayPage';
 function Boundary() { return <output data-testid="route-boundary">{useLocation().pathname}</output>; }
-function mount(entry = APP_ROUTES.MC_TODAY) { render(<MemoryRouter initialEntries={[entry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><PmsTodayPage /><Boundary /></MemoryRouter>); }
+function mount(entry: string = APP_ROUTES.MC_TODAY) { render(<MemoryRouter initialEntries={[entry]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><PmsTodayPage /><Boundary /></MemoryRouter>); }
 beforeEach(() => { vi.clearAllMocks(); mocks.scenario = 'populated'; });
 afterEach(() => { expect(mocks.database).not.toHaveBeenCalled(); cleanup(); });
 

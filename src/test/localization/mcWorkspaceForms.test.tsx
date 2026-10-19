@@ -111,7 +111,7 @@ for (const l of locales) {
       expect(screen.getByTestId('url')).toHaveTextContent('/mc/finance/tax-center');
       fireEvent.click(screen.getByRole('button', { name: l.company }));
       expect(screen.getByTestId('url')).toHaveTextContent('/mc/settings?tab=profile');
-      fireEvent.click(screen.getByRole('button', { name: l.back, exact: true }));
+      fireEvent.click(screen.getByRole('button', { name: l.back }));
       expect(screen.getByTestId('url')).toHaveTextContent('/mc');
     });
     it('translates shortcuts and view options without changing routes or role IDs', () => {
@@ -137,7 +137,7 @@ for (const l of locales) {
       mount(<CrmMeetingsPage />, '/mc/meetings?action=create&keep=yes');
       const dialog = await screen.findByRole('dialog', { name: l.newMeeting });
       expect(within(dialog).getByText(l.required)).toBeVisible();
-      expect(within(dialog).getByRole('button', { name: l.create, exact: true })).toBeDisabled();
+      expect(within(dialog).getByRole('button', { name: l.create })).toBeDisabled();
       expect(within(dialog).getByLabelText(l.title)).toBeRequired();
       expect(within(dialog).getByLabelText(l.date)).toBeRequired();
       expect(screen.getByTestId('url')).toHaveTextContent('/mc/meetings?keep=yes');
@@ -155,7 +155,7 @@ for (const l of locales) {
       fireEvent.change(screen.getByLabelText(l.date), { target: { value: '2026-10-20T09:30' } });
       fireEvent.change(screen.getByLabelText(l.location), { target: { value: 'Original location สถานที่เดิม' } });
       fireEvent.change(screen.getByLabelText(l.duration), { target: { value: '45' } });
-      fireEvent.click(screen.getByRole('button', { name: l.create, exact: true }));
+      fireEvent.click(screen.getByRole('button', { name: l.create }));
       await waitFor(() => expect(state.toast).toHaveBeenCalledWith(l.created));
       expect(state.write).toHaveBeenCalledExactlyOnceWith({ company_id: 'synthetic-company', host_user_id: 'synthetic-user', title: 'Original meeting ชื่อเดิม', meeting_type: 'general', scheduled_at: new Date('2026-10-20T09:30').toISOString(), duration_minutes: 45, location: 'Original location สถานที่เดิม', status: 'scheduled', notes: null, contact_id: null, deal_id: null });
     });
@@ -219,7 +219,7 @@ for (const l of locales) {
       mount(<PipelineSettingsPage />);
       expect(screen.getByRole('heading', { name: l.crm })).toBeVisible();
       fireEvent.click(screen.getByRole('button', { name: l.addStage }));
-      fireEvent.click(screen.getByRole('button', { name: l.save, exact: true }));
+      fireEvent.click(screen.getByRole('button', { name: l.save }));
       expect(state.toast.error).toHaveBeenCalledWith(l.validation);
       expect(state.write).not.toHaveBeenCalled();
       fireEvent.click(screen.getByRole('button', { name: l.cancel }));
@@ -288,7 +288,7 @@ it('keeps a failed meeting draft open with a localized error and original input'
   await screen.findByRole('dialog');
   fireEvent.change(screen.getByLabelText('หัวข้อ'), { target: { value: 'Original meeting' } });
   fireEvent.change(screen.getByLabelText('วันที่และเวลา'), { target: { value: '2026-10-20T09:30' } });
-  fireEvent.click(screen.getByRole('button', { name: 'สร้าง', exact: true }));
+  fireEvent.click(screen.getByRole('button', { name: 'สร้าง' }));
   await waitFor(() => expect(state.toast.error).toHaveBeenCalledWith('เกิดข้อผิดพลาด'));
   expect(screen.getByRole('dialog')).toBeVisible();
   expect(screen.getByLabelText('หัวข้อ')).toHaveValue('Original meeting');
