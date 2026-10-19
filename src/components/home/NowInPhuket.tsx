@@ -1,37 +1,37 @@
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import { usePhuketConditions } from '@/hooks/usePhuketConditions';
 import { cn } from '@/lib/utils';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 // WMO weather codes → short label (Open-Meteo)
-function weatherLabel(code: number | null, isRu: boolean): string {
+function weatherLabel(code: number | null, language: Language): string {
   if (code === null) return '—';
-  if (code === 0) return isRu ? 'Ясно' : 'Clear';
-  if (code <= 2) return isRu ? 'Перем. обл.' : 'Partly cloudy';
-  if (code === 3) return isRu ? 'Облачно' : 'Cloudy';
-  if (code >= 45 && code <= 48) return isRu ? 'Туман' : 'Fog';
-  if (code >= 51 && code <= 57) return isRu ? 'Морось' : 'Drizzle';
-  if (code >= 61 && code <= 67) return isRu ? 'Дождь' : 'Rain';
-  if (code >= 71 && code <= 77) return isRu ? 'Снег' : 'Snow';
-  if (code >= 80 && code <= 82) return isRu ? 'Ливни' : 'Showers';
-  if (code >= 95) return isRu ? 'Гроза' : 'Thunderstorm';
+  if (code === 0) return pickLang(language, { ru: 'Ясно', en: 'Clear', th: 'ท้องฟ้าแจ่มใส' });
+  if (code <= 2) return pickLang(language, { ru: 'Перем. обл.', en: 'Partly cloudy', th: 'มีเมฆบางส่วน' });
+  if (code === 3) return pickLang(language, { ru: 'Облачно', en: 'Cloudy', th: 'มีเมฆมาก' });
+  if (code >= 45 && code <= 48) return pickLang(language, { ru: 'Туман', en: 'Fog', th: 'หมอก' });
+  if (code >= 51 && code <= 57) return pickLang(language, { ru: 'Морось', en: 'Drizzle', th: 'ฝนปรอย' });
+  if (code >= 61 && code <= 67) return pickLang(language, { ru: 'Дождь', en: 'Rain', th: 'ฝนตก' });
+  if (code >= 71 && code <= 77) return pickLang(language, { ru: 'Снег', en: 'Snow', th: 'หิมะ' });
+  if (code >= 80 && code <= 82) return pickLang(language, { ru: 'Ливни', en: 'Showers', th: 'ฝนตกเป็นช่วง' });
+  if (code >= 95) return pickLang(language, { ru: 'Гроза', en: 'Thunderstorm', th: 'พายุฝนฟ้าคะนอง' });
   return '—';
 }
 
-function aqiLabel(band: ReturnType<typeof usePhuketConditions>['aqiBand'], isRu: boolean): string {
+function aqiLabel(band: ReturnType<typeof usePhuketConditions>['aqiBand'], language: Language): string {
   switch (band) {
-    case 'good': return isRu ? 'Хорошо' : 'Good';
-    case 'moderate': return isRu ? 'Умеренно' : 'Moderate';
-    case 'unhealthy': return isRu ? 'Вредно' : 'Unhealthy';
-    case 'hazardous': return isRu ? 'Опасно' : 'Hazardous';
+    case 'good': return pickLang(language, { ru: 'Хорошо', en: 'Good', th: 'ดี' });
+    case 'moderate': return pickLang(language, { ru: 'Умеренно', en: 'Moderate', th: 'ปานกลาง' });
+    case 'unhealthy': return pickLang(language, { ru: 'Вредно', en: 'Unhealthy', th: 'ไม่ดีต่อสุขภาพ' });
+    case 'hazardous': return pickLang(language, { ru: 'Опасно', en: 'Hazardous', th: 'อันตราย' });
     default: return '—';
   }
 }
 
 export function NowInPhuket() {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const {
     temp, aqi, rate, weatherCode, aqiBand, rateDelta,
     isLoading, hasAnyData, hasError, retry,
@@ -45,16 +45,16 @@ export function NowInPhuket() {
       <div className="px-4 pb-5">
         <div className="flex items-center justify-between border-t border-b border-border/[0.05] py-3.5 px-3.5 gap-3">
           <div className="text-[11px] tracking-[0.04em] uppercase text-muted-foreground/60 font-medium">
-            {isRu ? 'Данные сейчас недоступны' : 'Live data unavailable'}
+            {pickLang(language, { ru: 'Данные сейчас недоступны', en: 'Live data unavailable', th: 'ข้อมูลไม่พร้อมใช้งาน' })}
           </div>
           <button
             type="button"
             onClick={retry}
-            className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] font-semibold text-foreground hover:text-primary transition-colors"
-            aria-label={isRu ? 'Повторить' : 'Retry'}
+            className="flex min-h-11 items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] font-semibold text-foreground hover:text-primary transition-colors"
+            aria-label={pickLang(language, { ru: 'Повторить', en: 'Retry', th: 'ลองอีกครั้ง' })}
           >
             <RefreshCw className="w-3 h-3" />
-            {isRu ? 'Повторить' : 'Retry'}
+            {pickLang(language, { ru: 'Повторить', en: 'Retry', th: 'ลองอีกครั้ง' })}
           </button>
         </div>
       </div>
@@ -79,14 +79,14 @@ export function NowInPhuket() {
     <div className="px-4 pb-5">
       <div className="grid grid-cols-3 border-t border-b border-border/[0.05] py-3.5">
         <DataCell
-          label={isRu ? 'Пхукет' : 'Phuket'}
+          label={pickLang(language, { ru: 'Пхукет', en: 'Phuket', th: 'ภูเก็ต' })}
           value={temp}
-          sub={weatherLabel(weatherCode, isRu)}
+          sub={weatherLabel(weatherCode, language)}
         />
         <DataCell
           label="AQI"
           value={aqi}
-          sub={aqiLabel(aqiBand, isRu)}
+          sub={aqiLabel(aqiBand, language)}
           border
         />
         <DataCell
@@ -116,9 +116,9 @@ function DataCell({ label, value, sub, border }: { label: string; value: string;
 function SkeletonCell({ border }: { border?: boolean }) {
   return (
     <div className={cn('px-3.5', border && 'border-l border-border/[0.05] -ml-px')}>
-      <div className="h-[10px] w-12 bg-muted/60 mb-2 animate-pulse rounded-sm" />
-      <div className="h-[18px] w-14 bg-muted animate-pulse rounded-sm" />
-      <div className="h-[11px] w-16 bg-muted/60 mt-1.5 animate-pulse rounded-sm" />
+      <div className="h-[10px] w-12 bg-muted/60 mb-2 animate-pulse" />
+      <div className="h-[18px] w-14 bg-muted animate-pulse" />
+      <div className="h-[11px] w-16 bg-muted/60 mt-1.5 animate-pulse" />
     </div>
   );
 }

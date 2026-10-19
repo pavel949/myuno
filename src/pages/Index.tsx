@@ -1,11 +1,4 @@
-/**
- * Index — 5-зонная главная myUNO Home.
- *
- * Wave-1 IA cleanup (2026-06): IndexLegacy убран, оставлен только этот
- * 5-зонный layout. До 2026-06-17 файл назывался IndexSimplified и жил под
- * тонкой Suspense-обёрткой Index.tsx — обёртка удалена, так как
- * AnimatedRoutes уже ленивит и оборачивает все маршруты в Suspense.
- */
+/** Authenticated personal Home, preserving the existing legacy/V2 rollout gate. */
 import React, { useState } from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -15,11 +8,13 @@ import { useFeatureFlag } from '@/hooks/useFeatureFlag';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import IndexV2 from './IndexV2';
 
-
 import { HeroGreeting } from '@/components/home/HeroGreeting';
-import { PendingPaymentsChip } from '@/components/home/PendingPaymentsChip';
 import { AppDrawer } from '@/components/nav/AppDrawer';
 import { WorkspaceHomeBanner } from '@/components/home/WorkspaceHomeBanner';
+import { PendingPaymentsChip } from '@/components/home/PendingPaymentsChip';
+import { PersonalHomeActions } from '@/components/home/PersonalHomeActions';
+import { HomePreferencesEntry } from '@/components/home/HomePreferencesEntry';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { ActiveSituation } from '@/components/home/ActiveSituation';
 import { LifecycleSmartTip } from '@/components/home/LifecycleSmartTip';
 import { NowInPhuket } from '@/components/home/NowInPhuket';
@@ -27,10 +22,8 @@ import { RoleSheet } from '@/components/home/RoleSheet';
 import { OfficialNews } from '@/components/home/OfficialNews';
 import { PersonalGrid } from '@/components/superapp/PersonalGrid';
 import { ClusterRail } from '@/components/superapp/ClusterRail';
-import { FLAT_SERVICES, type ClusterId } from '@/lib/catalog/taxonomy';
+import type { ClusterId } from '@/lib/catalog/taxonomy';
 import { useLifeOSRole, type LifeOSRole } from '@/hooks/useLifeOS';
-
-const TOTAL_SERVICES = FLAT_SERVICES.length;
 
 /** Same gating as Navigator v3 — what each role sees on Home as icon rails. */
 const ROLE_VISIBLE_CLUSTERS: Record<LifeOSRole, ClusterId[]> = {
@@ -51,15 +44,14 @@ const IndexLegacy: React.FC = () => {
   const [showMore, setShowMore] = useState(false);
 
   const activePersonas = effectivePersonas;
-  const isRu = language === 'ru';
 
   const role = useLifeOSRole();
   const visibleClusters = ROLE_VISIBLE_CLUSTERS[role] ?? ['live', 'arrive', 'legal'];
 
   return (
     <AppLayout showHeader={false} showFooter>
-      <div className="pb-24">
-        {/* 1. Hero — navy gradient, greeting, persona chip, AI search */}
+      <div className="mx-auto w-full max-w-3xl pb-24">
+        {/* Compact identity; account actions take priority over interests. */}
         <HeroGreeting
           personas={personas}
           onRoleSheetOpen={() => setRoleSheetOpen(true)}
@@ -68,7 +60,7 @@ const IndexLegacy: React.FC = () => {
 
         <WorkspaceHomeBanner />
 
-        {/* 2. Pending payments — single compact chip (only renders if count>0) */}
+        <PersonalHomeActions />
         <PendingPaymentsChip />
 
         {/* 3. ActiveSituation — live signals for the active persona (only when real data) */}
@@ -77,11 +69,11 @@ const IndexLegacy: React.FC = () => {
           onRoleSheetOpen={() => setRoleSheetOpen(true)}
         />
 
-        {/* 3.5 Lifecycle smart tips — § 9.4 triggers (only when a signal fires) */}
-        <LifecycleSmartTip />
+        <HomePreferencesEntry onOpen={() => setRoleSheetOpen(true)} />
 
-        {/* 4. PersonalGrid — top-8 mini-apps ranked by role + personas */}
-        <PersonalGrid />
+        {/* Recommendations follow the stable personal actions. */}
+        <PersonalGrid limit={4} />
+        <LifecycleSmartTip />
 
         {/* 5. Первый (главный для роли) кластер всегда виден */}
         {visibleClusters.slice(0, 1).map((cid) => (
@@ -98,8 +90,8 @@ const IndexLegacy: React.FC = () => {
             >
               <span className="text-[14px] font-medium text-foreground">
                 {showMore
-                  ? (isRu ? 'Свернуть' : 'Show less')
-                  : (isRu ? 'Показать больше: разделы, погода, новости' : 'Show more: sections, weather, news')}
+                  ? pickLang(language, { ru: 'Свернуть', en: 'Show less', th: 'แสดงน้อยลง' })
+                  : pickLang(language, { ru: 'Ещё разделы, погода и новости', en: 'More sections, weather and news', th: 'หมวดหมู่ สภาพอากาศ และข่าวเพิ่มเติม' })}
               </span>
               <ChevronDown
                 className={`w-4 h-4 text-muted-foreground transition-transform ${showMore ? 'rotate-180' : ''}`}
@@ -119,7 +111,6 @@ const IndexLegacy: React.FC = () => {
         )}
 
 
-
         {/* 5. «Все приложения» — single explicit door to everything else */}
         <div className="px-4 mt-6">
           <button
@@ -129,13 +120,9 @@ const IndexLegacy: React.FC = () => {
           >
             <span>
               <span className="block text-[15px] font-semibold tracking-tight text-foreground">
-                {isRu ? 'Все услуги и приложения' : 'All services and apps'}
+                {pickLang(language, { ru: 'Все разделы', en: 'All sections', th: 'ทุกหมวดหมู่' })}
               </span>
-              <span className="block text-[12px] text-muted-foreground mt-0.5">
-                {isRu
-                  ? `Жильё, визы, врач, транспорт и ещё ${Math.max(TOTAL_SERVICES - 4, 0)} сервисов`
-                  : `Housing, visas, doctors, transport and ${Math.max(TOTAL_SERVICES - 4, 0)} more services`}
-              </span>
+
             </span>
             <ArrowRight className="w-5 h-5 text-muted-foreground" strokeWidth={2} />
           </button>
@@ -167,7 +154,7 @@ const Index: React.FC = () => {
   // Wave 2 — Home V2 rollout gate.
   // DB flag `feature_flag:home_v2` is the global kill-switch (set to `{enabled: true}`).
   // While we observe internal feedback, the *client* additionally restricts V2 to
-  // signed-in admins / uno_team members. Everyone else keeps the legacy 5-zone Home.
+  // signed-in admins. Everyone else keeps the legacy Home.
   // When ready for GA, drop the `isAdmin` guard or invert it.
   const homeV2Flag = useFeatureFlag('home_v2', false);
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();

@@ -90,6 +90,15 @@ jobs:
         run: npm run lint
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Network-denying compact home smoke fixture
+        id: home_browser
+        timeout-minutes: 4
+        continue-on-error: true
+        # Explicit browser opt-in; the default smoke matrix shares the 180s
+        # per-fixture cap. Exhaustive coverage is an optional separate run.
+        run: timeout 180s node scripts/qa/compact-personal-home-ui.mjs --run-browser
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Network-denying PMS browser fixtures
         timeout-minutes: 30
         id: browser
@@ -125,7 +134,8 @@ jobs:
           FOCUSED: ${{ steps.focused.outcome }}
           BUILD: ${{ steps.build.outcome }}
           BROWSER: ${{ steps.browser.outcome }}
+          HOME_BROWSER: ${{ steps.home_browser.outcome }}
           LINT: ${{ steps.lint.outcome }}
         run: |
-          printf 'types=%s unit=%s focused=%s build=%s browser=%s lint=%s\n' "$TYPES" "$UNIT" "$FOCUSED" "$BUILD" "$BROWSER" "$LINT" | tee -a "$GITHUB_STEP_SUMMARY"
-          test "$TYPES" = success && test "$UNIT" = success && test "$FOCUSED" = success && test "$BUILD" = success && test "$BROWSER" = success && test "$LINT" = success
+          printf 'types=%s unit=%s focused=%s build=%s browser=%s home_browser=%s lint=%s\n' "$TYPES" "$UNIT" "$FOCUSED" "$BUILD" "$BROWSER" "$HOME_BROWSER" "$LINT" | tee -a "$GITHUB_STEP_SUMMARY"
+          test "$TYPES" = success && test "$UNIT" = success && test "$FOCUSED" = success && test "$BUILD" = success && test "$BROWSER" = success && test "$HOME_BROWSER" = success && test "$LINT" = success
