@@ -139,6 +139,7 @@ export {
   normalizeAmenityId,
   normalizeAmenities,
   normalizeDistrictId,
+  districtFilterAliases,
   normalizePropertyType,
   getAmenityById,
   getDistrictById,

@@ -4,6 +4,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { PUBLIC_RENT_ELIGIBILITY, PUBLIC_SALE_ELIGIBILITY, PUBLIC_SALE_PRICE_ELIGIBILITY } from '@/lib/real-estate/propertyDetailIntent';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
+import { districtFilterAliases } from '@/lib/taxonomies';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { selectPropertyCatalogFirst } from '@/lib/publicPropertyCatalog';
 import {
@@ -354,7 +355,8 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
     query = query.eq('is_quick_sale', true);
   }
 
-  const dists = filters.districts?.length ? filters.districts : filters.district ? [filters.district] : [];
+  const requestedDistricts = filters.districts?.length ? filters.districts : filters.district ? [filters.district] : [];
+  const dists = [...new Set(requestedDistricts.flatMap(districtFilterAliases))];
   if (dists.length === 1) {
     query = query.eq('district', dists[0]);
   } else if (dists.length > 1) {
