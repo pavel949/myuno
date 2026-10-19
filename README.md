@@ -35,7 +35,7 @@ Rent / Buy            Structured              Exceptional /
 
 The system follows **One Operational Reality**: different surfaces project the same canonical property, booking, payment, person, service and accounting facts instead of creating parallel copies.
 
-### Current operating proof
+### Target operating acceptance
 
 The current P0 is to operate:
 
@@ -46,6 +46,8 @@ Ignatev Estate
 ```
 
 with secure team isolation, founder consolidated oversight, and one Layantara booking proven from quote through checkout and P&L.
+
+This is an acceptance target, not evidence that Spaces are populated/enforced or that live booking, payment and P&L acceptance has passed. Reconcile progress with current source and dated verification; preserve accepted gates rather than restarting the roadmap.
 
 ## Core domain boundaries
 
@@ -64,6 +66,8 @@ with secure team isolation, founder consolidated oversight, and one Layantara bo
 Do not merge `service_orders` into `orders` merely for neatness. Do not infer that an `orders` success means property inventory was reserved.
 
 ## Product surfaces
+
+This is the product map, not an implementation/readiness matrix. A route or source file alone does not prove operational readiness; use PROJECT.md and the relevant current acceptance evidence.
 
 - **Homes** — Rent / Buy discovery, project portal, home/unit detail, availability/terms, quote, booking/enquiry.
 - **Services Marketplace** — REQUEST / BOOK / BOOK+PAY structured services.
