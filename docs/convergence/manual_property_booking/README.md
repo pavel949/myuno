@@ -14,6 +14,8 @@ One transaction writes the existing canonical order, guest participant, property
 
 A request-level transaction lock serializes identical IDs; the property-row lock serializes competing commands for one unit. The receipt binds the full normalized payload, property and actor. A retry rechecks authority and actual persisted state before returning the original order. Changed payload, actor, property, cancelled/altered order, missing guest or missing hold fails. A forged raw order cannot become a receipt. Retry identity uses epoch timestamps so changing connection timezone does not change intent.
 
+Client adoption converts returned instants to Bangkok civil days in both the property calendar and the multi-property timeline. The timeline queries its half-open window with explicit `+07:00` boundaries; an arrival shortly after local midnight must not appear on the preceding UTC day. Other writers/report projections are not certified by this tranche.
+
 ## Evidence and verification
 
 Read-only inspection on 2026-10-19 captured the exact deployed authorization helpers, customer-update guard and item-to-inventory trigger in `predecessors.json`. `forward.sql` rejects changed helper definitions and a bridge without the accepted explicit-link/Bangkok correction. This candidate is intentionally outside both migration journals. The production bridge is still the old predecessor until the prerequisite is registered and activated.
