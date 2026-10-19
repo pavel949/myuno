@@ -57,6 +57,19 @@ async def main():
                             raise AssertionError({'viewport': width, 'page': size, 'box': box, 'noInternalOverflow': internal})
                         previous = snapshot
                         await asyncio.sleep(0.05)
+                async def ready_dialog():
+                    dialog = page.get_by_role('dialog', name=copy['open'])
+                    await expect(dialog).to_be_visible()
+                    await expect(dialog).to_have_attribute('data-state', 'open')
+                    await bounds(dialog)
+                    # Radix registers its Escape listener/layer in effects. A preserved
+                    # hidden selection value is not evidence that a reopened layer is ready.
+                    await page.wait_for_function("""() => {
+                        const dialog = document.querySelector('[role="dialog"][data-state="open"]');
+                        return dialog && dialog.contains(document.activeElement)
+                            && getComputedStyle(dialog).pointerEvents !== 'none';
+                    }""", timeout=5000)
+                    return dialog
                 async def selection(expected):
                     await expect(page.get_by_test_id('selection')).to_have_text(json.dumps(expected, separators=(',', ':')))
                 try:
@@ -68,9 +81,8 @@ async def main():
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-home.png'))
                     trigger = page.get_by_role('button', name=copy['open'], exact=True)
                     await trigger.press('Enter')
-                    dialog = page.get_by_role('dialog', name=copy['open'])
-                    await expect(dialog).to_be_visible()
-                    await bounds(dialog)
+                    dialog = await ready_dialog()
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-selected.png'))
                     rows = dialog.locator('ol > li')
                     await expect(rows).to_have_count(3)
                     for button in await rows.get_by_role('button').all():
@@ -92,6 +104,7 @@ async def main():
                     await done.click()
                     await expect(dialog).to_have_count(0)
                     await trigger.click()
+                    dialog = await ready_dialog()
                     await selection(['pet_owner', 'couple', 'family'])
                     await page.keyboard.press('Escape')
                     await expect(dialog).to_have_count(0)
@@ -114,9 +127,7 @@ async def main():
                             await expect(page.get_by_role('link', name=copy['business'])).to_have_attribute('href', '/vendor')
                         if state.startswith('preferences-'):
                             await page.get_by_role('button', name=copy['open'], exact=True).click()
-                            dialog = page.get_by_role('dialog', name=copy['open'])
-                            await expect(dialog).to_be_visible()
-                            await bounds(dialog)
+                            dialog = await ready_dialog()
                             for button in await dialog.locator('section').get_by_role('button').all():
                                 await expect(button).to_be_disabled()
                             await expect(dialog.get_by_role('alert' if state.endswith('error') else 'status')).to_be_visible()
