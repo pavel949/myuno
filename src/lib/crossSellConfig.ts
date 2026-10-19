@@ -14,8 +14,10 @@ export interface CrossSellLink {
   path: string;
   labelEn: string;
   labelRu: string;
+  labelTh?: string;
   descriptionEn?: string;
   descriptionRu?: string;
+  descriptionTh?: string;
   gradient?: string; // Tailwind gradient classes
 }
 
@@ -33,10 +35,10 @@ export const CROSS_SELL_MATRIX: Record<string, CrossSellLink[]> = {
     { id: 'transport', icon: Car, path: '/transport', labelEn: 'Transport', labelRu: 'Трансфер', descriptionEn: 'To the marina', descriptionRu: 'До причала', gradient: 'from-slate-500 to-slate-700' },
   ],
   property: [
-    { id: 'services', icon: Brush, path: '/services', labelEn: 'Home Services', labelRu: 'Домашний сервис', descriptionEn: 'Cleaning & more', descriptionRu: 'Уборка и сервис', gradient: 'from-success to-primary' },
-    { id: 'legal', icon: Scale, path: '/legal', labelEn: 'Legal', labelRu: 'Юристы', descriptionEn: 'Contract help', descriptionRu: 'Помощь с договором', gradient: 'from-accent to-accent' },
-    { id: 'transport', icon: Car, path: '/transport', labelEn: 'Transport', labelRu: 'Транспорт', descriptionEn: 'Vehicle rental', descriptionRu: 'Аренда авто', gradient: 'from-slate-500 to-slate-700' },
-    { id: 'market', icon: ShoppingCart, path: '/market', labelEn: 'Market', labelRu: 'Маркет', descriptionEn: 'Home essentials', descriptionRu: 'Товары для дома', gradient: 'from-success to-success' },
+    { id: 'services', labelTh: 'บริการสำหรับบ้าน', descriptionTh: 'ทำความสะอาดและอื่น ๆ', icon: Brush, path: '/services', labelEn: 'Home Services', labelRu: 'Домашний сервис', descriptionEn: 'Cleaning & more', descriptionRu: 'Уборка и сервис', gradient: 'from-success to-primary' },
+    { id: 'legal', labelTh: 'กฎหมาย', descriptionTh: 'ช่วยเรื่องสัญญา', icon: Scale, path: '/legal', labelEn: 'Legal', labelRu: 'Юристы', descriptionEn: 'Contract help', descriptionRu: 'Помощь с договором', gradient: 'from-accent to-accent' },
+    { id: 'transport', labelTh: 'การเดินทาง', descriptionTh: 'เช่ารถ', icon: Car, path: '/transport', labelEn: 'Transport', labelRu: 'Транспорт', descriptionEn: 'Vehicle rental', descriptionRu: 'Аренда авто', gradient: 'from-slate-500 to-slate-700' },
+    { id: 'market', labelTh: 'ร้านค้า', descriptionTh: 'ของใช้จำเป็นในบ้าน', icon: ShoppingCart, path: '/market', labelEn: 'Market', labelRu: 'Маркет', descriptionEn: 'Home essentials', descriptionRu: 'Товары для дома', gradient: 'from-success to-success' },
   ],
   tours: [
     { id: 'transport', icon: Car, path: '/transport', labelEn: 'Transport', labelRu: 'Трансфер', descriptionEn: 'Get there easy', descriptionRu: 'Удобный трансфер', gradient: 'from-slate-500 to-slate-700' },

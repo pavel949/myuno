@@ -6,11 +6,11 @@ import PropertySearchPage from '../PropertySearchPage';
 import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import GoalEntryPage from '@/pages/discover/GoalEntryPage';
 
-const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false }));
+const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false, language: 'en' }));
 const calendar = vi.hoisted(() => ({ pending: false, failed: false, hasNextPage: false }));
 vi.mock('@/hooks/useSearchPropertyAvailability', () => ({ useSearchPropertyAvailability: (_ids: string[], start?: string, end?: string) => ({ enabled: !!start && !!end, availableIds: new Set(), pending: calendar.pending, failed: calendar.failed, retry: vi.fn() }) }));
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
-vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: [] }] }, isLoading: false, isError: false, hasNextPage: calendar.hasNextPage, fetchNextPage: vi.fn() }; } }));
 vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => { throw new Error('Guest discovery must not fetch management companies'); } }));
 vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ districts: [{ id: 'layan', valueKey: 'layan', labelEn: 'Layan', labelRu: 'Лаян' }], isLoading: false }), applyQuickFilters: (items: unknown) => items }));
@@ -37,10 +37,28 @@ function mount(entry: string) {
     <Route path="/property/rent/medium-term" element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />} />
   </Routes></MemoryRouter>);
 }
-beforeEach(() => { calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
+beforeEach(() => { state.language = 'en'; calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it.each([
+    ['th', 'ค้นหาที่พักในภูเก็ต', 'เช่า', 'ซื้อ', 'ราคา ห้องนอน และสิ่งอำนวยความสะดวก', 'เรียงลำดับที่พัก', 'ตัวกรอง', 'ใช้ตัวกรอง', 'สระว่ายน้ำส่วนตัว'],
+    ['ru', 'Найдите ваш дом на Пхукете', 'Аренда', 'Покупка', 'Цена, спальни и удобства', 'Сортировка', 'Фильтры', 'Применить', 'Свой бассейн'],
+  ])('renders search and filter controls in %s without changing the query', (language, heading, rent, buy, filters, sort, sheet, apply, pool) => {
+    state.language = language;
+    mount('/property/search?mode=rent&q=Title');
+    expect(screen.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+    expect(screen.getByRole('button', { name: rent, exact: true })).toBeVisible();
+    expect(screen.getByRole('button', { name: buy, exact: true })).toBeVisible();
+    expect(screen.getByRole('combobox', { name: sort })).toBeVisible();
+    expect(screen.getByRole('button', { name: pool, exact: true })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: filters, exact: true }));
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText(sheet, { exact: true })).toBeVisible();
+    expect(within(dialog).getByRole('button', { name: apply, exact: true })).toBeVisible();
+    fireEvent.click(within(dialog).getByRole('button', { name: apply, exact: true }));
+    expect(screen.getByTestId('location')).toHaveTextContent('mode=rent&q=Title');
+  });
   it.each([false, true])('discloses checked-night filtering without changing selected dates (mobile=%s)', mobile => {
     state.mobile = mobile;
     mount('/property/search?mode=rent&checkIn=2027-11-10&checkOut=2027-11-15&guests=3');
