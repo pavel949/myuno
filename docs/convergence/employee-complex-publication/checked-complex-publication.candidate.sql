@@ -280,7 +280,7 @@ BEGIN
  PERFORM public.assert_managed_complex_content(saved);
  IF saved.owner_id IS NOT NULL OR saved.content_author_user_id IS DISTINCT FROM auth.uid()
  OR saved.management_company_id IS DISTINCT FROM p_company_id OR saved.authoring_space_id IS DISTINCT FROM p_operating_space_id
- OR saved.approval_status IS DISTINCT FROM CASE WHEN p_submit THEN 'pending' ELSE 'draft' END OR saved.is_active IS DISTINCT FROM false
+ OR saved.approval_status IS DISTINCT FROM (CASE WHEN p_submit THEN 'pending' ELSE 'draft' END) OR saved.is_active IS DISTINCT FROM false
  OR public.actor_has_complex_authoring_scope(p_company_id,p_operating_space_id,'edit') IS NOT TRUE THEN
   RAISE EXCEPTION 'complex creation contract was not preserved' USING ERRCODE='42501'; END IF;
  RETURN public.managed_complex_draft_projection(saved);
@@ -312,7 +312,7 @@ BEGIN
  PERFORM public.assert_managed_complex_content(saved);
  IF saved.id IS NULL OR (to_jsonb(saved)-(public.managed_complex_draft_fields()||ARRAY['approval_status','is_active','updated_at']))
  IS DISTINCT FROM (to_jsonb(original)-(public.managed_complex_draft_fields()||ARRAY['approval_status','is_active','updated_at']))
- OR saved.approval_status IS DISTINCT FROM CASE WHEN p_submit THEN 'pending' ELSE 'draft' END OR saved.is_active IS DISTINCT FROM false
+ OR saved.approval_status IS DISTINCT FROM (CASE WHEN p_submit THEN 'pending' ELSE 'draft' END) OR saved.is_active IS DISTINCT FROM false
  OR public.actor_can_author_managed_complex(p_complex_id,'edit') IS NOT TRUE THEN
   RAISE EXCEPTION 'complex update contract was not preserved' USING ERRCODE='42501'; END IF;
  RETURN public.managed_complex_draft_projection(saved);
@@ -355,7 +355,7 @@ BEGIN
  approved_at=CASE WHEN p_decision='approve' THEN clock_timestamp() ELSE NULL END WHERE id=p_complex_id RETURNING * INTO saved;
  IF (to_jsonb(saved)-ARRAY['approval_status','is_active','rejection_reason','reviewed_by','reviewed_at','approved_by','approved_at','updated_at'])
  IS DISTINCT FROM (to_jsonb(original)-ARRAY['approval_status','is_active','rejection_reason','reviewed_by','reviewed_at','approved_by','approved_at','updated_at'])
- OR saved.approval_status IS DISTINCT FROM CASE WHEN p_decision='approve' THEN 'approved' ELSE 'rejected' END
+ OR saved.approval_status IS DISTINCT FROM (CASE WHEN p_decision='approve' THEN 'approved' ELSE 'rejected' END)
  OR saved.is_active IS DISTINCT FROM (p_decision='approve') OR saved.reviewed_by IS DISTINCT FROM auth.uid()
  OR public.actor_has_platform_admin() IS NOT TRUE THEN
   RAISE EXCEPTION 'complex review contract was not preserved' USING ERRCODE='42501'; END IF;

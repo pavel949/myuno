@@ -119,7 +119,7 @@ suite('vendor moderation on real isolated PostgreSQL', () => {
     const id = await service();
     await sql`UPDATE public.restaurants SET approval_status='rejected',rejection_reason='Missing details' WHERE id=${id}`;
     expect(await notifications(id)).toEqual([{
-      user_id: providerUser, title: '❌ Контент отклонён!', body: '"Synthetic restaurant" отклонён. Причина: Missing details',
+      user_id: providerUser, title: '❌ Контент отклонён', body: '"Synthetic restaurant" отклонён. Причина: Missing details',
       type: 'content_moderation', is_read: false,
       data: { item_id: id, item_type: 'restaurants', new_status: 'rejected', rejection_reason: 'Missing details' },
     }]);
@@ -170,7 +170,7 @@ suite('vendor moderation on real isolated PostgreSQL', () => {
     await sql`UPDATE public.properties SET approval_status='rejected' WHERE id=${id}`;
     await sql`UPDATE public.properties SET approval_status='draft' WHERE id=${id}`;
     expect(await notifications(id)).toHaveLength(1);
-    expect((await notifications(id))[0].body).toContain('Not specified');
+    expect((await notifications(id))[0].body).toContain('Не указана');
   });
 
   it('preserves atomic failure when notification insertion is rejected', async () => {

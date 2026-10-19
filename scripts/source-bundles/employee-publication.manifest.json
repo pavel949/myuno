@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "34f5ec9e1140efa8b0edfb9fbf398f981d5374dd",
+  "sourceCommit": "0ea175ea1887c45cbff3f21b91d535ddd3020038",
   "activation": [
     {
       "id": "task-ceiling",
@@ -24,7 +24,7 @@
     {
       "id": "complex-publication",
       "path": "docs/convergence/employee-complex-publication/checked-complex-publication.candidate.sql",
-      "sha256": "ba94c6beb85c4adcdb15894f3747a7fdab52d2b0108cbc059ec514308c91d526"
+      "sha256": "ad0fc2431a3b5dd6a4e02a2384a5d0cd1ec35c479d8bd5010d72a3edebffc6ba"
     },
     {
       "id": "property-revisions",

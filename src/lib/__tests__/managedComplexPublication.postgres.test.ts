@@ -44,14 +44,16 @@ async function create(actor=U.editor,patch:Record<string,postgres.JSONValue>={na
  return as(actor,async tx=>(await tx`SELECT create_managed_complex_checked(${company},${space},${tx.json(patch)},${submit}) AS result`)[0].result);
 }
 async function version(key:string) {return (await sql`SELECT updated_at::text value FROM property_complexes WHERE id=${key}`)[0].value as string;}
+// Bind opaque revision strings as text: postgres-js otherwise infers timestamptz
+// and serializes through JavaScript Date, truncating server microseconds.
 async function save(actor:string,key:string,patch:Record<string,postgres.JSONValue>,submit=false,expected?:string) {
  const revision=expected??await version(key);
- return as(actor,async tx=>(await tx`SELECT save_managed_complex_draft_checked(${key},${revision}::timestamptz,${tx.json(patch)},${submit}) AS result`)[0].result);
+ return as(actor,async tx=>(await tx`SELECT save_managed_complex_draft_checked(${key},${revision}::text::timestamptz,${tx.json(patch)},${submit}) AS result`)[0].result);
 }
 async function read(actor:string,key:string) {return as(actor,async tx=>(await tx`SELECT read_managed_complex_draft_checked(${key}) AS result`)[0].result);}
 async function review(actor:string,key:string,decision='approve',reason:string|null=null,expected?:string) {
  const revision=expected??await version(key);
- return as(actor,async tx=>(await tx`SELECT review_managed_complex_submission_checked(${key},${revision}::timestamptz,${decision},${reason}) AS result`)[0].result);
+ return as(actor,async tx=>(await tx`SELECT review_managed_complex_submission_checked(${key},${revision}::text::timestamptz,${decision},${reason}) AS result`)[0].result);
 }
 async function withRollback(fn:()=>Promise<void>,undo:()=>Promise<unknown>) {try {await fn();} finally {await undo();}}
 
@@ -112,6 +114,11 @@ suite('governed complex publication on real isolated PostgreSQL',()=>{
   try {if(sql) await sql.end({timeout:2});} finally {if(started) run('pg_ctl',['-D',join(directory,'data'),'-m','immediate','-w','stop']); if(directory) rmSync(directory,{recursive:true,force:true});}
  });
 
+ it('preserves all six fractional digits when binding opaque PostgreSQL revision strings',async()=>{
+  const token='2026-10-19T07:36:06.811163+00:00';
+  const [roundtrip]=await sql`SELECT to_char(${token}::text::timestamptz,'US') AS microseconds`;
+  expect(roundtrip.microseconds).toBe('811163');
+ });
  it('reproduces then closes the legacy company-membership FOR ALL bypass',async()=>{
   expect(preCandidateBypass).toBe(true);
   expect(await as(U.editor,tx=>tx`UPDATE property_complexes SET name='Forbidden' WHERE id=${LEGACY} RETURNING id`)).toEqual([]);

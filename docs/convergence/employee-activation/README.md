@@ -1,6 +1,6 @@
 # Employee authoring: atomic source assembly plan
 
-**SOURCE ONLY / NO-GO for production activation.** Input reference: `34f5ec9e1140efa8b0edfb9fbf398f981d5374dd` (19 October 2026). Current integrated-head CI and live equivalence are separate pending gates. This plan creates reviewable files; it neither connects to a database nor authorizes applying SQL.
+**SOURCE ONLY / NO-GO for production activation.** Input reference: `0ea175ea1887c45cbff3f21b91d535ddd3020038` (19 October 2026). Current integrated-head CI and live equivalence are separate pending gates. This plan creates reviewable files; it neither connects to a database nor authorizes applying SQL.
 
 ## Scope and user boundary
 
@@ -60,3 +60,7 @@ The rollback assumes the full selected core transaction committed. If the activa
 - Independent source review found and prompted repairs for CR-only line-comment boundaries and malformed transaction wrappers. Regression coverage includes both; current pinned SQL had neither malformed input.
 - Targeted strict TypeScript checked against the repository's ES2020 target. ESLint has no errors for the generator/test source; the declaration file is typechecked and outside ESLint's configured extensions.
 - No SQL database execution, live validation, migration registration, push, build or full-project typecheck was performed by this assembly task.
+
+### Reviewed syntax repair (19 October 2026)
+
+Reference `0ea175ea1887c45cbff3f21b91d535ddd3020038` adds parentheses around the three complex create/save/review CASE operands inside PL/pgSQL IF conditions. PostgreSQL treats an unparenthesized CASE THEN as the IF-expression delimiter, causing the observed CI setup syntax error ([PostgreSQL 16 expression reader](https://github.com/postgres/postgres/blob/REL_16_STABLE/src/pl/plpgsql/src/pl_gram.y#L2534-L2637)). Independent source review confirmed this narrow repair preserves all authorization/state conditions. Only the complex candidate checksum changed; all nine other input checksums were rechecked unchanged. The new source regression passes; a fresh real PostgreSQL CI result is still required.

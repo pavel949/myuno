@@ -61,6 +61,16 @@ describe('managed complex publication source contract (not PostgreSQL execution)
     expect(sql).toContain('to_jsonb(saved)');
     expect(sql).toContain('governed complex content and review require checked RPCs');
   });
+  it('parenthesizes CASE operands inside PL/pgSQL IF conditions', () => {
+    // PL/pgSQL reads IF expressions until a top-level THEN. Without parentheses,
+    // CASE's THEN terminates that expression early (CI: syntax error at end of input).
+    const functions = ['create_managed_complex_checked', 'save_managed_complex_draft_checked', 'review_managed_complex_submission_checked'];
+    for (const name of functions) {
+      const body = sql.split(`CREATE FUNCTION public.${name}(`)[1].split('$$;')[0];
+      expect(body).toMatch(/saved\.approval_status IS DISTINCT FROM \(CASE WHEN [^\n]+ END\)/);
+      expect(body).not.toMatch(/IS DISTINCT FROM CASE\b/);
+    }
+  });
   it('provides atomic creation with content and no invented owner', () => {
     const create = sql.split('CREATE FUNCTION public.create_managed_complex_checked')[1].split('CREATE FUNCTION public.save_managed_complex_draft_checked')[0];
     expect(create).toContain('p_patch jsonb,p_submit boolean DEFAULT false');

@@ -89,6 +89,13 @@ describe('managed publication source contract (not database execution)', () => {
     const referenced=[...new Set([...publisher.matchAll(/\bop\.(\w+)/g)].map(match=>match[1]))];
     expect(referenced.filter(column=>!viewFields.has(column))).toEqual(['amenities']);
   });
+  it('binds fixture revision strings as text before the server timestamp cast', () => {
+    for(const suite of ['managedPropertyPublication','managedComplexPublication']) {
+      const source=readFileSync(`src/lib/__tests__/${suite}.postgres.test.ts`,'utf8');
+      expect(source).not.toMatch(/\$\{[^}]+\}::timestamptz/);
+      expect(source).toMatch(/\$\{[^}]+\}::text::timestamptz/);
+    }
+  });
   it('reserves only the new audit action names and requires cutover for the new platform-admin delegation path', () => {
     expect(candidate()).toContain("action NOT IN ('managed_property_draft_created','managed_property_publication_changed')");
     const sql=readFileSync('docs/convergence/employee-property-publication/platform-admin-authoring-delegation.candidate.sql','utf8');
