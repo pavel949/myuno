@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
@@ -18,8 +19,9 @@ interface AlertConfig {
   icon: React.ElementType;
   label: string;
   labelRu: string;
+  labelTh?: string;
   href: string;
-  getCount: (data: any) => number;
+  getCount: (data: any) => number | null;
   urgentThreshold: number;
   warningThreshold: number;
 }
@@ -67,10 +69,11 @@ const ALERTS: AlertConfig[] = [
   {
     id: 'moderation',
     icon: FileText,
-    label: 'Pending Moderation',
-    labelRu: 'На модерации',
+    label: 'Listings & properties pending review',
+    labelRu: 'Листинги и объекты на проверке',
+    labelTh: 'รายการและที่พักรอตรวจสอบ',
     href: '/admin/operations?tab=moderation',
-    getCount: (d) => d?.pendingContent || 0,
+    getCount: (d) => d?.pendingContent ?? null,
     urgentThreshold: 10,
     warningThreshold: 3,
   },
@@ -145,13 +148,14 @@ export function AdminOperationalAlerts() {
     ...alert,
     count: alert.getCount(data),
     level: getAlertLevel(
-      alert.getCount(data), 
+      alert.getCount(data) ?? 0,
       alert.urgentThreshold, 
       alert.warningThreshold
     ),
-  })).filter((a) => a.count > 0);
+  })).filter((a) => a.count === null || a.count > 0);
 
-  const totalAlerts = activeAlerts.reduce((sum, a) => sum + a.count, 0);
+  const totalAlerts = activeAlerts.reduce((sum, a) => sum + (a.count ?? 0), 0);
+  const hasUnknownCount = activeAlerts.some(alert => alert.count === null);
 
   return (
     <Surface variant="card" padding="md" radius="xl">
@@ -164,7 +168,7 @@ export function AdminOperationalAlerts() {
         />
         {totalAlerts > 0 && (
           <Badge variant="destructive" className="font-bold">
-            {totalAlerts}
+            {totalAlerts}{hasUnknownCount ? '+' : ''}
           </Badge>
         )}
       </div>
@@ -198,22 +202,22 @@ export function AdminOperationalAlerts() {
                 )}
                 onClick={() => navigate(alert.href)}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <Icon className={cn(
-                    "h-4 w-4",
+                    "h-4 w-4 shrink-0",
                     isUrgent && "text-destructive",
                     isWarning && "text-warning"
                   )} />
-                  <span className="text-sm font-medium">
-                    {isRu ? alert.labelRu : alert.label}
+                  <span className="text-sm font-medium whitespace-normal text-left">
+                    {pickLang(language, { en: alert.label, ru: alert.labelRu, th: alert.labelTh })}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-2">
                   <Badge 
                     variant={isUrgent ? "destructive" : isWarning ? "secondary" : "outline"}
                     className="font-bold"
                   >
-                    {alert.count}
+                    {alert.count ?? (pickLang(language, { en: "Unknown", ru: "Неизвестно", th: "ไม่ทราบ" }))}
                   </Badge>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </div>

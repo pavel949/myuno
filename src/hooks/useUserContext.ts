@@ -325,6 +325,7 @@ export function useUserContext() {
     
     // Available roles
     availableRoles,
+    hasMCMembership,
     hasRole,
     isOrgMember,
     

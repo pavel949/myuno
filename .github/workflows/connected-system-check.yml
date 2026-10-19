@@ -96,8 +96,11 @@ jobs:
           browser_failed=0
           mkdir -p /tmp/browser
           for fixture in \
+            scripts/qa/employee-invite-ui.mjs \
             scripts/qa/home-preferences-ui.mjs \
             scripts/qa/property-editor-ui.mjs \
+            scripts/qa/admin-review-queues.mjs \
+            scripts/qa/moderation-queue-ui.mjs \
             scripts/qa/ui-backlog-salvage.mjs \
             scripts/qa/pms-dashboard-ui.mjs \
             scripts/qa/mc-workspace-ui.mjs \

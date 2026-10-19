@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import React, { memo, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,9 @@ interface PricingStepProps {
   formData: PropertyFormData;
   updateFormData: (updates: Partial<PropertyFormData>) => void;
   selectedProject?: PropertyProject | null;
+  authoringOnly?: boolean;
+  canEditPricing?: boolean;
+  canEditBookingTerms?: boolean;
 }
 
 // Amenity labels for display
@@ -119,7 +123,7 @@ const PRICING_TEMPLATES = [
   },
 ] as const;
 
-function PricingStepInner({ formData, updateFormData, selectedProject }: PricingStepProps) {
+function PricingStepInner({ formData, updateFormData, selectedProject, authoringOnly = false, canEditPricing = true, canEditBookingTerms = true }: PricingStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const [pricingMode, setPricingMode] = useState<'short_term' | 'long_term' | 'sale' | null>(null);
@@ -155,6 +159,8 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
 
   return (
     <div className="space-y-3">
+      {authoringOnly && (!canEditPricing || !canEditBookingTerms) && <p className="text-sm text-muted-foreground" role="status">{pickLang(language, { en: 'Prices and booking settings need separate permissions. Disabled values remain unchanged; you can still save listing details.', ru: 'Тарифы и настройки бронирования требуют отдельных прав. Недоступные значения не меняются; данные объявления можно сохранить.', th: 'ราคาและการตั้งค่าการจองต้องมีสิทธิ์แยกต่างหาก ค่าที่ปิดไว้จะไม่เปลี่ยน คุณยังบันทึกรายละเอียดประกาศได้' })}</p>}
+      <fieldset disabled={!canEditBookingTerms} className="min-w-0">
       {/* ─── Pricing Templates — always first ─── */}
       <Card>
         <CardHeader className="pb-3">
@@ -194,6 +200,9 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
           </div>
         </CardContent>
       </Card>
+      </fieldset>
+
+      {!authoringOnly && <>
       {/* ─── Ownership structure (legal form for reporting) — distinct from "Management rights" on step 1 ─── */}
       <CollapsibleSection
         icon={<Landmark className="h-4 w-4" />}
@@ -225,6 +234,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         </div>
       </CollapsibleSection>
 
+      </>}
       {/* ─── Rental Terms — always open ─── */}
       <CollapsibleSection
         icon={<DollarSign className="h-4 w-4" />}
@@ -240,6 +250,8 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
                 <Input
                   type="number"
                   min={0}
+                  disabled={!canEditPricing}
+                  aria-label={pickLang(language, { en: 'Price per night', ru: 'Цена за ночь', th: 'ราคาต่อคืน' })}
                   value={formData.price_per_night}
                   onChange={(e) => updateFormData({ price_per_night: e.target.value })}
                   placeholder="2500"
@@ -267,6 +279,8 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
                 <Input
                   type="number"
                   min={1}
+                  disabled={!canEditBookingTerms}
+                  aria-label={pickLang(language, { en: 'Minimum nights', ru: 'Минимум ночей', th: 'จำนวนคืนขั้นต่ำ' })}
                   value={formData.min_stay_nights}
                   onChange={(e) => updateFormData({ min_stay_nights: Number(e.target.value) })}
                 />
@@ -279,6 +293,8 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
                 <Input
                   type="number"
                   min={1}
+                  disabled={!canEditBookingTerms}
+                  aria-label={pickLang(language, { en: 'Maximum guests', ru: 'Максимум гостей', th: 'จำนวนผู้เข้าพักสูงสุด' })}
                   value={formData.max_guests}
                   onChange={(e) => updateFormData({ max_guests: Number(e.target.value) })}
                 />
@@ -291,7 +307,9 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
               <Label>{isRu ? 'Заезд' : 'Check-in'}</Label>
               <Input
                 type="time"
-                value={formData.check_in_time}
+                disabled={!canEditBookingTerms}
+                  aria-label={pickLang(language, { en: 'Check-in time', ru: 'Время заезда', th: 'เวลาเช็กอิน' })}
+                  value={formData.check_in_time}
                 onChange={(e) => updateFormData({ check_in_time: e.target.value })}
               />
             </div>
@@ -299,7 +317,9 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
               <Label>{isRu ? 'Выезд' : 'Check-out'}</Label>
               <Input
                 type="time"
-                value={formData.check_out_time}
+                disabled={!canEditBookingTerms}
+                  aria-label={pickLang(language, { en: 'Check-out time', ru: 'Время выезда', th: 'เวลาเช็กเอาต์' })}
+                  value={formData.check_out_time}
                 onChange={(e) => updateFormData({ check_out_time: e.target.value })}
               />
             </div>
@@ -313,6 +333,8 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
               </p>
             </div>
             <Switch
+              disabled={!canEditBookingTerms}
+              aria-label={pickLang(language, { en: 'Instant booking', ru: 'Мгновенное бронирование', th: 'การจองทันที' })}
               checked={formData.instant_booking}
               onCheckedChange={(checked) => updateFormData({ instant_booking: checked })}
             />
@@ -320,6 +342,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         </div>
       </CollapsibleSection>
 
+      <fieldset disabled={!canEditPricing || !canEditBookingTerms} className="min-w-0">
       {/* ─── Seasonal Pricing — collapsed ─── */}
       <CollapsibleSection
         icon={<DollarSign className="h-4 w-4" />}
@@ -334,6 +357,9 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         />
       </CollapsibleSection>
 
+      </fieldset>
+
+      <fieldset disabled={!canEditPricing} className="min-w-0">
       {/* ─── Discounts — collapsed ─── */}
       <CollapsibleSection
         icon={<DollarSign className="h-4 w-4" />}
@@ -347,6 +373,9 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         <DiscountsSection formData={formData} updateFormData={updateFormData} />
       </CollapsibleSection>
 
+      </fieldset>
+
+      <fieldset disabled={!canEditPricing} className="min-w-0">
       {/* ─── Advanced Pricing Rules — collapsed ─── */}
       <CollapsibleSection
         icon={<DollarSign className="h-4 w-4" />}
@@ -355,6 +384,9 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         <PricingRulesSection formData={formData} updateFormData={updateFormData} />
       </CollapsibleSection>
 
+      </fieldset>
+
+      <fieldset disabled={!canEditPricing} className="min-w-0">
       {/* ─── Payment & Deposit — collapsed ─── */}
       <CollapsibleSection
         icon={<DollarSign className="h-4 w-4" />}
@@ -364,6 +396,9 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         <PaymentPolicySection formData={formData} updateFormData={updateFormData} />
       </CollapsibleSection>
 
+      </fieldset>
+
+      <fieldset disabled={!canEditPricing} className="min-w-0">
       {/* ─── Guest Extra Fees — metered utilities, cleaning, internet, etc. ─── */}
       <CollapsibleSection
         icon={<DollarSign className="h-4 w-4" />}
@@ -377,6 +412,9 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         <GuestExtraFeesSection formData={formData} updateFormData={updateFormData} />
       </CollapsibleSection>
 
+      </fieldset>
+
+      <fieldset disabled={!canEditBookingTerms} className="min-w-0">
       {/* ─── Cancellation — collapsed ─── */}
       <CollapsibleSection
         icon={<DollarSign className="h-4 w-4" />}
@@ -385,18 +423,20 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         <CancellationPolicySection formData={formData} updateFormData={updateFormData} />
       </CollapsibleSection>
 
+      </fieldset>
+
       {/* ─── House Rules — collapsed ─── */}
       <CollapsibleSection
         icon={<DollarSign className="h-4 w-4" />}
         title={isRu ? 'Правила дома' : 'House Rules'}
       >
-        <HouseRulesSection formData={formData} updateFormData={updateFormData} />
+        <HouseRulesSection canEditPricing={canEditPricing} formData={formData} updateFormData={updateFormData} />
       </CollapsibleSection>
 
       {/* ─── Platform Listing — collapsed ─── */}
       <CollapsibleSection
         icon={<Rocket className="h-4 w-4" />}
-        title={isRu ? 'Размещение на платформе' : 'Platform Listing'}
+        title={authoringOnly ? pickLang(language, { en: 'Administrator review', ru: 'Проверка администратором', th: 'การตรวจสอบโดยผู้ดูแล' }) : (isRu ? 'Размещение на платформе' : 'Platform Listing')}
         badge={formData.platform_listed ? (isRu ? 'Вкл' : 'On') : undefined}
       >
         <div className={`p-4 rounded-none border-2 transition-colors ${
@@ -408,20 +448,19 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
             <div className="flex-1">
               <p className="font-medium flex items-center gap-2">
                 <Rocket className="h-4 w-4 text-primary" />
-                {isRu ? 'Разместить на myUNO для гостей' : 'List on myUNO for guests'}
+                {authoringOnly ? pickLang(language, { en: 'Submit for review after saving', ru: 'Отправить на проверку после сохранения', th: 'ส่งตรวจสอบหลังบันทึก' }) : (isRu ? 'Разместить на myUNO для гостей' : 'List on myUNO for guests')}
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                {isRu 
-                  ? 'Комиссия платформы 10% с каждого успешного бронирования' 
-                  : '10% platform fee per successful booking'}
+                {authoringOnly ? pickLang(language, { en: 'Saving does not publish the listing. An administrator reviews it before publication.', ru: 'Сохранение не публикует объявление. Перед публикацией его проверит администратор.', th: 'การบันทึกไม่ได้เผยแพร่ประกาศ ผู้ดูแลต้องตรวจสอบก่อนเผยแพร่' }) : (isRu ? 'Комиссия платформы 10% с каждого успешного бронирования' : '10% platform fee per successful booking')}
               </p>
             </div>
             <Switch
+              aria-label={authoringOnly ? pickLang(language, { en: 'Submit for review after saving', ru: 'Отправить на проверку после сохранения', th: 'ส่งตรวจสอบหลังบันทึก' }) : (isRu ? 'Разместить на платформе' : 'Platform listing')}
               checked={formData.platform_listed ?? true}
               onCheckedChange={(checked) => updateFormData({ platform_listed: checked })}
             />
           </div>
-          {formData.platform_listed && basePrice > 0 && (
+          {!authoringOnly && formData.platform_listed && basePrice > 0 && (
             <div className="mt-3 pt-3 border-t border-border/50 text-sm text-muted-foreground">
               {isRu ? 'Пример: ' : 'Example: '}
               {basePrice.toLocaleString()} THB/{isRu ? 'ночь' : 'night'} → 
@@ -431,6 +470,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
         </div>
       </CollapsibleSection>
 
+      <fieldset disabled={!canEditPricing || !canEditBookingTerms} className="min-w-0">
       {/* ─── Sale Option — collapsed ─── */}
       <CollapsibleSection
         icon={<BadgeDollarSign className="h-4 w-4" />}
@@ -471,6 +511,8 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
           )}
         </div>
       </CollapsibleSection>
+
+      </fieldset>
 
       {/* ─── Description — edited on step 1 (Основное); here only summary + optional "Use project description" ─── */}
       <CollapsibleSection
@@ -520,9 +562,7 @@ function PricingStepInner({ formData, updateFormData, selectedProject }: Pricing
           <div className="p-4 bg-muted rounded-none flex items-start gap-2">
             <Sparkles className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
             <p className="text-sm text-muted-foreground">
-              {isRu 
-                ? 'После добавления объект будет проверен модератором UNO за 24 часа.' 
-                : "After adding, the property will be reviewed by UNO within 24 hours."}
+              {pickLang(language, { en: 'After submission, check the property list for the review status.', ru: 'После отправки статус проверки доступен в списке объектов.', th: 'หลังส่งตรวจสอบ ดูสถานะได้ในรายการอสังหาริมทรัพย์' })}
             </p>
           </div>
         </div>

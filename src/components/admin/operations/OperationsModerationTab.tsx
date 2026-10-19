@@ -1,343 +1,180 @@
-import React, { useState } from 'react';
+import { pickLang } from '@/lib/i18n/pickLang';
+import React, { useRef } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShieldCheck, Clock, CheckCircle, XCircle, Eye, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, Eye, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { fetchModerationQueue, updateModerationItem, type ModerationItem, type ModerationType } from '@/lib/adminModeration';
+import { moderationReviewDestination } from '@/lib/moderationReviewRoutes';
 
-type ModerationItem = {
-  id: string;
-  type: 'service' | 'property' | 'product' | 'provider' | 'listing';
-  name: string;
-  created_at: string;
-  status: string;
-  provider_name?: string;
+const typeLabels: Record<ModerationType, [string, string, string]> = {
+  listing: ["Listing", "Листинг", "รายการ"], property: ["Property", "Недвижимость", "ที่พัก"],
+  service: ["Service", "Услуга", "บริการ"], product: ["Product", "Товар", "สินค้า"],
 };
+const categoryLabels: Record<string, [string, string, string]> = {
+  yacht: ["Yachts", "Яхты", "เรือยอชต์"], restaurant: ["Restaurants", "Рестораны", "ร้านอาหาร"], clinic: ["Clinics", "Клиники", "คลินิก"],
+  vehicle: ["Vehicles", "Транспорт", "ยานพาหนะ"], experience: ["Experiences", "Экскурсии", "กิจกรรม"], education: ["Education", "Образование", "การศึกษา"],
+  pet_service: ["Pet services", "Уход за питомцами", "บริการสัตว์เลี้ยง"], cleaning: ["Cleaning", "Уборка", "ทำความสะอาด"], babysitter: ["Babysitters", "Няни", "พี่เลี้ยงเด็ก"],
+  villa: ["Villas", "Виллы", "วิลล่า"], condo: ["Condominiums", "Кондоминиумы", "คอนโดมิเนียม"], apartment: ["Apartments", "Апартаменты", "อพาร์ตเมนต์"],
+};
+const categoryOf = (item: ModerationItem) => item.vertical || item.category || '';
 
 export function OperationsModerationTab() {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRussian = language === 'ru';
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('pending');
-
-  // Fetch items pending moderation (same sources as dashboard "pendingContent": listings + properties; plus services/products)
-  const { data: moderationItems, isLoading } = useQuery({
-    queryKey: ['moderation-queue'],
-    queryFn: async () => {
-      const items: ModerationItem[] = [];
-
-      // Listings (yachts, restaurants, experiences, clinics, etc.) — main source of "252 need attention"
-      const { data: listings } = await supabase
-        .from('listings')
-        .select('id, name_en, name_ru, created_at, approval_status, provider_id, providers:provider_id (name)')
-        .eq('approval_status', 'pending')
-        .order('created_at', { ascending: false })
-        .limit(500);
-
-      (listings || []).forEach((l: { id: string; name_en?: string; name_ru?: string; created_at: string; approval_status?: string; providers?: { name?: string } | null }) => {
-        items.push({
-          id: l.id,
-          type: 'listing',
-          name: isRussian ? (l.name_ru || l.name_en || '') : (l.name_en || l.name_ru || ''),
-          created_at: l.created_at,
-          status: l.approval_status === 'approved' ? 'approved' : 'pending',
-          provider_name: l.providers && typeof l.providers === 'object' && 'name' in l.providers ? (l.providers as { name?: string }).name : undefined,
-        });
-      });
-
-      // Properties pending approval
-      const { data: properties } = await supabase
-        .from('properties')
-        .select('id, title_en, title_ru, created_at, status, approval_status')
-        .eq('approval_status', 'pending')
-        .not('owner_id', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(500);
-
-      (properties || []).forEach((p: { id: string; title_en?: string; title_ru?: string; created_at: string; approval_status?: string }) => {
-        items.push({
-          id: p.id,
-          type: 'property',
-          name: isRussian ? (p.title_ru || p.title_en || '') : (p.title_en || p.title_ru || ''),
-          created_at: p.created_at,
-          status: p.approval_status === 'approved' ? 'approved' : 'pending',
-        });
-      });
-
-      // Services pending (is_active = false) — optional, limit to avoid huge list
-      const { data: services } = await supabase
-        .from('services')
-        .select('id, name_en, name_ru, created_at, is_active, providers:provider_id (name)')
-        .eq('is_active', false)
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      (services || []).forEach((s: { id: string; name_en?: string; name_ru?: string; created_at: string; is_active?: boolean; providers?: { name?: string } | null }) => {
-        items.push({
-          id: s.id,
-          type: 'service',
-          name: isRussian ? (s.name_ru || s.name_en || '') : (s.name_en || s.name_ru || ''),
-          created_at: s.created_at,
-          status: s.is_active ? 'approved' : 'pending',
-          provider_name: s.providers && typeof s.providers === 'object' && 'name' in s.providers ? (s.providers as { name?: string }).name : undefined,
-        });
-      });
-
-      // Products pending (is_active = false)
-      const { data: products } = await supabase
-        .from('marketplace_products')
-        .select('id, name_en, name_ru, created_at, is_active')
-        .eq('is_active', false)
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      (products || []).forEach((p: { id: string; name_en?: string; name_ru?: string; created_at: string; is_active?: boolean }) => {
-        items.push({
-          id: p.id,
-          type: 'product',
-          name: isRussian ? (p.name_ru || p.name_en || '') : (p.name_en || p.name_ru || ''),
-          created_at: p.created_at,
-          status: p.is_active ? 'approved' : 'pending',
-        });
-      });
-
-      return items.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-    }
+  const location = useLocation();
+  const [params, setParams] = useSearchParams();
+  const activeTab = params.get('queue') === 'inactive' ? 'inactive' : 'pending';
+  const search = params.get('q') || '';
+  const type = params.get('type') || 'all';
+  const category = params.get('category') || 'all';
+  const setFilters = (updates: Record<string, string>) => setParams(previous => {
+    const next = new URLSearchParams(previous);
+    next.set('tab', 'moderation');
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value || (key !== 'q' && value === 'all') || (key === 'queue' && value === 'pending')) next.delete(key);
+      else next.set(key, value);
+    });
+    return next;
+  }, { replace: true });
+  const actionInFlight = useRef(false);
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: ['moderation-queue', user?.id], queryFn: fetchModerationQueue, enabled: !!user,
   });
-
-  const approveMutation = useMutation({
-    mutationFn: async ({ id, type }: { id: string; type: string }) => {
-      if (type === 'listing') {
-        const { error } = await supabase
-          .from('listings')
-          .update({ approval_status: 'approved', is_active: true })
-          .eq('id', id);
-        if (error) throw error;
-        return;
-      }
-      if (type === 'property') {
-        const { error } = await supabase
-          .from('properties')
-          .update({ approval_status: 'approved', is_active: true })
-          .eq('id', id);
-        if (error) throw error;
-        return;
-      }
-      const table = type === 'service' ? 'services' : 'marketplace_products';
-      const { error } = await supabase
-        .from(table)
-        .update({ is_active: true })
-        .eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
+  const label = (values: [string, string, string]) => pickLang(language, { en: values[0], ru: values[1], th: values[2] });
+  const categoryLabel = (value: string) => categoryLabels[value] ? label(categoryLabels[value]) : value;
+  const resetFilters = () => setFilters({ q: '', type: 'all', category: 'all' });
+  const mutation = useMutation({
+    mutationFn: updateModerationItem,
+    onSuccess: (_result, { type, approve }) => {
       queryClient.invalidateQueries({ queryKey: ['moderation-queue'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
-      toast.success(isRussian ? 'Одобрено' : 'Approved');
+      toast.success(type === 'service' || type === 'product'
+        ? (approve ? label(["Activated", "Активировано", "เปิดใช้งานแล้ว"]) : label(["Kept inactive", "Оставлено неактивным", "คงสถานะไม่ใช้งาน"]))
+        : (approve ? label(["Approved and activated", "Одобрено и активировано", "อนุมัติและเปิดใช้งานแล้ว"]) : label(["Rejected", "Отклонено", "ไม่อนุมัติ"])));
     },
     onError: () => {
-      toast.error(isRussian ? 'Ошибка' : 'Error');
-    }
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: async ({ id, type }: { id: string; type: string }) => {
-      if (type === 'listing') {
-        const { error } = await supabase
-          .from('listings')
-          .update({ approval_status: 'rejected', is_active: false })
-          .eq('id', id);
-        if (error) throw error;
-        return;
-      }
-      if (type === 'property') {
-        const { error } = await supabase
-          .from('properties')
-          .update({ approval_status: 'rejected', is_active: false })
-          .eq('id', id);
-        if (error) throw error;
-        return;
-      }
-      const table = type === 'service' ? 'services' : 'marketplace_products';
-      const { error } = await supabase
-        .from(table)
-        .update({ is_active: false })
-        .eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
+      toast.error(label(["Change not confirmed. Refresh the queue and try again.", "Изменение не подтверждено. Обновите очередь и повторите.", "ยังยืนยันการเปลี่ยนแปลงไม่ได้ โปรดรีเฟรชคิวแล้วลองอีกครั้ง"]));
       queryClient.invalidateQueries({ queryKey: ['moderation-queue'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
-      toast.success(isRussian ? 'Отклонено' : 'Rejected');
     },
-    onError: () => {
-      toast.error(isRussian ? 'Ошибка' : 'Error');
-    }
+    onSettled: () => { actionInFlight.current = false; },
   });
-
-  const pendingItems = moderationItems?.filter(i => i.status === 'pending') || [];
-  const approvedItems = moderationItems?.filter(i => i.status === 'approved') || [];
-
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, { en: string; ru: string }> = {
-      listing: { en: 'Listing', ru: 'Листинг' },
-      service: { en: 'Service', ru: 'Услуга' },
-      property: { en: 'Property', ru: 'Недвижимость' },
-      product: { en: 'Product', ru: 'Товар' },
-      provider: { en: 'Provider', ru: 'Провайдер' },
-    };
-    return isRussian ? labels[type]?.ru : labels[type]?.en;
+  const reviewAction = (item: ModerationItem, approve: boolean) => {
+    if (actionInFlight.current) return;
+    actionInFlight.current = true;
+    mutation.mutate({ id: item.id, type: item.type, approve, expectedUpdatedAt: item.updated_at });
   };
 
-  const renderTable = (items: ModerationItem[], showActions: boolean) => (
-    <div className="rounded-none border overflow-x-auto">
-      <Table className="min-w-[640px]">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="whitespace-nowrap">{isRussian ? 'Тип' : 'Type'}</TableHead>
-            <TableHead className="whitespace-nowrap">{isRussian ? 'Название' : 'Name'}</TableHead>
-            <TableHead className="whitespace-nowrap">{isRussian ? 'Провайдер' : 'Provider'}</TableHead>
-            <TableHead className="whitespace-nowrap">{isRussian ? 'Дата создания' : 'Created'}</TableHead>
-            {showActions && <TableHead className="w-[120px] whitespace-nowrap">{isRussian ? 'Действия' : 'Actions'}</TableHead>}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item) => (
-            <TableRow key={`${item.type}-${item.id}`}>
-              <TableCell>
-                <Badge variant="outline">{getTypeLabel(item.type)}</Badge>
-              </TableCell>
-              <TableCell className="font-medium">{item.name}</TableCell>
-              <TableCell>{item.provider_name || '—'}</TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {format(new Date(item.created_at), 'dd.MM.yyyy')}
-              </TableCell>
-              {showActions && (
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 min-h-[44px] min-w-[44px] text-success hover:text-success hover:bg-success/10"
-                      aria-label={isRussian ? 'Одобрить' : 'Approve'}
-                      onClick={() => approveMutation.mutate({ id: item.id, type: item.type })}
-                      disabled={approveMutation.isPending}
-                    >
-                      <ThumbsUp className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 min-h-[44px] min-w-[44px] text-destructive hover:text-destructive hover:bg-destructive/10"
-                      aria-label={isRussian ? 'Отклонить' : 'Reject'}
-                      onClick={() => rejectMutation.mutate({ id: item.id, type: item.type })}
-                      disabled={rejectMutation.isPending}
-                    >
-                      <ThumbsDown className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px]" aria-label={isRussian ? 'Просмотр' : 'View'}>
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-          {items.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={showActions ? 5 : 4} className="text-center py-8 text-muted-foreground">
-                {isRussian ? 'Нет элементов' : 'No items'}
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+  const activeTypes: ModerationType[] = activeTab === 'pending' ? ['listing', 'property'] : ['service', 'product'];
+  const loaded = (data?.items ?? []).filter(item => activeTypes.includes(item.type));
+  const failedTypes = data?.errors.filter(source => activeTypes.includes(source)) ?? [];
+  const unavailable = isError || failedTypes.length > 0;
+  const totals = activeTypes.map(source => data?.totals[source]);
+  const total = !isLoading && !unavailable && totals.every(value => typeof value === 'number')
+    ? totals.reduce<number>((sum, value) => sum + (value ?? 0), 0) : null;
+  const categories = [...new Set(loaded.filter(item => type === 'all' || type === item.type).map(categoryOf).filter(Boolean))].sort();
+  const term = search.trim().toLocaleLowerCase();
+  const filtered = loaded.filter(item =>
+    (type === 'all' || item.type === type) &&
+    (category === 'all' || categoryOf(item) === category) &&
+    (!term || [item.name_en, item.name_ru, item.id, item.provider_name, categoryOf(item), categoryLabel(categoryOf(item))]
+      .some(value => value?.toLocaleLowerCase().includes(term)))
   );
+  const hasFilters = !!search || type !== 'all' || category !== 'all';
+  const collectionLabel = (item: ModerationItem) => item.type === 'service'
+    ? (item.provider_id ? label(["Open provider's services", "Услуги провайдера", "เปิดบริการของผู้ให้บริการ"]) : label(["Open services", "Открыть услуги", "เปิดบริการ"]))
+    : item.type === 'listing' ? label(["Open category catalog", "Открыть каталог категории", "เปิดแคตตาล็อกหมวดหมู่"]) : label(["Open catalog", "Открыть каталог", "เปิดแคตตาล็อก"]);
 
   return (
-    <div className="space-y-4">
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <Clock className="h-8 w-8 text-warning" />
-            <div>
-              <p className="text-2xl font-bold">{pendingItems.length}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Ожидают проверки' : 'Pending Review'}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <CheckCircle className="h-8 w-8 text-success" />
-            <div>
-              <p className="text-2xl font-bold">{approvedItems.length}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Одобрено' : 'Approved'}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <ShieldCheck className="h-8 w-8 text-info" />
-            <div>
-              <p className="text-2xl font-bold">{moderationItems?.length || 0}</p>
-              <p className="text-sm text-muted-foreground">{isRussian ? 'Всего' : 'Total'}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Moderation Queue */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5" />
-            {isRussian ? 'Очередь модерации' : 'Moderation Queue'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="pending" className="gap-2">
-                <Clock className="h-4 w-4" />
-                {isRussian ? 'Ожидают' : 'Pending'}
-                {pendingItems.length > 0 && (
-                  <Badge variant="destructive" className="ml-1 h-5 min-w-[20px] px-1.5 justify-center text-xs">
-                    {pendingItems.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="approved" className="gap-2">
-                <CheckCircle className="h-4 w-4" />
-                {isRussian ? 'Одобренные' : 'Approved'}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="pending">
-              {isLoading ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  {isRussian ? 'Загрузка...' : 'Loading...'}
-                </div>
-              ) : (
-                renderTable(pendingItems, true)
-              )}
+    <Card className="min-w-0">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-lg"><ShieldCheck className="h-5 w-5 shrink-0" />{label(["Moderation queue", "Очередь модерации", "คิวตรวจสอบ"])}</CardTitle>
+        <p className="text-sm text-muted-foreground">{label([
+          'Pending approval: listings and properties. Inactive services and products are shown separately.',
+          'Ожидают одобрения: листинги и недвижимость. Неактивные услуги и товары показаны отдельно.',
+          'รออนุมัติ: รายการและที่พัก บริการและสินค้าที่ไม่ใช้งานแสดงแยกต่างหาก',
+        ])}</p>
+      </CardHeader>
+      <CardContent className="space-y-4 min-w-0">
+        <Tabs value={activeTab} onValueChange={value => setFilters({ queue: value, q: '', type: 'all', category: 'all' })}>
+          <TabsList className="grid h-auto w-full grid-cols-2">
+            <TabsTrigger value="pending" className="min-h-11 whitespace-normal">{label(["Pending review", "На проверке", "รอตรวจสอบ"])}</TabsTrigger>
+            <TabsTrigger value="inactive" className="min-h-11 whitespace-normal">{label(["Inactive catalog", "Неактивный каталог", "รายการที่ไม่ใช้งาน"])}</TabsTrigger>
+          </TabsList>
+          {['pending', 'inactive'].map(tab => (
+            <TabsContent value={tab} key={tab} className="space-y-4 min-w-0">
+              <div data-testid="moderation-summary" className="rounded-none border bg-muted/30 p-3 space-y-1">
+                <p className="font-medium"><span data-testid="moderation-count">{isLoading ? '…' : total ?? label(["Unknown", "Неизвестно", "ไม่ทราบ"])}</span> {tab === 'pending' ? label(["pending approval", "ожидают одобрения", "รายการรออนุมัติ"]) : label(["inactive catalog items", "неактивных записей каталога", "รายการแคตตาล็อกที่ไม่ใช้งาน"])}</p>
+                <p className="text-sm text-muted-foreground">{isLoading ? label(["Loading…", "Загрузка…", "กำลังโหลด…"]) : label([
+                  `Loaded ${loaded.length} of ${total ?? 'unknown'}. Showing ${filtered.length}. Search and filters apply to loaded records.`,
+                  `Загружено ${loaded.length} из ${total ?? 'неизвестного количества'}. Показано ${filtered.length}. Поиск и фильтры работают по загруженным записям.`,
+                  `โหลด ${loaded.length} จาก ${total ?? 'ไม่ทราบจำนวน'} รายการ แสดง ${filtered.length} รายการ การค้นหาและตัวกรองใช้กับรายการที่โหลดแล้วเท่านั้น`,
+                ])}</p>
+                {total !== null && loaded.length < total && <p className="text-sm text-muted-foreground">{label([
+                  'Latest records only: up to 500 listings and properties each, 100 services and products each. Open the relevant catalog for the full list.',
+                  'Последние записи: до 500 листингов и объектов каждого типа, до 100 услуг и товаров каждого типа. Полный список — в соответствующем каталоге.',
+                  'แสดงรายการล่าสุดเท่านั้น: รายการและที่พักประเภทละไม่เกิน 500 รายการ บริการและสินค้าประเภทละไม่เกิน 100 รายการ เปิดแคตตาล็อกที่เกี่ยวข้องเพื่อดูเพิ่มเติม',
+                ])}</p>}
+                {tab === 'inactive' && <p className="text-sm text-muted-foreground">{label(["Inactive does not mean awaiting approval. Approval status is shown separately.", "Неактивность не означает ожидание одобрения. Статус проверки указан отдельно.", "สถานะไม่ใช้งานไม่ได้หมายถึงรออนุมัติ สถานะการตรวจสอบแสดงแยกต่างหาก"])}</p>}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
+                <Input aria-label={label(["Search queue", "Поиск в очереди", "ค้นหาในคิว"])} placeholder={label(["Name, provider or ID", "Название, провайдер или ID", "ชื่อ ผู้ให้บริการ หรือรหัส"])} value={search} onChange={event => setFilters({ q: event.target.value })} className="min-h-11 min-w-0" />
+                <select aria-label={label(["Content type", "Тип контента", "ประเภทเนื้อหา"])} value={type} onChange={event => setFilters({ type: event.target.value, category: 'all' })} className="min-h-11 min-w-0 rounded-none border bg-background px-3 text-sm">
+                  <option value="all">{label(["All types", "Все типы", "ทุกประเภท"])}</option>
+                  {activeTypes.map(value => <option key={value} value={value}>{label(typeLabels[value])}</option>)}
+                </select>
+                <select aria-label={label(["Category", "Категория", "หมวดหมู่"])} value={category} onChange={event => setFilters({ category: event.target.value })} className="min-h-11 min-w-0 rounded-none border bg-background px-3 text-sm">
+                  <option value="all">{label(["All categories", "Все категории", "ทุกหมวดหมู่"])}</option>
+                  {categories.map(value => <option key={value} value={value}>{categoryLabel(value)}</option>)}
+                </select>
+                <Button variant="outline" className="min-h-11" onClick={resetFilters} disabled={!hasFilters}>{label(["Clear filters", "Сбросить фильтры", "ล้างตัวกรอง"])}</Button>
+              </div>
+              {unavailable && <div role="alert" className="rounded-none border border-warning p-3 space-y-2">
+                <p className="flex items-start gap-2 text-sm"><AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />{label(["Some queue data is unavailable. Counts are unknown; available records are shown below.", "Часть данных очереди недоступна. Количество неизвестно; ниже показаны доступные записи.", "ข้อมูลคิวบางส่วนไม่พร้อมใช้งาน จึงไม่ทราบจำนวน รายการที่โหลดได้แสดงอยู่ด้านล่าง"])}</p>
+                {failedTypes.length > 0 && <p className="text-sm">{failedTypes.map(source => label(typeLabels[source])).join(', ')}</p>}
+                <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>{label(["Retry", "Повторить", "ลองอีกครั้ง"])}</Button>
+              </div>}
+              {isLoading ? <p role="status" className="py-6 text-center text-muted-foreground">{label(["Loading…", "Загрузка…", "กำลังโหลด…"])}</p> : <div className="space-y-3">
+                {filtered.map(item => {
+                  const name = (isRussian ? item.name_ru || item.name_en : item.name_en || item.name_ru) || label(["Untitled", "Без названия", "ไม่มีชื่อ"]);
+                  const destination = moderationReviewDestination(item, location.pathname + location.search);
+                  const date = item.created_at ? new Date(item.created_at) : null;
+                  const approval = item.approval_status === 'pending' ? label(["Pending", "Ожидает", "รออนุมัติ"]) : item.approval_status === 'approved' ? label(["Approved", "Одобрено", "อนุมัติแล้ว"]) : item.approval_status === 'rejected' ? label(["Rejected", "Отклонено", "ไม่อนุมัติ"]) : item.approval_status === 'draft' ? label(['Draft', 'Черновик', 'ฉบับร่าง']) : item.approval_status || label(["Unknown", "Неизвестно", "ไม่ทราบ"]);
+                  return <article key={`${item.type}-${item.id}`} data-testid="moderation-row" className="min-w-0 rounded-none border p-3 sm:p-4 space-y-3">
+                    <div className="flex flex-wrap items-center gap-2"><Badge variant="outline">{label(typeLabels[item.type])}</Badge>{categoryOf(item) && <span className="text-xs text-muted-foreground break-words">{categoryLabel(categoryOf(item))}</span>}</div>
+                    <h3 className="font-medium break-words [overflow-wrap:anywhere]">{name}</h3>
+                    <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="min-w-0"><dt className="text-xs text-muted-foreground">{label(["Provider", "Провайдер", "ผู้ให้บริการ"])}</dt><dd className="break-words">{item.provider_name || label(["Not available", "Нет данных", "ไม่มีข้อมูล"])}</dd></div>
+                      <div><dt className="text-xs text-muted-foreground">{label(["Created, not submitted", "Создано, не дата подачи", "วันที่สร้าง ไม่ใช่วันที่ส่งตรวจ"])}</dt><dd>{date && !Number.isNaN(date.getTime()) ? format(date, 'dd.MM.yyyy') : label(["Unknown", "Неизвестно", "ไม่ทราบ"])}</dd></div>
+                      <div><dt className="text-xs text-muted-foreground">{label(["Approval status", "Статус проверки", "สถานะการอนุมัติ"])}</dt><dd>{approval}{tab === 'inactive' && ` · ${label(["Inactive", "Неактивно", "ไม่ใช้งาน"])}`}</dd></div>
+                    </dl>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" className="min-h-11" disabled={!destination.review} onClick={() => destination.review && navigate(destination.review)}><Eye className="h-4 w-4 mr-2" />{label(["Review", "Проверить", "ตรวจสอบ"])}</Button>
+                      {destination.collection && <Button variant="outline" className="min-h-11 whitespace-normal h-auto py-2" onClick={() => navigate(destination.collection!)}>{collectionLabel(item)}</Button>}
+                      <Button variant="ghost" className="min-h-11 text-success" aria-label={`${(tab === 'inactive' ? label(["Activate", "Активировать", "เปิดใช้งาน"]) : label(["Approve & activate", "Одобрить и активировать", "อนุมัติและเปิดใช้งาน"]))}: ${name}`} onClick={() => reviewAction(item, true)} disabled={mutation.isPending || isFetching}><ThumbsUp className="h-4 w-4 mr-2" />{(tab === 'inactive' ? label(["Activate", "Активировать", "เปิดใช้งาน"]) : label(["Approve & activate", "Одобрить и активировать", "อนุมัติและเปิดใช้งาน"]))}</Button>
+                      <Button variant="ghost" className="min-h-11 text-destructive" aria-label={`${(tab === 'inactive' ? label(["Keep inactive", "Оставить неактивным", "คงสถานะไม่ใช้งาน"]) : label(["Reject", "Отклонить", "ไม่อนุมัติ"]))}: ${name}`} onClick={() => reviewAction(item, false)} disabled={mutation.isPending || isFetching}><ThumbsDown className="h-4 w-4 mr-2" />{(tab === 'inactive' ? label(["Keep inactive", "Оставить неактивным", "คงสถานะไม่ใช้งาน"]) : label(["Reject", "Отклонить", "ไม่อนุมัติ"]))}</Button>
+                    </div>
+                    {!destination.review && <p className="text-xs text-muted-foreground">{label(["Direct item review is not available for this type. Use the catalog if available; opening it does not approve or publish the item.", "Прямой просмотр записи для этого типа недоступен. Используйте каталог, если ссылка доступна; переход не одобряет и не публикует запись.", "รายการประเภทนี้ยังไม่มีหน้าตรวจสอบโดยตรง โปรดใช้แคตตาล็อกหากมี การเปิดแคตตาล็อกไม่ใช่การอนุมัติหรือเผยแพร่รายการ"])}</p>}
+                  </article>;
+                })}
+                {filtered.length === 0 && !unavailable && <p className="py-6 text-center text-muted-foreground">{hasFilters ? label(["No matching items", "Ничего не найдено", "ไม่พบรายการที่ตรงกัน"]) : tab === 'pending' ? label(["No pending items", "Нет записей на проверке", "ไม่มีรายการรอตรวจสอบ"]) : label(["No inactive items", "Нет неактивных записей", "ไม่มีรายการที่ไม่ใช้งาน"])}</p>}
+              </div>}
             </TabsContent>
-
-            <TabsContent value="approved">
-              {renderTable(approvedItems, false)}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </div>
+          ))}
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }

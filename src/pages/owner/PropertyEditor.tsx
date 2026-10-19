@@ -1,5 +1,13 @@
+import { useQuery } from '@tanstack/react-query';
+import { buildPropertyPayload } from '@/hooks/property-wizard/buildPayload';
+import { initialOwnershipData, mapPropertyToFormData } from '@/hooks/property-wizard/initialData';
+import { propertyAuthoringDelta, editablePropertyAuthoringPatch, isIndependentPropertyProvider } from '@/lib/propertyAuthoring';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useTeamPermissions } from '@/hooks/useTeamPermissions';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCityCurrency } from '@/hooks/useCityCurrency';
 
@@ -105,18 +113,102 @@ function mapPropertyToInitialData(property: any) {
   };
 }
 
+function editorPayload({ formData, rooms, servicesData, utilitiesData }: { formData: PropertyFormData; rooms: Room[]; servicesData: Record<string, any>; utilitiesData: Record<string, any> }, managedEmployee: boolean) {
+    return {
+      ...(managedEmployee ? { ...buildPropertyPayload({ formData, ownershipData: initialOwnershipData, activeOrgId: null, approvalStatus: 'draft' }), ...utilitiesData, ...servicesData } : {}),
+      ...pickPropertyPaymentFields(formData),
+      title: formData.title,
+      title_en: formData.title,
+      title_ru: formData.title_ru,
+      property_type: formData.property_type,
+      bedrooms: formData.bedrooms,
+      bathrooms: formData.bathrooms,
+      area_sqm: formData.area_sqm ? Number(formData.area_sqm) : undefined,
+      management_type: formData.management_type,
+      is_rented: formData.is_rented,
+      description_en: formData.description,
+      description_ru: formData.description_ru,
+      highlights: formData.highlights,
+      rooms,
+      address: formData.address,
+      district: formData.district,
+      lat: formData.lat,
+      lng: formData.lng,
+      cover_image: formData.cover_image,
+      images: formData.images,
+      price_per_night: formData.price_per_night ? Number(formData.price_per_night) : undefined,
+      deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
+      weekly_discount: Number(formData.weekly_discount) || 0,
+      monthly_discount: Number(formData.monthly_discount) || 0,
+      seasonal_pricing: formData.seasonal_pricing && formData.seasonal_pricing.length > 0 ? formData.seasonal_pricing : null,
+      min_stay_nights: formData.min_stay_nights,
+      max_guests: formData.max_guests,
+      instant_booking: formData.instant_booking,
+      cancellation_policy: formData.cancellation_policy,
+      check_in_time: formData.check_in_time,
+      check_out_time: formData.check_out_time,
+      electricity_included: utilitiesData.electricity_included,
+      electricity_unit_price: utilitiesData.electricity_unit_price ? Number(utilitiesData.electricity_unit_price) : null,
+      water_included: utilitiesData.water_included,
+      water_unit_price: utilitiesData.water_unit_price ? Number(utilitiesData.water_unit_price) : null,
+      internet_speed: utilitiesData.internet_speed || null,
+      cleaning_included: servicesData.cleaning_included,
+      cleaning_frequency: servicesData.cleaning_frequency,
+      extra_cleaning_price: servicesData.extra_cleaning_price ? Number(servicesData.extra_cleaning_price) : null,
+      early_checkin_price: servicesData.early_checkin_price ? Number(servicesData.early_checkin_price) : null,
+      late_checkout_price: servicesData.late_checkout_price ? Number(servicesData.late_checkout_price) : null,
+      transfer_available: servicesData.transfer_available,
+      transfer_airport_price: servicesData.transfer_airport_price ? Number(servicesData.transfer_airport_price) : null,
+      pets_allowed: formData.pets_allowed,
+      pet_deposit: formData.pet_deposit ? Number(formData.pet_deposit) : null,
+      children_friendly: formData.children_friendly,
+      has_crib: formData.has_crib,
+      has_high_chair: formData.has_high_chair,
+      quiet_hours_start: formData.quiet_hours_start,
+      quiet_hours_end: formData.quiet_hours_end,
+      parties_allowed: formData.parties_allowed,
+      house_rules: formData.house_rules || null,
+      house_rules_ru: formData.house_rules_ru || null,
+      smoking_penalty: formData.smoking_penalty ? Number(formData.smoking_penalty) : null,
+      listing_modes: [
+        ...(formData.platform_listed ? ['platform'] : []),
+        ...(formData.is_for_sale ? ['sale'] : []),
+        ...(formData.price_per_night ? ['rent'] : []),
+      ],
+    };
+}
+
 export default function PropertyEditor() {
   const { id } = useParams();
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
+  const { canAccess, isLoading: permissionsLoading } = useTeamPermissions();
   const { code: cityCurrencyCode } = useCityCurrency();
 
   const navigate = useNavigate();
-const isRu = language === 'ru';
+  const isRu = language === 'ru';
 
-  const { data: property, isLoading } = useOwnerProperty(id);
+  const { data: property, isLoading, error: propertyError, refetch: refetchProperty } = useOwnerProperty(id, { authoring: true });
+  const providerAuthority = useQuery({
+    queryKey: ['property-authoring-provider', user?.id, property?.id, property?.provider_id],
+    enabled: !!user && !!property?.provider_id && property.owner_id !== user.id && !isAdmin,
+    queryFn: () => isIndependentPropertyProvider(property?.provider_id, user!.id),
+  });
+  const independentProvider = property?.provider_id === user?.id || providerAuthority.data === true;
+  const managedEmployee = !!property?.management_company_id && property.owner_id !== user?.id && !isAdmin && !independentProvider;
+  const canEdit = !!property && !!user && !adminLoading && !providerAuthority.isLoading && !providerAuthority.error && (!managedEmployee || (!permissionsLoading && canAccess('properties', 'edit') && ['draft', 'rejected'].includes(property?.approval_status || '')));
+  const savingRef = useRef(false);
+  const actorScope = `${user?.id || ''}:${id || ''}`;
+  const actorScopeRef = useRef(actorScope);
+  actorScopeRef.current = actorScope;
+  const mountedRef = useRef(true);
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
+  useEffect(() => { savingRef.current = false; }, [actorScope]);
+  const savedVersionRef = useRef<string>();
   const updateProperty = useUpdateOwnerProperty();
   const autosaveProperty = useUpdateOwnerProperty();
-  const { availability, syncAvailability, isSaving: isSavingAvailability } = usePropertyAvailabilityManagement(id);
+  const { availability, syncAvailability, isSaving: isSavingAvailability } = usePropertyAvailabilityManagement(property && !managedEmployee ? id : undefined);
 
   const [showPreview, setShowPreview] = useState(false);
 
@@ -131,13 +223,21 @@ const isRu = language === 'ru';
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'unsaved' | 'error'>('idle');
   const lastSavedSnapshotRef = useRef('');
+  const hydratedIdRef = useRef<string>();
+  const latestSnapshotRef = useRef('');
+  latestSnapshotRef.current = formData ? JSON.stringify({ formData, rooms, utilitiesData, servicesData }) : '';
 
   // Populate from property data
   useEffect(() => {
     if (!property) return;
-
+    // Background invalidation must not overwrite edits made while a save was
+    // in flight. Keep the old expected version if another editor changed it.
+    if (hydratedIdRef.current === `${user?.id}:${property.id}` && latestSnapshotRef.current !== lastSavedSnapshotRef.current) return;
+    hydratedIdRef.current = `${user?.id}:${property.id}`;
+    savedVersionRef.current = property.updated_at;
     const mapped = mapPropertyToInitialData(property);
     const nextFormData = {
+      ...mapPropertyToFormData(property),
       ...pickPropertyPaymentFields(mapped),
       title: mapped.title_en,
       title_ru: mapped.title_ru,
@@ -171,8 +271,8 @@ const isRu = language === 'ru';
       check_in_time: mapped.check_in_time,
       check_out_time: mapped.check_out_time,
       instant_booking: mapped.instant_booking,
-      is_for_sale: false,
-      sale_price: '',
+      is_for_sale: property.is_for_sale ?? false,
+      sale_price: property.sale_price != null ? String(property.sale_price) : '',
       pets_allowed: mapped.pets_allowed,
       pet_deposit: mapped.pet_deposit,
       smoking_allowed: mapped.smoking_allowed,
@@ -192,6 +292,8 @@ const isRu = language === 'ru';
       highlights: mapped.highlights,
     } as PropertyFormData;
     const nextUtilitiesData = {
+      electricity_notes: property.electricity_notes, electricity_notes_ru: property.electricity_notes_ru,
+      water_notes: property.water_notes, water_notes_ru: property.water_notes_ru,
       electricity_included: mapped.electricity_included,
       electricity_unit_price: mapped.electricity_unit_price,
       electricity_provider: mapped.electricity_provider,
@@ -202,6 +304,8 @@ const isRu = language === 'ru';
       internet_provider: mapped.internet_provider,
     };
     const nextServicesData = {
+      transfer_notes: property.transfer_notes, transfer_notes_ru: property.transfer_notes_ru,
+      late_checkout_penalty: property.late_checkout_penalty,
       cleaning_included: mapped.cleaning_included,
       cleaning_frequency: mapped.cleaning_frequency,
       extra_cleaning_price: mapped.extra_cleaning_price,
@@ -229,7 +333,7 @@ const isRu = language === 'ru';
     setUtilitiesData(nextUtilitiesData);
     setServicesData(nextServicesData);
     setRooms(nextRooms);
-  }, [property]);
+  }, [property, user?.id]);
 
   // Sync availability
   useEffect(() => {
@@ -300,93 +404,41 @@ const isRu = language === 'ru';
 
   const buildEditorPayload = useCallback(() => {
     if (!formData) return null;
-
-    return {
-      ...pickPropertyPaymentFields(formData),
-      title: formData.title,
-      title_en: formData.title,
-      title_ru: formData.title_ru,
-      property_type: formData.property_type,
-      bedrooms: formData.bedrooms,
-      bathrooms: formData.bathrooms,
-      area_sqm: formData.area_sqm ? Number(formData.area_sqm) : undefined,
-      management_type: formData.management_type,
-      is_rented: formData.is_rented,
-      description_en: formData.description,
-      description_ru: formData.description_ru,
-      highlights: formData.highlights,
-      rooms,
-      address: formData.address,
-      district: formData.district,
-      lat: formData.lat,
-      lng: formData.lng,
-      cover_image: formData.cover_image,
-      images: formData.images,
-      price_per_night: formData.price_per_night ? Number(formData.price_per_night) : undefined,
-      deposit_amount: formData.deposit_amount ? Number(formData.deposit_amount) : undefined,
-      weekly_discount: Number(formData.weekly_discount) || 0,
-      monthly_discount: Number(formData.monthly_discount) || 0,
-      seasonal_pricing: formData.seasonal_pricing && formData.seasonal_pricing.length > 0 ? formData.seasonal_pricing : null,
-      min_stay_nights: formData.min_stay_nights,
-      max_guests: formData.max_guests,
-      instant_booking: formData.instant_booking,
-      cancellation_policy: formData.cancellation_policy,
-      check_in_time: formData.check_in_time,
-      check_out_time: formData.check_out_time,
-      electricity_included: utilitiesData.electricity_included,
-      electricity_unit_price: utilitiesData.electricity_unit_price ? Number(utilitiesData.electricity_unit_price) : null,
-      water_included: utilitiesData.water_included,
-      water_unit_price: utilitiesData.water_unit_price ? Number(utilitiesData.water_unit_price) : null,
-      internet_speed: utilitiesData.internet_speed || null,
-      cleaning_included: servicesData.cleaning_included,
-      cleaning_frequency: servicesData.cleaning_frequency,
-      extra_cleaning_price: servicesData.extra_cleaning_price ? Number(servicesData.extra_cleaning_price) : null,
-      early_checkin_price: servicesData.early_checkin_price ? Number(servicesData.early_checkin_price) : null,
-      late_checkout_price: servicesData.late_checkout_price ? Number(servicesData.late_checkout_price) : null,
-      transfer_available: servicesData.transfer_available,
-      transfer_airport_price: servicesData.transfer_airport_price ? Number(servicesData.transfer_airport_price) : null,
-      pets_allowed: formData.pets_allowed,
-      pet_deposit: formData.pet_deposit ? Number(formData.pet_deposit) : null,
-      children_friendly: formData.children_friendly,
-      has_crib: formData.has_crib,
-      has_high_chair: formData.has_high_chair,
-      quiet_hours_start: formData.quiet_hours_start,
-      quiet_hours_end: formData.quiet_hours_end,
-      parties_allowed: formData.parties_allowed,
-      house_rules: formData.house_rules || null,
-      house_rules_ru: formData.house_rules_ru || null,
-      smoking_penalty: formData.smoking_penalty ? Number(formData.smoking_penalty) : null,
-      listing_modes: [
-        ...(formData.platform_listed ? ['platform'] : []),
-        ...(formData.is_for_sale ? ['sale'] : []),
-        ...(formData.price_per_night ? ['rent'] : []),
-      ],
-    };
-  }, [formData, rooms, servicesData, utilitiesData]);
+    const payload = editorPayload({ formData, rooms, servicesData, utilitiesData }, managedEmployee);
+    if (!managedEmployee) return payload;
+    const baseline = lastSavedSnapshotRef.current ? editorPayload(JSON.parse(lastSavedSnapshotRef.current), true) : {};
+    return editablePropertyAuthoringPatch(propertyAuthoringDelta(payload, baseline), { pricing: canAccess('pricing', 'edit'), bookings: canAccess('bookings', 'edit') });
+  }, [formData, rooms, servicesData, utilitiesData, managedEmployee, canAccess]);
 
   const persistEditorDraft = useCallback(async () => {
-    if (!id || !formData || !hasUnsavedChanges) return;
+    if (!id || !formData || !hasUnsavedChanges || !canEdit || savingRef.current || hydratedIdRef.current !== actorScope) return;
+    const savingScope = actorScope;
 
     const payload = buildEditorPayload();
     if (!payload) return;
 
     setSaveState('saving');
+    savingRef.current = true;
     try {
-      await autosaveProperty.mutateAsync({
+      const saved = await autosaveProperty.mutateAsync({
         id,
         ...payload,
-        approval_status: property?.approval_status || 'draft',
+        _authoring: true,
+        _expectedUpdatedAt: savedVersionRef.current,
         _silent: true,
       } as any);
 
+      if (!mountedRef.current || actorScopeRef.current !== savingScope) return;
+      savedVersionRef.current = saved.updated_at;
       lastSavedSnapshotRef.current = JSON.stringify({ formData, rooms, utilitiesData, servicesData });
       setLastSaved(new Date());
-      setSaveState('saved');
+      setSaveState(latestSnapshotRef.current === lastSavedSnapshotRef.current ? 'saved' : 'unsaved');
     } catch (error) {
+      if (!mountedRef.current || actorScopeRef.current !== savingScope) return;
       setSaveState('error');
       errorLog.silent(error, 'persist_editor_draft');
-    }
-  }, [autosaveProperty, buildEditorPayload, formData, hasUnsavedChanges, id, property?.approval_status, rooms, servicesData, utilitiesData]);
+    } finally { if (actorScopeRef.current === savingScope) savingRef.current = false; }
+  }, [actorScope, autosaveProperty, buildEditorPayload, canEdit, formData, hasUnsavedChanges, id, rooms, servicesData, utilitiesData]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
@@ -414,17 +466,24 @@ const isRu = language === 'ru';
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
-  const handleBlurAutosave = useCallback(() => {
+  const handleBlurAutosave = useCallback((event: React.FocusEvent) => {
+    // A save/review button must not lose its click to blur-triggered autosave.
+    if (event.relatedTarget instanceof HTMLElement && event.relatedTarget.closest('button')) return;
     if (!hasUnsavedChanges) return;
     void persistEditorDraft();
   }, [hasUnsavedChanges, persistEditorDraft]);
 
-  const handleSubmit = async () => {
-    if (!id || !formData) return;
+  const handleSubmit = async (submitForReview = false) => {
+    if (!id || !formData || !canEdit || savingRef.current || hydratedIdRef.current !== actorScope) return;
+    const savingScope = actorScope;
+    savingRef.current = true;
     try {
-      await updateProperty.mutateAsync({ id, ...(buildEditorPayload() || {}) } as any);
+      const saved = await updateProperty.mutateAsync({ id, ...(buildEditorPayload() || {}), _authoring: true, _expectedUpdatedAt: savedVersionRef.current, _submitForReview: submitForReview, ...(submitForReview ? { approval_status: 'pending', is_active: false } : {}) } as never);
+      if (!mountedRef.current || actorScopeRef.current !== savingScope) return;
+      savedVersionRef.current = saved.updated_at;
 
-      await syncAvailability(localAvailability);
+      if (!managedEmployee) await syncAvailability(localAvailability);
+      if (!mountedRef.current || actorScopeRef.current !== savingScope) return;
       lastSavedSnapshotRef.current = JSON.stringify({ formData, rooms, utilitiesData, servicesData });
       setLastSaved(new Date());
       setSaveState('saved');
@@ -437,10 +496,13 @@ const isRu = language === 'ru';
       toast(isRu ? 'Сохранено' : 'Saved', {
         description: isRu ? 'Изменения успешно сохранены' : 'Changes saved successfully',
       });
-      navigate(`/mc/properties/${id}`);
+      navigate(managedEmployee ? '/mc/properties' : `/mc/properties/${id}`);
     } catch (error) {
+      if (!mountedRef.current || actorScopeRef.current !== savingScope) return;
+      setSaveState('error');
+      toast.error(error instanceof Error ? error.message : pickLang(language, { en: 'Could not save property', ru: 'Не удалось сохранить объект', th: 'บันทึกอสังหาริมทรัพย์ไม่สำเร็จ' }));
       errorLog.error(error, 'save_property');
-    }
+    } finally { if (actorScopeRef.current === savingScope) savingRef.current = false; }
   };
 
   // Extra tabs for owner mode
@@ -473,10 +535,10 @@ const isRu = language === 'ru';
       labelRu: 'Команда',
       content: <PropertyTeamTab propertyId={id || ''} />,
     },
-  ], [rooms, localAvailability, formData?.price_per_night, formData?.seasonal_pricing, id]);
+  ], [rooms, localAvailability, formData?.price_per_night, id, cityCurrencyCode]);
 
   // Loading state
-  if (isLoading) {
+  if (isLoading || adminLoading || providerAuthority.isLoading || (managedEmployee && permissionsLoading)) {
     return (
       <PageContainer>
         <PageHeader title={isRu ? 'Редактирование' : 'Edit Property'} showBack fallbackPath="/mc/properties" />
@@ -489,6 +551,11 @@ const isRu = language === 'ru';
     );
   }
 
+  if (propertyError) return <PageContainer>
+    <p role="alert">{pickLang(language, { en: 'Could not load this property. Access or the checked workflow may be unavailable.', ru: 'Не удалось загрузить объект. Проверьте доступ и доступность защищённого процесса.', th: 'โหลดอสังหาริมทรัพย์ไม่สำเร็จ อาจไม่มีสิทธิ์หรือขั้นตอนที่ตรวจสอบสิทธิ์ยังไม่พร้อม' })}</p>
+    <Button onClick={() => void refetchProperty()}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+  </PageContainer>;
+
   if (!property) {
     return (
       <PageContainer>
@@ -497,7 +564,22 @@ const isRu = language === 'ru';
     );
   }
 
-  const isSubmitting = updateProperty.isPending || isSavingAvailability;
+  if (!canEdit) {
+    return <PageContainer>
+      <PageHeader title={property.title || property.title_en || ''} showBack fallbackPath="/mc/properties" />
+      <Card><CardContent className="p-6 space-y-3">
+        <p className="font-medium">{pickLang(language, { en: 'Read-only property', ru: 'Объект доступен для просмотра', th: 'ดูอสังหาริมทรัพย์ได้อย่างเดียว' })}</p>
+        <p className="text-sm text-muted-foreground">{pickLang(language, {
+          en: 'Only authorized draft or returned listings can be edited here. Pending listings are locked for review. Approved listings need a reviewed revision workflow; contact your administrator for changes.',
+          ru: 'Здесь редактируются только доступные вам черновики и возвращённые объекты. На проверке редактирование заблокировано. Для изменений одобренного объявления обратитесь к администратору.',
+          th: 'แก้ไขได้เฉพาะฉบับร่างหรือรายการที่ส่งคืนและได้รับสิทธิ์ รายการที่รอตรวจสอบจะถูกล็อก โปรดติดต่อผู้ดูแลเพื่อแก้ไขรายการที่อนุมัติแล้ว',
+        })}</p>
+        <Button variant="outline" onClick={() => navigate('/mc/properties')}>{pickLang(language, { en: 'Back to properties', ru: 'К списку объектов', th: 'กลับสู่รายการอสังหาริมทรัพย์' })}</Button>
+      </CardContent></Card>
+    </PageContainer>;
+  }
+
+  const isSubmitting = updateProperty.isPending || autosaveProperty.isPending || isSavingAvailability;
 
   return (
     <PageContainer>
@@ -516,7 +598,7 @@ const isRu = language === 'ru';
         }
         actions={
           <div className="flex items-center gap-2">
-            {property.approval_status === 'approved' && (
+            {property.approval_status === 'approved' && !managedEmployee && (
               <Button
                 variant={property.is_active ? "outline" : "default"}
                 size="sm"
@@ -535,6 +617,7 @@ const isRu = language === 'ru';
                 )}
               </Button>
             )}
+            {managedEmployee && <Button size="sm" className="whitespace-normal h-auto min-h-11" disabled={isSubmitting} onClick={() => void handleSubmit(true)}>{pickLang(language, { en: 'Submit for review', ru: 'Отправить на проверку', th: 'ส่งตรวจสอบ' })}</Button>}
             <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
               <Eye className="h-4 w-4 mr-1" />
               {showPreview ? (isRu ? 'Скрыть' : 'Hide') : (isRu ? 'Превью' : 'Preview')}
@@ -575,12 +658,15 @@ const isRu = language === 'ru';
           {formData && (
             <CanonicalPropertyForm
               mode="owner"
+              authoringOnly={managedEmployee}
+              canEditPricing={!managedEmployee || canAccess('pricing', 'edit')}
+              canEditBookingTerms={!managedEmployee || canAccess('bookings', 'edit')}
               initialData={mapPropertyToInitialData(property)}
-              onSubmit={handleSubmit}
+              onSubmit={() => handleSubmit(false)}
               isSubmitting={isSubmitting}
               onCancel={() => navigate(`/mc/properties/${id}`)}
               propertyId={id}
-              extraTabs={extraTabs}
+              extraTabs={managedEmployee ? extraTabs.filter(tab => tab.id === 'rooms') : extraTabs}
               controlledFormData={formData}
               onFormDataChange={setFormData}
               controlledUtilities={utilitiesData}

@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -36,12 +37,12 @@ const KPICard = React.forwardRef<HTMLDivElement, KPICardProps>(
         )}
         onClick={onClick}
       >
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
               {title}
             </p>
-            <p className="text-2xl lg:text-xl font-bold">{value}</p>
+            <p className="text-2xl lg:text-xl font-bold [overflow-wrap:anywhere]">{value}</p>
             {hasGrowth && (
               <div className={cn(
                 "flex items-center gap-1 mt-1 text-xs font-medium",
@@ -56,7 +57,7 @@ const KPICard = React.forwardRef<HTMLDivElement, KPICardProps>(
               </div>
             )}
           </div>
-          <div className={cn("p-2 rounded-none", color)}>
+          <div className={cn("shrink-0 p-2 rounded-none", color)}>
             <Icon className="h-5 w-5 text-white" />
           </div>
         </div>
@@ -103,7 +104,7 @@ export function AdminKPIGrid() {
     (stats?.cleaning || 0) + (stats?.babysitters || 0) + (stats?.flowers || 0) + (stats?.pharmacies || 0) +
     (stats?.stores || 0) + (stats?.insurance || 0) + (stats?.waterActivities || 0) + (stats?.services || 0);
 
-  const pendingApprovals = (stats?.pendingContent || 0);
+  const pendingApprovals = stats?.pendingContent ?? null;
 
   const kpis = [
     {
@@ -138,10 +139,10 @@ export function AdminKPIGrid() {
       onClick: () => navigate(APP_ROUTES.ADMIN_FINANCE),
     },
     {
-      title: isRu ? 'На модерации' : 'Pending',
-      value: pendingApprovals,
+      title: pickLang(language, { en: "Pending", ru: "На модерации", th: "รออนุมัติ" }),
+      value: pendingApprovals ?? (pickLang(language, { en: "Unknown", ru: "Неизвестно", th: "ไม่ทราบ" })),
       icon: AlertCircle,
-      color: pendingApprovals > 0 ? 'bg-destructive' : 'bg-muted-foreground',
+      color: (pendingApprovals ?? 0) > 0 ? 'bg-destructive' : 'bg-muted-foreground',
       onClick: () => navigate(`${APP_ROUTES.ADMIN_OPERATIONS}?tab=moderation`),
     },
     {

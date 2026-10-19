@@ -1,3 +1,4 @@
+import { ManagedPropertyDrafts } from '@/components/owner/ManagedPropertyDrafts';
 import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -406,6 +407,8 @@ const queryClient = useQueryClient();
           </>
         )}
       </div>
+
+      <ManagedPropertyDrafts />
 
       {/* Filters */}
       {allProperties && allProperties.length > 0 && (

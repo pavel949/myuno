@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { UnifiedMediaUploader } from '@/components/upload/UnifiedMediaUploader';
@@ -65,6 +66,7 @@ export function PhotosStep({ formData, updateFormData, modalLayer }: PhotosStepP
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">{pickLang(language, { en: 'Use public listing photos only. Uploaded file links are accessible even for drafts. Do not upload guest documents, agreements, or access codes.', ru: 'Используйте только публичные фотографии объекта. Ссылки доступны и для черновиков. Не загружайте документы гостей, договоры или коды доступа.', th: 'ใช้เฉพาะรูปภาพสำหรับประกาศสาธารณะ ลิงก์ไฟล์เข้าถึงได้แม้เป็นฉบับร่าง ห้ามอัปโหลดเอกสารผู้เข้าพัก สัญญา หรือรหัสเข้าที่พัก' })}</p>
           {/* Photo count indicator */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1">

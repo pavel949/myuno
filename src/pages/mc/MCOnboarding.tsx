@@ -1,4 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import { bindCompanyAccessOperation } from '@/lib/companyAccessOperation';
+import { useCompanyAccessLifetime } from '@/hooks/useCompanyAccessLifetime';
+import { teamInvitationMessage } from '@/lib/teamInvitation';
+import { inviteCompanyMember, TEAM_ACCESS_ENABLED } from '@/hooks/useCompanyTeam';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,7 +42,7 @@ interface TeamInvite {
   email: string;
   full_name: string;
   role: string;
-  sent?: boolean;
+  processed?: boolean;
 }
 
 const stepVariants = {
@@ -61,7 +65,10 @@ const MCOnboarding: React.FC = () => {
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const invitationInFlight = useRef(false);
   const [companyId, setCompanyId] = useState<string | null>(null);
+  const invitationLifetime = useCompanyAccessLifetime(user?.id, companyId ?? undefined);
+  const previousActor = useRef(user?.id);
 
   // Step 1: Company form
   const [form, setForm] = useState<CompanyForm>({
@@ -73,7 +80,19 @@ const MCOnboarding: React.FC = () => {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // Step 3: Team invites
-  const [invites, setInvites] = useState<TeamInvite[]>([{ email: '', full_name: '', role: 'manager' }]);
+  const [invites, setInvites] = useState<TeamInvite[]>([{ email: '', full_name: '', role: 'staff' }]);
+
+  useEffect(() => {
+    invitationInFlight.current = false;
+    setLoading(false);
+    if (previousActor.current !== user?.id) {
+      previousActor.current = user?.id;
+      setCompanyId(null); setStep(1);
+      setInvites([{ email: '', full_name: '', role: 'staff' }]);
+      setForm({ name_en: '', name_ru: '', email: '', phone: '', address: '', description_en: '', description_ru: '' });
+      setLogoFile(null); setLogoPreview(null);
+    }
+  }, [invitationLifetime, user?.id]);
 
   const updateField = (field: keyof CompanyForm, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -176,7 +195,7 @@ const MCOnboarding: React.FC = () => {
   // Step 3: Invite team
   const addInvite = () => {
     if (invites.length >= 3) return;
-    setInvites(prev => [...prev, { email: '', full_name: '', role: 'manager' }]);
+    setInvites(prev => [...prev, { email: '', full_name: '', role: 'staff' }]);
   };
 
   const removeInvite = (index: number) => {
@@ -188,40 +207,48 @@ const MCOnboarding: React.FC = () => {
   };
 
   const handleInviteTeam = useCallback(async () => {
-    const validInvites = invites.filter(i => i.email.trim() && !i.sent);
+    if (invitationInFlight.current) return;
+    const validInvites = invites.filter(i => i.email.trim() && !i.processed);
     if (validInvites.length === 0) { setStep(4); return; }
 
+    if (!TEAM_ACCESS_ENABLED) {
+      toast.error(language === 'th' ? 'คำเชิญที่ปลอดภัยกำลังรอเปิดใช้งาน โปรดตั้งค่าทีมภายหลัง' : isRu ? 'Безопасные приглашения ожидают активации. Настройте команду позже.' : 'Secure invitations await activation. Set up the team later.');
+      return;
+    }
+    const current = invitationLifetime.capture();
+    const lease = invitationLifetime.begin();
     setLoading(true);
-    // Track successfully-sent emails so we update state immutably and a retry
-    // does not re-send the ones that already went out.
-    const sentEmails = new Set<string>();
+    invitationInFlight.current = true;
+    // Track completed account operations; an existing account gets no new email.
+    // A retry must not repeat any confirmed operation.
+    const processedEmails = new Set<string>();
     try {
+      const operation = await bindCompanyAccessOperation(lease);
       for (const invite of validInvites) {
-        const { data, error } = await supabase.functions.invoke('invite-team-member', {
-          body: {
-            email: invite.email.trim(),
-            full_name: invite.full_name.trim() || invite.email.split('@')[0],
-            role: invite.role,
-            company_id: companyId,
-          },
+        const result = await inviteCompanyMember(operation, {
+          email: invite.email.trim(),
+          full_name: invite.full_name.trim() || invite.email.split('@')[0],
+          role: invite.role,
         });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        sentEmails.add(invite.email.trim());
+        operation.assertCurrent();
+        toast.info(teamInvitationMessage(result, language));
+        processedEmails.add(invite.email.trim());
       }
-      setInvites(prev => prev.map(inv => (sentEmails.has(inv.email.trim()) ? { ...inv, sent: true } : inv)));
-      toast.success(isRu ? 'Приглашения отправлены' : 'Invitations sent');
+      setInvites(prev => prev.map(inv => (processedEmails.has(inv.email.trim()) ? { ...inv, processed: true } : inv)));
+      toast.success(language === 'th' ? 'ดำเนินการบัญชีแล้ว โปรดกำหนดสิทธิ์และพื้นที่ปฏิบัติงานในส่วนทีม' : isRu ? 'Аккаунты обработаны. Настройте права и рабочие пространства в разделе команды.' : 'Accounts processed. Configure permissions and Operating Spaces in Team.');
       // Only advance when every invite actually succeeded.
       setStep(4);
     } catch (err: unknown) {
-      if (sentEmails.size > 0) {
-        setInvites(prev => prev.map(inv => (sentEmails.has(inv.email.trim()) ? { ...inv, sent: true } : inv)));
+      if (!current()) return;
+      if (processedEmails.size > 0) {
+        setInvites(prev => prev.map(inv => (processedEmails.has(inv.email.trim()) ? { ...inv, processed: true } : inv)));
       }
       toast.error((err instanceof Error ? err.message : '') || 'Failed to send invitations');
     } finally {
-      setLoading(false);
+      lease.finish();
+      if (current()) { invitationInFlight.current = false; setLoading(false); }
     }
-  }, [invites, companyId, isRu]);
+  }, [invites, invitationLifetime, isRu, language]);
 
   const handleGoBack = () => {
     if (step > 1) setStep(step - 1);
@@ -350,6 +377,8 @@ const MCOnboarding: React.FC = () => {
                 <h2 className="text-xl font-bold">{isRu ? 'Пригласите команду' : 'Invite Your Team'}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isRu ? 'До 3 сотрудников. Можно пропустить.' : 'Up to 3 members. You can skip this.'}
+                  <span className="block mt-2">{language === 'th' ? 'ต้องผ่านการเปิดใช้การแยกพื้นที่ของบริษัทก่อนเชิญพนักงาน หากยังไม่พร้อม ให้ข้ามและตั้งค่าทีมภายหลัง' : isRu ? 'Для приглашений требуется одобренная изоляция рабочих пространств компании. Если она не готова, пропустите шаг и настройте команду позже.' : 'Invitations require approved company Space isolation. If it is not ready, skip and configure the team later.'}</span>
+                  {!TEAM_ACCESS_ENABLED && <span className="block mt-2">{language === 'th' ? 'คำเชิญที่ปลอดภัยกำลังรอเปิดใช้งาน คุณสามารถข้ามขั้นตอนนี้ได้' : isRu ? 'Безопасные приглашения ожидают активации. Этот шаг можно пропустить.' : 'Secure invitations await activation. You can skip this step.'}</span>}
                 </p>
               </div>
 
@@ -363,27 +392,28 @@ const MCOnboarding: React.FC = () => {
                             value={inv.full_name}
                             onChange={e => updateInvite(i, 'full_name', e.target.value)}
                             placeholder={isRu ? 'Имя сотрудника' : 'Employee name'}
-                            disabled={inv.sent}
+                            disabled={inv.processed}
                           />
                           <Input
                             type="email"
                             value={inv.email}
                             onChange={e => updateInvite(i, 'email', e.target.value)}
                             placeholder="email@example.com"
-                            disabled={inv.sent}
+                            disabled={inv.processed}
                           />
-                          <Select value={inv.role} onValueChange={v => updateInvite(i, 'role', v)} disabled={inv.sent}>
+                          <Select value={inv.role} onValueChange={v => updateInvite(i, 'role', v)} disabled={inv.processed}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="manager">{isRu ? 'Менеджер' : 'Manager'}</SelectItem>
+                              <SelectItem value="manager">{language === 'th' ? 'ผู้จัดการ (บทบาทปฏิบัติการ)' : isRu ? 'Менеджер (операционная роль)' : 'Manager (operational role)'}</SelectItem>
                               <SelectItem value="staff">{isRu ? 'Сотрудник' : 'Staff'}</SelectItem>
                               <SelectItem value="accountant">{isRu ? 'Бухгалтер' : 'Accountant'}</SelectItem>
                             </SelectContent>
                           </Select>
+                          {inv.role === 'manager' && <p className="text-sm text-destructive">{language === 'th' ? 'บทบาทผู้จัดการอาจให้สิทธิ์ปฏิบัติการเพิ่มเติม เลือกพนักงานสำหรับงานเฉพาะเนื้อหา' : isRu ? 'Роль менеджера может давать дополнительный операционный доступ. Для работы только с контентом выберите «Сотрудник».' : 'Manager may confer additional operational access. Choose Staff for content-only work.'}</p>}
                         </div>
-                        {inv.sent ? (
+                        {inv.processed ? (
                           <Check className="h-5 w-5 text-primary mt-2" />
                         ) : invites.length > 1 ? (
                           <Button variant="ghost" size="icon" onClick={() => removeInvite(i)} className="mt-1" aria-label={isRu ? 'Удалить' : 'Remove'}>
@@ -407,7 +437,7 @@ const MCOnboarding: React.FC = () => {
                 <Button variant="outline" className="flex-1" onClick={() => setStep(4)} disabled={loading}>
                   {isRu ? 'Пропустить' : 'Skip'}
                 </Button>
-                <Button className="flex-1" onClick={handleInviteTeam} disabled={loading}>
+                <Button className="flex-1" onClick={handleInviteTeam} disabled={loading || !TEAM_ACCESS_ENABLED}>
                   {loading ? (isRu ? 'Отправка...' : 'Sending...') : (isRu ? 'Пригласить' : 'Invite')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>

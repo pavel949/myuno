@@ -175,6 +175,18 @@ PMS rules for later implementation:
   Task dates use the Bangkok civil calendar; no task view certifies a booking
   lifecycle transition, verified readiness, or financial reconciliation.
 
+### Property review views
+
+- Review queues project canonical `properties.approval_status`; they do not infer
+  pending approval from owner presence or inactivity. Approval and catalogue
+  activity are separate facts, and failed counts remain unknown.
+- Property admin review/save actions compare the revision the operator opened
+  and verify the returned row before reporting success. Navigation preserves the
+  review queue context without creating a separate property/review authority.
+- These client protections do not establish server-enforced revision approval.
+  A mandatory re-review policy for already-published edits requires a separately
+  governed backend contract and operational acceptance.
+
 ## 6. Donor patterns — adapt later, not build now
 
 | Pattern | Intended adaptation | Boundary |
