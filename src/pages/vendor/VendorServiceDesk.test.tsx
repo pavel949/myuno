@@ -25,21 +25,21 @@ describe('provider request handling', () => {
  it('keeps persisted currency/zero and scopes a confirmed update to provider and previous status', async () => {
   f.write.mockResolvedValue({ data: { id: 'request-a' }, error: null }); const invalidate = mount();
   expect(screen.getByText(/0 USD/)).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Confirmed' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
   await waitFor(() => expect(invalidate).toHaveBeenCalled());
   expect(f.filters).toEqual([{ status: 'confirmed' }, ['id', 'request-a'], ['provider_id', 'supplier-a'], ['status', 'pending']]);
   expect(invalidate).toHaveBeenCalledWith({ queryKey: ['guest-service-orders'] });
  });
  it('reports stale or denied zero-row updates, without successful cache invalidation', async () => {
   f.write.mockResolvedValue({ data: null, error: null }); const invalidate = mount();
-  fireEvent.click(screen.getByRole('button', { name: 'Confirmed' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
   await waitFor(() => expect(f.error).toHaveBeenCalledWith('Could not save'));
   expect(invalidate).not.toHaveBeenCalled();
  });
  it('catches transport rejection and prevents duplicate status submissions while pending', async () => {
   let reject!: (e: Error) => void;
   f.write.mockImplementation(() => new Promise((_resolve, r) => { reject = r; })); mount();
-  const confirm = screen.getByRole('button', { name: 'Confirmed' });
+  const confirm = screen.getByRole('button', { name: 'Confirm' });
   fireEvent.click(confirm); fireEvent.click(confirm);
   expect(f.write).toHaveBeenCalledOnce();
   expect(confirm).toBeDisabled();
@@ -50,11 +50,11 @@ describe('provider request handling', () => {
  it('preserves unknown persisted status and offers no invented transition', () => {
   f.order.status = 'future_status'; mount();
   expect(screen.getByText('Unknown status: future_status')).toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Confirmed' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Confirm' })).toBeNull();
  });
  it('uses the selected manual supplier for shared admin handling, never the operator’s own provider', async () => {
   f.write.mockResolvedValue({ data: { id: 'request-a' }, error: null }); mount('manual-supplier');
-  fireEvent.click(screen.getByRole('button', { name: 'Confirmed' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
   await waitFor(() => expect(f.write).toHaveBeenCalledOnce());
   expect(f.filters).toContainEqual(['provider_id', 'manual-supplier']);
   expect(f.filters).not.toContainEqual(['provider_id', 'supplier-a']);

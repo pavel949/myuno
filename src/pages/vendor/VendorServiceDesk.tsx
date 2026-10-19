@@ -59,6 +59,12 @@ export function ProviderServiceDesk({ provider }: { provider: { id: string; name
     in_progress: L('Выполняется', 'In progress', 'กำลังทำ'), completed: L('Выполнен', 'Completed', 'เสร็จแล้ว'),
     cancelled: L('Отменён', 'Cancelled', 'ยกเลิก'), rejected: L('Отклонён', 'Declined'), assigned: L('Назначен', 'Assigned'),
   };
+  const ACTIONS: Record<string, string> = {
+    confirmed: L('Подтвердить', 'Confirm', 'ยืนยัน'),
+    in_progress: L('Начать работу', 'Start', 'เริ่ม'),
+    completed: L('Завершить', 'Complete', 'เสร็จสิ้น'),
+    cancelled: L('Отменить', 'Cancel', 'ยกเลิก'),
+  };
   const WD = language === 'ru' ? ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'] : language === 'th' ? ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const fail = () => toast.error(L('Не удалось сохранить изменения', 'Could not save', 'บันทึกไม่สำเร็จ'));
 
@@ -133,7 +139,7 @@ export function ProviderServiceDesk({ provider }: { provider: { id: string; name
                   <Badge variant="outline" className="rounded-none">{STATUS[o.status ?? ''] ?? `${L('Неизвестный статус', 'Unknown status')}: ${o.status ?? '—'}`}</Badge>
                   {o.guest_phone && <Button size="sm" variant="outline" asChild><a href={`tel:${o.guest_phone}`} aria-label="Call"><Phone className="h-4 w-4" /></a></Button>}
                   {(NEXT[o.status ?? ''] ?? []).map((s) => (
-                    <Button key={s} size="sm" disabled={saving} variant={s === 'cancelled' ? 'outline' : 'default'} onClick={() => setStatus(o.id, o.status ?? '', s)}>{STATUS[s]}</Button>
+                    <Button key={s} size="sm" disabled={saving} variant={s === 'cancelled' ? 'outline' : 'default'} onClick={() => setStatus(o.id, o.status ?? '', s)}>{ACTIONS[s]}</Button>
                   ))}
                 </div>
               </div>
