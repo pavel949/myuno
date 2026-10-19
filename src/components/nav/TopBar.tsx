@@ -12,7 +12,7 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { ConsumerHeader } from './ConsumerHeader';
-import { Search } from 'lucide-react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,6 +21,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { MiniCart } from '@/components/market/MiniCart';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { GlobalSearchModal } from '@/components/search/GlobalSearchModal';
 import { UserAvatarMenu } from '@/components/layout/UserAvatarMenu';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
@@ -117,7 +118,7 @@ export const TopBar = memo(function TopBar({
           )}
 
           {/* Logo */}
-          <BrandWordmark />
+          <BrandWordmark className={role === 'owner' ? 'min-h-11 items-center' : undefined} />
 
           {/* Nav pills (≥md). Consumer roles get them on tablet+; workspace roles
               have a sidebar — pills are redundant, hidden. */}
@@ -184,12 +185,29 @@ export const TopBar = memo(function TopBar({
             >
               <Search className="size-5 text-muted-foreground" />
             </button>
-            <GlobalPreferencesControls size="sm" themeVariant="dropdown" />
+            {role === 'owner' ? (
+              <>
+                <div className="hidden md:block">
+                  <GlobalPreferencesControls size="sm" themeVariant="dropdown" />
+                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="md:hidden" aria-label={isRu ? 'Язык, валюта и тема' : 'Language, currency and theme'}>
+                      <SlidersHorizontal className="h-5 w-5" aria-hidden />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" aria-label={isRu ? 'Язык, валюта и тема' : 'Language, currency and theme'} className="w-auto max-w-[calc(100vw-2rem)] p-4 [&_button]:min-h-11 [&_button]:min-w-11">
+                    <p className="mb-3 text-body-sm font-medium">{isRu ? 'Язык, валюта и тема' : 'Language, currency and theme'}</p>
+                    <GlobalPreferencesControls size="default" themeVariant="dropdown" />
+                  </PopoverContent>
+                </Popover>
+              </>
+            ) : <GlobalPreferencesControls size="sm" themeVariant="dropdown" />}
             {cartEnabled && (
               <MiniCart className="rounded-none hover:bg-muted/40 transition-colors" />
             )}
             {user ? (
-              <UserAvatarMenu />
+              <UserAvatarMenu compact={role === 'owner'} />
             ) : (
               <Button
                 asChild

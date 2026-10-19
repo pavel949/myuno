@@ -81,7 +81,7 @@ export function useOperationalTasks(options?: {
 
   const queryKey = ['operational-tasks', user?.id, options?.propertyId, dateStr, dateRangeStr, statusArr, typeArr, propertyIdsKey];
   
-  const { data: tasks = [], isLoading: tasksLoading, refetch } = useQuery({
+  const { data: tasks = [], isLoading: tasksLoading, error, refetch } = useQuery({
     queryKey,
     queryFn: async () => {
       if (!user?.id || allPropertyIds.length === 0) return [];
@@ -229,6 +229,7 @@ export function useOperationalTasks(options?: {
     todayTasks,
     tasksByType,
     isLoading: tasksLoading || propsLoading,
+    error,
     refetch,
     createTask,
     updateTaskStatus,

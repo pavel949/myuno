@@ -28,7 +28,7 @@ vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: () => {} }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: mocks.network, functions: { invoke: mocks.network }, storage: { from: mocks.network } } }));
 vi.mock('@/components/uno/PageContainer', () => ({ PageContainer: ({ children }: React.PropsWithChildren) => <main>{children}</main> }));
 vi.mock('@/components/uno/PageHeader', () => ({ PageHeader: () => null }));
-vi.mock('@/components/admin/ProviderSelector', () => ({ ProviderSelector: () => <div>Fixture provider</div> }));
+vi.mock('@/components/admin/ProviderSelector', () => ({ ProviderSelector: () => <div><svg role="img" aria-label="Fixture provider icon"><path d="M0 0h10v10z" /></svg>Fixture provider</div> }));
 vi.mock('@/components/admin/RealEstateDomainHealthPanel', () => ({ RealEstateDomainHealthPanel: () => null }));
 vi.mock('@/components/admin/PropertyProjectBulkLinkPanel', () => ({ PropertyProjectBulkLinkPanel: () => null }));
 vi.mock('@/components/admin/PropertyStayRulesPanel', () => ({ PropertyStayRulesPanel: () => null }));
@@ -88,7 +88,9 @@ describe('contained admin property editor', () => {
     expect(body).not.toContainElement(actions as HTMLElement);
     expect(editor.querySelectorAll('.overflow-y-auto')).toHaveLength(1);
     await openPhotos();
-    expect(within(editor).getAllByRole('img')).toHaveLength(15);
+    // Reproduce Chromium's mixed image-role tree (SVG icons plus photo assets).
+    expect(within(editor).getAllByRole('img').length).toBeGreaterThan(15);
+    expect(within(editor).getAllByRole('img', { name: /^Photo \d+$/ })).toHaveLength(15);
     expect(within(editor).getByRole('button', { name: 'Save' })).toBeEnabled();
     expect(within(editor).getByRole('tab', { name: 'Photos' })).toHaveAttribute('aria-selected', 'true');
   });
@@ -134,7 +136,7 @@ describe('contained admin property editor', () => {
     expect(imageEditor.nextElementSibling).toHaveClass('z-[130]');
     fireEvent.click(within(imageEditor).getByRole('button', { name: 'Отмена' }));
     await waitFor(() => expect(screen.queryByRole('dialog', { name: /Редактирование фото/ })).not.toBeInTheDocument());
-    expect(within(screen.getByRole('dialog', { name: 'Edit Property' })).getAllByRole('img')).toHaveLength(15);
+    expect(within(screen.getByRole('dialog', { name: 'Edit Property' })).getAllByRole('img', { name: /^Photo \d+$/ })).toHaveLength(15);
     expect(mocks.update).not.toHaveBeenCalled();
   });
 
