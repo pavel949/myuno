@@ -207,7 +207,7 @@ export function usePropertyBookings(propertyId?: string) {
       const result = await createManualBooking(supabase, requestId, input);
       const order = { ...result.order, order_participants: result.order_participants, order_items: result.order_items };
       manualRequest.current.acknowledge(requestId);
-      const preparation: BookingPreparationOutcome = result.replayed
+      const preparation: BookingPreparationOutcome = result.replayed && order.status === 'confirmed'
         ? { status: 'needs_attention', unconfirmedTaskTypes: ['cleaning', 'check_in', 'check_out'] }
         : { status: 'not_requested', unconfirmedTaskTypes: [] };
 

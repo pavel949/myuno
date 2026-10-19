@@ -49,8 +49,8 @@ describe('PMS manual hook / canonical command boundary', () => {
     expect(result).toMatchObject({ preparation: { status: 'needs_attention', unconfirmedTaskTypes: ['cleaning', 'check_in', 'check_out'] } });
     expect(fixture.task).not.toHaveBeenCalled(); expect(fixture.message).not.toHaveBeenCalled();
   });
-  it('does not prepare or send confirmed messages for a server pending status', async () => {
-    fixture.responseStatus = 'pending'; const hook = mount();
+  it.each([false, true])('does not prepare a server pending status, replay=%s', async replayed => {
+    fixture.responseStatus = 'pending'; fixture.replayed = replayed; const hook = mount();
     await act(async () => { expect(await hook.result.current.createBooking(input)).toMatchObject({ status: 'pending', preparation: { status: 'not_requested' } }); });
     expect(fixture.task).not.toHaveBeenCalled(); expect(fixture.message).not.toHaveBeenCalled();
   });
