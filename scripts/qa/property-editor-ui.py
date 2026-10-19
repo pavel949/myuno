@@ -39,7 +39,11 @@ async def main():
                 sheet = page.get_by_role('dialog', name=sheet_title, exact=True)
                 await expect(sheet).to_be_visible()
                 await sheet.get_by_role('tab', name='Фото' if language == 'ru' else 'Photos', exact=True).click()
-                await expect(sheet.get_by_role('img')).to_have_count(15)
+                # Chromium exposes decorative SVGs as image roles too. Count actual
+                # gallery assets and their order, not every image-role element.
+                photos = sheet.locator('img[alt^="Photo "]')
+                await expect(photos).to_have_count(15)
+                assert await photos.evaluate_all('(images) => images.map(image => image.alt)') == [f'Photo {i}' for i in range(1, 16)]
                 await page.wait_for_timeout(350)  # finish the real sheet transition before geometry checks
                 body = sheet.locator('[data-property-form-scroll]')
                 footer = sheet.locator('[data-property-form-actions]')
@@ -100,7 +104,8 @@ async def main():
                 await image_cancel.click()
                 await expect(image_editor).to_have_count(0)
                 await expect(sheet).to_be_visible()
-                await expect(sheet.get_by_role('img')).to_have_count(15)
+                await expect(photos).to_have_count(15)
+                assert await photos.evaluate_all('(images) => images.map(image => image.alt)') == [f'Photo {i}' for i in range(1, 16)]
 
                 await close.click()
                 await expect(sheet).to_have_count(0)

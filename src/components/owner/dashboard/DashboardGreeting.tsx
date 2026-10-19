@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useProfile } from '@/hooks/useProfile';
-import { type BusinessRoleConfig, type MCCompanyRole, MC_ROLE_LABELS } from '@/lib/businessRoles';
+import { type BusinessRoleConfig } from '@/lib/businessRoles';
 
 interface DashboardGreetingProps {
   roleConfig: BusinessRoleConfig;
@@ -11,7 +11,7 @@ interface DashboardGreetingProps {
   mcRoleLabel?: { en: string; ru: string; icon: string } | null;
 }
 
-export function DashboardGreeting({ roleConfig, mcRole, mcRoleLabel }: DashboardGreetingProps) {
+export function DashboardGreeting({ roleConfig, mcRoleLabel }: DashboardGreetingProps) {
   const { user } = useAuth();
   const { language } = useLanguage();
   const { profile } = useProfile();
@@ -27,23 +27,17 @@ export function DashboardGreeting({ roleConfig, mcRole, mcRoleLabel }: Dashboard
     || '';
 
   // Show MC role label if available, otherwise fall back to business role label
-  const displayIcon = mcRoleLabel?.icon || roleConfig.icon;
   const displayLabel = mcRoleLabel
     ? (isRu ? mcRoleLabel.ru : mcRoleLabel.en)
     : (isRu ? roleConfig.labelRu : roleConfig.labelEn);
 
   return (
     <div className="space-y-1">
-      <h1 className="text-xl font-semibold tracking-tight text-foreground">
-        {greeting}{firstName ? `, ${firstName}` : ''} {displayIcon}
+      <h1 className="font-sans text-h3 font-medium tracking-tight text-foreground break-words">
+        {greeting}{firstName ? `, ${firstName}` : ''}
       </h1>
       <p className="text-sm text-muted-foreground">
         {displayLabel}
-        {mcRoleLabel && (
-          <span className="text-xs ml-2 opacity-60">
-            • {isRu ? roleConfig.labelRu : roleConfig.labelEn}
-          </span>
-        )}
       </p>
     </div>
   );
