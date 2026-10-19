@@ -5,6 +5,15 @@ export function bangkokTodayISO(now: Date = new Date()): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(now);
 }
 
+/** Preserve civil dates; convert timestamp instants to the Bangkok calendar. */
+export function toBangkokDateKey(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const parsed = parseISO(value);
+  if (!Number.isFinite(parsed.getTime())) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return civilDateKey(parsed) === value ? value : null;
+  return bangkokTodayISO(parsed);
+}
+
 /** Date picker carrier, not an instant: preserve the civil date in local fields. */
 export function parseCivilDate(value: string): Date {
   return parseISO(value);

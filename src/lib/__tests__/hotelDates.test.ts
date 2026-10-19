@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addDays } from 'date-fns';
-import { bangkokTodayDate, bangkokTodayISO, civilDateKey, civilStaysOverlap, civilStaySpan, occupiedCivilDates, parseCivilDate, stayHasDayEvent, stayOccupiesDate } from '@/lib/hotelDates';
+import { bangkokTodayDate, bangkokTodayISO, toBangkokDateKey, civilDateKey, civilStaysOverlap, civilStaySpan, occupiedCivilDates, parseCivilDate, stayHasDayEvent, stayOccupiesDate } from '@/lib/hotelDates';
 
 const cases = [
   ['2026-10-10', '2026-10-13', ['2026-10-10', '2026-10-11', '2026-10-12']],
@@ -54,5 +54,19 @@ describe('half-open civil stay dates (run under each TZ)', () => {
     expect(bangkokTodayISO(before)).toBe('2026-10-16');
     expect(bangkokTodayISO(after)).toBe('2026-10-17');
     expect(civilDateKey(bangkokTodayDate(after))).toBe('2026-10-17');
+  });
+});
+
+describe('toBangkokDateKey', () => {
+  it('preserves stored civil task dates and converts timestamp instants', () => {
+    expect(toBangkokDateKey('2026-10-17')).toBe('2026-10-17');
+    expect(toBangkokDateKey('2026-10-16T17:00:00Z')).toBe('2026-10-17');
+    expect(toBangkokDateKey('2026-10-17T16:59:59Z')).toBe('2026-10-17');
+    expect(toBangkokDateKey('2026-10-17T17:00:00Z')).toBe('2026-10-18');
+  });
+  it('keeps missing or invalid dates unknown', () => {
+    expect(toBangkokDateKey(null)).toBeNull();
+    expect(toBangkokDateKey('not-a-date')).toBeNull();
+    expect(toBangkokDateKey('2026-02-30')).toBeNull();
   });
 });

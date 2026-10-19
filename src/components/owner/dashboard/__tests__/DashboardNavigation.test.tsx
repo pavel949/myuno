@@ -115,5 +115,5 @@ it('preserves primary-button foreground and recognized small typography', () => 
   const primary = screen.getByRole('link', { name: 'Объекты' });
   expect(primary).toHaveClass('bg-primary', 'text-primary-foreground', 'text-sm');
   expect(primary).not.toHaveClass('text-[15px]', 'text-body-sm');
-  expect(screen.getByRole('link', { name: 'Календарь' }).querySelector('span')).toHaveClass('whitespace-nowrap');
+  expect(screen.getByRole('link', { name: 'Календарь' }).querySelector('span')).toHaveClass('break-words', 'min-w-0');
 });
