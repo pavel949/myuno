@@ -189,38 +189,38 @@ describe('one residential results surface', () => {
     const quick = within(screen.getByRole('group', { name: 'Popular features' }));
     expect(quick.getAllByRole('button')).toHaveLength(3);
     expect(screen.queryByRole('button', { name: 'All companies' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Filters', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
     const dialog = within(screen.getByRole('dialog'));
     for (const label of ['Beachfront', 'Walk to beach', 'Sea view', 'Private pool', 'Shared pool', 'Washing machine', 'Pet-friendly', 'Kid-friendly', 'Parking', 'WiFi', 'Luxury', 'Air conditioning', 'Gym', 'Jacuzzi / Hot tub']) {
-      expect(dialog.getByRole('button', { name: label, exact: true })).toBeVisible();
+      expect(dialog.getByRole('button', { name: label })).toBeVisible();
     }
   });
   it('keeps quick features and the advanced sheet synchronized without leaking editor state into the URL', () => {
     mount('/property/search?f.priceLevel=2&source=bookmark');
-    fireEvent.click(screen.getByRole('button', { name: 'Private pool', exact: true }));
-    expect(screen.getByRole('button', { name: 'Private pool', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'Private pool' }));
+    expect(screen.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
     let dialog = within(screen.getByRole('dialog'));
-    expect(dialog.getByRole('button', { name: 'Private pool', exact: true })).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(dialog.getByRole('button', { name: 'WiFi', exact: true }));
+    expect(dialog.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(dialog.getByRole('button', { name: 'WiFi' }));
     fireEvent.click(dialog.getByRole('button', { name: /Apply/ }));
     let url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
     expect(url.searchParams.get('cats')).toBe('private_pool,wifi');
     expect(url.searchParams.get('f.priceLevel')).toBe('2');
     expect(url.searchParams.get('source')).toBe('bookmark');
     expect(url.searchParams.has('f.guestFeatures')).toBe(false);
-    fireEvent.click(screen.getByRole('button', { name: 'Private pool', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Private pool' }));
     fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
     dialog = within(screen.getByRole('dialog'));
-    expect(dialog.getByRole('button', { name: 'Private pool', exact: true })).toHaveAttribute('aria-pressed', 'false');
-    expect(dialog.getByRole('button', { name: 'WiFi', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    expect(dialog.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'false');
+    expect(dialog.getByRole('button', { name: 'WiFi' })).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(dialog.getByRole('button', { name: /Apply/ }));
     url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
     expect(url.searchParams.get('cats')).toBe('wifi');
   });
   it('switches rental and purchase intent immediately while preserving the rental context and unrelated query state', () => {
     mount('/property/search?mode=rent&guests=4&tenancy=medium&checkIn=2027-11-10&checkOut=2027-11-15&district=layan&types=villa&f.priceLevel=2&source=bookmark');
-    fireEvent.click(screen.getByRole('button', { name: 'Buy', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Buy' }));
     expect(state.filters).toMatchObject({ listingType: 'sale', minPrice: 5000000, maxPrice: 15000000, district: 'layan', propertyType: 'villa' });
     expect(state.filters.minGuests).toBeUndefined();
     expect(state.filters.rentTenancy).toBeUndefined();
@@ -229,19 +229,19 @@ describe('one residential results surface', () => {
     expect(url.searchParams.get('guests')).toBe('4');
     expect(url.searchParams.get('checkIn')).toBe('2027-11-10');
     expect(url.searchParams.get('source')).toBe('bookmark');
-    fireEvent.click(screen.getByRole('button', { name: 'Rent', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rent' }));
     expect(state.filters).toMatchObject({ listingType: 'rent', minGuests: 4, rentTenancy: 'medium', minPrice: 3000 });
     expect(screen.getByText(/Monthly ·.*Guests: 4/)).toBeVisible();
   });
 
   it('does not count a retained rental-only filter in the purchase sheet', () => {
     mount('/property/search?mode=buy&instant=1');
-    fireEvent.click(screen.getByRole('button', { name: 'Filters', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
     const dialog = within(screen.getByRole('dialog'));
-    expect(dialog.getByRole('button', { name: 'Apply', exact: true })).toBeVisible();
-    fireEvent.click(dialog.getByRole('button', { name: 'Apply', exact: true }));
+    expect(dialog.getByRole('button', { name: 'Apply' })).toBeVisible();
+    fireEvent.click(dialog.getByRole('button', { name: 'Apply' }));
     expect(state.filters.instantBooking).toBeUndefined();
-    fireEvent.click(screen.getByRole('button', { name: 'Rent', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rent' }));
     expect(state.filters.instantBooking).toBe(true);
   });
 
