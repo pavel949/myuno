@@ -466,7 +466,7 @@ export default function ForBusinessPage() {
                     <CardContent className="pt-5 pb-5 flex flex-col gap-3">
                       <div className="flex items-start justify-between gap-2">
                         <s.icon className="w-8 h-8 text-primary" />
-                        <Checkbox checked={isOn} onCheckedChange={() => toggle(s.key)} aria-label={title} />
+                        <Checkbox className="min-h-4" checked={isOn} onCheckedChange={() => toggle(s.key)} aria-label={title} />
                       </div>
                       <div>
                         <h3 className="font-display font-semibold text-base mb-1">

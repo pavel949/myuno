@@ -21,6 +21,9 @@ describe('business entry routes', () => {
     expect(links).toContain('/legal/tax');
     expect(links).toContain('/legal');
     expect(state.write).not.toHaveBeenCalled();
+    for (const checkbox of screen.getAllByRole('checkbox')) {
+      expect(checkbox).toHaveClass('h-4', 'w-4', 'min-h-4', 'shrink-0', 'focus-visible:ring-2');
+    }
   });
   it('does not promote nominee ownership or unverified fixed formation fees', () => {
     const copy = JSON.stringify(LEGAL_SERVICES.company);

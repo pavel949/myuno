@@ -2,13 +2,14 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { CookieConsentBanner } from '../CookieConsentBanner';
-vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+const state = vi.hoisted(() => ({ language: 'en' }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => state }));
 vi.mock('@/hooks/useFeedbackSettings', () => ({ getFeedbackSettings: () => ({}) }));
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 it('keeps consent above navigation, scrollable on short screens, and preserves rejection semantics', () => {
  vi.useFakeTimers();
  localStorage.removeItem('myuno-cookie-consent');
- render(<MemoryRouter><CookieConsentBanner /></MemoryRouter>);
+ const { rerender } = render(<MemoryRouter><CookieConsentBanner /></MemoryRouter>);
  expect(document.querySelector('[data-cookie-consent-banner]')).toBeNull();
  act(() => vi.advanceTimersByTime(5000));
  const banner = document.querySelector('[data-cookie-consent-banner]');
@@ -17,6 +18,16 @@ it('keeps consent above navigation, scrollable on short screens, and preserves r
  expect(screen.getByRole('button', { name: 'Accept all' })).toBeInTheDocument();
  fireEvent.click(screen.getByRole('button', { name: 'Customize' }));
  expect(screen.getByRole('button', { name: 'Save preferences' })).toBeInTheDocument();
+ state.language = 'ru';
+ rerender(<MemoryRouter><CookieConsentBanner /></MemoryRouter>);
+ expect(screen.getByText('Мы используем cookie')).toBeInTheDocument();
+ state.language = 'th';
+ rerender(<MemoryRouter><CookieConsentBanner /></MemoryRouter>);
+ expect(screen.getByText('เราใช้คุกกี้')).toBeInTheDocument();
+ expect(screen.getByText('คุกกี้ที่จำเป็น')).toBeInTheDocument();
+ expect(screen.getByRole('button', { name: 'บันทึกการตั้งค่า' })).toBeInTheDocument();
+ state.language = 'en';
+ rerender(<MemoryRouter><CookieConsentBanner /></MemoryRouter>);
  fireEvent.click(screen.getByRole('button', { name: 'Dismiss cookie consent banner' }));
  expect(document.querySelector('[data-cookie-consent-banner]')).toBeNull();
  expect(JSON.parse(localStorage.getItem('myuno-cookie-consent')!)).toMatchObject({ essential: true, analytics: false, functional: false, marketing: false });

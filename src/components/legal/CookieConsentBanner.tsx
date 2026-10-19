@@ -66,7 +66,7 @@ function getStoredConsent(): CookiePreferences | null {
 
 export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieConsentBanner(_props, ref) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const t = (ru: string, en: string, th: string) => language === 'ru' ? ru : language === 'th' ? th : en;
   const [visible, setVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>({
@@ -160,23 +160,21 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-sm">
-                  {isRu ? 'Мы используем cookie' : 'We use cookies'}
+                  {t('Мы используем cookie', 'We use cookies', "เราใช้คุกกี้")}
                 </h3>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  {isRu
-                    ? 'Мы используем cookie для улучшения работы сервиса. Вы можете настроить предпочтения.'
-                    : 'We use cookies to improve our service. You can customize your preferences.'}
+                  {t('Мы используем cookie для улучшения работы сервиса. Вы можете настроить предпочтения.', 'We use cookies to improve our service. You can customize your preferences.', "เราใช้คุกกี้เพื่อปรับปรุงบริการของเรา คุณสามารถปรับแต่งการตั้งค่าได้")}
                   {' '}
                   <Link to="/cookies" className="text-primary hover:underline">
-                    {isRu ? 'Подробнее' : 'Learn more'}
+                    {t('Подробнее', 'Learn more', "อ่านเพิ่มเติม")}
                   </Link>
                 </p>
               </div>
               <button
                 type="button"
                 onClick={rejectOptional}
-                aria-label={isRu ? 'Закрыть баннер согласия на cookie' : 'Dismiss cookie consent banner'}
-                title={isRu ? 'Закрыть' : 'Dismiss'}
+                aria-label={t('Закрыть баннер согласия на cookie', 'Dismiss cookie consent banner', "ปิดแบนเนอร์ความยินยอมใช้คุกกี้")}
+                title={t('Закрыть', 'Dismiss', "ปิด")}
                 className="text-muted-foreground hover:text-foreground p-1"
               >
                 <X className="w-4 h-4" aria-hidden="true" />
@@ -195,10 +193,10 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
               >
                 <div className="px-4 pb-3 space-y-2.5 border-t border-border pt-3">
                   {[
-                    { key: 'essential' as const, label: isRu ? 'Необходимые' : 'Essential', desc: isRu ? 'Обязательные для работы' : 'Required for functionality', locked: true },
-                    { key: 'functional' as const, label: isRu ? 'Функциональные' : 'Functional', desc: isRu ? 'Язык, валюта, тема' : 'Language, currency, theme', locked: false },
-                    { key: 'analytics' as const, label: isRu ? 'Аналитика' : 'Analytics', desc: isRu ? 'Анонимная статистика' : 'Anonymous statistics', locked: false },
-                    { key: 'marketing' as const, label: isRu ? 'Маркетинг' : 'Marketing', desc: isRu ? 'Персонализированная реклама' : 'Personalized ads', locked: false },
+                    { key: 'essential' as const, label: t('Необходимые', 'Essential', "คุกกี้ที่จำเป็น"), desc: t('Обязательные для работы', 'Required for functionality', "จำเป็นต่อการทำงาน"), locked: true },
+                    { key: 'functional' as const, label: t('Функциональные', 'Functional', "คุกกี้เพื่อการทำงาน"), desc: t('Язык, валюта, тема', 'Language, currency, theme', "ภาษา สกุลเงิน และธีม"), locked: false },
+                    { key: 'analytics' as const, label: t('Аналитика', 'Analytics', "การวิเคราะห์"), desc: t('Анонимная статистика', 'Anonymous statistics', "สถิติที่ไม่ระบุตัวตน"), locked: false },
+                    { key: 'marketing' as const, label: t('Маркетинг', 'Marketing', "การตลาด"), desc: t('Персонализированная реклама', 'Personalized ads', "โฆษณาที่ปรับให้เหมาะกับคุณ"), locked: false },
                   ].map((cat) => (
                     <div key={cat.key} className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
@@ -226,16 +224,16 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
               className="text-xs gap-1.5"
             >
               <Settings className="w-3.5 h-3.5" />
-              {isRu ? 'Настроить' : 'Customize'}
+              {t('Настроить', 'Customize', "ตั้งค่า")}
             </Button>
             <div className="flex-1" />
             {showSettings ? (
               <Button size="sm" onClick={acceptSelected} className="text-xs">
-                {isRu ? 'Сохранить выбор' : 'Save preferences'}
+                {t('Сохранить выбор', 'Save preferences', "บันทึกการตั้งค่า")}
               </Button>
             ) : (
               <Button size="sm" onClick={acceptAll} className="text-xs">
-                {isRu ? 'Принять все' : 'Accept all'}
+                {t('Принять все', 'Accept all', "ยอมรับทั้งหมด")}
               </Button>
             )}
           </div>
