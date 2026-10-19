@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
@@ -22,6 +22,14 @@ beforeAll(() => {
   Element.prototype.hasPointerCapture = vi.fn(() => false);
 });
 describe('simplified service discovery', () => {
+  it('keeps homogeneous services in named canonical groups when expanding the catalogue', () => {
+    mount();
+    fireEvent.click(screen.getByRole('button', { name: /^All home services \(/ }));
+    const cleaning = screen.getByRole('region', { name: 'Cleaning' });
+    expect(within(cleaning).getAllByRole('button').length).toBeGreaterThan(0);
+    expect(within(cleaning).queryByText('AC Installation')).toBeNull();
+    expect(screen.getAllByText('AC Installation')).toHaveLength(1);
+  });
   it('opens the full catalogue and finds services outside the initial preview', () => {
     mount();
     expect(screen.getAllByRole('button').filter(button => button.hasAttribute('data-catalogue'))).toHaveLength(8);

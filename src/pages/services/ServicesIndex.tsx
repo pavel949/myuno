@@ -15,12 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 import { MarketplaceServiceGrid } from '@/components/services/MarketplaceServiceGrid';
 import { cn } from '@/lib/utils';
+import { groupHomeServices, homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
+import { ServiceCategorySection } from '@/components/services/ServiceCategorySection';
 
 const ConciergeHelpSheet = lazy(() => import('@/components/concierge/ConciergeHelpSheet').then(module => ({ default: module.ConciergeHelpSheet })));
 
 // Only equivalent names are aliases. Unavailable trades must not silently
 // become a different service (e.g. photography → handyman).
-const THAI_CATEGORY_LABELS: Record<string, string> = {"ac": "เครื่องปรับอากาศ", "plumbing": "ประปา", "electrical": "ระบบไฟฟ้า", "handyman": "ช่างซ่อมทั่วไป", "appliance_repair": "ซ่อมเครื่องใช้ไฟฟ้า", "cleaning": "ทำความสะอาด", "pool": "สระว่ายน้ำและจากุซซี", "garden": "สวน", "pest_control": "กำจัดแมลง", "security": "ความปลอดภัย", "moving": "ขนย้าย"};
 
 const CATEGORY_ALIAS: Record<string, string> = {
   'pest-control': 'pest_control', 'ac-repair': 'ac', gardening: 'garden',
@@ -123,7 +124,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
               <SelectContent collisionPadding={12} className="max-w-[calc(100vw-24px)]">
                 <SelectItem className="min-h-11" value="all">{t('Все категории', 'All categories', "ทุกหมวดหมู่")}</SelectItem>
                 {unknownCategory && <SelectItem className="min-h-11" value={category}>{rawCategory}</SelectItem>}
-                {categories.map(item => <SelectItem className="min-h-11" key={item.id} value={item.id}>{language === 'th' ? THAI_CATEGORY_LABELS[item.id] ?? item.name : item.name}</SelectItem>)}
+                {categories.map(item => <SelectItem className="min-h-11" key={item.id} value={item.id}>{homeServiceCategoryLabel(item.id, language)}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -134,9 +135,11 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
             <Button variant="outline" onClick={clear}>{t('Сбросить поиск и категорию', 'Clear search and category', "ล้างการค้นหาและหมวดหมู่")}</Button>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {visibleRequests.map(fn => <ServiceFunctionCard key={fn.id} fn={fn} catalogue
-              onClick={() => navigate(`/services/order/${fn.id}?returnTo=${encodeURIComponent(returnTo)}`)} />)}
+          <div className="space-y-6">
+            {groupHomeServices(visibleRequests).map(group => <ServiceCategorySection key={group.id} id={`request-group-${group.id}`} title={homeServiceCategoryLabel(group.id, language)}>
+                {group.items.map(fn => <ServiceFunctionCard key={fn.id} fn={fn} catalogue
+                  onClick={() => navigate(`/services/order/${fn.id}?returnTo=${encodeURIComponent(returnTo)}`)} />)}
+            </ServiceCategorySection>)}
           </div>
         )}
         {!filtered && !showAll && requests.length > visibleRequests.length && <Button variant="outline" className="min-h-11 w-full sm:w-auto" onClick={() => setShowAll(true)}>
