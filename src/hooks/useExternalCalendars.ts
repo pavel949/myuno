@@ -109,7 +109,8 @@ export function useExternalCalendars(propertyId?: string) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    // A failed batch may already have added safe blocks; refresh without converting rejection to success.
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['external-calendars', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['stays-unified-calendar'] });
@@ -137,7 +138,8 @@ export function useExternalCalendars(propertyId?: string) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    // A failed batch may already have added safe blocks; refresh without converting rejection to success.
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['external-calendars', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['property-bookings', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['stays-unified-calendar'] });

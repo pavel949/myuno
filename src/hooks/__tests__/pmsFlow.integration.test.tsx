@@ -18,6 +18,8 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: {
       is: (field: string, value: unknown) => filter('is', field, value),
       lte: (field: string, value: unknown) => filter('lte', field, value),
       gte: (field: string, value: unknown) => filter('gte', field, value),
+      lt: (field: string, value: unknown) => filter('lt', field, value),
+      gt: (field: string, value: unknown) => filter('gt', field, value),
       neq: (field: string, value: unknown) => filter('neq', field, value),
       or: (value: string) => filter('or', '', value),
       update: (value: unknown) => {
@@ -27,7 +29,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: {
       insert: () => { throw Error('Forbidden insert'); },
       delete: () => { throw Error('Forbidden delete'); },
       single: async () => ({ data: fixture.rows[table]?.[0] ?? null, error: fixture.errors[table] ?? null }),
-      then: (resolve: (value: unknown) => unknown) => Promise.resolve(resolve({ data: fixture.rows[table] ?? [], error: fixture.errors[table] ?? null })),
+      then: (resolve: (value: unknown) => unknown) => Promise.resolve(resolve({ data: fixture.rows[table] ?? [], count: fixture.rows[table]?.length ?? 0, error: fixture.errors[table] ?? null })),
     };
     function filter(op: string, field: string, value: unknown) { fixture.trace.push({ table, op, field, value }); return chain; }
     return chain;
@@ -47,6 +49,7 @@ vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), { error: vi.fn(), succe
 
 import { usePmsToday } from '../usePmsToday';
 import { usePropertyBookings } from '../usePropertyBookings';
+import { useMultiPropertyBookings } from '../useMultiPropertyBookings';
 import { useOperationalTasks } from '../useOperationalTasks';
 import { usePropertyReports } from '../usePropertyReports';
 
@@ -144,5 +147,40 @@ describe('PMS real hooks / in-memory request adapter, NOT hosted E2E', () => {
     const { result } = mount(() => usePropertyReports('foreign-home'));
     await waitFor(() => expect(result.current.error?.message).toBe('report denied'));
     expect(fixture.trace).toContainEqual({ table: 'property_reports', op: 'eq', field: 'property_id', value: 'foreign-home' });
+  });
+});
+
+
+describe('iCal calendar overlay uses existing scope, not a new inventory writer', () => {
+  const row = { id: 'block-a', property_id: 'home-a', check_in: '2026-11-01', check_out: '2026-11-04', source: 'ical', status: 'blocked', source_calendar_id: 'cal-a', external_id: 'event-a', order_id: null, marketplace_booking_id: null, total_amount: null };
+  it('single-property overlay resolves existing access before canonical read', async () => {
+    fixture.rows.property_bookings = [row];
+    const { result } = mount(() => usePropertyBookings('home-a', true));
+    await waitFor(() => expect(result.current.inventoryBlocks).toHaveLength(1));
+    expect(fixture.trace).toContainEqual({ table: 'property_bookings', op: 'in', field: 'property_id', value: ['home-a'] });
+    expect(result.current.bookings).toEqual([]);
+  });
+  it('out-of-scope single-property block read fails closed without a table request', async () => {
+    const { result } = mount(() => usePropertyBookings('home-b', true));
+    await waitFor(() => expect(result.current.inventoryBlocksError).not.toBeNull());
+    expect(fixture.trace.some(t => t.table === 'property_bookings')).toBe(false);
+  });
+  it('timeline intersects visible filters with the resolved portfolio scope', async () => {
+    fixture.properties = ['home-a', 'home-b'];
+    fixture.rows.property_bookings = [row, { ...row, id: 'other', property_id: 'home-b' }];
+    const { result } = mount(() => useMultiPropertyBookings(new Date(2026, 10, 1), 4, ['home-a', 'unauthorized']));
+    await waitFor(() => expect(result.current.inventoryBlocks).toHaveLength(1));
+    expect(fixture.trace).toContainEqual({ table: 'property_bookings', op: 'in', field: 'property_id', value: ['home-a'] });
+    expect(fixture.trace).toContainEqual({ table: 'orders', op: 'in', field: 'order_items.resource_id', value: ['home-a'] });
+    expect(result.current.allBookings).toEqual([]);
+  });
+  it('empty visible filter never queries all inventory', () => {
+    mount(() => useMultiPropertyBookings(new Date(2026, 10, 1), 4, []));
+    expect(fixture.trace).toEqual([]);
+  });
+  it('inventory read failure remains distinct from empty blocks', async () => {
+    fixture.errors.property_bookings = Error('inventory unavailable');
+    const { result } = mount(() => usePropertyBookings('home-a', true));
+    await waitFor(() => expect(result.current.inventoryBlocksError?.message).toBe('inventory unavailable'));
   });
 });

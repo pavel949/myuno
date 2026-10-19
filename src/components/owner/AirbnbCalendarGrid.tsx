@@ -1,4 +1,4 @@
-import { parseCivilDate, bangkokTodayDate, bangkokTodayISO, civilDateKey, stayHasDayEvent, civilStaySpan } from '@/lib/hotelDates';
+import { parseCivilDate, bangkokTodayDate, bangkokTodayISO, civilDateKey, stayHasDayEvent, civilStaySpan, stayOccupiesDate } from '@/lib/hotelDates';
 import { useState, useMemo, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePropertyBookings, PropertyBooking } from '@/hooks/usePropertyBookings';
@@ -45,7 +45,12 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
   const [showBlockDatesDialog, setShowBlockDatesDialog] = useState(false);
   const [blockDialogMode, setBlockDialogMode] = useState<'block' | 'unblock'>('block');
 
-  const { bookings, getBookingForDate } = usePropertyBookings(propertyId);
+  const { bookings, error: bookingsError, isLoading: bookingsLoading, refetch: refetchBookings,
+    inventoryBlocks = [], inventoryBlocksLoading, inventoryBlocksError, refetchInventoryBlocks,
+  } = usePropertyBookings(propertyId, true, {
+    from: civilDateKey(startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 1 })),
+    to: civilDateKey(addDays(endOfWeek(endOfMonth(currentMonth), { weekStartsOn: 1 }), 1)),
+  });
   const { tasks, completeTask } = useOperationalTasks({ propertyId });
   const { availability } = usePropertyAvailabilityManagement(propertyId);
   const { data: rentalTerms } = usePropertyRentalTerms(propertyId);
@@ -141,7 +146,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
 
   // Sheet event data
   const selectedDateEvents = useMemo(() => {
-    if (!selectedDate) return { bookings: [], tasks: [], availability: undefined };
+    if (!selectedDate) return { bookings: [], tasks: [], availability: undefined, inventoryBlocks: [] };
     const dateKey = format(selectedDate, 'yyyy-MM-dd');
     
     const dayBookings: PropertyBooking[] = [];
@@ -155,8 +160,9 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
     const dayTasks = taskMap.get(dateKey) || [];
     const avail = availability?.find(a => format(a.date, 'yyyy-MM-dd') === dateKey);
 
-    return { bookings: dayBookings, tasks: dayTasks, availability: avail };
-  }, [selectedDate, bookings, taskMap, availability]);
+    return { bookings: dayBookings, tasks: dayTasks, availability: avail,
+      inventoryBlocks: inventoryBlocks.filter(block => stayOccupiesDate(block, dateKey)) };
+  }, [selectedDate, bookings, taskMap, availability, inventoryBlocks]);
 
   const handleAddTask = () => { setShowEventsSheet(false); setShowCreateTaskDialog(true); };
   const handleAddBooking = () => { setShowEventsSheet(false); setShowAddBookingDialog(true); };
@@ -174,6 +180,16 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
         <p>{isRu ? 'Выберите объект для просмотра календаря' : 'Select a property to view calendar'}</p>
       </div>
     );
+  }
+
+  if (bookingsError || inventoryBlocksError) {
+    return <div role="alert" className="space-y-2 p-4 text-sm">
+      <p>{isRu ? 'Не удалось проверить занятые даты. Доступность неизвестна.' : 'Unavailable dates could not be checked. Availability is unknown.'}</p>
+      <Button variant="outline" onClick={() => { void refetchInventoryBlocks(); void refetchBookings(); }}>{isRu ? 'Повторить' : 'Retry'}</Button>
+    </div>;
+  }
+  if (bookingsLoading || inventoryBlocksLoading) {
+    return <p role="status" className="p-4 text-sm text-muted-foreground">{isRu ? 'Проверяем занятые даты…' : 'Checking unavailable dates…'}</p>;
   }
 
   return (
@@ -213,7 +229,8 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                     const inMonth = isSameMonth(day, currentMonth);
                     const today = civilDateKey(day) === bangkokTodayISO();
                     const avail = availabilityMap.get(dateKey);
-                    const isBlocked = avail?.status === 'blocked';
+                    const isImportedBlock = inventoryBlocks.some(block => stayOccupiesDate(block, dateKey));
+                    const isBlocked = avail?.status === 'blocked' || isImportedBlock;
                     const priceOverride = avail?.priceOverride;
                     const dayTasks = taskMap.get(dateKey) || [];
 
@@ -226,7 +243,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                     return (
                       <button
                         key={dayIdx}
-                        aria-label={format(day, 'd MMM yyyy', { locale })}
+                        aria-label={`${format(day, 'd MMM yyyy', { locale })}${isImportedBlock ? (isRu ? ': блокировка iCal' : ': iCal availability block') : ''}`}
                         onClick={() => handleDayClick(day)}
                         className={cn(
                           "h-16 sm:h-20 p-0.5 sm:p-1 flex flex-col items-start text-left transition-colors relative",
@@ -243,6 +260,8 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                         )}>
                           {day.getDate()}
                         </span>
+
+                        {isImportedBlock && inMonth && <span className="text-[9px] mt-1 text-destructive font-medium">iCal</span>}
 
                         {/* Price */}
                         {effectivePrice > 0 && inMonth && !isBlocked && (
@@ -381,6 +400,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
           })}
         </div>
 
+        {inventoryBlocks.length > 0 && <p className="text-xs text-muted-foreground">{isRu ? 'iCal: даты закрыты внешним календарём' : 'iCal: dates unavailable in an external calendar'}</p>}
         {/* Legend */}
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground justify-center pt-1">
           <div className="flex items-center gap-1.5">
@@ -411,6 +431,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
           bookings={selectedDateEvents.bookings}
           tasks={selectedDateEvents.tasks}
           availability={selectedDateEvents.availability}
+          inventoryBlocks={selectedDateEvents.inventoryBlocks}
           onAddTask={handleAddTask}
           onViewBooking={() => {}}
           onCompleteTask={handleCompleteTask}

@@ -57,6 +57,9 @@ jobs:
             TZ="$zone" npx vitest run src/hooks/__tests__/pmsFlow.integration.test.tsx src/pages/owner/__tests__/MCBookingsPage.test.tsx src/hooks/__tests__/roomCategoryCache.test.tsx src/pages/property/PropertyIndex.test.tsx src/hooks/__tests__/formDraftLifecycle.test.tsx src/components/auth/InvestorGuard.test.tsx src/components/onboarding/Coachmarks.test.tsx || exit 1
           done
           node scripts/qa/scheduled-backup-integrity.mjs
+          for zone in UTC Asia/Bangkok America/Los_Angeles; do
+            TZ="$zone" node --test scripts/qa/ical-inventory-integrity.mjs scripts/qa/ical-ingress-integrity.mjs || exit 1
+          done
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Production build with synthetic configuration
