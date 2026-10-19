@@ -78,6 +78,17 @@ describe('atomic property-order review candidate', () => {
     await sql.unsafe(`REVOKE ALL ON FUNCTION ${signature} FROM PUBLIC, anon, authenticated;
       GRANT EXECUTE ON FUNCTION ${signature} TO service_role`);
   }
+  async function applyScript(script: string) {
+    // The script includes BEGIN/COMMIT. Pin both commands and error recovery
+    // to one connection while retaining the pool for actual race tests.
+    const connection = await sql.reserve();
+    try {
+      await connection.unsafe(script);
+    } catch (error) {
+      await connection.unsafe('ROLLBACK');
+      throw error;
+    } finally { connection.release(); }
+  }
   async function counts() {
     const [row] = await sql`SELECT (SELECT count(*)::int FROM orders) orders,
       (SELECT count(*)::int FROM order_items) items,
@@ -88,7 +99,7 @@ describe('atomic property-order review candidate', () => {
       (SELECT count(*)::int FROM reconciliation_alerts) alerts`;
     return row;
   }
-  beforeEach(async () => { await restorePredecessors(); await sql.unsafe(forward); });
+  beforeEach(async () => { await restorePredecessors(); await applyScript(forward); });
   afterAll(restorePredecessors);
 
   it('persists exactly one linked hold, guest, intent and history in one transaction', async () => {
@@ -209,7 +220,7 @@ describe('atomic property-order review candidate', () => {
   });
 
   it('rollback disables property creation without restoring unlinked adoption or affecting service orders', async () => {
-    await sql.unsafe(rollback);
+    await applyScript(rollback);
     expect(await create()).toMatchObject({ success: false, error: 'property_order_writer_disabled' });
     expect((await create({ type: 'service', items: [], start: null, end: null })).success).toBe(true);
     expect((await counts()).bookings).toBe(0);
