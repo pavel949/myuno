@@ -46,6 +46,11 @@ describe('unified residential query compatibility', () => {
     const filters = filterValuesToPropertyFilters(state.filterValues, { listingType: 'sale', saleIntent: state.saleIntent, isQuickSale: state.isQuickSale });
     expect(filters).toMatchObject({ listingType: 'sale', saleIntent: 'quick_sale', isQuickSale: true, minPrice: 5000000, maxPrice: 15000000 });
   });
+  it.each(['2.5', '0', '-1', '51', 'NaN'])('does not apply invalid guest count %s', guests => {
+    const state = readPropertySearchQuery(new URLSearchParams({ guests }));
+    expect(state.hasGuestFilter).toBe(false);
+    expect(state.search.guests).toBe(2);
+  });
   it('accepts old ISO instants and rejects invalid date/party values', () => {
     expect(readPropertySearchQuery(new URLSearchParams('checkIn=2027-01-20T00:00:00.000Z')).search.checkIn?.toISOString()).toBe('2027-01-20T00:00:00.000Z');
     const state = readPropertySearchQuery(new URLSearchParams('checkIn=bad&guests=-9&mode=unknown&tenancy=wrong'));

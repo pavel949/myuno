@@ -26,7 +26,7 @@ import { MarketplaceProduct } from '@/types/marketplace';
 import { useCartToast } from '@/hooks/useCartToast';
 import { cn } from '@/lib/utils';
 import { CrossSellSection } from '@/components/crosssell';
-import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 
 // Unified components
 import { 
@@ -502,9 +502,9 @@ const MarketIndex = () => {
         />
       </div>
 
-      <MarketComingSoonOverlay />
     </MiniAppLayout>
   );
 };
 
-export default MarketIndex;
+const AvailableMarketIndex = withMarketAvailability(MarketIndex);
+export default AvailableMarketIndex;

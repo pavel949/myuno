@@ -34,6 +34,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { useSupportChat, UNO_WHATSAPP } from '@/hooks/useChat';
 import { COMPANY_CONTACTS } from '@/lib/config';
+import { supportCopy } from '@/lib/support/supportCopy';
 
 // WhatsApp icon component - wrapped in forwardRef for PremiumButton compatibility
 const WhatsAppIcon = React.forwardRef<SVGSVGElement, { className?: string }>(
@@ -51,6 +52,7 @@ export default function Support() {
   const { startSupportChat, openWhatsApp } = useSupportChat();
   const [quickMessage, setQuickMessage] = useState('');
   const isRu = language === 'ru';
+  const text = supportCopy[language as keyof typeof supportCopy] || supportCopy.en;
 
   const quickTopics = [
     { 
@@ -89,36 +91,9 @@ export default function Support() {
     { icon: Wrench, label: isRu ? 'Ремонт и обслуживание' : 'Maintenance & repairs' },
   ];
 
-  const guarantees = [
-    {
-      icon: Shield,
-      title: isRu ? 'Проверенные партнёры' : 'Verified Partners',
-      desc: isRu 
-        ? 'Каждый партнёр проходит многоступенчатую проверку: документы, качество услуг, отзывы клиентов' 
-        : 'Every partner undergoes multi-step verification: documents, service quality, customer reviews'
-    },
-    {
-      icon: CheckCircle2,
-      title: isRu ? 'Гарантия качества' : 'Quality Guarantee',
-      desc: isRu 
-        ? 'Если услуга не соответствует описанию — вернём деньги или предложим альтернативу' 
-        : 'If the service doesn\'t match the description — we\'ll refund or offer an alternative'
-    },
-    {
-      icon: Users,
-      title: isRu ? 'Поддержка 24/7' : '24/7 Support',
-      desc: isRu 
-        ? 'Наши менеджеры на связи круглосуточно — поможем в любой ситуации' 
-        : 'Our managers are available around the clock — we\'ll help in any situation'
-    },
-    {
-      icon: Star,
-      title: isRu ? 'Честные цены' : 'Fair Prices',
-      desc: isRu 
-        ? 'Никаких скрытых комиссий. Цена, которую вы видите — это финальная цена' 
-        : 'No hidden fees. The price you see is the final price'
-    },
-  ];
+  const requestSteps = text.steps.map((step, index) => ({
+    ...step, icon: [Shield, CheckCircle2, Users, Star][index],
+  }));
 
   const unoValues = [
     {
@@ -128,10 +103,8 @@ export default function Support() {
         : 'All services in one place. No need to search multiple sources'
     },
     {
-      title: isRu ? 'Локальная экспертиза' : 'Local Expertise',
-      desc: isRu 
-        ? 'Мы живём на Пхукете и знаем остров изнутри — рекомендуем только проверенное' 
-        : 'We live in Phuket and know the island inside out — we recommend only verified options'
+      title: text.localTitle,
+      desc: text.localDescription
     },
     {
       title: isRu ? 'Без языкового барьера' : 'No Language Barrier',
@@ -202,7 +175,7 @@ export default function Support() {
                 {isRu ? 'Чат с myUNO' : 'Chat with myUNO'}
               </h2>
               <p className="text-sm text-muted-foreground">
-                {isRu ? 'Быстрые ответы 24/7' : 'Quick answers 24/7'}
+                {text.chatHint}
               </p>
             </div>
           </div>
@@ -231,15 +204,13 @@ export default function Support() {
                 {isRu ? 'Персональный менеджер' : 'Personal Manager'}
               </h3>
               <p className="text-xs text-muted-foreground">
-                {isRu ? 'Поможем забронировать что угодно' : 'We\'ll help book anything'}
+                {text.managerHint}
               </p>
             </div>
           </div>
 
           <p className="text-sm text-muted-foreground mb-4">
-            {isRu 
-              ? 'Не хотите искать сами? Менеджер myUNO подберёт подходящие варианты, договорится о цене и забронирует за вас:' 
-              : 'Don\'t want to search yourself? myUNO manager will find suitable options, negotiate the price and book for you:'}
+            {text.managerDescription}
           </p>
 
           <div className="grid grid-cols-2 gap-2 mb-4">
@@ -260,9 +231,7 @@ export default function Support() {
           </PremiumButton>
 
           <p className="text-xs text-center text-muted-foreground mt-3">
-            {isRu 
-              ? '💬 Опишите что нужно — мы найдём и забронируем' 
-              : '💬 Describe what you need — we\'ll find and book it'}
+            {text.requestNote}
           </p>
         </SectionCard>
 
@@ -313,13 +282,13 @@ export default function Support() {
           </PremiumButton>
         </SectionCard>
 
-        {/* Guarantees Section */}
+        {/* Request confirmation guidance */}
         <div className="text-sm font-medium text-muted-foreground mb-2 mt-4">
-          {isRu ? 'Наши гарантии' : 'Our Guarantees'}
+          {text.processTitle}
         </div>
         <SectionCard>
           <div className="space-y-4">
-            {guarantees.map((item, idx) => (
+            {requestSteps.map((item, idx) => (
               <div key={idx} className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <item.icon className="w-5 h-5 text-primary" />
@@ -392,9 +361,9 @@ export default function Support() {
             </div>
             <div>
               <p className="text-sm font-medium">
-                {isRu ? 'Время работы' : 'Working hours'}
+                {text.availabilityTitle}
               </p>
-              <p className="text-xs text-muted-foreground">{COMPANY_CONTACTS.workingHours.support}</p>
+              <p className="text-xs text-muted-foreground">{text.availabilityDescription}</p>
             </div>
           </div>
         </SectionCard>

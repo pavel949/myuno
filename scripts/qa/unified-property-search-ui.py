@@ -142,7 +142,7 @@ async def main():
                     await expect(page.get_by_test_id('location')).to_contain_text('guests=5')
                     edited = await query()
                     expected = {'mode':'rent','tenancy':'medium','district':'rawai','types':'condo','guests':'5',
-                        'checkIn':'2026-11-12T00:00:00.000Z','checkOut':'2026-11-18T00:00:00.000Z',
+                        'checkIn':'2026-11-12','checkOut':'2026-11-18',
                         'company':'synthetic-company','source':'fixture-bookmark'}
                     assert all(edited.get(k)==[v] for k,v in expected.items()),edited
                     await server({'listingType':'rent','district':'rawai','propertyType':'condo','minGuests':5,'rentTenancy':'medium'})

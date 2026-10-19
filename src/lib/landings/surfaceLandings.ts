@@ -23,6 +23,7 @@ export interface SurfaceLandingMeta {
   color: string;
   titleRu: string;
   titleEn: string;
+  titleTh: string;
   taglineRu: string;
   taglineEn: string;
 }
@@ -35,6 +36,7 @@ export const SURFACE_LANDINGS: readonly SurfaceLandingMeta[] = [
     color: 'cluster-arrive',
     titleRu: 'Прибытие',
     titleEn: 'Arrive',
+    titleTh: 'การเดินทางมาถึง',
     taglineRu: 'Трансфер, SIM, заселение — первые 72 часа',
     taglineEn: 'Transfer, SIM, check-in — first 72 hours',
   },
@@ -45,6 +47,7 @@ export const SURFACE_LANDINGS: readonly SurfaceLandingMeta[] = [
     color: 'cluster-live',
     titleRu: 'Жизнь',
     titleEn: 'Live',
+    titleTh: 'การใช้ชีวิต',
     taglineRu: 'Дом, школа, банк, страховка, права',
     taglineEn: 'Home, school, bank, insurance, licence',
   },
@@ -55,6 +58,7 @@ export const SURFACE_LANDINGS: readonly SurfaceLandingMeta[] = [
     color: 'cluster-manage',
     titleRu: 'Управление',
     titleEn: 'Manage',
+    titleTh: 'การจัดการ',
     taglineRu: 'PMS, гости, отчёты собственнику',
     taglineEn: 'PMS, guests, owner reports',
   },
@@ -65,6 +69,7 @@ export const SURFACE_LANDINGS: readonly SurfaceLandingMeta[] = [
     color: 'cluster-invest',
     titleRu: 'Инвестиции',
     titleEn: 'Invest',
+    titleTh: 'การลงทุน',
     taglineRu: 'Недвижимость, бизнес, capital-сделки',
     taglineEn: 'Real estate, business, capital deals',
   },
@@ -75,6 +80,7 @@ export const SURFACE_LANDINGS: readonly SurfaceLandingMeta[] = [
     color: 'cluster-legal',
     titleRu: 'Право',
     titleEn: 'Legal',
+    titleTh: 'กฎหมาย',
     taglineRu: 'Виза, компания, споры, налоги',
     taglineEn: 'Visa, company, disputes, tax',
   },
@@ -85,6 +91,7 @@ export const SURFACE_LANDINGS: readonly SurfaceLandingMeta[] = [
     color: 'cluster-build',
     titleRu: 'Стройка',
     titleEn: 'Build',
+    titleTh: 'การก่อสร้าง',
     taglineRu: 'Земля, титул, подрядчик, сдача',
     taglineEn: 'Land, title, contractor, handover',
   },

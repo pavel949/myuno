@@ -507,6 +507,7 @@ export const UnifiedChatFAB: React.FC<{ className?: string }> = ({ className }) 
 
       {/* Single global FAB — Sparkles signals "AI", green dot signals "live". */}
       <button
+        data-global-chat-launcher
         onClick={() => setIsOpen(true)}
         className={cn(
           'fixed w-12 h-12 rounded-full',

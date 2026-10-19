@@ -1,0 +1,58 @@
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
+import { PropertyListingCard } from '../PropertyListingCard';
+import type { Property } from '@/hooks/useProperties';
+
+const state = vi.hoisted(() => ({ language: 'en', currency: '฿' }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
+vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (value: number) => `${state.currency}${value}` }) }));
+vi.mock('@/components/uno/FavoriteButton', () => ({ FavoriteButton: () => null }));
+vi.mock('../PropertyImageCarousel', () => ({ PropertyImageCarousel: () => null }));
+vi.mock('../TrustStrip', () => ({ TrustStrip: () => null }));
+vi.mock('../StayRulesInline', () => ({ StayRulesInline: () => null }));
+vi.mock('../GuestFavoriteBadge', () => ({ GuestFavoriteBadge: () => null, isGuestFavorite: () => false }));
+beforeEach(() => { state.language = 'en'; state.currency = '฿'; });
+afterEach(cleanup);
+function mount(values: Partial<Property>, mode: 'rent' | 'buy' = 'rent') {
+  const property = { id: 'test', title_en: 'Test home', title_ru: 'Дом', listing_type: 'rent', ...values } as Property;
+  return render(<MemoryRouter><PropertyListingCard property={property} mode={mode} nights={3} /></MemoryRouter>);
+}
+describe('public listing amount and billing period', () => {
+  it('pairs an explicit nightly amount with night even when the legacy period is month', () => {
+    mount({ price_per_night: 3000, price: 90000, price_period: 'month' });
+    expect(screen.getByText('฿3000').parentElement).toHaveTextContent('฿3000 night');
+    expect(screen.getByText('Estimated: ฿9000')).toBeVisible();
+  });
+  it.each(['$', '€', '₽'])('retains the currency formatter for %s without changing the billing period', currency => {
+    state.currency = currency;
+    mount({ price_per_night: 3000, price: 90000, price_period: 'month' });
+    expect(screen.getByText(`${currency}3000`).parentElement).toHaveTextContent(`${currency}3000 night`);
+    expect(screen.getByText(`Estimated: ${currency}9000`)).toBeVisible();
+  });
+  it.each([['ru', 'ночь', 'Ориентировочно'], ['th', '/ คืน', 'ประมาณ']])('localizes nightly price and estimate in %s', (language, period, estimate) => {
+    state.language = language;
+    mount({ price_per_night: 3000, price_period: 'month' });
+    expect(screen.getByText('฿3000').parentElement).toHaveTextContent(`฿3000 ${period}`);
+    expect(screen.getByText(`${estimate}: ฿9000`)).toBeVisible();
+  });
+  it('keeps a legacy monthly amount monthly without multiplying it by nights', () => {
+    mount({ price_per_night: null, price: 90000, price_period: 'month' });
+    expect(screen.getByText('฿90000').parentElement).toHaveTextContent('฿90000 month');
+    expect(screen.queryByText(/Estimated/)).toBeNull();
+  });
+  it('does not show the rental amount as a dual-listed sale asking price', () => {
+    mount({ listing_modes: ['rent', 'sale'], sale_price: null, price: 3000 }, 'buy');
+    expect(screen.getByText('Price on request')).toBeVisible();
+    expect(screen.queryByText('฿3000')).toBeNull();
+  });
+  it('preserves the legacy amount of an explicitly sale-only listing', () => {
+    mount({ listing_type: 'sale', sale_price: null, price: 5000000 }, 'buy');
+    expect(screen.getByText('฿5000000')).toBeVisible();
+  });
+  it.each([null, 0, -1, NaN])('does not invent a free rental for unknown/invalid amount %s', price => {
+    mount({ price, price_per_night: null });
+    expect(screen.getByText('Price on request')).toBeVisible();
+    expect(screen.queryByText(/Estimated/)).toBeNull();
+  });
+});

@@ -144,10 +144,11 @@ export const CookieConsentBanner = forwardRef<HTMLDivElement>(function CookieCon
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-0 left-0 right-0 z-40 p-4 pb-safe pointer-events-none"
+        data-cookie-consent-banner
+        className="fixed bottom-0 left-0 right-0 z-[110] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none"
       >
         <div
-          className="max-w-lg mx-auto bg-card border border-border rounded-none shadow-2xl overflow-hidden pointer-events-auto isolate"
+          className="max-w-lg mx-auto bg-card border border-border rounded-none shadow-2xl max-h-[calc(100dvh-2rem-env(safe-area-inset-bottom))] overflow-y-auto overscroll-contain pointer-events-auto isolate"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
         >
