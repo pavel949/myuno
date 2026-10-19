@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render as renderControls, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HomeDiscoverySearch } from '../HomeDiscoverySearch';
 const state = vi.hoisted(() => ({ navigate: vi.fn(), mobile: false, language: 'ru' }));
@@ -7,6 +7,12 @@ vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: s
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
 vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ districts: [{ id: 'a', valueKey: 'layan', labelRu: 'Лаян', labelEn: 'Layan' }], isLoading: false }) }));
 vi.mock('@/hooks/usePropertyFilterOptions', () => ({ usePropertyFilterOptions: () => ({ propertyTypes: [{ id: 'villa', labelRu: 'Вилла', labelEn: 'Villa' }, { id: 'condo', labelRu: 'Кондо', labelEn: 'Condo' }], isLoading: false }) }));
+
+function render(...args: Parameters<typeof renderControls>) {
+  const result = renderControls(...args);
+  fireEvent.click(result.container.querySelector('summary')!);
+  return result;
+}
 
 function choose(label: string, option: string) {
   fireEvent.keyDown(screen.getByRole('combobox', { name: label }), { key: 'Enter' });
@@ -29,6 +35,37 @@ describe('Home discovery themed controls and catalogue handoff', () => {
   });
   afterEach(() => { cleanup(); vi.useRealTimers(); });
 
+  it.each(['ru', 'en', 'th'])('keeps only primary criteria expanded initially in %s', language => {
+    state.language = language;
+    const { container } = renderControls(<HomeDiscoverySearch />);
+    expect(container.querySelector('details')).not.toHaveAttribute('open');
+    expect(screen.getByRole('spinbutton')).not.toBeVisible();
+    expect(screen.getByRole('searchbox')).not.toBeVisible();
+    expect(screen.getAllByRole('combobox')).toHaveLength(3);
+    expect(screen.getByRole('button', { name: language === 'en' ? 'Find a home' : language === 'ru' ? 'Найти жильё' : 'ค้นหาที่พัก' })).toBeVisible();
+  });
+  it('edits a legacy bedroom bookmark into a minimum threshold without losing secondary state', () => {
+    state.language = 'en';
+    render(<HomeDiscoverySearch initialParams={new URLSearchParams('f.bedrooms=studio&types=townhouse&guests=4&f.priceLevel=2&source=bookmark')} />);
+    choose('Bedrooms', '2+');
+    fireEvent.submit(screen.getByRole('form'));
+    const params = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams;
+    expect(params.get('bedrooms')).toBe('2+');
+    expect(params.has('f.bedrooms')).toBe(false);
+    expect(params.get('types')).toBe('townhouse');
+    expect(params.get('guests')).toBe('4');
+    expect(params.get('f.priceLevel')).toBe('2');
+    expect(params.get('source')).toBe('bookmark');
+  });
+  it('clears both modern and legacy bedroom constraints explicitly', () => {
+    state.language = 'en';
+    render(<HomeDiscoverySearch initialParams={new URLSearchParams('bedrooms=2%2B&f.bedrooms=4%2B')} />);
+    choose('Bedrooms', 'Any');
+    fireEvent.submit(screen.getByRole('form'));
+    const params = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams;
+    expect(params.has('bedrooms')).toBe(false);
+    expect(params.has('f.bedrooms')).toBe(false);
+  });
   it.each([['ru', 'Любое', 'Необязательно'], ['en', 'Any', 'Optional'], ['th', 'ไม่ระบุ', 'ไม่บังคับ']])('keeps the optional guest placeholder short and explained in %s', (language, placeholder, hint) => {
     state.language = language;
     render(<HomeDiscoverySearch rentalOnly />);

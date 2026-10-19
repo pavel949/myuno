@@ -59,7 +59,8 @@ async def main():
                     await expect(page.locator('input[type=date]')).to_have_count(0)
                     await bounds()
                     for label, option in [('Тип жилья' if ru else 'Home type', 'Вилла' if ru else 'Villa'),
-                                          ('Выберите район' if ru else 'Choose an area', 'Лаян' if ru else 'Layan')]:
+                                          ('Выберите район' if ru else 'Choose an area', 'Лаян' if ru else 'Layan'),
+                                          ('Спальни' if ru else 'Bedrooms', '2+')]:
                         trigger = page.get_by_role('combobox', name=label)
                         await trigger.press('Enter')
                         await expect(page.get_by_role('listbox')).to_be_visible()
@@ -88,7 +89,7 @@ async def main():
                     params = parse_qs(selected.split('?', 1)[1])
                     assert params['mode'] == ['rent'] and params['district'] == ['layan'] and params['types'] == ['villa'], params
                     assert params['checkIn'] == ['2026-10-20'] and params['checkOut'] == ['2026-10-25'], params
-                    assert 'guests' not in params, params
+                    assert 'guests' not in params and params['bedrooms'] == ['2+'], params
                     await page.get_by_role('button', name='Покупка' if ru else 'Buy', exact=True).click()
                     await expect(trigger).to_have_count(0)
                     await page.get_by_role('button', name='Найти жильё' if ru else 'Find a home', exact=True).click()

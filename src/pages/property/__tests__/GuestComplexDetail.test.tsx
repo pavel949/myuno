@@ -6,7 +6,7 @@ import GuestComplexDetail from '../GuestComplexDetail';
 import { complexVideoSource } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES } from '@/lib/config/routes';
 const state = vi.hoisted(() => ({
-  project: { data: { id: 'complex', name_en: 'Ocean Place', name_ru: '', description_en: 'A peaceful place.', images: [] as string[], video_url: undefined as string | undefined, units_available: 19 }, isLoading: false, isError: false, refetch: vi.fn() },
+  project: { data: { id: 'complex', name_en: 'Ocean Place', name_ru: '', description_en: 'A peaceful place.', images: [] as string[], video_url: undefined as string | undefined, units_available: 19, amenities: [] as string[] }, isLoading: false, isError: false, refetch: vi.fn() },
   rent: { data: { properties: [] as Array<{ id: string; management_company_id?: string }>, total: 0 }, isLoading: false, isError: false, isSuccess: true, refetch: vi.fn() },
   sale: { data: { properties: [] as Array<{ id: string; management_company_id?: string }>, total: 0 }, isLoading: false, isError: false, isSuccess: true, refetch: vi.fn() },
   units: vi.fn(),
@@ -19,11 +19,25 @@ vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCar
 vi.mock('@/components/property/PhotoLightbox', () => ({ PhotoLightbox: () => null }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null }));
 afterEach(cleanup);
-beforeEach(() => { state.project.data.images = []; state.project.data.video_url = undefined; state.project.isError = false; state.project.isLoading = false; state.rent.data = { properties: [], total: 0 }; state.sale.data = { properties: [], total: 0 }; state.rent.isError = false; state.units.mockClear(); });
+beforeEach(() => { state.project.data.images = []; state.project.data.amenities = []; state.project.data.video_url = undefined; state.project.isError = false; state.project.isLoading = false; state.rent.data = { properties: [], total: 0 }; state.sale.data = { properties: [], total: 0 }; state.rent.isError = false; state.units.mockClear(); });
 function LocationProbe() { const location = useLocation(); return <output data-testid="location">{location.search}</output>; }
 const mount = (search = '') => render(<MemoryRouter initialEntries={[`/property/complex/complex${search}`]}><Routes><Route path="/property/complex/:id" element={<GuestComplexDetail />} /></Routes><LocationProbe /></MemoryRouter>);
 
 describe('informational complex detail', () => {
+  it('shows only known facilities from the mixed project metadata array without inventing labels', () => {
+    state.project.data.amenities = ['set_listed', 'early_delivery', '637_units', 'bang_tao', 'pool', 'beach-access', 'pool', 'rooftop_observatory'];
+    mount();
+    expect(screen.getByRole('heading', { name: 'Around the grounds' })).toBeVisible();
+    expect(screen.getAllByText('Pool', { exact: true })).toHaveLength(1);
+    expect(screen.getByText('Beach Access', { exact: true })).toBeVisible();
+    for (const metadata of ['set_listed', 'early_delivery', '637_units', 'bang_tao', 'rooftop_observatory']) expect(screen.queryByText(metadata)).toBeNull();
+  });
+  it('omits the facility section when the record contains only project metadata', () => {
+    state.project.data.amenities = ['set_listed', 'early_delivery', '637_units', 'bang_tao'];
+    mount();
+    expect(screen.queryByRole('heading', { name: 'Around the grounds' })).toBeNull();
+    expect(screen.getByText('A peaceful place.')).toBeVisible();
+  });
   it('uses a compact no-photo hero and exposes accurate offer anchors early', () => {
     mount('?checkIn=2026-12-01&checkOut=2026-12-04&guests=2&managementCompanyId=operator');
     expect(screen.getByTestId('complex-hero')).toHaveClass('min-h-[280px]');

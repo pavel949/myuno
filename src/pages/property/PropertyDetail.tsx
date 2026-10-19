@@ -248,6 +248,16 @@ export default function PropertyDetail() {
     }
   };
 
+  const handleViewPricing = () => {
+    const panel = document.getElementById('property-pricing');
+    if (panel && panel.getClientRects().length > 0) {
+      panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      panel.focus({ preventScroll: true });
+    } else {
+      setDateSheetOpen(true);
+    }
+  };
+
   return (
     <>
       <SEOHead
@@ -613,6 +623,7 @@ export default function PropertyDetail() {
                     showPricingDeposit={Boolean(
                       rentalTerms.deposit_amount != null && rentalTerms.deposit_amount > 0,
                     )}
+                    onViewPricing={!isSaleListing && !isLongStayOnly ? handleViewPricing : undefined}
                   />
                   <GuestAssuranceCard compact className="lg:hidden mt-2" />
                 </>
@@ -685,6 +696,8 @@ export default function PropertyDetail() {
 
             {/* Sidebar — sticky on desktop */}
             <aside
+              id="property-pricing"
+              tabIndex={-1}
               className={cn(
                 'hidden lg:flex lg:flex-col gap-4 w-full',
                 'lg:sticky lg:top-[4.75rem] xl:top-[5.25rem] lg:self-start lg:z-10',
@@ -805,6 +818,7 @@ export default function PropertyDetail() {
         <PropertyDetailMobileBar
           propertyId={id || 'prop-1'}
           isSaleListing={isSaleListing}
+          isLongStayOnly={isLongStayOnly}
           salePrice={salePrice ?? 0}
           pricePerNight={pricePerNight}
           ownershipLabel={ownershipLabel}

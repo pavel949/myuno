@@ -9,7 +9,7 @@ import { PropertyListingCard } from '@/components/property/PropertyListingCard';
 import { PropertyDetailGallery } from '@/components/property/detail/PropertyDetailGallery';
 import { PhotoLightbox } from '@/components/property/PhotoLightbox';
 import { PropertyAttributeChip } from '@/components/property/PropertyAttributeChip';
-import { getProjectFacilityLabel } from '@/lib/propertyAttributeRegistry';
+import { getProjectFacilityLabel, normalizeProjectFacilityIds, PROJECT_FACILITY_LABELS } from '@/lib/propertyAttributeRegistry';
 import { complexMediaUrl, complexVideoSource } from '@/lib/real-estate/complexMedia';
 import { propertyCatalogHref } from '@/lib/real-estate/propertyDetailIntent';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,10 @@ export default function GuestComplexDetail() {
   const photos = [...new Set([project.cover_image, ...(project.images || [])].map(complexMediaUrl).filter((url): url is string => Boolean(url)))];
   const video = complexVideoSource(project.video_url);
   const units = unitsQuery.data?.properties || [];
+  // This mixed legacy array also carries project metadata. Only registered
+  // facilities are public amenity claims; unknown values need editorial evidence.
+  const facilities = normalizeProjectFacilityIds(project.amenities || [])
+    .filter(id => Object.prototype.hasOwnProperty.call(PROJECT_FACILITY_LABELS, id));
 
   return <>
     <SEOHead title={`${name} — myUNO`} description={description || name} />
@@ -74,7 +78,7 @@ export default function GuestComplexDetail() {
         <div><p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-3">{isRu ? 'Знакомство' : 'Discover'}</p><h2 className="text-3xl sm:text-4xl tracking-tight">{isRu ? 'О комплексе' : 'Life at the complex'}</h2></div>
         <div className="space-y-8">
           <p className="text-base sm:text-lg leading-relaxed whitespace-pre-line text-muted-foreground">{description || (isRu ? 'Описание комплекса пока не добавлено.' : 'A description of this complex has not been added yet.')}</p>
-          {!!project.amenities?.length && <div><h3 className="text-lg font-medium mb-4">{isRu ? 'Удобства на территории' : 'Around the grounds'}</h3><div className="flex flex-wrap gap-2">{project.amenities.map(amenity => <PropertyAttributeChip key={amenity} icon={amenity === 'pool' ? <Waves className="h-4 w-4" /> : <Building2 className="h-4 w-4" />} className="px-4 py-3"><span>{getProjectFacilityLabel(amenity, isRu ? 'ru' : 'en')}</span></PropertyAttributeChip>)}</div></div>}
+          {facilities.length > 0 && <div><h3 className="text-lg font-medium mb-4">{isRu ? 'Удобства на территории' : 'Around the grounds'}</h3><div className="flex flex-wrap gap-2">{facilities.map(amenity => <PropertyAttributeChip key={amenity} icon={amenity === 'pool' ? <Waves className="h-4 w-4" /> : <Building2 className="h-4 w-4" />} className="px-4 py-3"><span>{getProjectFacilityLabel(amenity, isRu ? 'ru' : 'en')}</span></PropertyAttributeChip>)}</div></div>}
         </div>
       </section>
 

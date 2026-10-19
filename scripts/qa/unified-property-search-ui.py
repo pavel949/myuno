@@ -71,7 +71,8 @@ async def main():
                 async def visible_search(focused=False):
                     # Search criteria stay visible before and after submission.
                     await expect(page.get_by_role('form')).to_have_count(1)
-                    await expect(page.get_by_role('searchbox')).to_be_visible()
+                    await expect(page.get_by_role('combobox', name=type_label)).to_be_visible()
+                    await expect(page.get_by_role('combobox', name='Спальни' if ru else 'Bedrooms')).to_be_visible()
                     if focused:
                         await expect(page.get_by_role('heading',level=2)).to_be_focused()
                     await bounds()
@@ -128,6 +129,8 @@ async def main():
                     await visible_search()
                     await choose(type_label,'Кондо' if ru else 'Condo')
                     await choose(area_label,'Равай' if ru else 'Rawai')
+                    await choose('Спальни' if ru else 'Bedrooms', '2+')
+                    await page.locator('.home-search-secondary summary').click()
                     await page.get_by_label(guests_label).fill('5')
                     await page.get_by_role('button',name='Помесячно' if ru else 'Monthly',exact=True).click()
                     await page.get_by_role('button',name=date_label).press('Enter')
@@ -143,9 +146,9 @@ async def main():
                     edited = await query()
                     expected = {'mode':'rent','tenancy':'medium','district':'rawai','types':'condo','guests':'5',
                         'checkIn':'2026-11-12','checkOut':'2026-11-18',
-                        'company':'synthetic-company','source':'fixture-bookmark'}
+                        'company':'synthetic-company','source':'fixture-bookmark','bedrooms':'2+'}
                     assert all(edited.get(k)==[v] for k,v in expected.items()),edited
-                    await server({'listingType':'rent','district':'rawai','propertyType':'condo','minGuests':5,'rentTenancy':'medium'})
+                    await server({'listingType':'rent','district':'rawai','propertyType':'condo','minGuests':5,'minBedrooms':2,'rentTenancy':'medium'})
                     await visible_search(focused=True)
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-edited-collapsed.png'),full_page=True)
                     await hydrated('Кондо' if ru else 'Condo','Равай' if ru else 'Rawai',5)
@@ -206,7 +209,7 @@ async def main():
                     await choose('Сортировка' if ru else 'Sort homes', 'Цена: по возрастанию' if ru else 'Price: Low → High')
                     # Quick chips and the real responsive filter sheet share one URL state.
                     pool_label = 'Свой бассейн' if ru else 'Private pool'
-                    filter_label = 'Цена, спальни и удобства' if ru else 'Price, bedrooms & amenities'
+                    filter_label = 'Цена и удобства' if ru else 'Price & amenities'
                     await page.get_by_role('button',name=pool_label,exact=True).click()
                     await expect(page.get_by_role('button',name=pool_label,exact=True)).to_have_attribute('aria-pressed','true')
                     await page.get_by_role('button',name=filter_label+' (1)',exact=True).click()

@@ -3,7 +3,7 @@ import { APP_ROUTES } from '@/lib/config/routes';
 export const PUBLIC_RENT_ELIGIBILITY = 'listing_type.eq.rent,listing_modes.cs.{rent}';
 export const PUBLIC_SALE_ELIGIBILITY = 'is_for_sale.eq.true,listing_type.eq.sale,listing_modes.cs.{sale}';
 // Legacy price belongs to the sale only when this is explicitly a sale listing.
-export const PUBLIC_SALE_PRICE_ELIGIBILITY = 'sale_price.gt.0,and(listing_type.eq.sale,sale_price.is.null,price.gt.0)';
+export const PUBLIC_SALE_PRICE_ELIGIBILITY = 'sale_price.gt.0,and(listing_type.eq.sale,sale_price.is.null,price.gt.0,or(listing_modes.is.null,listing_modes.not.cs.{rent}))';
 
 export interface PropertyIntentFields {
   listing_type?: string | null;
