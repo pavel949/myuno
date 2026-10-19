@@ -29,6 +29,16 @@ describe('Home discovery themed controls and catalogue handoff', () => {
   });
   afterEach(() => { cleanup(); vi.useRealTimers(); });
 
+  it.each([['ru', 'Любое', 'Необязательно'], ['en', 'Any', 'Optional'], ['th', 'ไม่ระบุ', 'ไม่บังคับ']])('keeps the optional guest placeholder short and explained in %s', (language, placeholder, hint) => {
+    state.language = language;
+    render(<HomeDiscoverySearch rentalOnly />);
+    const guests = screen.getByRole('spinbutton');
+    expect(guests).toHaveAttribute('placeholder', placeholder);
+    expect(guests).not.toBeRequired();
+    expect(guests).toHaveAccessibleDescription(expect.stringContaining(hint));
+    fireEvent.submit(screen.getByRole('form'));
+    expect(new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams.has('guests')).toBe(false);
+  });
   it('uses app controls and preserves type, district, dates and guests in the rental URL', () => {
     const { container } = render(<HomeDiscoverySearch />);
     expect(container.querySelector('input[type="date"]')).toBeNull();

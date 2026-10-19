@@ -50,6 +50,8 @@
 .public-commerce-form { width: 100%; max-width: 52rem; margin-inline: auto; }
 .public-commerce-form { padding-block: 1.5rem; }
 .public-commerce-form :is(input:not([type="checkbox"]):not([type="radio"]), [role="combobox"]) { min-height: 2.75rem; }
+/* Radio buttons sit inside padded labels; the mobile button minimum must not stretch their circles. */
+.public-commerce-form [role="radio"] { width: 1rem; height: 1rem; min-height: 1rem; flex: 0 0 1rem; }
 .public-commerce-form :is(h1, h2) { font-family: var(--font-display); font-weight: 500; }
 .public-commerce--market { border: 1px solid hsl(var(--border)); background: hsl(var(--card)); margin-block: 2rem; }
 .public-commerce--project > .relative { max-height: 32rem; }

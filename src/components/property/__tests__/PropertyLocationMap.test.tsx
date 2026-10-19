@@ -24,6 +24,29 @@ describe('property map failure recovery', () => {
     await waitFor(() => expect(screen.queryByTestId('map')).toBeNull());
     expect(screen.getByText('Map temporarily unavailable')).toBeVisible();
   });
+  it('detects the observed unclassed Google warning span after insertion', async () => {
+    render(<PropertyLocationMap lat={8.02} lng={98.3} />);
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = '<div><div><span>This page can’t load Google Maps correctly.</span></div></div>';
+    screen.getByTestId('map').appendChild(wrapper);
+    await waitFor(() => expect(screen.queryByTestId('map')).toBeNull());
+    expect(screen.getByText('Map temporarily unavailable')).toBeVisible();
+  });
+  it('detects a warning populated by a character-data mutation', async () => {
+    render(<PropertyLocationMap lat={8.02} lng={98.3} />);
+    const span = document.createElement('span');
+    const text = document.createTextNode('Loading map');
+    span.appendChild(text);
+    screen.getByTestId('map').appendChild(span);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    text.data = "This page can't load Google Maps correctly.";
+    await waitFor(() => expect(screen.queryByTestId('map')).toBeNull());
+  });
+  it('does not treat address text outside the map as a provider failure', () => {
+    render(<PropertyLocationMap address="This page can't load Google Maps correctly." />);
+    expect(screen.getByTestId('map')).toBeVisible();
+    expect(screen.queryByText('Map temporarily unavailable')).toBeNull();
+  });
   it.each([['en', 'Map temporarily unavailable'], ['ru', 'Карта временно недоступна'], ['th', 'แผนที่ไม่พร้อมใช้งานชั่วคราว']])('uses guest-facing localized recovery for auth failure in %s', (language, label) => {
     state.language = language;
     state.loadError = new Error('auth failed: check API key restrictions');

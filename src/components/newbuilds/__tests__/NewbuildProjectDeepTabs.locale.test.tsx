@@ -29,9 +29,9 @@ describe('project details locale', () => {
     ['th', 'รายละเอียดโครงการ', 'ห้องที่ว่าง', 'แปลนห้อง', 'ผู้พัฒนา', 'ยูนิตทั้งหมด'],
   ])('uses %s labels throughout the visible overview', (language, title, available, plans, developer, units) => {
     locale.language = language;
-    const project = { id: 'p', name_en: 'Project', description_en: 'English project description', description_ru: 'Описание проекта на русском', total_units: 20 } as NewbuildProject;
+    const project = { id: 'p', name_en: 'Project', description_en: 'English project description', description_ru: 'Описание проекта на русском', total_units: 20, amenities: ['11_villas', '2452+_sqm'] } as NewbuildProject;
     render(<NewbuildProjectDeepTabs project={project} variant="embedded" />);
-    for (const label of [title, available, plans, developer, units]) expect(screen.getByText(label)).toBeVisible();
+    for (const label of [title, available, plans, developer, units, '11 villas', '2452+ sqm']) expect(screen.getByText(label)).toBeVisible();
     expect(screen.getByText(language === 'ru' ? 'Описание проекта на русском' : 'English project description')).toBeVisible();
     if (language !== 'ru') expect(screen.queryByText('Полная карточка проекта')).toBeNull();
   });

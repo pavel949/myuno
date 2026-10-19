@@ -1,4 +1,5 @@
 import '@/styles/public-commerce.css';
+import { projectFeatureLabel } from '@/lib/offplan/presentation';
 /**
  * OffplanDetail - Detailed view of an off-plan project
  * Shows gallery, developer info, myUNO scoring, investment metrics
@@ -301,7 +302,7 @@ export default function OffplanDetail() {
                 <h3 className="font-medium mb-2">{isRu ? 'Удобства' : 'Amenities'}</h3>
                 <div className="flex flex-wrap gap-2">
                   {project.amenities.map((a, i) => (
-                    <Badge key={i} variant="outline">{a}</Badge>
+                    <Badge key={i} variant="outline">{projectFeatureLabel(a, language)}</Badge>
                   ))}
                 </div>
               </div>

@@ -102,7 +102,8 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
         <HomeSearchDateRange checkIn={checkIn} checkOut={checkOut} onChange={(start, end) => { setCheckIn(start); setCheckOut(end); setDateError(false); }} />
         <label className="home-search-guests" htmlFor={guestsId}><Users size={18} aria-hidden="true" /><span>
           <span className="home-field-label">{t({ ru: 'Гости', en: 'Guests', th: 'ผู้เข้าพัก' })}</span>
-          <input id={guestsId} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Не указано', en: 'Any number', th: 'ไม่ระบุ' })} value={guests} onChange={e => setGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
+          <input id={guestsId} aria-describedby={`${guestsId}-optional`} type="number" min="1" max="50" step="1" placeholder={t({ ru: 'Любое', en: 'Any', th: 'ไม่ระบุ' })} value={guests} onChange={e => setGuests(e.target.value)} aria-label={t({ ru: 'Количество гостей', en: 'Number of guests', th: 'จำนวนผู้เข้าพัก' })} />
+          <span id={`${guestsId}-optional`} className="sr-only">{t({ ru: 'Необязательно. Оставьте пустым, чтобы не ограничивать число гостей.', en: 'Optional. Leave blank for no guest-count restriction.', th: 'ไม่บังคับ เว้นว่างเพื่อไม่จำกัดจำนวนผู้เข้าพัก' })}</span>
         </span></label>
       </>}
       {mode === 'rent' && dateError && <p role="alert" className="col-span-full text-sm text-destructive">{t({ ru: 'Выберите даты заезда и выезда. Выезд должен быть позже заезда.', en: 'Choose check-in and check-out dates. Check-out must be after check-in.', th: 'เลือกวันเช็กอินและเช็กเอาต์ โดยวันเช็กเอาต์ต้องอยู่หลังวันเช็กอิน' })}</p>}
