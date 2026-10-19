@@ -5,6 +5,11 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+# Superseded commits of the same PR do not consume duplicate runners.
+# Manual runs and different PRs remain independent; no verification is skipped.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 permissions:
   contents: read
 jobs:
@@ -94,7 +99,10 @@ jobs:
             scripts/qa/property-editor-ui.mjs \
             scripts/qa/ui-backlog-salvage.mjs \
             scripts/qa/pms-dashboard-ui.mjs \
+            scripts/qa/mc-workspace-ui.mjs \
+            scripts/qa/mc-workspace-forms-ui.mjs \
             scripts/qa/services-discovery-ui.mjs \
+            scripts/qa/services-framework-ui.mjs \
             scripts/qa/trip-planner-ui.mjs \
             scripts/qa/unified-property-search-ui.mjs \
             scripts/qa/bookings-list-ui.mjs \
@@ -103,6 +111,7 @@ jobs:
             scripts/qa/today-ui.mjs \
             scripts/qa/property-browse-ui.mjs \
             scripts/qa/home-search-ui.mjs \
+            scripts/qa/home-preferences-ui.mjs \
             scripts/qa/guest-complex-ui.mjs; do
             if timeout 180s node "$fixture"; then
               printf '%s: PASS\n' "$fixture" | tee -a /tmp/browser/fixture-status.txt

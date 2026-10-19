@@ -9,7 +9,7 @@
  *    so adding a new app/route never requires editing the drawer.
  *
  * Composition (top → bottom):
- *  1. Header        — avatar, name, current active role, "Switch role" CTA
+ *  1. Header        — avatar, name, home preference, "Customize home" CTA
  *  2. Quick actions — 3-5 contextual shortcuts based on persona stack
  *  3. Clusters      — Arrive · Live · Enjoy · Manage · Invest · Legal · Build
  *                     (collapsible accordion, each lists services)
@@ -22,7 +22,7 @@
 import React, { useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Menu, ChevronRight, LogOut, Settings, Globe, Repeat,
+  Menu, ChevronRight, LogOut, Settings, Globe, SlidersHorizontal,
   Home as HomeIcon, Compass, Building2, TrendingUp,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -33,13 +33,31 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickTriplet } from '@/lib/ecosystemGlossary';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { APP_ROUTES } from '@/lib/config/routes';
 import {
   resolveNavRole, getWorkspaceDrawerGroups, type NavRoleKey,
 } from '@/lib/nav/navigationModel';
 import { useLiveClusterCatalog, isClusterVisibleToUser } from '@/lib/nav/clusterCatalog';
-import { ROLE_META, personaColor } from '@/lib/roleBlend';
+import { ROLE_META } from '@/lib/roleBlend';
 import type { UserPersona } from '@/hooks/useUserPersonas';
+
+const HOME_PREFERENCE_LABEL_TH: Record<UserPersona, string> = {
+  tourist: 'ท่องเที่ยวภูเก็ต',
+  resident: 'อาศัยในภูเก็ต',
+  property_owner: 'เจ้าของอสังหาริมทรัพย์',
+  investor: 'นักลงทุน',
+  real_estate_developer: 'ผู้พัฒนาอสังหาริมทรัพย์',
+  local_services_provider: 'ธุรกิจท้องถิ่น',
+  family: 'ครอบครัว',
+  couple: 'คู่รัก',
+  nightlife: 'เที่ยวกลางคืน',
+  active: 'กีฬาและกิจกรรม',
+  business: 'ธุรกิจ',
+  nomad: 'ทำงานพร้อมเดินทาง',
+  pet_owner: 'สัตว์เลี้ยง',
+  relocation: 'ย้ายถิ่นฐาน',
+};
 
 // ─────────────────────────────────────────────────────────────
 // Quick actions — contextual based on persona stack + nav role.
@@ -112,7 +130,7 @@ export interface AppDrawerProps {
   onOpenChange: (open: boolean) => void;
   /** Persona stack from useUserPersonas — drives quick actions. */
   personas?: UserPersona[];
-  /** Optional: open the role-switch sheet from header. */
+  /** Optional: open the home-preference sheet from the header. */
   onSwitchRole?: () => void;
 }
 
@@ -156,7 +174,7 @@ export function AppDrawer({
     ?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() ?? 'U';
   const displayName = (user?.user_metadata?.full_name as string | undefined)
     ?? user?.email
-    ?? (isRu ? 'Гость' : 'Guest');
+    ?? pickLang(language, { ru: 'Гость', en: 'Guest', th: 'ผู้เยี่ยมชม' });
 
   const primaryPersona = personas[0];
   const personaMeta = primaryPersona ? ROLE_META[primaryPersona] : undefined;
@@ -172,18 +190,20 @@ export function AppDrawer({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
+        closeLabel={pickLang(language, { ru: 'Закрыть', en: 'Close', th: 'ปิด' })}
         className="w-[88vw] max-w-[380px] p-0 flex flex-col bg-background"
       >
         <SheetHeader className="sr-only">
-          <SheetTitle>{isRu ? 'Меню приложения' : 'App menu'}</SheetTitle>
+          <SheetTitle>{pickLang(language, { ru: 'Меню приложения', en: 'App menu', th: 'เมนูแอป' })}</SheetTitle>
         </SheetHeader>
 
-        {/* 1. Header — user + role */}
-        <div className="px-5 pt-5 pb-4 border-b border-border/60">
+        {/* 1. Header — account and home preferences */}
+        <div className="px-5 pt-5 pb-4 border-b border-border/60 shrink-0">
           <button
             type="button"
             onClick={() => go(APP_ROUTES.ACCOUNT)}
-            className="flex items-center gap-3 w-full text-left"
+            aria-label={`${pickLang(language, { ru: 'Открыть профиль', en: 'Open profile', th: 'เปิดโปรไฟล์' })}: ${displayName}`}
+            className="flex items-center gap-3 w-full pr-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <div
               className="w-12 h-12 rounded-full border border-border flex items-center justify-center font-display text-[14px] font-semibold text-foreground shrink-0"
@@ -196,15 +216,14 @@ export function AppDrawer({
                 {displayName}
               </div>
               {personaMeta && primaryPersona && (
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: personaColor(primaryPersona) }}
-                  />
-                  <span className="text-[11px] text-muted-foreground">
-                    {isRu ? personaMeta.labelRu : personaMeta.label}
-                  </span>
-                </div>
+                <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                  {pickLang(language, { ru: 'На главной: ', en: 'Home preference: ', th: 'ความสนใจบนหน้าหลัก: ' })}
+                  {pickLang(language, {
+                    ru: primaryPersona === 'pet_owner' ? 'Питомцы' : personaMeta.labelRu,
+                    en: primaryPersona === 'pet_owner' ? 'Pets' : personaMeta.label,
+                    th: HOME_PREFERENCE_LABEL_TH[primaryPersona],
+                  })}
+                </p>
               )}
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -214,14 +233,14 @@ export function AppDrawer({
             <Button
               variant="outline"
               size="sm"
-              className="w-full mt-3 h-9 gap-2 text-[12px] font-medium"
+              className="w-full mt-3 min-h-11 gap-2 text-[12px] font-medium"
               onClick={() => {
                 onOpenChange(false);
                 onSwitchRole();
               }}
             >
-              <Repeat className="w-3.5 h-3.5" />
-              {isRu ? 'Переключить роль' : 'Switch role'}
+              <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden="true" />
+              {pickLang(language, { ru: 'Настроить главную', en: 'Customize home', th: 'ปรับแต่งหน้าหลัก' })}
             </Button>
           )}
         </div>
@@ -274,7 +293,7 @@ export function AppDrawer({
                 </h3>
                 <div className="space-y-1">
                   {workspaceGroups.flatMap((group) =>
-                    group.items.slice(0, 4).map((item) => {
+                    (role === 'owner' ? group.items : group.items.slice(0, 4)).map((item) => {
                       const ItemIcon = item.icon;
                       return (
                         <button
@@ -284,7 +303,7 @@ export function AppDrawer({
                         >
                           <ItemIcon className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
                           <span className="text-[13px] text-foreground truncate">
-                            {isRu ? item.labelRu : item.labelEn}
+                            {pickLang(language, { en: item.labelEn, ru: item.labelRu, th: item.labelTh })}
                           </span>
                         </button>
                       );
@@ -297,7 +316,7 @@ export function AppDrawer({
         </ScrollArea>
 
         {/* 5. Footer */}
-        <div className="border-t border-border/60 px-3 py-3 flex items-center justify-between gap-1">
+        <div className="shrink-0 border-t border-border/60 px-3 py-3 flex items-center justify-between gap-1">
           <Button
             variant="ghost"
             size="sm"
@@ -311,10 +330,10 @@ export function AppDrawer({
             variant="ghost"
             size="sm"
             className="gap-1.5 h-9 text-[12px]"
-            onClick={() => go('/account?tab=settings')}
+            onClick={() => go(APP_ROUTES.PROFILE_SETTINGS)}
           >
             <Settings className="w-3.5 h-3.5" />
-            {isRu ? 'Настройки' : 'Settings'}
+            {pickLang(language, { ru: 'Настройки', en: 'Settings', th: 'การตั้งค่า' })}
           </Button>
           {user && (
             <Button
@@ -327,7 +346,7 @@ export function AppDrawer({
               }}
             >
               <LogOut className="w-3.5 h-3.5" />
-              {isRu ? 'Выйти' : 'Logout'}
+              {pickLang(language, { ru: 'Выйти', en: 'Logout', th: 'ออกจากระบบ' })}
             </Button>
           )}
         </div>

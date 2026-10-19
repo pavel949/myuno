@@ -20,6 +20,7 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
+  SidebarFooter,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -31,9 +32,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, LayoutGrid } from 'lucide-react';
+import '@/styles/mc-workspace.css';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useBusinessRole } from '@/hooks/useBusinessRole';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import {
@@ -57,7 +60,7 @@ export function SideRail({ role, badges }: SideRailProps) {
   const { state, isMobile, setOpenMobile } = useSidebar();
   const { role: businessRole } = useBusinessRole();
   const { allProperties } = useMyProperties();
-  const isRussian = language === 'ru';
+  const labelOf = (value: { labelEn: string; labelRu: string; labelTh?: string }) => pickLang(language, { en: value.labelEn, ru: value.labelRu, th: value.labelTh });
   const isCollapsed = !isMobile && state === 'collapsed';
 
   if (!hasSidebar(role)) return null;
@@ -84,12 +87,12 @@ export function SideRail({ role, badges }: SideRailProps) {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
+    <Sidebar collapsible="icon" className={cn("border-r border-border", role === 'owner' && 'mc-workspace-sidebar')}>
       {!isCollapsed && (
         <SidebarHeader className="border-b border-border/70 px-2 py-2">
           <div className="flex items-center">
             <span className="text-xs font-medium text-muted-foreground">
-              {isRussian ? 'Навигация' : 'Navigation'}
+              {pickLang(language, { en: 'Navigation', ru: 'Навигация', th: 'เมนู' })}
             </span>
           </div>
         </SidebarHeader>
@@ -98,15 +101,17 @@ export function SideRail({ role, badges }: SideRailProps) {
         {groups.map((group) => {
           const open = groupHasActive(group) || group.defaultOpen || false;
           return (
-            <Collapsible key={group.labelEn} defaultOpen={open}>
+            <Collapsible key={`${group.labelEn}:${groupHasActive(group)}:${isCollapsed}`} defaultOpen={isCollapsed || open}>
               <SidebarGroup>
                 {!isCollapsed && (
                   <CollapsibleTrigger asChild>
-                    <SidebarGroupLabel
+                    <SidebarGroupLabel asChild
                       className="flex items-center justify-between cursor-pointer hover:text-foreground transition-colors"
                     >
-                      <span>{isRussian ? group.labelRu : group.labelEn}</span>
-                      <ChevronDown className="h-3.5 w-3.5 transition-transform data-[state=closed]:-rotate-90" />
+                      <button type="button">
+                        <span>{labelOf(group)}</span>
+                        <ChevronDown aria-hidden className="h-3.5 w-3.5 shrink-0 transition-transform data-[state=closed]:-rotate-90" />
+                      </button>
                     </SidebarGroupLabel>
                   </CollapsibleTrigger>
                 )}
@@ -116,7 +121,7 @@ export function SideRail({ role, badges }: SideRailProps) {
                       {group.items.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.path);
-                        const label = isRussian ? item.labelRu : item.labelEn;
+                        const label = labelOf(item);
                         const badge = item.badgeKey ? badges?.[item.badgeKey] : undefined;
                         return (
                           <SidebarMenuItem key={item.path}>
@@ -125,12 +130,12 @@ export function SideRail({ role, badges }: SideRailProps) {
                               tooltip={label}
                               onClick={() => handleNavigate(item.path)}
                               className={cn(
-                                'cursor-pointer',
+                                'cursor-pointer h-auto min-h-10 py-2',
                                 active && 'bg-sidebar-accent text-sidebar-accent-foreground font-medium',
                               )}
                             >
                               <Icon className="size-5 shrink-0" />
-                              <span className="truncate">{label}</span>
+                              <span className="min-w-0 break-words leading-snug" style={{ whiteSpace: 'normal', overflow: 'visible', textOverflow: 'clip' }}>{label}</span>
                               {badge && badge > 0 ? (
                                 <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
                                   {badge > 99 ? '99+' : badge}
@@ -148,6 +153,12 @@ export function SideRail({ role, badges }: SideRailProps) {
           );
         })}
       </SidebarContent>
+      {role === 'owner' && <SidebarFooter className="border-t border-sidebar-border p-2">
+        <SidebarMenu><SidebarMenuItem><SidebarMenuButton onClick={() => handleNavigate('/mc/modules')} tooltip={pickLang(language, {en:'All tools',ru:'Все инструменты',th:'เครื่องมือทั้งหมด'})} isActive={location.pathname === '/mc/modules'} className="min-h-11 h-auto py-2">
+          <LayoutGrid className="size-5 shrink-0" aria-hidden />
+          <span className="min-w-0 whitespace-normal break-words">{pickLang(language, {en:'All tools',ru:'Все инструменты',th:'เครื่องมือทั้งหมด'})}</span>
+        </SidebarMenuButton></SidebarMenuItem></SidebarMenu>
+      </SidebarFooter>}
       <SidebarRail />
     </Sidebar>
   );

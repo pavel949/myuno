@@ -3,7 +3,7 @@
  * Unit states are inferred signals, not verified readiness or inventory status.
  */
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { LogIn, LogOut, BedDouble, MessageSquare, RefreshCw, Phone, CalendarDays, ListTodo, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -12,7 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { usePmsToday, type TodayBooking, type TodayRequest, type TodayUnit, type UnitState } from '@/hooks/usePmsToday';
+import { usePmsToday, type TodayBooking, type TodayRequest, type TodayTask, type TodayUnit, type UnitState } from '@/hooks/usePmsToday';
+
+import { toBangkokDateKey } from '@/lib/hotelDates';
 
 type T = { en: string; ru: string; th: string };
 const STATE_META: Record<UnitState, { label: T; cls: string }> = {
@@ -32,6 +34,8 @@ const LABELS: Record<string, T> = {
   assigned: { en: 'Assigned', ru: 'Назначено', th: 'มอบหมายแล้ว' },
   scheduled: { en: 'Scheduled', ru: 'Запланировано', th: 'กำหนดเวลาแล้ว' },
   open: { en: 'Open', ru: 'Открыто', th: 'เปิดอยู่' },
+  medium: { en: 'Medium priority', ru: 'Средний приоритет', th: 'ความสำคัญปานกลาง' },
+  low: { en: 'Low priority', ru: 'Низкий приоритет', th: 'ความสำคัญต่ำ' },
   normal: { en: 'Normal priority', ru: 'Обычный приоритет', th: 'ความสำคัญปกติ' },
   high: { en: 'High priority', ru: 'Высокий приоритет', th: 'ความสำคัญสูง' },
   urgent: { en: 'Urgent', ru: 'Срочно', th: 'เร่งด่วน' },
@@ -42,6 +46,7 @@ export default function PmsTodayPage() {
   const { language } = useLanguage();
   const t = (v: T) => pickLang(language, v);
   const d = usePmsToday();
+  const location = useLocation();
   const dateLabel = new Date().toLocaleDateString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', {
     timeZone: 'Asia/Bangkok', weekday: 'long', day: 'numeric', month: 'long',
   });
@@ -61,7 +66,7 @@ export default function PmsTodayPage() {
         <p title={guest} className="break-words font-medium text-foreground [overflow-wrap:anywhere]">{guest}</p>
         <p title={property} className="mt-1 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">{property} · {b.guests_count ?? 1} {t({ en: 'guests', ru: 'чел.', th: 'คน' })}</p>
         <p className="mt-1 break-words font-mono text-xs text-muted-foreground">
-          {t(kind === 'in' ? { en: 'Arrival', ru: 'Заезд', th: 'เช็คอิน' } : kind === 'out' ? { en: 'Departure', ru: 'Выезд', th: 'เช็คเอาท์' } : { en: 'Until', ru: 'До', th: 'ถึง' })}: {kind === 'in' ? b.check_in.slice(0, 10) : b.check_out.slice(0, 10)}
+          {t(kind === 'in' ? { en: 'Arrival', ru: 'Заезд', th: 'เช็คอิน' } : kind === 'out' ? { en: 'Departure', ru: 'Выезд', th: 'เช็คเอาท์' } : { en: 'Until', ru: 'До', th: 'ถึง' })}: {toBangkokDateKey(kind === 'in' ? b.check_in : b.check_out) ?? '—'}
         </p>
         <div className="mt-2 flex flex-wrap gap-1">
           {b.status && <Badge variant="secondary" title={b.status} className="max-w-full whitespace-normal break-words [overflow-wrap:anywhere]">{label(b.status)}</Badge>}
@@ -69,7 +74,7 @@ export default function PmsTodayPage() {
         </div>
       </Link>
       {b.guest_phone && <Button asChild size="icon" variant="ghost" className="mt-2 shrink-0" aria-label={`${t({ en: 'Call guest', ru: 'Позвонить гостю', th: 'โทรหาผู้เข้าพัก' })}: ${guest}`} title={t({ en: 'Call guest', ru: 'Позвонить гостю', th: 'โทรหาผู้เข้าพัก' })}>
-        <a href={`tel:${b.guest_phone}`}><Phone aria-hidden className="size-4" /></a>
+        <a href={`tel:${b.guest_phone}`} aria-label={`${t({ en: 'Call guest', ru: 'Позвонить гостю', th: 'โทรหาผู้เข้าพัก' })}: ${guest}`}><Phone aria-hidden className="size-4" /></a>
       </Button>}
     </li>;
   };
@@ -90,6 +95,30 @@ export default function PmsTodayPage() {
           {r.priority && <Badge variant="outline" className={cn('max-w-full whitespace-normal break-words', (r.priority === 'urgent' || r.priority === 'high') && 'border-destructive text-destructive')}>{label(r.priority)}</Badge>}
           {r.status && <Badge variant="secondary" className="max-w-full whitespace-normal break-words [overflow-wrap:anywhere]">{label(r.status)}</Badge>}
         </div>
+      </Link>
+    </li>;
+  };
+
+  const TaskRow = ({ task }: { task: TodayTask }) => {
+    const title = language === 'ru' ? task.title_ru || task.title : task.title;
+    const due = toBangkokDateKey(task.due_date);
+    const params = new URLSearchParams({
+      source: task.source, id: task.id, company: d.companyId!,
+      returnTo: `${location.pathname}${location.search}${location.hash}`,
+    });
+    return <li className="min-w-0 border-b border-border last:border-0">
+      <Link to={`${APP_ROUTES.MC_TASKS}?${params}`} aria-label={`${t({ en: 'Open task', ru: 'Открыть задачу', th: 'เปิดงาน' })}: ${title}`} className={cn('flex min-h-11 min-w-0 items-start gap-3 py-3 hover:bg-muted/50', focusLink)}>
+        <div className="min-w-0 flex-1">
+          <p className="break-words font-medium [overflow-wrap:anywhere]">{title}</p>
+          <p className="mt-1 break-words text-sm text-muted-foreground [overflow-wrap:anywhere]">{d.titleOf(task.property_id)}</p>
+          <div className="mt-2 flex flex-wrap gap-1">
+            <Badge variant="outline">{task.source === 'ops' ? t({ en: 'Operations', ru: 'Операции', th: 'งานปฏิบัติการ' }) : 'CRM'}</Badge>
+            <Badge variant="secondary">{task.status ? label(task.status) : t({ en: 'Status not recorded', ru: 'Статус не указан', th: 'ไม่ได้บันทึกสถานะ' })}</Badge>
+            {task.priority && <Badge variant="outline">{label(task.priority)}</Badge>}
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">{due ? `${t(due < d.today ? { en: 'Overdue', ru: 'Просрочено', th: 'เกินกำหนด' } : { en: 'Due today', ru: 'На сегодня', th: 'ครบกำหนดวันนี้' })}: ${due}` : t({ en: 'Date not recorded', ru: 'Дата не указана', th: 'ไม่ได้บันทึกวันที่' })}</p>
+        </div>
+        <ArrowRight aria-hidden className="mt-1 size-4 shrink-0 text-muted-foreground" />
       </Link>
     </li>;
   };
@@ -139,7 +168,14 @@ export default function PmsTodayPage() {
       <h2 className="font-medium">{t({ en: 'No properties', ru: 'Нет объектов', th: 'ไม่มีที่พัก' })}</h2>
       <p className="mt-2 text-sm text-muted-foreground">{t({ en: 'Add a property to see arrivals and departures here.', ru: 'Добавьте объект, чтобы видеть здесь заезды и выезды.', th: 'เพิ่มที่พักเพื่อดูการเช็คอินและเช็คเอาท์' })}</p>
       <Button asChild className="mt-4"><Link to={APP_ROUTES.MC_PROPERTIES}>{t({ en: 'Go to properties', ru: 'Перейти к объектам', th: 'ไปที่ที่พัก' })}</Link></Button>
-    </section> : <>
+    </section> : (d.truncatedSources.length > 0 || d.countUnavailableSources.length > 0) ? <div role="alert" className="border border-accent bg-accent/10 p-4 text-sm">
+      {t({ en: 'Today’s snapshot is incomplete: not all records are loaded, or completeness could not be verified. Counts and readiness signals are withheld. Open Tasks or Calendar to continue.', ru: 'Сводка на сегодня неполная: загружены не все записи или полноту данных не удалось проверить. Счётчики и признаки готовности скрыты. Продолжите в задачах или календаре.', th: 'สรุปวันนี้ไม่ครบถ้วน: โหลดข้อมูลไม่ครบหรือไม่สามารถตรวจสอบความครบถ้วนได้ จึงไม่แสดงจำนวนและสัญญาณความพร้อม โปรดเปิดงานหรือปฏิทินเพื่อดำเนินการต่อ' })}
+    </div> : <>
+      <section aria-labelledby="today-tasks" className="min-w-0">
+        <h2 id="today-tasks" className="flex items-start gap-2 font-display text-h3"><ListTodo aria-hidden className="mt-1 size-5 shrink-0" />{t({ en: 'Tasks to act on', ru: 'Задачи к выполнению', th: 'งานที่ต้องดำเนินการ' })}<span className="font-mono text-sm text-muted-foreground">{d.tasks.length}</span></h2>
+        <p className="mt-2 text-sm text-muted-foreground">{t({ en: 'Open property tasks due today, overdue or without a date. Includes recorded booking preparation.', ru: 'Открытые задачи по объектам на сегодня, просроченные и без даты. Включая отмеченную подготовку к бронированиям.', th: 'งานที่พักที่ครบกำหนดวันนี้ เกินกำหนด หรือไม่มีวันที่ รวมงานเตรียมการจองที่บันทึกไว้' })}</p>
+        {d.tasks.length ? <ul className="mt-2">{d.tasks.map(task => <TaskRow key={`${task.source}:${task.id}`} task={task} />)}</ul> : <Empty text={t({ en: 'No open tasks due or undated in the loaded property scope', ru: 'В выбранных объектах нет открытых задач на сегодня, просроченных или без даты', th: 'ไม่มีงานที่ครบกำหนดหรือไม่ระบุวันที่ในขอบเขตที่พักที่โหลด' })} />}
+      </section>
       <section aria-labelledby="today-attention" className="min-w-0 border-l-2 border-accent pl-4">
         <h2 id="today-attention" className="flex items-start gap-2 font-display text-h3"><AlertTriangle aria-hidden className="mt-1 size-5 shrink-0 text-accent" />{attentionTitle}</h2>
         <div className="mt-4 grid min-w-0 gap-6 lg:grid-cols-3">

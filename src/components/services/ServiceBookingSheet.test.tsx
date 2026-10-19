@@ -45,6 +45,13 @@ describe('service request journey', () => {
     expect(mutate.mock.calls[0][0]).toMatchObject({ serviceId: 'service-a', providerId: 'provider-a', guestId: 'guest-a', guestName: 'Synthetic Guest', guestPhone: '+000' });
     expect(screen.getByRole('link', { name: 'My services' })).toHaveAttribute('href', '/me/services');
   });
+  it('shows confirmation only for a confirmed status returned by the server', async () => {
+    mutate.mockResolvedValue({ id: 'booking-a', status: 'confirmed' });
+    render(view()); selectAndContact();
+    fireEvent.click(screen.getByRole('button', { name: 'Book 09:00' }));
+    await waitFor(() => expect(screen.getByText('Booking confirmed')).toBeInTheDocument());
+    expect(screen.queryByText('Order sent')).toBeNull();
+  });
   it('drops the chosen slot when switching providers/services', () => {
     const { rerender } = render(view()); selectAndContact();
     rerender(view({ ...service, id: 'service-b', providerId: 'provider-b', name: 'Synthetic repair' }));

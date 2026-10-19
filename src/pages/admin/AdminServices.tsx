@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useAuth } from '@/contexts/AuthContext';
@@ -83,6 +83,7 @@ export default function AdminServices() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterProviderId, setFilterProviderId] = useState<string>(providerId || '');
@@ -155,8 +156,8 @@ export default function AdminServices() {
     setEditingService(null);
   };
 
-  const openEditDialog = (service: Service) => {
-    setEditingService(service);
+  const openEditDialog = (service: Service, duplicate = false) => {
+    setEditingService(duplicate ? null : service);
     // Determine if category_id is actually a subcategory
     const catId = service.category_id || '';
     const cat = categories.find(c => c.id === catId);
@@ -166,8 +167,8 @@ export default function AdminServices() {
       provider_id: service.provider_id,
       category_id: isSubcat ? (cat?.parent_id || '') : catId,
       subcategory_id: isSubcat ? catId : '',
-      name_en: service.name_en || '',
-      name_ru: service.name_ru || '',
+      name_en: `${service.name_en || ''}${duplicate ? ' (copy)' : ''}`,
+      name_ru: service.name_ru ? `${service.name_ru}${duplicate ? ' (копия)' : ''}` : '',
       description_en: service.description_en || '',
       description_ru: service.description_ru || '',
       price: service.price?.toString() || '',
@@ -207,7 +208,7 @@ export default function AdminServices() {
   }, [editingService, isRussian]);
 
   const handleSubmit = async () => {
-    if (isSubmitting) return;
+    if (submittingRef.current) return;
     const payload = serviceEditorPayload(formData);
     if (payload.ok === false) {
       const messages = {
@@ -220,6 +221,7 @@ export default function AdminServices() {
       return;
     }
 
+    submittingRef.current = true;
     setIsSubmitting(true);
     try {
       const serviceData = payload.data;
@@ -240,6 +242,7 @@ export default function AdminServices() {
       console.error('Error saving service:', error);
       toast.error(isRussian ? 'Ошибка при сохранении' : 'Error saving service');
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -471,10 +474,7 @@ export default function AdminServices() {
                           <Edit className="h-4 w-4 mr-2" />
                           {isRussian ? 'Редактировать' : 'Edit'}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
-                          openEditDialog(service);
-                          setTimeout(() => handleDuplicate(), 100);
-                        }}>
+                        <DropdownMenuItem onClick={() => openEditDialog(service, true)}>
                           <Copy className="h-4 w-4 mr-2" />
                           {isRussian ? 'Дублировать' : 'Duplicate'}
                         </DropdownMenuItem>
@@ -550,7 +550,7 @@ export default function AdminServices() {
                       </Select>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>{isRussian ? 'Категория' : 'Category'}</Label>
                         <Select
@@ -608,18 +608,20 @@ export default function AdminServices() {
                   badge={isRussian ? 'Обязательно' : 'Required'}
                 >
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>{isRussian ? 'Название (EN) *' : 'Name (EN) *'}</Label>
+                        <Label htmlFor="service-name_en">{isRussian ? 'Название (EN) *' : 'Name (EN) *'}</Label>
                         <Input
+                          id="service-name_en"
                           value={formData.name_en}
                           onChange={(e) => setFormData(prev => ({ ...prev, name_en: e.target.value }))}
                           placeholder="Thai Massage"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>{isRussian ? 'Название (RU)' : 'Name (RU)'}</Label>
+                        <Label htmlFor="service-name_ru">{isRussian ? 'Название (RU)' : 'Name (RU)'}</Label>
                         <Input
+                          id="service-name_ru"
                           value={formData.name_ru}
                           onChange={(e) => setFormData(prev => ({ ...prev, name_ru: e.target.value }))}
                           placeholder="Тайский массаж"
@@ -627,18 +629,20 @@ export default function AdminServices() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
+                        <Label htmlFor="service-description_en">{isRussian ? 'Описание (EN)' : 'Description (EN)'}</Label>
                         <Textarea
+                          id="service-description_en"
                           value={formData.description_en}
                           onChange={(e) => setFormData(prev => ({ ...prev, description_en: e.target.value }))}
                           rows={3}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>{isRussian ? 'Описание (RU)' : 'Description (RU)'}</Label>
+                        <Label htmlFor="service-description_ru">{isRussian ? 'Описание (RU)' : 'Description (RU)'}</Label>
                         <Textarea
+                          id="service-description_ru"
                           value={formData.description_ru}
                           onChange={(e) => setFormData(prev => ({ ...prev, description_ru: e.target.value }))}
                           rows={3}
@@ -675,7 +679,7 @@ export default function AdminServices() {
                   icon={<DollarSign className="h-4 w-4" />}
                   badge={isRussian ? 'Обязательно' : 'Required'}
                 >
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="service-price">{isRussian ? 'Цена (пусто — по запросу)' : 'Price (blank for a quote)'}</Label>
                       <Input

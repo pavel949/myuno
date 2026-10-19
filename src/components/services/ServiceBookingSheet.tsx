@@ -50,6 +50,7 @@ function ServiceBookingForm({ service, open, onOpenChange }: ServiceBookingSheet
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [doneId, setDoneId] = useState<string | null>(null);
+  const [doneStatus, setDoneStatus] = useState<string | null>(null);
   const submitting = useRef(false);
   const fieldId = useId();
 
@@ -72,7 +73,7 @@ function ServiceBookingForm({ service, open, onOpenChange }: ServiceBookingSheet
   const contactValid = name.trim().length > 0 && phone.trim().length > 0;
   const locale = language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB';
 
-  const reset = () => { setSlot(null); setError(null); setDoneId(null); setNotes(''); };
+  const reset = () => { setSlot(null); setError(null); setDoneId(null); setDoneStatus(null); setNotes(''); };
 
   const submit = async () => {
     if (!service || !slot || !slotValid || submitting.current
@@ -86,6 +87,7 @@ function ServiceBookingForm({ service, open, onOpenChange }: ServiceBookingSheet
         serviceId: service.id, providerId: service.providerId, scheduledAt: slot,
         guestId: user.id, guestName: name.trim(), guestPhone: phone.trim(), notes: notes.trim(),
       });
+      setDoneStatus(r.status ?? null);
       setDoneId(r.id);
     } catch (e) {
       const code = orderErrorCode(e);
@@ -114,9 +116,9 @@ function ServiceBookingForm({ service, open, onOpenChange }: ServiceBookingSheet
         {doneId ? (
           <div className="py-8 text-center space-y-3">
             <CheckCircle2 className="h-10 w-10 text-primary mx-auto" />
-            <p className="font-medium">{L('Заявка отправлена', 'Order sent', 'ส่งคำสั่งซื้อแล้ว')}</p>
+            <p className="font-medium">{doneStatus === 'confirmed' ? L('Запись подтверждена', 'Booking confirmed') : L('Заявка отправлена', 'Order sent', 'ส่งคำสั่งซื้อแล้ว')}</p>
             <p className="text-sm text-muted-foreground">
-              {L('Специалист подтвердит время приёма. Статус заявки отображается в разделе «Мои услуги».', 'The provider will confirm the time. Track it in My services.', 'ผู้ให้บริการจะยืนยันเวลา ติดตามได้ในบริการของฉัน')}
+              {doneStatus === 'confirmed' ? L('Время сохранено. Подробности в разделе «Мои услуги».', 'Your time is reserved. See My services for details.') : L('Специалист подтвердит время приёма. Статус заявки отображается в разделе «Мои услуги».', 'The provider will confirm the time. Track it in My services.', 'ผู้ให้บริการจะยืนยันเวลา ติดตามได้ในบริการของฉัน')}
             </p>
             <p className="text-xs font-mono text-muted-foreground">ID {doneId.slice(0, 8)}</p>
             <Button onClick={() => onOpenChange(false)} className="min-h-[44px]">{L('Готово', 'Done', 'เสร็จ')}</Button>

@@ -1,6 +1,6 @@
 // Actual PMS header/dashboard components with synthetic data and local-only browser assets.
 import { build } from 'esbuild';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -60,7 +60,8 @@ if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integ
 if(process.argv.includes('--bundle-only'))process.exit(0);
 const response=await fetch('http://localhost:8080/src/index.css?direct');
 if(!response.ok)throw Error('Preview CSS unavailable');
-await writeFile(path.join(output,'fixture.css'),await response.text());
+const componentCss=existsSync(path.join(output,'fixture.css'))?await readFile(path.join(output,'fixture.css'),'utf8'):'';
+await writeFile(path.join(output,'fixture.css'),(await response.text())+'\n'+componentCss);
 await writeFile(path.join(output,'fixture.html'),'<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script type="module" src="/fixture.js"></script></body></html>');
 if(process.argv.includes('--build-only'))process.exit(0);
 const run=spawnSync('python3',[path.join(root,'scripts/qa/pms-dashboard-ui.py'),output],{stdio:'inherit'});

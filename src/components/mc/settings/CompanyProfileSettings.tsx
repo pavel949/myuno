@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,13 +55,13 @@ interface CompanyProfile {
 }
 
 const COLOR_SCHEMES = [
-  { id: 'blue', labelEn: 'Blue', labelRu: 'Синий', hsl: '221 83% 53%' },
-  { id: 'teal', labelEn: 'Teal', labelRu: 'Бирюзовый', hsl: '173 80% 40%' },
-  { id: 'violet', labelEn: 'Violet', labelRu: 'Фиолетовый', hsl: '263 70% 50%' },
-  { id: 'rose', labelEn: 'Rose', labelRu: 'Розовый', hsl: '347 77% 50%' },
-  { id: 'amber', labelEn: 'Amber', labelRu: 'Янтарный', hsl: '38 92% 50%' },
-  { id: 'emerald', labelEn: 'Emerald', labelRu: 'Изумрудный', hsl: '160 84% 39%' },
-  { id: 'slate', labelEn: 'Slate', labelRu: 'Графитовый', hsl: '215 16% 47%' },
+  { id: 'blue', labelTh: 'สีน้ำเงิน', labelEn: 'Blue', labelRu: 'Синий', hsl: '221 83% 53%' },
+  { id: 'teal', labelTh: 'สีเขียวอมฟ้า', labelEn: 'Teal', labelRu: 'Бирюзовый', hsl: '173 80% 40%' },
+  { id: 'violet', labelTh: 'สีม่วง', labelEn: 'Violet', labelRu: 'Фиолетовый', hsl: '263 70% 50%' },
+  { id: 'rose', labelTh: 'สีชมพู', labelEn: 'Rose', labelRu: 'Розовый', hsl: '347 77% 50%' },
+  { id: 'amber', labelTh: 'สีเหลืองอำพัน', labelEn: 'Amber', labelRu: 'Янтарный', hsl: '38 92% 50%' },
+  { id: 'emerald', labelTh: 'สีเขียวมรกต', labelEn: 'Emerald', labelRu: 'Изумрудный', hsl: '160 84% 39%' },
+  { id: 'slate', labelTh: 'สีเทา', labelEn: 'Slate', labelRu: 'Графитовый', hsl: '215 16% 47%' },
 ];
 
 const INITIAL_FORM: CompanyProfile = {
@@ -77,7 +78,6 @@ const SELECT_FIELDS = 'name_en, name_ru, logo, cover_image, brand_color, email, 
 
 export function CompanyProfileSettings() {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
@@ -126,11 +126,11 @@ export function CompanyProfileSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mc-profile', companyId] });
-      toast.success(isRu ? 'Профиль сохранён' : 'Profile saved');
+      toast.success(pickLang(language, {"en": "Profile saved", "ru": "Профиль сохранён", "th": "บันทึกข้อมูลบริษัทแล้ว"}));
     },
     onError: (error: unknown) => {
       errorLog.silent(error, 'save_company_profile');
-      toast.error(isRu ? 'Ошибка сохранения' : 'Save failed');
+      toast.error(pickLang(language, {"en": "Save failed", "ru": "Ошибка сохранения", "th": "บันทึกไม่สำเร็จ"}));
     },
   });
 
@@ -151,7 +151,7 @@ export function CompanyProfileSettings() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div role="status" aria-label={pickLang(language, { en: 'Loading...', ru: 'Загрузка...', th: 'กำลังโหลด...' })} className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
@@ -165,14 +165,14 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-primary" />
-              {isRu ? 'Бренд компании' : 'Company Branding'}
+              {pickLang(language, {"en": "Company Branding", "ru": "Бренд компании", "th": "แบรนด์บริษัท"})}
             </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
             <div className="flex items-start gap-4">
               <div className="space-y-1.5 shrink-0">
                 <Label className="text-xs text-muted-foreground">
-                  {isRu ? 'Логотип' : 'Logo'}
+                  {pickLang(language, {"en": "Logo", "ru": "Логотип", "th": "โลโก้"})}
                 </Label>
                 <Avatar className="h-16 w-16 rounded-none border-2 border-dashed border-border">
                   <AvatarImage src={form.logo || undefined} className="object-cover" />
@@ -187,7 +187,7 @@ export function CompanyProfileSettings() {
                   value={form.logo || ''}
                   onChange={(url) => update({ logo: typeof url === 'string' ? url : '' })}
                   bucket="company-logos"
-                  placeholder={isRu ? 'Логотип (400×400)' : 'Logo (400×400)'}
+                  placeholder={pickLang(language, {"en": "Logo (400×400)", "ru": "Логотип (400×400)", "th": "โลโก้ (400×400)"})}
                 />
               </div>
             </div>
@@ -196,10 +196,10 @@ export function CompanyProfileSettings() {
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5 text-xs">
                 <Image className="h-3.5 w-3.5" />
-                {isRu ? 'Обложка' : 'Cover'}
+                {pickLang(language, {"en": "Cover", "ru": "Обложка", "th": "ภาพปก"})}
               </Label>
               {form.cover_image && (
-                <img src={form.cover_image} alt={isRu ? 'Обложка компании' : 'Company cover'} className="w-full h-24 object-cover rounded-none border border-border" />
+                <img src={form.cover_image} alt={pickLang(language, {"en": "Company cover", "ru": "Обложка компании", "th": "ภาพปกบริษัท"})} className="w-full h-24 object-cover rounded-none border border-border" />
               )}
               <UnifiedMediaUploader
                 mode="single"
@@ -207,7 +207,7 @@ export function CompanyProfileSettings() {
                 onChange={(url) => update({ cover_image: typeof url === 'string' ? url : '' })}
                 bucket="company-logos"
                 folder="covers"
-                placeholder={isRu ? 'Обложка (1200×400)' : 'Cover (1200×400)'}
+                placeholder={pickLang(language, {"en": "Cover (1200×400)", "ru": "Обложка (1200×400)", "th": "ภาพปก (1200×400)"})}
               />
             </div>
 
@@ -215,7 +215,7 @@ export function CompanyProfileSettings() {
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5 text-xs">
                 <Palette className="h-3.5 w-3.5" />
-                {isRu ? 'Цветовая схема' : 'Color Scheme'}
+                {pickLang(language, {"en": "Color Scheme", "ru": "Цветовая схема", "th": "ชุดสี"})}
               </Label>
               <div className="flex flex-wrap gap-2">
                 {COLOR_SCHEMES.map((scheme) => (
@@ -233,29 +233,29 @@ export function CompanyProfileSettings() {
                       className="w-4 h-4 rounded-full shrink-0 ring-1 ring-black/10"
                       style={{ backgroundColor: `hsl(${scheme.hsl})` }}
                     />
-                    {isRu ? scheme.labelRu : scheme.labelEn}
+                    {pickLang(language, { en: scheme.labelEn, ru: scheme.labelRu, th: scheme.labelTh })}
                   </button>
                 ))}
               </div>
               <p className="text-[11px] text-muted-foreground">
-                {isRu ? 'Используется в витрине и фирменных отчётах' : 'Used in storefront and branded reports'}
+                {pickLang(language, {"en": "Used in storefront and branded reports", "ru": "Используется в витрине и фирменных отчётах", "th": "ใช้ในหน้าร้านและรายงานของบริษัท"})}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Название (EN)' : 'Name (EN)'}</Label>
+                <Label className="text-xs">{pickLang(language, {"en": "Name (EN)", "ru": "Название (EN)", "th": "ชื่อ (ภาษาอังกฤษ)"})}</Label>
                 <Input value={form.name_en} onChange={(e) => update({ name_en: e.target.value })} placeholder="My Property Company" className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Название (RU)' : 'Name (RU)'}</Label>
+                <Label className="text-xs">{pickLang(language, {"en": "Name (RU)", "ru": "Название (RU)", "th": "ชื่อ (ภาษารัสเซีย)"})}</Label>
                 <Input value={form.name_ru} onChange={(e) => update({ name_ru: e.target.value })} placeholder="Моя УК" className="h-9" />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs">{isRu ? 'Директор' : 'Director'}</Label>
-              <Input value={form.director_name || ''} onChange={(e) => update({ director_name: e.target.value })} placeholder={isRu ? 'Иван Петров' : 'John Smith'} className="h-9" />
+              <Label className="text-xs">{pickLang(language, {"en": "Director", "ru": "Директор", "th": "ผู้อำนวยการ"})}</Label>
+              <Input value={form.director_name || ''} onChange={(e) => update({ director_name: e.target.value })} placeholder={pickLang(language, {"en": "John Smith", "ru": "Иван Петров", "th": "สมชาย ใจดี"})} className="h-9" />
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -265,17 +265,17 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-primary" />
-              {isRu ? 'Контакты' : 'Contacts'}
+              {pickLang(language, {"en": "Contacts", "ru": "Контакты", "th": "ข้อมูลติดต่อ"})}
             </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-3 pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1 text-xs"><Mail className="h-3 w-3" /> Email</Label>
+                <Label className="flex items-center gap-1 text-xs"><Mail className="h-3 w-3" /> {pickLang(language, { en: 'Email', ru: 'Эл. почта', th: 'อีเมล' })}</Label>
                 <Input type="email" value={form.email || ''} onChange={(e) => update({ email: e.target.value })} placeholder="info@company.com" className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1 text-xs"><Phone className="h-3 w-3" /> {isRu ? 'Телефон' : 'Phone'}</Label>
+                <Label className="flex items-center gap-1 text-xs"><Phone className="h-3 w-3" /> {pickLang(language, {"en": "Phone", "ru": "Телефон", "th": "โทรศัพท์"})}</Label>
                 <Input type="tel" value={form.phone || ''} onChange={(e) => update({ phone: e.target.value })} placeholder="+66 XX XXX XXXX" className="h-9" />
               </div>
               <div className="space-y-1.5">
@@ -283,18 +283,18 @@ export function CompanyProfileSettings() {
                 <Input type="tel" value={form.whatsapp || ''} onChange={(e) => update({ whatsapp: e.target.value })} placeholder="+66 XX XXX XXXX" className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1 text-xs"><Globe className="h-3 w-3" /> {isRu ? 'Сайт' : 'Website'}</Label>
+                <Label className="flex items-center gap-1 text-xs"><Globe className="h-3 w-3" /> {pickLang(language, {"en": "Website", "ru": "Сайт", "th": "เว็บไซต์"})}</Label>
                 <Input value={form.website || ''} onChange={(e) => update({ website: e.target.value })} placeholder="https://company.com" className="h-9" />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="flex items-center gap-1 text-xs"><MapPin className="h-3 w-3" /> {isRu ? 'Адрес' : 'Address'}</Label>
-                <Input value={form.address || ''} onChange={(e) => update({ address: e.target.value })} placeholder="123 Main St" className="h-9" />
+                <Label className="flex items-center gap-1 text-xs"><MapPin className="h-3 w-3" /> {pickLang(language, {"en": "Address", "ru": "Адрес", "th": "ที่อยู่"})}</Label>
+                <Input value={form.address || ''} onChange={(e) => update({ address: e.target.value })} placeholder={pickLang(language, { en: '123 Main St', ru: 'Улица, дом', th: 'บ้านเลขที่ ถนน' })} className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Район' : 'District'}</Label>
-                <Input value={form.district || ''} onChange={(e) => update({ district: e.target.value })} placeholder="Rawai" className="h-9" />
+                <Label className="text-xs">{pickLang(language, {"en": "District", "ru": "Район", "th": "พื้นที่"})}</Label>
+                <Input value={form.district || ''} onChange={(e) => update({ district: e.target.value })} placeholder={pickLang(language, { en: 'Rawai', ru: 'Раваи', th: 'ราไวย์' })} className="h-9" />
               </div>
             </div>
           </AccordionContent>
@@ -305,16 +305,16 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
-              {isRu ? 'О компании' : 'About'}
+              {pickLang(language, {"en": "About", "ru": "О компании", "th": "เกี่ยวกับบริษัท"})}
             </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-3 pb-4">
             <div className="space-y-1.5">
-              <Label className="text-xs">{isRu ? 'Описание (EN)' : 'Description (EN)'}</Label>
+              <Label className="text-xs">{pickLang(language, {"en": "Description (EN)", "ru": "Описание (EN)", "th": "คำอธิบาย (ภาษาอังกฤษ)"})}</Label>
               <Textarea value={form.description_en || ''} onChange={(e) => update({ description_en: e.target.value })} rows={2} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">{isRu ? 'Описание (RU)' : 'Description (RU)'}</Label>
+              <Label className="text-xs">{pickLang(language, {"en": "Description (RU)", "ru": "Описание (RU)", "th": "คำอธิบาย (ภาษารัสเซีย)"})}</Label>
               <Textarea value={form.description_ru || ''} onChange={(e) => update({ description_ru: e.target.value })} rows={2} />
             </div>
           </AccordionContent>
@@ -324,35 +324,35 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
-              {isRu ? 'Юридические данные' : 'Legal Details'}
+              {pickLang(language, {"en": "Legal Details", "ru": "Юридические данные", "th": "ข้อมูลทางกฎหมาย"})}
             </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-3 pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Юридическое название' : 'Legal Name'}</Label>
-                <Input value={form.legal_name || ''} onChange={(e) => update({ legal_name: e.target.value })} placeholder={isRu ? 'ООО «Компания»' : 'Company LLC'} className="h-9" />
+                <Label className="text-xs">{pickLang(language, {"en": "Legal Name", "ru": "Юридическое название", "th": "ชื่อตามทะเบียน"})}</Label>
+                <Input value={form.legal_name || ''} onChange={(e) => update({ legal_name: e.target.value })} placeholder={pickLang(language, {"en": "Company LLC", "ru": "ООО «Компания»", "th": "บริษัท ตัวอย่าง จำกัด"})} className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Рег. номер' : 'Registration №'}</Label>
+                <Label className="text-xs">{pickLang(language, {"en": "Registration №", "ru": "Рег. номер", "th": "เลขทะเบียน"})}</Label>
                 <Input value={form.registration_number || ''} onChange={(e) => update({ registration_number: e.target.value })} className="h-9" />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">{isRu ? 'Юридический адрес' : 'Legal Address'}</Label>
+              <Label className="text-xs">{pickLang(language, {"en": "Legal Address", "ru": "Юридический адрес", "th": "ที่อยู่ตามทะเบียน"})}</Label>
               <Input value={form.legal_address || ''} onChange={(e) => update({ legal_address: e.target.value })} className="h-9" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'ИНН / Tax ID' : 'Tax ID'}</Label>
+                <Label className="text-xs">{pickLang(language, {"en": "Tax ID", "ru": "ИНН / Tax ID", "th": "เลขประจำตัวผู้เสียภาษี"})}</Label>
                 <Input value={form.tax_id || ''} onChange={(e) => update({ tax_id: e.target.value })} className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Лицензия' : 'License №'}</Label>
+                <Label className="text-xs">{pickLang(language, {"en": "License №", "ru": "Лицензия", "th": "เลขที่ใบอนุญาต"})}</Label>
                 <Input value={form.license_number || ''} onChange={(e) => update({ license_number: e.target.value })} className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Год основания' : 'Founded'}</Label>
+                <Label className="text-xs">{pickLang(language, {"en": "Founded", "ru": "Год основания", "th": "ปีที่ก่อตั้ง"})}</Label>
                 <Input type="number" value={form.founded_year || ''} onChange={(e) => update({ founded_year: e.target.value ? Number(e.target.value) : null })} placeholder="2020" className="h-9" />
               </div>
             </div>
@@ -360,10 +360,10 @@ export function CompanyProfileSettings() {
             {/* DBD Card */}
             <div className="space-y-2">
               <Label className="text-xs font-medium">
-                {isRu ? 'DBD карточка (Dept. of Business Development)' : 'DBD Card (Dept. of Business Development)'}
+                {pickLang(language, {"en": "DBD Card (Dept. of Business Development)", "ru": "DBD карточка (Dept. of Business Development)", "th": "เอกสาร DBD (กรมพัฒนาธุรกิจการค้า)"})}
               </Label>
               {form.dbd_card_url && (
-                <img src={form.dbd_card_url} alt="DBD Card" className="w-full max-w-sm h-auto rounded-none border border-border" />
+                <img src={form.dbd_card_url} alt={pickLang(language, { en: 'DBD Card', ru: 'Карточка DBD', th: 'เอกสาร DBD' })} className="w-full max-w-sm h-auto rounded-none border border-border" />
               )}
               <UnifiedMediaUploader
                 mode="single"
@@ -371,7 +371,7 @@ export function CompanyProfileSettings() {
                 onChange={(url) => update({ dbd_card_url: typeof url === 'string' ? url : '' })}
                 bucket="company-logos"
                 folder="dbd-cards"
-                placeholder={isRu ? 'Загрузите DBD карточку' : 'Upload DBD card'}
+                placeholder={pickLang(language, {"en": "Upload DBD card", "ru": "Загрузите DBD карточку", "th": "อัปโหลดเอกสาร DBD"})}
               />
             </div>
           </AccordionContent>
@@ -382,17 +382,17 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <Landmark className="h-4 w-4 text-primary" />
-              {isRu ? 'Банковские реквизиты' : 'Banking Details'}
+              {pickLang(language, {"en": "Banking Details", "ru": "Банковские реквизиты", "th": "ข้อมูลธนาคาร"})}
             </span>
           </AccordionTrigger>
           <AccordionContent className="space-y-3 pb-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Название банка' : 'Bank Name'}</Label>
+                <Label className="text-xs">{pickLang(language, {"en": "Bank Name", "ru": "Название банка", "th": "ชื่อธนาคาร"})}</Label>
                 <Input value={form.bank_name || ''} onChange={(e) => update({ bank_name: e.target.value })} placeholder="Bangkok Bank" className="h-9" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">{isRu ? 'Номер счёта' : 'Account №'}</Label>
+                <Label className="text-xs">{pickLang(language, {"en": "Account №", "ru": "Номер счёта", "th": "เลขที่บัญชี"})}</Label>
                 <Input value={form.bank_account || ''} onChange={(e) => update({ bank_account: e.target.value })} className="h-9" />
               </div>
             </div>
@@ -408,7 +408,7 @@ export function CompanyProfileSettings() {
           <AccordionTrigger className="text-sm font-semibold gap-2 hover:no-underline py-3">
             <span className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
-              {isRu ? 'Документы компании' : 'Company Documents'}
+              {pickLang(language, {"en": "Company Documents", "ru": "Документы компании", "th": "เอกสารบริษัท"})}
               {form.documents.length > 0 && (
                 <span className="text-xs font-normal text-muted-foreground">({form.documents.length})</span>
               )}
@@ -416,7 +416,7 @@ export function CompanyProfileSettings() {
           </AccordionTrigger>
           <AccordionContent className="space-y-4 pb-4">
             <p className="text-xs text-muted-foreground">
-              {isRu ? 'Лицензии, сертификаты, регистрационные документы' : 'Licenses, certificates, registration documents'}
+              {pickLang(language, {"en": "Licenses, certificates, registration documents", "ru": "Лицензии, сертификаты, регистрационные документы", "th": "ใบอนุญาต ใบรับรอง และเอกสารจดทะเบียน"})}
             </p>
 
             {form.documents.length > 0 && (
@@ -428,7 +428,7 @@ export function CompanyProfileSettings() {
                       {doc.name}
                     </a>
                     <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => removeDocument(i)}>
-                      {isRu ? 'Удалить' : 'Remove'}
+                      {pickLang(language, {"en": "Remove", "ru": "Удалить", "th": "นำออก"})}
                     </Button>
                   </div>
                 ))}
@@ -441,7 +441,7 @@ export function CompanyProfileSettings() {
               onChange={(url) => handleDocumentUpload(typeof url === 'string' ? url : '')}
               bucket="company-logos"
               folder="documents"
-              placeholder={isRu ? 'Загрузите документ' : 'Upload document'}
+              placeholder={pickLang(language, {"en": "Upload document", "ru": "Загрузите документ", "th": "อัปโหลดเอกสาร"})}
             />
           </AccordionContent>
         </AccordionItem>
@@ -455,7 +455,7 @@ export function CompanyProfileSettings() {
           ) : (
             <Save className="h-4 w-4 mr-2" />
           )}
-          {isRu ? 'Сохранить профиль' : 'Save Profile'}
+          {pickLang(language, {"en": "Save Profile", "ru": "Сохранить профиль", "th": "บันทึกข้อมูลบริษัท"})}
         </Button>
       </div>
     </div>

@@ -183,7 +183,9 @@ export function useAdminServices(providerId?: string) {
     const { error } = await supabase
       .from('services')
       .delete()
-      .eq('id', serviceId);
+      .eq('id', serviceId)
+      .select('id')
+      .single();
 
     if (!error) invalidate();
     return { error };

@@ -1,11 +1,29 @@
 import React from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Plus, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { PERSONA_OPTIONS_PRIMARY, PERSONA_OPTIONS_LIFESTYLE } from '@/hooks/useUserPersonas';
-import { ROLE_META, personaColor } from '@/lib/roleBlend';
+import { ROLE_META } from '@/lib/roleBlend';
+import { pickLang } from '@/lib/i18n/pickLang';
+
+const PREFERENCE_COPY_TH: Record<UserPersona, { label: string; description: string }> = {
+  tourist: { label: 'ท่องเที่ยวภูเก็ต', description: 'การเดินทาง ที่พัก และกิจกรรม' },
+  resident: { label: 'อาศัยในภูเก็ต', description: 'วีซ่า ที่อยู่อาศัย และบริการประจำวัน' },
+  property_owner: { label: 'เจ้าของอสังหาริมทรัพย์', description: 'จัดการอสังหาริมทรัพย์และรายได้' },
+  investor: { label: 'นักลงทุน', description: 'โอกาสลงทุน พันธมิตร และเงินทุน' },
+  real_estate_developer: { label: 'ผู้พัฒนาอสังหาริมทรัพย์', description: 'โครงการ การจอง และการขาย' },
+  local_services_provider: { label: 'ธุรกิจท้องถิ่น', description: 'หน้าร้าน การจอง และการรับเงิน' },
+  family: { label: 'ครอบครัว', description: 'โรงเรียน คลินิก และการเดินทางของครอบครัว' },
+  couple: { label: 'คู่รัก', description: 'ร้านอาหาร ทริปพักผ่อน และช่วงเวลาดี ๆ' },
+  nightlife: { label: 'เที่ยวกลางคืน', description: 'คลับ บาร์ และรถรับส่งยามดึก' },
+  active: { label: 'กีฬาและกิจกรรม', description: 'การออกกำลังกาย อุปกรณ์ และสถานที่เล่นกีฬา' },
+  business: { label: 'ธุรกิจ', description: 'บริษัท บัญชี และสัญญา' },
+  nomad: { label: 'ทำงานพร้อมเดินทาง', description: 'พื้นที่ทำงานร่วม ซิมการ์ด และที่พักระยะยาว' },
+  pet_owner: { label: 'สัตว์เลี้ยง', description: 'สัตวแพทย์ ที่พักรับสัตว์เลี้ยง และการเดินทาง' },
+  relocation: { label: 'ย้ายถิ่นฐาน', description: 'วีซ่า การหาที่อยู่อาศัย และเอกสาร' },
+};
 
 interface RoleSheetProps {
   open: boolean;
@@ -13,168 +31,202 @@ interface RoleSheetProps {
   onClose: () => void;
   onToggle: (p: UserPersona) => void;
   onReorder: (reordered: UserPersona[]) => void;
+  /** Loading or saving preferences; closing the sheet remains available. */
+  isBusy?: boolean;
+  /** Do not offer mutations when the current preferences are unavailable. */
+  hasError?: boolean;
 }
 
-export function RoleSheet({ open, personas, onClose, onToggle, onReorder }: RoleSheetProps) {
+export function RoleSheet({
+  open,
+  personas,
+  onClose,
+  onToggle,
+  onReorder,
+  isBusy = false,
+  hasError = false,
+}: RoleSheetProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
+  const mutationsDisabled = isBusy || hasError;
+  const controlClass = 'inline-flex h-11 w-11 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:cursor-not-allowed disabled:opacity-35';
+
+  const preferenceLabel = (persona: UserPersona) => {
+    return pickLang(language, {
+      ru: persona === 'pet_owner' ? 'Питомцы' : ROLE_META[persona].labelRu,
+      en: persona === 'pet_owner' ? 'Pets' : ROLE_META[persona].label,
+      th: PREFERENCE_COPY_TH[persona].label,
+    });
+  };
 
   const moveUp = (idx: number) => {
-    if (idx === 0) return;
+    if (mutationsDisabled || idx === 0) return;
     const next = [...personas];
     [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
     onReorder(next);
   };
 
   const moveDown = (idx: number) => {
-    if (idx === personas.length - 1) return;
+    if (mutationsDisabled || idx === personas.length - 1) return;
     const next = [...personas];
     [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
     onReorder(next);
   };
 
-  const allKnownRoles: UserPersona[] = [...PERSONA_OPTIONS_PRIMARY, ...PERSONA_OPTIONS_LIFESTYLE];
-  const availableRoles = allKnownRoles.filter(
-    p => !personas.includes(p) && ROLE_META[p] !== undefined
-  );
+  const renderAvailableGroup = (options: UserPersona[], title: string) => {
+    const available = options.filter(p => !personas.includes(p) && ROLE_META[p]);
+    if (available.length === 0) return null;
+
+    return (
+      <section className="space-y-2" aria-label={title}>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        <div className="divide-y divide-border/60 border-y border-border/60">
+          {available.map(p => {
+            const meta = ROLE_META[p];
+            const label = preferenceLabel(p);
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onToggle(p)}
+                disabled={mutationsDisabled}
+                aria-label={`${pickLang(language, { ru: 'Добавить', en: 'Add', th: 'เพิ่ม' })}: ${label}`}
+                className="flex min-h-14 w-full items-center gap-3 px-2 py-2.5 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block break-words text-sm font-medium text-foreground">{label}</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+                    {pickLang(language, { ru: meta.descRu, en: meta.descEn, th: PREFERENCE_COPY_TH[p].description })}
+                  </span>
+                </span>
+                <Plus className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              </button>
+            );
+          })}
+        </div>
+      </section>
+    );
+  };
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-none p-0 overflow-auto">
-        {/* Visually hidden title gives the Sheet dialog an accessible name for screen readers */}
-        <SheetHeader className="sr-only">
-          <SheetTitle>{isRu ? 'Ваши роли' : 'Your roles'}</SheetTitle>
+      <SheetContent
+        side="bottom"
+        closeLabel={pickLang(language, { ru: 'Закрыть', en: 'Close', th: 'ปิด' })}
+        className="mx-auto flex h-[88dvh] max-h-[52rem] max-w-xl flex-col gap-0 overflow-hidden rounded-none bg-background p-0"
+      >
+        <SheetHeader className="shrink-0 border-b border-border px-4 py-4 text-left sm:px-5">
+          <SheetTitle className="pr-10 font-display text-2xl font-semibold tracking-tight">
+            {pickLang(language, { ru: 'Настроить главную', en: 'Customize home', th: 'ปรับแต่งหน้าหลัก' })}
+          </SheetTitle>
+          <SheetDescription className="text-xs leading-relaxed sm:text-sm">
+            {pickLang(language, {
+              ru: 'Выберите темы и приоритеты на главной. Права доступа к аккаунту и рабочим разделам не меняются.',
+              en: 'Choose topics and priorities for your home page. Account and workspace permissions stay the same.',
+              th: 'เลือกหัวข้อและลำดับความสำคัญสำหรับหน้าหลัก สิทธิ์เข้าถึงบัญชีและพื้นที่ทำงานจะไม่เปลี่ยนแปลง',
+            })}
+          </SheetDescription>
         </SheetHeader>
-        <div className="p-5 pb-8">
-          {/* Drag handle */}
-          <div className="w-9 h-1 rounded-full bg-border/60 mx-auto mb-5" />
 
-          <h2 className="font-display text-h3 font-normal text-foreground tracking-[-0.02em] mb-1">
-            {isRu ? 'Ваши роли' : 'Your roles'}
-          </h2>
-          <p className="text-body-sm text-muted-foreground leading-relaxed mb-5">
-            {isRu
-              ? 'На Пхукете люди носят много шляп. Выберите актуальные — myUNO объединит их. Порядок = приоритет.'
-              : "Phuket is a place where people wear many hats. Pick what's true today — myUNO blends them. Order = priority."}
-          </p>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-5">
+          {hasError ? (
+            <p role="alert" className="mb-4 border-l-2 border-destructive bg-muted px-3 py-2 text-sm text-foreground">
+              {pickLang(language, {
+                ru: 'Настройки недоступны. Закройте окно и попробуйте позже.',
+                en: 'Preferences are unavailable. Close this panel and try again later.',
+                th: 'ไม่สามารถโหลดการตั้งค่าได้ โปรดปิดหน้าต่างนี้แล้วลองอีกครั้งภายหลัง',
+              })}
+            </p>
+          ) : isBusy ? (
+            <p role="status" className="mb-4 text-sm text-muted-foreground">
+              {pickLang(language, { ru: 'Обновляем настройки…', en: 'Updating preferences…', th: 'กำลังอัปเดตการตั้งค่า…' })}
+            </p>
+          ) : null}
 
-          {/* Active roles */}
-          {personas.length > 0 && (
-            <>
-              <div className="text-label text-muted-foreground/70 mb-2">
-                {isRu ? 'Активные · порядок = приоритет' : 'Active · order = priority'}
-              </div>
-              <div className="flex flex-col gap-1.5 mb-5">
-                {personas.map((p, i) => {
-                  const meta = ROLE_META[p];
-                  if (!meta) return null;
-                  const isPrimary = i === 0;
-                  return (
-                    <div
-                      key={p}
-                      className={cn(
-                        'flex items-center gap-2.5 p-3 rounded-none border',
-                        !isPrimary && 'border-border',
-                      )}
-                      style={isPrimary
-                        ? { borderColor: personaColor(p, 0.35), background: personaColor(p, 0.06) }
-                        : undefined}
-                    >
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center font-display text-label font-semibold text-background flex-shrink-0"
-                        style={{ background: personaColor(p) }}
-                      >
-                        {meta.glyph}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-body-sm font-medium text-foreground flex items-center gap-1.5">
-                          {isRu ? meta.labelRu : meta.short}
-                          {isPrimary && (
-                            <span
-                              className="text-[10px] font-semibold tracking-[0.1em] uppercase"
-                              style={{ color: personaColor(p) }}
-                            >
-                              Primary
+          <div className="space-y-5" aria-busy={isBusy}>
+            {personas.length > 0 ? (
+              <section aria-label={pickLang(language, { ru: 'Выбранные темы', en: 'Selected topics', th: 'หัวข้อที่เลือก' })}>
+                <h3 className="text-sm font-semibold text-foreground">
+                  {pickLang(language, { ru: 'Выбрано', en: 'Selected', th: 'เลือกแล้ว' })} · {personas.length}
+                </h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  {pickLang(language, { ru: 'Поднимите важные темы выше.', en: 'Move the topics that matter most to the top.', th: 'เลื่อนหัวข้อที่สำคัญที่สุดไว้ด้านบน' })}
+                </p>
+                <ol className="mt-2 divide-y divide-border/60 border-y border-border/60">
+                  {personas.map((p, i) => {
+                    if (!ROLE_META[p]) return null;
+                    const label = preferenceLabel(p);
+                    return (
+                      <li key={p} className="flex min-h-14 items-center gap-2 py-1.5">
+                        <span className="w-5 shrink-0 text-center text-xs tabular-nums text-muted-foreground" aria-hidden="true">
+                          {i + 1}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <span className="block break-words text-sm font-medium text-foreground">{label}</span>
+                          {i === 0 && (
+                            <span className="mt-0.5 block text-xs font-medium text-[hsl(var(--brand-orange))]">
+                              {pickLang(language, { ru: 'Первый приоритет', en: 'Top priority', th: 'สำคัญที่สุด' })}
                             </span>
                           )}
                         </div>
-                        <div className="text-caption text-muted-foreground leading-snug">
-                          {isRu ? meta.descRu : meta.descEn}
+                        <div className="flex shrink-0 items-center">
+                          <button
+                            type="button"
+                            onClick={() => moveUp(i)}
+                            disabled={mutationsDisabled || i === 0}
+                            aria-label={`${pickLang(language, { ru: 'Выше', en: 'Move up', th: 'เลื่อนขึ้น' })}: ${label}`}
+                            className={controlClass}
+                          >
+                            <ChevronUp className="h-4 w-4" aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveDown(i)}
+                            disabled={mutationsDisabled || i === personas.length - 1}
+                            aria-label={`${pickLang(language, { ru: 'Ниже', en: 'Move down', th: 'เลื่อนลง' })}: ${label}`}
+                            className={controlClass}
+                          >
+                            <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onToggle(p)}
+                            disabled={mutationsDisabled}
+                            aria-label={`${pickLang(language, { ru: 'Убрать', en: 'Remove', th: 'นำออก' })}: ${label}`}
+                            className={cn(controlClass, 'hover:text-destructive')}
+                          >
+                            <X className="h-4 w-4" aria-hidden="true" />
+                          </button>
                         </div>
-                      </div>
-                      {/* WCAG-compliant reorder controls — 44×44 hit target each */}
-                      <div className="flex flex-col">
-                        <button
-                          onClick={() => moveUp(i)}
-                          disabled={i === 0}
-                          aria-label={isRu ? 'Выше' : 'Move up'}
-                          className="h-11 w-11 inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground/70 transition-colors"
-                        >
-                          <ChevronUp className="w-4 h-4" strokeWidth={2} aria-hidden />
-                        </button>
-                        <button
-                          onClick={() => moveDown(i)}
-                          disabled={i === personas.length - 1}
-                          aria-label={isRu ? 'Ниже' : 'Move down'}
-                          className="h-11 w-11 inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground disabled:opacity-30 disabled:hover:text-muted-foreground/70 transition-colors"
-                        >
-                          <ChevronDown className="w-4 h-4" strokeWidth={2} aria-hidden />
-                        </button>
-                      </div>
-                      <button
-                        onClick={() => onToggle(p)}
-                        className="h-11 px-3 inline-flex items-center text-caption font-medium rounded-none border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-                      >
-                        {isRu ? 'Убрать' : 'Remove'}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
+                      </li>
+                    );
+                  })}
+                </ol>
+              </section>
+            ) : !isBusy && !hasError ? (
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {pickLang(language, { ru: 'Темы пока не выбраны. Добавьте то, что вам интересно.', en: 'No topics selected yet. Add what interests you.', th: 'ยังไม่ได้เลือกหัวข้อ เพิ่มหัวข้อที่คุณสนใจ' })}
+              </p>
+            ) : null}
 
-          {/* Add roles */}
-          {availableRoles.length > 0 && (
-            <>
-              <div className="text-label text-muted-foreground/70 mb-2">
-                {isRu ? 'Добавить роль' : 'Add a role'}
-              </div>
-              <div className="flex flex-col gap-1.5">
-                {availableRoles.map(p => {
-                  const meta = ROLE_META[p];
-                  if (!meta) return null;
-                  return (
-                    <button
-                      key={p}
-                      onClick={() => onToggle(p)}
-                      className="flex items-center gap-3 p-3 rounded-none border border-border text-left hover:border-border/80 transition-colors min-h-[44px]"
-                    >
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center font-display text-label font-semibold text-background flex-shrink-0"
-                        style={{ background: personaColor(p) }}
-                      >
-                        {meta.glyph}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-body-sm font-medium text-foreground">{isRu ? meta.labelRu : meta.short}</div>
-                        <div className="text-caption text-muted-foreground leading-snug">
-                          {isRu ? meta.descRu : meta.descEn}
-                        </div>
-                      </div>
-                      <div className="ml-auto text-body text-muted-foreground/60 leading-none">+</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
+            {renderAvailableGroup(PERSONA_OPTIONS_PRIMARY, pickLang(language, { ru: 'Контекст', en: 'Contexts', th: 'บริบทการใช้ชีวิต' }))}
+            {renderAvailableGroup(PERSONA_OPTIONS_LIFESTYLE, pickLang(language, { ru: 'Интересы и образ жизни', en: 'Lifestyle interests', th: 'ความสนใจและไลฟ์สไตล์' }))}
+          </div>
+        </div>
 
+        <div className="shrink-0 border-t border-border bg-background px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-5">
+          <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
+            {pickLang(language, {
+              ru: 'Изменения применяются сразу. Порядок отображения сохраняется на этом устройстве.',
+              en: 'Changes apply immediately. Display order is saved on this device.',
+              th: 'การเปลี่ยนแปลงมีผลทันที ลำดับการแสดงผลจะบันทึกไว้บนอุปกรณ์นี้',
+            })}
+          </p>
           <button
+            type="button"
             onClick={onClose}
-            className="mt-5 w-full h-12 rounded-none bg-foreground text-background text-body font-semibold"
+            className="h-11 w-full bg-primary text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            {isRu ? 'Готово' : 'Done'}
+            {pickLang(language, { ru: 'Готово', en: 'Done', th: 'เสร็จสิ้น' })}
           </button>
         </div>
       </SheetContent>

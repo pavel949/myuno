@@ -128,7 +128,7 @@ export function useCreateServiceOrder() {
           service_name: 'pending', // overwritten by validate_service_order trigger
           status: 'pending',
         })
-        .select('id')
+        .select('id,status')
         .single();
       if (error) throw error;
       if (!data?.id) throw new Error('Service request was not acknowledged');
