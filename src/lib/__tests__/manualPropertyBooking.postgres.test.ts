@@ -233,3 +233,31 @@ describe('checked manual unpaid property booking / real PostgreSQL',()=>{
     expect((await counts()).bookings).toBe(1);
   });
 });
+
+// Same civil-date cases as the existing calendar UI regression matrix, now
+// checked by actual SQL rather than a mocked browser overlap preview.
+const dateCases = [
+  { label: '10→13 allows subsequent 13→15', stay: { check_in: '2026-10-13', check_out: '2026-10-15' }, blocked: [], existing: { check_in: '2026-10-10', check_out: '2026-10-13' }, allowed: true },
+  { label: 'checkout block 13 permits 10→13', stay: { check_in: '2026-10-10', check_out: '2026-10-13' }, blocked: ['2026-10-13'], allowed: true },
+  { label: 'occupied block 12 rejects 10→13', stay: { check_in: '2026-10-10', check_out: '2026-10-13' }, blocked: ['2026-10-12'], allowed: false },
+  { label: 'one night checks 10, not 11', stay: { check_in: '2026-10-10', check_out: '2026-10-11' }, blocked: ['2026-10-11'], allowed: true },
+  { label: 'one night rejects block 10', stay: { check_in: '2026-10-10', check_out: '2026-10-11' }, blocked: ['2026-10-10'], allowed: false },
+  { label: 'month boundary checkout free', stay: { check_in: '2026-01-31', check_out: '2026-02-01' }, blocked: ['2026-02-01'], allowed: true },
+  { label: 'year boundary occupied block', stay: { check_in: '2026-12-31', check_out: '2027-01-02' }, blocked: ['2027-01-01'], allowed: false },
+  { label: 'leap-day checkout free', stay: { check_in: '2028-02-28', check_out: '2028-02-29' }, blocked: ['2028-02-29'], allowed: true },
+  { label: 'leap night blocked', stay: { check_in: '2028-02-29', check_out: '2028-03-01' }, blocked: ['2028-02-29'], allowed: false },
+  { label: 'occupied overlap rejected', stay: { check_in: '2026-10-12', check_out: '2026-10-15' }, blocked: [], existing: { check_in: '2026-10-10', check_out: '2026-10-13' }, allowed: false },
+];
+describe('manual SQL / calendar civil-date parity',()=>{
+  it.each(dateCases)('$label',async({stay,blocked,existing,allowed})=>{
+    for(const date of blocked) await sql`INSERT INTO property_availability(property_id,date,status) VALUES (${room},${date}::date,'blocked')`;
+    if(existing) await sql`INSERT INTO property_bookings(property_id,check_in,check_out,status,guest_name)
+      VALUES (${room},${existing.check_in}::date,${existing.check_out}::date,'confirmed','Imported')`;
+    if(allowed) expect((await create(stay)).success).toBe(true);
+    else await expect(create(stay)).rejects.toThrow(existing?'property_inventory_not_committed':'property_dates_blocked');
+    const saved=await counts();
+    expect(saved.orders).toBe(allowed?1:0);
+    expect(saved.bookings).toBe((existing?1:0)+(allowed?1:0));
+    expect(saved.alerts).toBe(0);
+  });
+});

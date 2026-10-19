@@ -7,7 +7,7 @@ const state = vi.hoisted(() => ({
   blocked: [] as string[],
   existing: [] as { id: string; check_in: string; check_out: string }[],
   boundary: [] as string[],
-  failedTable: '', missingOrder: false,
+  failedTable: '', missingOrder: false, rpcInput: null as unknown,
 }));
 vi.mock('@tanstack/react-query', () => ({
   useQuery: () => ({ data: [], isLoading: false }),
@@ -62,7 +62,7 @@ vi.mock('@/integrations/supabase/client', () => {
     }
     return chain;
   }
-  return { supabase: { from, functions: { invoke: () => { throw Error('Forbidden function'); } } } };
+  return { supabase: { from, rpc: async (_name: string, args: unknown) => { state.rpcInput = args; state.boundary.push('manual_booking_rpc'); throw Error(state.failedTable || 'SYNTHETIC_RPC_BOUNDARY'); }, functions: { invoke: () => { throw Error('Forbidden function'); } } } };
 });
 
 const cases: { label: string; stay: CivilStay; blocked: string[]; existing?: CivilStay; allowed: boolean }[] = [
@@ -78,8 +78,8 @@ const cases: { label: string; stay: CivilStay; blocked: string[]; existing?: Civ
   { label: 'occupied overlap rejected', stay: { check_in: '2026-10-12', check_out: '2026-10-15' }, blocked: [], existing: { check_in: '2026-10-10', check_out: '2026-10-13' }, allowed: false },
 ];
 
-beforeEach(() => { state.blocked = []; state.existing = []; state.boundary = []; state.failedTable = ''; state.missingOrder = false; });
-describe.each(['create', 'update'] as const)('%s real booking writer preflight — synthetic only', mode => {
+beforeEach(() => { state.blocked = []; state.existing = []; state.boundary = []; state.failedTable = ''; state.missingOrder = false; state.rpcInput = null; });
+describe.each(['create', 'update'] as const)('%s date contract — synthetic client, actual server dates tested in PostgreSQL', mode => {
   it.each(cases)('$label', async ({ stay, blocked, existing, allowed }) => {
     state.blocked = blocked;
     state.existing = existing ? [{ ...existing, id: 'synthetic-existing' }] : [];
@@ -90,12 +90,21 @@ describe.each(['create', 'update'] as const)('%s real booking writer preflight �
     const attempt = mode === 'create'
       ? result.current.createBooking({ property_id: 'synthetic-home', ...stay })
       : result.current.updateBooking({ id: 'synthetic-current', ...stay });
+    if (mode === 'create') {
+      // Creation delegates the unchanged civil range to the checked command.
+      // The mocked transport does NOT certify an overlap decision; the full
+      // date matrix is exercised against real PostgreSQL in the command suite.
+      await expect(attempt).rejects.toThrow('SYNTHETIC_RPC_BOUNDARY');
+      expect(state.rpcInput).toMatchObject({ p_property_id: 'synthetic-home', p_input: stay });
+      expect(state.boundary).toEqual(['manual_booking_rpc']);
+      return;
+    }
     await expect(attempt).rejects.toThrow(allowed ? 'SYNTHETIC_WRITE_BOUNDARY' : existing ? 'пересекаются' : 'заблокированы');
     expect(state.boundary).toEqual(allowed ? [`orders.${mode === 'create' ? 'insert' : 'update'}`] : []);
   });
 });
 
-describe.each(['create', 'update'] as const)('%s fails closed before mutation', mode => {
+describe('existing update fails closed before mutation', () => {
   it.each(['orders', 'order_items', 'property_availability'])('rejects failed %s availability source', async table => {
     state.failedTable = table;
     state.existing = [{ id: 'synthetic-other', check_in: '2026-10-10', check_out: '2026-10-13' }];
@@ -103,12 +112,18 @@ describe.each(['create', 'update'] as const)('%s fails closed before mutation', 
     const dates = { check_in: '2026-10-11', check_out: '2026-10-14' };
     // For block-source failure, no earlier overlap should stop the read.
     if (table === 'property_availability') state.existing = [];
-    const attempt = mode === 'create'
-      ? result.current.createBooking({ property_id: 'synthetic-home', ...dates })
-      : result.current.updateBooking({ id: 'synthetic-current', ...dates });
+    const attempt = result.current.updateBooking({ id: 'synthetic-current', ...dates });
     await expect(attempt).rejects.toThrow('Synthetic read failure');
     expect(state.boundary).toEqual([]);
   });
+});
+it.each(['property_dates_blocked', 'property_inventory_not_committed', 'forbidden'])('creation surfaces checked server failure %s without separate writes', async failure => {
+  state.failedTable = failure;
+  const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
+  await expect(result.current.createBooking({ property_id: 'synthetic-home', check_in: '2026-10-10', check_out: '2026-10-13' })).rejects.toThrow(failure);
+  expect(state.boundary).toEqual(['manual_booking_rpc']);
+});
+describe.each(['create','update'] as const)('%s invalid civil dates fail before mutation', mode => {
   it.each([['2026-10-10','2026-10-10'], ['2026-10-13','2026-10-10'], ['2026-02-30','2026-03-03'], ['', '2026-10-13']])('rejects invalid stay %s → %s', async (check_in, check_out) => {
     const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
     const attempt = mode === 'create' ? result.current.createBooking({ property_id: 'synthetic-home', check_in, check_out })
