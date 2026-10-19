@@ -754,17 +754,7 @@ export function AirbnbStyleImageUpload({
       <CloudStoragePicker
         open={showCloudPicker}
         onOpenChange={setShowCloudPicker}
-        onSelect={(urls) => {
-          // Convert URLs to ExternalImageResult format
-          const images: ExternalImageResult[] = urls.map(url => ({
-            originalUrl: url,
-            previewUrl: url,
-            name: 'cloud-image.jpg',
-            isYandexDisk: false
-          }));
-          handleExternalImages(images);
-        }}
-        maxImages={maxImages}
+        onUseLink={() => setShowUrlPicker(true)}
       />
 
       {/* Image Editor */}

@@ -22,6 +22,8 @@ import {
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { propertyRequestReturnPath } from '@/lib/owner/propertyNavigation';
+import { usePropertyRequestReturn } from '@/hooks/usePropertyRequestReturn';
 
 export default function ServiceRequest() {
   const { language } = useLanguage();
@@ -48,6 +50,8 @@ export default function ServiceRequest() {
     special_instructions: '',
   });
 
+  const backPath = propertyRequestReturnPath(formData.property_id, allProperties, propertiesLoading);
+  const beginReturn = usePropertyRequestReturn(formData.property_id, allProperties, propertiesLoading);
   const requestedPropertyId = searchParams.get('property');
   useEffect(() => {
     // URL context is a convenience, never a source of property access.
@@ -85,6 +89,7 @@ export default function ServiceRequest() {
     const [hours, minutes] = formData.scheduled_time.split(':');
     scheduledAt.setHours(Number(hours), Number(minutes));
 
+    const returnAfterSuccess = beginReturn();
     await createRequest.mutateAsync({
       property_id: formData.property_id,
       service_type: formData.service_type,
@@ -98,7 +103,7 @@ export default function ServiceRequest() {
       special_instructions: formData.special_instructions || undefined,
     });
 
-    navigate('/owner');
+    returnAfterSuccess();
   };
 
   if (propertiesLoading) {
@@ -114,7 +119,7 @@ export default function ServiceRequest() {
   if (!allProperties?.length) {
     return (
       <PageContainer>
-        <BackButton />
+        <BackButton fallbackPath={backPath} />
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <Home className="h-16 w-16 text-muted-foreground mb-4" />
           <h1 className="text-xl font-bold mb-2">
@@ -137,7 +142,7 @@ export default function ServiceRequest() {
 
   return (
     <PageContainer>
-      <BackButton />
+      <BackButton fallbackPath={backPath} />
       <PageHeader 
         title={isRu ? 'Новая заявка' : 'New Request'}
         subtitle={selectedType ? (isRu ? selectedType.labelRu : selectedType.labelEn) : ''}

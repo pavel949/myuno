@@ -32,3 +32,14 @@ describe('departure metadata versus occupied nights', () => {
     expect(screen.queryByRole('button', { name: 'Book' })).toBeNull();
   });
 });
+it('shows imported availability separately without guest, booking or unblock actions', () => {
+  render(<CalendarDayEventsSheet open onOpenChange={vi.fn()} date={parseCivilDate('2026-10-13')}
+    bookings={[]} tasks={[]} inventoryBlocks={[{ id: 'ical-block', property_id: 'home-a', check_in: '2026-10-13', check_out: '2026-10-15', source_calendar_id: 'calendar-a', external_id: 'event-a' }]}
+    onAddTask={vi.fn()} onViewBooking={vi.fn()} onCompleteTask={vi.fn()} onAddBooking={vi.fn()} onUnblockDate={vi.fn()} onBlockDate={vi.fn()} />);
+  expect(screen.getByText('iCal availability block')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Book' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Unblock' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Block' })).not.toBeInTheDocument();
+  expect(screen.queryByText('No events for this day')).not.toBeInTheDocument();
+  expect(screen.queryByText('Guest')).not.toBeInTheDocument();
+});

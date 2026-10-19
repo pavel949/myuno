@@ -2,6 +2,7 @@ import { civilDateKey, civilStaysOverlap, stayOccupiesDate } from '@/lib/hotelDa
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PROPERTY_ORDER_RELEASE_FILTER, propertyOrderHoldsInventory } from '@/lib/propertyInventory';
+import { loadICalInventoryBlocks } from '@/lib/icalInventoryBlocks';
 import { useAuth } from '@/contexts/AuthContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
 import { useStorefront } from '@/contexts/StorefrontContext';
@@ -126,7 +127,7 @@ function mapOrderToBooking(orderInput: unknown, propertyId: string): PropertyBoo
   };
 }
 
-export function usePropertyBookings(propertyId?: string) {
+export function usePropertyBookings(propertyId?: string, includeInventoryBlocks = false, inventoryRange?: { from: string; to: string }) {
   const { user } = useAuth();
   const { activeCompany } = useActiveCompany();
   const { storefront } = useStorefront();
@@ -183,6 +184,19 @@ export function usePropertyBookings(propertyId?: string) {
       );
     },
     enabled: !!user?.id,
+  });
+
+  // Separate projection: inventory blocks must never acquire guest/order actions.
+  const inventoryQuery = useQuery({
+    queryKey: ['property-bookings', user?.id, activeCompanyId, propertyId, 'ical-inventory', inventoryRange?.from, inventoryRange?.to],
+    queryFn: async () => {
+      if (!user?.id || !propertyId) return [];
+      const { allIds } = await getAccessiblePropertyIds({ userId: user.id, activeCompanyId });
+      if (!allIds.includes(propertyId)) throw new Error('Property inventory scope unavailable');
+      return loadICalInventoryBlocks(supabase, [propertyId], inventoryRange);
+    },
+    enabled: includeInventoryBlocks && !!user?.id && !!propertyId,
+    refetchInterval: 60_000,
   });
 
   const createBooking = useMutation({
@@ -559,6 +573,10 @@ export function usePropertyBookings(propertyId?: string) {
   };
 
   return {
+    inventoryBlocks: inventoryQuery.data || [],
+    inventoryBlocksLoading: inventoryQuery.isLoading,
+    inventoryBlocksError: inventoryQuery.error,
+    refetchInventoryBlocks: inventoryQuery.refetch,
     bookings,
     isLoading,
     error,

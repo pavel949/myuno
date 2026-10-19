@@ -1,3 +1,4 @@
+import type { ICalInventoryBlock } from '@/lib/icalInventoryBlocks';
 import { parseCivilDate, stayOccupiesDate, civilDateKey } from '@/lib/hotelDates';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -26,6 +27,7 @@ interface CalendarDayEventsSheetProps {
   bookings: PropertyBooking[];
   tasks: OperationalTask[];
   availability?: AvailabilityEntry;
+  inventoryBlocks?: ICalInventoryBlock[];
   onAddTask: () => void;
   onViewBooking: (booking: PropertyBooking) => void;
   onCompleteTask: (taskId: string) => void;
@@ -37,7 +39,7 @@ interface CalendarDayEventsSheetProps {
 }
 
 export function CalendarDayEventsSheet({
-  open, onOpenChange, date, bookings, tasks, availability,
+  open, onOpenChange, date, bookings, tasks, availability, inventoryBlocks = [],
   onAddTask, onViewBooking, onCompleteTask, onStartTaskProgress,
   onAddBooking, onBlockDate, onUnblockDate, propertyTitle,
 }: CalendarDayEventsSheetProps) {
@@ -49,7 +51,9 @@ export function CalendarDayEventsSheet({
 
   if (!date) return null;
 
-  const hasEvents = bookings.length > 0 || tasks.length > 0;
+  const dayInventoryBlocks = inventoryBlocks.filter(block => stayOccupiesDate(block, civilDateKey(date)));
+  const isImportedBlock = dayInventoryBlocks.length > 0;
+  const hasEvents = bookings.length > 0 || tasks.length > 0 || isImportedBlock;
   const isBlocked = availability?.status === 'blocked';
   const hasBookingOnDate = bookings.some(b => stayOccupiesDate(b, civilDateKey(date)));
 
@@ -59,13 +63,13 @@ export function CalendarDayEventsSheet({
         onClick={() => { onOpenChange(false); onAddTask(); }}>
         <Plus className="h-4 w-4" />{isRu ? 'Задача' : 'Task'}
       </Button>
-      {onAddBooking && !hasBookingOnDate && !isBlocked && (
+      {onAddBooking && !hasBookingOnDate && !isBlocked && !isImportedBlock && (
         <Button variant="outline" size="sm" className="gap-1.5"
           onClick={() => { onOpenChange(false); onAddBooking(); }}>
           <CalendarPlus className="h-4 w-4" />{isRu ? 'Брон.' : 'Book'}
         </Button>
       )}
-      {!hasBookingOnDate && (
+      {!hasBookingOnDate && !isImportedBlock && (
         isBlocked ? (
           onUnblockDate && (
             <Button variant="outline" size="sm" className="gap-1.5 text-success border-success/30 hover:bg-success/10"
@@ -95,6 +99,18 @@ export function CalendarDayEventsSheet({
         size="md"
         footer={actionButtons}
       >
+        {isImportedBlock && (
+          <div className="border border-destructive/30 bg-destructive/5 p-3 space-y-1" role="note">
+            <p className="text-sm font-medium flex items-center gap-1.5"><Lock className="h-4 w-4" />
+              {isRu ? 'Блокировка доступности iCal' : 'iCal availability block'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isRu ? 'Даты закрыты внешним календарём. Изменения требуют сверки с источником.' : 'Dates are unavailable in the external calendar. Changes require source reconciliation.'}
+            </p>
+            {dayInventoryBlocks.map(block => <p key={block.id} className="text-xs">{block.check_in} → {block.check_out}</p>)}
+          </div>
+        )}
+
         {isBlocked && (
           <Badge variant="destructive" className="gap-1">
             <Lock className="h-3 w-3" />{isRu ? 'Закрыто' : 'Blocked'}

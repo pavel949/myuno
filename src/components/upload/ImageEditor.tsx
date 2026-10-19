@@ -36,6 +36,7 @@ import {
   Undo2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { mediaModalClasses, type MediaModalLayer } from './shared/mediaModalLayer';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -46,6 +47,7 @@ interface ImageEditorProps {
   onSave: (newUrl: string) => void;
   userId?: string;
   folder?: string;
+  modalLayer?: MediaModalLayer;
 }
 
 type EditMode = 'view' | 'crop';
@@ -56,7 +58,8 @@ export function ImageEditor({
   imageUrl,
   onSave,
   userId,
-  folder = 'images'
+  folder = 'images',
+  modalLayer,
 }: ImageEditorProps) {
   const [mode, setMode] = useState<EditMode>('view');
   const [rotation, setRotation] = useState(0);
@@ -219,8 +222,11 @@ export function ImageEditor({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
-        <DialogHeader className="p-4 border-b">
+      <DialogContent
+        overlayClassName={mediaModalClasses(modalLayer).overlayClassName}
+        className={cn("flex h-[90dvh] max-h-[900px] max-w-4xl flex-col gap-0 overflow-hidden p-0 [&>button]:z-20", mediaModalClasses(modalLayer).className)}
+      >
+        <DialogHeader className="shrink-0 p-4 pr-12 border-b">
           <DialogTitle className="flex items-center justify-between">
             <span>Редактирование фото</span>
             <div className="flex items-center gap-1">
@@ -238,7 +244,7 @@ export function ImageEditor({
         </DialogHeader>
         
         {/* Image Area */}
-        <div className="relative flex-1 bg-black/95 min-h-[400px] max-h-[60vh] overflow-hidden">
+        <div className="relative min-h-0 flex-1 bg-black/95 overflow-hidden">
           {mode === 'view' ? (
             <div className="w-full h-full flex items-center justify-center p-4">
               <img
@@ -273,8 +279,8 @@ export function ImageEditor({
         </div>
 
         {/* Tools */}
-        <div className="p-4 border-t bg-muted/30">
-          <div className="flex items-center justify-center gap-2">
+        <div className="shrink-0 p-4 border-t bg-muted/30">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {mode === 'view' ? (
               <>
                 <Button
@@ -336,7 +342,7 @@ export function ImageEditor({
           </div>
         </div>
 
-        <DialogFooter className="p-4 border-t">
+        <DialogFooter className="shrink-0 p-4 border-t">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}

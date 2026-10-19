@@ -1,4 +1,4 @@
-import { bangkokTodayDate, bangkokTodayISO, civilDateKey, civilStaySpan, stayHasDayEvent } from '@/lib/hotelDates';
+import { bangkokTodayDate, bangkokTodayISO, civilDateKey, civilStaySpan, stayHasDayEvent, stayOccupiesDate } from '@/lib/hotelDates';
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,7 +18,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, addDays, subDays, startOfWeek } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Sparkles, Wrench, FileText, DollarSign, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Wrench, FileText, DollarSign, ExternalLink, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -93,7 +93,9 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
   const [detailBooking, setDetailBooking] = useState<PropertyBooking | null>(null);
   const [detailTask, setDetailTask] = useState<OperationalTask | null>(null);
 
-  const { bookingsByProperty, isLoading: bookingsLoading } = useMultiPropertyBookings(startDate, DAYS_TO_SHOW);
+  const { bookingsByProperty, isLoading: bookingsLoading, error: bookingsError,
+    inventoryBlocks = [], inventoryBlocksLoading, inventoryBlocksError, refetchCalendar,
+  } = useMultiPropertyBookings(startDate, DAYS_TO_SHOW, propertyIds);
 
   const { tasks, completeTask, updateTaskStatus } = useOperationalTasks({
     dateRange: { from: startDate, to: addDays(startDate, DAYS_TO_SHOW) },
@@ -197,13 +199,14 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
   }, []);
 
   const selectedDateEvents = useMemo(() => {
-    if (!selectedDate || !selectedPropertyId) return { bookings: [], tasks: [] };
+    if (!selectedDate || !selectedPropertyId) return { bookings: [], tasks: [], inventoryBlocks: [] };
     const dateKey = format(selectedDate, 'yyyy-MM-dd');
     const propertyBookings = bookingsByProperty.get(selectedPropertyId) || [];
     const dayBookings = propertyBookings.filter(b => stayHasDayEvent(b, dateKey));
     const dayTasks = taskMap.get(`${selectedPropertyId}_${dateKey}`) || [];
-    return { bookings: dayBookings, tasks: dayTasks };
-  }, [selectedDate, selectedPropertyId, bookingsByProperty, taskMap]);
+    return { bookings: dayBookings, tasks: dayTasks,
+      inventoryBlocks: inventoryBlocks.filter(block => block.property_id === selectedPropertyId && stayOccupiesDate(block, dateKey)) };
+  }, [selectedDate, selectedPropertyId, bookingsByProperty, taskMap, inventoryBlocks]);
 
   // Find property title for detail sheets
   const getPropertyTitle = (propertyId: string) => {
@@ -228,6 +231,16 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
         <p>{isRu ? 'Нет объектов для отображения' : 'No properties to display'}</p>
       </div>
     );
+  }
+
+  if (bookingsError || inventoryBlocksError) {
+    return <div role="alert" className="space-y-2 p-4 text-sm">
+      <p>{isRu ? 'Не удалось проверить занятые даты. Доступность неизвестна.' : 'Unavailable dates could not be checked. Availability is unknown.'}</p>
+      <Button variant="outline" onClick={() => { void refetchCalendar(); }}>{isRu ? 'Повторить' : 'Retry'}</Button>
+    </div>;
+  }
+  if (isLoadingAll || inventoryBlocksLoading) {
+    return <p role="status" className="p-4 text-sm text-muted-foreground">{isRu ? 'Проверяем занятые даты…' : 'Checking unavailable dates…'}</p>;
   }
 
   return (
@@ -331,6 +344,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                 {/* Property rows */}
                 {sortedProperties.map((property, idx) => {
                   const propertyBookings = bookingsByProperty.get(property.property_id) || [];
+                  const propertyBlocks = inventoryBlocks.filter(block => block.property_id === property.property_id);
                   const group = complexGroups.find(g => g.startIndex === idx);
 
                   return (
@@ -342,6 +356,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                       {/* Day cells */}
                       {days.map((day, dayIdx) => {
                         const dateKey = format(day, 'yyyy-MM-dd');
+                        const isImportedBlock = propertyBlocks.some(block => stayOccupiesDate(block, dateKey));
                         const isWeekend = day.getDay() === 0 || day.getDay() === 6;
                         const today = civilDateKey(day) === bangkokTodayISO();
                         const dayTasks = taskMap.get(`${property.property_id}_${dateKey}`) || [];
@@ -356,7 +371,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                           <div
                             role="button"
                             tabIndex={0}
-                            aria-label={`${getPropertyTitle(property.property_id)}: ${format(day, 'd MMM yyyy', { locale })}`}
+                            aria-label={`${getPropertyTitle(property.property_id)}: ${format(day, 'd MMM yyyy', { locale })}${isImportedBlock ? (isRu ? ': блокировка iCal' : ': iCal availability block') : ''}`}
                             onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); handleCellClick(day, property.property_id); } }}
                             key={dayIdx}
                             onClick={() => handleCellClick(day, property.property_id)}
@@ -365,11 +380,12 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
                               "hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                               isWeekend && "bg-muted/20",
                               today && "bg-primary/5",
-                              cellDocs.length > 0 && "bg-destructive/5",
+                              (cellDocs.length > 0 || isImportedBlock) && "bg-destructive/5",
                             )}
                             style={{ width: CELL_WIDTH }}
                           >
                             <div className="flex gap-0.5 flex-wrap justify-center">
+                              {isImportedBlock && <span className="text-[9px] text-destructive flex items-center gap-0.5"><Lock className="h-3 w-3" />iCal</span>}
                               {hasCleaning && (
                                 <button
                                   onClick={(e) => cleaningTask && handleTaskIconClick(cleaningTask, e)}
@@ -485,6 +501,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
           </div>
         </div>
 
+        {inventoryBlocks.length > 0 && <p className="text-xs text-muted-foreground">{isRu ? 'iCal: даты закрыты внешним календарём' : 'iCal: dates unavailable in an external calendar'}</p>}
         {/* Legend */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground justify-center pt-2">
           <span className="font-medium text-foreground/70">{isRu ? 'Бронирования:' : 'Bookings:'}</span>
@@ -530,6 +547,7 @@ export function MultiPropertyTimeline({ properties, isLoading: propsLoading, com
           bookings={selectedDateEvents.bookings}
           tasks={selectedDateEvents.tasks}
           availability={undefined}
+          inventoryBlocks={selectedDateEvents.inventoryBlocks}
           onAddTask={() => {}}
           onViewBooking={(b) => setDetailBooking(b)}
           onCompleteTask={(id) => completeTask.mutate(id)}

@@ -5,11 +5,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useMyProperties } from '@/hooks/useMyProperties';
 import { format, addDays } from 'date-fns';
 import type { PropertyBooking } from '@/hooks/usePropertyBookings';
+import { loadICalInventoryBlocks, type ICalInventoryBlock } from '@/lib/icalInventoryBlocks';
 
 export interface MultiPropertyBookingsResult {
   bookingsByProperty: Map<string, PropertyBooking[]>;
   allBookings: PropertyBooking[];
   isLoading: boolean;
+  error: Error | null;
+  inventoryBlocks: ICalInventoryBlock[];
+  inventoryBlocksLoading: boolean;
+  inventoryBlocksError: Error | null;
+  refetchCalendar: () => unknown;
 }
 
 /**
@@ -18,21 +24,22 @@ export interface MultiPropertyBookingsResult {
  */
 export function useMultiPropertyBookings(
   startDate: Date,
-  days: number = 30
+  days: number = 30,
+  visiblePropertyIds?: string[],
 ): MultiPropertyBookingsResult {
   const { user } = useAuth();
   const { allProperties, isLoading: propsLoading } = useMyProperties();
   
   const propertyIds = useMemo(
-    () => allProperties.map(p => p.property_id),
-    [allProperties]
+    () => [...new Set(allProperties.map(p => p.property_id))].filter(id => !visiblePropertyIds || visiblePropertyIds.includes(id)),
+    [allProperties, visiblePropertyIds]
   );
   
   const endDate = useMemo(() => addDays(startDate, days), [startDate, days]);
   const startStr = format(startDate, 'yyyy-MM-dd');
   const endStr = format(endDate, 'yyyy-MM-dd');
 
-  const { data, isLoading: queryLoading } = useQuery({
+  const { data, isLoading: queryLoading, error, refetch } = useQuery({
     queryKey: ['multi-property-bookings', user?.id, startStr, endStr, propertyIds.join(',')],
     queryFn: async () => {
       if (!user?.id || propertyIds.length === 0) return [];
@@ -104,6 +111,13 @@ export function useMultiPropertyBookings(
     enabled: !!user?.id && propertyIds.length > 0,
   });
 
+  const inventoryQuery = useQuery({
+    queryKey: ['property-bookings', user?.id, 'ical-inventory', propertyIds.join(','), startStr, endStr],
+    queryFn: () => loadICalInventoryBlocks(supabase, propertyIds, { from: startStr, to: endStr }),
+    enabled: !!user?.id && !propsLoading && propertyIds.length > 0,
+    refetchInterval: 60_000,
+  });
+
   const bookingsByProperty = useMemo(() => {
     const map = new Map<string, PropertyBooking[]>();
     propertyIds.forEach(id => map.set(id, []));
@@ -116,6 +130,11 @@ export function useMultiPropertyBookings(
   }, [data, propertyIds]);
 
   return {
+    inventoryBlocks: inventoryQuery.data || [],
+    inventoryBlocksLoading: propsLoading || inventoryQuery.isLoading,
+    inventoryBlocksError: inventoryQuery.error,
+    refetchCalendar: () => Promise.all([refetch(), inventoryQuery.refetch()]),
+    error,
     bookingsByProperty,
     allBookings: data || [],
     isLoading: propsLoading || queryLoading,

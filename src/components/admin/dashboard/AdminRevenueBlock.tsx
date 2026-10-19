@@ -11,9 +11,9 @@ import { getCurrencySymbol } from '@/lib/config/currencies';
 
 export function AdminRevenueBlock() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRu = language === 'ru';
-  const { summary, isLoading } = useAdminAnalytics(14);
+  const { summary, isLoading, error } = useAdminAnalytics(14);
 
   const formatCurrency = (value: number) => {
     const symbol = getCurrencySymbol('THB');
@@ -60,11 +60,15 @@ export function AdminRevenueBlock() {
         className="mb-1"
       />
 
+      <p className="text-xs text-muted-foreground mb-3" role="note">
+        {t('admin.finance.evidence.snapshotSource')}
+      </p>
+
       {/* GMV */}
-      <div className="flex items-baseline gap-2 mb-3">
-        <span className="text-3xl font-bold">{formatCurrency(gmv)}</span>
+      <div className="flex flex-wrap items-baseline gap-2 mb-3">
+        <span className="text-3xl font-bold">{error ? t('admin.finance.evidence.unavailable') : formatCurrency(gmv)}</span>
         <span className="text-sm text-muted-foreground">GMV</span>
-        {growth !== 0 && (
+        {!error && growth !== 0 && (
           <div className={cn(
             "flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded-none",
             growth > 0 ? "text-success bg-success/10" : "text-destructive bg-destructive/10"
@@ -78,15 +82,15 @@ export function AdminRevenueBlock() {
       {/* Metrics Grid */}
       <div className="grid grid-cols-2 gap-3">
         <Surface variant="muted" padding="sm" radius="lg" bordered={false} className="text-center">
-          <p className="text-lg font-semibold text-success">{formatCurrency(revenue)}</p>
+          <p className="text-lg font-semibold break-words">{error ? t('admin.finance.evidence.unavailable') : formatCurrency(revenue)}</p>
           <p className="text-[10px] text-muted-foreground uppercase">
-            {isRu ? 'Выручка' : 'Revenue'}
+            {t('admin.finance.evidence.snapshotRevenue')}
           </p>
         </Surface>
         <Surface variant="muted" padding="sm" radius="lg" bordered={false} className="text-center">
-          <p className="text-lg font-semibold">{growth >= 0 ? '+' : ''}{growth.toFixed(0)}%</p>
+          <p className="text-lg font-semibold break-words">{error ? t('admin.finance.evidence.unavailable') : `${growth >= 0 ? '+' : ''}${growth.toFixed(0)}%`}</p>
           <p className="text-[10px] text-muted-foreground uppercase">
-            {isRu ? 'Рост' : 'Growth'}
+            {isRu ? 'Рост числа броней' : 'Booking growth'}
           </p>
         </Surface>
       </div>

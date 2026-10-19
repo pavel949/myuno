@@ -1,559 +1,44 @@
+// Scheduled iCal uses the same inventory-only writer as manual sync. Never create orders.
 import { createClient } from '../_shared/supabase.ts';
-import { validateExternalUrlForSSRF } from '../_shared/ssrf-guard.ts';
-import { propertyOrderHoldsInventory } from '../_shared/property-inventory.ts';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://myuno.app',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-// Parse iCal date format
-function parseICalDate(dateStr: string): string | null {
-  if (!dateStr) return null;
-  
-  // Handle DATE format (YYYYMMDD)
-  if (dateStr.length === 8) {
-    return `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`;
-  }
-  
-  // Handle DATETIME format (YYYYMMDDTHHMMSS or YYYYMMDDTHHMMSSZ)
-  if (dateStr.length >= 15) {
-    const year = dateStr.slice(0, 4);
-    const month = dateStr.slice(4, 6);
-    const day = dateStr.slice(6, 8);
-    return `${year}-${month}-${day}`;
-  }
-  
-  return null;
-}
-
-// Extract guest name from iCal SUMMARY field (Airbnb, Booking.com, Vrbo patterns)
-function parseGuestName(summary: string): string {
-  if (!summary) return 'External Booking';
-  
-  // Airbnb: "Reserved - John Smith" or "Not available - Airbnb (Imported)"
-  const airbnbMatch = summary.match(/^Reserved\s*[-–]\s*(.+)$/i);
-  if (airbnbMatch) return airbnbMatch[1].trim();
-  
-  // Booking.com: "CLOSED - John Smith" or just guest name
-  const bookingMatch = summary.match(/^CLOSED\s*[-–]\s*(.+)$/i);
-  if (bookingMatch) return bookingMatch[1].trim();
-  
-  // Vrbo: "Reserved: John Smith" 
-  const vrboMatch = summary.match(/^Reserved:\s*(.+)$/i);
-  if (vrboMatch) return vrboMatch[1].trim();
-  
-  // Generic: "Booking - John Smith"
-  const genericMatch = summary.match(/^(?:Booking|Reservation|Booked)\s*[-–:]\s*(.+)$/i);
-  if (genericMatch) return genericMatch[1].trim();
-  
-  // If it starts with "Not available" or "Blocked", it's a block, not a guest
-  if (/^(not available|blocked|unavailable)/i.test(summary)) return 'Blocked';
-  
-  // Otherwise, the summary itself might be the guest name
-  return summary.trim();
-}
-
-// Parse phone/email from DESCRIPTION field
-function parseContactInfo(description?: string): { phone?: string; email?: string } {
-  if (!description) return {};
-  const result: { phone?: string; email?: string } = {};
-  
-  // Email patterns
-  const emailMatch = description.match(/[\w.+-]+@[\w-]+\.[\w.]+/);
-  if (emailMatch) result.email = emailMatch[0];
-  
-  // Phone patterns
-  const phoneMatch = description.match(/(?:\+?\d{1,3}[\s.-]?)?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{2,4}/);
-  if (phoneMatch) result.phone = phoneMatch[0];
-  
-  return result;
-}
-
-// Parse iCal content into events with extended metadata
-function parseICalEvents(icalContent: string, sourceUrl: string): Array<{
-  uid: string;
-  summary: string;
-  dtstart: string | null;
-  dtend: string | null;
-  description?: string;
-  location?: string;
-  price?: number;
-  guestCount?: number;
-  organizer?: string;
-  guestName?: string;
-  guestEmail?: string;
-  guestPhone?: string;
-}> {
-  const events: Array<{
-    uid: string;
-    summary: string;
-    dtstart: string | null;
-    dtend: string | null;
-    description?: string;
-    location?: string;
-    price?: number;
-    guestCount?: number;
-    organizer?: string;
-    guestName?: string;
-    guestEmail?: string;
-    guestPhone?: string;
-  }> = [];
-  
-  // Unfold long lines (lines starting with space/tab are continuations)
-  const unfoldedContent = icalContent.replace(/\r?\n[ \t]/g, '');
-  const lines = unfoldedContent.split(/\r?\n/);
-  
-  let currentEvent: Record<string, string> | null = null;
-  
-  for (const line of lines) {
-    if (line === 'BEGIN:VEVENT') {
-      currentEvent = {};
-    } else if (line === 'END:VEVENT' && currentEvent) {
-      if (currentEvent.UID && currentEvent.DTSTART) {
-        const guestName = parseGuestName(currentEvent.SUMMARY || '');
-        const contactInfo = parseContactInfo(currentEvent.DESCRIPTION);
-        
-        const event: any = {
-          uid: currentEvent.UID,
-          summary: currentEvent.SUMMARY || 'Blocked',
-          dtstart: parseICalDate(currentEvent.DTSTART),
-          dtend: parseICalDate(currentEvent.DTEND || currentEvent.DTSTART),
-          description: currentEvent.DESCRIPTION,
-          location: currentEvent.LOCATION,
-          organizer: currentEvent.ORGANIZER,
-          guestName,
-          guestEmail: contactInfo.email,
-          guestPhone: contactInfo.phone,
-        };
-        
-        // Parse extended Airbnb fields
-        if (currentEvent['X-AIRBNB-PRICE']) {
-          event.price = parseFloat(currentEvent['X-AIRBNB-PRICE']);
-        }
-        
-        // Parse guest count from various fields
-        if (currentEvent['X-BOOKING-GUESTS'] || currentEvent['X-NUM-GUESTS']) {
-          event.guestCount = parseInt(currentEvent['X-BOOKING-GUESTS'] || currentEvent['X-NUM-GUESTS']);
-        }
-        
-        events.push(event);
-      }
-      currentEvent = null;
-    } else if (currentEvent) {
-      const colonIndex = line.indexOf(':');
-      if (colonIndex > 0) {
-        let propName = line.slice(0, colonIndex);
-        const propValue = line.slice(colonIndex + 1);
-        
-        const semiIndex = propName.indexOf(';');
-        if (semiIndex > 0) {
-          propName = propName.slice(0, semiIndex);
-        }
-        
-        currentEvent[propName] = propValue;
-      }
-    }
-  }
-  
-  return events;
-}
-
-// Detect channel type from URL
-function detectChannelType(url: string, name: string): string {
-  const urlLower = url.toLowerCase();
-  const nameLower = name.toLowerCase();
-  
-  if (urlLower.includes('airbnb') || nameLower.includes('airbnb')) return 'airbnb';
-  if (urlLower.includes('booking.com') || nameLower.includes('booking')) return 'booking';
-  if (urlLower.includes('vrbo') || urlLower.includes('homeaway') || nameLower.includes('vrbo')) return 'vrbo';
-  if (urlLower.includes('expedia') || nameLower.includes('expedia')) return 'expedia';
-  if (urlLower.includes('google') || nameLower.includes('google')) return 'google';
-  
-  return 'other';
-}
-
-// Look up property pricing from properties
-async function getPropertyPricing(supabase: any, propertyId: string): Promise<number> {
-  const { data } = await supabase
-    .from('properties')
-    .select('price, price_per_night')
-    .eq('id', propertyId)
-    .single();
-  return data?.price_per_night ?? data?.price ?? 0;
-}
-
-// Calculate nights between two date strings
-function calculateNights(dtstart: string, dtend: string): number {
-  const start = new Date(dtstart);
-  const end = new Date(dtend);
-  const diffMs = end.getTime() - start.getTime();
-  const nights = Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)));
-  return nights;
-}
-
-// Check for overlapping orders for this property and date range; return conflict order id if found
-async function findOverlappingOrder(
-  supabase: any,
-  propertyId: string,
-  startDate: string,
-  endDate: string,
-  excludeOrderId?: string
-): Promise<{ orderId: string; channel: string } | null> {
-  const startAt = `${startDate}T00:00:00Z`;
-  const endAt = `${endDate}T23:59:59Z`;
-
-  const { data: items } = await supabase
-    .from('order_items')
-    .select('order_id, metadata, resource_id')
-    .eq('item_type', 'property');
-
-  const orderIdsForProperty = (items || [])
-    .filter((i: any) => i.resource_id === propertyId || i.metadata?.property_id === propertyId)
-    .map((i: any) => i.order_id);
-
-  if (orderIdsForProperty.length === 0) return null;
-
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('id, start_at, end_at, metadata, status, deleted_at')
-    .in('id', orderIdsForProperty)
-    .eq('vertical', 'property')
-    .is('deleted_at', null);
-
-  const overlapping = (orders || []).find((o: any) => {
-    if (!propertyOrderHoldsInventory(o.status)) return false;
-    if (excludeOrderId && o.id === excludeOrderId) return false;
-    const oStart = new Date(o.start_at).getTime();
-    const oEnd = new Date(o.end_at).getTime();
-    const eStart = new Date(startAt).getTime();
-    const eEnd = new Date(endAt).getTime();
-    return oStart < eEnd && eStart < oEnd;
-  });
-
-  if (!overlapping) return null;
-
-  const channel = overlapping.metadata?.channel_type || overlapping.metadata?.source || 'myuno';
-  return { orderId: overlapping.id, channel };
-}
-
-// Create or update an order for an external calendar event (unified orders table)
-async function upsertOrderForEvent(
-  supabase: any,
-  event: { uid: string; summary: string; dtstart: string | null; dtend: string | null; description?: string; price?: number; guestCount?: number; location?: string; organizer?: string; guestName?: string; guestEmail?: string; guestPhone?: string },
-  calendar: any,
-  existingOrderId?: string
-): Promise<string> {
-  const startAt = `${event.dtstart}T14:00:00Z`;
-  const endAt = `${event.dtend}T12:00:00Z`;
-
-  // Use parsed guest name instead of raw summary
-  const guestName = event.guestName || event.summary || 'External Booking';
-
-  // Calculate pricing: prefer iCal price (Airbnb), fallback to property pricing
-  const nights = calculateNights(event.dtstart!, event.dtend!);
-  let totalAmount = event.price || 0;
-  let pricePerNight = 0;
-
-  if (totalAmount === 0) {
-    // Lookup from property data
-    pricePerNight = await getPropertyPricing(supabase, calendar.property_id);
-    totalAmount = pricePerNight * nights;
-  } else {
-    pricePerNight = Math.round(totalAmount / nights);
-  }
-
-  const platformFeeAmount = Math.round(totalAmount * 0.10 * 100) / 100;
-
-  // Skip creating orders with zero amount
-  if (totalAmount === 0 && !existingOrderId) {
-    console.info(`Skipping order creation: zero total for property ${calendar.property_id}`);
-    return '';
-  }
-
-  // Build notes from available info
-  const notesParts = [];
-  if (event.description) notesParts.push(event.description);
-  if (event.location) notesParts.push(`Location: ${event.location}`);
-  if (event.organizer) notesParts.push(`Contact: ${event.organizer}`);
-  if (event.guestEmail) notesParts.push(`Email: ${event.guestEmail}`);
-  if (event.guestPhone) notesParts.push(`Phone: ${event.guestPhone}`);
-  notesParts.push(`Synced from ${calendar.name}`);
-
-  // Generate order number for new orders
-  const now = new Date();
-  const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-  const rand = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
-  const orderNumber = `UNO-${dateStr}-${rand}`;
-
-  const orderData: Record<string, any> = {
-    order_type: 'property',
-    vertical: 'property',
-    start_at: startAt,
-    end_at: endAt,
-    status: 'confirmed',
-    total_amount: totalAmount,
-    subtotal: totalAmount,
-    platform_fee_amount: platformFeeAmount,
-    commission_rate_applied: 10,
-    order_number: orderNumber,
-    notes: notesParts.join('\n'),
-    metadata: {
-      source: 'ical',
-      source_calendar_id: calendar.id,
-      source_calendar_name: calendar.name,
-      external_id: event.uid,
-      guest_name: guestName,
-      guest_email: event.guestEmail || null,
-      guest_phone: event.guestPhone || null,
-      channel_type: detectChannelType(calendar.ical_url, calendar.name),
-      sync_priority: calendar.priority || 0,
-      nights: nights,
-      price_per_night: pricePerNight,
-    },
-  };
-
-  // customer_user_id is NULL for external OTA bookings
-  if (calendar.owner_id) {
-    orderData.provider_org_id = null;
-  }
-
-  if (existingOrderId) {
-    await supabase
-      .from('orders')
-      .update(orderData)
-      .eq('id', existingOrderId);
-    return existingOrderId;
-  } else {
-    const { data: order, error } = await supabase
-      .from('orders')
-      .insert(orderData)
-      .select('id')
-      .single();
-
-    if (error) throw error;
-
-    // Create order_item linking to property
-    await supabase
-      .from('order_items')
-      .insert({
-        order_id: order.id,
-        item_type: 'property',
-        item_name: guestName,
-        qty: nights,
-        unit_price: pricePerNight,
-        amount: totalAmount,
-        start_at: startAt,
-        end_at: endAt,
-        metadata: {
-          property_id: calendar.property_id,
-          guest_count: event.guestCount,
-        },
-      });
-
-    // Create guest participant with contact info
-    await supabase
-      .from('order_participants')
-      .insert({
-        order_id: order.id,
-        role: 'guest',
-        name: guestName,
-        email: event.guestEmail || null,
-        phone: event.guestPhone || null,
-      });
-
-    return order.id;
-  }
-}
-
-// Sync a single calendar with detailed logging
-async function syncCalendar(
-  supabase: any,
-  calendar: any,
-  syncType: string
-): Promise<{
-  success: boolean;
-  eventsFound: number;
-  eventsAdded: number;
-  eventsUpdated: number;
-  eventsRemoved: number;
-  newOrderIds: string[];
-  error?: string;
-  durationMs: number;
-}> {
-  const startTime = Date.now();
-  const newOrderIds: string[] = [];
-  
-  try {
-    console.info(`Fetching iCal from: ${calendar.name} (${calendar.ical_url})`);
-
-    // SSRF guard: ical_url is user-supplied DB data.
-    const ssrf = validateExternalUrlForSSRF(calendar.ical_url ?? '');
-    if (!ssrf.allowed) {
-      throw new Error(`Blocked iCal URL: ${ssrf.reason}`);
-    }
-
-    const response = await fetch(calendar.ical_url, {
-      headers: { 'User-Agent': 'UNO Calendar Sync/2.0' },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const icalContent = await response.text();
-    const events = parseICalEvents(icalContent, calendar.ical_url);
-    
-    console.info(`Parsed ${events.length} events from ${calendar.name}`);
-
-    // Get existing orders from this calendar (stored in metadata)
-    const { data: existingOrders } = await supabase
-      .from('orders')
-      .select('id, metadata')
-      .eq('vertical', 'property')
-      .is('deleted_at', null);
-
-    // Filter orders that came from this calendar
-    const calendarOrders = (existingOrders || []).filter((o: any) =>
-      o.metadata?.source_calendar_id === calendar.id
-    );
-
-    // Map external_id -> order.id
-    const existingIdMap = new Map<string, string>();
-    for (const order of calendarOrders) {
-      const extId = order.metadata?.external_id;
-      if (extId) existingIdMap.set(extId, order.id);
-    }
-
-    const newEventIds = new Set(events.map(e => e.uid));
-
-    // Soft-delete orders that no longer exist in external calendar
-    // Never wipe all bookings when the feed came back empty (outage / bad response).
-    const toDelete = events.length === 0 ? [] : calendarOrders.filter((o: any) =>
-      o.metadata?.external_id && !newEventIds.has(o.metadata.external_id)
-    );
-    const eventsRemoved = toDelete.length;
-
-    if (toDelete.length > 0) {
-      await supabase
-        .from('orders')
-        .update({ deleted_at: new Date().toISOString() })
-        .in('id', toDelete.map((o: any) => o.id));
-      console.info(`Soft-deleted ${toDelete.length} cancelled bookings`);
-    }
-
-    // Insert or update events
-    let eventsAdded = 0;
-    let eventsUpdated = 0;
-
-    for (const event of events) {
-      if (!event.dtstart || !event.dtend) continue;
-
-      const existingOrderId = existingIdMap.get(event.uid);
-
-      // For NEW events only: check overlap with existing orders before creating
-      if (!existingOrderId) {
-        const overlap = await findOverlappingOrder(
-          supabase,
-          calendar.property_id,
-          event.dtstart,
-          event.dtend
-        );
-        if (overlap) {
-          const channelIcal = detectChannelType(calendar.ical_url, calendar.name);
-          await supabase.from('booking_conflicts').insert({
-            property_id: calendar.property_id,
-            conflict_date: event.dtstart,
-            channel_a: channelIcal,
-            channel_b: overlap.channel,
-            order_id_a: null,
-            order_id_b: overlap.orderId,
-            resolved: false,
-          });
-          console.info(`Conflict detected: iCal ${channelIcal} overlaps order ${overlap.orderId} (${overlap.channel}). Skipping order creation.`);
-          continue;
-        }
-      }
-
-      const orderId = await upsertOrderForEvent(supabase, event, calendar, existingOrderId);
-
-      if (existingOrderId) {
-        eventsUpdated++;
-      } else if (orderId) {
-        newOrderIds.push(orderId);
-        eventsAdded++;
-      }
-    }
-
-    // Update calendar metadata
-    const channelType = detectChannelType(calendar.ical_url, calendar.name);
-    await supabase
-      .from('property_external_calendars')
-      .update({
-        last_synced_at: new Date().toISOString(),
-        sync_error: null,
-        channel_type: channelType,
-      })
-      .eq('id', calendar.id);
-
-    const durationMs = Date.now() - startTime;
-
-    return {
-      success: true,
-      eventsFound: events.length,
-      eventsAdded,
-      eventsUpdated,
-      eventsRemoved,
-      newOrderIds,
-      durationMs,
-    };
-
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`Error syncing calendar ${calendar.name}:`, error);
-    
-    await supabase
-      .from('property_external_calendars')
-      .update({ sync_error: errorMessage })
-      .eq('id', calendar.id);
-
-    return {
-      success: false,
-      eventsFound: 0,
-      eventsAdded: 0,
-      eventsUpdated: 0,
-      eventsRemoved: 0,
-      newOrderIds: [],
-      error: errorMessage,
-      durationMs: Date.now() - startTime,
-    };
-  }
-}
+import { getCorsHeaders } from '../_shared/cors.ts';
+import { syncICalInventory } from '../_shared/ical-inventory-sync.ts';
+import { requireInternalSecret } from '../_shared/internal-secret.ts';
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  if (req.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { ...corsHeaders, Allow: 'POST, OPTIONS', 'Content-Type': 'application/json' } });
+  const denied = requireInternalSecret(req, corsHeaders);
+  if (denied) return denied;
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    let ownerId: string | null = null;
-    let propertyId: string | null = null;
-    let syncType = 'scheduled';
-    
-    if (req.method === 'POST') {
-      const body = await req.json().catch(() => ({}));
-      ownerId = body.owner_id || null;
-      propertyId = body.property_id || null;
-      syncType = body.sync_type || 'scheduled';
+    let body: unknown;
+    try { body = await req.json(); } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!body || typeof body !== 'object' || Array.isArray(body) ||
+        Object.keys(body).some(key => !['owner_id', 'property_id', 'sync_type'].includes(key))) {
+      return new Response(JSON.stringify({ error: 'Invalid scheduled scope' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const filters = body as { owner_id?: unknown; property_id?: unknown; sync_type?: unknown };
+    if ([filters.owner_id, filters.property_id].some(id => id != null && (typeof id !== 'string' || !uuid.test(id))) ||
+        (filters.sync_type != null && (typeof filters.sync_type !== 'string' || !['scheduled', 'manual', 'webhook'].includes(filters.sync_type)))) {
+      return new Response(JSON.stringify({ error: 'Invalid scheduled scope' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const ownerId = filters.owner_id as string | undefined;
+    const propertyId = filters.property_id as string | undefined;
+    const syncType = (filters.sync_type as string | undefined) || 'scheduled';
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     let query = supabase
       .from('property_external_calendars')
-      .select('*, properties!inner(id, owner_id)')
+      .select('*', { count: 'exact' })
       .eq('is_active', true)
       .eq('auto_sync', true);
 
@@ -564,11 +49,11 @@ Deno.serve(async (req) => {
       query = query.eq('property_id', propertyId);
     }
 
-    const { data: calendars, error: calendarsError } = await query;
+    const { data: calendars, error: calendarsError, count } = await query;
 
-    if (calendarsError) {
+    if (calendarsError || !Array.isArray(calendars) || count == null || count !== calendars.length) {
       console.error('Error fetching calendars:', calendarsError);
-      return new Response(JSON.stringify({ error: 'Error fetching calendars' }), {
+      return new Response(JSON.stringify({ error: 'Calendar scope read failed or was incomplete' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -601,7 +86,7 @@ Deno.serve(async (req) => {
     for (const batch of calendarBatches) {
       const batchResults = await Promise.all(
         batch.map(async (calendar: any) => {
-          const result = await syncCalendar(supabase, calendar, syncType);
+          const result = await syncICalInventory(supabase, calendar);
           
           // Log to sync_logs table
           await supabase.from('calendar_sync_logs').insert({
@@ -626,7 +111,7 @@ Deno.serve(async (req) => {
             events_added: result.eventsAdded,
             events_updated: result.eventsUpdated,
             events_removed: result.eventsRemoved,
-            new_order_ids: result.newOrderIds,
+            new_order_ids: [], // Retained response field: inventory sync never creates orders.
             error: result.error,
             duration_ms: result.durationMs,
           };
