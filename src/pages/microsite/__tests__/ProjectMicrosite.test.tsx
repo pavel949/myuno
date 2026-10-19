@@ -5,6 +5,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import ProjectMicrosite from '../ProjectMicrosite';
 
 const state = vi.hoisted(() => ({ enabled: true, insert: vi.fn() }));
+// Shared construction presentation now reads the app language context.
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'ru' }) }));
 vi.mock('@/hooks/useNewbuildProjects', () => ({
   useNewbuildProject: () => ({ isLoading: false, data: {
     id: 'synthetic-project', name_en: 'Synthetic project', name_ru: 'Тестовый проект',
