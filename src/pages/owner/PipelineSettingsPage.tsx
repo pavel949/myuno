@@ -258,13 +258,13 @@ const [selectedType, setSelectedType] = useState<DealType>('sale');
   return (
     <div className="space-y-4">
       {/* Type tabs */}
-      <div className="flex gap-2 overflow-x-auto">
+      <div className="flex flex-wrap gap-2">
         {DEAL_TYPES.map(dt => (
           <button
             key={dt}
             onClick={() => setSelectedType(dt)}
             className={cn(
-              'shrink-0 px-4 py-2 rounded-full text-xs font-medium border transition-colors',
+              'min-w-0 max-w-full whitespace-normal break-words px-4 py-2 rounded-full text-xs font-medium border transition-colors',
               selectedType === dt ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-muted-foreground',
             )}
           >

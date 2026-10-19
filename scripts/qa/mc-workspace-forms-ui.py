@@ -20,6 +20,8 @@ async def main():
                     else:blocked.append(req.request.url);await req.abort()
                 await context.route('**/*',route)
                 page=await context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
+                async def settle():
+                    await page.evaluate('''async()=>{await document.fonts.ready;await Promise.all(document.getAnimations().filter(a=>a.effect?.getTiming().iterations!==Infinity).map(a=>a.finished.catch(()=>{})))}''')
                 async def bounds():
                     m=await page.evaluate('''()=>({page:document.documentElement.scrollWidth,controls:[...document.querySelectorAll('button,input,textarea,select,[role=combobox]')].filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect();return {text:e.textContent,left:r.left,right:r.right}})})''')
                     assert m['page']<=width,m
@@ -27,6 +29,7 @@ async def main():
                 for view in ['settings','meetings','account','dashboard']:
                     await page.goto(f'http://localhost:8080/fixture?lang={lang}&view={view}',wait_until='networkidle')
                     await expect(page.get_by_role('heading',level=1)).to_be_visible()
+                    await settle()
                     await bounds()
                     await page.screenshot(path=str(OUT/f'{lang}-{width}-{view}.png'),full_page=True)
                     if view=='settings':
@@ -36,15 +39,19 @@ async def main():
                         for i in range(5):
                             await triggers.nth(i).click()
                             await expect(triggers.nth(i)).to_have_attribute('aria-expanded','true')
+                            await settle()
                             await bounds()
                             await page.screenshot(path=str(OUT/f'{lang}-{width}-settings-{i}.png'),full_page=True)
                             await triggers.nth(i).click()
+                            await expect(triggers.nth(i)).to_have_attribute('aria-expanded','false')
+                            await settle()
                     if view=='meetings':
                         name={'en':'New Meeting','ru':'Новая встреча','th':'นัดหมายใหม่'}[lang]
                         # The first header button is the existing New Meeting action.
                         trigger=page.get_by_role('button').first
                         await trigger.click()
                         await expect(page.get_by_role('dialog')).to_be_visible()
+                        await settle()
                         await bounds()
                         await page.screenshot(path=str(OUT/f'{lang}-{width}-meeting-draft.png'),full_page=True)
                     assert not blocked,blocked

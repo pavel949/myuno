@@ -200,6 +200,8 @@ for (const l of locales) {
       mount(<FinanceCategorySettings />);
       expect(screen.getByRole('heading', { name: l.expense })).toBeVisible();
       expect(screen.getByText(l.cleaning)).toBeVisible();
+      expect(screen.getByText(l.cleaning).parentElement).toHaveClass('col-start-2', 'row-start-1', 'min-w-0');
+      expect(screen.getByText(l.cleaning).parentElement?.parentElement).toHaveClass('grid', 'grid-cols-[auto_minmax(0,1fr)_auto]');
       expect(screen.getAllByText(l.cost).length).toBeGreaterThan(0);
       fireEvent.click(screen.getAllByRole('button', { name: l.addCustom })[0]);
       const dialog = screen.getByRole('dialog', { name: l.newCategory });
@@ -218,6 +220,9 @@ for (const l of locales) {
     it('translates actual CRM stage/option editors and validation, preserving original option labels', async () => {
       mount(<PipelineSettingsPage />);
       expect(screen.getByRole('heading', { name: l.crm })).toBeVisible();
+      const sale = screen.getByRole('button', { name: l.lang === 'ru' ? 'Продажа' : l.lang === 'th' ? 'การขาย' : 'Sale' });
+      expect(sale.parentElement).toHaveClass('flex-wrap');
+      expect(sale).toHaveClass('max-w-full', 'whitespace-normal');
       fireEvent.click(screen.getByRole('button', { name: l.addStage }));
       fireEvent.click(screen.getByRole('button', { name: l.save }));
       expect(state.toast.error).toHaveBeenCalledWith(l.validation);

@@ -20,7 +20,7 @@ export function DashboardDestinations({ businessRole, propertyCount }: { busines
         if (!item) return null;
         const Icon = item.icon;
         return (
-          <Button key={path} asChild variant={index === 0 ? 'default' : 'secondary'} size="sm" className="h-auto min-h-11 min-w-0 gap-1 px-2 py-2 whitespace-normal sm:px-4">
+          <Button key={path} asChild variant={index === 0 ? 'default' : 'secondary'} size="sm" className="h-auto min-h-11 min-w-0 flex-col gap-1 px-2 py-2 whitespace-normal sm:flex-row sm:px-4">
             <Link to={path}>
               <Icon className="h-4 w-4" aria-hidden />
               <span className="min-w-0 break-words">{pickLang(language, { en: item.labelEn, ru: item.labelRu, th: item.labelTh })}</span>

@@ -71,19 +71,19 @@ const CategoryRow = memo(function CategoryRow({
         open && 'border-border bg-muted/30',
         !isEnabled && 'opacity-40',
       )}>
-        <div className="flex flex-wrap items-center gap-2 py-1.5 px-2.5 hover:bg-muted/50 rounded-none">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 py-1.5 px-2.5 hover:bg-muted/50 rounded-none">
           <CollapsibleTrigger asChild>
-            <button type="button" aria-label={pickLang(language, { en: `Configure ${displayEn}`, ru: `Настроить ${displayRu}`, th: `ตั้งค่า ${overrides?.custom_name_en || overrides?.custom_name_ru || STANDARD_CATEGORY_THAI[code] || displayEn}` })} className="shrink-0 p-0.5 text-muted-foreground hover:text-foreground transition-colors">
+            <button type="button" aria-label={pickLang(language, { en: `Configure ${displayEn}`, ru: `Настроить ${displayRu}`, th: `ตั้งค่า ${overrides?.custom_name_en || overrides?.custom_name_ru || STANDARD_CATEGORY_THAI[code] || displayEn}` })} className="col-start-1 row-start-1 shrink-0 p-0.5 text-muted-foreground hover:text-foreground transition-colors">
               {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
             </button>
           </CollapsibleTrigger>
 
           {editingName ? (
-            <div className="flex items-center gap-1.5 flex-1 mr-1" onClick={e => e.stopPropagation()}>
+            <div className="col-start-2 row-start-1 flex min-w-0 items-center gap-1.5" onClick={e => e.stopPropagation()}>
               <Input
                 value={isRu ? editNameRu : editNameEn}
                 onChange={e => isRu ? setEditNameRu(e.target.value) : setEditNameEn(e.target.value)}
-                className="h-7 text-sm px-2 flex-1"
+                className="h-7 min-w-0 text-sm px-2 flex-1"
                 autoFocus
                 onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') setEditingName(false); }}
               />
@@ -95,7 +95,7 @@ const CategoryRow = memo(function CategoryRow({
               </button>
             </div>
           ) : (
-            <div className="flex min-w-0 items-center gap-1 flex-1 mr-1 group/name">
+            <div className="col-start-2 row-start-1 flex min-w-0 items-center gap-1 group/name">
               <span className="text-sm text-foreground break-words min-w-0">
                 {pickLang(language, { en: displayEn, ru: displayRu, th: overrides?.custom_name_en || overrides?.custom_name_ru || STANDARD_CATEGORY_THAI[code] || displayEn })}
               </span>
@@ -109,18 +109,20 @@ const CategoryRow = memo(function CategoryRow({
             </div>
           )}
 
-          <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 min-h-5 whitespace-normal font-normal border', CLASS_COLORS[effectiveClass as CategoryClass] || '')}>
-            {categoryClassLabel(language, effectiveClass)}
-          </Badge>
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 min-h-5 whitespace-normal font-normal text-muted-foreground">
-            {categoryGroupLabel(language, effectiveGroup)}
-          </Badge>
+          <div className="col-span-2 col-start-2 row-start-2 flex min-w-0 flex-wrap gap-1.5">
+            <Badge variant="outline" className={cn('max-w-full text-[10px] px-1.5 py-0 min-h-5 whitespace-normal font-normal border', CLASS_COLORS[effectiveClass as CategoryClass] || '')}>
+              {categoryClassLabel(language, effectiveClass)}
+            </Badge>
+            <Badge variant="outline" className="max-w-full text-[10px] px-1.5 py-0 min-h-5 whitespace-normal font-normal text-muted-foreground">
+              {categoryGroupLabel(language, effectiveGroup)}
+            </Badge>
+          </div>
 
           <Switch
             checked={isEnabled}
             onCheckedChange={onToggle}
             disabled={isPending}
-            className="shrink-0"
+            className="col-start-3 row-start-1 shrink-0"
           />
         </div>
 

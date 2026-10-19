@@ -103,9 +103,9 @@ async def main():
                 await visit()
                 await bounds()
                 tasks = page.locator('section[aria-labelledby="today-tasks"]')
-                attention = page.get_by_role('region', name=labels['attention'])
-                routine = page.get_by_role('region', name=labels['requests'])
-                stays = page.get_by_role('region', name=labels['stays'])
+                attention = page.get_by_role('region', name=labels['attention'], exact=True)
+                routine = page.get_by_role('region', name=labels['requests'], exact=True)
+                stays = page.get_by_role('region', name=labels['stays'], exact=True)
                 headings = await page.get_by_role('heading', level=2).all_text_contents()
                 assert headings[0].startswith(labels['tasks']), headings
                 assert await page.locator('section').first.get_attribute('aria-labelledby') == 'today-tasks'
@@ -143,7 +143,9 @@ async def main():
                         await link.screenshot(path=str(OUTPUT / f'{lang}-{width}-focus.png'))
                     await link.press('Enter')
                     await expect(page.get_by_test_id('route-boundary')).to_have_text(href)
-                await attention.get_by_role('link').first.click()
+                await visit()
+                await expect(attention).to_have_count(1)
+                await attention.get_by_role('link', name=labels['open_property']).first.click()
                 await expect(page.get_by_test_id('route-boundary')).to_have_text('/mc/properties/synthetic-property')
                 await stays.get_by_role('link', name=labels['open_property']).first.click()
                 await expect(page.get_by_test_id('route-boundary')).to_have_text('/mc/properties/synthetic-property')
