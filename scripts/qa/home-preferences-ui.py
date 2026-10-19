@@ -88,6 +88,10 @@ async def main():
                     await done.click()
                     await expect(dialog).to_have_count(0)
                     await trigger.click()
+                    # Selection is already persisted: it does not prove that the
+                    # reopened Radix layer has mounted its keyboard listener.
+                    await expect(dialog).to_be_visible()
+                    await bounds(dialog)
                     await selection(['pet_owner', 'couple', 'family'])
                     await page.keyboard.press('Escape')
                     await expect(dialog).to_have_count(0)
