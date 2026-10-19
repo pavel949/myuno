@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import AdminProperties from '../AdminProperties';
@@ -106,6 +106,34 @@ describe('contained admin property editor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit fixture property' }));
     expect(await screen.findByRole('dialog', { name: 'Edit Property' })).toBeInTheDocument();
     expect(screen.getByLabelText('Fixture title')).toHaveValue('Synthetic property');
+  });
+
+  it('waits for the route commit separately from urgent sheet dismissal', async () => {
+    let released = false;
+    let release!: () => void;
+    const pendingNavigation = new Promise<void>(resolve => { release = resolve; });
+    function DeferredRouteProbe() {
+      const location = useLocation();
+      if (!location.search.includes('edit=') && !released) throw pendingNavigation;
+      return <output data-testid="location">{location.pathname}{location.search}</output>;
+    }
+    render(
+      <MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider&status=pending&edit=synthetic-property']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <React.Suspense fallback={<span>Waiting for navigation</span>}>
+          <AdminProperties />
+          <DeferredRouteProbe />
+        </React.Suspense>
+      </MemoryRouter>
+    );
+    const editor = await screen.findByRole('dialog', { name: 'Edit Property' });
+    fireEvent.click(within(editor).getByRole('button', { name: 'Close editor' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    // A closed sheet does not mean the lower-priority route has committed yet.
+    expect(screen.getByTestId('location')).toHaveTextContent('edit=synthetic-property');
+    await act(async () => { released = true; release(); await pendingNavigation; });
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent(/^\/admin\/properties\?provider=synthetic-provider&status=pending$/));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(mocks.update).not.toHaveBeenCalled();
   });
 
   it.each(['en', 'ru'])('shows honest cloud help above the sheet and opens the URL importer in %s', async language => {

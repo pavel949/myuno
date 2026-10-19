@@ -35,6 +35,31 @@ async def main():
                 await bounds()
                 nav = page.get_by_role('navigation', name='Рабочие разделы' if lang=='ru' else 'Workspace shortcuts')
                 await expect(nav.get_by_role('link')).to_have_count(3)
+                labels = await nav.get_by_role('link').evaluate_all("""links => links.map(link => {
+                    const label = link.querySelector('span');
+                    const range = document.createRange();
+                    range.selectNodeContents(label);
+                    const lines = [...range.getClientRects()];
+                    const bounds = link.getBoundingClientRect();
+                    return {text:label.textContent,lines:lines.length,contained:lines.every(line => line.left>=bounds.left && line.right<=bounds.right)};
+                })""")
+                assert all(label['lines'] == 1 and label['contained'] for label in labels), labels
+                primary_contrast = await nav.get_by_role('link').first.evaluate(r"""link => {
+                    const rgb = color => color.match(/[\d.]+/g).slice(0,3).map(Number);
+                    const luminance = color => rgb(color).map(channel => {
+                        const value=channel/255;
+                        return value<=0.04045 ? value/12.92 : ((value+0.055)/1.055)**2.4;
+                    }).reduce((sum,value,index)=>sum+value*[0.2126,0.7152,0.0722][index],0);
+                    const background=getComputedStyle(link).backgroundColor;
+                    const contrast=element=>{
+                        const foreground=getComputedStyle(element).color;
+                        const a=luminance(foreground),b=luminance(background);
+                        return {foreground,background,ratio:(Math.max(a,b)+0.05)/(Math.min(a,b)+0.05)};
+                    };
+                    return {label:contrast(link.querySelector('span')),icon:contrast(link.querySelector('svg'))};
+                }""")
+                assert primary_contrast['label']['ratio'] >= 4.5, primary_contrast
+                assert primary_contrast['icon']['ratio'] >= 3, primary_contrast
                 await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-empty.png'), full_page=True)
                 for label, path in [('Объекты' if lang=='ru' else 'Properties','/mc/properties'),('Календарь' if lang=='ru' else 'Calendar','/mc/calendar'),('Задачи' if lang=='ru' else 'Tasks','/mc/tasks')]:
                     link = nav.get_by_role('link', name=label, exact=True)
@@ -62,6 +87,7 @@ async def main():
                     await panel.get_by_test_id('language-switch').click()
                     await page.get_by_role('menuitem', name=re.compile('EN.*English')).click()
                     assert await page.evaluate('window.fixtureLanguage') == 'en'
+                    await expect(page.locator('[role="menu"]')).to_have_count(0)
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-preferences.png'))
                     await page.keyboard.press('Escape')
                     await page.get_by_role('button', name='Поиск' if lang=='ru' else 'Search', exact=True).click()
@@ -86,7 +112,7 @@ async def main():
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-{state}.png'), full_page=True)
                 assert not blocked, blocked
                 assert not errors, errors
-                results.append({'language':lang,'width':width,'states':4,'routeBoundaries':'pass','viewPreference':'pass','headerMenus':'pass','overflow':'none','externalRequests':0,'runtimeErrors':0})
+                results.append({'language':lang,'width':width,'states':4,'routeBoundaries':'pass','singleLineLabels':'pass','primaryContrast':primary_contrast,'viewPreference':'pass','headerMenus':'pass','overflow':'none','externalRequests':0,'runtimeErrors':0})
                 await context.close()
         await browser.close()
     (OUTPUT/'results.json').write_text(json.dumps(results,ensure_ascii=False,indent=2))

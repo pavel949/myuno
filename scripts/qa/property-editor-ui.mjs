@@ -41,7 +41,8 @@ const virtual = {
 await build({
   stdin: { contents: `import React from 'react'; import {createRoot} from 'react-dom/client'; import {MemoryRouter,useLocation} from 'react-router-dom'; import Page from '${root}/src/pages/admin/AdminProperties.tsx';
     window.fixtureWrites=0;window.fixtureDataCalls=0;
-    function Probe(){const location=useLocation();window.fixtureRoute=location.pathname+location.search;return null;}
+    // Read the committed router tree, not a global mutated during a transition render.
+    function Probe(){const location=useLocation();return <output data-testid="fixture-route" className="sr-only">{location.pathname}{location.search}</output>;}
     createRoot(document.getElementById('root')).render(<MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider&status=pending&edit=synthetic-property']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Page/><Probe/></MemoryRouter>);`, loader:'tsx', resolveDir:root },
   bundle:true, outfile:path.join(output,'fixture.js'), jsx:'automatic', format:'esm',
   define:{'process.env.NODE_ENV':'"production"', 'import.meta.env.DEV':'false', 'import.meta.env.VITE_SUPABASE_URL':'"http://127.0.0.1:54321"'},

@@ -14,6 +14,17 @@ async def is_topmost(locator):
       return !!top && (e===top || e.contains(top));
     }''')
 
+async def expect_committed_route(page, expected, checkpoint):
+    route_state = page.get_by_test_id('fixture-route')
+    try:
+        await expect(route_state).to_have_text(expected)
+    except AssertionError:
+        diagnostic = {'checkpoint': checkpoint, 'expected': expected, 'actual': await route_state.all_text_contents()}
+        (OUTPUT / f'{checkpoint}-route-failure.json').write_text(json.dumps(diagnostic, ensure_ascii=False, indent=2))
+        await page.screenshot(path=str(OUTPUT / f'{checkpoint}-route-failure.png'))
+        print(json.dumps(diagnostic, ensure_ascii=False), flush=True)
+        raise
+
 async def main():
     results = []
     async with async_playwright() as p:
@@ -35,6 +46,7 @@ async def main():
                 page = await context.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 await page.goto(f'http://localhost:8080/fixture?lang={language}', wait_until='networkidle')
+                route_state = page.get_by_test_id('fixture-route')
                 sheet_title = 'Редактировать объект' if language == 'ru' else 'Edit Property'
                 sheet = page.get_by_role('dialog', name=sheet_title, exact=True)
                 await expect(sheet).to_be_visible()
@@ -90,7 +102,7 @@ async def main():
                 await page.keyboard.press('Escape')
                 await expect(importer).to_have_count(0)
                 await expect(sheet).to_be_visible()
-                assert 'edit=synthetic-property' in await page.evaluate('window.fixtureRoute')
+                await expect(route_state).to_contain_text('edit=synthetic-property')
 
                 await sheet.get_by_role('button', name='Редактировать фото 1' if language == 'ru' else 'Edit photo 1', exact=True).click()
                 image_editor = page.get_by_role('dialog').filter(has=page.get_by_text('Редактирование фото', exact=True))
@@ -110,23 +122,29 @@ async def main():
                 await close.click()
                 await expect(sheet).to_have_count(0)
                 expected_route='/admin/properties?provider=synthetic-provider&status=pending'
-                assert await page.evaluate('window.fixtureRoute') == expected_route
+                # Sheet state closes urgently; startTransition navigation can commit later.
+                # This retains the exact route contract and reports the actual route on timeout.
+                await expect_committed_route(page, expected_route, f'{language}-{width}-close')
+                await expect(sheet).to_have_count(0)
                 # Revisit a fresh deep link so outside/Escape also proves URL cleanup.
                 await page.reload(wait_until='networkidle')
                 await expect(sheet).to_be_visible()
-                assert 'edit=synthetic-property' in await page.evaluate('window.fixtureRoute')
+                await expect(route_state).to_contain_text('edit=synthetic-property')
                 if width == 1280:
                     await page.wait_for_timeout(350)
                     await page.mouse.click(10, 400)
                 else:
                     await page.keyboard.press('Escape')
                 await expect(sheet).to_have_count(0)
-                assert await page.evaluate('window.fixtureRoute') == expected_route
+                # Sheet state closes urgently; startTransition navigation can commit later.
+                # This retains the exact route contract and reports the actual route on timeout.
+                await expect_committed_route(page, expected_route, f'{language}-{width}-outside-or-escape')
+                await expect(sheet).to_have_count(0)
                 assert await page.evaluate('window.fixtureWrites') == 0
                 assert await page.evaluate('window.fixtureDataCalls') == 0
                 assert not errors, errors
                 assert not any('supabase' in url or '/rest/' in url or '/functions/' in url for url in blocked), blocked
-                results.append({'language':language,'width':width,'geometry':geometry,'mutations':0,'dataCalls':0,'runtimeErrors':errors,'blockedRequests':len(blocked)})
+                results.append({'language':language,'width':width,'geometry':geometry,'mutations':0,'dataCalls':0,'committedRoute':await route_state.text_content(),'runtimeErrors':errors,'blockedRequests':len(blocked)})
                 await context.close()
         await browser.close()
     (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2))

@@ -109,3 +109,11 @@ it('does not present stale rows as current after a reported source failure', () 
   expect(screen.queryByText('Synthetic overdue task')).not.toBeInTheDocument();
   expect(screen.queryByText('One overdue task')).not.toBeInTheDocument();
 });
+
+it('preserves primary-button foreground and recognized small typography', () => {
+  render(<MemoryRouter><DashboardDestinations businessRole="general" propertyCount={0} /></MemoryRouter>);
+  const primary = screen.getByRole('link', { name: 'Объекты' });
+  expect(primary).toHaveClass('bg-primary', 'text-primary-foreground', 'text-sm');
+  expect(primary).not.toHaveClass('text-[15px]', 'text-body-sm');
+  expect(screen.getByRole('link', { name: 'Календарь' }).querySelector('span')).toHaveClass('whitespace-nowrap');
+});
