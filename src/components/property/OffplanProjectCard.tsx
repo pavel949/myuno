@@ -1,6 +1,6 @@
 /**
  * OffplanProjectCard - Premium card for off-plan property projects
- * Shows construction status, developer, myUNO score, pricing, ROI
+ * Shows construction status, developer, pricing and a route to project reports
  */
 
 import React, { useMemo } from 'react';
@@ -26,7 +26,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { cn } from '@/lib/utils';
 import { DeveloperBadge } from './DeveloperBadge';
-import { MyunoScoreWidget } from '@/components/invest/MyunoScoreWidget';
+import { pickLang } from '@/lib/i18n/pickLang';
 import type { OffplanProject, ProjectStatus } from '@/hooks/useOffplanProjects';
 import { surfaceFromOffplanProject } from '@/lib/real-estate/listingViewModel';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
@@ -176,13 +176,6 @@ export function OffplanProjectCard({
           )}
         </div>
 
-        {/* myUNO Score badge — show only score dots, no risk label or numeric value on public cards */}
-        {project.isClearviewRated && project.muunoScore && (
-          <div className="absolute top-3 right-3">
-            <MyunoScoreWidget score={project.muunoScore} size="sm" showRisk={false} showLabel={false} showScore={false} />
-          </div>
-        )}
-
         {/* Favorite (alerts on new units) */}
         <button
           type="button"
@@ -192,7 +185,7 @@ export function OffplanProjectCard({
             'absolute right-3 flex items-center justify-center w-8 h-8 min-h-[44px] min-w-[44px] rounded-full',
             'bg-background border border-border/50 shadow-sm',
             'hover:bg-background transition-colors',
-            project.isClearviewRated && project.muunoScore ? 'top-14' : 'top-3'
+            'top-3'
           )}
         >
           <Heart
@@ -250,36 +243,11 @@ export function OffplanProjectCard({
           </p>
         )}
 
-        {/* Due Diligence status */}
-        <div className={cn(
-          "flex items-center gap-1.5 px-2.5 py-1.5 rounded-none text-xs font-medium",
-          project.riskLevel 
-            ? "bg-success/10 text-success" 
-            : "bg-warning/10 text-warning"
-        )}>
-          {project.riskLevel ? (
-            <>
-              <ShieldCheck className="w-3.5 h-3.5" />
-              {isRu ? 'Due Diligence пройден' : 'Due Diligence Complete'}
-            </>
-          ) : (
-            <>
-              <ShieldAlert className="w-3.5 h-3.5" />
-              {isRu ? 'Запросить оценку рисков' : 'Request Risk Assessment'}
-            </>
-          )}
-        </div>
+        <p className="text-xs text-muted-foreground">
+          {pickLang(language, { ru: 'Отчёты: смотрите карточку проекта', en: 'Reports: see project details', th: 'รายงาน: ดูรายละเอียดโครงการ' })}
+        </p>
 
-        {/* Metrics row */}
         <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-          {/* ROI */}
-          {project.roiProjected && (
-            <div className="flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-              <TrendingUp className="w-3 h-3" />
-              <span className="font-medium">{project.roiProjected}% ROI</span>
-            </div>
-          )}
-
           {/* Completion date */}
           {project.completionDate && project.projectStatus !== 'completed' && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">

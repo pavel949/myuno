@@ -50,6 +50,7 @@ export function HomeDiscoverySearch({ rentalOnly = false, hideModeSwitch = false
     if (mode === 'rent') {
       for (const key of ['checkIn', 'checkOut', 'guests', 'f.guestsAtLeast']) params.delete(key);
       params.set('tenancy', tenancy);
+      if (tenancy !== 'short') params.delete('f.priceLevel');
       if (checkIn) params.set('checkIn', checkIn);
       if (checkOut) params.set('checkOut', checkOut);
       if (guests) params.set('guests', guests);

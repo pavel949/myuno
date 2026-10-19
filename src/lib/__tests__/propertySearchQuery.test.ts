@@ -16,7 +16,7 @@ describe('unified residential query compatibility', () => {
   it('adapts legacy scalar and multiple filters to the existing server contract', () => {
     const state = readPropertySearchQuery(new URLSearchParams('f.district=layan&f.propertyType=villa,condo&f.bedrooms=2&f.amenities=wifi&f.viewType=sea&f.priceLevel=2&tenancy=medium'));
     const filters = filterValuesToPropertyFilters(mergeSearchBarIntoFilterValues(state.filterValues, state.search), { listingType: 'rent', rentTenancy: state.tenancy });
-    expect(filters).toMatchObject({ district: 'layan', propertyTypes: ['villa', 'condo'], minBedrooms: 2, rentTenancy: 'medium', minPrice: 3000, maxPrice: 8000 });
+    expect(filters).toMatchObject({ district: 'layan', propertyTypes: ['villa', 'condo'], minBedrooms: 2, rentTenancy: 'medium' });
     expect(state.filterValues.amenities).toEqual(['wifi']);
     expect(state.filterValues.viewType).toEqual(['sea']);
   });

@@ -136,7 +136,7 @@ describe('one residential results surface', () => {
     expect(screen.getAllByRole('form')).toHaveLength(1);
     expect(screen.getByRole('combobox', { name: 'Home type' })).toHaveTextContent('Villa');
     expect(screen.getByRole('combobox', { name: 'Choose an area' })).toHaveTextContent('Layan');
-    expect(state.filters).toMatchObject({ district: 'layan', propertyType: 'villa', minGuests: 4, rentTenancy: 'medium', managementCompanyId: 'operator', minPrice: 3000 });
+    expect(state.filters).toMatchObject({ district: 'layan', propertyType: 'villa', minGuests: 4, rentTenancy: 'medium', managementCompanyId: 'operator' });
   });
   it('edits the URL in place and rehydrates on Back and Forward', () => {
     mount('/property/search?district=layan&types=villa&guests=3&tenancy=short&source=bookmark');
@@ -221,7 +221,7 @@ describe('one residential results surface', () => {
   it('switches rental and purchase intent immediately while preserving the rental context and unrelated query state', () => {
     mount('/property/search?mode=rent&guests=4&tenancy=medium&checkIn=2027-11-10&checkOut=2027-11-15&district=layan&types=villa&f.priceLevel=2&source=bookmark');
     fireEvent.click(screen.getByRole('button', { name: 'Buy' }));
-    expect(state.filters).toMatchObject({ listingType: 'sale', minPrice: 5000000, maxPrice: 15000000, district: 'layan', propertyType: 'villa' });
+    expect(state.filters).toMatchObject({ listingType: 'sale', district: 'layan', propertyType: 'villa' });
     expect(state.filters.minGuests).toBeUndefined();
     expect(state.filters.rentTenancy).toBeUndefined();
     expect(screen.queryByText(/Guests:/)).toBeNull();
@@ -230,8 +230,32 @@ describe('one residential results surface', () => {
     expect(url.searchParams.get('checkIn')).toBe('2027-11-10');
     expect(url.searchParams.get('source')).toBe('bookmark');
     fireEvent.click(screen.getByRole('button', { name: 'Rent' }));
-    expect(state.filters).toMatchObject({ listingType: 'rent', minGuests: 4, rentTenancy: 'medium', minPrice: 3000 });
+    expect(state.filters).toMatchObject({ listingType: 'rent', minGuests: 4, rentTenancy: 'medium' });
     expect(screen.getByText(/Monthly ·.*Guests: 4/)).toBeVisible();
+  });
+
+  it.each(['medium', 'long'])('removes unsupported %s price bands while preserving other filters', tenancy => {
+    mount(`/property/search?mode=rent&tenancy=${tenancy}&f.priceLevel=2&district=layan&types=villa&guests=4&cats=wifi&source=bookmark`);
+    expect(state.filters.minPrice).toBeUndefined();
+    expect(state.filters.maxPrice).toBeUndefined();
+    const url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
+    expect(url.searchParams.has('f.priceLevel')).toBe(false);
+    expect(url.searchParams.get('district')).toBe('layan');
+    expect(url.searchParams.get('cats')).toBe('wifi');
+    expect(url.searchParams.get('guests')).toBe('4');
+    expect(screen.getByText(/Confirm pricing for your chosen duration/)).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: /Bedrooms & amenities/ }));
+    expect(within(screen.getByRole('dialog')).queryByText('Price Level')).toBeNull();
+  });
+  it('drops a nightly price band when submitting a monthly search', () => {
+    mount('/property/search?mode=rent&f.priceLevel=2&district=layan');
+    expect(state.filters.minPrice).toBe(3000);
+    fireEvent.click(screen.getByRole('button', { name: 'Monthly' }));
+    fireEvent.submit(screen.getByRole('form'));
+    expect(state.filters.rentTenancy).toBe('medium');
+    expect(state.filters.minPrice).toBeUndefined();
+    expect(screen.getByTestId('location')).not.toHaveTextContent('f.priceLevel');
+    expect(state.filters.district).toBe('layan');
   });
 
   it('does not count a retained rental-only filter in the purchase sheet', () => {
