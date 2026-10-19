@@ -162,6 +162,11 @@ async def exercise_queue(page, language, width):
     await expect(rows).to_have_count(4)
 
     await tab(page, labels['inactive']).click()
+    # Both tabs contain four rows: row/count assertions can pass against the
+    # previous committed tree while React is still switching the route.
+    await expect(kind.locator('option')).to_have_count(3)
+    await expect(kind.locator('option').nth(1)).to_have_attribute('value', 'service')
+    await expect(kind.locator('option').nth(2)).to_have_attribute('value', 'product')
     await expect(rows).to_have_count(4)
     await expect(count).to_have_text('4')
     assert await kind.locator('option').evaluate_all('(options)=>options.map(option=>option.value)') == ['all', 'service', 'product']

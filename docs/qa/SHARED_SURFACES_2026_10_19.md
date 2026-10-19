@@ -47,8 +47,17 @@ The user's full-app request remains broader than this shared-component tranche: 
 
 ## Delivery status
 
-Source commit: `ac9c16a6e5abedef65f77ab76176d611891cf840`. Local branch: `fix/unified-responsive-surfaces-20261019`. Automatic approval review rejected `git push`: explicit authorization to publish source to GitHub was required. No alternate upload path was attempted. PR, merge, deployment and production acceptance have not been performed.
+Source commit: `ac9c16a6e5abedef65f77ab76176d611891cf840`. Branch: `fix/unified-responsive-surfaces-20261019`. After explicit user approval, the connected GitHub API published the identical verified tree as `1f08a9481feca3c37abfad650d8235e4d4fa5343` and opened [PR128](https://github.com/pavel949/myuno/pull/128). Direct Git transport lacked credentials. Merge, deployment and production acceptance have not been performed.
 
 ## Final frozen-source rerun
 
-After the final source commit, the complete expanded runner was rerun without source edits: **21/21 fixture groups passed, 322 recorded result cases/groups**, including all 20 existing fixtures and the 32-case shared-surface matrix. TypeScript, 135 focused tests and the memory-limited full Vite/PWA build also passed. This supersedes intermediate fixture attempts and timing races (the new test now awaits visible/focused mounted dialogs before sending Escape, and mounted/settled overlays before outside clicks; dismissal requirements remain unchanged). Representative mobile editor, service catalogue, PMS detail and shared light/dark screenshots were inspected. No external GitHub upload or deployment occurred.
+After the final source commit, the complete expanded runner was rerun without source edits: **21/21 fixture groups passed, 322 recorded result cases/groups**, including all 20 existing fixtures and the 32-case shared-surface matrix. TypeScript, 135 focused tests and the memory-limited full Vite/PWA build also passed. This supersedes intermediate fixture attempts and timing races (the new test now awaits visible/focused mounted dialogs before sending Escape, and mounted/settled overlays before outside clicks; dismissal requirements remain unchanged). Representative mobile editor, service catalogue, PMS detail and shared light/dark screenshots were inspected. No deployment occurred.
+
+## CI follow-up
+
+The first remote run found two test-harness issues despite the local pass:
+
+- `verify` run 39238152467: the combined four-operation `portal_messages` denial case exceeded its 5-second test budget. The full PostgreSQL suite passed in parallel run 39238152269. Each table/operation now has an independent fixture and assertion, retaining the default 5-second timeout and all SELECT/INSERT/UPDATE/DELETE denial checks. No production policies, SQL or permissions changed.
+- Connected run 39238152269: moderation at RU/430px read filter options before React committed the inactive tab. Both tabs contain four synthetic rows, so the old row/count assertions could accept the previous tree. The fixture now waits for the exact inactive option count and values before checking the rows and options. No sleeps, retries of the scenario, skipped assertions or relaxed geometry checks were introduced.
+
+The follow-up commit requires fresh CI acceptance; the first remote run is not a pass. The application implementation is unchanged by these test-harness fixes.
