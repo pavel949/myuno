@@ -48,7 +48,7 @@ function useCompanyProperties() {
   const companyId = activeCompany?.company_id;
 
   return useQuery({
-    queryKey: ['company-properties', companyId],
+    queryKey: ['company-properties', user?.id, companyId],
     queryFn: async () => {
       if (!companyId) return [];
       const { data, error } = await supabase
@@ -72,9 +72,9 @@ export function useMyProperties() {
   const isOwner = hasRole('owner');
   const isManager = hasRole('property_manager');
 
-  const { data: ownedRaw, isLoading: ownedLoading } = useOwnerProperties();
-  const { properties: managedRaw, isLoading: managedLoading } = useAssignedProperties();
-  const { data: companyRaw, isLoading: companyLoading } = useCompanyProperties();
+  const { data: ownedRaw, isLoading: ownedLoading, error: ownedError, refetch: refetchOwned } = useOwnerProperties();
+  const { properties: managedRaw, isLoading: managedLoading, error: managedError, refetch: refetchManaged } = useAssignedProperties();
+  const { data: companyRaw, isLoading: companyLoading, error: companyError, refetch: refetchCompany } = useCompanyProperties();
 
   // When an active MC is selected, only show properties belonging to that MC
   const isInMCMode = !!activeCompanyId;
@@ -207,6 +207,8 @@ export function useMyProperties() {
     allProperties,
     activeProperties,
     accessRole,
+    error: ownedError || managedError || companyError,
+    refetch: () => Promise.all([refetchOwned(), refetchManaged(), refetchCompany()]),
     isLoading: ownedLoading || managedLoading || companyLoading,
     isOwner,
     isManager,

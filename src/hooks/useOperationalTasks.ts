@@ -65,7 +65,7 @@ export function useOperationalTasks(options?: {
   const { user } = useAuth();
   const { language } = useLanguage();
   const queryClient = useQueryClient();
-  const { allProperties, isLoading: propsLoading } = useMyProperties();
+  const { allProperties, isLoading: propsLoading, error: propertiesError, refetch: refetchProperties } = useMyProperties();
   const allPropertyIds = useMemo(() => allProperties.map(p => p.property_id), [allProperties]);
   
   const t = (en: string, ru: string) => language === 'ru' ? ru : en;
@@ -81,9 +81,10 @@ export function useOperationalTasks(options?: {
 
   const queryKey = ['operational-tasks', user?.id, options?.propertyId, dateStr, dateRangeStr, statusArr, typeArr, propertyIdsKey];
   
-  const { data: tasks = [], isLoading: tasksLoading, error, refetch } = useQuery({
+  const { data: tasks = [], isLoading: tasksLoading, error: tasksError, refetch } = useQuery({
     queryKey,
     queryFn: async () => {
+      if (propertiesError) throw propertiesError;
       if (!user?.id || allPropertyIds.length === 0) return [];
 
       let query = supabase
@@ -142,7 +143,7 @@ export function useOperationalTasks(options?: {
       if (error) throw error;
       return (data || []) as OperationalTask[];
     },
-    enabled: !!user?.id,
+    enabled: !!user?.id && !propsLoading && !propertiesError,
   });
 
   // Note: Realtime subscription removed to prevent infinite query loops.
@@ -156,8 +157,8 @@ export function useOperationalTasks(options?: {
   const tasksByType = {
     checkIns: todayTasks.filter(t => t.task_type === 'check_in' && t.status === 'pending'),
     checkOuts: todayTasks.filter(t => t.task_type === 'check_out' && t.status === 'pending'),
-    cleaning: todayTasks.filter(t => t.task_type === 'cleaning' && t.status !== 'completed'),
-    maintenance: todayTasks.filter(t => t.task_type === 'maintenance' && t.status !== 'completed'),
+    cleaning: todayTasks.filter(t => t.task_type === 'cleaning' && !['completed', 'cancelled'].includes(t.status)),
+    maintenance: todayTasks.filter(t => t.task_type === 'maintenance' && !['completed', 'cancelled'].includes(t.status)),
     meterReadings: todayTasks.filter(t => t.task_type === 'meter_reading' && t.status === 'pending'),
   };
 
@@ -174,6 +175,7 @@ export function useOperationalTasks(options?: {
         .single();
 
       if (error) throw error;
+      if (!data) throw new Error(t('Task not saved or access denied', 'Задача не сохранена или нет доступа'));
       return data;
     },
     onSuccess: () => {
@@ -195,7 +197,11 @@ export function useOperationalTasks(options?: {
         updates.completed_by = user?.id;
       }
       
-      if (notes) {
+      if (status !== 'completed') {
+        updates.completed_at = null;
+        updates.completed_by = null;
+      }
+      if (notes !== undefined) {
         updates.notes = notes;
       }
 
@@ -207,6 +213,7 @@ export function useOperationalTasks(options?: {
         .single();
 
       if (error) throw error;
+      if (!data) throw new Error(t('Task not saved or access denied', 'Задача не сохранена или нет доступа'));
       return data;
     },
     onSuccess: () => {
@@ -222,6 +229,9 @@ export function useOperationalTasks(options?: {
     onSuccess: () => {
       toast(t('Task completed', 'Задача выполнена'));
     },
+    onError: () => {
+      toast.error(t('Could not complete task. Refresh and retry.', 'Не удалось завершить задачу. Обновите и повторите.'));
+    },
   });
 
   return {
@@ -229,8 +239,11 @@ export function useOperationalTasks(options?: {
     todayTasks,
     tasksByType,
     isLoading: tasksLoading || propsLoading,
-    error,
-    refetch,
+    error: propertiesError || tasksError,
+    refetch: async () => {
+      if (propertiesError) await refetchProperties?.();
+      return refetch();
+    },
     createTask,
     updateTaskStatus,
     completeTask,

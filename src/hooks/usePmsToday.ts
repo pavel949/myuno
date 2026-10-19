@@ -14,6 +14,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useMyProperties } from '@/hooks/useMyProperties';
+import { useAuth } from '@/contexts/AuthContext';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
 
 export type UnitState = 'occupied' | 'dirty' | 'maintenance' | 'clean';
 
@@ -73,13 +75,15 @@ export function deriveUnitState(args: {
 }
 
 export function usePmsToday(date: Date = new Date()) {
-  const { activeProperties, isLoading: propsLoading } = useMyProperties();
+  const { user } = useAuth();
+  const { activeCompany } = useActiveCompany();
+  const { activeProperties, isLoading: propsLoading, error: propertiesError, refetch: refetchProperties } = useMyProperties();
   const ids = activeProperties.map((p) => p.property_id || p.id);
   const today = ymd(date);
 
   const query = useQuery({
-    queryKey: ['pms-today', today, ids.join(',')],
-    enabled: !propsLoading && ids.length > 0,
+    queryKey: ['pms-today', user?.id, activeCompany?.company_id, today, ids.join(',')],
+    enabled: !!user && !propsLoading && !propertiesError && ids.length > 0,
     staleTime: 60_000,
     queryFn: async () => {
       const [bk, req, tasks] = await Promise.all([
@@ -156,8 +160,11 @@ export function usePmsToday(date: Date = new Date()) {
 
   return {
     isLoading: propsLoading || query.isLoading,
-    error: query.error as Error | null,
-    refetch: query.refetch,
+    error: propertiesError || query.error,
+    refetch: async () => {
+      if (propertiesError) await refetchProperties?.();
+      return query.refetch();
+    },
     hasProperties: ids.length > 0,
     arrivals, departures, inHouse, guestRequests, units, titleOf,
   };

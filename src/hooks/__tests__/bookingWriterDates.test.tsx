@@ -7,6 +7,7 @@ const state = vi.hoisted(() => ({
   blocked: [] as string[],
   existing: [] as { id: string; check_in: string; check_out: string }[],
   boundary: [] as string[],
+  failedTable: '', missingOrder: false,
 }));
 vi.mock('@tanstack/react-query', () => ({
   useQuery: () => ({ data: [], isLoading: false }),
@@ -31,10 +32,10 @@ vi.mock('@/integrations/supabase/client', () => {
       gt: (field: string, value: unknown) => add('gt', field, value),
       lte: (field: string, value: unknown) => add('lte', field, value),
       lt: (field: string, value: unknown) => add('lt', field, value),
-      single: async () => ({ data: { start_at: '2026-10-10T14:00:00Z', end_at: '2026-10-13T12:00:00Z', order_items: [{ resource_id: 'synthetic-home' }] }, error: null }),
+      single: async () => ({ data: state.missingOrder ? null : { start_at: '2026-10-10T14:00:00Z', end_at: '2026-10-13T12:00:00Z', order_items: [{ resource_id: 'synthetic-home' }] }, error: state.failedTable === 'current' ? new Error('Synthetic read failure') : null }),
       insert: () => stop('insert'),
       update: () => stop('update'),
-      then: (resolve: (result: { data: unknown[]; error: null }) => unknown) => {
+      then: (resolve: (result: { data: unknown[]; error: Error | null }) => unknown) => {
         const passes = (field: string, value: string) => filters.filter(f => f.field === field).every(f => {
           const right = String(f.value);
           switch (f.method) {
@@ -51,7 +52,7 @@ vi.mock('@/integrations/supabase/client', () => {
           : table === 'orders'
             ? state.existing.filter(b => passes('start_at', `${b.check_in}T14:00:00Z`) && passes('end_at', `${b.check_out}T12:00:00Z`) && passes('id', b.id)).map(b => ({ id: b.id }))
             : table === 'order_items' ? [{ order_id: 'synthetic-existing' }] : [];
-        return Promise.resolve(resolve({ data, error: null }));
+        return Promise.resolve(resolve({ data, error: state.failedTable === table ? new Error('Synthetic read failure') : null }));
       },
     };
     function add(method: string, field: string, value: unknown) { filters.push({ method, field, value }); return chain; }
@@ -77,7 +78,7 @@ const cases: { label: string; stay: CivilStay; blocked: string[]; existing?: Civ
   { label: 'occupied overlap rejected', stay: { check_in: '2026-10-12', check_out: '2026-10-15' }, blocked: [], existing: { check_in: '2026-10-10', check_out: '2026-10-13' }, allowed: false },
 ];
 
-beforeEach(() => { state.blocked = []; state.existing = []; state.boundary = []; });
+beforeEach(() => { state.blocked = []; state.existing = []; state.boundary = []; state.failedTable = ''; state.missingOrder = false; });
 describe.each(['create', 'update'] as const)('%s real booking writer preflight — synthetic only', mode => {
   it.each(cases)('$label', async ({ stay, blocked, existing, allowed }) => {
     state.blocked = blocked;
@@ -92,6 +93,35 @@ describe.each(['create', 'update'] as const)('%s real booking writer preflight �
     await expect(attempt).rejects.toThrow(allowed ? 'SYNTHETIC_WRITE_BOUNDARY' : existing ? 'пересекаются' : 'заблокированы');
     expect(state.boundary).toEqual(allowed ? [`orders.${mode === 'create' ? 'insert' : 'update'}`] : []);
   });
+});
+
+describe.each(['create', 'update'] as const)('%s fails closed before mutation', mode => {
+  it.each(['orders', 'order_items', 'property_availability'])('rejects failed %s availability source', async table => {
+    state.failedTable = table;
+    state.existing = [{ id: 'synthetic-other', check_in: '2026-10-10', check_out: '2026-10-13' }];
+    const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
+    const dates = { check_in: '2026-10-11', check_out: '2026-10-14' };
+    // For block-source failure, no earlier overlap should stop the read.
+    if (table === 'property_availability') state.existing = [];
+    const attempt = mode === 'create'
+      ? result.current.createBooking({ property_id: 'synthetic-home', ...dates })
+      : result.current.updateBooking({ id: 'synthetic-current', ...dates });
+    await expect(attempt).rejects.toThrow('Synthetic read failure');
+    expect(state.boundary).toEqual([]);
+  });
+  it.each([['2026-10-10','2026-10-10'], ['2026-10-13','2026-10-10'], ['2026-02-30','2026-03-03'], ['', '2026-10-13']])('rejects invalid stay %s → %s', async (check_in, check_out) => {
+    const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
+    const attempt = mode === 'create' ? result.current.createBooking({ property_id: 'synthetic-home', check_in, check_out })
+      : result.current.updateBooking({ id: 'synthetic-current', check_in, check_out });
+    await expect(attempt).rejects.toThrow(mode === 'update' && !check_in ? 'Booking dates or property unavailable' : 'корректные даты');
+    expect(state.boundary).toEqual([]);
+  });
+});
+it.each(['missing', 'error'])('update rejects %s current order before mutation', async outcome => {
+  state.missingOrder = outcome === 'missing'; state.failedTable = outcome === 'error' ? 'current' : '';
+  const { result } = renderHook(() => usePropertyBookings('synthetic-home'));
+  await expect(result.current.updateBooking({ id: 'synthetic-current', check_in: '2026-10-11' })).rejects.toThrow();
+  expect(state.boundary).toEqual([]);
 });
 
 describe('timestamp contract ambiguity — evidence, not a new conversion', () => {

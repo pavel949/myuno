@@ -7,7 +7,7 @@ import { usePropertyBookings } from '../usePropertyBookings';
 const state = vi.hoisted(() => ({
   writes: [] as { table: string; payload: Record<string, unknown> }[],
   taskResults: [] as ('ok' | 'error' | 'throw')[],
-  orderError: false,
+  orderError: false, guestFailure: '' as '' | 'error' | 'throw',
 }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-user' } }) }));
 vi.mock('@/hooks/useActiveCompany', () => ({ useActiveCompany: () => ({ activeCompany: null }) }));
@@ -19,6 +19,10 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: {
   from: (table: string) => {
     let inserted = false;
     const finish = () => {
+      if (inserted && table === 'order_participants' && state.guestFailure) {
+        if (state.guestFailure === 'throw') return Promise.reject(new Error('Synthetic guest transport failure'));
+        return Promise.resolve({ data: null, error: new Error('Synthetic denied guest') });
+      }
       if (inserted && table === 'property_operational_tasks') {
         const result = state.taskResults.shift() ?? 'ok';
         if (result === 'throw') return Promise.reject(new Error('Synthetic transport failure'));
@@ -43,7 +47,7 @@ function mount() {
   const hook = renderHook(() => usePropertyBookings('synthetic-home'), { wrapper: ({ children }) => <QueryClientProvider client={client}>{children}</QueryClientProvider> });
   return { ...hook, invalidate };
 }
-beforeEach(() => { state.writes = []; state.taskResults = []; state.orderError = false; });
+beforeEach(() => { state.writes = []; state.taskResults = []; state.orderError = false; state.guestFailure = ''; });
 afterEach(cleanup);
 describe('saved booking preparation outcome', () => {
   it.each(['error', 'throw'] as const)('keeps saved booking result after a task %s, without retries', async failure => {
@@ -82,4 +86,12 @@ describe('saved booking preparation outcome', () => {
     await act(async () => { await expect(result.current.createBooking(input)).rejects.toThrow('Synthetic order failure'); });
     expect(state.writes.map(w => w.table)).toEqual(['orders']);
   });
+});
+
+it.each(['error', 'throw'] as const)('saved primary record survives guest %s with explicit warning, without retry', async failure => {
+  state.guestFailure = failure;
+  const { result } = mount();
+  const booking = await act(() => result.current.createBooking({ ...input, guest_name: 'Synthetic guest' }));
+  expect(booking).toMatchObject({ id: 'saved-order', preparation: { status: 'needs_attention', guestDetailsUnconfirmed: true } });
+  expect(state.writes.filter(w => w.table === 'orders')).toHaveLength(1);
 });
