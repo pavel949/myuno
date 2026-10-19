@@ -55,22 +55,27 @@ describe('one residential results surface', () => {
     mount(route);
     expect(screen.queryByRole('note', { name: 'Availability check' })).toBeNull();
   });
-  it.each([false, true])('starts with a readable summary and expands only one editor (mobile=%s)', mobile => {
+  it.each([false, true])('shows one editable form immediately (mobile=%s)', mobile => {
     state.mobile = mobile;
-    mount('/property/search?district=layan&types=villa&guests=3&tenancy=medium&checkIn=2027-11-10&checkOut=2027-11-15');
-    expect(screen.queryByRole('form')).toBeNull();
-    expect(screen.getByText('Villa · Layan')).toBeVisible();
-    expect(screen.getByText(/Monthly ·.*Guests: 3/)).toBeVisible();
-    const edit = screen.getByRole('button', { name: 'Edit search' });
-    expect(edit).toHaveAttribute('aria-expanded', 'false');
-    fireEvent.click(edit);
+    mount('/property/search?district=layan&types=villa&guests=3&tenancy=medium');
     expect(screen.getAllByRole('form')).toHaveLength(1);
+    expect(screen.getByRole('searchbox', { name: 'Property name' })).toBeVisible();
     expect(screen.getByRole('spinbutton')).toHaveValue(3);
-    const close = screen.getByRole('button', { name: 'Close search' });
-    close.focus();
-    fireEvent.click(close);
-    expect(screen.queryByRole('form')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Edit search' })).toHaveFocus();
+    expect(screen.getByText('Villa · Layan')).toBeVisible();
+  });
+  it('submits a property name to server filters, preserves it through history and clears it', () => {
+    mount('/property/search?district=layan&source=bookmark');
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: '  Layantara  ' } });
+    fireEvent.submit(screen.getByRole('form'));
+    expect(state.filters).toMatchObject({ search: 'Layantara', district: 'layan' });
+    expect(screen.getByTestId('location')).toHaveTextContent('q=Layantara');
+    fireEvent.click(screen.getByRole('button', { name: 'History back' }));
+    expect(screen.getByRole('searchbox')).toHaveValue('');
+    fireEvent.click(screen.getByRole('button', { name: 'History forward' }));
+    expect(screen.getByRole('searchbox')).toHaveValue('Layantara');
+    fireEvent.click(screen.getByRole('button', { name: 'Clear all' }));
+    expect(state.filters.search).toBeUndefined();
+    expect(screen.getByRole('searchbox')).toHaveValue('');
   });
   it('shows no implied guest restriction for legacy unfiltered browsing', () => {
     state.mobile = true;
@@ -80,7 +85,6 @@ describe('one residential results surface', () => {
   });
   it('retains an edited desktop draft and focus when resized to mobile', () => {
     const view = mount('/property/search?guests=3');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
     const guests = screen.getByRole('spinbutton');
     guests.focus();
     fireEvent.change(guests, { target: { value: '5' } });
@@ -88,7 +92,7 @@ describe('one residential results surface', () => {
     view.rerender(<MemoryRouter initialEntries={['/property/search?guests=3']}><Location /><Routes><Route path="/property/search" element={<PropertySearchPage />} /></Routes></MemoryRouter>);
     expect(screen.getByRole('spinbutton')).toHaveValue(5);
     expect(screen.getByRole('spinbutton')).toHaveFocus();
-    expect(screen.getByRole('button', { name: 'Close search' })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getAllByRole('form')).toHaveLength(1);
   });
   it('does not invent dates and hides retained rental context in the purchase summary', () => {
     state.mobile = true;
@@ -100,13 +104,12 @@ describe('one residential results surface', () => {
     expect(screen.queryByText(/Guests:/)).toBeNull();
     expect(screen.queryByText(/Nov/)).toBeNull();
   });
-  it('collapses submitted mobile edits and focuses results, but history does not steal focus', () => {
+  it('keeps submitted mobile edits visible and focuses results, but history does not steal focus', () => {
     state.mobile = true;
     mount('/property/search?guests=3');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '5' } });
     fireEvent.submit(screen.getByRole('form'));
-    expect(screen.queryByRole('form')).toBeNull();
+    expect(screen.getByRole('form')).toBeVisible();
     expect(screen.getByRole('heading', { level: 2 })).toHaveFocus();
     expect(screen.getByText(/Guests: 5/)).toBeVisible();
     const back = screen.getByRole('button', { name: 'History back' });
@@ -114,14 +117,13 @@ describe('one residential results surface', () => {
     fireEvent.click(back);
     expect(screen.getByText(/Guests: 3/)).toBeVisible();
     expect(back).toHaveFocus();
-    expect(screen.queryByRole('form')).toBeNull();
+    expect(screen.getByRole('form')).toBeVisible();
   });
-  it('starts desktop compact and collapses submitted edits to the results', () => {
+  it('keeps desktop controls visible and focuses submitted results', () => {
     mount('/property/search?guests=3');
-    expect(screen.queryByRole('form')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
+    expect(screen.getByRole('form')).toBeVisible();
     fireEvent.submit(screen.getByRole('form'));
-    expect(screen.queryByRole('form')).toBeNull();
+    expect(screen.getByRole('form')).toBeVisible();
     expect(screen.getByRole('heading', { level: 2 })).toHaveFocus();
     expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
   });
@@ -131,7 +133,6 @@ describe('one residential results surface', () => {
     const url = new URL(screen.getByTestId('location').textContent!, 'https://myuno.app');
     expect(url.searchParams.get('source')).toBe('bookmark');
     expect(url.hash).toBe('#results');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
     expect(screen.getAllByRole('form')).toHaveLength(1);
     expect(screen.getByRole('combobox', { name: 'Home type' })).toHaveTextContent('Villa');
     expect(screen.getByRole('combobox', { name: 'Choose an area' })).toHaveTextContent('Layan');
@@ -139,13 +140,11 @@ describe('one residential results surface', () => {
   });
   it('edits the URL in place and rehydrates on Back and Forward', () => {
     mount('/property/search?district=layan&types=villa&guests=3&tenancy=short&source=bookmark');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Number of guests' }), { target: { value: '5' } });
     fireEvent.click(screen.getByRole('button', { name: 'Monthly' }));
     fireEvent.submit(screen.getByRole('form'));
     expect(state.filters).toMatchObject({ minGuests: 5, rentTenancy: 'medium' });
     expect(screen.getByTestId('location').textContent).toContain('source=bookmark');
-    fireEvent.click(screen.getByRole('button', { name: 'Edit search' }));
     fireEvent.click(screen.getByRole('button', { name: 'History back' }));
     expect(screen.getByRole('spinbutton')).toHaveValue(3);
     expect(state.filters.rentTenancy).toBe('short');
@@ -189,7 +188,7 @@ describe('one residential results surface', () => {
     const quick = within(screen.getByRole('group', { name: 'Popular features' }));
     expect(quick.getAllByRole('button')).toHaveLength(3);
     expect(screen.queryByRole('button', { name: 'All companies' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Price, bedrooms & amenities' }));
     const dialog = within(screen.getByRole('dialog'));
     for (const label of ['Beachfront', 'Walk to beach', 'Sea view', 'Private pool', 'Shared pool', 'Washing machine', 'Pet-friendly', 'Kid-friendly', 'Parking', 'WiFi', 'Luxury', 'Air conditioning', 'Gym', 'Jacuzzi / Hot tub']) {
       expect(dialog.getByRole('button', { name: label })).toBeVisible();
@@ -199,7 +198,7 @@ describe('one residential results surface', () => {
     mount('/property/search?f.priceLevel=2&source=bookmark');
     fireEvent.click(screen.getByRole('button', { name: 'Private pool' }));
     expect(screen.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Price, bedrooms/ }));
     let dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(dialog.getByRole('button', { name: 'WiFi' }));
@@ -211,7 +210,7 @@ describe('one residential results surface', () => {
     expect(url.searchParams.get('source')).toBe('bookmark');
     expect(url.searchParams.has('f.guestFeatures')).toBe(false);
     fireEvent.click(screen.getByRole('button', { name: 'Private pool' }));
-    fireEvent.click(screen.getByRole('button', { name: /Filters/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Price, bedrooms/ }));
     dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByRole('button', { name: 'Private pool' })).toHaveAttribute('aria-pressed', 'false');
     expect(dialog.getByRole('button', { name: 'WiFi' })).toHaveAttribute('aria-pressed', 'true');
@@ -237,7 +236,7 @@ describe('one residential results surface', () => {
 
   it('does not count a retained rental-only filter in the purchase sheet', () => {
     mount('/property/search?mode=buy&instant=1');
-    fireEvent.click(screen.getByRole('button', { name: 'Filters' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Price, bedrooms & amenities' }));
     const dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByRole('button', { name: 'Apply' })).toBeVisible();
     fireEvent.click(dialog.getByRole('button', { name: 'Apply' }));

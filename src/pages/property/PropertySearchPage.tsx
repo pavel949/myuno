@@ -2,9 +2,9 @@
  * PropertySearchPage — Full catalog grid with filters
  * One shared app-style editor; all criteria are hydrated from the catalogue URL.
  */
-import React, { useState, useMemo, useEffect, useRef, useId } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Home, SlidersHorizontal, Loader2, Search, Check, Map as MapIcon, List } from 'lucide-react';
+import { Home, SlidersHorizontal, Loader2, Check, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -39,8 +39,6 @@ export default function PropertySearchPage() {
   const { language } = useLanguage();
   const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
   const isRu = language === 'ru';
-  const editorId = useId();
-  const [editorOpen, setEditorOpen] = useState(false);
   const [focusResults, setFocusResults] = useState(false);
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
   const { districts } = usePropertyQuickFilters();
@@ -60,6 +58,7 @@ export default function PropertySearchPage() {
   const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
   const showMap = searchParamsUrl.get('view') === 'map';
   const selectedCompanyId = searchParamsUrl.get('company');
+  const searchText = searchParamsUrl.get('q')?.trim() || '';
   const setShowMap = (show: boolean) => {
     const params = new URLSearchParams(searchParamsUrl);
     if (show) params.set('view', 'map'); else params.delete('view');
@@ -142,6 +141,7 @@ export default function PropertySearchPage() {
     });
     return {
       ...base,
+      search: searchText || undefined,
       managementCompanyId: selectedCompanyId || undefined,
     };
   }, [
@@ -150,6 +150,7 @@ export default function PropertySearchPage() {
     searchParams.guests,
     searchParams.instantBooking,
     selectedCompanyId,
+    searchText,
     rentTenancy,
     state.hasGuestFilter,
     state.saleIntent,
@@ -201,7 +202,7 @@ export default function PropertySearchPage() {
     if (propertyMode === 'buy' && key === 'instantBooking') return count;
     return count + (Array.isArray(value) ? value.length : value ? 1 : 0);
   }, categoryFilters.length);
-  const activeFilterCount = advancedFilterCount + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0);
+  const activeFilterCount = advancedFilterCount + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0) + (searchText ? 1 : 0) + (state.hasGuestFilter || nights > 0 ? 1 : 0);
 
   const clearAllFilters = () => {
     const resetUrl = new URLSearchParams({ mode: propertyMode });
@@ -211,7 +212,6 @@ export default function PropertySearchPage() {
 
   const submitSearch = (params: URLSearchParams) => {
     setSearchParamsUrl(params);
-    setEditorOpen(false);
     setFocusResults(true);
   };
   const summaryTypes = searchParams.propertyTypes.map(id => {
@@ -232,7 +232,8 @@ export default function PropertySearchPage() {
   return (
     <div className="property-discovery min-h-screen bg-background">
         <header className="property-discovery-header border-b">
-          <h1 className="property-discovery-title">{propertyMode === 'rent' ? (isRu ? 'Найдите своё место на Пхукете' : 'Find your place in Phuket') : (isRu ? 'Найдите свой дом на Пхукете' : 'Find your home in Phuket')}</h1>
+          <h1 className="property-discovery-title">{isRu ? 'Найдите ваш дом на Пхукете' : 'Find your home in Phuket'}</h1>
+          <p className="text-body-sm text-muted-foreground">{isRu ? 'Введите название объекта или выберите параметры ниже и нажмите «Найти жильё».' : 'Enter a property name or choose your criteria below, then select “Find a home”.'}</p>
           <div className="flex items-center gap-3">
             <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0 min-h-11 min-w-11" />
             <div className="property-discovery-intent" role="group" aria-label={isRu ? 'Аренда или покупка' : 'Rent or buy'}>
@@ -240,30 +241,23 @@ export default function PropertySearchPage() {
                 if (mode === propertyMode) return;
                 const params = new URLSearchParams(searchParamsUrl);
                 params.set('mode', mode);
-                setEditorOpen(false);
-                setSearchParamsUrl(params);
+                            setSearchParamsUrl(params);
               }}>{mode === 'rent' ? (isRu ? 'Аренда' : 'Rent') : (isRu ? 'Покупка' : 'Buy')}</button>)}
             </div>
           </div>
-          <div className="property-discovery-summary" aria-label={isRu ? 'Текущий поиск' : 'Current search'}>
-            <Search className="hidden sm:block h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <div className="min-w-0 flex-1">
-              <p className="text-body font-medium leading-snug">{summaryTypes} · {summaryAreas}</p>
-              {propertyMode === 'rent' && <p className="mt-1 text-body-sm text-muted-foreground leading-relaxed">{summaryDuration} · {summaryDates} · {state.hasGuestFilter ? `${isRu ? 'Гостей' : 'Guests'}: ${searchParams.guests}` : (isRu ? 'Гости не указаны' : 'Guests not specified')}</p>}
-              {summaryExtraFilters > 0 && <p className="mt-1 text-caption text-muted-foreground">{isRu ? 'Доп. фильтров' : 'Additional filters'}: {summaryExtraFilters}</p>}
-            </div>
-            <button type="button" className="property-discovery-edit" aria-expanded={editorOpen} aria-controls={editorId} onClick={() => setEditorOpen(open => !open)}>
-              {editorOpen ? (isRu ? 'Закрыть поиск' : 'Close search') : (isRu ? 'Изменить поиск' : 'Edit search')}
-            </button>
+          <div className="journey-primary property-search-editor property-discovery-editor">
+            <HomeDiscoverySearch key={queryKey} hideModeSwitch initialParams={searchParamsUrl} onSearch={submitSearch} />
           </div>
-          <div id={editorId} hidden={!editorOpen} className="journey-primary property-search-editor property-discovery-editor">
-            {editorOpen && <HomeDiscoverySearch key={queryKey} hideModeSwitch initialParams={searchParamsUrl} onSearch={submitSearch} />}
+          <div className="text-body-sm text-muted-foreground" aria-label={isRu ? 'Текущий поиск' : 'Current search'}>
+            <p>{summaryTypes} · {summaryAreas}{searchText ? ` · «${searchText}»` : ''}</p>
+            {propertyMode === 'rent' && <p>{summaryDuration} · {summaryDates} · {state.hasGuestFilter ? `${isRu ? 'Гостей' : 'Guests'}: ${searchParams.guests}` : (isRu ? 'Гости не указаны' : 'Guests not specified')}</p>}
+            {summaryExtraFilters > 0 && <p>{isRu ? 'Дополнительных фильтров' : 'Additional filters'}: {summaryExtraFilters}</p>}
           </div>
           <div className="flex min-w-0 items-center gap-2">
             <UniversalFilter config={advancedFilterConfig} values={advancedValues} onChange={setAdvancedFilters} activeCount={advancedFilterCount}>
               <button type="button" className={cn('property-discovery-filter', advancedFilterCount > 0 && 'border-primary text-primary')}>
                 <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-                <span>{isRu ? 'Фильтры' : 'Filters'}</span>
+                <span>{isRu ? 'Цена, спальни и удобства' : 'Price, bedrooms & amenities'}</span>
                 {advancedFilterCount > 0 && <span className="font-mono">({advancedFilterCount})</span>}
               </button>
             </UniversalFilter>
@@ -293,7 +287,7 @@ export default function PropertySearchPage() {
         <div className="px-4 py-4 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 ref={resultsHeadingRef} tabIndex={-1} className="scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)] text-h3 font-display basis-full sm:basis-auto">
-              {isLoading ? (isRu ? 'Ищем жильё…' : 'Finding homes…') : isError ? (isRu ? 'Каталог недоступен' : 'Catalogue unavailable') : <>{isRu ? 'Найдено объектов:' : 'Places found:'} {properties.length}</>}
+              {isLoading ? (isRu ? 'Ищем жильё…' : 'Finding homes…') : isError ? (isRu ? 'Каталог недоступен' : 'Catalogue unavailable') : <>{isRu ? (hasNextPage ? 'Загружено объектов:' : 'Найдено объектов:') : (hasNextPage ? 'Homes loaded:' : 'Places found:')} {properties.length}</>}
             </h2>
             <div className="property-discovery-result-actions flex flex-wrap items-center gap-2">
               <PropertySortSelect value={sortKey} onChange={setSortKey} />
@@ -301,7 +295,7 @@ export default function PropertySearchPage() {
               <Button
                 variant={showMap ? 'default' : 'outline'}
                 size="sm"
-                className="gap-1.5 min-h-11 rounded-none text-body-sm"
+                className={cn("gap-1.5 min-h-11 rounded-none text-body-sm", showMap && "!text-primary-foreground")}
                 aria-pressed={showMap}
                 onClick={() => setShowMap(!showMap)}
               >
@@ -310,7 +304,7 @@ export default function PropertySearchPage() {
               </Button>
               {activeFilterCount > 0 && (
                 <Button variant="ghost" size="sm" className="text-body-sm min-h-11" onClick={clearAllFilters}>
-                  {isRu ? 'Сбросить' : 'Clear'}
+                  {isRu ? 'Сбросить всё' : 'Clear all'}
                 </Button>
               )}
             </div>
