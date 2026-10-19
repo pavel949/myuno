@@ -26,6 +26,13 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 describe('company access panel', () => {
+  it('keeps compact square controls inside full-height touch labels', () => {
+    render(<CompanyAccessPanel />);
+    for (const control of screen.getAllByRole('checkbox')) {
+      expect(control).toHaveClass('h-5', 'w-5', 'min-h-0');
+      expect(control.closest('label')).toHaveClass('min-h-11');
+    }
+  });
   it.each([
     ['en', 'Company account access', 'Edit tariffs'], ['ru', 'Доступ аккаунтов компании', 'Редактирование тарифов'], ['th', 'สิทธิ์บัญชีของบริษัท', 'แก้ไขอัตราราคา'],
   ])('renders explicit controls in %s', (language, title, pricing) => {

@@ -54,6 +54,14 @@ jobs:
         run: npm test -- --maxWorkers=2 --reporter=default --reporter=json --outputFile=unit-results.json
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Upload unit and PostgreSQL evidence early
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: connected-unit-evidence
+          path: unit-results.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Focused connected workflows in three timezones
         id: focused
         continue-on-error: true
