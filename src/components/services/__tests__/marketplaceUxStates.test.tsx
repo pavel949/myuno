@@ -15,7 +15,7 @@ describe('request versus online booking',()=>{
  it('explains the request alternative when providers are absent', () => {
    render(<MarketplaceServiceGrid />);
    expect(screen.getByRole('status')).toHaveTextContent(
-     'Online booking is not available yet. You can request a service below.',
+     'Online booking is not available yet. Choose a home service or describe your task.',
    );
  });
  it('distinguishes unmatched search from an empty marketplace',()=>{state.data = [{ id: 'fixture', name_en: 'Cleaning' } as MarketplaceService];render(<MarketplaceServiceGrid search="missing"/>);expect(screen.getByText(/No services match your search/)).toBeInTheDocument();expect(screen.queryByText(/Online booking is not available yet/)).not.toBeInTheDocument();});

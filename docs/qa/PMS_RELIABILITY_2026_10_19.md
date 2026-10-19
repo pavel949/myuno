@@ -15,7 +15,7 @@ Repository: `pavel949/myuno`. Source baseline: `796c0ee2a501e7c3feeac18ec25c9650
 
 ## Verification
 
-Local focused baseline after the new cases: 109 passed, one expected-text assertion corrected; corrected date suite 39/39. Final combined focused, lint/types and remote CI results belong to the PR head and are reported in its description, not inferred from these earlier runs.
+Local focused final run: **122/122 in 10 files**. A 73-case connected/date/detail subset passed in UTC, Asia/Bangkok and America/Los_Angeles before the final two Today-source guards were added. Changed-file lint: no errors (existing warnings remain). The initial CI candidate passed TypeScript and 2,054 tests but failed an inherited Marketplace empty-state copy expectation from main; the test now matches the current reviewed empty-state text, retaining its exact request/booking assertions. Final aggregate and browser results belong to the current PR head and are reported in its description; earlier counts are not final-head certification.
 
 Local aggregate TypeScript was attempted with the default Node heap and aborted with V8 out-of-memory; it is not counted as a pass. Disposable PostgreSQL and Python Playwright are not installed in this local execution environment. The repository's existing GitHub Actions workflow installs both and performs the broader type/unit/PostgreSQL/build/browser checks. No hosted write acceptance is claimed.
 
