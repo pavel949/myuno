@@ -35,7 +35,7 @@ export function PropertySortSelect({ value, onChange }: PropertySortSelectProps)
 
   return (
     <Select value={value} onValueChange={(v) => onChange(v as PropertySortKey)}>
-      <SelectTrigger className="w-auto gap-1.5 h-8 text-xs border-border/50 bg-background">
+      <SelectTrigger aria-label={isRu ? 'Сортировка' : 'Sort homes'} className="w-auto gap-1.5 h-8 text-xs border-border/50 bg-background">
         <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
         <SelectValue />
       </SelectTrigger>

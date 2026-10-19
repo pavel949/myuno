@@ -11,10 +11,10 @@ const virtual = {
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru'});`,
   '@/contexts/CurrencyContext': `export const useCurrency=()=>({formatPrice:(n)=>'฿'+Number(n).toLocaleString('en-US')});`,
   '@/hooks/usePropertyQuickFilters': `export const usePropertyQuickFilters=()=>({districts:[{id:'layan',valueKey:'layan',labelRu:'Лаян',labelEn:'Layan'},{id:'rawai',valueKey:'rawai',labelRu:'Равай',labelEn:'Rawai'}],isLoading:false});export const applyQuickFilters=(rows)=>rows;`,
-  '@/hooks/usePropertyFilterOptions': `export const usePropertyFilterOptions=()=>({filterConfig:{sections:[]},propertyTypes:[{id:'villa',labelRu:'Вилла',labelEn:'Villa'},{id:'condo',labelRu:'Кондо',labelEn:'Condo'}],isLoading:false});`,
-  '@/hooks/useManagementCompanies': `export const useManagementCompanies=()=>({data:[]});`,
+  '@/hooks/usePropertyFilterOptions': `export const usePropertyFilterOptions=()=>({filterConfig:{sections:[{id:'priceLevel',titleRu:'Уровень цен',titleEn:'Price level',type:'price-level',options:[]},{id:'bedrooms',titleRu:'Спальни',titleEn:'Bedrooms',type:'multi',options:[]}]},propertyTypes:[{id:'villa',labelRu:'Вилла',labelEn:'Villa'},{id:'condo',labelRu:'Кондо',labelEn:'Condo'}],isLoading:false});`,
+  '@/hooks/useManagementCompanies': `export const useManagementCompanies=()=>{throw Error('Guest discovery must not fetch management companies')};`,
   '@/hooks/useProperties': `
-const rows=[{id:'synthetic-villa',title_en:'Synthetic pool villa',title_ru:'Тестовая вилла с бассейном',property_type:'villa',listing_type:'rent',amenities:['pool'],district:'layan',price:2500,price_per_night:2500,sale_price:9500000,price_period:'night',currency:'THB',bedrooms:2,bathrooms:2,area_sqm:140,max_guests:6,cover_image:'/synthetic-property.svg',images:['/synthetic-property.svg'],created_at:'2026-10-17',updated_at:'2026-10-17'}];
+const rows=[{id:'synthetic-villa',title_en:'Synthetic pool villa',title_ru:'Тестовая вилла с бассейном',property_type:'villa',listing_type:'rent',amenities:['pool','private_pool','walk_to_beach','sea_view','wifi'],district:'layan',price:2500,price_per_night:2500,sale_price:9500000,price_period:'night',currency:'THB',bedrooms:2,bathrooms:2,area_sqm:140,max_guests:6,cover_image:'/synthetic-property.svg',images:['/synthetic-property.svg'],created_at:'2026-10-17',updated_at:'2026-10-17'}];
 export function usePropertiesInfinite(filters){window.fixtureFilters=filters;return {data:{pages:[{properties:rows}]},isLoading:false,isError:false,hasNextPage:false,isFetchingNextPage:false,fetchNextPage:()=>{throw Error('Unexpected pagination')},refetch:()=>{}};}`,
   '@/components/uno/BackButton': `export const BackButton=()=>null;`,
   '@/components/uno/FavoriteButton': `export const FavoriteButton=()=>null;`,
@@ -42,8 +42,9 @@ const result = await build({
   }}],
 });
 if(Object.keys(result.metafile.inputs).some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|hooks\/(useProperties|useManagementCompanies|usePropertyQuickFilters|usePropertyFilterOptions)\.ts$/.test(p))) throw Error('Production data module included');
+if(process.argv.includes('--compile-only')) { console.log('Network-isolated property search fixture compiled; production data modules excluded.'); process.exit(0); }
 await writeFile(path.join(output,'synthetic-property.svg'),'<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640"><rect width="640" height="640" fill="#cbd5d0"/><path d="M80 400V240L320 100L560 240V400Z" fill="#f7f5f1"/></svg>');
-const css = await Promise.all(['/src/index.css?direct','/src/styles/cinematic-home.css?direct'].map(async file => {
+const css = await Promise.all(['/src/index.css?direct','/src/styles/cinematic-home.css?direct','/src/styles/property-search.css?direct'].map(async file => {
   const response=await fetch('http://localhost:8080'+file);
   if(!response.ok) throw Error('Preview CSS unavailable: '+file);
   return response.text();

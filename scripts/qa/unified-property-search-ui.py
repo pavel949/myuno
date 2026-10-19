@@ -13,7 +13,7 @@ async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         for lang in ['ru', 'en']:
-            for width in [375, 430, 1280]:
+            for width in [375, 390, 430, 1280]:
                 context = await browser.new_context(viewport={'width': width, 'height': 1000},
                     has_touch=width < 768, timezone_id='UTC', service_workers='block')
                 blocked, errors = [], []
@@ -69,19 +69,20 @@ async def main():
                     await page.get_by_role('option', name=option, exact=True).click()
                     await expect(trigger).to_be_focused()
                 async def collapsed(focused=False):
-                    if width >= 768:
-                        return
                     await expect(page.get_by_role('form')).to_have_count(0)
                     await expect(page.get_by_role('button',name=edit_label,exact=True)).to_have_attribute('aria-expanded','false')
                     if focused:
-                        await expect(page.get_by_role('heading',level=1)).to_be_focused()
+                        await expect(page.get_by_role('heading',level=2)).to_be_focused()
+                    filter_box = await page.locator('.property-discovery-filter').bounding_box()
+                    feature_box = await page.locator('.property-discovery-features').bounding_box()
+                    assert filter_box and feature_box and feature_box['x'] >= filter_box['x'] + filter_box['width'] + 4, {'filter':filter_box,'features':feature_box}
                     first = page.locator('[data-catalog-kind][data-listing-id]').first
                     await expect(first).to_be_visible()
                     top = await first.evaluate('(el)=>el.getBoundingClientRect().top+scrollY')
                     # Isolated page excludes global consumer header; bound concerns page content.
-                    assert top < 600, {'firstOfferDocumentTop':top,'width':width,'globalHeader':'stubbed'}
+                    assert top < (560 if width < 768 else 460), {'firstOfferDocumentTop':top,'width':width,'globalHeader':'stubbed'}
                 async def hydrated(kind, area, guests=None, mode='rent'):
-                    if width < 768 and await page.get_by_role('button',name=edit_label,exact=True).count():
+                    if await page.get_by_role('button',name=edit_label,exact=True).count():
                         await page.get_by_role('button',name=edit_label,exact=True).press('Enter')
                         await expect(page.get_by_role('button',name=close_label,exact=True)).to_have_attribute('aria-expanded','true')
                     await expect(page.get_by_role('form')).to_have_count(1)
@@ -105,15 +106,25 @@ async def main():
                         'guests':'3','checkIn':'2026-11-10T00:00:00.000Z','checkOut':'2026-11-15T00:00:00.000Z','company':'synthetic-company','source':'fixture-bookmark'}
                     await page.goto('http://localhost:8080/fixture?'+urlencode(initial),wait_until='networkidle')
                     await collapsed()
-                    if width < 768:
-                        summary = page.get_by_label('Текущий поиск' if ru else 'Current search')
-                        await expect(summary).to_contain_text('Вилла' if ru else 'Villa')
-                        await expect(summary).to_contain_text('Лаян' if ru else 'Layan')
-                        await expect(summary).to_contain_text('10')
-                        await expect(summary).to_contain_text('15')
-                        await expect(summary).to_contain_text('3')
-                        await expect(summary).to_contain_text('Доп. фильтров: 1' if ru else 'Additional filters: 1')
+                    summary = page.get_by_label('Текущий поиск' if ru else 'Current search')
+                    await expect(summary).to_contain_text('Вилла' if ru else 'Villa')
+                    await expect(summary).to_contain_text('Лаян' if ru else 'Layan')
+                    await expect(summary).to_contain_text('10')
+                    await expect(summary).to_contain_text('15')
+                    await expect(summary).to_contain_text('3')
+                    await expect(summary).to_contain_text('Доп. фильтров: 1' if ru else 'Additional filters: 1')
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-collapsed.png'),full_page=True)
+                    await expect(page.get_by_role('button',name='Все компании' if ru else 'All companies',exact=True)).to_have_count(0)
+                    quick = page.get_by_role('group',name='Популярные удобства' if ru else 'Popular features',exact=True)
+                    await expect(quick.get_by_role('button')).to_have_count(3)
+                    for button in await quick.get_by_role('button').all():
+                        box = await button.bounding_box()
+                        assert box['height'] >= 44, box
+                    await bounds()
+                    if width in [390, 1280]:
+                        await page.evaluate("document.documentElement.classList.add('dark')")
+                        await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-collapsed-dark.png'),full_page=True)
+                        await page.evaluate("document.documentElement.classList.remove('dark')")
                     await hydrated('Вилла' if ru else 'Villa','Лаян' if ru else 'Layan',3)
                     await expect(page.get_by_role('button',name=date_label)).to_contain_text('10')
                     await expect(page.get_by_role('button',name=date_label)).to_contain_text('15')
@@ -123,11 +134,10 @@ async def main():
                     await expect(page.locator('[data-catalog-kind][data-listing-id]')).to_have_count(1)
                     await bounds()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-hydrated.png'),full_page=True)
-                    if width < 768:
-                        await page.get_by_role('button',name=close_label,exact=True).press('Enter')
-                        await expect(page.get_by_role('button',name=edit_label,exact=True)).to_be_focused()
-                        await collapsed()
-                        await page.get_by_role('button',name=edit_label,exact=True).press('Enter')
+                    await page.get_by_role('button',name=close_label,exact=True).press('Enter')
+                    await expect(page.get_by_role('button',name=edit_label,exact=True)).to_be_focused()
+                    await collapsed()
+                    await page.get_by_role('button',name=edit_label,exact=True).press('Enter')
                     await choose(type_label,'Кондо' if ru else 'Condo')
                     await choose(area_label,'Равай' if ru else 'Rawai')
                     await page.get_by_label(guests_label).fill('5')
@@ -162,7 +172,7 @@ async def main():
                     await hydrated('Кондо' if ru else 'Condo','Равай' if ru else 'Rawai',5)
                     assert await query() == edited
                     await page.get_by_role('button',name='Покупка' if ru else 'Buy',exact=True).click()
-                    await page.get_by_role('button',name=search_label,exact=True).click()
+                    await collapsed()
                     await expect(page.get_by_test_id('location')).to_contain_text('mode=buy')
                     purchase = await query()
                     assert purchase['district']==['rawai'] and purchase['types']==['condo'],purchase
@@ -205,10 +215,44 @@ async def main():
                     assert not any(k in current for k in ['guests','checkIn','checkOut','tenancy']),current
                     await bounds()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-direct-purchase.png'),full_page=True)
+                    await choose('Сортировка' if ru else 'Sort homes', 'Цена: по возрастанию' if ru else 'Price: Low → High')
+                    # Quick chips and the real responsive filter sheet share one URL state.
+                    pool_label = 'Свой бассейн' if ru else 'Private pool'
+                    filter_label = 'Фильтры' if ru else 'Filters'
+                    await page.get_by_role('button',name=pool_label,exact=True).click()
+                    await expect(page.get_by_role('button',name=pool_label,exact=True)).to_have_attribute('aria-pressed','true')
+                    await page.get_by_role('button',name=filter_label+' (1)',exact=True).click()
+                    filters = page.get_by_role('dialog')
+                    await expect(filters).to_be_visible()
+                    await bounds(filters)
+                    await expect(filters.get_by_role('button',name=pool_label,exact=True)).to_have_attribute('aria-pressed','true')
+                    await expect(filters.get_by_role('button',name='Джакузи' if ru else 'Jacuzzi / Hot tub',exact=True)).to_be_visible()
+                    await filters.get_by_role('button',name='WiFi',exact=True).click()
+                    await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-filters.png'),full_page=True)
+                    await filters.get_by_role('button',name='Применить (2)' if ru else 'Apply (2)',exact=True).click()
+                    await expect(filters).to_have_count(0)
+                    features = await query()
+                    assert features['cats']==['private_pool,wifi'],features
+                    assert 'f.guestFeatures' not in features,features
+                    assert features['intent']==['assignment'] and features['source']==['purchase-bookmark'],features
+                    await page.get_by_role('button',name=pool_label,exact=True).click()
+                    await page.get_by_role('button',name=filter_label+' (1)',exact=True).click()
+                    filters = page.get_by_role('dialog')
+                    await expect(filters.get_by_role('button',name=pool_label,exact=True)).to_have_attribute('aria-pressed','false')
+                    await expect(filters.get_by_role('button',name='WiFi',exact=True)).to_have_attribute('aria-pressed','true')
+                    await filters.get_by_role('button',name='Применить (1)' if ru else 'Apply (1)',exact=True).click()
+                    await page.get_by_role('button',name='Убрать WiFi' if ru else 'Remove WiFi',exact=True).click()
+                    await page.get_by_role('button',name='Карта' if ru else 'Map',exact=True).click()
+                    await expect(page.get_by_test_id('synthetic-map')).to_be_visible()
+                    assert (await query())['view']==['map']
+                    await page.get_by_role('button',name='Список' if ru else 'List',exact=True).click()
+                    await expect(page.get_by_test_id('synthetic-map')).to_have_count(0)
+                    assert 'view' not in await query()
+                    await bounds()
                     assert not errors,errors
                     assert not blocked,blocked
                     results.append({'language':lang,'width':width,'hydration':'pass','inPlaceEdit':'pass','history':'pass',
-                        'mobileSummary':'pass' if width<768 else 'desktop-unchanged','firstOfferBound':'<600px without global header' if width<768 else 'not-applicable','legacyRedirect':'pass','rentBuy':'pass','overflow':'none','externalRequests':0,'runtimeErrors':0})
+                        'compactSummary':'pass','featureSheetSync':'pass','mapToggle':'pass','firstOfferBound':'<560px mobile / <460px desktop without global header','legacyRedirect':'pass','rentBuy':'pass','overflow':'none','externalRequests':0,'runtimeErrors':0})
                 except Exception as error:
                     failure = {'language':lang,'width':width,'error':str(error),'blockedRequests':blocked,'runtimeErrors':errors}
                     try:

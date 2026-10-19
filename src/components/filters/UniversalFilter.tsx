@@ -92,6 +92,7 @@ function SingleSelectList({ options, value, onChange }: {
         return (
           <button
             key={option.id}
+            aria-pressed={isActive}
             onClick={() => onChange(isActive ? null : option.id)}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-2 rounded-none text-sm font-medium border transition-all",
@@ -134,6 +135,7 @@ function MultiSelectChips({ options, value, onChange }: {
         return (
           <button
             key={option.id}
+            aria-pressed={isActive}
             onClick={() => toggle(option.id)}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-2 rounded-none text-sm font-medium border transition-all",
@@ -182,6 +184,7 @@ function BedroomSelect({ value, onChange }: { value: string[]; onChange: (v: str
         return (
           <button
             key={option.id}
+            aria-pressed={isActive}
             onClick={() => toggle(option.id)}
             className={cn(
               "flex-1 py-2.5 rounded-none text-sm font-medium border transition-colors flex items-center justify-center gap-1",
@@ -240,7 +243,7 @@ export function UniversalFilter({
   const localActiveCount = useMemo(() => {
     let count = 0;
     Object.entries(localValues).forEach(([, val]) => {
-      if (Array.isArray(val) && val.length > 0) count++;
+      if (Array.isArray(val)) count += val.length;
       else if (val && typeof val === 'string') count++;
     });
     return count;
@@ -260,7 +263,7 @@ export function UniversalFilter({
 
   return (
     <>
-      <div onClick={() => setIsOpen(true)} className="cursor-pointer">
+      <div onClick={() => handleOpenChange(true)} className="cursor-pointer shrink-0">
         {trigger}
       </div>
       <ResponsiveModal
@@ -356,6 +359,7 @@ export function QuickFilterBar({ options, value, onChange, className }: QuickFil
         return (
           <button
             key={option.id}
+            aria-pressed={isActive}
             onClick={() => onChange(option.id)}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",

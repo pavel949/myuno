@@ -3,15 +3,14 @@
  * One shared app-style editor; all criteria are hydrated from the catalogue URL.
  */
 import React, { useState, useMemo, useEffect, useRef, useId } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Home, SlidersHorizontal, Loader2, Building2, ChevronDown, Map as MapIcon, List } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Home, SlidersHorizontal, Loader2, Search, Check, Map as MapIcon, List } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { UniversalFilter, FilterValues } from '@/components/filters/UniversalFilter';
+import { UniversalFilter, FilterValues, type FilterConfig } from '@/components/filters/UniversalFilter';
 import { usePropertyFilterOptions } from '@/hooks/usePropertyFilterOptions';
 import { usePropertiesInfinite, Property } from '@/hooks/useProperties';
-import { useManagementCompanies } from '@/hooks/useManagementCompanies';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BackButton } from '@/components/uno/BackButton';
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
@@ -20,9 +19,8 @@ import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 import { serializeFilters } from '@/lib/propertyBrowseFilters';
 import '@/styles/cinematic-home.css';
 import { PropertyListingCard } from '@/components/property/PropertyListingCard';
-import { PropertyCategoryIcons, matchesCategory } from '@/components/property/PropertyCategoryIcons';
-import { applyQuickFilters, usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { PROPERTY_DISCOVERY_FEATURE_IDS, matchesCategory } from '@/components/property/PropertyCategoryIcons';
+import { usePropertyQuickFilters } from '@/hooks/usePropertyQuickFilters';
 import { filterValuesToPropertyFilters, mergeSearchBarIntoFilterValues } from '@/lib/propertyCatalogServerFilters';
 import { comparePropertiesForSort } from '@/lib/propertySortPrice';
 import { useMapListSync } from '@/hooks/useMapListSync';
@@ -32,24 +30,17 @@ import { PropertySortSelect, PropertySortKey } from '@/components/property/Prope
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { OffplanCTASection } from '@/components/property/OffplanCTASection';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { differenceInDays } from 'date-fns';
+import '@/styles/property-search.css';
+
+const QUICK_FEATURE_IDS = ['walk_to_beach', 'private_pool', 'sea_view'];
 
 export default function PropertySearchPage() {
   const { language } = useLanguage();
-  const navigate = useNavigate();
   const [searchParamsUrl, setSearchParamsUrl] = useSearchParams();
   const isRu = language === 'ru';
-  const isMobile = useIsMobile();
   const editorId = useId();
   const [editorOpen, setEditorOpen] = useState(false);
-  const wasMobile = useRef(isMobile);
-  // Keep an in-progress desktop editor mounted when the viewport becomes mobile.
-  const editorVisible = !isMobile || editorOpen || !wasMobile.current;
-  useEffect(() => {
-    if (isMobile && !wasMobile.current) setEditorOpen(true);
-    wasMobile.current = isMobile;
-  }, [isMobile]);
   const [focusResults, setFocusResults] = useState(false);
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
   const { districts } = usePropertyQuickFilters();
@@ -65,16 +56,10 @@ export default function PropertySearchPage() {
   const { mode: propertyMode, search: searchParams, filterValues, categories: categoryFilters } = state;
   const [hoveredProperty, setHoveredProperty] = useState<string | null>(null);
   const { selectedId: focusedId, select: selectFocused } = useMapListSync();
-  const [quickFilters, setQuickFilters] = useState<string[]>([]);
   const [showStickyCTA, setShowStickyCTA] = useState(false);
   const [sortKey, setSortKey] = useState<PropertySortKey>('recommended');
   const showMap = searchParamsUrl.get('view') === 'map';
   const selectedCompanyId = searchParamsUrl.get('company');
-  const setSelectedCompanyId = (id: string | null) => {
-    const params = new URLSearchParams(searchParamsUrl);
-    if (id) params.set('company', id); else params.delete('company');
-    setSearchParamsUrl(params);
-  };
   const setShowMap = (show: boolean) => {
     const params = new URLSearchParams(searchParamsUrl);
     if (show) params.set('view', 'map'); else params.delete('view');
@@ -93,7 +78,13 @@ export default function PropertySearchPage() {
     Object.entries(serializeFilters(values, categories)).forEach(([key, value]) => params.set(key, value));
     setSearchParamsUrl(params);
   };
-  const setFilterValues = (values: FilterValues) => updateFilters(values);
+  // Features retain their existing `cats` URL/matching contract. The sheet is
+  // another editor for that same state, never a second amenities filter.
+  const setAdvancedFilters = ({ guestFeatures, ...values }: FilterValues) =>
+    updateFilters(
+      propertyMode === 'buy' && filterValues.instantBooking ? { ...values, instantBooking: filterValues.instantBooking } : values,
+      Array.isArray(guestFeatures) ? guestFeatures : [],
+    );
   const setCategoryFilters = (categories: string[]) => updateFilters(filterValues, categories);
 
   // Calculate nights from selected dates
@@ -115,10 +106,20 @@ export default function PropertySearchPage() {
   const { filterConfig, propertyTypes } = usePropertyFilterOptions();
   // Core criteria have one editor (the search bar). Avoid a second conflicting
   // property type/district/party selection inside the advanced filter sheet.
-  const advancedFilterConfig = useMemo(() => ({
-    sections: filterConfig.sections.filter(section => !['propertyType', 'district', 'listingType', 'guestsAtLeast', ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)),
+  const advancedFilterConfig = useMemo<FilterConfig>(() => ({
+    sections: [
+      ...filterConfig.sections.filter(section => !['propertyType', 'district', 'listingType', 'guestsAtLeast', ...(propertyMode === 'buy' ? ['instantBooking'] : [])].includes(section.id)),
+      {
+        id: 'guestFeatures', titleEn: 'Popular features', titleRu: 'Популярные удобства', type: 'multi',
+        options: PROPERTY_DISCOVERY_FEATURE_IDS.flatMap(id => {
+          const feature = PROPERTY_FEATURE_MAP.get(id);
+          return feature ? [{ id, labelEn: feature.labelEn, labelRu: feature.labelRu }] : [];
+        }),
+      },
+    ],
   }), [filterConfig, propertyMode]);
-  const { data: companies = [] } = useManagementCompanies();
+  const advancedValues: FilterValues = { ...filterValues, guestFeatures: categoryFilters };
+  if (propertyMode === 'buy') delete advancedValues.instantBooking;
 
   const listingCatalogType = propertyMode === 'buy' ? 'sale' : 'rent';
   const rentTenancy = state.tenancy;
@@ -165,14 +166,6 @@ export default function PropertySearchPage() {
     fetchNextPage,
   } = usePropertiesInfinite(serverFilters);
 
-  const companyMap = useMemo(() => {
-    const map = new Map<string, { name: string; slug: string }>();
-    for (const c of companies) {
-      map.set(c.id, { name: language === 'ru' ? c.name_ru : c.name_en, slug: c.slug });
-    }
-    return map;
-  }, [companies, language]);
-
   useEffect(() => {
     const sentinel = loadMoreRef.current;
     if (!sentinel) return;
@@ -197,32 +190,20 @@ export default function PropertySearchPage() {
       return true;
     }) as unknown as Property[];
 
-    const quickFiltered = applyQuickFilters(filtered, quickFilters, null);
-
     const sortMode = propertyMode === 'buy' ? 'buy' : 'rent';
-    const sorted = [...quickFiltered];
+    const sorted = [...filtered];
     sorted.sort((a, b) => comparePropertiesForSort(a, b, sortKey, sortMode));
 
     return sorted;
-  }, [infiniteData, quickFilters, sortKey, categoryFilters, propertyMode]);
+  }, [infiniteData, sortKey, categoryFilters, propertyMode]);
 
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    Object.entries(filterValues).forEach(([, value]) => {
-      if (Array.isArray(value)) count += value.length;
-      else if (value) count++;
-    });
-    count += searchParams.bedrooms.length;
-    count += searchParams.propertyTypes.length;
-    count += categoryFilters.length;
-    count += searchParams.locations.length;
-    if (searchParams.instantBooking) count++;
-    count += quickFilters.length;
-    return count;
-  }, [filterValues, quickFilters, searchParams, categoryFilters]);
+  const advancedFilterCount = Object.entries(filterValues).reduce((count, [key, value]) => {
+    if (propertyMode === 'buy' && key === 'instantBooking') return count;
+    return count + (Array.isArray(value) ? value.length : value ? 1 : 0);
+  }, categoryFilters.length);
+  const activeFilterCount = advancedFilterCount + searchParams.propertyTypes.length + searchParams.locations.length + (selectedCompanyId ? 1 : 0);
 
   const clearAllFilters = () => {
-    setQuickFilters([]);
     const resetUrl = new URLSearchParams({ mode: propertyMode });
     if (propertyMode === 'rent') resetUrl.set('tenancy', rentTenancy);
     setSearchParamsUrl(resetUrl);
@@ -230,10 +211,8 @@ export default function PropertySearchPage() {
 
   const submitSearch = (params: URLSearchParams) => {
     setSearchParamsUrl(params);
-    if (isMobile) {
-      setEditorOpen(false);
-      setFocusResults(true);
-    }
+    setEditorOpen(false);
+    setFocusResults(true);
   };
   const summaryTypes = searchParams.propertyTypes.map(id => {
     const type = propertyTypes.find(item => item.id === id);
@@ -247,142 +226,90 @@ export default function PropertySearchPage() {
   const summaryDates = searchParams.checkIn && searchParams.checkOut
     ? `${dateLabel(searchParams.checkIn)} – ${dateLabel(searchParams.checkOut)}`
     : (isRu ? 'Без дат' : 'Any dates');
-  const summaryExtraFilters = Object.keys(filterValues).filter(key => propertyMode !== 'buy' || key !== 'instantBooking').length + categoryFilters.length + (selectedCompanyId ? 1 : 0);
+  const summaryExtraFilters = advancedFilterCount + (selectedCompanyId ? 1 : 0);
   const summaryDuration = rentTenancy === 'medium' ? (isRu ? 'Помесячно' : 'Monthly') : rentTenancy === 'long' ? (isRu ? 'На год' : 'Yearly') : (isRu ? 'Посуточно' : 'Nightly');
 
   return (
-    <div className="min-h-screen bg-background">
-        {/* Sticky header */}
-        <header className="bg-background border-b">
-          <div className="px-4 pt-3 pb-2">
-            <div className="flex items-start gap-2">
-              <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0" />
-              <div className="flex-1 min-w-0 journey-primary property-search-editor">
-                {isMobile && <div className="space-y-2 py-1" aria-label={isRu ? 'Текущий поиск' : 'Current search'}>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-primary">{propertyMode === 'buy' ? (isRu ? 'Покупка' : 'Buy') : (isRu ? 'Аренда' : 'Rent')}</span>
-                    <button type="button" className="min-h-11 shrink-0 px-2 text-sm font-medium underline underline-offset-4" aria-expanded={editorVisible} aria-controls={editorId} onClick={() => setEditorOpen(open => !open)}>
-                      {editorVisible ? (isRu ? 'Закрыть поиск' : 'Close search') : (isRu ? 'Изменить поиск' : 'Edit search')}
-                    </button>
-                  </div>
-                  <p className="font-medium leading-snug">{summaryTypes} · {summaryAreas}</p>
-                  {propertyMode === 'rent' && <p className="text-sm text-muted-foreground leading-relaxed">{summaryDuration} · {summaryDates} · {state.hasGuestFilter ? `${isRu ? 'Гостей' : 'Guests'}: ${searchParams.guests}` : (isRu ? 'Гости не указаны' : 'Guests not specified')}</p>}
-                  {summaryExtraFilters > 0 && <p className="text-xs text-muted-foreground">{isRu ? 'Доп. фильтров' : 'Additional filters'}: {summaryExtraFilters}</p>}
-                </div>}
-                <div id={editorId} hidden={!editorVisible}>
-                  {editorVisible && <HomeDiscoverySearch key={queryKey} initialParams={searchParamsUrl} onSearch={submitSearch} />}
-                </div>
-              </div>
+    <div className="property-discovery min-h-screen bg-background">
+        <header className="property-discovery-header border-b">
+          <h1 className="property-discovery-title">{propertyMode === 'rent' ? (isRu ? 'Найдите своё место на Пхукете' : 'Find your place in Phuket') : (isRu ? 'Найдите свой дом на Пхукете' : 'Find your home in Phuket')}</h1>
+          <div className="flex items-center gap-3">
+            <BackButton fallbackPath="/property" variant="ghost" size="sm" className="shrink-0 min-h-11 min-w-11" />
+            <div className="property-discovery-intent" role="group" aria-label={isRu ? 'Аренда или покупка' : 'Rent or buy'}>
+              {(['rent', 'buy'] as const).map(mode => <button key={mode} type="button" aria-pressed={propertyMode === mode} onClick={() => {
+                if (mode === propertyMode) return;
+                const params = new URLSearchParams(searchParamsUrl);
+                params.set('mode', mode);
+                setEditorOpen(false);
+                setSearchParamsUrl(params);
+              }}>{mode === 'rent' ? (isRu ? 'Аренда' : 'Rent') : (isRu ? 'Покупка' : 'Buy')}</button>)}
             </div>
           </div>
-
-          {/* Minimal secondary filter row: Company + More Filters */}
-          <div className="px-4 pb-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Company Popover */}
-              {companies.length > 0 && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button className={cn(
-                      "inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-none text-xs font-medium border transition-all shrink-0",
-                      selectedCompanyId
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
-                    )}>
-                      <Building2 className="w-3.5 h-3.5" />
-                      <span>
-                        {selectedCompanyId
-                          ? (() => {
-                              const c = companies.find(c => c.id === selectedCompanyId);
-                              return c ? (isRu ? c.name_ru : c.name_en) : (isRu ? 'Все компании' : 'All companies');
-                            })()
-                          : (isRu ? 'Все компании' : 'All companies')
-                        }
-                      </span>
-                      <ChevronDown className="w-3 h-3 opacity-60" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-56 p-2 bg-popover z-50" align="start" sideOffset={6}>
-                    <div className="space-y-1">
-                      <button
-                        onClick={() => setSelectedCompanyId(null)}
-                        className={cn("w-full flex items-center gap-2 px-3 py-2 rounded-none text-sm transition-colors", !selectedCompanyId ? "bg-primary/10 text-primary" : "hover:bg-muted")}
-                      >
-                        <span className="flex-1 text-left">{isRu ? 'Все' : 'All'}</span>
-                      </button>
-                      {companies.map(c => {
-                        const label = isRu ? c.name_ru : c.name_en;
-                        return (
-                          <button key={c.id} onClick={() => setSelectedCompanyId(c.id === selectedCompanyId ? null : c.id)} className={cn("w-full flex items-center gap-2 px-3 py-2 rounded-none text-sm transition-colors", selectedCompanyId === c.id ? "bg-primary/10 text-primary" : "hover:bg-muted")}>
-                            <span className="flex-1 text-left">{label}</span>
-                            {selectedCompanyId === c.id && <span className="w-4 h-4 rounded-none bg-primary text-primary-foreground text-[10px] flex items-center justify-center">✓</span>}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              )}
-
-              {/* More filters (UniversalFilter) */}
-              <UniversalFilter
-                config={advancedFilterConfig}
-                values={filterValues}
-                onChange={setFilterValues}
-                activeCount={activeFilterCount}
-              >
-                <button className={cn(
-                  "inline-flex items-center gap-1.5 min-h-[44px] px-3 rounded-none text-xs font-medium border transition-all shrink-0",
-                  Object.keys(filterValues).length > 0
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
-                )}>
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>{isRu ? 'Фильтры' : 'Filters'}</span>
-                  {Object.keys(filterValues).length > 0 && <span className="ml-0.5">({Object.keys(filterValues).length})</span>}
-                </button>
-              </UniversalFilter>
+          <div className="property-discovery-summary" aria-label={isRu ? 'Текущий поиск' : 'Current search'}>
+            <Search className="hidden sm:block h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="text-body font-medium leading-snug">{summaryTypes} · {summaryAreas}</p>
+              {propertyMode === 'rent' && <p className="mt-1 text-body-sm text-muted-foreground leading-relaxed">{summaryDuration} · {summaryDates} · {state.hasGuestFilter ? `${isRu ? 'Гостей' : 'Guests'}: ${searchParams.guests}` : (isRu ? 'Гости не указаны' : 'Guests not specified')}</p>}
+              {summaryExtraFilters > 0 && <p className="mt-1 text-caption text-muted-foreground">{isRu ? 'Доп. фильтров' : 'Additional filters'}: {summaryExtraFilters}</p>}
+            </div>
+            <button type="button" className="property-discovery-edit" aria-expanded={editorOpen} aria-controls={editorId} onClick={() => setEditorOpen(open => !open)}>
+              {editorOpen ? (isRu ? 'Закрыть поиск' : 'Close search') : (isRu ? 'Изменить поиск' : 'Edit search')}
+            </button>
+          </div>
+          <div id={editorId} hidden={!editorOpen} className="journey-primary property-search-editor property-discovery-editor">
+            {editorOpen && <HomeDiscoverySearch key={queryKey} hideModeSwitch initialParams={searchParamsUrl} onSearch={submitSearch} />}
+          </div>
+          <div className="flex min-w-0 items-center gap-2">
+            <UniversalFilter config={advancedFilterConfig} values={advancedValues} onChange={setAdvancedFilters} activeCount={advancedFilterCount}>
+              <button type="button" className={cn('property-discovery-filter', advancedFilterCount > 0 && 'border-primary text-primary')}>
+                <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+                <span>{isRu ? 'Фильтры' : 'Filters'}</span>
+                {advancedFilterCount > 0 && <span className="font-mono">({advancedFilterCount})</span>}
+              </button>
+            </UniversalFilter>
+            <div className="property-discovery-features" role="group" aria-label={isRu ? 'Популярные удобства' : 'Popular features'}>
+              {QUICK_FEATURE_IDS.map(id => {
+                const feature = PROPERTY_FEATURE_MAP.get(id)!;
+                const selected = categoryFilters.includes(id);
+                return <button type="button" key={id} aria-pressed={selected} onClick={() => setCategoryFilters(selected ? categoryFilters.filter(value => value !== id) : [...categoryFilters, id])}>
+                  {selected && <Check className="h-3.5 w-3.5" aria-hidden="true" />}
+                  {isRu ? feature.labelRu : feature.labelEn}
+                </button>;
+              })}
             </div>
           </div>
+          {categoryFilters.filter(id => !QUICK_FEATURE_IDS.includes(id)).length > 0 && <div className="flex flex-wrap gap-2" aria-label={isRu ? 'Выбранные особенности' : 'Selected features'}>
+            {categoryFilters.filter(id => !QUICK_FEATURE_IDS.includes(id)).map(id => {
+              const feature = PROPERTY_FEATURE_MAP.get(id);
+              const label = feature ? (isRu ? feature.labelRu : feature.labelEn) : id;
+              return <button type="button" key={id} className="min-h-11 border border-primary/30 bg-card px-3 text-body-sm" aria-label={`${isRu ? 'Убрать' : 'Remove'} ${label}`} onClick={() => setCategoryFilters(categoryFilters.filter(value => value !== id))}>{label} ×</button>;
+            })}
+          </div>}
         </header>
-
-        {categoryFilters.length > 0 && <div className="flex flex-wrap gap-2 px-4 py-2" aria-label={isRu ? 'Выбранные особенности' : 'Selected features'}>
-          {categoryFilters.map(id => {
-            const feature = PROPERTY_FEATURE_MAP.get(id);
-            const label = feature ? (isRu ? feature.labelRu : feature.labelEn) : id;
-            return <button type="button" key={id} className="min-h-11 border px-3 text-sm" aria-label={`${isRu ? 'Убрать' : 'Remove'} ${label}`} onClick={() => setCategoryFilters(categoryFilters.filter(value => value !== id))}>{label} ×</button>;
-          })}
-        </div>}
-        {/* Canonical feature controls, including legacy amenities bookmarks. */}
-        <div className="border-b">
-          <PropertyCategoryIcons
-            selected={categoryFilters}
-            onSelect={setCategoryFilters}
-          />
-        </div>
 
         {propertyMode === 'rent' && nights > 0 && <p role="note" aria-label={isRu ? 'Проверка занятости' : 'Availability check'} className="mx-4 my-2 border-l-2 border-primary/30 pl-3 text-sm text-muted-foreground">
           {isRu ? 'Даты сохранены, но занятость объектов пока не проверена. Откройте объект для проверки.' : 'Your dates are saved, but availability has not been checked for these results. Open a property to check.'}
         </p>}
-        <div className="px-4 py-2">
+        <div className="px-4 py-4 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 ref={resultsHeadingRef} tabIndex={-1} className="scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)] text-sm text-muted-foreground basis-full sm:basis-auto">
-              {isLoading ? (isRu ? 'Ищем жильё…' : 'Finding homes…') : isError ? (isRu ? 'Каталог недоступен' : 'Catalogue unavailable') : <>{properties.length} {isRu ? 'объектов найдено' : 'places found'}</>}
-            </h1>
-            <div className="flex flex-wrap items-center gap-2">
+            <h2 ref={resultsHeadingRef} tabIndex={-1} className="scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)] text-h3 font-display basis-full sm:basis-auto">
+              {isLoading ? (isRu ? 'Ищем жильё…' : 'Finding homes…') : isError ? (isRu ? 'Каталог недоступен' : 'Catalogue unavailable') : <>{isRu ? 'Найдено объектов:' : 'Places found:'} {properties.length}</>}
+            </h2>
+            <div className="property-discovery-result-actions flex flex-wrap items-center gap-2">
               <PropertySortSelect value={sortKey} onChange={setSortKey} />
               {/* Map toggle */}
               <Button
                 variant={showMap ? 'default' : 'outline'}
                 size="sm"
-                className="gap-1.5 h-8 rounded-none text-xs"
+                className="gap-1.5 min-h-11 rounded-none text-body-sm"
+                aria-pressed={showMap}
                 onClick={() => setShowMap(!showMap)}
               >
                 {showMap ? <List className="w-3.5 h-3.5" /> : <MapIcon className="w-3.5 h-3.5" />}
                 {showMap ? (isRu ? 'Список' : 'List') : (isRu ? 'Карта' : 'Map')}
               </Button>
               {activeFilterCount > 0 && (
-                <Button variant="ghost" size="sm" className="text-xs h-7" onClick={clearAllFilters}>
+                <Button variant="ghost" size="sm" className="text-body-sm min-h-11" onClick={clearAllFilters}>
                   {isRu ? 'Сбросить' : 'Clear'}
                 </Button>
               )}
@@ -392,7 +319,7 @@ export default function PropertySearchPage() {
 
         {/* Map View */}
         {showMap && (
-          <div className="px-4 mb-4">
+          <div className="px-4 sm:px-6 mb-4">
             <PropertyMapView
               properties={properties}
               hoveredProperty={hoveredProperty}
@@ -406,7 +333,7 @@ export default function PropertySearchPage() {
         )}
 
 
-        <section aria-label={isRu ? 'Результаты поиска жилья' : 'Home search results'} className="px-4 pb-24">
+        <section aria-label={isRu ? 'Результаты поиска жилья' : 'Home search results'} className="px-4 sm:px-6 pb-24">
           {isLoading && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1,2,3,4,5,6,7,8].map(i => (
@@ -424,7 +351,6 @@ export default function PropertySearchPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {properties.map(property => {
-                  const mc = (property as any).management_company_id ? companyMap.get((property as any).management_company_id) : undefined;
                   return (
                     <PropertyListingCard
                       key={property.id}
@@ -434,8 +360,6 @@ export default function PropertySearchPage() {
                       onHover={setHoveredProperty}
                       isSelected={focusedId === property.id}
                       onSelect={showMap ? selectFocused : undefined}
-                      companyName={mc?.name}
-                      companySlug={mc?.slug}
                       nights={nights > 0 ? nights : undefined}
                     />
                   );
