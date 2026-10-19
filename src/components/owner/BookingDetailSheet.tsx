@@ -194,8 +194,6 @@ export function BookingDetailSheet({ open, onOpenChange, booking, propertyTitle 
         ) : (
           <BookingStatusTimeline
             events={historyEvents}
-            currentStatus={booking.status ?? undefined}
-            createdAt={booking.created_at}
             highlightIds={historyHighlightIds}
             compact
           />
