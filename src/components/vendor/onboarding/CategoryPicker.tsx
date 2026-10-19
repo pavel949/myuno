@@ -22,8 +22,24 @@ for (const v of Object.values(VERTICALS)) {
   verticalMap[v.id] = v;
 }
 
-// Filter groups relevant for vendors (exclude help)
-const VENDOR_GROUPS = VERTICAL_GROUPS.filter(g => g.id !== 'help');
+// Intake-only fallback: the existing onboarding writer accepts this category
+// and creates a pending application, not a published service or a new vertical.
+const OTHER_GROUP: VerticalGroup = {
+  id: 'other',
+  labelEn: 'Other',
+  labelRu: 'Другое',
+  labelTh: 'อื่นๆ',
+  icon: 'shapes',
+  items: [
+    { route: 'other', icon: 'shapes', labelEn: 'Other business', labelRu: 'Другой бизнес', labelTh: 'ธุรกิจอื่นๆ' },
+  ],
+};
+
+// Filter groups relevant for vendors (exclude help), always offer the catch-all last.
+const VENDOR_GROUPS = [
+  ...VERTICAL_GROUPS.filter(g => g.id !== 'help'),
+  OTHER_GROUP,
+];
 
 function resolveItem(item: VerticalGroupItem) {
   if (item.verticalId && verticalMap[item.verticalId]) {
