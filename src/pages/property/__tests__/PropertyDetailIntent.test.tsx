@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import PropertyDetail from '../PropertyDetail';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
-const state = vi.hoisted(() => ({ property: { id: 'unit', rating: 0, project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', images: [], amenities: [], rentalTerms: { price_per_night: 2000, included_services: [], extra_services: [] } } }));
+const state = vi.hoisted(() => ({ property: { id: 'unit', rating: 0, project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', tenancy_modes: [] as string[], images: [], amenities: [], rentalTerms: { price_per_night: 2000, included_services: [], extra_services: [] } } }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: () => ({ data: state.property, isLoading: false }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (v: number) => String(v) }) }));
@@ -15,7 +15,7 @@ vi.mock('@/hooks/usePropertyUnavailableDates', () => ({ usePropertyUnavailableDa
 vi.mock('@/hooks/usePropertyListingQuality', () => ({ usePropertyMedia: () => ({ data: [] }), mediaAlt: () => '', mediaCaption: () => '' }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null, createRealEstateListingSchema: () => ({}) }));
 vi.mock('@/components/property', () => ({ IncludedServices: () => null, ExtraServices: () => null, UtilitiesInfo: () => null, CheckInDetails: () => null, GuestAssuranceCard: () => null, HouseRules: () => null, GuestExtraFeesDisplay: () => null, PropertyBookingCard: ({ initialGuestContext }: { initialGuestContext: { guests: number; dateRange?: { from?: Date } } }) => <button data-guests={initialGuestContext.guests} data-check-in={initialGuestContext.dateRange?.from?.getFullYear()}>Book rental</button>, MessageHostButton: ({ labelEn }: { labelEn: string }) => <button>{labelEn}</button> }));
-vi.mock('@/components/property/detail', () => ({ PropertyDetailGallery: () => <div data-testid="property-gallery" />, PropertyDetailHighlights: () => null, PropertyDetailDateSheet: ({ guestCount, dateRange, onGuestCountChange, onDateRangeChange }: { dateRange?: { from?: Date }; guestCount: number; onGuestCountChange: (value: number) => void; onDateRangeChange: (value: undefined) => void }) => <><output data-testid="mobile-guests">{guestCount}</output><output data-testid="mobile-date">{dateRange?.from?.getDate() ?? "empty"}</output><button onClick={() => onGuestCountChange(4)}>Edit mobile party</button><button onClick={() => onDateRangeChange(undefined)}>Clear mobile dates</button></>, PropertyHeroFacts: () => null, PropertyDetailMobileBar: ({ isSaleListing }: { isSaleListing: boolean }) => <span data-testid="mobile-intent">{isSaleListing ? 'buy' : 'rent'}</span> }));
+vi.mock('@/components/property/detail', () => ({ PropertyDetailGallery: () => <div data-testid="property-gallery" />, PropertyDetailHighlights: () => null, PropertyDetailDateSheet: ({ guestCount, dateRange, onGuestCountChange, onDateRangeChange }: { dateRange?: { from?: Date }; guestCount: number; onGuestCountChange: (value: number) => void; onDateRangeChange: (value: undefined) => void }) => <><output data-testid="mobile-guests">{guestCount}</output><output data-testid="mobile-date">{dateRange?.from?.getDate() ?? "empty"}</output><button onClick={() => onGuestCountChange(4)}>Edit mobile party</button><button onClick={() => onDateRangeChange(undefined)}>Clear mobile dates</button></>, PropertyHeroFacts: () => null, PropertyDetailMobileBar: ({ isSaleListing, isLongStayOnly }: { isSaleListing: boolean; isLongStayOnly: boolean }) => <span data-testid="mobile-intent" data-long-stay={isLongStayOnly}>{isSaleListing ? 'buy' : 'rent'}</span> }));
 vi.mock('@/components/property/PropertyShareSheet', () => ({PropertyShareSheet: ({ children }: { children: React.ReactNode }) => <>{children}</>}));
 vi.mock('@/components/uno/FavoriteButton', () => ({FavoriteButton: () => null}));
 vi.mock('@/components/uno/BackButton', () => ({BackButton: () => null}));
@@ -36,10 +36,17 @@ vi.mock('@/components/property/PropertyReviewRatings', () => ({PropertyReviewRat
 vi.mock('@/components/property/StayRulesSection', () => ({StayRulesSection: () => null}));
 vi.mock('@/components/property/RoomCategoryOffers', () => ({RoomCategoryOffers: () => null}));
 vi.mock('@/components/reviews/ReviewsSection', () => ({ReviewsSection: () => null}));
-afterEach(() => { cleanup(); localStorage.clear(); state.property.listing_type = 'rent'; state.property.listing_modes = ['rent','sale']; state.property.is_for_sale = true; state.property.sale_price = 5000000; });
+afterEach(() => { cleanup(); localStorage.clear(); state.property.listing_type = 'rent'; state.property.listing_modes = ['rent','sale']; state.property.is_for_sale = true; state.property.sale_price = 5000000; state.property.tenancy_modes = []; });
 function NavigateContext() { const navigate = useNavigate(); return <button onClick={() => navigate('/property/unit?mode=rent&checkIn=2099-12-10&checkOut=2099-12-14&guests=2')}>New URL</button>; }
 function mount(mode: string) { render(<MemoryRouter initialEntries={[`/property/unit?mode=${mode}`]}><Routes><Route path="/property/:id" element={<CompareProvider><NavigateContext /><PropertyDetail /></CompareProvider>} /></Routes></MemoryRouter>); }
 describe('actual property detail purchase/rental intent', () => {
+  it('passes explicit medium-only rental eligibility to the mobile manager-request action', () => {
+    state.property.tenancy_modes = ['medium'];
+    mount('rent');
+    expect(screen.getByTestId('mobile-intent')).toHaveAttribute('data-long-stay', 'true');
+    expect(screen.getByRole('button', { name: 'Request rental' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Book rental' })).toBeNull();
+  });
   it('updates untouched mobile fields on same-ID URL navigation', () => {
     mount('rent&checkIn=2099-12-01&checkOut=2099-12-04&guests=3');
     fireEvent.click(screen.getByRole('button', { name: 'New URL' }));

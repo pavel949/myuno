@@ -805,6 +805,7 @@ export default function PropertyDetail() {
         <PropertyDetailMobileBar
           propertyId={id || 'prop-1'}
           isSaleListing={isSaleListing}
+          isLongStayOnly={isLongStayOnly}
           salePrice={salePrice ?? 0}
           pricePerNight={pricePerNight}
           ownershipLabel={ownershipLabel}
