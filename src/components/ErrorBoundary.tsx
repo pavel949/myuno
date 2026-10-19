@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { createErrorHandler } from '@/lib/errorHandler';
 import { getStoredLang as getLang } from '@/lib/languageConfig';
 import { pickLang } from '@/lib/i18n/pickLang';
+import { reloadAfterUserRecovery, requestRecoveryReload } from '@/lib/pwaRecovery';
 
 const errorLog = createErrorHandler('ErrorBoundary');
 
@@ -17,6 +18,8 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  reloading: boolean;
+  reloadFailed: boolean;
 }
 
 // Bilingual error messages
@@ -30,6 +33,8 @@ const ERROR_MESSAGES = {
     desc: { en: 'Try again, or reload the page. We have logged the issue.', ru: 'Попробуйте снова или перезагрузите страницу. Мы записали ошибку.', th: 'ลองอีกครั้งหรือรีเฟรชหน้านี้ เราได้บันทึกปัญหาไว้แล้ว' },
   },
   tryAgain: { en: 'Try again', ru: 'Попробовать снова', th: 'ลองอีกครั้ง' },
+  saveWarning: { en: 'Save unfinished changes before reloading.', ru: 'Сохраните незавершённые изменения перед перезагрузкой.', th: 'บันทึกการเปลี่ยนแปลงก่อนรีเฟรช' },
+  reloadFailed: { en: 'Reload could not be prepared. Please try again later.', ru: 'Не удалось подготовить перезагрузку. Попробуйте позже.', th: 'ยังไม่สามารถรีเฟรชได้ โปรดลองอีกครั้งภายหลัง' },
   reload: { en: 'Reload page', ru: 'Перезагрузить', th: 'รีเฟรชหน้า' },
 };
 
@@ -37,10 +42,12 @@ export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
+    reloading: false,
+    reloadFailed: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error, reloading: false, reloadFailed: false };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -59,33 +66,26 @@ export class ErrorBoundary extends Component<Props, State> {
       .catch(() => {});
     this.props.onError?.(error, errorInfo);
 
-    // Stale chunk auto-recovery: when a deploy invalidates the previous
-    // bundle, lazy-loaded routes throw "Failed to fetch dynamically
-    // imported module". A one-shot reload pulls the new index.html and
-    // re-resolves the chunk hashes. We guard against loops with a session
-    // marker — if we already reloaded once and still hit the error, fall
-    // through to the manual UI so the user isn't stuck reloading.
+    // An update-related failure can offer recovery, never reload without consent.
     const msg = error?.message ?? '';
-    const isChunkError =
-      msg.includes('dynamically imported') ||
-      msg.includes('Failed to fetch') ||
-      msg.includes('Loading chunk');
-    if (isChunkError && typeof window !== 'undefined') {
-      const RELOAD_KEY = '__myuno_chunk_reload__';
-      const alreadyReloaded = sessionStorage.getItem(RELOAD_KEY);
-      if (!alreadyReloaded) {
-        sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
-        window.location.reload();
-      }
+    if (typeof window !== 'undefined' && (msg.includes('dynamically imported') ||
+        msg.includes('Failed to fetch') || msg.includes('Loading chunk'))) {
+      requestRecoveryReload();
     }
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, reloading: false, reloadFailed: false });
   };
 
-  private handleReload = () => {
-    window.location.reload();
+  private handleReload = async () => {
+    if (this.state.reloading) return;
+    this.setState({ reloading: true, reloadFailed: false });
+    try {
+      await reloadAfterUserRecovery();
+    } catch {
+      this.setState({ reloading: false, reloadFailed: true });
+    }
   };
 
   public render() {
@@ -112,6 +112,8 @@ export class ErrorBoundary extends Component<Props, State> {
           <p className="text-sm text-muted-foreground mb-4 max-w-md">
             {messages.desc[lang]}
           </p>
+          {isChunkError && <p className="text-sm text-muted-foreground mb-4">{ERROR_MESSAGES.saveWarning[lang]}</p>}
+          {this.state.reloadFailed && <p role="alert" className="text-sm text-destructive mb-4">{ERROR_MESSAGES.reloadFailed[lang]}</p>}
           <div className="flex gap-2">
             {!isChunkError && (
               <Button onClick={this.handleReset} variant="outline" size="sm">
@@ -120,7 +122,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </Button>
             )}
             {isChunkError ? (
-              <Button onClick={this.handleReload} variant="default" size="sm">
+              <Button onClick={this.handleReload} variant="default" size="sm" disabled={this.state.reloading}>
                 {ERROR_MESSAGES.reload[lang]}
               </Button>
             ) : null}
@@ -152,12 +154,6 @@ export function useGlobalErrorHandler() {
   useEffect(() => {
     const lang = getLang();
 
-    // Clear stale-chunk reload marker after a successful mount — the next
-    // chunk failure should be allowed exactly one fresh auto-reload attempt.
-    if (typeof window !== 'undefined') {
-      try { sessionStorage.removeItem('__myuno_chunk_reload__'); } catch { /* ignore */ }
-    }
-
     const handleRejection = (event: PromiseRejectionEvent) => {
       errorLog.silent(event.reason, 'unhandled_rejection');
       
@@ -183,30 +179,20 @@ export function useGlobalErrorHandler() {
       if (message.includes('dynamically imported') ||
           message.includes('Failed to fetch') ||
           message.includes('Loading chunk')) {
-        // Stale-chunk auto-reload (one shot, guarded). Same logic as
-        // ErrorBoundary.componentDidCatch — handles cases where the failed
-        // import bubbles as an unhandled rejection instead of a render
-        // error (e.g. an awaited dynamic import outside a Suspense tree).
-        const RELOAD_KEY = '__myuno_chunk_reload__';
-        const alreadyReloaded = sessionStorage.getItem(RELOAD_KEY);
-        if (!alreadyReloaded) {
-          sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
-          window.location.reload();
-        } else {
-          toast.error(
-            pickLang(lang, {
-              ru: 'Не удалось загрузить компонент. Обновите страницу.',
-              en: 'Failed to load component. Please refresh the page.',
-              th: 'โหลดคอมโพเนนต์ไม่สำเร็จ โปรดรีเฟรชหน้า',
-            }),
-            {
-              action: {
-                label: pickLang(lang, { ru: 'Обновить', en: 'Refresh', th: 'รีเฟรช' }),
-                onClick: () => window.location.reload(),
-              },
-            }
-          );
-        }
+        requestRecoveryReload();
+        toast.error(
+          pickLang(lang, {
+            ru: 'Не удалось загрузить компонент. Обновите страницу.',
+            en: 'Failed to load component. Please refresh the page.',
+            th: 'โหลดคอมโพเนนต์ไม่สำเร็จ โปรดรีเฟรชหน้า',
+          }),
+          {
+            action: {
+              label: pickLang(lang, { ru: 'Обновить', en: 'Refresh', th: 'รีเฟรช' }),
+              onClick: () => requestRecoveryReload(true),
+            },
+          }
+        );
       } else {
         toast.error(
           pickLang(lang, {

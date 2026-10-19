@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import { deploymentMetadataPlugin } from "./scripts/vite-deployment-metadata";
+import { version } from "./package.json";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 // Lucide icon strategy:
@@ -15,8 +17,6 @@ import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
-  const buildTimestamp = new Date().toISOString();
-
   // Public Supabase config — safe to ship in client bundle (anon key + URL).
   // Hardcoded fallback ensures the app boots on every host (myuno.app,
   // Capacitor native shells, custom deployments) even when build-time env
@@ -65,7 +65,6 @@ export default defineConfig(({ mode, command }) => {
       port: 8080,
     },
     define: {
-      __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),
       "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
       "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabaseKey),
       "import.meta.env.VITE_SUPABASE_PROJECT_ID": JSON.stringify(supabaseProjectId),
@@ -75,6 +74,7 @@ export default defineConfig(({ mode, command }) => {
     esbuild: command === "build" ? { drop: ["console", "debugger"] } : undefined,
     plugins: [
       react(),
+      deploymentMetadataPlugin(version),
       // Cursor / VS Code Simple Browser loads URLs inside an iframe; CSP
       // frame-ancestors 'none' in index.html blocks that and yields a blank preview.
       // Applies to `vite` and `vite preview` (both command === "serve"), not to `vite build`
