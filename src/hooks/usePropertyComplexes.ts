@@ -152,18 +152,38 @@ export function useAssignPropertyToComplex() {
   });
 }
 
+// Frontend-first rollout bridge only. Do not reinterpret permission, transport,
+// row-not-found or unrelated relation errors as an absent catalogue view.
+function isMissingPublicComplexCatalogue(error: unknown, status?: number): boolean {
+  if (!error || typeof error !== 'object' || (status !== undefined && status !== 404)) return false;
+  const { code, message } = error as { code?: unknown; message?: unknown };
+  if (typeof message !== 'string') return false;
+  return (code === '42P01' && /^relation "(?:public\.)?public_complex_catalog" does not exist$/.test(message))
+    || (code === 'PGRST205' && message === "Could not find the table 'public.public_complex_catalog' in the schema cache");
+}
+
+const complexAmenityColumns = 'amenities, services, security_features, infrastructure, name, name_ru';
+const complexNameColumns = 'id,name,name_ru';
+
 /** Hook to get amenities inherited from a property's complex */
 export function useComplexAmenities(complexId: string | null | undefined) {
   return useQuery({
     queryKey: ['complex-amenities', complexId],
     enabled: !!complexId,
     queryFn: async () => {
-      const { data, error } = await typedFrom('public_complex_catalog')
-        .select('amenities, services, security_features, infrastructure, name, name_ru')
+      let result = await typedFrom('public_complex_catalog')
+        .select(complexAmenityColumns)
         .eq('id', complexId!)
         .single();
-      if (error) throw error;
-      return data as Pick<PropertyComplex, 'amenities' | 'services' | 'security_features' | 'infrastructure' | 'name' | 'name_ru'>;
+      if (isMissingPublicComplexCatalogue(result.error, result.status)) {
+        result = await db.from('property_complexes')
+          .select(complexAmenityColumns)
+          .eq('id', complexId!)
+          .eq('is_active', true)
+          .single();
+      }
+      if (result.error) throw result.error;
+      return result.data as Pick<PropertyComplex, 'amenities' | 'services' | 'security_features' | 'infrastructure' | 'name' | 'name_ru'>;
     },
     staleTime: 10 * 60 * 1000,
   });
@@ -173,14 +193,20 @@ export function useComplexAmenities(complexId: string | null | undefined) {
 /** Safe names used for grouping. Public catalogue + independently authorized
  * private names are projections of the same canonical complexes, never authority. */
 export async function readPropertyComplexNames(ids?: string[]) {
-  let publicQuery = typedFrom('public_complex_catalog').select('id,name,name_ru');
-  let privateQuery = db.from('property_complexes').select('id,name,name_ru');
-  if (ids) {
-    if (!ids.length) return [];
-    publicQuery = publicQuery.in('id', ids);
-    privateQuery = privateQuery.in('id', ids);
-  }
-  const [catalogue, independent] = await Promise.all([publicQuery.order('name'), privateQuery.order('name')]);
+  if (ids && !ids.length) return [];
+  const readCatalogue = async () => {
+    let query = typedFrom('public_complex_catalog').select(complexNameColumns);
+    if (ids) query = query.in('id', ids);
+    const result = await query.order('name');
+    if (!isMissingPublicComplexCatalogue(result.error, result.status)) return result;
+    // Same explicit public columns, active rows only, and existing RLS still applies.
+    let legacy = db.from('property_complexes').select(complexNameColumns).eq('is_active', true);
+    if (ids) legacy = legacy.in('id', ids);
+    return await legacy.order('name');
+  };
+  let privateQuery = db.from('property_complexes').select(complexNameColumns);
+  if (ids) privateQuery = privateQuery.in('id', ids);
+  const [catalogue, independent] = await Promise.all([readCatalogue(), privateQuery.order('name')]);
   if (catalogue.error) throw catalogue.error;
   if (independent.error) throw independent.error;
   const rows = [...(catalogue.data || []), ...(independent.data || [])] as Array<{ id: string; name: string; name_ru: string | null }>;
