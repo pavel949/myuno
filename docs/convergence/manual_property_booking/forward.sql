@@ -5,8 +5,9 @@ DO $preflight$
 BEGIN
   IF md5(pg_get_functiondef('public.actor_can_operate_property(uuid,uuid,text,text)'::regprocedure)) <> '781d38004497ca05e31bcc486451a1b8'
     OR md5(pg_get_functiondef('public.actor_has_platform_admin()'::regprocedure)) <> '459831d60535d4e9fcb5c86b2ff52042'
-    OR position('equal dates alone never' IN pg_get_functiondef('public.trg_sync_order_to_property_booking()'::regprocedure)) = 0
-    OR position('Asia/Bangkok' IN pg_get_functiondef('public.trg_sync_order_to_property_booking()'::regprocedure)) = 0 THEN
+    OR md5(pg_get_functiondef('public.trg_sync_order_to_property_booking()'::regprocedure)) <> '40bd0e79a1e210cfd64443ad10891c23'
+    OR NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.property_bookings'::regclass
+      AND conname='property_bookings_no_overlap' AND contype='x' AND convalidated) THEN
     RAISE EXCEPTION 'manual_booking_predecessor_drift';
   END IF;
 END $preflight$;
@@ -147,7 +148,10 @@ BEGIN
       AND public.property_booking_holds_inventory(status))<>1 THEN
     RAISE EXCEPTION 'property_inventory_not_committed' USING ERRCODE='23P01';
   END IF;
-  RETURN jsonb_build_object('success',true,'replayed',replayed,'order',to_jsonb(saved),
+  RETURN jsonb_build_object('success',true,'replayed',replayed,'order',jsonb_build_object(
+      'id',saved.id,'order_number',saved.order_number,'status',saved.status,'start_at',saved.start_at,'end_at',saved.end_at,
+      'total_amount',saved.total_amount,'currency',saved.currency,'notes',saved.notes,'metadata',saved.metadata,
+      'created_at',saved.created_at,'updated_at',saved.updated_at,'source_company_id',saved.source_company_id),
     'order_participants',jsonb_build_array(jsonb_build_object('role','guest','name',guest_name,'phone',guest_phone,'email',guest_email)),
     'order_items',jsonb_build_array(jsonb_build_object('item_type','property','resource_id',p_property_id)));
 END $command$;

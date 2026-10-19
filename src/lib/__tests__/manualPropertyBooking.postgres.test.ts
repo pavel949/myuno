@@ -4,10 +4,8 @@ import { mkdtempSync, readFileSync, rmSync, chmodSync, chownSync, realpathSync, 
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import postgres from 'postgres';
-import { verifyInventoryHold } from '../../../supabase/functions/_shared/inventory-hold';
 
 const room = '00000000-0000-4000-8000-000000000001';
-const category = '00000000-0000-4000-8000-000000000002';
 const actor = '00000000-0000-4000-8000-000000000003';
 let directory: string;
 let sql: ReturnType<typeof postgres>;
@@ -204,6 +202,28 @@ describe('checked manual unpaid property booking / real PostgreSQL',()=>{
       CREATE TRIGGER fixture_reject_history BEFORE INSERT ON order_status_history FOR EACH ROW EXECUTE FUNCTION fixture_reject_history()`);
     try {await expect(create()).rejects.toThrow('late_history_failure');expect(await counts()).toEqual({orders:0,bookings:0,items:0,guests:0,receipts:0,alerts:0,intents:0});}
     finally{await sql.unsafe('DROP TRIGGER fixture_reject_history ON order_status_history; DROP FUNCTION fixture_reject_history()');}
+  });
+  it('does not return arbitrary order or financial columns',async()=>{
+    await sql.unsafe('ALTER TABLE orders ADD COLUMN fixture_private_finance text DEFAULT \'private\'');
+    try{expect((await create()).order).not.toHaveProperty('fixture_private_finance');}
+    finally{await sql.unsafe('ALTER TABLE orders DROP COLUMN fixture_private_finance');}
+  });
+  it('rejects a missing canonical hold on replay',async()=>{
+    await create();await sql`DELETE FROM property_bookings WHERE external_id=${request}`;
+    await expect(create()).rejects.toThrow('property_inventory_not_committed');
+  });
+  it('preserves pending reservations and a nonzero stored quote in its own currency',async()=>{
+    expect(await create({status:'pending',total_amount:1200,currency:'USD'})).toMatchObject({order:{status:'pending',total_amount:1200,currency:'USD'}});
+    const [hold]=await sql`SELECT status,total_amount::text,currency FROM property_bookings`;
+    expect(hold).toEqual({status:'pending',total_amount:'1200',currency:'USD'});
+  });
+  it('fails preflight when the accepted bridge drifts',async()=>{
+    await sql.unsafe('DROP SCHEMA pms_commands CASCADE; DROP FUNCTION public.create_manual_property_booking(uuid,uuid,jsonb)');
+    const [original]=await sql`SELECT pg_get_functiondef('public.trg_sync_order_to_property_booking()'::regprocedure) definition`;
+    try{
+      await sql.unsafe(original.definition.replace('BEGIN','BEGIN -- fixture drift'));
+      await expect(script(forward)).rejects.toThrow('manual_booking_predecessor_drift');
+    }finally{await sql.unsafe(original.definition);}
   });
   it('exposes an invoker wrapper, denies receipt table access and keeps rollback restrictive',async()=>{
     const [def]=await sql`SELECT prosecdef FROM pg_proc WHERE oid='public.create_manual_property_booking(uuid,uuid,jsonb)'::regprocedure`;
