@@ -41,7 +41,6 @@ import {
 import { useLiveClusterCatalog, isClusterVisibleToUser } from '@/lib/nav/clusterCatalog';
 import { ROLE_META } from '@/lib/roleBlend';
 import type { UserPersona } from '@/hooks/useUserPersonas';
-import { pickLang } from '@/lib/i18n/pickLang';
 
 const HOME_PREFERENCE_LABEL_TH: Record<UserPersona, string> = {
   tourist: 'ท่องเที่ยวภูเก็ต',
