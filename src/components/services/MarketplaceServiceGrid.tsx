@@ -22,20 +22,20 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
   // separate so unavailable supply is never inferred from a failed read.
   if (!isLoading && !isError && data?.length === 0) {
     return <p role="status" className="text-sm text-muted-foreground">
-      {L('Онлайн-запись пока недоступна. Можно оставить заявку ниже.',
-        'Online booking is not available yet. You can request a service below.',
-        'ยังไม่มีบริการจองออนไลน์ ส่งคำขอด้านล่างได้')}
+      {L('Онлайн-запись пока недоступна. Выберите услугу для дома или опишите задачу.',
+        'Online booking is not available yet. Choose a home service or describe your task.',
+        'ยังไม่มีบริการจองออนไลน์ เลือกบริการสำหรับบ้านหรืออธิบายสิ่งที่ต้องการ')}
     </p>;
   }
 
   return (
-    <section aria-labelledby="bookable-services">
+    <section aria-labelledby="bookable-services" className="space-y-4">
       <div className="flex items-center gap-2 mb-3">
         <CalendarCheck className="h-4 w-4 text-primary" />
-        <h3 id="bookable-services" className="font-semibold text-sm">{L('Онлайн-запись к специалистам', 'Book a provider', 'จองผู้ให้บริการ')}</h3>
+        <h2 id="bookable-services" className="font-display text-h3">{L('Онлайн-запись к специалистам', 'Book a provider', 'จองผู้ให้บริการ')}</h2>
       </div>
       {isLoading ? (
-        <div className="grid gap-2 sm:grid-cols-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28" />)}</div>
+        <div role="status" aria-label={L('Загружаем услуги', 'Loading services', 'กำลังโหลดบริการ')} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64" />)}</div>
       ) : isError ? (
         <div className="border border-border p-4 text-sm flex items-center justify-between gap-2">
           <span className="text-muted-foreground">{L('Не удалось загрузить услуги.', 'Could not load services.', 'โหลดบริการไม่สำเร็จ')}</span>
@@ -44,27 +44,27 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
       ) : list.length === 0 ? (
         <p className="text-sm text-muted-foreground border border-border p-4">{(data ?? []).length > 0 && q ? L('По вашему запросу ничего не найдено. Измените поиск.', 'No services match your search. Try another search.', 'ไม่พบบริการที่ตรงกับการค้นหา') : L('Онлайн-запись пока недоступна. Ниже можно оставить заявку на подбор специалиста.', 'Online booking is not available yet. You can request a specialist below.', 'ยังไม่มีบริการจองออนไลน์ ส่งคำขอด้านล่างได้')}</p>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {list.map((s) => {
             const name = (language === 'ru' ? s.name_ru : s.name_en) || s.name_en;
             const img = s.images?.[0];
             return (
-              <article key={s.id} className="border border-border bg-card p-3 flex gap-3">
-                {img && <img src={img} alt="" loading="lazy" className="h-20 w-20 object-cover shrink-0" />}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <h4 className="font-medium text-sm leading-snug line-clamp-2">{name}</h4>
+              <article key={s.id} className="flex min-w-0 flex-col border border-border bg-card">
+                {img ? <img src={img} alt="" loading="lazy" className="h-40 w-full border-b border-border object-cover" /> : <div aria-hidden="true" className="flex h-24 items-center justify-center border-b border-border bg-muted/50 text-primary sm:h-28"><CalendarCheck className="h-10 w-10" strokeWidth={1.25} /></div>}
+                <div className="flex flex-1 min-w-0 flex-col gap-2 p-4">
+                  <h3 className="font-display text-h4 leading-snug line-clamp-2">{name}</h3>
                   {s.provider && (
-                    <Link to={`/services/provider/${s.provider.id}?returnTo=${encodeURIComponent(returnTo)}`} className="text-xs text-muted-foreground hover:underline flex items-center gap-1">
+                    <Link to={`/services/provider/${s.provider.id}?returnTo=${encodeURIComponent(returnTo)}`} className="min-h-11 text-sm text-muted-foreground hover:underline flex items-center gap-1">
                       {s.provider.is_verified && <Shield className="h-3 w-3 text-primary" aria-label={L('Специалист проверен', 'Verified', 'ยืนยันแล้ว')} />}
                       {s.provider.name}
                     </Link>
                   )}
-                  <div className="flex items-center justify-between gap-2 pt-1">
+                  <div className="mt-auto flex flex-col gap-3 border-t border-border pt-3">
                     <span className="text-sm font-mono">
                       {s.price != null ? `฿${Number(s.price).toLocaleString()}` : L('По запросу', 'On request', 'ตามคำขอ')}
                       {s.duration_minutes ? <span className="text-xs text-muted-foreground ml-1 inline-flex items-center gap-0.5"><Clock className="h-3 w-3" />{s.duration_minutes}′</span> : null}
                     </span>
-                    <Button size="sm" className="min-h-[40px]" onClick={() => setSelected({
+                    <Button size="sm" className="min-h-11 w-full" onClick={() => setSelected({
                       id: s.id, providerId: s.provider_id, name, price: s.price, currency: s.currency,
                       durationMinutes: s.duration_minutes, leadTimeHours: s.lead_time_hours,
                     })}>{L('Записаться на услугу', 'Book', 'จอง')}</Button>

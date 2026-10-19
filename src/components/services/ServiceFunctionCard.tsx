@@ -1,4 +1,4 @@
- import { Clock, ChevronRight, Zap } from 'lucide-react';
+ import { Clock, ChevronRight, Zap, Snowflake, Droplets, Wrench, Plug, Brush, Waves, Leaf, Bug, ShieldCheck, Truck, Coins } from 'lucide-react';
  import { Card, CardContent } from '@/components/ui/card';
  import { Button } from '@/components/ui/button';
  import { Badge } from '@/components/ui/badge';
@@ -22,31 +22,37 @@
      return `${getCurrencySymbol(currency)}${price.toLocaleString()}`;
    };
  
-   // Discovery uses one quiet, keyboard-accessible row action. Other placements
-   // retain their existing compact/default presentation.
+   // Category icons avoid implying that editorial images show actual providers.
+   // Other placements retain their existing compact/default presentation.
    if (catalogue) {
      const titleId = `service-${fn.id}-title`;
      const actionId = `service-${fn.id}-action`;
      const descriptionId = `service-${fn.id}-description`;
      const termsId = `service-${fn.id}-terms`;
+     const Icon = ({ ac: Snowflake, plumbing: Droplets, electrical: Zap, handyman: Wrench,
+       appliance_repair: Plug, cleaning: Brush, pool: Waves, garden: Leaf,
+       pest_control: Bug, security: ShieldCheck, moving: Truck })[fn.category] ?? Wrench;
      return (
-       <article className="min-w-0 border-b border-border/60">
+       <article className="min-w-0 border border-border bg-card transition-shadow hover:shadow-md">
          <button type="button" onClick={onClick} data-testid="service-request-card"
            aria-labelledby={`${titleId} ${actionId}`} aria-describedby={`${descriptionId} ${termsId}`}
-           className="group w-full min-w-0 px-1 py-4 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary">
-           <span id={titleId} className="block font-medium text-base leading-snug text-foreground">{fn.name}</span>
-           <span id={descriptionId} className="mt-1 block text-sm leading-relaxed text-muted-foreground line-clamp-2">
+           className="group flex h-full w-full min-w-0 flex-col text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary">
+           <span aria-hidden="true" className="flex h-16 w-full items-center justify-center border-b border-border bg-muted/50 text-primary sm:h-28"><Icon className="!h-10 !w-10" strokeWidth={1.25} /></span>
+           <span className="flex w-full flex-1 flex-col p-4">
+           <span id={titleId} className="block font-display text-h4 leading-snug text-foreground">{fn.name}</span>
+           <span id={descriptionId} className="mt-2 block text-sm leading-relaxed text-muted-foreground line-clamp-2">
              {fn.includes.slice(0, 3).join(' · ')}
            </span>
-           <span className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-             <span id={termsId} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-               <span className="font-medium text-primary">{isRu ? 'от' : 'from'} {formatPrice(fn.basePrice, fn.currency)}</span>{' '}
-               <span className="text-muted-foreground">{fn.estimatedTime}</span>{' '}
+           <span className="mt-auto block pt-4">
+             <span id={termsId} className="flex flex-col gap-2 border-t border-border pt-3 text-sm">
+               <span className="inline-flex items-center gap-2 font-medium text-primary"><Coins className="h-4 w-4 shrink-0" aria-hidden="true" />{isRu ? 'от' : 'from'} {formatPrice(fn.basePrice, fn.currency)}</span>{' '}
+               <span className="inline-flex items-center gap-2 text-muted-foreground"><Clock className="h-4 w-4 shrink-0" aria-hidden="true" />{fn.estimatedTime}</span>{' '}
                {fn.isUrgent && <span className="text-muted-foreground">{isRu ? 'Срочная заявка' : 'Urgent request'}</span>}
              </span>
-             <span id={actionId} className="inline-flex min-h-6 items-center gap-1 text-sm font-medium text-primary group-hover:underline underline-offset-4">
+             <span id={actionId} className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary group-hover:underline underline-offset-4">
                {isRu ? 'Оставить заявку' : 'Request service'}<ChevronRight className="h-4 w-4" aria-hidden="true" />
              </span>
+           </span>
            </span>
          </button>
        </article>
