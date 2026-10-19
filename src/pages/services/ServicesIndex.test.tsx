@@ -22,6 +22,26 @@ beforeAll(() => {
   Element.prototype.hasPointerCapture = vi.fn(() => false);
 });
 describe('simplified service discovery', () => {
+  it('opens the full catalogue and finds services outside the initial preview', () => {
+    mount();
+    expect(screen.getAllByRole('button').filter(button => button.hasAttribute('data-catalogue'))).toHaveLength(8);
+    expect(screen.queryByText('CCTV Installation')).toBeNull();
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'CCTV' } });
+    expect(screen.getByText('CCTV Installation')).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: /^All home services \(/ }));
+    expect(screen.getByText('CCTV Installation')).toBeInTheDocument();
+    expect(screen.getAllByRole('button').filter(button => button.hasAttribute('data-catalogue')).length).toBeGreaterThan(8);
+  });
+  it('keeps quick categories in sync with the URL and detailed category selector', () => {
+    mount('/discover/services?ref=fixture');
+    fireEvent.click(screen.getByRole('button', { name: /^Air conditioning$/ }));
+    expect(screen.getByRole('button', { name: /^Air conditioning$/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('combobox')).toHaveTextContent('Air Conditioning');
+    expect(screen.getByTestId('location')).toHaveTextContent('ref=fixture&category=ac');
+    expect(screen.getByText('AC Installation')).toBeInTheDocument();
+    expect(screen.queryByText('Leak Repair')).toBeNull();
+  });
   it('renders each request once without gateway or repeated popular blocks', () => {
     mount();
     expect(screen.getAllByText('AC Cleaning')).toHaveLength(1);

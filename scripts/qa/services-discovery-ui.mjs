@@ -13,6 +13,8 @@ const output = '/tmp/browser/services-discovery-isolated';
 await mkdir(output, { recursive: true });
 const virtual = {
   '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru',t:(s)=>s});`,
+  '@/contexts/AuthContext': `export const useAuth=()=>({user:null});`,
+  '@/lib/analytics/track': `export const trackEvent=()=>{};`,
   '@/components/layout/AppLayout': `export const AppLayout=({children})=><main>{children}</main>;`,
   '@/components/filters/UniversalFilter': `export const UniversalFilter=()=>null;`,
   '@/components/landings/PersonaFilterChip': `export const PersonaFilterChip=()=>null;`,
