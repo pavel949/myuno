@@ -48,15 +48,15 @@ describe('one residential results surface', () => {
     state.language = language;
     mount('/property/search?mode=rent&q=Title');
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeVisible();
-    expect(screen.getByRole('button', { name: rent, exact: true })).toBeVisible();
-    expect(screen.getByRole('button', { name: buy, exact: true })).toBeVisible();
+    expect(screen.getByRole('button', { name: rent })).toBeVisible();
+    expect(screen.getByRole('button', { name: buy })).toBeVisible();
     expect(screen.getByRole('combobox', { name: sort })).toBeVisible();
-    expect(screen.getByRole('button', { name: pool, exact: true })).toBeVisible();
-    fireEvent.click(screen.getByRole('button', { name: filters, exact: true }));
+    expect(screen.getByRole('button', { name: pool })).toBeVisible();
+    fireEvent.click(screen.getByRole('button', { name: filters }));
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByText(sheet, { exact: true })).toBeVisible();
-    expect(within(dialog).getByRole('button', { name: apply, exact: true })).toBeVisible();
-    fireEvent.click(within(dialog).getByRole('button', { name: apply, exact: true }));
+    expect(within(dialog).getByRole('button', { name: apply })).toBeVisible();
+    fireEvent.click(within(dialog).getByRole('button', { name: apply }));
     expect(screen.getByTestId('location')).toHaveTextContent('mode=rent&q=Title');
   });
   it.each([false, true])('discloses checked-night filtering without changing selected dates (mobile=%s)', mobile => {
