@@ -708,3 +708,5 @@ export const OutreachHub = lazy(() => import('@/pages/outreach/OutreachHub'));
 export const InvestorQuiz = lazy(() => import('@/pages/invest/InvestorQuiz'));
 export const GoalEntryPage = lazy(() => import('@/pages/discover/GoalEntryPage'));
 export const PmsTodayPage = lazy(() => import('@/pages/mc/operations/PmsTodayPage'));
+
+export const GuestResidentialComplexDetail = lazy(() => import('@/pages/property/GuestResidentialComplexDetail'));

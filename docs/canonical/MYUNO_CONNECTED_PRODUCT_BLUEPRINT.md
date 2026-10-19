@@ -138,7 +138,16 @@ These are **IA reference scenarios**, not claims about live completeness or
 currently verified project links, stock or portal behavior.
 
 Use current `properties`, rental category entities, `project_units` and trusted
-project views/adapters. Do not revive `property_complexes` or `development_units`.
+project views/adapters. Do not create a replacement inventory model or revive
+`development_units`. Current checked employee authoring also uses the existing
+`property_complexes` domain and `properties.complex_id`; this is distinct from
+`property_projects` / `properties.project_id`, not a new property or project truth.
+The guest project portal retains `/property/complex/:id`. Managed residential
+complexes use `/property/residential-complex/:id`, reading only the allowlisted
+`public_complex_catalog` and published units through `public_property_catalog`
+filtered by `complex_id`. No project-ID reinterpretation or private-table fallback
+is allowed. The public complex projection and checked publication contract must
+be deployed and verified separately; source routes do not prove activation.
 Existing project backing differs across older docs and callers; resolve it from
 current domain/view evidence before later implementation, not a new model here.
 Sales availability is not inferred from a rental calendar. Unsupported rental

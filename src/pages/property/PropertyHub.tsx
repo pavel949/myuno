@@ -144,7 +144,7 @@ function getActiveTab(pathname: string, search: string): string {
     pathname.startsWith(APP_ROUTES.PROPERTY_MAP) ||
     pathname.startsWith(APP_ROUTES.PROPERTY_CONSULTATION);
 
-  if (isBrowse || isLegacyPropertySearch || pathname.startsWith('/property/complex/')) {
+  if (isBrowse || isLegacyPropertySearch || pathname.startsWith('/property/complex/') || pathname.startsWith('/property/residential-complex/')) {
     const params = new URLSearchParams(search);
     if (params.get('mode') === 'buy') return 'buy';
     if (params.get('tenancy') === 'long') return 'rent_long';

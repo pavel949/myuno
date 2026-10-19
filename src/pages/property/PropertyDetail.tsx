@@ -34,6 +34,7 @@ import {
   MessageHostButton,
   GuestExtraFeesDisplay,
 } from '@/components/property';
+import { ResidentialComplexLink } from '@/components/property/ResidentialComplexLink';
 import { ProjectInfoCard } from '@/components/property/ProjectInfoCard';
 import { RelatedServicesSection } from '@/components/crosssell';
 import { UnitSpecs } from '@/components/property/UnitSpecs';
@@ -502,6 +503,8 @@ export default function PropertyDetail() {
                 />
               </ErrorBoundary>
 
+
+              {property.complex_id && <ResidentialComplexLink complexId={property.complex_id} mode={isSaleListing ? 'buy' : 'rent'} />}
 
               {property.project && (
                 <>
