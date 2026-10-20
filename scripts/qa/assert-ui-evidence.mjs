@@ -23,6 +23,10 @@ export function assertUiEvidence(rows, expected) {
       if (row.width === 320 && (!Array.isArray(geometry.touchTargets) || geometry.touchTargets.length < 5 || geometry.touchTargets.some(target => target.width < 44 || target.height < 44))) throw Error('Missing mobile target evidence');
       if (row.state === 'full') {
         for (const flag of ['searchFocusReturned', 'dashboardSearchKeptFocus', 'avatarFocusReturned', 'singleCommandDialog', 'commandFocusReturned']) if (row.keyboard?.[flag] !== true) throw Error('Missing keyboard evidence: ' + flag);
+        for (const modifier of ['ctrl', 'meta']) {
+          const command = row.keyboard.commands?.[modifier];
+          if (command?.ready?.dialog?.state !== 'open' || !command.ready.dialog.containsFocus || !Array.isArray(command.ready.dialog.animations) || command.ready.dialog.animations.some(animation => animation.pending || animation.state === 'running') || command.dismissed !== true || command.focusReturned !== true || command.closed?.dialogs?.length !== 0) throw Error('Missing settled command interaction: ' + modifier);
+        }
         if (row.width === 320 && row.keyboard?.preferencesFocusReturned !== true) throw Error('Missing mobile preferences evidence');
         if (row.navigation?.uniqueActualRoutes !== 74 || row.navigation?.renderedMenuButtons !== 74 || row.navigation?.singleActiveToday !== true || row.afterInteractionGeometry?.viewport !== row.width || row.afterInteractionGeometry?.bad?.length !== 0) throw Error('Missing navigation evidence');
       }

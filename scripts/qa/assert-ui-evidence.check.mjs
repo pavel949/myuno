@@ -6,13 +6,16 @@ function shellRows() {
   return ['ru', 'en', 'th'].flatMap(language => [320, 2560].flatMap(width => ['full', 'all-zero', 'total-source-failure'].map(state => ({
     language, width, state, outcome: 'PASS', actualShell: true, actualAdminLayout: true,
     geometry: {viewport: width, documentWidth: width, bad: [], touchTargets: Array.from({length: 5}, () => ({width: 44, height: 44}))},
-    keyboard: {searchFocusReturned: true, dashboardSearchKeptFocus: true, avatarFocusReturned: true, singleCommandDialog: true, commandFocusReturned: true, preferencesFocusReturned: true},
+    keyboard: {searchFocusReturned: true, dashboardSearchKeptFocus: true, avatarFocusReturned: true, singleCommandDialog: true, commandFocusReturned: true, preferencesFocusReturned: true, commands: Object.fromEntries(['ctrl', 'meta'].map(modifier => [modifier, {ready: {dialog: {state: 'open', containsFocus: true, animations: []}}, dismissed: true, focusReturned: true, closed: {dialogs: []}}]))},
     navigation: {uniqueActualRoutes: 74, renderedMenuButtons: 74, singleActiveToday: true}, afterInteractionGeometry: {viewport: width, bad: []},
   }))));
 }
 test('accepts a complete unique shell matrix with interaction evidence', () => assert.equal(assertUiEvidence(shellRows(), 18), 18));
 test('rejects duplicate rows despite correct case count', () => { const rows = shellRows(); rows[17] = rows[0]; assert.throws(() => assertUiEvidence(rows, 18), /duplicate/); });
 test('rejects missing required keyboard proof', () => { const rows = shellRows(); delete rows[0].keyboard.commandFocusReturned; assert.throws(() => assertUiEvidence(rows, 18), /keyboard/); });
+test('requires both settled shortcut iterations with dismissal/focus proof', () => { const rows = shellRows(); delete rows[0].keyboard.commands.meta; assert.throws(() => assertUiEvidence(rows, 18), /command interaction/); });
+test('rejects a still-animating command portal', () => { const rows = shellRows(); rows[0].keyboard.commands.ctrl.ready.dialog.animations.push({pending: true, state: 'running'}); assert.throws(() => assertUiEvidence(rows, 18), /command interaction/); });
+test('rejects a dialog remaining after Escape despite success booleans', () => { const rows = shellRows(); rows[0].keyboard.commands.meta.closed.dialogs.push({state: 'open'}); assert.throws(() => assertUiEvidence(rows, 18), /command interaction/); });
 test('rejects partial/failed matrices', () => { const rows = shellRows(); assert.throws(() => assertUiEvidence(rows.slice(1), 18)); rows[0].outcome = 'FAIL'; assert.throws(() => assertUiEvidence(rows, 18)); });
 test('rejects unexpected matrix keys', () => { const rows = shellRows(); rows[0].width = 375; assert.throws(() => assertUiEvidence(rows, 18)); });
 test('rejects missing actual layout and small mobile targets', () => { const rows = shellRows(); rows[0].actualAdminLayout = false; assert.throws(() => assertUiEvidence(rows, 18)); rows[0].actualAdminLayout = true; rows[0].geometry.touchTargets[0].width = 32; assert.throws(() => assertUiEvidence(rows, 18), /target/); });

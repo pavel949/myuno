@@ -10,7 +10,7 @@ from pathlib import Path
 import sys
 from urllib.parse import urlencode, urlparse
 from playwright.async_api import async_playwright, expect
-from dialog_readiness import wait_for_dialog_ready
+from dialog_readiness import wait_for_dialog_ready, dialog_diagnostics
 
 OUTPUT = Path(sys.argv[1])
 CASES = [(lang, width, state) for lang in ['ru', 'en', 'th']
@@ -86,18 +86,38 @@ async def keyboard_flow(page, width):
     menu_proof = {'searchFocusReturned': True, 'dashboardSearchKeptFocus': True}
     # The real AdminLayout owns Ctrl/Cmd+K; TopBar must not open global search
     # concurrently. Keep actual keyboard events and the original focused field.
+    command_proof = {}
     for shortcut in ['Control+k', 'Meta+k']:
         await tab_to(page, search)
         await page.keyboard.press(shortcut)
         command = page.get_by_role('dialog', name='Command Menu', exact=True)
-        await expect(command).to_be_visible()
-        await expect(page.get_by_role('dialog')).to_have_count(1)
-        await expect(command.locator('input')).to_be_focused()
-        await page.keyboard.press('Escape')
-        await expect(page.get_by_role('dialog')).to_have_count(0)
-        await expect(search).to_be_focused()
+        modifier = 'ctrl' if shortcut == 'Control+k' else 'meta'
+        diagnostic_path = OUTPUT / f'{lang}-{width}-command-{modifier}'
+        proof = {'shortcut': shortcut, 'phase': 'opening'}
+        try:
+            await expect(command).to_be_visible()
+            await expect(page.get_by_role('dialog')).to_have_count(1)
+            # Visibility and auto-focus can precede passive Radix layer setup.
+            # Observe the same actual portal settling contract as search/Sheet.
+            proof['ready'] = await wait_for_dialog_ready(page, command, keyboard=True,
+                failure_path=diagnostic_path.with_name(diagnostic_path.name + '-readiness'))
+            await expect(command.locator('input')).to_be_focused()
+            proof['phase'] = 'escape'
+            await page.keyboard.press('Escape')
+            await expect(page.get_by_role('dialog')).to_have_count(0)
+            proof['phase'] = 'focus-return'
+            await expect(search).to_be_focused()
+            proof.update(dismissed=True, focusReturned=True, phase='complete',
+                closed=await dialog_diagnostics(page, command))
+            command_proof[modifier] = proof
+        except Exception as error:
+            proof.update(error=str(error), afterEscape=await dialog_diagnostics(page, command))
+            diagnostic_path.with_suffix('.json').write_text(json.dumps(proof, ensure_ascii=False, indent=2), encoding='utf-8')
+            await page.screenshot(path=str(diagnostic_path.with_suffix('.png')), full_page=True)
+            raise
     menu_proof['singleCommandDialog'] = True
     menu_proof['commandFocusReturned'] = True
+    menu_proof['commands'] = command_proof
     if width < 1024:
         preferences = page.locator('header button').filter(has=page.locator('svg.lucide-sliders-horizontal'))
         await tab_to(page, preferences)

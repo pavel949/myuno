@@ -187,3 +187,25 @@ unique expected matrix keys, required source/interaction/access evidence and
 
 Fresh exact-head full CI and raw geometry artifacts are required. No new local
 full TypeScript success, physical-device result, merge or publication is claimed.
+
+## Command palette readiness investigation
+
+Exact head88f2336 passed remote TypeScript and3886 tests; the single local full
+TypeScript process (session52801) also completed successfully. Shell artifact
+12254560904 was downloaded and inspected:18unique cases,13PASS/5FAIL. All mobile
+geometry/44px checks passed. Five full-state cases retained a focused command
+input after one Escape. The EN320 failure pixels confirm one open command menu.
+
+The command iterations omitted the existing dialog readiness helper used by
+global search and mobile Sheet. Installed Radix code registers Escape callbacks,
+layer membership and callback updates in passive effects, whereas visibility and
+auto-focus can precede that lifecycle completion. This supports a readiness-race
+hypothesis; it does not establish a product defect from the old artifact alone.
+
+Both Control+k and Meta+k now observe the same real portal-animation/position/
+focus contract before one Escape. No sleep, repeated Escape, forced focus,
+animation override or excluded case was added. Each shortcut records its ready
+state and closed-dialog diagnostics; failures capture a separate language/width/
+modifier JSON and screenshot with the failing phase. Final evidence guards now
+require both settled iterations, dismissal and focus return. Fresh full CI and
+raw18case evidence remain required to validate the hypothesis.
