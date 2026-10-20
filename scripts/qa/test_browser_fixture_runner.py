@@ -1,18 +1,34 @@
 """Runner contract tests with lightweight subprocesses; never launch a browser."""
 import json
+import ast
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import sys
 import tempfile
 import time
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 import browser_fixture_runner as runner
 
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def declared_fixture_output(source):
+    """Resolve supported static declarations with the CI default temporary root."""
+    literal = re.search(r"(?m)^\s*const output\s*=\s*'([^']+)'\s*;", source)
+    if literal:
+        return literal.group(1)
+    portable = re.search(
+        r"(?m)^\s*const output\s*=\s*path\.join\(\s*process\.env\.TEMP\s*\|\|\s*'(/tmp)'\s*,\s*'(browser)'\s*,\s*'([^']+)'\s*\)\s*;",
+        source,
+    )
+    if portable:
+        return str(PurePosixPath(*portable.groups()))
+    raise AssertionError('Fixture must declare a literal output or the supported portable TEMP/browser path')
 
 
 class BrowserFixtureRunnerTest(unittest.TestCase):
@@ -56,10 +72,33 @@ class BrowserFixtureRunnerTest(unittest.TestCase):
         self.assertEqual(runner.MAX_WORKERS, 2)
         self.assertEqual(runner.FIXTURE_TIMEOUT_SECONDS, 180)
         for name, output in runner.FIXTURE_SPECS:
-            source = (ROOT / f'scripts/qa/{name}.mjs').read_text()
-            actual = re.search(r"const output\s*=\s*'([^']+)'", source).group(1)
+            source = (ROOT / f'scripts/qa/{name}.mjs').read_text(encoding='utf-8')
+            actual = declared_fixture_output(source)
             self.assertEqual(actual, f'/tmp/browser/{output}', name)
             self.assertTrue((ROOT / f'scripts/qa/{name}.py').is_file())
+
+    def test_output_contract_accepts_portable_paths_but_still_checks_exact_destination(self):
+        literal = "const output = '/tmp/browser/moderation-queue-isolated';"
+        portable = "const output = path.join(process.env.TEMP || '/tmp', 'browser', 'moderation-queue-isolated');"
+        self.assertEqual(declared_fixture_output(literal), declared_fixture_output(portable))
+        self.assertNotEqual(declared_fixture_output(portable.replace('moderation-queue-isolated', 'wrong')), declared_fixture_output(literal))
+        with self.assertRaisesRegex(AssertionError, 'Fixture must declare'):
+            declared_fixture_output('const output = arbitraryPath();')
+
+    def test_moderation_reader_assertion_checks_page_without_shadowing_browser_page(self):
+        source = (ROOT / 'scripts/qa/moderation-queue-ui.py').read_text(encoding='utf-8')
+        helper = next(node for node in ast.parse(source).body if isinstance(node, ast.AsyncFunctionDef) and node.name == 'assert_last_read')
+        namespace = {}
+        exec(compile(ast.Module(body=[helper], type_ignores=[]), '<read-assertion>', 'exec'), namespace)
+        async def evaluate(_script):
+            return {'source': 'listing', 'page': 0, 'queue': 'pending'}
+        page = SimpleNamespace(evaluate=evaluate)
+        # The synthetic evaluate returns immediately; drive the real helper
+        # directly without an OS event loop, subprocess or browser.
+        with self.assertRaises(StopIteration):
+            namespace['assert_last_read'](page, source='listing', page=0, queue='pending').send(None)
+        with self.assertRaises(AssertionError):
+            namespace['assert_last_read'](page, source='listing', page=1).send(None)
 
     def test_exactly_two_slots_and_all_fixtures_finish_with_isolated_logs(self):
         fixtures = [self.fixture(f'pass-{index}', 'time.sleep(0.2)') for index in range(5)]

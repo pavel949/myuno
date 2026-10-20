@@ -108,8 +108,8 @@ def tab(page, label):
     return page.get_by_role('tab', name=re.compile(r'^' + re.escape(label) + r'(?:\s|$)'))
 
 
-async def assert_last_read(page, **expected):
-    actual = await page.evaluate('() => window.fixtureReadOptions.at(-1)')
+async def assert_last_read(browser_page, **expected):
+    actual = await browser_page.evaluate('() => window.fixtureReadOptions.at(-1)')
     for key, value in expected.items():
         assert actual.get(key) == value, {'expected': expected, 'actual': actual}
 
