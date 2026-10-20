@@ -131,7 +131,7 @@ async def main():
                             await page.wait_for_timeout(100)
                             resized_header = await check_header(page, False)
                             resized_sticky = await page.locator('main .sticky').first.bounding_box()
-                            assert resized_sticky['y'] >= resized_header['height'] - 1, {'resizedSticky': resized_sticky, 'header': resized_header}
+                            assert abs(resized_sticky['y'] - resized_header['height']) <= 2, {'resizedSticky': resized_sticky, 'header': resized_header}
                             await page.set_viewport_size({'width': width, 'height': 900})
                             await page.wait_for_timeout(100)
                             await check_header(page, False)
@@ -158,6 +158,7 @@ async def main():
                     else:
                         await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{surface}.png'), full_page=True)
                         results.append(row)
+                        (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
                     finally:
                         await context.close()
         await browser.close()
