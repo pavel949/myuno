@@ -28,6 +28,7 @@ import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import type { OrderStatus } from '@/hooks/useOrders';
 import { COMPANY_CONTACTS, getTelLink } from '@/lib/config/contacts';
+import { CancelOrderAction } from '@/components/orders/CancelOrderAction';
 
 const statusConfig: Record<OrderStatus, { 
   icon: typeof Clock; 
@@ -62,6 +63,7 @@ export default function OrderTracking() {
     order, 
     timeline, 
     isLoading, 
+    refresh,
     getProgressPercentage, 
     isStatusCompleted,
     STATUS_SEQUENCE 
@@ -115,6 +117,7 @@ export default function OrderTracking() {
           showBack 
           fallbackPath="/orders" 
         />
+        <div className="mb-4"><CancelOrderAction orderId={order.id} status={order.status} onCancelled={refresh} /></div>
         {/* Order Header */}
         <Card className="mb-4">
           <CardContent className="pt-6">

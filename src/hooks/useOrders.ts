@@ -21,6 +21,7 @@ import type {
 } from '@/types/orders';
 
 import { toast } from 'sonner';
+import { readCustomerCancellation, cancelCustomerUnpaidOrder } from '@/lib/customerOrderCancellation';
 const errorLog = createErrorHandler('useOrders');
 
 // Re-export all types from canonical source — src/types/orders.ts
@@ -276,30 +277,9 @@ const queryClient = useQueryClient();
     mutationFn: async (orderId: string): Promise<boolean> => {
       if (!user?.id) return false;
 
-      // Get current order status
-      const { data: currentOrder } = await supabase
-        .from('orders')
-        .select('status')
-        .eq('id', orderId)
-        .maybeSingle();
-
-      // Update order status
-      const { error } = await supabase
-        .from('orders')
-        .update({ status: 'cancelled' })
-        .eq('id', orderId)
-        .eq('customer_user_id', user.id);
-
-      if (error) throw error;
-
-      // Record status change
-      await supabase.from('order_status_history').insert({
-        order_id: orderId,
-        from_status: currentOrder?.status || 'pending',
-        to_status: 'cancelled',
-        actor_user_id: user.id,
-        reason: 'Cancelled by customer',
-      });
+      const options = await readCustomerCancellation(orderId);
+      if (!options.eligible) throw new Error('cancellation_unavailable');
+      await cancelCustomerUnpaidOrder(options, crypto.randomUUID());
 
       toast(t('order.cancelled'));
       return true;
