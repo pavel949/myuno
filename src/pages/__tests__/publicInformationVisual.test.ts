@@ -22,7 +22,9 @@ it('keeps support actions compact on desktop and removes competing panel colors'
 });
 it('uses the display family for owner hierarchy and a plain business hero', () => {
  expect(source('ForOwners')).not.toContain('font-serif');
- expect(source('ForOwners')).toContain('font-display text-xl text-foreground pb-3');
+ expect(source('ForOwners')).toMatch(/<h1 className="[^"]*text-h1 md:text-display font-display/);
+ expect(source('ForOwners')).toMatch(/<h2 className="font-display text-h2\b/);
+ expect(source('ForOwners')).toMatch(/<h3 className="text-h3 font-display\b/);
  expect(source('ForBusinessPage')).not.toContain('absolute inset-0 bg-gradient-to-br');
 });
 it('does not draw a second card border around trip search', () => {

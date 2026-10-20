@@ -10,6 +10,11 @@ export const ECOSYSTEM_PAGE_CONTAINER = "w-full max-w-[1280px] mx-auto px-4 md:p
 /** Use for sticky app chrome so header content aligns with `<main>` below. */
 export const ECOSYSTEM_HEADER_INNER = ECOSYSTEM_PAGE_CONTAINER;
 
+/** Opt-in marketing frame aligned with public chrome; catalog/form bounds stay domain-owned. */
+export const PUBLIC_CONTENT_LAYOUT = {
+  marketing: ECOSYSTEM_PAGE_CONTAINER,
+} as const;
+
 export const ECOSYSTEM_MAIN_SPACING = "space-y-4 md:space-y-6";
 
 export const ECOSYSTEM_HEADER_TITLE = "text-lg md:text-xl font-semibold font-display tracking-tight break-words";
