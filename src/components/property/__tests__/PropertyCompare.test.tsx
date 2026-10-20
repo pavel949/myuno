@@ -1,18 +1,25 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { CompareProvider, CompareButton, type CompareProperty } from '../PropertyCompare';
+import { CompareProvider, CompareButton, PropertyCompareTrigger, type CompareProperty } from '../PropertyCompare';
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (v: number) => `THB ${v}` }) }));
 const home: CompareProperty = { id: 'dual', title_en: 'Dual home', mode: 'buy', listing_type: 'rent', sale_price: 5000000, currency: 'THB', sale_currency: 'USD', price: 2000, price_per_night: 2000, guestSearch: 'checkIn=2026-12-01&checkOut=2026-12-04&guests=3&operator=private' };
 function Location() { const location = useLocation(); return <output data-testid="url">{location.pathname + location.search}</output>; }
 function mount(items: CompareProperty[]) {
   localStorage.setItem('myuno_compare_properties', JSON.stringify(items));
-  render(<MemoryRouter><CompareProvider><Location /><CompareButton property={home} /></CompareProvider></MemoryRouter>);
+  render(<MemoryRouter><CompareProvider><Location /><PropertyCompareTrigger /><CompareButton property={home} /></CompareProvider></MemoryRouter>);
 }
 afterEach(() => { cleanup(); localStorage.clear(); });
 function open() { fireEvent.click(screen.getByRole('button', { name: /Compare \(/ })); }
 describe('comparison preserves property offer intent', () => {
+  it('keeps the comparison entry in document flow without a floating overlay', () => {
+    mount([home]);
+    const trigger = screen.getByRole('button', { name: 'Compare (1)' });
+    expect(trigger.closest('.fixed')).toBeNull();
+    fireEvent.click(trigger);
+    expect(screen.getByRole('heading', { name: 'Compare properties' })).toBeInTheDocument();
+  });
   it('shows the sale amount, and links back with safe purchase and guest context', () => {
     mount([home]); open();
     expect(screen.getByText('Purchase: 5,000,000.00 USD')).toBeInTheDocument();

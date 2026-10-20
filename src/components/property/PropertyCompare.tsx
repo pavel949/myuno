@@ -14,8 +14,7 @@ import { formatCurrencyAmount } from '@/lib/config/currencies';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { propertyDetailHref, propertyCatalogHref, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FLOATING, FLOATING_OFFSET } from '@/lib/nav/floatingStack';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 const MAX_COMPARE = 3;
 const STORAGE_KEY = 'myuno_compare_properties';
@@ -102,31 +101,23 @@ export function CompareProvider({ children }: { children: React.ReactNode }) {
   return (
     <CompareContext.Provider value={{ items, add, remove, clear, isInCompare, openSheet }}>
       {children}
-      {/* Floating compare bar */}
-      <AnimatePresence>
-        {items.length > 0 && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className={`fixed ${FLOATING_OFFSET.aboveBottomNav} left-1/2 -translate-x-1/2 ${FLOATING.compare}`}
-          >
-            <Button
-              onClick={() => setSheetOpen(true)}
-              className="gap-2 rounded-full shadow-lg px-5 py-3 h-auto"
-              size="lg"
-            >
-              <GitCompareArrows className="w-4 h-4" />
-              {isRu ? 'Сравнить' : 'Compare'} ({items.length})
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Compare Sheet */}
       <CompareSheet open={sheetOpen} onOpenChange={setSheetOpen} />
     </CompareContext.Provider>
   );
+}
+
+/** In-flow entry point: shares the existing sheet and persisted selection. */
+export function PropertyCompareTrigger() {
+  const context = useContext(CompareContext);
+  const { language } = useLanguage();
+  if (!context?.items.length) return null;
+  return <Button variant="outline" size="sm" className="gap-1.5 min-h-11" onClick={(event) => {
+    event.stopPropagation();
+    context.openSheet();
+  }}><GitCompareArrows className="w-4 h-4" />
+    {pickLang(language, { ru: 'Сравнить', en: 'Compare', th: 'เปรียบเทียบ' })} ({context.items.length})
+  </Button>;
 }
 
 function CompareSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {

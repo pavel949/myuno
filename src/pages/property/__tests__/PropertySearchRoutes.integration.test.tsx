@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { PROPERTY_FEATURE_MAP } from '@/lib/config/propertyFeatures';
 import PropertySearchPage from '../PropertySearchPage';
+import { CompareProvider } from '@/components/property/PropertyCompare';
 import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import GoalEntryPage from '@/pages/discover/GoalEntryPage';
 
@@ -43,6 +44,16 @@ beforeEach(() => { state.language = 'en'; calendar.pending = false; calendar.fai
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it('opens a persisted comparison from the results actions without an overlay', () => {
+    localStorage.setItem('myuno_compare_properties', JSON.stringify([{ id: 'one', title_en: 'Saved home', mode: 'rent' }]));
+    render(<MemoryRouter initialEntries={['/property/search']}><CompareProvider><PropertySearchPage /></CompareProvider></MemoryRouter>);
+    const compare = screen.getByRole('button', { name: 'Compare (1)' });
+    expect(compare.closest('.property-discovery-result-actions')).not.toBeNull();
+    expect(compare.closest('.fixed')).toBeNull();
+    fireEvent.click(compare);
+    expect(screen.getByRole('heading', { name: 'Compare properties' })).toBeInTheDocument();
+    localStorage.removeItem('myuno_compare_properties');
+  });
   it.each([1, 2, 3, 4])('maps the %s+ bookmark to a minimum and preserves it when secondary filters reset', minimum => {
     mount(`/property/search?bedrooms=${minimum}%2B&cats=pool`);
     expect(state.filters.minBedrooms).toBe(minimum);
