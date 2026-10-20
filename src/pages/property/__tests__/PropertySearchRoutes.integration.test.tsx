@@ -8,18 +8,18 @@ import PropertySearchRedirect from '@/components/property/PropertySearchRedirect
 import GoalEntryPage from '@/pages/discover/GoalEntryPage';
 import { PropertyHubIndex } from '@/components/layout/routes/propertyHubRoutes';
 
-const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false, language: 'en' }));
+const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false, language: 'en', loading: false, properties: [] as Record<string, unknown>[] }));
 const calendar = vi.hoisted(() => ({ pending: false, failed: false, hasNextPage: false }));
 vi.mock('@/hooks/useSearchPropertyAvailability', () => ({ useSearchPropertyAvailability: (_ids: string[], start?: string, end?: string) => ({ enabled: !!start && !!end, availableIds: new Set(), pending: calendar.pending, failed: calendar.failed, retry: vi.fn() }) }));
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
-vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: [] }] }, isLoading: false, isError: false, hasNextPage: calendar.hasNextPage, fetchNextPage: vi.fn() }; } }));
+vi.mock('@/hooks/useProperties', () => ({ usePropertiesInfinite: (filters: Record<string, unknown>) => { state.filters = filters; return { data: { pages: [{ properties: state.properties }] }, isLoading: state.loading, isError: false, hasNextPage: calendar.hasNextPage, fetchNextPage: vi.fn() }; } }));
 vi.mock('@/hooks/useManagementCompanies', () => ({ useManagementCompanies: () => { throw new Error('Guest discovery must not fetch management companies'); } }));
 vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ districts: [{ id: 'layan', valueKey: 'layan', labelEn: 'Layan', labelRu: 'Лаян' }], isLoading: false }), applyQuickFilters: (items: unknown) => items }));
 vi.mock('@/hooks/usePropertyFilterOptions', () => ({ usePropertyFilterOptions: () => ({ propertyTypes: [{ id: 'villa', labelEn: 'Villa', labelRu: 'Вилла' }], filterConfig: { sections: [] }, isLoading: false }) }));
 vi.mock('@/hooks/useMapListSync', () => ({ useMapListSync: () => ({ selectedId: null, select: vi.fn() }) }));
-vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: () => null }));
-vi.mock('@/components/property/PropertyMapView', () => ({ PropertyMapView: () => null }));
+vi.mock('@/components/property/PropertyListingCard', () => ({ PropertyListingCard: ({ property }: { property: { id: string } }) => <article data-testid="synthetic-property-card">{property.id}</article> }));
+vi.mock('@/components/property/PropertyMapView', () => ({ PropertyMapView: ({ properties, className }: { properties: unknown[]; className: string }) => <div data-testid="existing-map-boundary" data-property-count={properties.length} className={className} /> }));
 vi.mock('@/components/crosssell', () => ({ CrossSellSection: () => null }));
 vi.mock('@/components/leads/VerticalCTA', () => ({ VerticalCTA: () => null }));
 vi.mock('@/components/property/OffplanCTASection', () => ({ OffplanCTASection: () => null }));
@@ -42,10 +42,39 @@ function mount(entry: string) {
   fireEvent.click(result.container.querySelector('summary')!);
   return result;
 }
-beforeEach(() => { state.language = 'en'; calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
+beforeEach(() => { state.language = 'en'; state.loading = false; state.properties = []; calendar.pending = false; calendar.failed = false; calendar.hasNextPage = false; state.mobile = false; Element.prototype.scrollIntoView = vi.fn(); });
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it('uses the same wide catalogue columns for loaded homes and skeletons without a second form frame', () => {
+    state.loading = true;
+    const loading = mount('/property/search?source=wide-layout');
+    const columns = screen.getByTestId('property-results-skeleton').className;
+    expect(loading.container.querySelector('.property-discovery')).toHaveClass('max-w-[1760px]');
+    expect(loading.container.querySelector('.property-discovery-editor')).not.toHaveClass('journey-primary');
+    cleanup();
+    state.loading = false;
+    state.properties = [{ id: 'synthetic-wide-home', title_en: 'Synthetic wide home', listing_type: 'rent', monthly_rent: 1000 }];
+    mount('/property/search?source=wide-layout');
+    expect(screen.getByTestId('property-results-grid')).toHaveClass('min-[1440px]:grid-cols-4');
+    expect(screen.getByTestId('property-results-grid').className).toBe(columns);
+    expect(screen.getAllByTestId('synthetic-property-card')).toHaveLength(1);
+  });
+  it('keeps the existing map and list in separate responsive regions with identical filtered homes', () => {
+    state.properties = [{ id: 'synthetic-map-home', title_en: 'Synthetic map home', listing_type: 'rent', monthly_rent: 1000 }];
+    const view = mount('/property/search?view=map&source=wide-layout');
+    const regions = view.container.querySelector('.property-discovery-results--map');
+    expect(regions).toContainElement(screen.getByTestId('existing-map-boundary'));
+    expect(regions).toContainElement(screen.getByTestId('property-results-grid'));
+    expect(screen.getByTestId('existing-map-boundary')).toHaveAttribute('data-property-count', '1');
+    expect(screen.getByTestId('existing-map-boundary')).toHaveClass('property-discovery-map');
+    fireEvent.click(screen.getByRole('button', { name: 'List' }));
+    expect(screen.queryByTestId('existing-map-boundary')).not.toBeInTheDocument();
+    expect(screen.getByTestId('location')).toHaveTextContent('source=wide-layout');
+    fireEvent.click(screen.getByRole('button', { name: 'History back' }));
+    expect(screen.getByTestId('existing-map-boundary')).toBeInTheDocument();
+    expect(screen.getByTestId('location')).toHaveTextContent('view=map');
+  });
   it.each([['rent-month', 'medium', 'Monthly'], ['rent-long', 'long', 'Yearly']])('hydrates the legacy %s persona bookmark through the catalogue alias', (intent, tenancy, label) => {
     mount(`/property?intent=${intent}&persona=P3&returnTo=%2Ffor%2Flong-stay#anchor`);
     expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');

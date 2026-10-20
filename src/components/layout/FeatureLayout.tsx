@@ -23,7 +23,7 @@ import { FilterChip, FilterChipGroup } from '@/components/uno/FilterChip';
 import { BackButton } from '@/components/uno/BackButton';
 import { PersonaFilterChip } from '@/components/landings/PersonaFilterChip';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
+import { ECOSYSTEM_MAIN_SPACING, ECOSYSTEM_PAGE_CONTAINER, PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 import { SEOHead } from '@/components/seo';
 import { CrossSellSection } from '@/components/crosssell/CrossSellSection';
 import { UnifiedCatalogMap, type UnifiedMapMarker } from '@/components/map/UnifiedCatalogMap';
@@ -101,6 +101,7 @@ export interface MiniAppLayoutProps {
   children: ReactNode;
   showBottomNav?: boolean;
   contentClassName?: string;
+  pageWidth?: 'default' | 'catalogue';
   stickySubHeader?: ReactNode;
   showQuickFiltersInSubHeader?: boolean;
   showEcosystemHint?: boolean;
@@ -165,6 +166,7 @@ function MiniappMode({
   children,
   showBottomNav = true,
   contentClassName,
+  pageWidth = 'default',
   quickActions,
   stickySubHeader,
   showQuickFiltersInSubHeader = true,
@@ -341,6 +343,7 @@ function MiniappMode({
       {/* Keep catalog controls in normal flow: the shared consumer header owns sticky navigation. */}
       <div className="relative">
         <UnifiedHeader
+          containerClassName={pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : undefined}
           title={title}
           subtitle={subtitle}
           showBack
@@ -395,7 +398,7 @@ function MiniappMode({
 
       <div
         className={cn(
-          ECOSYSTEM_PAGE_CONTAINER,
+          pageWidth === 'catalogue' ? PUBLIC_CONTENT_LAYOUT.catalogue : ECOSYSTEM_PAGE_CONTAINER,
           'pb-4 md:pb-8',
           ECOSYSTEM_MAIN_SPACING,
           showBottomNav && 'pb-24 md:pb-8',

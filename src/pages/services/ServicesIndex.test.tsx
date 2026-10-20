@@ -22,11 +22,14 @@ beforeAll(() => {
   Element.prototype.hasPointerCapture = vi.fn(() => false);
 });
 describe('simplified service discovery', () => {
-  it('keeps homogeneous services in named canonical groups when expanding the catalogue', () => {
+  it('uses one coherent grid with explicit canonical categories when expanding the catalogue', () => {
     mount();
     fireEvent.click(screen.getByRole('button', { name: /^All home services \(/ }));
-    const cleaning = screen.getByRole('region', { name: 'Cleaning' });
+    const grid = screen.getByTestId('service-request-grid');
+    expect(grid).toHaveClass('min-[1440px]:grid-cols-4');
+    const cleaning = grid.querySelector('[data-service-category="cleaning"]') as HTMLElement;
     expect(within(cleaning).getAllByRole('button').length).toBeGreaterThan(0);
+    expect(within(cleaning).getByText('Cleaning')).toBeInTheDocument();
     expect(within(cleaning).queryByText('AC Installation')).toBeNull();
     expect(screen.getAllByText('AC Installation')).toHaveLength(1);
   });

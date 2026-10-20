@@ -395,7 +395,7 @@ export default function ForBusinessPage() {
         {/* Hero */}
         <section className="relative overflow-hidden py-10 md:py-16">
 
-          <div className={PUBLIC_CONTENT_LAYOUT.marketing}>
+          <div className={PUBLIC_CONTENT_LAYOUT.business}>
           <div className="relative max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -426,7 +426,7 @@ export default function ForBusinessPage() {
           </div>
         </section>
 
-        <section className={`${PUBLIC_CONTENT_LAYOUT.marketing} pb-12`} aria-labelledby="business-start-title">
+        <section className={`${PUBLIC_CONTENT_LAYOUT.business} pb-12`} aria-labelledby="business-start-title">
           <h2 id="business-start-title" className="text-2xl font-display mb-6">{t({ru:'С чего начнём?',en:'What do you need?',th:'คุณต้องการความช่วยเหลือเรื่องใด?'})}</h2>
           <div className="grid gap-4 md:grid-cols-3">
             {[
@@ -443,14 +443,14 @@ export default function ForBusinessPage() {
         </section>
 
         {/* Services menu */}
-        <section className={`${PUBLIC_CONTENT_LAYOUT.marketing} pb-12`}>
+        <section className={`${PUBLIC_CONTENT_LAYOUT.business} pb-12`}>
           <h2 className="text-2xl md:text-3xl font-display font-semibold mb-2 text-center">
             {t(UI.servicesTitle)}
           </h2>
           <p className="text-center text-muted-foreground mb-8 text-sm">
             {t(UI.servicesHint)}
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 min-[1440px]:grid-cols-4 gap-5">
             {SERVICES.map((s, i) => {
               const isOn = selected.has(s.key);
               const title = t(s.title);
