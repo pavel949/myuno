@@ -26,7 +26,7 @@ export const P3_EU_GUESTS: PersonaLanding = {
   ],
   services: [
     { slug: 'long-stay-villas', label: { ru: 'Long-stay виллы', en: 'Long-stay villas' }, oneLiner: { ru: 'От 14 ночей, прямые контракты с владельцами.', en: 'From 14 nights, direct owner contracts.' }, href: '/property/rent' },
-    { slug: 'private-transfer', label: { ru: 'Private transfer', en: 'Private transfer' }, oneLiner: { ru: 'Mercedes/Toyota Alphard, англоговорящий водитель.', en: 'Mercedes/Toyota Alphard, English-speaking driver.' }, href: '/landing/airport-transfer' },
+    { slug: 'private-transfer', label: { ru: 'Private transfer', en: 'Private transfer' }, oneLiner: { ru: 'Mercedes/Toyota Alphard, англоговорящий водитель.', en: 'Mercedes/Toyota Alphard, English-speaking driver.' }, href: '/transfer' },
     { slug: 'wellness', label: { ru: 'Wellness & spa', en: 'Wellness & spa' }, oneLiner: { ru: 'Йога, массаж, detox-программы.', en: 'Yoga, massage, detox programmes.' }, href: '/wellness' },
     { slug: 'dining', label: { ru: 'Fine dining', en: 'Fine dining' }, oneLiner: { ru: 'Бронирование Michelin-recommended ресторанов.', en: 'Bookings at Michelin-recommended restaurants.' }, href: '/cluster/lifestyle' },
   ],

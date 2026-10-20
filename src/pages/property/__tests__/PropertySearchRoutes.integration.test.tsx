@@ -6,6 +6,7 @@ import PropertySearchPage from '../PropertySearchPage';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import GoalEntryPage from '@/pages/discover/GoalEntryPage';
+import { PropertyHubIndex } from '@/components/layout/routes/propertyHubRoutes';
 
 const state = vi.hoisted(() => ({ filters: {} as Record<string, unknown>, mobile: false, language: 'en' }));
 const calendar = vi.hoisted(() => ({ pending: false, failed: false, hasNextPage: false }));
@@ -33,6 +34,7 @@ function Location() {
 function mount(entry: string) {
   const result = render(<MemoryRouter initialEntries={[entry]}><Location /><Routes>
     <Route path="/property/search" element={<PropertySearchPage />} />
+    <Route path="/property" element={<PropertyHubIndex />} />
     <Route path="/property/browse" element={<PropertySearchRedirect />} />
     <Route path="/discover/stay" element={<GoalEntryPage goal="stay" />} />
     <Route path="/property/rent/medium-term" element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />} />
@@ -44,6 +46,15 @@ beforeEach(() => { state.language = 'en'; calendar.pending = false; calendar.fai
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it.each([['rent-month', 'medium', 'Monthly'], ['rent-long', 'long', 'Yearly']])('hydrates the legacy %s persona bookmark through the catalogue alias', (intent, tenancy, label) => {
+    mount(`/property?intent=${intent}&persona=P3&returnTo=%2Ffor%2Flong-stay#anchor`);
+    expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');
+    expect(state.filters.rentTenancy).toBe(tenancy);
+    expect(screen.getByTestId('location')).toHaveTextContent(`intent=${intent}`);
+    expect(screen.getByTestId('location')).toHaveTextContent('persona=P3');
+    expect(screen.getByTestId('location')).toHaveTextContent('returnTo=%2Ffor%2Flong-stay');
+    expect(screen.getByTestId('location')).toHaveTextContent('#anchor');
+  });
   it('opens a persisted comparison from the results actions without an overlay', () => {
     localStorage.setItem('myuno_compare_properties', JSON.stringify([{ id: 'one', title_en: 'Saved home', mode: 'rent' }]));
     render(<MemoryRouter initialEntries={['/property/search']}><CompareProvider><PropertySearchPage /></CompareProvider></MemoryRouter>);

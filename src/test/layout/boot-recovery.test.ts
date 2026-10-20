@@ -1,10 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { assetCacheWillUpdate } from '../../../scripts/asset-cache-response-guard';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { LoadingState } from '@/components/uno/LoadingSpinner';
 const html = readFileSync('index.html', 'utf8');
 const code = html.match(/<script id="myuno-boot-recovery">([\s\S]*?)<\/script>/)![1];
 function install(href = 'https://www.myuno.app/property/search?guests=4#results', unavailableStorage = false, navigatorMock: object = {}) {
-  let onError: (event: { target: HTMLScriptElement }) => void = () => {};
+  let onError: (event: { target: EventTarget | null }) => void = () => {};
   const replace = vi.fn();
   const reload = vi.fn();
   const timeout = vi.fn();
@@ -13,9 +16,14 @@ function install(href = 'https://www.myuno.app/property/search?guests=4#results'
   const storage = unavailableStorage ? { getItem() { throw new Error('disabled'); } } : sessionStorage;
   new Function('window', 'document', 'navigator', 'sessionStorage', 'setTimeout', 'URL', code)(fakeWindow, document, navigatorMock, storage, timeout, URL);
   const fail = () => { const target = document.createElement('script'); target.type = 'module'; target.src = 'https://www.myuno.app/assets/index-old.js'; onError({ target }); };
-  return { replace, reload, timeout, fail };
+  const runtimeError = () => {
+    const event = { target: window, preventDefault: vi.fn(), stopPropagation: vi.fn() };
+    onError(event);
+    return event;
+  };
+  return { replace, reload, timeout, fail, runtimeError };
 }
-beforeEach(() => { document.body.innerHTML = '<div id="root"><div class="uno-splash" role="status"></div></div>'; document.documentElement.lang = 'en'; sessionStorage.clear(); });
+beforeEach(() => { document.body.innerHTML = '<div id="root"><div class="uno-splash" data-myuno-bootstrap-splash role="status"></div></div>'; document.documentElement.lang = 'en'; sessionStorage.clear(); });
 describe('bundle-independent bootstrap recovery', () => {
   it('retries a failing entry once and preserves route, search and hash', () => {
     const first = install(); first.fail();
@@ -31,6 +39,26 @@ describe('bundle-independent bootstrap recovery', () => {
   it('does not intervene after the app has mounted', () => {
     const app = install(); document.querySelector('#root')!.innerHTML = '<main>App</main>'; app.fail(); app.timeout.mock.calls[0][0]();
     expect(app.replace).not.toHaveBeenCalled(); expect(document.querySelector('button')).toBeNull();
+  });
+  it('never mutates a mounted React route loader on timeout or module error', () => {
+    const app = install();
+    const root = document.querySelector('#root')!;
+    root.innerHTML = `<main id="main-content">${renderToStaticMarkup(createElement(LoadingState))}</main><aside aria-label="Cookies"><button>Dismiss cookies</button></aside>`;
+    const mounted = root.innerHTML;
+    expect(root.querySelector('.uno-splash svg')).not.toBeNull();
+    expect(root.querySelector('[data-myuno-bootstrap-splash]')).toBeNull();
+    expect(app.timeout.mock.calls[0][1]).toBe(20000);
+    app.timeout.mock.calls[0][0]();
+    expect(root.innerHTML).toBe(mounted);
+    app.fail();
+    expect(root.innerHTML).toBe(mounted);
+    expect(app.reload).not.toHaveBeenCalled();
+    expect(app.replace).not.toHaveBeenCalled();
+    expect(sessionStorage.length).toBe(0);
+    const runtimeError = app.runtimeError();
+    expect(runtimeError.preventDefault).not.toHaveBeenCalled();
+    expect(runtimeError.stopPropagation).not.toHaveBeenCalled();
+    expect(root.innerHTML).toBe(mounted);
   });
   it.each([['en', 'Try again'], ['ru', 'Повторить'], ['th', 'ลองอีกครั้ง']])('offers accessible manual recovery after a slow start in %s', (language, label) => {
     document.documentElement.lang = language;

@@ -32,8 +32,9 @@ export function readPropertySearchQuery(params: URLSearchParams) {
   if (search.bedrooms.length) legacy.filterValues.bedrooms = search.bedrooms;
   if (search.instantBooking) legacy.filterValues.instantBooking = 'yes';
   const mode: 'rent' | 'buy' = params.get('mode') === 'buy' || (!params.has('mode') && params.get('f.listingType') === 'sale') ? 'buy' : 'rent';
-  const tenancy: 'short' | 'medium' | 'long' = params.get('tenancy') === 'medium' ? 'medium' : params.get('tenancy') === 'long' ? 'long' : 'short';
   const intent = params.get('intent');
+  const tenancyValue = params.get('tenancy') ?? (intent === 'rent-month' ? 'medium' : intent === 'rent-long' ? 'long' : 'short');
+  const tenancy: 'short' | 'medium' | 'long' = tenancyValue === 'medium' ? 'medium' : tenancyValue === 'long' ? 'long' : 'short';
   const saleIntent: 'standard' | 'assignment' | 'quick_sale' | undefined = intent === 'standard' || intent === 'assignment' || intent === 'quick_sale' ? intent : undefined;
   return { search, hasGuestFilter, mode, tenancy, saleIntent, isQuickSale: params.get('quick') === '1' || saleIntent === 'quick_sale', filterValues: legacy.filterValues, categories: [...new Set([...legacy.categories, ...search.amenities])] };
 }
