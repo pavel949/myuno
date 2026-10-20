@@ -13,60 +13,60 @@ Source snapshot: PR137 head 5af8cff; generated AST inventory includes live and d
 
 ## Every unmatched authored href
 
-72 occurrences / 50 unique hrefs in original snapshot. The table records each href individually; unresolved entries are findings, not accepted functionality.
+The data-only exposure trace runs the actual `isLiveClusterLanding` and `isLivePersonaLanding` predicates against current imported configs. ClusterLandingPage:337–343 and PersonaLandingPage:442–448 gate the page with these helpers, then render configured services/CTA hrefs. **All 72 unmatched occurrences / 50 unique hrefs are currently live**, not draft-only. The table records their reachable source pages individually; unresolved entries are real current navigation findings, not accepted functionality. Reproduce: `node scripts/qa/content-link-exposure.mjs <output.json>`.
 
-| Authored href | Source | Disposition |
-|---|---|---|
-| `/community/seniors` | personas/P20_RETIREES.ts | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
-| `/concierge?topic=checkin` | clusterLandings.ts | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
-| `/concierge?topic=emergency` | clusterLandings.ts | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
-| `/concierge?topic=insurance` | clusterLandings.ts | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
-| `/concierge?topic=medical` | personas/P14_MEDICAL.ts | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
-| `/concierge?topic=overstay` | clusterLandings.ts | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
-| `/concierge?topic=police` | clusterLandings.ts | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
-| `/fitness/muay-thai` | clusterLandings.ts | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
-| `/legal/consultation` | personas/P09_RELOCATOR_SOLO.ts | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
-| `/legal/driving-license` | clusterLandings.ts | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
-| `/legal/lost-documents` | clusterLandings.ts | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
-| `/legal/retirement-visa` | personas/P20_RETIREES.ts | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
-| `/legal/spa` | clusterLandings.ts | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
-| `/legal/tm30` | clusterLandings.ts | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
-| `/legal/visa-extension` | clusterLandings.ts | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
-| `/legal/visa-run` | clusterLandings.ts | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
-| `/legal/work-permit` | personas/P13_EMPLOYEE_EXPAT.ts | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
-| `/owner/audit` | clusterLandings.ts | Unmatched legacy owner operation. /mc requires membership/context; do not redirect public intent into private operations. |
-| `/owner/maintenance` | clusterLandings.ts, personas/P23_PROPERTY_OWNER.ts | Unmatched legacy owner operation. /mc requires membership/context; do not redirect public intent into private operations. |
-| `/owner/pms` | clusterLandings.ts | Unmatched legacy owner operation. /mc requires membership/context; do not redirect public intent into private operations. |
-| `/owner/rental` | clusterLandings.ts | Unmatched legacy owner operation. /mc requires membership/context; do not redirect public intent into private operations. |
-| `/owner/reports` | clusterLandings.ts | Unmatched legacy owner operation. /mc requires membership/context; do not redirect public intent into private operations. |
-| `/services/concierge` | personas/P17_HALAL.ts | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
-| `/services/coworking` | personas/P4_DIGITAL_NOMADS.ts | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
-| `/services/finance/bank-account` | clusterLandings.ts | No matching finance subpage. /banking and /exchange exist; account/cash workflow equivalence not established. |
-| `/services/finance/cash` | clusterLandings.ts | No matching finance subpage. /banking and /exchange exist; account/cash workflow equivalence not established. |
-| `/services/finance/insurance` | clusterLandings.ts | No matching insurance subpage. /insurance exists; specified product/advice workflow not verified. |
-| `/services/health/checkup` | personas/P14_MEDICAL.ts | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
-| `/services/health/clinics` | personas/P18_LGBTQ.ts | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
-| `/services/health/dental` | personas/P14_MEDICAL.ts | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
-| `/services/health/hospitals` | clusterLandings.ts, personas/P14_MEDICAL.ts, personas/P20_RETIREES.ts | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
-| `/services/health/nutrition` | personas/P16_ATHLETES.ts | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
-| `/services/health/paediatrics` | personas/P7_FAMILIES.ts | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
-| `/services/health/recovery` | personas/P14_MEDICAL.ts | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
-| `/services/home/cleaning` | personas/P20_RETIREES.ts | Existing /cleaning catalogue is candidate; exact page intent and approved provider coverage require review. |
-| `/services/insurance` | clusterLandings.ts | No matching insurance subpage. /insurance exists; specified product/advice workflow not verified. |
-| `/services/insurance/liaison` | personas/P14_MEDICAL.ts, personas/P19_ACCESSIBILITY.ts | No matching insurance subpage. /insurance exists; specified product/advice workflow not verified. |
-| `/services/insurance/senior` | personas/P20_RETIREES.ts | No matching insurance subpage. /insurance exists; specified product/advice workflow not verified. |
-| `/services/property/inspection` | clusterLandings.ts | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
-| `/services/transport` | clusterLandings.ts | Existing /transport entry is candidate; authored context must distinguish information, vehicle rental and booking. |
-| `/services/utilities/internet` | clusterLandings.ts | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
-| `/vendor/apply` | personas/P21_PROVIDERS.ts, personas/P22_FREELANCERS.ts, personas/P23_SMB.ts | Unmatched vendor subpage. /vendor is guarded workspace; application/billing equivalence not established. |
-| `/vendor/billing` | personas/P21_PROVIDERS.ts, personas/P22_FREELANCERS.ts, personas/P23_SMB.ts | Unmatched vendor subpage. /vendor is guarded workspace; application/billing equivalence not established. |
-| `/water-activities` | personas/P19_ACCESSIBILITY.ts | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
-| `/wedding/guests` | personas/P15_WEDDINGS.ts | Only /wedding hub mounted; requested specialist flow has no matching mounted subpage. |
-| `/wedding/legal` | personas/P15_WEDDINGS.ts | Only /wedding hub mounted; requested specialist flow has no matching mounted subpage. |
-| `/wedding/photo` | personas/P15_WEDDINGS.ts | Only /wedding hub mounted; requested specialist flow has no matching mounted subpage. |
-| `/wedding/planner` | personas/P15_WEDDINGS.ts | Only /wedding hub mounted; requested specialist flow has no matching mounted subpage. |
-| `/wedding/venues` | personas/P15_WEDDINGS.ts | Only /wedding hub mounted; requested specialist flow has no matching mounted subpage. |
-| `/wellness` | clusterLandings.ts, personas/P16_ATHLETES.ts, personas/P3_EU_GUESTS.ts | No /wellness landing mounted; wellness success route does not establish catalogue readiness. |
+| Authored href | Source | Live source pages | Disposition |
+|---|---|---|---|
+| `/community/seniors` | personas/P20_RETIREES.ts | `/for/retirees` | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
+| `/concierge?topic=checkin` | clusterLandings.ts | `/cluster/arrival` | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
+| `/concierge?topic=emergency` | clusterLandings.ts | `/cluster/emergency` | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
+| `/concierge?topic=insurance` | clusterLandings.ts | `/cluster/emergency` | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
+| `/concierge?topic=medical` | personas/P14_MEDICAL.ts | `/for/medical` | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
+| `/concierge?topic=overstay` | clusterLandings.ts | `/cluster/extension` | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
+| `/concierge?topic=police` | clusterLandings.ts | `/cluster/emergency` | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
+| `/fitness/muay-thai` | clusterLandings.ts | `/cluster/lifestyle` | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
+| `/legal/consultation` | personas/P09_RELOCATOR_SOLO.ts | `/for/relocator-solo` | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
+| `/legal/driving-license` | clusterLandings.ts | `/cluster/settlement` | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
+| `/legal/lost-documents` | clusterLandings.ts | `/cluster/emergency` | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
+| `/legal/retirement-visa` | personas/P20_RETIREES.ts | `/for/retirees` | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
+| `/legal/spa` | clusterLandings.ts | `/cluster/transaction` | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
+| `/legal/tm30` | clusterLandings.ts | `/cluster/extension` | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
+| `/legal/visa-extension` | clusterLandings.ts | `/cluster/extension` | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
+| `/legal/visa-run` | clusterLandings.ts | `/cluster/extension` | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
+| `/legal/work-permit` | personas/P13_EMPLOYEE_EXPAT.ts | `/for/employee-expat` | No matching legal subpage. /visa or /legal hubs are broader; specific service/claim not verified. |
+| `/owner/audit` | clusterLandings.ts | `/cluster/operations` | Unmatched legacy owner operation. /mc requires membership/context; do not redirect public intent into private operations. |
+| `/owner/maintenance` | clusterLandings.ts, personas/P23_PROPERTY_OWNER.ts | `/cluster/operations`, `/for/property-owner` | Unmatched legacy owner operation. /mc requires membership/context; do not redirect public intent into private operations. |
+| `/owner/pms` | clusterLandings.ts | `/cluster/operations` | Unmatched legacy owner operation. /mc requires membership/context; do not redirect public intent into private operations. |
+| `/owner/rental` | clusterLandings.ts | `/cluster/operations` | Unmatched legacy owner operation. /mc requires membership/context; do not redirect public intent into private operations. |
+| `/owner/reports` | clusterLandings.ts | `/cluster/operations` | Unmatched legacy owner operation. /mc requires membership/context; do not redirect public intent into private operations. |
+| `/services/concierge` | personas/P17_HALAL.ts | `/for/halal` | No mounted concierge target. Existing /support is escalation, not a proven topic-equivalent replacement; retain audit finding. |
+| `/services/coworking` | personas/P4_DIGITAL_NOMADS.ts | `/for/digital-nomads` | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
+| `/services/finance/bank-account` | clusterLandings.ts | `/cluster/settlement` | No matching finance subpage. /banking and /exchange exist; account/cash workflow equivalence not established. |
+| `/services/finance/cash` | clusterLandings.ts | `/cluster/arrival` | No matching finance subpage. /banking and /exchange exist; account/cash workflow equivalence not established. |
+| `/services/finance/insurance` | clusterLandings.ts | `/cluster/operations` | No matching insurance subpage. /insurance exists; specified product/advice workflow not verified. |
+| `/services/health/checkup` | personas/P14_MEDICAL.ts | `/for/medical` | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
+| `/services/health/clinics` | personas/P18_LGBTQ.ts | `/for/lgbtq` | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
+| `/services/health/dental` | personas/P14_MEDICAL.ts | `/for/medical` | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
+| `/services/health/hospitals` | clusterLandings.ts, personas/P14_MEDICAL.ts, personas/P20_RETIREES.ts | `/cluster/emergency`, `/for/medical`, `/for/retirees` | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
+| `/services/health/nutrition` | personas/P16_ATHLETES.ts | `/for/athletes` | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
+| `/services/health/paediatrics` | personas/P7_FAMILIES.ts | `/for/families` | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
+| `/services/health/recovery` | personas/P14_MEDICAL.ts | `/for/medical` | No matching health subpage. /medical catalogue exists; specialty/provider availability not established. |
+| `/services/home/cleaning` | personas/P20_RETIREES.ts | `/for/retirees` | Existing /cleaning catalogue is candidate; exact page intent and approved provider coverage require review. |
+| `/services/insurance` | clusterLandings.ts | `/cluster/settlement` | No matching insurance subpage. /insurance exists; specified product/advice workflow not verified. |
+| `/services/insurance/liaison` | personas/P14_MEDICAL.ts, personas/P19_ACCESSIBILITY.ts | `/for/accessibility`, `/for/medical` | No matching insurance subpage. /insurance exists; specified product/advice workflow not verified. |
+| `/services/insurance/senior` | personas/P20_RETIREES.ts | `/for/retirees` | No matching insurance subpage. /insurance exists; specified product/advice workflow not verified. |
+| `/services/property/inspection` | clusterLandings.ts | `/cluster/investment` | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
+| `/services/transport` | clusterLandings.ts | `/cluster/settlement` | Existing /transport entry is candidate; authored context must distinguish information, vehicle rental and booking. |
+| `/services/utilities/internet` | clusterLandings.ts | `/cluster/settlement` | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
+| `/vendor/apply` | personas/P21_PROVIDERS.ts, personas/P22_FREELANCERS.ts, personas/P23_SMB.ts | `/for/freelancers`, `/for/providers`, `/for/smb` | Unmatched vendor subpage. /vendor is guarded workspace; application/billing equivalence not established. |
+| `/vendor/billing` | personas/P21_PROVIDERS.ts, personas/P22_FREELANCERS.ts, personas/P23_SMB.ts | `/for/freelancers`, `/for/providers`, `/for/smb` | Unmatched vendor subpage. /vendor is guarded workspace; application/billing equivalence not established. |
+| `/water-activities` | personas/P19_ACCESSIBILITY.ts | `/for/accessibility` | No matching mounted subpage or verified entity. Keep unresolved; do not invent catalogue destination. |
+| `/wedding/guests` | personas/P15_WEDDINGS.ts | `/for/weddings` | Only /wedding hub mounted; requested specialist flow has no matching mounted subpage. |
+| `/wedding/legal` | personas/P15_WEDDINGS.ts | `/for/weddings` | Only /wedding hub mounted; requested specialist flow has no matching mounted subpage. |
+| `/wedding/photo` | personas/P15_WEDDINGS.ts | `/for/weddings` | Only /wedding hub mounted; requested specialist flow has no matching mounted subpage. |
+| `/wedding/planner` | personas/P15_WEDDINGS.ts | `/for/weddings` | Only /wedding hub mounted; requested specialist flow has no matching mounted subpage. |
+| `/wedding/venues` | personas/P15_WEDDINGS.ts | `/for/weddings` | Only /wedding hub mounted; requested specialist flow has no matching mounted subpage. |
+| `/wellness` | clusterLandings.ts, personas/P16_ATHLETES.ts, personas/P3_EU_GUESTS.ts | `/cluster/lifestyle`, `/for/athletes`, `/for/eu-guests` | No /wellness landing mounted; wellness success route does not establish catalogue readiness. |
 
 ## Dynamic matches require entity evidence
 
@@ -114,3 +114,9 @@ Route patterns accept these paths, but source-only inspection does not establish
 ## Remaining blocker
 
 Consumer-local Library materialization previously failed at Windows metadata/xattr preservation. No screenshot pixels were fabricated. Live entity verification is not completed in this source-only tranche; remaining links need approved catalogue/entity evidence and intent-specific decisions before repair or suppression. No blanket redirects, speculative service routes, schema changes or authority grants were added.
+
+## Specific candidate rejection evidence
+
+- `/services/transport` is labelled “Car rent or buy” with a monthly price and VIN-check claim (clusterLandings:659). Mounted `/transport` is TransportIndex, a vehicle-rental catalogue using useVehicles; source does not prove vehicle-purchase/VIN-check fulfilment. A blanket replacement would hide an intent mismatch.
+- `/services/home/cleaning` advertises “Home help”: cleaning at a fixed price, cooking and repairs (P20_RETIREES:33). `/cleaning` is a cleaning catalogue; source does not establish cooking, repairs or that fixed price. No claim-preserving equivalent was verified.
+- Health, insurance and visa links point to specific specialties/products or advice; a mounted broad catalogue is not proof those offerings or quoted conditions exist. Retain these as explicit unresolved live findings until catalogue/claims evidence supports a precise correction or approved content removal.
