@@ -25,7 +25,8 @@ async def check_header(page, marketing):
     failures = await bounds(page, header.locator('button,a'))
     assert not failures, {'headerOverflow': failures}
     assert await header.locator('button,a').evaluate_all("""els=>{const boxes=els.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>e.getBoundingClientRect());return boxes.every((x,i)=>boxes.slice(i+1).every(y=>x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1))}"""), 'header controls overlap'
-    language = header.get_by_test_id('language-switch')
+    language = header.locator('[data-testid="language-switch"]:visible')
+    await expect(language).to_have_count(1)
     await expect(language).to_have_text((await page.locator('html').get_attribute('lang')).upper())
     assert await language.evaluate("""e=>{const s=e.querySelector('span');const r=document.createRange();r.selectNodeContents(s);return r.getClientRects().length===1 && s.scrollWidth<=s.clientWidth+1 && e.getBoundingClientRect().width>=44;}"""), 'language label split/clipped'
     box = await header.bounding_box()
