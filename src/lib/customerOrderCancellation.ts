@@ -48,3 +48,24 @@ export async function cancelCustomerUnpaidOrder(options: Extract<CancellationOpt
       typeof value.already_cancelled !== 'boolean') throw new Error('cancellation_not_confirmed');
   return { orderId: options.orderId, requestId, historyId: value.history_id, alreadyCancelled: value.already_cancelled };
 }
+
+// Keep uncertain commands for this browser session. Actor/order scoping prevents cross-account replay.
+type PendingCancellation = { options: Extract<CancellationOptions, { eligible: true }>; requestId: string };
+const unresolved = new Map<string, PendingCancellation>();
+export function hasUnresolvedCancellation(actorId: string, orderId: string): boolean {
+  return unresolved.has(JSON.stringify([actorId, orderId]));
+}
+export async function retryCustomerCancellation(actorId: string, orderId: string, initial?: Extract<CancellationOptions, { eligible: true }>): Promise<CancellationReceipt> {
+  const key = JSON.stringify([actorId, orderId]);
+  let pending = unresolved.get(key);
+  if (!pending) {
+    const options = initial ?? await readCustomerCancellation(orderId);
+    if (!options.eligible) throw new Error('cancellation_unavailable');
+    pending = { options, requestId: crypto.randomUUID() };
+    unresolved.set(key, pending);
+  }
+  // Replay before reading eligibility: a committed cancellation may no longer be eligible.
+  const receipt = await cancelCustomerUnpaidOrder(pending.options, pending.requestId);
+  unresolved.delete(key);
+  return receipt;
+}

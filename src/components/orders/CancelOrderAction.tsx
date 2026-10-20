@@ -1,9 +1,9 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { readCustomerCancellation, cancelCustomerUnpaidOrder } from '@/lib/customerOrderCancellation';
+import { readCustomerCancellation, retryCustomerCancellation, hasUnresolvedCancellation } from '@/lib/customerOrderCancellation';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
@@ -24,7 +24,6 @@ function CustomerCancelAction({ orderId, status, onCancelled, actorId }: CancelO
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [cancelled, setCancelled] = useState(false);
-  const requestId = useRef<string | null>(null);
   const options = useQuery({
     queryKey: ['customer-order-cancellation', actorId, orderId],
     queryFn: () => readCustomerCancellation(orderId),
@@ -32,8 +31,7 @@ function CustomerCancelAction({ orderId, status, onCancelled, actorId }: CancelO
   });
   const command = useMutation({
     mutationFn: async () => {
-      if (!options.data?.eligible || !requestId.current) throw new Error('cancellation_unavailable');
-      return cancelCustomerUnpaidOrder(options.data, requestId.current);
+      return retryCustomerCancellation(actorId, orderId, options.data?.eligible ? options.data : undefined);
     },
     onSuccess: async () => {
       setCancelled(true); setOpen(false);
@@ -47,14 +45,15 @@ function CustomerCancelAction({ orderId, status, onCancelled, actorId }: CancelO
       ]);
     },
   });
-  if (!WAITING.has(status)) return null;
+  const unresolved = hasUnresolvedCancellation(actorId, orderId);
+  if (!WAITING.has(status) && !unresolved) return null;
   if (cancelled) return <p role="status" className="text-sm">{t('Заказ отменён', 'Order cancelled', 'ยกเลิกคำสั่งแล้ว')}</p>;
-  if (options.isError || options.data?.eligible === false && options.data.reason === 'unavailable') {
+  if (!unresolved && (options.isError || options.data?.eligible === false && options.data.reason === 'unavailable')) {
     return <p className="text-xs text-muted-foreground">{t('Отмена сейчас недоступна', 'Cancellation is currently unavailable', 'ยังไม่สามารถยกเลิกได้ในขณะนี้')}</p>;
   }
-  if (!options.data?.eligible) return null;
+  if (!options.data?.eligible && !unresolved) return null;
   return <>
-    <Button variant="outline" size="sm" onClick={() => { requestId.current = crypto.randomUUID(); command.reset(); setOpen(true); }}>
+    <Button variant="outline" size="sm" onClick={() => { command.reset(); setOpen(true); }}>
       {t('Отменить заказ', 'Cancel order', 'ยกเลิกคำสั่ง')}
     </Button>
     <Dialog open={open} onOpenChange={value => { if (!command.isPending) setOpen(value); }}>

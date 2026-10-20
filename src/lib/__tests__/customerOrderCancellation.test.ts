@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { readCustomerCancellation, cancelCustomerUnpaidOrder } from '../customerOrderCancellation';
+import { readCustomerCancellation, cancelCustomerUnpaidOrder, retryCustomerCancellation } from '../customerOrderCancellation';
 const state = vi.hoisted(() => ({ rpc: vi.fn(), from: vi.fn(() => { throw new Error('No direct writes permitted'); }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: state }));
 const revision = '2026-10-20T00:00:00Z';
@@ -47,4 +47,17 @@ describe('customer cancellation server boundary', () => {
     await expect(cancelCustomerUnpaidOrder(options, 'retry-one')).rejects.toThrow('cancellation_not_confirmed');
     expect(state.from).not.toHaveBeenCalled();
   });
+});
+
+it('replays uncertain commands before new eligibility with the same request across callers', async () => {
+ const orderId = 'uncertain-reopen-order';
+ state.rpc.mockImplementation(async (name: string, args: Record<string, string>) => {
+  if (name === 'get_customer_order_cancellation') return { error: null, data: { version: 1, order_id: orderId, eligible: true, expected_updated_at: revision } };
+  if (state.rpc.mock.calls.filter(c => c[0] === 'cancel_customer_unpaid_order').length === 1) throw new Error('timeout');
+  return { error: null, data: { version: 1, order_id: orderId, request_id: args.p_request_id, history_id: args.p_request_id, status: 'cancelled', already_cancelled: true } };
+ });
+ await expect(retryCustomerCancellation('actor-reopen', orderId)).rejects.toThrow('timeout');
+ await expect(retryCustomerCancellation('actor-reopen', orderId)).resolves.toMatchObject({ alreadyCancelled: true });
+ const calls = state.rpc.mock.calls.filter(c => c[0] === 'cancel_customer_unpaid_order');
+ expect(calls[0][1]).toEqual(calls[1][1]); expect(state.rpc.mock.calls.filter(c => c[0] === 'get_customer_order_cancellation')).toHaveLength(1);
 });

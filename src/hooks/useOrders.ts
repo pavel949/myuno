@@ -21,7 +21,7 @@ import type {
 } from '@/types/orders';
 
 import { toast } from 'sonner';
-import { readCustomerCancellation, cancelCustomerUnpaidOrder } from '@/lib/customerOrderCancellation';
+import { retryCustomerCancellation } from '@/lib/customerOrderCancellation';
 const errorLog = createErrorHandler('useOrders');
 
 // Re-export all types from canonical source — src/types/orders.ts
@@ -277,9 +277,7 @@ const queryClient = useQueryClient();
     mutationFn: async (orderId: string): Promise<boolean> => {
       if (!user?.id) return false;
 
-      const options = await readCustomerCancellation(orderId);
-      if (!options.eligible) throw new Error('cancellation_unavailable');
-      await cancelCustomerUnpaidOrder(options, crypto.randomUUID());
+      await retryCustomerCancellation(user.id, orderId);
 
       toast(t('order.cancelled'));
       return true;
