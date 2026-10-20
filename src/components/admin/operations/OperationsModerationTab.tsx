@@ -13,7 +13,7 @@ import { ShieldCheck, AlertTriangle, Eye, ThumbsUp, ThumbsDown } from 'lucide-re
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { fetchModerationQueue, updateModerationItem, type ModerationItem, type ModerationType } from '@/lib/adminModeration';
+import { fetchModerationQueue, fetchModerationCategoryOptions, updateModerationItem, type ModerationItem, type ModerationType, MODERATION_PAGE_SIZE } from '@/lib/adminModeration';
 import { moderationReviewDestination } from '@/lib/moderationReviewRoutes';
 
 const typeLabels: Record<ModerationType, [string, string, string]> = {
@@ -52,13 +52,16 @@ export function OperationsModerationTab() {
     }
     pendingFilters.current = new URLSearchParams(params);
   }, [location.key, location.pathname, navigationType, params]);
-  const activeTab = params.get('queue') === 'complexes' ? 'complexes' : params.get('queue') === 'inactive' ? 'inactive' : 'pending';
+  const activeTab = params.get('queue') === 'complexes' ? 'complexes' : params.get('queue') === 'inactive' ? 'inactive' : params.get('queue') === 'draft' ? 'draft' : 'pending';
   const search = params.get('q') || '';
-  const type = params.get('type') || 'all';
+  const activeTypes: ModerationType[] = activeTab === 'inactive' ? ['service', 'product'] : ['listing', 'property'];
+  const type = activeTypes.includes(params.get('type') as ModerationType) ? params.get('type') as ModerationType : activeTypes[0];
+  const page = Math.max(0, Number.parseInt(params.get('page') || '0', 10) || 0);
   const category = params.get('category') || 'all';
   const setFilters = (updates: Record<string, string>) => {
     // Router search-param callbacks are not queued like React state updates.
     const next = new URLSearchParams(pendingFilters.current);
+    if (!('page' in updates)) next.delete('page');
     next.set('tab', 'moderation');
     Object.entries(updates).forEach(([key, value]) => {
       if (!value || (key !== 'q' && value === 'all') || (key === 'queue' && value === 'pending')) next.delete(key);
@@ -70,11 +73,12 @@ export function OperationsModerationTab() {
   };
   const actionInFlight = useRef(false);
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: ['moderation-queue', user?.id], queryFn: fetchModerationQueue, enabled: !!user && activeTab !== 'complexes',
+    queryKey: ['moderation-queue', user?.id, activeTab, type, page, search, category], queryFn: () => fetchModerationQueue({ source: type, page, queue: activeTab === 'inactive' ? 'inactive' : activeTab === 'draft' ? 'draft' : 'pending', search, category }), enabled: !!user && activeTab !== 'complexes',
   });
+  const categoryOptions = useQuery({ queryKey: ['moderation-category-options', user?.id, type], queryFn: () => fetchModerationCategoryOptions(type), enabled: !!user && activeTab !== 'complexes' });
   const label = (values: [string, string, string]) => pickLang(language, { en: values[0], ru: values[1], th: values[2] });
   const categoryLabel = (value: string) => categoryLabels[value] ? label(categoryLabels[value]) : value;
-  const resetFilters = () => setFilters({ q: '', type: 'all', category: 'all' });
+  const resetFilters = () => setFilters({ q: '', category: 'all' });
   const mutation = useMutation({
     mutationFn: updateModerationItem,
     onSuccess: (_result, { type, approve }) => {
@@ -97,22 +101,13 @@ export function OperationsModerationTab() {
     mutation.mutate({ id: item.id, type: item.type, approve, expectedUpdatedAt: item.updated_at });
   };
 
-  const activeTypes: ModerationType[] = activeTab === 'pending' ? ['listing', 'property'] : ['service', 'product'];
-  const loaded = (data?.items ?? []).filter(item => activeTypes.includes(item.type));
-  const failedTypes = data?.errors.filter(source => activeTypes.includes(source)) ?? [];
+  const loaded = (data?.items ?? []).filter(item => item.type === type);
+  const failedTypes = data?.errors.filter(source => source === type) ?? [];
   const unavailable = isError || failedTypes.length > 0;
-  const totals = activeTypes.map(source => data?.totals[source]);
-  const total = !isLoading && !unavailable && totals.every(value => typeof value === 'number')
-    ? totals.reduce<number>((sum, value) => sum + (value ?? 0), 0) : null;
-  const categories = [...new Set(loaded.filter(item => type === 'all' || type === item.type).map(categoryOf).filter(Boolean))].sort();
-  const term = search.trim().toLocaleLowerCase();
-  const filtered = loaded.filter(item =>
-    (type === 'all' || item.type === type) &&
-    (category === 'all' || categoryOf(item) === category) &&
-    (!term || [item.name_en, item.name_ru, item.id, item.provider_name, categoryOf(item), categoryLabel(categoryOf(item))]
-      .some(value => value?.toLocaleLowerCase().includes(term)))
-  );
-  const hasFilters = !!search || type !== 'all' || category !== 'all';
+  const total = !isLoading && !unavailable ? data?.totals[type] ?? null : null;
+  const categories = [...new Set([...(categoryOptions.data ?? []), ...loaded.map(categoryOf).filter(Boolean), ...(category !== 'all' ? [category] : [])])].sort();
+  const filtered = loaded;
+  const hasFilters = !!search || category !== 'all';
   const collectionLabel = (item: ModerationItem) => item.type === 'service'
     ? (item.provider_id ? label(["Open provider's services", "Услуги провайдера", "เปิดบริการของผู้ให้บริการ"]) : label(["Open services", "Открыть услуги", "เปิดบริการ"]))
     : item.type === 'listing' ? label(["Open category catalog", "Открыть каталог категории", "เปิดแคตตาล็อกหมวดหมู่"]) : label(["Open catalog", "Открыть каталог", "เปิดแคตตาล็อก"]);
@@ -129,45 +124,48 @@ export function OperationsModerationTab() {
       </CardHeader>
       <CardContent className="space-y-4 min-w-0">
         <Tabs value={activeTab} onValueChange={value => setFilters({ queue: value, q: '', type: 'all', category: 'all' })}>
-          <TabsList className="grid h-auto w-full grid-cols-3">
+          <TabsList className="grid h-auto w-full grid-cols-4">
             <TabsTrigger value="pending" className="min-h-11 whitespace-normal">{label(["Pending review", "На проверке", "รอตรวจสอบ"])}</TabsTrigger>
+            <TabsTrigger value="draft" className="min-h-11 whitespace-normal">{label(["Drafts — not submitted", "Черновики — не поданы", "ฉบับร่าง — ยังไม่ส่ง"])}</TabsTrigger>
             <TabsTrigger value="inactive" className="min-h-11 whitespace-normal">{label(["Inactive catalog", "Неактивный каталог", "รายการที่ไม่ใช้งาน"])}</TabsTrigger>
             <TabsTrigger value="complexes" className="min-h-11 whitespace-normal">{label(["Complexes", "Комплексы", "โครงการที่พัก"])}</TabsTrigger>
           </TabsList>
           <TabsContent value="complexes"><ManagedComplexReviewQueue /></TabsContent>
-          {['pending', 'inactive'].map(tab => (
+          {['pending', 'inactive', 'draft'].map(tab => (
             <TabsContent value={tab} key={tab} className="space-y-4 min-w-0">
               <div data-testid="moderation-summary" className="rounded-none border bg-muted/30 p-3 space-y-1">
-                <p className="font-medium"><span data-testid="moderation-count">{isLoading ? '…' : total ?? label(["Unknown", "Неизвестно", "ไม่ทราบ"])}</span> {tab === 'pending' ? label(["pending approval", "ожидают одобрения", "รายการรออนุมัติ"]) : label(["inactive catalog items", "неактивных записей каталога", "รายการแคตตาล็อกที่ไม่ใช้งาน"])}</p>
-                <p className="text-sm text-muted-foreground">{isLoading ? label(["Loading…", "Загрузка…", "กำลังโหลด…"]) : label([
-                  `Loaded ${loaded.length} of ${total ?? 'unknown'}. Showing ${filtered.length}. Search and filters apply to loaded records.`,
-                  `Загружено ${loaded.length} из ${total ?? 'неизвестного количества'}. Показано ${filtered.length}. Поиск и фильтры работают по загруженным записям.`,
-                  `โหลด ${loaded.length} จาก ${total ?? 'ไม่ทราบจำนวน'} รายการ แสดง ${filtered.length} รายการ การค้นหาและตัวกรองใช้กับรายการที่โหลดแล้วเท่านั้น`,
+                <p className="font-medium"><span data-testid="moderation-count">{isLoading ? '…' : total ?? label(["Unknown", "Неизвестно", "ไม่ทราบ"])}</span> {tab === 'draft' ? label(['drafts', 'черновики', 'ฉบับร่าง']) : tab === 'pending' ? label(["pending approval", "ожидают одобрения", "รายการรออนุมัติ"]) : label(["inactive catalog items", "неактивных записей каталога", "รายการแคตตาล็อกที่ไม่ใช้งาน"])}</p>
+                <p className="text-sm text-muted-foreground">{isLoading ? label(["Loading.", "Загрузка.", "กำลังโหลด."]) : label([
+                  `Page ${page + 1}. Loaded ${loaded.length} of ${total ?? 'unknown'} for this source. Search and filters apply on the server.`,
+                  `Страница ${page + 1}. Загружено ${loaded.length} из ${total ?? 'неизвестного количества'} этого источника. Поиск и фильтры применяются на сервере.`,
+                  `หน้า ${page + 1} โหลด ${loaded.length} จาก ${total ?? 'ไม่ทราบจำนวน'} รายการของแหล่งข้อมูลนี้ ค้นหาและกรองที่เซิร์ฟเวอร์`,
                 ])}</p>
-                {total !== null && loaded.length < total && <p className="text-sm text-muted-foreground">{label([
-                  'Latest records only: up to 500 listings and properties each, 100 services and products each. Open the relevant catalog for the full list.',
-                  'Последние записи: до 500 листингов и объектов каждого типа, до 100 услуг и товаров каждого типа. Полный список — в соответствующем каталоге.',
-                  'แสดงรายการล่าสุดเท่านั้น: รายการและที่พักประเภทละไม่เกิน 500 รายการ บริการและสินค้าประเภทละไม่เกิน 100 รายการ เปิดแคตตาล็อกที่เกี่ยวข้องเพื่อดูเพิ่มเติม',
-                ])}</p>}
+                {tab === 'draft' && <p>{label(["Drafts have not been submitted for approval.", "Черновики не поданы на проверку.", "ฉบับร่างยังไม่ได้ส่งให้ตรวจสอบ"])}</p>}
                 {tab === 'inactive' && <p className="text-sm text-muted-foreground">{label(["Inactive does not mean awaiting approval. Approval status is shown separately.", "Неактивность не означает ожидание одобрения. Статус проверки указан отдельно.", "สถานะไม่ใช้งานไม่ได้หมายถึงรออนุมัติ สถานะการตรวจสอบแสดงแยกต่างหาก"])}</p>}
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto]">
-                <Input aria-label={label(["Search queue", "Поиск в очереди", "ค้นหาในคิว"])} placeholder={label(["Name, provider or ID", "Название, провайдер или ID", "ชื่อ ผู้ให้บริการ หรือรหัส"])} value={search} onChange={event => setFilters({ q: event.target.value })} className="min-h-11 min-w-0" />
+                <Input aria-label={label(["Search queue", "Поиск в очереди", "ค้นหาในคิว"])} placeholder={label(["Name or exact ID", "Название или точный ID", "ชื่อหรือรหัสที่ตรงกัน"])} value={search} onChange={event => setFilters({ q: event.target.value })} className="min-h-11 min-w-0" />
                 <select aria-label={label(["Content type", "Тип контента", "ประเภทเนื้อหา"])} value={type} onChange={event => setFilters({ type: event.target.value, category: 'all' })} className="min-h-11 min-w-0 rounded-none border bg-background px-3 text-sm">
-                  <option value="all">{label(["All types", "Все типы", "ทุกประเภท"])}</option>
                   {activeTypes.map(value => <option key={value} value={value}>{label(typeLabels[value])}</option>)}
                 </select>
-                <select aria-label={label(["Category", "Категория", "หมวดหมู่"])} value={category} onChange={event => setFilters({ category: event.target.value })} className="min-h-11 min-w-0 rounded-none border bg-background px-3 text-sm">
+                <select aria-label={label(["Category", "Категория", "หมวดหมู่"])} value={category} disabled={type === 'service'} onChange={event => setFilters({ category: event.target.value })} className="min-h-11 min-w-0 rounded-none border bg-background px-3 text-sm">
                   <option value="all">{label(["All categories", "Все категории", "ทุกหมวดหมู่"])}</option>
                   {categories.map(value => <option key={value} value={value}>{categoryLabel(value)}</option>)}
                 </select>
                 <Button variant="outline" className="min-h-11" onClick={resetFilters} disabled={!hasFilters}>{label(["Clear filters", "Сбросить фильтры", "ล้างตัวกรอง"])}</Button>
               </div>
+              <p className="text-xs text-muted-foreground">{label(['Categories include the canonical taxonomy and legacy values on this page. A selected legacy value is retained in the URL.', 'Категории включают справочник и устаревшие значения этой страницы. Выбранное устаревшее значение сохраняется в URL.', 'หมวดหมู่รวมรายการมาตรฐานและค่าเดิมในหน้านี้ ค่าเดิมที่เลือกจะคงอยู่ใน URL'])}</p>
+              {categoryOptions.isError && <p role="alert" className="text-sm">{label(['Category options could not be loaded.', 'Не удалось загрузить категории.', 'ไม่สามารถโหลดหมวดหมู่ได้'])} <Button variant="link" onClick={() => categoryOptions.refetch()}>{label(['Retry categories', 'Повторить загрузку категорий', 'ลองโหลดหมวดหมู่อีกครั้ง'])}</Button></p>}
               {unavailable && <div role="alert" className="rounded-none border border-warning p-3 space-y-2">
                 <p className="flex items-start gap-2 text-sm"><AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />{label(["Some queue data is unavailable. Counts are unknown; available records are shown below.", "Часть данных очереди недоступна. Количество неизвестно; ниже показаны доступные записи.", "ข้อมูลคิวบางส่วนไม่พร้อมใช้งาน จึงไม่ทราบจำนวน รายการที่โหลดได้แสดงอยู่ด้านล่าง"])}</p>
                 {failedTypes.length > 0 && <p className="text-sm">{failedTypes.map(source => label(typeLabels[source])).join(', ')}</p>}
                 <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>{label(["Retry", "Повторить", "ลองอีกครั้ง"])}</Button>
               </div>}
+              <nav className="flex items-center gap-3" aria-label={label(['Queue pages', 'Страницы очереди', 'หน้าคิว'])}>
+                <Button variant="outline" disabled={page === 0 || isFetching} onClick={() => setFilters({ page: String(page - 1) })}>{label(['Previous', 'Назад', 'ก่อนหน้า'])}</Button>
+                <span>{page + 1}</span>
+                <Button variant="outline" disabled={isFetching || total === null || (page + 1) * MODERATION_PAGE_SIZE >= total} onClick={() => setFilters({ page: String(page + 1) })}>{label(['Next', 'Далее', 'ถัดไป'])}</Button>
+              </nav>
               {isLoading ? <p role="status" className="py-6 text-center text-muted-foreground">{label(["Loading…", "Загрузка…", "กำลังโหลด…"])}</p> : <div className="space-y-3">
                 {filtered.map(item => {
                   const name = (isRussian ? item.name_ru || item.name_en : item.name_en || item.name_ru) || label(["Untitled", "Без названия", "ไม่มีชื่อ"]);
@@ -177,7 +175,7 @@ export function OperationsModerationTab() {
                   return <article key={`${item.type}-${item.id}`} data-testid="moderation-row" className="min-w-0 rounded-none border p-3 sm:p-4 space-y-3">
                     <div className="flex flex-wrap items-center gap-2"><Badge variant="outline">{label(typeLabels[item.type])}</Badge>{categoryOf(item) && <span className="text-xs text-muted-foreground break-words">{categoryLabel(categoryOf(item))}</span>}</div>
                     <h3 className="font-medium break-words [overflow-wrap:anywhere]">{name}</h3>
-                    <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                    <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
                       <div className="min-w-0"><dt className="text-xs text-muted-foreground">{label(["Provider", "Провайдер", "ผู้ให้บริการ"])}</dt><dd className="break-words">{item.provider_name || label(["Not available", "Нет данных", "ไม่มีข้อมูล"])}</dd></div>
                       <div><dt className="text-xs text-muted-foreground">{label(["Created, not submitted", "Создано, не дата подачи", "วันที่สร้าง ไม่ใช่วันที่ส่งตรวจ"])}</dt><dd>{date && !Number.isNaN(date.getTime()) ? format(date, 'dd.MM.yyyy') : label(["Unknown", "Неизвестно", "ไม่ทราบ"])}</dd></div>
                       <div><dt className="text-xs text-muted-foreground">{label(["Approval status", "Статус проверки", "สถานะการอนุมัติ"])}</dt><dd>{approval}{tab === 'inactive' && ` · ${label(["Inactive", "Неактивно", "ไม่ใช้งาน"])}`}</dd></div>
@@ -185,8 +183,8 @@ export function OperationsModerationTab() {
                     <div className="flex flex-wrap gap-2">
                       <Button variant="outline" className="min-h-11" disabled={!destination.review} onClick={() => destination.review && navigate(destination.review)}><Eye className="h-4 w-4 mr-2" />{label(["Review", "Проверить", "ตรวจสอบ"])}</Button>
                       {destination.collection && <Button variant="outline" className="min-h-11 whitespace-normal h-auto py-2" onClick={() => navigate(destination.collection!)}>{collectionLabel(item)}</Button>}
-                      <Button variant="ghost" className="min-h-11 text-success" aria-label={`${(tab === 'inactive' ? label(["Activate", "Активировать", "เปิดใช้งาน"]) : label(["Approve & activate", "Одобрить и активировать", "อนุมัติและเปิดใช้งาน"]))}: ${name}`} onClick={() => reviewAction(item, true)} disabled={mutation.isPending || isFetching}><ThumbsUp className="h-4 w-4 mr-2" />{(tab === 'inactive' ? label(["Activate", "Активировать", "เปิดใช้งาน"]) : label(["Approve & activate", "Одобрить и активировать", "อนุมัติและเปิดใช้งาน"]))}</Button>
-                      <Button variant="ghost" className="min-h-11 text-destructive" aria-label={`${(tab === 'inactive' ? label(["Keep inactive", "Оставить неактивным", "คงสถานะไม่ใช้งาน"]) : label(["Reject", "Отклонить", "ไม่อนุมัติ"]))}: ${name}`} onClick={() => reviewAction(item, false)} disabled={mutation.isPending || isFetching}><ThumbsDown className="h-4 w-4 mr-2" />{(tab === 'inactive' ? label(["Keep inactive", "Оставить неактивным", "คงสถานะไม่ใช้งาน"]) : label(["Reject", "Отклонить", "ไม่อนุมัติ"]))}</Button>
+                      <Button variant="ghost" className="min-h-11 text-success" aria-label={`${(tab === 'inactive' ? label(["Activate", "Активировать", "เปิดใช้งาน"]) : label(["Approve & activate", "Одобрить и активировать", "อนุมัติและเปิดใช้งาน"]))}: ${name}`} onClick={() => reviewAction(item, true)} disabled={mutation.isPending || isFetching || tab === 'draft'}><ThumbsUp className="h-4 w-4 mr-2" />{(tab === 'inactive' ? label(["Activate", "Активировать", "เปิดใช้งาน"]) : label(["Approve & activate", "Одобрить и активировать", "อนุมัติและเปิดใช้งาน"]))}</Button>
+                      <Button variant="ghost" className="min-h-11 text-destructive" aria-label={`${(tab === 'inactive' ? label(["Keep inactive", "Оставить неактивным", "คงสถานะไม่ใช้งาน"]) : label(["Reject", "Отклонить", "ไม่อนุมัติ"]))}: ${name}`} onClick={() => reviewAction(item, false)} disabled={mutation.isPending || isFetching || tab === 'draft'}><ThumbsDown className="h-4 w-4 mr-2" />{(tab === 'inactive' ? label(["Keep inactive", "Оставить неактивным", "คงสถานะไม่ใช้งาน"]) : label(["Reject", "Отклонить", "ไม่อนุมัติ"]))}</Button>
                     </div>
                     {!destination.review && <p className="text-xs text-muted-foreground">{label(["Direct item review is not available for this type. Use the catalog if available; opening it does not approve or publish the item.", "Прямой просмотр записи для этого типа недоступен. Используйте каталог, если ссылка доступна; переход не одобряет и не публикует запись.", "รายการประเภทนี้ยังไม่มีหน้าตรวจสอบโดยตรง โปรดใช้แคตตาล็อกหากมี การเปิดแคตตาล็อกไม่ใช่การอนุมัติหรือเผยแพร่รายการ"])}</p>}
                   </article>;

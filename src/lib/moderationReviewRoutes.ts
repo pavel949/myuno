@@ -24,13 +24,13 @@ export function moderationReviewDestination(item: Pick<ModerationItem, 'id' | 't
 // Return navigation is UI context only. Never accept arbitrary external/admin
 // destinations from query text, or replay unrelated action parameters.
 export function moderationReturnPath(value?: string | null): string | null {
-  if (!value?.startsWith('/admin/operations?')) return null;
+  if (!value?.startsWith('/admin/operations?') && value !== '/admin/review' && !value?.startsWith('/admin/review?')) return null;
   const url = new URL(value, 'https://myuno.invalid');
-  if (url.pathname !== '/admin/operations' || url.searchParams.get('tab') !== 'moderation') return null;
+  if (!['/admin/operations', '/admin/review'].includes(url.pathname) || (url.pathname === '/admin/operations' && url.searchParams.get('tab') !== 'moderation') || (url.pathname === '/admin/review' && url.searchParams.has('tab') && url.searchParams.get('tab') !== 'moderation')) return null;
   const params = new URLSearchParams({ tab: 'moderation' });
-  for (const key of ['queue', 'q', 'type', 'category']) {
+  for (const key of ['queue', 'q', 'type', 'category', 'page']) {
     const field = url.searchParams.get(key);
     if (field) params.set(key, field);
   }
-  return `/admin/operations?${params}`;
+  return `${url.pathname}?${params}`;
 }
