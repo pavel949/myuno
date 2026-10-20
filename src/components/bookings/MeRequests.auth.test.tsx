@@ -9,7 +9,7 @@ vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => state }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/hooks/useMyRequests', () => ({ useMyRequests: () => ({ data: state.data, failedSources: state.failedSources, refetch: state.refetch, isLoading: false }) }));
 vi.mock('@/components/layout/MeShellLayout', () => ({ MeShellLayout: ({ children }: { children: ReactNode }) => <main>{children}</main> }));
-vi.mock('@/components/page', () => ({ LoadingState: () => <p role="status">Loading requests</p>, EmptyState: () => <p>No requests</p> }));
+vi.mock('@/components/page', () => ({ LoadingState: () => <p role="status">Loading requests</p>, EmptyState: ({ title, description }: { title: string; description: string }) => <div><h2>{title}</h2><p>{description}</p></div> }));
 const Where = () => { const location = useLocation(); return <span data-testid="where">{location.pathname + location.search + location.hash}</span>; };
 const show = (entry = '/me/requests?source=visa&persona=P3&returnTo=%2Flegal#request-list') => render(<MemoryRouter initialEntries={[entry]}><Where /><Routes><Route path="/me/requests" element={<MeRequests />} /><Route path="/auth" element={<p>Sign in</p>} /></Routes></MemoryRouter>);
 afterEach(cleanup);
@@ -66,7 +66,7 @@ it.each([['visa', true], ['help', false]] as const)('limits read-completeness wa
  state.failedSources = ['visa'];
  show('/me/requests?source=' + source);
  expect(Boolean(screen.queryByRole('alert'))).toBe(shouldWarn);
- expect(Boolean(screen.queryByText('No requests'))).toBe(!shouldWarn);
+ expect(Boolean(screen.queryByText('Nothing found'))).toBe(!shouldWarn);
 });
 it.each([['ru', 'Повторить загрузку'], ['th', 'ลองโหลดอีกครั้ง']] as const)('localizes the failure retry in %s', (language, label) => {
  state.user = { id: 'synthetic-customer' };
@@ -87,4 +87,27 @@ it('clears only the source filter while preserving router context and anchor', a
    expect(url.searchParams.get('returnTo')).toBe('/legal');
    expect(url.hash).toBe('#request-list');
  });
+});
+
+it('localizes Thai request headings, filters and verified empty state', () => {
+ state.user = { id: 'synthetic-th-customer' };
+ state.language = 'th';
+ show('/me/requests?source=help');
+ expect(screen.getByRole('heading', { name: 'คำขอของฉัน' })).toBeVisible();
+ expect(screen.getByText('ติดตามคำขอของคุณได้ในที่เดียว')).toBeVisible();
+ expect(screen.getByRole('button', { name: 'ล้างตัวกรอง' })).toBeVisible();
+ expect(screen.getByRole('heading', { name: 'ไม่พบรายการ' })).toBeVisible();
+ expect(screen.getByText('ไม่มีคำขอตรงกับตัวกรองที่เลือก')).toBeVisible();
+});
+it('localizes Thai request columns and dates without translating authored user content', () => {
+ state.user = { id: 'synthetic-th-customer' };
+ state.language = 'th';
+ state.data = [{ id: 'help-th', source: 'help', status: 'new', title: 'Original user request', subtitle: 'Original user note', createdAt: '2026-10-20T00:00:00Z' }];
+ show('/me/requests');
+ expect(screen.getByText('Original user request')).toBeVisible();
+ expect(screen.getByText(/Original user note/)).toBeVisible();
+ expect(screen.getByRole('heading', { name: 'ใหม่' })).toBeVisible();
+ expect(screen.getByRole('heading', { name: 'กำลังดำเนินการ' })).toBeVisible();
+ expect(screen.getAllByText('ไม่มีรายการ')).toHaveLength(3);
+ expect(screen.getByText('ความช่วยเหลือ myUNO')).toBeVisible();
 });

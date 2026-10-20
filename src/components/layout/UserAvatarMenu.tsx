@@ -201,7 +201,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
     setViewAsError(null);
     const q = viewAsQuery.trim();
     if (!q) {
-      setViewAsError(isRu ? 'Введите email или ID пользователя' : 'Enter user email or UUID');
+      setViewAsError(pickLang(language, { ru: 'Введите email или ID пользователя', en: 'Enter user email or UUID', th: 'กรอกอีเมลหรือ UUID ผู้ใช้' }));
       return;
     }
     setViewAsBusy(true);
@@ -217,7 +217,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
           .maybeSingle();
         if (error) throw error;
         if (!data?.id) {
-          setViewAsError(isRu ? 'Пользователь не найден' : 'User not found');
+          setViewAsError(pickLang(language, { ru: 'Пользователь не найден', en: 'User not found', th: 'ไม่พบผู้ใช้' }));
           return;
         }
         targetId = data.id;
@@ -230,7 +230,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
           .maybeSingle();
         if (error) throw error;
         if (!data?.id) {
-          setViewAsError(isRu ? 'Пользователь не найден' : 'User not found');
+          setViewAsError(pickLang(language, { ru: 'Пользователь не найден', en: 'User not found', th: 'ไม่พบผู้ใช้' }));
           return;
         }
         targetId = data.id;
@@ -238,7 +238,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
       }
 
       if (targetId === user.id) {
-        setViewAsError(isRu ? 'Это ваш аккаунт' : 'That is your own account');
+        setViewAsError(pickLang(language, { ru: 'Это ваш аккаунт', en: 'That is your own account', th: 'นี่คือบัญชีของคุณ' }));
         return;
       }
 
@@ -277,20 +277,20 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
 
   // Primary nav items
   const primaryItems = [
-    { icon: Heart, labelEn: 'Favorites', labelRu: 'Избранное', path: '/favorites' },
-    { icon: ShoppingBag, labelEn: 'Bookings & Orders', labelRu: 'Заказы и брони', path: '/bookings' },
+    { icon: Heart, labelEn: 'Favorites', labelRu: 'Избранное', labelTh: 'รายการโปรด', path: '/favorites' },
+    { icon: ShoppingBag, labelEn: 'Bookings & Orders', labelRu: 'Заказы и брони', labelTh: 'การจองและคำสั่งซื้อ', path: '/bookings' },
     {
-      icon: Bell, labelEn: 'Notifications', labelRu: 'Уведомления', path: '/notifications',
+      icon: Bell, labelEn: 'Notifications', labelRu: 'Уведомления', labelTh: 'การแจ้งเตือน', path: '/notifications',
       badge: unreadCount > 0 ? unreadCount : undefined,
     },
-    { icon: User, labelEn: 'Profile', labelRu: 'Профиль', path: '/account' },
+    { icon: User, labelEn: 'Profile', labelRu: 'Профиль', labelTh: 'โปรไฟล์', path: '/account' },
   ];
 
   // Secondary items
   const secondaryItems = [
-    { icon: Settings, labelEn: 'Settings', labelRu: 'Настройки', path: '/profile/settings' },
-    { icon: CreditCard, labelEn: 'Wallet & Payments', labelRu: 'Кошелёк и оплата', path: '/wallet' },
-    { icon: HelpCircle, labelEn: 'Help Center', labelRu: 'Центр помощи', path: '/support' },
+    { icon: Settings, labelEn: 'Settings', labelRu: 'Настройки', labelTh: 'การตั้งค่า', path: '/profile/settings' },
+    { icon: CreditCard, labelEn: 'Wallet & Payments', labelRu: 'Кошелёк и оплата', labelTh: 'กระเป๋าเงินและการชำระเงิน', path: '/wallet' },
+    { icon: HelpCircle, labelEn: 'Help Center', labelRu: 'Центр помощи', labelTh: 'ศูนย์ช่วยเหลือ', path: '/support' },
   ];
 
   return (
@@ -298,7 +298,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          aria-label={isRu ? 'Меню аккаунта' : 'Account menu'}
+          aria-label={pickLang(language, { ru: 'Меню аккаунта', en: 'Account menu', th: 'เมนูบัญชี' })}
           className={cn(
             "flex items-center gap-2 h-10 pl-3 pr-1.5 rounded-full",
             compact && "h-11 w-11 justify-center p-0 md:w-auto md:pl-3 md:pr-1.5",
@@ -339,7 +339,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
                   <Zap className="w-5 h-5 text-primary flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">
-                      {isRu ? 'Перейти в рабочую панель' : 'Jump to workspace'}
+                      {pickLang(language, { ru: 'Перейти в рабочую панель', en: 'Jump to workspace', th: 'ไปยังพื้นที่ทำงาน' })}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
                       <Icon className="w-3 h-3 inline mr-1 align-text-bottom" />
@@ -352,7 +352,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
             {platformRoles.length > 0 && (
               <>
                 <DropdownMenuLabel className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {isRu ? 'Платформа' : 'Platform'}
+                  {pickLang(language, { ru: 'Платформа', en: 'Platform', th: 'แพลตฟอร์ม' })}
                 </DropdownMenuLabel>
                 {renderRoleItems(platformRoles)}
               </>
@@ -360,7 +360,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
             {workspaceRoles.length > 0 && (
               <>
                 <DropdownMenuLabel className="px-4 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {isRu ? 'Рабочие пространства' : 'Workspaces'}
+                  {pickLang(language, { ru: 'Рабочие пространства', en: 'Workspaces', th: 'พื้นที่ทำงาน' })}
                 </DropdownMenuLabel>
                 {renderRoleItems(workspaceRoles)}
               </>
@@ -376,12 +376,10 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
                 <Eye className="w-5 h-5 text-accent dark:text-accent flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground">
-                    {isRu ? 'Просмотр от имени пользователя' : 'View as user (audit)'}
+                    {pickLang(language, { ru: 'Просмотр от имени пользователя', en: 'View as user (audit)', th: 'ดูในนามผู้ใช้ (ตรวจสอบ)' })}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {isRu
-                      ? 'Запись в журнале; права не меняются'
-                      : 'Logged for audit; permissions stay yours'}
+                    {pickLang(language, { ru: 'Запись в журнале; права не меняются', en: 'Logged for audit; permissions stay yours', th: 'บันทึกเพื่อการตรวจสอบ สิทธิ์ยังคงเป็นของคุณ' })}
                   </p>
                 </div>
               </DropdownMenuItem>
@@ -395,10 +393,10 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
                 <Crown className="w-5 h-5 text-primary flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground">
-                    {isRu ? 'Newbuilds Console' : 'Newbuilds Console'}
+                    {pickLang(language, { ru: 'Newbuilds Console', en: 'Newbuilds Console', th: 'จัดการโครงการใหม่' })}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {isRu ? 'Ignatev Estate — застройщики, проекты, документы' : 'Ignatev Estate — developers, projects, docs'}
+                    {pickLang(language, { ru: 'Ignatev Estate — застройщики, проекты, документы', en: 'Ignatev Estate — developers, projects, docs', th: 'Ignatev Estate — ผู้พัฒนา โครงการ เอกสาร' })}
                   </p>
                 </div>
               </DropdownMenuItem>
@@ -432,7 +430,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
             >
               <Icon className="w-5 h-5 text-foreground/70 flex-shrink-0" />
               <span className="text-sm font-medium text-foreground flex-1">
-                {isRu ? item.labelRu : item.labelEn}
+                {pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh })}
               </span>
               {'badge' in item && item.badge && (
                 <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold">
@@ -456,7 +454,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
             >
               <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               <span className="text-sm text-foreground/80">
-                {isRu ? item.labelRu : item.labelEn}
+                {pickLang(language, { ru: item.labelRu, en: item.labelEn, th: item.labelTh })}
               </span>
             </DropdownMenuItem>
           );
@@ -472,10 +470,10 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
           <Gift className="w-5 h-5 text-primary flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground">
-              {isRu ? 'Пригласить друга' : 'Invite & Earn'}
+              {pickLang(language, { ru: 'Пригласить друга', en: 'Invite & Earn', th: 'ชวนเพื่อนและรับโบนัส' })}
             </p>
             <p className="text-xs text-muted-foreground">
-              {isRu ? 'Получите бонус за каждого друга' : 'Earn bonus for every referral'}
+              {pickLang(language, { ru: 'Получите бонус за каждого друга', en: 'Earn bonus for every referral', th: 'รับโบนัสเมื่อแนะนำเพื่อน' })}
             </p>
           </div>
         </DropdownMenuItem>
@@ -488,7 +486,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
           className="flex items-center gap-3 px-4 py-3 cursor-pointer text-foreground/70 hover:text-foreground focus:bg-muted/50"
         >
           <LogOut className="w-4 h-4 flex-shrink-0" />
-          <span className="text-sm">{isRu ? 'Выйти' : 'Log out'}</span>
+          <span className="text-sm">{pickLang(language, { ru: 'Выйти', en: 'Log out', th: 'ออกจากระบบ' })}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -496,16 +494,14 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
     <Dialog open={viewAsOpen} onOpenChange={setViewAsOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isRu ? 'Просмотр от имени пользователя' : 'View as user'}</DialogTitle>
+          <DialogTitle>{pickLang(language, { ru: 'Просмотр от имени пользователя', en: 'View as user', th: 'ดูในนามผู้ใช้' })}</DialogTitle>
           <DialogDescription>
-            {isRu
-              ? 'Введите email или UUID профиля. Действие записывается в журнал; RLS и ваши права не меняются.'
-              : 'Enter profile email or UUID. This is audited; RLS still applies to your admin session.'}
+            {pickLang(language, { ru: 'Введите email или UUID профиля. Действие записывается в журнал; RLS и ваши права не меняются.', en: 'Enter profile email or UUID. This is audited; RLS still applies to your admin session.', th: 'กรอกอีเมลโปรไฟล์หรือ UUID การดำเนินการนี้มีบันทึกตรวจสอบ และ RLS ยังคงใช้กับเซสชันผู้ดูแลระบบของคุณ' })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2 py-2">
           <Input
-            placeholder={isRu ? 'email или UUID' : 'email or user UUID'}
+            placeholder={pickLang(language, { ru: 'email или UUID', en: 'email or user UUID', th: 'อีเมลหรือ UUID ผู้ใช้' })}
             value={viewAsQuery}
             onChange={(e) => {
               setViewAsQuery(e.target.value);
@@ -523,10 +519,10 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
         </div>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" type="button" onClick={() => setViewAsOpen(false)} disabled={viewAsBusy}>
-            {isRu ? 'Отмена' : 'Cancel'}
+            {pickLang(language, { ru: 'Отмена', en: 'Cancel', th: 'ยกเลิก' })}
           </Button>
           <Button type="button" onClick={() => void handleViewAsSubmit()} disabled={viewAsBusy}>
-            {viewAsBusy ? '…' : isRu ? 'Начать' : 'Start'}
+            {viewAsBusy ? '…' : pickLang(language, { ru: 'Начать', en: 'Start', th: 'เริ่ม' })}
           </Button>
         </DialogFooter>
       </DialogContent>
