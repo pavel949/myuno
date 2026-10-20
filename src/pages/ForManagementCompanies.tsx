@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Helmet } from 'react-helmet-async';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { LandingChrome, LandingContainer } from '@/components/landings';
+import { MARKETING_ACTION_BUTTON } from '@/design-system/ecosystemLayout';
 import {
   Building2, BarChart3, Users, Calendar, FileText,
   MessageSquare, Shield, Zap, Check, ArrowRight,
@@ -174,12 +175,12 @@ const ForManagementCompanies: React.FC = () => {
                   ? 'myUNO — платформа, которую мы создали для своей управляющей компании. Теперь она доступна вам. Проверена на реальных объектах.'
                   : 'myUNO is the platform we built for our own management company. Now available for yours. Battle-tested on real properties.'}
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true')} className="gap-2">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center">
+                <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true')} className={MARKETING_ACTION_BUTTON}>
                   <Zap className="w-5 h-5" />
                   {isRu ? 'Попробовать бесплатно' : 'Start Free Trial'}
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
+                <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
                   {isRu ? 'Посмотреть тарифы' : 'View Pricing'}
                 </Button>
               </div>
@@ -359,7 +360,7 @@ const ForManagementCompanies: React.FC = () => {
                       <span className="text-muted-foreground">/{isRu ? 'мес' : 'mo'}</span>
                     </div>
                     <Button
-                      className="w-full mb-6 gap-2"
+                      className={`w-full mb-6 ${MARKETING_ACTION_BUTTON}`}
                       variant={tier.popular ? 'default' : 'outline'}
                       onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true&tier=' + tier.id)}
                     >
@@ -392,12 +393,12 @@ const ForManagementCompanies: React.FC = () => {
                 ? 'Мы сами используем myUNO каждый день. Присоединяйтесь к растущему сообществу УК Пхукета.'
                 : 'We use myUNO every day ourselves. Join the growing community of Phuket property managers.'}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true')} className="gap-2">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center">
+              <Button size="lg" onClick={() => navigate('/auth?redirect=/mc/onboarding&trial=true')} className={MARKETING_ACTION_BUTTON}>
                 <Zap className="w-5 h-5" />
                 {isRu ? 'Начать 14-дневный триал' : 'Start 14-Day Trial'}
               </Button>
-              <Button size="lg" variant="outline" onClick={() => window.open('https://wa.me/66922407355?text=Hi%2C+I%27m+interested+in+myUNO+for+my+management+company', '_blank')}>
+              <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => window.open('https://wa.me/66922407355?text=Hi%2C+I%27m+interested+in+myUNO+for+my+management+company', '_blank')}>
                 <MessageSquare className="w-5 h-5 mr-2" />
                 {isRu ? 'Связаться в WhatsApp' : 'Chat on WhatsApp'}
               </Button>

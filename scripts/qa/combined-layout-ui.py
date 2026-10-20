@@ -36,6 +36,13 @@ async def check_header(page, marketing):
     else:
         height = await page.locator('[data-canvas]').first.evaluate("e=>parseFloat(getComputedStyle(e).getPropertyValue('--consumer-header-height'))")
         assert abs(height - box['height']) <= 1, {'heightVariable': height, 'header': box}
+        if page.viewport_size['width'] < 640:
+            centers = await header.locator('button,a').evaluate_all("els=>els.filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden').map(e=>{const r=e.getBoundingClientRect();return r.top+r.height/2}).sort((a,b)=>a-b)")
+            rows = []
+            for center in centers:
+                if not rows or abs(center - rows[-1]) > 8:
+                    rows.append(center)
+            assert len(rows) <= 2 and box['height'] <= 120, {'mobileControlRows': rows, 'header': box}
     return box
 
 
@@ -137,11 +144,13 @@ async def main():
                             await check_header(page, False)
                             if width < 768:
                                 bottom = page.locator('nav.fixed.bottom-0')
-                                assert not await bounds(page, bottom.locator('a')), 'bottom nav overflow'
+                                row['bottomBoundsFailures'] = await bounds(page, bottom.locator('a'))
+                                assert not row['bottomBoundsFailures'], {'bottomBounds': row['bottomBoundsFailures']}
                                 name = {'ru': 'Бронирования', 'en': 'Bookings', 'th': 'การจอง'}[lang]
                                 await expect(bottom.get_by_role('link', name=name, exact=True)).to_have_attribute('href', '/bookings')
                         else:
-                            assert not await bounds(page, page.locator('section button')), 'marketing CTA clipped'
+                            row['ctaBoundsFailures'] = await bounds(page, page.locator('section button'))
+                            assert not row['ctaBoundsFailures'], {'marketingCTABounds': row['ctaBoundsFailures']}
                             # Check hero siblings against each other, allowing wrapped rows.
                             assert await page.locator('section').first.locator('button').evaluate_all("""els=>els.every((a,i)=>els.slice(i+1).every(b=>{const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();return x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1}))"""), 'CTA overlap'
                             row['destinations'] = await check_destinations(page, surface)
@@ -150,11 +159,10 @@ async def main():
                         assert not blocked and not errors, {'blocked': blocked, 'errors': errors}
                         row['outcome'] = 'PASS'
                     except Exception as error:
-                        row.update(error=str(error), blocked=blocked, runtimeErrors=errors)
-                        await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{surface}-FAIL.png'), full_page=True)
+                        row.update(error=str(error), details=error.args[0] if error.args and isinstance(error.args[0], dict) else None, blocked=blocked, runtimeErrors=errors)
                         results.append(row)
                         (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
-                        raise
+                        await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{surface}-FAIL.png'), full_page=True)
                     else:
                         await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-{surface}.png'), full_page=True)
                         results.append(row)
@@ -162,8 +170,9 @@ async def main():
                     finally:
                         await context.close()
         await browser.close()
-    assert len(results) == 75 and all(row['outcome'] == 'PASS' for row in results)
     (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
+    failures = [row for row in results if row['outcome'] != 'PASS']
+    assert len(results) == 75 and not failures, {'completed': len(results), 'failed': len(failures), 'cases': [(row['lang'], row['width'], row['surface'], row.get('error')) for row in failures]}
 
 
 if __name__ == '__main__':

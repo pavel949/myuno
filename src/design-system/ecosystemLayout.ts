@@ -15,6 +15,9 @@ export const PUBLIC_CONTENT_LAYOUT = {
   marketing: ECOSYSTEM_PAGE_CONTAINER,
 } as const;
 
+/** Marketing CTAs retain complete labels inside narrow cards and wrapped rows. */
+export const MARKETING_ACTION_BUTTON = 'h-auto min-h-12 max-w-full whitespace-normal break-words px-4 py-3 leading-snug';
+
 export const ECOSYSTEM_MAIN_SPACING = "space-y-4 md:space-y-6";
 
 export const ECOSYSTEM_HEADER_TITLE = "text-lg md:text-xl font-semibold font-display tracking-tight break-words";

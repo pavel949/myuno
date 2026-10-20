@@ -15,6 +15,6 @@ it('renders and opens the real filter using the exact layout fixture hook payloa
  expect(screen.getByRole('dialog')).toBeVisible();
  // An invalid config:[] used by the previous harness throws during rendering,
  // before any geometry could be checked. Exercise submit too, not just shape.
- fireEvent.click(screen.getByRole('button', { name: 'Apply', exact: true }));
+ fireEvent.click(screen.getByRole('button', { name: /^Apply$/ }));
  expect(onChange).toHaveBeenCalledWith({});
 });

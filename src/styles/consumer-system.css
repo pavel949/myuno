@@ -19,8 +19,8 @@
 
 .consumer-header [data-testid="global-preferences-controls"]>button{background:transparent;min-height:44px}.consumer-header [data-testid="global-preferences-controls"]{gap:0}
 
-/* Keep preference controls readable when the full utility group needs another row. */
-@media(max-width:639px){.consumer-header-inner{flex-wrap:wrap;gap:8px}.consumer-utilities{flex-shrink:0;flex-wrap:wrap;max-width:100%}}
+/* Deliberate two-row mobile chrome: brand/menu, then all account preferences. */
+@media(max-width:639px){.consumer-header-inner{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px}.consumer-wordmark{grid-column:1;grid-row:1}.consumer-utilities{grid-column:1/-1;grid-row:2;justify-content:flex-end;flex-shrink:0;flex-wrap:nowrap;max-width:100%;width:100%;margin-left:0}.consumer-menu{position:absolute;top:10px;right:18px}.consumer-header-overlay .consumer-menu{right:24px}}
 
 /* Consent controls take priority over floating launchers. Visibility also removes
    the hidden launcher from keyboard and accessibility navigation; removing the

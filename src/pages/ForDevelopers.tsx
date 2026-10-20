@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { LandingChrome, LandingContainer, LandingSection } from '@/components/landings';
+import { MARKETING_ACTION_BUTTON } from '@/design-system/ecosystemLayout';
 import {
   Building2, LineChart, Users, Megaphone, ArrowRight, HardHat, LayoutGrid, PenLine,
   CheckCircle2,
@@ -102,8 +103,8 @@ export default function ForDevelopers() {
                   ? 'Новострои, off-plan, брендированные страницы и доступ к аудитории myUNO на Пхукете.'
                   : 'Newbuilds, off-plan, branded pages, and access to myUNO’s Phuket audience.'}
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button size="lg" className="gap-2" onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_APPLY)}>
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center">
+                <Button size="lg" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_APPLY)}>
                   <PenLine className="w-4 h-4" />
                   {isRu ? 'Начать — это бесплатно' : 'Get started — it\'s free'}
                   <ArrowRight className="w-4 h-4" />
@@ -111,7 +112,7 @@ export default function ForDevelopers() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="gap-2"
+                  className={MARKETING_ACTION_BUTTON}
                   onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL)}
                 >
                   <Building2 className="w-4 h-4" />
@@ -207,12 +208,12 @@ export default function ForDevelopers() {
                 ? 'Регистрация бесплатна. Модерация — до 48 часов.'
                 : 'Registration is free. Moderation takes up to 48 hours.'}
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
-              <Button size="lg" className="gap-2" onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_APPLY)}>
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center mb-6">
+              <Button size="lg" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_APPLY)}>
                 <PenLine className="w-4 h-4" />
                 {isRu ? 'Зарегистрировать компанию' : 'Register your company'}
               </Button>
-              <Button size="lg" variant="outline" className="gap-2" onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL)}>
+              <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL)}>
                 <Building2 className="w-4 h-4" />
                 {isRu ? 'Войти в кабинет' : 'Sign in to portal'}
               </Button>

@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { LandingChrome, LandingContainer } from '@/components/landings';
+import { MARKETING_ACTION_BUTTON } from '@/design-system/ecosystemLayout';
 import {
   Store, CalendarDays, Banknote, ShieldCheck, ArrowRight, Wrench,
 } from 'lucide-react';
@@ -102,14 +103,14 @@ export default function ForLocalServices() {
                   : 'Residents, tourists, and concierge route requests to verified partners.'}
               </p>
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center">
-                <Button size="lg" className="gap-2" onClick={() => navigate(APP_ROUTES.VENDOR_JOIN)}>
+                <Button size="lg" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.VENDOR_JOIN)}>
                   {isRu ? 'Стать партнёром' : 'Become a partner'}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => navigate(APP_ROUTES.FOR_BUSINESS)}>
+                <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.FOR_BUSINESS)}>
                   {isRu ? 'Услуги для вашего бизнеса' : 'Services for your business'}
                 </Button>
-                <Button size="lg" variant="ghost" onClick={() => navigate(APP_ROUTES.BECOME_PARTNER)}>
+                <Button size="lg" variant="ghost" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.BECOME_PARTNER)}>
                   {isRu ? 'Корпоративное партнёрство' : 'Corporate partnership'}
                 </Button>
               </div>
@@ -142,7 +143,7 @@ export default function ForLocalServices() {
 
         <section>
         <LandingContainer variant="marketing" className="pb-20 text-center space-y-4">
-          <Button variant="secondary" onClick={() => navigate(APP_ROUTES.LIST_WITH_US)}>
+          <Button variant="secondary" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.LIST_WITH_US)}>
             {isRu ? 'Разместить объект или услугу' : 'List a property or service'}
           </Button>
           <p className="text-xs text-muted-foreground">

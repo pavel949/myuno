@@ -67,3 +67,26 @@ this audit does not certify unexercised backend or overlay behavior.
   device variations are outside this fixture.
 
 Production rendered acceptance and release remain with the coordinator.
+
+## Subsequent evidence and corrections
+
+The next remote attempt (647726a, run39369794773/artifact12240942361) passed
+RU/320 property, account and local-services cases, then found real clipping of
+the lower developer-card CTA. Runtime errors and blocked requests were empty.
+Its 165px consumer header offset matched the sticky surfaces, but the accidental
+three-row layout was too tall. The remaining71 cases were not executed then.
+
+The batch following that evidence keeps complete CTA copy/actions and gives all
+three marketing pages' buttons flexible height, normal whitespace and bounded
+width/padding; all multi-action rows can wrap. A real-component regression checks
+the full Russian developer registration label and original navigation. Consumer
+mobile chrome is now a deliberate two-row grid (wordmark/menu; preferences and
+account controls). CI requires at most two control rows and at most120px height,
+while retaining measured sticky offsets. LandingChrome retains its56px contract.
+
+The matrix now collects individual failures through all75 cases, saves each
+completed case and fails the aggregate. Bounds failures retain text, rectangles
+and overflow flags in both explicit result fields and assertion details. A
+failing case does not silently become a pass. The Testing Library exact-name
+query uses the supported `/^Apply$/` regex; source typecheck is separate from
+Vitest execution.

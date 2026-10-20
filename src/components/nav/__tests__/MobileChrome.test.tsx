@@ -23,7 +23,7 @@ it.each(['ru', 'en', 'th'])('keeps the %s language abbreviation unbroken at ever
 
 // Source contracts only: JSDOM does not measure rendered widths. Production
 // pixel acceptance remains a separate browser check with the actual fonts.
-it.each([320, 360, 390])('applies utility wrapping at a %ipx viewport without hiding controls', width => {
+it.each([320, 360, 390])('uses a two-row mobile grid at a %ipx viewport without hiding controls', width => {
  const css = postcss.parse(readFileSync('src/styles/consumer-system.css', 'utf8'));
  const declarations = new Map<string, string>();
  css.walkAtRules('media', media => {
@@ -34,9 +34,12 @@ it.each([320, 360, 390])('applies utility wrapping at a %ipx viewport without hi
    });
   });
  });
- expect(declarations.get('.consumer-header-inner:flex-wrap')).toBe('wrap');
+ expect(declarations.get('.consumer-header-inner:display')).toBe('grid');
+ expect(declarations.get('.consumer-header-inner:grid-template-columns')).toBe('minmax(0,1fr) 44px');
+ expect(declarations.get('.consumer-utilities:grid-row')).toBe('2');
+ expect(declarations.get('.consumer-menu:position')).toBe('absolute');
  expect(declarations.get('.consumer-utilities:flex-shrink')).toBe('0');
- expect(declarations.get('.consumer-utilities:flex-wrap')).toBe('wrap');
+ expect(declarations.get('.consumer-utilities:flex-wrap')).toBe('nowrap');
  expect(declarations.get('.consumer-utilities:max-width')).toBe('100%');
- expect([...declarations.keys()].some(key => /:(display|visibility|font-size)$/.test(key))).toBe(false);
+ expect([...declarations].some(([key, value]) => /:(visibility|font-size)$/.test(key) || (key.endsWith(':display') && value === 'none'))).toBe(false);
 });
