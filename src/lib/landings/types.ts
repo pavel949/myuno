@@ -64,12 +64,16 @@ export interface BilingualString {
 /** Статус публикации лендинга. `draft` → 404 на роуте (трек B.4/B.5). */
 export type LandingStatus = 'live' | 'draft';
 
+/** Editorial destination review; this never grants access or asserts provider availability. */
+export type LandingLinkAvailability = 'unavailable' | 'entity-unverified';
+
 /**
  * Ссылка на услугу из канонического каталога §02. `slug` — стабильный
  * идентификатор услуги в `02-service-catalogue-v2.md` / DB. `intent` —
  * необязательный квалификатор (например, 'rent' vs 'sale').
  */
 export interface LandingServiceRef {
+  availability?: LandingLinkAvailability;
   slug: string;
   /** Локализованное название карточки услуги. */
   label: BilingualString;
@@ -101,6 +105,7 @@ export interface LandingFaqEntry {
  * Если процесс платный — рекомендация §7 CONTENT_STYLE: показать сумму.
  */
 export interface LandingCta {
+  availability?: LandingLinkAvailability;
   label: BilingualString;
   /** Куда ведёт (внутренний роут или абсолютный URL). */
   href: string;

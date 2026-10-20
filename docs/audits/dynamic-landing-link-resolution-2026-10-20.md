@@ -6,6 +6,24 @@ Source base `4632f3b68`. Covers original 72 unmatched occurrences (50 unique hre
 
 Keep verified links. Correct only specific proven equivalents. Otherwise retain visible source entry as nonclickable with localized unavailable label; do not imply the advertised service is available. Unverified database entities remain unknown, not proven absent. Copy must be narrowed before using a partial alternative. No generic hub redirect.
 
+## Functional tranche
+
+Three authored area-guide links now use `/area`. Six provider registration actions now use the existing AuthGuard-protected `/vendor/onboarding`; their labels and descriptions refer to the application form, without promising a public profile, storefront, approval speed or instant booking. No roles or wizard writes were changed.
+
+Every remaining unresolved source entry has an explicit availability disposition. Shared landing action rendering retains its label as a non-navigable disabled entry, with RU/EN/TH availability text and no href or activation handler. This applies to service tiles, hero/secondary/repeated/sticky CTAs and the bundle CTA. Unverified service one-liners are suppressed for these disabled entries. Verified links retain their complete href and existing persona tagging.
+
+Same authored scanner scope (307 occurrences):
+
+| Measure | Before | After |
+|---|---:|---:|
+| Unmatched route occurrences | 72 | 66 |
+| Unique unmatched hrefs | 50 | 49 |
+| Dynamic-pattern matches | 36 | 33 |
+| Actionable unmatched entries | 72 | 0 |
+| Explicitly disabled configured entries | 0 | 89 |
+
+The remaining ten enabled dynamic-pattern occurrences are verified static compliance/lifestyle configurations. The other 23 dynamic occurrences are disabled. These are source/rendering counts, not deployed DOM observations or evidence that unavailable services exist. Historical FAQ, fee and service claims elsewhere in authored copy still need owner verification; this tranche does not certify them. Entity-dependent content can be enabled only after exact entity/public visibility evidence. Unavailable services need an actual scoped workflow and owner-confirmed offer before activation, not a generic catalogue redirect.
+
 ## Dynamic parameter contracts
 
 - PropertyDetail calls usePropertyWithRentalTerms(id), then selectPropertyCatalogFirst: public_property_catalog.eq(id), independently authorized properties fallback. No semantic feature-slug switch.

@@ -117,6 +117,23 @@ describe('PersonaLandingPage — B.4 routing', () => {
     expect(screen.getByText('боль 1')).toBeInTheDocument();
   });
 
+  it('keeps unavailable service, hero, bundle and repeated actions visible without broken hrefs', () => {
+    MOCK_LANDINGS = [{ ...liveLanding,
+      services: [{ slug: 'missing', label: { ru: 'Unavailable service', en: 'Unavailable service' }, oneLiner: { ru: 'Unverified promise', en: 'Unverified promise' }, href: '/missing-service', availability: 'unavailable' }],
+      primaryCta: { label: { ru: 'Unavailable action', en: 'Unavailable action' }, href: '/missing-action', availability: 'unavailable' },
+      secondaryCta: { label: { ru: 'Unknown details', en: 'Unknown details' }, href: '/missing-entity', availability: 'entity-unverified' },
+    }];
+    const { container } = renderAt('/for/tourists');
+    expect(screen.getAllByRole('link', { name: /Unavailable action/ }).length).toBeGreaterThanOrEqual(3);
+    expect(container.querySelectorAll('[data-link-availability]').length).toBeGreaterThanOrEqual(5);
+    expect(container.querySelector('a[href*="missing-"]')).toBeNull();
+    expect(screen.queryByText('Unverified promise')).toBeNull();
+    for (const entry of screen.getAllByRole('link', { name: /Unavailable action|Unavailable service|Unknown details/ })) {
+      expect(entry).toHaveAttribute('aria-disabled', 'true');
+      expect(entry).not.toHaveAttribute('href');
+    }
+  });
+
   it('renders the primary CTA href on live landing', () => {
     MOCK_LANDINGS = [liveLanding];
     renderAt('/for/tourists');
