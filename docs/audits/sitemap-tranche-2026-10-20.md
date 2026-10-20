@@ -1,6 +1,6 @@
 # Sitemap implementation: first route/link tranche
 
-Base: pending navigation PR135 (`866e9abd35f8f27d474990949d02e6879965773f`), itself based on main `1f3cf2164c7e64dd4a6aa8330a38fa864a94cdb1`. PR135 and the separate bootstrap PR136 are unchanged.
+Base: verified main `39ed762985378d176ca06e405ea78a67c8e659b8` after PR135 merged. Only the three follow-up commits are included; merged navigation changes are not repeated. The separate bootstrap PR136 is outside this tranche.
 
 ## Completed
 
@@ -19,6 +19,8 @@ Base: pending navigation PR135 (`866e9abd35f8f27d474990949d02e6879965773f`), its
 
 No global redirect rule or generic fallback was introduced. Other query parameters, persona definitions, text claims and booking writers were not changed.
 
+A separate compatibility commit restores the existing `intent=rent-month` and `intent=rent-long` persona bookmarks in the shared residential query parser. They hydrate monthly/yearly search respectively when no explicit tenancy parameter exists. An explicit tenancy (including an explicitly cleared value) takes precedence. Dates, guest filters, persona and return context remain in the URL; no availability code changes.
+
 ## Inventory limits and remaining work
 
 `node scripts/qa/content-route-inventory.mjs <output.json>` reads actual JSX route declarations, resolves imported route fragments and records parent layout/guard expressions. Catch-all routes are excluded from destination validation. It does not execute application readers or validate database entities.
@@ -30,3 +32,5 @@ Remaining unmatched destinations must be reviewed individually, including specia
 ## Validation
 
 44 focused tests across six files passed: mounted route ownership, actual MC guard guest/member/admin behavior and return context, verified content links, existing cluster/persona contracts and property-to-complex context. Scoped lint has no errors (two existing semantic-copy warnings); whitespace checks pass.
+
+The legacy-tenancy compatibility run passed 58 tests across the query parser and search-route integration suite. Two additional mounted monthly/yearly bookmark cases passed separately; they exercise the actual catalogue alias and preserve persona/return context. Scoped lint passed.

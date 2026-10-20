@@ -44,6 +44,14 @@ beforeEach(() => { state.language = 'en'; calendar.pending = false; calendar.fai
 afterEach(cleanup);
 
 describe('one residential results surface', () => {
+  it.each([['rent-month', 'medium', 'Monthly'], ['rent-long', 'long', 'Yearly']])('hydrates the legacy %s persona bookmark through the catalogue alias', (intent, tenancy, label) => {
+    mount(`/property/browse?intent=${intent}&persona=P3&returnTo=%2Ffor%2Flong-stay`);
+    expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');
+    expect(state.filters.rentTenancy).toBe(tenancy);
+    expect(screen.getByTestId('location')).toHaveTextContent(`intent=${intent}`);
+    expect(screen.getByTestId('location')).toHaveTextContent('persona=P3');
+    expect(screen.getByTestId('location')).toHaveTextContent('returnTo=%2Ffor%2Flong-stay');
+  });
   it('opens a persisted comparison from the results actions without an overlay', () => {
     localStorage.setItem('myuno_compare_properties', JSON.stringify([{ id: 'one', title_en: 'Saved home', mode: 'rent' }]));
     render(<MemoryRouter initialEntries={['/property/search']}><CompareProvider><PropertySearchPage /></CompareProvider></MemoryRouter>);
