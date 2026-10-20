@@ -46,12 +46,13 @@ describe('compact personal identity and actions', () => {
     state.language = language;
     render(<PersonalHomeActions />, { wrapper });
     expect(screen.getByRole('link', { name: search })).toHaveAttribute('href', '/search');
-    const paths = ['/property', '/services', '/me', '/support'];
+    const paths = ['/property', '/services', '/bookings', '/support'];
     labels.forEach((label, index) => expect(screen.getByRole('link', { name: label })).toHaveAttribute('href', paths[index]));
     expect(screen.getByRole('navigation', { name: nav }).querySelectorAll('a')).toHaveLength(4);
-    expect(screen.getAllByRole('link')).toHaveLength(5);
+    expect(screen.getAllByRole('link')).toHaveLength(6);
+    expect(screen.getByRole('link', { name: language === 'ru' ? 'Спланировать поездку' : language === 'th' ? 'วางแผนการเดินทาง' : 'Plan a trip' })).toHaveAttribute('href', '/trip-planner');
     fireEvent.click(screen.getByRole('link', { name: labels[2] }));
-    expect(screen.getByTestId('location')).toHaveTextContent('/me');
+    expect(screen.getByTestId('location')).toHaveTextContent('/bookings');
   });
   it('opens interest editing only on the explicit lower control', () => {
     const open = vi.fn();
@@ -113,12 +114,22 @@ describe('personal and verified work navigation', () => {
     rerender(<WorkspaceHomeBanner />);
     expect(screen.getByRole('link', { name: 'Работа: Управление объектами' })).toHaveAttribute('href', '/mc');
   });
-  it.each([['uno_team', '/team'], ['staff', '/staff']])('does not treat %s as property-management authority', (role, path) => {
+  it.each([['uno_team', '/team']])('does not treat %s as property-management authority', (role, path) => {
     state.availableRoles = ['user', role];
     render(<WorkspaceHomeBanner />, { wrapper });
     const links = screen.getAllByRole('link');
     expect(links.some(link => link.getAttribute('href') === path)).toBe(true);
     expect(links.some(link => link.getAttribute('href') === '/mc')).toBe(false);
+  });
+  it('does not expose the removed staff dashboard or substitute team authority', () => {
+    state.availableRoles = ['user', 'staff'];
+    render(<WorkspaceHomeBanner />, { wrapper });
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+  });
+  it('offers the guarded Capital workspace only to an existing investor role', () => {
+    state.language = 'en'; state.availableRoles = ['investor'];
+    render(<WorkspaceHomeBanner />, { wrapper });
+    expect(screen.getByRole('link', { name: 'Capital deal workspace' })).toHaveAttribute('href', '/capital');
   });
   it('routes an MC-managed owner to the owner portal', () => {
     state.availableRoles = ['user', 'owner']; state.isMCPortal = true;

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Heart, ShoppingBag, User, Settings,
   HelpCircle, Gift, LogOut, Store, Building2, Shield, Headphones,
-  Menu, Bell, CreditCard, UserCog, Briefcase, Construction, Crown,
+  Menu, Bell, CreditCard, Briefcase, Construction, Crown,
   LineChart, Eye, Zap,
 } from 'lucide-react';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
@@ -39,69 +39,77 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { useOwnerType } from '@/hooks/useOwnerType';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
   labelEn: string;
   labelRu: string;
+  labelTh: string;
   descEn: string;
   descRu: string;
+  descTh: string;
   icon: React.ComponentType<{ className?: string }>;
   path: string;
 }>> = {
   vendor: {
-    labelEn: 'Switch to Provider',
-    labelRu: 'Панель провайдера',
+    labelEn: 'Provider workspace',
+    labelRu: 'Кабинет поставщика',
+    labelTh: 'พื้นที่ผู้ให้บริการ',
     descEn: 'Manage your services',
     descRu: 'Управление услугами',
+    descTh: 'จัดการบริการของคุณ',
     icon: Store,
     path: '/vendor',
   },
   owner: {
-    labelEn: 'Property owner',
-    labelRu: 'Кабинет собственника',
-    descEn: 'Your own properties & bookings',
-    descRu: 'Личные объекты: брони и сервисы',
+    labelEn: 'Property management',
+    labelRu: 'Управление жильём',
+    labelTh: 'จัดการที่พัก',
+    descEn: 'Manage your own properties',
+    descRu: 'Управление своими объектами',
+    descTh: 'จัดการที่พักของคุณ',
     icon: Building2,
-    // /owner redirects to /mc — point directly to avoid an extra hop.
+    // Self-managed default; managed owners use their existing owner portal below.
     path: '/mc',
   },
   admin: {
-    labelEn: 'Admin Panel',
-    labelRu: 'Панель админа',
+    labelEn: 'Administration',
+    labelRu: 'Администрирование',
+    labelTh: 'ผู้ดูแลระบบ',
     descEn: 'Platform administration',
-    descRu: 'Администрирование',
+    descRu: 'Управление платформой',
+    descTh: 'จัดการแพลตฟอร์ม',
     icon: Shield,
     path: '/admin',
   },
   uno_team: {
-    labelEn: 'Team Dashboard',
+    labelEn: 'myUNO team',
     labelRu: 'Команда myUNO',
-    descEn: 'Support & operations',
-    descRu: 'Поддержка и операции',
+    labelTh: 'ทีม myUNO',
+    descEn: 'Team tasks and support',
+    descRu: 'Задачи команды и поддержка',
+    descTh: 'งานทีมและการช่วยเหลือ',
     icon: Headphones,
     path: '/team',
   },
-  staff: {
-    labelEn: 'Staff workspace',
-    labelRu: 'Сотрудник',
-    descEn: 'Internal staff tools',
-    descRu: 'Внутренние инструменты',
-    icon: UserCog,
-    path: '/staff',
-  },
   property_manager: {
-    labelEn: 'Management company (MC)',
-    labelRu: 'Управляющая компания (УК)',
-    descEn: 'MC dashboard for client properties',
-    descRu: 'Панель компании — объекты клиентов',
+    labelEn: 'Property management company',
+    labelRu: 'Управляющая компания',
+    labelTh: 'บริษัทจัดการที่พัก',
+    descEn: 'Manage client properties',
+    descRu: 'Управление объектами клиентов',
+    descTh: 'จัดการที่พักของลูกค้า',
     icon: Briefcase,
     path: '/mc',
   },
   investor: {
-    labelEn: 'Investor workspace',
-    labelRu: 'Кабинет инвестора',
-    descEn: 'Capital & portfolio tools',
-    descRu: 'Капитал и портфель',
+    labelEn: 'Investor portfolio',
+    labelRu: 'Портфель инвестора',
+    labelTh: 'พอร์ตการลงทุน',
+    descEn: 'Your investments and portfolio',
+    descRu: 'Инвестиции и портфель',
+    descTh: 'การลงทุนและพอร์ตของคุณ',
     icon: LineChart,
     // /investor route does not exist — investor dashboard lives under /invest/dashboard.
     path: APP_ROUTES.INVEST_DASHBOARD,
@@ -109,7 +117,7 @@ const ROLE_SWITCH_CONFIG: Partial<Record<AppRole, {
 };
 
 /** Platform / staff roles shown first in the switcher */
-const PLATFORM_ROLE_ORDER: AppRole[] = ['admin', 'uno_team', 'staff', 'investor'];
+const PLATFORM_ROLE_ORDER: AppRole[] = ['admin', 'uno_team', 'investor'];
 /** Business / workspace roles */
 const WORKSPACE_ROLE_ORDER: AppRole[] = ['vendor', 'owner', 'property_manager'];
 
@@ -127,6 +135,11 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
   const { availableRoles, switchContext } = useUserContext();
   const { unreadCount } = useNotifications();
   const { isAdmin } = useIsAdmin();
+  const { isMCPortal, isLoading: ownerTypeLoading } = useOwnerType();
+  const roleConfig = (role: AppRole) => role === 'owner' && isMCPortal
+    ? { ...ROLE_SWITCH_CONFIG.owner!, path: '/my-property', labelEn: 'Owner portal', labelRu: 'Кабинет собственника', labelTh: 'พอร์ทัลเจ้าของ', descEn: 'Your managed properties and reports', descRu: 'Объекты под управлением и отчёты', descTh: 'ที่พักที่มีผู้จัดการและรายงาน' }
+    : ROLE_SWITCH_CONFIG[role];
+  const roleLabel = (config: NonNullable<ReturnType<typeof roleConfig>>) => pickLang(language, { en: config.labelEn, ru: config.labelRu, th: config.labelTh });
   const { enter: enterViewAs } = usePlatformViewAs();
   const isRu = language === 'ru';
 
@@ -138,9 +151,9 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
   const switchableRoles = useMemo(
     () =>
       availableRoles.filter(
-        (r) => r !== 'user' && r !== 'guest' && r !== 'partner' && ROLE_SWITCH_CONFIG[r]
+        (r) => r !== 'user' && r !== 'guest' && r !== 'partner' && !(r === 'owner' && ownerTypeLoading) && ROLE_SWITCH_CONFIG[r]
       ),
-    [availableRoles]
+    [availableRoles, ownerTypeLoading]
   );
 
   const platformRoles = useMemo(
@@ -172,7 +185,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
   const initials = userName.charAt(0).toUpperCase();
 
   const handleRoleSwitch = async (role: AppRole) => {
-    const config = ROLE_SWITCH_CONFIG[role];
+    const config = roleConfig(role);
     if (!config) return;
     try { localStorage.setItem('myuno:lastOperateRole', role); } catch { /* ignore */ }
     await switchContext({ role });
@@ -241,7 +254,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
 
   const renderRoleItems = (roles: AppRole[]) =>
     roles.map((role) => {
-      const config = ROLE_SWITCH_CONFIG[role]!;
+      const config = roleConfig(role)!;
       const Icon = config.icon;
       return (
         <DropdownMenuItem
@@ -252,10 +265,10 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
           <Icon className="w-5 h-5 text-foreground/70 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground">
-              {isRu ? config.labelRu : config.labelEn}
+              {roleLabel(config)}
             </p>
             <p className="text-xs text-muted-foreground">
-              {isRu ? config.descRu : config.descEn}
+              {pickLang(language, { en: config.descEn, ru: config.descRu, th: config.descTh })}
             </p>
           </div>
         </DropdownMenuItem>
@@ -316,7 +329,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
         {/* Role switch + developer portal — top, prominent (portal is not an AppRole) */}
         <DropdownMenuGroup>
             {quickOperateRole && ROLE_SWITCH_CONFIG[quickOperateRole] && (() => {
-              const cfg = ROLE_SWITCH_CONFIG[quickOperateRole]!;
+              const cfg = roleConfig(quickOperateRole)!;
               const Icon = cfg.icon;
               return (
                 <DropdownMenuItem
@@ -330,7 +343,7 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
                       <Icon className="w-3 h-3 inline mr-1 align-text-bottom" />
-                      {isRu ? cfg.labelRu : cfg.labelEn}
+                      {roleLabel(cfg)}
                     </p>
                   </div>
                 </DropdownMenuItem>
@@ -398,12 +411,10 @@ export function UserAvatarMenu({ compact = false }: { compact?: boolean }) {
               <Construction className="w-5 h-5 text-foreground/70 flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground">
-                  {isRu ? 'Портал застройщика' : 'Developer portal'}
+                  {pickLang(language, { ru: 'Кабинет застройщика', en: 'Property developer portal', th: 'พอร์ทัลผู้พัฒนาอสังหาริมทรัพย์' })}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {isRu
-                    ? 'Кабинет застройщика: проекты, лиды, аналитика'
-                    : 'Developer workspace: projects, leads, analytics'}
+                  {pickLang(language, { ru: 'Проекты недвижимости, заявки и аналитика', en: 'Property projects, leads and analytics', th: 'โครงการอสังหาริมทรัพย์ ลูกค้าและการวิเคราะห์' })}
                 </p>
               </div>
             </DropdownMenuItem>
