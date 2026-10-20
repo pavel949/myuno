@@ -6,6 +6,7 @@
  * a single source. Used by the PersonaHalo activity-badge deep-link so a
  * tap on the Legal cluster's "2 open" badge lands on visa-only requests.
  */
+import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useMemo, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ClipboardList, ChevronRight, X } from 'lucide-react';
@@ -85,6 +86,7 @@ export default function MeRequests() {
   return (
     <MeShellLayout title={isRu ? 'Заявки' : 'Requests'}>
       <div className="space-y-6">
+        <Link to="/bookings" className="inline-flex min-h-11 items-center text-sm underline">{pickLang(language, { ru: 'Все бронирования и заказы', en: 'All bookings and orders', th: 'การจองและคำสั่งทั้งหมด' })}</Link>
         <header>
           <h1 className="font-display text-2xl font-bold tracking-tight">
             {isRu ? 'Мои заявки' : 'My requests'}

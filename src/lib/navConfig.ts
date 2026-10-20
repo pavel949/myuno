@@ -8,7 +8,6 @@
  */
 
 import {
-  Plane,
   Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
   CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
   FileCheck, Users, MessageCircle, BarChart3, FileText, TrendingUp, Inbox,
@@ -48,11 +47,11 @@ export type NavRoleKey =
  * `GUEST_NAV_ME_HUB` (Gosuslugi-style 5-tab) takes over via NavShell.
  */
 export const GUEST_NAV: NavItem[] = [
-  { path: APP_ROUTES.HOME,          icon: Home,      labelEn: 'Home',     labelRu: 'Главная',  labelTh: 'หน้าแรก', exact: true },
-  { path: APP_ROUTES.GOAL_STAY,     icon: BedDouble, labelEn: 'Homes',    labelRu: 'Жильё',   labelTh: 'ที่พัก' },
-  { path: APP_ROUTES.TRIP_PLANNER,  icon: Plane,     labelEn: 'Your trip', labelRu: 'Отдых',    labelTh: 'การเดินทาง' },
-  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench,    labelEn: 'Services', labelRu: 'Услуги',   labelTh: 'บริการ' },
-  { path: APP_ROUTES.ACCOUNT,       icon: User,      labelEn: 'Me',       labelRu: 'Профиль',  labelTh: 'ฉัน' },
+  { path: APP_ROUTES.HOME, icon: Home, labelEn: 'Home', labelRu: 'Главная', labelTh: 'หน้าแรก', exact: true },
+  { path: APP_ROUTES.GOAL_STAY, icon: BedDouble, labelEn: 'Homes', labelRu: 'Жильё', labelTh: 'ที่พัก' },
+  { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Bookings', labelRu: 'Бронирования', labelTh: 'การจอง' },
+  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
+  { path: APP_ROUTES.ACCOUNT, icon: User, labelEn: 'Profile', labelRu: 'Профиль', labelTh: 'โปรไฟล์' },
 ];
 
 /**

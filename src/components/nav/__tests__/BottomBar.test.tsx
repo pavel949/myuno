@@ -14,8 +14,11 @@ it.each([
  ['/property/example', 'Homes'],
  ['/transport/transfer', 'Services'],
  ['/discover/services', 'Services'],
- ['/trip-planner', 'Your trip'],
- ['/profile', 'Me'],
+ ['/trip-planner', 'Services'],
+ ['/bookings', 'Bookings'],
+ ['/me/requests', 'Bookings'],
+ ['/my-stay', 'Bookings'],
+ ['/profile', 'Profile'],
  ['/', 'Home'],
 ])('announces the same active tab it highlights on %s', (path, label) => {
  render(<MemoryRouter initialEntries={[path]}><BottomBar {...{ role: 'guest' as const }} /></MemoryRouter>);
