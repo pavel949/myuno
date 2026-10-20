@@ -3,10 +3,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { ProjectInfoCard } from '../ProjectInfoCard';
+import { ALL_LISTING_AMENITY_UI_ITEMS, normalizeProjectFacilityIds } from '@/lib/propertyAttributeRegistry';
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 afterEach(cleanup);
 function Location() { const location = useLocation(); return <output data-testid="location">{location.pathname}{location.search}</output>; }
 describe('unit to informational complex context', () => {
+  it('keeps existing admin checkbox keys selectable after the shared read normalization', () => {
+    const keys = ALL_LISTING_AMENITY_UI_ITEMS.map(item => item.id);
+    expect(normalizeProjectFacilityIds(keys)).toEqual(keys);
+    expect(normalizeProjectFacilityIds(['security'])).toEqual(['security_24h']);
+  });
   it('normalizes an alias-only pool from the project AI writer', () => {
     render(<MemoryRouter><ProjectInfoCard project={{ id: 'complex', name_en: 'Complex', name_ru: '', amenities: ['swimming_pool'] }} /></MemoryRouter>);
     expect(screen.getByText('Pool')).toBeInTheDocument();

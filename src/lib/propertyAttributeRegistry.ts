@@ -276,7 +276,7 @@ export function normalizeEquipmentId(raw: string): string {
 export function normalizeProjectFacilityId(raw: string): string {
   const key = normalizeEquipmentId(raw);
   const aliases: Record<string, string> = {
-    swimming_pool: 'pool', tennis_court: 'tennis', security_24h: 'security', bbq_area: 'bbq',
+    swimming_pool: 'pool', tennis_court: 'tennis', security: 'security_24h', bbq_area: 'bbq',
   };
   return aliases[key] || key;
 }
