@@ -91,7 +91,9 @@ async def assert_isolated(page, source='queue'):
     if source == 'dashboard':
         assert counters['fixtureReads'] == 0, counters
         assert counters['dashboardReads'] >= 2, counters
-        assert counters['analyticsReads'] >= 1, counters
+        # The linked count cards consume the canonical dashboard count hook.
+        # They must not start the former global finance/analytics reader.
+        assert counters['analyticsReads'] == 0, counters
     else:
         assert counters['fixtureReads'] >= 1, counters
     return counters
