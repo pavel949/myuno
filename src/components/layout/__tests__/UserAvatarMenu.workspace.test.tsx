@@ -36,3 +36,12 @@ describe('verified workspace menu destinations', () => {
    state.language = language; setup(); expect(screen.getByRole('button', { name: new RegExp(label) })).toBeInTheDocument();
  });
 });
+
+it('localizes ordinary Thai account destinations without changing their routes', async () => {
+ state.language = 'th';
+ setup();
+ expect(screen.getByRole('button', { name: 'เมนูบัญชี' })).toBeVisible();
+ for (const label of ['รายการโปรด', 'การจองและคำสั่งซื้อ', 'การแจ้งเตือน', 'โปรไฟล์', 'การตั้งค่า', 'กระเป๋าเงินและการชำระเงิน', 'ศูนย์ช่วยเหลือ', 'ออกจากระบบ']) expect(screen.getByRole('button', { name: label })).toBeVisible();
+ fireEvent.click(screen.getByRole('button', { name: 'การจองและคำสั่งซื้อ' }));
+ expect(await screen.findByText('/bookings')).toBeInTheDocument();
+});

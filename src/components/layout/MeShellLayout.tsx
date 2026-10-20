@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 /**
  * MeShellLayout — Phase A5 Universal Hub shell.
  *
@@ -24,16 +25,17 @@ interface MeTab {
   icon: React.ComponentType<{ className?: string }>;
   labelEn: string;
   labelRu: string;
+  labelTh: string;
 }
 
 const TABS: MeTab[] = [
-  { to: '/me',           end: true,  icon: Inbox,         labelEn: 'Overview',  labelRu: 'Обзор' },
-  { to: '/me/bookings',              icon: CalendarCheck, labelEn: 'Bookings',  labelRu: 'Бронирования' },
-  { to: '/me/services',              icon: Compass,       labelEn: 'Services',  labelRu: 'Услуги' },
-  { to: '/me/documents',             icon: FileText,      labelEn: 'Documents', labelRu: 'Документы' },
-  { to: '/me/payments',              icon: Wallet,        labelEn: 'Payments',  labelRu: 'Платежи' },
-  { to: '/me/requests',              icon: ClipboardList, labelEn: 'Requests',  labelRu: 'Заявки' },
-  { to: '/me/profile',               icon: User,          labelEn: 'Profile',   labelRu: 'Профиль' },
+  { to: '/me',           end: true,  icon: Inbox,         labelEn: 'Overview',  labelRu: 'Обзор', labelTh: 'ภาพรวม' },
+  { to: '/me/bookings',              icon: CalendarCheck, labelEn: 'Bookings',  labelRu: 'Бронирования', labelTh: 'การจอง' },
+  { to: '/me/services',              icon: Compass,       labelEn: 'Services',  labelRu: 'Услуги', labelTh: 'บริการ' },
+  { to: '/me/documents',             icon: FileText,      labelEn: 'Documents', labelRu: 'Документы', labelTh: 'เอกสาร' },
+  { to: '/me/payments',              icon: Wallet,        labelEn: 'Payments',  labelRu: 'Платежи', labelTh: 'การชำระเงิน' },
+  { to: '/me/requests',              icon: ClipboardList, labelEn: 'Requests',  labelRu: 'Заявки', labelTh: 'คำขอ' },
+  { to: '/me/profile',               icon: User,          labelEn: 'Profile',   labelRu: 'Профиль', labelTh: 'โปรไฟล์' },
 ];
 
 interface MeShellLayoutProps {
@@ -43,22 +45,21 @@ interface MeShellLayoutProps {
 
 export function MeShellLayout({ title, children }: MeShellLayoutProps) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const activeTab = TABS.find(t => t.end ? pathname === t.to : pathname === t.to || pathname.startsWith(t.to + '/')) ?? TABS[0];
   return (
-    <AppLayout usePageContainer={false} title={title ?? (isRu ? 'Мой кабинет' : 'My Hub')}>
+    <AppLayout usePageContainer={false} title={title ?? (pickLang(language, { ru: 'Мой кабинет', en: 'My Hub', th: 'บัญชีของฉัน' }))}>
       <div className="sticky top-[var(--consumer-header-height,0px)] z-20 bg-background border-b border-border/60">
         <div className="mx-auto w-full max-w-5xl px-[var(--page-padding-x)]">
           <div className="py-3 md:hidden">
             <Select value={activeTab.to} onValueChange={navigate}>
-              <SelectTrigger aria-label={isRu ? 'Раздел аккаунта' : 'Account section'} className="min-h-11 bg-card"><SelectValue /></SelectTrigger>
-              <SelectContent>{TABS.map(t => <SelectItem key={t.to} value={t.to}>{isRu ? t.labelRu : t.labelEn}</SelectItem>)}</SelectContent>
+              <SelectTrigger aria-label={pickLang(language, { ru: 'Раздел аккаунта', en: 'Account section', th: 'ส่วนบัญชี' })} className="min-h-11 bg-card"><SelectValue /></SelectTrigger>
+              <SelectContent>{TABS.map(t => <SelectItem key={t.to} value={t.to}>{pickLang(language, { ru: t.labelRu, en: t.labelEn, th: t.labelTh })}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <nav
-            aria-label={isRu ? 'Разделы' : 'Sections'}
+            aria-label={pickLang(language, { ru: 'Разделы', en: 'Sections', th: 'ส่วนต่าง ๆ' })}
             className="hidden gap-1 overflow-x-auto py-2 md:flex"
           >
             {TABS.map((t) => (
@@ -76,7 +77,7 @@ export function MeShellLayout({ title, children }: MeShellLayoutProps) {
                 }
               >
                 <t.icon className="h-4 w-4" />
-                <span>{isRu ? t.labelRu : t.labelEn}</span>
+                <span>{pickLang(language, { ru: t.labelRu, en: t.labelEn, th: t.labelTh })}</span>
               </NavLink>
             ))}
           </nav>

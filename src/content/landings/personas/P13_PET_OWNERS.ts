@@ -22,10 +22,10 @@ export const P13_PET_OWNERS: PersonaLanding = {
     { ru: 'Хотите гулять, плавать и есть в кафе с питомцем — не везде это разрешено.', en: 'You want to walk, swim and eat out with your pet — but rules differ per spot.' },
   ],
   services: [
-    { slug: 'pet-import', label: { ru: 'Ввоз питомца', en: 'Pet import' }, oneLiner: { ru: 'Полный пакет: чип, прививки, R7, перевозка из аэропорта.', en: 'Full pack: chip, shots, R7, airport pickup.' }, href: '/pets/import' },
+    { slug: 'pet-import', label: { ru: 'Ввоз питомца', en: 'Pet import' }, oneLiner: { ru: 'Полный пакет: чип, прививки, R7, перевозка из аэропорта.', en: 'Full pack: chip, shots, R7, airport pickup.' }, href: '/pets/import', availability: 'unavailable' },
     { slug: 'pet-friendly-villas', label: { ru: 'Pet-friendly виллы', en: 'Pet-friendly villas' }, oneLiner: { ru: 'Каталог проверенных вилл, где питомца действительно ждут.', en: 'Verified villas where pets are actually welcome.' }, href: '/property?petFriendly=1' },
-    { slug: 'vet-network', label: { ru: 'Многоязычные ветеринары', en: 'Multilingual vets' }, oneLiner: { ru: 'Сеть из 6 клиник (EN/RU/TH), доступ 24/7, скидка участникам.', en: '6-clinic network (EN/RU/TH), 24/7 access, member discount.' }, href: '/pets/vets' },
-    { slug: 'grooming-care', label: { ru: 'Груминг и зоомагазины', en: 'Grooming & pet shops' }, oneLiner: { ru: 'Премиум-уход в Раваи и Чалонге, доставка корма.', en: 'Premium care in Rawai and Chalong, pet-food delivery.' }, href: '/pets/care' },
+    { slug: 'vet-network', label: { ru: 'Многоязычные ветеринары', en: 'Multilingual vets' }, oneLiner: { ru: 'Сеть из 6 клиник (EN/RU/TH), доступ 24/7, скидка участникам.', en: '6-clinic network (EN/RU/TH), 24/7 access, member discount.' }, href: '/pets/vets', availability: 'unavailable' },
+    { slug: 'grooming-care', label: { ru: 'Груминг и зоомагазины', en: 'Grooming & pet shops' }, oneLiner: { ru: 'Премиум-уход в Раваи и Чалонге, доставка корма.', en: 'Premium care in Rawai and Chalong, pet-food delivery.' }, href: '/pets/care', availability: 'unavailable' },
   ],
   faq: [
     { q: { ru: 'Какие документы нужны для ввоза собаки?', en: 'Which documents are needed to import a dog?' }, a: { ru: 'Микрочип, паспорт, прививка от бешенства не моложе 21 дня, справка из госветслужбы и разрешение R7 от тайского DLD.', en: 'Microchip, pet passport, rabies vaccine ≥21 days old, government vet certificate and an R7 permit from Thai DLD.' } },
@@ -42,7 +42,7 @@ export const P13_PET_OWNERS: PersonaLanding = {
   },
   secondaryCta: {
     label: { ru: 'Оформить ввоз', en: 'Start the import paperwork' },
-    href: '/pets/import',
+    href: '/pets/import', availability: 'unavailable',
   },
   seo: {
     metaTitle: { ru: 'Пхукет с питомцем: ввоз, виллы, ветеринар — myUNO', en: 'Phuket with a pet: import, villas, vet — myUNO' },

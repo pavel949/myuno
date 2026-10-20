@@ -1,5 +1,5 @@
 /* Public landing only. Canonical application tokens and workspaces are untouched. */
-.cinematic-home{--home-navy:#0a2240;--home-cream:#f7f5f1;--home-ink:#1c1916;--home-muted:#68645f;background:var(--home-cream);color:var(--home-ink);font-family:var(--font-body);padding-bottom:28px}
+.cinematic-home{--home-navy:#0a2240;--home-cream:#f7f5f1;--home-ink:#1c1916;--home-muted:#68645f;background:var(--home-cream);color:var(--home-ink);font-family:var(--font-body);padding-bottom:calc(28px + var(--bottom-nav-h, 0px))}
 .cinematic-home .home-container{width:calc(100% - 112px);max-width:1328px;margin-inline:auto}
 .cinematic-home a,.cinematic-home button,.cinematic-home input,.cinematic-home select{touch-action:manipulation}
 .cinematic-home a:focus-visible,.cinematic-home button:focus-visible,.cinematic-home input:focus-visible,.cinematic-home select:focus-visible{outline:2px solid #d96b1a;outline-offset:5px}
