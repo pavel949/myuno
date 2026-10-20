@@ -32,7 +32,7 @@ it('uses the available admin work area and its PageShell gutter without widening
 
 it('returns keyboard focus to the actual search opener after Escape', async () => {
   render(<MemoryRouter initialEntries={['/admin']}><TopBar role="admin" /></MemoryRouter>);
-  const opener = screen.getByRole('button', { name: 'Search', exact: true });
+  const opener = screen.getByRole('button', { name: /^Search$/ });
   // JSDOM click does not perform the browser's native focus-on-click step.
   opener.focus();
   fireEvent.click(opener);

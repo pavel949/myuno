@@ -131,7 +131,9 @@ Review checks: 20 provider/partner focused tests, 6 Team boundary tests,
 moderation tests passed in separate runs. Root scoped lint has no errors.
 Earlier simultaneous full local typechecks were cancelled after host memory
 pressure; they are not passing evidence. A single stable-source full check was
-started for this review batch, with its outcome reported separately.
+completed for this review batch with one TS2769 in the new navigation test:
+getByRole does not accept an exact option. An anchored name expression preserves
+the exact assertion using the supported API. Fresh exact-head CI remains required.
 
 The additional actual-shell fixture has 18 cases at 320/2560 px in RU/EN/TH,
 full/zero/total-source-failure states, including actual shell, menus, dialogs,
