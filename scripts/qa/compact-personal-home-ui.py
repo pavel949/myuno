@@ -420,7 +420,7 @@ async def main():
                             continue
 
                         # Actual Link/navigate destinations, using only MemoryRouter.
-                        for key, href in [('search', '/search'), ('homes', '/property'), ('services', '/services'), ('bookings', '/me'), ('help', '/support')]:
+                        for key, href in [('search', '/search'), ('homes', '/property'), ('services', '/services'), ('bookings', '/bookings'), ('help', '/support')]:
                             await navigate()
                             link = page.get_by_role('link', name=copy[key], exact=True)
                             await expect(link).to_have_attribute('href', href)
