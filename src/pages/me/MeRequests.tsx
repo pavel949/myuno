@@ -6,9 +6,11 @@
  * a single source. Used by the PersonaHalo activity-badge deep-link so a
  * tap on the Legal cluster's "2 open" badge lands on visa-only requests.
  */
+import { useAuth } from '@/contexts/AuthContext';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 import { pickLang } from '@/lib/i18n/pickLang';
-import React, { useMemo, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import React, { useMemo, useCallback, useEffect } from 'react';
+import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { ClipboardList, ChevronRight, X } from 'lucide-react';
 import { MeShellLayout } from '@/components/layout/MeShellLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -60,9 +62,18 @@ function RequestCard({ r }: { r: MyRequest }) {
 
 export default function MeRequests() {
   const { language } = useLanguage();
+  const { user, isLoading: authLoading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
   const { data, isLoading } = useMyRequests();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      redirectToAuth(navigate, { replace: true, from: location.pathname + location.search + location.hash });
+    }
+  }, [authLoading, user, navigate, location.pathname, location.search, location.hash]);
 
   const sourceParam = searchParams.get('source') ?? '';
   const activeSource = (VALID_SOURCES as string[]).includes(sourceParam)
@@ -82,6 +93,9 @@ export default function MeRequests() {
       return next;
     }, { replace: true });
   }, [setSearchParams]);
+
+  if (authLoading) return <MeShellLayout><LoadingState /></MeShellLayout>;
+  if (!user) return null;
 
   return (
     <MeShellLayout title={isRu ? 'Заявки' : 'Requests'}>
