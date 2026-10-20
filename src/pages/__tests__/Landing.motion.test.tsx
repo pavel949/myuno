@@ -12,6 +12,9 @@ vi.mock('@/components/legal/LegalEntityInfo', () => ({ LegalCopyright: () => nul
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: () => null }));
 vi.mock('@/components/home/HomeDiscoverySearch', () => ({ HomeDiscoverySearch: () => null }));
 
+// Navigation composition is covered by Landing.anonymous-home.test.tsx.
+vi.mock('@/components/nav/BottomBar', () => ({ BottomBar: () => null }));
+
 import Landing from '../Landing';
 
 let reducedMotion = false;

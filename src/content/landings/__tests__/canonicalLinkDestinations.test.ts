@@ -6,6 +6,21 @@ import { P19_ACCESSIBILITY } from '../personas/P19_ACCESSIBILITY';
 import { auditContentRoutes, mountedRoutes } from '../../../../scripts/qa/content-route-inventory.mjs';
 
 describe('verified content-link destinations', () => {
+  it('does not offer unmatched authored routes as functioning actions', () => {
+    const links = auditContentRoutes();
+    expect(links.filter(link => link.status === 'unmatched' && !link.availability)).toEqual([]);
+    expect(links.filter(link => link.status === 'entity-verification-required' && !link.availability).map(link => link.href))
+      .toEqual(expect.arrayContaining(['/cluster/compliance', '/cluster/lifestyle']));
+    expect(links.filter(link => link.status === 'entity-verification-required' && !link.availability && !['/cluster/compliance', '/cluster/lifestyle'].includes(link.href))).toEqual([]);
+  });
+  it('uses the area directory and retains the existing authenticated provider application', () => {
+    const links = auditContentRoutes();
+    expect(links.filter(link => ['/guide/areas', '/property/areas', '/vendor/apply'].includes(link.href))).toEqual([]);
+    expect(links.filter(link => link.href === '/vendor/onboarding')).toHaveLength(6);
+    const route = mountedRoutes().find(route => route.path === '/vendor/onboarding')!;
+    expect(route.element).toContain('AuthGuard');
+    expect(route.element).toContain('VendorOnboarding');
+  });
   it('uses mounted destinations for the five verified obsolete path families', () => {
     const links = auditContentRoutes();
     const obsolete = ['/areas', '/clearview', '/dining', '/landing/airport-transfer', '/legal/insurance'];

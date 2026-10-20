@@ -57,7 +57,17 @@ export function contentLinks() {
   visit(path.join(root, 'src/content/landings'));
   return files.flatMap(file => {
     const source = fs.readFileSync(file, 'utf8');
-    return [...source.matchAll(/\bhref:\s*(['"])(\/[^'"]*)\1/g)].map(match => ({ href: match[2], file: path.relative(root, file).replaceAll('\\', '/'), line: source.slice(0, match.index).split('\n').length }));
+    const ast = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+    const availability = new Map();
+    const walk = node => {
+      if (ts.isPropertyAssignment(node) && node.name.getText(ast) === 'href' && ts.isObjectLiteralExpression(node.parent)) {
+        const reviewed = node.parent.properties.find(prop => ts.isPropertyAssignment(prop) && prop.name.getText(ast) === 'availability');
+        if (reviewed && ts.isStringLiteral(reviewed.initializer)) availability.set(node.getStart(ast), reviewed.initializer.text);
+      }
+      ts.forEachChild(node, walk);
+    };
+    walk(ast);
+    return [...source.matchAll(/\bhref:\s*(['"])(\/[^'"]*)\1/g)].map(match => ({ href: match[2], file: path.relative(root, file).replaceAll('\\', '/'), line: source.slice(0, match.index).split('\n').length, availability: availability.get(match.index) ?? null }));
   });
 }
 
