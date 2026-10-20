@@ -150,9 +150,10 @@ async def exercise_queue(page, language, width):
     await screenshot(page, prefix + '-combined-filters', width)
     await clear.click()
     await expect(search).to_have_value('')
-    await expect(kind).to_have_value('listing')
+    await expect(kind).to_have_value('property')
     await expect(category).to_have_value('all')
     await expect(rows).to_have_count(2)
+    await assert_last_read(page, source='property', page=0, search='', category='all')
 
     await kind.select_option('listing')
     await expect(rows).to_have_count(2)
