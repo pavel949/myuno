@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { TeamLayout } from '@/components/team/TeamLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,7 +15,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { fetchTeamModerationPage, fetchTeamModerationCounts, reviewTeamModerationItem, TEAM_MODERATION_PAGE_SIZE, type TeamReviewStatus } from '@/lib/teamModeration';
 import { toast } from 'sonner';
 
 const TYPE_CONFIG = {
@@ -35,55 +36,40 @@ interface ModerationItem {
   submitted_by_name: string | null;
   status: string;
   created_at: string;
+  updated_at: string;
 }
 
 export default function TeamModerationPage() {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const isRu = language === 'ru';
   const dateLocale = isRu ? ru : enUS;
-  const [activeTab, setActiveTab] = useState('pending');
+  const [activeTab, setActiveTab] = useState<TeamReviewStatus>('pending');
+  const [page, setPage] = useState(0);
   const queryClient = useQueryClient();
 
-  const { data: items = [], isLoading } = useQuery({
-    queryKey: ['moderation-queue'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('moderation_queue')
-        .select('id, item_type, title, content, rating, photo_count, category, submitted_by_name, status, created_at')
-        .order('created_at', { ascending: false })
-        .limit(100);
-      if (error) throw error;
-      return (data || []) as ModerationItem[];
-    },
+  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+    queryKey: ['moderation-queue', 'team', user?.id, activeTab, page], enabled: !!user,
+    queryFn: () => fetchTeamModerationPage(activeTab, page),
   });
-
+  const { data: counts, isError: countsError } = useQuery({ queryKey: ['moderation-queue', 'team-counts', user?.id], queryFn: fetchTeamModerationCounts, enabled: !!user });
+  const items = (data?.items ?? []) as ModerationItem[];
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase
-        .from('moderation_queue')
-        .update({ status, reviewed_at: new Date().toISOString() })
-        .eq('id', id);
-      if (error) throw error;
-    },
+    mutationFn: reviewTeamModerationItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['moderation-queue'] });
       toast.success(isRu ? 'Статус обновлён' : 'Status updated');
     },
     onError: () => {
+      queryClient.invalidateQueries({ queryKey: ['moderation-queue'] });
       toast.error(isRu ? 'Ошибка обновления' : 'Update failed');
     },
   });
 
-  const filteredItems = items.filter(item => {
-    if (activeTab === 'pending') return item.status === 'pending';
-    if (activeTab === 'approved') return item.status === 'approved';
-    if (activeTab === 'rejected') return item.status === 'rejected';
-    return true;
-  });
-
-  const pendingCount = items.filter(i => i.status === 'pending').length;
-  const approvedCount = items.filter(i => i.status === 'approved').length;
-  const rejectedCount = items.filter(i => i.status === 'rejected').length;
+  const filteredItems = items;
+  const pendingCount = countsError ? null : counts?.pending ?? null;
+  const approvedCount = countsError ? null : counts?.approved ?? null;
+  const rejectedCount = countsError ? null : counts?.rejected ?? null;
 
   return (
     <TeamLayout title={isRu ? 'Модерация' : 'Moderation'}>
@@ -103,26 +89,31 @@ export default function TeamModerationPage() {
         <div className="grid grid-cols-3 gap-3">
           <Card className="p-3 text-center bg-warning/10 border-warning/30">
             <Clock className="h-5 w-5 mx-auto mb-1 text-warning" />
-            <p className="text-xl font-bold">{pendingCount}</p>
+            <p className="text-xl font-bold">{pendingCount ?? '—'}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Ожидают' : 'Pending'}</p>
           </Card>
           <Card className="p-3 text-center bg-success/10 border-success/30">
             <CheckCircle2 className="h-5 w-5 mx-auto mb-1 text-success" />
-            <p className="text-xl font-bold">{approvedCount}</p>
+            <p className="text-xl font-bold">{approvedCount ?? '—'}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Одобрено' : 'Approved'}</p>
           </Card>
           <Card className="p-3 text-center bg-destructive/10 border-destructive/30">
             <XCircle className="h-5 w-5 mx-auto mb-1 text-destructive" />
-            <p className="text-xl font-bold">{rejectedCount}</p>
+            <p className="text-xl font-bold">{rejectedCount ?? '—'}</p>
             <p className="text-xs text-muted-foreground">{isRu ? 'Отклонено' : 'Rejected'}</p>
           </Card>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <nav className="flex items-center gap-3" aria-label="Review pages">
+          <Button variant="outline" disabled={page === 0 || isFetching} onClick={() => setPage(value => value - 1)}>{isRu ? 'Назад' : 'Previous'}</Button>
+          <span>{page + 1} · {isError ? '—' : data?.total ?? '—'}</span>
+          <Button variant="outline" disabled={isFetching || !data || (page + 1) * TEAM_MODERATION_PAGE_SIZE >= data.total} onClick={() => setPage(value => value + 1)}>{isRu ? 'Далее' : 'Next'}</Button>
+        </nav>
+        <Tabs value={activeTab} onValueChange={value => { setActiveTab(value as TeamReviewStatus); setPage(0); }}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="pending" className="gap-2">
               {isRu ? 'На проверке' : 'Pending'}
-              {pendingCount > 0 && <Badge variant="secondary">{pendingCount}</Badge>}
+              {(pendingCount ?? 0) > 0 && <Badge variant="secondary">{pendingCount ?? '—'}</Badge>}
             </TabsTrigger>
             <TabsTrigger value="approved">{isRu ? 'Одобрено' : 'Approved'}</TabsTrigger>
             <TabsTrigger value="rejected">{isRu ? 'Отклонено' : 'Rejected'}</TabsTrigger>
@@ -136,7 +127,7 @@ export default function TeamModerationPage() {
                     <div className="py-12 text-center text-muted-foreground">
                       <Loader2 className="h-8 w-8 mx-auto mb-4 animate-spin" />
                     </div>
-                  ) : filteredItems.length === 0 ? (
+                  ) : isError ? <div role="alert" className="p-4"><p>{isRu ? 'Не удалось загрузить очередь. Количество неизвестно.' : 'Could not load the queue. Count unavailable.'}</p><Button onClick={() => void refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button></div> : filteredItems.length === 0 ? (
                     <div className="py-12 text-center text-muted-foreground">
                       <ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-30" />
                       <p className="font-medium">{isRu ? 'Очередь пуста' : 'Queue is empty'}</p>
@@ -177,8 +168,8 @@ export default function TeamModerationPage() {
                                     <Button
                                       size="sm" variant="outline"
                                       className="h-7 text-xs gap-1 text-success hover:bg-success/10"
-                                      onClick={() => updateStatus.mutate({ id: item.id, status: 'approved' })}
-                                      disabled={updateStatus.isPending}
+                                      onClick={() => updateStatus.mutate({ id: item.id, status: 'approved', expectedUpdatedAt: item.updated_at })}
+                                      disabled={updateStatus.isPending || isFetching || !item.updated_at}
                                     >
                                       <ThumbsUp className="h-3 w-3" />
                                       {isRu ? 'Одобрить' : 'Approve'}
@@ -186,8 +177,8 @@ export default function TeamModerationPage() {
                                     <Button
                                       size="sm" variant="outline"
                                       className="h-7 text-xs gap-1 text-destructive hover:bg-destructive/10"
-                                      onClick={() => updateStatus.mutate({ id: item.id, status: 'rejected' })}
-                                      disabled={updateStatus.isPending}
+                                      onClick={() => updateStatus.mutate({ id: item.id, status: 'rejected', expectedUpdatedAt: item.updated_at })}
+                                      disabled={updateStatus.isPending || isFetching || !item.updated_at}
                                     >
                                       <ThumbsDown className="h-3 w-3" />
                                       {isRu ? 'Отклонить' : 'Reject'}

@@ -119,10 +119,10 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     const paths = BOTTOM_BAR_BY_ROLE.admin.map((i) => i.path);
     expect(paths).toEqual([
       APP_ROUTES.ADMIN,
-      APP_ROUTES.ADMIN_CRM,
-      APP_ROUTES.ADMIN_TICKETS,
-      APP_ROUTES.ADMIN_MODERATION,
-      APP_ROUTES.PROFILE,
+      '/admin/review',
+      APP_ROUTES.ADMIN_INBOX,
+      APP_ROUTES.ADMIN_OPERATIONS,
+      APP_ROUTES.ADMIN_CATALOG,
     ]);
   });
 
@@ -291,7 +291,7 @@ describe('getActiveBottomBarItem — most-specific wins', () => {
   });
 
   it('admin on /admin/crm/123 highlights CRM', () => {
-    expect(getActiveBottomBarItem('admin', '/admin/crm/123')?.labelEn).toBe('CRM');
+    expect(getActiveBottomBarItem('admin', '/admin/review')?.labelEn).toBe('Review');
   });
 
   it('vendor on /vendor highlights Dashboard (exact match)', () => {
