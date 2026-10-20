@@ -35,19 +35,23 @@ export interface ModerationPageOptions { source: ModerationType; page: number; q
 /** Each table owns its page and count. Filters run before range, never after a newest-N cap. */
 export async function fetchModerationSourcePage({ source, page, queue, search = '', category = '' }: ModerationPageOptions): Promise<ModerationQueue> {
   if ((queue === 'inactive') !== (source === 'service' || source === 'product')) throw new Error('Invalid moderation source/state');
-  const table = source === 'listing' ? 'listings' : source === 'property' ? 'properties' : source === 'service' ? 'services' : 'marketplace_products';
-  const columns = source === 'listing' ? 'id,name_en,name_ru,created_at,approval_status,vertical,category,provider_id,providers:provider_id(name)'
-    : source === 'property' ? 'id,title_en,title_ru,created_at,updated_at,approval_status,property_type'
-    : source === 'service' ? 'id,name_en,name_ru,created_at,approval_status,provider_id,providers:provider_id(name)'
-    : 'id,name_en,name_ru,created_at,approval_status,category_slug';
-  let query = supabase.from(table).select(columns, { count: 'exact' });
+  const hasCategory = category && category !== 'all';
+  // Apply table-specific columns before combining builders: their typed filter
+  // keys differ even though the common state, search and paging keys agree.
+  let query = (() => {
+    if (source === 'listing') {
+      const listing = supabase.from('listings').select('id,name_en,name_ru,created_at,approval_status,vertical,category,provider_id,providers:provider_id(name)', { count: 'exact' });
+      return hasCategory ? listing.eq('vertical', category) : listing;
+    }
+    if (source === 'property') {
+      const property = supabase.from('properties').select('id,title_en,title_ru,created_at,updated_at,approval_status,property_type', { count: 'exact' }).is('deleted_at', null);
+      return hasCategory ? property.eq('property_type', category) : property;
+    }
+    if (source === 'service') return supabase.from('services').select('id,name_en,name_ru,created_at,approval_status,provider_id,providers:provider_id(name)', { count: 'exact' });
+    const product = supabase.from('marketplace_products').select('id,name_en,name_ru,created_at,approval_status,category_slug', { count: 'exact' });
+    return hasCategory ? product.eq('category_slug', category) : product;
+  })();
   query = queue === 'inactive' ? query.eq('is_active', false) : query.eq('approval_status', queue);
-  if (source === 'property') query = query.is('deleted_at', null);
-  if (category && category !== 'all') {
-    if (source === 'listing') query = query.eq('vertical', category);
-    else if (source === 'property') query = query.eq('property_type', category);
-    else if (source === 'product') query = query.eq('category_slug', category);
-  }
   // PostgREST boolean grammar is not a text search language. Strip its delimiters
   // and wildcard operators so a query remains a literal name fragment.
   const term = search.trim().replace(/[,%()_*\\"]/g, ' ').trim().slice(0, 120);
