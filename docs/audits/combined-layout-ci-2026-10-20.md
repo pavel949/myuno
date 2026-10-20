@@ -90,3 +90,18 @@ and overflow flags in both explicit result fields and assertion details. A
 failing case does not silently become a pass. The Testing Library exact-name
 query uses the supported `/^Apply$/` regex; source typecheck is separate from
 Vitest execution.
+
+The5f4bd11 early matrix (run39370712644/artifact12241421367) completed75cases:
+57passed and18failed. All CTA bounds passed; mobile headers measured117px and
+at most2 rows in RU/EN/TH. The18 failures were harness defects:15 management CTA
+scroll checks sampled a long native smooth-scroll after only100ms, and3 desktop
+account checks selected the intentionally hidden mobile combobox. Source and
+screenshots confirmed the desktop tabs were visible and the real pricing handler
+called smooth scroll. No production change was indicated by those18 failures.
+
+The follow-up selects a visible sticky control and observes the actual pricing
+CTA's result with bounded RAF polling: the pricing heading must be fully inside
+the viewport below the header and stable for100ms, within5s. It never scrolls the
+page from the harness to satisfy pricing acceptance. Success records the observed
+heading/header/scroll geometry; timeout records the actual heading rectangle and
+last observed scroll. Current-head geometry remains unconfirmed until CI runs.

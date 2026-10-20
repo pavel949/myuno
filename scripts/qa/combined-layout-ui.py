@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import sys
 from urllib.parse import urlparse
-from playwright.async_api import async_playwright, expect
+from playwright.async_api import async_playwright, expect, TimeoutError as PlaywrightTimeoutError
 
 OUTPUT = Path(sys.argv[1])
 WIDTHS = [320, 360, 640, 767, 1280]
@@ -59,7 +59,7 @@ async def check_sticky(page, surface):
     box = await sticky.bounding_box()
     assert box['y'] >= header['y'] + header['height'] - 1, {'surface': surface, 'header': header, 'sticky': box}
     assert abs(box['y'] - header['height']) <= 2, {'stickyNotAtMeasuredOffset': box, 'header': header}
-    await expect(sticky.locator('button,a').first).to_be_visible()
+    await expect(sticky.locator('button:visible,a:visible').first).to_be_visible()
     return {'header': header, 'sticky': box}
 
 
@@ -86,9 +86,27 @@ async def check_destinations(page, surface):
         await expect(output).to_have_text(destination)
     if surface == 'management-companies':
         await buttons.nth(1).click()
-        await page.wait_for_timeout(100)
-        pricing = await page.locator('#pricing').bounding_box()
-        assert pricing and pricing['y'] < 900, {'pricingScroll': pricing}
+        # Observe the result of the actual CTA handler's smooth scroll. Do not
+        # scroll the page from the harness, and do not accept an in-flight frame.
+        try:
+            pricing = await page.wait_for_function("""() => {
+          const heading=document.querySelector('#pricing h2');
+          if(!heading)return false;
+          const r=heading.getBoundingClientRect(), header=document.querySelector('header').getBoundingClientRect();
+          const now=performance.now(), old=window.fixturePricingScroll;
+          if(!old||Math.abs(old.top-r.top)>0.5||Math.abs(old.scroll-scrollY)>0.5)
+            window.fixturePricingScroll={top:r.top,scroll:scrollY,since:now};
+          const stable=window.fixturePricingScroll;
+          return r.height>0 && r.top>=header.bottom-1 && r.bottom<=innerHeight+1
+            && now-stable.since>=100 ? {headingTop:r.top,headingBottom:r.bottom,headerBottom:header.bottom,scrollY,settledFor:now-stable.since} : false;
+            }""", polling='raf', timeout=5000)
+        except PlaywrightTimeoutError as error:
+            raise AssertionError({'pricingHeading': await page.locator('#pricing h2').bounding_box(),
+                                  'observedScroll': await page.evaluate('window.fixturePricingScroll'),
+                                  'error': 'Actual pricing CTA did not settle the heading inside the viewport within 5s'}) from error
+        pricing_proof = await pricing.json_value()
+        assert pricing_proof, 'pricing heading did not settle inside viewport'
+        await page.evaluate('value=>window.fixturePricingResult=value', pricing_proof)
         await buttons.last.click()
         opened = await page.evaluate('window.fixtureOpened')
         assert len(opened) == 1 and opened[0] == ['https://wa.me/66922407355?text=Hi%2C+I%27m+interested+in+myUNO+for+my+management+company', '_blank'], opened
@@ -154,6 +172,8 @@ async def main():
                             # Check hero siblings against each other, allowing wrapped rows.
                             assert await page.locator('section').first.locator('button').evaluate_all("""els=>els.every((a,i)=>els.slice(i+1).every(b=>{const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();return x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1}))"""), 'CTA overlap'
                             row['destinations'] = await check_destinations(page, surface)
+                            if surface == 'management-companies':
+                                row['pricingScroll'] = await page.evaluate('window.fixturePricingResult')
                         row['fontStack'] = await page.locator('body').evaluate('e=>getComputedStyle(e).fontFamily')
                         row['fontLimitation'] = 'Canonical Google Fonts are not bundled; network denied; system fallback geometry only.'
                         assert not blocked and not errors, {'blocked': blocked, 'errors': errors}
