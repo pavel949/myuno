@@ -18,6 +18,8 @@ it.each(['en', 'ru', 'th'])('preserves both owner journeys and comparison anchor
   expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
   const paths = container.querySelector('#paths');
   expect(paths).not.toBeNull();
+  expect(paths).toHaveClass('scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)]');
+  expect(paths).not.toHaveClass('scroll-mt-24');
   expect(container.querySelectorAll('a[href="#paths"]')).toHaveLength(2);
   const cards = paths!.querySelectorAll('article');
   expect(cards).toHaveLength(2);

@@ -16,7 +16,7 @@ import { ArrowRight, BarChart3, Users, Sparkles, CalendarRange, Wallet, FileText
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OwnerReferralCard } from '@/components/referral/OwnerReferralCard';
-import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
+import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CONTENT_ANCHOR } from '@/design-system/ecosystemLayout';
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
@@ -160,7 +160,7 @@ const ForOwnersPage: React.FC = () => {
         </header>
 
         {/* TWO PATHS */}
-        <section id="paths" className="mb-14 scroll-mt-24">
+        <section id="paths" className={`mb-14 ${PUBLIC_CONTENT_ANCHOR}`}>
           <h2 className="font-display text-h2 text-foreground pb-4 mb-6 border-b border-border">
             {isRu ? 'Два пути' : 'Two paths'}
           </h2>

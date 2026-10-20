@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { act, cleanup, render } from '@testing-library/react';
+import { act, cleanup, render, fireEvent, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { ConsumerHeader } from '../ConsumerHeader';
@@ -47,4 +47,12 @@ it('keeps property search and account tabs on the same shared height variable', 
  for (const path of ['src/pages/property/PropertyIndex.tsx', 'src/components/layout/MeShellLayout.tsx']) {
   expect(readFileSync(path, 'utf8')).toContain('sticky top-[var(--consumer-header-height,0px)]');
  }
+});
+
+it.each([false, true])('scopes canonical portal gutters only to non-overlay menu (overlay=%s)', overlay => {
+ render(<MemoryRouter><ConsumerHeader overlay={overlay} /></MemoryRouter>);
+ fireEvent.click(screen.getByRole('button', { name: /^Open menu$/ }));
+ const menu = screen.getByRole('dialog');
+ if (overlay) expect(menu).not.toHaveClass('consumer-header-menu');
+ else expect(menu).toHaveClass('consumer-header-menu');
 });
