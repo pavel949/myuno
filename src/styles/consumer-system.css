@@ -26,3 +26,12 @@
    the hidden launcher from keyboard and accessibility navigation; removing the
    banner restores it without touching consent or chat state. */
 body:has([data-cookie-consent-banner]) [data-global-chat-launcher]{visibility:hidden;pointer-events:none}
+
+/* Match ECOSYSTEM_PAGE_CONTAINER gutters; homepage overlay keeps its own inset. */
+.consumer-header:not(.consumer-header-overlay),.consumer-header-menu{--consumer-page-gutter:16px}
+.consumer-header:not(.consumer-header-overlay) .consumer-header-inner,[role="dialog"].consumer-header-menu{padding-inline:var(--consumer-page-gutter)}
+.consumer-header:not(.consumer-header-overlay) .consumer-mobile-menu{padding-inline:var(--consumer-page-gutter)}
+@media(min-width:768px){.consumer-header:not(.consumer-header-overlay),.consumer-header-menu{--consumer-page-gutter:24px}}
+@media(min-width:1024px){.consumer-header:not(.consumer-header-overlay),.consumer-header-menu{--consumer-page-gutter:32px}}
+@media(min-width:1280px){.consumer-header:not(.consumer-header-overlay),.consumer-header-menu{--consumer-page-gutter:40px}}
+@media(max-width:639px){.consumer-header:not(.consumer-header-overlay) .consumer-menu{right:var(--consumer-page-gutter)}}

@@ -64,7 +64,7 @@ export function ConsumerHeader({ overlay = false, onSearch }: { overlay?: boolea
           {user ? <UserAvatarMenu /> : <Link className="consumer-login" to={signInPath}>{t('Войти', 'Sign in', 'เข้าสู่ระบบ')}</Link>}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild><button type="button" className="consumer-menu" aria-label={t('Открыть меню', 'Open menu', 'เปิดเมนู')}><Menu aria-hidden="true" /></button></SheetTrigger>
-            <SheetContent closeLabel={t('Закрыть меню', 'Close menu', 'ปิดเมนู')} className="w-[min(100vw,24rem)] overflow-y-auto">
+            <SheetContent closeLabel={t('Закрыть меню', 'Close menu', 'ปิดเมนู')} className={`w-[min(100vw,24rem)] overflow-y-auto${overlay ? '' : ' consumer-header-menu'}`}>
               <SheetTitle>myUNO</SheetTitle>
               <SheetDescription>{t('Все основные разделы', 'Main destinations', 'เมนูหลัก')}</SheetDescription>
               <nav aria-label={t('Меню', 'Menu', 'เมนู')} className="mt-6 flex flex-col gap-1">
