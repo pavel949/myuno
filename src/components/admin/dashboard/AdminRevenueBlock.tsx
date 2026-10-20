@@ -43,10 +43,22 @@ export function AdminRevenueBlock() {
         {isLoading ? pickLang(language, { en: 'Loading snapshots…', ru: 'Загружаем снимки…', th: 'กำลังโหลดภาพรวม…' }) : isError ? pickLang(language, { en: 'Snapshots could not be refreshed. Period totals are unavailable.', ru: 'Не удалось обновить снимки. Итоги периода недоступны.', th: 'อัปเดตภาพรวมไม่สำเร็จ ไม่มีผลรวมช่วงเวลา' }) : !data?.complete ? `${unavailable} · ${pickLang(language, { en: 'snapshot days', ru: 'дней со снимками', th: 'วันที่มีภาพรวม' })}: ${data?.coverage ?? 0}/${days}` : pickLang(language, { en: 'All days have snapshots.', ru: 'Снимки есть за каждый день.', th: 'มีภาพรวมครบทุกวัน' })}
       </p>
       <p role="note" className="text-xs text-muted-foreground">{pickLang(language, {
-        en: 'Source: platform_metrics daily snapshots. Amounts are estimates, not ledger-confirmed revenue. Currency is not recorded in this source. Missing days are not treated as zero; subscription snapshots are excluded.',
-        ru: 'Источник: ежедневные снимки platform_metrics. Суммы — оценки, а не подтверждённый доход по ledger. Валюта в источнике не указана. Пропуски не считаются нулём; снимки подписок исключены.',
-        th: 'แหล่งข้อมูล: ภาพรวมรายวัน platform_metrics จำนวนเงินเป็นค่าประมาณ ไม่ใช่รายได้ยืนยันจาก ledger แหล่งนี้ไม่ระบุสกุลเงิน ไม่แทนวันที่ขาดด้วยศูนย์ และไม่รวมภาพรวมค่าสมาชิก',
+        en: 'Amounts are estimates. Currency is unavailable; missing days are not zero.',
+        ru: 'Суммы приблизительные. Валюта не указана; пропуски не считаются нулём.',
+        th: 'จำนวนเงินเป็นค่าประมาณ ไม่มีข้อมูลสกุลเงิน และวันที่ขาดไม่ถือเป็นศูนย์',
       })}</p>
+      <details className="text-xs text-muted-foreground">
+        <summary className="w-fit cursor-pointer py-1 text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{pickLang(language, {
+          en: 'How metrics are calculated',
+          ru: 'Как считаются показатели',
+          th: 'วิธีคำนวณตัวชี้วัด',
+        })}</summary>
+        <p className="mt-2 leading-relaxed">{pickLang(language, {
+          en: 'Source: platform_metrics daily snapshots for the selected completed Phuket calendar days. GMV sums gmv; platform revenue sums platform_revenue; completed bookings sums completed_bookings. These are not ledger-confirmed amounts. Subscription snapshots are excluded to avoid treating recurring balances as daily revenue.',
+          ru: 'Источник: ежедневные снимки platform_metrics за выбранные полные дни по календарю Пхукета. Оборот — сумма gmv; доход платформы — сумма platform_revenue; завершённые брони — сумма completed_bookings. Суммы не подтверждены по ledger. Снимки подписок исключены, чтобы не считать повторяющиеся остатки ежедневным доходом.',
+          th: 'แหล่งข้อมูล: ภาพรวมรายวัน platform_metrics ตามวันภูเก็ตที่ครบแล้วในช่วงที่เลือก GMV รวม gmv รายได้แพลตฟอร์มรวม platform_revenue และการจองเสร็จสิ้นรวม completed_bookings จำนวนเงินยังไม่ยืนยันจาก ledger ไม่รวมภาพรวมค่าสมาชิกเพื่อไม่ให้ยอดคงเหลือซ้ำถูกนับเป็นรายได้รายวัน',
+        })}</p>
+      </details>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link to="/admin/finance" className="text-sm text-primary underline-offset-4 hover:underline">{pickLang(language, { en: 'Open reports', ru: 'Перейти к отчётам', th: 'เปิดรายงาน' })} →</Link>
         <Button variant="ghost" size="sm" disabled={isFetching} onClick={() => void refetch()}>{pickLang(language, { en: 'Refresh metrics', ru: 'Обновить показатели', th: 'อัปเดตตัวชี้วัด' })}</Button>

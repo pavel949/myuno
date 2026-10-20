@@ -49,6 +49,11 @@ export function matchesProviderFilter(provider: { is_active?: boolean | null; is
   return filter === 'active' ? provider.is_active === true : filter === 'inactive' ? provider.is_active === false
     : filter === 'verified' ? provider.is_verified === true : filter === 'unverified' ? provider.is_verified === false : true;
 }
+export function applyProviderQueue<T>(query: T, filter: ProviderFilter): T {
+  const result = query as unknown as QueueQuery;
+  return (filter === 'active' ? result.eq('is_active', true) : filter === 'inactive' ? result.eq('is_active', false)
+    : filter === 'verified' ? result.eq('is_verified', true) : filter === 'unverified' ? result.eq('is_verified', false) : result) as unknown as T;
+}
 export const parseTicketStatus = (params: URLSearchParams): TicketQueueStatus => valid(params.get('status'), TICKET_QUEUE_STATUSES, 'all');
 export function applyTicketQueue<T>(query: T, status: TicketQueueStatus): T {
   const result = query as unknown as QueueQuery;

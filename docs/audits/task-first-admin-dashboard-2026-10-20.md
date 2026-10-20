@@ -89,8 +89,9 @@ Focused checks completed before draft:
   bundle guard, workflow YAML and required dashboard outcome checks pass.
 
 First full local TypeScript found TS2352 in sparse mock casts in two test files.
-Those mocks now use Vitest's typed partial-return API, without changing production
-types or assertions. The full recheck is running and is not claimed passed.
+The partial-return attempt subsequently failed the remote discriminated-union
+check. The review correction now derives complete offline QueryObserver results
+from the actual library, without changing production types or assertions.
 Fresh remote full unit/PostgreSQL/build/lint and browser enforcement remain
 required. The additional early dashboard fixture has60 scenarios: RU/EN/TH,
 375/768/1280/1920 widths, full/one-source-failure/stale/no-snapshot states and
@@ -105,3 +106,37 @@ final CI outcome. No browser was launched locally.
 This is source/isolated evidence, not deployed readiness. Parent coordinates
 review, merge and publication. Public wide-screen changes are independent in a
 different branch/worktree.
+
+## Review corrections
+
+Provider, partner-application and support queues apply server filters before
+bounded pages and return exact matching counts. Stable created_at/id ordering
+prevents equal-timestamp records from repeating or disappearing between pages.
+Synthetic tests retain older actionable records behind over 1,000 newer rows,
+and verify all pages with identical timestamps. Read failure is unavailable,
+and cached provider rows are explicitly stale. Existing object/route authority
+and mutation functions remain unchanged.
+
+Team dashboard callers no longer convert unavailable platform counts to zero.
+Actor-bound admin queries mask cached data while admin access is unresolved or
+removed; non-admin TeamDashboard coverage observes no platform reads. The admin
+header now fills the same frame as its body. Actual search and sidebar Escape
+focus regressions were reproduced and fixed; four navigation tests pass.
+Decision counts sit beside their actions, mobile queues precede system status,
+supplementary queues participate in search, and technical metric detail is
+disclosed on demand while estimate/currency limitations stay visible.
+
+Review checks: 20 provider/partner focused tests, 6 Team boundary tests,
+24 evidence/finance tests, 4 actual navigation tests and 15 root ticket/Today/
+moderation tests passed in separate runs. Root scoped lint has no errors.
+Earlier simultaneous full local typechecks were cancelled after host memory
+pressure; they are not passing evidence. A single stable-source full check was
+started for this review batch, with its outcome reported separately.
+
+The additional actual-shell fixture has 18 cases at 320/2560 px in RU/EN/TH,
+full/zero/total-source-failure states, including actual shell, menus, dialogs,
+74 destinations and keyboard focus. It supplements the prior 60 cases.
+Both result JSON files must independently contain their full intended case
+count and only PASS rows at final CI enforcement. Empty synthetic import.meta.env
+is explicit; there are no real API keys. Remote geometry is pending until those
+artifacts are inspected. No local browser or release was performed.

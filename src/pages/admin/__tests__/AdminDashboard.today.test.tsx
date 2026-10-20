@@ -6,7 +6,7 @@ import type { DashboardStats } from '@/hooks/useAdminDashboardStats';
 
 const mocks = vi.hoisted(() => ({
   roles: [{ role: 'admin' }], checking: false,
-  stats: vi.fn(), invalidate: vi.fn(async () => {}),
+  stats: vi.fn(), invalidate: vi.fn(async (_options: { queryKey: string[] }) => {}),
 }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/hooks/useUserRoles', () => ({ useUserRoles: () => ({ roles: mocks.roles, isLoading: mocks.checking }) }));
@@ -42,6 +42,10 @@ describe('platform Today workspace', () => {
     fireEvent.keyDown(search, { key: 'Escape' });
     expect(search).toHaveValue('');
     expect(document.querySelector('[data-queue="pendingContent"]')).toBeInTheDocument();
+    fireEvent.change(search, { target: { value: 'Partner applications' } });
+    expect(screen.getByRole('link', { name: /Partner applications/ })).toHaveAttribute('href', '/admin/partner-applications?status=pending');
+    expect(screen.queryByText('No matching work queues')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Manual payment review/ })).not.toBeInTheDocument();
   });
   it('keeps unavailable source and stale freshness explicit without discarding other queues', () => {
     const data = stats(); data.openTickets = null; data.sourceErrors.openTickets = 'unavailable'; data.sourceUpdatedAt.pendingOrders = Date.now() - 120000;

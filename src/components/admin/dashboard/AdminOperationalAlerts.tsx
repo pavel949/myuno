@@ -4,6 +4,7 @@ import { pickLang } from '@/lib/i18n/pickLang';
 import { useAdminDashboardStats, type DashboardCountKey } from '@/hooks/useAdminDashboardStats';
 import { Surface } from '@/components/ui/surface';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Scale, Clock, MessageSquare, CreditCard, ArrowRight } from 'lucide-react';
 import { DashboardCount } from './DashboardCount';
 
@@ -34,11 +35,13 @@ export function AdminOperationalAlerts({ search = '' }: { search?: string }) {
         <div className="min-w-0 flex-1 basis-44">
           <h3 className="font-medium [overflow-wrap:anywhere]">{item.label}</h3>
           <p className="mt-1 text-sm text-muted-foreground">{item.hint}</p>
-          <div className="mt-1 text-sm font-medium"><DashboardCount data={isError ? undefined : data} countKey={item.key as DashboardCountKey} loading={isLoading} /></div>
         </div>
-        <Button variant="outline" asChild className="min-h-11 max-w-full whitespace-normal"><Link to={item.href}>{label('Review', 'Проверить', 'ตรวจสอบ')}</Link></Button>
+        <div className="flex max-w-full flex-wrap items-center gap-3">
+          <Badge variant="secondary" className="max-w-full whitespace-normal py-2 text-sm"><span className="mr-2 font-normal">{label('In queue', 'В очереди', 'ในคิว')}:</span><DashboardCount data={data} countKey={item.key as DashboardCountKey} loading={isLoading} /></Badge>
+          <Button variant="outline" asChild className="min-h-11 max-w-full whitespace-normal"><Link to={item.href}>{label('Review', 'Проверить', 'ตรวจสอบ')}</Link></Button>
+        </div>
       </div>)}
-      {shown.length === 0 && <p className="py-8 text-sm text-muted-foreground" role="status">{search ? label('No matching queues', 'Подходящих очередей нет', 'ไม่พบคิวที่ตรงกัน') : label('No items in these decision queues.', 'В этих очередях нет задач для решения.', 'ไม่มีรายการในคิวที่ต้องตัดสินใจเหล่านี้')}</p>}
+      {shown.length === 0 && <p className="py-8 text-sm text-muted-foreground" role="status">{search ? label('No matching decision queues', 'Подходящих очередей решений нет', 'ไม่พบคิวที่ต้องตัดสินใจที่ตรงกัน') : label('No items in these decision queues.', 'В этих очередях нет задач для решения.', 'ไม่มีรายการในคิวที่ต้องตัดสินใจเหล่านี้')}</p>}
     </div>
     <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
       <Link className="inline-flex min-h-11 items-center gap-2 text-primary underline-offset-4 hover:underline" to="/admin/operations">{label('Open operations', 'Открыть операции', 'เปิดงานดำเนินการ')}<ArrowRight className="size-4" /></Link>

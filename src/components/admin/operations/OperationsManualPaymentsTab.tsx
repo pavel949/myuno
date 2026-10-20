@@ -112,6 +112,7 @@ export function OperationsManualPaymentsTab() {
           orders ( order_number, metadata )
         `, { count: 'exact' })
         .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
         .range(page*pageSize,(page+1)*pageSize-1);
       q = applyManualPaymentQueue(q, filter);
       const { data, error, count } = await q;

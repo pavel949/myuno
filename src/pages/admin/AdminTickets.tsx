@@ -33,7 +33,7 @@ import type { TicketQueueStatus } from '@/lib/adminDashboardQueues';
 
 export default function AdminTickets() {
   const navigate = useNavigate();
-  const { tickets, stats, isLoading, error, statsError, statsLoading, filters, setFilters, refetch } = useAdminTickets();
+  const { tickets, total, page, pageSize, setPage, stats, isLoading, error, statsError, statsLoading, filters, setFilters, refetch } = useAdminTickets();
   const { language } = useLanguage();
   const [searchInput, setSearchInput] = useState(filters.search || '');
   useEffect(() => { setSearchInput(filters.search || ''); }, [filters.search]);
@@ -191,7 +191,10 @@ export default function AdminTickets() {
         </Card>
 
         {/* Tickets Table */}
-        {!error && tickets.length >= 1000 && <p role="status" className="mb-3 text-sm text-muted-foreground">{pickLang(language,{en:'1,000 or more tickets loaded. The API may limit results; this is not a verified total.',ru:'Загружено 1 000 или более обращений. API может ограничивать выдачу; это не подтверждённое общее количество.',th:'โหลดรายการอย่างน้อย 1,000 รายการ API อาจจำกัดผลลัพธ์ นี่ไม่ใช่จำนวนรวมที่ยืนยันแล้ว'})}</p>}
+        {!error && <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-sm">
+          <p role="status">{pickLang(language, { en: 'Matching tickets', ru: 'Подходящие обращения', th: 'คำขอที่ตรงกัน' })}: {total ?? pickLang(language, { en: 'Unavailable', ru: 'Недоступно', th: 'ไม่พร้อมใช้งาน' })}. {pickLang(language, { en: 'Page', ru: 'Страница', th: 'หน้า' })} {page + 1}</p>
+          <div className="flex gap-2"><Button variant="outline" disabled={page === 0} onClick={() => setPage(page - 1)}>{pickLang(language, { en: 'Previous', ru: 'Назад', th: 'ก่อนหน้า' })}</Button><Button variant="outline" disabled={total === null || (page + 1) * pageSize >= total} onClick={() => setPage(page + 1)}>{pickLang(language, { en: 'Next', ru: 'Далее', th: 'ถัดไป' })}</Button></div>
+        </div>}
         {!error && <Card>
           <CardContent className="p-0 overflow-x-auto">
             <Table className="min-w-[820px]">

@@ -85,10 +85,13 @@ export async function fetchAdminDashboardStats(now = new Date()): Promise<Dashbo
 export function useAdminDashboardStats() {
   const { user } = useAuth();
   const { isAdmin, isLoading: checkingAccess } = useAdminCheck();
-  return useQuery({
+  const enabled = !!user && isAdmin && !checkingAccess;
+  const query = useQuery({
     ...CACHE_PROFILES.ADMIN,
-    enabled: !!user && isAdmin && !checkingAccess,
+    enabled,
     queryKey: ['admin-dashboard-stats', user?.id],
     queryFn: () => fetchAdminDashboardStats(),
   });
+  // Disabled queries can retain same-actor cached data after admin role loss.
+  return { ...query, data: enabled ? query.data : undefined, dataUpdatedAt: enabled ? query.dataUpdatedAt : 0 };
 }

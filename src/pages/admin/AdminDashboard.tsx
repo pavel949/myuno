@@ -57,14 +57,14 @@ function AdminToday() {
       <Input aria-label={l('Find a work queue', 'Найти рабочую очередь', 'ค้นหาคิวงาน')} placeholder={l('Find a work queue…', 'Найти рабочую очередь…', 'ค้นหาคิวงาน…')} value={search} onChange={event => setSearch(event.target.value)} onKeyDown={event => { if (event.key === 'Escape') setSearch(''); }} className="min-h-11 pl-10" />
     </div>
     {(hasUnavailable || refreshError) && !stats.isLoading && <p role="alert" className="border-l-2 border-warning bg-warning/5 p-3 text-sm">{l('Some sources are unavailable. Their counts are not shown as zero. Open the queue or refresh to check again.', 'Часть источников недоступна. Их счётчики не показаны нулём. Откройте очередь или обновите данные.', 'บางแหล่งข้อมูลไม่พร้อมใช้งาน จำนวนจะไม่แสดงเป็นศูนย์ เปิดคิวหรือรีเฟรชเพื่อตรวจสอบอีกครั้ง')}</p>}
-    <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
-      <AdminOperationalAlerts search={search} />
-      <aside className="min-w-0 space-y-4" aria-label={l('Platform status and quick actions', 'Состояние платформы и быстрые действия', 'สถานะแพลตฟอร์มและการดำเนินการด่วน')}>
+    <div className="grid min-w-0 gap-4 [grid-template-areas:'decisions'_'queues'_'status'] xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] xl:[grid-template-areas:'decisions_status'_'queues_queues']">
+      <div className="min-w-0 [grid-area:decisions]"><AdminOperationalAlerts search={search} /></div>
+      <div className="min-w-0 [grid-area:queues]"><AdminWorkQueues data={data} loading={stats.isLoading} search={search} /></div>
+      <aside className="min-w-0 space-y-4 [grid-area:status]" aria-label={l('Platform status and quick actions', 'Состояние платформы и быстрые действия', 'สถานะแพลตฟอร์มและการดำเนินการด่วน')}>
         <GoLiveChecklist />
         <AdminQuickActionsGrid />
       </aside>
     </div>
-    <AdminWorkQueues data={data} loading={stats.isLoading} search={search} />
     <AdminRevenueBlock />
   </PageShell>;
 }

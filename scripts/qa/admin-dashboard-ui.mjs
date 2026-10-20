@@ -43,7 +43,7 @@ createRoot(document.getElementById('root')).render(<QueryClientProvider client={
 const result = await build({
   stdin: { contents: entry, loader: 'tsx', resolveDir: root },
   bundle: true, outfile: path.join(output, 'fixture.js'), jsx: 'automatic', format: 'esm', metafile: true,
-  define: { 'process.env.NODE_ENV': '"production"', 'import.meta.env.DEV': 'false' },
+  define: { 'process.env.NODE_ENV': '"production"', 'import.meta.env': '{}', 'import.meta.env.DEV': 'false' },
   plugins: [{ name: 'isolated-admin-dashboard', setup(builder) {
     builder.onResolve({ filter: /.*/ }, args => {
       if (Object.hasOwn(virtual, args.path)) return { path: args.path, namespace: 'fixture' };

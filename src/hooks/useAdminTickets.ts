@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { CACHE_PROFILES } from '@/lib/queryConfig';
+import { useAuth } from '@/contexts/AuthContext';
 import type { SupportTicket, TicketMessage, TicketStatus, TicketPriority, ResolutionType } from './useTickets';
 
 import { toast } from 'sonner';
@@ -28,7 +29,18 @@ export interface TicketFilters {
 
 export function useAdminTickets() {
 const queryClient = useQueryClient();
+  const { user } = useAuth();
+  // Existing route/object authorization remains authoritative for support staff.
+  const enabled = !!user;
   const [params, setParams] = useSearchParams();
+  const rawPage = params.get('ticket_page') || '0';
+  const page = /^\d+$/.test(rawPage) && Number.isSafeInteger(Number(rawPage)) ? Number(rawPage) : 0;
+  const pageSize = 50;
+  const setPage = (nextPage: number) => setParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (nextPage > 0) next.set('ticket_page', String(nextPage)); else next.delete('ticket_page');
+    return next;
+  });
   const rawPriority = params.get('priority');
   const filters: TicketFilters = {
     status: parseTicketStatus(params),
@@ -41,6 +53,7 @@ const queryClient = useQueryClient();
     const nextFilters = typeof update === 'function' ? update(filters) : update;
     setParams(previous => {
       const next = new URLSearchParams(previous);
+      next.delete('ticket_page');
       for (const [key, value] of Object.entries({status: nextFilters.status, priority: nextFilters.priority, category: nextFilters.category, assigned_to: nextFilters.assignedTo, q: nextFilters.search})) {
         if (!value || value === 'all') next.delete(key); else next.set(key, value);
       }
@@ -52,13 +65,15 @@ const queryClient = useQueryClient();
   const filterKey = JSON.stringify(filters);
 
   // Tickets query with React Query
-  const { data: tickets = [], isLoading: ticketsLoading, error: ticketsError, refetch: refetchTickets } = useQuery({
-    queryKey: ['admin-tickets', filterKey],
+  const { data: ticketPage, isLoading: ticketsLoading, error: ticketsError, refetch: refetchTickets } = useQuery({
+    queryKey: ['admin-tickets', user?.id, filterKey, page],
+    enabled,
     queryFn: async () => {
       let query = supabase
         .from('support_tickets')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false });
 
       query = applyTicketQueue(query, filters.status || 'all');
 
@@ -79,10 +94,11 @@ const queryClient = useQueryClient();
         if (s) query = query.or(`ticket_number.ilike.%${s}%,subject.ilike.%${s}%`);
       }
 
-      const { data, error } = await query;
+      const { data, error, count } = await query.range(page * pageSize, (page + 1) * pageSize - 1);
 
       if (error) throw error;
-      return (data as unknown as SupportTicket[]) || [];
+      if (!data) throw new Error('Support ticket response unavailable');
+      return { rows: data as unknown as SupportTicket[], count: typeof count === 'number' ? count : null };
     },
     ...CACHE_PROFILES.ADMIN,
   });
@@ -97,34 +113,30 @@ const queryClient = useQueryClient();
     overdueSla: 0,
     urgent: 0,
   }, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useQuery({
-    queryKey: ['admin-tickets-stats'],
+    queryKey: ['admin-tickets-stats', user?.id],
+    enabled,
     queryFn: async () => {
-      const { data: allTickets, error } = await supabase
-        .from('support_tickets')
-        .select('status, priority, sla_deadline');
-
-      if (error) throw error;
-
-      const now = new Date();
-      const ticketsList = (allTickets as unknown as SupportTicket[]) || [];
-
+      const query = () => supabase.from('support_tickets').select('id', { count: 'exact', head: true });
+      const read = async (request: ReturnType<typeof query>) => {
+        const { count, error } = await request;
+        if (error) throw error;
+        if (typeof count !== 'number') throw new Error('Support count unavailable');
+        return count;
+      };
+      const [total, open, inProgress, waitingResponse, resolved, overdueSla, urgent] = await Promise.all([
+        read(query()), read(applyTicketQueue(query(), 'open')), read(applyTicketQueue(query(), 'in_progress')),
+        read(applyTicketQueue(query(), 'waiting_response')), read(query().in('status', ['resolved', 'closed'])),
+        read(query().lt('sla_deadline', new Date().toISOString()).not('status', 'in', '(resolved,closed)')),
+        read(query().eq('priority', 'urgent').not('status', 'in', '(resolved,closed)')),
+      ]);
       return {
-        total: ticketsList.length,
-        open: ticketsList.filter(t => t.status === 'open').length,
-        inProgress: ticketsList.filter(t => t.status === 'in_progress').length,
-        waitingResponse: ticketsList.filter(t => t.status === 'waiting_response').length,
-        resolved: ticketsList.filter(t => t.status === 'resolved' || t.status === 'closed').length,
-        overdueSla: ticketsList.filter(t => 
-          t.sla_deadline && 
-          new Date(t.sla_deadline) < now && 
-          !['resolved', 'closed'].includes(t.status)
-        ).length,
-        urgent: ticketsList.filter(t => t.priority === 'urgent' && !['resolved', 'closed'].includes(t.status)).length,
+        total, open, inProgress, waitingResponse, resolved, overdueSla, urgent,
       };
     },
     ...CACHE_PROFILES.ADMIN,
   });
 
+  const tickets = ticketPage?.rows ?? [];
   const isLoading = ticketsLoading;
 
   // Update status mutation
@@ -351,6 +363,7 @@ const queryClient = useQueryClient();
 
   // Real-time subscription for new tickets
   useEffect(() => {
+    if (!enabled) return;
     const channel = supabase
       .channel('admin-tickets-realtime')
       .on(
@@ -371,10 +384,14 @@ const queryClient = useQueryClient();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [queryClient, enabled]);
 
   return {
     tickets,
+    total: ticketPage?.count ?? null,
+    page,
+    pageSize,
+    setPage,
     stats,
     isLoading,
     error: ticketsError,

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { pickLang } from '@/lib/i18n/pickLang';
+import { parseQueuePage } from '@/lib/adminDashboardQueues';
+import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
@@ -128,17 +130,23 @@ export default function PartnerApplicationsAdmin() {
   const [applications, setApplications] = useState<PartnerApplication[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const [listError, setListError] = useState(false);
+  const [totalCount, setTotalCount] = useState<number|null>(null);
+  const readSequence = React.useRef(0);
   const [params, setParams] = useSearchParams();
   const searchQuery = params.get('q') || '';
   const rawStatus = params.get('status') || 'all';
-  const statusFilter = Object.hasOwn(statusConfig, rawStatus) ? rawStatus as KnownStatus : 'all';
+  const statusFilter = Object.prototype.hasOwnProperty.call(statusConfig, rawStatus) ? rawStatus as KnownStatus : 'all';
+  const page = parseQueuePage(params,'application_page');
+  const readKey=JSON.stringify([user?.id,statusFilter,searchQuery,page]);
+  const [loadedKey,setLoadedKey]=useState<string|null>(null);
   const setSearchQuery = (value: string) => setParams(previous => {
-    const next = new URLSearchParams(previous); if (value) next.set('q',value); else next.delete('q'); return next;
+    const next = new URLSearchParams(previous);next.delete('application_page'); if (value) next.set('q',value); else next.delete('q'); return next;
   }, {replace:true});
   const setStatusFilter = (value: string) => {
-    if (value !== 'all' && !Object.hasOwn(statusConfig, value)) return;
-    setParams(previous => { const next = new URLSearchParams(previous); if(value==='all') next.delete('status'); else next.set('status',value); return next; });
+    if (value !== 'all' && !Object.prototype.hasOwnProperty.call(statusConfig, value)) return;
+    setParams(previous => { const next = new URLSearchParams(previous);next.delete('application_page'); if(value==='all') next.delete('status'); else next.set('status',value); return next; });
   };
+  const setPage=(value:number)=>setParams(previous=>{const next=new URLSearchParams(previous);if(value===0)next.delete('application_page');else next.set('application_page',String(value));return next;});
   const [selectedApp, setSelectedApp] = useState<PartnerApplication | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
@@ -146,21 +154,30 @@ export default function PartnerApplicationsAdmin() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const isPageLoading = adminCheckLoading || (isAdmin && listLoading);
+  const isPageLoading = adminCheckLoading || (isAdmin && (listLoading||loadedKey!==readKey));
 
   const fetchApplications = React.useCallback(async () => {
     if (!user?.id || !isAdmin) return;
+    const sequence=++readSequence.current;
     setListLoading(true);
     setListError(false);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('partner_applications')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*',{count:'exact'})
+        .order('created_at', { ascending: false }).order('id',{ascending:false});
+      if(statusFilter!=='all')query=query.eq('status',statusFilter);
+      const term=sanitizeSearchTerm(searchQuery);
+      if(term)query=query.or(`business_name.ilike.%${term}%,contact_name.ilike.%${term}%,contact_email.ilike.%${term}%`);
+      const { data, error, count }=await query.range(page*50,page*50+49);
+      if(sequence!==readSequence.current)return;
       if (error) throw error;
       setApplications((data as PartnerApplication[]) || []);
+      setTotalCount(count??null);
     } catch {
+      if(sequence!==readSequence.current)return;
       setListError(true);
+      setTotalCount(null);
       toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
         description:
           language === 'ru'
@@ -169,9 +186,9 @@ export default function PartnerApplicationsAdmin() {
       });
       setApplications([]);
     } finally {
-      setListLoading(false);
+      if(sequence===readSequence.current){setLoadedKey(readKey);setListLoading(false);}
     }
-  }, [user?.id, isAdmin, language]);
+  }, [user?.id, isAdmin, language,statusFilter,searchQuery,page,readKey]);
 
   useEffect(() => {
     if (!user?.id) {
@@ -180,6 +197,7 @@ export default function PartnerApplicationsAdmin() {
     }
     if (!isAdmin || adminCheckLoading) return;
     void fetchApplications();
+    return()=>{readSequence.current+=1;};
   }, [user?.id, isAdmin, adminCheckLoading, fetchApplications]);
 
   const handleStatusChange = async (newStatus: 'approved' | 'rejected' | 'reviewing') => {
@@ -238,6 +256,8 @@ export default function PartnerApplicationsAdmin() {
       setIsDetailOpen(false);
       setRejectionReason('');
       setActionType(null);
+      // Refresh the exact filtered count/page after the existing writer settles.
+      void fetchApplications();
     } catch {
       toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
         description: language === 'ru'
@@ -257,23 +277,14 @@ export default function PartnerApplicationsAdmin() {
   // Filter applications
   const filteredApplications = applications.filter(app => {
     const matchesSearch = 
-      app.business_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.contact_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.contact_email.toLowerCase().includes(searchQuery.toLowerCase());
+      app.business_name.toLowerCase().includes(sanitizeSearchTerm(searchQuery).toLowerCase()) ||
+      app.contact_name.toLowerCase().includes(sanitizeSearchTerm(searchQuery).toLowerCase()) ||
+      app.contact_email.toLowerCase().includes(sanitizeSearchTerm(searchQuery).toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
-
-  // Stats
-  const stats = {
-    total: applications.length,
-    pending: applications.filter(a => a.status === 'pending').length,
-    reviewing: applications.filter(a => a.status === 'reviewing').length,
-    approved: applications.filter(a => a.status === 'approved').length,
-    rejected: applications.filter(a => a.status === 'rejected').length,
-  };
 
   if (!user) {
     return (
@@ -322,30 +333,7 @@ export default function PartnerApplicationsAdmin() {
         showBack
       />
 
-      {/* Stats Cards */}
-      {!isPageLoading && !listError && <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-        {[
-          { label: language === 'ru' ? 'Всего' : 'Total', value: stats.total, color: 'bg-primary/20 text-primary' },
-          { label: language === 'ru' ? 'Ожидают' : 'Pending', value: stats.pending, color: 'bg-warning/20 text-warning' },
-          { label: language === 'ru' ? 'На рассмотрении' : 'Reviewing', value: stats.reviewing, color: 'bg-info/20 text-info' },
-          { label: language === 'ru' ? 'Одобрено' : 'Approved', value: stats.approved, color: 'bg-success/20 text-success' },
-          { label: language === 'ru' ? 'Отклонено' : 'Rejected', value: stats.rejected, color: 'bg-destructive/20 text-destructive' },
-        ].map((stat, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className={cn("rounded-none p-4 text-center", stat.color)}
-          >
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <div className="text-xs opacity-80">{stat.label}</div>
-          </motion.div>
-        ))}
-      </div>}
-
       {/* Filters */}
-      {!listError && applications.length >= 1000 && <p role="status" className="mb-3 text-sm text-muted-foreground">{pickLang(language,{en:'1,000 or more applications loaded. The API may limit this list and its filter counts; these are not a verified total.',ru:'Загружено 1 000 или более заявок. API может ограничивать список и счётчики фильтров; это не подтверждённое общее количество.',th:'โหลดใบสมัครอย่างน้อย 1,000 รายการ API อาจจำกัดรายการและจำนวนตามตัวกรอง นี่ไม่ใช่จำนวนรวมที่ยืนยันแล้ว'})}</p>}
       <SectionCard className="mb-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
@@ -380,12 +368,17 @@ export default function PartnerApplicationsAdmin() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" onClick={() => setParams(previous => { const next=new URLSearchParams(previous); next.delete('status'); next.delete('q'); return next; })}>{pickLang(language,{en:'Reset filters',ru:'Сбросить фильтры',th:'ล้างตัวกรอง'})}</Button>
+          <Button variant="outline" onClick={() => setParams(previous => { const next=new URLSearchParams(previous); next.delete('status'); next.delete('q'); next.delete('application_page'); return next; })}>{pickLang(language,{en:'Reset filters',ru:'Сбросить фильтры',th:'ล้างตัวกรอง'})}</Button>
         </div>
       </SectionCard>
 
       {/* Applications List */}
-      {listError ? <div role="alert" className="border border-destructive p-4">
+      {!isPageLoading && !listError && <div className="mb-4 flex flex-wrap items-center gap-3">
+        <p role="status">{pickLang(language,{en:'Matching applications',ru:'Подходящие заявки',th:'ใบสมัครที่ตรงกัน'})}: {totalCount ?? pickLang(language,{en:'Count unavailable',ru:'Количество недоступно',th:'จำนวนไม่พร้อมใช้งาน'})} · {pickLang(language,{en:'Page',ru:'Страница',th:'หน้า'})} {page+1}</p>
+        <Button variant="outline" disabled={page===0||listLoading} onClick={()=>setPage(page-1)}>{pickLang(language,{en:'Previous',ru:'Назад',th:'ก่อนหน้า'})}</Button>
+        <Button variant="outline" disabled={listLoading||totalCount==null||(page+1)*50>=totalCount} onClick={()=>setPage(page+1)}>{pickLang(language,{en:'Next',ru:'Далее',th:'ถัดไป'})}</Button>
+      </div>}
+      {listError && loadedKey===readKey ? <div role="alert" className="border border-destructive p-4">
         {pickLang(language,{en:'Could not load partner applications. Counts and results are unavailable.',ru:'Не удалось загрузить заявки партнёров. Счётчики и результаты недоступны.',th:'โหลดใบสมัครพันธมิตรไม่สำเร็จ จำนวนและผลลัพธ์ไม่พร้อมใช้งาน'})}
         <Button variant="outline" disabled={listLoading} onClick={()=>fetchApplications()}>{pickLang(language,{en:'Retry',ru:'Повторить',th:'ลองอีกครั้ง'})}</Button>
       </div> : isPageLoading ? (

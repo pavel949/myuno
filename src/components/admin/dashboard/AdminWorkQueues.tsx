@@ -17,6 +17,12 @@ export function AdminWorkQueues({ data, loading, search = '' }: { data?: Dashboa
     { key: 'openTickets', title: l('Support', 'Поддержка', 'ความช่วยเหลือ'), hint: l('Open and in progress', 'Открыты и в работе', 'เปิดอยู่และกำลังดำเนินการ'), icon: MessageSquare, href: '/admin/tickets?status=active' },
   ] as const;
   const matching = cards.filter(card => `${card.title} ${card.hint}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()));
+  const extra = [
+    { key: 'pendingPartnerApplications', title: l('Partner applications', 'Заявки партнёров', 'ใบสมัครพันธมิตร'), href: '/admin/partner-applications?status=pending' },
+    { key: 'pendingManualPayments', title: l('Manual payment review', 'Проверка ручных оплат', 'ตรวจสอบการชำระเงินด้วยตนเอง'), href: '/admin/operations?tab=manual-payments&manual_status=review' },
+    { key: 'openDisputes', title: l('Open disputes', 'Открытые споры', 'ข้อพิพาทที่เปิดอยู่'), href: '/admin/disputes' },
+  ] as const;
+  const extraMatching = extra.filter(item => item.title.toLocaleLowerCase().includes(search.toLocaleLowerCase()));
   return <section aria-labelledby="admin-work-queues" className="min-w-0 space-y-3">
     <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
       <h2 id="admin-work-queues" className="text-xl font-semibold">{l('Work queues', 'Рабочие очереди', 'คิวงาน')}</h2>
@@ -34,11 +40,9 @@ export function AdminWorkQueues({ data, loading, search = '' }: { data?: Dashboa
         <Link to={card.href} className="mt-auto inline-flex min-h-11 items-center gap-2 pt-3 text-sm text-primary underline-offset-4 hover:underline">{l('Open queue', 'Открыть очередь', 'เปิดคิว')}<ArrowRight className="size-4" /></Link>
       </Surface>)}
     </div>
-    {matching.length === 0 && <p role="status" className="text-sm text-muted-foreground">{l('No matching work queues', 'Подходящих рабочих очередей нет', 'ไม่พบคิวงานที่ตรงกัน')}</p>}
+    {matching.length === 0 && extraMatching.length === 0 && <p role="status" className="text-sm text-muted-foreground">{l('No matching work queues', 'Подходящих рабочих очередей нет', 'ไม่พบคิวงานที่ตรงกัน')}</p>}
     <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-      <Link className="inline-flex min-h-11 items-center text-primary hover:underline" to="/admin/partner-applications?status=pending">{l('Partner applications', 'Заявки партнёров', 'ใบสมัครพันธมิตร')}: <span className="ml-2"><DashboardCount data={data} countKey="pendingPartnerApplications" loading={loading} /></span></Link>
-      <Link className="inline-flex min-h-11 items-center text-primary hover:underline" to="/admin/operations?tab=manual-payments&manual_status=review">{l('Manual payment review', 'Проверка ручных оплат', 'ตรวจสอบการชำระเงินด้วยตนเอง')}: <span className="ml-2"><DashboardCount data={data} countKey="pendingManualPayments" loading={loading} /></span></Link>
-      <Link className="inline-flex min-h-11 items-center text-primary hover:underline" to="/admin/disputes">{l('Open disputes', 'Открытые споры', 'ข้อพิพาทที่เปิดอยู่')}: <span className="ml-2"><DashboardCount data={data} countKey="openDisputes" loading={loading} /></span></Link>
+      {extraMatching.map(item => <Link key={item.key} className="inline-flex min-h-11 items-center text-primary hover:underline" to={item.href}>{item.title}: <span className="ml-2"><DashboardCount data={data} countKey={item.key} loading={loading} /></span></Link>)}
     </div>
   </section>;
 }

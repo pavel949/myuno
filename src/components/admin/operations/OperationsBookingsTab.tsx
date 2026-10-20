@@ -48,6 +48,7 @@ export function OperationsBookingsTab() {
           order_addresses (id, address_type, address_text, notes)
         `, { count: 'exact' })
         .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
         .range(page * pageSize, (page + 1) * pageSize - 1);
       query = applyOrderQueue(query, queue);
 
