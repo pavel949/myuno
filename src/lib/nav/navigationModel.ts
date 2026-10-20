@@ -353,7 +353,7 @@ export function getOwnerSidebarForRole(
  * real route (`/admin/control`) so the rail no longer routes through a
  * redirect.
  */
-const ADMIN_SIDEBAR: SidebarNavGroup[] = [
+const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
   {
     labelEn: 'Platform', labelRu: 'Платформа', defaultOpen: true,
     items: [
@@ -462,6 +462,19 @@ const ADMIN_SIDEBAR: SidebarNavGroup[] = [
       { path: '/admin/settings',           labelEn: 'System settings',    labelRu: 'Настройки',                 icon: Settings },
     ],
   },
+];
+
+// Daily navigation is intentionally small. Specialist destinations remain in their existing groups.
+const adminDaily: SidebarNavItem[] = [
+  { path: '/admin', labelEn: 'Overview', labelRu: 'Обзор', labelTh: 'ภาพรวม', icon: LayoutDashboard },
+  { path: '/admin/review', labelEn: 'Review', labelRu: 'Проверка', labelTh: 'ตรวจสอบ', icon: FileCheck, badgeKey: 'pendingContent' },
+  { path: '/admin/inbox', labelEn: 'Applications', labelRu: 'Заявки', labelTh: 'คำขอ', icon: MessageSquare },
+  { path: '/admin/operations', labelEn: 'Operations', labelRu: 'Операции', labelTh: 'การดำเนินงาน', icon: CalendarCheck },
+  { path: '/admin/catalog', labelEn: 'Catalog', labelRu: 'Каталог', labelTh: 'แคตตาล็อก', icon: Package },
+];
+const ADMIN_SIDEBAR: SidebarNavGroup[] = [
+  { labelEn: 'Daily work', labelRu: 'Ежедневная работа', labelTh: 'งานประจำวัน', defaultOpen: true, items: adminDaily },
+  ...ADMIN_SIDEBAR_SOURCE.map(group => ({ ...group, defaultOpen: false, items: group.items.filter(item => !adminDaily.some(daily => daily.path === item.path)) })).filter(group => group.items.length > 0),
 ];
 
 const VENDOR_SIDEBAR: SidebarNavGroup[] = [
