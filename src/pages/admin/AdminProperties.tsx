@@ -65,7 +65,7 @@ export default function AdminProperties() {
   const setFilters = (updates: Record<string, string>) => setSearchParams(previous => updateReviewParams(previous, updates), { replace: true });
   const resetFilters = () => setFilters({ provider: '', q: '', activity: 'all', status: 'all' });
 
-  const { properties, isLoading: propertiesLoading, error: propertiesError, refetch, createProperty, updateProperty, deleteProperty } = useAdminProperties(filterProviderId || undefined);
+  const { properties, isLoading: propertiesLoading, error: propertiesError, refetch, createProperty, updateProperty, deleteProperty } = useAdminProperties(filterProviderId || undefined, undefined, searchParams.get('edit') || undefined);
   const { data: mcs } = useManagementCompanies();
   
   // Redirect to unified property creation wizard instead of opening dialog
@@ -102,7 +102,7 @@ export default function AdminProperties() {
   React.useEffect(() => {
     const editId = searchParams.get('edit');
     if (previousEditRef.current !== editId) {
-      if (previousEditRef.current && !editId) {
+      if (previousEditRef.current) {
         setIsSheetOpen(false);
         setEditingProperty(null);
       }

@@ -10,6 +10,19 @@ beforeEach(() => {
   mocks.from.mockReturnValue(chain); mocks.eq.mockReturnValue(chain); mocks.is.mockReturnValue(chain); mocks.or.mockReturnValue(chain);
 });
 describe('admin property read state', () => {
+  it('reads an exact review record on the server and isolates changed record requests', async () => {
+    let finishOld!: (value: unknown) => void;
+    mocks.order.mockReturnValueOnce(new Promise(resolve => { finishOld = resolve; }))
+      .mockResolvedValueOnce({ data: [{ id: 'older-pending-record' }], error: null });
+    const { result, rerender } = renderHook(({ id }) => useAdminProperties(undefined, undefined, id), { initialProps: { id: 'old-record' } });
+    rerender({ id: 'older-pending-record' });
+    await waitFor(() => expect(result.current.properties[0]?.id).toBe('older-pending-record'));
+    expect(mocks.eq).toHaveBeenCalledWith('id', 'older-pending-record');
+    expect(mocks.is).toHaveBeenCalledWith('deleted_at', null);
+    await act(async () => { finishOld({ data: [{ id: 'old-record' }], error: null }); });
+    expect(result.current.properties[0]?.id).toBe('older-pending-record');
+    expect(mocks.write).not.toHaveBeenCalled();
+  });
   it('reports a failed read and retries without any business write', async () => {
     mocks.order.mockResolvedValueOnce({ data: null, error: { message: 'Synthetic denied read' } })
       .mockResolvedValueOnce({ data: [{ id: 'synthetic-property', approval_status: 'draft' }], error: null });
