@@ -64,6 +64,11 @@ const virtual = {
       row('fixture-product-b','product','Beach towel','Пляжное полотенце','accessories',{approval_status:null,created_at:null}),
     ];
     const unknown=()=>({listing:null,property:null,service:null,product:null});
+    export async function fetchModerationCategoryOptions(source){
+      const categories={listing:['restaurant','clinic','yacht'],property:['villa','apartment'],product:['groceries','accessories','books'],service:[]};
+      if(!Object.hasOwn(categories,source)) throw Error('Unknown fixture category source');
+      return [...categories[source]];
+    }
     export async function fetchModerationQueue(options){
       window.fixtureReadCalls++;
       if(!options) throw Error('Source/page/query options are required');
@@ -77,7 +82,7 @@ const virtual = {
       if(scenario==='error'||(scenario==='retry'&&window.fixtureReadCalls===1)||(scenario==='partial'&&source==='listing')) return unavailable;
       let candidates=items.filter(item=>item.type===source);
       if(queue==='draft') candidates=candidates.filter(item=>item.type==='listing'||item.type==='property').map(item=>({...item,approval_status:'draft'}));
-      if(scenario==='capped') candidates=Array.from({length:source==='listing'?240:source==='property'?8:2},(_,i)=>row('fixture-'+source+'-'+i,source,'Synthetic '+source+' '+i,'Тестовая запись '+i,source==='property'?'villa':null,{vertical:source==='listing'?'restaurant':null}));
+      if(scenario==='capped') candidates=Array.from({length:source==='listing'?240:source==='property'?8:2},(_,i)=>row('fixture-'+source+'-'+i,source,'Synthetic '+source+' '+i,'Тестовая запись '+i,source==='property'?'villa':null,{vertical:source==='listing'?(i===239?'yacht':'restaurant'):null}));
       if(scenario==='empty') candidates=[];
       const term=search.trim().replace(/[,%()_*\\"]/g,' ').trim().slice(0,120).toLowerCase();
       if(term) candidates=candidates.filter(item=>[item.name_en,item.name_ru].some(name=>name?.toLowerCase().includes(term))||item.id===term);
@@ -94,8 +99,12 @@ if (process.argv.includes('--verify-read-model')) {
   // Exercise only the synthetic boundary; no DOM, browser, DB client or mutation.
   const fixtureWindow = { fixtureReadCalls: 0, fixtureReadOptions: [] };
   const fixtureLocation = { search: '' };
-  const source = virtual['@/lib/adminModeration'].replace(/^\s*export \* from .*;$/m, '').replace('export async function', 'async function');
-  const read = new Function('window', 'location', source + '\nreturn fetchModerationQueue;')(fixtureWindow, fixtureLocation);
+  const source = virtual['@/lib/adminModeration'].replace(/^\s*export \* from .*;$/m, '').replaceAll('export async function', 'async function');
+  const { read, categories } = new Function('window', 'location', source + '\nreturn {read:fetchModerationQueue,categories:fetchModerationCategoryOptions};')(fixtureWindow, fixtureLocation);
+  assert.deepEqual(await categories('listing'), ['restaurant', 'clinic', 'yacht']);
+  assert.deepEqual(await categories('property'), ['villa', 'apartment']);
+  assert.deepEqual(await categories('product'), ['groceries', 'accessories', 'books']);
+  assert.deepEqual(await categories('service'), []);
   const options = { source: 'listing', page: 0, queue: 'pending', search: '', category: 'all' };
   let result = await read(options);
   assert.equal(result.items.length, 2);
@@ -106,6 +115,11 @@ if (process.argv.includes('--verify-read-model')) {
   result = await read(options);
   assert.equal(result.items.length, 50);
   assert.equal(result.totals.listing, 240);
+  assert(result.items.every(item => item.vertical !== 'yacht'));
+  assert((await categories('listing')).includes('yacht'));
+  const olderCategory = await read({ ...options, category: 'yacht' });
+  assert.equal(olderCategory.totals.listing, 1);
+  assert.equal(olderCategory.items[0].id, 'fixture-listing-239');
   assert.equal((await read({ ...options, page: 1 })).items[0].id, 'fixture-listing-50');
   result = await read({ ...options, page: 4 });
   assert.equal(result.items.length, 40);

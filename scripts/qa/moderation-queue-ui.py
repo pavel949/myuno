@@ -246,6 +246,17 @@ async def exercise_states(page, language, width):
     await page.goto(f'http://localhost:8080/fixture?lang={language}&case=capped', wait_until='networkidle')
     await expect(rows).to_have_count(50)
     await expect(count).to_have_text('240')
+    # Source-wide options must include a category whose only record is older
+    # than the current page. Selecting it filters the server source, then pages.
+    category = page.get_by_label(labels['category'], exact=True)
+    await expect(category.locator('option[value="yacht"]')).to_have_count(1)
+    await category.select_option('yacht')
+    await expect(rows).to_have_count(1)
+    await expect(rows.first).to_contain_text('239')
+    await expect(count).to_have_text('1')
+    await assert_last_read(page, source='listing', page=0, category='yacht')
+    await page.get_by_role('button', name=labels['clear'], exact=True).click()
+    await expect(rows).to_have_count(50)
     await page.get_by_role('button', name=labels['next'], exact=True).click()
     await expect(rows).to_have_count(50)
     await expect(rows.first).to_contain_text('50')
