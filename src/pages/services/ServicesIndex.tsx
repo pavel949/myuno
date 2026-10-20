@@ -109,7 +109,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
         <Link className="flex min-h-16 items-center gap-3 border border-border bg-card px-3 py-3 text-sm font-medium hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" to="/transport"><Car className="h-5 w-5 shrink-0" aria-hidden="true" />{t('Транспорт', 'Transport', "การเดินทาง")}</Link>
         <Link className="flex min-h-16 items-center gap-3 border border-border bg-card px-3 py-3 text-sm font-medium hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" to="/thai-services"><Users className="h-5 w-5 shrink-0" aria-hidden="true" />{t('Местные компании', 'Local businesses', "ธุรกิจท้องถิ่น")}</Link>
       </nav>
-      <div className="flex justify-end"><Link to="/me/services" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium underline underline-offset-4"><ClipboardList className="h-4 w-4" aria-hidden="true" />{t('Мои услуги и заявки', 'My services and requests', "บริการและคำขอของฉัน")}</Link></div>
+      <div className="flex flex-wrap justify-between gap-2"><Link to="/trip-planner" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">{t('Спланировать поездку', 'Plan a trip', 'วางแผนการเดินทาง')}</Link><Link to="/bookings" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium underline underline-offset-4"><ClipboardList className="h-4 w-4" aria-hidden="true" />{t('Мои услуги и заявки', 'My services and requests', "บริการและคำขอของฉัน")}</Link></div>
 
       <section aria-labelledby="service-requests" className="space-y-4">
         <header className="space-y-2">

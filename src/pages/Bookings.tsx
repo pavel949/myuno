@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell, AlertCircle, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,6 +25,8 @@ import {
 } from '@/lib/bookings/statusHistoryCache';
 import { cn } from '@/lib/utils';
 import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+
+import { BookingTrackingOverview } from '@/components/bookings/BookingTrackingOverview';
 
 interface BookingItem {
   id: string;
@@ -131,7 +133,8 @@ export default function Bookings() {
   const { t, language } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const clusterParam = searchParams.get('cluster') ?? '';
   const statusParam = searchParams.get('status') ?? '';
   const [bookings, setBookings] = useState<BookingItem[]>([]);
@@ -272,9 +275,9 @@ export default function Bookings() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      redirectToAuth(navigate, { replace: true });
+      redirectToAuth(navigate, { replace: true, from: location.pathname + location.search + location.hash });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, location.pathname, location.search, location.hash]);
 
   useEffect(() => {
     if (user) {
@@ -532,15 +535,13 @@ export default function Bookings() {
   }, [bookings, allowedTypes, statusParam, filterIsActive]);
 
   const clearFilter = useCallback(() => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.delete('cluster');
-      next.delete('status');
-      return next;
-    }, { replace: true });
-  }, [setSearchParams]);
+    const next = new URLSearchParams(searchParams);
+    next.delete('cluster');
+    next.delete('status');
+    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace: true });
+  }, [searchParams, navigate, location.pathname, location.hash]);
 
-  if (authLoading || isLoading) {
+  if (authLoading) {
     return (
       <AppLayout>
         <BookingListSkeleton />
@@ -570,6 +571,8 @@ export default function Bookings() {
             actions={<RealtimeIndicator status={realtimeStatus} language={language} />}
           />
 
+          <BookingTrackingOverview />
+
           {/* Active filter pill — surfaces deep-link context from PersonaHalo. */}
           {filterIsActive && (
             <div className="flex items-center gap-2 mb-3 px-1">
@@ -597,7 +600,7 @@ export default function Bookings() {
             </div>
           )}
 
-          {loadError ? (
+          {isLoading ? <BookingListSkeleton /> : loadError ? (
             <EmptyState
               icon={AlertCircle}
               title={language === 'ru' ? 'Не удалось загрузить заказы' : 'We could not load your orders'}

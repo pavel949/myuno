@@ -6,8 +6,11 @@
  * a single source. Used by the PersonaHalo activity-badge deep-link so a
  * tap on the Legal cluster's "2 open" badge lands on visa-only requests.
  */
-import React, { useMemo, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
+import { pickLang } from '@/lib/i18n/pickLang';
+import React, { useMemo, useCallback, useEffect } from 'react';
+import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { ClipboardList, ChevronRight, X } from 'lucide-react';
 import { MeShellLayout } from '@/components/layout/MeShellLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,18 +19,18 @@ import { EmptyState, LoadingState } from '@/components/page';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyRequests, type MyRequest, type RequestStatus, type RequestSource } from '@/hooks/useMyRequests';
 
-const COLUMNS: { key: RequestStatus; en: string; ru: string }[] = [
-  { key: 'new',         en: 'New',         ru: 'Новые' },
-  { key: 'in_progress', en: 'In progress', ru: 'В работе' },
-  { key: 'waiting',     en: 'Waiting',     ru: 'Ожидание' },
-  { key: 'done',        en: 'Done',        ru: 'Завершено' },
+const COLUMNS: { key: RequestStatus; en: string; ru: string; th: string }[] = [
+  { key: 'new',         en: 'New',         ru: 'Новые', th: 'ใหม่' },
+  { key: 'in_progress', en: 'In progress', ru: 'В работе', th: 'กำลังดำเนินการ' },
+  { key: 'waiting',     en: 'Waiting',     ru: 'Ожидание', th: 'รอข้อมูล' },
+  { key: 'done',        en: 'Done',        ru: 'Завершено', th: 'เสร็จสิ้น' },
 ];
 
-const SOURCE_LABEL: Record<RequestSource, { en: string; ru: string }> = {
-  concierge: { en: 'Concierge', ru: 'Консьерж' },
-  visa: { en: 'Visa', ru: 'Виза' },
-  order: { en: 'Orders', ru: 'Заказы' },
-  help: { en: 'myUNO Help', ru: 'Помощь myUNO' },
+const SOURCE_LABEL: Record<RequestSource, { en: string; ru: string; th: string }> = {
+  concierge: { en: 'Concierge', ru: 'Консьерж', th: 'ผู้ช่วยส่วนตัว' },
+  visa: { en: 'Visa', ru: 'Виза', th: 'วีซ่า' },
+  order: { en: 'Orders', ru: 'Заказы', th: 'คำสั่งซื้อ' },
+  help: { en: 'myUNO Help', ru: 'Помощь myUNO', th: 'ความช่วยเหลือ myUNO' },
 };
 
 const VALID_SOURCES: RequestSource[] = ['concierge', 'visa', 'order', 'help'];
@@ -49,7 +52,7 @@ function RequestCard({ r }: { r: MyRequest }) {
           {r.detailPath && <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
         </div>
         <Badge variant="outline" className="mt-2 text-[10px] font-normal capitalize">
-          {r.source}
+          {pickLang(language, SOURCE_LABEL[r.source])}
         </Badge>
       </CardContent>
     </Card>
@@ -59,9 +62,18 @@ function RequestCard({ r }: { r: MyRequest }) {
 
 export default function MeRequests() {
   const { language } = useLanguage();
+  const { user, isLoading: authLoading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const isRu = language === 'ru';
-  const { data, isLoading } = useMyRequests();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { data, isLoading, failedSources = [], refetch, isFetching, isError } = useMyRequests();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      redirectToAuth(navigate, { replace: true, from: location.pathname + location.search + location.hash });
+    }
+  }, [authLoading, user, navigate, location.pathname, location.search, location.hash]);
 
   const sourceParam = searchParams.get('source') ?? '';
   const activeSource = (VALID_SOURCES as string[]).includes(sourceParam)
@@ -74,17 +86,22 @@ export default function MeRequests() {
     return data.filter((r) => r.source === activeSource);
   }, [data, activeSource]);
 
+  const relevantFailedSources = activeSource ? failedSources.filter(source => source === activeSource) : failedSources;
+  const hasReadFailure = isError || relevantFailedSources.length > 0;
+
   const clearSource = useCallback(() => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      next.delete('source');
-      return next;
-    }, { replace: true });
-  }, [setSearchParams]);
+    const next = new URLSearchParams(searchParams);
+    next.delete('source');
+    navigate({ pathname: location.pathname, search: next.toString(), hash: location.hash }, { replace: true });
+  }, [searchParams, navigate, location.pathname, location.hash]);
+
+  if (authLoading) return <MeShellLayout><LoadingState /></MeShellLayout>;
+  if (!user) return null;
 
   return (
     <MeShellLayout title={isRu ? 'Заявки' : 'Requests'}>
       <div className="space-y-6">
+        <Link to="/bookings" className="inline-flex min-h-11 items-center text-sm underline">{pickLang(language, { ru: 'Все бронирования и заказы', en: 'All bookings and orders', th: 'การจองและคำสั่งทั้งหมด' })}</Link>
         <header>
           <h1 className="font-display text-2xl font-bold tracking-tight">
             {isRu ? 'Мои заявки' : 'My requests'}
@@ -92,7 +109,7 @@ export default function MeRequests() {
           <p className="text-sm text-muted-foreground mt-1">
             {isRu
               ? 'Статусы всех ваших обращений в одном месте.'
-              : 'Status of all your requests in one place.'}
+              : 'Track your requests in one place.'}
           </p>
 
           {/* Active source filter pill — surfaces PersonaHalo deep-link context. */}
@@ -102,7 +119,7 @@ export default function MeRequests() {
                 {isRu ? 'Фильтр' : 'Filter'}
               </span>
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary text-xs font-medium border border-primary/20">
-                {isRu ? SOURCE_LABEL[activeSource].ru : SOURCE_LABEL[activeSource].en}
+                {pickLang(language, SOURCE_LABEL[activeSource])}
               </span>
               <button
                 type="button"
@@ -117,9 +134,13 @@ export default function MeRequests() {
           )}
         </header>
 
+        {hasReadFailure && !isLoading && <div role="alert" className="space-y-2 border border-warning/40 bg-warning/5 p-3 text-sm">
+          <p>{pickLang(language, { ru: 'Не все заявки удалось загрузить. Показаны только доступные записи.', en: 'Some requests could not be loaded. Only available records are shown.', th: 'โหลดคำขอบางส่วนไม่สำเร็จ แสดงเฉพาะข้อมูลที่โหลดได้' })}</p>
+          <button type="button" disabled={isFetching} onClick={() => void refetch()} className="min-h-11 underline disabled:opacity-50">{pickLang(language, { ru: 'Повторить загрузку', en: 'Retry loading', th: 'ลองโหลดอีกครั้ง' })}</button>
+        </div>}
         {isLoading ? (
           <LoadingState />
-        ) : !filteredData || filteredData.length === 0 ? (
+        ) : (!filteredData || filteredData.length === 0) && hasReadFailure ? null : !filteredData || filteredData.length === 0 ? (
           <EmptyState
             icon={ClipboardList}
             title={activeSource
@@ -136,13 +157,13 @@ export default function MeRequests() {
               return (
                 <div key={col.key} className="space-y-2">
                   <div className="flex items-center gap-2 px-1">
-                    <h3 className="text-sm font-semibold">{isRu ? col.ru : col.en}</h3>
+                    <h3 className="text-sm font-semibold">{pickLang(language, col)}</h3>
                     <Badge variant="secondary" className="text-[10px]">{items.length}</Badge>
                   </div>
                   <div className="space-y-2">
                     {items.length === 0 ? (
                       <p className="text-xs text-muted-foreground px-1 py-2">
-                        {isRu ? 'Пусто' : 'Empty'}
+                        {hasReadFailure ? pickLang(language, { ru: 'Нет загруженных заявок', en: 'No loaded requests', th: 'ไม่มีคำขอที่โหลดได้' }) : (isRu ? 'Пусто' : 'Empty')}
                       </p>
                     ) : (
                       items.map((r) => <RequestCard key={r.id} r={r} />)

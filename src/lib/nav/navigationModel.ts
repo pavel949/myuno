@@ -67,7 +67,7 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 // Each role gets exactly 5 slots. The slot composition encodes
 // product-level "what matters most" for that role:
 //
-//  guest      → Home · Discover · Market · Property · Me
+//  guest      → Home · Homes · Bookings · Services · Profile
 //                  (consumer browsing + monetization entry points)
 //  investor   → Home · Invest · Discover · Property · Me
 //                  (capital workflow first, browse second)
@@ -82,8 +82,7 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 //  team       → Dashboard · Content · Moderation · CRM · Profile
 //                  (uno_team — content & moderation; SideRail N/A, see TeamLayout)
 //
-// When `feature_flag:me_shell_v1` is on, guest swaps to GUEST_NAV_ME_HUB
-// (Home · Feed · Services · Documents · Profile) — handled in BottomBar.
+// Consumer AppLayout selects the stable guest bar; workspace layouts retain their role bars.
 // ─────────────────────────────────────────────────────────────
 
 /**
@@ -121,9 +120,10 @@ export function isBottomBarRoute(role: NavRoleKey, path: string): boolean {
  * tab on the guest bar).
  */
 const PATH_ALIASES: Record<string, string[]> = {
-  '/account':     ['/account', '/profile', '/me', '/bookings'],
+  '/account':     ['/account', '/profile', '/me'],
+  '/bookings': ['/bookings', '/me/bookings', '/me/requests', '/my-stay', '/trip'],
   '/discover/stay': ['/discover/stay', '/discover/buy', '/property'],
-  '/discover/services': ['/discover/services', '/discover/situations', '/services', '/transport', '/experiences', '/insurance', '/beauty', '/restaurants', '/fitness', '/medical', '/events', '/education', '/flowers', '/legal', '/banking', '/veterinary', '/pharmacy', '/pets', '/yachts', '/cleaning', '/babysitter', '/delivery', '/sim', '/exchange', '/school-finder'],
+  '/discover/services': ['/trip-planner', '/me/services', '/discover/services', '/discover/situations', '/services', '/transport', '/experiences', '/insurance', '/beauty', '/restaurants', '/fitness', '/medical', '/events', '/education', '/flowers', '/legal', '/banking', '/veterinary', '/pharmacy', '/pets', '/yachts', '/cleaning', '/babysitter', '/delivery', '/sim', '/exchange', '/school-finder'],
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
@@ -149,6 +149,7 @@ const PATH_ALIASES: Record<string, string[]> = {
  */
 export function isBottomBarItemActive(item: NavItem, pathname: string): boolean {
   if (item.exact) return pathname === item.path;
+  if (item.path === '/account' && ['/me/bookings', '/me/requests', '/me/services'].some(path => pathname === path || pathname.startsWith(path + '/'))) return false;
   if (item.path === APP_ROUTES.GOAL_SERVICES && pathname === APP_ROUTES.DISCOVER) return true;
 
   const aliases = PATH_ALIASES[item.path];

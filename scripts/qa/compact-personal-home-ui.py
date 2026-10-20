@@ -36,7 +36,7 @@ WIDTHS = [375, 430, 1280]
 ROLES = ['guest', 'resident', 'admin', 'owner', 'vendor', 'employee']
 STATES = ['loading', 'empty', 'partial-error', 'live']
 SMOKE_STATES = ['loading', 'empty', 'error', 'partial-error', 'live']
-WORK = {'admin': '/mc', 'owner': '/my-property', 'vendor': '/vendor', 'employee': '/team', 'staff': '/staff', 'property_manager': '/mc', 'investor': '/invest/dashboard'}
+WORK = {'admin': '/mc', 'owner': '/my-property', 'vendor': '/vendor', 'employee': '/team', 'property_manager': '/mc', 'investor': '/invest/dashboard'}
 COPY = {
     'en': {
         'open': 'Customize home', 'done': 'Done', 'retry': 'Retry', 'close': 'Close',
@@ -102,7 +102,7 @@ def context_plan(surface, lang, width):
         'preferences': [{**base, 'kind': 'preferences', 'id': f'preferences/{surface}/{lang}/{width}/{role}', 'role': role} for role in preferences],
         'interaction': [{**base, 'kind': 'interaction', 'id': f'interaction/{surface}/{lang}/{width}'}] if core else [],
         'boundaries': [{**base, 'kind': 'access-boundary', 'id': f'access-boundary/{surface}/{lang}/{width}/{name}', 'name': name, 'role': role, 'extra': extra, 'destination': destination} for name, role, extra, destination in [
-            ('staff', 'staff', {}, '/staff'), ('property-manager', 'property_manager', {}, '/mc'),
+            ('staff', 'staff', {}, None), ('property-manager', 'property_manager', {}, '/mc'),
             ('investor', 'investor', {}, '/invest/dashboard'), ('self-managed-owner', 'owner', {'owner-portal': '0'}, '/mc'),
             ('context-loading', 'admin', {'context-loading': '1'}, None),
             ('owner-type-loading', 'admin', {'owner-loading': '1'}, None),
@@ -420,7 +420,7 @@ async def main():
                             continue
 
                         # Actual Link/navigate destinations, using only MemoryRouter.
-                        for key, href in [('search', '/search'), ('homes', '/property'), ('services', '/services'), ('bookings', '/me'), ('help', '/support')]:
+                        for key, href in [('search', '/search'), ('homes', '/property'), ('services', '/services'), ('bookings', '/bookings'), ('help', '/support')]:
                             await navigate()
                             link = page.get_by_role('link', name=copy[key], exact=True)
                             await expect(link).to_have_attribute('href', href)
