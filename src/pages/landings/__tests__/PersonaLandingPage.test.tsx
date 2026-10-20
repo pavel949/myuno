@@ -10,15 +10,21 @@
  * Live-кейс собираем in-test (PERSONA_LANDINGS на B.4 пока все draft —
  * это ожидаемо), чтобы проверить позитивную ветку рендера.
  */
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import type { PersonaLanding } from '@/lib/landings/types';
+import { P21_PROVIDERS } from '@/content/landings/personas/P21_PROVIDERS';
+import { P22_FREELANCERS } from '@/content/landings/personas/P22_FREELANCERS';
+import { P23_SMB } from '@/content/landings/personas/P23_SMB';
+
+const locale = vi.hoisted(() => ({ language: 'ru' }));
+beforeEach(() => { locale.language = 'ru'; });
 
 // Минимальные моки контекстов / heavy components, чтобы изолировать роут.
 vi.mock('@/contexts/LanguageContext', () => ({
-  useLanguage: () => ({ language: 'ru' }),
+  useLanguage: () => ({ language: locale.language }),
   LanguageProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 vi.mock('@/components/layout/AppLayout', () => ({
@@ -87,6 +93,15 @@ const draftLanding: PersonaLanding = {
   faq: [],
   primaryCta: { label: { ru: 'На главную', en: 'Go home' }, href: '/' },
 };
+
+it.each([P21_PROVIDERS, P22_FREELANCERS, P23_SMB])('renders the narrowed provider application in Thai for $slug', landing => {
+  locale.language = 'th';
+  MOCK_LANDINGS = [{ ...landing, status: 'live' }];
+  renderAt('/for/' + landing.slug);
+  expect(screen.getByRole('link', { name: /ใบสมัครผู้ให้บริการ/ })).toHaveAttribute('href', '/vendor/onboarding?persona=' + landing.slug);
+  expect(screen.getByText('ระบุข้อมูลส่วนตัวหรือบริษัทและบริการของคุณ')).toBeVisible();
+  expect(screen.getAllByRole('link', { name: 'เริ่มสมัครเป็นผู้ให้บริการ' }).length).toBeGreaterThan(0);
+});
 
 describe('PersonaLandingPage — B.4 routing', () => {
   it('renders 404 for unknown slug', () => {

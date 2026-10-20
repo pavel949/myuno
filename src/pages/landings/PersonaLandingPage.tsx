@@ -62,7 +62,7 @@ interface PersonaLandingViewProps {
 const PersonaLandingView = ({ landing }: PersonaLandingViewProps) => {
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const t = <T,>(pair: { ru: T; en: T }): T => (isRu ? pair.ru : pair.en);
+  const t = <T,>(pair: { ru: T; en: T; th?: T }): T => (isRu ? pair.ru : language === 'th' ? pair.th ?? pair.en : pair.en);
   const theme = getPersonaTheme(landing.slug);
   const Icon = theme.icon;
 

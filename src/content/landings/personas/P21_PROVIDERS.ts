@@ -19,7 +19,7 @@ export const P21_PROVIDERS: PersonaLanding = {
     { ru: 'Сложно доказать качество без публичного рейтинга.', en: 'Hard to prove quality without a public rating.' },
   ],
   services: [
-    { slug: 'vendor-onboarding', label: { ru: 'Заявка поставщика', en: 'Provider application' }, oneLiner: { ru: 'Укажите сведения о себе или компании и своих услугах.', en: 'Provide your individual or company details and services.' }, href: '/vendor/onboarding' },
+    { slug: 'vendor-onboarding', label: { ru: 'Заявка поставщика', en: 'Provider application', th: 'ใบสมัครผู้ให้บริการ' }, oneLiner: { ru: 'Укажите сведения о себе или компании и своих услугах.', en: 'Provide your individual or company details and services.', th: 'ระบุข้อมูลส่วนตัวหรือบริษัทและบริการของคุณ' }, href: '/vendor/onboarding' },
     { slug: 'unified-inbox', label: { ru: 'Единый чат с клиентами', en: 'Unified guest inbox' }, oneLiner: { ru: 'WhatsApp + in-app, авто-перевод RU/EN/TH.', en: 'WhatsApp + in-app, auto-translate RU/EN/TH.' }, href: '/vendor/messages' },
     { slug: 'commission', label: { ru: 'Прозрачная комиссия', en: 'Transparent commission' }, oneLiner: { ru: 'Единая ставка по вертикали, payout каждые 7 дней.', en: 'Flat per-vertical rate, payout every 7 days.' }, href: '/vendor/billing', availability: 'unavailable' },
     { slug: 'rating', label: { ru: 'Прозрачный рейтинг', en: 'Transparent rating' }, oneLiner: { ru: 'Отзывы только от подтверждённых клиентов.', en: 'Reviews only from verified customers.' }, href: '/vendor' },
@@ -28,7 +28,7 @@ export const P21_PROVIDERS: PersonaLanding = {
     { q: { ru: 'Какая комиссия?', en: 'What’s the commission?' }, a: { ru: 'Единая ставка по вашей вертикали (актуальный список — /vendor/billing). Никаких подписок и скрытых платежей.', en: 'Single per-vertical rate (live list at /vendor/billing). No subscriptions, no hidden fees.' } },
     { q: { ru: 'Когда приходят выплаты?', en: 'When do I get paid?' }, a: { ru: 'Каждые 7 дней на счёт компании или Wise.', en: 'Every 7 days to your company account or Wise.' } },
   ],
-  primaryCta: { label: { ru: 'Подать заявку поставщика', en: 'Start provider application' }, href: '/vendor/onboarding' },
+  primaryCta: { label: { ru: 'Подать заявку поставщика', en: 'Start provider application', th: 'เริ่มสมัครเป็นผู้ให้บริการ' }, href: '/vendor/onboarding' },
   secondaryCta: { label: { ru: 'Узнать о тарифах', en: 'See pricing' }, href: '/pricing' },
   seo: {
     metaTitle: { ru: 'Стать поставщиком myUNO: прозрачная комиссия, payout 7 дней', en: 'Become a myUNO provider: transparent commission, 7-day payout' },

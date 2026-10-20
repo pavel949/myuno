@@ -30,7 +30,7 @@ export function BookingTrackingOverview() {
   };
   const date = (value: string) => {
     const parsed = parseCivilDate(value);
-    return Number.isNaN(parsed.getTime()) ? t('Дата не указана', 'Date unavailable', 'ไม่มีข้อมูลวันที่') : parsed.toLocaleDateString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return Number.isNaN(parsed.getTime()) ? t('Дата не указана', 'Date unavailable', 'ไม่มีข้อมูลวันที่') : parsed.toLocaleDateString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', { calendar: 'gregory', day: 'numeric', month: 'short', year: 'numeric' });
   };
   const loading = t('Загрузка…', 'Loading…', 'กำลังโหลด…');
   const failed = t('Не удалось загрузить. Повторить', 'Could not load. Retry', 'โหลดไม่สำเร็จ ลองอีกครั้ง');

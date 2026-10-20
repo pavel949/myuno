@@ -1,4 +1,5 @@
 import { pickLang } from '@/lib/i18n/pickLang';
+import type { Language } from '@/i18n';
 import React, { useEffect, useCallback, useMemo, useState, useRef } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Calendar, Package, Scissors, Home, Car, Ship, Ticket, Flower2, Stethoscope, Clock, ChevronRight, Dumbbell, AlertCircle, ChevronDown, ChevronUp, X } from 'lucide-react';
@@ -72,7 +73,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const getStatusLabel = (status: string, language: string) => {
+const getStatusLabel = (status: string, language: Language) => {
   const labels: Record<string, { en: string; ru: string; th: string }> = {
     pending: { en: 'Waiting for confirmation', ru: 'Ждём подтверждения', th: 'รอการยืนยัน' },
     submitted: { en: 'Sent to the provider', ru: 'Отправлено исполнителю', th: 'ส่งให้ผู้ให้บริการแล้ว' },
@@ -86,7 +87,7 @@ const getStatusLabel = (status: string, language: string) => {
   return labels[status] ? pickLang(language, labels[status]) : status;
 };
 
-const getBookingTypeLabel = (type: string, language: string) => {
+const getBookingTypeLabel = (type: string, language: Language) => {
   const labels: Record<string, { en: string; ru: string; th: string }> = {
     beauty: { en: 'Beauty', ru: 'Красота', th: 'ความงาม' },
     service: { en: 'Service', ru: 'Услуга', th: 'บริการ' },

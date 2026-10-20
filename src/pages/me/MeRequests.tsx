@@ -44,7 +44,7 @@ function RequestCard({ r }: { r: MyRequest }) {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium leading-snug line-clamp-2">{r.title}</p>
             <p className="text-[11px] text-muted-foreground mt-1">
-              {new Date(r.createdAt).toLocaleDateString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB')}
+              {new Date(r.createdAt).toLocaleDateString(language === 'ru' ? 'ru-RU' : language === 'th' ? 'th-TH' : 'en-GB', { calendar: 'gregory' })}
               {r.subtitle ? ` · ${r.subtitle}` : ''}
             </p>
           </div>

@@ -59,6 +59,7 @@ export function isLandingClusterCode(value: string | null | undefined): value is
 export interface BilingualString {
   ru: string;
   en: string;
+  th?: string;
 }
 
 /** Статус публикации лендинга. `draft` → 404 на роуте (трек B.4/B.5). */

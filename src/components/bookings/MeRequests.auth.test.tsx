@@ -105,7 +105,7 @@ it('localizes Thai request columns and dates without translating authored user c
  state.data = [{ id: 'help-th', source: 'help', status: 'new', title: 'Original user request', subtitle: 'Original user note', createdAt: '2026-10-20T00:00:00Z' }];
  show('/me/requests');
  expect(screen.getByText('Original user request')).toBeVisible();
- expect(screen.getByText(/Original user note/)).toBeVisible();
+ expect(screen.getByText('20/10/2026 · Original user note')).toBeVisible();
  expect(screen.getByRole('heading', { name: 'ใหม่' })).toBeVisible();
  expect(screen.getByRole('heading', { name: 'กำลังดำเนินการ' })).toBeVisible();
  expect(screen.getAllByText('ไม่มีรายการ')).toHaveLength(3);
