@@ -58,7 +58,7 @@ suite('customer cancellation and checkout: isolated synthetic PostgreSQL contrac
  },60000);
  beforeEach(async()=>{
   await sql.unsafe(originalWriter);
-  await sql.unsafe('DROP TRIGGER IF EXISTS cancellation_history_suppression_test ON public.order_status_history; DELETE FROM public.payment_intents; DELETE FROM public.order_status_history; DELETE FROM public.orders');
+  await sql.unsafe('DROP TRIGGER IF EXISTS cancellation_history_suppression_test ON public.order_status_history; DELETE FROM public.property_bookings; DELETE FROM public.payment_intents; DELETE FROM public.order_status_history; DELETE FROM public.orders');
   await sql`INSERT INTO orders(id,customer_user_id,status,total_amount,currency,updated_at) VALUES
    (${ORDER},${ACTOR},'pending',100,'THB','2026-10-20T00:00:00Z'),(${OTHER},${ACTOR},'pending',100,'THB','2026-10-20T00:00:00Z')`;
  });
@@ -108,6 +108,15 @@ suite('customer cancellation and checkout: isolated synthetic PostgreSQL contrac
   await expect(reserve()).rejects.toThrow('order_not_payable');
   await expect(cancel()).rejects.toThrow('order_not_cancellable');
   await expect(as(FOREIGN,tx=>tx`SELECT public.reserve_customer_order_checkout(${ORDER},${FOREIGN})`,'service_role')).rejects.toThrow('order_not_accessible');
+ });
+
+ it.each(['order_id','external_id'] as const)('refuses a property booking linked through %s',async reference=>{
+  await enableDormantBodyForSyntheticTestOnly();
+  if(reference==='order_id') await sql`INSERT INTO property_bookings(id,order_id) VALUES (${id(40)},${ORDER})`;
+  else await sql`INSERT INTO property_bookings(id,external_id) VALUES (${id(40)},${ORDER})`;
+  await expect(cancel()).rejects.toThrow('linked_order_requires_reconciliation');
+  expect((await sql`SELECT status FROM orders WHERE id=${ORDER}`)[0].status).toBe('pending');
+  expect(await sql`SELECT id FROM order_status_history WHERE order_id=${ORDER}`).toHaveLength(0);
  });
  it('serializes concurrent reservation and cancellation on the same order lock',async()=>{
   await enableDormantBodyForSyntheticTestOnly(); const before=await revision();

@@ -55,17 +55,28 @@ const unresolved = new Map<string, PendingCancellation>();
 export function hasUnresolvedCancellation(actorId: string, orderId: string): boolean {
   return unresolved.has(JSON.stringify([actorId, orderId]));
 }
-export async function retryCustomerCancellation(actorId: string, orderId: string, initial?: Extract<CancellationOptions, { eligible: true }>): Promise<CancellationReceipt> {
+const inFlight = new Map<string, Promise<CancellationReceipt>>();
+export function retryCustomerCancellation(actorId: string, orderId: string, initial?: Extract<CancellationOptions, { eligible: true }>): Promise<CancellationReceipt> {
   const key = JSON.stringify([actorId, orderId]);
-  let pending = unresolved.get(key);
-  if (!pending) {
-    const options = initial ?? await readCustomerCancellation(orderId);
-    if (!options.eligible) throw new Error('cancellation_unavailable');
-    pending = { options, requestId: crypto.randomUUID() };
-    unresolved.set(key, pending);
-  }
-  // Replay before reading eligibility: a committed cancellation may no longer be eligible.
-  const receipt = await cancelCustomerUnpaidOrder(pending.options, pending.requestId);
-  unresolved.delete(key);
-  return receipt;
+  const existing = inFlight.get(key);
+  if (existing) return existing;
+  // Register before the eligibility await: concurrent hook/UI callers share both
+  // the read and command, including the same uncertain receipt identity.
+  const operation = Promise.resolve().then(async () => {
+    let pending = unresolved.get(key);
+    if (!pending) {
+      const options = initial ?? await readCustomerCancellation(orderId);
+      if (!options.eligible) throw new Error('cancellation_unavailable');
+      pending = { options, requestId: crypto.randomUUID() };
+      unresolved.set(key, pending);
+    }
+    // Replay before reading eligibility: a committed cancellation may no longer be eligible.
+    const receipt = await cancelCustomerUnpaidOrder(pending.options, pending.requestId);
+    if (unresolved.get(key) === pending) unresolved.delete(key);
+    return receipt;
+  });
+  inFlight.set(key, operation);
+  const release = () => { if (inFlight.get(key) === operation) inFlight.delete(key); };
+  void operation.then(release, release);
+  return operation;
 }

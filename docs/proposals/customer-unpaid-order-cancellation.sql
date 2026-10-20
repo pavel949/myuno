@@ -47,7 +47,7 @@ BEGIN
     OR EXISTS (SELECT 1 FROM public.manual_payment_requests WHERE order_id=p_order_id)
     OR EXISTS (SELECT 1 FROM public.ledger_entries WHERE order_id=p_order_id)
     OR EXISTS (SELECT 1 FROM public.order_items WHERE order_id=p_order_id)
-    OR EXISTS (SELECT 1 FROM public.property_bookings WHERE order_id=p_order_id) THEN
+    OR EXISTS (SELECT 1 FROM public.property_bookings WHERE order_id=p_order_id OR external_id=p_order_id::text) THEN
     RAISE EXCEPTION 'linked_order_requires_reconciliation';
   END IF;
   -- Exact remaining blocker: existing schema has no authoritative trusted
