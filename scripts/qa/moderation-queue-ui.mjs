@@ -25,12 +25,12 @@ const virtual = {
   '@/hooks/useAdmin': `export const useAdminCheck=()=>({isAdmin:true,isLoading:false});`,
   '@/hooks/useAdminDashboardStats': `
     const data={
-      providers:0,services:0,activeProviders:0,pendingProviders:0,
-      yachts:0,tours:0,properties:0,restaurants:0,salons:0,clinics:0,gyms:0,
+      providers:null,services:0,activeProviders:0,pendingProviders:0,
+      yachts:0,tours:0,properties:null,restaurants:0,salons:0,clinics:0,gyms:0,
       vehicles:0,events:0,education:0,pets:0,cleaning:0,babysitters:0,flowers:0,
-      pharmacies:0,stores:0,insurance:0,waterActivities:0,totalUsers:0,unoTeamMembers:0,
+      pharmacies:0,stores:0,insurance:0,waterActivities:0,totalUsers:null,unoTeamMembers:0,
       totalBookings:0,pendingBookings:0,pendingProperties:0,pendingContent:null,
-      openTickets:0,openDisputes:0,pendingPartnerApplications:0,pendingManualPayments:0,unpaidOrders24h:0,
+      openTickets:0,openDisputes:null,pendingPartnerApplications:0,pendingManualPayments:null,pendingOrders24h:null,
     };
     export const useAdminDashboardStats=()=>{window.fixtureDashboardReads++;return {data,isLoading:false,isError:false};};`,
   '@/hooks/useAdminAnalytics': `

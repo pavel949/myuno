@@ -142,3 +142,48 @@ Both result JSON files must independently contain their full intended case
 count and only PASS rows at final CI enforcement. Empty synthetic import.meta.env
 is explicit; there are no real API keys. Remote geometry is pending until those
 artifacts are inspected. No local browser or release was performed.
+
+## Connected executor follow-up
+
+Resumed from e6cea8391 with a clean tree. Integrated main
+dab2a360a9199b87d86a6ed9e3cb2b347e20dc9b; the sole workflow conflict was
+resolved by retaining both dashboard gates and the already accepted public-wide
+gate, artifacts and final enforcement. PR149 itself was not changed.
+
+Admin mobile preferences now use one 44px control; language, currency and theme
+remain available in its popover. Account and sidebar/search controls retain 44px
+mobile targets. Ctrl/Cmd+K belongs explicitly to AdminLayout's command palette;
+TopBar does not handle that shortcut for admin. The palette will not stack over
+another modal and restores its keyboard origin on close. The actual AdminLayout,
+AppLayout, NavShell and command palette are now included in the shell fixture.
+Its Tab target check uses document.activeElement instead of the nonexistent
+Python Locator.is_focused API. Real Tab/Enter/Escape and both shortcut modifiers
+are exercised, including preferences and account focus return.
+
+The moderation fixture now checks four actual linked count cards and their
+destinations, unavailable-not-zero labels and rendered text-line bounds rather
+than the removed six-card/icon DOM. Synthetic failed sources are explicit nulls.
+Unavailable labels are consistent in all three locales.
+
+The two queue searches use a separate literal-value builder: PostgreSQL LIKE
+backslash escaping followed by PostgREST quoted-value escaping. The actual
+Supabase client performs URL encoding. Fixed column lists prevent grammar from
+coming from the user. A literal star uses an escaped, bounded regular expression
+because PostgREST treats stars as LIKE aliases. The global sanitizer is unchanged.
+Server rows and exact counts share one predicate; redundant client re-filtering
+was removed. Providers also search their existing email field.
+References: https://docs.postgrest.org/en/stable/references/api/url_grammar.html#reserved-characters
+and https://www.postgresql.org/docs/current/functions-matching.html#FUNCTIONS-LIKE.
+
+56 focused tests passed, including actual AdminLayout shortcut/focus behavior,
+actual-client synthetic URL transport and provider/application literal searches
+for full email, apostrophe, underscore and percent, with nonliteral decoys and
+exact counts. Existing edit/refetch and moderation tests remain passing.
+Scoped lint had zero errors (12 retained source warnings after correcting the
+new test label). Shell and moderation bundle-only guards, Python AST, merged
+workflow gate parsing and diff checks passed. The evidence guard now verifies
+unique expected matrix keys, required source/interaction/access evidence and
+44px mobile targets; its positive and negative checks run in CI.
+
+Fresh exact-head full CI and raw geometry artifacts are required. No new local
+full TypeScript success, physical-device result, merge or publication is claimed.

@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { createErrorHandler } from '@/lib/errorHandler';
 import type { Database } from '@/integrations/supabase/types';
 import { applyProviderQueue, type ProviderFilter } from '@/lib/adminDashboardQueues';
-import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { adminLiteralSearchOr } from '@/lib/adminLiteralSearch';
 
 // Re-export the canonical admin check hook
 export { useIsAdmin as useAdminCheck } from '@/hooks/useIsAdmin';
@@ -55,8 +55,8 @@ export function useAdminProviders(options?: ProviderQueryOptions) {
         query = query.eq('id', options.editId);
       } else if (options) {
         query = applyProviderQueue(query, options.filter);
-        const search = sanitizeSearchTerm(options.search);
-        if (search) query = query.or(`name.ilike.%${search}%,description_en.ilike.%${search}%,business_category.ilike.%${search}%`);
+        const search = adminLiteralSearchOr('providers', options.search);
+        if (search) query = query.or(search);
         query = query.range(options.page*50,options.page*50+49);
       }
       const { data, error, count } = await query;

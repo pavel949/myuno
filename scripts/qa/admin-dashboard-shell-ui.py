@@ -27,19 +27,23 @@ async def geometry(page):
         const bad=[...document.querySelectorAll('button,a,input,select,h1,h2,h3')].filter(visible).map(e=>{
             const r=e.getBoundingClientRect();return{text:(e.textContent||e.getAttribute('aria-label')||'').trim().slice(0,110),left:r.left,right:r.right,tag:e.tagName};
         }).filter(r=>r.left < -1 || r.right > innerWidth+1);
-        return{viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,header:box(header),headerInner:box(inner),area:box(area),frame:box(frame),bad};
+        const touchTargets=[...inner.querySelectorAll('button,a')].filter(visible).map(e=>({label:e.getAttribute('aria-label')||e.textContent,...box(e),height:e.getBoundingClientRect().height}));
+        return{viewport:innerWidth,documentWidth:document.documentElement.scrollWidth,header:box(header),headerInner:box(inner),area:box(area),frame:box(frame),bad,touchTargets};
     }""")
     assert result['documentWidth'] <= result['viewport'], result
     assert not result['bad'], result
     assert abs(result['headerInner']['width'] - result['area']['width']) <= 1, result
     assert abs(result['headerInner']['left'] + result['headerInner']['padding'] - result['frame']['left'] - result['frame']['padding']) <= 1, result
     assert abs(result['frame']['width'] - result['area']['width']) <= 1, result
+    if result['viewport'] < 768:
+        assert len(result['touchTargets']) >= 5, result
+        assert all(item['width'] >= 44 and item['height'] >= 44 for item in result['touchTargets']), result
     return result
 
 
 async def tab_to(page, target, *, limit=100):
     for _ in range(limit):
-        if await target.is_focused():
+        if await target.evaluate('(element) => element === document.activeElement'):
             return
         await page.keyboard.press('Tab')
     raise AssertionError({'keyboardTargetNotReached': await target.get_attribute('aria-label'),
@@ -80,6 +84,31 @@ async def keyboard_flow(page, width):
     # Sidebar trigger opens a real mobile Sheet; its Escape focus behavior is
     # observed separately from the search dialog and avatar dropdown.
     menu_proof = {'searchFocusReturned': True, 'dashboardSearchKeptFocus': True}
+    # The real AdminLayout owns Ctrl/Cmd+K; TopBar must not open global search
+    # concurrently. Keep actual keyboard events and the original focused field.
+    for shortcut in ['Control+k', 'Meta+k']:
+        await tab_to(page, search)
+        await page.keyboard.press(shortcut)
+        command = page.get_by_role('dialog', name='Command Menu', exact=True)
+        await expect(command).to_be_visible()
+        await expect(page.get_by_role('dialog')).to_have_count(1)
+        await expect(command.locator('input')).to_be_focused()
+        await page.keyboard.press('Escape')
+        await expect(page.get_by_role('dialog')).to_have_count(0)
+        await expect(search).to_be_focused()
+    menu_proof['singleCommandDialog'] = True
+    menu_proof['commandFocusReturned'] = True
+    if width < 1024:
+        preferences = page.locator('header button').filter(has=page.locator('svg.lucide-sliders-horizontal'))
+        await tab_to(page, preferences)
+        await page.keyboard.press('Enter')
+        settings = page.get_by_role('dialog')
+        await expect(settings).to_be_visible()
+        await expect(settings.get_by_test_id('global-preferences-controls')).to_be_visible()
+        await page.keyboard.press('Escape')
+        await expect(settings).to_have_count(0)
+        await expect(preferences).to_be_focused()
+        menu_proof['preferencesFocusReturned'] = True
     avatar = page.locator('header button[aria-haspopup="menu"]').last
     await tab_to(page, avatar)
     await page.keyboard.press('Enter')
@@ -145,7 +174,7 @@ async def main():
             await context.route('**/*', intercept)
             page = await context.new_page()
             page.on('pageerror', lambda error: errors.append(str(error)))
-            row = {'language': lang, 'width': width, 'state': state, 'actualShell': True, 'outcome': 'FAIL'}
+            row = {'language': lang, 'width': width, 'state': state, 'actualShell': True, 'actualAdminLayout': True, 'outcome': 'FAIL'}
             try:
                 await page.goto('http://localhost:8080/fixture?' + urlencode({'lang': lang, 'scenario': state}), wait_until='networkidle')
                 await page.evaluate('document.fonts.ready')

@@ -171,6 +171,7 @@ async def main():
                     else:
                         await expect(page.get_by_role('alert')).to_be_visible()
                     assert await page.evaluate('Object.values(window.fixtureReads).every(value=>value===0)&&Object.values(window.fixtureHookCalls).every(value=>value===0)')
+                    row['accessProof'] = {'noPlatformReads': True, 'noPlatformHooks': True}
                 row['geometry'] = await bounds(page, fills_work_area=role == 'admin')
                 assert not await page.evaluate('window.fixtureForbidden'), 'Forbidden data access'
                 assert not blocked and not errors, {'blocked': blocked, 'runtimeErrors': errors}

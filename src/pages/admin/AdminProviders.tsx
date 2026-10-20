@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { pickLang } from '@/lib/i18n/pickLang';
-import { matchesProviderFilter, parseProviderFilter, parseQueuePage, type ProviderFilter } from '@/lib/adminDashboardQueues';
-import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { parseProviderFilter, parseQueuePage, type ProviderFilter } from '@/lib/adminDashboardQueues';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck, useAdminProviders, Provider } from '@/hooks/useAdmin';
@@ -300,14 +299,9 @@ export default function AdminProviders() {
     }
   };
 
-  const filteredProviders = providers.filter(p => {
-    const term = sanitizeSearchTerm(searchQuery).toLowerCase();
-    const matchesSearch = p.name?.toLowerCase().includes(term) ||
-      p.description_en?.toLowerCase().includes(term) ||
-      p.business_category?.toLowerCase().includes(term);
-    if (!matchesSearch) return false;
-    return matchesProviderFilter(p, filter);
-  });
+  // The server applies the literal search and status before pagination/count.
+  // Do not re-filter a page with a different client-side text predicate.
+  const filteredProviders = providers;
 
   const handleExportCsv = () => {
     if (filteredProviders.length === 0) {

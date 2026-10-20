@@ -52,6 +52,8 @@ Object.assign(virtual, {
   '@/hooks/useUserPersonas': `export const useUserPersonas=()=>({personas:[],isLoading:false});`,
   '@/lib/catalog/useCatalogFromDB': `export const useCatalogFromDB=()=>({clusterCatalog:[],isFromDB:false,isLoading:false});`,
   '@/hooks/useGlobalSearch': `export const useGlobalSearch=()=>({results:[],isLoading:false,aiAnswer:null,aiLoading:false});`,
+  '@/hooks/useUserTracking': `export const useUserTracking=()=>{};`,
+  '@/hooks/usePlatformAnalytics': `export const usePlatformAnalytics=()=>{};`,
   '@/hooks/usePrefetch': `export const usePrefetchRoute=()=>({prefetchRoute:()=>{}});`,
   '@/lib/prefetchRoute': `export const prefetchRoute=()=>{};`,
   '@/hooks/useFeedbackSettings': `export const getFeedbackSettings=()=>({hapticEnabled:false,soundEnabled:false});`,
@@ -59,9 +61,9 @@ Object.assign(virtual, {
 virtual['@/contexts/LanguageContext']=`export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en',setLanguage:()=>{},t:key=>key});`;
 
 const entry = `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,useLocation}from'react-router-dom';import{QueryClient,QueryClientProvider}from'@tanstack/react-query';
-import AdminDashboard from'${sourceRoot}/src/pages/admin/AdminDashboard.tsx';import{NavShell}from'${sourceRoot}/src/components/nav/NavShell.tsx';import{SIDEBAR_NAV}from'${sourceRoot}/src/lib/nav/navigationModel.ts';
+import AdminDashboard from'${sourceRoot}/src/pages/admin/AdminDashboard.tsx';import{AdminLayout}from'${sourceRoot}/src/components/admin/AdminLayout.tsx';import{SIDEBAR_NAV}from'${sourceRoot}/src/lib/nav/navigationModel.ts';
 const params=new URLSearchParams(location.search);document.documentElement.lang=params.get('lang')||'en';window.fixtureScenario=params.get('scenario')||'full';window.fixtureReads={stats:0,health:0,snapshots:0};window.fixtureHookCalls={stats:0,health:0,snapshots:0};window.fixtureForbidden=[];window.fixtureDelay=()=>new Promise(resolve=>setTimeout(resolve,180));window.fixtureAssertAdmin=()=>{if((params.get('role')||'admin')!=='admin'){window.fixtureForbidden.push('admin read without admin role');throw Error('Admin read forbidden')}};
-function Fixture(){const loc=useLocation();window.fixtureNavInventory=SIDEBAR_NAV.admin.flatMap(group=>group.items.map(item=>item.path));return <><div className="border-b p-2 text-xs">Synthetic read-only data; actual admin shell and navigation.</div><NavShell role="admin"><div data-testid="dashboard-work-area"><AdminDashboard/></div></NavShell><output hidden data-testid="fixture-location">{loc.pathname+loc.search}</output></>}
+function Fixture(){const loc=useLocation();window.fixtureNavInventory=SIDEBAR_NAV.admin.flatMap(group=>group.items.map(item=>item.path));return <><div className="border-b p-2 text-xs">Synthetic read-only data; actual admin shell and navigation.</div><AdminLayout><div data-testid="dashboard-work-area"><AdminDashboard/></div></AdminLayout><output hidden data-testid="fixture-location">{loc.pathname+loc.search}</output></>}
 createRoot(document.getElementById('root')).render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false,refetchOnWindowFocus:false}}})}><MemoryRouter initialEntries={['/admin']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter></QueryClientProvider>);`;
 const result = await build({
   stdin: { contents: entry, loader: 'tsx', resolveDir: root },
@@ -81,7 +83,7 @@ const result = await build({
   } }],
 });
 const inputs = Object.keys(result.metafile.inputs).map(file => file.replaceAll('\\', '/'));
-for (const required of ['pages/admin/AdminDashboard.tsx', 'admin/dashboard/AdminWorkQueues.tsx', 'admin/dashboard/AdminOperationalAlerts.tsx', 'admin/dashboard/DashboardCount.tsx', 'admin/GoLiveChecklist.tsx', 'admin/dashboard/AdminRevenueBlock.tsx', 'admin/dashboard/AdminQuickActionsGrid.tsx', 'page/PageShell.tsx', 'lib/adminDashboardEvidence.ts','nav/NavShell.tsx','nav/TopBar.tsx','nav/SideRail.tsx','nav/BottomBar.tsx','ui/sidebar.tsx','layout/AllAppsDrawer.tsx','nav/AppDrawer.tsx','layout/UserAvatarMenu.tsx','search/GlobalSearchModal.tsx']) {
+for (const required of ['pages/admin/AdminDashboard.tsx', 'admin/dashboard/AdminWorkQueues.tsx', 'admin/dashboard/AdminOperationalAlerts.tsx', 'admin/dashboard/DashboardCount.tsx', 'admin/GoLiveChecklist.tsx', 'admin/dashboard/AdminRevenueBlock.tsx', 'admin/dashboard/AdminQuickActionsGrid.tsx', 'page/PageShell.tsx', 'lib/adminDashboardEvidence.ts','admin/AdminLayout.tsx','admin/AdminCommandPalette.tsx','layout/AppLayout.tsx','nav/NavShell.tsx','nav/TopBar.tsx','nav/SideRail.tsx','nav/BottomBar.tsx','ui/sidebar.tsx','layout/AllAppsDrawer.tsx','nav/AppDrawer.tsx','layout/UserAvatarMenu.tsx','search/GlobalSearchModal.tsx']) {
   if (!inputs.some(file => !file.startsWith('fixture:') && file.endsWith(required))) throw Error('Actual component missing: ' + required);
 }
 if (inputs.some(file => !file.startsWith('fixture:') && /integrations\/supabase\/client|hooks\/useAdmin(DashboardStats|DashboardEvidence|Analytics|Content)\.ts|contexts\/(AuthContext|CartContext|CurrencyContext|ThemeContext)|lib\/catalog\/useCatalogFromDB|hooks\/(useGlobalSearch|useUserContext|useUserPersonas|useNotifications|useBusinessRole|useMyProperties)\.ts/.test(file))) throw Error('Production data module included');

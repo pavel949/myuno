@@ -81,11 +81,13 @@ export const TopBar = memo(function TopBar({
     }
   }, [role]);
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // AdminLayout's command palette exclusively owns this shortcut.
+    if (role === 'admin') return;
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
       openSearch();
     }
-  }, [openSearch]);
+  }, [openSearch, role]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -135,7 +137,7 @@ export const TopBar = memo(function TopBar({
           )}
 
           {/* Logo */}
-          <BrandWordmark className={role === 'owner' ? 'min-h-11 items-center' : undefined} />
+          <BrandWordmark className={role === 'owner' || role === 'admin' ? 'min-h-11 items-center' : undefined} />
 
           {/* Nav pills (≥md). Consumer roles get them on tablet+; workspace roles
               have a sidebar — pills are redundant, hidden. */}
@@ -202,14 +204,14 @@ export const TopBar = memo(function TopBar({
             >
               <Search className="size-5 text-muted-foreground" />
             </button>
-            {role === 'owner' ? (
+            {role === 'owner' || role === 'admin' ? (
               <>
-                <div className="hidden md:block">
+                <div className={role === 'admin' ? 'hidden lg:block' : 'hidden md:block'}>
                   <GlobalPreferencesControls size="sm" themeVariant="dropdown" />
                 </div>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="md:hidden" aria-label={isRu ? 'Язык, валюта и тема' : 'Language, currency and theme'}>
+                    <Button variant="ghost" size="icon" className={cn('h-11 w-11 shrink-0', role === 'admin' ? 'lg:hidden' : 'md:hidden')} aria-label={pickLang(language, {ru: 'Язык, валюта и тема', en: 'Language, currency and theme', th: 'ภาษา สกุลเงิน และธีม'})}>
                       <SlidersHorizontal className="h-5 w-5" aria-hidden />
                     </Button>
                   </PopoverTrigger>
@@ -224,7 +226,7 @@ export const TopBar = memo(function TopBar({
               <MiniCart className="rounded-none hover:bg-muted/40 transition-colors" />
             )}
             {user ? (
-              <UserAvatarMenu compact={role === 'owner'} />
+              <UserAvatarMenu compact={role === 'owner' || role === 'admin'} />
             ) : (
               <Button
                 asChild

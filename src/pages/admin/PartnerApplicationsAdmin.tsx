@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { parseQueuePage } from '@/lib/adminDashboardQueues';
-import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
+import { adminLiteralSearchOr } from '@/lib/adminLiteralSearch';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
@@ -167,8 +167,8 @@ export default function PartnerApplicationsAdmin() {
         .select('*',{count:'exact'})
         .order('created_at', { ascending: false }).order('id',{ascending:false});
       if(statusFilter!=='all')query=query.eq('status',statusFilter);
-      const term=sanitizeSearchTerm(searchQuery);
-      if(term)query=query.or(`business_name.ilike.%${term}%,contact_name.ilike.%${term}%,contact_email.ilike.%${term}%`);
+      const term=adminLiteralSearchOr('applications', searchQuery);
+      if(term)query=query.or(term);
       const { data, error, count }=await query.range(page*50,page*50+49);
       if(sequence!==readSequence.current)return;
       if (error) throw error;
@@ -274,17 +274,8 @@ export default function PartnerApplicationsAdmin() {
     setIsActionDialogOpen(true);
   };
 
-  // Filter applications
-  const filteredApplications = applications.filter(app => {
-    const matchesSearch = 
-      app.business_name.toLowerCase().includes(sanitizeSearchTerm(searchQuery).toLowerCase()) ||
-      app.contact_name.toLowerCase().includes(sanitizeSearchTerm(searchQuery).toLowerCase()) ||
-      app.contact_email.toLowerCase().includes(sanitizeSearchTerm(searchQuery).toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  // Exact count and rows share the same server-side literal search and status.
+  const filteredApplications = applications;
 
   if (!user) {
     return (

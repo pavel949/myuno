@@ -319,43 +319,43 @@ async def exercise_dashboard_unknown(page, language, width):
     await page.goto(f'http://localhost:8080/fixture?lang={language}&case=dashboard-unknown', wait_until='networkidle')
     alerts = page.get_by_test_id('fixture-dashboard-alerts')
     kpis = page.get_by_test_id('fixture-dashboard-kpis')
-    await expect(alerts.get_by_text(labels['unknown'], exact=True)).to_be_visible()
-    await expect(kpis.get_by_text(labels['unknown'], exact=True)).to_be_visible()
+    unavailable = {'ru': 'Недоступно', 'en': 'Unavailable', 'th': 'ไม่พร้อมใช้งาน'}[language]
+    await expect(alerts.locator('[data-count-state="unavailable"]')).to_have_count(3)
+    for count in await alerts.locator('[data-count-key]').all():
+        await expect(count).to_have_attribute('data-count-state', 'unavailable')
+        await expect(count.locator('span').first).to_have_text(unavailable)
+        assert await count.inner_text() != '0'
     await expect(page.get_by_text(re.compile(r'All clear!|Всё в порядке!'))).to_have_count(0)
     await expect(page.get_by_test_id('moderation-row')).to_have_count(0)
     await expect_committed_route(page, '/admin', prefix)
-    cards = kpis.locator(':scope > div > div')
-    await expect(cards).to_have_count(6)
-    pending_card = cards.filter(has=page.get_by_text('На модерации' if language == 'ru' else 'รออนุมัติ' if language == 'th' else 'Pending', exact=True))
-    await expect(pending_card).to_have_count(1)
-    await expect(pending_card.locator('p').nth(1)).to_have_text(labels['unknown'])
+    cards = kpis.locator(':scope > div > a')
+    await expect(cards).to_have_count(4)
+    expected_hrefs = ['/admin/users', '/admin/providers', '/admin/properties', '/admin/operations?tab=moderation']
+    assert await cards.evaluate_all('(cards) => cards.map(card => card.getAttribute("href"))') == expected_hrefs
+    for card in await cards.all():
+        await expect(card.locator('p').nth(1)).to_have_text(unavailable)
+        assert await card.locator('p').nth(1).inner_text() != '0'
 
-    # Root overflow is hidden by application CSS. Bounding boxes alone cannot
-    # detect cropped text, so inspect rendered text line rectangles, the actual
-    # text column, and icon separation inside all six real KPI cards.
+    # Inspect actual text line rectangles in every linked card; hidden root
+    # overflow must not conceal cropped unavailable labels or Thai wrapping.
     text_geometry = await cards.evaluate_all('''cards => cards.map(card => {
-      const pack=rect=>({left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,width:rect.width,height:rect.height});
-      const layout=card.firstElementChild;
-      const column=layout.firstElementChild;
-      const icon=layout.lastElementChild;
-      const cardRect=card.getBoundingClientRect(),columnRect=column.getBoundingClientRect(),iconRect=icon.getBoundingClientRect();
-      const paragraphs=[...column.querySelectorAll('p')].map(element=>{
+      const pack=rect=>({left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,width:rect.width});
+      const surface=card.firstElementChild, bounds=surface.getBoundingClientRect(), style=getComputedStyle(surface);
+      const paragraphs=[...surface.querySelectorAll('p')].map(element=>{
         const range=document.createRange();range.selectNodeContents(element);
         return {text:element.textContent,box:pack(element.getBoundingClientRect()),clientWidth:element.clientWidth,scrollWidth:element.scrollWidth,clientHeight:element.clientHeight,scrollHeight:element.scrollHeight,lines:[...range.getClientRects()].map(pack)};
       });
-      return {card:pack(cardRect),column:pack(columnRect),icon:pack(iconRect),paragraphs};
+      return {card:pack(bounds),contentLeft:bounds.left+parseFloat(style.paddingLeft),contentRight:bounds.right-parseFloat(style.paddingRight),paragraphs};
     })''')
     for card in text_geometry:
         assert card['card']['left'] >= -1 and card['card']['right'] <= width + 1, card
-        assert card['column']['width'] > 0, card
-        assert card['column']['right'] <= card['icon']['left'] + 1, card
         for paragraph in card['paragraphs']:
             assert paragraph['scrollWidth'] <= paragraph['clientWidth'] + 1, card
             assert paragraph['scrollHeight'] <= paragraph['clientHeight'] + 1, card
             assert paragraph['lines'], card
             for line in paragraph['lines']:
-                assert line['left'] >= card['column']['left'] - 1, card
-                assert line['right'] <= card['column']['right'] + 1, card
+                assert line['left'] >= card['contentLeft'] - 1, card
+                assert line['right'] <= card['contentRight'] + 1, card
                 assert line['top'] >= card['card']['top'] - 1, card
                 assert line['bottom'] <= card['card']['bottom'] + 1, card
 
