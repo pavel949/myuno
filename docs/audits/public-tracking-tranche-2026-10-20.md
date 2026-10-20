@@ -10,7 +10,7 @@ Guest sign-in returns preserve router pathname, search and hash for `/bookings` 
 
 ## Limits and follow-up
 
-The existing `useMyRequests` aggregation catches per-source read errors and can return partial/empty data without exposing the failure. This tranche does not change that reader's aggregation contract. Its signed-out state now redirects instead of pretending to be empty. Request-reader error completeness requires a separate audited correction.
+`useMyRequests` now records returned Supabase errors and thrown failures per source while preserving successful entries and its public requests-array API. MeRequests shows a localized retry warning for relevant failed sources and suppresses empty/all-clear claims for incomplete results. Filtering to a successfully read source can still show its verified empty state. Its signed-out state redirects instead of pretending to be empty. Queries, actor filters, limits and endpoints are unchanged.
 
 No housing complex index route was invented. Existing unit-to-complex context links remain. Existing tracking detail/readers retain their authorization and data contracts. No database, role, payment, booking creation or deployment change is included.
 
