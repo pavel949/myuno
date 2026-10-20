@@ -1,7 +1,8 @@
 # Shared header gutters and bounded partner form
 
-Independent branch from main342e2ecb; PR146 owner/business work is not included
-or modified.
+Originally independent from main342e2ecb. At coordinator request, PR146 head
+33df84dbf73bc20c527f1cc1300b04935b53078c is now integrated by normal merge,
+preserving both histories and all owner/business anchor work.
 
 ## Verified findings and changes
 
@@ -22,7 +23,7 @@ copy, route or permission logic changes.
 
 ## Reduced real-component CI matrix
 
-60 additional cases, alongside the unchanged existing75-case combined fixture:
+60 additional cases, alongside PR146's full105-case combined fixture:
 
 - EN non-overlay and overlay at all requested boundaries:639/640,767/768,
   820/821,1023/1024,1100/1101,1279/1280 (24cases).
@@ -56,5 +57,12 @@ artifact, and is an additional final enforcement condition. Original mandatory
 gates and network restrictions are retained. Both browser scripts refuse local
 execution. Local verification is JSDOM/source, syntax and bundle-only.
 
-No local browser operation, merge, deployment, production data or grant change.
+No local browser operation, merge to main, deployment, production data or grant change.
+
+Integration resolution: only combined-layout-ui.mjs conflicted. Its entry now
+retains the union of actual owner/business/partner/header/overlay surfaces and
+required-module assertions, plus the container-aware adapter and strictly
+synthetic partner transport. Both Python matrices and the workflow merged
+without conflict;105+60 cases and every mandatory outcome gate are retained.
+No merge to main or release is performed by this worker.
 Remote current-head geometry and coordinator acceptance remain required.
