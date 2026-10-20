@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetTrigger } from 
 import { Button } from '@/components/ui/button';
 import { MiniCart } from '@/components/market/MiniCart';
 import { buildAuthPath } from '@/lib/auth/redirectToAuth';
+import { publicContentFrame, PUBLIC_CONTENT_WIDTH } from '@/design-system/ecosystemLayout';
 
 /** One public navigation, shared by the homepage and consumer route shells. */
 export function ConsumerHeader({ overlay = false, onSearch }: { overlay?: boolean; onSearch?: () => void }) {
@@ -43,6 +44,7 @@ export function ConsumerHeader({ overlay = false, onSearch }: { overlay?: boolea
   }, []);
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const { pathname, search, hash } = useLocation();
+  const frame = publicContentFrame(pathname);
   const signInPath = buildAuthPath({ from: `${pathname}${search}${hash}` });
   const links = GUEST_TOP_NAV.map(item => ({
     to: item.path,
@@ -51,7 +53,7 @@ export function ConsumerHeader({ overlay = false, onSearch }: { overlay?: boolea
   }));
   return (
     <header ref={headerRef} className={`consumer-header${overlay ? ' consumer-header-overlay' : ''}`}>
-      <div className="consumer-header-inner">
+      <div className="consumer-header-inner" data-public-frame={overlay ? 'overlay' : frame} style={!overlay && frame !== 'default' ? { maxWidth: PUBLIC_CONTENT_WIDTH[frame] } : undefined}>
         <Link to={R.HOME} className="consumer-wordmark" aria-label="myUNO">myUNO</Link>
         <nav className="consumer-nav" aria-label={t('Основные разделы', 'Main navigation', 'เมนูหลัก')}>
           {links.map(l => <Link key={l.to} to={l.to} aria-current={l.active ? "page" : undefined}>{l.label}</Link>)}

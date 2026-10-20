@@ -15,8 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { usePersonaFilter } from '@/hooks/usePersonaFilter';
 import { MarketplaceServiceGrid } from '@/components/services/MarketplaceServiceGrid';
 import { cn } from '@/lib/utils';
-import { groupHomeServices, homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
-import { ServiceCategorySection } from '@/components/services/ServiceCategorySection';
+import { homeServiceCategoryLabel } from '@/lib/services/servicePresentation';
+import { PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 
 const ConciergeHelpSheet = lazy(() => import('@/components/concierge/ConciergeHelpSheet').then(module => ({ default: module.ConciergeHelpSheet })));
 
@@ -89,6 +89,7 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
 
   return (
     <Layout
+      pageWidth="catalogue"
       contentClassName="public-commerce public-commerce--services"
       title={t('Услуги на Пхукете', 'Services in Phuket', "บริการในภูเก็ต")}
       subtitle={t('Для дома, поездок и повседневных дел.', 'For your home, travel and everyday life.', "สำหรับบ้าน การเดินทาง และชีวิตประจำวันของคุณ")}
@@ -135,11 +136,11 @@ export default function ServicesIndex({ embedded = false }: { embedded?: boolean
             <Button variant="outline" onClick={clear}>{t('Сбросить поиск и категорию', 'Clear search and category', "ล้างการค้นหาและหมวดหมู่")}</Button>
           </div>
         ) : (
-          <div className="space-y-6">
-            {groupHomeServices(visibleRequests).map(group => <ServiceCategorySection key={group.id} id={`request-group-${group.id}`} title={homeServiceCategoryLabel(group.id, language)}>
-                {group.items.map(fn => <ServiceFunctionCard key={fn.id} fn={fn} catalogue
-                  onClick={() => navigate(`/services/order/${fn.id}?returnTo=${encodeURIComponent(returnTo)}`)} />)}
-            </ServiceCategorySection>)}
+          <div className={PUBLIC_CATALOG_GRID} data-testid="service-request-grid">
+            {visibleRequests.map(fn => <div key={fn.id} data-service-category={fn.category} className="flex min-w-0 flex-col gap-2 [&>article]:flex-1">
+              <p className="text-sm font-medium text-muted-foreground">{homeServiceCategoryLabel(fn.category, language)}</p>
+              <ServiceFunctionCard fn={fn} catalogue onClick={() => navigate(`/services/order/${fn.id}?returnTo=${encodeURIComponent(returnTo)}`)} />
+            </div>)}
           </div>
         )}
         {!filtered && !showAll && requests.length > visibleRequests.length && <Button variant="outline" className="min-h-11 w-full sm:w-auto" onClick={() => setShowAll(true)}>

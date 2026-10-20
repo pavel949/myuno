@@ -36,6 +36,7 @@ import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { differenceInDays, format } from 'date-fns';
 import { useSearchPropertyAvailability } from '@/hooks/useSearchPropertyAvailability';
 import '@/styles/property-search.css';
+import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CATALOG_GRID } from '@/design-system/ecosystemLayout';
 
 const FILTER_TITLES_TH: Record<string, string> = {'priceLevel': 'ระดับราคา', 'bedrooms': 'ห้องนอน', 'areaAtLeast': 'พื้นที่', 'instantBooking': 'การจอง', 'viewType': 'วิว', 'furnishingLevel': 'เฟอร์นิเจอร์', 'poolType': 'สระว่ายน้ำ', 'parkingType': 'ที่จอดรถ', 'ownershipForm': 'กรรมสิทธิ์', 'amenities': 'สิ่งอำนวยความสะดวก', 'highlights': 'จุดเด่น'};
 const FEATURE_LABELS_TH: Record<string, string> = {'beachfront': 'ติดชายหาด', 'walk_to_beach': 'เดินไปชายหาดได้', 'sea_view': 'วิวทะเล', 'private_pool': 'สระว่ายน้ำส่วนตัว', 'pool': 'สระว่ายน้ำ', 'washer': 'เครื่องซักผ้า', 'pet_friendly': 'อนุญาตให้นำสัตว์เลี้ยงเข้าพัก', 'kid_friendly': 'เหมาะสำหรับเด็ก', 'parking': 'ที่จอดรถ', 'wifi': 'WiFi', 'luxury': 'หรูหรา', 'air_conditioning': 'เครื่องปรับอากาศ', 'gym': 'ห้องออกกำลังกาย', 'jacuzzi': 'อ่างจากุซซี่'};
@@ -262,7 +263,7 @@ export default function PropertySearchPage() {
   const summaryDuration = rentTenancy === 'medium' ? (text('Помесячно', 'Monthly', 'รายเดือน')) : rentTenancy === 'long' ? (text('На год', 'Yearly', 'รายปี')) : (text('Посуточно', 'Nightly', 'รายคืน'));
 
   return (
-    <div className="public-commerce public-commerce--search property-discovery min-h-screen bg-background">
+    <div data-property-mode={propertyMode} className={cn(PUBLIC_CONTENT_LAYOUT.catalogue, 'public-commerce public-commerce--search property-discovery min-h-screen bg-background')}>
         <header className="property-discovery-header border-b">
           <h1 className="property-discovery-title">{text('Найдите ваш дом на Пхукете', 'Find your home in Phuket', 'ค้นหาที่พักในภูเก็ต')}</h1>
           <p className="text-body-sm text-muted-foreground">{text('Введите название объекта или выберите параметры ниже и нажмите «Найти жильё».', 'Enter a property name or choose your criteria below, then select “Find a home”.', 'กรอกชื่อที่พักหรือเลือกเงื่อนไขด้านล่าง แล้วกด “ค้นหาที่พัก”')}</p>
@@ -277,7 +278,7 @@ export default function PropertySearchPage() {
               }}>{mode === 'rent' ? (text('Аренда', 'Rent', 'เช่า')) : (text('Покупка', 'Buy', 'ซื้อ'))}</button>)}
             </div>
           </div>
-          <div className="journey-primary property-search-editor property-discovery-editor">
+          <div className="property-search-editor property-discovery-editor">
             <HomeDiscoverySearch key={queryKey} hideModeSwitch initialParams={searchParamsUrl} onSearch={submitSearch} />
           </div>
           <div className="text-body-sm text-muted-foreground" aria-label={text('Текущий поиск', 'Current search', 'การค้นหาปัจจุบัน')}>
@@ -314,7 +315,7 @@ export default function PropertySearchPage() {
           </div>}
         </header>
 
-        {availability.enabled && <div role="status" aria-label={availabilityText('Проверка занятости', 'Availability check', 'ตรวจสอบห้องว่าง')} className="mx-4 my-2 border-l-2 border-primary/30 pl-3 text-sm text-muted-foreground">
+        {availability.enabled && <div role="status" aria-label={availabilityText('Проверка занятости', 'Availability check', 'ตรวจสอบห้องว่าง')} className="my-2 border-l-2 border-primary/30 pl-3 text-sm text-muted-foreground">
           {availability.pending
             ? availabilityText('Проверяем занятость на выбранные даты…', 'Checking availability for your dates…', 'กำลังตรวจสอบห้องว่างสำหรับวันที่เลือก…')
             : availabilityText('Показаны объекты без занятых ночей по календарю на выбранные даты. Условия и доступность повторно проверяются при бронировании.', 'Only homes without blocked calendar nights for your dates are shown. Stay rules and availability are checked again when booking.', 'แสดงเฉพาะที่พักที่ไม่มีคืนที่ถูกจองในวันที่เลือก เงื่อนไขและห้องว่างสุดท้ายจะตรวจสอบเมื่อจอง')}
@@ -323,7 +324,7 @@ export default function PropertySearchPage() {
             <Button variant="outline" size="sm" className="ml-2" onClick={() => availability.retry()}>{availabilityText('Повторить', 'Try again', 'ลองอีกครั้ง')}</Button>
           </div>}
         </div>}
-        <div className="px-4 py-4 sm:px-6">
+        <div className="py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 ref={resultsHeadingRef} tabIndex={-1} className="scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)] text-h3 font-display basis-full sm:basis-auto">
               {isLoading ? (text('Ищем жильё…', 'Finding homes…', 'กำลังค้นหาที่พัก…')) : isError ? (text('Каталог недоступен', 'Catalogue unavailable', 'ไม่สามารถโหลดรายการที่พักได้')) : <>{availability.enabled ? availabilityText('Проверено, подходит по датам:', 'Checked date matches:', 'ที่พักที่ตรวจสอบแล้วตรงกับวันที่:') : hasNextPage ? text('Загружено объектов:', 'Homes loaded:', 'โหลดที่พักแล้ว:') : text('Найдено объектов:', 'Places found:', 'พบที่พัก:')} {properties.length}</>}
@@ -351,9 +352,10 @@ export default function PropertySearchPage() {
           </div>
         </div>
 
-        {/* Map View */}
+        <div className={cn('property-discovery-results', showMap && 'property-discovery-results--map')}>
+        {/* Existing map/list state and callbacks share the same filtered properties. */}
         {showMap && (
-          <div className="px-4 sm:px-6 mb-4">
+          <div className="property-discovery-map-panel mb-4">
             <PropertyMapView
               properties={properties}
               hoveredProperty={hoveredProperty}
@@ -362,14 +364,15 @@ export default function PropertySearchPage() {
               onSelect={selectFocused}
               mode={propertyMode}
               nights={nights > 0 ? nights : undefined}
+              className="property-discovery-map"
             />
           </div>
         )}
 
 
-        <section aria-label={text('Результаты поиска жилья', 'Home search results', 'ผลการค้นหาที่พัก')} className="px-4 sm:px-6 pb-24">
+        <section aria-label={text('Результаты поиска жилья', 'Home search results', 'ผลการค้นหาที่พัก')} className="property-discovery-list min-w-0 pb-24">
           {isLoading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className={cn(PUBLIC_CATALOG_GRID, 'property-discovery-card-grid')} data-testid="property-results-skeleton">
               {[1,2,3,4,5,6,7,8].map(i => (
                 <div key={i} className="space-y-3">
                   <Skeleton className="aspect-square rounded-none" />
@@ -383,7 +386,7 @@ export default function PropertySearchPage() {
           {!isLoading && !isError && properties.length > 0 && (
             <>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className={cn(PUBLIC_CATALOG_GRID, 'property-discovery-card-grid')} data-testid="property-results-grid">
                 {properties.map(property => {
                   return (
                     <PropertyListingCard
@@ -432,6 +435,7 @@ export default function PropertySearchPage() {
 
           {showStickyCTA && <VerticalCTA vertical="property" variant="sticky" context="list" />}
         </section>
+        </div>
       </div>
   );
 }

@@ -13,7 +13,20 @@ export const ECOSYSTEM_HEADER_INNER = ECOSYSTEM_PAGE_CONTAINER;
 /** Opt-in marketing frame aligned with public chrome; catalog/form bounds stay domain-owned. */
 export const PUBLIC_CONTENT_LAYOUT = {
   marketing: ECOSYSTEM_PAGE_CONTAINER,
+  catalogue: 'w-full max-w-[1760px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10',
+  business: 'w-full max-w-[1536px] mx-auto px-4 md:px-6 lg:px-8 xl:px-10',
 } as const;
+
+/** Opt-in public page types; article, details, form and wizard frames stay unchanged. */
+export function publicContentFrame(pathname: string): 'catalogue' | 'business' | 'default' {
+  const path = pathname.replace(/\/$/, '');
+  if (path === '/discover/services' || path === '/services' || path === '/property/search') return 'catalogue';
+  if (path === '/for-business') return 'business';
+  return 'default';
+}
+export const PUBLIC_CONTENT_WIDTH = { default: 1280, catalogue: 1760, business: 1536 } as const;
+/** Actual cards and skeletons must occupy the same columns. */
+export const PUBLIC_CATALOG_GRID = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 min-[1440px]:grid-cols-4 gap-6';
 
 /** Marketing CTAs retain complete labels inside narrow cards and wrapped rows. */
 export const MARKETING_ACTION_BUTTON = 'h-auto min-h-12 max-w-full whitespace-normal break-words px-4 py-3 leading-snug';
