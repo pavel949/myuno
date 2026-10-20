@@ -41,7 +41,7 @@ describe('business entry routes', () => {
     expect(form).not.toHaveClass('max-w-[1280px]');
     const hero = container.querySelector('section')!;
     expect(hero.querySelector('.max-w-3xl')).not.toBeNull();
-    for (const token of PUBLIC_CONTENT_LAYOUT.marketing.split(' ')) expect(hero.firstElementChild).toHaveClass(token);
+    for (const token of PUBLIC_CONTENT_LAYOUT.business.split(' ')) expect(hero.firstElementChild).toHaveClass(token);
     const actions = hero.querySelectorAll('button');
     expect(actions).toHaveLength(2);
     expect(actions[0].parentElement).toHaveClass('sm:flex-wrap');

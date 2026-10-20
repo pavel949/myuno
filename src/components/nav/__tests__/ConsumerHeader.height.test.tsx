@@ -56,3 +56,18 @@ it.each([false, true])('scopes canonical portal gutters only to non-overlay menu
  if (overlay) expect(menu).not.toHaveClass('consumer-header-menu');
  else expect(menu).toHaveClass('consumer-header-menu');
 });
+
+it.each([
+ ['/discover/services', '1760px'], ['/property/search', '1760px'], ['/for-business', '1536px'],
+ ['/become-partner', ''], ['/property/one', ''], ['/support', ''],
+])('aligns header to the explicit page frame at %s without widening forms/details', (route, expected) => {
+ const view = render(<MemoryRouter initialEntries={[route]}><ConsumerHeader /></MemoryRouter>);
+ expect((view.container.querySelector('.consumer-header-inner') as HTMLElement).style.maxWidth).toBe(expected);
+});
+
+it('retains the homepage overlay width regardless of route frame', () => {
+ const view = render(<MemoryRouter initialEntries={['/property/search']}><ConsumerHeader overlay /></MemoryRouter>);
+ const inner = view.container.querySelector('.consumer-header-inner') as HTMLElement;
+ expect(inner.style.maxWidth).toBe('');
+ expect(inner).toHaveAttribute('data-public-frame', 'overlay');
+});
