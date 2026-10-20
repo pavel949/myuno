@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { useReducedMotion } from '@/lib/motionConfig';
+import { BottomBar } from '@/components/nav/BottomBar';
 import { ConsumerHeader } from '@/components/nav/ConsumerHeader';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
@@ -18,6 +19,7 @@ import housing from '@/assets/solutions/housing.webp';
 import islands from '@/assets/solutions/islands.webp';
 import '@/styles/cinematic-home.css';
 
+const publicNavigationRole = 'guest' as const;
 const icons = { holiday: Umbrella, home: House, service: Settings2, key: KeyRound };
 const collections = [
   { image: pool, href: `${R.PROPERTY_SEARCH}?mode=rent&amenities=private_pool`, title: { ru: 'Жильё с бассейном', en: 'Homes with a private pool', th: 'ที่พักพร้อมสระว่ายน้ำส่วนตัว' } },
@@ -113,6 +115,7 @@ export default function Landing() {
           <Link to={R.PRIVACY}>{t({ ru: 'Конфиденциальность', en: 'Privacy', th: 'ความเป็นส่วนตัว' })}</Link><Link to={R.TERMS}>{t({ ru: 'Условия', en: 'Terms', th: 'ข้อกำหนด' })}</Link>
         </nav><LegalCopyright />
       </footer>
+      <BottomBar role={publicNavigationRole} aria-label={t({ ru: 'Основная навигация', en: 'Main navigation', th: 'เมนูหลัก' })} />
       <ConciergeHelpSheet open={requestOpen} onOpenChange={setRequestOpen} topic="general" />
     </div>
   );
