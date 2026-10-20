@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle2, 
@@ -125,8 +127,18 @@ export default function PartnerApplicationsAdmin() {
 
   const [applications, setApplications] = useState<PartnerApplication[]>([]);
   const [listLoading, setListLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [listError, setListError] = useState(false);
+  const [params, setParams] = useSearchParams();
+  const searchQuery = params.get('q') || '';
+  const rawStatus = params.get('status') || 'all';
+  const statusFilter = Object.hasOwn(statusConfig, rawStatus) ? rawStatus as KnownStatus : 'all';
+  const setSearchQuery = (value: string) => setParams(previous => {
+    const next = new URLSearchParams(previous); if (value) next.set('q',value); else next.delete('q'); return next;
+  }, {replace:true});
+  const setStatusFilter = (value: string) => {
+    if (value !== 'all' && !Object.hasOwn(statusConfig, value)) return;
+    setParams(previous => { const next = new URLSearchParams(previous); if(value==='all') next.delete('status'); else next.set('status',value); return next; });
+  };
   const [selectedApp, setSelectedApp] = useState<PartnerApplication | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
@@ -139,6 +151,7 @@ export default function PartnerApplicationsAdmin() {
   const fetchApplications = React.useCallback(async () => {
     if (!user?.id || !isAdmin) return;
     setListLoading(true);
+    setListError(false);
     try {
       const { data, error } = await supabase
         .from('partner_applications')
@@ -147,6 +160,7 @@ export default function PartnerApplicationsAdmin() {
       if (error) throw error;
       setApplications((data as PartnerApplication[]) || []);
     } catch {
+      setListError(true);
       toast.error(language === 'ru' ? 'Ошибка' : 'Error', {
         description:
           language === 'ru'
@@ -309,7 +323,7 @@ export default function PartnerApplicationsAdmin() {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+      {!isPageLoading && !listError && <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
         {[
           { label: language === 'ru' ? 'Всего' : 'Total', value: stats.total, color: 'bg-primary/20 text-primary' },
           { label: language === 'ru' ? 'Ожидают' : 'Pending', value: stats.pending, color: 'bg-warning/20 text-warning' },
@@ -328,9 +342,10 @@ export default function PartnerApplicationsAdmin() {
             <div className="text-xs opacity-80">{stat.label}</div>
           </motion.div>
         ))}
-      </div>
+      </div>}
 
       {/* Filters */}
+      {!listError && applications.length >= 1000 && <p role="status" className="mb-3 text-sm text-muted-foreground">{pickLang(language,{en:'1,000 or more applications loaded. The API may limit this list and its filter counts; these are not a verified total.',ru:'Загружено 1 000 или более заявок. API может ограничивать список и счётчики фильтров; это не подтверждённое общее количество.',th:'โหลดใบสมัครอย่างน้อย 1,000 รายการ API อาจจำกัดรายการและจำนวนตามตัวกรอง นี่ไม่ใช่จำนวนรวมที่ยืนยันแล้ว'})}</p>}
       <SectionCard className="mb-6">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
@@ -365,11 +380,15 @@ export default function PartnerApplicationsAdmin() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button variant="outline" onClick={() => setParams(previous => { const next=new URLSearchParams(previous); next.delete('status'); next.delete('q'); return next; })}>{pickLang(language,{en:'Reset filters',ru:'Сбросить фильтры',th:'ล้างตัวกรอง'})}</Button>
         </div>
       </SectionCard>
 
       {/* Applications List */}
-      {isPageLoading ? (
+      {listError ? <div role="alert" className="border border-destructive p-4">
+        {pickLang(language,{en:'Could not load partner applications. Counts and results are unavailable.',ru:'Не удалось загрузить заявки партнёров. Счётчики и результаты недоступны.',th:'โหลดใบสมัครพันธมิตรไม่สำเร็จ จำนวนและผลลัพธ์ไม่พร้อมใช้งาน'})}
+        <Button variant="outline" disabled={listLoading} onClick={()=>fetchApplications()}>{pickLang(language,{en:'Retry',ru:'Повторить',th:'ลองอีกครั้ง'})}</Button>
+      </div> : isPageLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-24 bg-secondary/50 rounded-none animate-pulse" />

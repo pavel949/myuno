@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { matchesProviderFilter, parseProviderFilter, type ProviderFilter } from '@/lib/adminDashboardQueues';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAdminCheck, useAdminProviders, Provider } from '@/hooks/useAdmin';
@@ -102,7 +103,7 @@ export default function AdminProviders() {
   // hook also drives one-shot `?action=new` and `?edit=id` dialog commands.
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
-  const filter = (searchParams.get('filter') as 'all' | 'active' | 'verified' | 'inactive') || 'all';
+  const filter = parseProviderFilter(searchParams);
   const setSearchQuery = (val: string) => {
     setSearchParams(
       (prev) => {
@@ -114,7 +115,7 @@ export default function AdminProviders() {
       { replace: true },
     );
   };
-  const setFilter = (val: 'all' | 'active' | 'verified' | 'inactive') => {
+  const setFilter = (val: ProviderFilter) => {
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
@@ -122,7 +123,7 @@ export default function AdminProviders() {
         else next.set('filter', val);
         return next;
       },
-      { replace: true },
+      { replace: false },
     );
   };
 
@@ -298,10 +299,7 @@ export default function AdminProviders() {
       p.description_en?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.business_category?.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
-    if (filter === 'active') return p.is_active;
-    if (filter === 'verified') return p.is_verified;
-    if (filter === 'inactive') return !p.is_active;
-    return true;
+    return matchesProviderFilter(p, filter);
   });
 
   const handleExportCsv = () => {
@@ -392,11 +390,13 @@ export default function AdminProviders() {
         </div>
 
         {/* Filter Chips */}
+        {!providersError && providers.length >= 1000 && <p role="status" className="mb-3 text-sm text-muted-foreground">{isRussian ? 'Загружено 1 000 или более записей. Список и счётчики фильтров могут быть ограничены ответом API; это не подтверждённое общее количество.' : '1,000 or more records loaded. The API may limit this list and its filter counts; these are not a verified total.'}</p>}
         <div className="flex gap-2 mb-4 flex-wrap">
           {([
             { key: 'all' as const, labelEn: 'All', labelRu: 'Все' },
             { key: 'active' as const, labelEn: 'Active', labelRu: 'Активные' },
             { key: 'verified' as const, labelEn: 'Verified', labelRu: 'Верифицированные' },
+            { key: 'unverified' as const, labelEn: 'Unverified', labelRu: 'Не проверены' },
             { key: 'inactive' as const, labelEn: 'Inactive', labelRu: 'Неактивные' },
           ]).map(f => (
             <Button
@@ -406,11 +406,12 @@ export default function AdminProviders() {
               onClick={() => setFilter(f.key)}
             >
               {isRussian ? f.labelRu : f.labelEn}
-              {f.key !== 'all' && (
+              {f.key !== 'all' && !providersLoading && !providersError && (
                 <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
                   {f.key === 'active' ? providers.filter(p => p.is_active).length :
                    f.key === 'verified' ? providers.filter(p => p.is_verified).length :
-                   providers.filter(p => !p.is_active).length}
+                   f.key === 'unverified' ? providers.filter(p => p.is_verified === false).length :
+                   providers.filter(p => p.is_active === false).length}
                 </Badge>
               )}
             </Button>

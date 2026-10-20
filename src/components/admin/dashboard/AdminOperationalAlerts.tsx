@@ -1,231 +1,48 @@
-import { pickLang } from '@/lib/i18n/pickLang';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAdminDashboardStats } from '@/hooks/useAdminDashboardStats';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { useAdminDashboardStats, type DashboardCountKey } from '@/hooks/useAdminDashboardStats';
 import { Surface } from '@/components/ui/surface';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { SectionHeader } from '@/components/ds';
-import {
-  AlertTriangle, Clock, MessageSquare, FileText,
-  Users, ChevronRight, CheckCircle,
-  Scale, Inbox, CreditCard, FileCheck,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Scale, Clock, MessageSquare, CreditCard, ArrowRight } from 'lucide-react';
+import { DashboardCount } from './DashboardCount';
 
-interface AlertConfig {
-  id: string;
-  icon: React.ElementType;
-  label: string;
-  labelRu: string;
-  labelTh?: string;
-  href: string;
-  getCount: (data: any) => number | null;
-  urgentThreshold: number;
-  warningThreshold: number;
-}
-
-/**
- * ALERTS — every actionable «needs your attention» source surfaced
- * on the admin dashboard inbox. Ordered roughly by typical urgency
- * (disputes → unpaid orders → applications → moderation → providers
- * → tickets → bookings → manual payments).
- *
- * Add a new alert by appending to this list AND extending
- * useAdminDashboardStats with the corresponding count.
- */
-const ALERTS: AlertConfig[] = [
-  {
-    id: 'disputes',
-    icon: Scale,
-    label: 'Open Disputes',
-    labelRu: 'Открытые споры',
-    href: '/admin/disputes',
-    getCount: (d) => d?.openDisputes || 0,
-    urgentThreshold: 3,
-    warningThreshold: 1,
-  },
-  {
-    id: 'unpaidOrders',
-    icon: CreditCard,
-    label: 'Unpaid > 24h',
-    labelRu: 'Не оплачено > 24ч',
-    href: '/admin/operations?tab=orders&status=pending',
-    getCount: (d) => d?.unpaidOrders24h || 0,
-    urgentThreshold: 5,
-    warningThreshold: 1,
-  },
-  {
-    id: 'partnerApplications',
-    icon: FileCheck,
-    label: 'Partner Applications',
-    labelRu: 'Заявки партнёров',
-    href: '/admin/partner-applications',
-    getCount: (d) => d?.pendingPartnerApplications || 0,
-    urgentThreshold: 5,
-    warningThreshold: 1,
-  },
-  {
-    id: 'moderation',
-    icon: FileText,
-    label: 'Listings & properties pending review',
-    labelRu: 'Листинги и объекты на проверке',
-    labelTh: 'รายการและที่พักรอตรวจสอบ',
-    href: '/admin/operations?tab=moderation',
-    getCount: (d) => d?.pendingContent ?? null,
-    urgentThreshold: 10,
-    warningThreshold: 3,
-  },
-  {
-    id: 'providers',
-    icon: Users,
-    label: 'Unverified Providers',
-    labelRu: 'Непроверенные провайдеры',
-    href: '/admin/providers',
-    getCount: (d) => d?.pendingProviders || 0,
-    urgentThreshold: 5,
-    warningThreshold: 1,
-  },
-  {
-    id: 'tickets',
-    icon: MessageSquare,
-    label: 'Open Tickets',
-    labelRu: 'Открытые тикеты',
-    href: '/admin/tickets',
-    getCount: (d) => d?.openTickets || 0,
-    urgentThreshold: 10,
-    warningThreshold: 3,
-  },
-  {
-    id: 'bookings',
-    icon: Clock,
-    label: 'Pending Bookings',
-    labelRu: 'Ожидающие заказы',
-    href: '/admin/operations',
-    getCount: (d) => d?.pendingBookings || 0,
-    urgentThreshold: 5,
-    warningThreshold: 1,
-  },
-  {
-    id: 'manualPayments',
-    icon: Inbox,
-    label: 'Manual Payments',
-    labelRu: 'Ручные оплаты',
-    href: '/admin/operations?tab=manual_payments',
-    getCount: (d) => d?.pendingManualPayments || 0,
-    urgentThreshold: 5,
-    warningThreshold: 1,
-  },
-];
-
-export function AdminOperationalAlerts() {
-  const navigate = useNavigate();
+/** Ordered by work type and age, never by arbitrary count-to-red thresholds. */
+export function AdminOperationalAlerts({ search = '' }: { search?: string }) {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
-  const { data, isLoading } = useAdminDashboardStats();
-
-  if (isLoading) {
-    return (
-      <Surface variant="card" padding="md" radius="xl">
-        <Skeleton className="h-5 w-40 mb-4" />
-        <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
+  const { data: cachedData, isLoading, isError } = useAdminDashboardStats();
+  const data = isError ? undefined : cachedData;
+  const label = (en: string, ru: string, th: string) => pickLang(language, { en, ru, th });
+  const cutoff = data?.ordersCreatedBefore;
+  const pendingHref = '/admin/operations?tab=bookings&status=pending';
+  const decisions = [
+    { key: 'openDisputes', icon: Scale, label: label('Open disputes', 'Открытые споры', 'ข้อพิพาทที่เปิดอยู่'), hint: label('Review the dispute and its evidence', 'Проверьте спор и его материалы', 'ตรวจสอบข้อพิพาทและหลักฐาน'), href: '/admin/disputes' },
+    { key: 'pendingOrders24h', icon: Clock, label: label('Pending orders older than 24 hours', 'Заказы в ожидании больше 24 часов', 'คำสั่งซื้อรอดำเนินการเกิน 24 ชั่วโมง'), hint: label('Pending status; payment state is not inferred', 'Статус «ожидает»; состояние оплаты проверяется отдельно', 'สถานะรอดำเนินการ ไม่ได้ยืนยันสถานะการชำระเงิน'), href: cutoff ? `${pendingHref}&created_before=${encodeURIComponent(cutoff)}` : pendingHref },
+    { key: 'pendingManualPayments', icon: CreditCard, label: label('Manual payment review', 'Проверка ручной оплаты', 'ตรวจสอบการชำระเงินด้วยตนเอง'), hint: label('Awaiting administrator or contacted', 'Ожидают администратора или уже связались', 'รอผู้ดูแลหรือติดต่อแล้ว'), href: '/admin/operations?tab=manual-payments&manual_status=review' },
+    { key: 'pendingOrders', icon: Clock, label: label('Pending orders', 'Ожидающие заказы', 'คำสั่งซื้อที่รอดำเนินการ'), hint: label('Commercial orders awaiting action', 'Коммерческие заказы в ожидании', 'คำสั่งซื้อที่รอดำเนินการ'), href: pendingHref },
+    { key: 'openTickets', icon: MessageSquare, label: label('Support requests', 'Обращения в поддержку', 'คำขอความช่วยเหลือ'), hint: label('Open and in progress', 'Открыты и в работе', 'เปิดอยู่และกำลังดำเนินการ'), href: '/admin/tickets?status=active' },
+  ] as const;
+  const matching = decisions.filter(item => `${item.label} ${item.hint}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()));
+  const active = matching.filter(item => data?.[item.key] == null || data[item.key] !== 0);
+  const shown = active.slice(0, 3);
+  return <Surface variant="card" padding="md" className="h-full min-w-0">
+    <h2 className="text-xl font-semibold">{label('Needs a decision', 'Требует решения', 'รายการที่ต้องตัดสินใจ')}</h2>
+    <p className="mt-1 text-sm text-muted-foreground">{label('Review exceptions, then continue with the work queues.', 'Сначала исключения, затем текущая работа.', 'ตรวจสอบข้อยกเว้น แล้วดำเนินงานในคิวต่อ')}</p>
+    <div className="mt-4 divide-y border-y" aria-busy={isLoading}>
+      {shown.map(item => <div key={item.key} className="flex min-w-0 flex-wrap items-center gap-3 py-4" data-decision={item.key}>
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted"><item.icon className="size-5" /></span>
+        <div className="min-w-0 flex-1 basis-44">
+          <h3 className="font-medium [overflow-wrap:anywhere]">{item.label}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{item.hint}</p>
+          <div className="mt-1 text-sm font-medium"><DashboardCount data={isError ? undefined : data} countKey={item.key as DashboardCountKey} loading={isLoading} /></div>
         </div>
-      </Surface>
-    );
-  }
-
-  const getAlertLevel = (count: number, urgent: number, warning: number) => {
-    if (count >= urgent) return 'urgent';
-    if (count >= warning) return 'warning';
-    return 'info';
-  };
-
-  const activeAlerts = ALERTS.map((alert) => ({
-    ...alert,
-    count: alert.getCount(data),
-    level: getAlertLevel(
-      alert.getCount(data) ?? 0,
-      alert.urgentThreshold, 
-      alert.warningThreshold
-    ),
-  })).filter((a) => a.count === null || a.count > 0);
-
-  const totalAlerts = activeAlerts.reduce((sum, a) => sum + (a.count ?? 0), 0);
-  const hasUnknownCount = activeAlerts.some(alert => alert.count === null);
-
-  return (
-    <Surface variant="card" padding="md" radius="xl">
-      <div className="flex items-center justify-between mb-4">
-        <SectionHeader
-          title={isRu ? 'Что требует внимания' : 'Action Inbox'}
-          icon={AlertTriangle}
-          iconClassName={totalAlerts > 0 ? 'text-warning' : undefined}
-          size="sm"
-        />
-        {totalAlerts > 0 && (
-          <Badge variant="destructive" className="font-bold">
-            {totalAlerts}{hasUnknownCount ? '+' : ''}
-          </Badge>
-        )}
-      </div>
-
-      {activeAlerts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-6 text-center">
-          <div className="p-3 rounded-full bg-success/10 mb-3">
-            <CheckCircle className="h-6 w-6 text-success" />
-          </div>
-          <p className="text-sm font-medium">{isRu ? 'Всё в порядке!' : 'All clear!'}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {isRu ? 'Нет срочных задач' : 'No urgent tasks'}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {activeAlerts.map((alert) => {
-            const Icon = alert.icon;
-            const isUrgent = alert.level === 'urgent';
-            const isWarning = alert.level === 'warning';
-            
-            return (
-              <Button
-                key={alert.id}
-                variant="ghost"
-                className={cn(
-                  "w-full justify-between h-auto py-3 px-3 border",
-                  isUrgent && "bg-destructive/10 border-destructive/30 hover:bg-destructive/20",
-                  isWarning && "bg-warning/10 border-warning/30 hover:bg-warning/20",
-                  !isUrgent && !isWarning && "bg-muted border-border hover:bg-muted"
-                )}
-                onClick={() => navigate(alert.href)}
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <Icon className={cn(
-                    "h-4 w-4 shrink-0",
-                    isUrgent && "text-destructive",
-                    isWarning && "text-warning"
-                  )} />
-                  <span className="text-sm font-medium whitespace-normal text-left">
-                    {pickLang(language, { en: alert.label, ru: alert.labelRu, th: alert.labelTh })}
-                  </span>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <Badge 
-                    variant={isUrgent ? "destructive" : isWarning ? "secondary" : "outline"}
-                    className="font-bold"
-                  >
-                    {alert.count ?? (pickLang(language, { en: "Unknown", ru: "Неизвестно", th: "ไม่ทราบ" }))}
-                  </Badge>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </Button>
-            );
-          })}
-        </div>
-      )}
-    </Surface>
-  );
+        <Button variant="outline" asChild className="min-h-11 max-w-full whitespace-normal"><Link to={item.href}>{label('Review', 'Проверить', 'ตรวจสอบ')}</Link></Button>
+      </div>)}
+      {shown.length === 0 && <p className="py-8 text-sm text-muted-foreground" role="status">{search ? label('No matching queues', 'Подходящих очередей нет', 'ไม่พบคิวที่ตรงกัน') : label('No items in these decision queues.', 'В этих очередях нет задач для решения.', 'ไม่มีรายการในคิวที่ต้องตัดสินใจเหล่านี้')}</p>}
+    </div>
+    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+      <Link className="inline-flex min-h-11 items-center gap-2 text-primary underline-offset-4 hover:underline" to="/admin/operations">{label('Open operations', 'Открыть операции', 'เปิดงานดำเนินการ')}<ArrowRight className="size-4" /></Link>
+      {active.length > 3 && <span className="self-center text-muted-foreground">{label('More queues below', 'Остальные очереди ниже', 'คิวเพิ่มเติมด้านล่าง')}</span>}
+    </div>
+  </Surface>;
 }

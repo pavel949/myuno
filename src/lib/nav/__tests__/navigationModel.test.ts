@@ -119,10 +119,10 @@ describe('BOTTOM_BAR_BY_ROLE — per-role relevance', () => {
     const paths = BOTTOM_BAR_BY_ROLE.admin.map((i) => i.path);
     expect(paths).toEqual([
       APP_ROUTES.ADMIN,
-      '/admin/review',
-      APP_ROUTES.ADMIN_INBOX,
       APP_ROUTES.ADMIN_OPERATIONS,
+      '/admin/review',
       APP_ROUTES.ADMIN_CATALOG,
+      APP_ROUTES.ADMIN_USERS,
     ]);
   });
 

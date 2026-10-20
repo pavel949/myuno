@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Loader2, MessageCircle, CheckCircle2, XCircle, Clock,
@@ -30,6 +30,9 @@ import { toast } from 'sonner';
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { ru as ruLocale } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useSearchParams } from 'react-router-dom';
+import { applyManualPaymentQueue, parseManualPaymentFilter, parseQueuePage, type ManualPaymentFilter } from '@/lib/adminDashboardQueues';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 type Status = 'awaiting_admin' | 'contacted' | 'paid' | 'confirmed' | 'rejected' | 'expired';
 
@@ -55,10 +58,12 @@ interface RequestRow {
   orders: { order_number: string | null; metadata: Record<string, any> | null } | null;
 }
 
-const STATUS_FILTERS: { id: 'all' | Status; en: string; ru: string }[] = [
+const STATUS_FILTERS: { id: ManualPaymentFilter; en: string; ru: string }[] = [
   { id: 'all', en: 'All', ru: 'Все' },
+  { id: 'review', en: 'Needs review', ru: 'Требуют проверки' },
   { id: 'awaiting_admin', en: 'Awaiting', ru: 'Ожидает' },
   { id: 'contacted', en: 'Contacted', ru: 'На связи' },
+  { id: 'paid', en: 'Paid', ru: 'Оплачено' },
   { id: 'confirmed', en: 'Confirmed', ru: 'Подтв.' },
   { id: 'rejected', en: 'Rejected', ru: 'Отклон.' },
   { id: 'expired', en: 'Expired', ru: 'Истёк' },
@@ -85,13 +90,18 @@ export function OperationsManualPaymentsTab() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const qc = useQueryClient();
-  const [filter, setFilter] = useState<'all' | Status>('all');
+  const [params, setParams] = useSearchParams();
+  const filter = parseManualPaymentFilter(params);
+  const page = parseQueuePage(params, 'manual_page');
+  const pageSize = 50;
+  const setFilter = (value: ManualPaymentFilter) => setParams(previous => { const next = new URLSearchParams(previous); next.delete('manual_page'); if (value === 'all') next.delete('manual_status'); else next.set('manual_status', value); return next; });
+  const setPage = (value: number) => setParams(previous => { const next = new URLSearchParams(previous); if (value===0) next.delete('manual_page'); else next.set('manual_page',String(value)); return next; });
   const [confirmTarget, setConfirmTarget] = useState<RequestRow | null>(null);
   const [rejectTarget, setRejectTarget] = useState<RequestRow | null>(null);
   const [detailTarget, setDetailTarget] = useState<RequestRow | null>(null);
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ['manual-payment-requests', filter],
+  const { data: result, isLoading, isFetching, error, refetch } = useQuery({
+    queryKey: ['manual-payment-requests', filter, page],
     queryFn: async () => {
       let q = supabase
         .from('manual_payment_requests')
@@ -100,22 +110,17 @@ export function OperationsManualPaymentsTab() {
           guest_name, guest_phone, guest_email, hold_expires_at, rejected_reason, proof_file_path,
           created_at, contacted_at, confirmed_at, metadata,
           orders ( order_number, metadata )
-        `)
+        `, { count: 'exact' })
         .order('created_at', { ascending: false })
-        .limit(200);
-      if (filter !== 'all') q = q.eq('status', filter);
-      const { data, error } = await q;
+        .range(page*pageSize,(page+1)*pageSize-1);
+      q = applyManualPaymentQueue(q, filter);
+      const { data, error, count } = await q;
       if (error) throw error;
-      return (data || []) as unknown as RequestRow[];
+      return { rows: (data || []) as unknown as RequestRow[], count };
     },
     refetchInterval: 30000,
   });
-
-  const counts = useMemo(() => {
-    const out: Partial<Record<Status, number>> = {};
-    (data || []).forEach((r) => { out[r.status] = (out[r.status] || 0) + 1; });
-    return out;
-  }, [data]);
+  const data = result?.rows;
 
   const markContacted = async (row: RequestRow) => {
     const { error } = await supabase
@@ -154,7 +159,7 @@ export function OperationsManualPaymentsTab() {
       <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
         <TabsList className="flex flex-wrap h-auto gap-1">
           {STATUS_FILTERS.map((f) => {
-            const c = f.id === 'all' ? data?.length : counts[f.id as Status];
+            const c = error || isLoading ? undefined : f.id === filter ? result?.count : undefined;
             return (
               <TabsTrigger key={f.id} value={f.id} className="gap-2">
                 {isRu ? f.ru : f.en}
@@ -167,13 +172,22 @@ export function OperationsManualPaymentsTab() {
         </TabsList>
       </Tabs>
 
+      {error && <div role="alert" className="border border-destructive p-4">
+        {pickLang(language, { en: 'Could not load payment requests. Results are unavailable.', ru: 'Не удалось загрузить запросы на оплату. Результаты недоступны.', th: 'โหลดคำขอชำระเงินไม่สำเร็จ ผลลัพธ์ไม่พร้อมใช้งาน' })}
+        <Button variant="outline" disabled={isFetching} onClick={() => refetch()}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+      </div>}
+      {!error && !isLoading && <div className="flex flex-wrap items-center gap-3 py-3">
+        <p role="status" className="text-sm">{pickLang(language,{en:'Matching requests',ru:'Подходящие запросы',th:'คำขอที่ตรงกัน'})}: {result?.count ?? pickLang(language,{en:'Count unavailable',ru:'Количество недоступно',th:'จำนวนไม่พร้อมใช้งาน'})} · {pickLang(language,{en:'Page',ru:'Страница',th:'หน้า'})} {page+1}</p>
+        <Button variant="outline" disabled={page===0||isFetching} onClick={()=>setPage(page-1)}>{pickLang(language,{en:'Previous',ru:'Назад',th:'ก่อนหน้า'})}</Button>
+        <Button variant="outline" disabled={isFetching||result?.count==null||(page+1)*pageSize>=result.count} onClick={()=>setPage(page+1)}>{pickLang(language,{en:'Next',ru:'Далее',th:'ถัดไป'})}</Button>
+      </div>}
       {isLoading && (
         <div className="flex justify-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
       )}
 
-      {!isLoading && rows.length === 0 && (
+      {!error && !isLoading && rows.length === 0 && (
         <Card>
           <CardContent className="p-12 text-center text-muted-foreground space-y-2">
             <Wallet className="w-10 h-10 mx-auto opacity-40" />
@@ -183,7 +197,7 @@ export function OperationsManualPaymentsTab() {
       )}
 
       {/* Desktop / tablet — table view */}
-      {rows.length > 0 && (
+      {!error && rows.length > 0 && (
         <Card className="hidden md:block">
           <CardContent className="p-0">
             <Table>
@@ -278,7 +292,7 @@ export function OperationsManualPaymentsTab() {
       )}
 
       {/* Mobile — compact list */}
-      {rows.length > 0 && (
+      {!error && rows.length > 0 && (
         <div className="md:hidden space-y-2">
           {rows.map((row) => {
             const expiresAt = parseISO(row.hold_expires_at);

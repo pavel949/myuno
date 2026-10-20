@@ -13,18 +13,31 @@ import { format } from 'date-fns';
 import { ORDER_STATUS_CONFIG } from '@/types/orders';
 import type { OrderStatus } from '@/types/orders';
 import { AdminOrderDetailSheet } from './AdminOrderDetailSheet';
+import { useSearchParams } from 'react-router-dom';
+import { applyOrderQueue, parseOrderQueue, parseQueuePage } from '@/lib/adminDashboardQueues';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 export function OperationsBookingsTab() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [params, setParams] = useSearchParams();
+  const queue = parseOrderQueue(params);
+  const page = parseQueuePage(params, 'order_page');
+  const pageSize = 100;
 
 
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const searchQuery = queue.search;
+  const statusFilter = queue.status;
+  const updateFilter = (key: string, value: string) => setParams(previous => {
+    const next = new URLSearchParams(previous);
+    if (!value || value === 'all') next.delete(key); else next.set(key, value);
+    if (key !== 'order_page') next.delete('order_page');
+    return next;
+  });
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const { data: orders, isLoading, refetch } = useQuery({
-    queryKey: ['admin-orders', statusFilter],
+  const { data: result, isLoading, error, isFetching, refetch } = useQuery({
+    queryKey: ['admin-orders', statusFilter, queue.createdBefore, page],
     queryFn: async () => {
       let query = supabase
         .from('orders')
@@ -33,20 +46,17 @@ export function OperationsBookingsTab() {
           order_items (id, item_name, item_type, qty, unit_price, amount),
           order_participants (id, name, phone, email, role),
           order_addresses (id, address_type, address_text, notes)
-        `)
-        .is('deleted_at', null)
+        `, { count: 'exact' })
         .order('created_at', { ascending: false })
-        .limit(1000);
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+      query = applyOrderQueue(query, queue);
 
-      if (statusFilter && statusFilter !== 'all') {
-        query = query.eq('status', statusFilter as any);
-      }
-
-      const { data, error } = await query;
+      const { data, error, count } = await query;
       if (error) throw error;
-      return data;
+      return { rows: data, count };
     },
   });
+  const orders = result?.rows;
 
   // Fetch profiles for customer names
   const customerIds = [...new Set(orders?.map((o) => o.customer_user_id) || [])];
@@ -96,8 +106,14 @@ export function OperationsBookingsTab() {
 
   return (
     <div className="space-y-4">
+      {error && <div role="alert" className="border border-destructive p-4">
+        {pickLang(language, { en: 'Could not load orders. Counts and results are unavailable.', ru: 'Не удалось загрузить заказы. Счётчики и результаты недоступны.', th: 'โหลดคำสั่งซื้อไม่สำเร็จ จำนวนและผลลัพธ์ไม่พร้อมใช้งาน' })}
+        <Button variant="outline" disabled={isFetching} onClick={() => refetch()}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+      </div>}
+      {queue.createdBefore && <p className="text-sm text-muted-foreground">{pickLang(language, { en: 'Created before', ru: 'Созданы до', th: 'สร้างก่อน' })}: <time>{queue.createdBefore}</time></p>}
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {!error && !isLoading && <p className="text-xs text-muted-foreground">{pickLang(language,{en:'Status counts below describe the loaded page, not the entire queue.',ru:'Счётчики статусов ниже относятся к загруженной странице, а не ко всей очереди.',th:'จำนวนตามสถานะด้านล่างเป็นของหน้าที่โหลด ไม่ใช่ทั้งคิว'})}</p>}
+      {!error && !isLoading && <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <AlertCircle className="h-8 w-8 text-warning" />
@@ -134,7 +150,7 @@ export function OperationsBookingsTab() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div>}
 
       {/* Filters */}
       <Card>
@@ -152,11 +168,11 @@ export function OperationsBookingsTab() {
               <Input
                 placeholder={t('admin.orders.searchPlaceholder')}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => updateFilter('q', e.target.value)}
                 className="pl-9"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={value => updateFilter('status', value)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('admin.orders.status')} />
               </SelectTrigger>
@@ -169,9 +185,16 @@ export function OperationsBookingsTab() {
                 <SelectItem value="cancelled">{t('admin.orders.filter.cancelled')}</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="outline" onClick={() => setParams(previous => { const next = new URLSearchParams(previous); ['q', 'status', 'created_before', 'order_page'].forEach(key => next.delete(key)); return next; })}>{pickLang(language, { en: 'Reset filters', ru: 'Сбросить фильтры', th: 'ล้างตัวกรอง' })}</Button>
           </div>
+          <p className="text-xs text-muted-foreground">{pickLang(language, {en:'Text search applies to this page; status and date filters apply to all orders.',ru:'Текстовый поиск — на текущей странице; статус и дата — по всем заказам.',th:'ค้นหาข้อความในหน้านี้ ตัวกรองสถานะและวันที่ใช้กับทุกคำสั่งซื้อ'})}</p>
+          {!error && !isLoading && <div className="flex flex-wrap items-center gap-3 py-3">
+            <p role="status" className="text-sm">{pickLang(language, {en:'Matching orders',ru:'Подходящие заказы',th:'คำสั่งซื้อที่ตรงกัน'})}: {result?.count ?? pickLang(language,{en:'Count unavailable',ru:'Количество недоступно',th:'จำนวนไม่พร้อมใช้งาน'})} · {pickLang(language,{en:'Page',ru:'Страница',th:'หน้า'})} {page+1}</p>
+            <Button variant="outline" disabled={page===0||isFetching} onClick={()=>updateFilter('order_page',String(page-1))}>{pickLang(language,{en:'Previous',ru:'Назад',th:'ก่อนหน้า'})}</Button>
+            <Button variant="outline" disabled={isFetching||result?.count==null||(page+1)*pageSize>=result.count} onClick={()=>updateFilter('order_page',String(page+1))}>{pickLang(language,{en:'Next',ru:'Далее',th:'ถัดไป'})}</Button>
+          </div>}
 
-          {isLoading ? (
+          {error ? null : isLoading ? (
             <div className="text-center py-8 text-muted-foreground">
               {t('admin.orders.loading')}
             </div>

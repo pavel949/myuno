@@ -105,11 +105,11 @@ export const VENDOR_NAV: NavItem[] = [
 ];
 
 export const ADMIN_NAV: NavItem[] = [
-  { path: APP_ROUTES.ADMIN, icon: LayoutDashboard, labelEn: 'Overview', labelRu: 'Обзор', labelTh: 'ภาพรวม', exact: true },
-  { path: '/admin/review', icon: FileCheck, labelEn: 'Review', labelRu: 'Проверка', labelTh: 'ตรวจสอบ' },
-  { path: APP_ROUTES.ADMIN_INBOX, icon: MessageSquare, labelEn: 'Applications', labelRu: 'Заявки', labelTh: 'คำขอ' },
-  { path: APP_ROUTES.ADMIN_OPERATIONS, icon: Calendar, labelEn: 'Operations', labelRu: 'Операции', labelTh: 'การดำเนินงาน' },
+  { path: APP_ROUTES.ADMIN, icon: LayoutDashboard, labelEn: 'Today', labelRu: 'Сегодня', labelTh: 'วันนี้', exact: true },
+  { path: APP_ROUTES.ADMIN_OPERATIONS, icon: Calendar, labelEn: 'Orders', labelRu: 'Заказы', labelTh: 'คำสั่งซื้อ' },
+  { path: '/admin/review', icon: FileCheck, labelEn: 'Review', labelRu: 'На проверке', labelTh: 'รอตรวจสอบ' },
   { path: APP_ROUTES.ADMIN_CATALOG, icon: Package, labelEn: 'Catalog', labelRu: 'Каталог', labelTh: 'แคตตาล็อก' },
+  { path: APP_ROUTES.ADMIN_USERS, icon: Users, labelEn: 'Participants', labelRu: 'Участники', labelTh: 'ผู้เข้าร่วม' },
 ];
 
 export const TEAM_NAV: NavItem[] = [

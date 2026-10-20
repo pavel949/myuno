@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab';
 import { AdminRevenueBlock } from '@/components/admin/dashboard/AdminRevenueBlock';
 import { useAdminFinance } from '@/hooks/useAdminFinance';
-import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
+import { useAdminDashboardSnapshots } from '@/hooks/useAdminDashboardEvidence';
 import { en } from '@/i18n/en';
 import { ru } from '@/i18n/ru';
 
@@ -23,7 +23,7 @@ vi.mock('@/hooks/useAdminFinance', () => ({
   useAdminFinance: vi.fn(),
   getVerticalLabel: () => 'Property',
 }));
-vi.mock('@/hooks/useAdminAnalytics', () => ({ useAdminAnalytics: vi.fn() }));
+vi.mock('@/hooks/useAdminDashboardEvidence', () => ({ useAdminDashboardSnapshots: vi.fn() }));
 
 const financeResult = () => ({
   summary: {
@@ -43,19 +43,15 @@ const financeResult = () => ({
   refetchProviders: vi.fn(),
 });
 const analyticsResult = () => ({
-  summary: {
-    totalGMV: 0, totalRevenue: 0, totalUsers: 0, totalProviders: 0,
-    totalBookings: 0, userGrowth: 0, providerGrowth: 0,
-    bookingGrowth: 0, revenueGrowth: 0,
-  },
-  metrics: [], revenueChartData: [], userChartData: [], bookingChartData: [],
-  isLoading: false, error: null,
+  data: { coverage: 0, complete: false, gmv: null, platformRevenue: null, completedBookings: null },
+  period: { days: 7, from: '2026-10-13', through: '2026-10-19', dates: [] },
+  isLoading: false, isError: false, isFetching: false, dataUpdatedAt: 0, refetch: vi.fn(),
 });
 
 beforeEach(() => {
   locale.value = 'en';
   vi.mocked(useAdminFinance).mockReturnValue(financeResult());
-  vi.mocked(useAdminAnalytics).mockReturnValue(analyticsResult());
+  vi.mocked(useAdminDashboardSnapshots).mockReturnValue(analyticsResult() as ReturnType<typeof useAdminDashboardSnapshots>);
 });
 afterEach(cleanup);
 
@@ -116,24 +112,20 @@ describe.each(['en', 'ru'])('finance evidence labels (%s)', (language) => {
     expect(screen.getAllByText('129600 THB')).toHaveLength(1);
   });
 
-  it('distinguishes dashboard snapshots, their period, and zero-filled gaps from finance', () => {
+  it('distinguishes snapshot estimates from confirmed finance and does not zero-fill gaps', () => {
     render(<MemoryRouter><AdminRevenueBlock /></MemoryRouter>);
-    expect(useAdminAnalytics).toHaveBeenLastCalledWith(14);
-    const note = screen.getByRole('note');
-    expect(note).toHaveTextContent(copy['admin.finance.evidence.snapshotSource']);
-    expect(note).toHaveTextContent('platform_metrics');
-    expect(note).toHaveTextContent('14');
-    expect(note).toHaveTextContent('orders');
-    expect(note).toHaveTextContent('30');
-    expect(screen.getByText(copy['admin.finance.evidence.snapshotRevenue'])).toBeVisible();
-    expect(screen.getAllByText('฿0')).toHaveLength(2);
+    expect(useAdminDashboardSnapshots).toHaveBeenLastCalledWith(7);
+    expect(screen.getByRole('note')).toHaveTextContent('platform_metrics');
+    expect(screen.getByRole('note')).toHaveTextContent('ledger');
+    expect(screen.getAllByText('—')).toHaveLength(3);
+    expect(screen.queryByText('+0%')).not.toBeInTheDocument();
   });
 
-  it('does not turn a snapshot query error into zero revenue or booking growth', () => {
-    vi.mocked(useAdminAnalytics).mockReturnValue({ ...analyticsResult(), error: 'offline' });
+  it('does not turn a snapshot query error into zero revenue or growth', () => {
+    vi.mocked(useAdminDashboardSnapshots).mockReturnValue({ ...analyticsResult(), isError: true } as ReturnType<typeof useAdminDashboardSnapshots>);
     render(<MemoryRouter><AdminRevenueBlock /></MemoryRouter>);
-    expect(screen.getAllByText(copy['admin.finance.evidence.unavailable'])).toHaveLength(3);
-    expect(screen.queryByText('฿0')).not.toBeInTheDocument();
+    expect(screen.getAllByText('—')).toHaveLength(3);
+    expect(screen.getByRole('alert')).toBeVisible();
     expect(screen.queryByText('+0%')).not.toBeInTheDocument();
   });
 });

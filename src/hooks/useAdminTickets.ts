@@ -1,4 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { applyTicketQueue, parseTicketStatus, type TicketQueueStatus } from '@/lib/adminDashboardQueues';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
@@ -17,7 +19,7 @@ export interface TicketStats {
 }
 
 export interface TicketFilters {
-  status?: TicketStatus | 'all';
+  status?: TicketQueueStatus;
   priority?: TicketPriority | 'all';
   category?: string;
   assignedTo?: string;
@@ -26,13 +28,31 @@ export interface TicketFilters {
 
 export function useAdminTickets() {
 const queryClient = useQueryClient();
-  const [filters, setFilters] = useState<TicketFilters>({ status: 'all', priority: 'all' });
+  const [params, setParams] = useSearchParams();
+  const rawPriority = params.get('priority');
+  const filters: TicketFilters = {
+    status: parseTicketStatus(params),
+    priority: ['urgent', 'high', 'normal', 'low'].includes(rawPriority || '') ? rawPriority as TicketPriority : 'all',
+    category: params.get('category') || undefined,
+    assignedTo: params.get('assigned_to') || undefined,
+    search: params.get('q') || undefined,
+  };
+  const setFilters = (update: TicketFilters | ((previous: TicketFilters) => TicketFilters)) => {
+    const nextFilters = typeof update === 'function' ? update(filters) : update;
+    setParams(previous => {
+      const next = new URLSearchParams(previous);
+      for (const [key, value] of Object.entries({status: nextFilters.status, priority: nextFilters.priority, category: nextFilters.category, assigned_to: nextFilters.assignedTo, q: nextFilters.search})) {
+        if (!value || value === 'all') next.delete(key); else next.set(key, value);
+      }
+      return next;
+    });
+  };
 
   // Stabilize filter key for query
-  const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
+  const filterKey = JSON.stringify(filters);
 
   // Tickets query with React Query
-  const { data: tickets = [], isLoading: ticketsLoading, refetch: refetchTickets } = useQuery({
+  const { data: tickets = [], isLoading: ticketsLoading, error: ticketsError, refetch: refetchTickets } = useQuery({
     queryKey: ['admin-tickets', filterKey],
     queryFn: async () => {
       let query = supabase
@@ -40,9 +60,7 @@ const queryClient = useQueryClient();
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (filters.status && filters.status !== 'all') {
-        query = query.eq('status', filters.status);
-      }
+      query = applyTicketQueue(query, filters.status || 'all');
 
       if (filters.priority && filters.priority !== 'all') {
         query = query.eq('priority', filters.priority);
@@ -78,7 +96,7 @@ const queryClient = useQueryClient();
     resolved: 0,
     overdueSla: 0,
     urgent: 0,
-  }, refetch: refetchStats } = useQuery({
+  }, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useQuery({
     queryKey: ['admin-tickets-stats'],
     queryFn: async () => {
       const { data: allTickets, error } = await supabase
@@ -359,6 +377,9 @@ const queryClient = useQueryClient();
     tickets,
     stats,
     isLoading,
+    error: ticketsError,
+    statsError,
+    statsLoading,
     filters,
     setFilters,
     updateTicketStatus,

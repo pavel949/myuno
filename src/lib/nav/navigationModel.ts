@@ -464,17 +464,36 @@ const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
   },
 ];
 
-// Daily navigation is intentionally small. Specialist destinations remain in their existing groups.
-const adminDaily: SidebarNavItem[] = [
-  { path: '/admin', labelEn: 'Overview', labelRu: 'Обзор', labelTh: 'ภาพรวม', icon: LayoutDashboard },
-  { path: '/admin/review', labelEn: 'Review', labelRu: 'Проверка', labelTh: 'ตรวจสอบ', icon: FileCheck, badgeKey: 'pendingContent' },
-  { path: '/admin/inbox', labelEn: 'Applications', labelRu: 'Заявки', labelTh: 'คำขอ', icon: MessageSquare },
-  { path: '/admin/operations', labelEn: 'Operations', labelRu: 'Операции', labelTh: 'การดำเนินงาน', icon: CalendarCheck },
-  { path: '/admin/catalog', labelEn: 'Catalog', labelRu: 'Каталог', labelTh: 'แคตตาล็อก', icon: Package },
+// Keep the same five everyday destinations across desktop rail and mobile bar.
+// Specialist routes remain reachable below without competing with daily work.
+const adminDaily: SidebarNavItem[] = ADMIN_NAV.map(item => ({
+  ...item,
+  ...(item.path === APP_ROUTES.ADMIN_OPERATIONS
+    ? { labelEn: 'Requests & orders', labelRu: 'Заявки и заказы', labelTh: 'คำขอและคำสั่งซื้อ' } : {}),
+  ...(item.path === '/admin/review' ? { badgeKey: 'pendingContent' as const } : {}),
+}));
+const adminSecondary: SidebarNavItem[] = [
+  { path: '/admin/finance', labelEn: 'Reports', labelRu: 'Отчёты', labelTh: 'รายงาน', icon: BarChart3 },
+  { path: '/admin/settings', labelEn: 'Settings', labelRu: 'Настройки', labelTh: 'การตั้งค่า', icon: Settings },
 ];
+const adminGroupThai: Record<string, string> = {
+  Platform: 'แพลตฟอร์ม',
+  'Content verticals': 'หมวดบริการ',
+  'Properties & Projects': 'ที่พักและโครงการ',
+  'Finance & Analytics': 'การเงินและการวิเคราะห์',
+  'Support & Ops': 'การสนับสนุนและการดำเนินงาน',
+  'AI & Tools': 'AI และเครื่องมือ',
+  System: 'ระบบ',
+};
 const ADMIN_SIDEBAR: SidebarNavGroup[] = [
   { labelEn: 'Daily work', labelRu: 'Ежедневная работа', labelTh: 'งานประจำวัน', defaultOpen: true, items: adminDaily },
-  ...ADMIN_SIDEBAR_SOURCE.map(group => ({ ...group, defaultOpen: false, items: group.items.filter(item => !adminDaily.some(daily => daily.path === item.path)) })).filter(group => group.items.length > 0),
+  { labelEn: 'Reports & settings', labelRu: 'Отчёты и настройки', labelTh: 'รายงานและการตั้งค่า', defaultOpen: true, items: adminSecondary },
+  ...ADMIN_SIDEBAR_SOURCE.map(group => ({
+    ...group,
+    labelTh: adminGroupThai[group.labelEn] ?? group.labelTh,
+    defaultOpen: false,
+    items: group.items.filter(item => ![...adminDaily, ...adminSecondary].some(primary => primary.path === item.path)),
+  })).filter(group => group.items.length > 0),
 ];
 
 const VENDOR_SIDEBAR: SidebarNavGroup[] = [
