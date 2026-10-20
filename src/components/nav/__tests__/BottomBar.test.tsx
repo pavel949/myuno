@@ -1,13 +1,30 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { BottomBar } from '../BottomBar';
 
-vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
+const locale = vi.hoisted(() => ({ language: 'en' }));
+vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => locale }));
 vi.mock('@/hooks/usePrefetch', () => ({ usePrefetchRoute: () => ({ prefetchRoute: vi.fn() }) }));
 vi.mock('@/lib/prefetchRoute', () => ({ prefetchRoute: vi.fn() }));
 vi.mock('@/components/layout/AllAppsDrawer', () => ({ AllAppsDrawer: () => null }));
 afterEach(cleanup);
+beforeEach(() => { locale.language = 'en'; });
+
+it.each([
+ ['ru', 'Бронирования', 'Брони'],
+ ['en', 'Bookings', 'Bookings'],
+ ['th', 'การจอง', 'การจอง'],
+])('keeps the %s booking destination and full accessible name with compact mobile text', (language, name, text) => {
+ locale.language = language;
+ render(<MemoryRouter initialEntries={['/bookings']}><BottomBar {...{ role: 'guest' as const }} /></MemoryRouter>);
+ const booking = screen.getByRole('link', { name });
+ expect(booking).toHaveAttribute('href', '/bookings');
+ expect(booking).toHaveAttribute('aria-current', 'page');
+ expect(booking.querySelector('span')).toHaveTextContent(text);
+ expect(booking.querySelector('span')).toHaveClass('whitespace-nowrap');
+ expect(screen.getAllByRole('link')).toHaveLength(5);
+});
 
 it.each([
  ['/property/search', 'Homes'],

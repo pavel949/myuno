@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, Search } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -18,6 +18,29 @@ export function ConsumerHeader({ overlay = false, onSearch }: { overlay?: boolea
   const { language } = useLanguage();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    const canvas = header?.closest<HTMLElement>('[data-canvas]');
+    if (!header || !canvas) return;
+    const property = '--consumer-header-height';
+    const previous = canvas.style.getPropertyValue(property);
+    const priority = canvas.style.getPropertyPriority(property);
+    const measure = () => {
+      const height = Math.ceil(header.getBoundingClientRect().height);
+      if (height > 0) canvas.style.setProperty(property, `${height}px`);
+    };
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(header);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+      if (previous) canvas.style.setProperty(property, previous, priority);
+      else canvas.style.removeProperty(property);
+    };
+  }, []);
   const t = (ru: string, en: string, th: string) => pickLang(language, { ru, en, th });
   const { pathname, search, hash } = useLocation();
   const signInPath = buildAuthPath({ from: `${pathname}${search}${hash}` });
@@ -27,7 +50,7 @@ export function ConsumerHeader({ overlay = false, onSearch }: { overlay?: boolea
     active: isBottomBarItemActive(item, pathname),
   }));
   return (
-    <header className={`consumer-header${overlay ? ' consumer-header-overlay' : ''}`}>
+    <header ref={headerRef} className={`consumer-header${overlay ? ' consumer-header-overlay' : ''}`}>
       <div className="consumer-header-inner">
         <Link to={R.HOME} className="consumer-wordmark" aria-label="myUNO">myUNO</Link>
         <nav className="consumer-nav" aria-label={t('Основные разделы', 'Main navigation', 'เมนูหลัก')}>

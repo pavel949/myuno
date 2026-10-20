@@ -22,6 +22,8 @@ export type NavItem = {
   labelRu: string;
   /** Thai label; falls back to English when absent. */
   labelTh?: string;
+  /** Compact mobile text; the full localized label remains the accessible name. */
+  mobileLabelRu?: string;
   /** Match path exactly (for `/` and dashboard roots) */
   exact?: boolean;
 };
@@ -49,7 +51,7 @@ export type NavRoleKey =
 export const GUEST_NAV: NavItem[] = [
   { path: APP_ROUTES.HOME, icon: Home, labelEn: 'Home', labelRu: 'Главная', labelTh: 'หน้าแรก', exact: true },
   { path: APP_ROUTES.GOAL_STAY, icon: BedDouble, labelEn: 'Homes', labelRu: 'Жильё', labelTh: 'ที่พัก' },
-  { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Bookings', labelRu: 'Бронирования', labelTh: 'การจอง' },
+  { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Bookings', labelRu: 'Бронирования', labelTh: 'การจอง', mobileLabelRu: 'Брони' },
   { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
   { path: APP_ROUTES.ACCOUNT, icon: User, labelEn: 'Profile', labelRu: 'Профиль', labelTh: 'โปรไฟล์' },
 ];
