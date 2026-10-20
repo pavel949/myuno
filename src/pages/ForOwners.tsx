@@ -133,10 +133,10 @@ const ForOwnersPage: React.FC = () => {
           <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-3">
             {isRu ? 'Для собственников и УК' : 'For owners & MCs'}
           </p>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-semibold leading-[1.05] tracking-[-0.02em] text-foreground">
+          <h1 className="text-h1 md:text-display font-display text-foreground">
             {isRu ? 'Ваша недвижимость — под контролем.' : 'Your property — under control.'}
           </h1>
-          <p className="mt-5 text-base sm:text-lg text-muted-foreground leading-[1.55] max-w-2xl">
+          <p className="mt-5 text-body-lg text-muted-foreground max-w-2xl">
             {isRu
               ? 'Сдавайте сами через myUNO PMS — или передайте нам в полное управление. Отчёты, гости, уборка, финансы и каналы — в одном кабинете.'
               : 'Self-manage with myUNO PMS — or hand it over for full management. Reports, guests, cleaning, finance and channels in one workspace.'}
@@ -161,7 +161,7 @@ const ForOwnersPage: React.FC = () => {
 
         {/* TWO PATHS */}
         <section id="paths" className="mb-14 scroll-mt-24">
-          <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground pb-4 mb-6 border-b border-border">
+          <h2 className="font-display text-h2 text-foreground pb-4 mb-6 border-b border-border">
             {isRu ? 'Два пути' : 'Two paths'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-8">
@@ -169,10 +169,10 @@ const ForOwnersPage: React.FC = () => {
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-2">
                 {isRu ? 'Передать нам' : 'Hand over'}
               </p>
-              <h3 className="text-2xl lg:text-3xl font-display font-semibold text-foreground leading-tight">
+              <h3 className="text-h3 font-display text-foreground">
                 {isRu ? 'Полное управление · 70 / 30' : 'Full Management · 70 / 30'}
               </h3>
-              <p className="mt-4 mb-6 text-base text-muted-foreground leading-relaxed max-w-prose">
+              <p className="mt-4 mb-6 text-body-lg text-muted-foreground max-w-prose">
                 {isRu
                   ? 'Мы находим гостей, убираем, встречаем, ведём финансы и отправляем отчёт раз в месяц. Вы получаете 70% выручки.'
                   : 'We find guests, clean, check-in, run finance and send a monthly statement. You keep 70% of revenue.'}
@@ -190,10 +190,10 @@ const ForOwnersPage: React.FC = () => {
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-2">
                 {isRu ? 'Управлять самому' : 'Self-manage'}
               </p>
-              <h3 className="text-2xl lg:text-3xl font-display font-semibold text-foreground leading-tight">
+              <h3 className="text-h3 font-display text-foreground">
                 {isRu ? 'myUNO PMS · от $25 / объект' : 'myUNO PMS · from $25 / property'}
               </h3>
-              <p className="mt-4 mb-6 text-base text-muted-foreground leading-relaxed max-w-prose">
+              <p className="mt-4 mb-6 text-body-lg text-muted-foreground max-w-prose">
                 {isRu
                   ? 'Календарь, iCal, финансы, отчёты, channel manager. Подписка по тарифу — без процента с выручки.'
                   : 'Calendar, iCal, finance, reports, channel manager. Flat subscription — no revenue share.'}
@@ -211,7 +211,7 @@ const ForOwnersPage: React.FC = () => {
 
         {/* WHAT YOU GET */}
         <section className="mb-14">
-          <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground pb-4 mb-6 border-b border-border">
+          <h2 className="font-display text-h2 text-foreground pb-4 mb-6 border-b border-border">
             {isRu ? 'Что вы получаете' : 'What you get'}
           </h2>
           <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
@@ -222,7 +222,7 @@ const ForOwnersPage: React.FC = () => {
                   <Icon className="w-5 h-5 text-primary shrink-0 mt-0.5" strokeWidth={1.75} />
                   <div className="flex-1">
                     <div className="text-base font-medium text-foreground">{isRu ? f.ru : f.en}</div>
-                    <div className="text-base leading-relaxed text-muted-foreground mt-2">{isRu ? f.descRu : f.descEn}</div>
+                    <div className="text-body text-muted-foreground mt-2">{isRu ? f.descRu : f.descEn}</div>
                   </div>
                 </li>
               );
@@ -232,7 +232,7 @@ const ForOwnersPage: React.FC = () => {
 
         {/* PRICING */}
         <section className="mb-14">
-          <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground pb-4 mb-6 border-b border-border">
+          <h2 className="font-display text-h2 text-foreground pb-4 mb-6 border-b border-border">
             {isRu ? 'Тарифы' : 'Pricing'}
           </h2>
           <div className="space-y-3">
@@ -279,7 +279,7 @@ const ForOwnersPage: React.FC = () => {
 
         {/* REFERRAL */}
         <section className="mb-14">
-          <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground pb-4 mb-6 border-b border-border">
+          <h2 className="font-display text-h2 text-foreground pb-4 mb-6 border-b border-border">
             {isRu ? 'Пригласить' : 'Invite'}
           </h2>
           <OwnerReferralCard />
@@ -296,7 +296,7 @@ const ForOwnersPage: React.FC = () => {
                 <AccordionTrigger className="text-base font-medium text-foreground py-4 hover:no-underline">
                   {isRu ? item.qRu : item.qEn}
                 </AccordionTrigger>
-                <AccordionContent className="text-base text-muted-foreground leading-relaxed pb-4 max-w-prose">
+                <AccordionContent className="text-body-lg text-muted-foreground pb-4 max-w-prose">
                   {isRu ? item.aRu : item.aEn}
                 </AccordionContent>
               </AccordionItem>
