@@ -1,4 +1,5 @@
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-admin' } }) }));
+vi.mock('@/hooks/useAdmin', () => ({ useAdminCheck: () => ({ isAdmin: true, isLoading: false }) }));
 import React from 'react';
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';

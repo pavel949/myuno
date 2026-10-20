@@ -39,6 +39,7 @@ type SidebarContext = {
   setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+  mobileOpener: React.MutableRefObject<HTMLElement | null>;
 };
 
 const SidebarContext = React.createContext<SidebarContext | null>(null);
@@ -62,6 +63,7 @@ const SidebarProvider = React.forwardRef<
 >(({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, className, style, children, ...props }, ref) => {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
+  const mobileOpener = React.useRef<HTMLElement | null>(null);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
@@ -95,13 +97,16 @@ const SidebarProvider = React.forwardRef<
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
+        if (isMobile && !openMobile && document.activeElement instanceof HTMLElement) {
+          mobileOpener.current = document.activeElement;
+        }
         toggleSidebar();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toggleSidebar]);
+  }, [toggleSidebar, isMobile, openMobile]);
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
@@ -116,6 +121,7 @@ const SidebarProvider = React.forwardRef<
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      mobileOpener,
     }),
     [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
   );
@@ -151,7 +157,7 @@ const Sidebar = React.forwardRef<
     collapsible?: "offcanvas" | "icon" | "none";
   }
 >(({ side = "left", variant = "sidebar", collapsible = "offcanvas", className, children, ...props }, ref) => {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, state, openMobile, setOpenMobile, mobileOpener } = useSidebar();
 
   if (collapsible === "none") {
     return (
@@ -178,6 +184,14 @@ const Sidebar = React.forwardRef<
             } as React.CSSProperties
           }
           side={side}
+          onCloseAutoFocus={(event) => {
+            // SidebarTrigger controls context rather than a Radix SheetTrigger.
+            const opener = mobileOpener.current;
+            if (!event.defaultPrevented && opener?.isConnected) {
+              event.preventDefault();
+              opener.focus({ preventScroll: true });
+            }
+          }}
         >
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
@@ -233,7 +247,7 @@ Sidebar.displayName = "Sidebar";
 
 const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.ComponentProps<typeof Button>>(
   ({ className, onClick, ...props }, ref) => {
-    const { toggleSidebar } = useSidebar();
+    const { toggleSidebar, isMobile, openMobile, mobileOpener } = useSidebar();
 
     return (
       <Button
@@ -244,6 +258,7 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         className={cn("h-7 w-7", className)}
         onClick={(event) => {
           onClick?.(event);
+          if (isMobile && !openMobile) mobileOpener.current = event.currentTarget;
           toggleSidebar();
         }}
         {...props}

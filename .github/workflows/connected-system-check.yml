@@ -94,6 +94,57 @@ jobs:
             /tmp/browser/combined-layout-isolated/bundle-inputs.json
             /tmp/header-partner-vite.log
           retention-days: 14
+      - name: Network-denying platform dashboard states
+        id: dashboard_browser
+        timeout-minutes: 6
+        continue-on-error: true
+        run: |
+          npm run dev -- --host 127.0.0.1 --port 8080 > /tmp/admin-dashboard-vite.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            curl --fail --silent http://localhost:8080/src/index.css?direct >/dev/null && break
+            sleep 1
+          done
+          timeout 240s node scripts/qa/admin-dashboard-ui.mjs
+          node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-dashboard-isolated/results.json 60
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Upload dashboard evidence early
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-dashboard-evidence
+          path: |
+            /tmp/browser/admin-dashboard-isolated/
+            /tmp/admin-dashboard-vite.log
+          retention-days: 14
+      - name: Network-denying actual dashboard shell
+        id: dashboard_shell_browser
+        timeout-minutes: 6
+        continue-on-error: true
+        run: |
+          node --test scripts/qa/assert-ui-evidence.check.mjs
+          npm run dev -- --host 127.0.0.1 --port 8080 > /tmp/admin-dashboard-shell-vite.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            curl --fail --silent http://localhost:8080/src/index.css?direct >/dev/null && break
+            sleep 1
+          done
+          timeout 240s node scripts/qa/admin-dashboard-shell-ui.mjs
+          node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-dashboard-shell-isolated/results.json 18
+        env:
+          NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
+      - name: Upload actual dashboard shell evidence early
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-dashboard-shell-evidence
+          path: |
+            /tmp/browser/admin-dashboard-shell-isolated/
+            /tmp/admin-dashboard-shell-vite.log
+          retention-days: 14
       - name: Network-denying wide public surface geometry
         id: public_wide_browser
         timeout-minutes: 7
@@ -215,12 +266,18 @@ jobs:
           HOME_BROWSER: ${{ steps.home_browser.outcome }}
           LAYOUT_BROWSER: ${{ steps.layout_browser.outcome }}
           HEADER_PARTNER_BROWSER: ${{ steps.header_partner_browser.outcome }}
+          DASHBOARD_BROWSER: ${{ steps.dashboard_browser.outcome }}
+          DASHBOARD_SHELL_BROWSER: ${{ steps.dashboard_shell_browser.outcome }}
           PUBLIC_WIDE_BROWSER: ${{ steps.public_wide_browser.outcome }}
           LINT: ${{ steps.lint.outcome }}
         run: |
           printf 'types=%s unit=%s focused=%s build=%s browser=%s home_browser=%s lint=%s\n' "$TYPES" "$UNIT" "$FOCUSED" "$BUILD" "$BROWSER" "$HOME_BROWSER" "$LINT" | tee -a "$GITHUB_STEP_SUMMARY"
           printf 'layout_browser=%s\n' "$LAYOUT_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
           printf 'header_partner_browser=%s\n' "$HEADER_PARTNER_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          printf 'dashboard_browser=%s\n' "$DASHBOARD_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          printf 'dashboard_shell_browser=%s\n' "$DASHBOARD_SHELL_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-dashboard-isolated/results.json 60
+          node scripts/qa/assert-ui-evidence.mjs /tmp/browser/admin-dashboard-shell-isolated/results.json 18
           printf 'public_wide_browser=%s\n' "$PUBLIC_WIDE_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
           python3 -c 'import json; from pathlib import Path; rows=json.loads(Path("/tmp/browser/public-wide-isolated/results.json").read_text()); assert len(rows)==76 and all(row.get("outcome")=="PASS" for row in rows), {"cases":len(rows),"failed":sum(row.get("outcome")!="PASS" for row in rows)}'
-          test "$TYPES" = success && test "$UNIT" = success && test "$FOCUSED" = success && test "$BUILD" = success && test "$BROWSER" = success && test "$HOME_BROWSER" = success && test "$LAYOUT_BROWSER" = success && test "$HEADER_PARTNER_BROWSER" = success && test "$PUBLIC_WIDE_BROWSER" = success && test "$LINT" = success
+          test "$TYPES" = success && test "$UNIT" = success && test "$FOCUSED" = success && test "$BUILD" = success && test "$BROWSER" = success && test "$HOME_BROWSER" = success && test "$LAYOUT_BROWSER" = success && test "$HEADER_PARTNER_BROWSER" = success && test "$DASHBOARD_BROWSER" = success && test "$DASHBOARD_SHELL_BROWSER" = success && test "$PUBLIC_WIDE_BROWSER" = success && test "$LINT" = success
