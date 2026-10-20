@@ -99,14 +99,16 @@ jobs:
         timeout-minutes: 7
         continue-on-error: true
         run: |
+          set -euo pipefail
           npm run dev -- --host 127.0.0.1 --port 8080 > /tmp/public-wide-vite.log 2>&1 &
           preview_pid=$!
-          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          trap 'fixture_status=$?; kill "$preview_pid" 2>/dev/null || true; exit "$fixture_status"' EXIT
           for attempt in $(seq 1 30); do
             curl --fail --silent http://localhost:8080/src/index.css?direct >/dev/null && break
             sleep 1
           done
           timeout 360s node scripts/qa/public-wide-layout-ui.mjs
+          python3 -c 'import json; from pathlib import Path; rows=json.loads(Path("/tmp/browser/public-wide-isolated/results.json").read_text()); assert len(rows)==76 and all(row.get("outcome")=="PASS" for row in rows), {"cases":len(rows),"failed":sum(row.get("outcome")!="PASS" for row in rows)}'
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload wide public surface evidence early
@@ -220,4 +222,5 @@ jobs:
           printf 'layout_browser=%s\n' "$LAYOUT_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
           printf 'header_partner_browser=%s\n' "$HEADER_PARTNER_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
           printf 'public_wide_browser=%s\n' "$PUBLIC_WIDE_BROWSER" | tee -a "$GITHUB_STEP_SUMMARY"
+          python3 -c 'import json; from pathlib import Path; rows=json.loads(Path("/tmp/browser/public-wide-isolated/results.json").read_text()); assert len(rows)==76 and all(row.get("outcome")=="PASS" for row in rows), {"cases":len(rows),"failed":sum(row.get("outcome")!="PASS" for row in rows)}'
           test "$TYPES" = success && test "$UNIT" = success && test "$FOCUSED" = success && test "$BUILD" = success && test "$BROWSER" = success && test "$HOME_BROWSER" = success && test "$LAYOUT_BROWSER" = success && test "$HEADER_PARTNER_BROWSER" = success && test "$PUBLIC_WIDE_BROWSER" = success && test "$LINT" = success
