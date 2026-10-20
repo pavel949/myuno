@@ -222,6 +222,16 @@ export const HIGHLIGHT_ALIAS_TO_CANONICAL: Record<string, string> = {
 
 /** project_facility keys (ProjectInfoCard / projects.amenities) */
 export const PROJECT_FACILITY_LABELS: Record<string, { en: string; ru: string }> = {
+  // AdminProjects persists ALL_AMENITIES; keep those explicit registry labels.
+  ...Object.fromEntries(ALL_LISTING_AMENITY_UI_ITEMS.map(item => [item.id, { en: item.labelEn, ru: item.labelRu }])),
+  steam_room: { en: 'Steam Room', ru: 'Парная' },
+  lobby: { en: 'Lobby', ru: 'Лобби' },
+  elevator: { en: 'Elevator', ru: 'Лифт' },
+  yoga_room: { en: 'Yoga Room', ru: 'Зал для йоги' },
+  library: { en: 'Library', ru: 'Библиотека' },
+  communal_kitchen: { en: 'Communal Kitchen', ru: 'Общая кухня' },
+  golf: { en: 'Golf', ru: 'Гольф' },
+  cinema: { en: 'Cinema', ru: 'Кинотеатр' },
   pool: { en: 'Pool', ru: 'Бассейн' },
   gym: { en: 'Gym', ru: 'Спортзал' },
   security: { en: '24h Security', ru: 'Охрана 24ч' },
@@ -264,10 +274,14 @@ export function normalizeEquipmentId(raw: string): string {
 }
 
 export function normalizeProjectFacilityId(raw: string): string {
-  return normalizeEquipmentId(raw);
+  const key = normalizeEquipmentId(raw);
+  const aliases: Record<string, string> = {
+    swimming_pool: 'pool', tennis_court: 'tennis', security_24h: 'security', bbq_area: 'bbq',
+  };
+  return aliases[key] || key;
 }
 
-/** Batch normalize for project / complex amenity arrays (hyphen→snake only; no listing-only aliases like security→security_24h). */
+/** Normalize project writer aliases without accepting arbitrary metadata as facilities. */
 export function normalizeProjectFacilityIds(ids: string[]): string[] {
   if (!ids?.length) return [];
   return [...new Set(ids.map(normalizeProjectFacilityId).filter(Boolean))];

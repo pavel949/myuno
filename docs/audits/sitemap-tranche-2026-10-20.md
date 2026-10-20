@@ -34,3 +34,11 @@ Remaining unmatched destinations must be reviewed individually, including specia
 44 focused tests across six files passed: mounted route ownership, actual MC guard guest/member/admin behavior and return context, verified content links, existing cluster/persona contracts and property-to-complex context. Scoped lint has no errors (two existing semantic-copy warnings); whitespace checks pass.
 
 The legacy-tenancy compatibility run passed 58 tests across the query parser and search-route integration suite. Two additional mounted monthly/yearly bookmark cases passed separately; they exercise the actual catalogue alias and preserve persona/return context. Scoped lint passed.
+
+## Independent review corrections
+
+The first `/property?...` redirect now reads router location and preserves the anchor as well as search parameters. Mounted monthly/yearly cases start at the authored `/property` entry, reach the final search and verify tenancy, persona, return context and anchor. No-query landing behavior remains unchanged.
+
+The project facility registry now covers the explicit ALL_AMENITIES checkbox writer and the AI intake project's enum. Explicit project aliases map swimming_pool to pool, tennis_court to tennis, security_24h to security and bbq_area to bbq. Unknown metadata remains outside the display allowlist. Alias-only and supported-facility versus metadata component cases verify the correction. The two focused suites passed 62 tests; scoped lint has no errors and one route-export warning.
+
+The exact independently reviewed bootstrap head `93d343e2ab01202e074cd94e67e58726f9e92504` was merged intact into this candidate for cumulative CI. Its watchdog code was not edited. Root coordinates PR136 first and verifies the regenerated PR137 merge candidate before merging; local results do not claim production acceptance.
