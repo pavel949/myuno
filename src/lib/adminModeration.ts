@@ -1,4 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
+import { VERTICALS } from '@/lib/verticals';
+import { PROPERTY_TYPES } from '@/lib/propertyTaxonomy';
 
 export type ModerationType = 'listing' | 'property' | 'service' | 'product';
 export type ModerationItem = {
@@ -31,6 +33,22 @@ export type ModerationQueue = {
 
 export const MODERATION_PAGE_SIZE = 50;
 export interface ModerationPageOptions { source: ModerationType; page: number; queue: 'pending' | 'inactive' | 'draft'; search?: string; category?: string }
+
+/** Canonical options are independent of the currently loaded review page. */
+export async function fetchModerationCategoryOptions(source: ModerationType): Promise<string[]> {
+  if (source === 'listing') return Object.values(VERTICALS).map(vertical => vertical.id);
+  if (source === 'property') return PROPERTY_TYPES.map(property => property.id);
+  if (source === 'service') return [];
+  const slugs: string[] = [];
+  // Include inactive taxonomy entries: an old product may still use that slug.
+  for (let offset = 0; ; offset += 50) {
+    const { data, error } = await supabase.from('marketplace_categories').select('slug').order('slug').range(offset, offset + 49);
+    if (error) throw error;
+    slugs.push(...(data ?? []).map(category => category.slug));
+    if (!data || data.length < 50) break;
+  }
+  return [...new Set(slugs)];
+}
 
 /** Each table owns its page and count. Filters run before range, never after a newest-N cap. */
 export async function fetchModerationSourcePage({ source, page, queue, search = '', category = '' }: ModerationPageOptions): Promise<ModerationQueue> {

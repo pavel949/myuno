@@ -9,7 +9,10 @@ import type { ModerationItem, ModerationQueue } from '@/lib/adminModeration';
 
 const state = vi.hoisted(() => ({ language: 'en', fetch: vi.fn(), success: vi.fn(), error: vi.fn(), response: null as null | Record<string, unknown>, pending: null as null | Promise<unknown>, filters: [] as unknown[][], writes: [] as Array<{ table: string; value: unknown; id?: string }> }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
-vi.mock('@/lib/adminModeration', async importOriginal => ({ ...await importOriginal<typeof import('@/lib/adminModeration')>(), fetchModerationQueue: (options: unknown) => state.fetch(options) }));
+vi.mock('@/lib/adminModeration', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/adminModeration')>();
+  return { ...actual, fetchModerationQueue: (options: unknown) => state.fetch(options), fetchModerationCategoryOptions: (source: ModerationItem['type']) => source === 'product' ? Promise.resolve(['supplies', 'retired-category']) : actual.fetchModerationCategoryOptions(source) };
+});
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn(), isTypingKey: () => false }));
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('sonner', () => ({ toast: { success: state.success, error: state.error } }));
@@ -66,6 +69,14 @@ afterEach(() => { cleanup(); clients.splice(0).forEach(client => client.clear())
 const ready = async (name = 'Synthetic clinic') => { await screen.findByText(name); };
 
 describe('source-specific review pages', () => {
+  it('offers retired taxonomy categories even when no current row uses them', async () => {
+    mount('/admin/operations?tab=moderation&queue=inactive&type=product');
+    await ready('Inactive rejected product');
+    await screen.findByRole('option', { name: 'retired-category' });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Category' }), { target: { value: 'retired-category' } });
+    await waitFor(() => expect(state.fetch).toHaveBeenLastCalledWith(expect.objectContaining({ source: 'product', page: 0, category: 'retired-category' })));
+    expect(state.writes).toEqual([]);
+  });
   it('keeps source counts and records separate, rather than merging capped cursors', async () => {
     mount(); await ready();
     expect(screen.getByTestId('moderation-count')).toHaveTextContent('240');

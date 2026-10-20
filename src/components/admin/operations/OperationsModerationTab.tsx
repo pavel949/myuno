@@ -13,7 +13,7 @@ import { ShieldCheck, AlertTriangle, Eye, ThumbsUp, ThumbsDown } from 'lucide-re
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { fetchModerationQueue, updateModerationItem, type ModerationItem, type ModerationType, MODERATION_PAGE_SIZE } from '@/lib/adminModeration';
+import { fetchModerationQueue, fetchModerationCategoryOptions, updateModerationItem, type ModerationItem, type ModerationType, MODERATION_PAGE_SIZE } from '@/lib/adminModeration';
 import { moderationReviewDestination } from '@/lib/moderationReviewRoutes';
 
 const typeLabels: Record<ModerationType, [string, string, string]> = {
@@ -75,6 +75,7 @@ export function OperationsModerationTab() {
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['moderation-queue', user?.id, activeTab, type, page, search, category], queryFn: () => fetchModerationQueue({ source: type, page, queue: activeTab === 'inactive' ? 'inactive' : activeTab === 'draft' ? 'draft' : 'pending', search, category }), enabled: !!user && activeTab !== 'complexes',
   });
+  const categoryOptions = useQuery({ queryKey: ['moderation-category-options', user?.id, type], queryFn: () => fetchModerationCategoryOptions(type), enabled: !!user && activeTab !== 'complexes' });
   const label = (values: [string, string, string]) => pickLang(language, { en: values[0], ru: values[1], th: values[2] });
   const categoryLabel = (value: string) => categoryLabels[value] ? label(categoryLabels[value]) : value;
   const resetFilters = () => setFilters({ q: '', category: 'all' });
@@ -104,7 +105,7 @@ export function OperationsModerationTab() {
   const failedTypes = data?.errors.filter(source => source === type) ?? [];
   const unavailable = isError || failedTypes.length > 0;
   const total = !isLoading && !unavailable ? data?.totals[type] ?? null : null;
-  const categories = [...new Set([...loaded.map(categoryOf).filter(Boolean), ...(category !== 'all' ? [category] : [])])].sort();
+  const categories = [...new Set([...(categoryOptions.data ?? []), ...loaded.map(categoryOf).filter(Boolean), ...(category !== 'all' ? [category] : [])])].sort();
   const filtered = loaded;
   const hasFilters = !!search || category !== 'all';
   const collectionLabel = (item: ModerationItem) => item.type === 'service'
@@ -153,6 +154,8 @@ export function OperationsModerationTab() {
                 </select>
                 <Button variant="outline" className="min-h-11" onClick={resetFilters} disabled={!hasFilters}>{label(["Clear filters", "Сбросить фильтры", "ล้างตัวกรอง"])}</Button>
               </div>
+              <p className="text-xs text-muted-foreground">{label(['Categories include the canonical taxonomy and legacy values on this page. A selected legacy value is retained in the URL.', 'Категории включают справочник и устаревшие значения этой страницы. Выбранное устаревшее значение сохраняется в URL.', 'หมวดหมู่รวมรายการมาตรฐานและค่าเดิมในหน้านี้ ค่าเดิมที่เลือกจะคงอยู่ใน URL'])}</p>
+              {categoryOptions.isError && <p role="alert" className="text-sm">{label(['Category options could not be loaded.', 'Не удалось загрузить категории.', 'ไม่สามารถโหลดหมวดหมู่ได้'])} <Button variant="link" onClick={() => categoryOptions.refetch()}>{label(['Retry categories', 'Повторить загрузку категорий', 'ลองโหลดหมวดหมู่อีกครั้ง'])}</Button></p>}
               {unavailable && <div role="alert" className="rounded-none border border-warning p-3 space-y-2">
                 <p className="flex items-start gap-2 text-sm"><AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />{label(["Some queue data is unavailable. Counts are unknown; available records are shown below.", "Часть данных очереди недоступна. Количество неизвестно; ниже показаны доступные записи.", "ข้อมูลคิวบางส่วนไม่พร้อมใช้งาน จึงไม่ทราบจำนวน รายการที่โหลดได้แสดงอยู่ด้านล่าง"])}</p>
                 {failedTypes.length > 0 && <p className="text-sm">{failedTypes.map(source => label(typeLabels[source])).join(', ')}</p>}

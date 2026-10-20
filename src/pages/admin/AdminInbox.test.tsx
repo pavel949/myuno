@@ -31,3 +31,12 @@ it('shows source read failure and retry rather than false zero or empty', async 
   fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
   await waitFor(() => expect(read.mock.calls.length).toBeGreaterThan(1));
 });
+it('labels domain statuses under All and advertises only source-supported search fields', async () => {
+  read.mockImplementation(async (_source, _page, status) => ({ total: status === 'all' ? 1 : 0, items: status === 'all' ? [{ id: 'one', source: 'partner_applications', status: 'other', rawStatus: 'approved', createdAt: '2026-01-01T00:00:00Z', title: 'Approved partner', contact: null, subtitle: null, href: '/admin/partner-applications' }] : [] }));
+  mount();
+  expect(screen.getByRole('searchbox')).toHaveAttribute('placeholder', 'Business, name, email, category');
+  fireEvent.click(screen.getByRole('tab', { name: /^All/ }));
+  expect(await screen.findByText('Other status: approved')).toBeVisible();
+  fireEvent.click(screen.getByRole('button', { name: 'Newbuilds' }));
+  expect(screen.getByRole('searchbox')).toHaveAttribute('placeholder', 'Name, email, phone');
+});

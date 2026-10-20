@@ -41,6 +41,13 @@ const TABS: { id: InboxStatus | 'all'; labelRu: string; labelEn: string }[] = [
   { id: 'escalated',   labelRu: 'Эскалация',   labelEn: 'Escalated' },
   { id: 'closed',      labelRu: 'Закрытые',    labelEn: 'Closed' },
 ];
+const SEARCH_HINTS: Record<InboxSource, [string, string]> = {
+  partner_applications: ['Business, name, email, category', 'Компания, имя, email, категория'],
+  listing_applications: ['Name, email, exact type, category', 'Имя, email, точный тип, категория'],
+  consultation_requests: ['Name, email, request type, vertical', 'Имя, email, тип запроса, направление'],
+  nb_leads: ['Name, email, phone', 'Имя, email, телефон'],
+  property_inquiries: ['Name, email, phone, message', 'Имя, email, телефон, сообщение'],
+};
 
 export default function AdminInbox() {
   const { language } = useLanguage();
@@ -138,7 +145,7 @@ export default function AdminInbox() {
               aria-label={isRu ? 'Поиск заявок' : 'Search applications'}
               value={query}
               onChange={(e) => { setQuery(e.target.value); setPage(0); }}
-              placeholder={isRu ? 'Имя, email, категория…' : 'Name, email, category…'}
+              placeholder={SEARCH_HINTS[sourceFilter][isRu ? 1 : 0]}
               className="w-full pl-9 pr-3 py-2 text-[13px] border border-border bg-card focus:border-primary outline-none"
             />
           </div>
@@ -148,8 +155,9 @@ export default function AdminInbox() {
           <button className="min-h-11 underline disabled:opacity-40" disabled={page === 0 || isFetching} onClick={() => setPage(value => value - 1)}>{isRu ? 'Назад' : 'Previous'}</button>
           <span>{page + 1} · {isError ? '—' : data?.total ?? '—'}</span>
           <button className="min-h-11 underline disabled:opacity-40" disabled={isFetching || isError || !data || (page + 1) * 50 >= data.total} onClick={() => setPage(value => value + 1)}>{isRu ? 'Далее' : 'Next'}</button>
-          <span>{isRu ? 'Отдельная страница и количество для выбранного источника. Текстовый поиск — по этой странице.' : 'Separate page and count for the selected source. Filters and search apply on the server.'}</span>
+          <span>{isRu ? 'Отдельная страница и количество для выбранного источника. Поиск и фильтры применяются на сервере.' : 'Separate page and count for the selected source. Filters and search apply on the server.'}</span>
         </nav>
+        <p className="mb-4 text-xs text-muted-foreground">{isRu ? 'Фильтры используют точные сохранённые статусы. Остальные статусы доступны во вкладке «Все» с исходным названием.' : 'Filters match stored statuses exactly. Other statuses remain under All with their original label.'}</p>
         {/* List */}
         {isLoading && (
           <div className="space-y-2">
@@ -206,7 +214,7 @@ export default function AdminInbox() {
                           item.status === 'in_progress' && 'text-primary',
                         )}
                       >
-                        {item.rawStatus}
+                        {item.status === 'other' ? `${isRu ? 'Другой статус' : 'Other status'}: ${item.rawStatus}` : item.rawStatus}
                       </span>
                       <span className="font-mono text-[10px] text-muted-foreground/60 ml-auto">{ago}</span>
                     </div>
