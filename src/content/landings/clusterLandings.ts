@@ -93,7 +93,7 @@ const A_ARRIVAL: ClusterLanding = {
       slug: 'area-guide',
       label: { ru: 'Гид по районам', en: 'Area guide' },
       oneLiner: { ru: 'Патонг, Камала, Сурин, Лагуна, Раваи, Чалонг — за 6 минут.', en: 'Patong, Kamala, Surin, Laguna, Rawai, Chalong in 6 minutes.' },
-      href: '/guide/areas',
+      href: '/area',
     },
     {
       slug: 'first-tour',
@@ -153,7 +153,7 @@ const A_ARRIVAL: ClusterLanding = {
   },
   secondaryCta: {
     label: { ru: 'Открыть гид по районам', en: 'Open the area guide' },
-    href: '/guide/areas',
+    href: '/area',
   },
   relatedPersonas: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P11', 'P14', 'P15', 'P16', 'P25'],
   seo: {
@@ -203,7 +203,7 @@ const D_INVESTMENT: ClusterLanding = {
       slug: 'area-comparison',
       label: { ru: 'Сравнение районов', en: 'Area comparison' },
       oneLiner: { ru: 'Цены, инфраструктура, динамика за 5 лет.', en: 'Prices, infrastructure, 5-year dynamics.' },
-      href: '/property/areas',
+      href: '/area',
     },
     {
       slug: 'clearview-rating',
