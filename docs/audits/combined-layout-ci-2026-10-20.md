@@ -105,3 +105,20 @@ the viewport below the header and stable for100ms, within5s. It never scrolls th
 page from the harness to satisfy pricing acceptance. Success records the observed
 heading/header/scroll geometry; timeout records the actual heading rectangle and
 last observed scroll. Current-head geometry remains unconfirmed until CI runs.
+
+Thed8a3e143 matrix (run39371327125/artifact12241975732) completed75cases with
+60PASS/15FAIL. Only management WhatsApp capture checks failed: captured calls
+were `[null]` followed by the correct URL/`_blank` pair, with no runtime errors or
+blocked requests. Playwright evaluates the initializer string then calls a
+function-valued result; the final assignment returned the replacement function
+and created the spurious call. Production had only its correct WhatsApp action.
+
+The replacement uses an explicit block initializer with undefined return. Pure
+Node VM tests reproduce the old evaluator behavior and verify the actual new
+initializer captures exactly one explicit correct call; they run before remote
+geometry. No external window or provider is opened. All remaining evaluate
+assignments were audited: spacer initialization is already a block, pricing
+polling returns data/false, other reads return data/promises/booleans, and the
+intermediate pricing assignment was removed. Pricing proof is now written into
+the case and results file immediately after the observed scroll succeeds,
+before subsequent WhatsApp/anchor assertions can fail.

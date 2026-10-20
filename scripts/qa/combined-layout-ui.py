@@ -63,10 +63,10 @@ async def check_sticky(page, surface):
     return {'header': header, 'sticky': box}
 
 
-async def check_destinations(page, surface):
+async def check_destinations(page, surface, row, completed):
     # Execute real handlers inside MemoryRouter; no destination page/provider is
     # loaded. Capture WhatsApp opening without opening a window or sending data.
-    await page.evaluate('window.fixtureOpened=[];window.open=(...args)=>window.fixtureOpened.push(args)')
+    await page.evaluate('() => { window.fixtureOpened = []; window.open = (...args) => { window.fixtureOpened.push(args); return null; }; }')
     output = page.get_by_test_id('location')
     if surface == 'local-services':
         expected = ['/vendor/join', '/for-business', '/become-partner', '/list-with-us']
@@ -106,7 +106,9 @@ async def check_destinations(page, surface):
                                   'error': 'Actual pricing CTA did not settle the heading inside the viewport within 5s'}) from error
         pricing_proof = await pricing.json_value()
         assert pricing_proof, 'pricing heading did not settle inside viewport'
-        await page.evaluate('value=>window.fixturePricingResult=value', pricing_proof)
+        row['pricingScroll'] = pricing_proof
+        row['phase'] = 'pricing-scroll-checked'
+        (OUTPUT / 'results.json').write_text(json.dumps([*completed, row], ensure_ascii=False, indent=2), encoding='utf-8')
         await buttons.last.click()
         opened = await page.evaluate('window.fixtureOpened')
         assert len(opened) == 1 and opened[0] == ['https://wa.me/66922407355?text=Hi%2C+I%27m+interested+in+myUNO+for+my+management+company', '_blank'], opened
@@ -171,9 +173,7 @@ async def main():
                             assert not row['ctaBoundsFailures'], {'marketingCTABounds': row['ctaBoundsFailures']}
                             # Check hero siblings against each other, allowing wrapped rows.
                             assert await page.locator('section').first.locator('button').evaluate_all("""els=>els.every((a,i)=>els.slice(i+1).every(b=>{const x=a.getBoundingClientRect(),y=b.getBoundingClientRect();return x.right<=y.left+1||y.right<=x.left+1||x.bottom<=y.top+1||y.bottom<=x.top+1}))"""), 'CTA overlap'
-                            row['destinations'] = await check_destinations(page, surface)
-                            if surface == 'management-companies':
-                                row['pricingScroll'] = await page.evaluate('window.fixturePricingResult')
+                            row['destinations'] = await check_destinations(page, surface, row, results)
                         row['fontStack'] = await page.locator('body').evaluate('e=>getComputedStyle(e).fontFamily')
                         row['fontLimitation'] = 'Canonical Google Fonts are not bundled; network denied; system fallback geometry only.'
                         assert not blocked and not errors, {'blocked': blocked, 'errors': errors}
