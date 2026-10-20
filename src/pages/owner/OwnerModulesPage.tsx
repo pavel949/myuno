@@ -1,16 +1,18 @@
-import { useState, useId } from 'react';
+import { useContext, useEffect, useState, useId } from 'react';
+import { QueryClientContext } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTeamPermissions, type ModuleKey } from '@/hooks/useTeamPermissions';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { useLayantaraPmsEnabled } from '@/hooks/useLayantaraPms';
 import {
   LayoutDashboard, Building2, CalendarDays, MessageSquare,
   Crown, ContactRound, TrendingUp, Star, Megaphone,
   ClipboardList, Tag, Radio, PackageOpen, Truck, ShieldCheck, FileText,
   DollarSign, ArrowLeftRight, BarChart3, Target, Receipt,
   Users, BookOpen, CreditCard, Zap, Settings, Calendar,
-  Globe, Search, Shuffle,
+  Globe, Search, Shuffle, Hotel,
   type LucideIcon,
 } from 'lucide-react';
 import { pickLang } from '@/lib/i18n/pickLang';
@@ -98,7 +100,7 @@ const THAI_MODULE_LABELS: Record<string, string> = {
   dashboard: 'ภาพรวม', properties: 'ที่พัก', calendar: 'ปฏิทิน', messages: 'ข้อความ',
   crm: 'CRM', owners: 'เจ้าของที่พัก', contacts: 'ผู้ติดต่อ', sales: 'การขาย', reviews: 'รีวิว',
   marketing: 'การตลาด', sequences: 'ลำดับการติดตาม', quotes: 'ใบเสนอราคา', tasks: 'งาน',
-  rates: 'ราคา', channels: 'ช่องทางการจอง', inventory: 'วัสดุและอุปกรณ์', vendors: 'ผู้ให้บริการ',
+  'resort-ops': 'ปฏิบัติการรีสอร์ท', rates: 'ราคา', channels: 'ช่องทางการจอง', inventory: 'วัสดุและอุปกรณ์', vendors: 'ผู้ให้บริการ',
   insurance: 'ประกันภัย', documents: 'เอกสาร', finance: 'ภาพรวมการเงิน',
   'management-terms': 'เงื่อนไขการบริหาร', transactions: 'รายการรับจ่าย', analytics: 'การวิเคราะห์',
   reports: 'รายงาน', budget: 'งบประมาณ', invoices: 'ใบแจ้งหนี้', staff: 'ทีมงาน',
@@ -107,22 +109,39 @@ const THAI_MODULE_LABELS: Record<string, string> = {
 
 const MODULE_AREAS = [
   { en: 'Daily work', ru: 'Ежедневная работа', th: 'งานประจำวัน', ids: ['dashboard', 'calendar', 'tasks', 'messages'] },
-  { en: 'Properties & rates', ru: 'Объекты и тарифы', th: 'ที่พักและราคา', ids: ['properties', 'rates', 'channels', 'inventory', 'vendors', 'insurance', 'documents'] },
+  { en: 'Properties & rates', ru: 'Объекты и тарифы', th: 'ที่พักและราคา', ids: ['properties', 'resort-ops', 'rates', 'channels', 'inventory', 'vendors', 'insurance', 'documents'] },
   { en: 'Finance & sales', ru: 'Финансы и продажи', th: 'การเงินและการขาย', ids: ['finance', 'management-terms', 'transactions', 'analytics', 'reports', 'budget', 'invoices', 'crm', 'owners', 'contacts', 'sales', 'reviews', 'marketing', 'sequences', 'quotes'] },
   { en: 'Team & settings', ru: 'Команда и настройки', th: 'ทีมงานและการตั้งค่า', ids: ['staff', 'subscription', 'plan', 'guide'] },
 ];
+
+/** Shown only when `feature_flag:layantara_pms` is on. */
+const RESORT_OPS_MODULE: AppModule = {
+  id: 'resort-ops', path: APP_ROUTES.MC_RESORT_OPS, icon: Hotel,
+  labelEn: 'Resort ops', labelRu: 'Операции курорта',
+  tint: 'bg-info/12', textColor: 'text-info', permModule: 'properties',
+};
+
+/** Reads the PMS flag without requiring a QueryClient above the page (rendered only when one exists). */
+function PmsFlagProbe({ onChange }: { onChange: (enabled: boolean) => void }) {
+  const enabled = useLayantaraPmsEnabled();
+  useEffect(() => onChange(enabled), [enabled, onChange]);
+  return null;
+}
 
 export default function OwnerModulesPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const { canAccess } = useTeamPermissions();
   const [query, setQuery] = useState('');
+  const [pmsEnabled, setPmsEnabled] = useState(false);
+  const hasQueryClient = useContext(QueryClientContext) !== undefined;
   const searchId = useId();
   const label = (m: AppModule) => pickLang(language, { en: m.labelEn, ru: m.labelRu, th: THAI_MODULE_LABELS[m.id] });
-  const visible = MODULE_GROUPS.flatMap(group => group.modules).filter(m =>
+  const visible = [...MODULE_GROUPS.flatMap(group => group.modules), ...(pmsEnabled ? [RESORT_OPS_MODULE] : [])].filter(m =>
     (!m.permModule || canAccess(m.permModule, 'view')) && label(m).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()),
   );
   return <div className="mx-auto w-full min-w-0 max-w-5xl space-y-6 px-4 py-6 pb-24 md:px-6">
+    {hasQueryClient && <PmsFlagProbe onChange={setPmsEnabled} />}
     <header>
       <h1 className="font-display text-h2 text-foreground">{pickLang(language, {en:'All tools', ru:'Все инструменты', th:'เครื่องมือทั้งหมด'})}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{pickLang(language, {en:'Choose the job you need to do.', ru:'Выберите задачу, которую нужно выполнить.', th:'เลือกงานที่ต้องการทำ'})}</p>

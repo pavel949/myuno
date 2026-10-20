@@ -36,7 +36,9 @@ function coerce(value: unknown): boolean {
 }
 
 
-async function fetchFlags(): Promise<Record<string, boolean>> {
+export const FEATURE_FLAGS_QUERY_KEY = ['feature-flags'] as const;
+
+export async function fetchFlags(): Promise<Record<string, boolean>> {
   const { data, error } = await supabase
     .from('system_settings')
     .select('key, value')
@@ -53,7 +55,7 @@ async function fetchFlags(): Promise<Record<string, boolean>> {
 
 export function useFeatureFlags() {
   return useQuery({
-    queryKey: ['feature-flags'],
+    queryKey: FEATURE_FLAGS_QUERY_KEY,
     queryFn: fetchFlags,
     staleTime: 5 * 60_000,
   });
