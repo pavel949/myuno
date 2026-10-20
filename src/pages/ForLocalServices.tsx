@@ -101,7 +101,7 @@ export default function ForLocalServices() {
                   ? 'Резиденты, туристы и консьерж маршрутизируют запросы в проверенных партнёров.'
                   : 'Residents, tourists, and concierge route requests to verified partners.'}
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center">
                 <Button size="lg" className="gap-2" onClick={() => navigate(APP_ROUTES.VENDOR_JOIN)}>
                   {isRu ? 'Стать партнёром' : 'Become a partner'}
                   <ArrowRight className="w-4 h-4" />

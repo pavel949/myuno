@@ -27,6 +27,10 @@ it('keeps default landing bounds and opts marketing content and chrome into the 
   expect(headers[0]).toHaveClass('max-w-6xl', 'px-4', 'sm:px-5');
   for (const token of PUBLIC_CONTENT_LAYOUT.marketing.split(' ')) expect(headers[1]).toHaveClass(token);
   expect(headers[1]).not.toHaveClass('max-w-6xl', 'sm:px-5');
+  for (const header of headers) {
+    expect(header).toHaveClass('h-14', 'items-center');
+    expect(header).not.toHaveClass('flex-wrap');
+  }
   expect(screen.getAllByRole('link', { name: 'Get started' })).toHaveLength(2);
 });
 
