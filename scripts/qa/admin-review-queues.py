@@ -3,6 +3,7 @@ import asyncio, json, re, sys
 from pathlib import Path
 from urllib.parse import urlencode, urlparse
 from playwright.async_api import async_playwright, expect
+from dialog_readiness import wait_for_dialog_ready, dialog_diagnostics
 OUTPUT = Path(sys.argv[1])
 
 async def main():
@@ -66,8 +67,18 @@ async def main():
                 await page.get_by_role('menuitem', name='Редактировать' if is_ru else 'Edit', exact=True).click()
                 await expect(page.get_by_role('dialog', name=('Редактировать объект' if is_ru else 'Edit Property' if lang != 'th' else 'แก้ไขที่พัก'))).to_be_visible()
                 await expect(page.get_by_test_id('property-editor-boundary')).to_be_visible()
+                dialog = page.get_by_role('dialog')
+                ready = await wait_for_dialog_ready(page, dialog, keyboard=True,
+                    failure_path=OUTPUT / f'{lang}-{width}-property-editor-readiness-failure')
                 await page.keyboard.press('Escape')
-                await expect(page.get_by_role('dialog')).to_have_count(0)
+                try:
+                    await expect(page.get_by_role('dialog')).to_have_count(0)
+                except Exception:
+                    (OUTPUT / f'{lang}-{width}-property-escape-failure.json').write_text(json.dumps({
+                        'beforeEscape': ready, 'afterEscape': await dialog_diagnostics(page, dialog)
+                    }, indent=2), encoding='utf-8')
+                    await page.screenshot(path=str(OUTPUT / f'{lang}-{width}-property-escape-failure.png'), full_page=True)
+                    raise
                 await no_writes()
                 await load('properties')
                 await expect(page.get_by_text(('Модерация: неизвестно' if is_ru else 'Approval: unknown' if lang != 'th' else 'การอนุมัติ: ไม่ทราบ'), exact=True)).to_be_visible()
@@ -87,6 +98,8 @@ async def main():
                 await capture('projects-pending')
                 await page.get_by_role('button', name=('Проверить' if is_ru else 'Review details' if lang != 'th' else 'ตรวจสอบข้อมูล'), exact=True).click()
                 await expect(page.get_by_role('dialog', name=('Редактировать проект' if is_ru else 'Edit Project' if lang != 'th' else 'แก้ไขโครงการ'))).to_be_visible()
+                project_ready = await wait_for_dialog_ready(page, page.get_by_role('dialog'), keyboard=True,
+                    failure_path=OUTPUT / f'{lang}-{width}-project-editor-readiness-failure')
                 await page.keyboard.press('Escape')
                 await expect(page.get_by_role('dialog')).to_have_count(0)
                 await expect(page.get_by_test_id('route-boundary')).to_have_text('/admin/projects?filter=pending&stage=offplan&source=newbuilds')
@@ -138,6 +151,8 @@ async def main():
                 assert not blocked, blocked
                 assert not errors, errors
                 results.append({'language': lang, 'width': width, 'properties': 'pass', 'projects': 'pass', 'urlComposition': 'pass', 'editorBoundaries': 'pass', 'readStates': 'pass', 'filterContrast': {'properties': properties_contrast, 'projects': projects_contrast}, 'horizontalOverflow': 'none', 'externalRequests': 0, 'businessWrites': 0, 'runtimeErrors': 0})
+                results[-1]['dialogReadiness'] = {'property': ready, 'project': project_ready}
+                (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
                 await context.close()
         await browser.close()
     (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2))

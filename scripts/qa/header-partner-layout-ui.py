@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 from urllib.parse import urlparse
 from playwright.async_api import async_playwright, expect
+from dialog_readiness import wait_for_dialog_ready
 
 ASSETS = Path(sys.argv[1])
 OUTPUT = Path('/tmp/browser/header-partner-isolated')
@@ -36,6 +37,7 @@ async def chrome(page, surface, width):
         await menu.click()
         dialog = page.get_by_role('dialog')
         await expect(dialog).to_be_visible()
+        settled = await wait_for_dialog_ready(page, dialog)
         menu_metrics = await dialog.evaluate("""e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect(),a=e.querySelector('nav a'),ar=a.getBoundingClientRect();return{padding:parseFloat(s.paddingLeft),rightPadding:parseFloat(s.paddingRight),left:r.left,firstLink:ar.left}}""")
         expected_menu = 24 if surface == 'overlay' else metrics['framePadding']
         assert abs(menu_metrics['padding']-expected_menu)<=1 and abs(menu_metrics['rightPadding']-expected_menu)<=1, menu_metrics
@@ -44,7 +46,7 @@ async def chrome(page, surface, width):
         assert not bad, {'menuBounds': bad}
         await dialog.locator('button').last.click()
         await expect(dialog).not_to_be_visible()
-        metrics['menu'] = menu_metrics
+        metrics['menu'] = {**menu_metrics, 'readiness': settled}
     return metrics
 
 

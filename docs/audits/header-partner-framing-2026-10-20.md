@@ -66,3 +66,26 @@ synthetic partner transport. Both Python matrices and the workflow merged
 without conflict;105+60 cases and every mandatory outcome gate are retained.
 No merge to main or release is performed by this worker.
 Remote current-head geometry and coordinator acceptance remain required.
+
+CI follow-up to integrated dadf745: artifact12244420019 has105/105 combined
+passes but59/60 header/partner passes. The TH639 menu links were sampled one
+384px sheet-width to the right (656 vs settled272); the later failure screenshot
+shows the sheet at255..639. SheetContent retains its real500ms entry animation.
+The geometry harness now waits at most5s for no pending/running own animations
+and100ms stable actual rectangle before measuring. Padding, link bounds,
+document overflow, all60 cases and final mandatory enforcement remain intact.
+
+Separate PR146 artifact12243254429 confirms an Escape failure after opening
+the real property card dropdown/editor atTH1280. It lacks failure-time DOM,
+focus and layer diagnostics, so its exact cause remains unproven. Source shows
+Radix menus remain registered dismissable layers until exit animation unmount;
+the fixture previously sent Escape after visibility alone. The fixture now
+requires the actual exiting menu to detach, sheet to settle and focus to be
+inside it before sending one Escape. It retains the original5s zero-dialog
+assertion and captures before/after focus, layers, animations and screenshot on
+failure. Successful cases persist readiness evidence incrementally. This
+checks ready keyboard interaction; it does not certify immediate Escape during
+an overlapping menu/sheet transition. No product animation, focus or close
+handler changed. Three pure Node VM predicate tests cover active/pending
+animations and geometry movement, and run in the existing required CI step.
+New-head remote browser evidence remains required; no blind rerun was made.
