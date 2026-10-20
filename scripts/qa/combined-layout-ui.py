@@ -10,7 +10,7 @@ from playwright.async_api import async_playwright, expect, TimeoutError as Playw
 OUTPUT = Path(sys.argv[1])
 WIDTHS = [320, 360, 640, 767, 1280]
 LANGUAGES = ['ru', 'en', 'th']
-SURFACES = ['property', 'account', 'local-services', 'developers', 'management-companies']
+SURFACES = ['property', 'account', 'local-services', 'developers', 'management-companies', 'owners', 'business']
 
 
 async def bounds(page, locator):
@@ -121,6 +121,59 @@ async def check_destinations(page, surface, row, completed):
     return expected
 
 
+async def check_measured_anchor(page, selector):
+    # Observe only the native anchor/default action or real scrollIntoView
+    # handler. The harness never scrolls an anchor into a passing position.
+    try:
+        proof = await page.wait_for_function("""selector => {
+          const target=document.querySelector(selector), header=document.querySelector('.consumer-header');
+          if(!target||!header)return false;
+          const r=target.getBoundingClientRect(), h=header.getBoundingClientRect();
+          const title=target.querySelector('h2').getBoundingClientRect();
+          const margin=parseFloat(getComputedStyle(target).scrollMarginTop);
+          const maxScroll=Math.max(0,document.documentElement.scrollHeight-innerHeight);
+          const expected=Math.max(margin,r.top+scrollY-maxScroll);
+          const now=performance.now(), old=window.fixtureMeasuredAnchor;
+          if(!old||old.selector!==selector||Math.abs(old.top-r.top)>0.5||Math.abs(old.scroll-scrollY)>0.5)
+            window.fixtureMeasuredAnchor={selector,top:r.top,scroll:scrollY,since:now};
+          return Math.abs(margin-h.height-16)<=2 && Math.abs(r.top-expected)<=2
+            && title.top>=h.bottom+15 && title.bottom<=innerHeight+1
+            && now-window.fixtureMeasuredAnchor.since>=100
+            ? {targetTop:r.top,headingTop:title.top,headingBottom:title.bottom,headerBottom:h.bottom,margin,expected,scrollY} : false;
+        }""", arg=selector, polling='raf', timeout=5000)
+        return await proof.json_value()
+    except PlaywrightTimeoutError as error:
+        raise AssertionError({'anchor': selector, 'target': await page.locator(selector).bounding_box(),
+                              'heading': await page.locator(selector+' h2').bounding_box(),
+                              'observed': await page.evaluate('window.fixtureMeasuredAnchor')}) from error
+
+
+async def check_owner_business(page, surface, row, completed):
+    if surface == 'owners':
+        actions = page.locator('main header a[href="#paths"]')
+        await expect(actions).to_have_count(2)
+        row['anchorProofs'] = []
+        for index in range(2):
+            await actions.nth(index).click()
+            assert await page.evaluate('location.hash') == '#paths'
+            row['anchorProofs'].append(await check_measured_anchor(page, '#paths'))
+            (OUTPUT / 'results.json').write_text(json.dumps([*completed, row], ensure_ascii=False, indent=2), encoding='utf-8')
+        await expect(page.locator('#paths article a').nth(0)).to_have_attribute('href', '/owner/management-landing')
+        await expect(page.locator('#paths article a').nth(1)).to_have_attribute('href', '/mc/onboarding')
+    else:
+        actions = page.locator('main section').first.locator('button')
+        await expect(actions).to_have_count(2)
+        row['ctaBoundsFailures'] = await bounds(page, actions)
+        assert not row['ctaBoundsFailures'], {'businessCTABounds': row['ctaBoundsFailures']}
+        await actions.nth(0).click()
+        row['anchorProofs'] = [await check_measured_anchor(page, '#b2b-inquiry-form')]
+        (OUTPUT / 'results.json').write_text(json.dumps([*completed, row], ensure_ascii=False, indent=2), encoding='utf-8')
+        # No form submission or provider/database call is performed.
+        assert await page.locator('#b2b-inquiry-form').evaluate('e=>e.getBoundingClientRect().width<=672'), 'form lost narrow bound'
+        await actions.nth(1).click()
+        await expect(page.get_by_test_id('location')).to_have_text('/for-local-services')
+
+
 async def main():
     if not os.environ.get('CI') or os.environ.get('GITHUB_ACTIONS') != 'true':
         raise RuntimeError('Browser execution is remote CI-only')
@@ -149,7 +202,7 @@ async def main():
                         await page.goto(f'http://localhost:8080/fixture?lang={lang}&surface={surface}', wait_until='networkidle')
                         await page.evaluate('document.fonts.ready')
                         await expect(page.locator('h1,main').first).to_be_visible()
-                        row['header'] = await check_header(page, surface not in ['property', 'account'])
+                        row['header'] = await check_header(page, surface not in ['property', 'account', 'owners', 'business'])
                         assert await page.evaluate('document.documentElement.scrollWidth<=innerWidth'), 'document overflow'
                         if surface in ['property', 'account']:
                             row['geometry'] = await check_sticky(page, surface)
@@ -168,6 +221,8 @@ async def main():
                                 assert not row['bottomBoundsFailures'], {'bottomBounds': row['bottomBoundsFailures']}
                                 name = {'ru': 'Бронирования', 'en': 'Bookings', 'th': 'การจอง'}[lang]
                                 await expect(bottom.get_by_role('link', name=name, exact=True)).to_have_attribute('href', '/bookings')
+                        elif surface in ['owners', 'business']:
+                            await check_owner_business(page, surface, row, results)
                         else:
                             row['ctaBoundsFailures'] = await bounds(page, page.locator('section button'))
                             assert not row['ctaBoundsFailures'], {'marketingCTABounds': row['ctaBoundsFailures']}
@@ -192,7 +247,7 @@ async def main():
         await browser.close()
     (OUTPUT / 'results.json').write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding='utf-8')
     failures = [row for row in results if row['outcome'] != 'PASS']
-    assert len(results) == 75 and not failures, {'completed': len(results), 'failed': len(failures), 'cases': [(row['lang'], row['width'], row['surface'], row.get('error')) for row in failures]}
+    assert len(results) == len(LANGUAGES)*len(WIDTHS)*len(SURFACES) and not failures, {'completed': len(results), 'failed': len(failures), 'cases': [(row['lang'], row['width'], row['surface'], row.get('error')) for row in failures]}
 
 
 if __name__ == '__main__':

@@ -17,6 +17,8 @@ export const PUBLIC_CONTENT_LAYOUT = {
 
 /** Marketing CTAs retain complete labels inside narrow cards and wrapped rows. */
 export const MARKETING_ACTION_BUTTON = 'h-auto min-h-12 max-w-full whitespace-normal break-words px-4 py-3 leading-snug';
+/** Anchor targets below consumer chrome use its observed height plus breathing room. */
+export const PUBLIC_CONTENT_ANCHOR = 'scroll-mt-[calc(var(--consumer-header-height,0px)+1rem)]';
 
 export const ECOSYSTEM_MAIN_SPACING = "space-y-4 md:space-y-6";
 

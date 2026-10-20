@@ -22,6 +22,8 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CONTENT_ANCHOR, MARKETING_ACTION_BUTTON } from '@/design-system/ecosystemLayout';
+import { cn } from '@/lib/utils';
 import {
   Building2, Languages, Globe, CalendarCheck, ShieldCheck, Megaphone,
   Banknote, Users, Sparkles, ArrowRight, Send,
@@ -391,8 +393,9 @@ export default function ForBusinessPage() {
       <div className="min-h-screen bg-background">
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-10 md:py-16 px-4">
+        <section className="relative overflow-hidden py-10 md:py-16">
 
+          <div className={PUBLIC_CONTENT_LAYOUT.marketing}>
           <div className="relative max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -409,20 +412,21 @@ export default function ForBusinessPage() {
               <p className="text-muted-foreground text-base md:text-lg mb-8">
                 {t(UI.heroDesc)}
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button size="lg" className="gap-2" onClick={scrollToForm}>
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center">
+                <Button size="lg" className={MARKETING_ACTION_BUTTON} onClick={scrollToForm}>
                   {t(UI.ctaInquiry)}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => navigate(APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS)}>
+                <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS)}>
                   {t(UI.ctaPartner)}
                 </Button>
               </div>
             </motion.div>
           </div>
+          </div>
         </section>
 
-        <section className="max-w-6xl mx-auto px-4 pb-12" aria-labelledby="business-start-title">
+        <section className={`${PUBLIC_CONTENT_LAYOUT.marketing} pb-12`} aria-labelledby="business-start-title">
           <h2 id="business-start-title" className="text-2xl font-display mb-6">{t({ru:'С чего начнём?',en:'What do you need?',th:'คุณต้องการความช่วยเหลือเรื่องใด?'})}</h2>
           <div className="grid gap-4 md:grid-cols-3">
             {[
@@ -439,7 +443,7 @@ export default function ForBusinessPage() {
         </section>
 
         {/* Services menu */}
-        <section className="max-w-6xl mx-auto px-4 pb-12">
+        <section className={`${PUBLIC_CONTENT_LAYOUT.marketing} pb-12`}>
           <h2 className="text-2xl md:text-3xl font-display font-semibold mb-2 text-center">
             {t(UI.servicesTitle)}
           </h2>
@@ -493,7 +497,7 @@ export default function ForBusinessPage() {
         </section>
 
         {/* Inquiry form */}
-        <section id="b2b-inquiry-form" className="max-w-2xl mx-auto px-4 pb-20 pt-4">
+        <section id="b2b-inquiry-form" className={cn(PUBLIC_CONTENT_LAYOUT.marketing, 'max-w-2xl pb-20 pt-4', PUBLIC_CONTENT_ANCHOR)}>
           <Card className="border-border/80">
             <CardContent className="pt-6">
               <h2 className="text-xl md:text-2xl font-display font-semibold mb-1">
@@ -569,7 +573,7 @@ export default function ForBusinessPage() {
                     placeholder={t(UI.notePh)}
                   />
                 </div>
-                <Button type="submit" size="lg" className="w-full gap-2" disabled={submitting}>
+                <Button type="submit" size="lg" className={cn('w-full', MARKETING_ACTION_BUTTON)} disabled={submitting}>
                   <Send className="w-4 h-4" />
                   {submitting ? t(UI.sending) : t(UI.send)}
                 </Button>

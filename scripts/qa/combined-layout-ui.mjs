@@ -21,6 +21,7 @@ const virtual = {
  '@/hooks/useNotifications': `export const useNotifications=()=>({unreadCount:0});`,
  '@/hooks/useIsAdmin': `export const useIsAdmin=()=>({isAdmin:false});`,
  '@/hooks/useOwnerType': `export const useOwnerType=()=>({isMCPortal:false,isLoading:false});`,
+ '@/hooks/useReferral': `export const useReferral=()=>({referralCode:'synthetic-only',isLoading:false,getShareLink:()=>'/fixture',copyReferralCode:()=>{},copyShareLink:()=>{}});`,
  '@/hooks/usePrefetch': `export const usePrefetchRoute=()=>({prefetchRoute:()=>{}});`,
  '@/lib/prefetchRoute': `export const prefetchRoute=()=>{};`,
  '@/components/layout/AllAppsDrawer': `export const AllAppsDrawer=()=>null;`,
@@ -43,7 +44,32 @@ const virtual = {
  'fixture:PropertyHub': `export const PropertyHubTabs=()=>null;`,
  '@/integrations/supabase/client': `export const supabase=new Proxy({},{get(){throw Error('Production database access forbidden')}});`,
 };
-const entry = `import React from'react';import{createRoot}from'react-dom/client';import{MemoryRouter,useLocation}from'react-router-dom';import{HelmetProvider}from'react-helmet-async';import{NavShell}from'${root.replaceAll('\\','/')}/src/components/nav/NavShell.tsx';import{MeShellLayout}from'${root.replaceAll('\\','/')}/src/components/layout/MeShellLayout.tsx';import PropertyIndex from'${root.replaceAll('\\','/')}/src/pages/property/PropertyIndex.tsx';import Local from'${root.replaceAll('\\','/')}/src/pages/ForLocalServices.tsx';import Developers from'${root.replaceAll('\\','/')}/src/pages/ForDevelopers.tsx';import Management from'${root.replaceAll('\\','/')}/src/pages/ForManagementCompanies.tsx';const params=new URLSearchParams(location.search);document.documentElement.lang=params.get('lang')||'en';const surface=params.get('surface')||'property';const start=surface==='property'?'/property/browse':surface==='account'?'/me/requests':'/for-'+surface;function Fixture(){const loc=useLocation();return <><output hidden data-testid="location">{loc.pathname+loc.search}</output>{surface==='property'?<NavShell role="guest"><PropertyIndex/><div style={{height:1800}}/></NavShell>:surface==='account'?<MeShellLayout><div style={{height:2200}}>Synthetic account content</div></MeShellLayout>:surface==='local-services'?<Local/>:surface==='developers'?<Developers/>:<Management/>}</>}createRoot(document.getElementById('root')).render(<HelmetProvider><MemoryRouter initialEntries={[start]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter></HelmetProvider>);`;
+const sourceRoot = root.replaceAll('\\','/');
+const entry = `
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {MemoryRouter,useLocation} from 'react-router-dom';
+import {HelmetProvider} from 'react-helmet-async';
+import {NavShell} from '${sourceRoot}/src/components/nav/NavShell.tsx';
+import {MeShellLayout} from '${sourceRoot}/src/components/layout/MeShellLayout.tsx';
+import PropertyIndex from '${sourceRoot}/src/pages/property/PropertyIndex.tsx';
+import Local from '${sourceRoot}/src/pages/ForLocalServices.tsx';
+import Developers from '${sourceRoot}/src/pages/ForDevelopers.tsx';
+import Management from '${sourceRoot}/src/pages/ForManagementCompanies.tsx';
+import Owners from '${sourceRoot}/src/pages/ForOwners.tsx';
+import Business from '${sourceRoot}/src/pages/ForBusinessPage.tsx';
+const params=new URLSearchParams(location.search);
+document.documentElement.lang=params.get('lang')||'en';
+const surface=params.get('surface')||'property';
+const start=surface==='property'?'/property/browse':surface==='account'?'/me/requests':'/for-'+surface;
+function Fixture(){const loc=useLocation();return <>
+ <output hidden data-testid="location">{loc.pathname+loc.search}</output>
+ {surface==='property'?<NavShell role="guest"><PropertyIndex/><div style={{height:1800}}/></NavShell>
+ :surface==='account'?<MeShellLayout><div style={{height:2200}}>Synthetic account content</div></MeShellLayout>
+ :surface==='local-services'?<Local/>:surface==='developers'?<Developers/>
+ :surface==='owners'?<Owners/>:surface==='business'?<Business/>:<Management/>}
+</>}
+createRoot(document.getElementById('root')).render(<HelmetProvider><MemoryRouter initialEntries={[start]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}><Fixture/></MemoryRouter></HelmetProvider>);`;
 const result = await build({stdin:{contents:entry,loader:'tsx',resolveDir:root},bundle:true,outfile:path.join(output,'fixture.js'),jsx:'automatic',format:'esm',metafile:true,
  define:{'process.env.NODE_ENV':'"production"','import.meta.env.DEV':'false'},
  plugins:[{name:'isolated-layout-data',setup(b){
@@ -56,10 +82,10 @@ const result = await build({stdin:{contents:entry,loader:'tsx',resolveDir:root},
  }}],
 });
 const inputs=Object.keys(result.metafile.inputs).map(p=>p.replaceAll('\\','/'));
-for(const required of ['nav/NavShell.tsx','nav/TopBar.tsx','nav/ConsumerHeader.tsx','nav/BottomBar.tsx','landings/LandingChrome.tsx','property/PropertyIndex.tsx','layout/MeShellLayout.tsx','uno/GlobalPreferencesControls.tsx','uno/LanguageSwitcher.tsx','layout/UserAvatarMenu.tsx','market/MiniCart.tsx','property/AirbnbSearchBar.tsx']){
+for(const required of ['nav/NavShell.tsx','nav/TopBar.tsx','nav/ConsumerHeader.tsx','nav/BottomBar.tsx','landings/LandingChrome.tsx','property/PropertyIndex.tsx','layout/MeShellLayout.tsx','uno/GlobalPreferencesControls.tsx','uno/LanguageSwitcher.tsx','layout/UserAvatarMenu.tsx','market/MiniCart.tsx','property/AirbnbSearchBar.tsx','pages/ForOwners.tsx','pages/ForBusinessPage.tsx']){
  if(!inputs.some(p=>!p.startsWith('fixture:')&&p.endsWith(required)))throw Error('Actual component missing: '+required);
 }
-if(inputs.some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|contexts\/(AuthContext|CartContext|CurrencyContext|ThemeContext)|hooks\/(useProperties|useNotifications|useUserContext)\.ts/.test(p)))throw Error('Production data dependency included');
+if(inputs.some(p=>!p.startsWith('fixture:')&&/integrations\/supabase\/client|contexts\/(AuthContext|CartContext|CurrencyContext|ThemeContext)|hooks\/(useProperties|useNotifications|useUserContext|useReferral)\.ts/.test(p)))throw Error('Production data dependency included');
 await writeFile(path.join(output,'bundle-inputs.json'),JSON.stringify(inputs,null,2));
 let css;
 if(process.env.COMBINED_LAYOUT_CSS_FILE)css=await readFile(process.env.COMBINED_LAYOUT_CSS_FILE,'utf8');
