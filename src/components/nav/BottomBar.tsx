@@ -91,9 +91,10 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
       : totalCols === 3 ? 'grid-cols-3'
       : 'grid-cols-5';
 
-    const renderItem = ({ path, icon: Icon, labelEn, labelRu, labelTh, exact }: NavItem) => {
+    const renderItem = ({ path, icon: Icon, labelEn, labelRu, labelTh, mobileLabelRu, exact }: NavItem) => {
       const active = isActive({ path, icon: Icon, labelEn, labelRu, labelTh, exact });
       const label = pickLang(language, { ru: labelRu, en: labelEn, th: labelTh });
+      const mobileLabel = language === 'ru' ? mobileLabelRu ?? label : label;
       return (
         <Link
           key={path}
@@ -124,10 +125,11 @@ export const BottomBar = forwardRef<HTMLDivElement, BottomBarProps>(
           <span
             className={cn(
               'text-[10px] leading-none',
+              mobileLabelRu && 'whitespace-nowrap',
               active ? 'font-semibold text-primary' : 'font-medium text-muted-foreground/80',
             )}
           >
-            {label}
+            {mobileLabel}
           </span>
         </Link>
       );
