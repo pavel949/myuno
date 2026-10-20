@@ -8,7 +8,7 @@ import {
 import { format } from 'date-fns';
 import { DateRange } from 'react-day-picker';
 import { PropertyShareSheet } from '@/components/property/PropertyShareSheet';
-import { CompareButton, type CompareProperty } from '@/components/property/PropertyCompare';
+import { CompareButton, PropertyCompareTrigger, type CompareProperty } from '@/components/property/PropertyCompare';
 import { PropertyPdfButton } from '@/components/property/PropertyPdfBrochure';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -363,6 +363,7 @@ export default function PropertyDetail() {
                   } as CompareProperty}
                 />
                 <PropertyPdfButton className="[&>span]:inline min-h-11" property={{ ...property, price_per_night: rentalTerms?.price_per_night }} />
+                <PropertyCompareTrigger />
               </div>
             </details>
             <FavoriteButton

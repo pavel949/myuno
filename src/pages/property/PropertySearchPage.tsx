@@ -29,6 +29,7 @@ import { useMapListSync } from '@/hooks/useMapListSync';
 import type { PropertyFilters } from '@/hooks/useProperties';
 import { CrossSellSection } from '@/components/crosssell';
 import { PropertySortSelect, PropertySortKey } from '@/components/property/PropertySortSelect';
+import { PropertyCompareTrigger } from '@/components/property/PropertyCompare';
 import { VerticalCTA } from '@/components/leads/VerticalCTA';
 import { OffplanCTASection } from '@/components/property/OffplanCTASection';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
@@ -329,6 +330,7 @@ export default function PropertySearchPage() {
             </h2>
             <div className="property-discovery-result-actions flex flex-wrap items-center gap-2">
               <PropertySortSelect value={sortKey} onChange={setSortKey} />
+              <PropertyCompareTrigger />
               {/* Map toggle */}
               <Button
                 variant={showMap ? 'default' : 'outline'}
