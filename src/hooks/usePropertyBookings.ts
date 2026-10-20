@@ -131,6 +131,14 @@ function mapOrderToBooking(orderInput: unknown, propertyId: string): PropertyBoo
   };
 }
 
+/** DB overlap guard rejections (23P01 / FAMILY_OVERLAP) -> the same bilingual conflict message. */
+function throwMappedOverlap(error: { code?: string; message?: string } | null): void {
+  if (!error) return;
+  if (error.code !== '23P01' && !error.message?.includes('FAMILY_OVERLAP')) return;
+  const hit = { kind: 'same_key', propertyId: '', bookingId: null, overlapStart: '', overlapEnd: '', source: null } as const;
+  throw new Error(pmsConflictMessage(new BookingConflictError([hit])));
+}
+
 /** Layan Tara PMS: reject villa/room family overlaps before the order is written. */
 async function assertFamilyAvailable(
   propertyId: string, checkIn: string, checkOut: string, ignoreOrderId?: string,
@@ -294,6 +302,7 @@ export function usePropertyBookings(propertyId?: string) {
 
       if (orderError) {
         errorLog.silent(orderError, 'create_order');
+        throwMappedOverlap(orderError);
         throw orderError;
       }
 
@@ -321,6 +330,7 @@ export function usePropertyBookings(propertyId?: string) {
         errorLog.silent(itemError, 'create_order_item');
         // Rollback: delete order
         await supabase.from('orders').delete().eq('id', order.id);
+        throwMappedOverlap(itemError);
         throw itemError;
       }
 
@@ -498,6 +508,7 @@ export function usePropertyBookings(propertyId?: string) {
 
       if (error) {
         errorLog.silent(error, 'update_booking');
+        throwMappedOverlap(error);
         throw error;
       }
       

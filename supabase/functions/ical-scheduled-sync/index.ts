@@ -192,6 +192,37 @@ function calculateNights(dtstart: string, dtend: string): number {
   return nights;
 }
 
+// Civil date in the Asia/Bangkok calendar for a stored timestamp.
+function toBangkokDate(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value).slice(0, 10);
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok' }).format(d);
+}
+
+// True when a DB error is the overlap / family guard rejecting the write.
+function isOverlapGuardError(error: any): boolean {
+  const msg = String(error?.message || '');
+  return error?.code === '23P01' || msg.includes('FAMILY_OVERLAP') || msg.includes('no_overlap');
+}
+
+async function recordFamilyConflict(
+  supabase: any,
+  calendar: any,
+  event: { uid: string; dtstart: string | null; dtend: string | null },
+  reason: string
+): Promise<void> {
+  const { error } = await supabase.from('booking_conflicts').insert({
+    property_id: calendar.property_id,
+    calendar_id: calendar.id,
+    source_event_id: event.uid,
+    conflict_type: 'family',
+    conflict_start: `${event.dtstart}T14:00:00Z`,
+    conflict_end: `${event.dtend}T12:00:00Z`,
+    raw: { channel_a: detectChannelType(calendar.ical_url, calendar.name), channel_b: 'family', reason },
+  });
+  if (error) console.error(`Failed to record family conflict: ${error.message}`);
+}
+
 // Check for overlapping orders for this property and date range; return conflict order id if found
 async function findOverlappingOrder(
   supabase: any,
@@ -222,8 +253,8 @@ async function findOverlappingOrder(
   const overlapping = (orders || []).find((o: any) => {
     if (!propertyOrderHoldsInventory(o.status)) return false;
     if (excludeOrderId && o.id === excludeOrderId) return false;
-    const oStart = String(o.start_at).slice(0, 10);
-    const oEnd = String(o.end_at).slice(0, 10);
+    const oStart = toBangkokDate(o.start_at);
+    const oEnd = toBangkokDate(o.end_at);
     return oStart < endDate && startDate < oEnd;
   });
 
@@ -315,10 +346,11 @@ async function upsertOrderForEvent(
   }
 
   if (existingOrderId) {
-    await supabase
+    const { error: updateError } = await supabase
       .from('orders')
       .update(orderData)
       .eq('id', existingOrderId);
+    if (updateError) throw updateError;
     return existingOrderId;
   } else {
     const { data: order, error } = await supabase
@@ -351,18 +383,14 @@ async function upsertOrderForEvent(
 
     if (itemError) {
       console.warn(`order_items insert rejected for ${event.uid}: ${itemError.message}`);
-      const { error: deleteError } = await supabase.from('orders').delete().eq('id', order.id);
+      // Soft-delete the just-created order (matches the rest of this file).
+      const { error: deleteError } = await supabase
+        .from('orders')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', order.id);
       if (deleteError) console.error(`Failed to remove orphan order ${order.id}: ${deleteError.message}`);
-      const { error: conflictError } = await supabase.from('booking_conflicts').insert({
-        property_id: calendar.property_id,
-        calendar_id: calendar.id,
-        source_event_id: event.uid,
-        conflict_type: 'family',
-        conflict_start: startAt,
-        conflict_end: endAt,
-        raw: { channel_a: detectChannelType(calendar.ical_url, calendar.name), channel_b: 'family', reason: itemError.message },
-      });
-      if (conflictError) console.error(`Failed to record family conflict: ${conflictError.message}`);
+      if (!isOverlapGuardError(itemError)) throw itemError;
+      await recordFamilyConflict(supabase, calendar, event, itemError.message);
       return null;
     }
 
@@ -490,7 +518,16 @@ async function syncCalendar(
         }
       }
 
-      const orderId = await upsertOrderForEvent(supabase, event, calendar, existingOrderId);
+      let orderId: string | null;
+      try {
+        orderId = await upsertOrderForEvent(supabase, event, calendar, existingOrderId);
+      } catch (error: any) {
+        if (!isOverlapGuardError(error)) throw error;
+        // One family overlap must not fail the whole calendar sync.
+        await recordFamilyConflict(supabase, calendar, event, String(error?.message || 'overlap'));
+        console.info(`Family overlap for event ${event.uid}; conflict recorded, continuing`);
+        continue;
+      }
 
       if (existingOrderId) {
         eventsUpdated++;

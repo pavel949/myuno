@@ -38,7 +38,7 @@ export async function loadFamilyHolds(
   const ids = rows.map(r => r.id);
   const [bookingsRes, blocksRes] = await Promise.all([
     supabase.from('property_bookings')
-      .select('id, order_id, property_id, check_in, check_out, status, source, guest_name')
+      .select('id, order_id, external_id, property_id, check_in, check_out, status, source, guest_name')
       .in('property_id', ids)
       .lt('check_in', checkOut)
       .gt('check_out', checkIn)
@@ -56,7 +56,7 @@ export async function loadFamilyHolds(
     target,
     keys: new Map(rows.map(r => [r.id, r] as const)),
     bookings: ((bookingsRes.data ?? []) as PmsBookingRow[])
-      .filter(b => !ignoreOrderId || b.order_id !== ignoreOrderId)
+      .filter(b => !ignoreOrderId || (b.order_id !== ignoreOrderId && b.external_id !== ignoreOrderId))
       .map(mapBookingRow),
     blocks: (blocksRes.data ?? []).map(mapBlockRow),
   };

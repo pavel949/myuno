@@ -24,6 +24,8 @@ export interface PmsPropertyRow {
 export interface PmsBookingRow {
   id: string;
   order_id?: string | null;
+  /** Order id for bookings mirrored from orders (mirror trigger sets external_id = order.id). */
+  external_id?: string | null;
   property_id: string;
   check_in: string;
   check_out: string;
@@ -65,7 +67,7 @@ export function mapBookingRow(r: PmsBookingRow): HeldBooking {
     status: r.status,
     source: r.source,
     guestName: r.guest_name,
-    orderId: r.order_id ?? null,
+    orderId: r.order_id ?? r.external_id ?? null,
   };
 }
 

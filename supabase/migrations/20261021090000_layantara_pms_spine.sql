@@ -68,6 +68,7 @@ GRANT EXECUTE ON FUNCTION public.layantara_pms_enabled() TO authenticated, servi
 CREATE OR REPLACE FUNCTION public.properties_parent_depth_guard()
 RETURNS trigger
 LANGUAGE plpgsql
+SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
@@ -216,9 +217,8 @@ CREATE TRIGGER property_bookings_auto_turnover
   FOR EACH ROW EXECUTE FUNCTION public.property_bookings_auto_turnover();
 
 -- 7. Ops RLS (idempotent, by policy name) -----------------------------------
--- REVIEWER: public.can_manage_property is defined in migration
--- 20260820004935 and is live-only; confirm it exists and its semantics match
--- management-company staff before applying.
+-- Both policies are flag-gated so they widen nothing while the flag is OFF.
+-- public.can_manage_property is defined in migration 20260820004935.
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -228,7 +228,7 @@ BEGIN
   ) THEN
     CREATE POLICY pms_ops_select_property_bookings ON public.property_bookings
       FOR SELECT TO authenticated
-      USING (public.can_manage_property(property_id));
+      USING (public.layantara_pms_enabled() AND public.can_manage_property(property_id));
   END IF;
 
   IF NOT EXISTS (
@@ -238,8 +238,8 @@ BEGIN
   ) THEN
     CREATE POLICY pms_ops_manage_operational_tasks ON public.property_operational_tasks
       FOR ALL TO authenticated
-      USING (public.can_manage_property(property_id))
-      WITH CHECK (public.can_manage_property(property_id));
+      USING (public.layantara_pms_enabled() AND public.can_manage_property(property_id))
+      WITH CHECK (public.layantara_pms_enabled() AND public.can_manage_property(property_id));
   END IF;
 END $$;
 
