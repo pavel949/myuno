@@ -85,7 +85,7 @@ async def check_admin(page, scenario):
     analytics = page.get_by_test_id('dashboard-period-analytics')
     cells = analytics.locator('[aria-busy] > div > p:last-child')
     if scenario == 'no-snapshots':
-        await expect(cells).to_have_text(['-', '-', '-'])
+        await expect(cells).to_have_text(['—', '—', '—'])
         await expect(analytics.locator('p[role="status"]')).to_contain_text('0/7')
     else:
         await expect(cells).to_have_text(['14', '840', '84'])
