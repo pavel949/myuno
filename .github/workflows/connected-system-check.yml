@@ -113,6 +113,9 @@ jobs:
           done
           # Two isolated browsers at most; every fixture retains its 180s limit.
           python3 scripts/qa/browser_fixture_runner.py
+          # Combined PR143/144 actual shell geometry; same network-denying
+          # environment, sequential after the bounded two-browser suite.
+          timeout 240s node scripts/qa/combined-layout-ui.mjs
         env:
           NODE_OPTIONS: --require ./scripts/qa/local-network-only.cjs
       - name: Upload validation evidence
