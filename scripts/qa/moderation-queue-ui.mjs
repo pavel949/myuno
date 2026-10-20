@@ -10,9 +10,11 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import assert from 'node:assert/strict';
 
-const root = process.cwd();
-const output = '/tmp/browser/moderation-queue-isolated';
+// These paths also enter generated import strings; avoid Windows escape sequences.
+const root = process.cwd().replaceAll('\\', '/');
+const output = path.join(process.env.TEMP || '/tmp', 'browser', 'moderation-queue-isolated');
 await mkdir(output, { recursive: true });
 
 const virtual = {
@@ -49,11 +51,11 @@ const virtual = {
     export * from '${root}/src/lib/adminModeration.ts';
     const row=(id,type,name_en,name_ru,category,extra={})=>({
       id,type,name_en,name_ru,category,created_at:'2026-10-18T09:00:00Z',
-      approval_status:'pending',provider_name:null,provider_id:null,vertical:null,...extra,
+      approval_status:'pending',updated_at:'2026-10-18T09:00:00Z',provider_name:null,provider_id:null,vertical:null,...extra,
     });
     const items=[
       row('fixture-property-a','property','Harbor villa with an unusually long descriptive title','Вилла Гавань с длинным описательным названием для проверки переноса','villa'),
-      row('fixture-property-b','property','Town apartment','Городская квартира','apartment',{created_at:null}),
+      row('fixture-property-b','property','Town apartment','Городская квартира','apartment',{created_at:null,updated_at:null}),
       row('fixture-listing-a','listing','Synthetic restaurant','Тестовый ресторан','dining',{vertical:'restaurant',provider_id:'fixture-provider',provider_name:'Synthetic provider with a deliberately long name / Тестовый провайдер с длинным названием'}),
       row('fixture-listing-b','listing','Synthetic clinic without a direct editor','Тестовая клиника без прямого редактора',null,{vertical:'clinic'}),
       row('fixture-service-a','service','Transfer service','Услуга трансфера',null,{approval_status:'approved',provider_id:'fixture-provider',provider_name:'Synthetic provider'}),
@@ -61,20 +63,71 @@ const virtual = {
       row('fixture-product-a','product','Local coffee','Местный кофе','groceries',{approval_status:'draft'}),
       row('fixture-product-b','product','Beach towel','Пляжное полотенце','accessories',{approval_status:null,created_at:null}),
     ];
-    const totals={listing:2,property:2,service:2,product:2};
-    const unavailable={items:[],totals:{listing:null,property:null,service:null,product:null},errors:['listing','property','service','product']};
-    export async function fetchModerationQueue(){
+    const unknown=()=>({listing:null,property:null,service:null,product:null});
+    export async function fetchModerationQueue(options){
       window.fixtureReadCalls++;
+      if(!options) throw Error('Source/page/query options are required');
+      window.fixtureReadOptions.push({...options});
+      const {source,page=0,queue='pending',search='',category='all'}=options;
+      if(!['listing','property','service','product'].includes(source)) throw Error('Unknown fixture source');
+      if((queue==='inactive')!==['service','product'].includes(source)) throw Error('Invalid source/state fixture request');
       const scenario=new URLSearchParams(location.search).get('case')||'default';
       if(scenario==='loading') return await new Promise(()=>{});
-      if(scenario==='capped') return {items,totals:{...totals,listing:240,property:8},errors:[]};
-      if(scenario==='empty') return {items:[],totals:{listing:0,property:0,service:0,product:0},errors:[]};
-      if(scenario==='error'||(scenario==='retry'&&window.fixtureReadCalls===1)) return unavailable;
-      if(scenario==='partial') return {items:items.filter(item=>item.type!=='listing'),totals:{...totals,listing:null},errors:['listing']};
-      return {items,totals,errors:[]};
+      const unavailable={items:[],totals:unknown(),errors:[source]};
+      if(scenario==='error'||(scenario==='retry'&&window.fixtureReadCalls===1)||(scenario==='partial'&&source==='listing')) return unavailable;
+      let candidates=items.filter(item=>item.type===source);
+      if(queue==='draft') candidates=candidates.filter(item=>item.type==='listing'||item.type==='property').map(item=>({...item,approval_status:'draft'}));
+      if(scenario==='capped') candidates=Array.from({length:source==='listing'?240:source==='property'?8:2},(_,i)=>row('fixture-'+source+'-'+i,source,'Synthetic '+source+' '+i,'Тестовая запись '+i,source==='property'?'villa':null,{vertical:source==='listing'?'restaurant':null}));
+      if(scenario==='empty') candidates=[];
+      const term=search.trim().replace(/[,%()_*\\"]/g,' ').trim().slice(0,120).toLowerCase();
+      if(term) candidates=candidates.filter(item=>[item.name_en,item.name_ru].some(name=>name?.toLowerCase().includes(term))||item.id===term);
+      if(category&&category!=='all') candidates=candidates.filter(item=>(source==='listing'?item.vertical:item.category)===category);
+      const totals=unknown();totals[source]=candidates.length;
+      const offset=Math.max(0,page)*50;
+      return {items:candidates.slice(offset,offset+50),totals,errors:[]};
     }
+
   `,
 };
+
+if (process.argv.includes('--verify-read-model')) {
+  // Exercise only the synthetic boundary; no DOM, browser, DB client or mutation.
+  const fixtureWindow = { fixtureReadCalls: 0, fixtureReadOptions: [] };
+  const fixtureLocation = { search: '' };
+  const source = virtual['@/lib/adminModeration'].replace(/^\s*export \* from .*;$/m, '').replace('export async function', 'async function');
+  const read = new Function('window', 'location', source + '\nreturn fetchModerationQueue;')(fixtureWindow, fixtureLocation);
+  const options = { source: 'listing', page: 0, queue: 'pending', search: '', category: 'all' };
+  let result = await read(options);
+  assert.equal(result.items.length, 2);
+  assert.deepEqual(result.totals, { listing: 2, property: null, service: null, product: null });
+  assert(result.items.every(item => item.type === 'listing' && item.approval_status === 'pending'));
+  assert.equal((await read({ ...options, search: 'Synthetic provider' })).items.length, 0);
+  fixtureLocation.search = '?case=capped';
+  result = await read(options);
+  assert.equal(result.items.length, 50);
+  assert.equal(result.totals.listing, 240);
+  assert.equal((await read({ ...options, page: 1 })).items[0].id, 'fixture-listing-50');
+  result = await read({ ...options, page: 4 });
+  assert.equal(result.items.length, 40);
+  assert.equal(result.items.at(-1).id, 'fixture-listing-239');
+  result = await read({ ...options, search: 'Synthetic listing 239' });
+  assert.equal(result.totals.listing, 1);
+  assert.equal(result.items[0].id, 'fixture-listing-239');
+  result = await read({ ...options, source: 'property', category: 'villa' });
+  assert.deepEqual(result.totals, { listing: null, property: 8, service: null, product: null });
+  fixtureLocation.search = '';
+  assert((await read({ ...options, queue: 'draft' })).items.every(item => item.approval_status === 'draft'));
+  result = await read({ ...options, source: 'service', queue: 'inactive' });
+  assert(result.items.every(item => item.type === 'service' && item.approval_status !== 'pending'));
+  fixtureLocation.search = '?case=partial';
+  assert.deepEqual((await read(options)).errors, ['listing']);
+  result = await read({ ...options, source: 'property' });
+  assert.equal(result.items.length, 2);
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(fixtureWindow.fixtureReadOptions.at(-1), { ...options, source: 'property' });
+  console.log('Source-specific synthetic read model passed; browser and database were not used.');
+  process.exit(0);
+}
 
 const bundle = await build({
   stdin: {
@@ -86,16 +139,18 @@ const bundle = await build({
       import {OperationsModerationTab} from '${root}/src/components/admin/operations/OperationsModerationTab.tsx';
       import {AdminOperationalAlerts} from '${root}/src/components/admin/dashboard/AdminOperationalAlerts.tsx';
       import {AdminKPIGrid} from '${root}/src/components/admin/dashboard/AdminKPIGrid.tsx';
-      window.fixtureWrites=0;window.fixtureDataCalls=0;window.fixtureClientCalls=0;window.fixtureReadCalls=0;window.fixtureNetworkCalls=0;window.fixtureDashboardReads=0;window.fixtureAnalyticsReads=0;
+      window.fixtureWrites=0;window.fixtureDataCalls=0;window.fixtureClientCalls=0;window.fixtureReadCalls=0;window.fixtureReadOptions=[];window.fixtureNetworkCalls=0;window.fixtureDashboardReads=0;window.fixtureAnalyticsReads=0;
       const denyNetwork=()=>{window.fixtureNetworkCalls++;throw Error('Network forbidden in isolated moderation fixture');};
       window.fetch=denyNetwork;window.XMLHttpRequest=class{constructor(){denyNetwork();}};window.WebSocket=class{constructor(){denyNetwork();}};
       document.documentElement.lang=new URLSearchParams(location.search).get('lang')||'en';
-      const isDashboard=new URLSearchParams(location.search).get('case')==='dashboard-unknown';
+      const fixtureParams=new URLSearchParams(location.search);
+      const isDashboard=fixtureParams.get('case')==='dashboard-unknown';
+      const initialRoute=fixtureParams.get('route')||'/admin/operations?tab=moderation';
       const client=new QueryClient({defaultOptions:{queries:{retry:false,refetchOnWindowFocus:false},mutations:{retry:false}}});
       function Probe(){const route=useLocation();return <output data-testid="fixture-route" hidden>{route.pathname}{route.search}</output>;}
       createRoot(document.getElementById('root')).render(
         <QueryClientProvider client={client}>
-          <MemoryRouter initialEntries={[isDashboard?'/admin':'/admin/operations?tab=moderation']} future={{v7_startTransition:true,v7_relativeSplatPath:true}}>
+          <MemoryRouter initialEntries={[isDashboard?'/admin':initialRoute]} future={{v7_startTransition:true,v7_relativeSplatPath:true}}>
             <main style={{padding:16,maxWidth:1440,margin:'0 auto',minWidth:0}}>
               {isDashboard?<div style={{display:'grid',gap:24,minWidth:0}}>
                 <section data-testid="fixture-dashboard-alerts"><AdminOperationalAlerts/></section>
