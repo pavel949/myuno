@@ -51,7 +51,7 @@ const analyticsResult = () => ({
 beforeEach(() => {
   locale.value = 'en';
   vi.mocked(useAdminFinance).mockReturnValue(financeResult());
-  vi.mocked(useAdminDashboardSnapshots).mockReturnValue(analyticsResult() as ReturnType<typeof useAdminDashboardSnapshots>);
+  vi.mocked(useAdminDashboardSnapshots, { partial: true }).mockReturnValue(analyticsResult());
 });
 afterEach(cleanup);
 
@@ -122,7 +122,7 @@ describe.each(['en', 'ru'])('finance evidence labels (%s)', (language) => {
   });
 
   it('does not turn a snapshot query error into zero revenue or growth', () => {
-    vi.mocked(useAdminDashboardSnapshots).mockReturnValue({ ...analyticsResult(), isError: true } as ReturnType<typeof useAdminDashboardSnapshots>);
+    vi.mocked(useAdminDashboardSnapshots, { partial: true }).mockReturnValue({ ...analyticsResult(), isError: true });
     render(<MemoryRouter><AdminRevenueBlock /></MemoryRouter>);
     expect(screen.getAllByText('—')).toHaveLength(3);
     expect(screen.getByRole('alert')).toBeVisible();

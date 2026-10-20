@@ -88,7 +88,9 @@ Focused checks completed before draft:
   fast-refresh warnings remain. Python AST, Node fixture syntax, dependency-only
   bundle guard, workflow YAML and required dashboard outcome checks pass.
 
-Full local TypeScript is running at draft creation and is not claimed passed.
+First full local TypeScript found TS2352 in sparse mock casts in two test files.
+Those mocks now use Vitest's typed partial-return API, without changing production
+types or assertions. The full recheck is running and is not claimed passed.
 Fresh remote full unit/PostgreSQL/build/lint and browser enforcement remain
 required. The additional early dashboard fixture has60 scenarios: RU/EN/TH,
 375/768/1280/1920 widths, full/one-source-failure/stale/no-snapshot states and

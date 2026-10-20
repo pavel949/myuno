@@ -11,11 +11,11 @@ vi.mock('@/hooks/useAdminDashboardEvidence', () => ({ useAdminDashboardSnapshots
 vi.mock('@/hooks/useHapticFeedback', () => ({ triggerHaptic: vi.fn() }));
 vi.mock('@/hooks/useSoundEffects', () => ({ playSound: vi.fn() }));
 const snapshots = () => ({ data: { coverage: 0, complete: false, gmv: null, platformRevenue: null, completedBookings: null }, period: { days: 7, from: '2026-10-13', through: '2026-10-19', dates: [] }, isLoading: false, isError: false, isFetching: false, dataUpdatedAt: 0, refetch: state.refetch });
-const health = () => ({ data: [{ key: 'stripe_mode', status: 'configured' }, { key: 'admin_emails', status: 'unknown' }, { key: 'verticals', status: 'unknown' }], isLoading: false, isError: false, isFetching: false, dataUpdatedAt: 0, refetch: state.refetch });
+const health = (): Partial<ReturnType<typeof useAdminPlatformStatus>> => ({ data: [{ key: 'stripe_mode', status: 'configured' }, { key: 'admin_emails', status: 'unknown' }, { key: 'verticals', status: 'unknown' }], isLoading: false, isError: false, isFetching: false, dataUpdatedAt: 0, refetch: state.refetch });
 beforeEach(() => {
   vi.clearAllMocks(); state.language = 'en';
-  vi.mocked(useAdminDashboardSnapshots).mockReturnValue(snapshots() as ReturnType<typeof useAdminDashboardSnapshots>);
-  vi.mocked(useAdminPlatformStatus).mockReturnValue(health() as ReturnType<typeof useAdminPlatformStatus>);
+  vi.mocked(useAdminDashboardSnapshots, { partial: true }).mockReturnValue(snapshots());
+  vi.mocked(useAdminPlatformStatus, { partial: true }).mockReturnValue(health());
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 const mount = (element: React.ReactNode) => render(<MemoryRouter>{element}</MemoryRouter>);
@@ -32,14 +32,14 @@ describe('dashboard period metrics', () => {
     expect(screen.getByRole('link', { name: /Open reports/ })).toHaveAttribute('href', '/admin/finance');
   });
   it('does not retain successful amounts as current after a refetch error', () => {
-    vi.mocked(useAdminDashboardSnapshots).mockReturnValue({ ...snapshots(), data: { coverage: 7, complete: true, gmv: 123, platformRevenue: 7, completedBookings: 2 }, isError: true } as ReturnType<typeof useAdminDashboardSnapshots>);
+    vi.mocked(useAdminDashboardSnapshots, { partial: true }).mockReturnValue({ ...snapshots(), data: { coverage: 7, complete: true, gmv: 123, platformRevenue: 7, completedBookings: 2 }, isError: true });
     mount(<AdminRevenueBlock />);
     expect(screen.getByRole('alert')).toHaveTextContent('unavailable');
     expect(screen.getAllByText('—')).toHaveLength(3);
     expect(screen.queryByText('123')).not.toBeInTheDocument();
   });
   it('keeps each metric distinct and omits unrelated growth', () => {
-    vi.mocked(useAdminDashboardSnapshots).mockReturnValue({ ...snapshots(), data: { coverage: 7, complete: true, gmv: 120, platformRevenue: 7, completedBookings: 2 } } as ReturnType<typeof useAdminDashboardSnapshots>);
+    vi.mocked(useAdminDashboardSnapshots, { partial: true }).mockReturnValue({ ...snapshots(), data: { coverage: 7, complete: true, gmv: 120, platformRevenue: 7, completedBookings: 2 } });
     mount(<AdminRevenueBlock />);
     expect(screen.getByText('120')).toBeVisible();
     expect(screen.getByText('7')).toBeVisible();
@@ -49,8 +49,8 @@ describe('dashboard period metrics', () => {
   it('ages cached evidence visibly while the screen remains open', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
-    vi.mocked(useAdminDashboardSnapshots).mockReturnValue({ ...snapshots(), dataUpdatedAt: Date.now() } as ReturnType<typeof useAdminDashboardSnapshots>);
-    vi.mocked(useAdminPlatformStatus).mockReturnValue({ ...health(), dataUpdatedAt: Date.now() } as ReturnType<typeof useAdminPlatformStatus>);
+    vi.mocked(useAdminDashboardSnapshots, { partial: true }).mockReturnValue({ ...snapshots(), dataUpdatedAt: Date.now() });
+    vi.mocked(useAdminPlatformStatus, { partial: true }).mockReturnValue({ ...health(), dataUpdatedAt: Date.now() });
     mount(<><GoLiveChecklist /><AdminRevenueBlock /></>);
     expect(screen.queryByText(/Stale check/)).not.toBeInTheDocument();
     act(() => { vi.advanceTimersByTime(70_000); });
