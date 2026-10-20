@@ -69,7 +69,7 @@ const A_ARRIVAL: ClusterLanding = {
       slug: 'airport-transfer',
       label: { ru: 'Трансфер из аэропорта', en: 'Airport transfer' },
       oneLiner: { ru: 'Седан 800 THB, минивэн 1 200 THB.', en: 'Sedan 800 THB, minivan 1,200 THB.' },
-      href: '/landing/airport-transfer',
+      href: '/transfer',
     },
     {
       slug: 'esim',
@@ -148,7 +148,7 @@ const A_ARRIVAL: ClusterLanding = {
   ],
   primaryCta: {
     label: { ru: 'Заказать трансфер', en: 'Book a transfer' },
-    href: '/landing/airport-transfer',
+    href: '/transport/airport-transfer',
     subtitle: { ru: 'Цена в THB, оплата в приложении.', en: 'Price in THB, paid in the app.' },
   },
   secondaryCta: {
@@ -209,7 +209,7 @@ const D_INVESTMENT: ClusterLanding = {
       slug: 'clearview-rating',
       label: { ru: 'ClearView™ рейтинг', en: 'ClearView™ rating' },
       oneLiner: { ru: '8 категорий, AAA–CCC, отчёт за 5 рабочих дней.', en: '8 categories, AAA–CCC, 5-day report.' },
-      href: '/clearview',
+      href: '/property/clearview',
     },
     {
       slug: 'offplan-catalog',
@@ -282,7 +282,7 @@ const D_INVESTMENT: ClusterLanding = {
   ],
   primaryCta: {
     label: { ru: 'Заказать ClearView-отчёт', en: 'Order a ClearView report' },
-    href: '/clearview',
+    href: '/property/clearview',
     subtitle: { ru: 'Готов за 5 рабочих дней.', en: 'Ready in 5 working days.' },
   },
   secondaryCta: {
@@ -777,7 +777,7 @@ const I_LIFESTYLE: ClusterLanding = {
     { ru: 'Заказать опыт под повод: предложение, юбилей, корпоратив.', en: 'Curate an experience for a proposal, anniversary or corporate event.' },
   ],
   services: [
-    { slug: 'restaurants', label: { ru: 'Рестораны и брони', en: 'Restaurants & reservations' }, oneLiner: { ru: 'PRU, Suay, Mia, Black Ginger — стол к нужному часу.', en: 'PRU, Suay, Mia, Black Ginger — table at the right time.' }, href: '/dining' },
+    { slug: 'restaurants', label: { ru: 'Рестораны и брони', en: 'Restaurants & reservations' }, oneLiner: { ru: 'PRU, Suay, Mia, Black Ginger — стол к нужному часу.', en: 'PRU, Suay, Mia, Black Ginger — table at the right time.' }, href: '/restaurants' },
     { slug: 'yacht-charter', label: { ru: 'Аренда яхт', en: 'Yacht charter' }, oneLiner: { ru: 'Катамараны, моторные яхты, sunset cruise — от ฿18 000.', en: 'Catamarans, motor yachts, sunset cruise — from ฿18,000.' }, href: '/yachts' },
     { slug: 'wellness', label: { ru: 'Wellness и spa', en: 'Wellness & spa' }, oneLiner: { ru: 'Six Senses, Anantara, COMO Shambhala — программы детокса.', en: 'Six Senses, Anantara, COMO Shambhala — detox programs.' }, href: '/wellness' },
     { slug: 'fight-camps', label: { ru: 'Muay Thai и fight camps', en: 'Muay Thai & fight camps' }, oneLiner: { ru: 'Tiger, Sinbi, Phuket Top Team — пробное занятие.', en: 'Tiger, Sinbi, Phuket Top Team — trial session.' }, href: '/fitness/muay-thai' },
