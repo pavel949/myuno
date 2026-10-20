@@ -54,7 +54,7 @@ export default function ForDevelopers() {
   const isRu = language === 'ru';
 
   return (
-    <AppLayout showHeader={false}>
+    <AppLayout usePageContainer={false} showHeader={false}>
       {(() => {
         const title = isRu
           ? 'Застройщикам Пхукета — myUNO | Проекты и лиды'
@@ -79,10 +79,10 @@ export default function ForDevelopers() {
       })()}
 
       <div className="min-h-screen bg-background">
-        <LandingChrome isRu={isRu} />
+        <LandingChrome isRu={isRu} variant="marketing" />
         <section className="relative overflow-hidden py-16 md:py-24">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
-          <LandingContainer className="relative max-w-3xl text-center">
+          <LandingContainer variant="marketing" className="relative text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -92,12 +92,12 @@ export default function ForDevelopers() {
                 <HardHat className="w-3.5 h-3.5" />
                 {isRu ? 'Для девелоперов' : 'For developers'}
               </Badge>
-              <h1 className="text-3xl md:text-5xl font-bold font-display tracking-tight mb-4">
+              <h1 className="text-h1 md:text-display font-display mb-4">
                 {isRu
                   ? 'Ваш проект — в супераппе, откуда приходят сделки'
                   : 'Your project in the super-app where deals start'}
               </h1>
-              <p className="text-muted-foreground text-base md:text-lg mb-8">
+              <p className="text-muted-foreground text-body-lg max-w-prose mx-auto mb-8">
                 {isRu
                   ? 'Новострои, off-plan, брендированные страницы и доступ к аудитории myUNO на Пхукете.'
                   : 'Newbuilds, off-plan, branded pages, and access to myUNO’s Phuket audience.'}
@@ -123,7 +123,7 @@ export default function ForDevelopers() {
         </section>
 
         <LandingSection>
-          <LandingContainer className="max-w-5xl pb-16 grid sm:grid-cols-2 gap-4">
+          <LandingContainer variant="marketing" className="pb-16 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {benefits.map((b, i) => (
             <motion.div
               key={b.titleEn}
@@ -134,10 +134,10 @@ export default function ForDevelopers() {
               <Card className="h-full border-border/80">
                 <CardContent className="pt-6">
                   <b.icon className="w-8 h-8 text-primary mb-3" />
-                  <h2 className="font-display font-semibold text-lg mb-1">
+                  <h2 className="font-display text-h2 mb-2">
                     {isRu ? b.titleRu : b.titleEn}
                   </h2>
-                  <p className="text-sm text-muted-foreground">{isRu ? b.descRu : b.descEn}</p>
+                  <p className="text-body-lg text-muted-foreground">{isRu ? b.descRu : b.descEn}</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -147,8 +147,8 @@ export default function ForDevelopers() {
 
         {/* How it works */}
         <LandingSection>
-          <LandingContainer className="max-w-3xl pb-16">
-          <h2 className="text-2xl font-display font-bold text-center mb-8">
+          <LandingContainer variant="marketing" className="pb-16">
+          <h2 className="text-h2 font-display text-center mb-8">
             {isRu ? 'Как это работает' : 'How it works'}
           </h2>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -197,9 +197,9 @@ export default function ForDevelopers() {
 
         {/* Bottom CTA */}
         <LandingSection border={false}>
-          <LandingContainer className="max-w-3xl pb-20 text-center">
+          <LandingContainer variant="marketing" className="pb-20 text-center">
           <div className="rounded-none border border-border/80 bg-card p-8">
-            <h3 className="text-xl font-display font-bold mb-2">
+            <h3 className="text-h3 font-display mb-2">
               {isRu ? 'Готовы разместить проект?' : 'Ready to list your project?'}
             </h3>
             <p className="text-sm text-muted-foreground mb-6">

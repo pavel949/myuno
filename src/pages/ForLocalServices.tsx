@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { LandingChrome } from '@/components/landings';
+import { LandingChrome, LandingContainer } from '@/components/landings';
 import {
   Store, CalendarDays, Banknote, ShieldCheck, ArrowRight, Wrench,
 } from 'lucide-react';
@@ -53,7 +53,7 @@ export default function ForLocalServices() {
   const isRu = language === 'ru';
 
   return (
-    <AppLayout showHeader={false}>
+    <AppLayout usePageContainer={false} showHeader={false}>
       {(() => {
         const title = isRu
           ? 'Локальным сервисам Пхукета — myUNO | Партнёрская программа'
@@ -78,10 +78,10 @@ export default function ForLocalServices() {
       })()}
 
       <div className="min-h-screen bg-background">
-        <LandingChrome isRu={isRu} />
-        <section className="relative overflow-hidden py-16 md:py-24 px-4">
+        <LandingChrome isRu={isRu} variant="marketing" />
+        <section className="relative overflow-hidden py-16 md:py-24">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-background to-primary/10" />
-          <div className="relative max-w-3xl mx-auto text-center">
+          <LandingContainer variant="marketing" className="relative text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -91,12 +91,12 @@ export default function ForLocalServices() {
                 <Wrench className="w-3.5 h-3.5" />
                 {isRu ? 'Для поставщиков услуг' : 'For service providers'}
               </Badge>
-              <h1 className="text-3xl md:text-5xl font-bold font-display tracking-tight mb-4">
+              <h1 className="text-h1 md:text-display font-display mb-4">
                 {isRu
                   ? 'Клиенты из супераппа — на ваш календарь'
                   : 'Super-app customers — on your calendar'}
               </h1>
-              <p className="text-muted-foreground text-base md:text-lg mb-8">
+              <p className="text-muted-foreground text-body-lg max-w-prose mx-auto mb-8">
                 {isRu
                   ? 'Резиденты, туристы и консьерж маршрутизируют запросы в проверенных партнёров.'
                   : 'Residents, tourists, and concierge route requests to verified partners.'}
@@ -114,10 +114,11 @@ export default function ForLocalServices() {
                 </Button>
               </div>
             </motion.div>
-          </div>
+          </LandingContainer>
         </section>
 
-        <section className="max-w-5xl mx-auto px-4 pb-16 grid sm:grid-cols-2 gap-4">
+        <section>
+        <LandingContainer variant="marketing" className="pb-16 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {benefits.map((b, i) => (
             <motion.div
               key={b.titleEn}
@@ -128,17 +129,19 @@ export default function ForLocalServices() {
               <Card className="h-full border-border/80">
                 <CardContent className="pt-6">
                   <b.icon className="w-8 h-8 text-primary mb-3" />
-                  <h2 className="font-display font-semibold text-lg mb-1">
+                  <h2 className="font-display text-h2 mb-2">
                     {isRu ? b.titleRu : b.titleEn}
                   </h2>
-                  <p className="text-sm text-muted-foreground">{isRu ? b.descRu : b.descEn}</p>
+                  <p className="text-body-lg text-muted-foreground">{isRu ? b.descRu : b.descEn}</p>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
+        </LandingContainer>
         </section>
 
-        <section className="max-w-3xl mx-auto px-4 pb-20 text-center space-y-4">
+        <section>
+        <LandingContainer variant="marketing" className="pb-20 text-center space-y-4">
           <Button variant="secondary" onClick={() => navigate(APP_ROUTES.LIST_WITH_US)}>
             {isRu ? 'Разместить объект или услугу' : 'List a property or service'}
           </Button>
@@ -147,6 +150,7 @@ export default function ForLocalServices() {
               ? 'Уже есть аккаунт — войдите и откройте панель вендора из профиля.'
               : 'Already have an account — sign in and open the vendor panel from your profile.'}
           </p>
+        </LandingContainer>
         </section>
       </div>
     </AppLayout>

@@ -1,16 +1,19 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 
 const CONTAINER = 'mx-auto w-full max-w-6xl px-5';
 
 export function LandingContainer({
   className,
   children,
+  variant = 'default',
 }: {
   className?: string;
   children: React.ReactNode;
+  variant?: 'default' | 'marketing';
 }) {
-  return <div className={cn(CONTAINER, className)}>{children}</div>;
+  return <div className={cn(variant === 'marketing' ? PUBLIC_CONTENT_LAYOUT.marketing : CONTAINER, className)}>{children}</div>;
 }
 
 export function LandingSection({

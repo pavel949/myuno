@@ -5,6 +5,7 @@ import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { GlobalPreferencesControls } from '@/components/uno/GlobalPreferencesControls';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { PUBLIC_CONTENT_LAYOUT } from '@/design-system/ecosystemLayout';
 
 export interface LandingChromeProps {
   isRu: boolean;
@@ -12,6 +13,7 @@ export interface LandingChromeProps {
   endSlot?: React.ReactNode;
   showCurrency?: boolean;
   themeVariant?: 'buttons' | 'dropdown';
+  variant?: 'default' | 'marketing';
 }
 
 /**
@@ -22,10 +24,11 @@ export function LandingChrome({
   endSlot,
   showCurrency = true,
   themeVariant = 'buttons',
+  variant = 'default',
 }: LandingChromeProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border/40 bg-background">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 sm:px-5">
+      <div className={cn('flex h-14 items-center justify-between gap-2', variant === 'marketing' ? PUBLIC_CONTENT_LAYOUT.marketing : 'mx-auto max-w-6xl px-4 sm:px-5')}>
         <div className="min-w-0 shrink-0">
           <BrandWordmark />
         </div>
