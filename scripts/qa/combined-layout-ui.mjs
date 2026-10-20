@@ -5,6 +5,7 @@ import { mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { propertyFilterOptions } from './combined-layout-fixture-data.mjs';
 const root = process.cwd();
 const output = '/tmp/browser/combined-layout-isolated';
 await mkdir(output, { recursive: true });
@@ -13,7 +14,7 @@ const virtual = {
  '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'en',setLanguage:()=>{},t:key=>key});`,
  '@/contexts/AuthContext': `export const useAuth=()=>({user:new URLSearchParams(location.search).get('auth')==='guest'?null:{id:'synthetic',email:'fixture@example.invalid',user_metadata:{full_name:'Fixture Account'}},signOut:()=>{}});`,
  '@/contexts/ThemeContext': `export const useTheme=()=>({theme:'light',resolvedTheme:'light',setTheme:()=>{}});`,
- '@/contexts/CurrencyContext': `export const currencies={THB:{code:'THB',symbol:'฿',nameEn:'Thai baht',nameRu:'Бат',nameTh:'บาท'}};export const useCurrency=()=>({currency:'THB',currencyInfo:currencies.THB,setCurrency:()=>{},formatPrice:n=>'฿'+n});`,
+ '@/contexts/CurrencyContext': `export const currencies={THB:{code:'THB',symbol:'฿',name:'Thai baht',nameRu:'Бат',nameTh:'บาท'}};export const useCurrency=()=>({currency:'THB',currencyInfo:currencies.THB,setCurrency:()=>{},formatPrice:n=>'฿'+n});`,
  '@/contexts/CartContext': `export const useCart=()=>({getItemsByType:()=>[],getItemCount:()=>0,removeItem:()=>{}});`,
  '@/contexts/PlatformViewAsContext': `export const usePlatformViewAs=()=>({enter:()=>{}});`,
  '@/hooks/useUserContext': `export const useUserContext=()=>({availableRoles:['guest'],activeRole:'guest',switchContext:()=>{}});`,
@@ -29,7 +30,7 @@ const virtual = {
  '@/components/layout/AppLayout': `import React from 'react';import{NavShell}from'${root.replaceAll('\\','/')}/src/components/nav/NavShell.tsx';import{useNavShellActive}from'${root.replaceAll('\\','/')}/src/components/nav/NavShellContext.tsx';export const AppLayout=({children,showHeader=true})=>useNavShellActive()?<>{children}</>:<NavShell role="guest" showHeader={showHeader}>{children}</NavShell>;`,
  '@/hooks/useProperties': `export const usePropertiesInfinite=()=>({data:{pages:[{properties:[]}]},isLoading:false,isError:false,hasNextPage:false,isFetchingNextPage:false,fetchNextPage:()=>{},refetch:()=>{}});`,
  '@/hooks/useRecentlyViewed': `export const useRecentlyViewed=()=>({items:[]});`,
- '@/hooks/usePropertyFilterOptions': `export const usePropertyFilterOptions=()=>({filterConfig:[],propertyTypes:[],districts:[],amenities:[],highlights:[]});`,
+ '@/hooks/usePropertyFilterOptions': `export const usePropertyFilterOptions=()=>(${JSON.stringify(propertyFilterOptions)});`,
  '@/hooks/usePropertyQuickFilters': `export const usePropertyQuickFilters=()=>({districts:[],quickFilters:[],projects:[]});`,
  '@/hooks/usePersonaFilter': `export const usePersonaFilter=()=>({applyFilter:rows=>rows});`,
  '@/components/seo': `export const SEOHead=()=>null;`,

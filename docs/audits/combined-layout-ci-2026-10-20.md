@@ -21,11 +21,27 @@ button bounds/non-overlap and all page CTA handlers/destinations. Management
 pricing scroll/module anchors and captured WhatsApp URL are checked without
 opening a window or contacting a provider.
 
-The workflow runs this fixture sequentially after the existing two-slot fixture
-runner under the same network-denying Node environment. The existing browser
-step and final enforcement gate remain intact. A 240-second timeout bounds the
-new fixture; nonzero exit fails the browser step. Screenshots, matrix results and
-bundle inputs are uploaded with the existing `/tmp/browser/` artifact.
+The workflow runs this fixture in an early dedicated step immediately after
+dependency installation under the same network-denying Node environment. Its
+own artifact uploads immediately, before slower checks. The existing two-slot
+browser runner and all mandatory gates remain intact; the final gate additionally
+requires the early layout step to pass. A 240-second timeout bounds the fixture.
+
+The first remote attempt on c365a723 failed before geometry: the filter hook mock
+incorrectly supplied `filterConfig: []`, while actual UniversalFilter calls
+`config.sections.map`. Runtime errors contained the corresponding undefined-map
+error and no blocked requests. **Zero geometry cases passed on that run.** The
+payload is now `{sections: []}` and shared between the virtual hook and a JSDOM
+regression that renders, opens and submits the actual UniversalFilter.
+
+The mock audit compared consumed fields with PropertyIndex, AirbnbSearchBar,
+PropertySearchSheet, TopBar, UserAvatarMenu, MiniCart and preference controls:
+property data pages and query flags; quick-filter district arrays; persona filter
+function; account metadata/role/notification/owner fields; cart methods; theme
+methods; currency symbol/code/names/formatter; and language/translation methods.
+CurrencySwitcher consumes `name`, so the synthetic currency record now supplies
+that field rather than `nameEn`. Mocks remain narrow empty/signed-in fixtures;
+this audit does not certify unexercised backend or overlay behavior.
 
 ## Limits
 
