@@ -163,7 +163,7 @@ The combined branch push succeeded, but creating its draft PR was explicitly den
 
 The prior auth commit, receipts draft, company upload, PR125/157 metadata, mark-ready/merge and Lovable Publish blockers remain unchanged. PR8 rejection and PR51 unrecovered Guardian reasons remain separate. Nothing has been merged to main or published.
 
-## 20:00 UTC bounded integration checkpoint
+## 19:57 UTC bounded integration checkpoint
 
 Main was independently re-read and remains
 `fb4b944a4c736f680ddb8e4b178f833030e021b1`. Homepage PR156 exact head
@@ -206,3 +206,24 @@ and PR51's unrecovered rejection reasons remain unchanged. No denied action was
 retried. Current supported Library host uploads succeeded for the final35-PNG
 archive and four representative screenshots; these are synthetic actual-App9d
 screens, not production activation or real catalogue availability evidence.
+
+## 20:03 UTC Tailwind terminal outcome
+
+PR11 exact56969cdef0ed4c6ad4d744a35a4e87e40b178647 is now SUCCESS in
+standard39662745462 and connected39662745431/job119439742185 (20:02:48 UTC).
+Decoded job logs confirm3914 tests/288 files, three120-test focused timezone
+passes, build/type/lint, compact58, all22 central fixture groups and final
+admin-shell18/dashboard60/public-wide76 enforcement. The earlier single shell
+failure did not recur; its causal explanation remains unknown, not retrospectively
+claimed fixed. Evidence artifact12376568658; actual-shell artifact12377715754.
+This raises individually green prepared heads to17, not17 combined release-ready PRs.
+
+Local combined UI candidate36f6080ddf9a5732479e2ad65daa440cc7f3e1ef has
+TypeScript build-mode PASS and focused165/165 across10 files PASS. The focused
+selection includes unchanged workspace forms/service route tests, actor-bound
+service context/admin framework, reference FX, consent boundaries and home search.
+Types and focused tests briefly overlapped; no resource-isolated benchmark claim
+is made. Actual-App10-case responsive empty/error checks are still in progress.
+The independent source review GO is limited to local verification, not release.
+Nonblocking observed telemetry slug mismatch bangtao/naiharn versus canonical
+bang-tao/nai-harn is recorded for correction before final combined acceptance.
