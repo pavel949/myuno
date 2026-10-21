@@ -57,7 +57,7 @@ const ast=ts.createSourceFile('sender.ts',senderSource,ts.ScriptTarget.Latest,tr
 const sender=ast.statements.find(s=>ts.isFunctionDeclaration(s)&&s.name?.text==='processOutreach');
 if(!sender) throw new Error('Canonical sender loop missing');
 const loopJs=ts.transpile((sender as ts.FunctionDeclaration).getText(ast),{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None});
-const createLoop=(generate:unknown,send:unknown)=>new Function('vendorOutreachEligible','generatePersonalizedMessage','sendWhatsApp','sendEmail','FOLLOW_UP_DELAYS_DAYS',`${loopJs}; return processOutreach;`)(vendorOutreachEligible,generate,send,send,[3,7,14]);
+const createLoop=(generate:unknown,send:unknown,eligible:unknown=vendorOutreachEligible)=>new Function('vendorOutreachEligible','generatePersonalizedMessage','sendWhatsApp','sendEmail','FOLLOW_UP_DELAYS_DAYS',`${loopJs}; return processOutreach;`)(eligible,generate,send,send,[3,7,14]);
 it.each(['opted_out','responded','unsubscribed'])('actual sender skips %s before generation, sends or mutation',async status=>{
  const f=fixture({outreach_status:status,email:'vendor@example.test',phone:null});
  const generate=vi.fn(); const send=vi.fn();
@@ -71,4 +71,12 @@ it('actual sender does not generate or send when suppression lookup fails',async
  const generate=vi.fn(); const send=vi.fn();
  expect(await createLoop(generate,send)(f.client,[{id:'contact',email:'vendor@example.test',phone:null}],2,'house')).toEqual([]);
  expect(generate).not.toHaveBeenCalled();expect(send).not.toHaveBeenCalled();
+});
+it('actual sender rechecks after slow generation and halts changed eligibility before delivery or mutation',async()=>{
+ const f=fixture();
+ const eligible=vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+ const generate=vi.fn().mockResolvedValue({body:'Synthetic message, never sent'});const send=vi.fn();
+ expect(await createLoop(generate,send,eligible)(f.client,[{id:'contact',email:'vendor@example.test',phone:null}],2,'house')).toEqual([]);
+ expect(eligible).toHaveBeenCalledTimes(2);expect(generate).toHaveBeenCalledOnce();
+ expect(send).not.toHaveBeenCalled();expect(f.from).not.toHaveBeenCalled();
 });

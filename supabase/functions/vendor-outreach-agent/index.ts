@@ -249,6 +249,10 @@ async function processOutreach(
     // Generate personalized message
     const message = await generatePersonalizedMessage(contact, sequence, channel);
 
+    // Generation can take time: consent or the destination may have changed.
+    // Recheck again immediately before the external delivery boundary.
+    if (!(await vendorOutreachEligible(supabase, contact.id, companyId, channel, (channel === "email" ? contact.email : contact.phone) || ""))) continue;
+
     let success = false;
     let error: string | undefined;
 

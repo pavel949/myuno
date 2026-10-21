@@ -14,7 +14,8 @@ responded or unsubscribed contact could still be returned. The sender did not
 check the existing `suppressed_emails` table.
 
 A bounded containment adds a canonical contact re-read, constrained by ID,
-house company and vendor type, before generation/delivery/mutation. Only known
+house company and vendor type, before generation and again after generation
+immediately before delivery/mutation. Only known
 sendable statuses are accepted. The chosen destination must still match the
 current contact. Email suppression must explicitly return no row with no error;
 missing rows, errors, unknown statuses and thrown reads deny sending. No new
