@@ -17,3 +17,17 @@ recovery with unchanged key/filters/ordering/data. External fetch is forbidden.
 Scoped lint and diff checks passed. No heavy type/build or responsive browser
 run was performed in this isolated tranche; parent owns integrated actual-App
 verification after review. No push, PR metadata, merge or deployment.
+
+## Nested search calendar pointer obstruction
+
+Integrated actual-App screenshots at 768 and 1440 revealed the desktop date
+popover behind its parent search Sheet. Native pointer regression on the prior
+candidate failed at the unchanged five-second click limit: the date was visible,
+enabled and stable, but the search Sheet intercepted the pointer. Keyboard-only
+selection had passed and did not prove pointer usability.
+
+The specialized HomeSearchDateRange popover now uses layer 130 above the existing
+Sheet layer 120. The shared Popover primitive and other dialogs are unchanged.
+Final actual-App pointer hit testing, native clicks, keyboard selection, focus
+restoration, range semantics and screenshot inspection remain pending integrated
+verification. No forced click or programmatic DOM click counts as acceptance.
