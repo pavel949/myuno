@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { parseCivilDate, stayOccupiesDate, civilDateKey } from '@/lib/hotelDates';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -34,12 +35,13 @@ interface CalendarDayEventsSheetProps {
   onBlockDate?: () => void;
   onUnblockDate?: () => void;
   propertyTitle?: string;
+  propertyId?: string;
 }
 
 export function CalendarDayEventsSheet({
   open, onOpenChange, date, bookings, tasks, availability,
   onAddTask, onViewBooking, onCompleteTask, onStartTaskProgress,
-  onAddBooking, onBlockDate, onUnblockDate, propertyTitle,
+  onAddBooking, onBlockDate, onUnblockDate, propertyTitle, propertyId,
 }: CalendarDayEventsSheetProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -55,6 +57,7 @@ export function CalendarDayEventsSheet({
 
   const actionButtons = (
     <div className="grid grid-cols-3 gap-2 w-full">
+      {propertyId && <Button variant="outline" size="sm" asChild><Link to={`/mc/rates?property=${propertyId}&view=calendar&date=${civilDateKey(date)}`}>{isRu ? 'Изменить цену' : 'Edit price'}</Link></Button>}
       <Button variant="outline" size="sm" className="gap-1.5"
         onClick={() => { onOpenChange(false); onAddTask(); }}>
         <Plus className="h-4 w-4" />{isRu ? 'Задача' : 'Task'}
