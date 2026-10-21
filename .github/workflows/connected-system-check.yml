@@ -200,6 +200,7 @@ jobs:
           done
           node scripts/qa/scheduled-backup-integrity.mjs
           node scripts/qa/vendor-outreach-boundary.mjs
+          node scripts/qa/currency-rate-updater-boundary.mjs
           node scripts/qa/transfer-operator-conflicts.mjs
           node scripts/qa/final-order-handlers.mjs
           python3 -m unittest discover -s scripts/qa -p 'test_browser_fixture_runner.py'
