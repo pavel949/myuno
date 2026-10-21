@@ -68,7 +68,7 @@ function ProjectCard({ project, mode, propertyType, language, queryKey, onCount,
     else if (count.isError) onCount(project.id, queryKey, null);
   }, [count.data?.total, count.isError, count.isSuccess, onCount, project.id, queryKey]);
   const isRu = language === 'ru';
-  const lang = language === 'ru' ? 'ru' : 'en';
+  const lang = language === 'ru' ? 'ru' : language === 'th' ? 'th' : 'en';
   const name = (isRu ? project.name_ru : project.name_en) || project.name_en || project.name_ru;
   const location = projectLocation(project);
   const image = [project.cover_image, ...(project.images || [])]
@@ -80,20 +80,20 @@ function ProjectCard({ project, mode, propertyType, language, queryKey, onCount,
 
   return (
     <article hidden={hidden} className="home-project-card">
-      <Link to={href} className="home-project-card-link" aria-label={`${name} — ${copy.open[isRu ? 'ru' : 'en']}`}>
+      <Link to={href} className="home-project-card-link" aria-label={`${name} — ${copy.open[lang]}`}>
         <div className="home-project-card-image">
-          {image ? <img src={image} alt={name} loading="lazy" decoding="async" width="720" height="480" /> : <div className="home-project-no-image"><Building2 size={34} aria-hidden="true" /><span>{copy.noImage[isRu ? 'ru' : language === 'th' ? 'th' : 'en']}</span></div>}
+          {image ? <img src={image} alt={name} loading="lazy" decoding="async" width="720" height="480" /> : <div className="home-project-no-image"><Building2 size={34} aria-hidden="true" /><span>{copy.noImage[lang]}</span></div>}
         </div>
         <div className="home-project-card-copy">
           {location && <p className="home-project-location"><MapPin size={15} aria-hidden="true" />{getDistrictLabel(location, lang)}</p>}
           <h3>{name}</h3>
           <p className="home-project-count" aria-live="polite">
-            {count.isLoading ? '…' : count.isError ? copy.countError[isRu ? 'ru' : language === 'th' ? 'th' : 'en'] : count.data?.total
+            {count.isLoading ? '…' : count.isError ? copy.countError[lang] : count.data?.total
               ? formatListingCount(count.data.total, language)
-              : copy.noInventory[isRu ? 'ru' : language === 'th' ? 'th' : 'en']}
-            {!count.isLoading && !count.isError && count.data?.total ? <span>{copy.countNote[isRu ? 'ru' : language === 'th' ? 'th' : 'en']}</span> : null}
+              : copy.noInventory[lang]}
+            {!count.isLoading && !count.isError && count.data?.total ? <span>{copy.countNote[lang]}</span> : null}
           </p>
-          <span className="home-project-card-cta">{copy.open[isRu ? 'ru' : language === 'th' ? 'th' : 'en']}<ArrowRight size={17} aria-hidden="true" /></span>
+          <span className="home-project-card-cta">{copy.open[lang]}<ArrowRight size={17} aria-hidden="true" /></span>
         </div>
       </Link>
     </article>
