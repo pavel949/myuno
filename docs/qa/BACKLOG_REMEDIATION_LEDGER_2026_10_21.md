@@ -75,3 +75,22 @@ Auth/journey WIP remains uncommitted in its isolated worktree at homepage f78295
 Transport checkout linkage source `20a1a6832e600b859fa039c6e2efac675fe183b1` is pushed on `codex/transport-contract-audit-20261021`.52 isolated cases passed, including real disposable PostgreSQL JSONB compare-and-swap concurrency and actual handler/SDK tests. The bounded fix preserves metadata, rejects conflicting/unknown sessions, rereads uncertain acknowledgements and only retires a known uncommitted losing session. No financial/type/refund policy was changed. Deno runtime/npm resolution and deployed PostgREST/RLS are NOT TESTED. Full transfer remains NO-GO pending the REQUEST versus BOOK+PAY business contract and existing refund/type/writer gates.
 
 Independent visual review now explicitly inspects real rendered pixels with viewport/commit/data-mode attribution. The cloud product-design skill package is unavailable; repository redesign-existing-projects skill and supported Chromium/Playwright inspection are used. No invented catalog content, stock-photo location claims or live transactions are introduced for audit.
+
+
+## Journey coverage boundaries
+
+| Journey | Isolated evidence | Whole live journey |
+| --- | --- | --- |
+| Public homepage, search refinement, catalog rails and routes | PASS on PR156 exact f782951; existing21-group browser CI, synthetic catalog states and responsive interaction | NOT TESTED on new production version; unpublished |
+| Property/PMS booking write authority, overlap and concurrency | PASS on PR125 local PostgreSQL contract cases and connected fixtures | NO-GO: prerequisite/writer rollout and deployed privilege parity unaccepted |
+| Service/editor navigation and actor-bound reads | PASS on PR123 focused/browser/connected evidence | NOT TESTED with live staff/customer/provider accounts or notifications |
+| Registration/login/recovery | Structural isolated flows PASS, Thai recovery localization FAIL; double-submit/unmount guard WIP preserved | NOT TESTED against actual auth/OAuth/SMTP; commit approval blocked |
+| Customer order receipts | Focused actual components PASS for canonical owned order reads, error/unknown and cart preservation | NOT TESTED against real payments/orders; PR creation blocked; final full suite pending |
+| Transport checkout link | PASS52 lifecycle/handler/SDK/disposable SQL cases | NO-GO: trusted tariff/object authority, subtype parity, recognition contract and atomic refund unresolved |
+| Public FX reference display | PASS actual component/RPC-shaped fixture values, empty/error and18 browser cases on PR158 | NOT TESTED commercial exchange/merchant transactions; none claimed |
+| Sender permission containment | PASS focused denial cases and source review on PR157; final connected CI pending | NO-GO for live outbound delivery/promotion activation |
+| React19 modal/calendar/help controls | PASS3917 tests plus focused native browser interactions; tablet screenshot inspected | Tablet repeated interaction NOT TESTED after contention timeout; final connected CI pending |
+| Tailwind4 controls | PASS light/dark390/1440 keyboard and forced-colors fixture; migration uncommitted | Whole-app styled acceptance pending; first geometry run failed stability under load |
+| Administrative authorization and operational scope | Existing source safeguards retained; selected contract fixtures PASS | NOT TESTED as every real role/module/action on deployed data; no blanket certification |
+
+This is a family-level evidence matrix, not a claim that every declared route or every combination has been executed. Screen-only, source review, synthetic read fixtures, local database semantics and live integration are different evidence levels. Public version checks during this follow-up returned a tunnel403 on both domains; current production rendering/version is therefore not freshly verified.
