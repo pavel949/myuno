@@ -49,7 +49,7 @@ function formatListingCount(total: number, language: string) {
 }
 
 function projectLocation(project: PropertyProject) {
-  return project.location_area || project.district || '';
+  return project.district || '';
 }
 
 function ProjectCard({ project, mode, propertyType, language, queryKey, onCount, hidden }: {
