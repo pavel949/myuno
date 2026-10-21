@@ -2,13 +2,8 @@ import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CalmClusterHero } from '@/components/uno/CalmClusterHero';
-import { ClusterAppCard } from '@/components/uno/ClusterAppCard';
+import { GroupedServiceDestinations, type ServiceDestination } from '@/components/services/GroupedServiceDestinations';
 import { APP_ROUTES } from '@/lib/config/routes';
-import {
-  getServiceCatalogStatus,
-  getServiceIcon,
-  type ServiceStatus,
-} from '@/lib/catalog';
 import {
   Plane,
   PlaneLanding,
@@ -29,22 +24,7 @@ import { ClusterBreadcrumb } from '@/components/navigation/ClusterBreadcrumb';
 import { ExploreMoreRail } from '@/components/navigation/ExploreMoreRail';
 import { SEOHead } from '@/components/seo';
 
-interface ClusterApp {
-  /** Catalog `service.id` when present in SSOT; arbitrary ids use `fallbackIcon` only. */
-  serviceId: string;
-  label: string;
-  labelRu: string;
-  desc: string;
-  descRu: string;
-  path: string;
-  fallbackIcon: LucideIcon;
-  /** When set, overrides catalog `status` (e.g. routes not yet in taxonomy). */
-  statusOverride?: ServiceStatus;
-}
-
-function resolveStatus(app: ClusterApp): ServiceStatus {
-  return app.statusOverride ?? getServiceCatalogStatus(app.serviceId) ?? 'available';
-}
+type ClusterApp = ServiceDestination;
 
 /** Short trips & holidays (1–4 weeks). */
 const VISITING_PRE_ARRIVAL: ClusterApp[] = [
@@ -269,27 +249,6 @@ function SectionHeader({
   );
 }
 
-function AppGrid({ apps, t }: { apps: ClusterApp[]; t: boolean }) {
-  return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-      {apps.map((app) => {
-        const Icon = getServiceIcon(app.serviceId, app.fallbackIcon);
-        return (
-          <ClusterAppCard
-            key={app.path}
-            clusterId="arrive"
-            icon={Icon}
-            title={t ? app.labelRu : app.label}
-            description={t ? app.descRu : app.desc}
-            path={app.path}
-            status={resolveStatus(app)}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
 export default function ArriveClusterPage() {
   const { language } = useLanguage();
   const t = language === 'ru';
@@ -354,7 +313,7 @@ export default function ArriveClusterPage() {
                   title={t ? 'До отъезда' : 'Before You Come'}
                   description={t ? 'Бронируйте за 1–2 недели в высокий сезон' : 'Book 1–2 weeks ahead in high season'}
                 />
-                <AppGrid apps={VISITING_PRE_ARRIVAL} t={t} />
+                <GroupedServiceDestinations apps={VISITING_PRE_ARRIVAL} clusterId="arrive" idPrefix="visit-before" />
               </div>
               <div>
                 <SectionHeader
@@ -362,7 +321,7 @@ export default function ArriveClusterPage() {
                   title={t ? 'День прилёта' : 'Day of Arrival'}
                   description={t ? 'Первые часы на острове' : 'Your first hours on the island'}
                 />
-                <AppGrid apps={VISITING_DAY_ONE} t={t} />
+                <GroupedServiceDestinations apps={VISITING_DAY_ONE} clusterId="arrive" idPrefix="visit-arrival" />
               </div>
             </>
           ) : (
@@ -373,7 +332,7 @@ export default function ArriveClusterPage() {
                   title={t ? 'До переезда' : 'Before the move'}
                   description={t ? 'Визы, жильё, школы и документы' : 'Visas, housing, schools & paperwork'}
                 />
-                <AppGrid apps={MOVING_PRE} t={t} />
+                <GroupedServiceDestinations apps={MOVING_PRE} clusterId="arrive" idPrefix="move-before" />
               </div>
               <div>
                 <SectionHeader
@@ -381,7 +340,7 @@ export default function ArriveClusterPage() {
                   title={t ? 'Первые недели' : 'First weeks'}
                   description={t ? 'Быт, банк и ориентация по районам' : 'Banking, SIM, and finding your base'}
                 />
-                <AppGrid apps={MOVING_FIRST_WEEKS} t={t} />
+                <GroupedServiceDestinations apps={MOVING_FIRST_WEEKS} clusterId="arrive" idPrefix="move-weeks" />
               </div>
             </>
           )}

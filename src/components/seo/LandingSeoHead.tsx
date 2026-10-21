@@ -77,7 +77,7 @@ function buildServiceSchema(
   canonicalUrl: string,
 ): Record<string, unknown> {
   const jobs = pickJobs(landing, type, language);
-  const serviceList = landing.services.map((s) => ({
+  const serviceList = landing.services.filter(s => !s.availability).map((s) => ({
     '@type': 'Offer',
     name: s.label[language],
     url: s.href.startsWith('http') ? s.href : `${canonicalUrl.split('/').slice(0, 3).join('/')}${s.href}`,

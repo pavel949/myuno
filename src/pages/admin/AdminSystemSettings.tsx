@@ -11,6 +11,8 @@ import { ControlLogsTab } from '@/components/admin/control/ControlLogsTab';
 import { FeatureFlagManager } from '@/components/admin/settings/FeatureFlagManager';
 import { OrgProfileEditor } from '@/components/admin/settings/OrgProfileEditor';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { LaunchSwitch } from '@/components/maintenance/LaunchSwitch';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface QuickLink {
   icon: React.ElementType;
@@ -46,6 +48,11 @@ export default function AdminSystemSettings() {
         icon={Settings}
         size="lg"
       />
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border p-4">
+        <p className="text-sm">{pickLang(language, { en: 'Site availability controls', ru: 'Управление доступностью сайта', th: 'การควบคุมการเปิดใช้งานเว็บไซต์' })}</p>
+        <LaunchSwitch variant="compact" />
+      </div>
 
       {/* Quick Links Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">

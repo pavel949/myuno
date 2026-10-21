@@ -9,7 +9,7 @@
  *
  * Reads PRIMARY_NAV[role] from the SSOT navigation model.
  */
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { ConsumerHeader } from './ConsumerHeader';
 import { Search, SlidersHorizontal } from 'lucide-react';
@@ -55,30 +55,49 @@ export const TopBar = memo(function TopBar({
   const location = useLocation();
   const isRu = language === 'ru';
   const [searchOpen, setSearchOpen] = useState(false);
+  const searchOrigin = useRef<HTMLElement | null>(null);
   const scrolled = useScrolled(60);
 
   const sidebarVisible = hasSidebar(role);
   const isConsumer = !sidebarVisible;
+  const headerFrame = role === 'admin'
+    ? 'mx-auto w-full max-w-none px-[var(--page-padding-x)]'
+    : ECOSYSTEM_HEADER_INNER;
   const cartEnabled = showCart ?? isConsumer;
   const navItems = PRIMARY_NAV[role];
   const showCrumbs = shouldShowBreadcrumbs(location.pathname);
 
+  const openSearch = useCallback((event?: React.MouseEvent<HTMLElement>) => {
+    if (role === 'admin') searchOrigin.current = event?.currentTarget
+      ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+    setSearchOpen(true);
+  }, [role]);
+  const handleSearchOpenChange = useCallback((open: boolean) => {
+    setSearchOpen(open);
+    // This controlled search has no Radix DialogTrigger to restore focus to.
+    if (!open && role === 'admin') {
+      const origin = searchOrigin.current;
+      requestAnimationFrame(() => { if (origin?.isConnected) origin.focus({ preventScroll: true }); });
+    }
+  }, [role]);
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // AdminLayout's command palette exclusively owns this shortcut.
+    if (role === 'admin') return;
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
-      setSearchOpen(true);
+      openSearch();
     }
-  }, []);
+  }, [openSearch, role]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
-    const openHandler = () => setSearchOpen(true);
+    const openHandler = () => openSearch();
     window.addEventListener('myuno:open-search', openHandler);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('myuno:open-search', openHandler);
     };
-  }, [handleKeyDown]);
+  }, [handleKeyDown, openSearch]);
 
   const isActive = (path: string, exact?: boolean) => {
     if (exact) return location.pathname === path;
@@ -87,8 +106,8 @@ export const TopBar = memo(function TopBar({
 
   if (isConsumer) return (
     <>
-      <ConsumerHeader onSearch={() => setSearchOpen(true)} />
-      <GlobalSearchModal open={searchOpen} onOpenChange={setSearchOpen} />
+      <ConsumerHeader onSearch={() => openSearch()} />
+      <GlobalSearchModal open={searchOpen} onOpenChange={handleSearchOpenChange} />
     </>
   );
 
@@ -105,7 +124,7 @@ export const TopBar = memo(function TopBar({
       >
         <div
           className={cn(
-            ECOSYSTEM_HEADER_INNER,
+            headerFrame,
             'flex h-14 items-center gap-1.5 lg:h-16 lg:gap-2',
           )}
         >
@@ -118,7 +137,7 @@ export const TopBar = memo(function TopBar({
           )}
 
           {/* Logo */}
-          <BrandWordmark className={role === 'owner' ? 'min-h-11 items-center' : undefined} />
+          <BrandWordmark className={role === 'owner' || role === 'admin' ? 'min-h-11 items-center' : undefined} />
 
           {/* Nav pills (≥md). Consumer roles get them on tablet+; workspace roles
               have a sidebar — pills are redundant, hidden. */}
@@ -150,7 +169,7 @@ export const TopBar = memo(function TopBar({
 
           {/* Desktop search input (lg+) */}
           <button
-            onClick={() => setSearchOpen(true)}
+            onClick={openSearch}
             className={cn(
               'hidden lg:flex items-center gap-3 mx-4 flex-1 max-w-sm',
               'px-4 py-2 rounded-none',
@@ -179,20 +198,20 @@ export const TopBar = memo(function TopBar({
           {/* Right utilities */}
           <div className="flex items-center gap-0.5 lg:gap-1.5 ml-auto shrink-0">
             <button
-              onClick={() => setSearchOpen(true)}
+              onClick={openSearch}
               className="lg:hidden flex items-center justify-center w-11 h-11 rounded-none hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label={pickLang(language, { ru: 'Поиск', en: 'Search', th: 'ค้นหา' })}
             >
               <Search className="size-5 text-muted-foreground" />
             </button>
-            {role === 'owner' ? (
+            {role === 'owner' || role === 'admin' ? (
               <>
-                <div className="hidden md:block">
+                <div className={role === 'admin' ? 'hidden lg:block' : 'hidden md:block'}>
                   <GlobalPreferencesControls size="sm" themeVariant="dropdown" />
                 </div>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="md:hidden" aria-label={isRu ? 'Язык, валюта и тема' : 'Language, currency and theme'}>
+                    <Button variant="ghost" size="icon" className={cn('h-11 w-11 shrink-0', role === 'admin' ? 'lg:hidden' : 'md:hidden')} aria-label={pickLang(language, {ru: 'Язык, валюта и тема', en: 'Language, currency and theme', th: 'ภาษา สกุลเงิน และธีม'})}>
                       <SlidersHorizontal className="h-5 w-5" aria-hidden />
                     </Button>
                   </PopoverTrigger>
@@ -207,7 +226,7 @@ export const TopBar = memo(function TopBar({
               <MiniCart className="rounded-none hover:bg-muted/40 transition-colors" />
             )}
             {user ? (
-              <UserAvatarMenu compact={role === 'owner'} />
+              <UserAvatarMenu compact={role === 'owner' || role === 'admin'} />
             ) : (
               <Button
                 asChild
@@ -224,14 +243,14 @@ export const TopBar = memo(function TopBar({
             Hidden on /auth, /, and other top-level surfaces. */}
         {showCrumbs && (
           <div className="border-t border-border/40 bg-[hsl(var(--bg-surface)/0.6)]">
-            <div className={cn(ECOSYSTEM_HEADER_INNER, 'flex h-9 items-center')}>
+            <div className={cn(headerFrame, 'flex h-9 items-center')}>
               <Breadcrumbs />
             </div>
           </div>
         )}
       </header>
 
-      <GlobalSearchModal open={searchOpen} onOpenChange={setSearchOpen} />
+      <GlobalSearchModal open={searchOpen} onOpenChange={handleSearchOpenChange} />
     </>
   );
 });

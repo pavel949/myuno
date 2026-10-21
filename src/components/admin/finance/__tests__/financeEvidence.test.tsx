@@ -1,11 +1,12 @@
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ControlFinanceTab } from '@/components/admin/control/ControlFinanceTab';
 import { AdminRevenueBlock } from '@/components/admin/dashboard/AdminRevenueBlock';
 import { useAdminFinance } from '@/hooks/useAdminFinance';
-import { useAdminAnalytics } from '@/hooks/useAdminAnalytics';
+import { useAdminDashboardSnapshots } from '@/hooks/useAdminDashboardEvidence';
+import { dashboardSnapshotResult } from '@/test/adminDashboardEvidenceMocks';
 import { en } from '@/i18n/en';
 import { ru } from '@/i18n/ru';
 
@@ -23,7 +24,7 @@ vi.mock('@/hooks/useAdminFinance', () => ({
   useAdminFinance: vi.fn(),
   getVerticalLabel: () => 'Property',
 }));
-vi.mock('@/hooks/useAdminAnalytics', () => ({ useAdminAnalytics: vi.fn() }));
+vi.mock('@/hooks/useAdminDashboardEvidence', () => ({ useAdminDashboardSnapshots: vi.fn() }));
 
 const financeResult = () => ({
   summary: {
@@ -42,20 +43,11 @@ const financeResult = () => ({
   isLoading: false,
   refetchProviders: vi.fn(),
 });
-const analyticsResult = () => ({
-  summary: {
-    totalGMV: 0, totalRevenue: 0, totalUsers: 0, totalProviders: 0,
-    totalBookings: 0, userGrowth: 0, providerGrowth: 0,
-    bookingGrowth: 0, revenueGrowth: 0,
-  },
-  metrics: [], revenueChartData: [], userChartData: [], bookingChartData: [],
-  isLoading: false, error: null,
-});
 
 beforeEach(() => {
   locale.value = 'en';
   vi.mocked(useAdminFinance).mockReturnValue(financeResult());
-  vi.mocked(useAdminAnalytics).mockReturnValue(analyticsResult());
+  vi.mocked(useAdminDashboardSnapshots).mockReturnValue(dashboardSnapshotResult());
 });
 afterEach(cleanup);
 
@@ -116,24 +108,28 @@ describe.each(['en', 'ru'])('finance evidence labels (%s)', (language) => {
     expect(screen.getAllByText('129600 THB')).toHaveLength(1);
   });
 
-  it('distinguishes dashboard snapshots, their period, and zero-filled gaps from finance', () => {
+  it('distinguishes snapshot estimates from confirmed finance and does not zero-fill gaps', () => {
     render(<MemoryRouter><AdminRevenueBlock /></MemoryRouter>);
-    expect(useAdminAnalytics).toHaveBeenLastCalledWith(14);
-    const note = screen.getByRole('note');
-    expect(note).toHaveTextContent(copy['admin.finance.evidence.snapshotSource']);
-    expect(note).toHaveTextContent('platform_metrics');
-    expect(note).toHaveTextContent('14');
-    expect(note).toHaveTextContent('orders');
-    expect(note).toHaveTextContent('30');
-    expect(screen.getByText(copy['admin.finance.evidence.snapshotRevenue'])).toBeVisible();
-    expect(screen.getAllByText('฿0')).toHaveLength(2);
+    expect(useAdminDashboardSnapshots).toHaveBeenLastCalledWith(7);
+    const essential = screen.getByRole('note');
+    expect(essential).toBeVisible();
+    expect(essential).toHaveTextContent(language === 'ru' ? 'Суммы приблизительные' : 'Amounts are estimates');
+    expect(essential).toHaveTextContent(language === 'ru' ? 'Валюта не указана' : 'Currency is unavailable');
+    expect(essential).toHaveTextContent(language === 'ru' ? 'пропуски не считаются нулём' : 'missing days are not zero');
+    const calculation = screen.getByText(/platform_metrics/);
+    expect(calculation).not.toBeVisible();
+    fireEvent.click(screen.getByText(language === 'ru' ? 'Как считаются показатели' : 'How metrics are calculated'));
+    expect(calculation).toBeVisible();
+    expect(calculation).toHaveTextContent('ledger');
+    expect(screen.getAllByText('—')).toHaveLength(3);
+    expect(screen.queryByText('+0%')).not.toBeInTheDocument();
   });
 
-  it('does not turn a snapshot query error into zero revenue or booking growth', () => {
-    vi.mocked(useAdminAnalytics).mockReturnValue({ ...analyticsResult(), error: 'offline' });
+  it('does not turn a snapshot query error into zero revenue or growth', () => {
+    vi.mocked(useAdminDashboardSnapshots).mockReturnValue(dashboardSnapshotResult(undefined, { error: new Error('synthetic refresh failure') }));
     render(<MemoryRouter><AdminRevenueBlock /></MemoryRouter>);
-    expect(screen.getAllByText(copy['admin.finance.evidence.unavailable'])).toHaveLength(3);
-    expect(screen.queryByText('฿0')).not.toBeInTheDocument();
+    expect(screen.getAllByText('—')).toHaveLength(3);
+    expect(screen.getByRole('alert')).toBeVisible();
     expect(screen.queryByText('+0%')).not.toBeInTheDocument();
   });
 });

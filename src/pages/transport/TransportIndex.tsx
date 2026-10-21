@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 /**
  * TransportIndex — Premium vehicle rental catalog
  * Sixt/Hertz-level UX with myUNO trust architecture
@@ -119,7 +120,7 @@ export default function TransportIndex() {
       showFilter={false}
       showCategories={false}
       showEcosystemHint={false}
-      contentClassName="space-y-0 px-0 md:px-0 lg:px-0 xl:px-0"
+      contentClassName="public-commerce public-commerce--transport space-y-0 px-0 md:px-0 lg:px-0 xl:px-0"
     >
       {/* Hero Search */}
       <TransportHeroSearch onSearch={(params) => {

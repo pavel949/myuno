@@ -8,7 +8,6 @@
  */
 
 import {
-  Plane,
   Home, Compass, ShoppingBag, User, LayoutDashboard, Building2,
   CalendarDays, Calendar, Package, Wallet, UserCheck, MessageSquare,
   FileCheck, Users, MessageCircle, BarChart3, FileText, TrendingUp, Inbox,
@@ -23,6 +22,8 @@ export type NavItem = {
   labelRu: string;
   /** Thai label; falls back to English when absent. */
   labelTh?: string;
+  /** Compact mobile text; the full localized label remains the accessible name. */
+  mobileLabelRu?: string;
   /** Match path exactly (for `/` and dashboard roots) */
   exact?: boolean;
 };
@@ -48,11 +49,11 @@ export type NavRoleKey =
  * `GUEST_NAV_ME_HUB` (Gosuslugi-style 5-tab) takes over via NavShell.
  */
 export const GUEST_NAV: NavItem[] = [
-  { path: APP_ROUTES.HOME,          icon: Home,      labelEn: 'Home',     labelRu: 'Главная',  labelTh: 'หน้าแรก', exact: true },
-  { path: APP_ROUTES.GOAL_STAY,     icon: BedDouble, labelEn: 'Homes',    labelRu: 'Жильё',   labelTh: 'ที่พัก' },
-  { path: APP_ROUTES.TRIP_PLANNER,  icon: Plane,     labelEn: 'Your trip', labelRu: 'Отдых',    labelTh: 'การเดินทาง' },
-  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench,    labelEn: 'Services', labelRu: 'Услуги',   labelTh: 'บริการ' },
-  { path: APP_ROUTES.ACCOUNT,       icon: User,      labelEn: 'Me',       labelRu: 'Профиль',  labelTh: 'ฉัน' },
+  { path: APP_ROUTES.HOME, icon: Home, labelEn: 'Home', labelRu: 'Главная', labelTh: 'หน้าแรก', exact: true },
+  { path: APP_ROUTES.GOAL_STAY, icon: BedDouble, labelEn: 'Homes', labelRu: 'Жильё', labelTh: 'ที่พัก' },
+  { path: APP_ROUTES.BOOKINGS, icon: CalendarDays, labelEn: 'Bookings', labelRu: 'Бронирования', labelTh: 'การจอง', mobileLabelRu: 'Брони' },
+  { path: APP_ROUTES.GOAL_SERVICES, icon: Wrench, labelEn: 'Services', labelRu: 'Услуги', labelTh: 'บริการ' },
+  { path: APP_ROUTES.ACCOUNT, icon: User, labelEn: 'Profile', labelRu: 'Профиль', labelTh: 'โปรไฟล์' },
 ];
 
 /**
@@ -104,11 +105,11 @@ export const VENDOR_NAV: NavItem[] = [
 ];
 
 export const ADMIN_NAV: NavItem[] = [
-  { path: APP_ROUTES.ADMIN,            icon: LayoutDashboard, labelEn: 'Dashboard',  labelRu: 'Обзор', exact: true },
-  { path: APP_ROUTES.ADMIN_CRM,        icon: UserCheck,       labelEn: 'CRM',        labelRu: 'CRM' },
-  { path: APP_ROUTES.ADMIN_TICKETS,    icon: MessageSquare,   labelEn: 'Tickets',    labelRu: 'Тикеты' },
-  { path: APP_ROUTES.ADMIN_MODERATION, icon: FileCheck,       labelEn: 'Moderation', labelRu: 'Модерация' },
-  { path: APP_ROUTES.PROFILE,          icon: User,            labelEn: 'Profile',    labelRu: 'Профиль' },
+  { path: APP_ROUTES.ADMIN, icon: LayoutDashboard, labelEn: 'Today', labelRu: 'Сегодня', labelTh: 'วันนี้', exact: true },
+  { path: APP_ROUTES.ADMIN_OPERATIONS, icon: Calendar, labelEn: 'Orders', labelRu: 'Заказы', labelTh: 'คำสั่งซื้อ' },
+  { path: '/admin/review', icon: FileCheck, labelEn: 'Review', labelRu: 'На проверке', labelTh: 'รอตรวจสอบ' },
+  { path: APP_ROUTES.ADMIN_CATALOG, icon: Package, labelEn: 'Catalog', labelRu: 'Каталог', labelTh: 'แคตตาล็อก' },
+  { path: APP_ROUTES.ADMIN_USERS, icon: Users, labelEn: 'Participants', labelRu: 'Участники', labelTh: 'ผู้เข้าร่วม' },
 ];
 
 export const TEAM_NAV: NavItem[] = [

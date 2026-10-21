@@ -29,7 +29,7 @@ export const P23_PROPERTY_OWNER: PersonaLanding = {
     { slug: 'str-listing', label: { ru: 'Размещение в STR', en: 'STR listing' }, oneLiner: { ru: 'Airbnb, Booking, Agoda — один календарь.', en: 'Airbnb, Booking, Agoda — single calendar.' }, href: '/owner/onboarding' },
     { slug: 'long-term-tenants', label: { ru: 'Долгосрочные арендаторы', en: 'Long-term tenants' }, oneLiner: { ru: 'Подбор за 14 дней, депозит-эскроу.', en: 'Filled in 14 days, escrowed deposit.' }, href: '/property?intent=rent-long' },
     { slug: 'tax-rental', label: { ru: 'Налог с аренды', en: 'Rental tax' }, oneLiner: { ru: 'PND.93, VAT-порог, House & Land tax.', en: 'PND.93, VAT threshold, House & Land tax.' }, href: '/legal/tax' },
-    { slug: 'maintenance', label: { ru: 'Техобслуживание', en: 'Maintenance' }, oneLiner: { ru: 'Уборка, ремонт, бассейн, сад — по расписанию.', en: 'Cleaning, repairs, pool, garden — on schedule.' }, href: '/owner/maintenance' },
+    { slug: 'maintenance', label: { ru: 'Техобслуживание', en: 'Maintenance' }, oneLiner: { ru: 'Уборка, ремонт, бассейн, сад — по расписанию.', en: 'Cleaning, repairs, pool, garden — on schedule.' }, href: '/owner/maintenance', availability: 'unavailable' },
     { slug: 'owner-reports', label: { ru: 'Дашборд владельца', en: 'Owner dashboard' }, oneLiner: { ru: 'P&L по месяцам, акт сверки, выплата на счёт.', en: 'Monthly P&L, reconciliation, payout to your account.' }, href: '/my-property' },
   ],
   faq: [

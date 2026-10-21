@@ -37,7 +37,7 @@ async def main():
                             const content = form.parentElement;
                             const card = content.parentElement.getBoundingClientRect();
                             const sidebar = content.parentElement.parentElement.parentElement.children[1].getBoundingClientRect();
-                            const controls = [...form.querySelectorAll('input, button')].map(el => {
+                            const controls = [...form.querySelectorAll('input, button')].filter(el => el.getClientRects().length > 0).map(el => {
                                 const box = el.getBoundingClientRect();
                                 return {label: el.getAttribute('aria-label') || el.textContent, left: box.left, right: box.right};
                             });

@@ -1,3 +1,4 @@
+import { getServiceRequestConfirmationNote, serviceRequestConfirmationNote } from '@/lib/services/serviceRequestCopy';
 import { useEffect, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { Calendar, MapPin, Phone } from 'lucide-react';
@@ -120,8 +121,8 @@ export default function ServiceOrderSuccess() {
       isLoading={loading}
       orderNumber={order?.order_number || undefined}
       note={{
-        ru: 'Менеджер свяжется в течение 30 минут для подтверждения деталей.',
-        en: 'A manager will contact you within 30 minutes to confirm details.',
+        ru: serviceRequestConfirmationNote.ru,
+        en: getServiceRequestConfirmationNote(language),
       }}
       details={details}
       extras={<CrossSellRecommendations orderType="service" />}

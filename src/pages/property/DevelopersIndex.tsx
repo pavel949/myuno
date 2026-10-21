@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 /**
  * DevelopersIndex - Catalog of property developers
  */
@@ -22,15 +23,15 @@ export default function DevelopersIndex() {
   const { data: developers, isLoading } = useDevelopers();
 
   return (
-    <div className="px-4 py-4 pb-24 space-y-4">
+    <div className="public-commerce public-commerce--developers px-4 py-6 pb-24 space-y-6">
         {/* Hero */}
-        <div className="rounded-none bg-gradient-to-br from-primary/10 via-background to-accent/5 p-4 border border-border/50">
+        <div className="public-commerce-intro border-b border-border py-4">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2.5 rounded-none bg-primary/10">
               <Building2 className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="font-bold text-xl">
+              <h1 className="public-commerce-title">
                 {isRu ? 'Застройщики Пхукета' : 'Phuket Developers'}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -41,7 +42,7 @@ export default function DevelopersIndex() {
           <Button
             variant="outline"
             size="sm"
-            className="w-full border-primary/30 text-primary hover:bg-primary/10"
+            className="min-h-11 w-full sm:w-auto border-border text-primary hover:bg-muted"
             onClick={() => navigate(APP_ROUTES.DEVELOPER_PORTAL_APPLY)}
           >
             {isRu ? 'Я застройщик — добавить компанию' : "I'm a developer — list my company"}

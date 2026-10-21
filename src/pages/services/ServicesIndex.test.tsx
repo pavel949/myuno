@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
@@ -22,6 +22,17 @@ beforeAll(() => {
   Element.prototype.hasPointerCapture = vi.fn(() => false);
 });
 describe('simplified service discovery', () => {
+  it('uses one coherent grid with explicit canonical categories when expanding the catalogue', () => {
+    mount();
+    fireEvent.click(screen.getByRole('button', { name: /^All home services \(/ }));
+    const grid = screen.getByTestId('service-request-grid');
+    expect(grid).toHaveClass('min-[1440px]:grid-cols-4');
+    const cleaning = grid.querySelector('[data-service-category="cleaning"]') as HTMLElement;
+    expect(within(cleaning).getAllByRole('button').length).toBeGreaterThan(0);
+    expect(within(cleaning).getByText('Cleaning')).toBeInTheDocument();
+    expect(within(cleaning).queryByText('AC Installation')).toBeNull();
+    expect(screen.getAllByText('AC Installation')).toHaveLength(1);
+  });
   it('opens the full catalogue and finds services outside the initial preview', () => {
     mount();
     expect(screen.getAllByRole('button').filter(button => button.hasAttribute('data-catalogue'))).toHaveLength(8);

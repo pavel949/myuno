@@ -67,7 +67,7 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 // Each role gets exactly 5 slots. The slot composition encodes
 // product-level "what matters most" for that role:
 //
-//  guest      → Home · Discover · Market · Property · Me
+//  guest      → Home · Homes · Bookings · Services · Profile
 //                  (consumer browsing + monetization entry points)
 //  investor   → Home · Invest · Discover · Property · Me
 //                  (capital workflow first, browse second)
@@ -82,8 +82,7 @@ export const PRIMARY_NAV = NAV_BY_ROLE;
 //  team       → Dashboard · Content · Moderation · CRM · Profile
 //                  (uno_team — content & moderation; SideRail N/A, see TeamLayout)
 //
-// When `feature_flag:me_shell_v1` is on, guest swaps to GUEST_NAV_ME_HUB
-// (Home · Feed · Services · Documents · Profile) — handled in BottomBar.
+// Consumer AppLayout selects the stable guest bar; workspace layouts retain their role bars.
 // ─────────────────────────────────────────────────────────────
 
 /**
@@ -121,9 +120,10 @@ export function isBottomBarRoute(role: NavRoleKey, path: string): boolean {
  * tab on the guest bar).
  */
 const PATH_ALIASES: Record<string, string[]> = {
-  '/account':     ['/account', '/profile', '/me', '/bookings'],
+  '/account':     ['/account', '/profile', '/me'],
+  '/bookings': ['/bookings', '/me/bookings', '/me/requests', '/my-stay', '/trip'],
   '/discover/stay': ['/discover/stay', '/discover/buy', '/property'],
-  '/discover/services': ['/discover/services', '/discover/situations', '/services', '/transport', '/experiences', '/insurance', '/beauty', '/restaurants', '/fitness', '/medical', '/events', '/education', '/flowers', '/legal', '/banking', '/veterinary', '/pharmacy', '/pets', '/yachts', '/cleaning', '/babysitter', '/delivery', '/sim', '/exchange', '/school-finder'],
+  '/discover/services': ['/trip-planner', '/me/services', '/discover/services', '/discover/situations', '/services', '/transport', '/experiences', '/insurance', '/beauty', '/restaurants', '/fitness', '/medical', '/events', '/education', '/flowers', '/legal', '/banking', '/veterinary', '/pharmacy', '/pets', '/yachts', '/cleaning', '/babysitter', '/delivery', '/sim', '/exchange', '/school-finder'],
   '/me':          ['/me', '/account', '/profile'],
   '/profile':     ['/profile', '/account'],
   '/market':      ['/market'],
@@ -149,6 +149,7 @@ const PATH_ALIASES: Record<string, string[]> = {
  */
 export function isBottomBarItemActive(item: NavItem, pathname: string): boolean {
   if (item.exact) return pathname === item.path;
+  if (item.path === '/account' && ['/me/bookings', '/me/requests', '/me/services'].some(path => pathname === path || pathname.startsWith(path + '/'))) return false;
   if (item.path === APP_ROUTES.GOAL_SERVICES && pathname === APP_ROUTES.DISCOVER) return true;
 
   const aliases = PATH_ALIASES[item.path];
@@ -352,7 +353,7 @@ export function getOwnerSidebarForRole(
  * real route (`/admin/control`) so the rail no longer routes through a
  * redirect.
  */
-const ADMIN_SIDEBAR: SidebarNavGroup[] = [
+const ADMIN_SIDEBAR_SOURCE: SidebarNavGroup[] = [
   {
     labelEn: 'Platform', labelRu: 'Платформа', defaultOpen: true,
     items: [
@@ -461,6 +462,38 @@ const ADMIN_SIDEBAR: SidebarNavGroup[] = [
       { path: '/admin/settings',           labelEn: 'System settings',    labelRu: 'Настройки',                 icon: Settings },
     ],
   },
+];
+
+// Keep the same five everyday destinations across desktop rail and mobile bar.
+// Specialist routes remain reachable below without competing with daily work.
+const adminDaily: SidebarNavItem[] = ADMIN_NAV.map(item => ({
+  ...item,
+  ...(item.path === APP_ROUTES.ADMIN_OPERATIONS
+    ? { labelEn: 'Requests & orders', labelRu: 'Заявки и заказы', labelTh: 'คำขอและคำสั่งซื้อ' } : {}),
+  ...(item.path === '/admin/review' ? { badgeKey: 'pendingContent' as const } : {}),
+}));
+const adminSecondary: SidebarNavItem[] = [
+  { path: '/admin/finance', labelEn: 'Reports', labelRu: 'Отчёты', labelTh: 'รายงาน', icon: BarChart3 },
+  { path: '/admin/settings', labelEn: 'Settings', labelRu: 'Настройки', labelTh: 'การตั้งค่า', icon: Settings },
+];
+const adminGroupThai: Record<string, string> = {
+  Platform: 'แพลตฟอร์ม',
+  'Content verticals': 'หมวดบริการ',
+  'Properties & Projects': 'ที่พักและโครงการ',
+  'Finance & Analytics': 'การเงินและการวิเคราะห์',
+  'Support & Ops': 'การสนับสนุนและการดำเนินงาน',
+  'AI & Tools': 'AI และเครื่องมือ',
+  System: 'ระบบ',
+};
+const ADMIN_SIDEBAR: SidebarNavGroup[] = [
+  { labelEn: 'Daily work', labelRu: 'Ежедневная работа', labelTh: 'งานประจำวัน', defaultOpen: true, items: adminDaily },
+  { labelEn: 'Reports & settings', labelRu: 'Отчёты и настройки', labelTh: 'รายงานและการตั้งค่า', defaultOpen: true, items: adminSecondary },
+  ...ADMIN_SIDEBAR_SOURCE.map(group => ({
+    ...group,
+    labelTh: adminGroupThai[group.labelEn] ?? group.labelTh,
+    defaultOpen: false,
+    items: group.items.filter(item => ![...adminDaily, ...adminSecondary].some(primary => primary.path === item.path)),
+  })).filter(group => group.items.length > 0),
 ];
 
 const VENDOR_SIDEBAR: SidebarNavGroup[] = [

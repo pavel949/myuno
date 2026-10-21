@@ -28,7 +28,7 @@ export const P08_RELOCATOR_FAMILY: PersonaLanding = {
     { slug: 'school-finder', label: { ru: 'Подбор школы', en: 'School Finder' }, oneLiner: { ru: '15 школ, фильтр по программе и бюджету.', en: '15 schools filtered by curriculum and budget.' }, href: '/school-finder' },
     { slug: 'ed-visa', label: { ru: 'Education + Guardian visa', en: 'Education + Guardian visa' }, oneLiner: { ru: 'ED для ребёнка, Guardian для родителя.', en: 'ED for the child, Guardian for the parent.' }, href: '/visa/quiz' },
     { slug: 'long-term-rental', label: { ru: 'Долгосрочная аренда', en: 'Long-term rental' }, oneLiner: { ru: 'Виллы 6–12 мес, защита депозита.', en: '6–12 month villas with deposit protection.' }, href: '/property?intent=rent-long' },
-    { slug: 'family-insurance', label: { ru: 'Семейная страховка', en: 'Family insurance' }, oneLiner: { ru: 'Pacific Cross, Cigna, April — подбор.', en: 'Pacific Cross, Cigna, April — broker pick.' }, href: '/legal/insurance' },
+    { slug: 'family-insurance', label: { ru: 'Семейная страховка', en: 'Family insurance' }, oneLiner: { ru: 'Pacific Cross, Cigna, April — подбор.', en: 'Pacific Cross, Cigna, April — broker pick.' }, href: '/insurance' },
     { slug: 'bank-account', label: { ru: 'Тайский банковский счёт', en: 'Thai bank account' }, oneLiner: { ru: 'Kasikorn, Bangkok Bank — открытие за визит.', en: 'Kasikorn, Bangkok Bank — opened in one visit.' }, href: '/banking' },
     { slug: 'cost-of-living', label: { ru: 'Калькулятор расходов', en: 'Cost of Living' }, oneLiner: { ru: 'Бюджет семьи 2+2 от ฿120k/мес.', en: 'Family of 4 budget from ฿120k/month.' }, href: '/cost-of-living' },
   ],

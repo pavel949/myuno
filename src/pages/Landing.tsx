@@ -1,34 +1,36 @@
 /** Cinematic public front door. Existing authenticated workspace stays in HomeRouter. */
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Umbrella, House, Settings2, KeyRound, LifeBuoy, Pause, Play } from 'lucide-react';
+import { ArrowRight, Umbrella, House, Settings2, LifeBuoy, Pause, Play } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { useReducedMotion } from '@/lib/motionConfig';
+import { BottomBar } from '@/components/nav/BottomBar';
 import { ConsumerHeader } from '@/components/nav/ConsumerHeader';
 import { SEOHead } from '@/components/seo/SEOHead';
 import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 import { ConciergeHelpSheet } from '@/components/concierge/ConciergeHelpSheet';
 import { HomeDiscoverySearch } from '@/components/home/HomeDiscoverySearch';
+import { HorizontalRail } from '@/components/home/HorizontalRail';
+import { HomeLocationGallery, HomeExperienceGallery, HomeServiceGallery } from '@/components/home/HomeCatalogGalleries';
+import { HomeProjectGallery } from '@/components/home/HomeProjectGallery';
+import { PropertyListingCard } from '@/components/property/PropertyListingCard';
+import { useProperties } from '@/hooks/useProperties';
 import { homeCopy as copy, homeJourneys } from '@/content/home/cinematicHome';
 import hero from '@/assets/hero-phuket-desktop.webp';
-import pool from '@/assets/solutions/pool.webp';
-import housing from '@/assets/solutions/housing.webp';
-import islands from '@/assets/solutions/islands.webp';
 import '@/styles/cinematic-home.css';
 
-const icons = { holiday: Umbrella, home: House, service: Settings2, key: KeyRound };
-const collections = [
-  { image: pool, href: `${R.PROPERTY_SEARCH}?mode=rent&amenities=private_pool`, title: { ru: 'Жильё с бассейном', en: 'Homes with a private pool', th: 'ที่พักพร้อมสระว่ายน้ำส่วนตัว' } },
-  { image: housing, href: `${R.PROPERTY_SEARCH}?mode=rent&tenancy=long`, title: { ru: 'Жильё для жизни', en: 'A place to call home', th: 'ที่พักสำหรับอยู่อาศัย' } },
-  { image: islands, href: R.EXPERIENCES, title: { ru: 'Остров впечатлений', en: 'An island to discover', th: 'เกาะแห่งประสบการณ์' } },
-];
+const publicNavigationRole = 'guest' as const;
+const icons = { holiday: Umbrella, home: House, service: Settings2 };
+
 
 export default function Landing() {
   const { language } = useLanguage();
   const t = (v: LangValues) => pickLang(language, v);
   const [requestOpen, setRequestOpen] = useState(false);
+  const [requestSubject, setRequestSubject] = useState<string | undefined>();
+  const stays = useProperties({ listingType: 'rent' }, 8);
   const [motionPaused, setMotionPaused] = useState(false);
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [motionStarted, setMotionStarted] = useState(false);
@@ -85,6 +87,7 @@ export default function Landing() {
           <h1 id="home-title"><span>{t(copy.place)}</span><span>{t(copy.headline)}</span></h1>
           <p>{t(copy.lead)}</p>
         </div>
+        <div className="home-search-wrap home-container"><HomeDiscoverySearch showGuestsInline /></div>
         {motionEnabled && motionStarted && <div className="home-hero-bottom home-container">
           <button type="button" aria-pressed={motionPaused} onClick={() => setMotionPaused(v => !v)} className="home-motion-control">
             {motionPaused ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
@@ -92,7 +95,18 @@ export default function Landing() {
           </button>
         </div>}
       </section>
-      <div className="home-search-wrap home-container"><HomeDiscoverySearch /></div>
+      <HomeLocationGallery />
+      <HomeProjectGallery />
+      <section className="home-properties home-container" aria-labelledby="home-stays-title">
+        <div className="home-section-heading"><div><h2 id="home-stays-title">{t(copy.stays)}</h2><p className="home-section-lead">{t(copy.staysLead)}</p></div><Link className="home-text-link" to={R.PROPERTY_SEARCH + '?mode=rent'}>{t(copy.browse)}<ArrowRight size={18} aria-hidden="true" /></Link></div>
+        {stays.isLoading ? <div className="home-properties-loading" role="status">{t({ ru: 'Загружаем варианты…', en: 'Loading homes…', th: 'กำลังโหลดที่พัก…' })}</div> : stays.isError ? <p className="home-properties-empty">{t(copy.loadHomesError)}</p> : stays.data?.length ? <HorizontalRail label={t(copy.stays)}>{stays.data.map(property => <div key={property.id} className="home-home-card"><PropertyListingCard property={property} mode="rent" /></div>)}</HorizontalRail> : <p className="home-properties-empty">{t(copy.emptyHomes)} <Link to={R.PROPERTY_SEARCH + '?mode=rent'}>{t(copy.browse)}</Link></p>}
+      </section>
+      <section className="home-layantara home-container" aria-labelledby="home-layantara-title">
+        <div className="home-layantara-panel">
+          <div><span className="home-layantara-eyebrow">{t({ ru: 'Виллы с обслуживанием', en: 'Serviced villa stays', th: 'วิลล่าพร้อมบริการ' })}</span><h2 id="home-layantara-title">{t(copy.layantara)}</h2><p>{t(copy.layantaraLead)}</p></div>
+          <button type="button" className="home-layantara-action" onClick={() => { setRequestSubject(t({ ru: 'Доступность Layantara Villas', en: 'Layantara Villas availability', th: 'สอบถามที่พัก Layantara Villas' })); setRequestOpen(true); }}>{t(copy.layantaraAction)}<ArrowRight size={18} aria-hidden="true" /></button>
+        </div>
+      </section>
       <section className="home-plans home-container" aria-labelledby="home-plans-title">
         <h2 id="home-plans-title">{t(copy.plans)}</h2><p className="home-section-lead">{t(copy.plansLead)}</p>
         <div className="home-journeys">{homeJourneys.map(j => { const Icon = icons[j.icon as keyof typeof icons]; return (
@@ -101,11 +115,10 @@ export default function Landing() {
           </Link>
         ); })}</div>
       </section>
-      <section className="home-discovery home-container" aria-labelledby="home-discovery-title">
-        <div className="home-section-heading"><div><h2 id="home-discovery-title">{t(copy.discover)}</h2><p className="home-section-lead">{t(copy.discoverLead)}</p></div><Link className="home-text-link" to={R.GOAL_STAY}>{t(copy.browse)}<ArrowRight size={18} aria-hidden="true" /></Link></div>
-        <div className="home-collections">{collections.map(c => <Link key={c.href} to={c.href} className="home-collection"><div className="home-collection-photo"><img src={c.image} loading="lazy" alt="" width="600" height="450" /></div><h3>{t(c.title)}<ArrowRight size={19} aria-hidden="true" /></h3></Link>)}</div>
-      </section>
-      <section className="home-closing home-container"><h2>{t(copy.closing)}</h2><button type="button" className="home-text-link" onClick={() => setRequestOpen(true)}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
+      <HomeExperienceGallery />
+      <HomeServiceGallery />
+      <section className="home-owner-prompt home-container"><div><h2>{t(copy.ownersPrompt)}</h2><p>{t(copy.ownersPromptLead)}</p></div><Link className="home-text-link" to={R.FOR_OWNERS}>{t(copy.forOwners)}<ArrowRight size={18} aria-hidden="true" /></Link></section>
+      <section className="home-closing home-container"><h2>{t(copy.closing)}</h2><button type="button" className="home-text-link" onClick={() => { setRequestSubject(undefined); setRequestOpen(true); }}>{t(copy.contact)}<ArrowRight size={18} aria-hidden="true" /></button></section>
       <footer className="home-footer home-container">
         <Link className="home-emergency" to={R.SOS}><LifeBuoy size={19} aria-hidden="true" />{t(copy.urgent)}</Link>
         <nav aria-label={t({ ru: 'Дополнительные разделы', en: 'More links', th: 'ลิงก์เพิ่มเติม' })}>
@@ -113,7 +126,8 @@ export default function Landing() {
           <Link to={R.PRIVACY}>{t({ ru: 'Конфиденциальность', en: 'Privacy', th: 'ความเป็นส่วนตัว' })}</Link><Link to={R.TERMS}>{t({ ru: 'Условия', en: 'Terms', th: 'ข้อกำหนด' })}</Link>
         </nav><LegalCopyright />
       </footer>
-      <ConciergeHelpSheet open={requestOpen} onOpenChange={setRequestOpen} topic="general" />
+      <BottomBar role={publicNavigationRole} aria-label={t({ ru: 'Основная навигация', en: 'Main navigation', th: 'เมนูหลัก' })} />
+      <ConciergeHelpSheet open={requestOpen} onOpenChange={setRequestOpen} topic="property" initialSubject={requestSubject} />
     </div>
   );
 }

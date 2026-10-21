@@ -1,4 +1,5 @@
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-admin' } }) }));
+vi.mock('@/hooks/useAdmin', () => ({ useAdminCheck: () => ({ isAdmin: true, isLoading: false }) }));
 import React from 'react';
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -132,6 +133,8 @@ describe('verified moderation destinations', () => {
 
 describe('moderation return navigation', () => {
   it('preserves only queue navigation context', () => {
+    expect(moderationReturnPath('/admin/review?queue=pending&type=property&page=12&action=delete'))
+      .toBe('/admin/review?tab=moderation&queue=pending&type=property&page=12');
     expect(moderationReturnPath('/admin/operations?tab=moderation&q=two+words&type=property&category=villa&action=delete&return=https://evil.test'))
       .toBe('/admin/operations?tab=moderation&q=two+words&type=property&category=villa');
   });

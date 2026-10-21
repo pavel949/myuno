@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -41,11 +42,11 @@ export const CrossSellCard = memo(function CrossSellCard({
         className="mb-2"
       />
       <span className="font-medium text-sm text-foreground truncate w-full text-center">
-        {language === 'ru' ? link.labelRu : link.labelEn}
+        {pickLang(language, { ru: link.labelRu, en: link.labelEn, th: link.labelTh })}
       </span>
       {(link.descriptionEn || link.descriptionRu) && (
         <span className="text-xs text-muted-foreground truncate w-full text-center mt-0.5">
-          {language === 'ru' ? link.descriptionRu : link.descriptionEn}
+          {pickLang(language, { ru: link.descriptionRu || '', en: link.descriptionEn || '', th: link.descriptionTh })}
         </span>
       )}
     </motion.button>

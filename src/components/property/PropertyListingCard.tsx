@@ -17,10 +17,9 @@ import { getDistrictLabel, getPropertyTypeLabel, getHighlightLabel, getViewTypeL
 import { normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 import { cn } from '@/lib/utils';
 import { APP_ROUTES } from '@/lib/config/routes';
-import { propertyDetailHref } from '@/lib/real-estate/propertyDetailIntent';
+import { propertyDetailHref, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
 import { surfaceFromProperty } from '@/lib/real-estate/listingViewModel';
 import type { Property } from '@/hooks/useProperties';
-import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 import { TrustStrip } from './TrustStrip';
 import { StayRulesInline } from './StayRulesInline';
 
@@ -41,17 +40,16 @@ interface PropertyListingCardProps {
 }
 
 
-const FALLBACK_IMAGE = PLACEHOLDER_IMAGES.property;
 
 const formatPriceLabel = (period: string, lang: string) => {
-  const labels: Record<string, { en: string; ru: string }> = {
-    night: { en: ' night', ru: ' ночь' },
-    week: { en: ' week', ru: ' нед.' },
-    month: { en: ' month', ru: ' мес.' },
-    year: { en: ' year', ru: ' год' },
-    total: { en: '', ru: '' },
+  const labels: Record<string, { en: string; ru: string; th: string }> = {
+    night: { en: ' night', ru: ' ночь', th: ' / คืน' },
+    week: { en: ' week', ru: ' нед.', th: ' / สัปดาห์' },
+    month: { en: ' month', ru: ' мес.', th: ' / เดือน' },
+    year: { en: ' year', ru: ' год', th: ' / ปี' },
+    total: { en: '', ru: '', th: '' },
   };
-  return labels[period]?.[lang as 'en' | 'ru'] || '';
+  return labels[period]?.[lang as 'en' | 'ru' | 'th'] || '';
 };
 
 function PropertyListingCardBase({
@@ -76,7 +74,7 @@ function PropertyListingCardBase({
 
   const surface = useMemo(() => surfaceFromProperty(property, mode), [property, mode]);
   const title = isRu ? surface.titleRu : surface.titleEn;
-  const images = property.images?.length ? property.images : [property.cover_image || FALLBACK_IMAGE];
+  const images = [...(property.images || []), ...(property.cover_image ? [property.cover_image] : [])];
 
   const viewIds = useMemo(() => normalizeViewTypes(property.view_type), [property.view_type]);
   const primaryViewLabel =
@@ -95,9 +93,14 @@ function PropertyListingCardBase({
     ? getDistrictLabel(property.district, isRu ? 'ru' : 'en')
     : 'Phuket';
 
-  // Use price_per_night as primary, fallback to price
-  const unitPrice = property.price_per_night || property.price || 0;
-  const totalPrice = nights && nights > 0 && (property.price_period === 'night' || !property.price_period)
+  // Keep each displayed amount paired with its own billing period.
+  const nightlyPrice = typeof property.price_per_night === 'number' && Number.isFinite(property.price_per_night) && property.price_per_night > 0 ? property.price_per_night : null;
+  const legacyPrice = typeof property.price === 'number' && Number.isFinite(property.price) && property.price > 0 ? property.price : null;
+  const unitPrice = nightlyPrice ?? legacyPrice;
+  const pricePeriod = nightlyPrice !== null ? 'night' : property.price_period || 'night';
+  const salePrice = propertySaleAskingPrice(property);
+  const priceOnRequest = isRu ? 'Цена по запросу' : language === 'th' ? 'สอบถามราคา' : 'Price on request';
+  const totalPrice = nights && nights > 0 && pricePeriod === 'night' && unitPrice !== null
     ? unitPrice * nights
     : null;
 
@@ -135,6 +138,7 @@ function PropertyListingCardBase({
       {/* Image Carousel — Airbnb style */}
       <div className="relative">
         <PropertyImageCarousel
+          key={property.id}
           images={images}
           alt={title}
           isHovered={isHovered}
@@ -273,20 +277,20 @@ function PropertyListingCardBase({
           <p className="text-base leading-snug text-foreground">
             {mode === 'buy' ? (
               <span className="font-semibold">
-                {formatPrice(property.sale_price ?? property.price ?? 0)}
+                {salePrice !== null ? formatPrice(salePrice) : priceOnRequest}
               </span>
             ) : (
               <>
-                <span className="font-semibold">{formatPrice(unitPrice)}</span>
+                <span className="font-semibold">{unitPrice !== null ? formatPrice(unitPrice) : priceOnRequest}</span>
                 <span className="font-normal text-muted-foreground">
-                  {formatPriceLabel(property.price_period || 'night', language)}
+                  {unitPrice !== null && formatPriceLabel(pricePeriod, language)}
                 </span>
               </>
             )}
           </p>
           {totalPrice && nights && mode !== 'buy' && (
             <p className="text-sm text-muted-foreground mt-1 underline decoration-muted-foreground/50">
-              {formatPrice(totalPrice)} {isRu ? 'итого' : 'total'}
+              {isRu ? 'Ориентировочно' : language === 'th' ? 'ประมาณ' : 'Estimated'}: {formatPrice(totalPrice)}
             </p>
           )}
         </div>

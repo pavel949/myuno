@@ -390,6 +390,7 @@ export const AdminPoiClaims = lazy(() => import('@/pages/admin/AdminPoiClaims'))
 export const AdminProviders = lazy(() => import('@/pages/admin/AdminProviders'));
 export const AdminServices = lazy(() => import('@/pages/admin/AdminServices'));
 export const AdminOperations = lazy(() => import('@/pages/admin/AdminOperations'));
+export const AdminReview = lazy(() => import('@/pages/admin/AdminReview'));
 export const AdminYachts = lazy(() => import('@/pages/admin/AdminYachts'));
 export const AdminTransfers = lazy(() => import('@/pages/admin/AdminTransfers'));
 export const AdminTransferSLA = lazy(() => import('@/pages/admin/AdminTransferSLA'));

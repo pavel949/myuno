@@ -2,7 +2,7 @@
  * Property Hub child routes — extracted from AnimatedRoutes.
  * Rendered as nested children of /property under PropertyHub layout.
  */
-import { Route, Navigate, useParams } from 'react-router-dom';
+import { Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { Suspense } from 'react';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { APP_ROUTES } from '@/lib/config/routes';
@@ -27,10 +27,10 @@ const InvestIdRedirect = () => {
 };
 
 // Property Hub index: legacy `/property?…` query bookmarks → /property/browse?…
-const PropertyHubIndex = () => {
-  const search = typeof window !== 'undefined' ? window.location.search : '';
+export const PropertyHubIndex = () => {
+  const { search, hash } = useLocation();
   if (search && search.length > 1) {
-    return <Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}${search}`} replace />;
+    return <Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}${search}${hash}`} replace />;
   }
   return <Pages.PropertyLanding />;
 };

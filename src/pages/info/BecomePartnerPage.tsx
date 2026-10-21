@@ -194,8 +194,8 @@ const navigate = useNavigate();
 
   if (isSubmitted) {
     return (
-      <AppLayout showHeader={false}>
-      <PageContainer>
+      <AppLayout showHeader={false} usePageContainer={false}>
+      <PageContainer className="max-w-3xl">
         <div className="min-h-[60vh] flex items-center justify-center">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
@@ -224,8 +224,8 @@ const navigate = useNavigate();
   }
 
   return (
-    <AppLayout showHeader={false}>
-    <PageContainer>
+    <AppLayout showHeader={false} usePageContainer={false}>
+    <PageContainer className="max-w-3xl">
       <PageHeader 
         title={language === 'ru' ? 'Станьте партнёром myUNO' : 'Become a myUNO Partner'}
         showBack

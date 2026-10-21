@@ -326,8 +326,6 @@ export const AnimatedRoutes: React.FC = () => {
 
         {/* ── Stage 4: Unified Outreach Hub ── */}
         <Route path="/outreach" element={<LazyPage><Pages.OutreachHub /></LazyPage>} />
-        {/* Legacy entry: /mc/sequences → /outreach?audience=guest */}
-        <Route path="/mc/sequences" element={<Navigate to="/outreach?audience=guest" replace />} />
         
         {/* ── Beauty & Spa ── */}
         <Route path={APP_ROUTES.BEAUTY} element={<LazyPage><Pages.BeautySpaIndex /></LazyPage>} />
@@ -554,9 +552,6 @@ export const AnimatedRoutes: React.FC = () => {
         <Route path={APP_ROUTES.INVEST_CALCULATOR} element={<LazyPage><Pages.InvestmentCalculatorPage /></LazyPage>} />
         {/* Wave 2: unified tools hub (ClearView + Calculator + Advisory + DD) */}
         <Route path={APP_ROUTES.INVEST_TOOLS} element={<LazyPage><Pages.InvestmentToolsHub /></LazyPage>} />
-        {/* Wave 2: canonical ClearView landing + apply (previously unmounted → 404) */}
-        <Route path={APP_ROUTES.CLEARVIEW} element={<LazyPage><Pages.ClearViewLanding /></LazyPage>} />
-        <Route path={APP_ROUTES.CLEARVIEW_APPLY} element={<LazyPage><Pages.ClearViewApplyPage /></LazyPage>} />
         {/* Wave 2: /invest/clearview alias → canonical /property/clearview */}
         <Route path="/invest/clearview" element={<Navigate to={APP_ROUTES.CLEARVIEW} replace />} />
         <Route path="/invest/deal/:id" element={<LazyPage><Pages.InvestmentDealPublicDetail /></LazyPage>} />
@@ -568,7 +563,6 @@ export const AnimatedRoutes: React.FC = () => {
         {/* Legacy: /invest/:id → /invest/project/:id */}
         <Route path="/invest/:id" element={<LazyPage><Pages.InvestmentDetail /></LazyPage>} />
         {/* Legacy aliases */}
-        <Route path={APP_ROUTES.INVEST_CLUSTER} element={<Navigate to={APP_ROUTES.INVEST} replace />} />
         <Route path="/invest-hub" element={<Navigate to={APP_ROUTES.INVEST} replace />} />
         
         {/* ── Knowledge ── */}

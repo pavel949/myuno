@@ -1,13 +1,18 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render as renderControls, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HomeDiscoverySearch } from '../HomeDiscoverySearch';
-import { civilDateKey } from '@/lib/hotelDates';
 const state = vi.hoisted(() => ({ navigate: vi.fn(), mobile: false, language: 'ru' }));
 vi.mock('react-router-dom', () => ({ useNavigate: () => state.navigate }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: state.language }) }));
 vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => state.mobile }));
 vi.mock('@/hooks/usePropertyQuickFilters', () => ({ usePropertyQuickFilters: () => ({ districts: [{ id: 'a', valueKey: 'layan', labelRu: 'Лаян', labelEn: 'Layan' }], isLoading: false }) }));
 vi.mock('@/hooks/usePropertyFilterOptions', () => ({ usePropertyFilterOptions: () => ({ propertyTypes: [{ id: 'villa', labelRu: 'Вилла', labelEn: 'Villa' }, { id: 'condo', labelRu: 'Кондо', labelEn: 'Condo' }], isLoading: false }) }));
+
+function render(...args: Parameters<typeof renderControls>) {
+  const result = renderControls(...args);
+  fireEvent.click(result.container.querySelector('summary')!);
+  return result;
+}
 
 function choose(label: string, option: string) {
   fireEvent.keyDown(screen.getByRole('combobox', { name: label }), { key: 'Enter' });
@@ -30,6 +35,47 @@ describe('Home discovery themed controls and catalogue handoff', () => {
   });
   afterEach(() => { cleanup(); vi.useRealTimers(); });
 
+  it.each(['ru', 'en', 'th'])('keeps only primary criteria expanded initially in %s', language => {
+    state.language = language;
+    const { container } = renderControls(<HomeDiscoverySearch />);
+    expect(container.querySelector('details')).not.toHaveAttribute('open');
+    expect(screen.getByRole('spinbutton')).not.toBeVisible();
+    expect(screen.getByRole('searchbox')).not.toBeVisible();
+    expect(screen.getAllByRole('combobox')).toHaveLength(3);
+    expect(screen.getByRole('button', { name: language === 'en' ? 'Find a home' : language === 'ru' ? 'Найти жильё' : 'ค้นหาที่พัก' })).toBeVisible();
+  });
+  it('edits a legacy bedroom bookmark into a minimum threshold without losing secondary state', () => {
+    state.language = 'en';
+    render(<HomeDiscoverySearch initialParams={new URLSearchParams('f.bedrooms=studio&types=townhouse&guests=4&f.priceLevel=2&source=bookmark')} />);
+    choose('Bedrooms', '2+');
+    fireEvent.submit(screen.getByRole('form'));
+    const params = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams;
+    expect(params.get('bedrooms')).toBe('2+');
+    expect(params.has('f.bedrooms')).toBe(false);
+    expect(params.get('types')).toBe('townhouse');
+    expect(params.get('guests')).toBe('4');
+    expect(params.get('f.priceLevel')).toBe('2');
+    expect(params.get('source')).toBe('bookmark');
+  });
+  it('clears both modern and legacy bedroom constraints explicitly', () => {
+    state.language = 'en';
+    render(<HomeDiscoverySearch initialParams={new URLSearchParams('bedrooms=2%2B&f.bedrooms=4%2B')} />);
+    choose('Bedrooms', 'Any');
+    fireEvent.submit(screen.getByRole('form'));
+    const params = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams;
+    expect(params.has('bedrooms')).toBe(false);
+    expect(params.has('f.bedrooms')).toBe(false);
+  });
+  it.each([['ru', 'Любое', 'Необязательно'], ['en', 'Any', 'Optional'], ['th', 'ไม่ระบุ', 'ไม่บังคับ']])('keeps the optional guest placeholder short and explained in %s', (language, placeholder, hint) => {
+    state.language = language;
+    render(<HomeDiscoverySearch rentalOnly />);
+    const guests = screen.getByRole('spinbutton');
+    expect(guests).toHaveAttribute('placeholder', placeholder);
+    expect(guests).not.toBeRequired();
+    expect(guests).toHaveAccessibleDescription(expect.stringContaining(hint));
+    fireEvent.submit(screen.getByRole('form'));
+    expect(new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams.has('guests')).toBe(false);
+  });
   it('uses app controls and preserves type, district, dates and guests in the rental URL', () => {
     const { container } = render(<HomeDiscoverySearch />);
     expect(container.querySelector('input[type="date"]')).toBeNull();
@@ -44,8 +90,8 @@ describe('Home discovery themed controls and catalogue handoff', () => {
     const url = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app');
     expect(url.pathname).toBe('/property/search');
     expect(Object.fromEntries(url.searchParams)).toMatchObject({ mode: 'rent', tenancy: 'short', district: 'layan', guests: '4', types: 'villa' });
-    expect(civilDateKey(new Date(url.searchParams.get('checkIn')!))).toBe('2026-10-20');
-    expect(civilDateKey(new Date(url.searchParams.get('checkOut')!))).toBe('2026-10-25');
+    expect(url.searchParams.get('checkIn')).toBe('2026-10-20');
+    expect(url.searchParams.get('checkOut')).toBe('2026-10-25');
   });
   it('keeps purchase separate from rental dates and guests', () => {
     render(<HomeDiscoverySearch />);
@@ -63,6 +109,24 @@ describe('Home discovery themed controls and catalogue handoff', () => {
     choose('Тип жилья', 'Кондо');
     fireEvent.submit(screen.getByRole('form'));
     expect(Object.fromEntries(new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams)).toMatchObject({ mode: 'rent', types: 'condo' });
+  });
+  it('keeps an unspecified guest count blank and does not silently add a restriction', () => {
+    render(<HomeDiscoverySearch />);
+    expect(screen.getByLabelText('Количество гостей')).toHaveValue(null);
+    fireEvent.submit(screen.getByRole('form'));
+    expect(new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams.has('guests')).toBe(false);
+  });
+  it('allows clearing an explicit guest restriction', () => {
+    render(<HomeDiscoverySearch initialParams={new URLSearchParams('guests=4')} />);
+    fireEvent.change(screen.getByLabelText('Количество гостей'), { target: { value: '' } });
+    fireEvent.submit(screen.getByRole('form'));
+    expect(new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams.has('guests')).toBe(false);
+  });
+  it('keeps rental-only entry points in rent mode even with a purchase bookmark', () => {
+    render(<HomeDiscoverySearch rentalOnly initialParams={new URLSearchParams('mode=buy')} />);
+    expect(screen.getByLabelText('Количество гостей')).toBeVisible();
+    fireEvent.submit(screen.getByRole('form'));
+    expect(new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams.get('mode')).toBe('rent');
   });
   it('rejects incomplete/same-day stays, resets old checkout, and allows clearing dates', () => {
     render(<HomeDiscoverySearch />);

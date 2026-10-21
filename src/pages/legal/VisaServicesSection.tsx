@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useVisaServices } from '@/hooks/useVisaServices';
 import { Badge } from '@/components/ui/badge';
 import { Clock, FileCheck, ChevronRight } from 'lucide-react';
+import { servicePriceLabel } from '@/lib/services/servicePresentation';
 
 interface VisaServicesSectionProps {
   limit?: number;
@@ -48,10 +49,11 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
 
       <div className="grid grid-cols-1 gap-3">
         {visaServices.map((visa) => (
-          <div
+          <button type="button"
             key={visa.id}
+            aria-label={(language === 'ru' ? visa.name_ru : visa.name_en) || visa.name_en}
             onClick={() => navigate(`/legal/visa/${visa.id}`)}
-            className="bg-card border border-border rounded-none p-4 cursor-pointer hover:border-primary/50 transition-all group"
+            className="w-full text-left bg-card border border-border rounded-none p-4 cursor-pointer hover:border-primary/50 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -99,7 +101,7 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
               
               <div className="text-right ml-4">
                 <p className="font-bold text-primary">
-                  ฿{(visa.price || 0).toLocaleString()}
+                  {servicePriceLabel(visa.price, visa.currency, language)}
                 </p>
                 {visa.government_fee && (
                   <p className="text-xs text-muted-foreground">
@@ -108,7 +110,7 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
                 )}
               </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

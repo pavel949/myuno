@@ -339,6 +339,7 @@ export default function PropertyHub() {
       title={title}
       showHeader={!hideGlobalTopBar}
       showBottomNav={showBottomNav}
+      usePageContainer={p !== APP_ROUTES.PROPERTY_SEARCH && p !== `${APP_ROUTES.PROPERTY_SEARCH}/`}
     >
       <CompareProvider>
         {!hideOuterTabs && p !== APP_ROUTES.PROPERTY_SEARCH && <PropertyHubTabs />}

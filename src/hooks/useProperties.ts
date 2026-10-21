@@ -4,6 +4,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { PUBLIC_RENT_ELIGIBILITY, PUBLIC_SALE_ELIGIBILITY, PUBLIC_SALE_PRICE_ELIGIBILITY } from '@/lib/real-estate/propertyDetailIntent';
 import { PUBLIC_CATALOG_APPROVAL_STATUS } from '@/lib/real-estate/canonicalModel';
+import { districtFilterAliases } from '@/lib/taxonomies';
 import { sanitizeSearchTerm } from '@/lib/sanitizeSearch';
 import { selectPropertyCatalogFirst } from '@/lib/publicPropertyCatalog';
 import {
@@ -242,7 +243,7 @@ const PAGE_SIZE = 20;
  * Using explicit columns instead of select('*') reduces payload ~60%.
  */
 const PROPERTY_LIST_COLUMNS = `
-  id, title_en, title_ru, property_type, listing_type,
+  id, title_en, title_ru, property_type, listing_type, listing_modes,
   price, price_per_night, price_period, currency, bedrooms, bathrooms, area_sqm,
   max_guests, amenities, equipment, images, cover_image, address, district,
   lat, lng, is_active, is_featured, is_verified, instant_booking,
@@ -355,7 +356,8 @@ function applyPropertyFiltersToQuery(query: any, filters: PropertyFilters) {
     query = query.eq('is_quick_sale', true);
   }
 
-  const dists = filters.districts?.length ? filters.districts : filters.district ? [filters.district] : [];
+  const requestedDistricts = filters.districts?.length ? filters.districts : filters.district ? [filters.district] : [];
+  const dists = [...new Set(requestedDistricts.flatMap(districtFilterAliases))];
   if (dists.length === 1) {
     query = query.eq('district', dists[0]);
   } else if (dists.length > 1) {
@@ -673,10 +675,10 @@ function usePropertiesByGroup(
   column: 'project_id' | 'complex_id',
   groupId?: string,
   limit = 20,
-  options: { mode?: 'rent' | 'buy'; managementCompanyId?: string } = {},
+  options: { mode?: 'rent' | 'buy'; managementCompanyId?: string; propertyType?: string } = {},
 ) {
   return useQuery({
-    queryKey: [column === 'project_id' ? 'properties-by-project' : 'properties-by-complex', groupId, limit, options.mode, options.managementCompanyId],
+    queryKey: [column === 'project_id' ? 'properties-by-project' : 'properties-by-complex', groupId, limit, options.mode, options.managementCompanyId, options.propertyType],
     queryFn: async () => {
       if (!groupId) return { properties: [] as Property[], total: 0 };
 
@@ -688,6 +690,7 @@ function usePropertiesByGroup(
       if (options.mode === 'rent') query = query.or(PUBLIC_RENT_ELIGIBILITY);
       if (options.mode === 'buy') query = query.or(PUBLIC_SALE_ELIGIBILITY).or(PUBLIC_SALE_PRICE_ELIGIBILITY);
       if (options.managementCompanyId) query = query.eq('management_company_id', options.managementCompanyId);
+      if (options.propertyType) query = query.eq('property_type', options.propertyType);
       const { data, error, count } = await query
         .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false })
@@ -701,11 +704,11 @@ function usePropertiesByGroup(
   });
 }
 
-export function usePropertiesByProject(projectId?: string, limit = 20, options: { mode?: 'rent' | 'buy'; managementCompanyId?: string } = {}) {
+export function usePropertiesByProject(projectId?: string, limit = 20, options: { mode?: 'rent' | 'buy'; managementCompanyId?: string; propertyType?: string } = {}) {
   return usePropertiesByGroup('project_id', projectId, limit, options);
 }
 
-export function usePropertiesByComplex(complexId?: string, limit = 20, options: { mode?: 'rent' | 'buy'; managementCompanyId?: string } = {}) {
+export function usePropertiesByComplex(complexId?: string, limit = 20, options: { mode?: 'rent' | 'buy'; managementCompanyId?: string; propertyType?: string } = {}) {
   return usePropertiesByGroup('complex_id', complexId, limit, options);
 }
 

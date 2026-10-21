@@ -10,9 +10,9 @@ import { useCart } from '@/contexts/CartContext';
 import { ProductCard } from '@/components/market/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MarketComingSoonOverlay } from '@/components/market/MarketComingSoonOverlay';
+import { withMarketAvailability } from '@/components/market/MarketAvailabilityGate';
 
-export default function WishlistPage() {
+function WishlistPage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const { wishlist, isLoading: wishlistLoading } = useUserCollections({ itemType: 'product' });
@@ -103,7 +103,9 @@ export default function WishlistPage() {
           </div>
         )}
       </div>
-      <MarketComingSoonOverlay />
     </div>
   );
 }
+
+const AvailableWishlistPage = withMarketAvailability(WishlistPage);
+export default AvailableWishlistPage;
