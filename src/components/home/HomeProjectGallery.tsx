@@ -85,7 +85,7 @@ function ProjectCard({ project, mode, propertyType, language, queryKey, onCount,
           {image ? <img src={image} alt={name} loading="lazy" decoding="async" width="720" height="480" /> : <div className="home-project-no-image"><Building2 size={34} aria-hidden="true" /><span>{copy.noImage[lang]}</span></div>}
         </div>
         <div className="home-project-card-copy">
-          {location && <p className="home-project-location"><MapPin size={15} aria-hidden="true" />{getDistrictLabel(location, lang)}</p>}
+          {location && <p className="home-project-location"><MapPin size={15} aria-hidden="true" />{getDistrictLabel(location, isRu ? 'ru' : 'en')}</p>}
           <h3>{name}</h3>
           <p className="home-project-count" aria-live="polite">
             {count.isLoading ? '…' : count.isError ? copy.countError[lang] : count.data?.total
