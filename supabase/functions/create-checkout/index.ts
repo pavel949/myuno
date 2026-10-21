@@ -3,6 +3,7 @@ import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient, createServiceClient } from "../_shared/supabase.ts";
 import { getCorsHeaders, getAllowedOrigin } from "../_shared/cors.ts";
 import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { filterCheckoutSnapshot, linkCheckoutSession, type LinkOrder } from "../_shared/checkout-session-link.ts";
 
  interface CheckoutRequest {
    order_id: string;
@@ -52,14 +53,14 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
      const serviceClient = createServiceClient();
      const { data: order, error: orderError } = await serviceClient
        .from("orders")
-       .select("total_amount, currency, customer_user_id")
+       .select("id, total_amount, currency, customer_user_id, status, metadata")
        .eq("id", order_id)
        .single();
 
      if (orderError || !order) throw new Error("Order not found");
 
      // Ownership guard: the order must belong to the caller.
-     if (order.customer_user_id && order.customer_user_id !== user.id) {
+     if (order.customer_user_id !== user.id) {
        return new Response(
          JSON.stringify({ error: "Forbidden", message: "Order does not belong to the authenticated user" }),
          { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 403 }
@@ -75,20 +76,6 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
      console.info(`[create-checkout] Processing ${order_type} order ${order_id} for ${amount} ${currency}`);
 
      const stripe = createStripeClient();
-
-     // Get or create Stripe customer
-     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-     let customerId: string;
-
-     if (customers.data.length > 0) {
-       customerId = customers.data[0].id;
-     } else {
-       const customer = await stripe.customers.create({
-         email: user.email,
-         metadata: { supabase_user_id: user.id },
-       });
-       customerId = customer.id;
-     }
 
      // SECURITY: validate client-supplied redirect URLs against the origin
      // allow-list so a forged `success_url`/`cancel_url` (or `origin` header)
@@ -115,38 +102,72 @@ import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
        ? ["card", "promptpay"]
        : ["card"];
 
-     const session = await stripe.checkout.sessions.create({
-       customer: customerId,
-       payment_method_types: paymentMethods,
-       line_items: [{
-         price_data: {
-           currency: currency.toLowerCase(),
-           product_data: {
-             name: body.description || `Order Payment`,
+     const linked = await linkCheckoutSession(order as LinkOrder, user.id, {
+       read: async () => {
+         const { data, error } = await serviceClient.from('orders')
+           .select('id, total_amount, currency, customer_user_id, status, metadata')
+           .eq('id', order_id).eq('customer_user_id', user.id).maybeSingle();
+         if (error) throw new Error('checkout_link_read_failed');
+         return data as LinkOrder | null;
+       },
+       retrieve: id => stripe.checkout.sessions.retrieve(id),
+       expire: id => stripe.checkout.sessions.expire(id),
+       cas: async (snapshot, metadata) => {
+         const { data, error } = await filterCheckoutSnapshot(
+           serviceClient.from('orders').update({ metadata }), snapshot,
+         ).select('id');
+         if (error || !Array.isArray(data)) return 'unknown';
+         if (data.length === 0) return 'conflict';
+         return data.length === 1 && data[0].id === order_id ? 'stored' : 'unknown';
+       },
+       create: async () => {
+         // Get or create Stripe customer
+         const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+         let customerId: string;
+
+         if (customers.data.length > 0) {
+           customerId = customers.data[0].id;
+         } else {
+           const customer = await stripe.customers.create({
+             email: user.email,
+             metadata: { supabase_user_id: user.id },
+           });
+           customerId = customer.id;
+         }
+
+         return stripe.checkout.sessions.create({
+           customer: customerId,
+           payment_method_types: paymentMethods,
+           line_items: [{
+             price_data: {
+               currency: currency.toLowerCase(),
+               product_data: {
+                 name: body.description || `Order Payment`,
+               },
+               unit_amount: Math.round(amount * 100),
+             },
+             quantity: 1,
+           }],
+           mode: "payment",
+           success_url: safeRedirect(success_url, `/bookings/${order_id}?success=true`),
+           cancel_url: safeRedirect(cancel_url, `/bookings?canceled=true`),
+           metadata: {
+             order_id,
+             order_type,
+             user_id: user.id,
+             type: "order_payment",
            },
-           unit_amount: Math.round(amount * 100),
-         },
-         quantity: 1,
-       }],
-       mode: "payment",
-       success_url: safeRedirect(success_url, `/bookings/${order_id}?success=true`),
-       cancel_url: safeRedirect(cancel_url, `/bookings?canceled=true`),
-       metadata: {
-         order_id,
-         order_type,
-         user_id: user.id,
-         type: "order_payment",
+         });
        },
      });
-
-     // Update order status to pending payment (service role — bypasses RLS so the
-     // session id is reliably persisted).
-     await serviceClient
-       .from('orders')
-       .update({ metadata: { stripe_session_id: session.id } })
-       .eq('id', order_id);
-
-     console.info(`[create-checkout] Session created: ${session.id}`);
+     if (linked.ok === false) {
+       return new Response(
+         JSON.stringify({ error: linked.reason }),
+         { headers: { ...corsHeaders, "Content-Type": "application/json" },
+           status: linked.reason === 'reconciliation_required' ? 503 : 409 }
+       );
+     }
+     const session = linked.session;
 
      return new Response(
        JSON.stringify({ url: session.url, sessionId: session.id }),
