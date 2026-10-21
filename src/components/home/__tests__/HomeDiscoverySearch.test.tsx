@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render as renderControls, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render as renderControls, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HomeDiscoverySearch } from '../HomeDiscoverySearch';
 const state = vi.hoisted(() => ({ navigate: vi.fn(), mobile: false, language: 'ru' }));
