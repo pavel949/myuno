@@ -25,12 +25,12 @@ export const P20_RETIREES: PersonaLanding = {
     { ru: 'Хочется международное комьюнити рядом, не одному.', en: 'You want an international community nearby, not isolation.' },
   ],
   services: [
-    { slug: 'retirement-visa', label: { ru: 'Retirement visa O-A', en: 'Retirement O-A visa' }, oneLiner: { ru: '1 год + продление, ฿800 000 на счету или ฿65 000/мес.', en: '1 year + renewal, ฿800,000 on deposit or ฿65,000/mo.' }, href: '/legal/retirement-visa' },
-    { slug: 'senior-insurance', label: { ru: 'Страховка 60+', en: 'Insurance 60+' }, oneLiner: { ru: 'Pacific Cross, April — принимают до 75 лет.', en: 'Pacific Cross, April — accept up to age 75.' }, href: '/services/insurance/senior' },
+    { slug: 'retirement-visa', label: { ru: 'Retirement visa O-A', en: 'Retirement O-A visa' }, oneLiner: { ru: '1 год + продление, ฿800 000 на счету или ฿65 000/мес.', en: '1 year + renewal, ฿800,000 on deposit or ฿65,000/mo.' }, href: '/legal/retirement-visa', availability: 'unavailable' },
+    { slug: 'senior-insurance', label: { ru: 'Страховка 60+', en: 'Insurance 60+' }, oneLiner: { ru: 'Pacific Cross, April — принимают до 75 лет.', en: 'Pacific Cross, April — accept up to age 75.' }, href: '/services/insurance/senior', availability: 'unavailable' },
     { slug: 'senior-housing', label: { ru: 'Comfort condo и виллы', en: 'Comfort condos & villas' }, oneLiner: { ru: 'Один уровень, лифт, рядом hospital и market.', en: 'Single level, lift, near hospital and market.' }, href: '/property?audience=senior' },
-    { slug: 'thai-healthcare', label: { ru: 'Тайская медицина', en: 'Thai healthcare' }, oneLiner: { ru: 'Bangkok Hospital, BIH, многоязычные кардиологи (EN/RU/TH).', en: 'Bangkok Hospital, BIH, multilingual cardiologists (EN/RU/TH).' }, href: '/services/health/hospitals' },
-    { slug: 'senior-community', label: { ru: 'Комьюнити и события', en: 'Community & events' }, oneLiner: { ru: 'Бридж-клуб, шахматы, Telegram-группа 800+.', en: 'Bridge club, chess, 800+ member Telegram group.' }, href: '/community/seniors' },
-    { slug: 'home-help', label: { ru: 'Помощь по дому', en: 'Home help' }, oneLiner: { ru: 'Уборка ฿500/раз, домашняя кухня, ремонт.', en: 'Cleaning ฿500/visit, home-style cooking, repairs.' }, href: '/services/home/cleaning' },
+    { slug: 'thai-healthcare', label: { ru: 'Тайская медицина', en: 'Thai healthcare' }, oneLiner: { ru: 'Bangkok Hospital, BIH, многоязычные кардиологи (EN/RU/TH).', en: 'Bangkok Hospital, BIH, multilingual cardiologists (EN/RU/TH).' }, href: '/services/health/hospitals', availability: 'unavailable' },
+    { slug: 'senior-community', label: { ru: 'Комьюнити и события', en: 'Community & events' }, oneLiner: { ru: 'Бридж-клуб, шахматы, Telegram-группа 800+.', en: 'Bridge club, chess, 800+ member Telegram group.' }, href: '/community/seniors', availability: 'unavailable' },
+    { slug: 'home-help', label: { ru: 'Помощь по дому', en: 'Home help' }, oneLiner: { ru: 'Уборка ฿500/раз, домашняя кухня, ремонт.', en: 'Cleaning ฿500/visit, home-style cooking, repairs.' }, href: '/services/home/cleaning', availability: 'unavailable' },
   ],
   faq: [
     { q: { ru: 'Какая разница между O-A и O-X visa?', en: 'O-A vs O-X — what is the difference?' }, a: { ru: 'O-A — 1 год + продление, ฿800 000 на счету или ฿65 000/мес дохода. O-X — 5+5 лет, ฿3 млн на счету. Для большинства снежных птиц достаточно O-A.', en: 'O-A — 1 year + renewable, ฿800,000 deposit or ฿65,000/mo income. O-X — 5+5 years, ฿3M deposit. O-A suffices for most snowbirds.' } },
@@ -42,7 +42,7 @@ export const P20_RETIREES: PersonaLanding = {
   ],
   primaryCta: {
     label: { ru: 'Подобрать retirement visa', en: 'Pick a retirement visa' },
-    href: '/legal/retirement-visa',
+    href: '/legal/retirement-visa', availability: 'unavailable',
     subtitle: { ru: 'Бесплатная 15-минутная консультация.', en: '15-minute free consultation.' },
   },
   secondaryCta: {

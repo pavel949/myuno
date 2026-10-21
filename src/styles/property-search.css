@@ -1,6 +1,6 @@
 /* Guest catalogue: existing navy/cream tokens, compact controls, results first. */
-.property-discovery{max-width:1400px;margin-inline:auto}
-.property-discovery-header{display:grid;gap:12px;padding:16px}
+.property-discovery{margin-inline:auto}
+.property-discovery-header{display:grid;gap:12px;padding-block:16px}
 .property-discovery-intent{display:inline-flex;border-bottom:1px solid hsl(var(--border));gap:24px}
 .property-discovery-intent button{min-height:44px;padding:0 4px;border-bottom:2px solid transparent;color:hsl(var(--muted-foreground));font-size:15px}
 .property-discovery-intent button[aria-pressed=true]{border-color:hsl(var(--primary));color:hsl(var(--primary));font-weight:600}
@@ -17,7 +17,42 @@
 .property-discovery-editor .home-search-duration button{border:0;background:transparent;color:hsl(var(--muted-foreground));padding-inline:12px}
 .property-discovery-editor .home-search-duration button[aria-pressed=true]{background:hsl(var(--muted));color:hsl(var(--foreground));box-shadow:inset 0 -2px hsl(var(--primary))}
 .property-discovery-result-actions [role=combobox]{min-height:44px;font-size:13px;max-width:100%}
-@media(min-width:640px){.property-discovery-header{padding:20px 24px 12px}.property-discovery-edit{max-width:none}.property-discovery-summary{min-height:80px}}
+@media(min-width:640px){.property-discovery-header{padding-block:20px 12px}.property-discovery-edit{max-width:none}.property-discovery-summary{min-height:80px}}
 @media(max-width:430px){.property-discovery-summary{gap:8px;padding:12px}.property-discovery-edit{max-width:94px;padding-inline:8px}}
 
 .property-discovery-title{font-family:var(--font-display,Georgia,serif);font-size:clamp(24px,2.5vw,36px);line-height:1.2;color:hsl(var(--foreground));letter-spacing:-.025em;margin:0}
+
+/* Keep the primary criteria visible and clearly editable on every viewport. */
+.property-discovery-editor .home-search{padding:16px}
+.property-discovery-editor .home-search-select,.property-discovery-editor .home-search-date-trigger,.property-discovery-editor .home-search-guests{border:1px solid hsl(var(--border));padding:8px 12px;background:hsl(var(--background))}
+.property-discovery-header>.flex.min-w-0{flex-wrap:wrap}
+@media(max-width:430px){.property-discovery-editor .home-search{gap:12px}.property-discovery-editor .home-search-dates{padding:0;border:0}.property-discovery-editor .home-search-submit{width:100%}.property-discovery-features{width:100%}}
+
+/* Catalogue-only desktop layout. The homepage/editor validation is untouched. */
+@media(min-width:1024px){
+  .property-discovery .property-discovery-editor .home-search.home-search{min-height:0;padding:12px;gap:8px 12px}
+  .property-discovery .property-discovery-editor .home-search.home-search>.home-search-duration{max-width:480px;grid-row:1;grid-column:1/-1}
+  .property-discovery .property-discovery-editor .home-search-secondary summary{min-height:36px}
+  .property-discovery .property-discovery-editor .home-search-secondary-fields{grid-template-columns:minmax(0,1fr) minmax(140px,220px);max-width:900px}
+  .property-discovery .property-discovery-editor .home-search-secondary-fields>.home-search-query{grid-column:auto}
+}
+@media(min-width:1280px){
+  .property-discovery .property-discovery-editor .home-search.home-search{grid-template-columns:minmax(240px,1.35fr) minmax(130px,.8fr) minmax(160px,1fr) minmax(130px,.8fr) minmax(150px,.8fr);align-items:end}
+  .property-discovery .property-discovery-editor .home-search.home-search>.home-search-dates{grid-column:1;grid-row:2;max-width:none;padding:0;border:0;align-self:end}
+  .property-discovery .property-discovery-editor .home-search.home-search>.home-search-type{grid-column:2;grid-row:2}
+  .property-discovery .property-discovery-editor .home-search.home-search>.home-search-location{grid-column:3;grid-row:2}
+  .property-discovery .property-discovery-editor .home-search.home-search>.home-search-bedrooms{grid-column:4;grid-row:2}
+  .property-discovery .property-discovery-editor .home-search.home-search>.home-search-submit{grid-column:5;grid-row:2;white-space:normal;min-height:52px;padding-inline:12px}
+  .property-discovery .property-discovery-editor .home-search.home-search>.home-search-secondary{grid-column:1/-1;grid-row:3}
+  .property-discovery[data-property-mode=buy] .property-discovery-editor .home-search.home-search{grid-template-columns:minmax(160px,1fr) minmax(200px,1.2fr) minmax(150px,.8fr) minmax(160px,.8fr)}
+  .property-discovery[data-property-mode=buy] .property-discovery-editor .home-search.home-search>.home-search-type{grid-column:1;grid-row:1}
+  .property-discovery[data-property-mode=buy] .property-discovery-editor .home-search.home-search>.home-search-location{grid-column:2;grid-row:1}
+  .property-discovery[data-property-mode=buy] .property-discovery-editor .home-search.home-search>.home-search-bedrooms{grid-column:3;grid-row:1}
+  .property-discovery[data-property-mode=buy] .property-discovery-editor .home-search.home-search>.home-search-submit{grid-column:4;grid-row:1}
+  .property-discovery[data-property-mode=buy] .property-discovery-editor .home-search.home-search>.home-search-secondary{grid-row:2}
+  .property-discovery-results--map{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start;gap:24px}
+  .property-discovery-results--map>.property-discovery-map-panel{grid-column:2;grid-row:1;position:sticky;top:calc(var(--consumer-header-height,80px) + 16px);min-width:0}
+  .property-discovery-results--map>.property-discovery-list{grid-column:1;grid-row:1}
+  .property-discovery-results--map .property-discovery-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .property-discovery-results--map .property-discovery-map{height:min(720px,calc(100dvh - var(--consumer-header-height,80px) - 32px));min-height:400px}
+}

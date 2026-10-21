@@ -39,4 +39,12 @@ describe('provider catalogue states', () => {
     data = [service]; mount('cleaning');
     expect(screen.getByRole('link', { name: 'Fixture provider' })).toHaveAttribute('href', '/services/provider/provider-1?returnTo=%2Fdiscover%2Fservices%3Fq%3Dcleaning');
   });
+  it('displays the recorded currency and scope without assuming baht', () => {
+    data = [{ ...service, price: 35, currency: 'USD', description_en: 'Recorded scope', duration_minutes: 60 }];
+    mount();
+    expect(screen.getByText('USD 35')).toBeVisible();
+    expect(screen.getByText('Recorded scope')).toBeVisible();
+    expect(screen.getByText('60 min')).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Book' })).toBeVisible();
+  });
 });

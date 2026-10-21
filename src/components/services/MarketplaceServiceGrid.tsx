@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Clock, CalendarCheck } from 'lucide-react';
+import { Shield, CalendarCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang } from '@/lib/i18n/pickLang';
 import { useMarketplaceServices } from '@/hooks/useServiceMarketplace';
 import { ServiceBookingSheet, type BookableService } from './ServiceBookingSheet';
-import { formatServicePrice } from '@/lib/services/formatServicePrice';
+import { ServiceSummary } from './ServiceSummary';
 
 /** Real, bookable services from verified providers (services + providers tables). */
 export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/services' }: { search?: string; returnTo?: string }) {
@@ -53,7 +53,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
               <article key={s.id} className="flex min-w-0 flex-col border border-border bg-card">
                 {img ? <img src={img} alt="" loading="lazy" className="h-40 w-full border-b border-border object-cover" /> : <div aria-hidden="true" className="flex h-24 items-center justify-center border-b border-border bg-muted/50 text-primary sm:h-28"><CalendarCheck className="h-10 w-10" strokeWidth={1.25} /></div>}
                 <div className="flex flex-1 min-w-0 flex-col gap-2 p-4">
-                  <h3 className="font-display text-h4 leading-snug line-clamp-2">{name}</h3>
+                  <ServiceSummary name={name} description={(language === 'ru' ? s.description_ru : s.description_en) || s.description_en} price={s.price} currency={s.currency} durationMinutes={s.duration_minutes} />
                   {s.provider && (
                     <Link to={`/services/provider/${s.provider.id}?returnTo=${encodeURIComponent(returnTo)}`} className="min-h-11 text-sm text-muted-foreground hover:underline flex items-center gap-1">
                       {s.provider.is_verified && <Shield className="h-3 w-3 text-primary" aria-label={L('Специалист проверен', 'Verified', 'ยืนยันแล้ว')} />}
@@ -61,10 +61,7 @@ export function MarketplaceServiceGrid({ search = '', returnTo = '/discover/serv
                     </Link>
                   )}
                   <div className="mt-auto flex flex-col gap-3 border-t border-border pt-3">
-                    <span className="text-sm font-mono">
-                      {formatServicePrice(s.price, s.currency, language)}
-                      {s.duration_minutes ? <span className="text-xs text-muted-foreground ml-1 inline-flex items-center gap-0.5"><Clock className="h-3 w-3" />{s.duration_minutes}′</span> : null}
-                    </span>
+
                     <Button size="sm" className="min-h-11 w-full" onClick={() => setSelected({
                       id: s.id, providerId: s.provider_id, name, price: s.price, currency: s.currency,
                       durationMinutes: s.duration_minutes, leadTimeHours: s.lead_time_hours,

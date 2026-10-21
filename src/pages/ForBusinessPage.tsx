@@ -22,6 +22,8 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { PUBLIC_CONTENT_LAYOUT, PUBLIC_CONTENT_ANCHOR, MARKETING_ACTION_BUTTON } from '@/design-system/ecosystemLayout';
+import { cn } from '@/lib/utils';
 import {
   Building2, Languages, Globe, CalendarCheck, ShieldCheck, Megaphone,
   Banknote, Users, Sparkles, ArrowRight, Send,
@@ -374,7 +376,7 @@ export default function ForBusinessPage() {
   const isRu = language === 'ru';
 
   return (
-    <AppLayout>
+    <AppLayout usePageContainer={false}>
       <Helmet>
         <html lang={language} />
         <title>{t(UI.metaTitle)}</title>
@@ -391,8 +393,9 @@ export default function ForBusinessPage() {
       <div className="min-h-screen bg-background">
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-16 md:py-24 px-4">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+        <section className="relative overflow-hidden py-10 md:py-16">
+
+          <div className={PUBLIC_CONTENT_LAYOUT.business}>
           <div className="relative max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -403,26 +406,27 @@ export default function ForBusinessPage() {
                 <Building2 className="w-3.5 h-3.5" />
                 {t(UI.heroBadge)}
               </Badge>
-              <h1 className="text-3xl md:text-5xl font-bold font-display tracking-tight mb-4">
+              <h1 className="text-3xl md:text-5xl font-display font-semibold tracking-tight mb-4">
                 {t(UI.heroTitle)}
               </h1>
               <p className="text-muted-foreground text-base md:text-lg mb-8">
                 {t(UI.heroDesc)}
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button size="lg" className="gap-2" onClick={scrollToForm}>
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center">
+                <Button size="lg" className={MARKETING_ACTION_BUTTON} onClick={scrollToForm}>
                   {t(UI.ctaInquiry)}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => navigate(APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS)}>
+                <Button size="lg" variant="outline" className={MARKETING_ACTION_BUTTON} onClick={() => navigate(APP_ROUTES.FOR_LOCAL_SERVICE_PROVIDERS)}>
                   {t(UI.ctaPartner)}
                 </Button>
               </div>
             </motion.div>
           </div>
+          </div>
         </section>
 
-        <section className="max-w-6xl mx-auto px-4 pb-12" aria-labelledby="business-start-title">
+        <section className={`${PUBLIC_CONTENT_LAYOUT.business} pb-12`} aria-labelledby="business-start-title">
           <h2 id="business-start-title" className="text-2xl font-display mb-6">{t({ru:'С чего начнём?',en:'What do you need?',th:'คุณต้องการความช่วยเหลือเรื่องใด?'})}</h2>
           <div className="grid gap-4 md:grid-cols-3">
             {[
@@ -439,14 +443,14 @@ export default function ForBusinessPage() {
         </section>
 
         {/* Services menu */}
-        <section className="max-w-6xl mx-auto px-4 pb-12">
+        <section className={`${PUBLIC_CONTENT_LAYOUT.business} pb-12`}>
           <h2 className="text-2xl md:text-3xl font-display font-semibold mb-2 text-center">
             {t(UI.servicesTitle)}
           </h2>
           <p className="text-center text-muted-foreground mb-8 text-sm">
             {t(UI.servicesHint)}
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 min-[1440px]:grid-cols-4 gap-5">
             {SERVICES.map((s, i) => {
               const isOn = selected.has(s.key);
               const title = t(s.title);
@@ -466,7 +470,7 @@ export default function ForBusinessPage() {
                     <CardContent className="pt-5 pb-5 flex flex-col gap-3">
                       <div className="flex items-start justify-between gap-2">
                         <s.icon className="w-8 h-8 text-primary" />
-                        <Checkbox checked={isOn} onCheckedChange={() => toggle(s.key)} aria-label={title} />
+                        <Checkbox className="min-h-4" checked={isOn} onCheckedChange={() => toggle(s.key)} aria-label={title} />
                       </div>
                       <div>
                         <h3 className="font-display font-semibold text-base mb-1">
@@ -493,7 +497,7 @@ export default function ForBusinessPage() {
         </section>
 
         {/* Inquiry form */}
-        <section id="b2b-inquiry-form" className="max-w-2xl mx-auto px-4 pb-20 pt-4">
+        <section id="b2b-inquiry-form" className={cn(PUBLIC_CONTENT_LAYOUT.marketing, 'max-w-2xl pb-20 pt-4', PUBLIC_CONTENT_ANCHOR)}>
           <Card className="border-border/80">
             <CardContent className="pt-6">
               <h2 className="text-xl md:text-2xl font-display font-semibold mb-1">
@@ -569,7 +573,7 @@ export default function ForBusinessPage() {
                     placeholder={t(UI.notePh)}
                   />
                 </div>
-                <Button type="submit" size="lg" className="w-full gap-2" disabled={submitting}>
+                <Button type="submit" size="lg" className={cn('w-full', MARKETING_ACTION_BUTTON)} disabled={submitting}>
                   <Send className="w-4 h-4" />
                   {submitting ? t(UI.sending) : t(UI.send)}
                 </Button>

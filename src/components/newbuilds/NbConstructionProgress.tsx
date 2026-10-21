@@ -1,4 +1,7 @@
 import React from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
+import { projectCompletionLabel } from '@/lib/offplan/presentation';
 
 interface Props {
   progress: number; // 0-100
@@ -7,6 +10,7 @@ interface Props {
 }
 
 export function NbConstructionProgress({ progress, completionDate, size = 'md' }: Props) {
+  const { language } = useLanguage();
   const h = size === 'sm' ? 'h-1' : 'h-1.5';
   
   return (
@@ -17,7 +21,7 @@ export function NbConstructionProgress({ progress, completionDate, size = 'md' }
         </span>
         {completionDate && (
           <span className="text-xs" style={{ color: 'hsl(var(--nb-muted))' }}>
-            Сдача: {new Date(completionDate).toLocaleDateString('ru-RU', { month: 'short', year: 'numeric' })}
+            {pickLang(language, { ru: 'Сдача:', en: 'Completion:', th: 'กำหนดแล้วเสร็จ:' })} {projectCompletionLabel(completionDate, language)}
           </span>
         )}
       </div>

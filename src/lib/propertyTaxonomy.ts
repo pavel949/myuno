@@ -321,6 +321,17 @@ export function normalizeDistrictId(id: string): string {
   return DISTRICT_ALIASES[trimmed] || trimmed.toLowerCase().replace(/\s+/g, '-').replace(/_/g, '-');
 }
 
+/** Read compatibility for public rows stored with historical district labels. */
+export function districtFilterAliases(value: string): string[] {
+  const raw = value.trim();
+  if (!raw) return [];
+  const canonical = normalizeDistrictId(raw);
+  const label = PHUKET_DISTRICTS.find(district => district.id === canonical)?.labelEn;
+  return [...new Set([canonical, raw, ...(label ? [label] : []),
+    ...Object.entries(DISTRICT_ALIASES).filter(([, id]) => id === canonical).map(([alias]) => alias),
+  ])];
+}
+
 /**
  * Normalize property type ID
  * @example normalizePropertyType('Villa') => 'villa'

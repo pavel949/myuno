@@ -81,6 +81,21 @@ describe('event dates and times', () => {
 });
 
 describe('operational claims match their sources', () => {
+  it('limits pet updates to pet-service commercial orders and labels that source', async () => {
+    mocks.from.mockImplementation(() => chain({ data: [{
+      id: 'synthetic-pet-order', vertical: 'pet_service', order_type: 'service',
+      start_at: '2027-01-01T06:20:00Z', status: 'pending',
+    }], error: null }));
+    const { result } = renderHook(() => useRoleSignals(['pet_owner']), { wrapper: wrapper() });
+    await waitFor(() => expect(result.current.signals.pet_owner).toBeDefined());
+    expect(mocks.from).toHaveBeenCalledWith('orders');
+    expect(mocks.calls).toContainEqual(['in', 'vertical', ['pet_service']]);
+    expect(mocks.calls).not.toContainEqual(['in', 'vertical', ['pet_service', 'medical']]);
+    expect(result.current.signals.pet_owner).toMatchObject({
+      lead: 'Pet-service order', leadRu: 'Заказ для питомца', leadTh: 'คำสั่งซื้อบริการสัตว์เลี้ยง',
+      value: '13:20', isLive: true, href: '/orders/synthetic-pet-order/tracking',
+    });
+  });
   it.each(['cancelled', 'rejected', 'expired', null])('does not surface a released or unknown booking (%s)', async status => {
     mocks.from.mockImplementation(() => chain({ data: [{ check_in: '2026-10-01', check_out: '2026-11-01', status }], error: null }));
     const { result } = renderHook(() => useRoleSignals(['property_owner']), { wrapper: wrapper() });

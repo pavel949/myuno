@@ -68,6 +68,7 @@ const HOME_PREFERENCE_LABEL_TH: Record<UserPersona, string> = {
 interface QuickAction {
   labelEn: string;
   labelRu: string;
+  labelTh?: string;
   path: string;
   icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   /** Persona stack must include at least one of these (OR with `roles`). */
@@ -80,26 +81,26 @@ const QUICK_ACTION_CATALOG: QuickAction[] = [
   // Workspace — owner / vendor
   {
     labelEn: 'My property', labelRu: 'Мой объект',
-    path: '/my-property', icon: Building2,
+    labelTh: 'อสังหาริมทรัพย์ของฉัน', path: '/my-property', icon: Building2,
     personas: ['property_owner'], roles: ['owner', 'mc_portal'],
   },
   // Workspace — investor / capital
   {
     labelEn: 'New developments', labelRu: 'Новостройки',
-    path: '/newbuilds', icon: TrendingUp,
+    labelTh: 'โครงการใหม่', path: '/newbuilds', icon: TrendingUp,
     personas: ['investor'], roles: ['investor'],
   },
   // Consumer — discovery (always relevant for non-workspace roles)
   {
     labelEn: 'Find a service', labelRu: 'Найти услугу',
-    path: APP_ROUTES.DISCOVER, icon: Compass,
+    labelTh: 'ค้นหาบริการ', path: APP_ROUTES.DISCOVER, icon: Compass,
     personas: ['tourist', 'resident', 'family', 'couple', 'nightlife', 'active', 'business', 'nomad', 'pet_owner', 'relocation'],
     roles: ['guest'],
   },
   // Universal fallback — every signed-in user has bookings
   {
     labelEn: 'My bookings', labelRu: 'Мои бронирования',
-    path: '/bookings', icon: HomeIcon,
+    labelTh: 'การจองของฉัน', path: '/bookings', icon: HomeIcon,
   },
 ];
 
@@ -268,7 +269,7 @@ export function AppDrawer({
                       >
                         <Icon className="w-4 h-4 text-primary shrink-0" />
                         <span className="text-[12px] font-medium text-foreground line-clamp-2 leading-tight">
-                          {isRu ? a.labelRu : a.labelEn}
+                          {pickLang(language, { ru: a.labelRu, en: a.labelEn, th: a.labelTh })}
                         </span>
                       </button>
                     );
@@ -278,7 +279,13 @@ export function AppDrawer({
             )}
 
             {/* 3. Clusters — accordion (shared with AllAppsDrawer) */}
+            <button type="button" onClick={() => go(APP_ROUTES.PROPERTY_SEARCH)}
+              className="flex items-center gap-3 w-full min-h-12 py-3 text-sm font-semibold text-left border-b border-border/40">
+              <HomeIcon className="w-4 h-4 shrink-0" />
+              {pickLang(language, { ru: 'Найти жильё', en: 'Find a home', th: 'ค้นหาที่พัก' })}
+            </button>
             <ServiceClusterAccordion
+              compact
               clusters={visibleClusters}
               language={language}
               onNavigate={go}

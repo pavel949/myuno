@@ -28,7 +28,7 @@ export default function TripPlannerPage() {
                 <h2 className="font-display text-2xl">{t('Где будем жить?', 'Where will you stay?')}</h2>
                 <p className="text-sm text-muted-foreground">{t('Укажите район и даты, чтобы найти жильё.', 'Choose an area and dates to find a home.')}</p>
               </CardHeader>
-              <CardContent className="journey-primary"><HomeDiscoverySearch rentalOnly /></CardContent>
+              <CardContent className="journey-primary !mb-0 !border-0"><HomeDiscoverySearch rentalOnly /></CardContent>
             </Card>
             <TripChecklist />
           </div>

@@ -1,3 +1,4 @@
+import { CalendarPriceEditor } from '@/components/owner/pricing/CalendarPriceEditor';
 import { useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { accessiblePropertySelection, propertyContextBackPath } from '@/lib/owner/propertyNavigation';
@@ -52,9 +53,12 @@ export default function RateManagementPage() {
   const setSelectedProperty = (id: string) => {
     if (id !== 'all' && !allProperties.some(p => p.property_id === id)) return;
     const next = new URLSearchParams(params);
-    if (id === 'all') next.delete('property'); else next.set('property', id);
+    if (id === 'all') next.delete('property'); else { next.set('property', id); next.set('view', 'calendar'); }
     setParams(next);
   };
+  const pricingView = params.get('view') || (selectedProperty && selectedProperty !== 'all' ? 'calendar' : 'matrix');
+  const visibleProperties = selectedProperty === 'all' ? allProperties : allProperties.filter(p => p.property_id === selectedProperty);
+  const changeView = (view: string) => { const next = new URLSearchParams(params); next.set('view', view); if(view === 'calendar' && selectedProperty === 'all' && allProperties.length === 1) next.set('property', allProperties[0].property_id); setParams(next); };
   const backPath = propertyContextBackPath(params.get('returnTo'), selectedProperty);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingRate, setEditingRate] = useState<RateSeasonRecord | null>(null);
@@ -122,7 +126,7 @@ export default function RateManagementPage() {
   }
 
   return (
-    <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 max-w-4xl mx-auto space-y-6">
+    <div className="px-4 md:px-6 lg:px-8 pt-6 pb-24 max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" aria-label={t('Back', 'Назад')} onClick={() => navigate(backPath)}>
@@ -141,7 +145,7 @@ export default function RateManagementPage() {
       </div>
 
       {/* Property filter */}
-      {allProperties.length > 1 && (
+      {allProperties.length > 0 && (
         <Select value={selectedProperty} onValueChange={setSelectedProperty}>
           <SelectTrigger aria-label={t('Property', 'Объект')} className="w-full md:w-64">
             <SelectValue placeholder={t('All properties', 'Все объекты')} />
@@ -156,6 +160,17 @@ export default function RateManagementPage() {
           </SelectContent>
         </Select>
       )}
+
+      <div role="group" aria-label={t('Pricing view', 'Вид тарифов')} className="flex gap-2"><Button variant={pricingView === 'matrix' ? 'default' : 'outline'} onClick={() => changeView('matrix')}>{t('Table', 'Таблица')}</Button><Button variant={pricingView === 'calendar' ? 'default' : 'outline'} onClick={() => changeView('calendar')}>{t('Calendar', 'Календарь')}</Button></div>
+      {pricingView === 'calendar' && selectedProperty === 'all' && <p className="text-sm text-muted-foreground">{t('Select a property to edit its calendar.', 'Выберите объект для настройки календаря.')}</p>}
+      {pricingView === 'calendar' && selectedProperty && selectedProperty !== 'all' && allProperties.find(p => p.property_id === selectedProperty) && <CalendarPriceEditor key={selectedProperty} property={allProperties.find(p => p.property_id === selectedProperty)!} />}
+
+      {pricingView === 'matrix' && <section className="border bg-card overflow-hidden">
+        <div className="p-5"><h2 className="font-semibold">{t('Rates by property', 'Тарифы по объектам')}</h2><p className="text-sm text-muted-foreground">{t('Open a property calendar or select a seasonal rate to edit.', 'Откройте календарь объекта или выберите сезонный тариф для редактирования.')}</p></div>
+        <div className="overflow-x-auto"><table className="w-full text-sm text-left"><thead className="bg-muted/50"><tr><th className="p-4">{t('Property', 'Объект')}</th><th className="p-4">{t('Base / night', 'База / ночь')}</th>{Array.from(new Set(activeRates.map(r => r.name_en))).map(name => <th className="p-4" key={name}>{name}</th>)}</tr></thead><tbody>
+          {visibleProperties.map(prop => <tr key={prop.property_id} className="border-t"><th className="p-4"><button className="text-left underline underline-offset-4" onClick={() => setSelectedProperty(prop.property_id)}>{isRu ? prop.title_ru || prop.title : prop.title}</button></th><td className="p-4 whitespace-nowrap">{formatPropertyRate(prop.price_per_night, prop.record_currency, isRu)}</td>{Array.from(new Set(activeRates.map(r => r.name_en))).map(name => { const rate = activeRates.find(r => r.property_id === prop.property_id && r.name_en === name); return <td className="p-4" key={name}>{rate ? <button className="border px-3 py-2 whitespace-nowrap hover:bg-muted" onClick={() => { setEditingRate(rate); setSheetOpen(true); }}>{formatPropertyRate(rate.nightly_rate, rate.currency, isRu)}</button> : <span className="text-muted-foreground">—</span>}</td>; })}</tr>)}
+        </tbody></table></div>
+      </section>}
 
       {/* ─── AI Pricing Suggestions ─── */}
       {aiPropId && (

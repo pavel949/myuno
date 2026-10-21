@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { createErrorHandler } from '@/lib/errorHandler';
 import type { Database } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { applyProviderQueue, type ProviderFilter } from '@/lib/adminDashboardQueues';
+import { adminLiteralSearchOr } from '@/lib/adminLiteralSearch';
 
 // Re-export the canonical admin check hook
 export { useIsAdmin as useAdminCheck } from '@/hooks/useIsAdmin';
@@ -36,26 +38,42 @@ const QUERY_KEYS = {
 };
 
 // ============= useAdminProviders =============
-export function useAdminProviders() {
+export interface ProviderQueryOptions { filter: ProviderFilter; search: string; page: number; actorId?: string; enabled: boolean; editId?: string | null }
+export function useAdminProviders(options?: ProviderQueryOptions) {
   const { user } = useAuth();
+  const actorId = options ? options.actorId : user?.id;
   const queryClient = useQueryClient();
 
-  const { data: providers = [], isLoading, isFetching, error } = useQuery({
-    queryKey: [...QUERY_KEYS.providers, user?.id],
-    enabled: !!user?.id,
+  const { data: result, isLoading, isFetching, error } = useQuery({
+    queryKey: options ? [...QUERY_KEYS.providers, actorId, options.filter, options.search, options.page, options.editId] : [...QUERY_KEYS.providers, actorId],
+    enabled: !!actorId && (options ? options.enabled : true),
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('providers')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*', {count:'exact'})
+        .order('created_at', { ascending: false }).order('id',{ascending:false});
+      if (options?.editId) {
+        // A one-shot editor lookup selects the exact row independently of list
+        // filters; the existing admin gate and database authorization still apply.
+        query = query.eq('id', options.editId);
+      } else if (options) {
+        query = applyProviderQueue(query, options.filter);
+        const search = adminLiteralSearchOr('providers', options.search);
+        if (search) query = query.or(search);
+        query = query.range(options.page*50,options.page*50+49);
+      }
+      const { data, error, count } = await query;
 
       if (error) {
         errorLog.silent(error, 'fetch_providers');
         throw error;
       }
-      return data as Provider[];
+      return {rows: data as Provider[], count};
     },
   });
+  // Old callers/cached arrays remain compatible; paged callers receive exact total.
+  const providers: Provider[] = Array.isArray(result) ? result : result?.rows || [];
+  const totalCount = error ? null : Array.isArray(result) ? null : result?.count ?? null;
 
   const invalidate = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: QUERY_KEYS.providers });
@@ -107,7 +125,7 @@ export function useAdminProviders() {
     return { error };
   }, [invalidate]);
 
-  return { providers, isLoading, isFetching, error, createProvider, updateProvider, deleteProvider, refetch: invalidate };
+  return { providers, totalCount, isLoading, isFetching, error, createProvider, updateProvider, deleteProvider, refetch: invalidate };
 }
 
 // ============= useAdminServices =============

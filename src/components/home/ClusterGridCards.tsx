@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import type { UserPersona } from '@/hooks/useUserPersonas';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { blendClusters } from '@/lib/roleBlend';
-import type { ClusterCatalogEntry } from '@/lib/nav/clusterCatalog';
+import { getClusterHeaderLabel, getClusterValueLine, type ClusterCatalogEntry } from '@/lib/nav/clusterCatalog';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface ClusterGridCardsProps {
   personas: UserPersona[];
@@ -28,7 +29,6 @@ function availableCount(entry: ClusterCatalogEntry): number {
 export function ClusterGridCards({ personas }: ClusterGridCardsProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const isRu = language === 'ru';
 
   // blendClusters derives this exact audience context from `personas` when omitted.
   const clusters = useMemo(() => blendClusters(personas), [personas]);
@@ -41,16 +41,17 @@ export function ClusterGridCards({ personas }: ClusterGridCardsProps) {
     <div className="px-4 pb-6">
       <div className="mb-2.5 flex items-baseline justify-between">
         <div className="text-label uppercase tracking-[0.12em] text-muted-foreground/70 font-semibold">
-          {isRu ? 'Все категории' : 'All services'}
+          {pickLang(language, { ru: 'Все категории', en: 'All categories', th: 'ทุกหมวดหมู่' })}
         </div>
         <div className="text-[11px] text-muted-foreground">
-          {isRu ? `${totalServices} сервисов · для вас` : `${totalServices} apps · ranked for you`}
+          {pickLang(language, { ru: `${totalServices} разделов`, en: `${totalServices} sections`, th: `${totalServices} หมวด` })}
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2">
         {clusters.map((c) => (
           <button
             key={c.id}
+            aria-label={getClusterHeaderLabel(c, language)}
             type="button"
             onClick={() => navigate(c.homeRoute)}
             className="relative flex min-h-[86px] flex-col justify-between rounded-none border border-border bg-card p-3.5 pl-4 text-left transition-colors hover:border-primary/40 hover:bg-primary/5"
@@ -62,15 +63,15 @@ export function ClusterGridCards({ personas }: ClusterGridCardsProps) {
             />
             <span>
               <span className="block text-label uppercase tracking-[0.1em] text-muted-foreground/60 font-semibold">
-                {isRu ? 'Категория' : 'Cluster'}
+                {pickLang(language, { ru: 'Категория', en: 'Category', th: 'หมวดหมู่' })}
               </span>
               <span className="mt-0.5 block font-display text-[17px] font-semibold tracking-[-0.01em] text-foreground">
-                {isRu ? c.labelRu : c.labelEn}
+                {getClusterHeaderLabel(c, language)}
               </span>
             </span>
             <span className="mt-2 flex items-end justify-between gap-2">
               <span className="max-w-[80%] text-[11px] leading-snug text-muted-foreground">
-                {isRu ? c.valueRu : c.valueEn}
+                {getClusterValueLine(c, language)}
               </span>
               <span className="font-mono text-[10.5px] font-medium" style={{ color: clusterTint(c.id) }}>
                 {availableCount(c)}

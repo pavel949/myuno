@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 /**
  * OffplanIndex - Catalog of off-plan property projects in Phuket
  * Server filters + OFFPLAN-style client filters (offplan_catalog JSON when present)
@@ -166,14 +167,14 @@ export default function OffplanIndex() {
         type="website"
         jsonLd={breadcrumbSchema}
       />
-      <div className="px-4 py-4 pb-24 space-y-4">
-        <div className="rounded-none bg-gradient-to-br from-primary/10 via-background to-accent/5 p-4 border border-border/50">
+      <div className="public-commerce public-commerce--projects px-4 py-6 pb-24 space-y-6">
+        <div className="public-commerce-intro border-b border-border py-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2.5 rounded-none bg-primary/10">
               <Building2 className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h1 className="font-bold text-xl">
+              <h1 className="public-commerce-title">
                 {isRu ? 'Новостройки Пхукета' : 'Phuket New Developments'}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -475,7 +476,7 @@ export default function OffplanIndex() {
         </div>
 
         {isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3, 4].map((i) => (
               <div key={i}>
                 <Skeleton className="aspect-[16/10] rounded-none" />
@@ -498,7 +499,7 @@ export default function OffplanIndex() {
             )}
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {displayedProjects.map((project) => (
               <OffplanProjectCard key={project.id} project={project} variant="grid" />
             ))}

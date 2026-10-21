@@ -3,6 +3,9 @@
  * embedded Property Hub detail and legacy newbuilds-themed views.
  */
 import React, { useState } from 'react';
+import { projectFeatureLabel } from '@/lib/offplan/presentation';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { NbProjectStatusBadge } from '@/components/newbuilds/NbProjectStatusBadge';
 import { NbConstructionProgress } from '@/components/newbuilds/NbConstructionProgress';
 import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
@@ -23,17 +26,17 @@ import type { NewbuildProject } from '@/hooks/useNewbuildProjects';
 import '@/styles/newbuilds-theme.css';
 
 const TABS = [
-  { key: 'overview', label: 'Обзор' },
-  { key: 'availability', label: 'Доступность' },
-  { key: 'units', label: 'Юниты' },
-  { key: 'inventory', label: 'Инвентарь' },
-  { key: 'plans', label: 'Планировки' },
-  { key: 'terms', label: 'Условия' },
-  { key: 'marketing', label: 'Маркетинг' },
-  { key: 'deals', label: 'Сделки' },
-  { key: 'updates', label: 'Обновления' },
-  { key: 'reports', label: 'Отчёты' },
-  { key: 'developer', label: 'О девелопере' },
+  { key: 'overview', label: { ru: 'Обзор', en: 'Overview', th: 'ภาพรวม' } },
+  { key: 'availability', label: { ru: 'Доступность', en: 'Availability', th: 'ห้องที่ว่าง' } },
+  { key: 'units', label: { ru: 'Юниты', en: 'Units', th: 'ยูนิต' } },
+  { key: 'inventory', label: { ru: 'Инвентарь', en: 'Inventory', th: 'รายการยูนิต' } },
+  { key: 'plans', label: { ru: 'Планировки', en: 'Floor plans', th: 'แปลนห้อง' } },
+  { key: 'terms', label: { ru: 'Условия', en: 'Terms', th: 'เงื่อนไข' } },
+  { key: 'marketing', label: { ru: 'Маркетинг', en: 'Marketing', th: 'การตลาด' } },
+  { key: 'deals', label: { ru: 'Сделки', en: 'Deals', th: 'ข้อเสนอ' } },
+  { key: 'updates', label: { ru: 'Обновления', en: 'Updates', th: 'อัปเดต' } },
+  { key: 'reports', label: { ru: 'Отчёты', en: 'Reports', th: 'รายงาน' } },
+  { key: 'developer', label: { ru: 'О девелопере', en: 'Developer', th: 'ผู้พัฒนา' } },
 ] as const;
 
 export interface NewbuildProjectDeepTabsProps {
@@ -43,6 +46,8 @@ export interface NewbuildProjectDeepTabsProps {
 }
 
 export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDeepTabsProps) {
+  const { language } = useLanguage();
+  const t = (copy: LangValues) => pickLang(language, copy);
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [selectedImage, setSelectedImage] = useState(0);
   const showSidebar = variant === 'full';
@@ -104,10 +109,10 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
       {variant === 'embedded' && (
         <div className="px-1 pb-2 mb-4 border-b" style={{ borderColor: 'hsl(var(--nb-gold) / 0.15)' }}>
           <p className="text-sm font-medium" style={{ color: 'hsl(var(--nb-text))' }}>
-            Полная карточка проекта
+            {t({ ru: 'Полная карточка проекта', en: 'Project details', th: 'รายละเอียดโครงการ' })}
           </p>
           <p className="text-xs mt-1" style={{ color: 'hsl(var(--nb-muted))' }}>
-            Планировки, инвентарь, условия и сделки — в одном месте
+            {t({ ru: 'Планировки, инвентарь, условия и сделки — в одном месте', en: 'Floor plans, inventory, terms and deals in one place', th: 'แปลนห้อง รายการยูนิต เงื่อนไข และข้อเสนอในที่เดียว' })}
           </p>
         </div>
       )}
@@ -125,7 +130,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
               fontFamily: 'var(--font-body-nb)',
             }}
           >
-            {tab.label}
+            {t(tab.label)}
           </button>
         ))}
       </div>
@@ -140,16 +145,16 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
             <div className="space-y-8">
               <div className="prose prose-invert max-w-none">
                 <p className="text-base leading-relaxed" style={{ color: 'hsl(var(--nb-text-secondary))' }}>
-                  {project.description_ru || project.description_en || 'Описание проекта пока не добавлено.'}
+                  {(language === 'ru' ? project.description_ru || project.description_en : project.description_en || project.description_ru) || t({ ru: 'Описание проекта пока не добавлено.', en: 'Project description is not available yet.', th: 'ยังไม่มีรายละเอียดโครงการ' })}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: 'Всего юнитов', value: project.total_units },
-                  { label: 'Доступно', value: project.units_available },
-                  { label: 'Продано', value: project.units_sold },
-                  { label: 'Типы', value: project.unit_types?.join(', ') },
+                  { label: t({ ru: 'Всего юнитов', en: 'Total units', th: 'ยูนิตทั้งหมด' }), value: project.total_units },
+                  { label: t({ ru: 'Доступно', en: 'Available', th: 'ว่าง' }), value: project.units_available },
+                  { label: t({ ru: 'Продано', en: 'Sold', th: 'ขายแล้ว' }), value: project.units_sold },
+                  { label: t({ ru: 'Типы', en: 'Types', th: 'ประเภท' }), value: project.unit_types?.join(', ') },
                 ]
                   .filter(s => s.value != null && s.value !== '')
                   .map(spec => (
@@ -163,7 +168,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
               </div>
 
               <div className="nb-glass p-5">
-                <p className="nb-label mb-4">Прогресс строительства</p>
+                <p className="nb-label mb-4">{t({ ru: 'Прогресс строительства', en: 'Construction progress', th: 'ความคืบหน้าการก่อสร้าง' })}</p>
                 <NbConstructionProgress
                   progress={project.construction_progress}
                   completionDate={project.completion_date}
@@ -173,7 +178,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
 
               {project.amenities && project.amenities.length > 0 && (
                 <div>
-                  <p className="nb-label mb-3">Удобства</p>
+                  <p className="nb-label mb-3">{t({ ru: 'Удобства', en: 'Amenities', th: 'สิ่งอำนวยความสะดวก' })}</p>
                   <div className="flex flex-wrap gap-2">
                     {project.amenities.map(a => (
                       <span
@@ -185,7 +190,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
                           border: '1px solid hsl(var(--nb-gold) / 0.15)',
                         }}
                       >
-                        {a}
+                        {projectFeatureLabel(a, language)}
                       </span>
                     ))}
                   </div>
@@ -233,7 +238,7 @@ export function NewbuildProjectDeepTabs({ project, variant }: NewbuildProjectDee
           {activeTab === 'developer' && !project.developer_id && (
             <div className="text-center py-16">
               <p className="nb-display text-xl" style={{ color: 'hsl(var(--nb-muted))' }}>
-                Информация о девелопере не указана
+                {t({ ru: 'Информация о девелопере не указана', en: 'Developer information is not available', th: 'ไม่มีข้อมูลผู้พัฒนา' })}
               </p>
             </div>
           )}

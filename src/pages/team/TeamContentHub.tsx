@@ -1,3 +1,5 @@
+import { useUserContext } from '@/hooks/useUserContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyUnoPermissions, VERTICAL_LABELS, type Vertical } from '@/hooks/useUnoTeamPermissions';
@@ -34,7 +36,7 @@ const VERTICAL_ICONS: Record<Vertical, typeof Ship> = {
 const VERTICAL_ROUTES: Partial<Record<Vertical, string>> = {
   yachts: '/vendor/yachts',
   tours: '/vendor/tours',
-  properties: '/vendor/properties',
+  properties: '/mc/properties',
   restaurants: '/vendor/restaurants',
   salons: '/vendor/beauty',
   events: '/vendor/events',
@@ -52,9 +54,11 @@ export default function TeamContentHub() {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   const navigate = useNavigate();
-  const { permissions, allowedVerticals, isLoading, canAccess } = useMyUnoPermissions();
+  const { permissions, allowedVerticals, isLoading, canAccess, error, refetch } = useMyUnoPermissions();
 
-  if (isLoading) {
+  const { hasMCMembership, isLoading: contextLoading } = useUserContext();
+
+  if (isLoading || contextLoading) {
     return (
       <TeamLayout title={isRu ? 'Контент' : 'Content'}>
         <div className="py-6 px-4 space-y-4">
@@ -86,6 +90,15 @@ export default function TeamContentHub() {
           </p>
         </div>
 
+        {error && <div role="alert" className="border border-destructive p-4 space-y-2">
+          <p>{pickLang(language, { en: 'Permissions could not be loaded. Try again.', ru: 'Не удалось загрузить права. Повторите попытку.', th: 'โหลดสิทธิ์ไม่สำเร็จ กรุณาลองอีกครั้ง' })}</p>
+          <Button variant="outline" onClick={() => void refetch()}>{pickLang(language, { en: 'Retry', ru: 'Повторить', th: 'ลองอีกครั้ง' })}</Button>
+        </div>}
+        {!error && !hasMCMembership && (canAccess('properties', 'create') || canAccess('properties', 'edit')) && <p className="border p-4 text-sm" role="status">{pickLang(language, {
+          en: 'Property work also needs a management company, an assigned Operating Space, and property permissions. Ask your administrator to complete that assignment.',
+          ru: 'Для работы с объектами нужны компания, назначенная рабочая область и права на объекты. Попросите администратора завершить назначение.',
+          th: 'งานอสังหาริมทรัพย์ต้องมีบริษัทจัดการ พื้นที่ปฏิบัติงาน และสิทธิ์ที่ได้รับมอบหมาย โปรดให้ผู้ดูแลดำเนินการให้ครบถ้วน',
+        })}</p>}
         {/* Stats */}
         <Card>
           <CardContent className="p-4">
@@ -107,7 +120,8 @@ export default function TeamContentHub() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {allVerticals.map(vertical => {
             const Icon = VERTICAL_ICONS[vertical];
-            const hasAccess = canAccess(vertical, 'create');
+            const hasPermission = canAccess(vertical, 'create') || canAccess(vertical, 'edit') || canAccess(vertical, 'submit');
+            const hasAccess = !error && hasPermission && (vertical !== 'properties' || hasMCMembership);
             const route = VERTICAL_ROUTES[vertical];
             const label = VERTICAL_LABELS[vertical];
 
@@ -119,7 +133,7 @@ export default function TeamContentHub() {
                     ? 'hover:border-primary/50 hover:shadow-md cursor-pointer' 
                     : 'opacity-50'
                 }`}
-                onClick={() => hasAccess && route && navigate(`${route}?uno_team=true`)}
+
               >
                 <CardContent className="p-4 flex flex-col items-center text-center gap-3">
                   <div className={`p-3 rounded-none ${
@@ -135,6 +149,7 @@ export default function TeamContentHub() {
                   </div>
                   <div>
                     <p className="font-medium">{isRu ? label.ru : label.en}</p>
+                    {hasAccess && route && <Button variant="link" className="min-h-11 h-auto whitespace-normal" onClick={() => navigate(route)}>{pickLang(language, { en: 'Open workspace', ru: 'Открыть кабинет', th: 'เปิดพื้นที่ทำงาน' })}</Button>}
                     {hasAccess ? (
                       <p className="text-xs text-muted-foreground mt-1">
                         {isRu ? 'Добавить' : 'Add new'}
@@ -152,7 +167,7 @@ export default function TeamContentHub() {
         </div>
 
         {/* Help */}
-        {allowedVerticals.length === 0 && (
+        {!error && !permissions?.some(permission => permission.can_create || permission.can_edit || permission.can_submit_for_review) && (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center">
               <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />

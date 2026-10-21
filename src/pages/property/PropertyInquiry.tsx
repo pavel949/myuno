@@ -1,3 +1,4 @@
+import '@/styles/public-commerce.css';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
@@ -377,9 +378,9 @@ export default function PropertyInquiry() {
   }
 
   return (
-    <div className="pb-28">
+    <div className="public-commerce public-commerce--inquiry pb-28">
         {/* Sticky Header */}
-        <div className="sticky top-0 z-20 bg-background/95 border-b">
+        <div className="public-commerce-form-header bg-background border-b">
           <div className="flex items-center gap-4 p-4">
             <BackButton fallbackPath={editUrl} variant="ghost" />
             <h1 className="text-lg font-display font-bold">
@@ -390,7 +391,7 @@ export default function PropertyInquiry() {
           </div>
         </div>
 
-        <div className="p-4 space-y-6">
+        <div className="public-commerce-form p-4 space-y-6">
 
           {/* ===== YOUR TRIP ===== */}
           <section className="space-y-4">

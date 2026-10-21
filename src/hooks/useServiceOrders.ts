@@ -176,6 +176,7 @@ export function useGuestServiceOrders() {
     orders,
     activeOrders,
     completedOrders,
+    error,
     isLoading,
     error,
     createOrder,

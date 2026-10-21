@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import React, { memo, useState, useCallback, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -114,6 +115,7 @@ function RoomStepper({ label, value, onChange, min = 0, max = 20 }: RoomStepperP
 }
 
 interface BasicInfoStepProps {
+  catalogueOnly?: boolean;
   formData: PropertyFormData;
   updateFormData: (updates: Partial<PropertyFormData>) => void;
   selectedProject: PropertyProject | null;
@@ -164,7 +166,8 @@ function BasicInfoStepInner({
   selectedProject,
   setSelectedProject,
   ownershipData,
-  updateOwnershipData
+  updateOwnershipData,
+  catalogueOnly = false,
 }: BasicInfoStepProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
@@ -212,6 +215,7 @@ function BasicInfoStepInner({
 
   return (
     <div className="space-y-6">
+      {catalogueOnly && <p className="text-sm text-muted-foreground">{pickLang(language, { en: 'This form saves catalogue details only. Owner identity, title documents, company assignments, operational settings and financial reporting require their separately authorized workflows.', ru: 'Здесь сохраняются только данные объявления. Собственник, правоустанавливающие документы, назначения компании, эксплуатационные настройки и финансовая отчётность оформляются в отдельных уполномоченных процессах.', th: 'แบบฟอร์มนี้บันทึกเฉพาะรายละเอียดประกาศ ข้อมูลเจ้าของ เอกสารสิทธิ์ การมอบหมายบริษัท การตั้งค่าปฏิบัติงาน และรายงานการเงินต้องใช้ขั้นตอนที่ได้รับสิทธิ์แยกต่างหาก' })}</p>}
       {/* 0. Asset Class — high-level discriminator */}
       <Card>
         <CardHeader className="pb-3">
@@ -333,6 +337,7 @@ function BasicInfoStepInner({
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1 text-xs"><ShieldCheck className="h-3 w-3" />{isRu ? 'Тип документа' : 'Title deed'}</Label>
                   <select
+                    disabled={catalogueOnly}
                     value={formData.title_deed_type ?? ''}
                     onChange={(e) => updateFormData({ title_deed_type: e.target.value || undefined })}
                     className="flex h-9 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
@@ -379,6 +384,7 @@ function BasicInfoStepInner({
                     <Label className="flex items-center gap-1 text-xs"><TrendingUp className="h-3 w-3" />Cap rate, %</Label>
                     <Input
                       type="number" min={0} step="0.1"
+                      disabled={catalogueOnly}
                       value={formData.cap_rate_pct ?? ''}
                       onChange={(e) => updateFormData({ cap_rate_pct: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="6.8"
@@ -388,6 +394,7 @@ function BasicInfoStepInner({
                     <Label className="text-xs">{isRu ? 'NOI, ฿/год' : 'NOI, ฿/yr'}</Label>
                     <Input
                       type="number" min={0}
+                      disabled={catalogueOnly}
                       value={formData.noi_annual_thb ?? ''}
                       onChange={(e) => updateFormData({ noi_annual_thb: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="3060000"
@@ -397,6 +404,7 @@ function BasicInfoStepInner({
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1 text-xs"><ShieldCheck className="h-3 w-3" />{isRu ? 'Тип документа' : 'Title deed'}</Label>
                   <select
+                    disabled={catalogueOnly}
                     value={formData.title_deed_type ?? ''}
                     onChange={(e) => updateFormData({ title_deed_type: e.target.value || undefined })}
                     className="flex h-9 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
@@ -463,6 +471,7 @@ function BasicInfoStepInner({
                   <ShieldCheck className="h-3 w-3" />{isRu ? 'Лицензия' : 'License'}
                 </Label>
                 <select
+                  disabled={catalogueOnly}
                   value={formData.hotel_license_type ?? ''}
                   onChange={(e) => updateFormData({ hotel_license_type: e.target.value || undefined })}
                   className="flex h-9 w-full rounded-none border border-input bg-background px-3 py-1 text-sm shadow-sm"
@@ -484,6 +493,7 @@ function BasicInfoStepInner({
               </div>
             </div>
 
+            {!catalogueOnly && <>
             <div className="space-y-1.5">
               <Label className="text-xs">{isRu ? 'Статус управления' : 'Management status'}</Label>
               <div className="grid grid-cols-2 gap-2">
@@ -573,10 +583,12 @@ function BasicInfoStepInner({
                   : '✨ This listing will be flagged as "Seeking Operator" in the HMA opportunities section — hotel management companies will see it in a dedicated feed.'}
               </div>
             )}
+            </>}
           </CardContent>
         </Card>
       )}
       <LocationProjectSearch
+        lockedProjectId={catalogueOnly ? formData.project_id : undefined}
         formData={formData}
         updateFormData={updateFormData}
         selectedProject={selectedProject}

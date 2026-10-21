@@ -5,7 +5,7 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 export { createClient };
-export type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+export type { SupabaseClient, User } from "npm:@supabase/supabase-js@2";
 
 /**
  * Create a Supabase client with service role key

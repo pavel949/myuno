@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import PropertyDetail from '../PropertyDetail';
 import { CompareProvider } from '@/components/property/PropertyCompare';
 import { propertyDetailHref, propertyDetailMode, propertySaleAskingPrice } from '@/lib/real-estate/propertyDetailIntent';
-const state = vi.hoisted(() => ({ property: { id: 'unit', rating: 0, project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', images: [], amenities: [], rentalTerms: { price_per_night: 2000, included_services: [], extra_services: [] } } }));
+const state = vi.hoisted(() => ({ property: { id: 'unit', rating: 0, project: { id: 'complex', name_en: 'Complex', name_ru: '' }, title_en: 'Dual home', title_ru: 'Квартира', listing_type: 'rent', listing_modes: ['rent','sale'], is_for_sale: true, sale_price: 5000000 as number | null, price: 2000, price_per_night: 2000, property_type: 'condo', tenancy_modes: [] as string[], images: [], amenities: [], rentalTerms: { price_per_night: 2000, deposit_amount: 1000, included_services: [], extra_services: [] } } }));
 vi.mock('@/hooks/useProperties', () => ({ usePropertyWithRentalTerms: () => ({ data: state.property, isLoading: false }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
 vi.mock('@/contexts/CurrencyContext', () => ({ useCurrency: () => ({ formatPrice: (v: number) => String(v) }) }));
@@ -14,8 +14,8 @@ vi.mock('@/hooks/useFeatureFlag', () => ({ useFeatureFlag: () => false }));
 vi.mock('@/hooks/usePropertyUnavailableDates', () => ({ usePropertyUnavailableDates: () => ({ data: [], isSuccess: true, isError: false, refetch: vi.fn() }) }));
 vi.mock('@/hooks/usePropertyListingQuality', () => ({ usePropertyMedia: () => ({ data: [] }), mediaAlt: () => '', mediaCaption: () => '' }));
 vi.mock('@/components/seo', () => ({ SEOHead: () => null, createRealEstateListingSchema: () => ({}) }));
-vi.mock('@/components/property', () => ({ IncludedServices: () => null, ExtraServices: () => null, UtilitiesInfo: () => null, CheckInDetails: () => null, GuestAssuranceCard: () => null, HouseRules: () => null, GuestExtraFeesDisplay: () => null, PropertyBookingCard: ({ initialGuestContext }: { initialGuestContext: { guests: number; dateRange?: { from?: Date } } }) => <button data-guests={initialGuestContext.guests} data-check-in={initialGuestContext.dateRange?.from?.getFullYear()}>Book rental</button>, MessageHostButton: ({ labelEn }: { labelEn: string }) => <button>{labelEn}</button> }));
-vi.mock('@/components/property/detail', () => ({ PropertyDetailGallery: () => <div data-testid="property-gallery" />, PropertyDetailHighlights: () => null, PropertyDetailDateSheet: ({ guestCount, dateRange, onGuestCountChange, onDateRangeChange }: { dateRange?: { from?: Date }; guestCount: number; onGuestCountChange: (value: number) => void; onDateRangeChange: (value: undefined) => void }) => <><output data-testid="mobile-guests">{guestCount}</output><output data-testid="mobile-date">{dateRange?.from?.getDate() ?? "empty"}</output><button onClick={() => onGuestCountChange(4)}>Edit mobile party</button><button onClick={() => onDateRangeChange(undefined)}>Clear mobile dates</button></>, PropertyHeroFacts: () => null, PropertyDetailMobileBar: ({ isSaleListing }: { isSaleListing: boolean }) => <span data-testid="mobile-intent">{isSaleListing ? 'buy' : 'rent'}</span> }));
+vi.mock('@/components/property', () => ({ IncludedServices: () => null, ExtraServices: () => null, UtilitiesInfo: () => null, CheckInDetails: ({ showPricingDeposit, onViewPricing }: { showPricingDeposit: boolean; onViewPricing?: () => void }) => showPricingDeposit && onViewPricing ? <button onClick={onViewPricing}>Go to Pricing</button> : null, GuestAssuranceCard: () => null, HouseRules: () => null, GuestExtraFeesDisplay: () => null, PropertyBookingCard: ({ initialGuestContext }: { initialGuestContext: { guests: number; dateRange?: { from?: Date } } }) => <button data-guests={initialGuestContext.guests} data-check-in={initialGuestContext.dateRange?.from?.getFullYear()}>Book rental</button>, MessageHostButton: ({ labelEn }: { labelEn: string }) => <button>{labelEn}</button> }));
+vi.mock('@/components/property/detail', () => ({ PropertyDetailGallery: () => <div data-testid="property-gallery" />, PropertyDetailHighlights: () => null, PropertyDetailDateSheet: ({ open, guestCount, dateRange, onGuestCountChange, onDateRangeChange }: { open?: boolean; dateRange?: { from?: Date }; guestCount: number; onGuestCountChange: (value: number) => void; onDateRangeChange: (value: undefined) => void }) => <><output data-testid="mobile-date-sheet-open">{String(open)}</output><output data-testid="mobile-guests">{guestCount}</output><output data-testid="mobile-date">{dateRange?.from?.getDate() ?? "empty"}</output><button onClick={() => onGuestCountChange(4)}>Edit mobile party</button><button onClick={() => onDateRangeChange(undefined)}>Clear mobile dates</button></>, PropertyHeroFacts: () => null, PropertyDetailMobileBar: ({ isSaleListing, isLongStayOnly }: { isSaleListing: boolean; isLongStayOnly: boolean }) => <span data-testid="mobile-intent" data-long-stay={isLongStayOnly}>{isSaleListing ? 'buy' : 'rent'}</span> }));
 vi.mock('@/components/property/PropertyShareSheet', () => ({PropertyShareSheet: ({ children }: { children: React.ReactNode }) => <>{children}</>}));
 vi.mock('@/components/uno/FavoriteButton', () => ({FavoriteButton: () => null}));
 vi.mock('@/components/uno/BackButton', () => ({BackButton: () => null}));
@@ -36,10 +36,24 @@ vi.mock('@/components/property/PropertyReviewRatings', () => ({PropertyReviewRat
 vi.mock('@/components/property/StayRulesSection', () => ({StayRulesSection: () => null}));
 vi.mock('@/components/property/RoomCategoryOffers', () => ({RoomCategoryOffers: () => null}));
 vi.mock('@/components/reviews/ReviewsSection', () => ({ReviewsSection: () => null}));
-afterEach(() => { cleanup(); localStorage.clear(); state.property.listing_type = 'rent'; state.property.listing_modes = ['rent','sale']; state.property.is_for_sale = true; state.property.sale_price = 5000000; });
+afterEach(() => { cleanup(); localStorage.clear(); state.property.listing_type = 'rent'; state.property.listing_modes = ['rent','sale']; state.property.is_for_sale = true; state.property.sale_price = 5000000; state.property.tenancy_modes = []; });
 function NavigateContext() { const navigate = useNavigate(); return <button onClick={() => navigate('/property/unit?mode=rent&checkIn=2099-12-10&checkOut=2099-12-14&guests=2')}>New URL</button>; }
 function mount(mode: string) { render(<MemoryRouter initialEntries={[`/property/unit?mode=${mode}`]}><Routes><Route path="/property/:id" element={<CompareProvider><NavigateContext /><PropertyDetail /></CompareProvider>} /></Routes></MemoryRouter>); }
 describe('actual property detail purchase/rental intent', () => {
+  it('opens the existing mobile date sheet from the deposit pricing action when the desktop quote is hidden', () => {
+    mount('rent');
+    expect(document.getElementById('property-pricing')).toBeInTheDocument();
+    expect(screen.getByTestId('mobile-date-sheet-open')).toHaveTextContent('false');
+    fireEvent.click(screen.getByRole('button', { name: 'Go to Pricing' }));
+    expect(screen.getByTestId('mobile-date-sheet-open')).toHaveTextContent('true');
+  });
+  it('passes explicit medium-only rental eligibility to the mobile manager-request action', () => {
+    state.property.tenancy_modes = ['medium'];
+    mount('rent');
+    expect(screen.getByTestId('mobile-intent')).toHaveAttribute('data-long-stay', 'true');
+    expect(screen.getByRole('button', { name: 'Request rental' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Book rental' })).toBeNull();
+  });
   it('updates untouched mobile fields on same-ID URL navigation', () => {
     mount('rent&checkIn=2099-12-01&checkOut=2099-12-04&guests=3');
     fireEvent.click(screen.getByRole('button', { name: 'New URL' }));
@@ -103,6 +117,14 @@ describe('actual property detail purchase/rental intent', () => {
   it('rejects a rental URL intent on a sale-only unit', () => { state.property.listing_type = 'sale'; state.property.listing_modes = ['sale']; mount('rent'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); });
   it('rejects a purchase intent on a rental-only unit', () => { state.property.is_for_sale = false; state.property.listing_modes = ['rent']; mount('buy'); expect(screen.getByRole('button', { name: 'Book rental' })).toBeInTheDocument(); });
   it('keeps inquiry for an eligible legacy sale without displaying the rental amount as its asking price', () => { state.property.sale_price = null; mount('buy'); expect(screen.getByRole('button', { name: 'Request consultation' })).toBeInTheDocument(); expect(screen.getAllByText('Price on request')).toHaveLength(2); });
+  it('does not promote a nightly amount to sale price when legacy sale type conflicts with explicit rent modes', () => {
+    state.property.listing_type = 'sale';
+    state.property.listing_modes = ['platform', 'rent', 'short'];
+    state.property.sale_price = null;
+    mount('buy');
+    expect(screen.getAllByText('Price on request')).toHaveLength(2);
+    expect(screen.queryByText('2000')).toBeNull();
+  });
   it('uses legacy price only for a pure sale listing with absent sale_price', () => {
     expect(propertySaleAskingPrice({ listing_type: 'sale', sale_price: null, price: 7500000 })).toBe(7500000);
     expect(propertySaleAskingPrice({ listing_type: 'rent', is_for_sale: true, sale_price: null, price: 2000 })).toBeNull();

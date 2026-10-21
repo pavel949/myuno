@@ -34,10 +34,32 @@ describe('guest complex catalog boundaries', () => {
     const { result } = renderHook(() => usePropertiesByProject('project', 24, { mode: 'buy' }), { wrapper: Wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mock.or).toHaveBeenCalledWith('is_for_sale.eq.true,listing_type.eq.sale,listing_modes.cs.{sale}');
-    expect(mock.or).toHaveBeenCalledWith('sale_price.gt.0,and(listing_type.eq.sale,sale_price.is.null,price.gt.0)');
+    expect(mock.or).toHaveBeenCalledWith('sale_price.gt.0,and(listing_type.eq.sale,sale_price.is.null,price.gt.0,or(listing_modes.is.null,listing_modes.not.cs.{rent}))');
     expect(mock.eq).not.toHaveBeenCalledWith('management_company_id', expect.anything());
     expect(result.current.data?.properties[0].id).toBe('dual-listing');
     expect(result.current.data?.total).toBe(31);
+  });
+  it('excludes a dual-listed rental fallback while retaining explicit and legacy sale-only asking prices', async () => {
+    const rows = [
+      { id: 'dual-unpriced', listing_type: 'sale', listing_modes: ['rent', 'sale'], sale_price: null, price: 2700 },
+      { id: 'dual-priced', listing_type: 'rent', listing_modes: ['rent', 'sale'], sale_price: 9000000, price: 2700 },
+      { id: 'legacy-sale', listing_type: 'sale', listing_modes: ['sale'], sale_price: null, price: 7000000 },
+      { id: 'legacy-null-modes', listing_type: 'sale', listing_modes: null, sale_price: null, price: 4000000 },
+    ];
+    let selected = rows;
+    mock.or.mockImplementation((filter: string) => {
+      if (filter.startsWith('sale_price.gt.0,')) {
+        selected = selected.filter(row => (row.sale_price != null && row.sale_price > 0)
+          || (row.listing_type === 'sale' && row.sale_price == null && row.price > 0 && !row.listing_modes?.includes('rent')));
+      }
+      return mock;
+    });
+    mock.limit.mockImplementation(() => Promise.resolve({ data: selected, count: selected.length, error: null }));
+    const { result } = renderHook(() => usePropertiesByProject('project', 24, { mode: 'buy' }), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mock.or).toHaveBeenCalledWith(expect.stringContaining('listing_modes.not.cs.{rent}'));
+    expect(result.current.data?.properties.map(row => row.id)).toEqual(['dual-priced', 'legacy-sale', 'legacy-null-modes']);
+    expect(result.current.data?.total).toBe(3);
   });
   it('loads only active descriptive project fields for guest pages', async () => {
     const { result } = renderHook(() => usePropertyProject('project', true), { wrapper: Wrapper });

@@ -6,6 +6,9 @@ import AdminProperties from '../AdminProperties';
 import { CanonicalPropertyForm } from '@/components/property/canonical-form/CanonicalPropertyForm';
 import { CloudStoragePicker } from '@/components/upload/CloudStoragePicker';
 
+vi.mock('@/components/admin/PublishedPropertyRevisionQueue', () => ({ PublishedPropertyRevisionQueue: () => null }));
+vi.mock('@tanstack/react-query', async importOriginal => ({ ...await importOriginal<typeof import('@tanstack/react-query')>(), useQueryClient: () => ({ invalidateQueries: vi.fn() }) }));
+
 const mocks = vi.hoisted(() => ({
   language: 'en',
   isMobile: false,
@@ -16,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   remove: vi.fn(),
   network: vi.fn(() => { throw new Error('Unexpected data access in synthetic UI test'); }),
 }));
+vi.mock('@/lib/errorHandler', () => ({ createErrorHandler: () => ({ error: vi.fn() }) }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: mocks.language }) }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'synthetic-admin' }, isLoading: false }) }));
 vi.mock('@/hooks/useAdmin', () => ({ useAdminCheck: () => ({ isAdmin: true, isLoading: false }) }));
@@ -53,9 +57,10 @@ function LocationProbe() {
   const location = useLocation();
   return <output data-testid="location">{location.pathname}{location.search}</output>;
 }
-function renderEditor() {
-  return render(<MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider&status=pending&edit=synthetic-property']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><AdminProperties /><LocationProbe /></MemoryRouter>);
+function editorElement() {
+  return (<MemoryRouter initialEntries={['/admin/properties?provider=synthetic-provider&status=pending&edit=synthetic-property']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><AdminProperties /><LocationProbe /></MemoryRouter>);
 }
+function renderEditor() { return render(editorElement()); }
 async function openPhotos() {
   fireEvent.mouseDown(await screen.findByRole('tab', { name: mocks.language === 'ru' ? 'Фото' : 'Photos' }), { button: 0, ctrlKey: false });
   return screen.findByRole('button', { name: mocks.language === 'ru' ? 'Облачная ссылка' : 'Cloud link' });
@@ -73,7 +78,7 @@ describe('contained admin property editor', () => {
     vi.clearAllMocks();
     mocks.language = 'en';
     mocks.isMobile = false;
-    mocks.properties = [{ id: 'synthetic-property', title_en: 'Synthetic property', provider_id: 'synthetic-provider', images: Array.from({ length: 15 }, (_, i) => `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>#${i}`) }];
+    mocks.properties = [{ id: 'synthetic-property', updated_at: '2026-10-19T00:00:00Z', approval_status: 'pending', title_en: 'Synthetic property', provider_id: 'synthetic-provider', images: Array.from({ length: 15 }, (_, i) => `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>#${i}`) }];
   });
   afterEach(() => { cleanup(); expect(mocks.network).not.toHaveBeenCalled(); });
 
@@ -176,4 +181,40 @@ describe('contained admin property editor', () => {
     expect(screen.getByRole('dialog')).toHaveClass('z-50');
     expect(screen.getByRole('dialog')).not.toHaveClass('z-[140]');
   });
+
+  it('keeps the originally reviewed revision after a background list refresh', async () => {
+    mocks.properties = [{ id: 'synthetic-property', updated_at: '2026-10-19T00:00:00Z', approval_status: 'pending', title_en: 'Synthetic property', provider_id: 'synthetic-provider', images: [] }];
+    mocks.update.mockResolvedValue({ error: null });
+    const view = renderEditor();
+    await screen.findByRole('dialog', { name: 'Edit Property' });
+    mocks.properties = [{ ...mocks.properties[0], updated_at: '2026-10-19T01:00:00Z', title_en: 'Changed elsewhere' }];
+    view.rerender(editorElement());
+    expect(screen.getByLabelText('Fixture title')).toHaveValue('Synthetic property');
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mocks.update).toHaveBeenCalledWith('synthetic-property', expect.any(Object), '2026-10-19T00:00:00Z'));
+  });
+
+
+  it('keeps unsaved edits visible and explains an unconfirmed save without closing', async () => {
+    mocks.update.mockResolvedValue({ error: new Error('Stale revision') });
+    renderEditor();
+    await screen.findByRole('dialog', { name: 'Edit Property' });
+    fireEvent.change(screen.getByLabelText('Fixture title'), { target: { value: 'Unsaved new title' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Save was not confirmed');
+    expect(screen.getByRole('dialog', { name: 'Edit Property' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Fixture title')).toHaveValue('Unsaved new title');
+    expect(screen.getByTestId('location')).toHaveTextContent('edit=synthetic-property');
+    expect(mocks.update).toHaveBeenCalledTimes(1);
+  });
+
+
+  it('provides a Thai editor title and explicit dismissal label', async () => {
+    mocks.language = 'th';
+    renderEditor();
+    const editor = await screen.findByRole('dialog', { name: 'แก้ไขที่พัก' });
+    fireEvent.click(within(editor).getByRole('button', { name: 'ปิดหน้าต่างแก้ไข' }));
+    await expectDismissed();
+  });
+
 });

@@ -1,0 +1,73 @@
+/* Public catalogue and request surfaces only. No app-shell or theme overrides. */
+.public-commerce {
+  min-width: 0;
+  font-family: var(--font-body);
+  color: hsl(var(--foreground));
+}
+.public-commerce .public-commerce-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.625rem, 2.5vw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -.025em;
+  overflow-wrap: anywhere;
+}
+.public-commerce :is(h2, h3) {
+  font-family: var(--font-display);
+  line-height: 1.35;
+}
+.public-commerce :is(p, label) { text-wrap: pretty; }
+.public-commerce-intro { background: hsl(var(--background)); }
+.public-commerce-intro > .flex > div:last-child { min-width: 0; }
+.public-commerce--services > section { margin-top: 1.75rem; }
+.public-commerce--services [data-testid="service-request-card"] > [aria-hidden="true"] {
+  height: 4rem;
+  justify-content: flex-start;
+  padding-inline: 1rem;
+  background: hsl(var(--background));
+}
+.public-commerce--services [data-testid="service-request-card"] > [aria-hidden="true"] svg {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+}
+.public-commerce--services [data-testid="service-request-card"] [id$="-terms"] {
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: 1rem;
+}
+.public-commerce-catalog-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  transition: border-color 150ms ease;
+}
+.public-commerce-catalog-card:hover { border-color: hsl(var(--primary) / .45); }
+.public-commerce-catalog-card > div:last-child { padding: .75rem 1rem 1rem; }
+.public-commerce-catalog-card h3 { font-size: 1.125rem; line-height: 1.35; }
+.public-commerce-catalog-card img { object-fit: cover; }
+.public-commerce-form-header > div,
+.public-commerce-form { width: 100%; max-width: 52rem; margin-inline: auto; }
+.public-commerce-form { padding-block: 1.5rem; }
+.public-commerce-form :is(input:not([type="checkbox"]):not([type="radio"]), [role="combobox"]) { min-height: 2.75rem; }
+/* Radio buttons sit inside padded labels; the mobile button minimum must not stretch their circles. */
+.public-commerce-form [role="radio"] { width: 1rem; height: 1rem; min-height: 1rem; flex: 0 0 1rem; }
+.public-commerce-form :is(h1, h2) { font-family: var(--font-display); font-weight: 500; }
+.public-commerce--market { border: 1px solid hsl(var(--border)); background: hsl(var(--card)); margin-block: 2rem; }
+.public-commerce--project > .relative { max-height: 32rem; }
+.public-commerce--property article > section { padding-block: .5rem; }
+.public-commerce--search .property-discovery-header { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.public-commerce--search .property-discovery-editor .home-search { border-color: hsl(var(--border)); }
+@media (min-width: 360px) and (max-width: 639px) {
+  .public-commerce--search .property-discovery-editor .home-search { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem; padding: .75rem; }
+  .public-commerce--search .property-discovery-editor .home-search > :is(.home-search-type, .home-search-location) { grid-column: auto; min-width: 0; }
+  .public-commerce--search .property-discovery-editor .home-search > :is(.home-search-type, .home-search-location) :is(button, span) { min-width: 0; }
+}
+@media (min-width: 768px) {
+  .public-commerce-form { padding: 2rem; }
+  .public-commerce--services > section { margin-top: 2.5rem; }
+  .public-commerce--market { margin-block: 3rem; padding: 3rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .public-commerce-catalog-card { transition: none; }
+}

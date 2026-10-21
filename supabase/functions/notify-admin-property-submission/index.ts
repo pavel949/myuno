@@ -27,7 +27,8 @@ Deno.serve(async (req: Request) => {
   const { data: property, error: propertyError } = await service.from('properties')
    .select('id,owner_id,title_en,title_ru,approval_status,deleted_at').eq('id', input.data.property_id).maybeSingle();
   if (propertyError || !property || property.approval_status !== 'pending' || property.deleted_at !== null) throw new AccessDenied('Forbidden');
-  if (property.owner_id !== auth.user.id) await authorizeRpc(actor, 'actor_has_platform_admin', {});
+  // Re-authorize current persisted scope/permission; a successful prior check is not a lease.
+  await authorizeRpc(actor, 'actor_can_notify_property_submission', { p_property_id: property.id });
   const { data: roles, error: roleError } = await service.from('user_roles').select('user_id').eq('role', 'admin');
   if (roleError) throw new AccessDenied('Recipient authority unavailable');
   const ids = [...new Set((roles ?? []).map(r => r.user_id))];

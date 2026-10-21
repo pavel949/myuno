@@ -3,14 +3,14 @@
  * (Supabase auth.admin.inviteUserByEmail). Supabase auto-creates the session
  * when the invite token resolves, so by the time the component mounts the
  * user is already signed in but has no password set. We collect the password,
- * call supabase.auth.updateUser, then drop them on the main page.
+ * call supabase.auth.updateUser, then use the shared post-login routing.
  *
  * If somehow the page loads without a session (token expired, link reused,
  * direct navigation), we explain the situation and offer a path back to
- * the public /auth signup flow.
+ * existing-account sign-in and password recovery.
  */
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { z } from 'zod';
 import { toast } from 'sonner';
@@ -23,15 +23,25 @@ import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrengthInd
 import { UnderlineInput } from '@/components/auth/UnderlineInput';
 import { BrandWordmark } from '@/components/uno/BrandWordmark';
 import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { cn } from '@/lib/utils';
+import { buildAuthPath } from '@/lib/auth/redirectToAuth';
 
 const passwordSchema = z.string().min(8, 'Password must be at least 8 characters');
 
 export default function SetupPassword() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const continuePath = buildAuthPath({ from: searchParams.get('redirect') || '/' });
   const { user, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const copy = (en: string, ru: string, th: string) => pickLang(language, { en, ru, th });
+  const submittingRef = useRef(false);
+  const actorRef = useRef(user?.id);
+  actorRef.current = user?.id;
+  const mountedRef = useRef(true);
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -41,28 +51,30 @@ export default function SetupPassword() {
 
   const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
   const fullName = (meta.full_name as string | undefined) ?? '';
-  const inviteRole = (meta.role as string | undefined) ?? null;
 
   useEffect(() => {
     if (!authLoading && user && (meta.password_set === true)) {
-      navigate('/', { replace: true });
+      navigate(continuePath, { replace: true });
     }
-  }, [authLoading, user, meta.password_set, navigate]);
+  }, [authLoading, user, meta.password_set, navigate, continuePath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current || !user) return;
     setErrors({});
 
     const parsed = passwordSchema.safeParse(password);
     if (!parsed.success) {
-      setErrors({ password: isRu ? 'Минимум 8 символов' : 'At least 8 characters' });
+      setErrors({ password: copy('At least 8 characters', 'Минимум 8 символов', 'อย่างน้อย 8 ตัวอักษร') });
       return;
     }
     if (password !== confirmPassword) {
-      setErrors({ confirmPassword: isRu ? 'Пароли не совпадают' : 'Passwords do not match' });
+      setErrors({ confirmPassword: copy('Passwords do not match', 'Пароли не совпадают', 'รหัสผ่านไม่ตรงกัน') });
       return;
     }
 
+    submittingRef.current = true;
+    const submittingActor = user.id;
     setIsSubmitting(true);
     try {
       const { error } = await supabase.auth.updateUser({
@@ -70,19 +82,22 @@ export default function SetupPassword() {
         data: { password_set: true },
       });
       if (error) throw error;
+      if (!mountedRef.current || actorRef.current !== submittingActor) return;
       toast.success(
-        isRu ? 'Пароль создан' : 'Password set',
-        { description: isRu ? 'Добро пожаловать в myUNO' : 'Welcome to myUNO' },
+        copy('Password set', 'Пароль создан', 'ตั้งรหัสผ่านแล้ว'),
+        { description: copy('Welcome to myUNO', 'Добро пожаловать в myUNO', 'ยินดีต้อนรับสู่ myUNO') },
       );
-      navigate('/', { replace: true });
+      navigate(continuePath, { replace: true });
     } catch (err) {
+      if (!mountedRef.current || actorRef.current !== submittingActor) return;
       const message = err instanceof Error ? err.message : String(err);
       toast.error(
-        isRu ? 'Не удалось сохранить пароль' : 'Could not save password',
+        copy('Could not save password', 'Не удалось сохранить пароль', 'บันทึกรหัสผ่านไม่สำเร็จ'),
         { description: message },
       );
     } finally {
-      setIsSubmitting(false);
+      submittingRef.current = false;
+      if (mountedRef.current) setIsSubmitting(false);
     }
   };
 
@@ -91,7 +106,7 @@ export default function SetupPassword() {
       <AppLayout showHeader={false} showFooter={false} showBottomNav={false}>
         <div className="flex items-center justify-center min-h-[60vh]">
           <p className="text-muted-foreground text-sm">
-            {isRu ? 'Подождите…' : 'Loading…'}
+            {copy('Loading…', 'Подождите…', 'กำลังโหลด…')}
           </p>
         </div>
       </AppLayout>
@@ -107,20 +122,21 @@ export default function SetupPassword() {
             <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
             <div className="space-y-1.5">
               <p className="font-semibold text-foreground text-sm">
-                {isRu ? 'Ссылка-приглашение не активна' : 'Invite link not active'}
+                {copy('Invite link not active', 'Ссылка-приглашение не активна', 'ลิงก์เชิญใช้งานไม่ได้')}
               </p>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                {isRu
-                  ? 'Сессия не найдена. Возможно, ссылка устарела или уже использована. Зарегистрируйтесь обычным способом или попросите администратора отправить новое приглашение.'
-                  : 'No active session. The invite link may have expired or already been used. Please sign up the normal way or ask the administrator to resend the invitation.'}
+                {copy('No active session. The invite link may have expired or already been used. Sign in to your existing account or request a password reset using the invited email. Contact your administrator if you still cannot access it.', 'Сессия не найдена. Возможно, ссылка устарела или уже использована. Войдите в существующий аккаунт или запросите ссылку для установки пароля на тот же email. Если доступа нет, обратитесь к администратору.', 'ไม่พบเซสชัน ลิงก์เชิญอาจหมดอายุหรือถูกใช้แล้ว โปรดเข้าสู่บัญชีเดิมหรือตั้งรหัสผ่านใหม่ด้วยอีเมลที่ได้รับเชิญ หากยังเข้าไม่ได้ให้ติดต่อผู้ดูแล')}
               </p>
             </div>
           </div>
           <PremiumButton
-            onClick={() => navigate(`${APP_ROUTES.AUTH}?mode=signup`)}
+            onClick={() => navigate(APP_ROUTES.AUTH_FORGOT_PASSWORD)}
             className="w-full"
           >
-            {isRu ? 'Перейти к регистрации' : 'Go to sign-up'}
+            {copy('Reset password by email', 'Установить пароль по email', 'ตั้งรหัสผ่านใหม่ทางอีเมล')}
+          </PremiumButton>
+          <PremiumButton variant="outline" onClick={() => navigate(continuePath)} className="w-full">
+            {copy('Sign in', 'Войти в аккаунт', 'เข้าสู่ระบบ')}
           </PremiumButton>
         </div>
       </AppLayout>
@@ -134,32 +150,23 @@ export default function SetupPassword() {
 
         <div className="rounded-none border border-primary/30 bg-primary/[0.04] p-4">
           <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground font-semibold">
-            {isRu ? 'Приглашение принято' : 'Invitation accepted'}
+            {copy('Invitation accepted', 'Приглашение принято', 'ยอมรับคำเชิญแล้ว')}
           </p>
           <p className="mt-1 text-foreground font-semibold">
             {fullName
-              ? (isRu ? `Здравствуйте, ${fullName}!` : `Welcome, ${fullName}!`)
-              : (isRu ? 'Здравствуйте!' : 'Welcome!')}
+              ? copy(`Welcome, ${fullName}!`, `Здравствуйте, ${fullName}!`, `ยินดีต้อนรับ ${fullName}!`)
+              : (copy('Welcome!', 'Здравствуйте!', 'ยินดีต้อนรับ!'))}
           </p>
           <p className="mt-1 text-[13px] text-muted-foreground leading-relaxed">
-            {isRu
-              ? 'Email подтверждён. Создайте пароль, чтобы войти в систему.'
-              : 'Your email is verified. Create a password to access the system.'}
-            {inviteRole && (
-              <>
-                {' '}
-                <span className="text-foreground">
-                  {isRu ? `Роль: ${inviteRole}.` : `Role: ${inviteRole}.`}
-                </span>
-              </>
-            )}
+            {copy('Create a password for your account.', 'Создайте пароль для вашего аккаунта.', 'ตั้งรหัสผ่านสำหรับบัญชีของคุณ')}
+
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <UnderlineInput
-              label={isRu ? 'Новый пароль' : 'New password'}
+              label={copy('New password', 'Новый пароль', 'รหัสผ่านใหม่')}
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={setPassword}
@@ -175,7 +182,7 @@ export default function SetupPassword() {
                 'absolute right-0 top-1/2 -translate-y-1/2 p-2',
                 'text-muted-foreground hover:text-foreground',
               )}
-              aria-label={isRu ? (showPassword ? 'Скрыть пароль' : 'Показать пароль') : (showPassword ? 'Hide password' : 'Show password')}
+              aria-label={showPassword ? copy('Hide password', 'Скрыть пароль', 'ซ่อนรหัสผ่าน') : copy('Show password', 'Показать пароль', 'แสดงรหัสผ่าน')}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -183,7 +190,7 @@ export default function SetupPassword() {
           <PasswordStrengthIndicator password={password} />
 
           <UnderlineInput
-            label={isRu ? 'Повторите пароль' : 'Confirm password'}
+            label={copy('Confirm password', 'Повторите пароль', 'ยืนยันรหัสผ่าน')}
             type={showPassword ? 'text' : 'password'}
             value={confirmPassword}
             onChange={setConfirmPassword}
@@ -195,8 +202,8 @@ export default function SetupPassword() {
 
           <PremiumButton type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting
-              ? (isRu ? 'Сохраняем…' : 'Saving…')
-              : (isRu ? 'Сохранить и войти' : 'Save & continue')}
+              ? (copy('Saving…', 'Сохраняем…', 'กำลังบันทึก…'))
+              : (copy('Save & continue', 'Сохранить и войти', 'บันทึกและดำเนินการต่อ'))}
           </PremiumButton>
         </form>
       </div>

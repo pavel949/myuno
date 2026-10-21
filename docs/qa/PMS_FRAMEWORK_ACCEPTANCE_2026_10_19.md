@@ -78,3 +78,9 @@ A 9/10 framework verdict requires steps 1–5 to pass their actual boundaries.
 Unapplied SQL, UI mocks or data completeness never substitute for that evidence.
 Real payment collection, settlement and catalogue population are excluded from
 this user's score; canonical authorization and inventory remain included.
+
+## 21 October integration refresh
+
+Reconciled this frontend tranche with main `fb4b944a4c736f680ddb8e4b178f833030e021b1`. The current shared ServiceSummary replaces this branch's duplicate marketplace price block. The current admin provider pagination, stable ordering, queue predicates and exact editor lookup remain; legacy service-editor reads additionally retain actor-bound keys and signed-out disabling. Three regression cases cover actor changes, filter-before-page ordering and exact lookup/read failure.
+
+The services-framework browser fixture is registered in the current two-slot runner rather than restoring this branch's obsolete sequential workflow loop. No fixture timeout, security guard, public read projection, server transition, schema or production setting is relaxed. The existing backend acceptance gaps above remain explicit: this reconciliation is not operational acceptance of guest cancellation, instant capacity or structured unscheduled requests. Main PR156's homepage source is unchanged by this tranche and compatibility is checked separately.

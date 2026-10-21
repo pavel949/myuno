@@ -258,8 +258,8 @@ export default function FAQPage() {
   ];
 
   return (
-    <AppLayout>
-      <PageContainer>
+    <AppLayout usePageContainer={false}>
+      <PageContainer className="max-w-4xl">
         <PageHeader 
           title={isRu ? 'Частые вопросы' : isTh ? 'คำถามที่พบบ่อย' : 'FAQ'} 
           showBack 
@@ -315,7 +315,7 @@ export default function FAQPage() {
                       value={`${catIndex}-${index}`}
                       className="border-b last:border-b-0"
                     >
-                      <AccordionTrigger className="px-4 text-left text-sm hover:no-underline">
+                      <AccordionTrigger className="min-h-14 px-4 text-left font-sans text-sm leading-relaxed hover:no-underline">
                         {item.q}
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pb-4 text-sm text-muted-foreground">
@@ -338,7 +338,7 @@ export default function FAQPage() {
           <p className="text-sm text-muted-foreground mb-4">
             {isRu ? 'Наша поддержка работает 24/7 на нескольких языках' : isTh ? 'ฝ่ายสนับสนุนของเราทำงาน 24/7 หลายภาษา' : 'Our support works 24/7 in multiple languages'}
           </p>
-          <Button className="w-full" asChild>
+          <Button className="w-full sm:w-auto" asChild>
             <Link to="/support">
               {isRu ? 'Написать в поддержку' : isTh ? 'ติดต่อฝ่ายสนับสนุน' : 'Contact Support'}
             </Link>
