@@ -12,6 +12,7 @@ vi.mock('@/components/legal/LegalEntityInfo', () => ({ LegalCopyright: () => nul
 vi.mock('@/components/concierge/ConciergeHelpSheet', () => ({ ConciergeHelpSheet: () => null }));
 vi.mock('@/components/home/HomeDiscoverySearch', () => ({ HomeDiscoverySearch: () => null }));
 vi.mock('@/components/home/HomeProjectGallery', () => ({ HomeProjectGallery: () => null }));
+vi.mock('@/components/home/HomeCatalogGalleries', () => ({ HomeLocationGallery: () => null, HomeExperienceGallery: () => null, HomeServiceGallery: () => null }));
 vi.mock('@/hooks/useProperties', () => ({ useProperties: () => ({ data: [], isLoading: false, isError: false }) }));
 
 // Navigation composition is covered by Landing.anonymous-home.test.tsx.
