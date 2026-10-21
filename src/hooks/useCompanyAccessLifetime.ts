@@ -4,7 +4,7 @@ import { CompanyAccessLifetime } from '@/lib/companyAccessOperation';
 
 /** Invalidates old work during the context render, on Auth changes, and unmount. */
 export function useCompanyAccessLifetime(actorId: string | undefined, companyId: string | undefined) {
-  const ref = useRef<CompanyAccessLifetime>();
+  const ref = useRef<CompanyAccessLifetime>(undefined);
   if (!ref.current || ref.current.actorId !== actorId || ref.current.companyId !== companyId || !ref.current.isActive) {
     ref.current?.invalidate();
     ref.current = new CompanyAccessLifetime(actorId, companyId);

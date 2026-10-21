@@ -74,7 +74,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, className }:
   const [geolocating, setGeolocating] = useState(false);
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const sessionTokenRef = useRef<unknown>(null);
 
   // Clear selection if the user edits the value away from the selected one
