@@ -3,11 +3,14 @@ import { useEffect, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { Calendar, MapPin, Phone } from 'lucide-react';
 import { resolveIcon } from '@/lib/iconMap';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
+
+type ReadPhase = 'loading' | 'ready' | 'error' | 'missing' | 'signed_out';
 
 interface OrderData {
   id: string;
@@ -30,6 +33,8 @@ export default function ServiceOrderSuccess() {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const isRu = language === 'ru';
+  const { user, isLoading: authLoading } = useAuth();
+  const actorId = user?.id;
 
   const sessionId = searchParams.get('session_id');
   const navState = (location.state as {
@@ -40,34 +45,72 @@ export default function ServiceOrderSuccess() {
   } | null) || {};
   const { functionName, functionIcon, orderId: stateOrderId } = navState;
 
-  const [order, setOrder] = useState<OrderData | null>(null);
-  const [loading, setLoading] = useState(!!(sessionId || stateOrderId));
+  const readKey = JSON.stringify([actorId, sessionId, stateOrderId]);
+  const [retry, setRetry] = useState(0);
+  const [snapshot, setSnapshot] = useState<{ key: string; phase: ReadPhase; row: OrderData | null }>(
+    { key: '', phase: 'loading', row: null },
+  );
+  // Hide previous actor/URL data during the render before the effect resets it.
+  const current = snapshot.key === readKey ? snapshot : { phase: 'loading' as const, row: null };
+  const order = current.row;
+  const loading = authLoading || current.phase === 'loading';
 
   useEffect(() => {
-    if (!sessionId && !stateOrderId) return;
+    let stopped = false;
     let attempts = 0;
-    const maxAttempts = 10;
-
-    const fetchOrder = async () => {
-      const baseSelect = 'id, order_number, total_amount, currency, status, start_at, metadata';
-      let query = supabase.from('orders').select(baseSelect).eq('order_type', 'service');
-      query = stateOrderId
-        ? query.eq('id', stateOrderId)
-        : query.filter('metadata->>stripe_session_id', 'eq', sessionId!);
-      const { data } = await query.maybeSingle();
-
-      if (data) {
-        setOrder(data as unknown as OrderData);
-        setLoading(false);
-      } else if (++attempts < maxAttempts) {
-        setTimeout(fetchOrder, 2000);
-      } else {
-        setLoading(false);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let deadline: ReturnType<typeof setTimeout> | undefined;
+    const controller = new AbortController();
+    const publish = (phase: ReadPhase, row: OrderData | null = null) => {
+      if (!stopped) setSnapshot({ key: readKey, phase, row });
+    };
+    publish('loading');
+    const poll = async () => {
+      try {
+        deadline = setTimeout(() => {
+          publish('error');
+          stopped = true;
+          controller.abort();
+        }, 10000);
+        let query = supabase.from('orders')
+          .select('id, order_number, total_amount, currency, status, start_at, metadata')
+          .eq('customer_user_id', actorId).eq('order_type', 'service');
+        query = stateOrderId ? query.eq('id', stateOrderId)
+          : query.filter('metadata->>stripe_session_id', 'eq', sessionId!);
+        const { data, error } = await query.abortSignal(controller.signal).maybeSingle();
+        clearTimeout(deadline);
+        if (stopped) return;
+        if (error) { publish('error'); return; }
+        const row = data as unknown as OrderData | null;
+        if (row && typeof row.id !== 'string') { publish('error'); return; }
+        if (row) {
+          publish('ready', row);
+          if (!['draft', 'pending', 'pending_advance', 'awaiting_client_payment', 'pending_deposit'].includes(row.status ?? '')) return;
+        }
+        if (++attempts < 10) timer = setTimeout(poll, 2000);
+        else if (!row) publish('missing');
+      } catch {
+        clearTimeout(deadline);
+        publish('error');
       }
     };
+    if (authLoading) { /* wait for an actor before querying */ }
+    else if (!actorId) publish('signed_out');
+    else if (!(sessionId || stateOrderId)) publish('missing');
+    else void poll();
+    return () => { stopped = true; clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
+  }, [actorId, authLoading, sessionId, stateOrderId, readKey, retry]);
 
-    fetchOrder();
-  }, [sessionId, stateOrderId]);
+  const confirmed = !!order && ['confirmed', 'in_progress', 'completed'].includes(order.status ?? '');
+  const pending = !!order && ['draft', 'pending', 'pending_advance', 'awaiting_client_payment', 'pending_deposit'].includes(order.status ?? '');
+  const title = confirmed
+    ? (order.status === 'completed' ? { ru: 'Заказ завершён.', en: 'Order completed.' }
+      : order.status === 'in_progress' ? { ru: 'Заказ выполняется.', en: 'Order in progress.' }
+      : { ru: 'Заказ подтверждён.', en: 'Order confirmed.' })
+    : pending ? { ru: 'Ожидаем подтверждения заказа.', en: 'Order confirmation pending.' }
+    : current.phase === 'signed_out' ? { ru: 'Войдите, чтобы проверить заказ.', en: 'Sign in to check your order.' }
+    : current.phase === 'error' ? { ru: 'Не удалось проверить заказ.', en: 'Could not check your order.' }
+    : { ru: 'Статус заказа не подтверждён.', en: 'Order status not verified.' };
 
   const details = order ? (
     <div className="space-y-2 text-sm">
@@ -81,7 +124,7 @@ export default function ServiceOrderSuccess() {
         <div className="font-medium">{order.metadata.provider_name}</div>
       )}
       <div className="font-semibold">
-        {order.total_amount.toLocaleString()} {order.currency}
+        {order.total_amount?.toLocaleString()} {order.currency}
       </div>
       {order.start_at && (
         <div className="flex items-center gap-2 text-muted-foreground">
@@ -119,17 +162,20 @@ export default function ServiceOrderSuccess() {
   return (
     <UnifiedSuccessLayout
       isLoading={loading}
+      status={{ title, tone: confirmed ? 'success' : 'neutral',
+        onRetry: actorId && (sessionId || stateOrderId) ? () => setRetry(value => value + 1) : undefined }}
+      hideWhatsApp={!order}
       orderNumber={order?.order_number || undefined}
       note={{
         ru: serviceRequestConfirmationNote.ru,
         en: getServiceRequestConfirmationNote(language),
       }}
       details={details}
-      extras={<CrossSellRecommendations orderType="service" />}
-      primaryHref="/services"
-      primaryLabel={{ ru: 'Заказать ещё', en: 'Order more' }}
-      secondaryHref="/bookings"
-      secondaryLabel={{ ru: 'Мои заказы', en: 'My orders' }}
+      extras={confirmed ? <CrossSellRecommendations orderType="service" /> : undefined}
+      primaryHref={confirmed ? '/services' : '/bookings'}
+      primaryLabel={confirmed ? { ru: 'Заказать ещё', en: 'Order more' } : { ru: 'Мои заказы', en: 'My orders' }}
+      secondaryHref={confirmed ? '/bookings' : '/services'}
+      secondaryLabel={confirmed ? { ru: 'Мои заказы', en: 'My orders' } : { ru: 'Вернуться в каталог', en: 'Back to catalog' }}
       totalAmount={order?.total_amount}
       currency={order?.currency || undefined}
       whatsappSummary={summaryRu || summaryEn ? { ru: summaryRu, en: summaryEn } : undefined}

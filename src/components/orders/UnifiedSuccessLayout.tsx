@@ -8,7 +8,7 @@
  */
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Info, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -16,6 +16,8 @@ import { WhatsAppOrderContact } from '@/components/contact/WhatsAppOrderContact'
 
 interface UnifiedSuccessLayoutProps {
   isLoading?: boolean;
+  /** Explicit read/confirmation state; omission preserves existing callers. */
+  status?: { title: { ru: string; en: string }; tone: 'neutral' | 'success'; onRetry?: () => void };
   orderNumber?: string;
   /** Block of order facts (lines, addresses, totals). */
   details?: ReactNode;
@@ -43,6 +45,7 @@ const DEFAULT_SECONDARY = { ru: 'Вернуться в каталог', en: 'Bac
 
 export function UnifiedSuccessLayout({
   isLoading = false,
+  status,
   orderNumber,
   details,
   extras,
@@ -63,7 +66,7 @@ export function UnifiedSuccessLayout({
   if (isLoading) {
     return (
       <AppLayout showHeader={false}>
-        <div className="min-h-[60vh] flex items-center justify-center">
+        <div role="status" aria-label={isRu ? 'Проверяем заказ' : 'Checking order'} className="min-h-[60vh] flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
       </AppLayout>
@@ -78,11 +81,13 @@ export function UnifiedSuccessLayout({
           <div className="rounded-none border border-border bg-card p-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <Check className="w-5 h-5 text-foreground" />
+                {!status || status.tone === 'success'
+                  ? <Check className="w-5 h-5 text-foreground" />
+                  : <Info className="w-5 h-5 text-foreground" />}
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-base font-semibold text-foreground leading-tight">
-                  {isRu ? 'Оплата подтверждена.' : 'Payment confirmed.'}
+                  {status ? (isRu ? status.title.ru : status.title.en) : (isRu ? 'Оплата подтверждена.' : 'Payment confirmed.')}
                 </h1>
                 {orderNumber && (
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -107,6 +112,9 @@ export function UnifiedSuccessLayout({
           {extras}
 
           {/* Actions */}
+          {status?.onRetry && <Button variant="outline" onClick={status.onRetry} className="w-full">
+            {isRu ? 'Проверить ещё раз' : 'Check again'}
+          </Button>}
           <div className="space-y-2 pt-1">
             <Button onClick={() => navigate(primaryHref)} className="w-full">
               {isRu ? primaryLabel.ru : primaryLabel.en}
