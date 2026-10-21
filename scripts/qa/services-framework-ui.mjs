@@ -8,7 +8,8 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-const root = process.cwd(), output = '/tmp/browser/services-framework-isolated';
+const root = process.cwd();
+const output = '/tmp/browser/services-framework-isolated';
 await mkdir(output, { recursive: true });
 const virtual = {
  '@/contexts/LanguageContext': `export const useLanguage=()=>({language:new URLSearchParams(location.search).get('lang')||'ru',t:s=>s});`,
