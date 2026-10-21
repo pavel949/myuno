@@ -208,7 +208,7 @@ function PropertyListingCardBase({
         {/* Listing name is the primary destination; district and rating are secondary. */}
         <div className="flex items-start justify-between gap-1">
           <h3 className="min-w-0 font-sans text-base font-semibold leading-snug text-foreground">
-            <Link to={detailHref} onClick={(event) => event.stopPropagation()} className="line-clamp-2 break-words focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <Link to={detailHref} onClick={(event) => event.stopPropagation()} className="line-clamp-2 break-words focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
               {title || districtDisplay}
             </Link>
           </h3>

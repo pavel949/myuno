@@ -105,7 +105,7 @@ export default function CrmMeetingsPage() {
             <Button><Plus className="h-4 w-4 mr-2" />{pickLang(language, {"en": "New Meeting", "ru": "Новая встреча", "th": "นัดหมายใหม่"})}</Button>
           </DialogTrigger>
           <DialogContent hideCloseButton>
-            <DialogClose className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={pickLang(language, { en: 'Close', ru: 'Закрыть', th: 'ปิด' })}>
+            <DialogClose className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring" aria-label={pickLang(language, { en: 'Close', ru: 'Закрыть', th: 'ปิด' })}>
               <X className="h-4 w-4" aria-hidden />
             </DialogClose>
             <DialogHeader className="pr-10">

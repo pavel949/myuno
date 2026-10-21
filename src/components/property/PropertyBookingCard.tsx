@@ -260,7 +260,7 @@ export function PropertyBookingCard({
             <button
               className={cn(
                 "w-full rounded-none border-2 border-border/80 hover:border-foreground/40 transition-colors",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
                 calendarOpen && "border-foreground/60 ring-1 ring-foreground/20"
               )}
             >
@@ -372,7 +372,7 @@ export function PropertyBookingCard({
               className={cn(
                 "w-full rounded-none border-2 border-border/80 hover:border-foreground/40 transition-colors",
                 "flex items-center justify-between px-4 py-3",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               )}
             >
               <div className="flex flex-col items-start">

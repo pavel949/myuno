@@ -134,7 +134,7 @@ export function StartPageLayout({
             'inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-none',
             'bg-primary text-primary-foreground font-semibold text-[15px]',
             'min-h-[48px] transition-transform',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+            'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
           )}
         >
           {startLabel}
@@ -149,7 +149,7 @@ export function StartPageLayout({
               'inline-flex items-center justify-center px-6 py-3.5 rounded-none',
               'bg-card border border-border text-foreground font-medium text-[14.5px]',
               'min-h-[48px] transition-transform',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+              'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
             )}
           >
             {secondaryLabel}

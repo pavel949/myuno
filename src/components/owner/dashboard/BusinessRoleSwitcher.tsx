@@ -37,7 +37,7 @@ export function BusinessRoleSwitcher({ activeRole, onRoleChange }: BusinessRoleS
           queryClient.invalidateQueries();
           onRoleChange(role);
         }}
-        className="h-11 w-full min-w-0 border border-input bg-background px-3 text-body-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:max-w-xs"
+        className="h-11 w-full min-w-0 border border-input bg-background px-3 text-body-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:max-w-xs"
       >
         {BUSINESS_ROLE_LIST.map(role => (
           <option key={role.id} value={role.id}>{dashboardBusinessRoleLabel(language, role)}</option>

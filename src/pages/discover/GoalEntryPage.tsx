@@ -33,7 +33,7 @@ export default function GoalEntryPage({ goal }: { goal: string }) {
       <Link
         to={link.path}
         className={cn(
-          'group flex items-start gap-3 border border-border bg-card p-4 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          'group flex items-start gap-3 border border-border bg-card p-4 transition-colors hover:border-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
           large && 'sm:p-5',
         )}
       >

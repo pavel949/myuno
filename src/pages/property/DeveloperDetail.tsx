@@ -189,7 +189,7 @@ export default function DeveloperDetail() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={isRu ? `Сайт ${name}` : `${name} website`}
-              className="flex items-center gap-2 text-sm text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none"
+              className="flex items-center gap-2 text-sm text-primary hover:underline focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-none"
             >
               <Globe className="w-4 h-4" aria-hidden />
               {developer.website}
@@ -199,7 +199,7 @@ export default function DeveloperDetail() {
             <a
               href={`tel:${developer.phone}`}
               aria-label={isRu ? `Позвонить ${name}` : `Call ${name}`}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-none"
             >
               <Phone className="w-4 h-4" aria-hidden />
               {developer.phone}
@@ -209,7 +209,7 @@ export default function DeveloperDetail() {
             <a
               href={`mailto:${developer.email}`}
               aria-label={isRu ? `Написать ${name}` : `Email ${name}`}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-none"
             >
               <Mail className="w-4 h-4" aria-hidden />
               {developer.email}

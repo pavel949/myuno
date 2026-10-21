@@ -50,7 +50,7 @@ export const FilterChip = forwardRef<HTMLButtonElement, FilterChipProps>(
         }}
         className={cn(
           "relative overflow-hidden inline-flex items-center rounded-full font-medium transition-all duration-200",
-          "border focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+          "border focus:outline-hidden focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
           "flex-shrink-0",
           sizeClasses[size],
           isActive

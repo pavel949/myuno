@@ -582,7 +582,7 @@ export default function MapView() {
                 {language === 'ru' ? 'объектов на карте' : 'locations'}
               </p>
               {activeFilterCount > 0 && (
-                <button type="button" onClick={resetAllFilters} className="text-xs text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-sm px-1">
+                <button type="button" onClick={resetAllFilters} className="text-xs text-primary hover:underline focus:outline-hidden focus:ring-2 focus:ring-primary/40 rounded-sm px-1">
                   {language === 'ru' ? `Сбросить фильтры (${activeFilterCount})` : `Clear (${activeFilterCount})`}
                 </button>
               )}

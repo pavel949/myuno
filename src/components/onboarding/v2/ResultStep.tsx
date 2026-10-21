@@ -67,7 +67,7 @@ export function ResultStep({ result, lang, onReset }: Props) {
               onClick={() => navigate(item.route)}
               className={cn(
                 'group flex w-full items-center gap-3 rounded-none border bg-card p-3 text-left transition-all min-h-[64px]',
-                'hover:border-primary/60 hover:bg-primary/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                'hover:border-primary/60 hover:bg-primary/5 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary',
                 idx === 0 && 'border-primary/60 bg-primary/5',
               )}
             >

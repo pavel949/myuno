@@ -40,7 +40,7 @@ const LABELS: Record<string, T> = {
   high: { en: 'High priority', ru: 'Высокий приоритет', th: 'ความสำคัญสูง' },
   urgent: { en: 'Urgent', ru: 'Срочно', th: 'เร่งด่วน' },
 };
-const focusLink = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+const focusLink = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 export default function PmsTodayPage() {
   const { language } = useLanguage();

@@ -270,7 +270,7 @@ export function BilingualFieldWithAI({
           maxLength={maxLength}
           className={cn(
             'w-full px-3 py-2 border rounded-none bg-background',
-            'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary',
             multiline && 'min-h-[100px] resize-y'
           )}
         />
@@ -300,7 +300,7 @@ export function BilingualFieldWithAI({
           maxLength={maxLength}
           className={cn(
             'w-full px-3 py-2 border rounded-none bg-background',
-            'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary',
             multiline && 'min-h-[100px] resize-y'
           )}
         />

@@ -239,7 +239,7 @@ export function AirbnbCalendarGrid({ propertyId, properties = [] }: AirbnbCalend
                         onClick={() => handleDayClick(day)}
                         className={cn(
                           "h-16 sm:h-20 p-0.5 sm:p-1 flex flex-col items-start text-left transition-colors relative",
-                          "hover:bg-muted/50 active:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          "hover:bg-muted/50 active:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
                           !inMonth && "opacity-30",
                           isBlocked && "bg-destructive/5",
                         )}

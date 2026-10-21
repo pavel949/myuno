@@ -73,10 +73,10 @@ export function HomeTopBar({
   const isOnNavy = variant === 'onNavy';
 
   // Style atoms — keeps the JSX readable while the two contracts diverge.
-  const iconButtonCls = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ' + (isOnNavy
+  const iconButtonCls = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ' + (isOnNavy
     ? 'text-primary-foreground/90 hover:bg-primary-foreground/10 hover:text-primary-foreground'
     : 'text-foreground hover:bg-muted/40');
-  const borderedButtonCls = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ' + (isOnNavy
+  const borderedButtonCls = 'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ' + (isOnNavy
     ? 'border border-primary-foreground/20 text-primary-foreground/90 hover:bg-primary-foreground/10 hover:border-primary-foreground/30 hover:text-primary-foreground'
     : 'border border-border text-muted-foreground hover:text-foreground');
   const subtitleCls = isOnNavy
@@ -133,7 +133,7 @@ export function HomeTopBar({
           onClick={() => navigate(APP_ROUTES.ME_PROFILE)}
           aria-label={pickLang(language, { ru: 'Профиль', en: 'Profile', th: 'โปรไฟล์' })}
           className={cn(
-            'w-11 h-11 rounded-full flex items-center justify-center text-[12px] font-semibold font-sans shadow-inner focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            'w-11 h-11 rounded-full flex items-center justify-center text-[12px] font-semibold font-sans shadow-inner focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
             isOnNavy
               ? 'border border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/15'
               : 'border border-border text-foreground bg-gradient-to-br from-card to-secondary',

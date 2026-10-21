@@ -88,7 +88,7 @@ export function AuthValuePanel({ compact = false }: AuthValuePanelProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.04, duration: 0.25, ease: 'easeOut' }}
               className={cn(
-                'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ring-1 transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary/40',
+                'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full ring-1 transition-transform hover:-translate-y-0.5 focus:outline-hidden focus:ring-2 focus:ring-primary/40',
                 cluster.bg,
                 cluster.ring,
               )}

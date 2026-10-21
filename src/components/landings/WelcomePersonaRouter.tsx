@@ -125,7 +125,7 @@ export function WelcomePersonaRouter() {
           onClick={() => navigate(target)}
           className={cn(
             'group bg-background p-6 text-left transition-colors sm:p-7',
-            'hover:bg-card/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+            'hover:bg-card/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           )}
         >
           <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-none border border-border bg-card transition-colors group-hover:border-primary/30">

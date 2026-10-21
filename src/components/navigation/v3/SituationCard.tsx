@@ -65,7 +65,7 @@ export function SituationCard({
         'border border-border bg-card text-card-foreground',
         'transition-[border-color,transform] duration-150',
         'hover:border-primary/40 hover:-translate-y-px',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+        'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
         className,
       )}
       style={clusterColor ? { borderLeftWidth: 3, borderLeftColor: clusterColor } : undefined}

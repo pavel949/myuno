@@ -74,7 +74,7 @@ export default function DevelopersIndex() {
                 className={cn(
                   "rounded-none border bg-card p-4 cursor-pointer",
                   "hover:border-primary/50 hover:shadow-md transition-all",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  "focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                 )}
               >
                 <div className="flex items-start gap-4">

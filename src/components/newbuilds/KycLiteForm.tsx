@@ -36,7 +36,7 @@ const INPUT_CLASS = cn(
   'w-full px-3 py-2 rounded-none text-sm',
   'bg-[hsl(var(--nb-bg))] text-[hsl(var(--nb-text))]',
   'border border-[hsl(var(--nb-glass-border))]',
-  'focus:outline-none focus:border-[hsl(var(--nb-gold)/0.5)]',
+  'focus:outline-hidden focus:border-[hsl(var(--nb-gold)/0.5)]',
 );
 
 export function KycLiteForm({ onComplete, leadId }: Props) {

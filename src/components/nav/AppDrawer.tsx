@@ -204,7 +204,7 @@ export function AppDrawer({
             type="button"
             onClick={() => go(APP_ROUTES.ACCOUNT)}
             aria-label={`${pickLang(language, { ru: 'Открыть профиль', en: 'Open profile', th: 'เปิดโปรไฟล์' })}: ${displayName}`}
-            className="flex items-center gap-3 w-full pr-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex items-center gap-3 w-full pr-6 text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           >
             <div
               className="w-12 h-12 rounded-full border border-border flex items-center justify-center font-display text-[14px] font-semibold text-foreground shrink-0"

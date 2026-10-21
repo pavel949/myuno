@@ -130,16 +130,16 @@ export default function OwnerModulesPage() {
     <label htmlFor={searchId} className="flex min-h-11 items-center gap-3 border border-border bg-card px-3">
       <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
       <span className="sr-only">{pickLang(language, {en:'Find a tool', ru:'Найти инструмент', th:'ค้นหาเครื่องมือ'})}</span>
-      <input id={searchId} aria-label={pickLang(language, {en: 'Find a tool', ru: 'Найти инструмент', th: 'ค้นหาเครื่องมือ'})} className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" value={query} onChange={event => setQuery(event.target.value)} placeholder={pickLang(language, {en:'Search tools', ru:'Поиск по инструментам', th:'ค้นหาเครื่องมือ'})} />
+      <input id={searchId} aria-label={pickLang(language, {en: 'Find a tool', ru: 'Найти инструмент', th: 'ค้นหาเครื่องมือ'})} className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-hidden focus-visible:ring-2 focus-visible:ring-ring" value={query} onChange={event => setQuery(event.target.value)} placeholder={pickLang(language, {en:'Search tools', ru:'Поиск по инструментам', th:'ค้นหาเครื่องมือ'})} />
     </label>
     {visible.length === 0 && <p role="status" className="py-6 text-sm text-muted-foreground">{pickLang(language, {en:'No matching tools available.', ru:'Доступные инструменты не найдены.', th:'ไม่พบเครื่องมือที่ใช้งานได้'})}</p>}
     {MODULE_AREAS.map((area, index) => {
       const modules = visible.filter(m => area.ids.includes(m.id));
       if (!modules.length) return null;
       return <details key={`${area.en}:${Boolean(query.trim())}`} open={query.trim() ? true : index === 0} className="border border-border bg-card">
-        <summary className="min-h-12 cursor-pointer px-4 py-4 font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{pickLang(language, area)} <span className="ml-2 text-xs text-muted-foreground">{modules.length}</span></summary>
+        <summary className="min-h-12 cursor-pointer px-4 py-4 font-medium text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">{pickLang(language, area)} <span className="ml-2 text-xs text-muted-foreground">{modules.length}</span></summary>
         <div className="grid gap-px border-t border-border bg-border sm:grid-cols-2">
-          {modules.map(mod => <button type="button" key={mod.id} onClick={() => navigate(mod.path)} className="flex min-h-16 min-w-0 items-center gap-3 bg-card p-4 text-left text-sm text-foreground hover:bg-muted focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          {modules.map(mod => <button type="button" key={mod.id} onClick={() => navigate(mod.path)} className="flex min-h-16 min-w-0 items-center gap-3 bg-card p-4 text-left text-sm text-foreground hover:bg-muted focus-visible:z-10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
             <mod.icon className="h-5 w-5 shrink-0 text-primary" aria-hidden />
             <span className="min-w-0 break-words">{label(mod)}</span>
           </button>)}

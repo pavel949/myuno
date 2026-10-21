@@ -112,7 +112,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
               <Link
                 key={s.slug}
                 to={s.href}
-                className="text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
+                className="text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:underline"
               >
                 {t({ ru: s.titleRu, en: s.titleEn, th: s.titleTh })}
               </Link>
@@ -131,7 +131,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
                 )}
                 <Link
                   to={link.to}
-                  className="transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
+                  className="transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:underline"
                 >
                   {link.label}
                 </Link>
@@ -170,7 +170,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
           <div className="flex justify-center">
             <button
               onClick={handleInstallClick}
-              className="inline-flex items-center gap-2 rounded-none border border-border bg-card px-4 py-2 font-sans text-body-sm font-medium text-foreground transition-colors hover:bg-card/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-flex items-center gap-2 rounded-none border border-border bg-card px-4 py-2 font-sans text-body-sm font-medium text-foreground transition-colors hover:bg-card/70 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             >
               {isIOS ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />}
               {t(ECOSYSTEM_FOOTER_UI.downloadApp)}
@@ -201,7 +201,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
             <Link
               key={s.slug}
               to={s.href}
-              className="text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
+              className="text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:underline"
             >
               {t({ ru: s.titleRu, en: s.titleEn, th: s.titleTh })}
             </Link>
@@ -216,7 +216,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
             <Link
               key={link.to}
               to={link.to}
-              className="transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
+              className="transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:underline"
             >
               {link.label}
             </Link>

@@ -178,7 +178,7 @@ export default function RestaurantsIndex() {
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
-            className="flex-shrink-0 text-[11px] font-medium bg-secondary border border-border rounded-full px-2.5 py-1.5 outline-none cursor-pointer"
+            className="flex-shrink-0 text-[11px] font-medium bg-secondary border border-border rounded-full px-2.5 py-1.5 outline-hidden cursor-pointer"
           >
             {SORT_OPTIONS.map(opt => (
               <option key={opt.id} value={opt.id}>

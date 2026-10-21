@@ -335,7 +335,7 @@ export default function PropertyDetail() {
               </Button>
             </PropertyShareSheet>
             <details className="relative">
-              <summary className="cursor-pointer list-none px-3 py-2 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{isRu ? 'Ещё' : 'More'}</summary>
+              <summary className="cursor-pointer list-none px-3 py-2 text-sm text-muted-foreground hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">{isRu ? 'Ещё' : 'More'}</summary>
               <div className="absolute right-0 top-full z-30 flex flex-col items-start gap-1 border border-border bg-background p-2 shadow-md min-w-40">
                 <CompareButton className="[&>span]:inline min-h-11"
                   property={{

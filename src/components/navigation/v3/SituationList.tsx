@@ -99,7 +99,7 @@ function SituationListImpl({
           <button
             type="button"
             onClick={onRetry}
-            className="mt-2 underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
+            className="mt-2 underline hover:no-underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-destructive"
           >
             {t('discover.retryAction')}
           </button>
@@ -145,7 +145,7 @@ function SituationListImpl({
               onClick={() => onSituationClick(s.code, { href, count })}
               className={cn(
                 'group flex items-center gap-4 -mx-2 px-2 transition-colors',
-                'hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                'hover:bg-muted/40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary',
                 styles.row,
               )}
             >

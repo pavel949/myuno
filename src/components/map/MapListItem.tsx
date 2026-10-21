@@ -46,7 +46,7 @@ export function MapListItem({
       onClick={() => onSelect(id)}
       className={cn(
         'w-full text-left px-4 py-3 flex items-start gap-3 border-b border-border/60 transition-colors',
-        'hover:bg-muted/40 focus-visible:outline-none focus-visible:bg-muted/60',
+        'hover:bg-muted/40 focus-visible:outline-hidden focus-visible:bg-muted/60',
         isSelected && 'bg-primary/5 ring-2 ring-inset ring-primary',
       )}
     >

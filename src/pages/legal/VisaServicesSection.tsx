@@ -53,7 +53,7 @@ export function VisaServicesSection({ limit = 6, showTitle = true }: VisaService
             key={visa.id}
             aria-label={(language === 'ru' ? visa.name_ru : visa.name_en) || visa.name_en}
             onClick={() => navigate(`/legal/visa/${visa.id}`)}
-            className="w-full text-left bg-card border border-border rounded-none p-4 cursor-pointer hover:border-primary/50 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full text-left bg-card border border-border rounded-none p-4 cursor-pointer hover:border-primary/50 transition-all group focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">

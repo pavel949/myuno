@@ -42,7 +42,7 @@ export function WelcomeGosuslugiQuickAccess() {
               to={row.href}
               className={cn(
                 'min-w-[140px] shrink-0 rounded-none border border-border bg-card px-4 py-3 transition-colors',
-                'hover:bg-card/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:min-w-0',
+                'hover:bg-card/80 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring md:min-w-0',
               )}
             >
               <div className="font-mono text-h3 font-medium tabular-nums text-foreground">{row.value}</div>

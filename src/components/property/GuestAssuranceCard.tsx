@@ -98,7 +98,7 @@ export function GuestAssuranceCard({ compact, className }: GuestAssuranceCardPro
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        className="rounded-full p-0.5 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                        className="rounded-full p-0.5 text-muted-foreground hover:text-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring shrink-0"
                         aria-label={isRu ? 'Подробнее' : 'More info'}
                       >
                         <Info className="w-3.5 h-3.5" />

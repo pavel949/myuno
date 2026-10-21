@@ -152,7 +152,7 @@ export default function NewbuildsLanding() {
                 key={to}
                 to={to}
                 className={
-                  'flex items-start gap-3 p-4 rounded-none border transition-all hover:shadow-card-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ' +
+                  'flex items-start gap-3 p-4 rounded-none border transition-all hover:shadow-card-hover focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring ' +
                   (primary
                     ? 'border-primary/35 bg-primary/5'
                     : 'border-border bg-card hover:border-primary/30')

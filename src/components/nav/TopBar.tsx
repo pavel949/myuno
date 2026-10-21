@@ -175,7 +175,7 @@ export const TopBar = memo(function TopBar({
               'px-4 py-2 rounded-none',
               'bg-[hsl(var(--bg-elevated))] border border-border',
               'transition-all duration-200 cursor-pointer group/search',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             )}
           >
             <Search className="size-5 text-muted-foreground group-hover/search:text-foreground transition-colors shrink-0" />
@@ -199,7 +199,7 @@ export const TopBar = memo(function TopBar({
           <div className="flex items-center gap-0.5 lg:gap-1.5 ml-auto shrink-0">
             <button
               onClick={openSearch}
-              className="lg:hidden flex items-center justify-center w-11 h-11 rounded-none hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="lg:hidden flex items-center justify-center w-11 h-11 rounded-none hover:bg-muted/40 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label={pickLang(language, { ru: 'Поиск', en: 'Search', th: 'ค้นหา' })}
             >
               <Search className="size-5 text-muted-foreground" />

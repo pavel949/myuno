@@ -39,7 +39,7 @@ export const UnderlineInput = React.forwardRef<HTMLInputElement, UnderlineInputP
             readOnly={readOnly}
             className={cn(
               "w-full h-12 bg-transparent border-0 border-b-2 px-0 text-base transition-colors",
-              "focus:outline-none focus:ring-0",
+              "focus:outline-hidden focus:ring-0",
               icon ? "pr-10" : "",
               readOnly && "text-muted-foreground cursor-default",
               error
