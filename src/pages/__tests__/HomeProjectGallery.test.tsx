@@ -6,8 +6,8 @@ import { HomeProjectGallery } from '@/components/home/HomeProjectGallery';
 
 const state = vi.hoisted(() => ({
   projects: [
-    { id: 'layan', name_en: 'Layan Garden Homes', name_ru: 'Дома в Лаяне', district: 'bang_tao', location_area: 'bang_tao', cover_image: null, images: [], is_active: true },
-    { id: 'rawai', name_en: 'Rawai Residence', name_ru: 'Резиденция Равай', district: 'rawai', location_area: 'rawai', cover_image: null, images: [], is_active: true },
+    { id: 'layan', name_en: 'Layan Garden Homes', name_ru: 'Дома в Лаяне', district: 'bang_tao', cover_image: null, images: [], is_active: true },
+    { id: 'rawai', name_en: 'Rawai Residence', name_ru: 'Резиденция Равай', district: 'rawai', cover_image: null, images: [], is_active: true },
   ],
 }));
 vi.mock('@/contexts/LanguageContext', () => ({ useLanguage: () => ({ language: 'en' }) }));
@@ -55,4 +55,11 @@ it('updates the displayed count when guests switch between rent and purchase', (
   const layanLink = screen.getByRole('link', { name: 'Layan Garden Homes — Explore community' });
   expect(layanLink).toHaveAttribute('href', '/property/complex/layan?mode=buy');
   expect(within(layanLink).getByText('1 listing')).toBeVisible();
+});
+
+it('hides complexes without published homes matching the selected type', () => {
+  show();
+  fireEvent.change(screen.getByLabelText('Home type'), { target: { value: 'villa' } });
+  expect(screen.getByRole('link', { name: 'Layan Garden Homes — Explore community' })).toBeVisible();
+  expect(screen.queryByRole('link', { name: 'Rawai Residence — Explore community' })).toBeNull();
 });
