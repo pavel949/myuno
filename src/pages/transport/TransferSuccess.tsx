@@ -1,65 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Plane, MapPin, Clock, User } from 'lucide-react';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useOrderReturnRead } from '@/hooks/useOrderReturnRead';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
-
-interface OrderDetails {
-  order_number: string;
-  total_amount: number;
-  currency: string;
-  start_at: string | null;
-  metadata: Record<string, unknown>;
-  order_addresses?: Array<{
-    address_type: string;
-    address_text: string;
-  }>;
-  order_participants?: Array<{
-    name: string;
-    phone: string | null;
-  }>;
-}
 
 export default function TransferSuccess() {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
-  const [order, setOrder] = useState<OrderDetails | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
   const orderId = searchParams.get('order_id');
-
-  useEffect(() => {
-    if (!orderId) {
-      setIsLoading(false);
-      return;
-    }
-
-    const fetchOrder = async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          order_number,
-          total_amount,
-          currency,
-          start_at,
-          metadata,
-          order_addresses(address_type, address_text),
-          order_participants(name, phone)
-        `)
-        .eq('id', orderId)
-        .single();
-
-      if (!error && data) {
-        setOrder(data as OrderDetails);
-      }
-      setIsLoading(false);
-    };
-
-    fetchOrder();
-  }, [orderId]);
+  const { order, confirmed, isLoading, status } = useOrderReturnRead({ orderTypes: ['transfer', 'vehicle'], orderId, sessionId: searchParams.get('session_id'), children: 'transfer' });
 
   const isRu = language === 'ru';
   const metadata = order?.metadata || {};
@@ -150,13 +102,15 @@ export default function TransferSuccess() {
   return (
     <UnifiedSuccessLayout
       isLoading={isLoading}
+      status={status}
+      hideWhatsApp={!order}
       orderNumber={order?.order_number}
       note={{
-        ru: 'Водитель встретит вас с табличкой у выхода из терминала.',
-        en: 'Driver will meet you with a sign at the terminal exit.',
+        ru: 'Место встречи и водитель требуют отдельного подтверждения в деталях заказа.',
+        en: 'Meeting arrangements and driver assignment require separate confirmation in your order details.',
       }}
       details={details}
-      extras={<CrossSellRecommendations orderType="transport" />}
+      extras={confirmed ? <CrossSellRecommendations orderType="transport" /> : undefined}
       primaryHref={APP_ROUTES.BOOKINGS}
       secondaryHref={APP_ROUTES.TRANSPORT}
       totalAmount={order?.total_amount}

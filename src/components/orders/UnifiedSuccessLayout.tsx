@@ -1,8 +1,8 @@
 /**
- * UnifiedSuccessLayout — single canonical success page for all verticals.
+ * UnifiedSuccessLayout — shared order-return presentation for all verticals.
  *
  * Tone (mem://style/calm-vertical-tone-standard):
- *  - "Оплата подтверждена." — point, not exclamation.
+ *  - Unknown is unverified. Callers must supply owned persisted order evidence.
  *  - Nominal CTAs ("Мои заказы", "Вернуться в каталог").
  *  - No animate-ping, no celebratory copy.
  */
@@ -16,7 +16,7 @@ import { WhatsAppOrderContact } from '@/components/contact/WhatsAppOrderContact'
 
 interface UnifiedSuccessLayoutProps {
   isLoading?: boolean;
-  /** Explicit read/confirmation state; omission preserves existing callers. */
+  /** Explicit read/confirmation state; omission is deliberately unverified. */
   status?: { title: { ru: string; en: string }; tone: 'neutral' | 'success'; onRetry?: () => void };
   orderNumber?: string;
   /** Block of order facts (lines, addresses, totals). */
@@ -81,13 +81,13 @@ export function UnifiedSuccessLayout({
           <div className="rounded-none border border-border bg-card p-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                {!status || status.tone === 'success'
+                {status?.tone === 'success'
                   ? <Check className="w-5 h-5 text-foreground" />
                   : <Info className="w-5 h-5 text-foreground" />}
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-base font-semibold text-foreground leading-tight">
-                  {status ? (isRu ? status.title.ru : status.title.en) : (isRu ? 'Оплата подтверждена.' : 'Payment confirmed.')}
+                  {status ? (isRu ? status.title.ru : status.title.en) : (isRu ? 'Статус заказа не подтверждён.' : 'Order status not verified.')}
                 </h1>
                 {orderNumber && (
                   <p className="text-xs text-muted-foreground mt-0.5">

@@ -1,23 +1,8 @@
-import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { readCheckoutReturnHint } from '@/hooks/useStripeUnifiedCheckout';
-import { useAuth } from '@/contexts/AuthContext';
+import { useOrderReturnRead } from '@/hooks/useOrderReturnRead';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
-
-type ReadPhase = 'loading' | 'ready' | 'error' | 'missing' | 'signed_out';
-
-interface OrderRow {
-  id: string;
-  order_number: string | null;
-  status: string;
-  total_amount: number;
-  currency: string | null;
-  metadata: Record<string, unknown> | null;
-  created_at: string;
-}
 
 const VERTICAL_PATHS: Record<string, { en: string; ru: string; path: string }> = {
   beauty: { en: 'Beauty & Spa', ru: 'Красота и СПА', path: '/beauty' },
@@ -30,76 +15,8 @@ export default function WellnessOrderSuccess() {
   const sessionId = searchParams.get('session_id');
   const { language } = useLanguage();
   const isRu = language === 'ru';
-  const { user, isLoading: authLoading } = useAuth();
-  const actorId = user?.id;
 
-  const hintedOrderId = readCheckoutReturnHint(actorId, sessionId);
-  const readKey = JSON.stringify([actorId, sessionId, hintedOrderId]);
-  const [retry, setRetry] = useState(0);
-  const [snapshot, setSnapshot] = useState<{ key: string; phase: ReadPhase; row: OrderRow | null }>(
-    { key: '', phase: 'loading', row: null },
-  );
-  // Hide previous actor/URL data during the render before the effect resets it.
-  const current = snapshot.key === readKey ? snapshot : { phase: 'loading' as const, row: null };
-  const order = current.row;
-  const loading = authLoading || current.phase === 'loading';
-
-  useEffect(() => {
-    let stopped = false;
-    let attempts = 0;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let deadline: ReturnType<typeof setTimeout> | undefined;
-    const controller = new AbortController();
-    const publish = (phase: ReadPhase, row: OrderRow | null = null) => {
-      if (!stopped) setSnapshot({ key: readKey, phase, row });
-    };
-    publish('loading');
-    const poll = async () => {
-      try {
-        deadline = setTimeout(() => {
-          publish('error');
-          stopped = true;
-          controller.abort();
-        }, 10000);
-        const query = supabase.from('orders')
-          .select('id, order_number, status, total_amount, currency, metadata, created_at')
-          .eq('customer_user_id', actorId)
-          .in('order_type', ['beauty', 'fitness', 'medical'])
-          .eq('id', hintedOrderId!);
-        const { data, error } = await query.abortSignal(controller.signal).maybeSingle();
-        clearTimeout(deadline);
-        if (stopped) return;
-        if (error) { publish('error'); return; }
-        const row = data as unknown as OrderRow | null;
-        if (row && typeof row.id !== 'string') { publish('error'); return; }
-        if (row) {
-          publish('ready', row);
-          if (!['draft', 'pending', 'pending_advance', 'awaiting_client_payment', 'pending_deposit'].includes(row.status ?? '')) return;
-        }
-        if (++attempts < 10) timer = setTimeout(poll, 2000);
-        else if (!row) publish('missing');
-      } catch {
-        clearTimeout(deadline);
-        publish('error');
-      }
-    };
-    if (authLoading) { /* wait for an actor before querying */ }
-    else if (!actorId) publish('signed_out');
-    else if (!sessionId || !hintedOrderId) publish('missing');
-    else void poll();
-    return () => { stopped = true; clearTimeout(timer); clearTimeout(deadline); controller.abort(); };
-  }, [actorId, authLoading, sessionId, hintedOrderId, readKey, retry]);
-
-  const confirmed = !!order && ['confirmed', 'in_progress', 'completed'].includes(order.status ?? '');
-  const pending = !!order && ['draft', 'pending', 'pending_advance', 'awaiting_client_payment', 'pending_deposit'].includes(order.status ?? '');
-  const title = confirmed
-    ? (order.status === 'completed' ? { ru: 'Заказ завершён.', en: 'Order completed.' }
-      : order.status === 'in_progress' ? { ru: 'Заказ выполняется.', en: 'Order in progress.' }
-      : { ru: 'Заказ подтверждён.', en: 'Order confirmed.' })
-    : pending ? { ru: 'Ожидаем подтверждения заказа.', en: 'Order confirmation pending.' }
-    : current.phase === 'signed_out' ? { ru: 'Войдите, чтобы проверить заказ.', en: 'Sign in to check your order.' }
-    : current.phase === 'error' ? { ru: 'Не удалось проверить заказ.', en: 'Could not check your order.' }
-    : { ru: 'Статус заказа не подтверждён.', en: 'Order status not verified.' };
+  const { order, confirmed, isLoading: loading, status } = useOrderReturnRead({ orderTypes: ['beauty', 'fitness', 'medical'], sessionId });
 
   const vertical = typeof order?.metadata?.vertical === 'string' ? order.metadata.vertical : undefined;
   const info = vertical ? VERTICAL_PATHS[vertical] : undefined;
@@ -122,8 +39,7 @@ export default function WellnessOrderSuccess() {
   return (
     <UnifiedSuccessLayout
       isLoading={loading}
-      status={{ title, tone: confirmed ? 'success' : 'neutral',
-        onRetry: actorId && sessionId ? () => setRetry(value => value + 1) : undefined }}
+      status={status}
       hideWhatsApp={!order}
       orderNumber={order?.order_number || undefined}
       note={{

@@ -1,107 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Package, MapPin, Calendar, User, Gift } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { useOrderReturnRead } from '@/hooks/useOrderReturnRead';
 import { CrossSellRecommendations } from '@/components/orders/CrossSellRecommendations';
 import { UnifiedSuccessLayout } from '@/components/orders/UnifiedSuccessLayout';
-
-interface OrderDetails {
-  id: string;
-  order_number: string;
-  status: string;
-  total_amount: number;
-  currency: string;
-  metadata: Record<string, unknown>;
-  created_at: string;
-  items: Array<{
-    product_name: string;
-    qty: number;
-    unit_price: number;
-  }>;
-}
 
 const FlowersSuccess = () => {
   const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const { clearByType } = useCart();
-  const [isProcessing, setIsProcessing] = useState(true);
-  const [order, setOrder] = useState<OrderDetails | null>(null);
   const isRu = language === 'ru';
 
   const sessionId = searchParams.get('session_id');
 
+  const { order: record, confirmed, isLoading, status } = useOrderReturnRead({
+    orderTypes: ['flowers'], sessionId, children: 'items',
+  });
+  const order = record ? { ...record, items: (record.order_items || []).map(item => ({
+    product_name: item.item_name, qty: item.qty, unit_price: item.unit_price,
+  })) } : null;
+  const clearedOrder = useRef<string>();
   useEffect(() => {
-    let attempts = 0;
-    const maxAttempts = 10;
-    let timer: ReturnType<typeof setTimeout>;
-
-    const pollOrder = async () => {
-      if (!sessionId) {
-        setIsProcessing(false);
-        return;
-      }
-
-      try {
-        const { data: pi } = await supabase
-          .from('payment_intents')
-          .select('order_id')
-          .eq('provider_ref', sessionId)
-          .limit(1)
-          .maybeSingle();
-
-        if (pi?.order_id) {
-          const { data: orderData } = await supabase
-            .from('orders')
-            .select('id, order_number, status, total_amount, currency, metadata, created_at')
-            .eq('id', pi.order_id)
-            .single();
-
-          const { data: itemsData } = await supabase
-            .from('order_items')
-            .select('item_name, qty, unit_price')
-            .eq('order_id', pi.order_id);
-
-          if (orderData) {
-            setOrder({
-              ...orderData,
-              metadata: (orderData.metadata as Record<string, unknown>) || {},
-              items: (itemsData || []).map(i => ({ product_name: i.item_name, qty: i.qty ?? 1, unit_price: i.unit_price })),
-            });
-            clearByType('flowers');
-            setIsProcessing(false);
-            return;
-          }
-        }
-
-        attempts++;
-        if (attempts < maxAttempts) {
-          timer = setTimeout(pollOrder, 1500);
-        } else {
-          clearByType('flowers');
-          setIsProcessing(false);
-        }
-      } catch (err) {
-        console.error('Error polling order:', err);
-        attempts++;
-        if (attempts < maxAttempts) {
-          timer = setTimeout(pollOrder, 2000);
-        } else {
-          setIsProcessing(false);
-        }
-      }
-    };
-
-    pollOrder();
-    return () => clearTimeout(timer);
-  }, [sessionId, clearByType, isRu]);
+    if (confirmed && record && clearedOrder.current !== record.id) {
+      clearedOrder.current = record.id;
+      clearByType('flowers');
+    }
+  }, [confirmed, record, clearByType]);
 
   const meta = order?.metadata || {};
   const statusLabel = order?.status === 'confirmed'
     ? (isRu ? 'Подтверждён' : 'Confirmed')
-    : (isRu ? 'Ожидает' : 'Pending');
+    : order?.status === 'pending' ? (isRu ? 'Ожидает' : 'Pending') : (isRu ? 'Проверьте статус' : 'Check status');
 
   const details = order ? (
     <div className="space-y-4 text-left">
@@ -127,12 +59,12 @@ const FlowersSuccess = () => {
           {order.items.map((item, i) => (
             <div key={i} className="flex justify-between text-sm">
               <span className="text-muted-foreground">{item.product_name} × {item.qty}</span>
-              <span>฿{(item.unit_price * item.qty).toLocaleString()}</span>
+              <span>{Number.isFinite(item.unit_price) && Number.isFinite(item.qty) ? (item.unit_price * item.qty).toLocaleString() : '—'} {order.currency}</span>
             </div>
           ))}
           <div className="flex justify-between font-semibold text-sm pt-2 border-t border-border">
             <span>{isRu ? 'Итого' : 'Total'}</span>
-            <span>฿{order.total_amount?.toLocaleString()}</span>
+            <span>{order.total_amount?.toLocaleString()} {order.currency}</span>
           </div>
         </div>
       )}
@@ -170,14 +102,16 @@ const FlowersSuccess = () => {
 
   return (
     <UnifiedSuccessLayout
-      isLoading={isProcessing}
+      isLoading={isLoading}
+      status={status}
+      hideWhatsApp={!order}
       orderNumber={order?.order_number}
       note={{
-        ru: 'Заказ принят. Мы свяжемся для подтверждения доставки.',
-        en: 'Order received. We will contact you to confirm delivery.',
+        ru: 'Проверьте состав заказа, время и условия доставки в разделе заказов.',
+        en: 'Check the order contents, timing and delivery arrangements in My orders.',
       }}
       details={details}
-      extras={<CrossSellRecommendations orderType="flowers" />}
+      extras={confirmed ? <CrossSellRecommendations orderType="flowers" /> : undefined}
       primaryHref="/bookings"
       secondaryHref="/flowers"
       totalAmount={order?.total_amount}
