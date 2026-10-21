@@ -30,6 +30,7 @@ import {
   Legend,
 } from 'recharts';
 import { CHART_THEME } from '@/lib/chartTheme';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const CHART_COLORS = CHART_THEME.palette;
 
@@ -180,7 +181,7 @@ export default function OwnerPortfolio() {
 
 
   if (!user) {
-    navigate('/auth');
+    redirectToAuth(navigate);
     return null;
   }
 

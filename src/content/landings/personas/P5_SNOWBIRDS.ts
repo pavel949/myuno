@@ -62,7 +62,7 @@ export const P5_SNOWBIRDS: PersonaLanding = {
       slug: 'mortgage-estimator',
       label: { ru: 'Финансирование от родного банка', en: 'Financing from your home bank' },
       oneLiner: { ru: 'Сравним ставки в стране резидентства vs Thai mortgage.', en: 'Compare rates in your home country vs Thai mortgage.' },
-      href: '/property/mortgage',
+      href: '/property/mortgage', availability: 'unavailable',
     },
   ],
   faq: [

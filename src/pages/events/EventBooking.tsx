@@ -25,6 +25,7 @@ import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function EventBooking() {
   const { id } = useParams<{ id: string }>();
@@ -57,7 +58,7 @@ export default function EventBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/events/booking/${id}` } });
+    redirectToAuth(navigate, { from: `/events/booking/${id}` });
     return null;
   }
 

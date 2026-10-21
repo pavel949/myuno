@@ -7,8 +7,6 @@
  * single question: "what should I do here?".
  */
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   CLUSTERS,
@@ -19,10 +17,10 @@ import { useUserPersonas } from '@/hooks/useUserPersonas';
 import { useLifeOSRole } from '@/hooks/useLifeOS';
 import { rankServices } from '@/lib/superapp/rankServices';
 import { MiniAppCard } from '@/components/superapp/MiniAppCard';
-import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
-import { trackSituationClick } from '@/lib/analytics/track';
-import { formatServices } from '@/lib/i18n/pluralize';
+import { formatSituations } from '@/lib/i18n/pluralize';
+import { SituationList } from './SituationList';
 import type { LifeSituation } from '@/hooks/useLifeOS';
+
 
 interface NavigatorClusterSectionProps {
   clusterId: ClusterId;
@@ -32,25 +30,9 @@ interface NavigatorClusterSectionProps {
   hideAppGrid?: boolean;
   /** code -> {ru,en} map for hint resolution inside MiniAppCard. */
   situationLabels?: Record<string, { ru: string; en: string }>;
+  /** Service ids already rendered in the page-level "For you" grid. */
+  excludeServiceIds?: string[];
 }
-
-const CLUSTER_LABEL_RU: Record<ClusterId, string> = {
-  arrive: 'Прибытие',
-  live: 'Жизнь',
-  manage: 'Управление',
-  invest: 'Инвестиции',
-  legal: 'Документы и право',
-  build: 'Девелопмент',
-};
-
-const CLUSTER_LABEL_EN: Record<ClusterId, string> = {
-  arrive: 'Arrive',
-  live: 'Live',
-  manage: 'Manage',
-  invest: 'Invest',
-  legal: 'Legal',
-  build: 'Build',
-};
 
 function NavigatorClusterSectionImpl({
   clusterId,
@@ -58,8 +40,9 @@ function NavigatorClusterSectionImpl({
   counts,
   hideAppGrid,
   situationLabels,
+  excludeServiceIds,
 }: NavigatorClusterSectionProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRu = language === 'ru';
   const { effectivePersonas } = useUserPersonas();
   const role = useLifeOSRole();
@@ -67,13 +50,17 @@ function NavigatorClusterSectionImpl({
 
   const topServices = useMemo(() => {
     if (hideAppGrid) return [];
-    const inCluster = AVAILABLE_SERVICES.filter((s) => s.clusterId === clusterId);
+    // Skip services already shown in the page-level "For you" grid.
+    const skip = new Set(excludeServiceIds ?? []);
+    const inCluster = AVAILABLE_SERVICES.filter(
+      (s) => s.clusterId === clusterId && !skip.has(s.id),
+    );
     return rankServices(inCluster, { role, personas: effectivePersonas }).slice(0, 6);
-  }, [clusterId, role, effectivePersonas, hideAppGrid]);
+  }, [clusterId, role, effectivePersonas, hideAppGrid, excludeServiceIds]);
 
   if (!cluster || situations.length === 0) return null;
 
-  const label = isRu ? CLUSTER_LABEL_RU[clusterId] : CLUSTER_LABEL_EN[clusterId];
+  const label = t(`discover.cluster.${clusterId}`);
 
   return (
     <section
@@ -90,7 +77,7 @@ function NavigatorClusterSectionImpl({
         </h2>
         <span
           className="font-mono text-[11px] text-muted-foreground tabular-nums"
-          aria-label={`${situations.length} ${isRu ? 'ситуаций' : 'situations'}`}
+          aria-label={formatSituations(situations.length, language)}
         >
           {situations.length}
         </span>
@@ -99,7 +86,7 @@ function NavigatorClusterSectionImpl({
       {topServices.length > 0 && (
         <div className="mt-4 mb-5">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80 mb-2">
-            {isRu ? 'Мини-приложения для вас' : 'Mini-apps for you'}
+            {t('discover.miniAppsForYou')}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {topServices.map((svc) => (
@@ -115,47 +102,14 @@ function NavigatorClusterSectionImpl({
         </div>
       )}
 
-      <ul className="divide-y divide-border">
-        {situations.map((s) => {
-          const title = isRu ? s.title_ru : s.title_en;
-          const desc = isRu ? s.description_ru : s.description_en;
-          const count = counts?.[s.id];
-          const href = resolveSituationHref(s.code);
-          return (
-            <li key={s.id}>
-              <Link
-                to={href}
-                onClick={() => trackSituationClick(s.code, {
-                  source: 'cluster_section',
-                  cluster: clusterId,
-                  href,
-                  count,
-                })}
-                className="group flex items-center gap-4 py-4 -mx-2 px-2 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors min-h-[56px]"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="text-[15px] font-medium text-foreground leading-tight">
-                    {title}
-                  </div>
-                  {desc && (
-                    <div className="mt-0.5 text-[12.5px] text-muted-foreground leading-snug line-clamp-1">
-                      {desc}
-                    </div>
-                  )}
-                </div>
-                <span className="font-mono text-[12px] text-muted-foreground tabular-nums shrink-0">
-                  {typeof count === 'number' && count > 0 ? formatServices(count, language) : (isRu ? 'открыть' : 'open')}
-                </span>
-                <ArrowRight
-                  aria-hidden="true"
-                  className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary shrink-0 transition-colors"
-                  strokeWidth={1.75}
-                />
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      <SituationList
+        situations={situations}
+        counts={counts}
+        source="cluster_section"
+        trackContext={{ cluster: clusterId }}
+        variant="compact"
+      />
+
     </section>
   );
 }

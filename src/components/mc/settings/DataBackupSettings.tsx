@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useActiveCompany } from '@/hooks/useActiveCompany';
@@ -16,11 +17,11 @@ import { toast } from 'sonner';
 type ExportType = 'properties' | 'crm' | 'finance' | 'reports' | 'all';
 type ExportFormat = 'json' | 'csv';
 
-const EXPORT_CATEGORIES: { type: ExportType; labelEn: string; labelRu: string; icon: React.ElementType; descEn: string; descRu: string }[] = [
-  { type: 'properties', labelEn: 'Properties', labelRu: 'Объекты', icon: Database, descEn: 'All property data and settings', descRu: 'Все данные и настройки объектов' },
-  { type: 'crm', labelEn: 'CRM Contacts', labelRu: 'CRM Контакты', icon: Users, descEn: 'Contacts, deals, activities', descRu: 'Контакты, сделки, активности' },
-  { type: 'finance', labelEn: 'Finance', labelRu: 'Финансы', icon: DollarSign, descEn: 'Transactions, invoices, reports', descRu: 'Транзакции, счета, отчёты' },
-  { type: 'reports', labelEn: 'Reports', labelRu: 'Отчёты', icon: FileBarChart, descEn: 'Analytics and generated reports', descRu: 'Аналитика и сгенерированные отчёты' },
+const EXPORT_CATEGORIES: { type: ExportType; labelEn: string; labelRu: string; labelTh: string; icon: React.ElementType; descEn: string; descRu: string; descTh: string }[] = [
+  { type: 'properties', labelTh: 'ที่พัก', descTh: 'ข้อมูลและการตั้งค่าที่พักทั้งหมด', labelEn: 'Properties', labelRu: 'Объекты', icon: Database, descEn: 'All property data and settings', descRu: 'Все данные и настройки объектов' },
+  { type: 'crm', labelTh: 'ผู้ติดต่อ CRM', descTh: 'ผู้ติดต่อ ดีล และกิจกรรม', labelEn: 'CRM Contacts', labelRu: 'CRM Контакты', icon: Users, descEn: 'Contacts, deals, activities', descRu: 'Контакты, сделки, активности' },
+  { type: 'finance', labelTh: 'การเงิน', descTh: 'รายการธุรกรรม ใบแจ้งหนี้ และรายงาน', labelEn: 'Finance', labelRu: 'Финансы', icon: DollarSign, descEn: 'Transactions, invoices, reports', descRu: 'Транзакции, счета, отчёты' },
+  { type: 'reports', labelTh: 'รายงาน', descTh: 'ข้อมูลวิเคราะห์และรายงานที่สร้างไว้', labelEn: 'Reports', labelRu: 'Отчёты', icon: FileBarChart, descEn: 'Analytics and generated reports', descRu: 'Аналитика и сгенерированные отчёты' },
 ];
 
 interface BackupSettings {
@@ -31,7 +32,6 @@ interface BackupSettings {
 
 export function DataBackupSettings() {
   const { language } = useLanguage();
-  const isRu = language === 'ru';
   const { activeCompany } = useActiveCompany();
   const companyId = activeCompany?.company_id;
   const queryClient = useQueryClient();
@@ -80,11 +80,11 @@ export function DataBackupSettings() {
       a.download = `${exportType}-backup-${new Date().toISOString().slice(0, 10)}.${ext}`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(isRu ? 'Экспорт завершён' : 'Export complete');
+      toast.success(pickLang(language, {"en": "Export complete", "ru": "Экспорт завершён", "th": "ส่งออกข้อมูลแล้ว"}));
       setExportingType(null);
     },
     onError: () => {
-      toast.error(isRu ? 'Ошибка экспорта' : 'Export failed');
+      toast.error(pickLang(language, {"en": "Export failed", "ru": "Ошибка экспорта", "th": "ส่งออกข้อมูลไม่สำเร็จ"}));
       setExportingType(null);
     },
   });
@@ -101,7 +101,7 @@ export function DataBackupSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mc-backup-settings', companyId] });
-      toast.success(isRu ? 'Настройки сохранены' : 'Settings saved');
+      toast.success(pickLang(language, {"en": "Settings saved", "ru": "Настройки сохранены", "th": "บันทึกการตั้งค่าแล้ว"}));
     },
   });
 
@@ -130,17 +130,17 @@ export function DataBackupSettings() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Download className="h-4 w-4" />
-            {isRu ? 'Экспорт данных' : 'Data Export'}
+            {pickLang(language, {"en": "Data Export", "ru": "Экспорт данных", "th": "ส่งออกข้อมูล"})}
           </CardTitle>
           <CardDescription className="text-xs">
-            {isRu ? 'Скачайте данные вашей компании' : 'Download your company data'}
+            {pickLang(language, {"en": "Download your company data", "ru": "Скачайте данные вашей компании", "th": "ดาวน์โหลดข้อมูลบริษัทของคุณ"})}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-3">
-            <Label className="text-xs">{isRu ? 'Формат' : 'Format'}</Label>
+            <Label className="text-xs">{pickLang(language, {"en": "Format", "ru": "Формат", "th": "รูปแบบ"})}</Label>
             <Select value={format} onValueChange={(v) => setFormat(v as ExportFormat)}>
-              <SelectTrigger className="w-28 h-8 text-xs">
+              <SelectTrigger aria-label={pickLang(language, { en: 'Format', ru: 'Формат', th: 'รูปแบบ' })} className="w-28 h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -160,8 +160,8 @@ export function DataBackupSettings() {
                     <Icon className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{isRu ? cat.labelRu : cat.labelEn}</p>
-                    <p className="text-[10px] text-muted-foreground">{isRu ? cat.descRu : cat.descEn}</p>
+                    <p className="text-sm font-medium">{pickLang(language, { en: cat.labelEn, ru: cat.labelRu, th: cat.labelTh })}</p>
+                    <p className="text-[10px] text-muted-foreground">{pickLang(language, { en: cat.descEn, ru: cat.descRu, th: cat.descTh })}</p>
                   </div>
                   <Button
                     variant="outline"
@@ -171,7 +171,7 @@ export function DataBackupSettings() {
                     onClick={() => exportMutation.mutate(cat.type)}
                   >
                     {isExporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                    {isRu ? 'Скачать' : 'Export'}
+                    {pickLang(language, {"en": "Export", "ru": "Скачать", "th": "ส่งออก"})}
                   </Button>
                 </div>
               );
@@ -184,10 +184,10 @@ export function DataBackupSettings() {
           <Button
             onClick={() => exportMutation.mutate('all')}
             disabled={!!exportingType}
-            className="w-full gap-2"
+            className="w-full h-auto min-h-11 whitespace-normal gap-2"
           >
             {exportingType === 'all' ? <Loader2 className="h-4 w-4 animate-spin" /> : <HardDrive className="h-4 w-4" />}
-            {isRu ? 'Полный бэкап всех данных' : 'Full Backup — All Data'}
+            {pickLang(language, {"en": "Full Backup — All Data", "ru": "Полный бэкап всех данных", "th": "สำรองข้อมูลทั้งหมด"})}
           </Button>
         </CardContent>
       </Card>
@@ -197,37 +197,37 @@ export function DataBackupSettings() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            {isRu ? 'Автоматический бэкап' : 'Auto Backup'}
+            {pickLang(language, {"en": "Auto Backup", "ru": "Автоматический бэкап", "th": "สำรองข้อมูลอัตโนมัติ"})}
           </CardTitle>
           <CardDescription className="text-xs">
-            {isRu ? 'Настройте автоматическое резервное копирование' : 'Schedule automatic data backups'}
+            {pickLang(language, {"en": "Schedule automatic data backups", "ru": "Настройте автоматическое резервное копирование", "th": "กำหนดเวลาสำรองข้อมูลอัตโนมัติ"})}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-medium">{isRu ? 'Включить автобэкап' : 'Enable auto backup'}</p>
+              <p className="text-sm font-medium">{pickLang(language, {"en": "Enable auto backup", "ru": "Включить автобэкап", "th": "เปิดการสำรองข้อมูลอัตโนมัติ"})}</p>
               <p className="text-xs text-muted-foreground">
-                {isRu ? 'Данные будут сохраняться автоматически' : 'Data will be backed up automatically'}
+                {pickLang(language, {"en": "Data will be backed up automatically", "ru": "Данные будут сохраняться автоматически", "th": "ระบบจะสำรองข้อมูลโดยอัตโนมัติ"})}
               </p>
             </div>
-            <Switch checked={autoEnabled} onCheckedChange={toggleAutoBackup} />
+            <Switch aria-label={pickLang(language, { en: 'Enable auto backup', ru: 'Включить автобэкап', th: 'เปิดการสำรองข้อมูลอัตโนมัติ' })} checked={autoEnabled} onCheckedChange={toggleAutoBackup} />
           </div>
 
           {autoEnabled && (
             <div className="flex items-center gap-3">
-              <Label className="text-xs">{isRu ? 'Частота' : 'Frequency'}</Label>
+              <Label className="text-xs">{pickLang(language, {"en": "Frequency", "ru": "Частота", "th": "ความถี่"})}</Label>
               <Select value={autoFrequency} onValueChange={(v) => changeFrequency(v as 'weekly' | 'monthly')}>
-                <SelectTrigger className="w-36 h-8 text-xs">
+                <SelectTrigger aria-label={pickLang(language, { en: 'Frequency', ru: 'Частота', th: 'ความถี่' })} className="w-36 h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="weekly">{isRu ? 'Еженедельно' : 'Weekly'}</SelectItem>
-                  <SelectItem value="monthly">{isRu ? 'Ежемесячно' : 'Monthly'}</SelectItem>
+                  <SelectItem value="weekly">{pickLang(language, {"en": "Weekly", "ru": "Еженедельно", "th": "ทุกสัปดาห์"})}</SelectItem>
+                  <SelectItem value="monthly">{pickLang(language, {"en": "Monthly", "ru": "Ежемесячно", "th": "ทุกเดือน"})}</SelectItem>
                 </SelectContent>
               </Select>
               <Badge variant="secondary" className="text-[10px]">
-                {isRu ? 'Сохраняется в облако' : 'Saved to cloud'}
+                {pickLang(language, {"en": "Saved to cloud", "ru": "Сохраняется в облако", "th": "บันทึกบนคลาวด์"})}
               </Badge>
             </div>
           )}

@@ -17,6 +17,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useMyChatWithBusiness, useThaiChatMessages, useSendThaiMessage } from '@/hooks/thaiServices/useThaiServices';
 import { cn } from '@/lib/utils';
 import type { ThaiChatMessage } from '@/types/thaiBusiness';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 interface Props {
   businessId: string;
@@ -47,7 +48,7 @@ export function ThaiChatSheet({ businessId, businessName, open, onOpenChange }: 
   }, [messages.length]);
 
   const submit = async (body: string) => {
-    if (!user) { navigate('/auth'); return; }
+    if (!user) { redirectToAuth(navigate); return; }
     if (!body.trim()) return;
     const res = await send.mutateAsync({ businessId, chatId: effectiveChatId, text: body, senderLang: 'ru' });
     setChatId(res.chatId);

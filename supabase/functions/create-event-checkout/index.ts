@@ -1,9 +1,12 @@
 import { createCheckoutHandler } from "../_shared/checkout-handler.ts";
 import type { StripeLineItem } from "../_shared/checkout-handler.ts";
+import { validateSinglePrice } from "../_shared/price-guard.ts";
 
 Deno.serve(
   createCheckoutHandler({
     endpoint: "create-event-checkout",
+    // Event tickets are charged in full up-front.
+    enforceLineItemTotal: true,
 
     async build(raw, user, origin, supabaseAdmin) {
       const {
@@ -24,6 +27,16 @@ Deno.serve(
       if (!event_id || !ticket_count || ticket_count < 1) {
         throw new Error("Invalid event booking parameters");
       }
+
+      // Anti-tampering: validate the per-ticket price against events.price
+      // BEFORE reserving spots (fail fast, and never trust client unit_price).
+      await validateSinglePrice(
+        supabaseAdmin,
+        { table: "events", priceColumns: ["price"], activeColumn: "is_active" },
+        String(event_id),
+        Number(unit_price),
+        "create-event-checkout",
+      );
 
       const total_amount = ticket_count * unit_price;
       const cur = String(currency).toLowerCase();

@@ -1,11 +1,14 @@
 // Deno.serve used (native edge runtime)
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createClient } from "../_shared/supabase.ts";
+import { withRateLimit, RATE_LIMITS } from "../_shared/rate-limit.ts";
+import { getAllowedOrigin } from "../_shared/cors.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
+import { quotePropertyStay, bangkokToday, splitDepositMinorUnits, type PropertyPricingRow, type RateSeasonRow } from "../_shared/property-quote.ts";
+import { quoteHotelStay, mergeRestrictions, type HotelCategoryRow, type HotelRatePlanRow, type HotelSeasonRow, type HotelRestrictionRow } from "../_shared/hotel-quote.ts";
+import { PROPERTY_BOOKING_RELEASE_FILTER } from "../_shared/property-inventory.ts";
+import { verifyInventoryHold } from "../_shared/inventory-hold.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 interface PropertyDepositRequest {
   property_id: string;
@@ -29,6 +32,7 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 };
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -64,17 +68,27 @@ Deno.serve(async (req) => {
 
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // Rate limiting — payment endpoint. This function bypasses the shared
+    // checkout handler, so the throttle must be applied explicitly here.
+    const rateLimitResponse = await withRateLimit(
+      req,
+      "create-property-deposit-checkout",
+      RATE_LIMITS.payment,
+      corsHeaders,
+      user.id,
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body: PropertyDepositRequest = await req.json();
+    let { property_id } = body;
     const {
-      property_id,
       property_title,
       check_in,
       check_out,
       guests,
-      nights,
-      total_amount,
-      deposit_amount,
-      cleaning_fee,
+    } = body;
+    let { nights, total_amount, deposit_amount, cleaning_fee } = body;
+    const {
       guest_name,
       guest_phone,
       guest_email,
@@ -89,21 +103,134 @@ Deno.serve(async (req) => {
       cleaning_fee,
     });
 
-    // Validate deposit amount (should be ~10% of total)
-    const expectedDeposit = Math.round(total_amount * 0.1);
-    if (deposit_amount < expectedDeposit * 0.95 || deposit_amount > expectedDeposit * 1.05) {
-      logStep("ERROR: Invalid deposit amount", { deposit_amount, expectedDeposit });
-      return new Response(
-        JSON.stringify({ error: "Invalid deposit amount" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
-    }
-
     // Use service role client for DB operations
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
+
+    // ── Resort / hotel: booking by room category + rate plan ───────────────
+    const room_category_id = (body as { room_category_id?: string }).room_category_id;
+    const rate_plan_id = (body as { rate_plan_id?: string }).rate_plan_id;
+    let categoryMeta: Record<string, unknown> | null = null;
+    if (room_category_id) {
+      const [{ data: cat }, { data: plan }, { data: cSeasons }, { data: restr }] = await Promise.all([
+        supabaseAdmin.from("property_room_categories").select("id, property_id, base_price_per_night, min_stay_nights, max_guests, is_active").eq("id", room_category_id).maybeSingle(),
+        supabaseAdmin.from("property_rate_plans").select("id, category_id, adjustment_type, adjustment_value, min_stay_nights, max_stay_nights, min_advance_days, is_active").eq("id", rate_plan_id ?? "").maybeSingle(),
+        supabaseAdmin.from("property_rate_seasons").select("start_date, end_date, nightly_rate, min_stay_nights, is_active").eq("category_id", room_category_id).eq("is_active", true).lte("start_date", check_out).gte("end_date", check_in),
+        // Category rows and resort-wide rows (property_id = parent) both apply.
+        supabaseAdmin.from("property_stay_restrictions").select("category_id, date, price_override, min_stay_nights, closed_to_arrival, closed_to_departure, stop_sell").or(`category_id.eq.${room_category_id},property_id.eq.${property_id}`).gte("date", check_in).lte("date", check_out),
+      ]);
+      if (!cat || cat.property_id !== property_id) {
+        return new Response(JSON.stringify({ error: "Room category not found" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 404 });
+      }
+      const hq = quoteHotelStay({
+        category: cat as HotelCategoryRow, plan: plan as HotelRatePlanRow | null,
+        seasons: (cSeasons ?? []) as HotelSeasonRow[],
+        restrictions: mergeRestrictions((restr ?? []) as (HotelRestrictionRow & { category_id: string | null })[]),
+        check_in, check_out, guests, today: bangkokToday(),
+      });
+      if (!hq.ok) {
+        return new Response(JSON.stringify({ error: hq.message, code: hq.code }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 });
+      }
+      if (typeof total_amount === "number" && Math.abs(total_amount - hq.total) > 1) {
+        return new Response(JSON.stringify({ error: "Booking total does not match the current price", code: "total_mismatch" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 });
+      }
+      const { data: roomId, error: assignErr } = await supabaseAdmin.rpc("assign_room_for_category", { _category_id: room_category_id, _check_in: check_in, _check_out: check_out });
+      if (assignErr || !roomId) {
+        return new Response(JSON.stringify({ error: "No rooms of this category are available for the selected dates" }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 });
+      }
+      nights = hq.nights;
+      total_amount = hq.total;
+      deposit_amount = Math.round(hq.total * 0.1);
+      cleaning_fee = 0;
+      categoryMeta = { parent_property_id: property_id, room_category_id, rate_plan_id, nightly: hq.nightly, quoted_total: hq.total, quoted_at: new Date().toISOString() };
+      property_id = roomId as string;
+    }
+
+    // ── Authoritative server quote (F06) ───────────────────────────────────
+    if (!categoryMeta) {
+    // Nights are derived from the dates in the Bangkok calendar, the property
+    // must be active/THB, guests and minimum stay are enforced, the cleaning
+    // fee must equal the stored fee, the total must lie between the base price
+    // minus the property's own largest configured discount and the undiscounted
+    // base price, and the deposit is computed here (client value is ignored).
+    const { data: propertyRow, error: propErr } = await supabaseAdmin
+      .from("properties")
+      .select("price_per_night, price, price_period, extra_cleaning_price, currency, status, is_active, max_guests, min_stay_nights, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount, custom_length_discounts, seasonal_pricing, property_kind, room_category_id")
+      .eq("id", property_id)
+      .maybeSingle();
+
+    if (propErr) {
+      logStep("ERROR: Property lookup failed", { error: propErr.message });
+      return new Response(
+        JSON.stringify({ error: "Could not verify property pricing" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+    // Resorts/hotels and their categorised rooms are priced only by category
+    // and rate plan; booking them as a plain unit would bypass that price.
+    const kindRow = propertyRow as { property_kind?: string | null; room_category_id?: string | null } | null;
+    if (kindRow && ((kindRow.property_kind && kindRow.property_kind !== "unit") || kindRow.room_category_id)) {
+      return new Response(
+        JSON.stringify({ error: "Choose a room category and rate to book this property", code: "category_required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+
+    const { data: seasonRows, error: seasonErr } = await supabaseAdmin
+      .from("property_rate_seasons")
+      .select("start_date, end_date, nightly_rate, min_stay_nights, is_active, weekly_discount, monthly_discount, early_booking_discount, last_minute_discount")
+      .eq("property_id", property_id)
+      .eq("is_active", true)
+      .lte("start_date", check_out)
+      .gte("end_date", check_in);
+    if (seasonErr) {
+      logStep("ERROR: Season lookup failed", { error: seasonErr.message });
+      return new Response(
+        JSON.stringify({ error: "Could not verify property pricing" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+
+    const { data: dateRows, error: dateErr } = await supabaseAdmin
+      .from("property_availability")
+      .select("date, price_override")
+      .eq("property_id", property_id)
+      .gte("date", check_in)
+      .lt("date", check_out)
+      .not("price_override", "is", null);
+    if (dateErr) {
+      logStep("ERROR: Date price lookup failed", { error: dateErr.message });
+      return new Response(
+        JSON.stringify({ error: "Could not verify property pricing" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+    const dateOverrides: Record<string, number> = {};
+    for (const r of dateRows ?? []) dateOverrides[String(r.date)] = Number(r.price_override);
+
+    const quote = quotePropertyStay(propertyRow as PropertyPricingRow | null, {
+      seasons: (seasonRows ?? []) as RateSeasonRow[],
+      dateOverrides,
+      check_in, check_out, guests, nights, total_amount, cleaning_fee, today: bangkokToday(),
+    });
+    if (!quote.ok) {
+      logStep("ERROR: Quote rejected", { code: quote.code, property_id });
+      return new Response(
+        JSON.stringify({ error: quote.message, code: quote.code }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: quote.code === "not_found" ? 404 : 400 }
+      );
+    }
+    if (typeof deposit_amount === "number" && Math.abs(deposit_amount - quote.deposit) > 1) {
+      logStep("Client deposit differs from server deposit; server value used", { deposit_amount, server: quote.deposit });
+    }
+    nights = quote.nights;
+    total_amount = quote.total;
+    deposit_amount = quote.deposit;
+    cleaning_fee = quote.cleaningFee;
+    }
 
     // P0 FIX: Check availability BEFORE creating the order
     const { data: isAvailable, error: availError } = await supabaseAdmin.rpc(
@@ -133,7 +260,6 @@ Deno.serve(async (req) => {
 
     // Create order in database BEFORE Stripe checkout
     const orderItems = [{
-      product_id: property_id,
       resource_id: property_id,
       provider_org_id: provider_org_id || null,
       item_name: property_title,
@@ -143,7 +269,7 @@ Deno.serve(async (req) => {
       amount: total_amount,
       start_at: `${check_in}T14:00:00.000Z`,
       end_at: `${check_out}T12:00:00.000Z`,
-      metadata: { guests, deposit_amount, cleaning_fee: cleaning_fee || 0 },
+      metadata: { property_id, guests, deposit_amount, cleaning_fee: cleaning_fee || 0, ...(categoryMeta ?? {}) },
     }];
 
     const orderParticipants = [{
@@ -195,6 +321,44 @@ Deno.serve(async (req) => {
 
     logStep("Order created in database", { orderId: order.order_id, orderNumber: order.order_number });
 
+    // Inventory guard: the order trigger writes a property_bookings row that is
+    // protected by the no-overlap exclusion constraint. If a concurrent request
+    // took the same unit, that insert is rejected (and only an alert is logged),
+    // so no live booking exists for this order. Cancel it before taking money.
+    const holdResult = await verifyInventoryHold(async () => {
+    const { data: heldBooking, error: holdErr } = await supabaseAdmin
+      .from("property_bookings")
+      .select("id")
+      .eq("external_id", order.order_id)
+      .eq("property_id", property_id)
+      .not("status", "in", PROPERTY_BOOKING_RELEASE_FILTER)
+      .maybeSingle();
+    if (holdErr || !heldBooking) {
+      logStep("Inventory hold failed; cancelling order", { orderId: order.order_id, error: holdErr?.message });
+    }
+    return !holdErr && !!heldBooking;
+    }, async () => {
+      const { data: cancelledOrder, error: cancelError } = await supabaseAdmin.from("orders")
+        .update({ status: "cancelled", notes: "Auto-cancelled: dates taken by a concurrent booking" })
+        .eq("id", order.order_id).select("id").maybeSingle();
+      if (cancelError || !cancelledOrder) {
+        logStep("ERROR: Inventory conflict compensation failed", { orderId: order.order_id, error: cancelError?.message });
+      }
+      return !cancelError && !!cancelledOrder;
+    });
+    if (holdResult === 'compensation_failed') {
+      return new Response(
+        JSON.stringify({ error: "Could not cancel the conflicting booking; payment was not started", code: "inventory_compensation_failed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 }
+      );
+    }
+    if (holdResult === 'conflict') {
+      return new Response(
+        JSON.stringify({ error: "Selected dates are no longer available", code: "inventory_conflict" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 }
+      );
+    }
+
     // Initialize Stripe
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) {
@@ -229,7 +393,9 @@ Deno.serve(async (req) => {
       logStep("New customer created", { customerId });
     }
 
-    const origin = req.headers.get("origin") || Deno.env.get("SITE_URL") || "https://uno.ae";
+    // Validate the attacker-controlled Origin header against the allow-list
+    // before interpolating it into the Stripe redirect URLs (open-redirect guard).
+    const origin = getAllowedOrigin(req.headers.get("origin"));
 
     // Build Stripe line items — separate deposit and cleaning fee
     const lineItems: Array<{
@@ -243,7 +409,8 @@ Deno.serve(async (req) => {
 
     // Calculate how much of the deposit covers each component
     const cleaningFeeAmount = cleaning_fee && cleaning_fee > 0 ? cleaning_fee : 0;
-    const rentalDeposit = deposit_amount - Math.round(cleaningFeeAmount * 0.1);
+    const { rental: rentalDepositMinor, cleaning: cleaningDepositMinor } =
+      splitDepositMinorUnits(deposit_amount, cleaningFeeAmount);
 
     // Main rental deposit line
     lineItems.push({
@@ -253,7 +420,7 @@ Deno.serve(async (req) => {
           name: `Deposit: ${property_title}`,
           description: `10% deposit for ${nights} nights (${check_in} – ${check_out})`,
         },
-        unit_amount: Math.round((cleaningFeeAmount > 0 ? rentalDeposit : deposit_amount) * 100),
+        unit_amount: rentalDepositMinor,
       },
       quantity: 1,
     });
@@ -267,7 +434,7 @@ Deno.serve(async (req) => {
             name: "Cleaning Fee (10% deposit)",
             description: `Cleaning fee deposit portion`,
           },
-          unit_amount: Math.round(cleaningFeeAmount * 0.1 * 100),
+          unit_amount: cleaningDepositMinor,
         },
         quantity: 1,
       });
@@ -280,7 +447,7 @@ Deno.serve(async (req) => {
       line_items: lineItems,
       mode: "payment",
       success_url: `${origin}/property/deposit-success?session_id={CHECKOUT_SESSION_ID}&property_id=${property_id}&order_id=${order.order_id}`,
-      cancel_url: `${origin}/property/${property_id}/inquiry?canceled=true`,
+      cancel_url: `${origin}/property/${categoryMeta ? String(categoryMeta.parent_property_id) : property_id}/inquiry?canceled=true`,
       metadata: {
         type: "property_deposit",
         user_id: user.id,
@@ -298,6 +465,10 @@ Deno.serve(async (req) => {
         guest_email: guest_email || user.email || "",
         order_id: order.order_id,
         order_number: order.order_number || "",
+      },
+      // Propagate linkage to the charge so refunds resolve the order (F08).
+      payment_intent_data: {
+        metadata: { order_id: order.order_id, property_id, type: "property_deposit" },
       },
     });
 

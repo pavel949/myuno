@@ -80,7 +80,7 @@ export function useHomeServices(options: UseHomeServicesOptions = {}) {
       setIsLoading(true);
       try {
         let query = supabase
-          .from('providers')
+          .from('public_provider_catalog')
           .select('id, name, description_en, description_ru, business_category, phone, email, address, rating, review_count, logo_url, is_verified, is_active, provider_type, response_time_minutes, has_insurance, has_guarantee, service_domains')
           .in('business_category', HOME_SERVICE_CATEGORY_IDS)
           .eq('is_active', true);

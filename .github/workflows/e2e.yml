@@ -7,6 +7,10 @@ on:
 
 jobs:
   playwright:
+    # This legacy suite seeds a backend using secrets. Never run it automatically
+    # on pull requests against the shared production backend. PR coverage lives
+    # in connected-system-check.yml and uses synthetic, network-denying fixtures.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:

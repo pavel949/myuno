@@ -99,7 +99,7 @@ export function PageHeader({
         </nav>
       )}
 
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3 min-w-0 flex-1">
           {showBack && (
             <button
@@ -117,7 +117,7 @@ export function PageHeader({
           )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-display font-bold tracking-tight text-foreground truncate">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-display font-bold tracking-tight text-foreground break-words">
                 {title}
               </h1>
               {badge !== undefined && badge !== 0 && (
@@ -125,13 +125,13 @@ export function PageHeader({
               )}
             </div>
             {subtitle && (
-              <p className="mt-1 text-sm md:text-base text-muted-foreground line-clamp-2">{subtitle}</p>
+              <p className="mt-1 text-sm md:text-base text-muted-foreground">{subtitle}</p>
             )}
           </div>
         </div>
 
         {actions && (
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
             {!isActionArray && actions}
             {isActionArray && (
               <>

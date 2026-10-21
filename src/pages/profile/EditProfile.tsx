@@ -19,6 +19,7 @@ import { LoadingSpinner } from '@/components/uno/LoadingSpinner';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
 import { AlertTriangle } from 'lucide-react';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const texts = {
   ru: {
@@ -122,7 +123,7 @@ export default function EditProfile() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      redirectToAuth(navigate);
     }
   }, [user, authLoading, navigate]);
 

@@ -92,7 +92,7 @@ export function usePropertyQuickFilters() {
 
       // Count properties per project
       const { data: projectCounts } = await supabase
-        .from('properties')
+        .from('public_property_catalog')
         .select('project_id')
         .not('project_id', 'is', null);
 

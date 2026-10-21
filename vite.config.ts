@@ -3,6 +3,10 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
+import { deploymentMetadataPlugin } from "./scripts/vite-deployment-metadata";
+import { assetCacheWillUpdate } from "./scripts/asset-cache-response-guard";
+import { version } from "./package.json";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 // Lucide icon strategy:
 // We tried tiered chunking (core/extended/rare) — it didn't reduce the entry
@@ -14,8 +18,6 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => {
-  const buildTimestamp = new Date().toISOString();
-
   // Public Supabase config — safe to ship in client bundle (anon key + URL).
   // Hardcoded fallback ensures the app boots on every host (myuno.app,
   // Capacitor native shells, custom deployments) even when build-time env
@@ -30,6 +32,7 @@ export default defineConfig(({ mode, command }) => {
 
   return {
     server: {
+      allowedHosts: ["terminal.local"],
       // `true` is more reliable than `::` on Windows / embedded browser previews (Cursor Simple Browser).
       host: true,
       port: 8080,
@@ -63,7 +66,6 @@ export default defineConfig(({ mode, command }) => {
       port: 8080,
     },
     define: {
-      __BUILD_TIMESTAMP__: JSON.stringify(buildTimestamp),
       "import.meta.env.VITE_SUPABASE_URL": JSON.stringify(supabaseUrl),
       "import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY": JSON.stringify(supabaseKey),
       "import.meta.env.VITE_SUPABASE_PROJECT_ID": JSON.stringify(supabaseProjectId),
@@ -73,6 +75,7 @@ export default defineConfig(({ mode, command }) => {
     esbuild: command === "build" ? { drop: ["console", "debugger"] } : undefined,
     plugins: [
       react(),
+      deploymentMetadataPlugin(version),
       // Cursor / VS Code Simple Browser loads URLs inside an iframe; CSP
       // frame-ancestors 'none' in index.html blocks that and yields a blank preview.
       // Applies to `vite` and `vite preview` (both command === "serve"), not to `vite build`
@@ -89,6 +92,7 @@ export default defineConfig(({ mode, command }) => {
         },
       },
       mode === "development" && componentTagger(),
+      mcpPlugin(),
       VitePWA({
         // Auto-updating Workbox service worker. Two jobs:
         //  1. Installability — a SW with a fetch handler + the manifest below
@@ -105,9 +109,9 @@ export default defineConfig(({ mode, command }) => {
         injectRegister: false,
 
         manifest: {
-          name: 'myUNO — Phuket SuperApp',
+          name: 'myUNO — Phuket Super-App for Foreigners',
           short_name: 'myUNO',
-          description: 'Digital infrastructure for foreigners in Phuket: rentals, services, legal help and real estate deals in one app.',
+          description: 'myUNO — цифровая инфраструктура для жизни иностранца на Пхукете: аренда, услуги, юридическая помощь и сделки с недвижимостью в одном приложении.',
           // PWA manifest spec (https://www.w3.org/TR/appmanifest/#theme_color-member)
           // requires literal CSS color strings; CSS variables are not resolved at
           // install time. Synced 2026-06-18 with DS 2.1 navy palette.
@@ -198,8 +202,13 @@ export default defineConfig(({ mode, command }) => {
             /^\/api\//,
             /^\/auth\//,
             /^\/functions\//,
+            // OAuth broker paths must always hit the network — Lovable's proxy
+            // worker intercepts these on the edge. If the SW returns the SPA
+            // shell instead, Google sign-in dies with a client-side 404.
+            /^\/~oauth(\/|$)/,
             /\/version\.json$/,
           ],
+
           runtimeCaching: [
             {
               // Hashed JS/CSS/worker chunks — safe to cache, revalidate in the
@@ -211,6 +220,7 @@ export default defineConfig(({ mode, command }) => {
               handler: 'StaleWhileRevalidate',
               options: {
                 cacheName: 'myuno-assets',
+                plugins: [{ cacheWillUpdate: assetCacheWillUpdate }],
                 expiration: { maxEntries: 250, maxAgeSeconds: 60 * 60 * 24 * 30 },
               },
             },

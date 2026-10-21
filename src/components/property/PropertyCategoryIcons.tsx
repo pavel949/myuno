@@ -22,7 +22,7 @@ export interface PropertyCategory {
  * Curated subset of the canonical feature taxonomy shown on the guest ribbon.
  * Every ID here MUST exist in PROPERTY_FEATURE_GROUPS so owner ↔ guest filters stay in sync.
  */
-const RIBBON_FEATURE_IDS = [
+export const PROPERTY_DISCOVERY_FEATURE_IDS = [
   'beachfront',
   'walk_to_beach',
   'sea_view',
@@ -40,7 +40,7 @@ const RIBBON_FEATURE_IDS = [
 ] as const;
 
 /** Build the ribbon from the canonical map — guarantees IDs match */
-const CATEGORIES: PropertyCategory[] = RIBBON_FEATURE_IDS
+const CATEGORIES: PropertyCategory[] = PROPERTY_DISCOVERY_FEATURE_IDS
   .map(id => PROPERTY_FEATURE_MAP.get(id))
   .filter((f): f is PropertyFeature => !!f)
   .map(f => ({

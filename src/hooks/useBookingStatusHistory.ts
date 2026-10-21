@@ -5,6 +5,7 @@
  * (id, booking_id, from_status, to_status, notes, created_at) shape:
  *   - 'booking_status_history'           — public.bookings (services + transactional)
  *   - 'property_booking_status_history'  — public.property_bookings (stays)
+ *   - 'order_status_history'             — orders; order_id/reason normalized below
  *
  * Used by user, partner (vendor), and staff (MC/admin) booking surfaces so the
  * same canonical timeline is rendered everywhere.
@@ -15,7 +16,8 @@ import type { BookingStatusEvent } from '@/components/bookings/BookingStatusTime
 
 export type BookingHistoryTable =
   | 'booking_status_history'
-  | 'property_booking_status_history';
+  | 'property_booking_status_history'
+  | 'order_status_history';
 
 interface Options {
   table: BookingHistoryTable;
@@ -46,15 +48,23 @@ export function useBookingStatusHistory({
   const seenRef = useRef<Set<string>>(new Set());
   const highlightTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
+  const isOrder = table === 'order_status_history';
+  const idColumn = isOrder ? 'order_id' : 'booking_id';
+
   // Initial fetch.
   useEffect(() => {
+    highlightTimersRef.current.forEach(clearTimeout);
+    highlightTimersRef.current.clear();
+    setHighlightIds(new Set());
     if (!enabled || !bookingId) {
       setEvents([]);
+      setError(null);
       setIsLoading(false);
       return;
     }
 
     let cancelled = false;
+    setEvents([]);
     setIsLoading(true);
     setError(null);
     seenRef.current = new Set();
@@ -75,8 +85,8 @@ export function useBookingStatusHistory({
         };
       })
         .from(table)
-        .select('id, booking_id, from_status, to_status, notes, created_at')
-        .eq('booking_id', bookingId)
+        .select(isOrder ? 'id, from_status, to_status, notes:reason, created_at' : 'id, from_status, to_status, notes, created_at')
+        .eq(idColumn, bookingId)
         .order('created_at', { ascending: true });
 
       if (cancelled) return;
@@ -96,17 +106,23 @@ export function useBookingStatusHistory({
         setEvents(rows);
       }
       setIsLoading(false);
-    })();
+    })().catch((reason: unknown) => {
+      if (cancelled) return;
+      setError(reason instanceof Error ? reason : new Error('History unavailable'));
+      setEvents([]);
+      setIsLoading(false);
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [table, bookingId, enabled]);
+  }, [table, bookingId, enabled, isOrder, idColumn]);
 
   // Realtime subscription (filtered to this single booking_id).
   useEffect(() => {
     if (!enabled || !bookingId) return;
 
+    let active = true;
     const channel = supabase
       .channel(`bk-history-${table}-${bookingId}`)
       .on(
@@ -115,14 +131,16 @@ export function useBookingStatusHistory({
           event: 'INSERT',
           schema: 'public',
           table,
-          filter: `booking_id=eq.${bookingId}`,
+          filter: `${idColumn}=eq.${bookingId}`,
         },
         (payload) => {
+          if (!active) return;
           const row = payload.new as {
             id: string;
             from_status: string | null;
             to_status: string;
             notes: string | null;
+            reason?: string | null;
             created_at: string;
           };
           if (seenRef.current.has(row.id)) return;
@@ -132,7 +150,7 @@ export function useBookingStatusHistory({
             id: row.id,
             from_status: row.from_status,
             to_status: row.to_status,
-            notes: row.notes,
+            notes: isOrder ? row.reason : row.notes,
             created_at: row.created_at,
           };
 
@@ -165,15 +183,17 @@ export function useBookingStatusHistory({
       .subscribe();
 
     return () => {
+      active = false;
       supabase.removeChannel(channel);
     };
-  }, [table, bookingId, enabled]);
+  }, [table, bookingId, enabled, idColumn, isOrder]);
 
   // Cleanup pending timers on unmount.
   useEffect(() => {
+    const timers = highlightTimersRef.current;
     return () => {
-      highlightTimersRef.current.forEach((t) => clearTimeout(t));
-      highlightTimersRef.current.clear();
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
     };
   }, []);
 

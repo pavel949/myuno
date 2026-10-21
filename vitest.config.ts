@@ -12,6 +12,12 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    // Unit tests may import the client through route registries. Never use the
+    // developer/production credentials just to construct that client.
+    env: {
+      VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'unit-test-placeholder',
+    },
     setupFiles: [path.join(__dirname, "src/test/setup.ts")],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
     exclude: [

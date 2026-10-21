@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -16,40 +17,25 @@ import {
 interface PropertySubmissionSuccessProps {
   propertyId?: string;
   propertyTitle?: string;
+  approvalStatus?: 'draft' | 'pending';
   onAddAnother?: () => void;
 }
 
 export function PropertySubmissionSuccess({ 
   propertyId, 
   propertyTitle,
+  approvalStatus = 'draft',
   onAddAnother,
 }: PropertySubmissionSuccessProps) {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const isRu = language === 'ru';
+  const copy = (en: string, ru: string, th: string) => pickLang(language, { en, ru, th });
+  const submitted = approvalStatus === 'pending';
 
   const steps = [
-    {
-      icon: Eye,
-      title: isRu ? 'Сохранён как черновик' : 'Saved as draft',
-      description: isRu 
-        ? 'Объект не виден гостям — только вам и вашей команде' 
-        : 'Not visible to guests — only you and your team can see it'
-    },
-    {
-      icon: Bell,
-      title: isRu ? 'Модерация и одобрение' : 'Review and approval',
-      description: isRu 
-        ? 'Специалисты myUNO проверят информацию (обычно от 1 часа)' 
-        : 'myUNO team will review (usually within 1 hour)'
-    },
-    {
-      icon: CalendarCheck,
-      title: isRu ? 'Вы решаете, когда публиковать' : 'You decide when to publish',
-      description: isRu 
-        ? 'После одобрения нажмите «Опубликовать для гостей» когда будете готовы' 
-        : 'After approval, click "Publish for guests" when you\'re ready'
-    }
+    { icon: Eye, title: submitted ? copy('Submitted for review', 'Отправлен на проверку', 'ส่งตรวจสอบแล้ว') : copy('Saved as draft', 'Сохранён как черновик', 'บันทึกเป็นฉบับร่างแล้ว'), description: copy('The listing is not published in the catalogue', 'Объявление пока не опубликовано в каталоге', 'ประกาศยังไม่เผยแพร่ในแค็ตตาล็อก') },
+    { icon: Bell, title: copy('Review and approval', 'Модерация и одобрение', 'ตรวจสอบและอนุมัติ'), description: submitted ? copy('Check the property list for the review result', 'Результат проверки появится в списке объектов', 'ดูผลการตรวจสอบในรายการอสังหาริมทรัพย์') : copy('Submit a completed draft for review', 'Отправьте готовый черновик на проверку', 'ส่งฉบับร่างที่พร้อมแล้วเพื่อตรวจสอบ') },
+    { icon: CalendarCheck, title: copy('Publication after review', 'Публикация после проверки', 'เผยแพร่หลังตรวจสอบ'), description: copy('Publication requires approval and publication authority', 'Для публикации нужны одобрение и право публикации', 'การเผยแพร่ต้องได้รับอนุมัติและมีสิทธิ์เผยแพร่') },
   ];
 
   return (
@@ -84,7 +70,7 @@ export function PropertySubmissionSuccess({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          {isRu ? 'Объект сохранён!' : 'Property saved!'}
+          {copy('Property saved!', 'Объект сохранён!', 'บันทึกอสังหาริมทรัพย์แล้ว!')}
         </motion.h1>
 
         <motion.p 
@@ -93,9 +79,7 @@ export function PropertySubmissionSuccess({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          {isRu 
-            ? 'Объект сохранён как черновик и отправлен на проверку' 
-            : 'Property saved as draft and submitted for review'}
+          {submitted ? copy('Property submitted for administrator review', 'Объект отправлен на проверку администратору', 'ส่งอสังหาริมทรัพย์ให้ผู้ดูแลตรวจสอบแล้ว') : copy('Draft saved. It has not been submitted for review.', 'Черновик сохранён. Проверка ещё не запрошена.', 'บันทึกฉบับร่างแล้ว ยังไม่ได้ส่งตรวจสอบ')}
         </motion.p>
 
         {/* Property name if available */}
@@ -124,12 +108,10 @@ export function PropertySubmissionSuccess({
               </div>
               <div>
                 <p className="font-medium text-sm">
-                  {isRu ? 'Модерация займёт от 1 часа' : 'Review takes from 1 hour'}
+                  {submitted ? copy('Awaiting review', 'Ожидает проверки', 'รอการตรวจสอบ') : copy('Continue editing', 'Продолжите редактирование', 'แก้ไขต่อ')}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {isRu 
-                    ? 'Обычно в рабочее время ещё быстрее' 
-                    : 'Usually faster during business hours'}
+                  {copy('Check the property list for the current status', 'Статус доступен в списке объектов', 'ดูสถานะปัจจุบันในรายการอสังหาริมทรัพย์')}
                 </p>
               </div>
             </div>
@@ -144,7 +126,7 @@ export function PropertySubmissionSuccess({
           transition={{ delay: 0.6 }}
         >
           <p className="text-sm font-medium text-muted-foreground">
-            {isRu ? 'Что будет дальше:' : 'What happens next:'}
+            {copy('What happens next:', 'Что будет дальше:', 'ขั้นตอนต่อไป:')}
           </p>
           
           {steps.map((step, index) => (
@@ -181,9 +163,7 @@ export function PropertySubmissionSuccess({
         >
           <Card className="p-3 bg-muted/50">
             <p className="text-xs text-muted-foreground text-center">
-              {isRu 
-                ? '🔒 Объект НЕ виден гостям, пока вы не нажмёте «Опубликовать для гостей» после одобрения' 
-                : '🔒 Property is NOT visible to guests until you click "Publish for guests" after approval'}
+              {copy('The listing appears in the catalogue only after approval and publication.', 'Объявление появляется в каталоге только после одобрения и публикации.', 'ประกาศจะแสดงในแค็ตตาล็อกหลังได้รับอนุมัติและเผยแพร่แล้วเท่านั้น')}
             </p>
           </Card>
         </motion.div>
@@ -202,7 +182,7 @@ export function PropertySubmissionSuccess({
               onClick={() => navigate(`/mc/properties/${propertyId}/editor`)}
             >
               <Eye className="h-4 w-4 mr-2" />
-              {isRu ? 'Открыть объект' : 'Open Property'}
+              {copy('Open property', 'Открыть объект', 'เปิดอสังหาริมทรัพย์')}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           )}
@@ -214,7 +194,7 @@ export function PropertySubmissionSuccess({
             onClick={() => navigate('/mc/properties')}
           >
             <Home className="h-4 w-4 mr-2" />
-            {isRu ? 'Мои объекты' : 'My Properties'}
+            {copy('My properties', 'Мои объекты', 'อสังหาริมทรัพย์ของฉัน')}
           </Button>
           
           <Button 
@@ -228,7 +208,7 @@ export function PropertySubmissionSuccess({
               }
             }}
           >
-            {isRu ? 'Добавить ещё объект' : 'Add another property'}
+            {copy('Add another property', 'Добавить ещё объект', 'เพิ่มอสังหาริมทรัพย์อีกแห่ง')}
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </motion.div>

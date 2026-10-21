@@ -21,6 +21,7 @@ import { ru } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const courseData: Record<string, any> = {
   "course-1": { title_ru: "Английский для детей", title_en: "English for Kids", price: 150 },
@@ -60,7 +61,7 @@ export default function EducationBooking() {
 
   // Auth redirect
   if (!authLoading && !user) {
-    navigate('/auth', { state: { from: `/education/booking/${id}` } });
+    redirectToAuth(navigate, { from: `/education/booking/${id}` });
     return null;
   }
 

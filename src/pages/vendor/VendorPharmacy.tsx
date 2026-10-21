@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { Pill, Plus, MoreVertical, Edit, Trash2, Loader2, MapPin, Truck, Clock } from 'lucide-react';
 import { ImageUpload } from '@/components/upload/ImageUpload';
 import { VendorLocationField } from '@/components/vendor/VendorLocationField';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 const initialForm = {
   name_en: '', name_ru: '', description_en: '', description_ru: '',
@@ -49,7 +50,7 @@ const VendorPharmacy = () => {
   const isRu = language === 'ru';
 
   useEffect(() => {
-    if (!authLoading && !user) navigate('/auth');
+    if (!authLoading && !user) redirectToAuth(navigate);
   }, [user, authLoading, navigate]);
 
   useEffect(() => {

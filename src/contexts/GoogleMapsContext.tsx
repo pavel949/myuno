@@ -62,6 +62,7 @@ function loadGoogleMaps(opts: {
   language: string;
   region: string;
 }): Promise<void> {
+  const channel = import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID as string | undefined;
   const loader = new Loader({
     apiKey: opts.apiKey,
     version: 'weekly',
@@ -69,6 +70,7 @@ function loadGoogleMaps(opts: {
     language: opts.language,
     region: opts.region,
     authReferrerPolicy: 'origin',
+    channel,
   });
   return loader.load().then(() => undefined);
 }

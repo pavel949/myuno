@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, CheckCircle2, XCircle, AlertCircle, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 type CheckStatus = 'idle' | 'running' | 'ok' | 'fail' | 'warn';
 
@@ -48,7 +49,6 @@ export default function AdminGoogleMapsDiagnostics() {
 
   const browserKey = env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY;
   const trackingId = env.VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID;
-  const lovableApiKey = env.VITE_LOVABLE_API_KEY;
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const host = typeof window !== 'undefined' ? window.location.hostname : '';
@@ -135,21 +135,21 @@ export default function AdminGoogleMapsDiagnostics() {
     }
   };
 
-  // 3. Gateway → Geocoding API
+  // 3. Backend connector → Geocoding API
   const runGeocodeCheck = async () => {
     setGeocodeCheck({ status: 'running' });
     try {
       const r = await fetch(
-        'https://connector-gateway.lovable.dev/google_maps/maps/api/geocode/json?address=Phuket',
-        { headers: lovableApiKey ? { Authorization: `Bearer ${lovableApiKey}` } : {} },
+        `${env.VITE_SUPABASE_URL}/functions/v1/geocode-address?query=Phuket&language=en`,
+        { headers: { apikey: env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '' } },
       );
       const j = await r.json().catch(() => ({}));
-      if (r.ok && j.status === 'OK') {
-        setGeocodeCheck({ status: 'ok', message: `Gateway Geocoding OK (${j.results?.length ?? 0} результатов)`, detail: j.status });
+      if (r.ok && Array.isArray(j.results)) {
+        setGeocodeCheck({ status: 'ok', message: `Backend Geocoding OK (${j.results.length} результатов)`, detail: j.results?.[0]?.address });
       } else {
         setGeocodeCheck({
           status: 'fail',
-          message: `HTTP ${r.status} • status=${j.status ?? '?'} ${j.error_message ?? j.error ?? ''}`,
+          message: `HTTP ${r.status} • ${j.error ?? ''}`,
           detail: j,
         });
       }
@@ -158,27 +158,20 @@ export default function AdminGoogleMapsDiagnostics() {
     }
   };
 
-  // 4. Gateway → Places API (New) searchText
+  // 4. Backend connector → Places API (New) searchText/details
   const runPlacesCheck = async () => {
     setPlacesCheck({ status: 'running' });
     try {
-      const r = await fetch('https://connector-gateway.lovable.dev/google_maps/places/v1/places:searchText', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-FieldMask': 'places.id,places.displayName',
-          ...(lovableApiKey ? { Authorization: `Bearer ${lovableApiKey}` } : {}),
-        },
-        body: JSON.stringify({ textQuery: 'restaurants in Phuket' }),
+      const { data, error } = await supabase.functions.invoke('place-details', {
+        body: { query: { name: 'Central Phuket', lat: 7.8939, lng: 98.3523 } },
       });
-      const j = await r.json().catch(() => ({}));
-      if (r.ok && Array.isArray(j.places)) {
-        setPlacesCheck({ status: 'ok', message: `Places API (New) OK — ${j.places.length} мест` });
+      if (!error && data?.place) {
+        setPlacesCheck({ status: 'ok', message: `Places API (New) OK — ${data.place.name ?? data.place.place_id ?? 'place loaded'}` });
       } else {
         setPlacesCheck({
           status: 'fail',
-          message: `HTTP ${r.status} ${j?.error?.status ?? ''} ${j?.error?.message ?? ''}`,
-          detail: j,
+          message: error?.message ?? 'Places backend returned no place',
+          detail: data,
         });
       }
     } catch (e) {
@@ -254,9 +247,9 @@ export default function AdminGoogleMapsDiagnostics() {
           />
           <Row label="VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID" value={trackingId ?? '—'} />
           <Row
-            label="VITE_LOVABLE_API_KEY (для gateway)"
-            value={MASK(lovableApiKey)}
-            badge={lovableApiKey ? <Badge variant="secondary">есть</Badge> : <Badge variant="destructive">нет</Badge>}
+            label="Backend gateway credentials"
+            value="server-side only"
+            badge={<Badge variant="secondary">не экспонируются в браузер</Badge>}
           />
           <details className="pt-2">
             <summary className="cursor-pointer text-xs text-muted-foreground">Все env-переменные с GOOGLE/LOVABLE ({allEnvKeys.length})</summary>
@@ -291,13 +284,13 @@ export default function AdminGoogleMapsDiagnostics() {
             onRun={runBrowserRestCheck}
           />
           <CheckRow
-            title="Gateway → Geocoding API"
+            title="Backend → Geocoding API"
             hint="Server-side путь через connector. Должен вернуть OK."
             result={geocodeCheck}
             onRun={runGeocodeCheck}
           />
           <CheckRow
-            title="Gateway → Places API (New) searchText"
+            title="Backend → Places API (New) search/details"
             hint="Если 403 PERMISSION_DENIED — Places API (New) не включён в Google Cloud проекте custom key."
             result={placesCheck}
             onRun={runPlacesCheck}

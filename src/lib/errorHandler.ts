@@ -256,9 +256,9 @@ export const errorHandler = {
   critical: (error: unknown, options?: Omit<ErrorHandlerOptions, 'severity'>) => 
     handleError(error, { ...options, severity: 'critical', showToast: true }),
   
-  // Silent logging (dev only, no toast)
-  silent: (error: unknown, context?: ErrorContext) => 
-    handleError(error, { silent: false, showToast: false, context }),
+  // Silent logging (no toast, no production error report — swallow quietly)
+  silent: (error: unknown, context?: ErrorContext) =>
+    handleError(error, { silent: true, showToast: false, context }),
 
   // Network errors
   network: (error: unknown, action?: string) =>

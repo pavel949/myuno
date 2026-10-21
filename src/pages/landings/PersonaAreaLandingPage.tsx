@@ -5,6 +5,7 @@
  * pros/cons) and a pre-tagged lead form.
  */
 import { useMemo } from 'react';
+import { LandingActionLink } from '@/components/landings/LandingActionLink';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -46,7 +47,12 @@ const PersonaAreaLandingPage = () => {
   const a = area.area;
   const theme = getPersonaTheme(persona.slug);
   const Icon = theme.icon;
-  const wp = (href: string) => withPersonaParam(href, persona.slug);
+  const wp = (href: string) => {
+    const url = new URL(href, 'https://www.myuno.app');
+    url.searchParams.set('area', a.slug);
+    const destination = href.startsWith('/') ? `${url.pathname}${url.search}${url.hash}` : url.toString();
+    return withPersonaParam(destination, persona.slug);
+  };
   const override = findPersonaAreaOverride(persona.slug, a.slug);
   const waUrl = override ? getWhatsAppUrl(t(override.whatsappMessage)) : null;
 
@@ -149,10 +155,10 @@ const PersonaAreaLandingPage = () => {
 
           <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button asChild size="lg" className="shadow-lg">
-              <a href={wp(`${persona.primaryCta.href}${persona.primaryCta.href.includes('?') ? '&' : '?'}area=${a.slug}`)}>
+              <LandingActionLink availability={persona.primaryCta.availability} href={wp(persona.primaryCta.href)}>
                 {t(persona.primaryCta.label)}
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </LandingActionLink>
             </Button>
             {waUrl && override ? (
               <Button asChild size="lg" variant="outline">
@@ -250,18 +256,18 @@ const PersonaAreaLandingPage = () => {
             <ul className="grid gap-3 sm:grid-cols-2">
               {persona.services.slice(0, 6).map((s) => (
                 <li key={s.slug}>
-                  <a
-                    href={wp(`${s.href}${s.href.includes('?') ? '&' : '?'}area=${a.slug}`)}
+                  <LandingActionLink availability={s.availability}
+                    href={wp(s.href)}
                     className="group flex h-full items-start gap-3 border border-border bg-card p-4 transition-all hover:border-primary/60"
                   >
                     <Sparkles className="mt-0.5 h-4 w-4 shrink-0" style={{ color: tokenColor(theme.color) }} />
                     <div className="flex-1">
                       <div className="font-medium text-foreground">{t(s.label)}</div>
-                      {s.oneLiner ? (
+                      {s.oneLiner && !s.availability ? (
                         <div className="mt-1 text-sm text-muted-foreground">{t(s.oneLiner)}</div>
                       ) : null}
                     </div>
-                  </a>
+                  </LandingActionLink>
                 </li>
               ))}
             </ul>
@@ -325,7 +331,7 @@ const PersonaAreaLandingPage = () => {
           </Button>
         ) : (
           <Button asChild size="lg" className="w-full">
-            <a href={wp(persona.primaryCta.href)}>{t(persona.primaryCta.label)}</a>
+            <LandingActionLink availability={persona.primaryCta.availability} href={wp(persona.primaryCta.href)}>{t(persona.primaryCta.label)}</LandingActionLink>
           </Button>
         )}
       </div>

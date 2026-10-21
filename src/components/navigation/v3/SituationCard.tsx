@@ -6,8 +6,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { hexTint, accentColor } from '@/lib/ui/colorTint';
 import { formatServices } from '@/lib/i18n/pluralize';
-import { resolveSituationHref } from '@/lib/navigation/situationLandingMap';
-import { trackSituationClick } from '@/lib/analytics/track';
+import { buildSituationListUrl } from '@/lib/navigation/situationUrls';
+import { useSituationTracking } from './useSituationTracking';
 import type { LifeSituation } from '@/hooks/useLifeOS';
 
 interface SituationCardProps {
@@ -30,12 +30,21 @@ export function SituationCard({
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
+  // Same analytics layer as SituationList (impressions + clicks).
+  const codes = React.useMemo(() => [situation.code], [situation.code]);
+  const { containerRef, onSituationClick } = useSituationTracking({
+    codes,
+    source: 'situation_card',
+    variant: 'card',
+    context: clusterId ? { cluster: clusterId } : undefined,
+  });
+
   const title = isRu ? situation.title_ru : situation.title_en;
   const description = isRu ? situation.description_ru : situation.description_en;
   const color = situation.color ?? null;
   const tint = hexTint(color, 0.125);
   const iconColor = accentColor(color);
-  const href = resolveSituationHref(situation.code);
+  const href = buildSituationListUrl(situation.code);
 
   const countLabel =
     typeof serviceCount === 'number' && serviceCount > 0
@@ -48,13 +57,9 @@ export function SituationCard({
 
   return (
     <Link
+      ref={containerRef}
       to={href}
-      onClick={() => trackSituationClick(situation.code, {
-        source: 'situation_card',
-        cluster: clusterId,
-        href,
-        count: serviceCount,
-      })}
+      onClick={() => onSituationClick(situation.code, { href, count: serviceCount })}
       className={cn(
         'group relative flex flex-col gap-4 p-5 min-h-[180px]',
         'border border-border bg-card text-card-foreground',

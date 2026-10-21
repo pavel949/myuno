@@ -1,3 +1,4 @@
+import { pickLang } from '@/lib/i18n/pickLang';
 import React, { useState, useMemo } from 'react';
 import { Filter, X, Check, ChevronDown, RotateCcw, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ export interface FilterOption {
   id: string;
   labelEn: string;
   labelRu: string;
+  labelTh?: string;
   icon?: string | LucideIcon;
   count?: number;
 }
@@ -24,6 +26,7 @@ export interface FilterSection {
   id: string;
   titleEn: string;
   titleRu: string;
+  titleTh?: string;
   type: 'single' | 'multi' | 'range' | 'price-level';
   options: FilterOption[];
   defaultValue?: string | string[];
@@ -92,6 +95,7 @@ function SingleSelectList({ options, value, onChange }: {
         return (
           <button
             key={option.id}
+            aria-pressed={isActive}
             onClick={() => onChange(isActive ? null : option.id)}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-2 rounded-none text-sm font-medium border transition-all",
@@ -101,7 +105,7 @@ function SingleSelectList({ options, value, onChange }: {
             )}
           >
             {option.icon && <InlineIcon icon={option.icon} size="sm" className="flex-shrink-0" />}
-            <span>{language === 'ru' ? option.labelRu : option.labelEn}</span>
+            <span>{pickLang(language, { ru: option.labelRu, en: option.labelEn, th: 'labelTh' in option ? option.labelTh : undefined })}</span>
             {isActive && <Check className="w-3.5 h-3.5 ml-1" />}
           </button>
         );
@@ -134,6 +138,7 @@ function MultiSelectChips({ options, value, onChange }: {
         return (
           <button
             key={option.id}
+            aria-pressed={isActive}
             onClick={() => toggle(option.id)}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-2 rounded-none text-sm font-medium border transition-all",
@@ -143,7 +148,7 @@ function MultiSelectChips({ options, value, onChange }: {
             )}
           >
             {option.icon && <InlineIcon icon={option.icon} size="sm" className="flex-shrink-0" />}
-            <span>{language === 'ru' ? option.labelRu : option.labelEn}</span>
+            <span>{pickLang(language, { ru: option.labelRu, en: option.labelEn, th: 'labelTh' in option ? option.labelTh : undefined })}</span>
             {option.count !== undefined && (
               <span className="text-xs opacity-60">({option.count})</span>
             )}
@@ -160,7 +165,7 @@ function MultiSelectChips({ options, value, onChange }: {
 function BedroomSelect({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const { language } = useLanguage();
   const options = [
-    { id: 'studio', labelEn: 'Studio', labelRu: 'Студия' },
+    { id: 'studio', labelEn: 'Studio', labelRu: 'Студия', labelTh: 'สตูดิโอ' },
     { id: '1', labelEn: '1', labelRu: '1' },
     { id: '2', labelEn: '2', labelRu: '2' },
     { id: '3', labelEn: '3', labelRu: '3' },
@@ -182,6 +187,7 @@ function BedroomSelect({ value, onChange }: { value: string[]; onChange: (v: str
         return (
           <button
             key={option.id}
+            aria-pressed={isActive}
             onClick={() => toggle(option.id)}
             className={cn(
               "flex-1 py-2.5 rounded-none text-sm font-medium border transition-colors flex items-center justify-center gap-1",
@@ -191,7 +197,7 @@ function BedroomSelect({ value, onChange }: { value: string[]; onChange: (v: str
             )}
           >
             {option.id !== 'studio' && <Bed className="w-3.5 h-3.5" />}
-            {language === 'ru' ? option.labelRu : option.labelEn}
+            {pickLang(language, { ru: option.labelRu, en: option.labelEn, th: 'labelTh' in option ? option.labelTh : undefined })}
           </button>
         );
       })}
@@ -240,7 +246,7 @@ export function UniversalFilter({
   const localActiveCount = useMemo(() => {
     let count = 0;
     Object.entries(localValues).forEach(([, val]) => {
-      if (Array.isArray(val) && val.length > 0) count++;
+      if (Array.isArray(val)) count += val.length;
       else if (val && typeof val === 'string') count++;
     });
     return count;
@@ -249,7 +255,7 @@ export function UniversalFilter({
   const trigger = children || (
     <Button variant="outline" size="sm" className={cn("gap-2", className)} onClick={() => setIsOpen(true)}>
       <Filter className="w-4 h-4" />
-      {language === 'ru' ? 'Фильтры' : 'Filters'}
+      {pickLang(language, { ru: 'Фильтры', en: 'Filters', th: 'ตัวกรอง' })}
       {activeCount > 0 && (
         <Badge className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
           {activeCount}
@@ -260,13 +266,13 @@ export function UniversalFilter({
 
   return (
     <>
-      <div onClick={() => setIsOpen(true)} className="cursor-pointer">
+      <div onClick={() => handleOpenChange(true)} className="cursor-pointer shrink-0">
         {trigger}
       </div>
       <ResponsiveModal
         open={isOpen}
         onOpenChange={handleOpenChange}
-        title={language === 'ru' ? 'Фильтры' : 'Filters'}
+        title={pickLang(language, { ru: 'Фильтры', en: 'Filters', th: 'ตัวกรอง' })}
         icon={<Filter className="w-5 h-5 text-primary" />}
         size="lg"
         mobileHeight="max-h-[85vh]"
@@ -280,13 +286,11 @@ export function UniversalFilter({
                 className="text-muted-foreground gap-1.5"
               >
                 <RotateCcw className="w-4 h-4" />
-                {language === 'ru' ? 'Сбросить' : 'Reset'}
+                {pickLang(language, { ru: 'Сбросить', en: 'Reset', th: 'ล้างค่า' })}
               </Button>
             )}
             <Button onClick={handleApply} className="flex-1 max-w-xs ml-auto h-11 text-base" size="lg">
-              {language === 'ru'
-                ? `Применить${localActiveCount > 0 ? ` (${localActiveCount})` : ''}`
-                : `Apply${localActiveCount > 0 ? ` (${localActiveCount})` : ''}`}
+              {pickLang(language, { ru: 'Применить', en: 'Apply', th: 'ใช้ตัวกรอง' })}{localActiveCount > 0 ? ` (${localActiveCount})` : ''}
             </Button>
           </div>
         }
@@ -297,7 +301,7 @@ export function UniversalFilter({
               {index > 0 && <Separator className="mb-6" />}
 
               <h3 className="font-semibold text-base mb-4">
-                {language === 'ru' ? section.titleRu : section.titleEn}
+                {pickLang(language, { ru: section.titleRu, en: section.titleEn, th: section.titleTh })}
               </h3>
 
               {section.type === 'price-level' && (
@@ -356,6 +360,7 @@ export function QuickFilterBar({ options, value, onChange, className }: QuickFil
         return (
           <button
             key={option.id}
+            aria-pressed={isActive}
             onClick={() => onChange(option.id)}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
@@ -366,7 +371,7 @@ export function QuickFilterBar({ options, value, onChange, className }: QuickFil
             )}
           >
             {option.icon && <InlineIcon icon={option.icon} size="sm" className="flex-shrink-0" />}
-            <span className="truncate max-w-[100px]">{language === 'ru' ? option.labelRu : option.labelEn}</span>
+            <span className="truncate max-w-[100px]">{pickLang(language, { ru: option.labelRu, en: option.labelEn, th: 'labelTh' in option ? option.labelTh : undefined })}</span>
           </button>
         );
       })}
@@ -405,7 +410,7 @@ export function ActiveFilters({
           activeFilters.push({
             sectionId: section.id,
             optionId,
-            label: language === 'ru' ? option.labelRu : option.labelEn,
+            label: pickLang(language, { ru: option.labelRu, en: option.labelEn, th: 'labelTh' in option ? option.labelTh : undefined }),
           });
         }
       });
@@ -422,7 +427,7 @@ export function ActiveFilters({
           activeFilters.push({
             sectionId: section.id,
             optionId: sectionValue,
-            label: language === 'ru' ? option.labelRu : option.labelEn,
+            label: pickLang(language, { ru: option.labelRu, en: option.labelEn, th: 'labelTh' in option ? option.labelTh : undefined }),
           });
         }
       }
@@ -450,7 +455,7 @@ export function ActiveFilters({
           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive border border-destructive/30 flex-shrink-0"
         >
           <RotateCcw className="w-3 h-3" />
-          <span>{language === 'ru' ? 'Сброс' : 'Clear'}</span>
+          <span>{pickLang(language, { ru: 'Сброс', en: 'Clear', th: 'ล้าง' })}</span>
         </button>
       )}
     </div>

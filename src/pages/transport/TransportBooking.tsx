@@ -37,6 +37,7 @@ import { format, differenceInDays, addDays } from "date-fns";
 import { ru, th } from "date-fns/locale";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function TransportBooking() {
   const { id } = useParams<{ id: string }>();
@@ -107,7 +108,7 @@ export default function TransportBooking() {
   // Auth redirect
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth', { state: { from: `/transport/booking/${id}` } });
+      redirectToAuth(navigate, { from: `/transport/booking/${id}` });
     }
   }, [authLoading, user, navigate, id]);
 

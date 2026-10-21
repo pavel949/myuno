@@ -12,7 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BackButton } from '@/components/uno/BackButton';
-import { APP_ROUTES } from '@/lib/config/routes';
 import { OwnerOverviewTab } from '@/components/owner/transparency/OwnerOverviewTab';
 import { ActivityFeed } from '@/components/owner/transparency/ActivityFeed';
 import { OwnerFinanceTab } from '@/components/owner/transparency/OwnerFinanceTab';
@@ -65,7 +64,7 @@ export default function OwnerTransparencyDashboard() {
             ? 'У вас нет прав для просмотра этого объекта. Попросите управляющую компанию отправить вам приглашение.'
             : 'You don\'t have permission to view this property. Ask the management company to send you an invitation.'}
         </p>
-        <Button variant="outline" onClick={() => navigate('/property/my')}>
+        <Button variant="outline" onClick={() => navigate('/my-property')}>
           {isRu ? 'Назад' : 'Go back'}
         </Button>
       </div>
@@ -78,7 +77,7 @@ export default function OwnerTransparencyDashboard() {
     <div className="p-4 space-y-5 max-w-3xl mx-auto pb-24">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <BackButton fallbackPath={APP_ROUTES.OWNER} variant="ghost" />
+        <BackButton fallbackPath={`/my-property/${propertyId}`} variant="ghost" />
         <div className="flex-1 min-w-0">
           <h1 className="text-lg font-semibold text-foreground truncate">{propertyTitle || (isRu ? 'Объект' : 'Property')}</h1>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

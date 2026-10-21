@@ -13,6 +13,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 const STORAGE_KEY = 'myuno:impersonate_dev';
 
@@ -35,6 +36,7 @@ const ImpersonationContext = createContext<ImpersonationContextValue>({
 
 export function ImpersonationProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const [state, setState] = useState<ImpersonationState>({ developerId: null, developerName: null });
   const boundUserRef = useRef<string | null | undefined>(undefined);
 
@@ -59,6 +61,11 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
   }, [user?.id]);
 
   const enter = useCallback(async (developerId: string, developerName: string) => {
+    // Defense in depth: impersonation is admin-only. Re-check here rather than
+    // trusting callers/route guards (which admit non-admin investor tiers), so a
+    // non-admin can never set the impersonation scope or write a spoofed
+    // admin_id into the audit log.
+    if (!user?.id || !isAdmin) return;
     const next = { developerId, developerName };
     setState(next);
     try {
@@ -77,7 +84,7 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
         // ignore audit failure
       }
     }
-  }, [user?.id]);
+  }, [user?.id, isAdmin]);
 
   const exit = useCallback(() => {
     setState({ developerId: null, developerName: null });

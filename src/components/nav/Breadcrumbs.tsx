@@ -13,6 +13,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { pickLang } from '@/lib/i18n/pickLang';
 import { getRouteCrumbs } from '@/lib/config/routeMeta';
 
 interface BreadcrumbsProps {
@@ -27,7 +28,6 @@ export const Breadcrumbs = memo(function Breadcrumbs({
 }: BreadcrumbsProps) {
   const location = useLocation();
   const { language } = useLanguage();
-  const isRu = language === 'ru';
 
   const path = pathname ?? location.pathname;
   const crumbs = getRouteCrumbs(path);
@@ -36,7 +36,7 @@ export const Breadcrumbs = memo(function Breadcrumbs({
 
   return (
     <nav
-      aria-label={isRu ? 'Хлебные крошки' : 'Breadcrumbs'}
+      aria-label={pickLang(language, {ru: 'Путь страницы', en: 'Breadcrumbs', th: 'เส้นทางหน้าปัจจุบัน'})}
       className={cn(
         'flex items-center gap-1 text-[12px] text-muted-foreground min-w-0 overflow-hidden',
         className,
@@ -45,7 +45,7 @@ export const Breadcrumbs = memo(function Breadcrumbs({
       <ol className="flex items-center gap-1 min-w-0">
         {crumbs.map((crumb, idx) => {
           const isLast = idx === crumbs.length - 1;
-          const label = isRu ? crumb.labelRu : crumb.labelEn;
+          const label = pickLang(language, {ru: crumb.labelRu, en: crumb.labelEn, th: crumb.labelTh});
           const isEllipsis = label === '…';
 
           return (

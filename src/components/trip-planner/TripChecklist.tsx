@@ -118,26 +118,26 @@ export function TripChecklist() {
     if (item.action === 'navigate' && item.target) {
       navigate(item.target);
     } else if (item.action === 'external' && item.target) {
-      window.open(item.target, '_blank');
+      window.open(item.target, '_blank', 'noopener,noreferrer');
     } else if (item.action === 'expand') {
       setExpandedId(prev => prev === item.id ? null : item.id);
     }
   };
 
   return (
-    <div className="space-y-4">
+    <section className="space-y-4" aria-labelledby="trip-checklist-title">
       {/* Progress header */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold">
-            {isRu ? 'Готовность к поездке' : 'Trip Readiness'}
+          <h2 id="trip-checklist-title" className="trip-checklist-heading">
+            {isRu ? 'Перед поездкой' : 'Before you travel'}
           </h2>
           <div className="flex items-center gap-1.5 text-sm font-medium text-primary">
             <CheckCircle2 className="w-4 h-4" />
             {completedCount}/{totalCount}
           </div>
         </div>
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} aria-label={isRu ? "Ваш список дел" : "Your checklist"} className="h-1" />
       </div>
 
       {/* Reassurance banner */}
@@ -145,8 +145,8 @@ export function TripChecklist() {
         <Shield className="w-4 h-4 text-primary shrink-0" />
         <p className="text-xs text-muted-foreground">
           {isRu
-            ? 'Отмечайте пункты по мере готовности — мы поможем со сложным.'
-            : 'Tick off each item as it’s ready — we help with the complex parts.'}
+            ? 'Личный список дел. Отметки сохраняются в этом браузере и не подтверждают бронирование.'
+            : 'Your personal checklist, saved in this browser. Checkmarks do not confirm a booking.'}
         </p>
       </div>
 
@@ -170,44 +170,30 @@ export function TripChecklist() {
                   isCompleted ? 'border-primary/20 bg-primary/5' : 'border-border',
                 )}
               >
-                <div className="flex items-center gap-3 p-3.5">
+                <div className="trip-checklist-row">
+                  <label className="flex size-11 shrink-0 cursor-pointer items-center justify-center">
                   <Checkbox
                     checked={isCompleted}
+                    aria-label={`${isRu ? "Готово" : "Done"}: ${isRu ? item.labelRu : item.labelEn}`}
                     onCheckedChange={() => toggle(item.id)}
-                    className="shrink-0"
+                    className="!min-h-4 shrink-0"
                   />
+                  </label>
 
-                  <div
-                    className={cn(
-                      'w-9 h-9 rounded-none flex items-center justify-center shrink-0',
-                      isCompleted ? 'bg-primary/15' : 'bg-muted'
-                    )}
-                  >
-                    <Icon className={cn('w-4.5 h-4.5', isCompleted ? 'text-primary' : 'text-muted-foreground')} />
-                  </div>
-
-                  <div
-                    className="flex-1 min-w-0 cursor-pointer"
+                  <button
+                    type="button"
+                    className="trip-checklist-action"
                     onClick={() => handleItemAction(item)}
+                    aria-expanded={item.action === 'expand' ? isExpanded : undefined}
+                    aria-controls={item.action === 'expand' ? `trip-${item.id}` : undefined}
                   >
-                    <p className={cn(
-                      'text-sm font-medium leading-tight',
-                      isCompleted && 'line-through text-muted-foreground'
-                    )}>
-                      {isRu ? item.labelRu : item.labelEn}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {isRu ? item.descRu : item.descEn}
-                    </p>
-                  </div>
-
-                  <ChevronRight
-                    className={cn(
-                      'w-4 h-4 text-muted-foreground/50 shrink-0 transition-transform',
-                      isExpanded && 'rotate-90'
-                    )}
-                    onClick={() => handleItemAction(item)}
-                  />
+                    <Icon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    <span>
+                      <strong className={cn(isCompleted && 'line-through text-muted-foreground')}>{isRu ? item.labelRu : item.labelEn}</strong>
+                      <small>{isRu ? item.descRu : item.descEn}</small>
+                    </span>
+                    <ChevronRight className={cn('size-4 shrink-0 text-muted-foreground', isExpanded && 'rotate-90')} aria-hidden="true" />
+                  </button>
                 </div>
 
                 {/* Expandable content */}
@@ -219,7 +205,7 @@ export function TripChecklist() {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="px-3.5 pb-3.5">
+                      <div id={`trip-${item.id}`} className="px-3.5 pb-3.5">
                         <ArrivalCardBlock
                           onAssisted={() => {
                             // TODO: navigate to arrival card assistance order flow
@@ -235,6 +221,6 @@ export function TripChecklist() {
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }

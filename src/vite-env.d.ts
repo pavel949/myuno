@@ -4,6 +4,7 @@
 declare module 'virtual:pwa-register' {
   export interface RegisterSWOptions {
     immediate?: boolean;
+    onNeedReload?: () => void;
     onNeedRefresh?: () => void;
     onOfflineReady?: () => void;
     onRegistered?: (registration: ServiceWorkerRegistration | undefined) => void;
@@ -24,6 +25,7 @@ declare module 'virtual:pwa-register/react' {
 
   export interface RegisterSWOptions {
     immediate?: boolean;
+    onNeedReload?: () => void;
     onNeedRefresh?: () => void;
     onOfflineReady?: () => void;
     onRegistered?: (registration: ServiceWorkerRegistration | undefined) => void;

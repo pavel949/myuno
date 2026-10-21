@@ -1,28 +1,24 @@
 import { createStripeClient } from "../_shared/stripe.ts";
 import { createServiceClient } from "../_shared/supabase.ts";
+import { requireActorRpc } from "../_shared/authz.ts";
+import { requireAuth } from "../_shared/auth-guard.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabase = createServiceClient();
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header");
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !userData.user) throw new Error("Not authenticated");
-
+    const auth = await requireAuth(req, corsHeaders);
+    if (auth instanceof Response) return auth;
     const { company_id } = await req.json();
-    if (!company_id) throw new Error("company_id is required");
+    if (!company_id) throw new Error('company_id is required');
+    const denied = await requireActorRpc(req, corsHeaders, 'actor_can_manage_company_billing', { p_company_id: company_id });
+    if (denied) return denied;
+    const supabase = createServiceClient();
 
     const { data: company } = await supabase
       .from("management_companies")

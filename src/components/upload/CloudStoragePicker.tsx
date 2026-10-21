@@ -1,29 +1,12 @@
-/**
- * CloudStoragePicker - Google Drive & Dropbox integration
- * Airbnb-style cloud storage import
- */
-
-import { useState, useEffect, useCallback } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+/** Guidance for importing public cloud links through the existing URL importer. */
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Loader2, 
-  Cloud, 
-  Check, 
-  AlertCircle,
-  HardDrive,
-  Droplet,
-  Link as LinkIcon,
-  ExternalLink
-} from 'lucide-react';
+import { Cloud, Link as LinkIcon } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { mediaModalClasses, type MediaModalLayer } from './shared/mediaModalLayer';
 
 // Google Drive SVG Icon
 const GoogleDriveIcon = () => (
@@ -47,165 +30,62 @@ const DropboxIcon = () => (
 interface CloudStoragePickerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelect: (urls: string[]) => void;
-  maxImages?: number;
+  onUseLink?: () => void;
+  modalLayer?: MediaModalLayer;
 }
 
-interface CloudFile {
-  id: string;
-  name: string;
-  thumbnailUrl?: string;
-  downloadUrl: string;
-  mimeType: string;
-}
+export function CloudStoragePicker({ open, onOpenChange, onUseLink, modalLayer }: CloudStoragePickerProps) {
+  const [activeTab, setActiveTab] = useState('google');
+  const { language } = useLanguage();
+  const isRu = language === 'ru';
 
-export function CloudStoragePicker({
-  open,
-  onOpenChange,
-  onSelect,
-  maxImages = 10
-}: CloudStoragePickerProps) {
-  const [activeTab, setActiveTab] = useState<'google' | 'dropbox'>('google');
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<CloudFile[]>([]);
-  const [isConnected, setIsConnected] = useState({
-    google: false,
-    dropbox: false
-  });
-
-  // Note: These integrations require API keys and OAuth setup
-  // For now, we show instructions to users
-  
-  const handleGoogleDriveConnect = useCallback(() => {
-    // Google Picker API requires:
-    // 1. Google Cloud Console project
-    // 2. OAuth 2.0 Client ID
-    // 3. API Key with Picker API enabled
-    
-    toast.info(
-      'Google Drive требует настройки. Используйте "С сайта" для импорта по ссылке.',
-      { duration: 5000 }
-    );
-  }, []);
-
-  const handleDropboxConnect = useCallback(() => {
-    // Dropbox Chooser requires:
-    // 1. Dropbox App registration
-    // 2. App Key
-    
-    toast.info(
-      'Dropbox требует настройки. Используйте "С сайта" для импорта по ссылке.',
-      { duration: 5000 }
-    );
-  }, []);
-
-  const handleSelect = () => {
-    if (selectedFiles.length === 0) return;
-    
-    const urls = selectedFiles.map(f => f.downloadUrl);
-    onSelect(urls);
-    onOpenChange(false);
-    setSelectedFiles([]);
-  };
+  const sources = [
+    { id: 'google', name: 'Google Drive', Icon: GoogleDriveIcon },
+    { id: 'dropbox', name: 'Dropbox', Icon: DropboxIcon },
+  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
+      <DialogContent
+        overlayClassName={mediaModalClasses(modalLayer).overlayClassName}
+        className={cn('max-w-lg max-h-[90dvh] overflow-y-auto [&>button]:z-20', mediaModalClasses(modalLayer).className)}
+      >
+        <DialogHeader className="pr-6">
           <DialogTitle className="flex items-center gap-2">
-            <Cloud className="h-5 w-5" />
-            Импорт из облака
+            <Cloud className="h-5 w-5 shrink-0" />
+            {isRu ? 'Фото по облачной ссылке' : 'Photos from a cloud link'}
           </DialogTitle>
+          <DialogDescription>
+            {isRu
+              ? 'Импорт по общедоступной ссылке. Подключать облачный аккаунт не требуется.'
+              : 'Import using a public link. No cloud account connection is required.'}
+          </DialogDescription>
         </DialogHeader>
-        
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="google" className="gap-2">
-              <GoogleDriveIcon />
-              Google Drive
-            </TabsTrigger>
-            <TabsTrigger value="dropbox" className="gap-2">
-              <DropboxIcon />
-              Dropbox
-            </TabsTrigger>
+            {sources.map(({ id, name, Icon }) => (
+              <TabsTrigger key={id} value={id} className="gap-2"><Icon />{name}</TabsTrigger>
+            ))}
           </TabsList>
-          
-          <TabsContent value="google" className="mt-4">
-            <div className="text-center py-8 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto">
-                <GoogleDriveIcon />
-              </div>
-              <div>
-                <h4 className="font-medium">Google Drive</h4>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Импортируйте фото напрямую из Google Drive
-                </p>
-              </div>
-              
-              <div className="bg-muted/50 rounded-none p-4 text-sm text-left space-y-2">
-                <p className="font-medium">Как импортировать:</p>
-                <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                  <li>Откройте нужный файл в Google Drive</li>
-                  <li>Нажмите «Получить ссылку» → «Все, у кого есть ссылка»</li>
-                  <li>Скопируйте ссылку и вставьте через кнопку «С сайта»</li>
-                </ol>
-              </div>
-              
-              <Button 
-                variant="outline" 
-                onClick={handleGoogleDriveConnect}
-                className="gap-2"
-              >
-                <LinkIcon className="h-4 w-4" />
-                Использовать ссылку
-              </Button>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="dropbox" className="mt-4">
-            <div className="text-center py-8 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto">
-                <DropboxIcon />
-              </div>
-              <div>
-                <h4 className="font-medium">Dropbox</h4>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Импортируйте фото из Dropbox
-                </p>
-              </div>
-              
-              <div className="bg-muted/50 rounded-none p-4 text-sm text-left space-y-2">
-                <p className="font-medium">Как импортировать:</p>
-                <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-                  <li>Откройте файл в Dropbox</li>
-                  <li>Нажмите «Поделиться» → «Создать ссылку»</li>
-                  <li>Скопируйте и вставьте через кнопку «С сайта»</li>
-                </ol>
-              </div>
-              
-              <Button 
-                variant="outline" 
-                onClick={handleDropboxConnect}
-                className="gap-2"
-              >
-                <LinkIcon className="h-4 w-4" />
-                Использовать ссылку
-              </Button>
-            </div>
-          </TabsContent>
+          {sources.map(({ id, name }) => (
+            <TabsContent key={id} value={id} className="mt-4">
+              <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                <li>{isRu ? `Откройте нужное фото в ${name}.` : `Open the photo in ${name}.`}</li>
+                <li>{isRu
+                  ? 'Скопируйте общедоступную ссылку. Делитесь только фото, предназначенными для публикации.'
+                  : 'Copy its public link. Only share photos intended for publication.'}</li>
+                <li>{isRu
+                  ? 'Вставьте ссылку в форму импорта. Если фото не найдено, скачайте его и загрузите с устройства.'
+                  : 'Paste the link in the importer. If no photo is found, download it and upload it from your device.'}</li>
+              </ol>
+            </TabsContent>
+          ))}
         </Tabs>
-        
-        {/* Future: Show file grid when connected */}
-        {selectedFiles.length > 0 && (
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="ghost" onClick={() => setSelectedFiles([])}>
-              Отмена
-            </Button>
-            <Button onClick={handleSelect}>
-              Импортировать ({selectedFiles.length})
-            </Button>
-          </div>
-        )}
+        <Button type="button" onClick={() => { onOpenChange(false); onUseLink?.(); }} className="gap-2">
+          {onUseLink && <LinkIcon className="h-4 w-4" />}
+          {onUseLink ? (isRu ? 'Вставить ссылку' : 'Paste link') : (isRu ? 'Понятно' : 'Got it')}
+        </Button>
       </DialogContent>
     </Dialog>
   );

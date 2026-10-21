@@ -61,7 +61,7 @@ export function TodayActionsWidget() {
       items.push({
         id: 'low-stock',
         icon: PackageOpen,
-        title: isRu ? 'Низкий запас' : 'Low Stock',
+        title: isRu ? 'Заканчиваются расходные материалы' : 'Low Stock',
         subtitle: isRu ? `${ops.lowStockItems} позиций нужно пополнить` : `${ops.lowStockItems} items need restocking`,
         count: ops.lowStockItems,
         priority: 'high',
@@ -73,7 +73,7 @@ export function TodayActionsWidget() {
       items.push({
         id: 'unread-messages',
         icon: MessageCircle,
-        title: isRu ? 'Непрочитанные' : 'Unread Messages',
+        title: isRu ? 'Непрочитанные сообщения' : 'Unread Messages',
         subtitle: isRu ? `${ops.unreadMessages} новых сообщений` : `${ops.unreadMessages} new messages`,
         count: ops.unreadMessages,
         priority: 'normal',
@@ -134,7 +134,7 @@ export function TodayActionsWidget() {
       <div className="flex items-center justify-between px-1">
         <h3 className="font-semibold text-[15px] flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-warning" />
-          {isRu ? 'Требует внимания' : 'Needs Attention'}
+          {isRu ? 'Требуют внимания' : 'Needs Attention'}
           <Badge variant="secondary" className="text-xs">{actions.length}</Badge>
         </h3>
       </div>

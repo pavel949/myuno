@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { reportWebVitals } from "./lib/webVitals";
 import App from "./App.tsx";
+import { requestUpdateCheck } from "./lib/appVersion";
+import { installFetchRecoveryPrompt } from "./lib/pwaRecovery";
 
 function renderBootstrapError(message: string) {
   const root = document.getElementById("root");
@@ -45,11 +47,28 @@ if (sentryDsn && import.meta.env.PROD && typeof window !== "undefined") {
         release: `myuno@${document.querySelector('meta[name="version"]')?.getAttribute('content') ?? 'unknown'}`,
         integrations: [
           Sentry.browserTracingIntegration(),
-          Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
+          // PII protection: this app renders passport/visa/bank/payment data.
+          // Mask ALL text and block ALL media in session replays so those never
+          // leave the browser. Do NOT set these to false.
+          Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
         ],
         tracesSampleRate: 0.1,
         replaysSessionSampleRate: 0.01,
         replaysOnErrorSampleRate: 1.0,
+        // Defence-in-depth scrubber: strip common PII from the request URL/query
+        // and known sensitive fields before any event is sent to Sentry.
+        beforeSend(event) {
+          try {
+            if (event.request?.url) {
+              event.request.url = event.request.url.replace(/([?&](email|phone|token|access_token|session_id)=)[^&]+/gi, "$1[redacted]");
+            }
+            if (event.user) {
+              delete event.user.email;
+              delete event.user.ip_address;
+            }
+          } catch { /* never let scrubbing break error reporting */ }
+          return event;
+        },
       });
     }).catch(() => { /* Sentry is non-critical — silent fail */ });
   };
@@ -114,6 +133,8 @@ reportWebVitals(undefined, { debug: import.meta.env.DEV });
     .then(({ registerSW }) => {
       registerSW({
         immediate: true,
+        // autoUpdate otherwise reloads on activation, including another tab's update.
+        onNeedReload: requestUpdateCheck,
         onRegisteredSW(_swUrl, registration) {
           if (!registration) return;
           const ONE_HOUR = 60 * 60 * 1000;
@@ -131,53 +152,9 @@ reportWebVitals(undefined, { debug: import.meta.env.DEV });
     });
 })();
 
-// ── HTTP 412 recovery (auth-bridge / preview proxy) ──
-// Lovable's preview proxy occasionally returns 412 for auth-bridge token
-// refreshes when the bundle/manifest goes stale. We can't intercept the
-// initial document 412 (React isn't mounted yet), but we CAN catch 412 on
-// runtime fetches: clear SW + caches and force a one-time hard reload so
-// the proxy hands us a fresh token. Guarded by sessionStorage to avoid
-// reload loops.
-(() => {
-  if (typeof window === "undefined" || !window.fetch) return;
-  const RELOAD_KEY = "__myuno_412_reload__";
-  const originalFetch = window.fetch.bind(window);
-
-  const recover = async () => {
-    if (sessionStorage.getItem(RELOAD_KEY)) return;
-    sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
-    try {
-      if ("serviceWorker" in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map((r) => r.unregister().catch(() => {})));
-      }
-      if ("caches" in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map((k) => caches.delete(k).catch(() => {})));
-      }
-    } catch {
-      /* noop */
-    }
-    window.location.reload();
-  };
-
-  window.fetch = async (...args: Parameters<typeof fetch>) => {
-    const res = await originalFetch(...args);
-    if (res.status === 412) {
-      const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url ?? "";
-      // Only react to preview-proxy / auth-bridge 412s, not API 412s
-      if (/lovableproject\.com|lovable\.app|auth-bridge|\/auth\//.test(url)) {
-        void recover();
-      }
-    }
-    return res;
-  };
-
-  // Clear the reload guard once the app boots successfully
-  window.addEventListener("load", () => {
-    setTimeout(() => sessionStorage.removeItem(RELOAD_KEY), 5000);
-  });
-})();
+// Runtime proxy/auth-bridge 412 responses only offer an explicit recovery prompt.
+// The original response still reaches its caller; no automatic cleanup or reload.
+if (typeof window !== "undefined" && window.fetch) installFetchRecoveryPrompt();
 
 try {
   createRoot(document.getElementById("root")!).render(

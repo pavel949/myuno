@@ -1,11 +1,14 @@
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useTeamPermissions } from '@/hooks/useTeamPermissions';
+import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useQuery } from '@tanstack/react-query';
+import { useActiveCompany } from '@/hooks/useActiveCompany';
+import { readPropertyCreationScope } from '@/lib/propertyAuthoring';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserContext } from '@/hooks/useUserContext';
 import {
-  useCreateOwnerProperty,
   useOwnerProperty,
   useUpdateOwnerProperty,
 } from '@/hooks/usePropertyCare';
@@ -43,13 +46,32 @@ const errorLog = createErrorHandler('usePropertyWizard');
 export function usePropertyWizard() {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { activeCompany, isLoading: companyLoading, error: companyError, refetch: retryCompany } = useActiveCompany();
+  const companyId = activeCompany?.company_id || null;
+  const { canAccess, isLoading: permissionsLoading } = useTeamPermissions();
+  const authoringCapabilities = useMemo(() => ({ pricing: !companyId || (!permissionsLoading && canAccess('pricing', 'edit')), bookings: !companyId || (!permissionsLoading && canAccess('bookings', 'edit')) }), [companyId, permissionsLoading, canAccess]);
+  const submitLock = useRef(false);
+  const actorScope = `${user?.id || ''}:${companyId || ''}`;
+  const actorScopeRef = useRef(actorScope);
+  actorScopeRef.current = actorScope;
+  useEffect(() => { submitLock.current = false; }, [actorScope]);
+  const [operatingSpaceId, setOperatingSpaceId] = useState<string | null>(null);
+  useEffect(() => setOperatingSpaceId(null), [companyId]);
+  const resumeDraftId = searchParams.get('draft');
+  const onDraftCreated = useCallback((id: string) => {
+    setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('draft', id); next.delete('cloneFrom'); return next; }, { replace: true });
+  }, [setSearchParams]);
+  const creationScope = useQuery({
+    queryKey: ['property-creation-scope', user?.id, companyId],
+    enabled: !!user && !!companyId,
+    queryFn: ({ signal }) => readPropertyCreationScope(companyId!, signal),
+  });
   const isRu = language === 'ru';
 
   const cloneFromId = searchParams.get('cloneFrom');
-  const { data: sourceProperty, isLoading: isLoadingSource } = useOwnerProperty(cloneFromId || undefined);
+  const { data: sourceProperty, isLoading: isLoadingSource } = useOwnerProperty(cloneFromId || undefined, { authoring: true });
 
-  const createProperty = useCreateOwnerProperty();
   const updateProperty = useUpdateOwnerProperty();
   const sendInvite = useSendOwnershipInvite();
   const { activeOrgId } = useUserContext();
@@ -61,16 +83,18 @@ export function usePropertyWizard() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdPropertyId, setCreatedPropertyId] = useState<string>();
   const [createdPropertyTitle, setCreatedPropertyTitle] = useState<string>();
+  const [createdApprovalStatus, setCreatedApprovalStatus] = useState<'draft' | 'pending'>('draft');
 
   // Draft persistence — load/save/auto-save/beforeunload
   const draft = usePropertyWizardDraft({
-    userId: user?.id,
+    userId: !companyLoading && !companyError ? user?.id : undefined,
     cloneFromId,
     formData,
     setFormData,
     ownershipData,
     activeOrgId,
-    isRu,
+    isRu, language,
+    companyId, operatingSpaceId, resumeDraftId, onDraftCreated, capabilities: authoringCapabilities,
   });
 
   const updateFormData = useCallback((updates: Partial<PropertyFormData>) => {
@@ -114,8 +138,9 @@ export function usePropertyWizard() {
   }, [isRu]);
 
   const validateStep = useCallback((stepId: string): boolean => {
-    return validateWizardStep({ stepId, formData, ownershipData, isRu });
-  }, [formData, ownershipData, isRu]);
+    if (companyId && stepId === 'pricing' && (!authoringCapabilities.pricing || !authoringCapabilities.bookings)) return true;
+    return validateWizardStep({ stepId, formData, ownershipData: companyId ? initialOwnershipData : ownershipData, isRu });
+  }, [companyId, authoringCapabilities, formData, ownershipData, isRu]);
 
   const buildPropertyPayload = useCallback(
     (approvalStatus: 'draft' | 'pending') =>
@@ -125,17 +150,26 @@ export function usePropertyWizard() {
 
   // Submit property
   const handleSubmit = useCallback(async () => {
+    if (submitLock.current) return;
+    submitLock.current = true;
+    const submissionScope = actorScope;
     try {
-      const isOnBehalf = ownershipData.ownership_type !== 'own';
+      const isOnBehalf = !companyId && ownershipData.ownership_type !== 'own';
       const approvalStatus = formData.platform_listed ? 'pending' : 'draft';
       const submitPayload = buildPropertyPayload(approvalStatus);
 
-      const property = draft.draftPropertyId
-        ? await updateProperty.mutateAsync({ id: draft.draftPropertyId, ...submitPayload } as any)
-        : await createProperty.mutateAsync(submitPayload as any);
+      // Share the in-flight draft save so blur/autosave/Submit cannot create
+      // parallel property shells. Review is a separate checked transition.
+      const savedDraft = await draft.persistDraft(true);
+      if (!savedDraft || actorScopeRef.current !== submissionScope) return;
+      const property = approvalStatus === 'pending'
+        ? await updateProperty.mutateAsync({ id: savedDraft.id, ...(companyId ? {} : submitPayload), is_active: false, _authoring: true, _expectedUpdatedAt: savedDraft.updated_at, _submitForReview: true } as never)
+        : savedDraft;
+
+      if (actorScopeRef.current !== submissionScope) return;
 
       // Save documents
-      if (property?.id) {
+      if (property?.id && !companyId) {
         const userId = (await supabase.auth.getUser()).data.user?.id;
 
         if (ownershipData.management_document_url) {
@@ -233,18 +267,21 @@ export function usePropertyWizard() {
         }
       }
 
+      if (actorScopeRef.current !== submissionScope) return;
       draft.clearDraft();
       draft.resetDraftSnapshot();
 
+      setCreatedApprovalStatus(approvalStatus);
       setCreatedPropertyId(property?.id);
       setCreatedPropertyTitle(formData.title || formData.title_ru);
       setShowSuccess(true);
     } catch (error: unknown) {
+      if (actorScopeRef.current !== submissionScope) return;
       errorLog.error(error, 'submit_property');
       const msg = error instanceof Error ? error.message : String(error);
       toast.error(isRu ? `Ошибка сохранения: ${msg}` : `Error saving: ${msg}`);
-    }
-  }, [activeOrgId, buildPropertyPayload, createProperty, draft, formData, isRu, ownershipData, sendInvite, updateProperty]);
+    } finally { if (actorScopeRef.current === submissionScope) submitLock.current = false; }
+  }, [actorScope, activeOrgId, companyId, buildPropertyPayload, draft, formData, isRu, ownershipData, sendInvite, updateProperty]);
 
   // Preview data for live preview
   const previewData = useMemo(() => ({
@@ -283,6 +320,7 @@ export function usePropertyWizard() {
   }, [draft]);
 
   const resetForm = useCallback(() => {
+    setSearchParams(previous => { const next = new URLSearchParams(previous); next.delete('draft'); return next; }, { replace: true });
     setFormData(initialFormData);
     setOwnershipData(initialOwnershipData);
     setSelectedProject(null);
@@ -291,7 +329,7 @@ export function usePropertyWizard() {
     setCreatedPropertyId(undefined);
     setCreatedPropertyTitle(undefined);
     draft.clearDraft();
-  }, [draft]);
+  }, [draft, setSearchParams]);
 
   return {
     formData,
@@ -301,12 +339,21 @@ export function usePropertyWizard() {
     showSuccess,
     createdPropertyId,
     createdPropertyTitle,
+    createdApprovalStatus,
+    creationScope,
+    companyLoading, companyError, retryCompany,
+    managedCreation: !!companyId,
+    authoringCapabilities,
+    operatingSpaces: creationScope.data?.spaces || [],
+    operatingSpaceId,
+    setOperatingSpaceId,
+    draftLoadError: draft.draftLoadError,
     isLoadingSource,
     isLoadingDraft: draft.isLoadingDraft,
     cloneFromId,
     sourceProperty,
     previewData,
-    isSubmitting: createProperty.isPending,
+    isSubmitting: updateProperty.isPending || draft.isSavingDraft,
     isSavingDraft: draft.isSavingDraft,
     saveState: draft.saveState,
     hasUnsavedChanges: draft.hasUnsavedChanges,

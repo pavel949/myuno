@@ -1,3 +1,4 @@
+import { bangkokTodayDate } from '@/lib/hotelDates';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOperationalTasks, OperationalTask } from '@/hooks/useOperationalTasks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,8 +17,8 @@ export function CalendarTodayTasks({ propertyId }: CalendarTodayTasksProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
   
-  const today = useMemo(() => new Date(), []);
-  const { tasks, completeTask, isLoading } = useOperationalTasks({
+  const today = useMemo(() => bangkokTodayDate(), []);
+  const { tasks, completeTask, isLoading, error, refetch } = useOperationalTasks({
     propertyId,
     date: today,
   });
@@ -28,6 +29,13 @@ export function CalendarTodayTasks({ propertyId }: CalendarTodayTasksProps) {
 
   if (isLoading) return null;
   if (!propertyId) return null;
+
+  if (error) return (
+    <Card><CardContent className="p-4 space-y-2" role="alert">
+      <p>{isRu ? 'Не удалось загрузить задачи на сегодня' : "Could not load today's tasks"}</p>
+      <Button variant="outline" onClick={() => refetch()}>{isRu ? 'Повторить' : 'Retry'}</Button>
+    </CardContent></Card>
+  );
 
   if (allTasks.length === 0) {
     return (
@@ -91,7 +99,9 @@ export function CalendarTodayTasks({ propertyId }: CalendarTodayTasksProps) {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="shrink-0 h-8 w-8 p-0"
+                  className="shrink-0 min-h-11 min-w-11 p-0"
+                  disabled={completeTask.isPending}
+                  aria-label={`${isRu ? 'Завершить задачу' : 'Complete task'}: ${isRu ? (task.title_ru || task.title) : task.title}`}
                   onClick={() => completeTask.mutate(task.id)}
                 >
                   <CheckCircle2 className="h-5 w-5 text-muted-foreground hover:text-success transition-colors" />

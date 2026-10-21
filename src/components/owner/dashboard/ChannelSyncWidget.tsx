@@ -43,9 +43,9 @@ export function ChannelSyncWidget() {
         body: { calendar_ids: calendarIds },
       });
       if (error) throw error;
-      toast.success(isRu ? 'Каналы синхронизированы' : 'Channels synced');
+      toast.success(isRu ? 'Календари площадок обновлены' : 'Channels synced');
     } catch {
-      toast.error(isRu ? 'Ошибка синхронизации' : 'Sync failed');
+      toast.error(isRu ? 'Не удалось обновить календарь' : 'Sync failed');
     } finally {
       setSyncing(false);
     }
@@ -67,7 +67,7 @@ export function ChannelSyncWidget() {
         <CardContent className="py-6 text-center">
           <Radio className="h-8 w-8 mx-auto mb-2 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground mb-3">
-            {isRu ? 'Подключите OTA-каналы для синхронизации' : 'Connect OTA channels to sync'}
+            {isRu ? 'Подключите календари площадок бронирования (Airbnb, Booking.com)' : 'Connect OTA channels to sync'}
           </p>
           <Button size="sm" variant="outline" onClick={() => navigate(APP_ROUTES.MC_CHANNELS)}>
             {isRu ? 'Подключить' : 'Connect'}
@@ -85,7 +85,7 @@ export function ChannelSyncWidget() {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Radio className="h-4 w-4 text-primary" />
-            {isRu ? 'Каналы' : 'Channels'}
+            {isRu ? 'Площадки бронирования' : 'Channels'}
             {hasIssues && (
               <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
                 {(stats?.error || 0) + (stats?.warning || 0)}
@@ -96,7 +96,7 @@ export function ChannelSyncWidget() {
             <Button
               variant="ghost"
               size="icon"
-              aria-label={isRu ? 'Синхронизировать каналы' : 'Sync channels'}
+              aria-label={isRu ? 'Обновить календари площадок' : 'Sync channels'}
               disabled={syncing}
               onClick={handleSyncAll}
             >
@@ -105,7 +105,7 @@ export function ChannelSyncWidget() {
             <Button
               variant="ghost"
               size="icon"
-              aria-label={isRu ? 'Все каналы' : 'All channels'}
+              aria-label={isRu ? 'Все площадки' : 'All channels'}
               onClick={() => navigate(APP_ROUTES.MC_CHANNELS)}
             >
               <ChevronRight className="h-4 w-4" />
@@ -133,7 +133,7 @@ export function ChannelSyncWidget() {
             </span>
           )}
           <span className="ml-auto text-muted-foreground">
-            {isRu ? 'Авто: каждые 5 мин' : 'Auto: every 5 min'}
+            {isRu ? 'Автоматическое обновление' : 'Auto: every 5 min'}
           </span>
         </div>
 

@@ -53,13 +53,13 @@ export const P6_RU_EXPATS: PersonaLanding = {
       slug: 'leasehold-guide',
       label: { ru: 'Leasehold vs Freehold', en: 'Leasehold vs Freehold' },
       oneLiner: { ru: 'Гайд по правам собственности для иностранца на Пхукете.', en: 'Foreign-buyer guide to ownership rights in Phuket.' },
-      href: '/knowledge/pillars/leasehold-vs-freehold',
+      href: '/knowledge/pillars/leasehold-vs-freehold', availability: 'entity-unverified',
     },
     {
       slug: 'foreign-quota',
       label: { ru: 'Foreign quota: что это', en: 'Foreign quota explained' },
       oneLiner: { ru: '49% правило, как проверить available quota в проекте.', en: 'The 49% rule, how to check available quota in a project.' },
-      href: '/knowledge/pillars/foreign-quota',
+      href: '/knowledge/pillars/foreign-quota', availability: 'entity-unverified',
     },
   ],
   faq: [

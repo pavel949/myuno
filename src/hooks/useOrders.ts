@@ -137,7 +137,7 @@ const queryClient = useQueryClient();
 
       // Call atomic RPC
       const { data: orderResult, error: orderError } = await supabase
-        .rpc('create_order_atomic', {
+        .rpc('create_order_checked', {
           p_order_type: input.order_type,
           p_customer_user_id: user.id,
           p_provider_org_id: input.provider_org_id || null,

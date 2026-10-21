@@ -35,6 +35,7 @@ export const WishlistButton = forwardRef<HTMLButtonElement, WishlistButtonProps>
           className
         )}
         aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+        aria-pressed={isWishlisted}
       >
         <Heart
           className={cn(
@@ -55,6 +56,7 @@ export const WishlistButton = forwardRef<HTMLButtonElement, WishlistButtonProps>
       variant={isWishlisted ? 'default' : 'outline'}
       size={size}
       onClick={handleClick}
+      aria-pressed={isWishlisted}
       className={cn(
         isWishlisted && 'bg-destructive hover:bg-destructive/90 text-destructive-foreground',
         className

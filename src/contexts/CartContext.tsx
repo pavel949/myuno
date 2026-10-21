@@ -253,9 +253,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const removeItem = useCallback(async (id: string) => {
-    const previousItems = [...items];
-    // Optimistic update
-    setItems(prev => prev.filter(item => item.id !== id));
+    // Capture the pre-mutation snapshot inside the functional updater to avoid a
+    // stale closure — the callback deps are [user], so an outer `[...items]`
+    // read would roll back to a stale value on failure and lose live cart items.
+    let previousItems: CartItem[] = [];
+    setItems(prev => {
+      previousItems = prev;
+      return prev.filter(item => item.id !== id);
+    });
 
     if (user) {
       try {
@@ -279,11 +284,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const previousItems = [...items];
-    // Optimistic update
-    setItems(prev => prev.map(item => 
-      item.id === id ? { ...item, quantity } : item
-    ));
+    // Capture snapshot inside the functional updater (see removeItem) to avoid a
+    // stale-closure rollback.
+    let previousItems: CartItem[] = [];
+    setItems(prev => {
+      previousItems = prev;
+      return prev.map(item =>
+        item.id === id ? { ...item, quantity } : item
+      );
+    });
 
     if (user) {
       try {

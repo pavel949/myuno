@@ -1,21 +1,10 @@
-/**
- * HeroGreeting — насыщенный hero-блок главной.
- *
- * Полноценный навигационный экран:
- *  - TopBar поверх navy-фона
- *  - Большое приветствие (font-display = Source Serif 4) + контекст персоны
- *  - AI search bar — единая точка входа
- *
- * DS 2.1: каноническая палитра navy + orange + cream, без glass/glow.
- */
+/** Compact account header. Interests are preferences, not the user's identity. */
 import React from 'react';
-import { Search, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useUserPersonas, type UserPersona } from '@/hooks/useUserPersonas';
+import { useLanguage, type Language } from '@/contexts/LanguageContext';
+import type { UserPersona } from '@/hooks/useUserPersonas';
 import { HomeTopBar } from './HomeTopBar';
-import { APP_ROUTES } from '@/lib/config/routes';
+import { pickLang } from '@/lib/i18n/pickLang';
 
 interface HeroGreetingProps {
   personas: UserPersona[];
@@ -23,128 +12,26 @@ interface HeroGreetingProps {
   onAppDrawerOpen: () => void;
 }
 
-function getGreeting(isRu: boolean): string {
+function getGreeting(language: Language): string {
   const hour = new Date().getHours();
-  if (hour < 5) return isRu ? 'Доброй ночи' : 'Good night';
-  if (hour < 12) return isRu ? 'Доброе утро' : 'Good morning';
-  if (hour < 18) return isRu ? 'Добрый день' : 'Good afternoon';
-  return isRu ? 'Добрый вечер' : 'Good evening';
+  if (hour < 5) return pickLang(language, { ru: 'Доброй ночи', en: 'Good night', th: 'สวัสดียามดึก' });
+  if (hour < 12) return pickLang(language, { ru: 'Доброе утро', en: 'Good morning', th: 'สวัสดีตอนเช้า' });
+  if (hour < 18) return pickLang(language, { ru: 'Добрый день', en: 'Good afternoon', th: 'สวัสดีตอนบ่าย' });
+  return pickLang(language, { ru: 'Добрый вечер', en: 'Good evening', th: 'สวัสดีตอนเย็น' });
 }
-
-const PERSONA_LABEL: Record<string, { ru: string; en: string }> = {
-  tourist:                { ru: 'Турист',          en: 'Tourist' },
-  resident:               { ru: 'Резидент',        en: 'Resident' },
-  family:                 { ru: 'Семья',           en: 'Family' },
-  nomad:                  { ru: 'Цифровой кочевник', en: 'Digital nomad' },
-  investor:               { ru: 'Инвестор',        en: 'Investor' },
-  property_owner:         { ru: 'Владелец',        en: 'Property owner' },
-  business:               { ru: 'Бизнес',          en: 'Business' },
-  pet_owner:              { ru: 'С питомцем',      en: 'With pet' },
-  relocation:             { ru: 'Релокация',       en: 'Relocating' },
-  couple:                 { ru: 'Пара',            en: 'Couple' },
-  active:                 { ru: 'Активный',        en: 'Active' },
-  nightlife:              { ru: 'Nightlife',       en: 'Nightlife' },
-  real_estate_developer:  { ru: 'Девелопер',       en: 'Developer' },
-  local_services_provider:{ ru: 'Поставщик услуг', en: 'Service provider' },
-};
 
 export function HeroGreeting({ personas, onRoleSheetOpen, onAppDrawerOpen }: HeroGreetingProps) {
   const { user } = useAuth();
   const { language } = useLanguage();
-  const navigate = useNavigate();
-  const isRu = language === 'ru';
-
-  const firstName =
-    (user?.user_metadata?.full_name as string | undefined)?.split(' ')[0] ??
-    (user?.email?.split('@')[0]) ??
-    null;
-
-  const persona = personas[0];
-  const personaLabel = persona ? PERSONA_LABEL[persona] : null;
+  const name = user?.user_metadata?.full_name;
+  const firstName = (typeof name === 'string' ? name.trim().split(/\s+/)[0] : '') || user?.email?.split('@')[0];
 
   return (
-    <div className="relative overflow-hidden bg-primary text-primary-foreground">
-      {/* Subtle grid texture (flat, no glow — canon §6) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage:
-            'linear-gradient(hsl(var(--primary-foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary-foreground)) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }}
-      />
-
-      <div className="relative px-4">
-        <HomeTopBar
-          personas={personas}
-          onRoleSheetOpen={onRoleSheetOpen}
-          onAppDrawerOpen={onAppDrawerOpen}
-          variant="onNavy"
-        />
-
-        {/* Greeting block */}
-        <div className="pt-2 pb-6">
-          <h1 className="font-display text-[34px] leading-[1.05] font-semibold tracking-tight text-primary-foreground">
-            {getGreeting(isRu)}
-            {firstName && (
-              <span className="block text-primary-foreground/85">
-                {firstName}
-              </span>
-            )}
-          </h1>
-
-          {personaLabel && (
-            <div className="mt-3 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-primary-foreground/90">
-                <span
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: 'hsl(var(--brand-orange-400))' }}
-                  aria-hidden
-                />
-                {isRu ? personaLabel.ru : personaLabel.en}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Glass AI search */}
-        <button
-          type="button"
-          onClick={() => navigate(APP_ROUTES.SEARCH)}
-          className="group w-full flex items-center gap-3 rounded-none border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-3.5 mb-5 text-left transition-all hover:bg-primary-foreground/15 hover:border-primary-foreground/30 active:scale-[0.99]"
-          aria-label={isRu ? 'Открыть поиск' : 'Open search'}
-        >
-          <span
-            className="grid w-9 h-9 place-items-center rounded-none flex-shrink-0"
-            style={{
-              backgroundColor: 'hsl(var(--brand-orange) / 0.95)',
-              color: 'hsl(var(--primary-foreground))',
-            }}
-          >
-            <Sparkles className="w-[18px] h-[18px]" strokeWidth={2} aria-hidden="true" />
-          </span>
-          <span className="flex-1 min-w-0">
-            <span className="block text-[14px] font-semibold text-primary-foreground truncate">
-              {isRu ? 'Спросите AI-консьержа' : 'Ask the AI concierge'}
-            </span>
-            <span className="block text-[11px] text-primary-foreground/65 truncate">
-              {isRu ? 'Жильё · услуги · документы — одной строкой' : 'Stay · services · docs — in one line'}
-            </span>
-          </span>
-          <Search className="w-4 h-4 text-primary-foreground/60 flex-shrink-0" strokeWidth={2} aria-hidden="true" />
-        </button>
-      </div>
-
-      {/* Soft fade into page bg */}
-      <div
-        aria-hidden
-        className="absolute left-0 right-0 -bottom-px h-6 pointer-events-none"
-        style={{
-          background:
-            'linear-gradient(to bottom, transparent, hsl(var(--background)) 100%)',
-        }}
-      />
-    </div>
+    <header className="px-4 pb-2">
+      <HomeTopBar personas={personas} onRoleSheetOpen={onRoleSheetOpen} onAppDrawerOpen={onAppDrawerOpen} />
+      <h1 className="break-words font-display text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl">
+        {getGreeting(language)}{firstName ? `, ${firstName}` : ''}
+      </h1>
+    </header>
   );
 }

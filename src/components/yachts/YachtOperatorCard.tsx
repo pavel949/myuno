@@ -34,7 +34,7 @@ export function YachtOperatorCard({ providerId }: YachtOperatorCardProps) {
     const fetchProvider = async () => {
       // Fetch provider + fleet count
       const { data: prov } = await supabase
-        .from('providers')
+        .from('public_provider_catalog')
         .select('id, name, logo_url, phone, email, website, is_verified, rating, review_count, response_time_minutes')
         .eq('id', providerId)
         .single();

@@ -21,6 +21,7 @@ import { NbPriceDisplay } from '@/components/newbuilds/NbPriceDisplay';
 import { NbLeadForm } from '@/components/newbuilds/NbLeadForm';
 import { APP_ROUTES } from '@/lib/config/routes';
 import { supabase } from '@/integrations/supabase/client';
+import '@/styles/newbuilds-theme.css';
 
 export default function ProjectMicrosite() {
   const { slug } = useParams<{ slug: string }>();

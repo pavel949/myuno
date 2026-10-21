@@ -82,23 +82,23 @@ interface SpotlightRect {
   height: number;
 }
 
-function useTargetRect(target: string, dep: number): SpotlightRect | null {
-  const [rect, setRect] = useState<SpotlightRect | null>(null);
+function useTargetRect(target: string, dep: number, active: boolean) {
+  const [measurement, setMeasurement] = useState<{ target: string; rect: SpotlightRect | null } | null>(null);
 
   useLayoutEffect(() => {
     const measure = () => {
       const el = document.querySelector<HTMLElement>(`[data-coach="${target}"]`);
       if (!el) {
-        setRect(null);
+        setMeasurement({ target, rect: null });
         return;
       }
       const r = el.getBoundingClientRect();
-      setRect({
-        top: r.top + window.scrollY,
-        left: r.left + window.scrollX,
+      setMeasurement({ target, rect: {
+        top: r.top,
+        left: r.left,
         width: r.width,
         height: r.height,
-      });
+      } });
     };
     measure();
     window.addEventListener('resize', measure);
@@ -107,9 +107,9 @@ function useTargetRect(target: string, dep: number): SpotlightRect | null {
       window.removeEventListener('resize', measure);
       window.removeEventListener('scroll', measure);
     };
-  }, [target, dep]);
+  }, [target, dep, active]);
 
-  return rect;
+  return { rect: measurement?.target === target ? measurement.rect : null, measured: measurement?.target === target };
 }
 
 export const Coachmarks: React.FC = () => {
@@ -129,17 +129,24 @@ export const Coachmarks: React.FC = () => {
   }, []);
 
   const current = STEPS[step];
-  const rect = useTargetRect(current?.target ?? '', step);
+  const { rect, measured } = useTargetRect(current?.target ?? '', step, active);
 
   // Lock body scroll while overlay is open.
   useEffect(() => {
-    if (!active) return;
+    if (!active || !rect) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      writeState({ ...readState(), dismissed_at: Date.now() });
+      setActive(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
     return () => {
+      window.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = prev;
     };
-  }, [active]);
+  }, [active, rect]);
 
   const dismiss = () => {
     writeState({ ...readState(), dismissed_at: Date.now() });
@@ -159,34 +166,37 @@ export const Coachmarks: React.FC = () => {
     }
   };
 
-  // Skip silently if a target is missing from the DOM (graceful degradation).
-  if (active && !rect && step < STEPS.length) {
-    // try advancing once, then bail.
-    if (step >= STEPS.length - 1) {
-      complete();
-      return null;
+  // Responsive or conditional pages may omit any target. Never display an
+  // empty blocking backdrop; advance to the next available target instead.
+  useEffect(() => {
+    if (!active || !measured || rect) return;
+    if (step < STEPS.length - 1) {
+      setStep(s => s + 1);
+    } else {
+      writeState({ ...readState(), completed_at: Date.now() });
+      setActive(false);
     }
-  }
+  }, [active, rect, measured, step]);
 
   const tooltipPos = useMemo(() => {
     if (!rect) return null;
     const pad = 12;
     const tooltipHeight = 160;
     const viewportH = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const below = rect.top - window.scrollY + rect.height + pad;
+    const below = rect.top + rect.height + pad;
     const showBelow = below + tooltipHeight < viewportH;
     return {
-      top: showBelow
+      top: Math.max(pad, showBelow
         ? rect.top + rect.height + pad
-        : rect.top - tooltipHeight - pad,
+        : rect.top - tooltipHeight - pad),
       left: Math.max(12, Math.min(rect.left, window.innerWidth - 320 - 12)),
     };
   }, [rect]);
 
-  if (!active || !current) return null;
+  if (!active || !current || !rect) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] pointer-events-none" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-[120] pointer-events-none" role="dialog" aria-modal="true" aria-label={isRu ? current.title.ru : current.title.en}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-foreground/60 pointer-events-auto"
@@ -212,8 +222,8 @@ export const Coachmarks: React.FC = () => {
       {/* Tooltip */}
       {tooltipPos && (
         <div
-          className="absolute w-[320px] max-w-[calc(100vw-24px)] bg-card border border-border p-4 pointer-events-auto"
-          style={{ top: tooltipPos.top, left: tooltipPos.left }}
+          className="absolute w-[320px] max-w-[calc(100vw-24px)] bg-card border border-border p-4 pointer-events-auto overflow-y-auto"
+          style={{ top: tooltipPos.top, left: tooltipPos.left, maxHeight: `calc(100dvh - ${tooltipPos.top + 12}px)` }}
         >
           <div className="flex items-start justify-between gap-2">
             <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
@@ -260,3 +270,4 @@ export const Coachmarks: React.FC = () => {
     </div>
   );
 };
+

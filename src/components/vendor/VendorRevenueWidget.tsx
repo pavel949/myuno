@@ -36,27 +36,27 @@ export function VendorRevenueWidget() {
       const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
       const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString();
 
-      // Orders this month + previous month
+      // Service orders this month + previous month (service_orders has provider_id + amount)
       const [currentRes, prevRes, totalOrdersRes] = await Promise.all([
-        (supabase as any).from('orders')
-          .select('total_amount')
+        supabase.from('service_orders')
+          .select('amount')
           .eq('provider_id', provider.id)
           .eq('status', 'completed')
           .gte('created_at', startOfMonth),
-        (supabase as any).from('orders')
-          .select('total_amount')
+        supabase.from('service_orders')
+          .select('amount')
           .eq('provider_id', provider.id)
           .eq('status', 'completed')
           .gte('created_at', startOfPrevMonth)
           .lt('created_at', endOfPrevMonth),
-        (supabase as any).from('orders')
+        supabase.from('service_orders')
           .select('id', { count: 'exact', head: true })
           .eq('provider_id', provider.id)
           .eq('status', 'completed'),
       ]);
 
-      const currentRevenue = (currentRes.data || []).reduce((s: number, o: { total_amount: number | null }) => s + Number(o.total_amount || 0), 0);
-      const prevRevenue = (prevRes.data || []).reduce((s: number, o: { total_amount: number | null }) => s + Number(o.total_amount || 0), 0);
+      const currentRevenue = (currentRes.data || []).reduce((s: number, o: { amount: number | null }) => s + Number(o.amount || 0), 0);
+      const prevRevenue = (prevRes.data || []).reduce((s: number, o: { amount: number | null }) => s + Number(o.amount || 0), 0);
       const totalOrders = totalOrdersRes.count || 0;
       const growth = prevRevenue > 0 ? Math.round(((currentRevenue - prevRevenue) / prevRevenue) * 100) : 0;
 

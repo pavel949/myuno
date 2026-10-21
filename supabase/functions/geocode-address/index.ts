@@ -1,10 +1,21 @@
-// Deno.serve used (native edge runtime)
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { withRateLimit, RATE_LIMITS } from '../_shared/rate-limit.ts';
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://myuno.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const GATEWAY_URL = 'https://connector-gateway.lovable.dev/google_maps';
+
+function getGatewayHeaders() {
+  const lovableKey = Deno.env.get('LOVABLE_API_KEY');
+  const googleMapsKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
+
+  if (!lovableKey || !googleMapsKey) {
+    throw new Error('Google Maps connector credentials are not configured');
+  }
+
+  return {
+    Authorization: `Bearer ${lovableKey}`,
+    'X-Connection-Api-Key': googleMapsKey,
+  };
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -20,31 +31,25 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const language = url.searchParams.get("language") || "en";
 
-    const googleApiKey = Deno.env.get("GOOGLE_MAPS_API_KEY");
-    if (!googleApiKey) {
-      throw new Error("GOOGLE_MAPS_API_KEY not configured");
-    }
-
     // Check for reverse geocoding mode (lat + lng params)
     const lat = url.searchParams.get("lat");
     const lng = url.searchParams.get("lng");
+    const gatewayHeaders = getGatewayHeaders();
 
     if (lat && lng) {
       // Reverse geocoding via Google Geocoding API
-      const reverseUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${googleApiKey}&language=${language}`;
+      const reverseUrl = new URL(`${GATEWAY_URL}/maps/api/geocode/json`);
+      reverseUrl.searchParams.set('latlng', `${lat},${lng}`);
+      reverseUrl.searchParams.set('language', language);
 
-      console.info(`[geocode-address] Reverse geocoding: ${lat},${lng}`);
-
-      const response = await fetch(reverseUrl);
+      const response = await fetch(reverseUrl, { headers: gatewayHeaders });
       if (!response.ok) {
         const errorBody = await response.text();
-        console.error(`[geocode-address] Google reverse error ${response.status}:`, errorBody);
-        throw new Error(`Google Geocoding API error: ${response.status}`);
+        throw new Error(`Google Geocoding gateway error: ${response.status} ${errorBody}`);
       }
 
       const data = await response.json();
       if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
-        console.error(`[geocode-address] Google Geocoding status: ${data.status}`);
         throw new Error(`Google Geocoding status: ${data.status}`);
       }
 
@@ -69,21 +74,20 @@ Deno.serve(async (req) => {
       });
     }
 
-    const encodedQuery = encodeURIComponent(query);
-    const searchUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedQuery}&key=${googleApiKey}&language=${language}&region=TH&bounds=7.7,98.2|8.2,98.5`;
+    const searchUrl = new URL(`${GATEWAY_URL}/maps/api/geocode/json`);
+    searchUrl.searchParams.set('address', query);
+    searchUrl.searchParams.set('language', language);
+    searchUrl.searchParams.set('region', 'TH');
+    searchUrl.searchParams.set('bounds', '7.7,98.2|8.2,98.5');
 
-    console.info(`[geocode-address] Searching: "${query}" via Google Geocoding API`);
-
-    const response = await fetch(searchUrl);
+    const response = await fetch(searchUrl, { headers: gatewayHeaders });
     
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error(`[geocode-address] Google error ${response.status}:`, errorBody);
-      throw new Error(`Google Geocoding API error: ${response.status}`);
+      throw new Error(`Google Geocoding gateway error: ${response.status} ${errorBody}`);
     }
 
     const data = await response.json();
-    console.info(`[geocode-address] Got ${data.results?.length || 0} results`);
 
     const results = (data.results || []).slice(0, 5).map((r: any) => ({
       mapbox_id: r.place_id,
@@ -97,7 +101,6 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error("[geocode-address]", message);
     return new Response(JSON.stringify({ error: message, results: [] }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

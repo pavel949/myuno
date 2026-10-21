@@ -41,7 +41,7 @@ export const P1_TOURISTS: PersonaLanding = {
       slug: 'airport-transfer',
       label: { ru: 'Трансфер из аэропорта', en: 'Airport transfer' },
       oneLiner: { ru: 'Минивэн до отеля, цена THB фикс.', en: 'Fixed-price minivan to your hotel.' },
-      href: '/landing/airport-transfer',
+      href: '/transfer',
     },
     {
       slug: 'esim',
@@ -87,7 +87,7 @@ export const P1_TOURISTS: PersonaLanding = {
   ],
   primaryCta: {
     label: { ru: 'Заказать трансфер', en: 'Book a transfer' },
-    href: '/landing/airport-transfer',
+    href: '/transport/airport-transfer',
     subtitle: { ru: 'Цена в THB, оплата в приложении.', en: 'Price in THB, paid in the app.' },
   },
   secondaryCta: {

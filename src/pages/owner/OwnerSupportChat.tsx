@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/uno/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { OwnerAIAssistant } from '@/components/owner/OwnerAIAssistant';
+import { redirectToAuth } from '@/lib/auth/redirectToAuth';
 
 export default function OwnerSupportChat() {
   const { language } = useLanguage();
@@ -27,7 +28,7 @@ export default function OwnerSupportChat() {
           <p className="text-muted-foreground mb-6">
             {isRu ? 'Войдите для доступа к ассистенту' : 'Sign in to access the assistant'}
           </p>
-          <Button onClick={() => navigate('/auth')}>
+          <Button onClick={() => redirectToAuth(navigate)}>
             {isRu ? 'Войти' : 'Sign In'}
           </Button>
         </div>

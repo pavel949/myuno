@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -21,6 +22,8 @@ import {
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { propertyRequestReturnPath } from '@/lib/owner/propertyNavigation';
+import { usePropertyRequestReturn } from '@/hooks/usePropertyRequestReturn';
 
 export default function ServiceRequest() {
   const { language } = useLanguage();
@@ -46,6 +49,17 @@ export default function ServiceRequest() {
     description: '',
     special_instructions: '',
   });
+
+  const backPath = propertyRequestReturnPath(formData.property_id, allProperties, propertiesLoading);
+  const beginReturn = usePropertyRequestReturn(formData.property_id, allProperties, propertiesLoading);
+  const requestedPropertyId = searchParams.get('property');
+  useEffect(() => {
+    // URL context is a convenience, never a source of property access.
+    if (propertiesLoading || !requestedPropertyId ||
+        !allProperties.some(property => property.property_id === requestedPropertyId)) return;
+    // A refetch or URL update must not overwrite the user's selection.
+    setFormData(current => current.property_id ? current : { ...current, property_id: requestedPropertyId });
+  }, [requestedPropertyId, propertiesLoading, allProperties]);
 
   const serviceTypes = [
     { value: 'check_in', labelEn: 'Check-in', labelRu: 'Check-in', icon: Key, color: 'text-success' },
@@ -75,6 +89,7 @@ export default function ServiceRequest() {
     const [hours, minutes] = formData.scheduled_time.split(':');
     scheduledAt.setHours(Number(hours), Number(minutes));
 
+    const returnAfterSuccess = beginReturn();
     await createRequest.mutateAsync({
       property_id: formData.property_id,
       service_type: formData.service_type,
@@ -88,7 +103,7 @@ export default function ServiceRequest() {
       special_instructions: formData.special_instructions || undefined,
     });
 
-    navigate('/owner');
+    returnAfterSuccess();
   };
 
   if (propertiesLoading) {
@@ -104,7 +119,7 @@ export default function ServiceRequest() {
   if (!allProperties?.length) {
     return (
       <PageContainer>
-        <BackButton />
+        <BackButton fallbackPath={backPath} />
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
           <Home className="h-16 w-16 text-muted-foreground mb-4" />
           <h1 className="text-xl font-bold mb-2">
@@ -127,7 +142,7 @@ export default function ServiceRequest() {
 
   return (
     <PageContainer>
-      <BackButton />
+      <BackButton fallbackPath={backPath} />
       <PageHeader 
         title={isRu ? 'Новая заявка' : 'New Request'}
         subtitle={selectedType ? (isRu ? selectedType.labelRu : selectedType.labelEn) : ''}
@@ -329,22 +344,36 @@ export default function ServiceRequest() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>{isRu ? 'Описание задачи' : 'Task Description'}</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder={isRu ? 'Опишите, что нужно сделать...' : 'Describe what needs to be done...'}
-                rows={3}
-              />
+              <div className="relative">
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder={isRu ? 'Опишите, что нужно сделать...' : 'Describe what needs to be done...'}
+                  rows={3}
+                  className="pr-12"
+                />
+                <VoiceInputButton
+                  onTranscript={(t) => setFormData(prev => ({ ...prev, description: appendTranscript(prev.description, t) }))}
+                  className="absolute bottom-2 right-2"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
               <Label>{isRu ? 'Особые инструкции' : 'Special Instructions'}</Label>
-              <Textarea
-                value={formData.special_instructions}
-                onChange={(e) => setFormData(prev => ({ ...prev, special_instructions: e.target.value }))}
-                placeholder={isRu ? 'Код от ворот, где ключи...' : 'Gate code, where are the keys...'}
-                rows={2}
-              />
+              <div className="relative">
+                <Textarea
+                  value={formData.special_instructions}
+                  onChange={(e) => setFormData(prev => ({ ...prev, special_instructions: e.target.value }))}
+                  placeholder={isRu ? 'Код от ворот, где ключи...' : 'Gate code, where are the keys...'}
+                  rows={2}
+                  className="pr-12"
+                />
+                <VoiceInputButton
+                  onTranscript={(t) => setFormData(prev => ({ ...prev, special_instructions: appendTranscript(prev.special_instructions, t) }))}
+                  className="absolute bottom-2 right-2"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

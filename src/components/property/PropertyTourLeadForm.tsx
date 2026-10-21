@@ -41,23 +41,29 @@ export function PropertyTourLeadForm({ open, onOpenChange, source = 'home_banner
         ? [{ date: formData.preferredDate, time: '' }]
         : null;
 
-      const { data, error } = await supabase.from('consultation_requests').insert({
-        user_id: user?.id || null,
-        request_type: 'property_tour',
-        name: formData.name,
-        phone: formData.phone,
-        preferred_dates: preferredDates,
-        guests_count: parseInt(formData.guests) || 2,
-        notes: `[Free Property Tour] Source: ${source}. ${formData.notes}`.trim(),
-        status: 'pending',
-        vertical_id: 'property',
-        lead_source: 'website',
-        entry_point: source,
-      }).select().single();
+      // Guests cannot read back consultation_requests (PII) — use the RPC that
+      // returns only the new lead id.
+      const { data: leadId, error } = await supabase.rpc('submit_consultation_request', {
+        payload: {
+          request_type: 'property_tour',
+          name: formData.name,
+          phone: formData.phone,
+          preferred_dates: preferredDates,
+          guests_count: parseInt(formData.guests) || 2,
+          notes: `[Free Property Tour] Source: ${source}. ${formData.notes}`.trim(),
+          status: 'pending',
+          vertical_id: 'property',
+          lead_source: 'website',
+          entry_point: source,
+        } as never,
+      });
 
       if (error) throw error;
 
+      const data = leadId ? { id: leadId as string } : null;
+
       if (data) {
+
         supabase.functions.invoke('notify-admin-order', {
           body: {
             order_id: data.id,

@@ -103,8 +103,8 @@ export default function SOS() {
   };
 
   return (
-    <AppLayout showHeader={false}>
-      <PageContainer>
+    <AppLayout usePageContainer={false} showHeader={false}>
+      <PageContainer className="max-w-3xl">
         <PageHeader title="SOS" showBack fallbackPath="/" />
 
         {/* Offline indicator + Emergency Card */}
@@ -159,7 +159,7 @@ export default function SOS() {
         </div>
 
         {/* Quick Actions - 4 big buttons */}
-        <div className="grid grid-cols-4 gap-2 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
           {quickActions.map((action) => {
             const Icon = action.icon ?? resolveIcon(undefined);
             const tone = EMERGENCY_TONE_CLASSES[action.tone ?? 'destructive'];
@@ -168,13 +168,13 @@ export default function SOS() {
                 key={action.id}
                 onClick={() => handleCall(action.phone)}
                 className={cn(
-                  "flex flex-col items-center p-3 rounded-none border transition-all ",
+                  "flex min-h-28 min-w-0 flex-col items-center justify-center p-3 rounded-none border transition-colors ",
                   tone.bg, "border-transparent hover:border-current/20"
                 )}
               >
                 <Icon className={cn("w-6 h-6 mb-1", tone.color)} />
                 <span className="font-bold text-lg">{action.phone}</span>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-xs leading-relaxed text-center text-muted-foreground">
                   {language === 'ru'
                     ? (action.shortLabelRu ?? action.nameRu)
                     : (action.shortLabelEn ?? action.nameEn)}
@@ -224,7 +224,7 @@ export default function SOS() {
                   <div className="font-medium text-sm">
                     {language === 'ru' ? service.titleRu : service.title}
                   </div>
-                  <div className="text-[10px] text-muted-foreground">
+                  <div className="text-xs leading-relaxed text-center text-muted-foreground">
                     {language === 'ru' ? service.descRu : service.desc}
                   </div>
                 </div>

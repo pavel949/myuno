@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
   if (body.context_type === 'project' && body.context_slug) {
     try {
       const { data: project } = await supabase
-        .from('nb_projects')
+        .from('property_projects')
         .select('id, developer_id')
         .eq('slug', body.context_slug)
         .maybeSingle();

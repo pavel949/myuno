@@ -132,11 +132,11 @@ function PaymentPolicySectionInner({ formData, updateFormData }: PaymentPolicySe
               className="flex-1"
             />
             <Select
-              value={formData.deposit_currency || 'USD'}
+              value={formData.deposit_currency || ''}
               onValueChange={(v) => updateFormData({ deposit_currency: v })}
             >
               <SelectTrigger className="w-24">
-                <SelectValue />
+                <SelectValue placeholder={isRu ? 'Валюта' : 'Currency'} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="USD">$ USD</SelectItem>

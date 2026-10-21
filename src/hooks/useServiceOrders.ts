@@ -59,7 +59,7 @@ export function useGuestServiceOrders() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: orders = [], isLoading, refetch } = useQuery({
+  const { data: orders = [], isLoading, error, refetch } = useQuery({
     queryKey: ['guest-service-orders', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -170,6 +170,7 @@ export function useGuestServiceOrders() {
     orders,
     activeOrders,
     completedOrders,
+    error,
     isLoading,
     createOrder,
     cancelOrder,

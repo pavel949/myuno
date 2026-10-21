@@ -12,6 +12,7 @@ import {
   Droplets, Building, Wrench
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { LegalEntityBlock } from '@/components/legal/LegalEntityInfo';
 
 type ServiceType = 'escrow' | 'lead';
 
@@ -596,11 +597,7 @@ export default function RefundPolicyPage() {
             <p className="text-xs text-muted-foreground mt-3">
               {isRu ? 'Последнее обновление: Январь 2026' : 'Last updated: January 2026'}
             </p>
-            <div className="mt-4 p-3 bg-muted rounded-none text-xs text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">myUNO Pte. Ltd.</p>
-              <p>{isRu ? 'Сингапур | Сервисное подразделение: Таиланд' : 'Singapore | Service Operations: Thailand'}</p>
-              <p className="mt-1">www.myuno.app</p>
-            </div>
+            <LegalEntityBlock className="mt-4" />
           </CardContent>
         </Card>
       </PageContainer>

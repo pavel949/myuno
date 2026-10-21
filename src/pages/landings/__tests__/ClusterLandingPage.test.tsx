@@ -190,6 +190,20 @@ describe('ClusterLandingPage — cross-link «По персонам»', () => {
     expect(screen.queryByRole('link', { name: 'HNW' })).not.toBeInTheDocument();
   });
 
+  it('disables unresolved service and repeated CTA destinations while retaining visible labels', () => {
+    MOCK_CLUSTERS = [{ ...liveCluster,
+      services: [{ slug: 'missing', label: { ru: 'Unavailable service', en: 'Unavailable service' }, href: '/missing-service', availability: 'unavailable' }],
+      primaryCta: { label: { ru: 'Unavailable action', en: 'Unavailable action' }, href: '/missing-action', availability: 'unavailable' },
+    }];
+    MOCK_PERSONAS = [];
+    const { container } = renderAt('/cluster/arrival');
+    expect(container.querySelector('a[href*="missing-"]')).toBeNull();
+    for (const entry of screen.getAllByRole('link', { name: /Unavailable action|Unavailable service/ })) {
+      expect(entry).toHaveAttribute('aria-disabled', 'true');
+      expect(entry).not.toHaveAttribute('href');
+    }
+  });
+
   it('does NOT include personas not in relatedPersonas, even if live', () => {
     const otherLive: PersonaLanding = { ...livePersonaP1, personaCode: 'P3', slug: 'eu-guests', h1: { ru: 'Гости', en: 'Guests' } };
     MOCK_CLUSTERS = [liveCluster]; // relatedPersonas: ['P1','P9']

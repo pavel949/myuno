@@ -179,7 +179,7 @@ export default function FullManagement() {
     return (
       <PageContainer>
         <PageHeader 
-          title="myUNO Full Management"
+          title={isRu ? 'Полное управление myUNO' : 'myUNO Full Management'}
           subtitle={isRu ? 'Передайте управление профессионалам' : 'Leave it to the professionals'}
           showBack
           fallbackPath="/owner"

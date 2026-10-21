@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useRef } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PropertyImageCarouselProps {
   images: string[];
@@ -12,22 +13,28 @@ interface PropertyImageCarouselProps {
   aspectClass?: string;
 }
 
-import { PLACEHOLDER_IMAGES } from '@/lib/config/placeholders';
 
-const FALLBACK_IMAGE = PLACEHOLDER_IMAGES.property;
 
 /**
  * Lazy carousel: renders a single static image on mount for fast LCP.
  * Carousel initializes only after user interaction (touch/mouse-enter).
  */
-export function PropertyImageCarousel({
+export function PropertyImageCarousel(props: PropertyImageCarouselProps) {
+  // Remount state when the gallery changes so failures never leak to another home.
+  return <PropertyImageCarouselGallery key={JSON.stringify(props.images)} {...props} />;
+}
+
+function PropertyImageCarouselGallery({
   images,
   alt = '',
   className,
   isHovered,
   aspectClass = 'aspect-[4/5] sm:aspect-square',
 }: PropertyImageCarouselProps) {
-  const allImages = images.length > 0 ? images : [FALLBACK_IMAGE];
+  const { language } = useLanguage();
+  const [failedImages, setFailedImages] = useState<Set<string>>(() => new Set());
+  const allImages = [...new Set(images.filter(image => typeof image === 'string' && image.trim()))].filter(image => !failedImages.has(image));
+  const imageFailed = (image: string) => setFailedImages(previous => new Set([...previous, image]));
   const [carouselActive, setCarouselActive] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const activatedRef = useRef(false);
@@ -67,6 +74,14 @@ export function PropertyImageCarousel({
 
   const hasMultiple = allImages.length > 1;
 
+  if (allImages.length === 0) {
+    const label = language === 'ru' ? 'Фото недоступно' : language === 'th' ? 'ไม่มีรูปภาพ' : 'Photo unavailable';
+    return <div role="img" aria-label={label} className={cn(aspectClass, 'flex flex-col items-center justify-center gap-2 bg-muted text-muted-foreground', className)}>
+      <ImageOff className="h-8 w-8" aria-hidden="true" />
+      <span className="px-4 text-center text-sm">{label}</span>
+    </div>;
+  }
+
   // Static cover image — fast initial render
   if (!carouselActive || !hasMultiple) {
     return (
@@ -77,6 +92,7 @@ export function PropertyImageCarousel({
       >
         <img
           src={allImages[0]}
+          onError={() => imageFailed(allImages[0])}
           alt={alt}
           className={cn(
             "w-full h-full object-cover transition-transform duration-300",
@@ -102,9 +118,10 @@ export function PropertyImageCarousel({
       <div ref={emblaRef} className="overflow-hidden h-full">
         <div className="flex h-full">
           {allImages.slice(0, 5).map((img, i) => (
-            <div key={i} className="flex-[0_0_100%] min-w-0 h-full">
+            <div key={img} className="flex-[0_0_100%] min-w-0 h-full">
               <img
                 src={img}
+                onError={() => imageFailed(img)}
                 alt={`${alt} ${i + 1}`}
                 className={cn(
                   "w-full h-full object-cover transition-transform duration-300",

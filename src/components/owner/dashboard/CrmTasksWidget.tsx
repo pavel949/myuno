@@ -44,7 +44,7 @@ export function CrmTasksWidget() {
             {isRu ? 'Задачи на сегодня' : "Today's Tasks"}
           </h3>
         </div>
-        <p className="text-sm text-muted-foreground">{isRu ? 'Нет срочных задач ✓' : 'No urgent tasks ✓'}</p>
+        <p className="text-sm text-muted-foreground">{isRu ? 'Срочных задач нет' : 'No urgent tasks ✓'}</p>
       </div>
     );
   }

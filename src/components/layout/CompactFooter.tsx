@@ -21,6 +21,7 @@ import { ECOSYSTEM_FOOTER_UI, pickTriplet } from '@/lib/ecosystemGlossary';
 import { ECOSYSTEM_PAGE_CONTAINER } from '@/design-system/ecosystemLayout';
 import { cn } from '@/lib/utils';
 import { SURFACE_LANDINGS } from '@/lib/landings/surfaceLandings';
+import { LegalCopyright } from '@/components/legal/LegalEntityInfo';
 
 export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
   const { language } = useLanguage();
@@ -101,11 +102,11 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
 
           {/* Row 1.5 — surface explore (Master Taxonomy v1.0) */}
           <nav
-            aria-label={language === 'ru' ? 'Жизненный цикл' : 'Lifecycle'}
+            aria-label={t({ ru: 'Жизненный цикл', en: 'Lifecycle', th: 'ช่วงการใช้ชีวิต' })}
             className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-caption"
           >
             <span className="text-muted-foreground/70">
-              {language === 'ru' ? 'Жизненный цикл:' : 'Lifecycle:'}
+              {t({ ru: 'Жизненный цикл:', en: 'Lifecycle:', th: 'ช่วงการใช้ชีวิต:' })}
             </span>
             {SURFACE_LANDINGS.map((s) => (
               <Link
@@ -113,7 +114,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
                 to={s.href}
                 className="text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
               >
-                {language === 'ru' ? s.titleRu : s.titleEn}
+                {t({ ru: s.titleRu, en: s.titleEn, th: s.titleTh })}
               </Link>
             ))}
           </nav>
@@ -141,7 +142,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
           {/* Row 3 — copyright + made-in */}
           <div className="mt-6 flex flex-col gap-2 border-t border-border/40 pt-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="font-sans text-caption tracking-[0.04em] text-muted-foreground/70">
-              © {new Date().getFullYear()} myUNO · Phuket Edition
+              <LegalCopyright />
             </p>
             <p className="font-sans text-caption tracking-[0.04em] text-muted-foreground/70">
               {t(ECOSYSTEM_FOOTER_UI.madeIn)}
@@ -193,7 +194,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
         </div>
 
         <nav
-          aria-label={language === 'ru' ? 'Жизненный цикл' : 'Lifecycle'}
+          aria-label={t({ ru: 'Жизненный цикл', en: 'Lifecycle', th: 'ช่วงการใช้ชีวิต' })}
           className="flex flex-wrap justify-center gap-x-3 gap-y-2 font-sans text-caption"
         >
           {SURFACE_LANDINGS.map((s) => (
@@ -202,7 +203,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
               to={s.href}
               className="text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
             >
-              {language === 'ru' ? s.titleRu : s.titleEn}
+              {t({ ru: s.titleRu, en: s.titleEn, th: s.titleTh })}
             </Link>
           ))}
         </nav>
@@ -223,7 +224,7 @@ export const CompactFooter = forwardRef<HTMLElement>((_props, ref) => {
         </nav>
 
         <p className="text-center font-sans text-caption text-muted-foreground/70">
-          © {new Date().getFullYear()} myUNO · Phuket Edition
+          <LegalCopyright />
         </p>
       </div>
     </footer>

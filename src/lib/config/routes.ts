@@ -16,6 +16,12 @@ export const APP_ROUTES = {
 
   // ── Discovery & Navigation ──
   DISCOVER: '/discover',
+  DISCOVER_SITUATIONS: '/discover/situations',
+  /** Goal-first entry pages (Phuket One-Stop IA). Mounted under /discover. */
+  GOAL_STAY: '/discover/stay',
+  GOAL_LIVE: '/discover/live',
+  GOAL_BUY: '/discover/buy',
+  GOAL_SERVICES: '/discover/services',
   NAVIGATOR: '/navigator',
   MAP: '/map',
   SEARCH: '/search',
@@ -98,9 +104,11 @@ export const APP_ROUTES = {
   PROPERTY_MAP: '/property/map',
   PROPERTY_CONSULTATION: '/property/consultation',
   PROPERTY_DEPOSIT_SUCCESS: '/property/deposit-success',
+  COMPLEX_DETAIL: (id: string) => `/property/complex/${id}`,
   PROJECT_DETAIL: (id: string) => `/property/project/${id}`,
   COMPLEXES: '/property/projects',
   MANAGEMENT_COMPANY: (slug: string) => `/company/${slug}`,
+  PROPERTY_COMPANIES: '/property/companies',
 
   // ── Offplan & Developers (under Property Hub) ──
   OFFPLAN: '/property/offplan',
@@ -449,6 +457,7 @@ export const APP_ROUTES = {
   MC_COMPLEXES: '/mc/complexes',
   MC_PROJECTS: '/mc/projects',
   MC_PROPERTY_IMPORT: '/mc/properties/import',
+  MC_TODAY: '/mc/today',
   MC_CALENDAR: '/mc/calendar',
   MC_CONTACTS: '/mc/contacts',
   MC_CONTACT_DETAIL: (id: string) => `/mc/contacts/${id}`,
@@ -463,6 +472,7 @@ export const APP_ROUTES = {
   MC_FINANCE: '/mc/finance',
   MC_FINANCIALS: '/mc/financials',
   MC_STAFF: '/mc/staff',
+  MC_ANALYTICS: '/mc/analytics',
   MC_REPORTS: '/mc/reports',
   MC_BUDGET: '/mc/budget',
   MC_FINANCE_PLANNING: '/mc/finance/planning',

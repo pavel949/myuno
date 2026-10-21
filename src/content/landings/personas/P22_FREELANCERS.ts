@@ -19,8 +19,8 @@ export const P22_FREELANCERS: PersonaLanding = {
     { ru: 'Нужен публичный портфолио без своего сайта.', en: 'You need a public portfolio without building a site.' },
   ],
   services: [
-    { slug: 'profile', label: { ru: 'Публичный профиль', en: 'Public profile' }, oneLiner: { ru: 'Портфолио, отзывы, моментальный booking.', en: 'Portfolio, reviews, instant booking.' }, href: '/vendor/apply' },
-    { slug: 'card-payments', label: { ru: 'Оплата картой', en: 'Card payments' }, oneLiner: { ru: 'Stripe + Wise, выплата в THB.', en: 'Stripe + Wise, payout in THB.' }, href: '/vendor/billing' },
+    { slug: 'profile', label: { ru: 'Заявка поставщика', en: 'Provider application', th: 'ใบสมัครผู้ให้บริการ' }, oneLiner: { ru: 'Укажите сведения о себе или компании и своих услугах.', en: 'Provide your individual or company details and services.', th: 'ระบุข้อมูลส่วนตัวหรือบริษัทและบริการของคุณ' }, href: '/vendor/onboarding' },
+    { slug: 'card-payments', label: { ru: 'Оплата картой', en: 'Card payments' }, oneLiner: { ru: 'Stripe + Wise, выплата в THB.', en: 'Stripe + Wise, payout in THB.' }, href: '/vendor/billing', availability: 'unavailable' },
     { slug: 'concierge', label: { ru: 'AI-консьерж', en: 'AI concierge' }, oneLiner: { ru: 'Подбирает гостям именно вас под их запрос.', en: 'Matches guests to you based on their request.' }, href: '/vendor' },
     { slug: 'classifieds', label: { ru: 'Объявления и лиды', en: 'Listings & leads' }, oneLiner: { ru: 'Доступ к запросам резидентов острова.', en: 'Access to island resident requests.' }, href: '/classifieds' },
   ],
@@ -28,7 +28,7 @@ export const P22_FREELANCERS: PersonaLanding = {
     { q: { ru: 'Нужно ли быть юр.лицом?', en: 'Do I need a registered company?' }, a: { ru: 'Нет — фрилансеры работают как self-employed, нужен только work permit или соответствующая виза.', en: 'No, freelancers work as self-employed; only work permit or matching visa is required.' } },
     { q: { ru: 'Сколько стоит размещение?', en: 'What does it cost?' }, a: { ru: 'Регистрация бесплатна. Платформа берёт стандартную комиссию с выполненных заказов — актуальная ставка на /vendor/billing.', en: 'Sign-up is free. The platform charges its standard commission on completed orders, current rate on /vendor/billing.' } },
   ],
-  primaryCta: { label: { ru: 'Создать профиль', en: 'Create a profile' }, href: '/vendor/apply' },
+  primaryCta: { label: { ru: 'Подать заявку поставщика', en: 'Start provider application', th: 'เริ่มสมัครเป็นผู้ให้บริการ' }, href: '/vendor/onboarding' },
   secondaryCta: { label: { ru: 'Открыть объявления', en: 'Browse listings' }, href: '/classifieds' },
   seo: {
     metaTitle: { ru: 'Фрилансеры на Пхукете: клиенты, оплата, портфолио — myUNO', en: 'Phuket freelancers: clients, payments, portfolio, myUNO' },

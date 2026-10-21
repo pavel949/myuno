@@ -32,7 +32,7 @@ const buttonVariants = cva(
           "bg-primary text-primary-foreground hover:bg-[hsl(var(--primary-hover))]",
         // Secondary — canon §8.1 Secondary (outline): transparent, navy text, 1.5px navy border.
         outline:
-          "bg-transparent text-primary border-[1.5px] border-primary hover:bg-[hsl(var(--brand-navy-50))]",
+          "bg-transparent text-primary border-[1.5px] border-primary hover:bg-muted",
         // Secondary surface — alternative for stacked secondary actions on light blocks.
         secondary:
           "bg-[hsl(var(--surface-raised))] text-foreground border border-border hover:bg-[hsl(var(--border-subtle))]",

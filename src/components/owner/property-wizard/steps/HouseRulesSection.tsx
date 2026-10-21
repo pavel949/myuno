@@ -20,11 +20,12 @@ import { cn } from '@/lib/utils';
 import { PropertyFormData } from '@/hooks/usePropertyWizard';
 
 interface HouseRulesSectionProps {
+  canEditPricing?: boolean;
   formData: PropertyFormData;
   updateFormData: (updates: Partial<PropertyFormData>) => void;
 }
 
-function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionProps) {
+function HouseRulesSectionInner({ formData, updateFormData, canEditPricing = true }: HouseRulesSectionProps) {
   const { language } = useLanguage();
   const isRu = language === 'ru';
 
@@ -73,6 +74,7 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
                 <Input
                   type="number"
                   min={0}
+                  disabled={!canEditPricing}
                   value={formData.pet_deposit || ''}
                   onChange={(e) => updateFormData({ pet_deposit: Number(e.target.value) || undefined })}
                   placeholder="2000"
@@ -116,6 +118,7 @@ function HouseRulesSectionInner({ formData, updateFormData }: HouseRulesSectionP
                 <Input
                   type="number"
                   min={0}
+                  disabled={!canEditPricing}
                   value={formData.smoking_penalty || ''}
                   onChange={(e) => updateFormData({ smoking_penalty: Number(e.target.value) || undefined })}
                   placeholder="5000"

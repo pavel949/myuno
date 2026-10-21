@@ -43,16 +43,25 @@ interface VendorModerationQueueProps {
   className?: string;
 }
 
-// Tables to query for moderation status
-const MODERATION_TABLES = [
-  { table: 'marketplace_products', nameField: 'name_en', providerField: 'vendor_id', useVendorId: true, path: '/vendor/marketplace' },
-  { table: 'vendor_services', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/services' },
-  { table: 'yachts', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/yachts' },
-  { table: 'tours', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/tours' },
-  { table: 'salons', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/beauty' },
-  { table: 'clinics', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/clinics' },
-  { table: 'gyms', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/fitness' },
-  { table: 'vehicles', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/transport' },
+// Tables to query for moderation status.
+// `hasRejectionReason` reflects actual live schema — tours/clinics/vehicles
+// don't have a rejection_reason column yet, so we must not select it.
+// vendor_services has no approval_status/rejection_reason at all → excluded.
+const MODERATION_TABLES: Array<{
+  table: string;
+  nameField: string;
+  providerField: string;
+  useVendorId: boolean;
+  path: string;
+  hasRejectionReason: boolean;
+}> = [
+  { table: 'marketplace_products', nameField: 'name_en', providerField: 'vendor_id', useVendorId: true, path: '/vendor/marketplace', hasRejectionReason: true },
+  { table: 'yachts', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/yachts', hasRejectionReason: true },
+  { table: 'tours', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/tours', hasRejectionReason: false },
+  { table: 'salons', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/beauty', hasRejectionReason: true },
+  { table: 'clinics', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/clinics', hasRejectionReason: false },
+  { table: 'gyms', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/fitness', hasRejectionReason: true },
+  { table: 'vehicles', nameField: 'name_en', providerField: 'provider_id', useVendorId: false, path: '/vendor/transport', hasRejectionReason: false },
 ];
 
 export function VendorModerationQueue({
@@ -69,6 +78,7 @@ export function VendorModerationQueue({
   const [isLoading, setIsLoading] = useState(true);
   const [pendingCount, setPendingCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
+  const [loadErrors, setLoadErrors] = useState<Array<{ table: string; message: string }>>([]);
 
   useEffect(() => {
     const fetchModerationItems = async () => {
@@ -79,6 +89,7 @@ export function VendorModerationQueue({
 
       setIsLoading(true);
       const allItems: ModerationItem[] = [];
+      const errors: Array<{ table: string; message: string }> = [];
 
       try {
         // Query each table for pending/rejected items
@@ -87,9 +98,12 @@ export function VendorModerationQueue({
           if (!id) continue;
 
           try {
+            const selectCols = tableConfig.hasRejectionReason
+              ? `id, ${tableConfig.nameField}, approval_status, rejection_reason, created_at`
+              : `id, ${tableConfig.nameField}, approval_status, created_at`;
             const { data, error } = await supabase
               .from(tableConfig.table as any)
-              .select(`id, ${tableConfig.nameField}, approval_status, rejection_reason, created_at`)
+              .select(selectCols)
               .eq(tableConfig.providerField, id)
               .in('approval_status', ['pending', 'rejected'])
               .order('created_at', { ascending: false })
@@ -97,6 +111,7 @@ export function VendorModerationQueue({
 
             if (error) {
               logger.warn(`Error fetching ${tableConfig.table}:`, error.message);
+              errors.push({ table: tableConfig.table, message: error.message });
               continue;
             }
 
@@ -107,24 +122,25 @@ export function VendorModerationQueue({
                   name: item[tableConfig.nameField] || 'Untitled',
                   table: tableConfig.table,
                   status: (item.approval_status || 'pending') as ApprovalStatus,
-                  rejectionReason: item.rejection_reason,
+                  rejectionReason: tableConfig.hasRejectionReason ? item.rejection_reason : null,
                   createdAt: item.created_at,
                 });
               }
             }
-          } catch (e) {
-            // Table might not exist, skip silently
+          } catch (e: any) {
+            errors.push({ table: tableConfig.table, message: e?.message || String(e) });
           }
         }
 
         // Sort by created date and limit
-        allItems.sort((a, b) => 
+        allItems.sort((a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
 
         setItems(allItems.slice(0, limit));
         setPendingCount(allItems.filter(i => i.status === APPROVAL_STATUSES.PENDING).length);
         setRejectedCount(allItems.filter(i => i.status === APPROVAL_STATUSES.REJECTED).length);
+        setLoadErrors(errors);
       } catch (err) {
         console.error('Error fetching moderation items:', err);
       } finally {
@@ -177,10 +193,12 @@ export function VendorModerationQueue({
     );
   }
 
-  // Don't show if nothing pending/rejected
-  if (items.length === 0) {
+  // Don't show if nothing pending/rejected AND no errors to surface
+  if (items.length === 0 && loadErrors.length === 0) {
     return null;
   }
+
+  const errorTableLabels = loadErrors.map(e => getTableLabel(e.table)).join(', ');
 
   return (
     <Card className={className}>
@@ -205,6 +223,36 @@ export function VendorModerationQueue({
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0 space-y-2">
+        {loadErrors.length > 0 && (
+          <div
+            role="alert"
+            className="flex items-start gap-2 p-3 border border-destructive/30 bg-destructive/10 text-destructive text-xs rounded-none"
+            title={loadErrors.map(e => `${e.table}: ${e.message}`).join('\n')}
+          >
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="font-medium">
+                {isRu
+                  ? 'Не удалось загрузить часть очереди модерации'
+                  : 'Some moderation data failed to load'}
+              </p>
+              <p className="opacity-80 mt-0.5 break-words">
+                {isRu ? 'Разделы: ' : 'Sections: '}
+                {errorTableLabels}
+                {'. '}
+                {isRu
+                  ? 'Ошибка схемы БД — сообщите в поддержку. Список ниже может быть неполным.'
+                  : 'Database schema error — please contact support. The list below may be incomplete.'}
+              </p>
+              {loadErrors[0]?.message && (
+                <p className="opacity-70 mt-1 font-mono text-[10px] break-all">
+                  {loadErrors[0].message}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         {items.map((item) => (
           <div
             key={`${item.table}-${item.id}`}

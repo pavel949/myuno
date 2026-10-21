@@ -14,7 +14,7 @@ export default function ReferralPage() {
   const isRu = language === 'ru';
 
   return (
-    <AppLayout title={isRu ? 'Реферальная программа' : 'Referral Program'}>
+    <AppLayout title={isRu ? 'Приглашайте друзей' : 'Invite your friends'}>
       <div className="px-4 py-6 pb-24 max-w-lg mx-auto space-y-6">
         <ReferralCard />
 
@@ -25,9 +25,9 @@ export default function ReferralPage() {
           </h3>
           <div className="space-y-3">
             {[
-              { step: '1', textRu: 'Поделитесь кодом с друзьями', textEn: 'Share your code with friends' },
-              { step: '2', textRu: 'Друг регистрируется по вашему коду', textEn: 'Friend signs up with your code' },
-              { step: '3', textRu: 'Оба получают бонус после первого заказа', textEn: 'Both get a bonus after first order' },
+              { step: '1', textRu: 'Отправьте свой код другу', textEn: 'Send your code to a friend' },
+              { step: '2', textRu: 'Друг регистрируется с этим кодом', textEn: 'They sign up using that code' },
+              { step: '3', textRu: 'После его первого заказа бонус получаете оба', textEn: 'After their first order, you both get a bonus' },
             ].map(item => (
               <div key={item.step} className="flex items-start gap-3">
                 <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -45,7 +45,7 @@ export default function ReferralPage() {
         {referrals.length > 0 && (
           <div className="rounded-none bg-card border border-border p-5 space-y-3">
             <h3 className="font-semibold text-foreground">
-              {isRu ? 'История приглашений' : 'Invite History'}
+              {isRu ? 'Кого вы уже пригласили' : 'Friends you invited'}
             </h3>
             <div className="space-y-2">
               {referrals.map(ref => (
@@ -69,7 +69,7 @@ export default function ReferralPage() {
                   ) : (
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Clock className="w-4 h-4" />
-                      <span className="text-xs">{isRu ? 'Ожидание' : 'Pending'}</span>
+                      <span className="text-xs">{isRu ? 'Ждём первый заказ' : 'Waiting for first order'}</span>
                     </div>
                   )}
                 </div>

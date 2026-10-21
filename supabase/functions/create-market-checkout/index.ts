@@ -1,11 +1,15 @@
 import { createCheckoutHandler } from "../_shared/checkout-handler.ts";
 import type { StripeLineItem } from "../_shared/checkout-handler.ts";
+import { validateItemPrices } from "../_shared/price-guard.ts";
 
 Deno.serve(
   createCheckoutHandler({
     endpoint: "create-market-checkout",
+    // Market orders are charged in full up-front → keep the persisted total
+    // pinned to the (now price-validated) line-item sum.
+    enforceLineItemTotal: true,
 
-    build(raw, user, origin) {
+    async build(raw, user, origin, supabaseAdmin) {
       const {
         items = [],
         delivery_fee = 0,
@@ -21,6 +25,15 @@ Deno.serve(
       } = raw as Record<string, any>;
 
       if (!items || items.length === 0) throw new Error("Cart is empty");
+
+      // Anti-tampering: validate every cart line against the authoritative
+      // marketplace_products price before trusting client-supplied item.price.
+      await validateItemPrices(
+        supabaseAdmin,
+        { table: "marketplace_products", priceColumns: ["price"], activeColumn: "is_active" },
+        (items as Array<{ id: string; price: number }>).map((i) => ({ id: i.id, price: i.price })),
+        "create-market-checkout",
+      );
 
       const cur = String(currency).toLowerCase();
       const deliveryName = delivery_type === "international"

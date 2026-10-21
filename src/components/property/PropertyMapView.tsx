@@ -1,6 +1,6 @@
 /**
  * PropertyMapView — Airbnb-style map with price markers
- * Uses Google Maps (Maps JavaScript API). Requires VITE_GOOGLE_MAPS_API_KEY.
+ * Uses Google Maps (Maps JavaScript API) through the Google Maps Platform connector.
  *
  * Marker click opens an InfoWindow mini-card showing photo, title, price and
  * trust signals (TrustStrip) so users can validate listings without leaving

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Send, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { VoiceInputButton, appendTranscript } from '@/components/ui/voice-input-button';
 
 interface Props {
   propertyId: string;
@@ -105,6 +106,11 @@ export function PortalChatTab({ propertyId, senderRole = 'owner' }: Props) {
           onChange={e => setInput(e.target.value)}
           placeholder={isRu ? 'Написать сообщение...' : 'Type a message...'}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+          disabled={isSending}
+        />
+        <VoiceInputButton
+          variant="outline"
+          onTranscript={(text) => setInput((prev) => appendTranscript(prev, text))}
           disabled={isSending}
         />
         <Button size="icon" aria-label={isRu ? 'Отправить' : 'Send'} onClick={handleSend} disabled={!input.trim() || isSending}>

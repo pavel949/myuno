@@ -1,3 +1,4 @@
+import { parseCivilDate } from '@/lib/hotelDates';
 /**
  * @deprecated Legacy task sheet used by CalendarDayEventsSheet + MultiPropertyTimeline.
  * Canonical sheet lives in `./tasks/TaskDetailSheet.tsx` (richer UnifiedTask model).
@@ -100,7 +101,7 @@ export function TaskDetailSheet({ open, onOpenChange, task, onComplete, onStartP
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-sm">
           <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          <span>{format(new Date(task.scheduled_date), 'd MMMM yyyy', { locale: isRu ? ru : undefined })}</span>
+          <span>{format(parseCivilDate(task.scheduled_date), 'd MMMM yyyy', { locale: isRu ? ru : undefined })}</span>
         </div>
         {task.scheduled_time && (
           <div className="flex items-center gap-2 text-sm">
@@ -135,9 +136,9 @@ export function TaskDetailSheet({ open, onOpenChange, task, onComplete, onStartP
           <p className="text-sm text-muted-foreground">
             {task.booking.guest_name || (isRu ? 'Гость' : 'Guest')}
             {' • '}
-            {format(new Date(task.booking.check_in), 'd MMM', { locale: isRu ? ru : undefined })}
+            {format(parseCivilDate(task.booking.check_in), 'd MMM', { locale: isRu ? ru : undefined })}
             {' — '}
-            {format(new Date(task.booking.check_out), 'd MMM', { locale: isRu ? ru : undefined })}
+            {format(parseCivilDate(task.booking.check_out), 'd MMM', { locale: isRu ? ru : undefined })}
           </p>
         </div>
       )}

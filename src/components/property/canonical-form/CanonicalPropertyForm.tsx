@@ -9,9 +9,10 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { PropertyFormData, OwnershipData } from '@/hooks/usePropertyWizard';
 import { PropertyProject } from '@/hooks/usePropertyProjects';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import type { MediaModalLayer } from '@/components/upload/shared/mediaModalLayer';
 import { Home, MapPin, Camera, DollarSign, Loader2, Zap, Sparkles, Shield, Bed, Calendar, FileText, UsersRound, Check } from 'lucide-react';
 import { normalizeFurnishingLevel, normalizeViewTypes } from '@/lib/propertyFormNormalizers';
 
@@ -103,6 +104,9 @@ interface CanonicalPropertyFormProps {
   onCancel?: () => void;
   isSubmitting?: boolean;
   mode: 'admin' | 'vendor' | 'owner';
+  authoringOnly?: boolean;
+  canEditPricing?: boolean;
+  canEditBookingTerms?: boolean;
   showOwnership?: boolean;
   showProviderSelector?: boolean;
   providerSelector?: React.ReactNode;
@@ -112,6 +116,10 @@ interface CanonicalPropertyFormProps {
   propertyId?: string;
   /** Hide the built-in action buttons (host renders its own) */
   hideActions?: boolean;
+  /** Contained hosts supply a bounded height; only the body scrolls. */
+  layout?: 'page' | 'contained';
+  /** Keep photo portals above this form's host without changing global layers. */
+  mediaModalLayer?: MediaModalLayer;
   /** External form data control — when provided, the form becomes controlled */
   controlledFormData?: PropertyFormData;
   onFormDataChange?: (data: PropertyFormData) => void;
@@ -268,10 +276,15 @@ export function CanonicalPropertyForm({
   onCancel,
   isSubmitting = false,
   mode,
+  authoringOnly = false,
+  canEditPricing = true,
+  canEditBookingTerms = true,
   showOwnership = false,
   providerSelector,
   extraTabs = [],
   hideActions = false,
+  layout = 'page',
+  mediaModalLayer,
   controlledFormData,
   onFormDataChange,
   controlledUtilities,
@@ -486,7 +499,11 @@ export function CanonicalPropertyForm({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className={cn("flex min-w-0 flex-col", layout === 'contained' && "h-full min-h-0 overflow-hidden")}>
+      <div
+        data-property-form-scroll=""
+        className={cn("min-w-0", layout === 'contained' && "min-h-0 flex-1 overflow-y-auto overscroll-contain")}
+      >
       {/* Provider Selector for Admin */}
       {providerSelector && (
         <div className="p-4 bg-muted/50 rounded-none border-2 border-dashed mb-4">
@@ -494,20 +511,20 @@ export function CanonicalPropertyForm({
         </div>
       )}
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="min-w-0">
         {/* Sticky tab bar — full width, bold labels */}
         <div className="sticky top-0 z-20 bg-background border-b border-border mb-6">
-          <div className="flex gap-0 overflow-x-auto scrollbar-none -mb-px">
+          <TabsList aria-label={isRu ? 'Разделы объекта' : 'Property sections'} className="flex h-auto justify-start gap-0 overflow-x-auto rounded-none border-0 bg-transparent p-0 shadow-none scrollbar-none -mb-px">
             {tabs.map((tab) => {
               const status = getTabStatus(tab.id);
               const isActive = activeTab === tab.id;
               return (
-                <button
+                <TabsTrigger
                   key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
+                  value={tab.id}
+                  aria-label={isRu ? tab.labelRu : tab.labelEn}
                   className={cn(
-                    "relative flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px",
+                    "relative flex flex-none items-center gap-2 overflow-visible px-4 py-3.5 text-sm font-medium whitespace-nowrap transition-colors border-b-2 -mb-px data-[state=active]:shadow-none",
                     isActive
                       ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
@@ -522,16 +539,17 @@ export function CanonicalPropertyForm({
                   {status === 'partial' && !isActive && (
                     <span className="h-2 w-2 rounded-full bg-warning shrink-0" />
                   )}
-                </button>
+                </TabsTrigger>
               );
             })}
-          </div>
+          </TabsList>
         </div>
 
         {/* Content area — full width, no ScrollArea constraint */}
         <div className="w-full">
           <TabsContent value="basic" className="mt-0">
             <BasicInfoStep
+              catalogueOnly={authoringOnly}
               formData={formData}
               updateFormData={updateFormData}
               selectedProject={selectedProject}
@@ -543,6 +561,7 @@ export function CanonicalPropertyForm({
 
           <TabsContent value="location" className="mt-0">
             <LocationStep
+              catalogueOnly={authoringOnly}
               formData={formData}
               updateFormData={updateFormData}
             />
@@ -552,11 +571,15 @@ export function CanonicalPropertyForm({
             <PhotosStep
               formData={formData}
               updateFormData={updateFormData}
+              modalLayer={mediaModalLayer}
             />
           </TabsContent>
 
           <TabsContent value="pricing" className="mt-0">
             <PricingStep
+              authoringOnly={authoringOnly}
+              canEditPricing={canEditPricing}
+              canEditBookingTerms={canEditBookingTerms}
               formData={formData}
               updateFormData={updateFormData}
               selectedProject={selectedProject}
@@ -566,11 +589,11 @@ export function CanonicalPropertyForm({
           {(isAdmin || isOwner) && (
             <>
               <TabsContent value="utilities" className="mt-0">
-                <UtilitiesStep data={utilitiesData} onChange={updateUtilities} />
+                <UtilitiesStep canEditPricing={canEditPricing} data={utilitiesData} onChange={updateUtilities} />
               </TabsContent>
 
               <TabsContent value="services" className="mt-0">
-                <ServicesStep data={servicesData} onChange={updateServices} />
+                <ServicesStep canEditPricing={canEditPricing} data={servicesData} onChange={updateServices} />
               </TabsContent>
             </>
           )}
@@ -584,8 +607,8 @@ export function CanonicalPropertyForm({
           {isOwner && (
             <TabsContent value="rules" className="mt-0">
               <div className="space-y-4">
-                <HouseRulesSection formData={formData} updateFormData={updateFormData} />
-                <CancellationPolicySection formData={formData} updateFormData={updateFormData} />
+                <HouseRulesSection canEditPricing={canEditPricing} formData={formData} updateFormData={updateFormData} />
+                <fieldset disabled={!canEditBookingTerms}><CancellationPolicySection formData={formData} updateFormData={updateFormData} /></fieldset>
               </div>
             </TabsContent>
           )}
@@ -598,10 +621,11 @@ export function CanonicalPropertyForm({
           ))}
         </div>
       </Tabs>
+      </div>
 
-      {/* Action Buttons */}
+      {/* Actions stay outside the clipped body, even with a long gallery. */}
       {!hideActions && (
-        <div className="flex gap-3 pt-4 mt-4 border-t">
+        <div data-property-form-actions="" className="relative z-30 flex shrink-0 gap-3 border-t bg-background pt-4 mt-4 pb-[env(safe-area-inset-bottom)]">
           {onCancel && (
             <Button variant="outline" onClick={onCancel} className="flex-1">
               {isRu ? 'Отмена' : 'Cancel'}

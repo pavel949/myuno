@@ -2,11 +2,12 @@
  * Property Hub child routes — extracted from AnimatedRoutes.
  * Rendered as nested children of /property under PropertyHub layout.
  */
-import { Route, Navigate, useParams } from 'react-router-dom';
+import { Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import { Suspense } from 'react';
 import { LoadingState } from '@/components/uno/LoadingSpinner';
 import { APP_ROUTES } from '@/lib/config/routes';
 import * as Pages from '../pageRegistry';
+import PropertySearchRedirect from '@/components/property/PropertySearchRedirect';
 import { PageTransition } from '../PageTransition';
 
 const LazyPage = ({ children }: { children: React.ReactNode }) => (
@@ -26,10 +27,10 @@ const InvestIdRedirect = () => {
 };
 
 // Property Hub index: legacy `/property?…` query bookmarks → /property/browse?…
-const PropertyHubIndex = () => {
-  const search = typeof window !== 'undefined' ? window.location.search : '';
+export const PropertyHubIndex = () => {
+  const { search, hash } = useLocation();
   if (search && search.length > 1) {
-    return <Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}${search}`} replace />;
+    return <Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}${search}${hash}`} replace />;
   }
   return <Pages.PropertyLanding />;
 };
@@ -37,37 +38,38 @@ const PropertyHubIndex = () => {
 export const propertyHubRoutes = (
   <>
     <Route index element={<LazyPage><PropertyHubIndex /></LazyPage>} />
-    <Route path="browse" element={<LazyPage><Pages.PropertyIndex /></LazyPage>} />
+    <Route path="browse" element={<LazyPage><PropertySearchRedirect /></LazyPage>} />
     {/* Top-level aliases for persona landings (C8) */}
     <Route
       path="rent"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'rent' }} />}
     />
     <Route
       path="buy"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=buy`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'buy' }} />}
     />
     <Route
       path="rent/short-term"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=short`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'short' }} />}
     />
     <Route
       path="rent/medium-term"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=medium`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'medium' }} />}
     />
     <Route
       path="rent/long-term"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=rent&tenancy=long`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'rent', tenancy: 'long' }} />}
     />
 
     <Route
       path="quick-sale"
-      element={<Navigate to={`${APP_ROUTES.PROPERTY_BROWSE}?mode=buy&intent=quick_sale`} replace />}
+      element={<PropertySearchRedirect defaults={{ mode: 'buy', intent: 'quick_sale' }} />}
     />
     <Route path="search" element={<LazyPage><Pages.PropertySearchPage /></LazyPage>} />
     <Route path="consultation" element={<LazyPage><Pages.PropertyConsultation /></LazyPage>} />
     <Route path="deposit-success" element={<LazyPage><Pages.PropertyDepositSuccess /></LazyPage>} />
     <Route path="map" element={<LazyPage><Pages.PropertyMap /></LazyPage>} />
+    <Route path="complex/:id" element={<LazyPage><Pages.GuestComplexDetail /></LazyPage>} />
     {/* Legacy /property/project/:id → canonical /property/offplan/:id */}
     <Route path="project/:id" element={<PropertyProjectRedirect />} />
 
@@ -110,6 +112,9 @@ export const propertyHubRoutes = (
     <Route path="invest/network" element={<Navigate to={APP_ROUTES.INVEST_NETWORK} replace />} />
     <Route path="invest/execution" element={<Navigate to={APP_ROUTES.INVEST_EXECUTION} replace />} />
     <Route path="invest/:id" element={<InvestIdRedirect />} />
+
+    {/* Public directory of management companies → /company/:slug profiles */}
+    <Route path="companies" element={<LazyPage><Pages.ManagementCompaniesIndex /></LazyPage>} />
 
     {/* My Property */}
     <Route path="my" element={<LazyPage><Pages.PropertyMySection /></LazyPage>} />
