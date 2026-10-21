@@ -44,6 +44,9 @@ async def main():
                 await expect(page.locator('html')).to_have_class('dark' if theme == 'dark' else '')
                 button = page.get_by_role('button', name='Find a home')
                 field = page.get_by_role('textbox', name='Your search')
+                await expect(page.locator('main')).to_have_css('padding', '24px')
+                await expect(button).to_have_css('padding-left', '24px')
+                await expect(field).to_have_css('padding-left', '12px')
                 await page.keyboard.press('Tab')
                 await expect(button).to_be_focused()
                 style = await button.evaluate('''el => {
