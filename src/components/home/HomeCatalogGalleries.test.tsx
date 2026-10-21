@@ -78,7 +78,7 @@ const show = () =>
 it('keeps successful empty catalogues distinct from errors and category requests', () => {
   show();
   expect(
-    screen.getByText('No areas in the published catalog yet.'),
+    screen.getByRole('link', { name: /Kamala/ }),
   ).toBeVisible();
   expect(
     screen.getByText('No published experiences yet. Check back later.'),
@@ -101,7 +101,7 @@ it('shows failures with retry and never reports failed reads as empty supply', (
   expect(screen.getAllByRole('alert')).toHaveLength(4);
   expect(screen.queryByText(/No published/)).toBeNull();
   fireEvent.click(screen.getAllByRole('button', { name: 'Try again' })[0]);
-  expect(state.retry).toHaveBeenCalledOnce();
+  expect(state.retry).toHaveBeenCalledTimes(2);
 });
 it('shows loading separately', () => {
   state.loading = true;
@@ -155,7 +155,7 @@ it('renders only supplied records, deduplicates districts and preserves public d
   );
   expect(screen.queryByText('Unpublished shop')).toBeNull();
   expect(document.querySelector('img')).toBeNull();
-  expect(screen.queryByText(/rating|available|popular/i)).toBeNull();
+  expect(screen.queryByText(/rating|available units|popular/i)).toBeNull();
 });
 it.each(['ru', 'th'])(
   'localizes empty and navigation states in %s',
@@ -189,4 +189,12 @@ it('resolves canonical district separators to existing area guides without inven
   expect(screen.getByRole('link', { name: /Cherng Talay/ })).toHaveAttribute('href', '/area/cherngtalay');
   expect(screen.getByRole('link', { name: /Bang Tao/ })).toHaveAttribute('href', '/area/bang-tao');
   expect(screen.queryByRole('link', { name: /Unknown/ })).toBeNull();
+});
+
+it('keeps Kamala, Surin and Bang Tao discoverable even without catalog photos', () => {
+  show();
+  const areaLinks = Array.from(document.querySelectorAll('.home-location-card')).map(link => link.getAttribute('href'));
+  expect(areaLinks).toEqual(['/area/kamala', '/area/surin', '/area/bang-tao']);
+  expect(screen.getAllByText('Area photograph not available yet')).toHaveLength(3);
+  expect(screen.queryByText(/available units|popular|rating/i)).toBeNull();
 });

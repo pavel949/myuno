@@ -81,8 +81,11 @@ export function HomeLocationGallery() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
   const projects = usePublicPropertyProjects(24);
+  // Editorial guide order is independent of the alphabetical project catalogue.
+  // One targeted public read supplies Surin media without downloading every project.
+  const surin = usePublicPropertyProjects(1, 'Surin');
   const seen = new Set<string>();
-  const areas = (projects.data ?? []).flatMap(project => {
+  const catalogAreas = [...(projects.data ?? []), ...(surin.data ?? [])].flatMap(project => {
     const district = project.district;
     if (!district) return [];
     const normalized = district.toLowerCase().trim().replace(/[ _-]+/g, '');
@@ -91,15 +94,22 @@ export function HomeLocationGallery() {
     seen.add(slug);
     return [{ slug, district, project }];
   });
+  const featured = ['kamala', 'surin', 'bang-tao'];
+  const areas = [
+    ...featured.map(slug => catalogAreas.find(area => area.slug === slug) ?? { slug, district: slug === 'bang-tao' ? 'Bang Tao' : slug, project: undefined }),
+    ...catalogAreas.filter(area => !featured.includes(area.slug)),
+  ];
+  const retry = () => { void projects.refetch(); void surin.refetch(); };
   const title = t({ ru: 'Познакомьтесь с районами Пхукета', en: 'Get to know Phuket’s areas', th: 'ทำความรู้จักย่านต่าง ๆ ในภูเก็ต' });
   return <section className="home-locations home-container" aria-labelledby="home-locations-title">
-    <div className="home-section-heading"><div><h2 id="home-locations-title">{title}</h2><p className="home-section-lead">{t({ ru: 'Ещё не знаете, где остановиться? Начните со знакомства с островом.', en: 'Not sure where to stay? Start by getting to know the island.', th: 'ยังไม่แน่ใจว่าจะพักที่ไหน เริ่มจากทำความรู้จักเกาะ' })}</p></div><Link className="home-text-link" to="/area">{t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}<ArrowRight size={18} aria-hidden="true" /></Link></div>
-    {projects.isLoading || projects.isError || !areas.length ? <CatalogState loading={projects.isLoading} error={projects.isError} retry={projects.refetch} empty={{ ru: 'В каталоге пока нет опубликованных районов.', en: 'No areas in the published catalog yet.', th: 'ยังไม่มีย่านในรายการที่เผยแพร่' }} /> : <HorizontalRail label={title}>
-      {areas.map(({ slug, district, project }) => <Link className="home-location-card home-location-card--editorial" key={slug} to={`/area/${slug}`}>
-        <CatalogPhoto image={project.cover_image || project.images?.[0]} />
-        <div className="home-location-copy"><h3>{getDistrictLabel(district, language === 'ru' ? 'ru' : 'en')}</h3><p>{t(project.cover_image || project.images?.[0] ? { ru: 'На фото — комплекс', en: 'Pictured community', th: 'โครงการในภาพ' } : { ru: 'В каталоге района', en: 'In this area’s catalog', th: 'ในรายการของย่านนี้' })}: {language === 'ru' ? project.name_ru || project.name_en : project.name_en || project.name_ru}</p><span>{t({ ru: 'Познакомиться с районом', en: 'Explore the area guide', th: 'อ่านคู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
+    <div className="home-section-heading"><div><h2 id="home-locations-title">{title}</h2><p className="home-section-lead">{t({ ru: 'Ещё не знаете, где остановиться? Начните со знакомства с островом.', en: 'Not sure where to stay? Start by getting to know the island.', th: 'ยังไม่แน่ใจว่าจะพักที่ไหน เริ่มจากทำความรู้จักเกาะ' })}</p></div><Link className="home-text-link" to={R.AREA_INDEX}>{t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}<ArrowRight size={18} aria-hidden="true" /></Link></div>
+    {(projects.isLoading || surin.isLoading || projects.isError || surin.isError) && <CatalogState loading={projects.isLoading || surin.isLoading} error={projects.isError || surin.isError} retry={retry} empty={{ ru: 'Фото районов пока нет.', en: 'Area photographs are not available yet.', th: 'ยังไม่มีภาพย่าน' }} />}
+    <HorizontalRail label={title}>
+      {areas.map(({ slug, district, project }) => <Link className="home-location-card home-location-card--editorial" key={slug} to={R.AREA_DETAIL(slug)}>
+        <CatalogPhoto image={project?.cover_image || project?.images?.[0]} />
+        <div className="home-location-copy"><h3>{getDistrictLabel(district, language === 'ru' ? 'ru' : 'en')}</h3><p>{project ? <>{t(project.cover_image || project.images?.[0] ? { ru: 'На фото — комплекс', en: 'Pictured community', th: 'โครงการในภาพ' } : { ru: 'В каталоге района', en: 'In this area’s catalog', th: 'ในรายการของย่านนี้' })}: {language === 'ru' ? project.name_ru || project.name_en : project.name_en || project.name_ru}</> : t({ ru: 'Фото района пока нет', en: 'Area photograph not available yet', th: 'ยังไม่มีภาพย่าน' })}</p><span>{t({ ru: 'Познакомиться с районом', en: 'Explore the area guide', th: 'อ่านคู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
       </Link>)}
-    </HorizontalRail>}
+    </HorizontalRail>
   </section>;
 }
 
