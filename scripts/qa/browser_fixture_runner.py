@@ -39,6 +39,7 @@ FIXTURE_SPECS = (
     ('home-search-ui', 'home-search-isolated'),
     ('homepage-galleries-ui', 'homepage-galleries-isolated'),
     ('guest-complex-ui', 'guest-complex-isolated'),
+    ('tailwind-focus-ui', 'tailwind-focus-isolated'),
 )
 
 

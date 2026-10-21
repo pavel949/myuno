@@ -4,8 +4,7 @@
 @import './design-system/index.css';
 
 /* Phase 3 of Canon Migration — globally remap legacy palette + remove glassmorphism.
-   Imported AFTER design tokens AND BEFORE Tailwind so utilities can layer on top,
-   but the override layer below wins via !important + :where() pattern. */
+   Keep the canonical overrides after the framework import and design tokens. */
 @import './styles/canon-overrides.css';
 
 /* Onboarding flow (friction-removal animation + 4 screens). Scoped under
@@ -153,6 +152,12 @@ body {
 }
 
 @layer base {
+  /* v4 preflight uses the default cursor; preserve the v3 interaction affordance. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
   * {
     @apply border-border;
     min-width: 0;
