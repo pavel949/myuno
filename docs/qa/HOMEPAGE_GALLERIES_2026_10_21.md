@@ -1,6 +1,6 @@
 # Anonymous homepage galleries — 21 October 2026
 
-Scope: `pavel949/myuno`, myuno.app; frontend code, local QA and draft PR only. No merge, deployment, schema, secrets, DNS, permissions or production business writes.
+Target: `pavel949/myuno`, `myuno.app` and `www.myuno.app`. Initial authorization covered frontend code, local QA and a draft PR. Separate explicit target-specific approval was subsequently received for merge to main and production publication after successful exact-head checks, browser QA and review. No schema, secrets, DNS, permissions or production business writes are authorized by this frontend release.
 
 ## Baseline and concurrent work
 
@@ -35,8 +35,10 @@ Local artifact directories:
 
 Screenshots were visually inspected locally at mobile and desktop sizes. Synthetic screenshots establish layout/interaction evidence, not final product-owner visual acceptance or production end-to-end acceptance.
 
-## Known baseline blocker
+## Baseline build correction
 
-Full typecheck reports four TS2300 errors in untouched `src/integrations/supabase/types.ts`: duplicate `get_property_calendar_prices` at lines 36550/37070 and duplicate `set_property_calendar_price` at 36554/37390. `git show` confirms the duplicate declarations already exist in base main. They are outside this homepage tranche; no operational RPC contract was changed to hide the failure. Draft PR must remain unmerged pending resolution and separate target-specific publication approval.
+Full typecheck reports four TS2300 errors in untouched `src/integrations/supabase/types.ts`: duplicate `get_property_calendar_prices` at lines 36550/37070 and duplicate `set_property_calendar_price` at 36554/37390. `git show` confirms the duplicate declarations already exist in base main. The follow-up type-only correction removes the two redundant declarations and retains nullable `p_category_id` in the surviving entries. All arguments and JSON return types remain; no runtime, RPC implementation or database schema changes. This narrow correction is required for the authorized release checks. Final exact-head typecheck and CI, rather than the initial failure, determine the release gate.
 
 Final local counts and exact-head CI outcomes are recorded in the PR description.
+
+Independent review of the final implementation and type correction found no remaining code blocker (9 focused tests independently passed). Initial broad local tests: 3,456 passed, 191 skipped, seven suites could not initialize without PostgreSQL and three unrelated sidebar tests hit the default timeout under concurrent build load. A standalone rerun passed seven sidebar cases and hit one different timeout. Temporary PostgreSQL 18.4 binaries were extracted under `/tmp`, with no repository dependency or system/database changes; the seven previously failing database suites then passed all 258 tests. Final exact-head suite results are recorded in PR #154.

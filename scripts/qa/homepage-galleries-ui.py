@@ -89,6 +89,26 @@ async def main():
                     await expect(projects.locator('article:visible')).to_have_count(6)
                     assert 'mode=buy&propertyType=condo' in await projects.locator('article a').first.get_attribute('href')
                     await projects.locator('select').nth(1).select_option('')
+                    # Exercise actual card CTAs and verify the committed public destination.
+                    for selector, prefix in [('.home-locations a', '/property/search?'),
+                                             ('.home-project-card-link', '/property/complex/'),
+                                             ('.home-home-card a', '/property/home-')]:
+                        link = page.locator(selector).first
+                        href = await link.get_attribute('href')
+                        assert href.startswith(prefix), href
+                        await link.click()
+                        await expect(page.get_by_test_id('location')).to_have_text(href)
+                    for selector, prefix in [('.home-catalog a[href^="/experiences/"]', '/experiences/'),
+                                             ('.home-catalog a[href^="/services/provider/"]', '/services/provider/'),
+                                             ('.home-catalog a[href^="/flowers/bouquet/"]', '/flowers/bouquet/'),
+                                             ('.home-owner-prompt a', '/for-owners')]:
+                        link = page.locator(selector).first
+                        href = await link.get_attribute('href')
+                        assert href.startswith(prefix), href
+                        await link.click()
+                        await expect(page.get_by_test_id('location')).to_have_text(href)
+                    await page.locator('.home-rail-viewport').evaluate_all('(rows)=>rows.forEach(row=>row.scrollLeft=0)')
+                    await page.evaluate('window.scrollTo({top:0,behavior:"instant"})')
                     await page.locator('.home-hero').scroll_into_view_if_needed()
                     await page.screenshot(path=str(OUTPUT/f'{lang}-{width}-homepage.png'), full_page=True)
                     assert not errors, errors
