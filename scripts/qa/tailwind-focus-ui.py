@@ -24,7 +24,15 @@ async def main():
                     name = 'fixture.html' if url.path == '/fixture' else url.path.lstrip('/')
                     types = {'fixture.html': 'text/html', 'fixture.js': 'text/javascript', 'fixture.css': 'text/css'}
                     if url.netloc == 'localhost:8080' and name in types:
-                        await r.fulfill(path=str(OUTPUT / name), content_type=types[name])
+                        if name == 'fixture.html':
+                            # Establish the theme before styles and controls render.
+                            # Toggling it after navigation samples transition colors.
+                            html = (OUTPUT / name).read_text()
+                            if theme == 'dark':
+                                html = html.replace('<html>', '<html class="dark">', 1)
+                            await r.fulfill(body=html, content_type=types[name])
+                        else:
+                            await r.fulfill(path=str(OUTPUT / name), content_type=types[name])
                     else:
                         blocked.append(r.request.url)
                         await r.abort()
@@ -33,7 +41,7 @@ async def main():
                 page = await context.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 await page.goto('http://localhost:8080/fixture', wait_until='networkidle')
-                await page.evaluate('(dark)=>document.documentElement.classList.toggle("dark",dark)', theme == 'dark')
+                await expect(page.locator('html')).to_have_class('dark' if theme == 'dark' else '')
                 button = page.get_by_role('button', name='Find a home')
                 field = page.get_by_role('textbox', name='Your search')
                 await page.keyboard.press('Tab')
