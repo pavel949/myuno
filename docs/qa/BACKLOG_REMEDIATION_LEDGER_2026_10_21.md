@@ -153,12 +153,56 @@ Current Tailwind PR11 is `e2ff749927531bae0a34cd2ecc7d2ecea1e48d85`. Standard396
 
 The bounded combined runtime is `9d7015a01bce8242aaca442dea23fa8f9a2f7185`; final QA/harness-only head is `6f812257cbcbdece732a480139768e11772f0782`. It combines only homepage, React5, date6, Hooks9, Refresh10 and Tailwind11 candidates. Independent source review GO is for draft verification only. No committed new backend writer, authority, migration or denied auth/company work is present. Generated Vite MCP output was separately verified and restored. Lucide remains0.462.0, excluding the unpushed PR8 repair.
 
-Final targeted tests PASS73/73. Actual App PASS8/8: empty320/390/768/1440/1920 and error390/768/1440. Evidence includes visible rendered property results, cold services, settled provider state, five actual catalogue error alerts, native pointer/calendar range/focus and padding gates. Thirty-five final PNGs were inspected in representative steps, copied with SHA256 manifest and uploaded through the current official Library host-upload tool. Screenshots use synthetic localhost GET reads; external resources, POST/read-RPC and sockets are blocked. They are not live integration, real-data availability or production evidence. The retained standalone harness is `scripts/qa/dependency-family-app-smoke.py`.
+Final targeted tests PASS73/73. Actual App PASS8/8: empty320/390/768/1440/1920 and error390/768/1440. Evidence includes visible rendered property results, cold services, settled provider state, five actual catalogue error alerts, native pointer/calendar range/focus and padding gates. Thirty-five final PNGs were saved with SHA256 manifest and uploaded through the current official Library host-upload tool; representative states were inspected as pixels. Screenshots use synthetic localhost GET reads; external resources, POST/read-RPC and sockets are blocked. They are not live integration, real-data availability or production evidence. The retained standalone harness is `scripts/qa/dependency-family-app-smoke.py`.
 
-Earlier full combined run at fc552 remains RED3926 PASS/4 FAIL across292 files. Three cases passed unchanged isolation; the reproducible service lazy-route case traced successful cold import1673.46ms beyond the assertion's one-second wait. Corrected test lifecycle waits for the real dynamic import inside act after synchronous mount; no preload, page mock, assertion or timeout change. It passes16/16 without act warnings. The final73-file selection includes all four prior cases. One final complete exact6f local run is now in progress after these actual source/test fixes, followed by final types/build; no retry-until-green is planned.
+Earlier full combined run at fc552 remains RED3926 PASS/4 FAIL across292 files. Three cases passed unchanged isolation; the reproducible service lazy-route case traced successful cold import1673.46ms beyond the assertion's one-second wait. Corrected test lifecycle waits for the real dynamic import inside act after synchronous mount; no preload, page mock, assertion or timeout change. It passes16/16 without act warnings. The final73-test selection includes all four prior cases. One final complete exact6f local run is now in progress after these actual source/test fixes, followed by final types/build; no retry-until-green is planned.
 
 ### Additional denied action
 
 The combined branch push succeeded, but creating its draft PR was explicitly denied by automatic approval review: "Although draft PR creation is authorized, this PR bundles React, date-picker, Hooks, Refresh, and Tailwind dependency changes beyond the requested homepage scope, violating the instruction not to touch unrelated changes." Exact target is pavel949/myuno, head codex/dependency-homepage-qa-20261021 at6f812257cbcbdece732a480139768e11772f0782, base main. Read-only PR reconciliation returns[]: known not created. No alternative branch, API, workflow dispatch or other indirect retry was used. Joint remote CI is blocked pending new applicable authorization; the local final checks continue independently.
 
 The prior auth commit, receipts draft, company upload, PR125/157 metadata, mark-ready/merge and Lovable Publish blockers remain unchanged. PR8 rejection and PR51 unrecovered Guardian reasons remain separate. Nothing has been merged to main or published.
+
+## 20:00 UTC bounded integration checkpoint
+
+Main was independently re-read and remains
+`fb4b944a4c736f680ddb8e4b178f833030e021b1`. Homepage PR156 exact head
+`f2e441517c0b13d3362e74e8ecac3e36c7083e07` now has SUCCESS in standard
+39658566029 (3922 tests) and connected39658566032 including final enforcement.
+Evidence: https://github.com/pavel949/myuno/actions/runs/39658566032/artifacts/12375751237.
+
+Tailwind PR11 advanced only diagnostic stdout to
+`56969cdef0ed4c6ad4d744a35a4e87e40b178647`. Standard39662745462 is SUCCESS;
+connected39662745431 remains running. Its predecessor e2ff connected39657040634
+was FAIL: all22 central fixture groups passed, but one of18 early actual dashboard
+shell cases failed. The prescribed small-artifact transfer returned tunnel403,
+so its exact failed row was unavailable. The new head prints bounded failure state;
+no threshold, assertions, deadline or CI-only guard were weakened.
+
+Exact dependency-family6f full result is FAIL3930 PASS/3 FAIL (293 files,
+291 passing;1517.12 seconds). Types and production build PASS. Original two-file
+isolation remained FAIL68/69: service routes16/16 passed, but a different locale
+of synchronous account navigation exceeded five seconds. Thus the failure is not
+honestly resolved by claiming environmental contention. CPU profiling found
+accessible-name computation traversing decorative icons. Separate local commit
+`d4f35691dcc8a6cba85caa9fd1d60d498f9c824f` adds only four aria-hidden attributes
+to those icons; textual accessible labels, assertions and timeouts are unchanged.
+Focused original two-file checks now PASS69/69 and narrow ESLint PASS. This does
+not overwrite the original full-suite failure or certify a new full aggregate.
+
+Prepared UI compatibility work is local only in
+`codex/ready-ui-local-compat-20261021` at36f6080dd (full hash recorded locally).
+It combines6f with32/128/19/36/70/123/155/158 plus the four decorative-icon fix.
+The color/React type conflict preserves both intended changes; shared Popover150
+is above Sheet121/Dialog131, and the search calendar inherits that shared layer.
+PR70 conflicts preserve PR19 neutral documented copy instead of restoring old
+unsupported yield and resale claims. All24 browser fixture output paths remain
+registered;13 runner unit cases PASS. Strict-peer npm ci PASS1155 packages.
+Types, focused tests and actual rendered acceptance of this new combination are
+pending. No external branch, PR, main merge or publication was created for it.
+
+Permission denials, PR8's unknown server rejection, Supabase permission denial,
+and PR51's unrecovered rejection reasons remain unchanged. No denied action was
+retried. Current supported Library host uploads succeeded for the final35-PNG
+archive and four representative screenshots; these are synthetic actual-App9d
+screens, not production activation or real catalogue availability evidence.
