@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Compass, MapPin, ImageOff, Wrench } from 'lucide-react';
+import { ArrowRight, Compass, ImageOff, Wrench } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { pickLang, type LangValues } from '@/lib/i18n/pickLang';
 import { usePublicPropertyProjects } from '@/hooks/usePropertyProjects';
@@ -8,6 +8,7 @@ import { useExperiences } from '@/hooks/useExperiences';
 import { useBouquets } from '@/hooks/useBouquets';
 import { useMarketplaceServices } from '@/hooks/useServiceMarketplace';
 import { getDistrictLabel } from '@/lib/taxonomies';
+import { LIVE_AREA_SLUGS } from '@/content/landings/areaLandings';
 import { complexMediaUrl } from '@/lib/real-estate/complexMedia';
 import { APP_ROUTES as R } from '@/lib/config/routes';
 import { HorizontalRail } from './HorizontalRail';
@@ -79,74 +80,27 @@ function CatalogPhoto({ image }: { image?: string | null }) {
 export function HomeLocationGallery() {
   const { language } = useLanguage();
   const t = (value: LangValues) => pickLang(language, value);
-  const projects = usePublicPropertyProjects(12);
-  // Locations come only from published project records, not a second directory.
-  const districts = [
-    ...new Set(
-      (projects.data ?? [])
-        .map((project) => project.district)
-        .filter((value): value is string => Boolean(value)),
-    ),
-  ];
-  const title = t({
-    ru: 'Сначала выберите район',
-    en: 'Find your part of Phuket',
-    th: 'เลือกย่านในภูเก็ต',
+  const projects = usePublicPropertyProjects(24);
+  const seen = new Set<string>();
+  const areas = (projects.data ?? []).flatMap(project => {
+    const district = project.district;
+    if (!district) return [];
+    const normalized = district.toLowerCase().trim().replace(/[ _-]+/g, '');
+    const slug = LIVE_AREA_SLUGS.find(value => value.replace(/-/g, '') === normalized);
+    if (!slug || seen.has(slug)) return [];
+    seen.add(slug);
+    return [{ slug, district, project }];
   });
-  return (
-    <section
-      className="home-locations home-container"
-      aria-labelledby="home-locations-title"
-    >
-      <div className="home-section-heading">
-        <div>
-          <h2 id="home-locations-title">{title}</h2>
-          <p className="home-section-lead">
-            {t({
-              ru: 'Начните с района, затем присмотритесь к комплексам и жилью.',
-              en: 'Start with an area, then explore its communities and homes.',
-              th: 'เริ่มจากย่าน แล้วเลือกโครงการและที่พัก',
-            })}
-          </p>
-        </div>
-      </div>
-      {projects.isLoading || projects.isError || !districts.length ? (
-        <CatalogState
-          loading={projects.isLoading}
-          error={projects.isError}
-          retry={projects.refetch}
-          empty={{
-            ru: 'В каталоге пока нет опубликованных районов.',
-            en: 'No areas in the published catalog yet.',
-            th: 'ยังไม่มีย่านในรายการที่เผยแพร่',
-          }}
-        />
-      ) : (
-        <HorizontalRail label={title} compact>
-          {districts.map((district) => (
-            <Link
-              className="home-location-card"
-              key={district}
-              to={`${R.PROPERTY_SEARCH}?${new URLSearchParams({ mode: 'rent', district })}`}
-            >
-              <MapPin size={20} aria-hidden="true" />
-              <h3>
-                {getDistrictLabel(district, language === 'ru' ? 'ru' : 'en')}
-              </h3>
-              <span>
-                {t({
-                  ru: 'Посмотреть жильё',
-                  en: 'Explore homes',
-                  th: 'ดูที่พัก',
-                })}
-                <ArrowRight size={16} aria-hidden="true" />
-              </span>
-            </Link>
-          ))}
-        </HorizontalRail>
-      )}
-    </section>
-  );
+  const title = t({ ru: 'Познакомьтесь с районами Пхукета', en: 'Get to know Phuket’s areas', th: 'ทำความรู้จักย่านต่าง ๆ ในภูเก็ต' });
+  return <section className="home-locations home-container" aria-labelledby="home-locations-title">
+    <div className="home-section-heading"><div><h2 id="home-locations-title">{title}</h2><p className="home-section-lead">{t({ ru: 'Ещё не знаете, где остановиться? Начните со знакомства с островом.', en: 'Not sure where to stay? Start by getting to know the island.', th: 'ยังไม่แน่ใจว่าจะพักที่ไหน เริ่มจากทำความรู้จักเกาะ' })}</p></div><Link className="home-text-link" to="/area">{t({ ru: 'Все районы', en: 'All areas', th: 'ทุกย่าน' })}<ArrowRight size={18} aria-hidden="true" /></Link></div>
+    {projects.isLoading || projects.isError || !areas.length ? <CatalogState loading={projects.isLoading} error={projects.isError} retry={projects.refetch} empty={{ ru: 'В каталоге пока нет опубликованных районов.', en: 'No areas in the published catalog yet.', th: 'ยังไม่มีย่านในรายการที่เผยแพร่' }} /> : <HorizontalRail label={title}>
+      {areas.map(({ slug, district, project }) => <Link className="home-location-card home-location-card--editorial" key={slug} to={`/area/${slug}`}>
+        <CatalogPhoto image={project.cover_image || project.images?.[0]} />
+        <div className="home-location-copy"><h3>{getDistrictLabel(district, language === 'ru' ? 'ru' : 'en')}</h3><p>{t(project.cover_image || project.images?.[0] ? { ru: 'На фото — комплекс', en: 'Pictured community', th: 'โครงการในภาพ' } : { ru: 'В каталоге района', en: 'In this area’s catalog', th: 'ในรายการของย่านนี้' })}: {language === 'ru' ? project.name_ru || project.name_en : project.name_en || project.name_ru}</p><span>{t({ ru: 'Познакомиться с районом', en: 'Explore the area guide', th: 'อ่านคู่มือย่าน' })}<ArrowRight size={16} aria-hidden="true" /></span></div>
+      </Link>)}
+    </HorizontalRail>}
+  </section>;
 }
 
 export function HomeExperienceGallery() {
@@ -163,7 +117,7 @@ export function HomeExperienceGallery() {
   });
   return (
     <section
-      className="home-catalog home-container"
+      className="home-catalog home-experiences home-container"
       aria-labelledby="home-experiences-title"
     >
       <div className="home-section-heading">
@@ -243,7 +197,7 @@ export function HomeServiceGallery() {
   });
   return (
     <section
-      className="home-catalog home-container"
+      className="home-catalog home-services home-container"
       aria-labelledby="home-services-title"
     >
       <div className="home-section-heading">

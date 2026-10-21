@@ -139,7 +139,7 @@ it('renders only supplied records, deduplicates districts and preserves public d
   show();
   expect(screen.getByRole('link', { name: /Rawai/ })).toHaveAttribute(
     'href',
-    '/property/search?mode=rent&district=rawai',
+    '/area/rawai',
   );
   expect(screen.getByRole('link', { name: /Catalog tour/ })).toHaveAttribute(
     'href',
@@ -181,4 +181,12 @@ it('replaces a failed stored photograph with the neutral media state', () => {
   fireEvent.error(image);
   expect(document.querySelector('img')).toBeNull();
   expect(screen.getByRole('link', { name: /Catalog tour/ })).toBeVisible();
+});
+
+it('resolves canonical district separators to existing area guides without inventing slugs', () => {
+  state.projects = [{ district: 'cherng_talay', name_en: 'Published Cherng Talay project' }, { district: 'Bang Tao', name_en: 'Published Bang Tao project' }, { district: 'unknown_district', name_en: 'Unknown' }];
+  show();
+  expect(screen.getByRole('link', { name: /Cherng Talay/ })).toHaveAttribute('href', '/area/cherngtalay');
+  expect(screen.getByRole('link', { name: /Bang Tao/ })).toHaveAttribute('href', '/area/bang-tao');
+  expect(screen.queryByRole('link', { name: /Unknown/ })).toBeNull();
 });
