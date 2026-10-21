@@ -1,6 +1,6 @@
 import { Suspense, type ReactNode } from 'react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import { Discover, GoalEntryPage, MeServices, ServicesIndex, SituationNavigator } from '@/components/layout/pageRegistry';
 import { BackButton } from '@/components/uno/BackButton';
@@ -37,6 +37,7 @@ describe('integrated direct service route ownership', () => {
   it.each(['/discover', '/discover/services', '/services', '/me/services'])('preserves combined filters and request/provider return paths at %s', async path => {
     const original = `${path}?category=ac&q=cleaning&ref=fixture`;
     mount(original);
+    await act(async () => { await vi.dynamicImportSettled(); });
     expect(await screen.findByRole('button', { name: /^AC Cleaning$/ })).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /^AC Cleaning$/ })).toHaveLength(1);
     expect(screen.queryByRole('button', { name: /^AC Installation$/ })).not.toBeInTheDocument();
