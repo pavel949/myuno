@@ -47,6 +47,24 @@ describe('Home discovery themed controls and catalogue handoff', () => {
     expect(screen.getAllByRole('combobox')).toHaveLength(3);
     expect(screen.getByRole('button', { name: language === 'en' ? 'Find a home' : language === 'ru' ? 'Найти жильё' : 'ค้นหาที่พัก' })).toBeVisible();
   });
+  it.each([
+    ['ru', 'Срок аренды', 'На год', 'Помесячно'],
+    ['en', 'Rental duration', 'Yearly', 'Monthly'],
+    ['th', 'ระยะเวลาเช่า', 'รายปี', 'รายเดือน'],
+  ])('exposes and changes the active rental duration before progressive submission in %s', (language, group, yearly, monthly) => {
+    state.language = language;
+    renderControls(<HomeDiscoverySearch hideModeSwitch progressive initialParams={new URLSearchParams('mode=rent&tenancy=long')} />);
+    const duration = screen.getByRole('group', { name: group });
+    expect(within(duration).getByRole('button', { name: yearly })).toBeVisible();
+    expect(within(duration).getByRole('button', { name: yearly })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByRole('combobox')).toBeNull();
+    fireEvent.click(within(duration).getByRole('button', { name: monthly }));
+    fireEvent.submit(screen.getByRole('form'));
+    const params = new URL(state.navigate.mock.calls[0][0], 'https://myuno.app').searchParams;
+    expect(params.get('tenancy')).toBe('medium');
+    expect(params.has('district')).toBe(false);
+    expect(params.has('guests')).toBe(false);
+  });
   it('edits a legacy bedroom bookmark into a minimum threshold without losing secondary state', () => {
     state.language = 'en';
     render(<HomeDiscoverySearch initialParams={new URLSearchParams('f.bedrooms=studio&types=townhouse&guests=4&f.priceLevel=2&source=bookmark')} />);
@@ -186,4 +204,19 @@ describe('Home discovery themed controls and catalogue handoff', () => {
     expect(screen.getByRole('dialog')).toBeVisible();
     expect(screen.getByText(language === 'en' ? 'Select check-in' : 'เลือกวันเช็กอิน')).toBeVisible();
   });
+});
+
+it('progressive search starts without a required district and retains optional refinements', () => {
+  state.language = 'ru'; state.navigate.mockClear();
+  renderControls(<HomeDiscoverySearch hideModeSwitch progressive />);
+  expect(screen.queryByRole('combobox')).toBeNull();
+  expect(screen.queryByRole('spinbutton')).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Найти жильё' }));
+  expect(state.navigate).toHaveBeenCalledWith('/property/search?mode=rent&tenancy=short');
+  fireEvent.click(screen.getByRole('button', { name: 'Уточнить поиск' }));
+  expect(screen.getAllByRole('combobox')).toHaveLength(3);
+  fireEvent.click(screen.getByText('Название и гости'));
+  fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '4' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Найти жильё' }));
+  expect(state.navigate).toHaveBeenLastCalledWith('/property/search?mode=rent&tenancy=short&guests=4');
 });

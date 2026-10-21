@@ -3,11 +3,11 @@ import type { LangValues } from '@/lib/i18n/pickLang';
 
 /** Public navigation only: no new domain state, catalogue, prices or availability. */
 export const homeCopy = {
-  place: { ru: 'Остановитесь на Пхукете.', en: 'Stay in Phuket.', th: 'พักที่ภูเก็ต' },
-  headline: { ru: 'С остальным поможем.', en: 'We’ll help with the rest.', th: 'เราช่วยดูแลเรื่องอื่นให้' },
-  lead: { ru: 'Жильё для отпуска и переезда, местные услуги и поддержка команды на острове.', en: 'Homes for holidays and longer stays, local services, and support from our team on the island.', th: 'ที่พักสำหรับวันหยุดหรือการอยู่อาศัยระยะยาว บริการท้องถิ่น และทีมงานที่พร้อมช่วยเหลือบนเกาะ' },
-  stays: { ru: 'Где остановиться', en: 'Places to stay', th: 'ที่พักสำหรับคุณ' },
-  staysLead: { ru: 'Посмотрите доступные варианты и откройте карточку, чтобы узнать подробности и выбрать даты.', en: 'Browse real listings, then open a home to see details and choose your dates.', th: 'ดูที่พักที่ลงประกาศ แล้วเปิดรายละเอียดเพื่อเลือกวันเข้าพัก' },
+  place: { ru: 'Ваш дом и жизнь', en: 'Your home and life', th: 'บ้านและชีวิตของคุณ' },
+  headline: { ru: 'на Пхукете', en: 'in Phuket', th: 'ในภูเก็ต' },
+  lead: { ru: 'Найдите место, в котором вам будет хорошо. Начните с жилья или познакомьтесь с районами острова.', en: 'Find a place that feels right for you. Start with a home or get to know the island’s areas.', th: 'ที่พักสำหรับวันหยุดหรือการอยู่อาศัยระยะยาว บริการท้องถิ่น และทีมงานที่พร้อมช่วยเหลือบนเกาะ' },
+  stays: { ru: 'Найдите свой дом', en: 'Find your home', th: 'ที่พักสำหรับคุณ' },
+  staysLead: { ru: 'Квартиры и виллы из опубликованного каталога. Подробности и даты — в карточке жилья.', en: 'Browse real listings, then open a home to see details and choose your dates.', th: 'ดูที่พักที่ลงประกาศ แล้วเปิดรายละเอียดเพื่อเลือกวันเข้าพัก' },
   layantara: { ru: 'Layantara Villas', en: 'Layantara Villas', th: 'Layantara Villas' },
   layantaraLead: { ru: 'Уточните у команды свободные даты и подходящий вариант.', en: 'Ask our team about available dates and the right villa for your stay.', th: 'ติดต่อทีมงานเพื่อสอบถามวันที่ว่างและวิลล่าที่เหมาะกับการเข้าพัก' },
   layantaraAction: { ru: 'Уточнить даты', en: 'Ask about dates', th: 'สอบถามวันที่ว่าง' },
@@ -27,7 +27,7 @@ export const homeCopy = {
   housing: { ru: 'Жильё', en: 'Homes', th: 'ที่พัก' },
   experiences: { ru: 'Впечатления', en: 'Experiences', th: 'ประสบการณ์' },
   services: { ru: 'Услуги', en: 'Services', th: 'บริการ' },
-  closing: { ru: 'Планы меняются.\nМы остаёмся рядом.', en: 'Plans change.\nWe’re still here for you.', th: 'แผนเปลี่ยนได้\nเรายังอยู่เคียงข้างคุณ' },
+  closing: { ru: 'Поможем сориентироваться', en: 'We’ll help you find your way', th: 'เราช่วยคุณเลือกได้' },
   contact: { ru: 'Связаться с командой', en: 'Talk to our team', th: 'ติดต่อทีมงาน' },
   urgent: { ru: 'Экстренная помощь и телефоны служб', en: 'Emergency help and useful numbers', th: 'ความช่วยเหลือฉุกเฉินและหมายเลขติดต่อ' },
   business: { ru: 'Инвестиции и бизнес', en: 'Investment and business', th: 'การลงทุนและธุรกิจ' },
